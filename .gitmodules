@@ -1,9 +1,6 @@
 [submodule "chef/cookbooks/rbenv"]
 	path = chef/cookbooks/rbenv
 	url = git@github.com:NREL-cookbooks/rbenv.git
-[submodule "chef/cookbooks/ruby-build"]
-	path = chef/cookbooks/ruby-build
-	url = git@github.com:NREL-cookbooks/chef-ruby_build.git
 [submodule "chef/cookbooks/apt"]
 	path = chef/cookbooks/apt
 	url = git@github.com:NREL-cookbooks/apt.git
