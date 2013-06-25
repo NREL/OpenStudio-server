@@ -17,19 +17,19 @@ run_list([
 
 default_attributes(
     'rbenv' => {
-        'rubies' => [ '1.9.3-p392'],
-        #'global' => '1.9.3-p392',
+        'rubies' => ['1.8.7-p371'], #, '1.9.3-p385', '2.0.0-p195'],
+        'global' => '1.8.7-p371',
         'gems' => {
             '1.8.7-p371' => [
-                { 'name' => 'bundler'},
-                { 'name' => 'rake'},
-                { 'name' => 'rubygems-bundler'}
-            ],
+                {'name' => 'bundler'},
+                {'name' => 'rails'},
+                {'name' => 'rake'},
+                {'name' => 'rubygems-bundler'}],
             '1.9.3-p392' => [
-                { 'name' => 'bundler'},
-                { 'name' => 'rake'},
-                { 'name' => 'rails'},
-                { 'name' => 'rubygems-bundler'}
+                {'name' => 'bundler'},
+                {'name' => 'rake'},
+                {'name' => 'rails'},
+                {'name' => 'rubygems-bundler'}
             ]
         }
     },
@@ -43,17 +43,19 @@ default_attributes(
         :checksum => "c1ec1499f964bad8638d3c732c9bd10793dd4052a188cd06bb49288d3d962e09"
     },
     'R' => {
-        'source_url' => "http://cran.r-project.org/src/contrib",
+        'apt_distribution' => "precise/",
+        'apt_key' => "E084DAB9",
+        'package_source_url' => "http://cran.r-project.org/src/contrib",
         'packages' => [
             {
                 'name' => 'lhs',
-                'version' => '0.10' },
+                'version' => '0.10'},
             {
                 'name' => 'Rserve',
-                'version' => '0.6-8.1' },
+                'version' => '0.6-8.1'},
             {
                 'name' => 'triangle',
-                'version' => '0.8' }
+                'version' => '0.8'}
         ]
     }
 )
