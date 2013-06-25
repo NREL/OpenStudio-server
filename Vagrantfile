@@ -7,11 +7,7 @@ Vagrant.configure("2") do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ubuntu-precise-64"
-
-  # The url from where the 'config.vm.box' box will be fetched if it
-  # doesn't already exist on the user's system.
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   config.omnibus.chef_version = :latest
@@ -61,13 +57,16 @@ Vagrant.configure("2") do |config|
     chef.roles_path = "chef/roles"
 
     chef.add_role "openstudio-server"
-
-  #   chef.json = { :mysql_password => "foo" }
   end
 
   config.vm.provider :aws do |aws, override|
+    #http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
+    require 'excon'
+    Excon.defaults[:ssl_verify_peer] = false
+
     # you will need to create a yaml file with these values to
     # properly deploy to ec2
+    require 'yaml'
     aws_config = YAML::load_file(File.join(Dir.home, ".aws_secrets"))
     aws.access_key_id = aws_config.fetch("access_key_id")
     aws.secret_access_key = aws_config.fetch("secret_access_key")
@@ -75,9 +74,17 @@ Vagrant.configure("2") do |config|
     override.ssh.private_key_path = aws_config.fetch("private_key_path")
 
     aws.security_groups = ["default"]
-    aws.instance_type = "m1.small"
-    aws.ami = "ami-b89842d1"
+    #aws.instance_type = "m1.small"
+    aws.instance_type = "m1.xlarge"
+    aws.ami = "ami-d0f89fb9"
 
     override.ssh.username = "ubuntu"
+
+    aws.tags = {
+        'Name' => 'OpenStudio',
+        'OpenStudio Version' => '0.10.5'
+    }
+
+
   end
 end
