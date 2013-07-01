@@ -2,7 +2,12 @@ class AnalysesController < ApplicationController
   # GET /analyses
   # GET /analyses.json
   def index
-    @analyses = Analysis.all
+    if params[:project_id].nil?
+      @analyses = Analysis.all
+    else
+      @analysis = Project.find(params[:project_id]).analyses
+    end
+
 
     respond_to do |format|
       format.html # index.html.erb
