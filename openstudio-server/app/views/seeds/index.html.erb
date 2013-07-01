@@ -1,0 +1,21 @@
+<h1>Listing seeds</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @seeds.each do |seed| %>
+  <tr>
+    <td><%= link_to 'Show', seed %></td>
+    <td><%= link_to 'Edit', edit_seed_path(seed) %></td>
+    <td><%= link_to 'Destroy', seed, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Seed', new_seed_path %>
