@@ -23,11 +23,20 @@ default_attributes(
         'global' => '2.0.0-p195',
         'gems' => {
             '2.0.0-p195' => [
-                {'name' => 'bundler'},
-                {'name' => 'rails'},
-                {'name' => 'rake'},
-                {'name' => 'rubygems-bundler'}],
-            ]
+                {
+                    'name' => 'bundler',
+                    'source' => 'http://rubygems.org/'
+                },
+                {
+                    'name' => 'rails',
+                    'source' => 'http://rubygems.org/',
+                    'version' => '3.2.13'
+                },
+                {
+                    'name' => 'rubygems-bundler',
+                    'source' => 'http://rubygems.org/'
+                }
+            ],
         }
     },
 
