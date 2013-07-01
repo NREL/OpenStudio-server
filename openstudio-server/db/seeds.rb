@@ -5,3 +5,21 @@
 #
 #   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
 #   Mayor.create(:name => 'Emanuel', :city => cities.first)
+
+
+p = Project.find_or_create_by(:name => "test")
+p.save
+puts p.inspect
+analysis = p.analyses.find_or_create_by(name: "test analysis")
+puts analysis.inspect
+
+analysis.problem.find_or_create_by(name: "test problem")
+#(1..50).each do |i|
+#  puts a.inspect
+#  m = a.data_points.find_or_create_by(:name => "test model #{i}")
+#  m.save
+#end
+
+
+p = Project.find_or_create_by(:name => 'test 2')
+#a = p.analyses.find_or_create_by(:name => 'test analysis 2')

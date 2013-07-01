@@ -1,4 +1,8 @@
 OpenstudioServer::Application.routes.draw do
+
+  resources :measures
+
+
   resources :workflow_steps
 
 

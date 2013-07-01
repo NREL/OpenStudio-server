@@ -9,9 +9,7 @@ class Analysis
 
   belongs_to :project
 
-  has_one :problem
-  has_one :seed
-  has_one :alogithm
-
   has_many :data_points
+  has_one :problem
+
 end
