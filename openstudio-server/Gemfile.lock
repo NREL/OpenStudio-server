@@ -52,7 +52,14 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.23)
+    mongoid (3.1.4)
+      activemodel (~> 3.2)
+      moped (~> 1.4)
+      origin (~> 1.0)
+      tzinfo (~> 0.3.22)
+    moped (1.5.0)
     multi_json (1.7.7)
+    origin (1.1.0)
     polyglot (0.3.3)
     rack (1.4.5)
     rack-cache (1.2)
@@ -108,8 +115,11 @@ PLATFORMS
 
 DEPENDENCIES
   coffee-rails (~> 3.2.1)
+  execjs
   jquery-rails
   json
+  libv8
+  mongoid
   rails (= 3.2.13)
   sass-rails (~> 3.2.3)
   therubyracer
