@@ -5,12 +5,16 @@
 1. Update Ruby gems
  `gem update --system`
 1. Turn off ssl verification in the .gemrc file
+ `cd /etc`
+ `sudo vi
  `cd /home/vagrant`
- `echo ":ssl_verify_mode: 0" > .gemrc`
+ `echo ":ssl_verify_mode: 0" >> .gemrc`
 
+
+1. Reinstall with --force the gem that didn't install correctly (most likely rails)
+`sudo gem install rails -v "3.2.13" --force`
 
 1. Exit the VM and then reprovision the VM
-
 `vagrant provision`
 
 1. Login to the vagrant box and start the rails server
