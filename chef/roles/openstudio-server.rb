@@ -17,19 +17,16 @@ run_list([
 
 default_attributes(
     'rbenv' => {
-        'rubies' => ['1.8.7-p371'], #, '1.9.3-p385', '2.0.0-p195'],
-        'global' => '1.8.7-p371',
+        #'rubies' => ['1.8.7-p371'], #, '1.9.3-p385', '2.0.0-p195'],
+        #'global' => '1.8.7-p371',
+        'rubies' => ['2.0.0-p195'],
+        'global' => '2.0.0-p195',
         'gems' => {
-            '1.8.7-p371' => [
+            '2.0.0-p195' => [
                 {'name' => 'bundler'},
                 {'name' => 'rails'},
                 {'name' => 'rake'},
                 {'name' => 'rubygems-bundler'}],
-            '1.9.3-p392' => [
-                {'name' => 'bundler'},
-                {'name' => 'rake'},
-                {'name' => 'rails'},
-                {'name' => 'rubygems-bundler'}
             ]
         }
     },
