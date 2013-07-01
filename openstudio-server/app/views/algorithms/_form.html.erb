@@ -1,0 +1,17 @@
+<%= form_for(@algorithm) do |f| %>
+  <% if @algorithm.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@algorithm.errors.count, "error") %> prohibited this algorithm from being saved:</h2>
+
+      <ul>
+      <% @algorithm.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

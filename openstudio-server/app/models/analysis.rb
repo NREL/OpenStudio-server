@@ -1,0 +1,17 @@
+class Analysis
+  include Mongoid::Document
+
+  field :uuid
+  field :version_uuid
+  field :name, :type => String
+  field :display_name, :type => String
+  field :description, :type => String
+
+  belongs_to :project
+
+  has_one :problem
+  has_one :seed
+  has_one :alogithm
+
+  has_many :data_points
+end
