@@ -1,0 +1,7 @@
+{
+    "analysis": {
+      "data" : <%= @analysis.to_json.html_safe %>,
+        "models": <%= @analysis.data_points.to_json.html_safe %>
+    }
+
+}

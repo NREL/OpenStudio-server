@@ -1,5 +1,3 @@
 <p id="notice"><%= notice %></p>
 
-
-<%= link_to 'Edit', edit_problem_path(@problem) %> |
-<%= link_to 'Back', problems_path %>
+<%= @problem.to_json %>

@@ -11,11 +11,15 @@ p = Project.find_or_create_by(:name => "test")
 p.save
 puts p.inspect
 a = p.analyses.find_or_create_by(name: "test analysis")
+a.problems.find_or_create_by(name: "test problem")
 puts a.inspect
-
-a.problem = Problem.find_or_create_by(name: "test problem")
 (1..50).each do |i|
-  m = a.data_points.find_or_create_by(:name => "test model #{i}")
+  m = a.data_points.find_or_create_by(name: "test model #{i}")
+  m['results'] = {}
+  ['eui','abc','def','ghi'].each do |w|
+    m['results'][w] = 50 * rand(502)
+  end
+  m.save
 end
 
 p.save

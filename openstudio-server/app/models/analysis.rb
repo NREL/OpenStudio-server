@@ -10,6 +10,6 @@ class Analysis
   belongs_to :project
 
   has_many :data_points
-  has_one :problem
+  has_many :problems
 
 end
