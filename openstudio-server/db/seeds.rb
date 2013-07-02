@@ -10,16 +10,14 @@
 p = Project.find_or_create_by(:name => "test")
 p.save
 puts p.inspect
-analysis = p.analyses.find_or_create_by(name: "test analysis")
-puts analysis.inspect
+a = p.analyses.find_or_create_by(name: "test analysis")
+puts a.inspect
 
-analysis.problem.find_or_create_by(name: "test problem")
-#(1..50).each do |i|
-#  puts a.inspect
-#  m = a.data_points.find_or_create_by(:name => "test model #{i}")
-#  m.save
-#end
+a.problem = Problem.find_or_create_by(name: "test problem")
+(1..50).each do |i|
+  m = a.data_points.find_or_create_by(:name => "test model #{i}")
+end
 
-
+p.save
 p = Project.find_or_create_by(:name => 'test 2')
 #a = p.analyses.find_or_create_by(:name => 'test analysis 2')
