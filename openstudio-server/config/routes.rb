@@ -6,7 +6,7 @@ OpenstudioServer::Application.routes.draw do
   resources :workflow_steps
 
 
-  resources :data_points
+  #resources :data_points
 
 
   resources :algorithms
@@ -15,13 +15,20 @@ OpenstudioServer::Application.routes.draw do
   resources :seeds
 
 
-  resources :problems
+  #resources :problems
 
 
-  resources :analyses
+  #resources :analyses
 
 
-  resources :projects
+ # :only => [:show, :index]
+  resources :projects do
+    resources :analyses, shallow: true do
+      resources :problems, shallow: true
+      resources :data_points, shallow: true
+    end
+    #end
+  end
 
 
   # The priority is based upon order of creation:

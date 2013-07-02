@@ -8,7 +8,6 @@ class AnalysesController < ApplicationController
       @analysis = Project.find(params[:project_id]).analyses
     end
 
-
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @analyses }
@@ -22,7 +21,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @analysis }
+      format.json { render :partial => 'models.json'  }
     end
   end
 
