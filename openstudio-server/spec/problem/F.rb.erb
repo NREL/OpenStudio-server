@@ -1,9 +1,0 @@
-
-
-require 'mondoid'
-
-
-Mongoid.configure do |config|
-    config.database = Mongo::Connection.new(@mongo_ip, @mongo_host, :pool_size => @MONGO_POOL_CNT, :w => 1).db("assetscore-#{@version_id}")
-    config.allow_dynamic_fields = true
-end
