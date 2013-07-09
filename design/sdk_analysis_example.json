@@ -1,0 +1,264 @@
+{
+	"metadata": {
+		"version": "1.0.3"
+	},
+	"analysis": {
+		"uuid": "",
+		"version_uuid": "",
+		"name": "",
+		"display_name": "",
+		"description": "",
+		"seed": {
+			"uuid": "",
+			"version_uuid": "",
+			"name": "",
+			"display_name": "",
+			"description": "",
+			"path": "",
+			"file_type": "",
+			"timestamp_create": "",
+			"timestamp_last": "",
+			"checksum_create": "",
+			"checksum_last": ""
+		},
+		"algorithm": {
+			"algorithm_type": "Sampling",
+			"complete": false,
+			"failed": false,
+			"iter": -1,
+			"options": [{
+				"max_iter": null,
+				"max_sims": null,
+				"sampling_algorithm_sample_type": "lhs",
+				"samples": 100,
+				"seed": 1789351982
+			}]
+		},
+		"problem": {
+			"uuid": "",
+			"version_uuid": "",
+			"name": "",
+			"display_name": "",
+			"description": "",
+			"workflow_steps": [{
+				"workflow_step_type": "MeasureGroup",
+				"workflow_index": 0,
+				"uuid": "",
+				"version_uuid": "",
+				"name": "",
+				"display_name": "",
+				"description": "",
+				"is_selected": true,
+				"fixed_value": null,
+				"measures": [{
+					"measure_group_index": 0,
+					"measure_type": "NullMeasure",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "",
+					"display_name": "",
+					"description": "",
+					"is_selected": true
+				},
+				{
+					"measure_group_index": 1,
+					"measure_type": "RubyMeasure",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "",
+					"display_name": "",
+					"description": "",
+					"is_selected": true,
+					"measure_directory": "/home/ehale/.../createHVACSystemType1",
+					"measure_uuid": "",
+					"measure_version_uuid": "",
+					"arguments": [{
+						"argument_type": "Double",
+						"uuid": "",
+						"version_uuid": "",
+						"name": "fan_efficiency",
+						"display_name": "Fan Efficiency",
+						"required": true,
+						"value": 0.5,
+						"default_value": 0.7
+					},
+					{
+						"argument_type": "Double",
+						"uuid": "",
+						"version_uuid": "",
+						"name": "dx_coil_cop",
+						"display_name": "DX Coil COP",
+						"required": true,
+						"value": 2.9,
+						"default_value": 2.5
+					},
+					{
+						"argument_type": "Boolean",
+						"uuid": "",
+						"version_uuid": "",
+						"name": "economizer",
+						"display_name": "Economizer",
+						"required": true,
+						"value": null,
+						"default_value": false
+					}]
+				}]
+			},
+			{
+				"workflow_step_type": "RubyMeasure",
+				"workflow_index": 1,
+				"uuid": "",
+				"version_uuid": "",
+				"name": "",
+				"display_name": "",
+				"description": "",
+				"measure_directory": "/home/ehale/.../setWindowToWallRatio",
+				"measure_uuid": "",
+				"measure_version_uuid": "",
+				"arguments": [{
+					"argument_type": "Choice",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "facade",
+					"display_name": "Cardinal Direction",
+					"required": true,
+					"value": "North",
+					"default_value": "South",
+					"choices": ["North",
+					"East",
+					"South",
+					"West"],
+					"choice_display_names": null
+				},
+				{
+					"argument_type": "Double",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "btwn_window_dist",
+					"display_name": "Between Window Distance (in.)",
+					"required": false,
+					"value": 48,
+					"default_value": 36
+				}],
+				"variables": [{
+					"variable_index": 0,
+					"variable_type": "RubyContinuousVariable",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "wwr",
+					"display_name": "Window to Wall Ratio (fraction)",
+					"description": "",
+					"is_selected": true,
+					"fixed_value": null,
+					"minimum": 0,
+					"maximum": 0.9,
+					"n_steps": null,
+					"increment": null,
+					"argument": {
+						"argument_type": "Double",
+						"uuid": "",
+						"version_uuid": "",
+						"name": "wwr",
+						"display_name": "Window to Wall Ratio (fraction)",
+						"required": true,
+						"value": null,
+						"default_value": 0.4
+					},
+					"uncertainty_description": {
+						"uncertainty_description_type": "triangular",
+						"mode": 0.5,
+						"lower_bound": 0,
+						"upper_bound": 0.6
+					}
+				},
+				{
+					"variable_index": 1,
+					"variable_type": "RubyContinuousVariable",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "sillHeight",
+					"display_name": "Sill Height (in.)",
+					"description": "",
+					"is_selected": false,
+					"fixed_value": 36,
+					"argument": {
+						"argument_type": "Double",
+						"uuid": "",
+						"version_uuid": "",
+						"name": "sillHeight",
+						"display_name": "Sill Height (in.)",
+						"required": true,
+						"value": null,
+						"default_value": 30
+					}
+				},
+				{
+					"variable_index": 2,
+					"variable_type": "RubyDiscreteVariable",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "",
+					"display_name": "",
+					"description": "",
+					"is_selected": true,
+					"fixed_value": null,
+					"minimum": 0,
+					"maximum": null,
+					"argument": {
+						"argument_type": "Integer",
+						"uuid": "",
+						"version_uuid": "",
+						"name": "num_windows",
+						"display_name": "Number of Windows per Surface",
+						"required": true,
+						"value": null,
+						"default_value": 1
+					},
+					"uncertainty_description": {
+						"uncertainty_description_type": "histogram_point_uncertain",
+						"abscissas": [0,
+						1,
+						3],
+						"counts": [0.3,
+						0.6,
+						0.1]
+					}
+				}]
+			},
+			{
+				"workflow_step_type": "WorkItem",
+				"workflow_index": 2,
+				"job_type": "ModelToIdf"
+			},
+			{
+				"workflow_step_type": "WorkItem",
+				"workflow_index": 3,
+				"job_type": "EnergyPlus"
+			},
+			{
+				"workflow_step_type": "MeasureGroup",
+				"workflow_index": 4,
+				"uuid": "",
+				"version_uuid": "",
+				"name": "",
+				"display_name": "",
+				"description": "",
+				"is_selected": false,
+				"fixed_value": 0,
+				"measures": [{
+					"index": 0,
+					"measure_type": "RubyMeasure",
+					"uuid": "",
+					"version_uuid": "",
+					"name": "",
+					"display_name": "",
+					"description": "",
+					"is_selected": true,
+					"measure_directory": "/home/ehale/.../MyPostProcess",
+					"measure_uuid": "",
+					"measure_version_uuid": ""
+				}]
+			}]
+		}
+	}
+}

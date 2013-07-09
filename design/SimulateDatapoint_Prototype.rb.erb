@@ -1,0 +1,42 @@
+
+require 'openstudio'
+require 'mondoid'
+
+# Parse arguments with optparse
+
+# Load problem formulation and seed model
+analysisJsonPath = OpenStudio::Path.new(analysisJsonPath)
+analysis = OpenStudio::Analysis::load(analysisJsonPath)
+raise "Unable to load analysis from " + analysisJsonPath.to_s + "." if analysis.empty
+analysis = analysis.get.to_Analysis
+raise "Json file at " + analysisJsonPath.to_s + " did not contain an Analysis object." if analysis.empty
+analysis = analysis.get
+problem = analysis.problem
+seed = analysis.seed
+
+# Load data point to run
+# ... as above
+dataPoint = dataPoint.get
+
+# Requrie dataPoint to belong to problem
+
+# Create a RunManager
+# runManager = ...
+
+# Have problem create the workflow
+
+# Queue the workflow + seed as a RunManager job
+
+# Wait for the job to finish
+runManager.waitForFinished
+
+# Use the completed job to populate dataPoint with results
+
+# Post dataPoint JSON file to mongo database
+dataPointJSON = dataPoint.print
+Mongoid.configure do |config|
+  config.database = Mongo::Connection.new(@mongo_ip, @mongo_host, :pool_size => @MONGO_POOL_CNT, :w => 1).db("name_of_database")
+  config.allow_dynamic_fields = true
+end
+# now how do I push the data up?
+
