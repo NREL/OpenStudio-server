@@ -8,21 +8,19 @@
   },
   "algorithm": {
     "algorithm_type": "optimization, sampling",
-    "options": {
-      "initial_value": [{
-        "value_index": 0,
-        "value_type": "Double",
-        "value": 5.2
-      },
-      {
-        "value_index": 1,
-        "value_type": "Integer",
-        "value": 3
-      }],
-      "method": "lhs",
-      "max_iter": 5,
-      "num_samples": 100
-    }
+    "initial_value": [{
+      "value_index": 0,
+      "value_type": "Double",
+      "value": 5.2
+    },
+    {
+      "value_index": 1,
+      "value_type": "Integer",
+      "value": 3
+    }],
+    "method": "lhs",
+    "max_iter": 5,
+    "num_samples": 100
   },
   "variables": [{
     "variable_index": 0
@@ -38,7 +36,14 @@
     "expected_response_shapes": [
       "null, increasing, decreasing, convex, concave"
     ],
-    "expected_objective_shapes": []
+    "expected_objective_shapes": [],
+    "uncertainty": {
+      "distribution":"triangle, uniform, normal",
+      "mean":"0.5",
+      "mode":"0.25",
+      "stddev":"0.1"
+    },
+    "linked_output_attribute": "office_lighting_power"
   }],
   "responses": [{
     "response_index": 0,
