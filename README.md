@@ -16,7 +16,7 @@ $ gem update --system
 ```sh
 # Right now this is using sudo. This will be fixed later.
 $ sudo -i
-$ echo ":ssl_verify_mode: 0" >> /etc/gemrc`
+$ echo ":ssl_verify_mode: 0" >> /etc/gemrc
 ```
 
 - Reinstall with --force the gem that didn't install correctly (most likely rails)
@@ -43,7 +43,9 @@ vagrant plugin install vagrant-aws
 
 - Install Vagrant Omnibus plug-in to automatically install chef on the destination system
 
-`vagrant plugin install vagrant-omnibus`
+```sh
+vagrant plugin install vagrant-omnibus
+```
 
 - Create an `.aws_secrets` file in your home directory and include the following
 
@@ -55,7 +57,10 @@ private_key_path: /Users/<user>/.ssh/amazon.pem
 ```
 
 - Launch vagrant using the
+
+```sh
 vagrant up --provider=aws
+```
 
 - vagrant ssh or vagrant ubuntu@ec2-a-b-c-d.compute-1.amazonaws.com
 

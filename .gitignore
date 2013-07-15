@@ -2,3 +2,4 @@
 .idea
 .ruby-version
 .DS_Store
+.Vagrantfile.swp

@@ -7,6 +7,8 @@
 #   Mayor.create(:name => 'Emanuel', :city => cities.first)
 
 
+
+
 p = Project.find_or_create_by(:name => "test")
 p.save
 puts p.inspect
