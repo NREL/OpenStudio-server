@@ -1,127 +1,137 @@
 {
-	"metadata": {
-		"version": "1.0.3"
-	},
-	"data_point": {
-		"data_point_type": "DataPoint",
-		"uuid": "",
-		"version_uuid": "",
-		"name": "",
-		"display_name": "",
-		"description": "",
-		"complete": true,
-		"failed": false,
-		"analysis_uuid": "",
-		"problem_uuid": "",
-		"variable_values": [{
-			"value_type": "QVariant::Double",
-			"value": 3.56
-		},
-		{
-			"value_type": "QVariant::Int",
-			"value": 3
-		},
-		{
-			"value_type": "QVariant::Int",
-			"value": 0
-		}],
-		"response_values": [65782.0,
-		2819.1,
-		0.45],
-		"directory": "",
-		"osm_input_data": {
-			"uuid": "",
-			"version_uuid": "",
-			"name": "",
-			"display_name": "",
-			"description": "",
-			"path": "",
-			"file_type": "",
-			"timestamp_create": "",
-			"timestamp_last": "",
-			"checksum_create": "",
-			"checksum_last": ""
-		},
-		"idf_input_data": {
-			"uuid": "",
-			"version_uuid": "",
-			"name": "",
-			"display_name": "",
-			"description": "",
-			"path": "",
-			"file_type": "",
-			"timestamp_create": "",
-			"timestamp_last": "",
-			"checksum_create": "",
-			"checksum_last": ""
-		},
-		"sql_output_data": {
-			"uuid": "",
-			"version_uuid": "",
-			"name": "",
-			"display_name": "",
-			"description": "",
-			"path": "",
-			"file_type": "",
-			"timestamp_create": "",
-			"timestamp_last": "",
-			"checksum_create": "",
-			"checksum_last": ""
-		},
-		"xml_output_data": {
-			"uuid": "",
-			"version_uuid": "",
-			"name": "",
-			"display_name": "",
-			"description": "",
-			"path": "",
-			"file_type": "",
-			"timestamp_create": "",
-			"timestamp_last": "",
-			"checksum_create": "",
-			"checksum_last": ""
-		},
-		"top_level_job": {
-      "id": "",
-      "job_type": "RubyJob",
-      "queue_index": 0,
-      "job_params": {},
-      "input_files": {},
-      "job_errors": {
-        "result_value": "Success",
-        "all_errors": [{
-          "error_type": "Warning",
-          "message": "Your sill height argument seems high."
+    "metadata": {
+        "version": "1.0.3"
+    },
+    "data_point": {
+        "data_point_type": "DataPoint",
+        "uuid": "",
+        "version_uuid": "",
+        "name": "",
+        "display_name": "",
+        "description": "",
+        "complete": true,
+        "failed": false,
+        "analysis_uuid": "",
+        "problem_uuid": "",
+        "variable_values": [
+            {
+                "value_type": "QVariant::Double",
+                "value": 3.56
+            },
+            {
+                "value_type": "QVariant::Int",
+                "value": 3
+            },
+            {
+                "value_type": "QVariant::Int",
+                "value": 0
+            }
+        ],
+        "response_values": [65782.0,
+            2819.1,
+            0.45],
+        "directory": "",
+        "osm_input_data": {
+            "uuid": "",
+            "version_uuid": "",
+            "name": "",
+            "display_name": "",
+            "description": "",
+            "path": "",
+            "file_type": "",
+            "timestamp_create": "",
+            "timestamp_last": "",
+            "checksum_create": "",
+            "checksum_last": ""
         },
-        {
-          "error_type": "InitialCondition",
-          "message": "No windows on Surface 1."
+        "idf_input_data": {
+            "uuid": "",
+            "version_uuid": "",
+            "name": "",
+            "display_name": "",
+            "description": "",
+            "path": "",
+            "file_type": "",
+            "timestamp_create": "",
+            "timestamp_last": "",
+            "checksum_create": "",
+            "checksum_last": ""
         },
-        {
-          "error_type": "FinalCondition",
-          "message": "Created a banded window at sill height 5.0 m, taking up 10% of the wall area."
-        }]
-      },
-      "status": "Idle",
-      "finished_job": null,
-      "children": [{
-        "id": "",
-        "job_type": "RubyJob",
-        "queue_index": 0,
-        "job_params": {},
-        "input_files": {},
-        "job_errors": {
-          "result_value": "Success",
-          "all_errors": [{
-            "error_type": "FinalCondition",
-            "message": "Removed existing HVAC systems and put all zones on a single VAV."
-          }]        
+        "sql_output_data": {
+            "uuid": "",
+            "version_uuid": "",
+            "name": "",
+            "display_name": "",
+            "description": "",
+            "path": "",
+            "file_type": "",
+            "timestamp_create": "",
+            "timestamp_last": "",
+            "checksum_create": "",
+            "checksum_last": ""
         },
-        "status": "Idle",
-        "finished_job": null,
-        "children": [{
-        }]      
-      }]
-		}
-	}
+        "xml_output_data": {
+            "uuid": "",
+            "version_uuid": "",
+            "name": "",
+            "display_name": "",
+            "description": "",
+            "path": "",
+            "file_type": "",
+            "timestamp_create": "",
+            "timestamp_last": "",
+            "checksum_create": "",
+            "checksum_last": ""
+        },
+        "top_level_job": {
+            "id": "",
+            "job_type": "RubyJob",
+            "queue_index": 0,
+            "job_params": {},
+            "input_files": {},
+            "job_errors": {
+                "result_value": "Success",
+                "all_errors": [
+                    {
+                        "error_type": "Warning",
+                        "message": "Your sill height argument seems high."
+                    },
+                    {
+                        "error_type": "InitialCondition",
+                        "message": "No windows on Surface 1."
+                    },
+                    {
+                        "error_type": "FinalCondition",
+                        "message": "Created a banded window at sill height 5.0 m, taking up 10% of the wall area."
+                    }
+                ]
+            },
+            "status": "Idle",
+            "finished_job": null,
+            "children": [
+                {
+                    "id": "",
+                    "job_type": "RubyJob",
+                    "queue_index": 0,
+                    "job_params": {},
+                    "input_files": {},
+                    "job_errors": {
+                        "result_value": "Success",
+                        "all_errors": [
+                            {
+                                "error_type": "FinalCondition",
+                                "message": "Removed existing HVAC systems and put all zones on a single VAV."
+                            }
+                        ]
+                    },
+                    "status": "Idle",
+                    "finished_job": null,
+                    "children": [
+                        {
+                        }
+                    ]
+                }
+            ]
+        }
+    }
 }

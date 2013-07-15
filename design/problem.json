@@ -1,82 +1,123 @@
 {
- "variables": {
-      "number of variables" : 6,
-      "Variable 1" : {"name" : "Variable 1",
-                      "display_name" : "Variable 1",
-                      "type" : "Boolean",
-                      "initial_val" : true,
-                      "order_applied" : 1},
-      "Variable 2" : {"name" : "Variable 2",
-                      "display_name" : "Variable 2",
-                      "type" : "enum",
-                      "values" : "{"x1","x2","x3","x4","x5"}",
-                      "minimum" : "x1",
-                      "maximum" : "x4",
-                      "initial_val" : "x2",
-                      "order_applied" : 2},
-      "Variable 3" : {"name" : "Variable 3",
-                      "display_name" : "Variable 3",
-                      "type" : "Continuous",
-                      "minimum" : 0.0,
-                      "maximum" : 10.0,
-                      "initial_val" : 1.0,
-                      "order_applied" : 3,
-                      "units" : "ft",
-                      "relation_to_eui" : "decreasing",
-                      "uncertainty" : {"method" : "lhs",
-                                       "distribution":"triangle",
-                                       "num_samples":"100",
-                                       "mode":"0.25"},
-                                       "apply_method" : "absolute"},
-      "Variable 4" : {"name" : "Variable 4",
-                      "display_name" : "Variable 4",
-                      "type" : "Continuous",
-                      "minimum" : "0.0",
-                      "maximum" : "1.0",
-                      "initial_val" : "0.5",
-                      "order_applied" : "4",
-                      "units" : "ft",
-                      "relation_to_eui" : "increasing",
-                      "uncertainty" : {"method" : "lhs",
-                                       "distribution":"uniform",
-                                       "num_samples":"100",
-                                       "apply_method" : "absolute"},
-      "Variable 5" : {"name" : "Variable 5",
-                      "display_name" : "Variable 5",
-                      "type" : "Continuous",
-                      "minimum" : "0.0",
-                      "maximum" : "1.0",
-                      "initial_val" : "0.25",
-                      "order_applied" : "5",
-                      "units" : "ft",
-                      "relation_to_eui" : "null",
-                      "uncertainty" : {"method" : "lhs",
-                                       "distribution":"normal",
-                                       "num_samples":"100",
-                                       "mean":"0.5",
-                                       "stddev":"0.1"},
-                                       "apply_method" : "multiplier"},
-      "Variable 6" : {"name" : "Variable 6",
-                      "display_name" : "Variable 6",
-                      "type" : "Integer",
-                      "minimum" : "0",
-                      "maximum" : "10",
-                      "initial_val" : "2",
-                      "order_applied" : "6",
-                      "units" : "ft",
-                      "relation_to_eui" : "increasing"},
-              },
-  "response" : "number of response variables" : "1",
-               "response 1" : {"name" : "Response 1",
-                               "display_name" : "Response 1",
-                               "type" : "Continuous",
-                               "minimum" : "0.0",
-                               "maximum" : "1.0"},
-
-  "algorithm" : { "optim" : {"initial":"{x1,x2,x3,...}",
-                             "lower":"{xl1,xl2,xl3,...}",
-                             "upper":"{xu1,xu2,xu3,...}",
-                             "max_iter" : "100"},
-                },
-
+    "variables": [
+        {
+            "name": "Variable 1",
+            "display_name": "Variable 1",
+            "type": "Boolean",
+            "initial_val": true,
+            "order_applied": 1
+        },
+        {
+            "name": "Variable 2",
+            "display_name": "Variable 2",
+            "type": "enum",
+            "values": {
+                "x1",
+                "x2",
+                "x3",
+                "x4",
+                "x5"
+            },
+            "minimum": "x1",
+            "maximum": "x4",
+            "initial_val": "x2",
+            "order_applied": 2
+        },
+        {
+            "name": "Variable 3",
+            "display_name": "Variable 3",
+            "type": "Continuous",
+            "minimum": 0.0,
+            "maximum": 10.0,
+            "initial_val": 1.0,
+            "order_applied": 3,
+            "units": "ft",
+            "relation_to_eui": "decreasing",
+            "uncertainty": {
+                "method": "lhs",
+                "distribution": "triangle",
+                "num_samples": "100",
+                "mode": "0.25"
+            },
+            "apply_method": "absolute"
+        },
+        {
+            "name": "Variable 4",
+            "display_name": "Variable 4",
+            "type": "Continuous",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "initial_val": 0.5,
+            "order_applied": 4,
+            "units": "ft",
+            "relation_to_eui": "increasing",
+            "uncertainty": {
+                "method": "lhs",
+                "distribution": "uniform",
+                "num_samples": "100",
+                "apply_method": "absolute"
+            }
+        },
+        {
+            "name": "Variable 5",
+            "display_name": "Variable 5",
+            "type": "Continuous",
+            "minimum": "0.0",
+            "maximum": "1.0",
+            "initial_val": "0.25",
+            "order_applied": "5",
+            "units": "ft",
+            "relation_to_eui": "null",
+            "uncertainty": {
+                "method": "lhs",
+                "distribution": "normal",
+                "num_samples": "100",
+                "mean": "0.5",
+                "stddev": "0.1"
+            },
+            "apply_method": "multiplier"
+        },
+        {
+            "name": "Variable 6",
+            "display_name": "Variable 6",
+            "type": "Integer",
+            "minimum": "0",
+            "maximum": "10",
+            "initial_val": "2",
+            "order_applied": "6",
+            "units": "ft",
+            "relation_to_eui": "increasing"
+        }
+    ],
+    "responses": [
+        {
+            "name": "Response 1",
+            "display_name": "Response 1",
+            "type": "Continuous",
+            "minimum": "0.0",
+            "maximum": "1.0"
+        }
+    ],
+    "algorithms": [
+        {
+            "function_call": "optim",
+            "arguments": {
+                "initial": ["x1", "x2", x3],
+                "lower": "{xl1,xl2,xl3,...}",
+                "upper": "{xu1,xu2,xu3,...}",
+                "max_iter": "100"
+            }
+        }   ,
+        {
+            "function_call": "batch",
+            "arguments": {
+                "data_points": [
+                    {
+                        "measure_group_index": 1
+                    }
+                ]
+            }
+        }
+}
+]
 }
