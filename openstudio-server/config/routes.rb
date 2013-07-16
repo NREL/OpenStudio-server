@@ -1,5 +1,8 @@
 OpenstudioServer::Application.routes.draw do
 
+  resources :variables
+
+
   resources :measures
 
 

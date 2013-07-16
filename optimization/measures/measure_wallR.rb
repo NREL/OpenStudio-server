@@ -404,7 +404,7 @@ class SetInsulationRValueForExteriorWalls < OpenStudio::Ruleset::ModelUserScript
           end
           
 
-          #add one time sunck costs for replaced objects if project is retrofit
+          #add one time sunck costs for replaced objects if models is retrofit
           if retrofit == "Retrofit"
             retrofit_cost = OpenStudio::Model::ComponentCostLineItem.new(final_construction)
             retrofit_cost.setName("Measure Generated CCLI")
