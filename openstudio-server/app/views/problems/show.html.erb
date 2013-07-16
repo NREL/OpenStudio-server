@@ -1,3 +1,9 @@
 <p id="notice"><%= notice %></p>
 
-<%= @problem.to_json %>
+<%= @problem.variables.inspect %>
+
+
+</br>
+
+<%= @problem.variables.map!{|a| a['variable_index']} %>
+

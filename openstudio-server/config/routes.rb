@@ -9,9 +9,9 @@ OpenstudioServer::Application.routes.draw do
     resources :analyses, shallow: true do
 
       resources :seeds, shallow: true
-      resources :algorithm
-      resources :problem, shallow: true do
-        resources :variables
+      resources :algorithms, shallow: true
+      resources :problems, shallow: true do
+        resources :variables, shallow: true
       end
       resources :data_points, shallow: true
     end
