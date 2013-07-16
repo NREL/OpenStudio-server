@@ -4,7 +4,6 @@
 jsonfile = "/vagrant/prototype/pat/server_problem.json"
 if File.exists?(jsonfile)
   json = JSON.parse(File.read(jsonfile), :symbolize_names => true)
-  puts json
 
   project = Project.find_or_create_by(:name => "Example 1")
   project.create_single_analysis("PAT Example", "Batch")
@@ -15,9 +14,32 @@ if File.exists?(jsonfile)
   problem.load_variables_from_pat_json(json)
   problem.save!
 
+
+  # load the datapoints from pat that need to be run
+  datapoint_file =  "/vagrant/prototype/pat/server_datapoints_request.json"
+  if File.exists?(datapoint_file)
+    json = JSON.parse(File.read(datapoint_file), :symbolize_names => true)
+
+    analysis = project.analyses.where(name: "PAT Example").first
+    json[:datapoints].each do |datum|
+      datapoint = analysis.data_points.find_or_create_by(uuid: datum[:uuid])
+
+      puts datapoint.inspect
+      #save the rest of the values to the database
+      datum.each_key do |key|
+        next if key == 'uuid'
+
+        datapoint[key] = datum[key]
+      end
+      datapoint.save!
+    end
+
+  end
 else
   puts "file does not exist"
 end
+
+
 exit
 
 json = ActiveSupport::JSON.decode(File.read('/vagrant/prototype/pat/server_problem.json'))
@@ -27,21 +49,3 @@ json.each do |a|
   Project.create!(a['data'], without_protection: true)
 end
 
-
-=begin
-p.save
-puts p.inspect
-a = p.analyses.find_or_create_by(name: "test analysis")
-a.problems.find_or_create_by(name: "test problem")
-(1..50).each do |i|
-  m = a.data_points.find_or_create_by(name: "test model #{i}")
-  m['results'] = {}
-  ['eui','abc','def','ghi'].each do |w|
-    m['results'][w] = 50 * rand(502)
-  end
-
-  m.save
-end
-
-p.save
-=end
