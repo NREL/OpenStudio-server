@@ -4,16 +4,6 @@ OpenstudioServer::Application.routes.draw do
   resources :measures
   resources :workflow_steps
 
-
-  #resources :data_points
-
-
-  #resources :problems
-
-
-  #resources :analyses
-
-
   # :only => [:show, :index]
   resources :projects do
     resources :analyses, shallow: true do
