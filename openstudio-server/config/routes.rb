@@ -1,18 +1,11 @@
 OpenstudioServer::Application.routes.draw do
 
+
   resources :measures
-
-
   resources :workflow_steps
 
 
   #resources :data_points
-
-
-  resources :algorithms
-
-
-  resources :seeds
 
 
   #resources :problems
@@ -21,10 +14,15 @@ OpenstudioServer::Application.routes.draw do
   #resources :analyses
 
 
- # :only => [:show, :index]
+  # :only => [:show, :index]
   resources :projects do
     resources :analyses, shallow: true do
-      resources :problems, shallow: true
+
+      resources :seeds, shallow: true
+      resources :algorithm
+      resources :problem, shallow: true do
+        resources :variables
+      end
       resources :data_points, shallow: true
     end
     #end

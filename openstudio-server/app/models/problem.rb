@@ -4,4 +4,6 @@ class Problem
   #has_many :workflow_steps
 
   belongs_to :analysis
+
+  has_many :variables
 end
