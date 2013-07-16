@@ -1,6 +1,7 @@
 {
     "variables": [
         {
+            "uuid": "23498us02948sdo",
             "name": "Variable 1",
             "display_name": "Variable 1",
             "type": "Boolean",
@@ -8,18 +9,19 @@
             "order_applied": 1
         },
         {
+            "uuid": "23498us02948sdo",
             "name": "Variable 2",
             "display_name": "Variable 2",
             "type": "enum",
             "values": {
-                "x1",
-                "x2",
-                "x3",
-                "x4",
-                "x5"
+                "x1": 5.0,
+                "x2": 3.2,
+                "x3": 7,
+                "x4": 1.2,
+                "x5": 12
             },
-            "minimum": "x1",
-            "maximum": "x4",
+            "minimum": 2.0,
+            "maximum": 32,
             "initial_val": "x2",
             "order_applied": 2
         },
@@ -102,12 +104,12 @@
         {
             "function_call": "optim",
             "arguments": {
-                "initial": ["x1", "x2", x3],
+                "initial": ["x1", "x2", "x3"],
                 "lower": "{xl1,xl2,xl3,...}",
                 "upper": "{xu1,xu2,xu3,...}",
                 "max_iter": "100"
             }
-        }   ,
+        },
         {
             "function_call": "batch",
             "arguments": {
@@ -118,6 +120,5 @@
                 ]
             }
         }
-}
-]
+    ]
 }
