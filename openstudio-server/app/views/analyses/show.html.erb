@@ -5,9 +5,9 @@
 <%= link_to problem.name, problem_path(problem) %> <br>
 <% end %>
 
-<h1> list of models for this analysis </h1>
+<h1> list of datapoints for this analysis </h1>
 <% @analysis.data_points.each do |model| %>
-    <%= link_to "data point #{model.name}", data_point_path(model) %> </br>
+    <%= link_to "data point: #{model.name}", data_point_path(model) %> </br>
 <% end %>
 
 <%= link_to 'Back', analysis_path %>
