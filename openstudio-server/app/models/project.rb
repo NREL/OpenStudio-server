@@ -5,4 +5,5 @@ class Project
 
   has_many :analyses
 
+
 end

@@ -16,15 +16,15 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  test "should create project" do
+  test "should create models" do
     assert_difference('Project.count') do
-      post :create, project: {  }
+      post :create, models: {  }
     end
 
-    assert_redirected_to project_path(assigns(:project))
+    assert_redirected_to project_path(assigns(:models))
   end
 
-  test "should show project" do
+  test "should show models" do
     get :show, id: @project
     assert_response :success
   end
@@ -34,12 +34,12 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  test "should update project" do
-    put :update, id: @project, project: {  }
-    assert_redirected_to project_path(assigns(:project))
+  test "should update models" do
+    put :update, id: @project, models: {  }
+    assert_redirected_to project_path(assigns(:models))
   end
 
-  test "should destroy project" do
+  test "should destroy models" do
     assert_difference('Project.count', -1) do
       delete :destroy, id: @project
     end
