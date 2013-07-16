@@ -11,7 +11,13 @@ class Analysis
 
   has_many :data_points
 
-  has_one :algorithm
-  has_one :problem
+  has_many :algorithms
+  has_many :problems
+
+
+  def start_r_and_run_sample()
+
+
+  end
 
 end
