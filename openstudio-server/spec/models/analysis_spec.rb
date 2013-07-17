@@ -12,9 +12,6 @@ describe Analysis do
 
   it "should return a value from R" do
     result = @analysis.start_r_and_run_sample()
-
-    puts result.inspect
-
   end
 
   after :each do
