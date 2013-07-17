@@ -64,7 +64,7 @@ Vagrant.configure("2") do |config|
     chef.cookbooks_path = "../chef/cookbooks"
     chef.roles_path = "../chef/roles"
 
-    chef.add_role "openstudio-server"
+    chef.add_role "openstudio-worker"
   end
 
   config.vm.provider :aws do |aws, override|
