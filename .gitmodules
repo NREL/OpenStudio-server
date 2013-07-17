@@ -1,24 +1,21 @@
-[submodule "chef/cookbooks/rbenv"]
-	path = chef/cookbooks/rbenv
+[submodule "vagrant/chef/cookbooks/rbenv"]
+	path = vagrant/chef/cookbooks/rbenv
 	url = git@github.com:NREL-cookbooks/rbenv.git
-[submodule "chef/cookbooks/apt"]
-	path = chef/cookbooks/apt
+[submodule "vagrant/chef/cookbooks/apt"]
+	path = vagrant/chef/cookbooks/apt
 	url = git@github.com:NREL-cookbooks/apt.git
-[submodule "chef/cookbooks/build-essential"]
-	path = chef/cookbooks/build-essential
+[submodule "vagrant/chef/cookbooks/build-essential"]
+	path = vagrant/chef/cookbooks/build-essential
 	url = git@github.com:opscode-cookbooks/build-essential.git
-[submodule "chef/cookbooks/ruby_build"]
-	path = chef/cookbooks/ruby_build
-	url = git@github.com:NREL-cookbooks/chef-ruby_build.git
-[submodule "chef/cookbooks/openstudio"]
-	path = chef/cookbooks/openstudio
+[submodule "vagrant/chef/cookbooks/openstudio"]
+	path = vagrant/chef/cookbooks/openstudio
 	url = git@github.com:NREL-cookbooks/openstudio.git
-[submodule "chef/cookbooks/energyplus"]
-	path = chef/cookbooks/energyplus
+[submodule "vagrant/chef/cookbooks/energyplus"]
+	path = vagrant/chef/cookbooks/energyplus
 	url = git@github.com:NREL-cookbooks/energyplus.git
-[submodule "chef/cookbooks/R"]
-	path = chef/cookbooks/R
+[submodule "vagrant/chef/cookbooks/R"]
+	path = vagrant/chef/cookbooks/R
 	url = git@github.com:NREL-cookbooks/R.git
-[submodule "chef/cookbooks/mongodb"]
-	path = chef/cookbooks/mongodb
+[submodule "vagrant/chef/cookbooks/mongodb"]
+	path = vagrant/chef/cookbooks/mongodb
 	url = git@github.com:nllong/mongodb.git
