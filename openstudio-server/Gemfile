@@ -8,6 +8,9 @@ gem 'json'
 # database modules
 gem 'mongoid'
 
+# R
+gem 'rserve-simpler'
+
 # javascript
 gem 'libv8'
 gem 'execjs'

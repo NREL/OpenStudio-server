@@ -96,6 +96,9 @@ GEM
     rdoc (3.12.2)
       json (~> 1.4)
     ref (1.0.5)
+    rserve-client (0.3.0)
+    rserve-simpler (0.0.6)
+      rserve-client (~> 0.3.0)
     rspec (2.13.0)
       rspec-core (~> 2.13.0)
       rspec-expectations (~> 2.13.0)
@@ -149,6 +152,7 @@ DEPENDENCIES
   libv8
   mongoid
   rails (= 3.2.13)
+  rserve-simpler
   rspec
   rspec-html-matchers
   rspec-rails (~> 2.0)
