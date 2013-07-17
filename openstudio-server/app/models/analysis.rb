@@ -15,12 +15,13 @@ class Analysis
   has_many :problems
 
 
-  def start_r_and_run_sample()
+  def start_r_and_run_sample
 
     # determine which problem to run
 
     # add into delayed job
     require 'rserve/simpler'
+    require 'uuid'
 
     #create an instance for R
     @r = Rserve::Simpler.new
@@ -37,9 +38,19 @@ class Analysis
         }
     end
 
-    @r.converse('b')
 
+    out = @r.converse('b$par').to_ruby
+
+    # for now just create the datapoints
+    out.each do |value|
+      datapoint = self.data_points.new
+      datapoint.uuid = UUID.new().generate
+      datapoint.name = "automatically generated from R"
+      datapoint['values'] = [ {"variable_index" => 0, "variable_uuid" => UUID.new().generate, "value" => value}]
+      datapoint.save!
+    end
 
   end
+  handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }
 
 end

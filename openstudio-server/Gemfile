@@ -10,6 +10,7 @@ gem 'mongoid'
 
 # R
 gem 'rserve-simpler'
+gem 'uuid'
 
 # javascript
 gem 'libv8'
@@ -34,6 +35,10 @@ group :test do
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
 end
+
+# job queuing
+gem 'delayed_job_mongoid'
+gem 'daemons'
 
 
 
