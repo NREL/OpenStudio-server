@@ -1,4 +1,4 @@
-name "openstudio-server"
+name "openstudio-worker"
 description "Install and configure OpenStudio for use with Ruby on Rails"
 
 run_list([
