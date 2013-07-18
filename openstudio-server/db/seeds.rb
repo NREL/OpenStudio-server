@@ -1,7 +1,7 @@
 # This file should contain all the record creation needed to seed the database with its default values.
 # The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
 
-jsonfile = "/vagrant/prototype/pat/server_problem.json"
+jsonfile = "/data/pat/server_problem.json"
 if File.exists?(jsonfile)
   json = JSON.parse(File.read(jsonfile), :symbolize_names => true)
 
@@ -16,7 +16,7 @@ if File.exists?(jsonfile)
 
 
   # load the datapoints from pat that need to be run
-  datapoint_file =  "/vagrant/prototype/pat/server_datapoints_request.json"
+  datapoint_file =  "/data/pat/server_datapoints_request.json"
   if File.exists?(datapoint_file)
     json = JSON.parse(File.read(datapoint_file), :symbolize_names => true)
 
@@ -36,16 +36,8 @@ if File.exists?(jsonfile)
 
   end
 else
-  puts "file does not exist"
+  puts "File #{datapoint_file} does not exist"
 end
 
 
-exit
-
-json = ActiveSupport::JSON.decode(File.read('/vagrant/prototype/pat/server_problem.json'))
-puts json
-
-json.each do |a|
-  Project.create!(a['data'], without_protection: true)
-end
 
