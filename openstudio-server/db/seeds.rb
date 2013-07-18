@@ -36,7 +36,7 @@ if File.exists?(jsonfile)
 
   end
 else
-  puts "file does not exist"
+  puts "File #{datapoint_file} does not exist"
 end
 
 
