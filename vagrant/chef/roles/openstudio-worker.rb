@@ -41,7 +41,7 @@ default_attributes(
     'R' => {
         'apt_distribution' => "precise/",
         'apt_key' => "E084DAB9",
-        'package_source_url' => "http://cran.r-models.org/src/contrib",
+        'package_source_url' => "http://cran.r-project.org/src/contrib",
         'packages' => [
             {
                 'name' => 'lhs',
