@@ -19,10 +19,17 @@ $ sudo -i
 $ echo ":ssl_verify_mode: 0" >> /etc/gemrc
 ```
 
-- Reinstall with --force the gem that didn't install correctly (most likely rails)
+- Reinstall with --force the gem that didn't install correctly (most likely rails). 
 
 ```sh
 $ sudo gem install rails -v "3.2.13" --force --no-rdoc --no-ri
+```
+
+Note if this fails, then go into the rails directory for the application and do bundle install
+
+```sh
+$ cd /var/www/rails/openstudio
+$ sudo bundle install
 ```
 
 - Exit the VM and then reprovision the VM
