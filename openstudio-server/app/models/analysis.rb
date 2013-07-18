@@ -45,7 +45,7 @@ class Analysis
     out.each do |value|
       datapoint = self.data_points.new
       datapoint.uuid = UUID.new().generate
-      datapoint.name = "automatically generated from R"
+      datapoint.name = "automatically generated from R #{datapoint.uuid}"
       datapoint['values'] = [ {"variable_index" => 0, "variable_uuid" => UUID.new().generate, "value" => value}]
       datapoint.save!
     end
