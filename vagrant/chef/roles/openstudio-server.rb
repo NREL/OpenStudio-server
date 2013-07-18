@@ -69,6 +69,10 @@ default_attributes(
             {
                 'name' => 'snow',
                 'version' => '0.3-12'
+            },
+            {
+                'name' => 'snowfall',
+                'version' => '1.84-4'
             }
         ]
     }
