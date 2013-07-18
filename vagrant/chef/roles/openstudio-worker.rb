@@ -46,13 +46,20 @@ default_attributes(
         'packages' => [
             {
                 'name' => 'lhs',
-                'version' => '0.10'},
+                'version' => '0.10'
+            },
             {
                 'name' => 'Rserve',
-                'version' => '0.6-8.1'},
+                'version' => '0.6-8.1'
+            },
             {
                 'name' => 'triangle',
-                'version' => '0.8'}
+                'version' => '0.8'
+            },
+            {
+                'name' => 'snow',
+                'version' => '0.3-12'
+            }
         ]
     }
 )
