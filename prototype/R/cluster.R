@@ -6,14 +6,19 @@ f <- function(x){
 
 library(snow)
 
+localOptions <- list(host = "localhost")
+lnxOptions <- list(host = "192.168.33.11", snowlib = "/home/vagrant/R/x86_64-pc-linux-gnu-library/3.0")
 
 
-cl <- makeSOCKcluster(c("localhost","localhost"))
+
+
+cl <- makeCluster(c(rep(list(localOptions), 2), rep(list(lnxOptions),2)), type="SOCK")
+
 
      library(lhs)
-     a <- randomLHS(10000000,2)
+     a <- randomLHS(1000000,2)
 
-     b <- matrix(0,nrow=10000000,ncol=2)
+     b <- matrix(0,nrow=1000000,ncol=2)
      b[,1] <- a[,1] * 3.0
      b[,2] <- a[,2] * 180
 
@@ -21,3 +26,5 @@ cl <- makeSOCKcluster(c("localhost","localhost"))
     results_d <- parLapply(cl,d,f)
 
     stopCluster(cl)
+
+    cl <- makeCluster(c("localhost", "localhost", rep(list(lnxOptions),2)), type="SOCK")

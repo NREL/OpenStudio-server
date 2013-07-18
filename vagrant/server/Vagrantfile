@@ -55,6 +55,8 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
   end
 
+  config.vm.hostname = "os-server"
+
   # View the documentation for the provider you're using for more
   # information on available options.
 
