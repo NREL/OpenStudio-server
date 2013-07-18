@@ -11,6 +11,7 @@ run_list([
              "recipe[openstudio]",
              "recipe[energyplus]",
              "recipe[R]",
+             "recipe[mongodb::server]",  #for some reason the client does not work, only server?
          ])
 
 
