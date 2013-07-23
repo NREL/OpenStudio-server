@@ -24,6 +24,16 @@ default_attributes(
         :version => "7.2.0.006",
         :checksum => "c1ec1499f964bad8638d3c732c9bd10793dd4052a188cd06bb49288d3d962e09"
     },
+#    :rbenv => {
+#        :gems => {
+#            "2.0.0-p195" => [
+#                {
+##                    :name => "rails",
+ #                   :version => "3.2.13"
+ #               }
+ #           ],
+ #       },
+ #   },
     'R' => {
         'apt_distribution' => "precise/",
         'apt_key' => "E084DAB9",

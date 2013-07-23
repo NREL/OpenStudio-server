@@ -7,7 +7,7 @@ run_list([
              # "recipe[ca_certificates]",
 
              # Manage the sudoers file
-             "recipe[sudo]",
+             #"recipe[sudo]",
              #"recipe[sudo::nrel_defaults]",
              #"recipe[sudo::secure_path]",
 
@@ -63,6 +63,12 @@ default_attributes({
                            :rotate => 30,
                            :compress => true,
                            :delaycompress => true,
+                       },
+                       :authorization => {
+                           :sudo => {
+                               :users => ["vagrant"],
+                               :include_sudoers_d => true
+                           }
                        },
                        :deploy_permissions => {
                            :group_members => [
