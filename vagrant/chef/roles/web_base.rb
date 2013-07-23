@@ -11,11 +11,12 @@ run_list([
   "recipe[apache2::iptables]",
   "role[passenger_apache]",
 
+  "recipe[openstudio_server]"
   #"recipe[buildingagent::web]",
 
-  "recipe[deploy_permissions]",
-  "recipe[deploy_permissions::apache]",
-  "recipe[deploy_permissions::whenever]",
+  #"recipe[deploy_permissions]",
+  #"recipe[deploy_permissions::apache]",
+  #"recipe[deploy_permissions::whenever]",
 ])
 
 override_attributes({

@@ -4,7 +4,12 @@
 The preferred development approach for this application is to use Vagrant to provision and test the server.  To see the server instructions go to [OpenStudio Rails Application](./openstudio-server/README.md)
 
 ## Instructions
-- Start the VM and let the provisioning continue until it crashes
+- Start the VM and let the provisioning continue until it crashes (if inside of NREL make sure to disable SSL)
+
+```sh
+OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
+```
+
 - Update Ruby gems
 
 ```sh
@@ -17,6 +22,12 @@ $ gem update --system
 # Right now this is using sudo. This will be fixed later.
 $ sudo -i
 $ echo ":ssl_verify_mode: 0" >> /etc/gemrc
+```
+
+- Add http://rubygems.org to gem sources
+
+```sh
+$
 ```
 
 - Reinstall with --force the gem that didn't install correctly (most likely rails). 
