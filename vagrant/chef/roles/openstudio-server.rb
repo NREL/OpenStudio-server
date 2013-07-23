@@ -3,43 +3,18 @@ description "Install and configure OpenStudio for use with Ruby on Rails"
 
 run_list([
              # Default iptables setup on all servers.
-             "recipe[apt]",
-             "recipe[build-essential]",
-             "recipe[ruby_build]",
-             "recipe[rbenv::system]",
-             "recipe[rbenv::vagrant]",
-             "recipe[openstudio]",
-             "recipe[energyplus]",
-             "recipe[R]",
-             "recipe[mongodb::server]",
+            "role[base]",
+            "role[ruby]",
+            "role[web_base]",
+             #"recipe[openstudio]",
+             #"recipe[energyplus]",
+             #"recipe[R]",
+             #"recipe[mongodb::server]",
          ])
 
 
 default_attributes(
-    'rbenv' => {
-        #'rubies' => ['1.8.7-p371'], #, '1.9.3-p385', '2.0.0-p195'],
-        #'global' => '1.8.7-p371',
-        'rubies' => ['2.0.0-p195'],
-        'global' => '2.0.0-p195',
-        'gems' => {
-            '2.0.0-p195' => [
-                {
-                    'name' => 'bundler',
-                    'source' => 'http://rubygems.org/'
-                },
-                {
-                    'name' => 'rails',
-                    'source' => 'http://rubygems.org/',
-                    'version' => '3.2.13'
-                },
-                {
-                    'name' => 'rubygems-bundler',
-                    'source' => 'http://rubygems.org/'
-                }
 
-            ],
-        }
-    },
 
     :openstudio => {
         :version => "0.10.5.11322",

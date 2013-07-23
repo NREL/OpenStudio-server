@@ -3,7 +3,6 @@ description "Install and configure OpenStudio for use with Ruby on Rails"
 
 run_list([
              # Default iptables setup on all servers.
-             "recipe[apt]",
              "recipe[build-essential]",
              "recipe[ruby_build]",
              "recipe[rbenv::system]",

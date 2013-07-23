@@ -22,3 +22,60 @@
 [submodule "vagrant/chef/cookbooks/ruby_build"]
 	path = vagrant/chef/cookbooks/ruby_build
 	url = git@github.com:NREL-cookbooks/chef-ruby_build.git
+[submodule "vagrant/chef/cookbooks/logrotate"]
+	path = vagrant/chef/cookbooks/logrotate
+	url = git@github.com:opscode-cookbooks/logrotate.git
+[submodule "vagrant/chef/cookbooks/cron"]
+	path = vagrant/chef/cookbooks/cron
+	url = git@github.com:NREL-cookbooks/cron.git
+[submodule "vagrant/chef/cookbooks/git"]
+	path = vagrant/chef/cookbooks/git
+	url = git@github.com:NREL-cookbooks/git.git
+[submodule "vagrant/chef/cookbooks/dmg"]
+	path = vagrant/chef/cookbooks/dmg
+	url = git@github.com:opscode-cookbooks/dmg.git
+[submodule "vagrant/chef/cookbooks/runit"]
+	path = vagrant/chef/cookbooks/runit
+	url = git@github.com:opscode-cookbooks/runit.git
+[submodule "vagrant/chef/cookbooks/windows"]
+	path = vagrant/chef/cookbooks/windows
+	url = git@github.com:opscode-cookbooks/windows.git
+[submodule "vagrant/chef/cookbooks/chef_handler"]
+	path = vagrant/chef/cookbooks/chef_handler
+	url = git@github.com:opscode-cookbooks/chef_handler.git
+[submodule "vagrant/chef/cookbooks/man"]
+	path = vagrant/chef/cookbooks/man
+	url = git@github.com:opscode-cookbooks/man.git
+[submodule "vagrant/chef/cookbooks/ntp"]
+	path = vagrant/chef/cookbooks/ntp
+	url = git@github.com:opscode-cookbooks/ntp.git
+[submodule "vagrant/chef/cookbooks/postfix"]
+	path = vagrant/chef/cookbooks/postfix
+	url = https://github.com/NREL-cookbooks/postfix
+[submodule "vagrant/chef/cookbooks/ack"]
+	path = vagrant/chef/cookbooks/ack
+	url = git@github.com:NREL-cookbooks/ack.git
+[submodule "vagrant/chef/cookbooks/vim"]
+	path = vagrant/chef/cookbooks/vim
+	url = git@github.com:opscode-cookbooks/vim.git
+[submodule "vagrant/chef/cookbooks/unzip"]
+	path = vagrant/chef/cookbooks/unzip
+	url = git@github.com:NREL-cookbooks/unzip.git
+[submodule "vagrant/chef/cookbooks/apache2"]
+	path = vagrant/chef/cookbooks/apache2
+	url = git@github.com:opscode-cookbooks/apache2.git
+[submodule "vagrant/chef/cookbooks/passenger_apache2"]
+	path = vagrant/chef/cookbooks/passenger_apache2
+	url = git@github.com:NREL-cookbooks/passenger_apache2.git
+[submodule "vagrant/chef/cookbooks/deploy_permissions"]
+	path = vagrant/chef/cookbooks/deploy_permissions
+	url = git@github.com:NREL-cookbooks/deploy_permissions.git
+[submodule "vagrant/chef/cookbooks/iptables"]
+	path = vagrant/chef/cookbooks/iptables
+	url = git@github.com:NREL-cookbooks/iptables.git
+[submodule "vagrant/chef/cookbooks/sudo"]
+	path = vagrant/chef/cookbooks/sudo
+	url = git@github.com:NREL-cookbooks/sudo.git
+[submodule "vagrant/chef/cookbooks/yum"]
+	path = vagrant/chef/cookbooks/yum
+	url = git@github.com:opscode-cookbooks/yum.git
