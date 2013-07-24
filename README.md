@@ -16,21 +16,16 @@ OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
 $ gem update --system
 ```
 
-- Turn off ssl verification in the .gemrc file (NREL only requirement)
+- Add http://rubygems.org to gem sources (NREL ONLY)
 
 ```sh
-# Right now this is using sudo. This will be fixed later.
 $ sudo -i
-$ echo ":ssl_verify_mode: 0" >> /etc/gemrc
+$ gem sources -r https://rubygems.org/
+$ gem sources -a http://rubygems.org/
+
 ```
 
-- Add http://rubygems.org to gem sources
-
-```sh
-$
-```
-
-- Reinstall with --force the gem that didn't install correctly (most likely rails). 
+- Reinstall with --force the gem that didn't install correctly (most likely rails).
 
 ```sh
 $ sudo gem install rails -v "3.2.13" --force --no-rdoc --no-ri
