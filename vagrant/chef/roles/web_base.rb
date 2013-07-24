@@ -11,7 +11,7 @@ run_list([
              "recipe[apache2::iptables]",
              "role[passenger_apache]",
 
-         "recipe[openstudio_server]"
+             "recipe[openstudio_server]"
          #"recipe[buildingagent::web]",
 
          #"recipe[deploy_permissions]",
@@ -21,7 +21,7 @@ run_list([
 
 override_attributes({
                         :apache => {
-                            :listen_ports => ["80", "443"],
+                            :listen_ports => ["80", "443", "8080", "8081", "8082", "8888"],
                         },
 
                     })

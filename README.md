@@ -10,10 +10,10 @@ The preferred development approach for this application is to use Vagrant to pro
 OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
 ```
 
-- Update Ruby gems
+- Log into Vagrant VM
 
 ```sh
-$ gem update --system
+vagrant ssh
 ```
 
 - Add http://rubygems.org to gem sources (NREL ONLY)
@@ -43,6 +43,8 @@ $ sudo bundle install
 ```sh
 $ vagrant provision
 ```
+
+- If provisioning fails, continue to call the vagrant provision command
 
 - Test the rails server
 

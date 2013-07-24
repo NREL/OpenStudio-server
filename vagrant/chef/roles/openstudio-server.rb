@@ -9,7 +9,7 @@ run_list([
              #"recipe[openstudio]",
              #"recipe[energyplus]",
              #"recipe[R]",
-             #"recipe[mongodb::server]",
+             "recipe[mongodb::server]",
          ])
 
 
