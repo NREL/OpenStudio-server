@@ -21,7 +21,7 @@ run_list([
 
 override_attributes({
                         :apache => {
-                            :listen_ports => ["80", "443", "8080", "8081", "8082", "8888"],
+                            :listen_ports => ["80", "443"],
                         },
 
                     })
