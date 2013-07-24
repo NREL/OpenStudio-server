@@ -7,8 +7,8 @@
 include_recipe "passenger_apache2"
 
 web_app "openstudio-server" do
-  docroot "/var/www/rails/openstudio"
-  server_name "openstudio.#{node[:domain]}"
-  server_aliases [ "openstudio", node[:hostname] ]
+  docroot "/var/www/rails/openstudio/public"
+  server_name "openstudio-server"
+  #server_aliases [ "openstudio", node[:hostname] ]
   rails_env "development"
 end
