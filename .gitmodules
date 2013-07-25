@@ -79,3 +79,6 @@
 [submodule "vagrant/chef/cookbooks/yum"]
 	path = vagrant/chef/cookbooks/yum
 	url = git@github.com:opscode-cookbooks/yum.git
+[submodule "vagrant/chef/cookbooks/expect"]
+	path = vagrant/chef/cookbooks/expect
+	url = git@github.com:NREL-cookbooks/expect.git
