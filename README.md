@@ -19,23 +19,24 @@ vagrant ssh
 - Add http://rubygems.org to gem sources (NREL ONLY)
 
 ```sh
-$ sudo -i
-$ gem sources -r https://rubygems.org/
-$ gem sources -a http://rubygems.org/
+sudo -i
+gem sources -r https://rubygems.org/
+gem sources -a http://rubygems.org/
 
 ```
 
 - Reinstall with --force the gem that didn't install correctly (most likely rails).
 
 ```sh
-$ sudo gem install rails -v "3.2.13" --force --no-rdoc --no-ri
+sudo -i
+gem install rails -v "3.2.13" --force --no-rdoc --no-ri
 ```
 
 Note if this fails, then go into the rails directory for the application and do bundle install
 
 ```sh
-$ cd /var/www/rails/openstudio
-$ sudo bundle install
+cd /var/www/rails/openstudio
+bundle install
 ```
 
 - Exit the VM and then reprovision the VM

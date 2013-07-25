@@ -15,9 +15,9 @@ run_list([
              "recipe[apt]",
 
              # Default iptables setup on all servers.
-             "recipe[iptables]",
-             "recipe[iptables::ssh]",
-             "recipe[iptables::icmp_timestamps]",
+             #"recipe[iptables]",
+             #"recipe[iptables::ssh]",
+             #"recipe[iptables::icmp_timestamps]",
 
              #"recipe[curl]",
 
@@ -54,6 +54,9 @@ run_list([
 
              # Unzip is typically handy to have.
              "recipe[unzip]",
+
+             # Install expect for some advanced scripting
+             "recipe[expect]"
          ])
 
 default_attributes({

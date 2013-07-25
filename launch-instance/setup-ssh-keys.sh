@@ -44,7 +44,6 @@ if {[catch "system cp $env(HOME)/.ssh/id_rsa.pub $env(HOME)/.ssh/authorized_keys
 
 if {[catch "system \"cat << EOF > $env(HOME)/.ssh/config
 StrictHostKeyChecking no
-ForwardX11 yes
 EOF\"" catch_result]} {
   puts "Error: $catch_result"
 
@@ -55,3 +54,19 @@ EOF\"" catch_result]} {
 #
 system chmod 700 $env(HOME)/.ssh
 system chmod 600 $env(HOME)/.ssh/config
+
+puts "copying public key to worker nodes ... (un-hardcode this in the near future)"
+if {[catch "spawn /usr/bin/ssh-copy-id vagrant@192.168.33.11"]} {
+  puts "error"
+}
+
+set timeout 30
+expect {
+  " password:" {
+    send -s "vagrant\r"
+    exp_continue
+  }
+  EOF {
+    puts "got EOF"
+  }
+}

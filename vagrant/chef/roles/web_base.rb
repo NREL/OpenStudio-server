@@ -6,9 +6,9 @@ run_list([
              "role[ruby]",
 
              "recipe[apache2]",
-             "recipe[apache2::mod_rewrite]",
              "recipe[apache2::mod_ssl]",
-             "recipe[apache2::iptables]",
+             #"recipe[apache2::mod_rewrite]",
+             #"recipe[apache2::iptables]",
              "role[passenger_apache]",
 
              "recipe[openstudio_server]"
