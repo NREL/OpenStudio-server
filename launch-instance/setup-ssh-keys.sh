@@ -55,18 +55,3 @@ EOF\"" catch_result]} {
 system chmod 700 $env(HOME)/.ssh
 system chmod 600 $env(HOME)/.ssh/config
 
-puts "copying public key to worker nodes ... (un-hardcode this in the near future)"
-if {[catch "spawn /usr/bin/ssh-copy-id vagrant@192.168.33.11"]} {
-  puts "error"
-}
-
-set timeout 30
-expect {
-  " password:" {
-    send -s "vagrant\r"
-    exp_continue
-  }
-  EOF {
-    puts "got EOF"
-  }
-}

@@ -1,0 +1,21 @@
+#!/usr/bin/expect -f
+set timeout 20
+set IPADDRESS [lindex $argv 0]
+set USERNAME [lindex $argv 1]
+set PASSWORD [lindex $argv 2]
+
+puts "copying public key to worker nodes ..."
+puts "$USERNAME@$IPADDRESS"
+if {[catch "spawn /usr/bin/ssh-copy-id $USERNAME@$IPADDRESS"]} {
+  puts "error"
+}
+
+expect {
+  " password:" {
+    send -s "$PASSWORD\r"
+    exp_continue
+  }
+  EOF {
+    puts "got EOF"
+  }
+}
