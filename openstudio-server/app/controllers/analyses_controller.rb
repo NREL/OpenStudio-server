@@ -84,4 +84,9 @@ class AnalysesController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  # container for
+  def action
+
+  end
 end
