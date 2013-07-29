@@ -16,13 +16,23 @@ vagrant ssh
 sudo -i
 cd /var/www/rails/openstudio/
 script/delayed_job start
-rails s
+
 ```
 
-- In another terminal start vagrant ssh and run
-
+## Initializing the database
 ```sh
 sudo -i
 cd /var/www/rails/openstudio
 rake db:seed
 ```
+
+# WEBbrick
+- If you want to run the server through webbrick do the following
+
+```sh
+sudo -i
+cd /var/www/rails/openstudio/
+rails s
+```
+
+

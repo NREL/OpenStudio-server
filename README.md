@@ -40,9 +40,22 @@ gem install rails -v "3.2.13" --force --no-rdoc --no-ri
 vagrant provision
 ```
 
-- If provisioning fails, continue to call the vagrant provision command
+Note, if provisioning fails continue to call the `vagrant provision` command
 
-- Test the rails server
+- Run the rails server
+By default, apache is configured to run the rails application, but the `bundle install` command has yet to be called.
+
+SSH into the vagrant machine and run bundler in the openstudio-server application directory
+
+```sh
+vagrant ssh
+cd /var/www/rails/openstudio
+sudo bundle install
+```
+
+There may be a couple other dependencies to start (i.e. delayed_job).  To see the server instructions go to [OpenStudio Rails Application](./openstudio-server/README.md)
+
+- Test the Rails application by pointing your local browser to http://localhost:8080
 
 ## Deploying to Amazon EC2
 
