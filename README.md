@@ -10,6 +10,8 @@ The preferred development approach for this application is to use Vagrant to pro
 OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
 ```
 
+Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
+
 - Log into Vagrant VM
 
 ```sh
@@ -32,17 +34,10 @@ sudo -i
 gem install rails -v "3.2.13" --force --no-rdoc --no-ri
 ```
 
-Note if this fails, then go into the rails directory for the application and do bundle install
-
-```sh
-cd /var/www/rails/openstudio
-bundle install
-```
-
 - Exit the VM and then reprovision the VM
 
 ```sh
-$ vagrant provision
+vagrant provision
 ```
 
 - If provisioning fails, continue to call the vagrant provision command

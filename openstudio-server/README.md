@@ -7,6 +7,11 @@ This is a bare bones rails installation and there are some quirks due to NREL/va
 - Login to the vagrant box and start the rails server.  You also need to start delayed job for handing the R calls
 
 ```sh
+cd /var/www/rails/openstudio
+bundle install
+```
+
+```sh
 vagrant ssh
 sudo -i
 cd /var/www/rails/openstudio/

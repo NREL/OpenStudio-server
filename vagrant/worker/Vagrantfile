@@ -91,9 +91,9 @@ Vagrant.configure("2") do |config|
 
     aws.tags = {
         'Name' => 'OpenStudio',
-        'OpenStudio Version' => '0.10.5'
+        'NodeType' => 'Worker',
+        'OpenStudioVersion' => '0.10.5'
     }
-
 
   end
 end
