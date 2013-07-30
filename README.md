@@ -4,6 +4,12 @@
 The preferred development approach for this application is to use Vagrant to provision and test the server.  To see the server instructions go to [OpenStudio Rails Application](./openstudio-server/README.md)
 
 ## Instructions
+- Install the vagrant omnibus plugin
+
+```sh
+vagrant plugin install vagrant-omnibus
+```
+
 - Start the VM and let the provisioning continue until it crashes (if inside of NREL make sure to disable SSL)
 
 ```sh
