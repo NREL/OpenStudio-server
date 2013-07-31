@@ -1,9 +1,3 @@
-//= require dj_mon/bootstrap_tooltip
-//= require dj_mon/bootstrap_tab
-//= require dj_mon/bootstrap_popover
-//= require dj_mon/bootstrap_modal
-//= require dj_mon/mustache
-
 $(function(){
 
   $('a[data-toggle="tab"]').bind('shown', function(e) {
@@ -39,7 +33,7 @@ $(function(){
   });
 
   (function refreshCount() {
-    $.getJSON(dj_counts_dj_reports_url).success(function(data){
+    $.getJSON(dj_count_delayed_job_view_url).success(function(data){
       var template = $('#dj_counts_template').html();
       var output = Mustache.render(template, data);
       $('#dj-counts-view').html(output);

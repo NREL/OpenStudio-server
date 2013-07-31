@@ -1,6 +1,7 @@
 module DelayedJobView
   class DelayedJobReport
 
+    require 'haml'
     require "delayed_job/backend"
     require "delayed_job/mongoid"
 
@@ -72,7 +73,7 @@ module DelayedJobView
             :max_run_time => Delayed::Worker.max_run_time,
             :read_ahead => defined?(Delayed::Worker.read_ahead) ? Delayed::Worker.read_ahead : 5,
             :delay_jobs => Delayed::Worker.delay_jobs,
-            #:delayed_job_version => Gem.loaded_specs["delayed_job"].version.version,
+            :delayed_job_version => Gem.loaded_specs["delayed_job"].version.version,
             #:dj_mon_version =>      DjMon::VERSION
         }
       end
