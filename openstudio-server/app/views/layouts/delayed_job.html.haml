@@ -14,7 +14,7 @@
         .navbar-inner
           .container
             .pull-left
-              = link_to "DJ Mon", delayed_job_views_url, :class => "brand"
+              = link_to "Delayed Job Queue Viewer", delayed_job_views_url, :class => "brand"
             .pull-right
               = link_to "Settings", "#dj_settings_template", :rel => 'modal', "data-content" => DelayedJobView::DelayedJobReport.settings.to_json, :id => "settings", :class => "btn btn-primary btn-mini"
 

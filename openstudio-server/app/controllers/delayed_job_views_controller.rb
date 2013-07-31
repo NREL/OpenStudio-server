@@ -7,30 +7,31 @@
     #before_filter :set_api_version
 
     def index
+      @dj = DelayedJobView::DelayedJobReport.all_reports
     end
 
     def all
-      respond_with DelayedJobReport.all_reports
+      respond_with DelayedJobView::DelayedJobReport.all_reports
     end
 
     def failed
-      respond_with DelayedJobReport.failed_reports
+      respond_with DelayedJobView::DelayedJobReport.failed_reports
     end
 
     def active
-      respond_with DelayedJobReport.active_reports
+      respond_with DelayedJobView::DelayedJobReport.active_reports
     end
 
     def queued
-      respond_with DelayedJobReport.queued_reports
+      respond_with DelayedJobView::DelayedJobReport.queued_reports
     end
 
     def dj_counts
-      respond_with DelayedJobReport.dj_counts
+      respond_with DelayedJobView::DelayedJobReport.dj_counts
     end
 
     def settings
-      respond_with DelayedJobReport.settings
+      respond_with DelayedJobView::DelayedJobReport.settings
     end
 
     def retry
