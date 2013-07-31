@@ -1,5 +1,6 @@
 class Problem
   include Mongoid::Document
+  include Mongoid::Timestamps
 
   #has_many :workflow_steps
 

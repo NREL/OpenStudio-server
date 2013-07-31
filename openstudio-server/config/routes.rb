@@ -1,13 +1,26 @@
 OpenstudioServer::Application.routes.draw do
 
 
+  resources :delayed_job_views do
+    collection do
+      get :all
+      get :failed
+      get :active
+      get :queued
+      get :dj_counts
+      get :settings
+    end
+    member do
+      post :retry
+    end
+  end
+
   resources :measures
   resources :workflow_steps
 
   # :only => [:show, :index]
   resources :projects do
     resources :analyses, shallow: true do
-
       resources :seeds, shallow: true
       resources :algorithms, shallow: true
       resources :problems, shallow: true do

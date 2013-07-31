@@ -1,5 +1,6 @@
 class Analysis
   include Mongoid::Document
+  include Mongoid::Timestamps
 
   field :uuid
   field :version_uuid
