@@ -1,0 +1,88 @@
+!!! 5
+%html
+  %head{:lang => "en"}
+    %meta{:name => "apple-itunes-app", :content => "app-id=552732872"}
+    %script
+      var dj_counts_delayed_job_views_url = "#{dj_counts_delayed_job_views_url}"
+    = javascript_include_tag "application"
+    = stylesheet_link_tag "application", :media => "screen, projection"
+    = yield :head
+
+  %body
+    %header
+      .navbar.navbar-fixed-top
+        .navbar-inner
+          .container
+            .pull-left
+              = link_to "DJ Mon", delayed_job_views_url, :class => "brand"
+            .pull-right
+              = link_to "Settings", "#dj_settings_template", :rel => 'modal', "data-content" => DelayedJobView::DelayedJobReport.settings.to_json, :id => "settings", :class => "btn btn-primary btn-mini"
+
+            .pull-right
+              #dj-counts-view
+
+    .container.centered
+      - if flash[:notice]
+        .alert.alert-success
+          = flash[:notice]
+
+    .container
+      = yield
+
+    %script#dj_counts_template{ :type=> "text/x-handlebars-template" }
+      %span.badge.badge-warning
+        {{failed}} failed
+      %span.badge.badge-info
+        {{queued}} queued
+      %span.badge.badge-info
+        {{active}} active
+      %span.badge.badge-info
+        {{all}} all
+
+    %script#dj_settings_template{ :type=> "text/x-handlebars-template" }
+      .modal.hide
+        .modal-header
+          %button{ :type => "button", :class => "close", 'data-dismiss' => "modal" }
+            ×
+          %h3
+            Settings
+        .modal-body
+          %table.table.table-bordered.table-striped
+            %tr
+              %td
+                Delayed Job version
+              %td
+                <code>{{content.delayed_job_version}}</code>
+            %tr
+              %td
+                Destroy failed jobs
+              %td
+                <code>{{content.destroy_failed_jobs}}</code>
+            %tr
+              %td
+                Sleep delay
+              %td
+                <code>{{content.sleep_delay}}</code> seconds
+            %tr
+              %td
+                Max attempts
+              %td
+                <code>{{content.max_attempts}}</code>
+            %tr
+              %td
+                Max run time
+              %td
+                <code>{{content.max_run_time}}</code> seconds
+            %tr
+              %td
+                Read ahead
+              %td
+                <code>{{content.read_ahead}}</code>
+            %tr
+              %td
+                Delay Jobs
+              %td
+                <code>{{content.delay_jobs}}</code>
+
+        .modal-footer
+          = link_to "Close", '#', :class => 'btn btn-primary', 'data-dismiss'=> 'modal'

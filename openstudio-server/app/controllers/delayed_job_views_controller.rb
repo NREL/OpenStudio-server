@@ -1,14 +1,12 @@
 #module DelayedJobView
   class DelayedJobViewsController < ApplicationController
     respond_to :json, :html
-    #layout 'dj_mon'
+    layout 'delayed_job'
 
     #before_filter :authenticate
     #before_filter :set_api_version
 
     def index
-      @dj = DelayedJobView::DelayedJobReport.all_reports
-     # respond_with DelayedJobView::DelayedJobReport.all_reports
     end
 
     def all
