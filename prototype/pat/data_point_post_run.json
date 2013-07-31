@@ -1,0 +1,529 @@
+{
+ "data_point" :  {
+  "analysis_uuid" : "{c95cca5c-dc6d-4f8f-9f55-76a6cd937d01}",
+  "complete" : true,
+  "data_point_type" : "DataPoint",
+  "description" : "Demonstrating json serialization of complete DataPoint.",
+  "directory" : "myProject/fakeDataPoint/",
+  "display_name" : "Fake Data Point",
+  "failed" : false,
+  "idf_input_data" :   {
+   "checksum_create" : "00000000",
+   "checksum_last" : "00000000",
+   "display_name" : "out",
+   "file_type" : "IDF",
+   "name" : "myProject/fakeDataPoint/72-ModelToIdf-0/out.idf",
+   "path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/myProject/fakeDataPoint/72-ModelToIdf-0/out.idf",
+   "timestamp_create" : "2013-Jul-29 15:36:02",
+   "timestamp_last" : "2013-Jul-29 15:36:02",
+   "uuid" : "{f1382d75-3d68-4a21-81d7-66894ef1c2cb}",
+   "version_uuid" : "{39953420-0509-4139-9d6f-ae20b0e030d9}"
+  },
+  "name" : "fakeDataPoint",
+  "osm_input_data" :   {
+   "checksum_create" : "00000000",
+   "checksum_last" : "00000000",
+   "display_name" : "out",
+   "file_type" : "OSM",
+   "name" : "myProject/fakeDataPoint/71-Ruby-0/out.osm",
+   "path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/myProject/fakeDataPoint/71-Ruby-0/out.osm",
+   "timestamp_create" : "2013-Jul-29 15:36:02",
+   "timestamp_last" : "2013-Jul-29 15:36:02",
+   "uuid" : "{7402c5d3-60d5-4999-949d-e6e6a1812a5a}",
+   "version_uuid" : "{fd872507-8484-4d38-beda-033cb642ecd4}"
+  },
+  "output_attributes" : [
+   {
+    "name" : "enduses.electric",
+    "uuid" : "{7e938127-44b0-4b47-b61c-5c22aa86b27d}",
+    "value" : [
+     {
+      "name" : "electricity.Cooling",
+      "units" : "kWh",
+      "uuid" : "{52b9a6e3-c62b-4d49-8196-f42db7ea9347}",
+      "value" : 281.282,
+      "value_type" : "Double",
+      "version_uuid" : "{e4080c6d-6309-4faf-b34b-05771a4cc5ae}"
+     },
+     {
+      "name" : "electricity.Lighting",
+      "units" : "kWh",
+      "uuid" : "{c548784f-8afc-4de9-8fa7-eb4d334bd46e}",
+      "value" : 19206.3,
+      "value_type" : "Double",
+      "version_uuid" : "{6c4b83ad-4d18-4b7f-8639-9bb4e312661f}"
+     },
+     {
+      "name" : "electricity.Equipment",
+      "units" : "kWh",
+      "uuid" : "{ecfb651c-87e9-4da6-88d8-7a8213fede7e}",
+      "value" : 5112.13,
+      "value_type" : "Double",
+      "version_uuid" : "{dbd304ff-46b2-44c9-85eb-1be0f0afeed4}"
+     }
+    ],
+    "value_type" : "AttributeVector",
+    "version_uuid" : "{d75d8523-c324-4769-95ec-bf4e3632f099}"
+   },
+   {
+    "name" : "eui",
+    "units" : "kBtu/ft^2",
+    "uuid" : "{e1a8447e-590d-4ba6-8ff9-d7b3fcc634f9}",
+    "value" : 128.217,
+    "value_type" : "Quantity",
+    "version_uuid" : "{efb358f0-b7b5-4afc-ba21-f0b5b0876d59}"
+   }
+  ],
+  "problem_uuid" : "{ac4ad2ad-6406-437d-80f3-c8f8ef7b3615}",
+  "response_values" : [
+   {
+    "response_value_index" : 0,
+    "value" : 58.282
+   },
+   {
+    "response_value_index" : 1,
+    "value" : 718952.0
+   },
+   {
+    "response_value_index" : 2,
+    "value" : 0.3
+   }
+  ],
+  "sql_output_data" :   {
+   "checksum_create" : "00000000",
+   "checksum_last" : "00000000",
+   "display_name" : "eplusout",
+   "file_type" : "SQL",
+   "name" : "myProject/fakeDataPoint/74-EnergyPlus-0/eplusout.sql",
+   "path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/myProject/fakeDataPoint/74-EnergyPlus-0/eplusout.sql",
+   "timestamp_create" : "2013-Jul-29 15:36:02",
+   "timestamp_last" : "2013-Jul-29 15:36:02",
+   "uuid" : "{acaa0366-31c5-4651-ac37-4ef1a6634214}",
+   "version_uuid" : "{3134f5c6-cc16-4c26-94a2-bcbc630a1c48}"
+  },
+  "tags" : [
+   {
+    "name" : "custom",
+    "uuid" : "{825aa6c5-c321-4190-84ae-aca9a58daa6b}"
+   },
+   {
+    "name" : "faked",
+    "uuid" : "{837bffaa-264a-4a2a-8d0b-b69a246cf696}"
+   }
+  ],
+  "top_level_job" :   {
+   "children" : [
+    {
+     "children" : [
+      {
+       "children" : [
+        {
+         "children" : [
+          {
+           "children" : [
+            {
+             "errors" :              {
+              "all_errors" : [
+               {
+                "description" : "Post-process completed successfully.",
+                "error_type" : "Info"
+               }
+              ],
+              "result" : "Success"
+             },
+             "job_type" : "OpenStudioPostProcess",
+             "last_run" : "2018-Mar-21 08:34:21",
+             "output_files" : [
+              {
+               "exists" : true,
+               "file_name" : "report.xml",
+               "full_path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/UserScript/UserScript-0/ModelToIdf-0/EnergyPlusPreProcess-0/EnergyPlus-0/OpenStudioPostProcess-0/myProject/fakeDataPoint/75-OpenStudioPostProcess-0/report.xml",
+               "key" : "",
+               "last_modified" : "2018-Mar-21 08:34:21"
+              }
+             ],
+             "uuid" : "{e97a1049-3db0-4ef8-8755-e7dc23d764de}"
+            }
+           ],
+           "errors" :            {
+            "all_errors" : [
+             {
+              "description" : "ENERGYPLUS WARNING: ...",
+              "error_type" : "Warning"
+             },
+             {
+              "description" : "ENERGYPLUS WARNING: ...",
+              "error_type" : "Warning"
+             },
+             {
+              "description" : "ENERGYPLUS WARNING: ...",
+              "error_type" : "Warning"
+             }
+            ],
+            "result" : "Success"
+           },
+           "job_type" : "EnergyPlus",
+           "last_run" : "2018-Mar-21 08:33:42",
+           "output_files" : [
+            {
+             "exists" : true,
+             "file_name" : "eplusout.sql",
+             "full_path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/UserScript/UserScript-0/ModelToIdf-0/EnergyPlusPreProcess-0/EnergyPlus-0/myProject/fakeDataPoint/74-EnergyPlus-0/eplusout.sql",
+             "key" : "",
+             "last_modified" : "2018-Mar-21 08:33:32"
+            },
+            {
+             "exists" : true,
+             "file_name" : "eplusout.err",
+             "full_path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/UserScript/UserScript-0/ModelToIdf-0/EnergyPlusPreProcess-0/EnergyPlus-0/myProject/fakeDataPoint/74-EnergyPlus-0/eplusout.err",
+             "key" : "",
+             "last_modified" : "2018-Mar-21 08:33:34"
+            }
+           ],
+           "uuid" : "{a6ab5833-1722-4be5-b66e-e58fb90a2afd}"
+          }
+         ],
+         "errors" :          {
+          "all_errors" : [
+
+          ],
+          "result" : "Success"
+         },
+         "job_type" : "EnergyPlusPreProcess",
+         "last_run" : "2018-Mar-21 08:23:12",
+         "output_files" : [
+          {
+           "exists" : true,
+           "file_name" : "out.idf",
+           "full_path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/UserScript/UserScript-0/ModelToIdf-0/EnergyPlusPreProcess-0/myProject/fakeDataPoint/73-EnergyPlusPreProcess-0/out.idf",
+           "key" : "",
+           "last_modified" : "2018-Mar-21 08:23:05"
+          }
+         ],
+         "uuid" : "{16a3b3cb-1102-4833-83d3-c3e788d0532a}"
+        }
+       ],
+       "errors" :        {
+        "all_errors" : [
+         {
+          "description" : "Did not find ScheduleTypeLimits for Schedule ...",
+          "error_type" : "Info"
+         },
+         {
+          "description" : "Unexpectedly did not find a child object of a certain type, replaced with a default one.",
+          "error_type" : "Warning"
+         }
+        ],
+        "result" : "Success"
+       },
+       "job_type" : "ModelToIdf",
+       "last_run" : "2018-Mar-21 08:22:32",
+       "output_files" : [
+        {
+         "exists" : true,
+         "file_name" : "out.idf",
+         "full_path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/UserScript/UserScript-0/ModelToIdf-0/myProject/fakeDataPoint/72-ModelToIdf-0/out.idf",
+         "key" : "",
+         "last_modified" : "2018-Mar-21 08:22:30"
+        }
+       ],
+       "uuid" : "{bbd9c92f-a951-4d90-8d1d-a09beb06d2d0}"
+      }
+     ],
+     "errors" :      {
+      "all_errors" : [
+       {
+        "description" : "Started with a window to wall ratio of ...",
+        "error_type" : "InitialCondition"
+       },
+       {
+        "description" : "Set the window to wall ratio ...",
+        "error_type" : "FinalCondition"
+       }
+      ],
+      "result" : "Success"
+     },
+     "files" : [
+      {
+       "exists" : true,
+       "file_name" : "UserScriptAdapter.rb",
+       "full_path" : "/home/ehale/projects/openstudio-branch2/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
+       "key" : "rb",
+       "last_modified" : "2013-Jul-09 22:47:49",
+       "required_files" : [
+        {
+         "path" : "user_script.rb",
+         "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/measure.rb"
+        },
+        {
+         "path" : "ExampleModel_Test.rb",
+         "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/tests/ExampleModel_Test.rb"
+        },
+        {
+         "path" : "SimpleModel.osm",
+         "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/tests/SimpleModel.osm"
+        },
+        {
+         "path" : "SimpleModel_Test.rb",
+         "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/tests/SimpleModel_Test.rb"
+        }
+       ]
+      }
+     ],
+     "job_type" : "UserScript",
+     "last_run" : "2018-Mar-21 08:21:52",
+     "params" : [
+      {
+       "children" : [
+        {
+         "value" : "--argumentName=facade"
+        },
+        {
+         "value" : "--argumentValue=North"
+        },
+        {
+         "value" : "--argumentName=wwr"
+        },
+        {
+         "value" : "--argumentValue=0.3"
+        },
+        {
+         "value" : "--argumentName=offset"
+        },
+        {
+         "value" : "--argumentValue=0.9"
+        }
+       ],
+       "value" : "ruby_scriptparameters"
+      },
+      {
+       "children" : [
+        {
+         "children" : [
+          {
+           "children" : [
+            {
+             "children" : [
+              {
+               "value" : "in.osm"
+              }
+             ],
+             "value" : ".*\\.osm"
+            }
+           ],
+           "value" : "All"
+          }
+         ],
+         "value" : "Last"
+        }
+       ],
+       "value" : "ruby_inputfiles"
+      },
+      {
+       "children" : [
+        {
+         "value" : "-I"
+        },
+        {
+         "value" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/"
+        }
+       ],
+       "value" : "ruby_toolparameters"
+      },
+      {
+       "children" : [
+        {
+         "children" : [
+          {
+           "children" : [
+            {
+             "value" : ""
+            }
+           ],
+           "value" : "osm"
+          }
+         ],
+         "value" : "osm"
+        }
+       ],
+       "value" : "ruby_copyrequired"
+      },
+      {
+       "children" : [
+        {
+         "value" : "true"
+        }
+       ],
+       "value" : "ruby_isuserscriptjob"
+      },
+      {
+       "children" : [
+        {
+         "value" : "myProject/fakeDataPoint/"
+        }
+       ],
+       "value" : "outdir"
+      }
+     ],
+     "uuid" : "{b0d09b71-45aa-40ca-8166-bc47a7d39d9e}"
+    }
+   ],
+   "errors" :    {
+    "all_errors" : [
+     {
+      "description" : "Started with a window to wall ratio of ...",
+      "error_type" : "InitialCondition"
+     },
+     {
+      "description" : "Set the window to wall ratio ...",
+      "error_type" : "FinalCondition"
+     }
+    ],
+    "result" : "Success"
+   },
+   "files" : [
+    {
+     "exists" : true,
+     "file_name" : "UserScriptAdapter.rb",
+     "full_path" : "/home/ehale/projects/openstudio-branch2/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
+     "key" : "rb",
+     "last_modified" : "2013-Jul-09 22:47:49",
+     "required_files" : [
+      {
+       "path" : "user_script.rb",
+       "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/measure.rb"
+      },
+      {
+       "path" : "ExampleModel_Test.rb",
+       "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/tests/ExampleModel_Test.rb"
+      },
+      {
+       "path" : "SimpleModel.osm",
+       "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/tests/SimpleModel.osm"
+      },
+      {
+       "path" : "SimpleModel_Test.rb",
+       "url" : "file:///home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade/tests/SimpleModel_Test.rb"
+      }
+     ]
+    }
+   ],
+   "job_type" : "UserScript",
+   "last_run" : "2018-Mar-21 08:21:10",
+   "params" : [
+    {
+     "children" : [
+      {
+       "value" : "--argumentName=facade"
+      },
+      {
+       "value" : "--argumentValue=South"
+      },
+      {
+       "value" : "--argumentName=wwr"
+      },
+      {
+       "value" : "--argumentValue=0.1"
+      }
+     ],
+     "value" : "ruby_scriptparameters"
+    },
+    {
+     "children" : [
+      {
+       "children" : [
+        {
+         "children" : [
+          {
+           "children" : [
+            {
+             "value" : "in.osm"
+            }
+           ],
+           "value" : ".*\\.osm"
+          }
+         ],
+         "value" : "All"
+        }
+       ],
+       "value" : "Last"
+      }
+     ],
+     "value" : "ruby_inputfiles"
+    },
+    {
+     "children" : [
+      {
+       "value" : "-I"
+      },
+      {
+       "value" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/"
+      }
+     ],
+     "value" : "ruby_toolparameters"
+    },
+    {
+     "children" : [
+      {
+       "children" : [
+        {
+         "children" : [
+          {
+           "value" : ""
+          }
+         ],
+         "value" : "osm"
+        }
+       ],
+       "value" : "osm"
+      }
+     ],
+     "value" : "ruby_copyrequired"
+    },
+    {
+     "children" : [
+      {
+       "value" : "true"
+      }
+     ],
+     "value" : "ruby_isuserscriptjob"
+    }
+   ],
+   "uuid" : "{d05bcfb3-a8ff-4d26-994c-7b2416a52520}"
+  },
+  "uuid" : "{a5ff1d0b-e542-475a-a2bf-130be6b5f0bd}",
+  "variable_values" : [
+   {
+    "value" : 1,
+    "value_type" : "int",
+    "variable_value_index" : 0
+   },
+   {
+    "value" : 0.3,
+    "value_type" : "double",
+    "variable_value_index" : 1
+   },
+   {
+    "value" : 0.9,
+    "value_type" : "double",
+    "variable_value_index" : 2
+   }
+  ],
+  "version_uuid" : "{30a08b1c-8511-49ac-8495-a108e41ff5ba}",
+  "xml_output_data" :   {
+   "checksum_create" : "00000000",
+   "checksum_last" : "00000000",
+   "display_name" : "report",
+   "file_type" : "XML",
+   "name" : "myProject/fakeDataPoint/75-OpenStudioPostProcess-0/report.xml",
+   "path" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/Products/myProject/fakeDataPoint/75-OpenStudioPostProcess-0/report.xml",
+   "timestamp_create" : "2013-Jul-29 15:36:02",
+   "timestamp_last" : "2013-Jul-29 15:36:02",
+   "uuid" : "{ca50f21d-77cc-47eb-96cb-d0310792eeb1}",
+   "version_uuid" : "{7b6a9c2b-95ba-47c3-a22c-e3d7b83099d6}"
+  }
+ },
+ "metadata" :  {
+  "version" : "1.0.2"
+ }
+}

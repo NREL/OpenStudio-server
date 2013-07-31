@@ -1,0 +1,486 @@
+{
+ "analysis" :  {
+  "data_points_are_invalid" : false,
+  "display_name" : "My Analysis",
+  "name" : "My Analysis",
+  "problem" :   {
+   "display_name" : "My Problem",
+   "name" : "My Problem",
+   "problem_type" : "Problem",
+   "responses" : [
+    {
+     "display_name" : "Energy Use Intensity",
+     "function_type" : "LinearFunction",
+     "name" : "Energy Use Intensity",
+     "response_index" : 0,
+     "uuid" : "{5a66fff6-352f-4f36-8908-6d8724c0d964}",
+     "variables" : [
+      {
+       "attribute_name" : "site.eui",
+       "display_name" : "EUI",
+       "name" : "EUI",
+       "uuid" : "{ebf96a14-e46c-45db-83d9-460e2c8bfc39}",
+       "variable_index" : 0,
+       "variable_type" : "OutputAttributeVariable",
+       "version_uuid" : "{e9a25fd8-d201-4494-a8ca-da4bcda5d289}"
+      }
+     ],
+     "version_uuid" : "{d087bcc1-a05e-4914-97a3-e9e78fe78b99}"
+    },
+    {
+     "display_name" : "Approximate Source Energy",
+     "function_type" : "LinearFunction",
+     "name" : "Approximate Source Energy",
+     "response_index" : 1,
+     "uuid" : "{948c1726-614e-4119-970c-e20e98cca6a7}",
+     "variables" : [
+      {
+       "attribute_name" : "heating.energy.gas",
+       "coefficient" : 1.0,
+       "display_name" : "Heating Energy",
+       "name" : "Heating Energy",
+       "uuid" : "{f2ff3bb6-75f5-4641-a64c-edaf02f90f30}",
+       "variable_index" : 0,
+       "variable_type" : "OutputAttributeVariable",
+       "version_uuid" : "{87ce2e50-79b3-45bc-a829-03d5bb0964fd}"
+      },
+      {
+       "attribute_name" : "cooling.energy.elec",
+       "coefficient" : 2.5,
+       "display_name" : "Cooling Energy",
+       "name" : "Cooling Energy",
+       "uuid" : "{5e18101e-150f-4a85-9281-fca082d86ea2}",
+       "variable_index" : 1,
+       "variable_type" : "OutputAttributeVariable",
+       "version_uuid" : "{d835366f-b0b5-418d-9ed2-6458e7f42e5b}"
+      }
+     ],
+     "version_uuid" : "{67e2f25a-d65c-4901-a83d-4467dccc2c5c}"
+    },
+    {
+     "display_name" : "North WWR",
+     "function_type" : "LinearFunction",
+     "name" : "North WWR",
+     "response_index" : 2,
+     "uuid" : "{82b6f31f-2830-445c-8506-546a90111e67}",
+     "variables" : [
+      {
+       "argument" :        {
+        "display_name" : "wwr",
+        "name" : "wwr",
+        "required" : true,
+        "type" : "Double",
+        "uuid" : "{91e84f28-a873-4f43-90df-519133ef466b}",
+        "version_uuid" : "{3301641a-e9f2-4a12-901c-5fbe59bc2bda}"
+       },
+       "display_name" : "Window to Wall Ratio",
+       "maximum" : 1.0,
+       "minimum" : 0.0,
+       "name" : "Window to Wall Ratio",
+       "uncertainty_description" :        {
+        "attributes" : [
+         {
+          "display_name" : "Mode",
+          "name" : "modes",
+          "uuid" : "{4ce145b8-708e-4970-ad45-525efc009cd7}",
+          "value" : 0.2,
+          "value_type" : "Double",
+          "version_uuid" : "{2f102d90-8891-44b2-b792-9838ce9f0d66}"
+         },
+         {
+          "display_name" : "Lower Bound",
+          "name" : "lower_bounds",
+          "uuid" : "{8680173d-c27d-400b-8939-99289f3cec24}",
+          "value" : 0.0,
+          "value_type" : "Double",
+          "version_uuid" : "{bcc01567-fbf5-489d-9dfb-d3ea398882a9}"
+         },
+         {
+          "display_name" : "Upper Bound",
+          "name" : "upper_bounds",
+          "uuid" : "{80aa69b6-98c1-4fef-9103-d76a7b82eef1}",
+          "value" : 0.5,
+          "value_type" : "Double",
+          "version_uuid" : "{0a55c919-6626-45e1-8e7e-21382755acb8}"
+         }
+        ],
+        "type" : "triangular_uncertain"
+       },
+       "uuid" : "{4ff6579b-4093-47ed-b791-ac03d56bb978}",
+       "variable_index" : 0,
+       "variable_type" : "RubyContinuousVariable",
+       "version_uuid" : "{4ee0cf7b-c78d-4450-a1b1-c0b8533090e0}"
+      }
+     ],
+     "version_uuid" : "{d1998947-565b-4439-9db6-315b4f5d3da0}"
+    }
+   ],
+   "uuid" : "{69cd627a-ebfd-40c2-8dbb-b434552aa73b}",
+   "version_uuid" : "{6dbdcc25-4185-4f79-9c57-e3d64f2d2b32}",
+   "workflow" : [
+    {
+     "display_name" : "South Windows",
+     "measures" : [
+      {
+       "is_selected" : true,
+       "measure_group_index" : 0,
+       "measure_type" : "NullMeasure",
+       "uuid" : "{78ce8774-ad83-492b-b66b-d8e7b4650bca}",
+       "version_uuid" : "{f6bd7b97-e85f-42d7-b46f-72e94359e38e}"
+      },
+      {
+       "arguments" : [
+        {
+         "argument_index" : 0,
+         "choices" : [
+          {
+           "choice_index" : 0,
+           "display_name" : "North",
+           "value" : "North"
+          },
+          {
+           "choice_index" : 1,
+           "display_name" : "South",
+           "value" : "South"
+          },
+          {
+           "choice_index" : 2,
+           "display_name" : "East",
+           "value" : "East"
+          },
+          {
+           "choice_index" : 3,
+           "display_name" : "West",
+           "value" : "West"
+          }
+         ],
+         "display_name" : "facade",
+         "name" : "facade",
+         "required" : true,
+         "type" : "Choice",
+         "uuid" : "{13397606-203e-41b2-aabe-981eabaf83de}",
+         "value" : "South",
+         "version_uuid" : "{11e5a0ae-9529-4eae-b187-b2c949772417}"
+        },
+        {
+         "argument_index" : 1,
+         "display_name" : "wwr",
+         "name" : "wwr",
+         "required" : true,
+         "type" : "Double",
+         "uuid" : "{365b89c1-247c-43c3-97fe-d6030d6f5fa3}",
+         "value" : 0.1,
+         "version_uuid" : "{f71f0824-d983-49fd-a1d9-76d2cdcf919f}"
+        }
+       ],
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade",
+       "bcl_measure_uuid" : "{f347ae80-48b4-4c40-bfd4-6c5139b38136}",
+       "bcl_measure_version_uuid" : "{45c147fc-6e23-4894-b2cd-38f89f266324}",
+       "input_file_type" : "OSM",
+       "is_selected" : true,
+       "is_user_script" : false,
+       "measure_group_index" : 1,
+       "measure_type" : "RubyMeasure",
+       "output_file_type" : "OSM",
+       "uuid" : "{283dbb16-97ec-4e20-b34a-ca097d13de50}",
+       "version_uuid" : "{ab55940c-bb20-4c8a-a88c-0a24c559e244}"
+      },
+      {
+       "arguments" : [
+        {
+         "argument_index" : 0,
+         "choices" : [
+          {
+           "choice_index" : 0,
+           "display_name" : "North",
+           "value" : "North"
+          },
+          {
+           "choice_index" : 1,
+           "display_name" : "South",
+           "value" : "South"
+          },
+          {
+           "choice_index" : 2,
+           "display_name" : "East",
+           "value" : "East"
+          },
+          {
+           "choice_index" : 3,
+           "display_name" : "West",
+           "value" : "West"
+          }
+         ],
+         "display_name" : "facade",
+         "name" : "facade",
+         "required" : true,
+         "type" : "Choice",
+         "uuid" : "{3e8d0ba4-cfbf-4240-979c-511f8d212673}",
+         "value" : "South",
+         "version_uuid" : "{140c5906-206c-44c4-933a-25b58ec75818}"
+        },
+        {
+         "argument_index" : 1,
+         "display_name" : "wwr",
+         "name" : "wwr",
+         "required" : true,
+         "type" : "Double",
+         "uuid" : "{1ebc2acf-5e49-4daa-8f6b-fde1c4fa9ea4}",
+         "value" : 0.2,
+         "version_uuid" : "{a8d2a4cd-5c10-4d48-975f-202b18833d61}"
+        }
+       ],
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade",
+       "bcl_measure_uuid" : "{f347ae80-48b4-4c40-bfd4-6c5139b38136}",
+       "bcl_measure_version_uuid" : "{45c147fc-6e23-4894-b2cd-38f89f266324}",
+       "input_file_type" : "OSM",
+       "is_selected" : true,
+       "is_user_script" : false,
+       "measure_group_index" : 2,
+       "measure_type" : "RubyMeasure",
+       "output_file_type" : "OSM",
+       "uuid" : "{d121e2aa-b6ef-4e29-bf52-578188fd60ca}",
+       "version_uuid" : "{934c5fbb-38ca-41c8-9e8e-f1b090e0580e}"
+      },
+      {
+       "arguments" : [
+        {
+         "argument_index" : 0,
+         "choices" : [
+          {
+           "choice_index" : 0,
+           "display_name" : "North",
+           "value" : "North"
+          },
+          {
+           "choice_index" : 1,
+           "display_name" : "South",
+           "value" : "South"
+          },
+          {
+           "choice_index" : 2,
+           "display_name" : "East",
+           "value" : "East"
+          },
+          {
+           "choice_index" : 3,
+           "display_name" : "West",
+           "value" : "West"
+          }
+         ],
+         "display_name" : "facade",
+         "name" : "facade",
+         "required" : true,
+         "type" : "Choice",
+         "uuid" : "{2b4c8209-2489-4c50-834e-8c8402b4526a}",
+         "value" : "South",
+         "version_uuid" : "{6d1cff90-710a-4df0-9544-993b3b664ddf}"
+        },
+        {
+         "argument_index" : 1,
+         "display_name" : "wwr",
+         "name" : "wwr",
+         "required" : true,
+         "type" : "Double",
+         "uuid" : "{69a5b235-fba2-494b-9309-bb5aa8d40ecb}",
+         "value" : 0.3,
+         "version_uuid" : "{c59cd350-c886-4f89-acbd-f4ae456ab634}"
+        }
+       ],
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade",
+       "bcl_measure_uuid" : "{f347ae80-48b4-4c40-bfd4-6c5139b38136}",
+       "bcl_measure_version_uuid" : "{45c147fc-6e23-4894-b2cd-38f89f266324}",
+       "input_file_type" : "OSM",
+       "is_selected" : true,
+       "is_user_script" : false,
+       "measure_group_index" : 3,
+       "measure_type" : "RubyMeasure",
+       "output_file_type" : "OSM",
+       "uuid" : "{e3d9e729-05dd-4edd-a4fe-f404e0194268}",
+       "version_uuid" : "{442593fb-0d5a-4e04-8cf2-1726980c9443}"
+      }
+     ],
+     "name" : "South Windows",
+     "uuid" : "{524b3852-b0af-4748-bcd0-0554fd7d4da9}",
+     "version_uuid" : "{b033115b-4add-4744-9c1e-6d0f35080f92}",
+     "workflow_index" : 0,
+     "workflow_step_type" : "MeasureGroup"
+    },
+    {
+     "arguments" : [
+      {
+       "argument_index" : 0,
+       "choices" : [
+        {
+         "choice_index" : 0,
+         "display_name" : "North",
+         "value" : "North"
+        },
+        {
+         "choice_index" : 1,
+         "display_name" : "South",
+         "value" : "South"
+        },
+        {
+         "choice_index" : 2,
+         "display_name" : "East",
+         "value" : "East"
+        },
+        {
+         "choice_index" : 3,
+         "display_name" : "West",
+         "value" : "West"
+        }
+       ],
+       "display_name" : "facade",
+       "name" : "facade",
+       "required" : true,
+       "type" : "Choice",
+       "uuid" : "{9e289c3e-9b5c-49ed-9a4b-6c7a0096a4ce}",
+       "value" : "North",
+       "version_uuid" : "{0cbabfa5-ba5f-4132-9b6c-0cfa7f404028}"
+      }
+     ],
+     "bcl_measure_directory" : "/home/ehale/projects/openstudio-branch2/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/resources/utilities/BCL/Measures/SetWindowToWallRatioByFacade",
+     "bcl_measure_uuid" : "{f347ae80-48b4-4c40-bfd4-6c5139b38136}",
+     "bcl_measure_version_uuid" : "{45c147fc-6e23-4894-b2cd-38f89f266324}",
+     "input_file_type" : "OSM",
+     "is_selected" : true,
+     "is_user_script" : false,
+     "measure_type" : "RubyMeasure",
+     "output_file_type" : "OSM",
+     "uuid" : "{174d5b31-2b5d-447a-89b2-85a45cd33a7c}",
+     "variables" : [
+      {
+       "argument" :        {
+        "display_name" : "wwr",
+        "name" : "wwr",
+        "required" : true,
+        "type" : "Double",
+        "uuid" : "{91e84f28-a873-4f43-90df-519133ef466b}",
+        "version_uuid" : "{3301641a-e9f2-4a12-901c-5fbe59bc2bda}"
+       },
+       "display_name" : "Window to Wall Ratio",
+       "maximum" : 1.0,
+       "minimum" : 0.0,
+       "name" : "Window to Wall Ratio",
+       "uncertainty_description" :        {
+        "attributes" : [
+         {
+          "display_name" : "Mode",
+          "name" : "modes",
+          "uuid" : "{4ce145b8-708e-4970-ad45-525efc009cd7}",
+          "value" : 0.2,
+          "value_type" : "Double",
+          "version_uuid" : "{2f102d90-8891-44b2-b792-9838ce9f0d66}"
+         },
+         {
+          "display_name" : "Lower Bound",
+          "name" : "lower_bounds",
+          "uuid" : "{8680173d-c27d-400b-8939-99289f3cec24}",
+          "value" : 0.0,
+          "value_type" : "Double",
+          "version_uuid" : "{bcc01567-fbf5-489d-9dfb-d3ea398882a9}"
+         },
+         {
+          "display_name" : "Upper Bound",
+          "name" : "upper_bounds",
+          "uuid" : "{80aa69b6-98c1-4fef-9103-d76a7b82eef1}",
+          "value" : 0.5,
+          "value_type" : "Double",
+          "version_uuid" : "{0a55c919-6626-45e1-8e7e-21382755acb8}"
+         }
+        ],
+        "type" : "triangular_uncertain"
+       },
+       "uuid" : "{4ff6579b-4093-47ed-b791-ac03d56bb978}",
+       "variable_index" : 0,
+       "variable_type" : "RubyContinuousVariable",
+       "version_uuid" : "{4ee0cf7b-c78d-4450-a1b1-c0b8533090e0}"
+      },
+      {
+       "argument" :        {
+        "display_name" : "offset",
+        "name" : "offset",
+        "required" : true,
+        "type" : "Double",
+        "uuid" : "{188a90d0-b209-46da-8e81-14174cf388f1}",
+        "version_uuid" : "{ddc993f2-896d-4736-a73a-169b4edf5fe7}"
+       },
+       "display_name" : "Offset",
+       "maximum" : 1.5,
+       "minimum" : 0.0,
+       "name" : "Offset",
+       "uncertainty_description" :        {
+        "attributes" : [
+         {
+          "display_name" : "Mean",
+          "name" : "means",
+          "uuid" : "{726321d1-f9d0-4463-bc7d-421a57aef202}",
+          "value" : 0.9,
+          "value_type" : "Double",
+          "version_uuid" : "{b208b8c9-39b0-47de-bf96-4b66305abb0d}"
+         },
+         {
+          "display_name" : "Standard Deviation",
+          "name" : "std_deviations",
+          "uuid" : "{1c7666a1-2618-41de-b2ec-1de2bb667bc0}",
+          "value" : 0.05,
+          "value_type" : "Double",
+          "version_uuid" : "{c27d4968-f48e-4f9e-ba95-9632b50aa4c5}"
+         }
+        ],
+        "type" : "normal_uncertain"
+       },
+       "uuid" : "{86e97ae4-af98-4d17-856c-a1ebe5124ad5}",
+       "variable_index" : 1,
+       "variable_type" : "RubyContinuousVariable",
+       "version_uuid" : "{56e41445-3a47-4ab7-83d1-6388046d3ba0}"
+      }
+     ],
+     "version_uuid" : "{deef1c2c-542d-464d-9bac-023e71d4d853}",
+     "workflow_index" : 1,
+     "workflow_step_type" : "Measure"
+    },
+    {
+     "type" : "ModelToIdf",
+     "workflow_index" : 3,
+     "workflow_step_type" : "WorkItem"
+    },
+    {
+     "type" : "EnergyPlusPreProcess",
+     "workflow_index" : 4,
+     "workflow_step_type" : "WorkItem"
+    },
+    {
+     "type" : "EnergyPlus",
+     "workflow_index" : 5,
+     "workflow_step_type" : "WorkItem"
+    },
+    {
+     "type" : "OpenStudioPostProcess",
+     "workflow_index" : 6,
+     "workflow_step_type" : "WorkItem"
+    }
+   ]
+  },
+  "results_are_invalid" : false,
+  "seed" :   {
+   "checksum_create" : "00000000",
+   "checksum_last" : "00000000",
+   "display_name" : "*",
+   "file_type" : "OSM",
+   "name" : "*.osm",
+   "path" : "*.osm",
+   "timestamp_create" : "2013-Jul-26 12:13:26",
+   "timestamp_last" : "2013-Jul-26 12:13:26",
+   "uuid" : "{254e22ba-87e4-4d9d-a4ab-c96f3136f413}",
+   "version_uuid" : "{f4013211-ac0b-40ec-a776-62d8888d7756}"
+  },
+  "uuid" : "{c3b7e1ac-e194-4cc5-b906-dea3bf989a53}",
+  "version_uuid" : "{ee03e85a-8dc8-4552-a025-e23cf384dba4}"
+ },
+ "metadata" :  {
+  "version" : "1.0.2"
+ }
+}
