@@ -1,0 +1,50 @@
+/*= require 'dj_mon/bootstrap' */
+
+body {
+  padding: 90px;
+}
+
+.container {
+  width: 980px;
+}
+
+.navbar .btn#settings {
+  margin: 8px 5px 5px;
+  padding: 1px 10px 1px;
+}
+
+table#jobs-table td, table#jobs-table th {
+  text-align: center;
+}
+
+table#jobs-table td.date, table#jobs-table th.date {
+  text-align: left;
+}
+
+table#jobs-table td.date {
+  font-size: 80%;
+}
+
+.centered {
+  text-align: center;
+}
+
+code.block {
+  display: block;
+  word-wrap: break-word;
+}
+
+#dj-counts-view {
+  position: relative;
+  top: 12px;
+  width: 400px;
+}
+
+#dj-counts-view .badge {
+  float: right;
+  margin: 0 2px;
+}
+
+form.form-inline {
+  display: inline;
+}
