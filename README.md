@@ -4,15 +4,31 @@
 The preferred development approach for this application is to use Vagrant to provision and test the server.  To see the server instructions go to [OpenStudio Rails Application](./openstudio-server/README.md)
 
 ## Instructions
+
+- Check out the git repo
+
+See the instruction on the Wiki. ** Make sure to checkout the repo with LF end-of-lines if on windows **
+
 - Install the vagrant omnibus plugin
 
 ```sh
 vagrant plugin install vagrant-omnibus
 ```
 
-- Start the VM and let the provisioning continue until it crashes (if inside of NREL make sure to disable SSL)
+- Start the VM and let it provision
+
+Windows
 
 ```sh
+# for each cmd window set the environment variable (or set globally (for NREL only)
+set OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
+vagrant up
+```
+
+Mac / Linux
+
+```sh
+# for each cmd window set the environment variable (or set globally (for NREL only)
 OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
 ```
 
