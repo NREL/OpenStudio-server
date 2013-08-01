@@ -41,10 +41,10 @@ run_list([
              "recipe[ntp]",
 
              # Use postfix for sending mail.
-             "recipe[postfix]",
+             #"recipe[postfix]",
 
              # We want to setup e-mail aliases for the root user by default.
-             "recipe[postfix::aliases]",
+             #"recipe[postfix::aliases]",
 
              # A much nicer replacement for grep.
              "recipe[ack]",
