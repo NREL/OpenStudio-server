@@ -87,6 +87,11 @@ class AnalysesController < ApplicationController
 
   # container for
   def action
+    @analysis = Analysis.find(params[:id])
+
+    @analysis.start_r_and_run_sample
+
+    redirect_to analysis_url(@analysis)
 
   end
 end
