@@ -10,11 +10,7 @@ run_list([
 
 default_attributes({
                        :rbenv => {
-                           # Don't use the git:// protocol behind our firewall.
-                           #:git_url => "https://github.com/sstephenson/rbenv.git",
-                           #:git_ref => "v0.4.0",
                            :upgrade => true,
-                           #:root_path => "/opt/rbenv",
                            :rubies => ["2.0.0-p195"],
                            :global => "2.0.0-p195",
                            :gems => {
@@ -25,12 +21,8 @@ default_attributes({
                                    },
                                    {
                                        :name => "rails",
-                                       :version => "3.2.13"
+                                       :version => "3.2.13",
                                    },
-                                   #{
-                                       #:name => "passenger",
-                                       #:version => "4.0.0.rc6"
-                                   #}
                                ]
                            }
                        },
