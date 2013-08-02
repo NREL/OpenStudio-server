@@ -34,7 +34,7 @@ expect {
   }
 }
 
-if {[catch "system cp $env(HOME)/.ssh/id_rsa.pub $env(HOME)/.ssh/authorized_keys" catch_result]} {
+if {[catch "system cat $env(HOME)/.ssh/id_rsa.pub >> $env(HOME)/.ssh/authorized_keys" catch_result]} {
   puts "Error: $catch_result"
 }
 
