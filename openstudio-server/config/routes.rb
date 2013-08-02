@@ -21,6 +21,10 @@ OpenstudioServer::Application.routes.draw do
   # :only => [:show, :index]
   resources :projects do
     resources :analyses, shallow: true do
+      member do
+        get :action
+      end
+
       resources :seeds, shallow: true
       resources :algorithms, shallow: true
       resources :problems, shallow: true do
