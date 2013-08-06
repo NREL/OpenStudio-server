@@ -25,8 +25,8 @@ default_attributes(
                 'version' => '0.8'
             },
             {
-                'name' => 'snow',
-                'version' => '0.3-12'
+                'name' => 'RMongo',
+                'version' => '0.0.23'
             },
             {
                 'name' => 'snowfall',
