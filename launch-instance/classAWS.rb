@@ -252,6 +252,11 @@ module AwsInterface
           puts "Running #{command} on the instance #{instance.instance_id}:"
           puts ssh.exec!(command)
         end
+      rescue Net::SSH::HostKeyMismatch => e
+        e.remember_host!
+        puts "key mismatch, retry"
+        sleep 1
+        retry
       rescue SystemCallError, Timeout::Error => e
         # port 22 might not be available immediately after the instance finishes launching
         sleep 1
