@@ -28,7 +28,7 @@ prepare_slave_script("slave_script.sh", master_ip, master_dns, master_hostname)
 #prepare_slave_script("master_script.sh", master_ip, master_dns, master_hostname)
 
 # Launch Slaves 
-slave_info = a.launch_slave(2, master_info, "slave_script.sh")
+slave_info = a.launch_slave(12, master_info, "slave_script.sh")
 slave_instances = Array.new(0)
 slave_info.each {|struct| slave_instances.push(struct.instance)}
 
