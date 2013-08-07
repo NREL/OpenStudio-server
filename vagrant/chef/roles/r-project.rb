@@ -13,7 +13,7 @@ default_attributes(
         'apt_key' => "E084DAB9",
         'package_source_url' => "http://cran.r-project.org/src/contrib",
         'add_ld_path' => true,
-        'java_libjvm' => "/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/server/libjvm.so",
+        'java_libjvm_path' => "/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/server/",
         'packages' => [
             {
                 'name' => 'lhs',
