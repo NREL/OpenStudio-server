@@ -1,1 +1,3 @@
-192.168.33.11|vagrant|vagrant
+ec2-54-227-171-140.compute-1.amazonaws.com|ubuntu|ubuntu
+ec2-107-22-87-129.compute-1.amazonaws.com|ubuntu|ubuntu
+ec2-50-17-55-144.compute-1.amazonaws.com|ubuntu|ubuntu
