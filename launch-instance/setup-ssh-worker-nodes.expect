@@ -1,5 +1,5 @@
 #!/usr/bin/expect -f
-set timeout 60
+set timeout 10
 set IPADDRESS [lindex $argv 0]
 set USERNAME [lindex $argv 1]
 set PASSWORD [lindex $argv 2]
