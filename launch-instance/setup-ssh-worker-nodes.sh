@@ -7,5 +7,5 @@ do
   ipaddress=`echo $line | awk -F'|' '{print $1}'`
   username=`echo $line | awk -F'|' '{print $2}'`
   password=`echo $line | awk -F'|' '{print $3}'`
-  ./setup-ssh-worker-nodes.expect $ipaddress $username \"$password\"
+  ./setup-ssh-worker-nodes.expect $ipaddress $username $password
 done < "ip_addresses"
