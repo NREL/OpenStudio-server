@@ -82,3 +82,6 @@
 [submodule "vagrant/chef/cookbooks/expect"]
 	path = vagrant/chef/cookbooks/expect
 	url = git@github.com:NREL-cookbooks/expect.git
+[submodule "vagrant/chef/cookbooks/java"]
+	path = vagrant/chef/cookbooks/java
+	url = git@github.com:NREL-cookbooks/java.git
