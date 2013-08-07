@@ -10,6 +10,11 @@ log_user 1
 system rm -f $env(HOME)/.ssh/id_dsa $env(HOME)/.ssh/id_dsa.pub
 system rm -f $env(HOME)/.ssh/id_rsa $env(HOME)/.ssh/id_rsa.pub
 
+puts "unlocking ubuntu ..."
+if {[catch "spawn sudo passwd -u ubuntu"]} {
+  puts "error"
+}
+
 puts "generating ssh key ..."
 if {[catch "spawn /usr/bin/ssh-keygen -t rsa"]} {
   puts "error"

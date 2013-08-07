@@ -6,8 +6,9 @@ require 'net/scp'
 module AwsInterface 
   class AwsAdapter
     #IMAGE_ID = "ami-efed9586" #-Brians
+    IMAGE_ID = "ami-862d6aef" #-new Brians
     REGION = "us-east-1"
-    IMAGE_ID = "ami-4c0d4925" #-Nicks
+    #IMAGE_ID = "ami-4c0d4925" #-Nicks
     #REGION = "us-west-1"
     MASTER_USER_DATA_FILE = "master_script.sh"
     SLAVE_USER_DATA_FILE = "slave_script.sh"
@@ -41,7 +42,10 @@ module AwsInterface
       # ftp traffic
       @group.authorize_ingress(:tcp, 20..21)
       # ssh access
-      @group.authorize_ingress(:tcp, 22, '0.0.0.0/0', '1.1.1.1/0', '2.2.2.2/0')
+      @group.authorize_ingress(:tcp, 22, '0.0.0.0/0')
+      #@group.authorize_ingress(:tcp, 22, '0.0.0.0/0', '1.1.1.1/0', '2.2.2.2/0')
+      # telnet
+      @group.authorize_ingress(:tcp, 23, '0.0.0.0/0')
     
       # generate a key pair
       @key_pair = @ec2.key_pairs.create("key-pair-#{Time.now.to_i}")

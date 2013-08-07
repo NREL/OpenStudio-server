@@ -4,6 +4,11 @@ set IPADDRESS [lindex $argv 0]
 set USERNAME [lindex $argv 1]
 set PASSWORD [lindex $argv 2]
 
+#puts "unlocking ubuntu ..."
+#if {[catch "spawn sudo passwd -u ubuntu"]} {
+#  puts "error"
+#}
+
 puts "copying public key to worker nodes ..."
 puts "$USERNAME@$IPADDRESS"
 if {[catch "spawn /usr/bin/ssh-copy-id $USERNAME@$IPADDRESS"]} {
@@ -12,7 +17,8 @@ if {[catch "spawn /usr/bin/ssh-copy-id $USERNAME@$IPADDRESS"]} {
 
 expect {
   " password:" {
-    send -s "$PASSWORD\r"
+    #puts "$PASSWORD"
+    send "$PASSWORD\r"
     exp_continue
   }
   EOF {
