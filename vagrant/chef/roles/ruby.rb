@@ -9,21 +9,22 @@ run_list([
          ])
 
 default_attributes({
-                       :rbenv => {
-                           :upgrade => true,
-                           :rubies => ["2.0.0-p195"],
-                           :global => "2.0.0-p195",
-                           :gems => {
-                               "2.0.0-p195" => [
-                                   {
-                                       :name => "rubygems-bundler",
-                                       :version => "1.2.2",
-                                   },
-                                   {
-                                       :name => "rails",
-                                       :version => "3.2.13",
-                                   },
-                               ]
-                           }
-                       },
-                   })
+       :rbenv => {
+           :upgrade => true,
+           :rubies => ["2.0.0-p195"],
+           :global => "2.0.0-p195",
+           :environment => {'RUBY_CONFIGURE_OPTS' => '--enabled-shared'}, # needs to be set for openstudio linking
+           :gems => {
+               "2.0.0-p195" => [
+                   {
+                       :name => "rubygems-bundler",
+                       :version => "1.2.2",
+                   },
+                   {
+                       :name => "rails",
+                       :version => "3.2.13",
+                   },
+               ]
+           }
+       },
+   })
