@@ -1,4 +1,5 @@
 require 'openstudio'
+require 'openstudio/energyplus/find_energyplus'
 
 require 'rubygems'
 require 'json'
@@ -105,19 +106,44 @@ project_dir_path = OpenStudio::Path.new(project_dir_name)
 # that is called and posted to openstudio-server by the RemoteAnalysisDriver. 
 #
 # seed.osm and seed/files/
-FileUtils.cp(project.seed.path.to_s,(project_dir_path / OpenStudio::Path.new("seed.osm")).to_s)
-FileUtils.mkdir((project_dir_path / OpenStudio::Path.new("seed")).to_s)
+seed_dir_path = project_dir_path / OpenStudio::Path.new("seed")
+model_name = OpenStudio::toString(project.seed.path.stem)
+FileUtils.mkdir(seed_dir_path.to_s)
+FileUtils.cp(project.seed.path.to_s,
+             (seed_dir_path / OpenStudio::Path.new(model_name + ".osm")).to_s)
+FileUtils.mkdir((seed_dir_path / OpenStudio::Path.new(model_name)).to_s)
 FileUtils.cp_r((project.seed.path.parent_path / 
                 OpenStudio::Path.new(project.seed.path.stem) / 
                 OpenStudio::Path.new("files")).to_s,
-               (project_dir_path / OpenStudio::Path.new("seed/files")).to_s)
+               (seed_dir_path / OpenStudio::Path.new(model_name + "/files")).to_s)
 # scripts
 FileUtils.cp_r((pat_path / OpenStudio::Path.new("scripts")).to_s,
                (project_dir_path / OpenStudio::Path.new("scripts")).to_s)
 # problem formulation
 formulation_json_path = project_dir_path / OpenStudio::Path.new("formulation.json")
 analysis.saveJSON(formulation_json_path,"ProblemFormulation".to_AnalysisSerializationScope)
-
+# tools
+#
+# ETH@20130808: This should be replaced by a json serialization of AnalysisRunOptions. 
+# For now, pass in just tools as a WorkItem json and hard-code other options. Add log level
+# to AnalysisRunOptions.
+#
+tools_json_path = project_dir_path / OpenStudio::Path.new("tools.json")
+ep_hash = OpenStudio::EnergyPlus::find_energyplus(8,0)
+ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
+tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
+                                                         OpenStudio::Path.new,
+                                                         OpenStudio::Path.new,
+                                                         $OpenStudio_RubyExeDir,
+                                                         OpenStudio::Path.new)
+work_item = OpenStudio::Runmanager::WorkItem.new("Null".to_JobType,
+                                                 tools,
+                                                 OpenStudio::Runmanager::JobParams.new,
+                                                 OpenStudio::Runmanager::Files.new)
+File.open(tools_json_path.to_s,'w') do |file|
+  file.puts work_item.toJSON
+end
+                                                         
 # Set up run folders and files
 datapoints.each do |data_point|
 

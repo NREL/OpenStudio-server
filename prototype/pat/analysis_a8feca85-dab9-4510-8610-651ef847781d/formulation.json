@@ -23,7 +23,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "{ae13cbfd-1be2-4185-aff3-8903f977fbd9}",
-     "version_uuid" : "{de672331-c48a-4e79-8bbb-5767f9372c1f}",
+     "version_uuid" : "{0044af04-ab8c-4620-89fb-d5b6a3156bb9}",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -129,7 +129,7 @@
      ],
      "name" : "Rotate Building",
      "uuid" : "{05505496-bba2-49fc-9f86-5633ecafe0e5}",
-     "version_uuid" : "{4b4b72bb-5ede-47fd-8b59-f490f35bb19a}",
+     "version_uuid" : "{92f11fdb-addd-4760-9c04-a7ce25070bee}",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -404,7 +404,7 @@
      ],
      "name" : "Reduce Lighting Load",
      "uuid" : "{5ba3c9b4-2f5d-4792-9ef7-569108649aa2}",
-     "version_uuid" : "{9973e9d6-e97a-4467-b903-53ac4d57fdda}",
+     "version_uuid" : "{89f73ed7-6b4a-482c-adff-1c4b31dc6149}",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -604,7 +604,7 @@
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "{e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7}",
-     "version_uuid" : "{f6d7db8a-847a-4fb9-90d0-55a1f38bcb32}",
+     "version_uuid" : "{e59cae92-9d2e-4c4e-af17-2f4e6f4ecd44}",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
