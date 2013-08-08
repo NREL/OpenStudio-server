@@ -2,7 +2,7 @@
 mkdir /home/ubuntu/test
 
 # Change Host
-echo 23.20.138.156 ec2-23-20-138-156.compute-1.amazonaws.com master_hostname >> /etc/hosts
+echo 50.16.146.112 ec2-50-16-146-112.compute-1.amazonaws.com master_hostname >> /etc/hosts
 
 # Replace Hostname 
 #echo "slave1" > /etc/hostname

@@ -1,28 +1,24 @@
 #!/usr/bin/expect -f
-set timeout 10
+set timeout 3
 set IPADDRESS [lindex $argv 0]
 set USERNAME [lindex $argv 1]
 set PASSWORD [lindex $argv 2]
 set count 1
 
 while { $count == 1 } {
-
   puts "Testing Passwordless SSH"
   puts "$USERNAME@$IPADDRESS"
   if {[catch "spawn /usr/bin/ssh $USERNAME@$IPADDRESS"]} {
     puts "error"
   }
-
   expect {
     " password:" {
-      send \003
-  
+      send \003  
       puts "copying public key to worker nodes again"
       puts "$USERNAME@$IPADDRESS"
       if {[catch "spawn /usr/bin/ssh-copy-id $USERNAME@$IPADDRESS"]} {
         puts "error"
       }
-    
       expect {
         " password:" {
           send "$PASSWORD\r"
@@ -31,14 +27,17 @@ while { $count == 1 } {
         EOF {
           puts "got EOF"
         }
-      } #expect   
-    
+      }
       exp_continue
+    }
+    "*~$ " {
+      puts "worked"
+      send "exit\r"
+      set count 0
     }
     EOF {
       puts "got EOF"
       set count 0
     }
-  } #expect
-
+  }
 }
