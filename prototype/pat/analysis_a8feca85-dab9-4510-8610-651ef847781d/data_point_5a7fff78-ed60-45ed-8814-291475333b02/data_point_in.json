@@ -1,0 +1,38 @@
+{
+ "data_point" :  {
+  "analysis_uuid" : "{a8feca85-dab9-4510-8610-651ef847781d}",
+  "complete" : false,
+  "data_point_type" : "DataPoint",
+  "display_name" : "Baseline",
+  "failed" : false,
+  "name" : "Baseline",
+  "problem_uuid" : "{412b1879-f0ee-4919-ab90-6ab642fd39ee}",
+  "uuid" : "{5a7fff78-ed60-45ed-8814-291475333b02}",
+  "variable_values" : [
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 0
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 1
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 2
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 3
+   }
+  ],
+  "version_uuid" : "{906ee92f-f9d8-4b45-bfbd-8b2db2333310}"
+ },
+ "metadata" :  {
+  "version" : "1.0.3"
+ }
+}

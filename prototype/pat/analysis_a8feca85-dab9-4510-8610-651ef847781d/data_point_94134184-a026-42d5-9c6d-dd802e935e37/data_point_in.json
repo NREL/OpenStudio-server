@@ -1,0 +1,38 @@
+{
+ "data_point" :  {
+  "analysis_uuid" : "{a8feca85-dab9-4510-8610-651ef847781d}",
+  "complete" : false,
+  "data_point_type" : "DataPoint",
+  "display_name" : "Rotate Building 270 degrees Only",
+  "failed" : false,
+  "name" : "Rotate Building 270 degrees Only",
+  "problem_uuid" : "{412b1879-f0ee-4919-ab90-6ab642fd39ee}",
+  "uuid" : "{94134184-a026-42d5-9c6d-dd802e935e37}",
+  "variable_values" : [
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 0
+   },
+   {
+    "value" : 3,
+    "value_type" : "int",
+    "variable_value_index" : 1
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 2
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 3
+   }
+  ],
+  "version_uuid" : "{e53c7f19-6e46-4b99-a248-f43f99897c8e}"
+ },
+ "metadata" :  {
+  "version" : "1.0.3"
+ }
+}

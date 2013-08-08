@@ -1,0 +1,38 @@
+{
+ "data_point" :  {
+  "analysis_uuid" : "{a8feca85-dab9-4510-8610-651ef847781d}",
+  "complete" : false,
+  "data_point_type" : "DataPoint",
+  "display_name" : "Rotate Building 90 degrees Only",
+  "failed" : false,
+  "name" : "Rotate Building 90 degrees Only",
+  "problem_uuid" : "{412b1879-f0ee-4919-ab90-6ab642fd39ee}",
+  "uuid" : "{2ef91856-ea59-4c46-b9da-052d79e2b1fe}",
+  "variable_values" : [
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 0
+   },
+   {
+    "value" : 1,
+    "value_type" : "int",
+    "variable_value_index" : 1
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 2
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 3
+   }
+  ],
+  "version_uuid" : "{a29d4658-6553-4ada-9dc0-b1ae9b8f4a49}"
+ },
+ "metadata" :  {
+  "version" : "1.0.3"
+ }
+}
