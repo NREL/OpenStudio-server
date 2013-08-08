@@ -276,16 +276,15 @@ module AwsInterface
           puts "Uploading #{local_path} on the instance #{instance.instance_id}:"
           scp.upload! local_path, remote_path
         end
-      rescue Net::SCP::HostKeyMismatch => e
-        e.remember_host!
-        puts "key mismatch, retry"
-        sleep 1
-        retry  
       rescue SystemCallError, Timeout::Error => e
         # port 22 might not be available immediately after the instance finishes launching
         sleep 1
         puts "Not Yet"
         retry
+      rescue
+        puts "unknown upload error, retry"
+        sleep 1
+        retry    
       end
     end    
 #======================= get status ======================#
