@@ -251,7 +251,9 @@ module AwsInterface
         Net::SSH.start(instance.ip_address, "ubuntu",
                        :key_data => [@key_pair.private_key]) do |ssh|
           puts "Running #{command} on the instance #{instance.instance_id}:"
-          puts ssh.exec!(command)
+          #ssh.exec!(command)
+          ssh.exec(command)
+          
         end
       rescue Net::SSH::HostKeyMismatch => e
         e.remember_host!
