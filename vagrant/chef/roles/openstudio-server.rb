@@ -7,7 +7,7 @@ run_list([
              "role[ruby]",
              "role[web_base]",
              "role[r-project]",
-	     "recipe[mongodb::server]",
+             "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
          ])
@@ -15,7 +15,8 @@ run_list([
 
 default_attributes(
     :openstudio => {
-        :version => "1.0.2.efb742a74c",
+        #:version => "1.0.2.efb742a74c",
+        :version => "1.0.2.Unknown", # this is openstudio with ruby 2.0 support
         #:checksum => "9180659c77a7fc710cb9826d40ae67c65db0d26bb4bce1a93b64d7e63f4a1f2c"
     },
     :energyplus => {

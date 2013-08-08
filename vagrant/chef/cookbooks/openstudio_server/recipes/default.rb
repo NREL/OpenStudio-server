@@ -12,3 +12,8 @@ web_app "openstudio-server" do
   #server_aliases [ "openstudio", node[:hostname] ]
   rails_env "development"
 end
+
+
+# execute bundle install in directory
+
+# start delayed_job
