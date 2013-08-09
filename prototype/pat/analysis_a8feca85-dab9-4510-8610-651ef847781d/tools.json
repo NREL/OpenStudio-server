@@ -10,7 +10,7 @@
     "out_file_filter" : "expanded\\.idf",
     "remote_archive" : "",
     "remote_exe" : "ExpandObjects",
-    "version" : "-.-.-"
+    "version" : "8.0.0"
    },
    {
     "local_bin_path" : "/EnergyPlusV8-0-0/EnergyPlus.exe",
@@ -18,7 +18,7 @@
     "out_file_filter" : "eplus.*",
     "remote_archive" : "",
     "remote_exe" : "EnergyPlus",
-    "version" : "-.-.-"
+    "version" : "8.0.0"
    },
    {
     "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/slab.exe",
@@ -26,7 +26,7 @@
     "out_file_filter" : ".*\\.TXT",
     "remote_archive" : "",
     "remote_exe" : "slab",
-    "version" : "-.-.-"
+    "version" : "8.0.0"
    },
    {
     "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/basement.exe",
@@ -34,7 +34,7 @@
     "out_file_filter" : ".*\\.TXT",
     "remote_archive" : "",
     "remote_exe" : "basement",
-    "version" : "-.-.-"
+    "version" : "8.0.0"
    },
    {
     "local_bin_path" : "C:/ruby/bin/ruby.exe",

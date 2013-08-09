@@ -88,6 +88,7 @@ data_point = OpenStudio::Analysis::loadJSON(data_point_json_path)
 raise "Unable to laod json file from '" + data_point_json_path.to_s + "." if data_point.empty?
 data_point = data_point.get.to_DataPoint.get
 raise "DataPoint was not created by Problem." if data_point.problemUUID != analysis.problem.uuid
+analysis.addDataPoint(data_point) # also hooks up real copy of problem
 
 # create a RunManager
 run_manager_path = directory / OpenStudio::Path.new("run.db")

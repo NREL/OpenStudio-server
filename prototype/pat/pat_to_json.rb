@@ -144,7 +144,7 @@ tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
                                                          OpenStudio::Path.new,
                                                          OpenStudio::Path.new,
                                                          $OpenStudio_RubyExeDir,
-                                                         OpenStudio::Path.new)
+                                                         OpenStudio::Path.new)                                                         
 work_item = OpenStudio::Runmanager::WorkItem.new("Null".to_JobType,
                                                  tools,
                                                  OpenStudio::Runmanager::JobParams.new,
