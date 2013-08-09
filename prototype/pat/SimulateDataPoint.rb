@@ -25,12 +25,18 @@ if not options[:directory]
 end
 
 directory = OpenStudio::Path.new(options[:directory])
+# on linux, if directory ends in /, need to call parent_path
+if directory.stem.to_s == String.new
+  directory = directory.parent_path
+end
 logLevel = options[:logLevel].to_i
+
+project_path = directory.parent_path
 
 # verify the existence of required files
 data_point_json_path = directory / OpenStudio::Path.new("data_point_in.json")
-formulation_json_path = directory.parent_path / OpenStudio::Path.new("formulation.json")
-tools_json_path = directory.parent_path / OpenStudio::Path.new("tools.json")
+formulation_json_path = project_path / OpenStudio::Path.new("formulation.json")
+tools_json_path = project_path / OpenStudio::Path.new("tools.json")
 raise "Required file '" + data_point_json_path.to_s + "' does not exist." if not File.exist?(data_point_json_path.to_s)
 raise "Required file '" + formulation_json_path.to_s + "' does not exist." if not File.exist?(formulation_json_path.to_s)
 raise "Required file '" + tools_json_path.to_s + "' does not exist." if not File.exist?(tools_json_path.to_s)
@@ -50,12 +56,11 @@ analysis = analysis.get.to_Analysis.get
 
 # project paths
 original_project_path = analysis.seed.path.parent_path.parent_path
-new_project_path = directory.parent_path
 puts "Fixing up file paths originally at '" + original_project_path.to_s + 
-     "' to now be at '" + new_project_path.to_s + "'."
+     "' to now be at '" + project_path.to_s + "'."
 
 # fix up seed model path
-new_seed_path = new_project_path / OpenStudio::Path.new("seed/seed.osm")
+new_seed_path = project_path / OpenStudio::Path.new("seed/seed.osm")
 ok = analysis.setSeed(OpenStudio::FileReference.new(new_seed_path))
 raise "Unable to fix up seed model path to '" + new_seed_path.to_s + "'." if not ok
 
@@ -65,11 +70,11 @@ if not analysis.weatherFile.empty?
   weather_file_path = analysis.weatherFile.get.path
   weather_file_path = OpenStudio::relocatePath(weather_file_path,
                                                original_project_path,
-                                               new_project_path)
+                                               project_path)
 end
 
 # fix up measure paths
-scripts_dir = new_project_path / OpenStudio::Path.new("scripts")
+scripts_dir = project_path / OpenStudio::Path.new("scripts")
 Dir.foreach(scripts_dir.to_s) do |script_folder|
   next if script_folder == '.' or script_folder == '..'
   bclMeasure = OpenStudio::BCLMeasure.new( scripts_dir / OpenStudio::Path.new(script_folder))
@@ -91,7 +96,7 @@ run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path,true,false
 # have problem create the workflow
 workflow = analysis.problem.createWorkflow(data_point,OpenStudio::Path.new($OpenStudio_Dir));
 params = OpenStudio::Runmanager::JobParams.new;
-params.append("cleanoutfiles","standard"); # ETH@20130808 This needs to come in as an option.
+params.append("cleanoutfiles","none"); # ETH@20130808 This needs to come in as an option.
 workflow.add(params);
 file = File.open(tools_json_path.to_s,'rb')
 tools = OpenStudio::Runmanager::WorkItem::fromJSON(file.read).tools
