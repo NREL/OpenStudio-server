@@ -21,74 +21,83 @@ datapoints = analysis.dataPoints
 
 # Print server views ###########################################################
 
+# Works with branch: https://github.com/NREL/OpenStudio/tree/20130808_ETH_JSONServerView_53229997
+server_problem_request_path = OpenStudio::Path.new("server_problem.json")
+analysis.saveServerRequestForProblemFormulation(server_problem_request_path,true)
+
+server_datapoints_request_path = OpenStudio::Path.new("server_datapoints_request.json")
+analysis.saveServerRequestForDataPoints(server_datapoints_request_path,true)
+
+# PROTOTYPE CODE
+#
 # server_problem.json
-variables_array = []
-variables.each_index do |i|
-  variable = variables[i]
+# variables_array = []
+# variables.each_index do |i|
+#   variable = variables[i]
   
-  variable_hash = OrderedHash.new
-  variable_hash["variable_index"] = i
-  variable_hash["uuid"] = print_uuid(variable.uuid)
-  variable_hash["version_uuid"] = print_uuid(variable.versionUUID)
-  variable_hash["name"] = variable.name
-  variable_hash["display_name"] = variable.displayName
+#   variable_hash = OrderedHash.new
+#   variable_hash["variable_index"] = i
+#   variable_hash["uuid"] = print_uuid(variable.uuid)
+#   variable_hash["version_uuid"] = print_uuid(variable.versionUUID)
+#   variable_hash["name"] = variable.name
+#   variable_hash["display_name"] = variable.displayName
   
-  measure_group = variable.to_MeasureGroup.get
+#   measure_group = variable.to_MeasureGroup.get
 
   # DLM: do we want only selected measures?  Would this be better as an enum?
-  measures = measure_group.measures(false)
+#  measures = measure_group.measures(false)
   
-  variable_hash["type"] = "Integer"
-  variable_hash["minimum"] = 0
-  variable_hash["maximum"] = measures.size - 1
-  variable_hash["initial_value"] = seed_data_point.variableValues[i].toInt
+#  variable_hash["type"] = "Integer"
+#  variable_hash["minimum"] = 0
+#  variable_hash["maximum"] = measures.size - 1
+#  variable_hash["initial_value"] = seed_data_point.variableValues[i].toInt
 
-  variables_array << variable_hash
-end
+#  variables_array << variable_hash
+# end
 
-result_hash = OrderedHash.new
-result_hash["variables"] = variables_array
+# result_hash = OrderedHash.new
+# result_hash["variables"] = variables_array
 
-result = JSON.pretty_generate(result_hash)
-puts result
-File.open('server_problem.json', 'w') do |file|
-  file.puts result
-end
+# result = JSON.pretty_generate(result_hash)
+# puts result
+# File.open('server_problem.json', 'w') do |file|
+#   file.puts result
+# end
 
 # server_datapoints_request.json
 
-datapoints_array = []
-datapoints.each do |data_point|
-  data_point_hash = OrderedHash.new
-  data_point_hash["uuid"] = print_uuid(data_point.uuid)
-  data_point_hash["version_uuid"] = print_uuid(data_point.versionUUID)
-  data_point_hash["name"] = data_point.name
-  data_point_hash["display_name"] = data_point.displayName
+# datapoints_array = []
+# datapoints.each do |data_point|
+#   data_point_hash = OrderedHash.new
+#   data_point_hash["uuid"] = print_uuid(data_point.uuid)
+#   data_point_hash["version_uuid"] = print_uuid(data_point.versionUUID)
+#   data_point_hash["name"] = data_point.name
+#   data_point_hash["display_name"] = data_point.displayName
   
-  values = []
-  variable_values = data_point.variableValues
-  variable_values.each_index do |i|
-    variable_value = variable_values[i]
+#   values = []
+#   variable_values = data_point.variableValues
+#   variable_values.each_index do |i|
+#     variable_value = variable_values[i]
     
-    variable_value_hash = OrderedHash.new
-    variable_value_hash["variable_index"] = i
-    variable_value_hash["variable_uuid"] = print_uuid(variables[i].uuid)
-    variable_value_hash["value"] = variable_value.toInt
-    values << variable_value_hash
-  end
-  data_point_hash["values"] = values
+#     variable_value_hash = OrderedHash.new
+#     variable_value_hash["variable_index"] = i
+#     variable_value_hash["variable_uuid"] = print_uuid(variables[i].uuid)
+#     variable_value_hash["value"] = variable_value.toInt
+#     values << variable_value_hash
+#   end
+#   data_point_hash["values"] = values
   
-  datapoints_array << data_point_hash
-end
+#   datapoints_array << data_point_hash
+# end
 
-result_hash = OrderedHash.new
-result_hash["datapoints"] = datapoints_array
+# result_hash = OrderedHash.new
+# result_hash["datapoints"] = datapoints_array
 
-result = JSON.pretty_generate(result_hash)
-puts result
-File.open('server_datapoints_request.json', 'w') do |file|
-  file.puts result
-end
+# result = JSON.pretty_generate(result_hash)
+# puts result
+# File.open('server_datapoints_request.json', 'w') do |file|
+#   file.puts result
+# end
 
 # Create and populate folders for individual DataPoint runs ####################
 

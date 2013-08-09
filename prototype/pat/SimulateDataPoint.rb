@@ -1,7 +1,6 @@
 
 require 'openstudio'
 require 'optparse'
-require 'mondoid'
 
 # parse arguments with optparse
 options = Hash.new
@@ -63,13 +62,21 @@ raise "Unable to fix up seed model path to '" + new_seed_path.to_s + "'." if not
 # fix up weather file path
 weather_file_path = OpenStudio::Path.new
 if not analysis.weatherFile.empty?
-  weather_file_path = analysis.weatherFile.get
+  weather_file_path = analysis.weatherFile.get.path
   weather_file_path = OpenStudio::relocatePath(weather_file_path,
                                                original_project_path,
                                                new_project_path)
 end
 
 # fix up measure paths
+scripts_dir = new_project_path / OpenStudio::Path.new("scripts")
+Dir.foreach(scripts_dir.to_s) do |script_folder|
+  next if script_folder == '.' or script_folder == '..'
+  bclMeasure = OpenStudio::BCLMeasure.new( scripts_dir / OpenStudio::Path.new(script_folder))
+  analysis.problem.updateMeasure(bclMeasure,OpenStudio::Ruleset::OSArgumentVector.new,true)
+end
+debug_formulation_json_path = directory / OpenStudio::Path.new("fixed_up_formulation.json")
+analysis.saveJSON(debug_formulation_json_path,"ProblemFormulation".to_AnalysisSerializationScope)
 
 # load data point to run
 data_point = OpenStudio::Analysis::loadJSON(data_point_json_path)
@@ -82,7 +89,7 @@ run_manager_path = directory / OpenStudio::Path.new("run.db")
 run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path,true,false,false)
 
 # have problem create the workflow
-workflow = analysis.problem.createWorkflow(data_point,OpenStudio::Path.new($OpenStudio_LibPath));
+workflow = analysis.problem.createWorkflow(data_point,OpenStudio::Path.new($OpenStudio_Dir));
 params = OpenStudio::Runmanager::JobParams.new;
 params.append("cleanoutfiles","standard"); # ETH@20130808 This needs to come in as an option.
 workflow.add(params);
@@ -95,7 +102,7 @@ url_search_paths = OpenStudio::URLSearchPathVector.new
 job = workflow.create(directory,new_seed_path,weather_file_path,url_search_paths)
 OpenStudio::Runmanager::JobFactory::optimizeJobTree(job)
 analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
-run_manager().enqueue(job);
+run_manager.enqueue(job,false);
 
 # wait for the job to finish
 run_manager.waitForFinished
