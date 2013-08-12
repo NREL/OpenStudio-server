@@ -1,0 +1,1 @@
+default[:openstudio_server][:server_path] = "/var/www/rails/openstudio"
