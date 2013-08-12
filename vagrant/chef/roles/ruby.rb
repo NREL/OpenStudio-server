@@ -20,7 +20,7 @@ default_attributes({
                    }
                }
            ],
-           :no_rdoc_ri => true
+           :no_rdoc_ri => true,
            :global => "2.0.0-p195",
            :gems => {
                "2.0.0-p195" => [
