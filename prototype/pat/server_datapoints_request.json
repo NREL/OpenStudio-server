@@ -226,6 +226,6 @@
   }
  ],
  "metadata" :  {
-  "version" : "1.0.3"
+  "openstudio_version" : "1.0.3"
  }
 }

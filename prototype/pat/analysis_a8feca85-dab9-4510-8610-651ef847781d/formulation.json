@@ -7,8 +7,8 @@
    "display_name" : "Simple Project Problem",
    "name" : "Simple Project Problem",
    "problem_type" : "Problem",
-   "uuid" : "{412b1879-f0ee-4919-ab90-6ab642fd39ee}",
-   "version_uuid" : "{131ea56b-31ce-4c2a-9535-ed770a6c6b11}",
+   "uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
+   "version_uuid" : "131ea56b-31ce-4c2a-9535-ed770a6c6b11",
    "workflow" : [
     {
      "display_name" : "Alternative Model",
@@ -17,13 +17,13 @@
        "is_selected" : true,
        "measure_group_index" : 0,
        "measure_type" : "NullMeasure",
-       "uuid" : "{08fc4ef2-7be3-4912-8563-9c98be487e0b}",
-       "version_uuid" : "{01ef8439-2835-402b-bc9b-1de24cf50f52}"
+       "uuid" : "08fc4ef2-7be3-4912-8563-9c98be487e0b",
+       "version_uuid" : "01ef8439-2835-402b-bc9b-1de24cf50f52"
       }
      ],
      "name" : "Alternative Model",
-     "uuid" : "{ae13cbfd-1be2-4185-aff3-8903f977fbd9}",
-     "version_uuid" : "{8ae0ea9e-0b51-4b7f-9efd-773e5b3cc7e6}",
+     "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
+     "version_uuid" : "0c79860d-1e34-48f4-b58b-d45d978b5a13",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -34,8 +34,8 @@
        "is_selected" : true,
        "measure_group_index" : 0,
        "measure_type" : "NullMeasure",
-       "uuid" : "{53d4e18d-33d0-479f-8d27-8247e836572c}",
-       "version_uuid" : "{31ea0014-7311-4973-a77c-6181edc650bb}"
+       "uuid" : "53d4e18d-33d0-479f-8d27-8247e836572c",
+       "version_uuid" : "31ea0014-7311-4973-a77c-6181edc650bb"
       },
       {
        "arguments" : [
@@ -47,13 +47,13 @@
          "name" : "relative_building_rotation",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{8e42df38-57c4-4952-8c64-a674647b2c70}",
-         "version_uuid" : "{4a946a09-d9ce-41b6-a9f5-70ac716814e4}"
+         "uuid" : "8e42df38-57c4-4952-8c64-a674647b2c70",
+         "version_uuid" : "4a946a09-d9ce-41b6-a9f5-70ac716814e4"
         }
        ],
        "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
-       "bcl_measure_uuid" : "{a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d}",
-       "bcl_measure_version_uuid" : "{06e6f4da-c57b-4caf-880f-cb6a3918181e}",
+       "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 90 degrees",
        "input_file_type" : "OSM",
@@ -63,8 +63,8 @@
        "measure_type" : "RubyMeasure",
        "name" : "Rotate Building 90 degrees",
        "output_file_type" : "OSM",
-       "uuid" : "{4839a263-d0a9-4037-93e6-b5d89bf7a659}",
-       "version_uuid" : "{bc58ea56-bf10-41c0-8b92-d3676530b83c}"
+       "uuid" : "4839a263-d0a9-4037-93e6-b5d89bf7a659",
+       "version_uuid" : "bc58ea56-bf10-41c0-8b92-d3676530b83c"
       },
       {
        "arguments" : [
@@ -76,14 +76,14 @@
          "name" : "relative_building_rotation",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{852ea37a-092d-4078-9370-e61dcefa5892}",
+         "uuid" : "852ea37a-092d-4078-9370-e61dcefa5892",
          "value" : 180.0,
-         "version_uuid" : "{5cb48665-876d-416a-90cf-f4b136cd081f}"
+         "version_uuid" : "5cb48665-876d-416a-90cf-f4b136cd081f"
         }
        ],
        "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
-       "bcl_measure_uuid" : "{a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d}",
-       "bcl_measure_version_uuid" : "{06e6f4da-c57b-4caf-880f-cb6a3918181e}",
+       "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 180 degrees",
        "input_file_type" : "OSM",
@@ -93,8 +93,8 @@
        "measure_type" : "RubyMeasure",
        "name" : "Rotate Building 180 degrees",
        "output_file_type" : "OSM",
-       "uuid" : "{b7832c17-bf4f-47be-9f32-3753e6b17b58}",
-       "version_uuid" : "{2108c21b-4b7f-410f-88c1-0db59661f89f}"
+       "uuid" : "b7832c17-bf4f-47be-9f32-3753e6b17b58",
+       "version_uuid" : "2108c21b-4b7f-410f-88c1-0db59661f89f"
       },
       {
        "arguments" : [
@@ -106,14 +106,14 @@
          "name" : "relative_building_rotation",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{f68f5db7-a515-4ed8-bf4c-97edd31ea03b}",
+         "uuid" : "f68f5db7-a515-4ed8-bf4c-97edd31ea03b",
          "value" : 270.0,
-         "version_uuid" : "{337331d7-3c51-415a-b660-00d189d0aa69}"
+         "version_uuid" : "337331d7-3c51-415a-b660-00d189d0aa69"
         }
        ],
        "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
-       "bcl_measure_uuid" : "{a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d}",
-       "bcl_measure_version_uuid" : "{06e6f4da-c57b-4caf-880f-cb6a3918181e}",
+       "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 270 degrees",
        "input_file_type" : "OSM",
@@ -123,13 +123,13 @@
        "measure_type" : "RubyMeasure",
        "name" : "Rotate Building 270 degrees",
        "output_file_type" : "OSM",
-       "uuid" : "{9327dbd3-2c36-4a0d-94a2-ffb52b3e780d}",
-       "version_uuid" : "{722207bc-76de-4876-b303-f6775439098e}"
+       "uuid" : "9327dbd3-2c36-4a0d-94a2-ffb52b3e780d",
+       "version_uuid" : "722207bc-76de-4876-b303-f6775439098e"
       }
      ],
      "name" : "Rotate Building",
-     "uuid" : "{05505496-bba2-49fc-9f86-5633ecafe0e5}",
-     "version_uuid" : "{51b24dae-1d5c-4beb-a6f1-316a330b9188}",
+     "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
+     "version_uuid" : "895cb21f-188e-4883-92f8-746a1cf5c516",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -140,8 +140,8 @@
        "is_selected" : true,
        "measure_group_index" : 0,
        "measure_type" : "NullMeasure",
-       "uuid" : "{4c974e72-786c-4aa3-a4cc-bead43276d43}",
-       "version_uuid" : "{19b51494-6257-42dd-a825-fcad61e8db6e}"
+       "uuid" : "4c974e72-786c-4aa3-a4cc-bead43276d43",
+       "version_uuid" : "19b51494-6257-42dd-a825-fcad61e8db6e"
       },
       {
        "arguments" : [
@@ -165,8 +165,8 @@
          "name" : "space_type",
          "required" : true,
          "type" : "Choice",
-         "uuid" : "{09988191-1cf8-4217-a790-062901ee9759}",
-         "version_uuid" : "{64755dd1-bffd-40a9-b403-ee43d205d00c}"
+         "uuid" : "09988191-1cf8-4217-a790-062901ee9759",
+         "version_uuid" : "64755dd1-bffd-40a9-b403-ee43d205d00c"
         },
         {
          "argument_index" : 1,
@@ -176,8 +176,8 @@
          "name" : "reduction_percent",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{29580d94-43b3-4881-96e4-935fa140bcf6}",
-         "version_uuid" : "{0255c23a-4b07-4d05-a8a3-b093ef60880e}"
+         "uuid" : "29580d94-43b3-4881-96e4-935fa140bcf6",
+         "version_uuid" : "0255c23a-4b07-4d05-a8a3-b093ef60880e"
         },
         {
          "argument_index" : 2,
@@ -187,8 +187,8 @@
          "name" : "material_and_installation_cost",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{cab7d382-da06-4c27-89e2-fff8f7e72a6e}",
-         "version_uuid" : "{3e6021f1-a1a5-4916-a345-b07b242c109f}"
+         "uuid" : "cab7d382-da06-4c27-89e2-fff8f7e72a6e",
+         "version_uuid" : "3e6021f1-a1a5-4916-a345-b07b242c109f"
         },
         {
          "argument_index" : 3,
@@ -198,8 +198,8 @@
          "name" : "demolition_cost",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{037842b8-bab0-4cd8-a04b-64a058f6b01b}",
-         "version_uuid" : "{3e57d80e-3e75-4dfe-b5dd-505daaadca3c}"
+         "uuid" : "037842b8-bab0-4cd8-a04b-64a058f6b01b",
+         "version_uuid" : "3e57d80e-3e75-4dfe-b5dd-505daaadca3c"
         },
         {
          "argument_index" : 4,
@@ -209,8 +209,8 @@
          "name" : "years_until_costs_start",
          "required" : true,
          "type" : "Integer",
-         "uuid" : "{8ac455af-d9fa-48ba-a5ba-7bcff102d845}",
-         "version_uuid" : "{0ae73332-15d6-417c-accb-04b6bff0d1fb}"
+         "uuid" : "8ac455af-d9fa-48ba-a5ba-7bcff102d845",
+         "version_uuid" : "0ae73332-15d6-417c-accb-04b6bff0d1fb"
         },
         {
          "argument_index" : 5,
@@ -220,8 +220,8 @@
          "name" : "initial_demo_costs",
          "required" : true,
          "type" : "Boolean",
-         "uuid" : "{31091352-bbae-4ac1-b0b3-97e1445ed406}",
-         "version_uuid" : "{83d62985-0a25-4fa7-a29d-dcfa915bd01b}"
+         "uuid" : "31091352-bbae-4ac1-b0b3-97e1445ed406",
+         "version_uuid" : "83d62985-0a25-4fa7-a29d-dcfa915bd01b"
         },
         {
          "argument_index" : 6,
@@ -231,8 +231,8 @@
          "name" : "expected_life",
          "required" : true,
          "type" : "Integer",
-         "uuid" : "{d7310c71-493c-486f-b9b7-e6eaf38f7603}",
-         "version_uuid" : "{6297f50b-0fee-49be-9133-2155de03e0b1}"
+         "uuid" : "d7310c71-493c-486f-b9b7-e6eaf38f7603",
+         "version_uuid" : "6297f50b-0fee-49be-9133-2155de03e0b1"
         },
         {
          "argument_index" : 7,
@@ -242,8 +242,8 @@
          "name" : "om_cost",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{b7ef0571-db39-41c8-b2b6-bf511282381d}",
-         "version_uuid" : "{01ee4d9b-aa91-434a-a967-9a00562a065b}"
+         "uuid" : "b7ef0571-db39-41c8-b2b6-bf511282381d",
+         "version_uuid" : "01ee4d9b-aa91-434a-a967-9a00562a065b"
         },
         {
          "argument_index" : 8,
@@ -253,13 +253,13 @@
          "name" : "om_frequency",
          "required" : true,
          "type" : "Integer",
-         "uuid" : "{a413b48f-7031-43a8-b4c2-0d38c7145d3b}",
-         "version_uuid" : "{7658be79-7a01-466d-85e9-ad2b15224708}"
+         "uuid" : "a413b48f-7031-43a8-b4c2-0d38c7145d3b",
+         "version_uuid" : "7658be79-7a01-466d-85e9-ad2b15224708"
         }
        ],
        "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
-       "bcl_measure_uuid" : "{d37b7ed5-887a-4d1f-b304-259462eadbe9}",
-       "bcl_measure_version_uuid" : "{07700ee2-85e4-458b-8e71-3db5c98def70}",
+       "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
+       "bcl_measure_version_uuid" : "07700ee2-85e4-458b-8e71-3db5c98def70",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Load By 30 percent",
        "input_file_type" : "OSM",
@@ -269,8 +269,8 @@
        "measure_type" : "RubyMeasure",
        "name" : "Reduce Lighting Load By 30 percent",
        "output_file_type" : "OSM",
-       "uuid" : "{883ebc58-845f-4708-81b2-0930d9cf22e0}",
-       "version_uuid" : "{8725b62f-967a-4c0a-a377-c5a3e68c5295}"
+       "uuid" : "883ebc58-845f-4708-81b2-0930d9cf22e0",
+       "version_uuid" : "8725b62f-967a-4c0a-a377-c5a3e68c5295"
       },
       {
        "arguments" : [
@@ -294,8 +294,8 @@
          "name" : "space_type",
          "required" : true,
          "type" : "Choice",
-         "uuid" : "{07c72605-d097-4c92-a5b4-1e999f49e20d}",
-         "version_uuid" : "{a6722a6d-1295-4f73-a824-7a1c88aa3856}"
+         "uuid" : "07c72605-d097-4c92-a5b4-1e999f49e20d",
+         "version_uuid" : "a6722a6d-1295-4f73-a824-7a1c88aa3856"
         },
         {
          "argument_index" : 1,
@@ -305,8 +305,8 @@
          "name" : "reduction_percent",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{a21781f1-8d34-46a2-8cf4-0fcce91663ae}",
-         "version_uuid" : "{9c433187-96ee-4a8d-b3f4-9f2c1d66848a}"
+         "uuid" : "a21781f1-8d34-46a2-8cf4-0fcce91663ae",
+         "version_uuid" : "9c433187-96ee-4a8d-b3f4-9f2c1d66848a"
         },
         {
          "argument_index" : 2,
@@ -316,8 +316,8 @@
          "name" : "material_and_installation_cost",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{d9ad0b79-b0d7-443a-b91d-28f15332c8c4}",
-         "version_uuid" : "{91c24b45-e04a-443c-ab27-777bcebc3699}"
+         "uuid" : "d9ad0b79-b0d7-443a-b91d-28f15332c8c4",
+         "version_uuid" : "91c24b45-e04a-443c-ab27-777bcebc3699"
         },
         {
          "argument_index" : 3,
@@ -327,8 +327,8 @@
          "name" : "demolition_cost",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{460e9734-02be-4418-a5d2-b2ce0a401534}",
-         "version_uuid" : "{bdefed2e-af4b-44c8-a085-d4dfe67ef017}"
+         "uuid" : "460e9734-02be-4418-a5d2-b2ce0a401534",
+         "version_uuid" : "bdefed2e-af4b-44c8-a085-d4dfe67ef017"
         },
         {
          "argument_index" : 4,
@@ -338,8 +338,8 @@
          "name" : "years_until_costs_start",
          "required" : true,
          "type" : "Integer",
-         "uuid" : "{75289e65-14ba-4e5b-81ea-ed0ed4bfd7fc}",
-         "version_uuid" : "{2010c4cf-8be3-438b-8375-134d7fc31eaa}"
+         "uuid" : "75289e65-14ba-4e5b-81ea-ed0ed4bfd7fc",
+         "version_uuid" : "2010c4cf-8be3-438b-8375-134d7fc31eaa"
         },
         {
          "argument_index" : 5,
@@ -349,8 +349,8 @@
          "name" : "initial_demo_costs",
          "required" : true,
          "type" : "Boolean",
-         "uuid" : "{c52b9604-398d-42e2-a931-6052ead9ce2c}",
-         "version_uuid" : "{8828ce47-b3d5-43bd-9be2-3f83b9897ce0}"
+         "uuid" : "c52b9604-398d-42e2-a931-6052ead9ce2c",
+         "version_uuid" : "8828ce47-b3d5-43bd-9be2-3f83b9897ce0"
         },
         {
          "argument_index" : 6,
@@ -360,8 +360,8 @@
          "name" : "expected_life",
          "required" : true,
          "type" : "Integer",
-         "uuid" : "{5d9db3fc-26e7-4d27-b6e8-442f01f50402}",
-         "version_uuid" : "{5ac4c97b-3f37-4c71-aa9f-411269710405}"
+         "uuid" : "5d9db3fc-26e7-4d27-b6e8-442f01f50402",
+         "version_uuid" : "5ac4c97b-3f37-4c71-aa9f-411269710405"
         },
         {
          "argument_index" : 7,
@@ -371,8 +371,8 @@
          "name" : "om_cost",
          "required" : true,
          "type" : "Double",
-         "uuid" : "{5059ecb2-c97c-4498-ac0d-266c5b85bdcc}",
-         "version_uuid" : "{372ece8b-63ea-430a-966f-97ea3f655875}"
+         "uuid" : "5059ecb2-c97c-4498-ac0d-266c5b85bdcc",
+         "version_uuid" : "372ece8b-63ea-430a-966f-97ea3f655875"
         },
         {
          "argument_index" : 8,
@@ -382,13 +382,13 @@
          "name" : "om_frequency",
          "required" : true,
          "type" : "Integer",
-         "uuid" : "{e83b59dd-fe54-4fb6-9fca-1da2bda52955}",
-         "version_uuid" : "{dc1e0562-9bb7-494e-afe4-8081ef8f5754}"
+         "uuid" : "e83b59dd-fe54-4fb6-9fca-1da2bda52955",
+         "version_uuid" : "dc1e0562-9bb7-494e-afe4-8081ef8f5754"
         }
        ],
        "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
-       "bcl_measure_uuid" : "{d37b7ed5-887a-4d1f-b304-259462eadbe9}",
-       "bcl_measure_version_uuid" : "{07700ee2-85e4-458b-8e71-3db5c98def70}",
+       "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
+       "bcl_measure_version_uuid" : "07700ee2-85e4-458b-8e71-3db5c98def70",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Load By 50 percent",
        "input_file_type" : "OSM",
@@ -398,13 +398,13 @@
        "measure_type" : "RubyMeasure",
        "name" : "Reduce Lighting Load By 50 percent",
        "output_file_type" : "OSM",
-       "uuid" : "{3bad6d70-9cc6-4f1d-a98f-b69a59d994bf}",
-       "version_uuid" : "{c44b1ceb-8d25-4f58-ac0f-e2a8835d99d4}"
+       "uuid" : "3bad6d70-9cc6-4f1d-a98f-b69a59d994bf",
+       "version_uuid" : "c44b1ceb-8d25-4f58-ac0f-e2a8835d99d4"
       }
      ],
      "name" : "Reduce Lighting Load",
-     "uuid" : "{5ba3c9b4-2f5d-4792-9ef7-569108649aa2}",
-     "version_uuid" : "{0b291766-d53e-45ad-b3e5-e8a7b20eaf36}",
+     "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
+     "version_uuid" : "b0e76761-9219-413a-b310-36326faf38db",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -539,8 +539,8 @@
          "name" : "elec_tar",
          "required" : true,
          "type" : "Choice",
-         "uuid" : "{f1cc663e-6971-4f4c-b8bc-fc34752c3ad1}",
-         "version_uuid" : "{d8058e12-b342-4992-a641-4a53f95ea3ee}"
+         "uuid" : "f1cc663e-6971-4f4c-b8bc-fc34752c3ad1",
+         "version_uuid" : "d8058e12-b342-4992-a641-4a53f95ea3ee"
         },
         {
          "argument_index" : 1,
@@ -582,13 +582,13 @@
          "name" : "gas_tar",
          "required" : true,
          "type" : "Choice",
-         "uuid" : "{cdbc59cd-8699-4516-8480-a17dbc546858}",
-         "version_uuid" : "{a92f8fde-c3bd-4adb-8929-0287478813a6}"
+         "uuid" : "cdbc59cd-8699-4516-8480-a17dbc546858",
+         "version_uuid" : "a92f8fde-c3bd-4adb-8929-0287478813a6"
         }
        ],
        "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/XcelEDATariffSelectionandModelSetup",
-       "bcl_measure_uuid" : "{c5ab60e9-b8e5-4653-a502-5ed030f1335d}",
-       "bcl_measure_version_uuid" : "{258a83a6-3e59-475d-a09f-67ea62139462}",
+       "bcl_measure_uuid" : "c5ab60e9-b8e5-4653-a502-5ed030f1335d",
+       "bcl_measure_version_uuid" : "258a83a6-3e59-475d-a09f-67ea62139462",
        "description" : "Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program.",
        "display_name" : "Xcel EDA Tariff Selection and Model Setup",
        "input_file_type" : "IDF",
@@ -598,13 +598,13 @@
        "measure_type" : "RubyMeasure",
        "name" : "Xcel EDA Tariff Selection and Model Setup",
        "output_file_type" : "IDF",
-       "uuid" : "{6dc40350-47bd-4612-baa1-4cf439d5f6d7}",
-       "version_uuid" : "{2146c0de-509c-468b-b03d-1773f18f1b0d}"
+       "uuid" : "6dc40350-47bd-4612-baa1-4cf439d5f6d7",
+       "version_uuid" : "2146c0de-509c-468b-b03d-1773f18f1b0d"
       }
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
-     "uuid" : "{e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7}",
-     "version_uuid" : "{e0be50e0-d580-4a37-b096-9cb5b967cb46}",
+     "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
+     "version_uuid" : "4e611bfd-efb2-4585-a583-f04d978c20f4",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -695,13 +695,13 @@
    "file_type" : "OSM",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
    "path" : "C:/projects/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
-   "timestamp_create" : "2013-Jul-16 14:42:25",
-   "timestamp_last" : "2013-Aug-08 13:04:51",
-   "uuid" : "{e105d3df-8259-4257-a89c-f31cd7a62e52}",
-   "version_uuid" : "{43046880-90ff-4ae8-85df-9d67ce399cc5}"
+   "timestamp_create" : 1373985745,
+   "timestamp_last" : 1375967091,
+   "uuid" : "e105d3df-8259-4257-a89c-f31cd7a62e52",
+   "version_uuid" : "43046880-90ff-4ae8-85df-9d67ce399cc5"
   },
-  "uuid" : "{a8feca85-dab9-4510-8610-651ef847781d}",
-  "version_uuid" : "{ada30015-5c86-4289-84ac-af42a1e124c4}",
+  "uuid" : "a8feca85-dab9-4510-8610-651ef847781d",
+  "version_uuid" : "ada30015-5c86-4289-84ac-af42a1e124c4",
   "weather_file" :   {
    "checksum_create" : "72673005",
    "checksum_last" : "72673005",
@@ -709,13 +709,13 @@
    "file_type" : "EPW",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
    "path" : "C:/projects/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
-   "timestamp_create" : "2013-Jul-16 14:42:25",
-   "timestamp_last" : "2013-Aug-08 13:04:51",
-   "uuid" : "{9a6a9a9e-0cc6-4396-8373-d1736300a006}",
-   "version_uuid" : "{b796bcea-e19a-452d-a828-3f66c42e7589}"
+   "timestamp_create" : 1373985745,
+   "timestamp_last" : 1375967091,
+   "uuid" : "9a6a9a9e-0cc6-4396-8373-d1736300a006",
+   "version_uuid" : "b796bcea-e19a-452d-a828-3f66c42e7589"
   }
  },
  "metadata" :  {
-  "version" : "1.0.3"
+  "openstudio_version" : "1.0.3"
  }
 }
