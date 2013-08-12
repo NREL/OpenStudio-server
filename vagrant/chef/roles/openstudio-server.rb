@@ -10,6 +10,7 @@ run_list([
              "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
+             "recipe[openstudio_server]"
          ])
 
 
