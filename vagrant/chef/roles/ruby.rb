@@ -5,15 +5,23 @@ run_list([
              #"recipe[build-essential]",
              "recipe[ruby_build]",
              "recipe[rbenv::system]",
-             "recipe[rbenv::vagrant]",
+         #"recipe[rbenv::vagrant]",
          ])
 
 default_attributes({
        :rbenv => {
            :upgrade => true,
-           :rubies => ["2.0.0-p195"],
+           :rubies => [
+               {
+                   :name => '2.0.0-p195',
+                   :environment => {
+                       'RUBY_CONFIGURE_OPTS' => '--enable-shared', # needs to be set for openstudio linking
+                       'CONFIGURE_OPTS' => '--disable-install-doc'
+                   }
+               }
+           ],
+           :no_rdoc_ri => true
            :global => "2.0.0-p195",
-           :environment => {'RUBY_CONFIGURE_OPTS' => '--enabled-shared'}, # needs to be set for openstudio linking
            :gems => {
                "2.0.0-p195" => [
                    {
@@ -23,8 +31,9 @@ default_attributes({
                    {
                        :name => "rails",
                        :version => "3.2.13",
-                   },
+                   }
                ]
            }
-       },
-   })
+       }
+   }
+)
