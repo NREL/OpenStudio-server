@@ -60,3 +60,4 @@ EOF\"" catch_result]} {
 system chmod 700 $env(HOME)/.ssh
 system chmod 600 $env(HOME)/.ssh/config
 
+
