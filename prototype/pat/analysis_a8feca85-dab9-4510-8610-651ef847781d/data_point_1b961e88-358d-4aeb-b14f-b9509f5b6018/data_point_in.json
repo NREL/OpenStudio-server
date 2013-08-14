@@ -1,13 +1,13 @@
 {
  "data_point" :  {
-  "analysis_uuid" : "{a8feca85-dab9-4510-8610-651ef847781d}",
+  "analysis_uuid" : "a8feca85-dab9-4510-8610-651ef847781d",
   "complete" : false,
   "data_point_type" : "DataPoint",
   "display_name" : "Reduce Lighting Load By 30 percent Only",
   "failed" : false,
   "name" : "Reduce Lighting Load By 30 percent Only",
-  "problem_uuid" : "{412b1879-f0ee-4919-ab90-6ab642fd39ee}",
-  "uuid" : "{1b961e88-358d-4aeb-b14f-b9509f5b6018}",
+  "problem_uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
+  "uuid" : "1b961e88-358d-4aeb-b14f-b9509f5b6018",
   "variable_values" : [
    {
     "value" : 0,
@@ -30,9 +30,9 @@
     "variable_value_index" : 3
    }
   ],
-  "version_uuid" : "{6fbad736-b7b5-4489-869c-1cd0a3bb2ea4}"
+  "version_uuid" : "6fbad736-b7b5-4489-869c-1cd0a3bb2ea4"
  },
  "metadata" :  {
-  "version" : "1.0.3"
+  "openstudio_version" : "1.0.4"
  }
 }
