@@ -28,7 +28,7 @@ prepare_slave_script("slave_script.sh", master_ip, master_dns, master_hostname)
 #prepare_slave_script("master_script.sh", master_ip, master_dns, master_hostname)
 
 # Launch Slaves 
-slave_info = a.launch_slave(10, master_info, "slave_script.sh")
+slave_info = a.launch_slave(2, master_info, "slave_script.sh")
 slave_instances = Array.new(0)
 slave_info.each {|struct| slave_instances.push(struct.instance)}
 
@@ -72,12 +72,12 @@ slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
 File.open("ip_addresses", 'w+') {|f| f.write(text) }
 
 # Right now these paths are assuming that we are in the same directory as the files
-upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect"]
+upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
 
-# Send Command ls
+# Send Commands
 command = "chmod 774 ~/setup-ssh-keys.sh"
 master_instance.each { |instance|
   a.send_command(instance, command)
@@ -103,6 +103,16 @@ master_instance.each { |instance|
   a.send_command(instance, command)
 }
  
+command = "chmod 774 ~/start_rserve.sh"
+master_instance.each { |instance|
+  a.send_command(instance, command)
+}
+
+command = "~/start_rserve.sh"
+master_instance.each { |instance|
+  a.send_command(instance, command)
+}
+
  
  # test, ssh into the master, then ssh into a worker node.  you should 
  # not be asked to authenticate a key nor enter username/password
