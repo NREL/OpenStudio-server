@@ -108,11 +108,10 @@ master_instance.each { |instance|
   a.send_command(instance, command)
 }
 
-command = "~/start_rserve.sh"
+command = "nohup ~/start_rserve.sh </dev/null >/dev/null 2>&1 &"
 master_instance.each { |instance|
   a.send_command(instance, command)
 }
-
  
  # test, ssh into the master, then ssh into a worker node.  you should 
  # not be asked to authenticate a key nor enter username/password

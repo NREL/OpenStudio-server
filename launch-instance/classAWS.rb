@@ -6,7 +6,8 @@ require 'net/scp'
 module AwsInterface 
   class AwsAdapter
     #IMAGE_ID = "ami-efed9586" #-Brians
-    IMAGE_ID = "ami-862d6aef" #-new Brians
+    #IMAGE_ID = "ami-862d6aef" #-new Brians
+    IMAGE_ID = "ami-a05a1bc9"
     REGION = "us-east-1"
     #IMAGE_ID = "ami-4c0d4925" #-Nicks
     #REGION = "us-west-1"
@@ -267,6 +268,34 @@ module AwsInterface
         retry
       end
     end
+    
+#======================= send command ======================#
+    # Send a command through SSH to an instance. 
+    # Need to pass instance object and the command as a string. 
+    def send_command_blocking(instance, command)
+      # send command to instance
+      puts "Executing #{command}"
+      begin
+        Net::SSH.start(instance.ip_address, "ubuntu",
+                       :key_data => [@key_pair.private_key]) do |ssh|
+          puts "Running #{command} on the instance #{instance.instance_id}:"
+          ssh.exec!(command)
+          #ssh.exec(command)
+          
+        end
+      rescue Net::SSH::HostKeyMismatch => e
+        e.remember_host!
+        puts "key mismatch, retry"
+        sleep 1
+        retry
+      rescue SystemCallError, Timeout::Error => e
+        # port 22 might not be available immediately after the instance finishes launching
+        sleep 1
+        # puts "Not Yet"
+        retry
+      end
+    end
+    
 #======================= upload file ======================#
     # Uploads a file using SCP to an instance. 
     # Need to pass the instance object and the path to the file (Local and Remote). 
