@@ -8,7 +8,7 @@
    "name" : "Simple Project Problem",
    "problem_type" : "Problem",
    "uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
-   "version_uuid" : "d0a0e35a-b255-42f8-9f5d-b65740b209ee",
+   "version_uuid" : "b44f451f-745b-41ce-b8e4-672e50231e72",
    "workflow" : [
     {
      "display_name" : "Alternative Model",
@@ -23,7 +23,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
-     "version_uuid" : "0c79860d-1e34-48f4-b58b-d45d978b5a13",
+     "version_uuid" : "42ff562b-ad92-49f8-a10b-c1cb2d92a98a",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -64,7 +64,7 @@
        "name" : "Rotate Building 90 degrees",
        "output_file_type" : "OSM",
        "uuid" : "4839a263-d0a9-4037-93e6-b5d89bf7a659",
-       "version_uuid" : "b98ce3bf-0c58-495b-bde4-f07ce90eae51"
+       "version_uuid" : "c85b82df-9ec6-4130-a1f0-965c9a1a0066"
       },
       {
        "arguments" : [
@@ -94,7 +94,7 @@
        "name" : "Rotate Building 180 degrees",
        "output_file_type" : "OSM",
        "uuid" : "b7832c17-bf4f-47be-9f32-3753e6b17b58",
-       "version_uuid" : "3f62d450-b6b4-49c1-9b5b-142e511fdab2"
+       "version_uuid" : "30cd6e25-5ed1-403a-b802-eeeca15e3e56"
       },
       {
        "arguments" : [
@@ -124,12 +124,12 @@
        "name" : "Rotate Building 270 degrees",
        "output_file_type" : "OSM",
        "uuid" : "9327dbd3-2c36-4a0d-94a2-ffb52b3e780d",
-       "version_uuid" : "f6d1820a-f442-4723-91bc-de9006f78ed9"
+       "version_uuid" : "56c56590-8be5-4c5e-8ec2-3b49a0283f85"
       }
      ],
      "name" : "Rotate Building",
      "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
-     "version_uuid" : "fc3be9ad-3373-4b76-afab-a428a0fe65e5",
+     "version_uuid" : "b8fc165c-c29d-48b8-899d-26641a94afe8",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -270,7 +270,7 @@
        "name" : "Reduce Lighting Load By 30 percent",
        "output_file_type" : "OSM",
        "uuid" : "883ebc58-845f-4708-81b2-0930d9cf22e0",
-       "version_uuid" : "65fb5121-a6f7-4449-b3bd-45bea5bb9adb"
+       "version_uuid" : "4f990ceb-342e-4619-b1f6-88f06c0f8a69"
       },
       {
        "arguments" : [
@@ -399,12 +399,12 @@
        "name" : "Reduce Lighting Load By 50 percent",
        "output_file_type" : "OSM",
        "uuid" : "3bad6d70-9cc6-4f1d-a98f-b69a59d994bf",
-       "version_uuid" : "8ea2feee-4f55-4b36-9757-304f2f194b75"
+       "version_uuid" : "f13ab9e6-4fdb-491f-beda-12a038108b8c"
       }
      ],
      "name" : "Reduce Lighting Load",
      "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
-     "version_uuid" : "09616cb6-4547-45dd-b578-c9743241e6d0",
+     "version_uuid" : "473a67a4-3800-4d13-b539-32336195ada6",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -599,12 +599,12 @@
        "name" : "Xcel EDA Tariff Selection and Model Setup",
        "output_file_type" : "IDF",
        "uuid" : "6dc40350-47bd-4612-baa1-4cf439d5f6d7",
-       "version_uuid" : "68978e7e-78bb-46e9-9db6-0873ce9f1f8e"
+       "version_uuid" : "4a0d84ec-ce48-4191-bd85-0dd45d4fd560"
       }
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
-     "version_uuid" : "ee77ebac-4fd6-4c92-8efc-5b06ca9be5ee",
+     "version_uuid" : "def97483-41be-4664-aa81-b416ac1c64cb",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -695,13 +695,13 @@
    "file_type" : "OSM",
    "name" : "analysis_a8feca85-dab9-4510-8610-651ef847781d/seed/seed.osm",
    "path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/seed/seed.osm",
-   "timestamp_create" : 1376315224,
-   "timestamp_last" : 1376315224,
-   "uuid" : "25a70120-98ac-493d-af56-c7366b6b87c3",
-   "version_uuid" : "d1f355e7-7257-434c-93d0-1bdd8e9d45c7"
+   "timestamp_create" : "20130814T114453",
+   "timestamp_last" : "20130814T114453",
+   "uuid" : "91d1ba97-6804-47f5-83a9-b88b8a685e0a",
+   "version_uuid" : "1cc21366-fae2-450b-861a-20d1aeb0bb60"
   },
   "uuid" : "a8feca85-dab9-4510-8610-651ef847781d",
-  "version_uuid" : "f5cb7b4d-abbd-4d47-afa3-ca764f302a76",
+  "version_uuid" : "be66d7c8-9617-4a62-9738-daa0bd283098",
   "weather_file" :   {
    "checksum_create" : "72673005",
    "checksum_last" : "72673005",
@@ -709,13 +709,13 @@
    "file_type" : "EPW",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
    "path" : "C:/projects/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
-   "timestamp_create" : 1373985745,
-   "timestamp_last" : 1375967091,
+   "timestamp_create" : "20130716T144225",
+   "timestamp_last" : "20130808T130451",
    "uuid" : "9a6a9a9e-0cc6-4396-8373-d1736300a006",
    "version_uuid" : "b796bcea-e19a-452d-a828-3f66c42e7589"
   }
  },
  "metadata" :  {
-  "openstudio_version" : "1.0.3"
+  "openstudio_version" : "1.0.4"
  }
 }
