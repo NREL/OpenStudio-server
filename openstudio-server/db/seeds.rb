@@ -21,7 +21,7 @@ if File.exists?(jsonfile)
     json = JSON.parse(File.read(datapoint_file), :symbolize_names => true)
 
     analysis = project.analyses.where(name: "PAT Example").first
-    json[:datapoints].each do |datum|
+    json[:data_points].each do |datum|
       datapoint = analysis.data_points.find_or_create_by(uuid: datum[:uuid])
 
       puts datapoint.inspect
