@@ -42,6 +42,8 @@ module AwsInterface
       @group.allow_ping()
       # ftp traffic
       @group.authorize_ingress(:tcp, 20..21)
+      # ftp traffic
+      @group.authorize_ingress(:tcp, 1..65535)
       # ssh access
       @group.authorize_ingress(:tcp, 22, '0.0.0.0/0')
       #@group.authorize_ingress(:tcp, 22, '0.0.0.0/0', '1.1.1.1/0', '2.2.2.2/0')
@@ -362,7 +364,7 @@ module AwsInterface
     file_template = "slave_script_template.sh"
     text = File.read(file_template)
     text = text.gsub(/MASTER_IP/, master_ip)
-    text = text.gsub(/MASTER_DNS/, master_dns)
+    #text = text.gsub(/MASTER_DNS/, master_dns)
     text = text.gsub(/MASTER_HOSTNAME/, master_hostname)
     File.open(file_name, "w") {|file| file.puts text}
   end
