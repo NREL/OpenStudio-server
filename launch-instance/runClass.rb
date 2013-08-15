@@ -23,7 +23,7 @@ master_instance.push(master_info.instance)
 # to send set up the /etc/hosts and /etc/hostname files.
 master_ip = master_info.ip_address
 master_dns = master_info.dns_name 
-master_hostname = "master_hostname"
+master_hostname = "master_name"
 prepare_slave_script("slave_script.sh", master_ip, master_dns, master_hostname)
 #prepare_slave_script("master_script.sh", master_ip, master_dns, master_hostname)
 
