@@ -7,6 +7,7 @@ class Project
   has_many :analyses
 
 
+
   def get_problem(problem_name)
     self.analyses.first.problems.find_or_create_by(name: problem_name)
   end
