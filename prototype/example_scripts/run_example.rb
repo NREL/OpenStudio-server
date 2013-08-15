@@ -1,5 +1,6 @@
 require 'rest-client'
 require 'json'
+require 'base64'
 
 HOSTNAME = "http://localhost:8080"
 
@@ -53,6 +54,25 @@ if !project_id.nil?
 end
 
 
+# add the seed model, measures, etc to the analysis
+if !analysis_id.nil?
+  file = "../pat/server_seed.zip"
+  file_b64 = Base64.encode64(file.read)
+  file_data = {"file" =>
+                   {
+                       "file" => "#{file_b64}",
+                       "filesize" => "#{File.size(filename_and_path)}",
+                       "filename" => filename
+                   },
+  }
+
+  resp = RestClient.post("#{HOSTNAME}/anlayses/#{analysis_id}/upload.json", file_data)
+
+
+end
+
+
+
 # add all the datapoints to the analysis
 if !analysis_id.nil?
   dp_json = JSON.parse(File.open("../pat/server_datapoints_request.json").read, :symbolize_names => true)
@@ -74,6 +94,7 @@ if !analysis_id.nil?
   # run the analysis
 
   action_hash = { action: "start" }
+  #action_hash = { action: "stop"}
 
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
 
