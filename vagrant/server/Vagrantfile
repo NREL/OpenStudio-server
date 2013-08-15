@@ -32,9 +32,9 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder "../../openstudio-server", "/var/www/rails/openstudio", :nfs => !is_windows
-  config.vm.synced_folder "../../prototype", "/data/prototype", :nfs => !is_windows
-  config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => !is_windows
+  config.vm.synced_folder "../../openstudio-server", "/var/www/rails/openstudio" , :nfs => !is_windows
+  config.vm.synced_folder "../../prototype", "/data/prototype" , :nfs => !is_windows
+  config.vm.synced_folder "../../launch-instance", "/data/launch-instance" , :nfs => !is_windows
 
 
 
@@ -80,11 +80,14 @@ Vagrant.configure("2") do |config|
     # you will need to create a yaml file with these values to
     # properly deploy to ec2
     require 'yaml'
-    aws_config = YAML::load_file(File.join(Dir.home, ".aws_secrets"))
-    aws.access_key_id = aws_config.fetch("access_key_id")
-    aws.secret_access_key = aws_config.fetch("secret_access_key")
-    aws.keypair_name = aws_config.fetch("keypair_name")
-    override.ssh.private_key_path = aws_config.fetch("private_key_path")
+    secretsFile = File.join(Dir.home, ".aws_secrets")
+    if File.exist? secretsFile 
+      aws_config = YAML::load_file(secretsFile)
+      aws.access_key_id = aws_config.fetch("access_key_id")
+      aws.secret_access_key = aws_config.fetch("secret_access_key")
+      aws.keypair_name = aws_config.fetch("keypair_name")
+      override.ssh.private_key_path = aws_config.fetch("private_key_path")
+    end
 
     aws.security_groups = ["default"]
     aws.instance_type = "m1.small"
