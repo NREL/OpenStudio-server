@@ -4,9 +4,12 @@ class ProjectsController < ApplicationController
   def index
     @projects = Project.all
 
+    logger.info(@projects.to_json(:include => :analyses ))
+
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: @projects }
+
+      format.json { render json: @projects.to_json(:include => :analyses ) }
     end
   end
 
@@ -17,7 +20,7 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @project }
+      format.json { render json: @project.to_json(:include => :analyses ) }
     end
   end
 

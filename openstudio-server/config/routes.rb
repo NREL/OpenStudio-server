@@ -23,6 +23,7 @@ OpenstudioServer::Application.routes.draw do
     resources :analyses, shallow: true do
       member do
         get :action
+        get :status
       end
 
       resources :seeds, shallow: true

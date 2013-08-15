@@ -21,7 +21,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render :partial => 'models.json'  }
+      format.json { render json: @analysis.to_json(:include => :data_points) }
     end
   end
 
@@ -89,9 +89,36 @@ class AnalysesController < ApplicationController
   def action
     @analysis = Analysis.find(params[:id])
 
-    @analysis.start_r_and_run_sample
+    #@analysis.start_r_and_run_sample
 
-    redirect_to analysis_url(@analysis)
+    #redirect_to analysis_url(@analysis)
 
+    respond_to do |format|
+    #  format.html # new.html.erb
+      format.json { render json: @analysis }
+    end
+
+  end
+
+  def status
+    @analysis = Analysis.find(params[:id])
+
+    dps = nil
+    if params[:jobs].nil?
+      dps = @analysis.data_points
+    else
+      dps = @analysis.data_points.where(status: params[:jobs])
+    end
+
+
+
+    #@analysis.start_r_and_run_sample
+
+    #redirect_to analysis_url(@analysis)
+
+    respond_to do |format|
+      #  format.html # new.html.erb
+      format.json { render json: {data_points: dps} }
+    end
   end
 end

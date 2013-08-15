@@ -15,7 +15,7 @@ class Analysis
   has_many :algorithms
   has_many :problems
 
-  validates_format_of :uuid, :with => /[^0-]+/
+  #validates_format_of :uuid, :with => /[^0-]+/
 
   def start_r_and_run_sample
 
