@@ -15,6 +15,12 @@ See the instruction on the Wiki. ** Make sure to checkout the repo with LF end-o
 vagrant plugin install vagrant-omnibus
 ```
 
+- Also install the vagrant AWS plugin as the vagrant file will fail if not installed 
+
+```sh
+vagrant plugin install vagrant-aws
+```
+
 - Start the VM and let it provision
 
 Windows
