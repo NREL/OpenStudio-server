@@ -5,7 +5,7 @@
  "work_item" :  {
   "tools" : [
    {
-    "local_bin_path" : "/EnergyPlusV8-0-0/ExpandObjects.exe",
+    "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/ExpandObjects",
     "name" : "expandobjects",
     "out_file_filter" : "expanded\\.idf",
     "remote_archive" : "",
@@ -13,7 +13,7 @@
     "version" : "8.0.0"
    },
    {
-    "local_bin_path" : "/EnergyPlusV8-0-0/EnergyPlus.exe",
+    "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/EnergyPlus",
     "name" : "energyplus",
     "out_file_filter" : "eplus.*",
     "remote_archive" : "",
@@ -21,7 +21,7 @@
     "version" : "8.0.0"
    },
    {
-    "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/slab.exe",
+    "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/PreProcess/GrndTempCalc/slab",
     "name" : "slab",
     "out_file_filter" : ".*\\.TXT",
     "remote_archive" : "",
@@ -29,7 +29,7 @@
     "version" : "8.0.0"
    },
    {
-    "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/basement.exe",
+    "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/PreProcess/GrndTempCalc/basement",
     "name" : "basement",
     "out_file_filter" : ".*\\.TXT",
     "remote_archive" : "",
@@ -37,7 +37,7 @@
     "version" : "8.0.0"
    },
    {
-    "local_bin_path" : "C:/ruby/bin/ruby.exe",
+    "local_bin_path" : "/usr/bin/ruby",
     "name" : "ruby",
     "out_file_filter" : ".*",
     "remote_archive" : "",
