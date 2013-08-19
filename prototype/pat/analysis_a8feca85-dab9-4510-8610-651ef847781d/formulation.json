@@ -23,7 +23,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
-     "version_uuid" : "42ff562b-ad92-49f8-a10b-c1cb2d92a98a",
+     "version_uuid" : "da3345c5-174a-413b-87b9-e7bef9f9e0fb",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -51,9 +51,9 @@
          "version_uuid" : "4a946a09-d9ce-41b6-a9f5-70ac716814e4"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
+       "bcl_measure_version_uuid" : "304759b7-2f21-43f1-a2a3-425dfac9a151",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 90 degrees",
        "input_file_type" : "OSM",
@@ -81,9 +81,9 @@
          "version_uuid" : "5cb48665-876d-416a-90cf-f4b136cd081f"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
+       "bcl_measure_version_uuid" : "304759b7-2f21-43f1-a2a3-425dfac9a151",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 180 degrees",
        "input_file_type" : "OSM",
@@ -111,9 +111,9 @@
          "version_uuid" : "337331d7-3c51-415a-b660-00d189d0aa69"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
+       "bcl_measure_version_uuid" : "304759b7-2f21-43f1-a2a3-425dfac9a151",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 270 degrees",
        "input_file_type" : "OSM",
@@ -129,7 +129,7 @@
      ],
      "name" : "Rotate Building",
      "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
-     "version_uuid" : "1e482738-b44d-4470-8afa-8282d4b8ec3a",
+     "version_uuid" : "5434c95e-f07b-4cef-8bc8-9af0f214e884",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -257,9 +257,9 @@
          "version_uuid" : "7658be79-7a01-466d-85e9-ad2b15224708"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-       "bcl_measure_version_uuid" : "07700ee2-85e4-458b-8e71-3db5c98def70",
+       "bcl_measure_version_uuid" : "8de9ede3-d989-4995-8da7-012306158636",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Load By 30 percent",
        "input_file_type" : "OSM",
@@ -386,9 +386,9 @@
          "version_uuid" : "dc1e0562-9bb7-494e-afe4-8081ef8f5754"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-       "bcl_measure_version_uuid" : "07700ee2-85e4-458b-8e71-3db5c98def70",
+       "bcl_measure_version_uuid" : "8de9ede3-d989-4995-8da7-012306158636",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Load By 50 percent",
        "input_file_type" : "OSM",
@@ -404,7 +404,7 @@
      ],
      "name" : "Reduce Lighting Load",
      "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
-     "version_uuid" : "2846e502-df00-4e60-9ac6-89bac3a2dbca",
+     "version_uuid" : "44d2c329-1110-45ea-8cce-ee976391a7f0",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -586,9 +586,9 @@
          "version_uuid" : "a92f8fde-c3bd-4adb-8929-0287478813a6"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/XcelEDATariffSelectionandModelSetup",
+       "bcl_measure_directory" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/scripts/XcelEDATariffSelectionandModelSetup",
        "bcl_measure_uuid" : "c5ab60e9-b8e5-4653-a502-5ed030f1335d",
-       "bcl_measure_version_uuid" : "258a83a6-3e59-475d-a09f-67ea62139462",
+       "bcl_measure_version_uuid" : "bd72c207-126a-4e2a-85f2-0d2b1f1c89d6",
        "description" : "Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program.",
        "display_name" : "Xcel EDA Tariff Selection and Model Setup",
        "input_file_type" : "IDF",
@@ -604,7 +604,7 @@
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
-     "version_uuid" : "11a1ede5-372e-472e-84c5-e1e2f26c1317",
+     "version_uuid" : "abc912c2-dafe-4787-b9ef-aaca7f11823c",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -694,11 +694,11 @@
    "display_name" : "seed",
    "file_type" : "OSM",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
-   "path" : "C:/projects/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
+   "path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/seed/seed.osm",
    "timestamp_create" : "20130716T144225",
-   "timestamp_last" : "20130808T130451",
+   "timestamp_last" : "20130816T125557",
    "uuid" : "e105d3df-8259-4257-a89c-f31cd7a62e52",
-   "version_uuid" : "43046880-90ff-4ae8-85df-9d67ce399cc5"
+   "version_uuid" : "e3dc82d5-73ce-402d-b2ef-08bf0911525b"
   },
   "uuid" : "a8feca85-dab9-4510-8610-651ef847781d",
   "version_uuid" : "ada30015-5c86-4289-84ac-af42a1e124c4",
@@ -708,14 +708,59 @@
    "display_name" : "USA_CO_Golden-NREL.724666_TMY3",
    "file_type" : "EPW",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
-   "path" : "C:/projects/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+   "path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
    "timestamp_create" : "20130716T144225",
-   "timestamp_last" : "20130808T130451",
+   "timestamp_last" : "20130816T125557",
    "uuid" : "9a6a9a9e-0cc6-4396-8373-d1736300a006",
-   "version_uuid" : "b796bcea-e19a-452d-a828-3f66c42e7589"
+   "version_uuid" : "c98b4ee2-db01-49f5-b0ff-69048069dd33"
   }
  },
  "metadata" :  {
-  "openstudio_version" : "1.0.4"
+  "openstudio_version" : "1.0.4",
+  "project_path" : "./PATTest",
+  "server_view" :   {
+   "variables" : [
+    {
+     "display_name" : "Alternative Model",
+     "maximum" : 0,
+     "minimum" : 0,
+     "name" : "Alternative Model",
+     "type" : "Integer",
+     "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
+     "variable_index" : 0,
+     "version_uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9"
+    },
+    {
+     "display_name" : "Rotate Building",
+     "maximum" : 3,
+     "minimum" : 0,
+     "name" : "Rotate Building",
+     "type" : "Integer",
+     "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
+     "variable_index" : 1,
+     "version_uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5"
+    },
+    {
+     "display_name" : "Reduce Lighting Load",
+     "maximum" : 2,
+     "minimum" : 0,
+     "name" : "Reduce Lighting Load",
+     "type" : "Integer",
+     "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
+     "variable_index" : 2,
+     "version_uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2"
+    },
+    {
+     "display_name" : "Xcel EDA Tariff Selection and Model Setup Group",
+     "maximum" : 0,
+     "minimum" : 0,
+     "name" : "Xcel EDA Tariff Selection and Model Setup Group",
+     "type" : "Integer",
+     "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
+     "variable_index" : 3,
+     "version_uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7"
+    }
+   ]
+  }
  }
 }

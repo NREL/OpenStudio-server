@@ -81,7 +81,8 @@ Dir.foreach(scripts_dir.to_s) do |script_folder|
   analysis.problem.updateMeasure(bclMeasure,OpenStudio::Ruleset::OSArgumentVector.new,true)
 end
 debug_formulation_json_path = directory / OpenStudio::Path.new("fixed_up_formulation.json")
-analysis.saveJSON(debug_formulation_json_path,"ProblemFormulation".to_AnalysisSerializationScope)
+analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
+analysis.saveJSON(debug_formulation_json_path,analysis_options)
 
 # load data point to run
 data_point = OpenStudio::Analysis::loadJSON(data_point_json_path)
@@ -118,4 +119,6 @@ analysis.problem.updateDataPoint(data_point,job)
 
 # for now, print the final data point json
 data_point_json_path = directory / OpenStudio::Path.new("data_point_out.json")
-data_point.saveJSON(data_point_json_path,true)
+data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(project_path)
+data_point.saveJSON(data_point_json_path,data_point_options,true)
+

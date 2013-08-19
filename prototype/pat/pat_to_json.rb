@@ -21,12 +21,7 @@ datapoints = analysis.dataPoints
 
 # Print server views ###########################################################
 
-# Works with branch: https://github.com/NREL/OpenStudio/tree/20130808_ETH_JSONServerView_53229997
-server_problem_request_path = OpenStudio::Path.new("server_problem.json")
-analysis.saveServerRequestForProblemFormulation(server_problem_request_path,true)
-
-server_datapoints_request_path = OpenStudio::Path.new("server_datapoints_request.json")
-analysis.saveServerRequestForDataPoints(server_datapoints_request_path,true)
+# Now server views are under metadata section of main JSON files.
 
 # PROTOTYPE CODE
 #
@@ -130,7 +125,8 @@ FileUtils.cp_r((pat_path / OpenStudio::Path.new("scripts")).to_s,
                (project_dir_path / OpenStudio::Path.new("scripts")).to_s)
 # problem formulation
 formulation_json_path = project_dir_path / OpenStudio::Path.new("formulation.json")
-analysis.saveJSON(formulation_json_path,"ProblemFormulation".to_AnalysisSerializationScope)
+analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project.projectDir)
+analysis.saveJSON(formulation_json_path,analysis_options)
 # tools
 #
 # ETH@20130808: This should be replaced by a json serialization of AnalysisRunOptions. 
@@ -154,6 +150,7 @@ File.open(tools_json_path.to_s,'w') do |file|
 end
                                                          
 # Set up run folders and files
+data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(project.projectDir)
 datapoints.each do |data_point|
 
   data_point_dir_name = "data_point_" + print_uuid(data_point.uuid)
@@ -161,6 +158,6 @@ datapoints.each do |data_point|
   FileUtils.mkdir(data_point_dir_path.to_s)
   
   data_point_json_path = data_point_dir_path / OpenStudio::Path.new("data_point_in.json")  
-  data_point.saveJSON(data_point_json_path)  
+  data_point.saveJSON(data_point_json_path,data_point_options)  
   
 end
