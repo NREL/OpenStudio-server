@@ -50,6 +50,7 @@ vagrant ssh
 
 ```sh
 sudo -i
+apt-get update
 apt-get install rubygems -y
 gem sources -r https://rubygems.org/
 gem sources -a http://rubygems.org/
