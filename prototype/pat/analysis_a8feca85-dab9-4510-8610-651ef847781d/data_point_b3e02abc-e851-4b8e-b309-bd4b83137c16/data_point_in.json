@@ -33,7 +33,7 @@
  },
  "metadata" :  {
   "openstudio_version" : "1.0.4",
-  "project_path" : "./PATTest",
+  "project_dir" : "C:/projects/openstudio-server/prototype/pat/PATTest",
   "server_view" :   {
    "display_name" : "",
    "name" : "New Design Alternative 1",
