@@ -29,6 +29,7 @@ Windows
 # for each cmd window set the environment variable (or set globally (for NREL only)
 set OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
 vagrant up
+vagrant provision
 ```
 
 Mac / Linux
@@ -36,6 +37,7 @@ Mac / Linux
 ```sh
 # for each cmd window set the environment variable (or set globally (for NREL only)
 OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
+vagrant provision
 ```
 
 Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
@@ -54,13 +56,6 @@ apt-get update
 apt-get install rubygems -y
 gem sources -r https://rubygems.org/
 gem sources -a http://rubygems.org/
-
-```
-
-- Reinstall with --force the gem that didn't install correctly (most likely rails).
-
-```sh
-sudo -i
 gem install rails -v "3.2.13" --force --no-rdoc --no-ri
 ```
 
