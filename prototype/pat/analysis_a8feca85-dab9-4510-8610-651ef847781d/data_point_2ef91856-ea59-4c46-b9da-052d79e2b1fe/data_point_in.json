@@ -34,7 +34,7 @@
  },
  "metadata" :  {
   "openstudio_version" : "1.0.4",
-  "project_dir" : "C:/projects/openstudio-server/prototype/pat/PATTest",
+  "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/PATTest",
   "server_view" :   {
    "display_name" : "Rotate Building 90 degrees Only",
    "name" : "Rotate Building 90 degrees Only",

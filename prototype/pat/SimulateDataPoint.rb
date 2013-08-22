@@ -55,12 +55,6 @@ if loadResult.analysisObject.empty?
 end
 analysis = loadResult.analysisObject.get.to_Analysis.get
 
-# fix up file paths
-analysis.updateInputPathData(loadResult.projectDir,project_path)
-debug_formulation_json_path = directory / OpenStudio::Path.new("fixed_up_formulation.json")
-analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
-analysis.saveJSON(debug_formulation_json_path,analysis_options)
-
 # load data point to run
 loadResult = OpenStudio::Analysis::loadJSON(data_point_json_path)
 if loadResult.analysisObject.empty?

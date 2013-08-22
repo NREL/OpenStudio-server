@@ -23,7 +23,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
-     "version_uuid" : "ab1773a8-53ac-4090-af28-556d70f08d82",
+     "version_uuid" : "fc2e5361-ce7a-4785-ba1f-77ef8c5f9e15",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -51,9 +51,9 @@
          "version_uuid" : "4a946a09-d9ce-41b6-a9f5-70ac716814e4"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
+       "bcl_measure_version_uuid" : "6b7e3a85-8ba5-41f5-9275-b2ce40ce77f5",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 90 degrees",
        "input_file_type" : "OSM",
@@ -81,9 +81,9 @@
          "version_uuid" : "5cb48665-876d-416a-90cf-f4b136cd081f"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
+       "bcl_measure_version_uuid" : "6b7e3a85-8ba5-41f5-9275-b2ce40ce77f5",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 180 degrees",
        "input_file_type" : "OSM",
@@ -111,9 +111,9 @@
          "version_uuid" : "337331d7-3c51-415a-b660-00d189d0aa69"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "06e6f4da-c57b-4caf-880f-cb6a3918181e",
+       "bcl_measure_version_uuid" : "6b7e3a85-8ba5-41f5-9275-b2ce40ce77f5",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building 270 degrees",
        "input_file_type" : "OSM",
@@ -129,7 +129,7 @@
      ],
      "name" : "Rotate Building",
      "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
-     "version_uuid" : "0336641a-8381-4cfc-98e9-ddf892dc56a3",
+     "version_uuid" : "529bc2d9-a038-4118-93c7-dfae12fc3ab2",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -257,9 +257,9 @@
          "version_uuid" : "7658be79-7a01-466d-85e9-ad2b15224708"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-       "bcl_measure_version_uuid" : "07700ee2-85e4-458b-8e71-3db5c98def70",
+       "bcl_measure_version_uuid" : "7c57be45-3ff6-4f1a-b78e-4391c3ac0ca2",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Load By 30 percent",
        "input_file_type" : "OSM",
@@ -386,9 +386,9 @@
          "version_uuid" : "dc1e0562-9bb7-494e-afe4-8081ef8f5754"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-       "bcl_measure_version_uuid" : "07700ee2-85e4-458b-8e71-3db5c98def70",
+       "bcl_measure_version_uuid" : "7c57be45-3ff6-4f1a-b78e-4391c3ac0ca2",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Load By 50 percent",
        "input_file_type" : "OSM",
@@ -404,7 +404,7 @@
      ],
      "name" : "Reduce Lighting Load",
      "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
-     "version_uuid" : "0c02223f-ad00-4c49-8ff7-da9e44eeb86e",
+     "version_uuid" : "8016a6c9-c004-4f21-9ab8-56e1d1ed869f",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -586,9 +586,9 @@
          "version_uuid" : "a92f8fde-c3bd-4adb-8929-0287478813a6"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server/prototype/pat/PATTest/scripts/XcelEDATariffSelectionandModelSetup",
+       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/XcelEDATariffSelectionandModelSetup",
        "bcl_measure_uuid" : "c5ab60e9-b8e5-4653-a502-5ed030f1335d",
-       "bcl_measure_version_uuid" : "258a83a6-3e59-475d-a09f-67ea62139462",
+       "bcl_measure_version_uuid" : "c30d17a3-c3ea-410f-b301-6e915a486c28",
        "description" : "Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program.",
        "display_name" : "Xcel EDA Tariff Selection and Model Setup",
        "input_file_type" : "IDF",
@@ -604,7 +604,7 @@
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
-     "version_uuid" : "2a772bf3-94cc-4774-bad4-be1572c97a12",
+     "version_uuid" : "7388848e-6bf2-4a09-907e-10dec6346e64",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -694,11 +694,11 @@
    "display_name" : "seed",
    "file_type" : "OSM",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
-   "path" : "C:/projects/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
+   "path" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/seed/seed.osm",
    "timestamp_create" : "20130716T144225",
-   "timestamp_last" : "20130808T130451",
+   "timestamp_last" : "20130822T114007",
    "uuid" : "e105d3df-8259-4257-a89c-f31cd7a62e52",
-   "version_uuid" : "43046880-90ff-4ae8-85df-9d67ce399cc5"
+   "version_uuid" : "9020d03a-b26d-499f-b448-8be3451f7925"
   },
   "uuid" : "a8feca85-dab9-4510-8610-651ef847781d",
   "version_uuid" : "ada30015-5c86-4289-84ac-af42a1e124c4",
@@ -708,16 +708,16 @@
    "display_name" : "USA_CO_Golden-NREL.724666_TMY3",
    "file_type" : "EPW",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
-   "path" : "C:/projects/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+   "path" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
    "timestamp_create" : "20130716T144225",
-   "timestamp_last" : "20130808T130451",
+   "timestamp_last" : "20130822T114007",
    "uuid" : "9a6a9a9e-0cc6-4396-8373-d1736300a006",
-   "version_uuid" : "b796bcea-e19a-452d-a828-3f66c42e7589"
+   "version_uuid" : "81218b06-2bd9-4f7f-acfd-476cc62ec124"
   }
  },
  "metadata" :  {
   "openstudio_version" : "1.0.4",
-  "project_dir" : "C:/projects/openstudio-server/prototype/pat/PATTest",
+  "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d",
   "server_view" :   {
    "variables" : [
     {
