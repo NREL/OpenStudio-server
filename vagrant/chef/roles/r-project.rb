@@ -9,9 +9,6 @@ run_list([
 
 default_attributes(
     :java => {
-        :oracle => {
-            "accept_oracle_download_terms" => true
-        }
     },
     :R => {
         :apt_distribution => "precise/",
@@ -19,6 +16,8 @@ default_attributes(
         :package_source_url => "http://cran.r-project.org/src/contrib",
         #:add_ld_path => true,
         #:java_libjvm_path => "/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/server/",
+        :rserve_start_on_boot => true,
+        :rserve_user => "vagrant",
         :packages => [
             {
                 :name => 'lhs',
