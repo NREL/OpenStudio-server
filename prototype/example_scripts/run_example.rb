@@ -85,7 +85,6 @@ if !analysis_id.nil?
       puts "new datapoint created for #{analysis_id}"
     end
   end
-
 end
 
 
