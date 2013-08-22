@@ -22,7 +22,7 @@ default_attributes(
             },
             {
                 :name => 'Rserve',
-                :version => '1.7-2'
+                :version => '1.7-3'
             },
             {
                 :name => 'triangle',
