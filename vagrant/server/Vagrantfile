@@ -8,8 +8,8 @@ Vagrant.configure("2") do |config|
   #config.omnibus.chef_version = "11.4.0"
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu-precise-64-vanilla"
-  config.vm.box_url = "http://dl.dropboxusercontent.com/u/165709740/boxes/precise64-vanilla.box"
+  config.vm.box = "ubuntu-precise-64-vbox"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,

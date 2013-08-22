@@ -85,3 +85,9 @@
 [submodule "vagrant/chef/cookbooks/java"]
 	path = vagrant/chef/cookbooks/java
 	url = git@github.com:NREL-cookbooks/java.git
+[submodule "vagrant/chef/cookbooks/ssh_known_hosts"]
+	path = vagrant/chef/cookbooks/ssh_known_hosts
+	url = git@github.com:opscode-cookbooks/ssh_known_hosts.git
+[submodule "vagrant/chef/cookbooks/partial_search"]
+	path = vagrant/chef/cookbooks/partial_search
+	url = git@github.com:opscode-cookbooks/partial_search.git
