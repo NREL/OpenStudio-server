@@ -6,310 +6,310 @@
   "display_name" : "Reduce Lighting Load By 30 percent Only",
   "failed" : false,
   "idf_input_data" :   {
-   "checksum_create" : "DB14CD73",
-   "checksum_last" : "DB14CD73",
-   "display_name" : "out",
+   "checksum_create" : "87708895",
+   "checksum_last" : "87708895",
+   "display_name" : "out.idf",
    "file_type" : "IDF",
    "name" : "analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/5-EnergyPlusPreProcess-0/out.idf",
-   "path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/5-EnergyPlusPreProcess-0/out.idf",
-   "timestamp_create" : "20130816T125956",
-   "timestamp_last" : "20130816T125956",
-   "uuid" : "65b0c454-167c-4649-b53b-f8d20b081572",
-   "version_uuid" : "6c0af114-bf2d-4a4e-b389-7239edb3d394"
+   "path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/5-EnergyPlusPreProcess-0/out.idf",
+   "timestamp_create" : "20130820T140849",
+   "timestamp_last" : "20130820T140849",
+   "uuid" : "452cfd36-d4de-4bd5-b4f6-54d2ac285157",
+   "version_uuid" : "c670e279-df53-4d2a-82cc-dcc2a5082bf4"
   },
   "name" : "Reduce Lighting Load By 30 percent Only",
   "osm_input_data" :   {
-   "checksum_create" : "16991C61",
-   "checksum_last" : "16991C61",
-   "display_name" : "out",
+   "checksum_create" : "8A1A201F",
+   "checksum_last" : "8A1A201F",
+   "display_name" : "out.osm",
    "file_type" : "OSM",
-   "name" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/out.osm",
-   "path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/out.osm",
-   "timestamp_create" : "20130816T125956",
-   "timestamp_last" : "20130816T125956",
-   "uuid" : "33e551ac-8127-4eff-93da-2fc499019b75",
-   "version_uuid" : "fd234c6c-07a5-43aa-ba20-0131faf4662a"
+   "name" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/out.osm",
+   "path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/out.osm",
+   "timestamp_create" : "20130820T140820",
+   "timestamp_last" : "20130820T140820",
+   "uuid" : "61483637-ca41-4639-834c-347bc1c9dd9e",
+   "version_uuid" : "d2e26844-09c5-4e49-8590-53e312e8bb40"
   },
   "output_attributes" : [
    {
     "name" : "Total Site Energy",
     "units" : "GJ",
-    "uuid" : "27c1ce05-7575-48fc-8f56-0dcdc3c7ba5d",
+    "uuid" : "1a598005-5450-4c51-8951-840f4c66e446",
     "value" : 65.45,
     "value_type" : "Double",
-    "version_uuid" : "15f6349c-7220-45ca-8e70-f01521c6892a"
+    "version_uuid" : "48a381cb-3574-47fb-a76f-a211cb6edaca"
    },
    {
     "name" : "Net Site Energy",
     "units" : "GJ",
-    "uuid" : "e26384b7-f578-42c8-b1cd-94c16a86df76",
+    "uuid" : "69c805af-27d5-4de9-b2db-0ee9be3bbfc9",
     "value" : 65.45,
     "value_type" : "Double",
-    "version_uuid" : "99d67699-db90-45d7-8674-7782be30801c"
+    "version_uuid" : "f5fa1f3a-59dd-45fe-bdfa-fee8afd24d20"
    },
    {
     "name" : "Total Source Energy",
     "units" : "GJ",
-    "uuid" : "0ee9bd3c-e845-4fcd-a658-69b66e30f438",
+    "uuid" : "56920963-1a52-423c-8b85-739cabf2c67b",
     "value" : 196.43,
     "value_type" : "Double",
-    "version_uuid" : "3acd7a89-7282-4db7-81bf-dce281f11e3d"
+    "version_uuid" : "1c7f1dbc-68c3-4053-9cba-fd773236f6bb"
    },
    {
     "name" : "Net Source Energy",
     "units" : "GJ",
-    "uuid" : "b4487229-6bbb-41c1-a22a-309b64c427b4",
+    "uuid" : "b34c5437-2901-48ba-a06d-94607cc3ed6e",
     "value" : 196.43,
     "value_type" : "Double",
-    "version_uuid" : "d7278d4f-e52e-4cd4-863f-4c6acdd2972e"
+    "version_uuid" : "f33e1e63-884b-4e55-9cf0-73e3afc46113"
    },
    {
     "name" : "Annual Total Utility Cost",
     "units" : "$",
-    "uuid" : "a2ef0a64-0ebf-4101-b67c-cbc12c6aca42",
+    "uuid" : "4eeaef7a-aa41-4f0f-836c-b26c20cb91ef",
     "value" : 960.88,
     "value_type" : "Double",
-    "version_uuid" : "dcacd8be-484b-42be-991b-3ebcfd61d5c9"
+    "version_uuid" : "91c86562-ff00-4594-abff-751f7e151118"
    },
    {
     "name" : "Annual Electric Total Cost",
     "units" : "$",
-    "uuid" : "9fdf3f1d-a1b0-49b5-8b19-c67df21ac340",
+    "uuid" : "60a03128-dfc1-4dbb-b68b-c7548c252c92",
     "value" : 960.88,
     "value_type" : "Double",
-    "version_uuid" : "192677aa-7ac3-4909-a977-768248853327"
+    "version_uuid" : "e5348dfb-f4b5-42b8-96f4-e183532cd033"
    },
    {
     "name" : "Annual Gas Total Cost",
     "units" : "$",
-    "uuid" : "56d4d1f8-3f88-49e7-9f2d-f2856894baed",
+    "uuid" : "663c0240-ba6c-4d6a-bba1-9e5b92615dd1",
     "value" : 0.0,
     "value_type" : "Double",
-    "version_uuid" : "7edd9ec7-71b1-4530-9685-ebb22595e430"
+    "version_uuid" : "cda0f508-2a6e-4f91-95d9-8e7c1f7557c8"
    },
    {
     "name" : "Net Site Energy Use Intentsity",
     "units" : "MJ/m^2",
-    "uuid" : "a083a75f-4f16-4a7f-b159-0b9e6eb1ddc4",
+    "uuid" : "a5f5d6ee-2c17-4898-b6aa-a13833a38a60",
     "value" : 292.75,
     "value_type" : "Double",
-    "version_uuid" : "f50d825b-6ce0-4949-bb7b-cc40618de173"
+    "version_uuid" : "c3efa0e4-b31f-4f10-ad1f-49356573de4c"
    },
    {
     "name" : "Instantaneous Peak Electricity Demand",
     "units" : "kW",
-    "uuid" : "d0ac1ce0-343f-4df4-acfa-91ad6336f675",
+    "uuid" : "849b8fb1-954c-4d9c-a8e2-79013c82679b",
     "value" : 2534.17,
     "value_type" : "Double",
-    "version_uuid" : "87f0fcfd-5c78-426f-9e77-bb4ab1d6cf93"
+    "version_uuid" : "9ff4ca88-95a6-458b-8cef-6cfe4e932cb6"
    },
    {
     "name" : "Electricity Total End Uses",
     "units" : "GJ",
-    "uuid" : "30f9302b-c025-4ad6-ae71-86f799d933b3",
+    "uuid" : "d4e377e7-6787-400b-b000-02a8ca0a7b4d",
     "value" : 39.86,
     "value_type" : "Double",
-    "version_uuid" : "4762c3e6-04ac-4297-a37c-6a839f542416"
+    "version_uuid" : "fedbcdb7-44cf-47fc-b604-56b334fe6ce7"
    },
    {
     "name" : "Natural Gas Total End Uses",
     "units" : "GJ",
-    "uuid" : "f56c23e7-0ad4-47dd-8e10-4d636a1927b8",
+    "uuid" : "65562d6d-dad2-4924-8c2c-334c6bf2f180",
     "value" : 0.0,
     "value_type" : "Double",
-    "version_uuid" : "dd8166c9-68f7-410e-b88b-e0f6148139bc"
+    "version_uuid" : "9d0e49a9-3fde-49c7-8542-372682e319f3"
    },
    {
     "name" : "District Cooling Total End Uses",
     "units" : "GJ",
-    "uuid" : "b40294eb-810b-470a-b7ca-d7c686cdd143",
+    "uuid" : "3e4d4b93-bfc2-469a-9f82-eb8c3839c101",
     "value" : 8.71,
     "value_type" : "Double",
-    "version_uuid" : "a77cd072-4ed0-43c3-b6e0-acba7e02bf96"
+    "version_uuid" : "c809c951-c020-4e9e-9766-1cba8412dd57"
    },
    {
     "name" : "District Heating Total End Uses",
     "units" : "GJ",
-    "uuid" : "543ef3c0-556d-4d23-b6d5-0855fe7c5385",
+    "uuid" : "c0eb5aca-b860-436a-a233-212d11208e45",
     "value" : 16.88,
     "value_type" : "Double",
-    "version_uuid" : "10023589-d82e-4f2f-9f50-ec50fe96a04a"
+    "version_uuid" : "262f54d5-0efd-490b-b598-b335b820cd42"
    },
    {
     "name" : "EndUses.Electricity.InteriorLights.General",
     "units" : "GJ",
-    "uuid" : "fb810e60-ecff-4d05-a1f4-897112f17865",
+    "uuid" : "2361b48f-759f-47d8-b580-1640a8fd3fc6",
     "value" : 17.66,
     "value_type" : "Double",
-    "version_uuid" : "6457fc98-958f-4c8b-b14c-c5f1b09acba3"
+    "version_uuid" : "c26fe888-85f4-4705-b4f9-f58a8077c9bd"
    },
    {
     "name" : "EndUses.Electricity.InteriorEquipment.General",
     "units" : "GJ",
-    "uuid" : "3858904f-e059-41b2-9e4d-ea3c33202ff7",
+    "uuid" : "54407990-ab60-45a4-afe4-84a220a9e4dd",
     "value" : 22.2,
     "value_type" : "Double",
-    "version_uuid" : "63e860b6-8ec8-4136-83c0-4e6b07b574c1"
+    "version_uuid" : "4a0024a0-1176-4464-8b0a-e947519565d5"
    },
    {
     "name" : "EndUses.DistrictCooling.Cooling.General",
     "units" : "GJ",
-    "uuid" : "cf8d29cc-e7fc-4d67-bfd1-5a1350719cc2",
+    "uuid" : "7fa6de83-31b8-451e-816a-78e166d43e22",
     "value" : 8.71,
     "value_type" : "Double",
-    "version_uuid" : "facd08f3-e6d8-49d7-8595-1f02adb5fe8c"
+    "version_uuid" : "b98c4982-1f57-4502-abaa-88011fd8c06b"
    },
    {
     "name" : "EndUses.DistrictHeating.Heating.General",
     "units" : "GJ",
-    "uuid" : "12e09b1d-a5c7-4b63-88fd-37aa14c616f2",
+    "uuid" : "7aca3692-24bd-4351-b2dd-b2986216df50",
     "value" : 16.88,
     "value_type" : "Double",
-    "version_uuid" : "68626846-d32f-4132-b9e9-b8a40528520e"
+    "version_uuid" : "fec00378-b7a2-4db8-a65a-6bca8c6562bd"
    },
    {
     "name" : "First Year Capital Costs",
     "units" : "$",
-    "uuid" : "162ae6fa-f512-4a93-8028-fc642a957dda",
+    "uuid" : "51eee479-5e2b-4e19-a6da-b1389542ad61",
     "value" : 0.0,
     "value_type" : "Double",
-    "version_uuid" : "c5c71d37-2766-4790-aa6b-152e603833f9"
+    "version_uuid" : "500e446b-6c96-4a05-b65a-e2b6f8c24ce2"
    },
    {
     "name" : "Total Life Cycle Cost",
     "units" : "$",
-    "uuid" : "4f733f34-76d6-4f7c-9038-30c90efdc711",
-    "value" : 1838.61,
+    "uuid" : "8a5599ff-2eb3-4271-9757-55618207f1b5",
+    "value" : 16731.9,
     "value_type" : "Double",
-    "version_uuid" : "926fd883-2968-4c7b-add2-65973458a95f"
+    "version_uuid" : "94845144-9f1b-45be-b900-3b82a0fa4827"
    },
    {
     "display_name" : "Floor Area",
     "name" : "floorArea",
     "units" : "m^2",
-    "uuid" : "54254254-8e68-4b07-b0ad-d93a0fd18874",
+    "uuid" : "4235479b-b1d2-4b5a-9e3e-6bf3408f35e0",
     "value" : 223.582,
     "value_type" : "Double",
-    "version_uuid" : "d14dcee6-c3dc-43e6-95b2-1c28461bc262"
+    "version_uuid" : "638fd5f4-d391-482f-8650-a1e4a1897ed2"
    },
    {
     "display_name" : "Conditioned Floor Area",
     "name" : "conditionedFloorArea",
     "units" : "m^2",
-    "uuid" : "c45baaaf-1945-4fae-8398-d6e25b91a731",
+    "uuid" : "d2925dea-5e80-4d27-b675-36c463c4b7cc",
     "value" : 223.582,
     "value_type" : "Double",
-    "version_uuid" : "92b6d19b-5fa1-4446-b2a2-43690a03920b"
+    "version_uuid" : "dc7f3586-1c98-455d-b091-8053b8e1e447"
    },
    {
     "name" : "EndUses",
-    "uuid" : "4ec69686-21b7-4207-88de-b40bb0f97c9a",
+    "uuid" : "f655912b-5846-43a7-aeb2-886a2d89c5f4",
     "value" : [
      {
       "name" : "Electricity",
-      "uuid" : "91a7a2ca-a1b6-4c77-b118-a6f5dd224bf6",
+      "uuid" : "c819188c-f505-4005-b3a7-9cf9ccd0eab1",
       "value" : [
        {
         "name" : "InteriorLights",
-        "uuid" : "47a4dc2f-a50e-48d4-83d0-4ee0b9de25ad",
+        "uuid" : "3bbd01af-d723-42eb-9eea-0ac9fe8a7d00",
         "value" : [
          {
           "name" : "General",
           "units" : "GJ",
-          "uuid" : "b3b51445-e3e2-40e9-8753-3d66e6ce3d42",
+          "uuid" : "d0fbbadb-b109-4e30-80d1-21d93c51a122",
           "value" : 17.66,
           "value_type" : "Double",
-          "version_uuid" : "93eb7b18-46ee-4c8b-8822-3f01616eae4f"
+          "version_uuid" : "08fabd6b-27ed-45be-a112-bbfd0b8e41c0"
          }
         ],
         "value_type" : "AttributeVector",
-        "version_uuid" : "cff10cfe-07fa-431f-bbdc-3811424483e9"
+        "version_uuid" : "14e6d39b-1afe-40d9-8edb-efa111d172a5"
        },
        {
         "name" : "InteriorEquipment",
-        "uuid" : "b144b7dd-7f6a-456f-8176-3b25e1ae6e41",
+        "uuid" : "c348ba27-3e11-41b5-906a-1ce74c0e0261",
         "value" : [
          {
           "name" : "General",
           "units" : "GJ",
-          "uuid" : "2448fabc-e4d8-4e3c-9cee-d47452bd7223",
+          "uuid" : "c12ed688-698a-4331-9b3e-e83b5f927c68",
           "value" : 22.2,
           "value_type" : "Double",
-          "version_uuid" : "707d826d-1655-4519-874d-407844700700"
+          "version_uuid" : "dc2dc31e-6ee6-4d61-98c8-ceb5b231686d"
          }
         ],
         "value_type" : "AttributeVector",
-        "version_uuid" : "1bf40de4-42c9-46a4-8bc3-e452a4f9ac5b"
+        "version_uuid" : "41189c3a-640a-4ff7-b981-baec93237c53"
        }
       ],
       "value_type" : "AttributeVector",
-      "version_uuid" : "5a66aaf1-2b76-4398-8885-9369283cdc10"
+      "version_uuid" : "65920a8a-cc96-4cbd-ad88-4acdef720498"
      },
      {
       "name" : "DistrictCooling",
-      "uuid" : "3e5c8d52-bd52-4f6d-9895-bf7f7425930a",
+      "uuid" : "80e4cbe9-538b-4df5-9ffc-4af1431b2268",
       "value" : [
        {
         "name" : "Cooling",
-        "uuid" : "651edd4f-fac7-44b9-b230-9bae15ea9eec",
+        "uuid" : "0eef30b6-8926-47f5-a820-b57246a97458",
         "value" : [
          {
           "name" : "General",
           "units" : "GJ",
-          "uuid" : "235d455d-637b-4168-be0a-9b4727227dfe",
+          "uuid" : "212af9f7-e15b-4a7f-b272-0e59bc8c22dc",
           "value" : 8.71,
           "value_type" : "Double",
-          "version_uuid" : "28f29ace-3efc-43b7-b5e9-6077ef6cbcd6"
+          "version_uuid" : "8ec87efc-ded0-4e5d-94ca-492a1c4ffde6"
          }
         ],
         "value_type" : "AttributeVector",
-        "version_uuid" : "137db5b7-dd4d-4ba0-bae8-2f2ea27827b1"
+        "version_uuid" : "7ad70c69-3ca2-498f-8b00-5e867a1a2780"
        }
       ],
       "value_type" : "AttributeVector",
-      "version_uuid" : "0e03dc63-7587-416f-832b-0bd3c397c7ae"
+      "version_uuid" : "59938137-db5c-4edc-9ed1-a8802ac29ab7"
      },
      {
       "name" : "DistrictHeating",
-      "uuid" : "905b31e4-a37f-4b4b-8efd-7c5f92dcffe4",
+      "uuid" : "ccee26b2-6513-4fa4-854f-42e44d7d6dd6",
       "value" : [
        {
         "name" : "Heating",
-        "uuid" : "392a9397-b82e-4ea0-ada5-21d04a00ce0a",
+        "uuid" : "ccbf08af-ae45-4b58-b503-988a07446e91",
         "value" : [
          {
           "name" : "General",
           "units" : "GJ",
-          "uuid" : "40f9f3c1-51a6-4e3b-99a1-2c712659db21",
+          "uuid" : "d4695384-667e-42ef-8452-4b1a08df6a82",
           "value" : 16.88,
           "value_type" : "Double",
-          "version_uuid" : "31eebb57-645e-4aa0-b37a-f27f3d0a9cbd"
+          "version_uuid" : "f049f6a5-f6b8-4238-b449-7aab84ae1906"
          }
         ],
         "value_type" : "AttributeVector",
-        "version_uuid" : "6a68ca38-63db-4caa-939f-713fcdd53362"
+        "version_uuid" : "7bd90731-b862-45b3-af8d-3f83ccd43e4a"
        }
       ],
       "value_type" : "AttributeVector",
-      "version_uuid" : "a8fe7a58-bfb0-41b5-ab1e-5674ced0c27a"
+      "version_uuid" : "66533c2c-48da-4070-8409-30546cb35620"
      }
     ],
     "value_type" : "AttributeVector",
-    "version_uuid" : "b0b4f91c-81b3-434d-b879-f927411724f4"
+    "version_uuid" : "91f45936-12f8-4f0e-9e35-2102101bcdbb"
    }
   ],
   "problem_uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
   "sql_output_data" :   {
-   "checksum_create" : "A23D33CB",
-   "checksum_last" : "A23D33CB",
-   "display_name" : "eplusout",
+   "checksum_create" : "931581FF",
+   "checksum_last" : "931581FF",
+   "display_name" : "eplusout.sql",
    "file_type" : "SQL",
-   "name" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.sql",
-   "path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.sql",
-   "timestamp_create" : "20130816T125956",
-   "timestamp_last" : "20130816T125956",
-   "uuid" : "7447110f-b304-47ac-abcd-0254c22c535e",
-   "version_uuid" : "95776f48-1057-43f4-936b-a842df7d0c7a"
+   "name" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.sql",
+   "path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.sql",
+   "timestamp_create" : "20130820T140851",
+   "timestamp_last" : "20130820T140917",
+   "uuid" : "0444b518-35e9-41ef-944b-6b29db546f9c",
+   "version_uuid" : "ae57c4a6-3025-4bb5-8e28-9efef0012d00"
   },
   "top_level_job" :   {
    "children" : [
@@ -333,14 +333,14 @@
                   "result" : "Success"
                  },
                  "job_type" : "OpenStudioPostProcess",
-                 "last_run" : "20130816T125955",
+                 "last_run" : "20130820T140917",
                  "output_files" : [
                   {
                    "exists" : true,
                    "file_name" : "report.xml",
                    "full_path" : "analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/7-OpenStudioPostProcess-0/report.xml",
                    "key" : "xml",
-                   "last_modified" : "20130816T185955"
+                   "last_modified" : "20130820T200919"
                   }
                  ],
                  "params" : [
@@ -373,7 +373,10 @@
                    "param_index" : 1
                   }
                  ],
-                 "uuid" : "110bb645-9f02-4789-a67e-a0492c7b232e"
+                 "status" :                  {
+                  "status" : "Idle"
+                 },
+                 "uuid" : "75d70ff2-5726-4d92-ab54-51fb42e7a7f9"
                 }
                ],
                "errors" :                {
@@ -442,133 +445,126 @@
                 "result" : "Success"
                },
                "job_type" : "EnergyPlus",
-               "last_run" : "20130816T125941",
+               "last_run" : "20130820T140849",
                "output_files" : [
                 {
                  "exists" : true,
                  "file_name" : "Energy+.ini",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/Energy+.ini",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/Energy+.ini",
                  "key" : "Energy+.ini",
-                 "last_modified" : "20130816T125846"
+                 "last_modified" : "20130820T140850"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.audit",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.audit",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.audit",
                  "key" : "eplusout.audit",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.bnd",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.bnd",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.bnd",
                  "key" : "eplusout.bnd",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.eio",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.eio",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.eio",
                  "key" : "eplusout.eio",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.end",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.end",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.end",
                  "key" : "eplusout.end",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.err",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.err",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.err",
                  "key" : "eplusout.err",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.eso",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.eso",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.eso",
                  "key" : "eplusout.eso",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.mdd",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.mdd",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.mdd",
                  "key" : "eplusout.mdd",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.mtd",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.mtd",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.mtd",
                  "key" : "eplusout.mtd",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.mtr",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.mtr",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.mtr",
                  "key" : "eplusout.mtr",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.rdd",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.rdd",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.rdd",
                  "key" : "eplusout.rdd",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.shd",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.shd",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.shd",
                  "key" : "eplusout.shd",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplusout.sql",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.sql",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplusout.sql",
                  "key" : "eplusout.sql",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "eplustbl.htm",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplustbl.htm",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/eplustbl.htm",
                  "key" : "eplustbl.htm",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "epluszsz.csv",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/epluszsz.csv",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/epluszsz.csv",
                  "key" : "epluszsz.csv",
-                 "last_modified" : "20130816T125943"
+                 "last_modified" : "20130820T140852"
                 },
                 {
                  "exists" : true,
                  "file_name" : "sqlite.err",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/sqlite.err",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/sqlite.err",
                  "key" : "sqlite.err",
-                 "last_modified" : "20130816T125955"
-                },
-                {
-                 "exists" : true,
-                 "file_name" : "stderr",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/stderr",
-                 "key" : "stderr",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 },
                 {
                  "exists" : true,
                  "file_name" : "stdout",
-                 "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/stdout",
+                 "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/6-EnergyPlus-0/stdout",
                  "key" : "stdout",
-                 "last_modified" : "20130816T125955"
+                 "last_modified" : "20130820T140917"
                 }
                ],
                "params" : [
@@ -601,7 +597,10 @@
                  "param_index" : 1
                 }
                ],
-               "uuid" : "9f99df91-4fb1-4404-8763-732281412c5c"
+               "status" :                {
+                "status" : "Idle"
+               },
+               "uuid" : "883c9e6c-3cea-4ce3-a5a9-ddbb87fc759c"
               }
              ],
              "errors" :              {
@@ -611,18 +610,18 @@
               "result" : "Success"
              },
              "job_type" : "EnergyPlusPreProcess",
-             "last_run" : "20130816T125941",
+             "last_run" : "20130820T140848",
              "output_files" : [
               {
                "exists" : true,
                "file_name" : "out.idf",
                "full_path" : "analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/5-EnergyPlusPreProcess-0/out.idf",
                "key" : "idf",
-               "last_modified" : "20130816T185941",
+               "last_modified" : "20130820T200849",
                "required_files" : [
                 {
                  "path" : "in.epw",
-                 "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/in.epw"
+                 "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
                 }
                ]
               }
@@ -671,7 +670,10 @@
                "param_index" : 2
               }
              ],
-             "uuid" : "7af99292-0677-403e-b918-73e96753cfa0"
+             "status" :              {
+              "status" : "Idle"
+             },
+             "uuid" : "c7f70e26-45b3-40a7-a035-2487807c8217"
             }
            ],
            "errors" :            {
@@ -689,7 +691,7 @@
               "error_type" : "Info"
              },
              {
-              "description" : "removed existing lifecycle parameters named {7f933f3a-dad1-44a6-ab5b-ba555d9f4b6c}",
+              "description" : "removed existing lifecycle parameters named {f544691b-5502-45b6-8890-890c22aa282a}",
               "error_type" : "Info"
              },
              {
@@ -697,11 +699,15 @@
               "error_type" : "Info"
              },
              {
-              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Distillate Oil",
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Natural gas",
               "error_type" : "Info"
              },
              {
-              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Natural gas",
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Coal",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Distillate Oil",
               "error_type" : "Info"
              },
              {
@@ -710,10 +716,6 @@
              },
              {
               "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Electricity",
-              "error_type" : "Info"
-             },
-             {
-              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Coal",
               "error_type" : "Info"
              },
              {
@@ -743,129 +745,122 @@
             {
              "exists" : true,
              "file_name" : "UserScriptAdapter.rb",
-             "full_path" : "/home/ehale/projects/openstudio-branch1/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
+             "full_path" : "C:/projects/openstudio-branch1/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
              "key" : "rb",
-             "last_modified" : "20130801T231557",
+             "last_modified" : "20130708T214346",
              "required_files" : [
               {
                "path" : "user_script.rb",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/measure.rb"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/measure.rb"
               },
               {
                "path" : "Interruptible Industrial G.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Interruptible Industrial G.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Interruptible Industrial G.idf"
               },
               {
                "path" : "Commercial.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Commercial.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Commercial.idf"
               },
               {
                "path" : "Non-Xcel Commercial.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Commercial.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Commercial.idf"
               },
               {
                "path" : "Non-Xcel Primary General.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Primary General.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Primary General.idf"
               },
               {
                "path" : "Non-Xcel Secondary General Low Load Factor.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Secondary General Low Load Factor.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Secondary General Low Load Factor.idf"
               },
               {
                "path" : "Non-Xcel Secondary General.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Secondary General.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Secondary General.idf"
               },
               {
                "path" : "Non-Xcel Transmission General.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Transmission General.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Transmission General.idf"
               },
               {
                "path" : "Primary General.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Primary General.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Primary General.idf"
               },
               {
                "path" : "Residential General.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Residential General.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Residential General.idf"
               },
               {
                "path" : "Secondary General Low Load Factor.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary General Low Load Factor.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary General Low Load Factor.idf"
               },
               {
                "path" : "Secondary General.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary General.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary General.idf"
               },
               {
                "path" : "Transmission General.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Transmission General.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Transmission General.idf"
               },
               {
                "path" : "Large CG.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Large CG.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Large CG.idf"
               },
               {
                "path" : "Residential Gas.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Residential Gas.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Residential Gas.idf"
               },
               {
                "path" : "Small CG.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Small CG.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Small CG.idf"
               },
               {
                "path" : "Secondary Photovoltaic Time-of-Use.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary Photovoltaic Time-of-Use.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary Photovoltaic Time-of-Use.idf"
               },
               {
                "path" : "Non-Xcel Gas Firm.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Gas Firm.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Gas Firm.idf"
               },
               {
                "path" : "Non-Xcel Gas Interruptible.idf",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Gas Interruptible.idf"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Gas Interruptible.idf"
               },
               {
                "path" : "XcelEDATariffSelectionandModelSetup_Test.rb",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/tests/XcelEDATariffSelectionandModelSetup_Test.rb"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/XcelEDATariffSelectionandModelSetup/tests/XcelEDATariffSelectionandModelSetup_Test.rb"
               }
              ]
             }
            ],
            "job_type" : "UserScript",
-           "last_run" : "20130816T125939",
+           "last_run" : "20130820T140840",
            "output_files" : [
             {
              "exists" : true,
              "file_name" : "out.idf",
-             "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/4-UserScript-0/out.idf",
+             "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/4-UserScript-0/out.idf",
              "key" : "out.idf",
-             "last_modified" : "20130816T125941",
+             "last_modified" : "20130820T140847",
              "required_files" : [
               {
                "path" : "in.epw",
-               "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/in.epw"
+               "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
               }
              ]
             },
             {
              "exists" : true,
              "file_name" : "result.ossr",
-             "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/4-UserScript-0/result.ossr",
+             "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/4-UserScript-0/result.ossr",
              "key" : "result.ossr",
-             "last_modified" : "20130816T125941"
-            },
-            {
-             "exists" : true,
-             "file_name" : "stderr",
-             "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/4-UserScript-0/stderr",
-             "key" : "stderr",
-             "last_modified" : "20130816T125846"
+             "last_modified" : "20130820T140847"
             },
             {
              "exists" : true,
              "file_name" : "stdout",
-             "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/4-UserScript-0/stdout",
+             "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/4-UserScript-0/stdout",
              "key" : "stdout",
-             "last_modified" : "20130816T125941"
+             "last_modified" : "20130820T140848"
             }
            ],
            "params" : [
@@ -950,7 +945,7 @@
                },
                {
                 "param" :                 {
-                 "value" : "/home/ehale/projects/openstudio-branch1/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/"
+                 "value" : "C:/projects/openstudio-branch1/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/Debug/"
                 },
                 "param_index" : 1
                }
@@ -1018,7 +1013,10 @@
              "param_index" : 5
             }
            ],
-           "uuid" : "d866b1d7-22a6-4b3e-8e48-089db80d87dd"
+           "status" :            {
+            "status" : "Idle"
+           },
+           "uuid" : "6b8afc45-e79d-4d01-be14-decb79811bd9"
           }
          ],
          "errors" :          {
@@ -1028,34 +1026,27 @@
           "result" : "Success"
          },
          "job_type" : "ExpandObjects",
-         "last_run" : "20130816T125939",
+         "last_run" : "20130820T140839",
          "output_files" : [
           {
            "exists" : true,
-           "file_name" : "stdout",
-           "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/3-ExpandObjects-0/stdout",
-           "key" : "stdout",
-           "last_modified" : "20130816T125939"
-          },
-          {
-           "exists" : true,
            "file_name" : "expanded.idf",
-           "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/3-ExpandObjects-0/expanded.idf",
+           "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/3-ExpandObjects-0/expanded.idf",
            "key" : "expanded.idf",
-           "last_modified" : "20130816T125939",
+           "last_modified" : "20130820T140840",
            "required_files" : [
             {
              "path" : "in.epw",
-             "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/in.epw"
+             "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
             }
            ]
           },
           {
            "exists" : true,
-           "file_name" : "stderr",
-           "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/3-ExpandObjects-0/stderr",
-           "key" : "stderr",
-           "last_modified" : "20130816T125844"
+           "file_name" : "stdout",
+           "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/3-ExpandObjects-0/stdout",
+           "key" : "stdout",
+           "last_modified" : "20130820T140840"
           }
          ],
          "params" : [
@@ -1088,7 +1079,10 @@
            "param_index" : 1
           }
          ],
-         "uuid" : "ef7c6d2b-33a3-4ea7-8f8d-459745934da3"
+         "status" :          {
+          "status" : "Idle"
+         },
+         "uuid" : "c5a82cd6-b57b-43e8-9c8c-4b1db5e2a0e8"
         }
        ],
        "errors" :        {
@@ -1098,18 +1092,18 @@
         "result" : "Success"
        },
        "job_type" : "ModelToIdf",
-       "last_run" : "20130816T125936",
+       "last_run" : "20130820T140821",
        "output_files" : [
         {
          "exists" : true,
          "file_name" : "in.idf",
          "full_path" : "analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/2-ModelToIdf-0/in.idf",
          "key" : "idf",
-         "last_modified" : "20130816T185939",
+         "last_modified" : "20130820T200838",
          "required_files" : [
           {
            "path" : "in.epw",
-           "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/in.epw"
+           "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
           }
          ]
         }
@@ -1158,7 +1152,10 @@
          "param_index" : 2
         }
        ],
-       "uuid" : "c928a6eb-fbe0-471f-ba72-b75928040fb9"
+       "status" :        {
+        "status" : "Idle"
+       },
+       "uuid" : "5165f9aa-1674-4005-bf5e-21a791015570"
       }
      ],
      "errors" :      {
@@ -1178,34 +1175,34 @@
       {
        "exists" : true,
        "file_name" : "UserScriptAdapter.rb",
-       "full_path" : "/home/ehale/projects/openstudio-branch1/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
+       "full_path" : "C:/projects/openstudio-branch1/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
        "key" : "rb",
-       "last_modified" : "20130801T231557",
+       "last_modified" : "20130708T214346",
        "required_files" : [
         {
          "path" : "user_script.rb",
-         "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/ReduceLightingLoadsByPercentage/measure.rb"
+         "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/ReduceLightingLoadsByPercentage/measure.rb"
         },
         {
          "path" : "EnvelopeAndLoadTestModel_01.osm",
-         "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/ReduceLightingLoadsByPercentage/tests/EnvelopeAndLoadTestModel_01.osm"
+         "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/ReduceLightingLoadsByPercentage/tests/EnvelopeAndLoadTestModel_01.osm"
         },
         {
          "path" : "ReduceLightingLoadsByPercentage_Test.rb",
-         "url" : "file:///home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/ReduceLightingLoadsByPercentage/tests/ReduceLightingLoadsByPercentage_Test.rb"
+         "url" : "file:///C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/scripts/ReduceLightingLoadsByPercentage/tests/ReduceLightingLoadsByPercentage_Test.rb"
         }
        ]
       }
      ],
      "job_type" : "UserScript",
-     "last_run" : "20130816T125934",
+     "last_run" : "20130820T140814",
      "output_files" : [
       {
        "exists" : true,
        "file_name" : "out.osm",
-       "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/out.osm",
+       "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/out.osm",
        "key" : "out.osm",
-       "last_modified" : "20130816T125936",
+       "last_modified" : "20130820T140820",
        "required_files" : [
         {
          "path" : "files/USA_CO_Golden-NREL.724666_TMY3.epw",
@@ -1220,23 +1217,16 @@
       {
        "exists" : true,
        "file_name" : "result.ossr",
-       "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/result.ossr",
+       "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/result.ossr",
        "key" : "result.ossr",
-       "last_modified" : "20130816T125936"
-      },
-      {
-       "exists" : true,
-       "file_name" : "stderr",
-       "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/stderr",
-       "key" : "stderr",
-       "last_modified" : "20130816T125841"
+       "last_modified" : "20130820T140820"
       },
       {
        "exists" : true,
        "file_name" : "stdout",
-       "full_path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/stdout",
+       "full_path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/1-UserScript-0/stdout",
        "key" : "stdout",
-       "last_modified" : "20130816T125936"
+       "last_modified" : "20130820T140814"
       }
      ],
      "params" : [
@@ -1405,7 +1395,7 @@
          },
          {
           "param" :           {
-           "value" : "/home/ehale/projects/openstudio-branch1/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/"
+           "value" : "C:/projects/openstudio-branch1/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/Debug/"
           },
           "param_index" : 1
          }
@@ -1473,7 +1463,10 @@
        "param_index" : 5
       }
      ],
-     "uuid" : "fe049160-4d67-4031-835d-ff2f08728586"
+     "status" :      {
+      "status" : "Idle"
+     },
+     "uuid" : "fa6db1ce-2e65-49dc-844c-64f510303510"
     }
    ],
    "errors" :    {
@@ -1488,7 +1481,7 @@
      "file_name" : "seed.osm",
      "full_path" : "analysis_a8feca85-dab9-4510-8610-651ef847781d/seed/seed.osm",
      "key" : "osm",
-     "last_modified" : "20130816T185557",
+     "last_modified" : "20130820T200147",
      "required_files" : [
       {
        "path" : "in.epw",
@@ -1498,7 +1491,7 @@
     }
    ],
    "job_type" : "Null",
-   "last_run" : "20130816T125934",
+   "last_run" : "20130820T140814",
    "params" : [
     {
      "param" :      {
@@ -1525,7 +1518,7 @@
       "children" : [
        {
         "param" :         {
-         "value" : "none"
+         "value" : "standard"
         },
         "param_index" : 0
        }
@@ -1553,7 +1546,7 @@
       "children" : [
        {
         "param" :         {
-         "value" : "46954a0a98a7d0a1e950b6ae4525c53c"
+         "value" : "a30c3eea44b7010a452bbba25dbbd3af"
         },
         "param_index" : 0
        }
@@ -1577,49 +1570,47 @@
      "param_index" : 5
     }
    ],
+   "status" :    {
+    "status" : "Idle"
+   },
    "tools" : [
     {
-     "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/ExpandObjects",
+     "local_bin_path" : "/EnergyPlusV8-0-0/ExpandObjects.exe",
      "name" : "expandobjects",
      "out_file_filter" : "expanded\\.idf",
      "remote_archive" : "",
-     "remote_exe" : "ExpandObjects",
-     "version" : "8.0.0"
+     "remote_exe" : "ExpandObjects"
     },
     {
-     "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/EnergyPlus",
+     "local_bin_path" : "/EnergyPlusV8-0-0/EnergyPlus.exe",
      "name" : "energyplus",
      "out_file_filter" : "eplus.*",
      "remote_archive" : "",
-     "remote_exe" : "EnergyPlus",
-     "version" : "8.0.0"
+     "remote_exe" : "EnergyPlus"
     },
     {
-     "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/PreProcess/GrndTempCalc/slab",
+     "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/slab.exe",
      "name" : "slab",
      "out_file_filter" : ".*\\.TXT",
      "remote_archive" : "",
-     "remote_exe" : "slab",
-     "version" : "8.0.0"
+     "remote_exe" : "slab"
     },
     {
-     "local_bin_path" : "/usr/local/EnergyPlus-8-0-0/PreProcess/GrndTempCalc/basement",
+     "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/basement.exe",
      "name" : "basement",
      "out_file_filter" : ".*\\.TXT",
      "remote_archive" : "",
-     "remote_exe" : "basement",
-     "version" : "8.0.0"
+     "remote_exe" : "basement"
     },
     {
-     "local_bin_path" : "/usr/bin/ruby",
+     "local_bin_path" : "C:/ruby/bin/ruby.exe",
      "name" : "ruby",
      "out_file_filter" : ".*",
      "remote_archive" : "",
-     "remote_exe" : "ruby",
-     "version" : "0.0.0"
+     "remote_exe" : "ruby"
     }
    ],
-   "uuid" : "09950655-00d7-47e5-9ffa-2b14b3226602"
+   "uuid" : "13c47b75-a553-4bc3-bb8e-3e04670fcbb9"
   },
   "uuid" : "1b961e88-358d-4aeb-b14f-b9509f5b6018",
   "variable_values" : [
@@ -1644,23 +1635,23 @@
     "variable_value_index" : 3
    }
   ],
-  "version_uuid" : "c816ce29-aa5b-4e26-89cd-83de75de008e",
+  "version_uuid" : "9e258d5a-a776-4fde-b3ff-5f1ff9de826e",
   "xml_output_data" :   {
-   "checksum_create" : "3E091CA1",
-   "checksum_last" : "3E091CA1",
-   "display_name" : "report",
+   "checksum_create" : "CCD735F2",
+   "checksum_last" : "CCD735F2",
+   "display_name" : "report.xml",
    "file_type" : "XML",
    "name" : "analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/7-OpenStudioPostProcess-0/report.xml",
-   "path" : "/home/ehale/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/7-OpenStudioPostProcess-0/report.xml",
-   "timestamp_create" : "20130816T125956",
-   "timestamp_last" : "20130816T125956",
-   "uuid" : "2a746ad1-7718-4fed-a4ec-d65b68a9902a",
-   "version_uuid" : "a1775139-63ab-4895-a392-d7e521b791c4"
+   "path" : "C:/projects/openstudio-server/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d/data_point_1b961e88-358d-4aeb-b14f-b9509f5b6018/7-OpenStudioPostProcess-0/report.xml",
+   "timestamp_create" : "20130820T140919",
+   "timestamp_last" : "20130820T140919",
+   "uuid" : "082a2eae-c4ee-4d77-8f75-1c4cb3276fb8",
+   "version_uuid" : "65918d74-9d0c-40df-86c8-72e3e94aca50"
   }
  },
  "metadata" :  {
   "openstudio_version" : "1.0.4",
-  "project_path" : "analysis_a8feca85-dab9-4510-8610-651ef847781d",
+  "project_dir" : "analysis_a8feca85-dab9-4510-8610-651ef847781d",
   "server_view" :   {
    "display_name" : "Reduce Lighting Load By 30 percent Only",
    "name" : "Reduce Lighting Load By 30 percent Only",

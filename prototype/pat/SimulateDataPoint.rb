@@ -1,5 +1,6 @@
 
 require 'openstudio'
+require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 
 # parse arguments with optparse
@@ -36,10 +37,8 @@ project_path = directory.parent_path
 # verify the existence of required files
 data_point_json_path = directory / OpenStudio::Path.new("data_point_in.json")
 formulation_json_path = project_path / OpenStudio::Path.new("formulation.json")
-tools_json_path = project_path / OpenStudio::Path.new("tools.json")
 raise "Required file '" + data_point_json_path.to_s + "' does not exist." if not File.exist?(data_point_json_path.to_s)
 raise "Required file '" + formulation_json_path.to_s + "' does not exist." if not File.exist?(formulation_json_path.to_s)
-raise "Required file '" + tools_json_path.to_s + "' does not exist." if not File.exist?(tools_json_path.to_s)
 
 # set up log file
 logSink = OpenStudio::FileLogSink.new(directory / OpenStudio::Path.new("openstudio.log"))
@@ -47,48 +46,30 @@ logSink.setLogLevel(logLevel)
 OpenStudio::Logger::instance.standardOutLogger.disable
 
 # load problem formulation
-analysis = OpenStudio::Analysis::loadJSON(formulation_json_path)
-raise "Unable to load json file from '" + formulation_json_path.to_s + "." if analysis.empty?
-analysis = analysis.get.to_Analysis.get
-
-# ETH@20130808 Replace the following fix up code with a single method call to analysis
-# to swap out project directories (similar to what osp does on open)
-
-# project paths
-original_project_path = analysis.seed.path.parent_path.parent_path
-puts "Fixing up file paths originally at '" + original_project_path.to_s + 
-     "' to now be at '" + project_path.to_s + "'."
-
-# fix up seed model path
-new_seed_path = project_path / OpenStudio::Path.new("seed/seed.osm")
-ok = analysis.setSeed(OpenStudio::FileReference.new(new_seed_path))
-raise "Unable to fix up seed model path to '" + new_seed_path.to_s + "'." if not ok
-
-# fix up weather file path
-weather_file_path = OpenStudio::Path.new
-if not analysis.weatherFile.empty?
-  weather_file_path = analysis.weatherFile.get.path
-  weather_file_path = OpenStudio::relocatePath(weather_file_path,
-                                               original_project_path,
-                                               project_path)
+loadResult = OpenStudio::Analysis::loadJSON(formulation_json_path)
+if loadResult.analysisObject.empty?
+  loadResult.errors.each { |error|
+    warn error.logMessage
+  }
+  raise "Unable to load json file from '" + formulation_json_path.to_s + "." 
 end
+analysis = loadResult.analysisObject.get.to_Analysis.get
 
-# fix up measure paths
-scripts_dir = project_path / OpenStudio::Path.new("scripts")
-Dir.foreach(scripts_dir.to_s) do |script_folder|
-  next if script_folder == '.' or script_folder == '..'
-  bclMeasure = OpenStudio::BCLMeasure.new( scripts_dir / OpenStudio::Path.new(script_folder))
-  analysis.problem.updateMeasure(bclMeasure,OpenStudio::Ruleset::OSArgumentVector.new,true)
-end
+# fix up file paths
+analysis.updateInputPathData(loadResult.projectDir,project_path)
 debug_formulation_json_path = directory / OpenStudio::Path.new("fixed_up_formulation.json")
 analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
 analysis.saveJSON(debug_formulation_json_path,analysis_options)
 
 # load data point to run
-data_point = OpenStudio::Analysis::loadJSON(data_point_json_path)
-raise "Unable to laod json file from '" + data_point_json_path.to_s + "." if data_point.empty?
-data_point = data_point.get.to_DataPoint.get
-raise "DataPoint was not created by Problem." if data_point.problemUUID != analysis.problem.uuid
+loadResult = OpenStudio::Analysis::loadJSON(data_point_json_path)
+if loadResult.analysisObject.empty?
+  loadResult.errors.each { |error|
+    warn error.logMessage
+  }
+  raise "Unable to laod json file from '" + data_point_json_path.to_s + "."
+end
+data_point = loadResult.analysisObject.get.to_DataPoint.get
 analysis.addDataPoint(data_point) # also hooks up real copy of problem
 
 # create a RunManager
@@ -98,15 +79,24 @@ run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path,true,false
 # have problem create the workflow
 workflow = analysis.problem.createWorkflow(data_point,OpenStudio::Path.new($OpenStudio_Dir));
 params = OpenStudio::Runmanager::JobParams.new;
-params.append("cleanoutfiles","none"); # ETH@20130808 This needs to come in as an option.
+params.append("cleanoutfiles","standard");
 workflow.add(params);
-file = File.open(tools_json_path.to_s,'rb')
-tools = OpenStudio::Runmanager::WorkItem::fromJSON(file.read).tools
+ep_hash = OpenStudio::EnergyPlus::find_energyplus(8,0)
+ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
+tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
+                                                         OpenStudio::Path.new,
+                                                         OpenStudio::Path.new,
+                                                         $OpenStudio_RubyExeDir,
+                                                         OpenStudio::Path.new)
 workflow.add(tools)
 
 # queue the RunManager job
 url_search_paths = OpenStudio::URLSearchPathVector.new
-job = workflow.create(directory,new_seed_path,weather_file_path,url_search_paths)
+weather_file_path = OpenStudio::Path.new
+if (analysis.weatherFile)
+  weather_file_path = analysis.weatherFile.get.path
+end
+job = workflow.create(directory,analysis.seed.path,weather_file_path,url_search_paths)
 OpenStudio::Runmanager::JobFactory::optimizeJobTree(job)
 analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
 run_manager.enqueue(job,false);

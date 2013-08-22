@@ -72,7 +72,7 @@ slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
 File.open("ip_addresses", 'w+') {|f| f.write(text) }
 
 # Right now these paths are assuming that we are in the same directory as the files
-upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
+upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh", "R_config.rb"]
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
@@ -113,6 +113,16 @@ master_instance.each { |instance|
   a.send_command(instance, command)
 }
  
+ 
+command = "chmod 774 ~/R_config.rb"
+master_instance.each { |instance|
+  a.send_command(instance, command)
+} 
+
+#command = "ruby R_config.rb"
+#master_instance.each { |instance|
+#  a.send_command(instance, command)
+#}
  # test, ssh into the master, then ssh into a worker node.  you should 
  # not be asked to authenticate a key nor enter username/password
 
