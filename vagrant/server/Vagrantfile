@@ -102,7 +102,7 @@ Vagrant.configure("2") do |config|
           'NodeType' => 'Server',
           'OpenStudio Version' => '0.10.5'
       }
-    rescue
+    rescue LoadError
       warn "Unable to configure AWS provider."
     end
 

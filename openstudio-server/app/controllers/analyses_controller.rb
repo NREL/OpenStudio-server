@@ -89,14 +89,14 @@ class AnalysesController < ApplicationController
   def action
     @analysis = Analysis.find(params[:id])
 
-    #@analysis.start_r_and_run_sample
+    @analysis.start_r_and_run_sample
 
-    #redirect_to analysis_url(@analysis)
+    redirect_to analysis_url(@analysis)
 
-    respond_to do |format|
+    #respond_to do |format|
     #  format.html # new.html.erb
-      format.json { render json: @analysis }
-    end
+    #  format.json { render json: @analysis }
+    #end
 
   end
 
@@ -118,7 +118,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {data_points: dps} }
+      format.json { render json: {data_points: dps } }
     end
   end
 end
