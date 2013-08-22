@@ -33,10 +33,16 @@ if File.exist?(project_dir_name)
 end
 # 2. Create project folder
 FileUtils.mkdir(project_dir_name)
-project_dir_path = OpenStudio::Path.new(project_dir_name)
+project_dir_path = OpenStudio::completeAndNormalize(OpenStudio::Path.new(project_dir_name))
 # 3. Unzip project in folder
 unzip = OpenStudio::UnzipFile.new(staged_zip_file)
 unzip.extractAllFiles(project_dir_path) # formulation.json is in here too.
+# 4. Fix up paths in formulation.json
+puts loaded_json.projectDir.to_s
+puts project_dir_path.to_s
+loaded_analysis.updateInputPathData(loaded_json.projectDir,project_dir_path)
+analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_dir_path)
+analysis.saveJSON(project_dir_path / OpenStudio::Path.new("formulation.json"),analysis_options,true)
 
 # Client-side process.
 # 1. Create and *post* data point requests
