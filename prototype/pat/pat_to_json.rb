@@ -27,7 +27,7 @@ FileUtils.copy_file(zip_local_path.to_s,(staged_zip_file).to_s)
 loaded_json = OpenStudio::Analysis::loadJSON(staged_analysis_json)
 loaded_analysis = loaded_json.analysisObject.get.to_Analysis.get
 # Y. Delete existing project folder
-project_dir_name = "analysis_" + OpenStudio::removeBraces(loaded_analysis.uuid)
+project_dir_name = "analysis"
 if File.exist?(project_dir_name)
   FileUtils.rm_rf(project_dir_name)
 end

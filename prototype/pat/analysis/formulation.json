@@ -23,7 +23,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
-     "version_uuid" : "a1bb8b8b-738a-4c38-88c1-a349c5fdae03",
+     "version_uuid" : "1b9cad9f-1c4f-4fc7-a631-327241033572",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -129,7 +129,7 @@
      ],
      "name" : "Rotate Building",
      "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
-     "version_uuid" : "0b8ff555-b09f-4803-8f5f-3442d819d0a4",
+     "version_uuid" : "76257b46-3ab8-47eb-a48d-ff2efc49b0a1",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -404,7 +404,7 @@
      ],
      "name" : "Reduce Lighting Load",
      "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
-     "version_uuid" : "7355f502-b30d-4fa8-b8b4-a3537f69dc11",
+     "version_uuid" : "92a931e7-a917-4ac4-abb7-171e8cf56ff3",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -604,7 +604,7 @@
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
-     "version_uuid" : "c630ecc5-86a7-4484-91b8-a30192bf66d5",
+     "version_uuid" : "4709b95d-3a07-4629-bba7-18c6fa16209d",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -717,50 +717,48 @@
  },
  "metadata" :  {
   "openstudio_version" : "1.0.4",
-  "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/analysis_a8feca85-dab9-4510-8610-651ef847781d",
-  "server_view" :   {
-   "variables" : [
-    {
-     "display_name" : "Alternative Model",
-     "maximum" : 0,
-     "minimum" : 0,
-     "name" : "Alternative Model",
-     "type" : "Integer",
-     "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
-     "variable_index" : 0,
-     "version_uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9"
-    },
-    {
-     "display_name" : "Rotate Building",
-     "maximum" : 3,
-     "minimum" : 0,
-     "name" : "Rotate Building",
-     "type" : "Integer",
-     "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
-     "variable_index" : 1,
-     "version_uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5"
-    },
-    {
-     "display_name" : "Reduce Lighting Load",
-     "maximum" : 2,
-     "minimum" : 0,
-     "name" : "Reduce Lighting Load",
-     "type" : "Integer",
-     "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
-     "variable_index" : 2,
-     "version_uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2"
-    },
-    {
-     "display_name" : "Xcel EDA Tariff Selection and Model Setup Group",
-     "maximum" : 0,
-     "minimum" : 0,
-     "name" : "Xcel EDA Tariff Selection and Model Setup Group",
-     "type" : "Integer",
-     "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
-     "variable_index" : 3,
-     "version_uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7"
-    }
-   ]
-  }
+  "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/analysis",
+  "variables" : [
+   {
+    "display_name" : "Alternative Model",
+    "maximum" : 0,
+    "minimum" : 0,
+    "name" : "Alternative Model",
+    "type" : "Integer",
+    "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
+    "variable_index" : 0,
+    "version_uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9"
+   },
+   {
+    "display_name" : "Rotate Building",
+    "maximum" : 3,
+    "minimum" : 0,
+    "name" : "Rotate Building",
+    "type" : "Integer",
+    "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
+    "variable_index" : 1,
+    "version_uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5"
+   },
+   {
+    "display_name" : "Reduce Lighting Load",
+    "maximum" : 2,
+    "minimum" : 0,
+    "name" : "Reduce Lighting Load",
+    "type" : "Integer",
+    "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
+    "variable_index" : 2,
+    "version_uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2"
+   },
+   {
+    "display_name" : "Xcel EDA Tariff Selection and Model Setup Group",
+    "maximum" : 0,
+    "minimum" : 0,
+    "name" : "Xcel EDA Tariff Selection and Model Setup Group",
+    "type" : "Integer",
+    "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
+    "variable_index" : 3,
+    "version_uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7"
+   }
+  ]
  }
 }
