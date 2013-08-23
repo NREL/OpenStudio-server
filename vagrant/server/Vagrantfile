@@ -5,7 +5,6 @@ Vagrant.configure("2") do |config|
   is_windows = (RUBY_PLATFORM =~ /mswin|mingw|cygwin/)
 
   config.omnibus.chef_version = :latest
-  #config.omnibus.chef_version = "11.4.0"
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ubuntu-precise-64-vbox"
@@ -74,7 +73,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :aws do |aws, override|
     #http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
-    begin 
+    begin
       require 'excon'
       Excon.defaults[:ssl_verify_peer] = false
 
@@ -105,6 +104,5 @@ Vagrant.configure("2") do |config|
     rescue LoadError
       warn "Unable to configure AWS provider."
     end
-
   end
 end
