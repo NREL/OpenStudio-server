@@ -1,7 +1,7 @@
 # This file should contain all the record creation needed to seed the database with its default values.
 # The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
 
-jsonfile = "/data/prototype/pat/server_problem.json"
+jsonfile = Dir.glob("/data/prototype/pat/analysis*/formulation.json").first
 if File.exists?(jsonfile)
   json = JSON.parse(File.read(jsonfile), :symbolize_names => true)
 
@@ -16,27 +16,31 @@ if File.exists?(jsonfile)
 
 
   # load the datapoints from pat that need to be run
-  datapoint_file =  "/data/prototype/pat/server_datapoints_request.json"
-  if File.exists?(datapoint_file)
-    json = JSON.parse(File.read(datapoint_file), :symbolize_names => true)
+  datapoint_files = Dir.glob("/data/prototype/pat/analysis*/data_point*/data_point_in.json")
+  datapoint_files.each do |datapoint_file|
+    puts "loading #{datapoint_file}"
+    if File.exists?(datapoint_file)
 
-    analysis = project.analyses.where(name: "PAT Example").first
-    json[:data_points].each do |datum|
-      datapoint = analysis.data_points.find_or_create_by(uuid: datum[:uuid])
+
+      analysis = project.analyses.where(name: "PAT Example").first
+      dp = JSON.parse(File.read(datapoint_file), :symbolize_names => true)[:data_point]
+      datapoint = analysis.data_points.find_or_create_by(uuid: dp[:uuid])
 
       puts datapoint.inspect
       #save the rest of the values to the database
-      datum.each_key do |key|
+      dp.each_key do |key|
         next if key == 'uuid'
 
-        datapoint[key] = datum[key]
+        datapoint[key] = dp[key]
       end
       datapoint.save!
-    end
 
+    end
+    puts "File #{datapoint_file} does not exist"
   end
+
 else
-  puts "File #{datapoint_file} does not exist"
+  puts "File #{jsonfile} does not exist"
 end
 
 

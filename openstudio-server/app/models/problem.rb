@@ -9,7 +9,8 @@ class Problem
   has_many :variables
 
   def load_variables_from_pat_json(data)
-    data[:variables].each do |datum|
+    data[:metadata][:server_view][:variables].each do |datum|
+      puts datum.inspect
       variable = self.variables.find_or_create_by(uuid: datum[:uuid])
 
       #save the rest of the values to the database
