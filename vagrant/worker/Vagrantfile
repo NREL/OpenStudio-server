@@ -4,15 +4,11 @@
 Vagrant.configure("2") do |config|
   is_windows = (RUBY_PLATFORM =~ /mswin|mingw|cygwin/)
 
-  # All Vagrant configuration is done here. The most common configuration
-  # options are documented and commented below. For a complete reference,
-  # please see the online documentation at vagrantup.com.
+  config.omnibus.chef_version = :latest
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ubuntu-precise-64"
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
-
-  config.omnibus.chef_version = :latest
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -44,7 +40,7 @@ Vagrant.configure("2") do |config|
     # vb.gui = true
 
     # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", 2048, "--cpus", 4]
+    vb.customize ["modifyvm", :id, "--memory", 2048, "--cpus", 2]
 
     # Disable DNS proxy.
     # Causes slowness: https://github.com/rubygems/rubygems/issues/513
@@ -70,30 +66,33 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :aws do |aws, override|
     #http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
-    require 'excon'
-    Excon.defaults[:ssl_verify_peer] = false
+    begin
+      require 'excon'
+      Excon.defaults[:ssl_verify_peer] = false
 
-    # you will need to create a yaml file with these values to
-    # properly deploy to ec2
-    require 'yaml'
-    aws_config = YAML::load_file(File.join(Dir.home, ".aws_secrets"))
-    aws.access_key_id = aws_config.fetch("access_key_id")
-    aws.secret_access_key = aws_config.fetch("secret_access_key")
-    aws.keypair_name = aws_config.fetch("keypair_name")
-    override.ssh.private_key_path = aws_config.fetch("private_key_path")
+      # you will need to create a yaml file with these values to
+      # properly deploy to ec2
+      require 'yaml'
+      aws_config = YAML::load_file(File.join(Dir.home, ".aws_secrets"))
+      aws.access_key_id = aws_config.fetch("access_key_id")
+      aws.secret_access_key = aws_config.fetch("secret_access_key")
+      aws.keypair_name = aws_config.fetch("keypair_name")
+      override.ssh.private_key_path = aws_config.fetch("private_key_path")
 
-    aws.security_groups = ["default"]
-    aws.instance_type = "m1.small"
-    #aws.instance_type = "m1.xlarge"
-    aws.ami = "ami-d0f89fb9"
+      aws.security_groups = ["default"]
+      aws.instance_type = "m1.small"
+      #aws.instance_type = "m1.xlarge"
+      aws.ami = "ami-d0f89fb9"
 
-    override.ssh.username = "ubuntu"
+      override.ssh.username = "ubuntu"
 
-    aws.tags = {
-        'Name' => 'OpenStudio',
-        'NodeType' => 'Worker',
-        'OpenStudioVersion' => '0.10.5'
-    }
-
+      aws.tags = {
+          'Name' => 'OpenStudio',
+          'NodeType' => 'Worker',
+          'OpenStudioVersion' => '0.10.5'
+      }
+    rescue LoadError
+      warn "Unable to configure AWS provider."
+    end
   end
 end
