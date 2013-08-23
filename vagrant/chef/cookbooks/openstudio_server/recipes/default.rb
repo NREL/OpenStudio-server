@@ -14,13 +14,6 @@ bash "bundle install" do
   EOH
 end
 
-# restart (or start) delayed_job
-bash "restart delayed job" do
-  code <<-EOH
-    cd #{node[:openstudio_server][:server_path]}
-    script/delayed_job restart
-  EOH
-end
 
 # load the test data (eventaully make this a separate recipe)
 bash "load default data" do
@@ -40,6 +33,13 @@ end
 # restart apache?
 
 
+# restart (or start) delayed_job
+bash "restart delayed job" do
+  code <<-EOH
+    cd #{node[:openstudio_server][:server_path]}
+    ./script/delayed_job restart
+  EOH
+end
 
 
 

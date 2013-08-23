@@ -2,22 +2,19 @@ name "r-project"
 description "Installs and configure R"
 
 run_list([
-             "recipe[java::openjdk]",
+             "recipe[java]",
              "recipe[R]",
          ])
 
 
 default_attributes(
     :java => {
+        :set_java_home => false
     },
     :R => {
         :apt_distribution => "precise/",
         :apt_key => "E084DAB9",
         :package_source_url => "http://cran.r-project.org/src/contrib",
-        #:add_ld_path => true,
-        #:java_libjvm_path => "/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/amd64/server/",
-        :rserve_start_on_boot => true,
-        :rserve_user => "vagrant",
         :packages => [
             {
                 :name => 'lhs',
