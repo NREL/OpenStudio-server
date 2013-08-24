@@ -2,7 +2,7 @@ class Analysis
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :uuid
+  field :_id, :type => String, default: ->{ uuid || UUID.generate}
   field :version_uuid
   field :name, :type => String
   field :display_name, :type => String
