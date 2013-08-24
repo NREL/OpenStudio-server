@@ -3,6 +3,7 @@ class Problem
   include Mongoid::Timestamps
 
   #has_many :workflow_steps
+  field :name, :type => String
 
   belongs_to :analysis
 
