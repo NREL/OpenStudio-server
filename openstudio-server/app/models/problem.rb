@@ -3,6 +3,9 @@ class Problem
   include Mongoid::Timestamps
 
   #has_many :workflow_steps
+  field :uuid, :type => String
+  field :_id, :type => String, default: ->{ uuid || UUID.generate }
+  field :name, :type => String
 
   belongs_to :analysis
 
