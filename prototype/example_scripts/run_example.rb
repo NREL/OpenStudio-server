@@ -32,7 +32,6 @@ puts resp.code
 # create a new project
 project_id = nil
 if resp.code == 201
-
   project_id = JSON.parse(resp)["_id"]
 
   puts "new project created with ID: #{project_id}"
@@ -45,12 +44,16 @@ end
 # create a new analysis
 analysis_id = nil
 if !project_id.nil?
-  analysis_hash = { analysis: { project_id: project_id, name: "script example"} }
+  formulation_file = "../pat/analysis/formulation.json"
+  formulation_json = JSON.parse(File.read(formulation_file), :symbolize_names => true)
+  analysis_id = formulation_json[:analysis][:uuid]
+
+  analysis_hash = { analysis: { project_id: project_id, name: "script example", uuid: analysis_id } }
+  puts analysis_hash.inspect
 
   resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", analysis_hash)
 
   if resp.code == 201
-
     analysis_id = JSON.parse(resp)["_id"]
     puts "new analysis created with ID: #{analysis_id}"
   end
@@ -88,7 +91,9 @@ if !analysis_id.nil?
     # rename some items for compatibility
     puts dp_hash.inspect
 
-    resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/data_points.json", dp_hash)
+    url = "#{HOSTNAME}/analyses/#{analysis_id}/data_points.json"
+    puts url
+    resp = RestClient.post(url, dp_hash)
     if resp.code == 201
       puts "new datapoint created for analysis #{analysis_id}"
     end
