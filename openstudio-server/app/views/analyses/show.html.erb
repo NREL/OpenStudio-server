@@ -6,8 +6,8 @@
 <% end %>
 
 <h1> list of datapoints for this analysis </h1>
-<% @analysis.data_points.each do |model| %>
-    <%= link_to "data point: #{model.name}", data_point_path(model) %> </br>
+<% @analysis.data_points.each do |dp| %>
+    <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </br>
 <% end %>
 
 <h1> run analysis</h1>

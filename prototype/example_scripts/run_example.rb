@@ -37,6 +37,9 @@ if resp.code == 201
 
   puts "new project created with ID: #{project_id}"
   #grab the project id
+elsif resp.code == 500
+  puts "500 Error"
+  puts resp.inspect
 end
 
 # create a new analysis
@@ -57,16 +60,16 @@ end
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?
   file = "../pat/server_seed.zip"
-  file_b64 = Base64.encode64(file.read)
-  file_data = {"file" =>
-                   {
-                       "file" => "#{file_b64}",
-                       "filesize" => "#{File.size(filename_and_path)}",
-                       "filename" => filename
-                   },
-  }
+  #file_b64 = Base64.encode64(file.read)
+  #file_data = {"file" =>
+  #                 {
+  #                     "file" => "#{file_b64}",
+  #                     "filesize" => "#{File.size(filename_and_path)}",
+  #                     "filename" => filename
+  #                 },
+  #}
 
-  resp = RestClient.post("#{HOSTNAME}/anlayses/#{analysis_id}/upload.json", file_data)
+  #resp = RestClient.post("#{HOSTNAME}/anlayses/#{analysis_id}/upload.json", file_data)
 
 
 end
@@ -75,14 +78,19 @@ end
 
 # add all the datapoints to the analysis
 if !analysis_id.nil?
-  dp_json = JSON.parse(File.open("../pat/server_datapoints_request.json").read, :symbolize_names => true)
+  datapoints = Dir.glob("../pat/analysis*/data_point*/*.json")
+  datapoints.each do |dp|
+    dp_json = JSON.parse(File.open(dp).read, :symbolize_names => true)
 
-  dp_json[:data_points].each do |dp|
-    dp_hash = { data_point: dp.merge({analysis_id: analysis_id}) }    # TODO merge in the rest of the datapoint hash
+    # merge in the analysis_id as it has to be what is in the database
+    dp_hash = dp_json.merge({analysis_id: analysis_id})     # TODO merge in the rest of the datapoint hash
+    
+    # rename some items for compatibility
+    puts dp_hash.inspect
 
     resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/data_points.json", dp_hash)
     if resp.code == 201
-      puts "new datapoint created for #{analysis_id}"
+      puts "new datapoint created for analysis #{analysis_id}"
     end
   end
 end
@@ -95,7 +103,8 @@ if !analysis_id.nil?
   action_hash = { action: "start" }
   #action_hash = { action: "stop"}
 
-  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
+  # end point does not exist yet
+  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
 
   puts resp
 
