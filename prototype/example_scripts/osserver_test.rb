@@ -135,6 +135,10 @@ puts "Posting Analysis #{analysis.uuid()}"
 success = server.postAnalysisJSON(analysis.uuid(), analysisJSON)
 puts "  Success = #{success}"
 
+File.open(patDirName + "analysisJSON.json", 'w') do |file|
+  file << analysisJSON
+end
+
 analysis.dataPoints().each do |dataPoint|
   options = OpenStudio::Analysis::DataPointSerializationOptions.new(OpenStudio::Path.new(patDirName))
   dataPointJSON = dataPoint.toJSON(options)
@@ -144,16 +148,28 @@ analysis.dataPoints().each do |dataPoint|
   puts "  Success = #{success}"
 end
 
-# TODO: server.uploadAnalysisFiles(analysisUUID, analysisZipFile)
+analysisZipFile = project.zipFileForCloud()
+
+puts "Uploading analysisZipFile #{analysisZipFile}"
+success = server.uploadAnalysisFiles(analysis.uuid(), analysisZipFile)
+puts "  Success = #{success}"
 
 # list projects on the server
 listProjects(server)
 
-# TODO: server.start(analysisUUID)
+# start the analysis
+puts "Starting analysis #{analysis.uuid()}"
+success = server.start(analysis.uuid())
+puts "  Success = #{success}"
+
+# list projects on the server
+listProjects(server)
 
 # TODO: server.isAnalysisRunning(analysisUUID)
 
-# TODO: server.stop(analysisUUID)
+puts "Stoping analysis #{analysis.uuid()}"
+success = server.stop(analysis.uuid())
+puts "  Success = #{success}"
     
 # shut the vagrant boxes down
 puts "shutting down"
