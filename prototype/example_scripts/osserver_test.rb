@@ -10,10 +10,55 @@ require 'openstudio'
 
 OpenStudio::Application::instance
 
+def listProjects(server)
+
+  projectUUIDs = server.projectUUIDs
+  puts "projectUUIDs = #{projectUUIDs}"
+
+  projectUUIDs.each do |projectUUID|
+    puts "Project = #{projectUUID}"
+
+    analysisUUIDs = server.analysisUUIDs(projectUUID)
+    puts "  Project has #{analysisUUIDs.size} Analyses"
+    
+    analysisUUIDs.each do |analysisUUID|
+      puts "  Analysis = #{analysisUUID}"
+      
+      dataPointUUIDs = server.dataPointUUIDs(analysisUUID)
+      puts "    Analysis has #{dataPointUUIDs.size} DataPoints"
+      
+      dataPointUUIDs.each do |dataPointUUID|
+        puts "    DataPoint = #{dataPointUUID}"
+        
+        dataPointJSON = server.dataPointJSON(analysisUUID, dataPointUUID)
+        puts "      JSON has #{dataPointJSON.size} characters"
+        
+        # DLM: Nick I don't see the example API call for this, does it exist?
+        #TODO: server.downloadDataPoint(analysisUUID, dataPointUUID, downloadPath)
+      end
+      
+      runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+      puts "  #{runningDataPointUUIDs.size} Running DataPoints"
+
+      queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
+      puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
+
+      completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
+      puts "  #{completeDataPointUUIDs.size} Complete DataPoints"    
+    end
+  end
+
+end
+
+# find paths
+serverFileName = File.dirname(__FILE__) + "/../../vagrant/server"
+workerFileName = File.dirname(__FILE__) + "/../../vagrant/worker"
+patDirName = File.dirname(__FILE__) + "/../pat/PATTest/"
+
 # create the vagrant provider
-serverPath = OpenStudio::Path.new('C:\working\openstudio-server\vagrant\server')
+serverPath = OpenStudio::Path.new(serverFileName)
 serverUrl = OpenStudio::Url.new("http://localhost:8080")
-workerPath = OpenStudio::Path.new('C:\working\openstudio-server\vagrant\worker')
+workerPath = OpenStudio::Path.new(workerFileName)
 workerUrl = OpenStudio::Url.new("http://localhost:8081")
 haltOnStop = false
 vagrantProvider = OpenStudio::VagrantProvider.new(serverPath, serverUrl, workerPath, workerUrl, haltOnStop)
@@ -61,47 +106,48 @@ end
 
 puts "server available"
 
-# read current contents of server database 
-projectUUIDs = server.projectUUIDs
-puts "projectUUIDs = #{projectUUIDs}"
+# list projects on the server
+listProjects(server)
 
-projectUUIDs.each do |projectUUID|
-  puts "Project = #{projectUUID}"
-
-  analysisUUIDs = server.analysisUUIDs(projectUUID)
-  puts "#{analysisUUIDs.size} Analyses"
-  
-  analysisUUIDs.each do |analysisUUID|
-    puts "  Analysis = #{analysisUUID}"
-    
-    dataPointUUIDs = server.dataPointUUIDs(analysisUUID)
-    puts "  #{dataPointUUIDs.size} DataPoints"
-    
-    dataPointUUIDs.each do |dataPointUUID|
-      puts "    DataPoint = #{dataPointUUID}"
-      
-      dataPointJSON = server.dataPointJSON(analysisUUID, dataPointUUID)
-      puts "    #{dataPointJSON}"
-      
-      #TODO: server.downloadDataPoint(analysisUUID, dataPointUUID, downloadPath)
-    end
-    
-    runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
-    puts "  #{runningDataPointUUIDs.size} Running DataPoints"
-
-    queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
-    puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
-
-    completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
-    puts "  #{completeDataPointUUIDs.size} Complete DataPoints"    
-  end
+# delete all projects on the server
+server.projectUUIDs.each do |projectUUID|
+  puts "Deleting project #{projectUUID}"
+  success = server.deleteProject(projectUUID)
+  puts "  Success = #{success}"
 end
 
-# TODO: server.postAnalysisJSON(projectUUID, analysisJSON)
+# list projects on the server
+listProjects(server)
 
-# TODO: server.postDataPointJSON(analysisUUID, dataPointJSON)
+# load project from disk
+project = OpenStudio::AnalysisDriver::SimpleProject::open(OpenStudio::Path.new(patDirName)).get()
+analysis = project.analysis
+
+# post analysis
+puts "Creating Project #{analysis.uuid()}"
+success = server.createProject(analysis.uuid())
+puts "  Success = #{success}"
+
+options = OpenStudio::Analysis::AnalysisSerializationOptions.new(OpenStudio::Path.new(patDirName))
+analysisJSON = analysis.toJSON(options)
+
+puts "Posting Analysis #{analysis.uuid()}"
+success = server.postAnalysisJSON(analysis.uuid(), analysisJSON)
+puts "  Success = #{success}"
+
+analysis.dataPoints().each do |dataPoint|
+  options = OpenStudio::Analysis::DataPointSerializationOptions.new(OpenStudio::Path.new(patDirName))
+  dataPointJSON = dataPoint.toJSON(options)
+  
+  puts "Posting DataPoint #{dataPoint.uuid()}"
+  success = server.postDataPointJSON(dataPoint.uuid(), dataPointJSON)
+  puts "  Success = #{success}"
+end
 
 # TODO: server.uploadAnalysisFiles(analysisUUID, analysisZipFile)
+
+# list projects on the server
+listProjects(server)
 
 # TODO: server.start(analysisUUID)
 
