@@ -36,7 +36,8 @@ ssh vagrant@192.168.33.11
 ```
 no password should be required
 
-- ssh into worker @ 192.168.33.11
+
+ssh into worker @ 192.168.33.11
 
 - add os-worker to /etc/hosts on os-server
 ```sh
