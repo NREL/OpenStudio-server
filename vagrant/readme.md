@@ -39,8 +39,7 @@ no password should be required
 
 ssh into worker @ 192.168.33.11
 
-- add os-worker to /etc/hosts on os-server
-
+- add os-server to /etc/hosts on os-worker
 ```sh
 sudo -i
 echo 192.168.33.10 os-server >> /etc/hosts
