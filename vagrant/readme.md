@@ -32,6 +32,7 @@ cat id_rsa.pub >> authorized_keys
 /usr/bin/ssh-copy-id vagrant@192.168.33.11
 ```
 if prompted, answer yes.
+
 enter password vagrant
 
 - test passwordless login
