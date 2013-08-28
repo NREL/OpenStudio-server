@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'rubygems'
 require 'rserve/simpler'
 
@@ -40,7 +42,7 @@ puts "starting cluster and running"
   library(snowfall)
   sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
   sfExport("uuid")
-  results <- sfLapply(rep(1:100),f)
+  results <- sfLapply(rep(1:100000),f)
   sfStop()
   }
 end

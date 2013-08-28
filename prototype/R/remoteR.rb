@@ -1,7 +1,10 @@
+##!/usr/bin/env ruby
+
 require 'rubygems'
 require 'net/http'
 require 'net/ssh'
-require 'net/scp'
+require 'net/ssh/shell'
+#require 'net/scp'
 
 module RInterface 
   class Rtest
@@ -14,9 +17,11 @@ module RInterface
       begin
         Net::SSH.start('192.168.33.10', 'vagrant',
                        :password => "vagrant") do |ssh|
-          #ssh.exec!(command)
-          ssh.exec(command)
-          
+          #ssh.exec(command)
+          ssh.shell do |sh|
+            sh.execute command
+            sh.execute "exit"
+          end  
         end
       rescue Net::SSH::HostKeyMismatch => e
         e.remember_host!
