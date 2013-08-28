@@ -4,6 +4,12 @@ require 'rserve/simpler'
 
 #create an instance for R
 @r = Rserve::Simpler.new
+
+puts "Setting working directory ="
+puts @r.converse('setwd("/home/ubuntu")')
+puts "R working dir ="
+puts @r.converse('getwd()')
+puts "starting cluster and running"
 @r.converse "library(snow)"
 @r.command() do
 %Q{

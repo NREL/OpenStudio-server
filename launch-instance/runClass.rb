@@ -113,16 +113,16 @@ master_instance.each { |instance|
   a.send_command(instance, command)
 }
  
- 
 command = "chmod 774 ~/R_config.rb"
 master_instance.each { |instance|
   a.send_command(instance, command)
 } 
 
-#command = "ruby R_config.rb"
-#master_instance.each { |instance|
-#  a.send_command(instance, command)
-#}
+command = "/usr/local/rbenv/shims/ruby /home/ubuntu/R_config.rb"
+master_instance.each { |instance|
+  a.shell_command(instance, command)
+}
+
  # test, ssh into the master, then ssh into a worker node.  you should 
  # not be asked to authenticate a key nor enter username/password
 
