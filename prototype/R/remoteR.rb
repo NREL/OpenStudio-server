@@ -11,11 +11,11 @@ module RInterface
 #======================= send command ======================#
     # Send a command through SSH to an instance. 
     # Need to pass instance object and the command as a string. 
-    def send_command(command)
+    def send_command(instance,command)
       # send command to instance
       puts "Executing #{command}"
       begin
-        Net::SSH.start('192.168.33.10', 'vagrant',
+        Net::SSH.start(instance, 'vagrant',
                        :password => "vagrant") do |ssh|
           ssh.exec(command)
           #ssh.shell do |sh|
@@ -38,9 +38,9 @@ module RInterface
 #======================= send command ======================#
     # Send a command through SSH Shell to an instance. 
     # Need to pass instance object and the command as a string.     
-def shell_command(command)
+def shell_command(instance,command)
   puts "executing shell command #{command}"
-  Net::SSH.start('192.168.33.10', 'vagrant',
+  Net::SSH.start(instance, 'vagrant',
                  :password => "vagrant") do |ssh|
     channel = ssh.open_channel do |ch|
       ch.exec "#{command}" do |ch, success|
@@ -69,11 +69,11 @@ end
     # Need to pass the instance object and the path to the file (Local and Remote). 
     def upload_file(instance, local_path, remote_path)
       # send command to instance
-      puts "Uploading #{local_path} to instance #{instance.instance_id}"
+      puts "Uploading #{local_path} to instance #{instance}"
       begin
-        Net::SCP.start(instance.ip_address, "ubuntu",
-                       :key_data => [@key_pair.private_key]) do |scp|
-          puts "Uploading #{local_path} on the instance #{instance.instance_id}:"
+        Net::SCP.start(instance, 'vagrant',
+                 :password => "vagrant") do |scp|
+          puts "Uploading #{local_path} on the instance #{instance}: to #{remote_path}"
           scp.upload! local_path, remote_path
         end
       rescue SystemCallError, Timeout::Error => e

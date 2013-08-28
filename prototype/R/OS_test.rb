@@ -28,8 +28,8 @@ puts "starting cluster and running"
      
      #sfInit(parallel=TRUE, type="SOCK", socketHosts=rep("localhost",4))
      sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
-     setwd("/home/vagrant")
-     results <- sfLapply(rep(1:10000),f)
+     sfExport("f")
+     results <- sfLapply(rep(1:10),f)
      sfStop()
   }
 end
