@@ -3,8 +3,8 @@
 require 'rubygems'
 require 'net/http'
 require 'net/ssh'
-require 'net/ssh/shell'
-#require 'net/scp'
+#require 'net/ssh/shell'
+require 'net/scp'
 
 module RInterface 
   class Rtest
@@ -35,7 +35,9 @@ module RInterface
         retry
       end
     end
-    
+#======================= send command ======================#
+    # Send a command through SSH Shell to an instance. 
+    # Need to pass instance object and the command as a string.     
 def shell_command(command)
   puts "executing shell command #{command}"
   Net::SSH.start('192.168.33.10', 'vagrant',
