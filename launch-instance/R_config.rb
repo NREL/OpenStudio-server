@@ -34,9 +34,10 @@ require 'rserve/simpler'
   library(snowfall)
   sfInit(parallel=TRUE, cpus=10, type="SOCK", socketHosts=b)
   sfExport("uuid")
-  results <- sfLapply(rep(1:1000000),f)
+  results <- sfLapply(rep(1:100),f)
   sfStop()
   }
 end
 puts "results ="
 puts @r.converse('results')
+#sfInit(parallel=TRUE, cpus=2, type="SOCK", socketHosts=c("192.168.33.11"))
