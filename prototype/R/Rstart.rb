@@ -13,5 +13,5 @@ a.send_command(command)
 command = "gem list"
 a.send_command(command)
 
-command = "ruby /data/prototype/R/R_config.rb"
-a.send_command(command)
+command = "/usr/local/rbenv/shims/ruby /data/prototype/R/R_config.rb"
+a.shell_command(command)

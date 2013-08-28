@@ -17,11 +17,11 @@ module RInterface
       begin
         Net::SSH.start('192.168.33.10', 'vagrant',
                        :password => "vagrant") do |ssh|
-          #ssh.exec(command)
-          ssh.shell do |sh|
-            sh.execute command
-            sh.execute "exit"
-          end  
+          ssh.exec(command)
+          #ssh.shell do |sh|
+          #  sh.execute command
+          #  sh.execute "exit"
+          #end
         end
       rescue Net::SSH::HostKeyMismatch => e
         e.remember_host!
@@ -35,7 +35,33 @@ module RInterface
         retry
       end
     end
-       
+    
+def shell_command(command)
+  puts "executing shell command #{command}"
+  Net::SSH.start('192.168.33.10', 'vagrant',
+                 :password => "vagrant") do |ssh|
+    channel = ssh.open_channel do |ch|
+      ch.exec "#{command}" do |ch, success|
+        raise "could not execute #{command}" unless success
+
+        # "on_data" is called when the process writes something to stdout
+        ch.on_data do |c, data|
+          $stdout.print data
+        end
+
+        # "on_extended_data" is called when the process writes something to stderr
+        ch.on_extended_data do |c, type, data|
+          $stderr.print data
+        end
+
+        ch.on_close { puts "done!" }
+      end
+    end
+
+  #channel.wait
+  end
+end  
+  
 #======================= upload file ======================#
     # Uploads a file using SCP to an instance. 
     # Need to pass the instance object and the path to the file (Local and Remote). 
