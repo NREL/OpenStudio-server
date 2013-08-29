@@ -1,3 +1,4 @@
+
 name "r-project"
 description "Installs and configure R"
 
@@ -14,6 +15,9 @@ default_attributes(
     :R => {
         :apt_distribution => "precise/",
         :apt_key => "E084DAB9",
+        :rserve_start_on_boot => true,
+        :rserve_user => "vagrant",     #todo: how do we change this based on vagrant provisioner
+        :rserve_path => "/usr/bin/R/",
         :package_source_url => "http://cran.r-project.org/src/contrib",
         :packages => [
             {
