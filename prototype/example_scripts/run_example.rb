@@ -109,10 +109,25 @@ if !analysis_id.nil?
   #action_hash = { action: "stop"}
 
   # end point does not exist yet
-  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
-
+  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
   puts resp
 
+
+  # check all the queued analyses for this project (eventually move this to all analyses)
+  puts
+  puts "list of queued analyses"
+  resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
+  puts resp
+
+
+
+  puts
+  puts "list of queued analyses"
+  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=queued")
+  puts resp
+
+
+  exit
 end
 
 # get the status of all the entire analysis
