@@ -83,19 +83,21 @@ end
 if !analysis_id.nil?
   datapoints = Dir.glob("../pat/analysis*/data_point*/*.json")
   datapoints.each do |dp|
-    dp_json = JSON.parse(File.open(dp).read, :symbolize_names => true)
+    dp_hash = JSON.parse(File.open(dp).read, :symbolize_names => true)
 
     # merge in the analysis_id as it has to be what is in the database
-    dp_hash = dp_json.merge({analysis_id: analysis_id})     # TODO merge in the rest of the datapoint hash
-    
-    # rename some items for compatibility
+    dp_hash[:data_point][:analysis_id] = analysis_id
     puts dp_hash.inspect
+
+    # rename some items for compatibility
+    # TODO
 
     url = "#{HOSTNAME}/analyses/#{analysis_id}/data_points.json"
     puts url
     resp = RestClient.post(url, dp_hash)
     if resp.code == 201
       puts "new datapoint created for analysis #{analysis_id}"
+      puts resp
     end
   end
 end
@@ -118,32 +120,22 @@ if !analysis_id.nil?
   puts "list of queued analyses"
   resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   puts resp
-
-
-
-  puts
-  puts "list of queued analyses"
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=queued")
-  puts resp
-
-
-  exit
 end
 
 # get the status of all the entire analysis
 if !analysis_id.nil?
   resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json")
-  puts resp
+  puts "Data points (all): #{resp}"
 
   resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=running")
-  puts resp
+  puts "Data points (running): #{resp}"
 
   resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=queued")
-  puts resp
+  puts "Data points (queued): #{resp}"
 
   resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=complete")
 
-  puts resp
+  puts "Data points (complete): #{resp}"
 end
 
 
