@@ -83,4 +83,21 @@ class ProjectsController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  def status
+    @project = Project.find(params[:id])
+
+    # get the list of all the statuses
+    q = nil
+    if params[:jobs].nil?
+      q = @project.analyses.all
+    else
+      q = @project.analyses.where(status: params[:jobs])
+    end
+
+    respond_to do |format|
+      #  format.html # new.html.erb
+      format.json { render json: {analyses: q } }
+    end
+  end
 end

@@ -8,6 +8,7 @@ class Analysis
   field :name, :type => String
   field :display_name, :type => String
   field :description, :type => String
+  field :status, :type => String # enum on the status of the analysis
 
   belongs_to :project
 
@@ -28,6 +29,8 @@ class Analysis
 
     #create an instance for R
     @r = Rserve::Simpler.new
+    self.status = 'running'
+    self.save!
 
     @r.command() do
       %Q{
@@ -52,6 +55,9 @@ class Analysis
       datapoint['values'] = [ {"variable_index" => 0, "variable_uuid" => UUID.new().generate, "value" => value}]
       datapoint.save!
     end
+
+    self.status = 'complete'
+    self.save!
 
   end
   handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }

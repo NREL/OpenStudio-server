@@ -85,19 +85,28 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # container for
+  # Controller for submitting the action via post.  This right now only works with the API
+  # and will only return a JSON response based on whether or not the analysis has been
+  # queued into Delayed Jobs
   def action
     @analysis = Analysis.find(params[:id])
 
-    @analysis.start_r_and_run_sample
+    result = {}
+    if @analysis.start_r_and_run_sample
+      result[:code] = 200
+      @analysis.status = 'queued'
+      result[:analysis] = @analysis
+    else
+      result[:code] = 500
+      @analysis.status = 'error'
+      # TODO: save off the error
+    end
 
-    redirect_to analysis_url(@analysis)
-
-    #respond_to do |format|
+    @analysis.save!
+    respond_to do |format|
     #  format.html # new.html.erb
-    #  format.json { render json: @analysis }
-    #end
-
+      format.json { render json: result }
+    end
   end
 
   def status
