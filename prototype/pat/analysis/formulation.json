@@ -51,7 +51,7 @@
          "version_uuid" : "4a946a09-d9ce-41b6-a9f5-70ac716814e4"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "/home/vagrant/analysis/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
        "bcl_measure_version_uuid" : "6b7e3a85-8ba5-41f5-9275-b2ce40ce77f5",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
@@ -81,7 +81,7 @@
          "version_uuid" : "5cb48665-876d-416a-90cf-f4b136cd081f"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "/home/vagrant/analysis/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
        "bcl_measure_version_uuid" : "6b7e3a85-8ba5-41f5-9275-b2ce40ce77f5",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
@@ -111,7 +111,7 @@
          "version_uuid" : "337331d7-3c51-415a-b660-00d189d0aa69"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "/home/vagrant/analysis/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
        "bcl_measure_version_uuid" : "6b7e3a85-8ba5-41f5-9275-b2ce40ce77f5",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
@@ -257,7 +257,7 @@
          "version_uuid" : "7658be79-7a01-466d-85e9-ad2b15224708"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "/home/vagrant/analysis/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
        "bcl_measure_version_uuid" : "7c57be45-3ff6-4f1a-b78e-4391c3ac0ca2",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
@@ -386,7 +386,7 @@
          "version_uuid" : "dc1e0562-9bb7-494e-afe4-8081ef8f5754"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "/home/vagrant/analysis/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
        "bcl_measure_version_uuid" : "7c57be45-3ff6-4f1a-b78e-4391c3ac0ca2",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
@@ -586,7 +586,7 @@
          "version_uuid" : "a92f8fde-c3bd-4adb-8929-0287478813a6"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/scripts/XcelEDATariffSelectionandModelSetup",
+       "bcl_measure_directory" : "/home/vagrant/analysis/scripts/XcelEDATariffSelectionandModelSetup",
        "bcl_measure_uuid" : "c5ab60e9-b8e5-4653-a502-5ed030f1335d",
        "bcl_measure_version_uuid" : "c30d17a3-c3ea-410f-b301-6e915a486c28",
        "description" : "Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program.",
@@ -694,7 +694,7 @@
    "display_name" : "seed",
    "file_type" : "OSM",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
-   "path" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/seed/seed.osm",
+   "path" : "/home/vagrant/analysis/seed/seed.osm",
    "timestamp_create" : "20130716T144225",
    "timestamp_last" : "20130822T114007",
    "uuid" : "e105d3df-8259-4257-a89c-f31cd7a62e52",
@@ -708,7 +708,7 @@
    "display_name" : "USA_CO_Golden-NREL.724666_TMY3",
    "file_type" : "EPW",
    "name" : "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
-   "path" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+   "path" : "/home/vagrant/analysis/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
    "timestamp_create" : "20130716T144225",
    "timestamp_last" : "20130822T114007",
    "uuid" : "9a6a9a9e-0cc6-4396-8373-d1736300a006",
@@ -717,7 +717,7 @@
  },
  "metadata" :  {
   "openstudio_version" : "1.0.4",
-  "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/",
+  "project_dir" : "/home/vagrant/analysis/",
   "variables" : [
    {
     "display_name" : "Alternative Model",
