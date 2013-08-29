@@ -4,6 +4,12 @@ require 'rserve/simpler'
 
 #create an instance for R
 @r = Rserve::Simpler.new
+
+puts "Setting working directory ="
+puts @r.converse('setwd("/home/ubuntu")')
+puts "R working dir ="
+puts @r.converse('getwd()')
+puts "starting cluster and running"
 @r.converse "library(snow)"
 @r.command() do
 %Q{
@@ -34,9 +40,10 @@ require 'rserve/simpler'
   library(snowfall)
   sfInit(parallel=TRUE, cpus=10, type="SOCK", socketHosts=b)
   sfExport("uuid")
-  results <- sfLapply(rep(1:1000000),f)
+  results <- sfLapply(rep(1:100),f)
   sfStop()
   }
 end
 puts "results ="
 puts @r.converse('results')
+#sfInit(parallel=TRUE, cpus=2, type="SOCK", socketHosts=c("192.168.33.11"))
