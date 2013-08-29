@@ -1,10 +1,10 @@
 ##!/usr/bin/env ruby
 
 require 'rubygems'
-require 'net/http'
-require 'net/ssh'
+require 'net/http'        # gem install net-http-persistent
+require 'net/ssh'         # gem install net-ssh
 #require 'net/ssh/shell'
-require 'net/scp'
+require 'net/scp'         # gem install net-scp
 
 module RInterface 
   class Rtest

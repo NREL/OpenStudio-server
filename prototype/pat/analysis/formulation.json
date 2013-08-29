@@ -717,7 +717,7 @@
  },
  "metadata" :  {
   "openstudio_version" : "1.0.4",
-  "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/analysis",
+  "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/PATTest/",
   "variables" : [
    {
     "display_name" : "Alternative Model",

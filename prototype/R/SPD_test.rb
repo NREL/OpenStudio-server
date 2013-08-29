@@ -21,7 +21,7 @@ puts "starting cluster and running"
   for(i in 1:nrow(ips)) {b[i] = ips[i,]}
         
   f <- function(x){ 
-      y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/vagrant/SDP.rb")
+      y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/vagrant/SimulateDataPoint.rb -d ~/analysis/data_point_",x,sep="")
       z <- system(y,intern=TRUE)
       j <- length(z)
       z}
@@ -29,7 +29,12 @@ puts "starting cluster and running"
      #sfInit(parallel=TRUE, type="SOCK", socketHosts=rep("localhost",4))
      sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
      sfExport("f")
-     results <- sfLapply(rep(1:10),f)
+     
+     dpts = read.table("data_point_uuids.txt", as.is = 1)
+     datapoints <- character(length=nrow(dpts))
+     for(i in 1:nrow(dpts)) {datapoints[i] = dpts[i,]}
+     
+     results <- sfLapply(datapoints,f)
      sfStop()
   }
 end
