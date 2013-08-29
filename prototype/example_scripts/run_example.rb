@@ -11,13 +11,13 @@ resp = RestClient.get("#{HOSTNAME}/projects.json")
 json = JSON.parse(resp)
 puts json.inspect
 
-analysis_id = json[0]['analyses'][0]['_id']
-puts analysis_id
+if json.count > 0
+  analysis_id = json[0]['analyses'][0]['_id']
+  puts analysis_id
 
-datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
-puts JSON.pretty_generate(JSON.parse(datapoints))
-
-
+  datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
+  puts JSON.pretty_generate(JSON.parse(datapoints))
+end
 
 # ------- add new project and run example ----------
 project_name = "project #{(rand()*1000).round}"
