@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'rubygems'
 require 'rserve/simpler'
 
@@ -6,7 +8,7 @@ require 'rserve/simpler'
 @r = Rserve::Simpler.new
 
 puts "Setting working directory ="
-puts @r.converse('setwd("/home/ubuntu")')
+puts @r.converse('setwd("/data/prototype/R")')
 puts "R working dir ="
 puts @r.converse('getwd()')
 puts "starting cluster and running"
@@ -14,7 +16,7 @@ puts "starting cluster and running"
 @r.command() do
 %Q{
   #read in ipaddresses
-  ips = read.table("hosts_slave_file.sh", as.is = 1)
+  ips = read.table("slave_info.sh", as.is = 1)
   #create character list of ipaddresses
   b <- character(length=nrow(ips))
   for(i in 1:nrow(ips)) {b[i] = ips[i,]}
@@ -38,9 +40,9 @@ puts "starting cluster and running"
 	u}
 
   library(snowfall)
-  sfInit(parallel=TRUE, cpus=10, type="SOCK", socketHosts=b)
+  sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
   sfExport("uuid")
-  results <- sfLapply(rep(1:100),f)
+  results <- sfLapply(rep(1:10000),f)
   sfStop()
   }
 end

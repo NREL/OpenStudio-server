@@ -4,17 +4,22 @@ require 'rserve/simpler'
 
 #create an instance for R
 @r = Rserve::Simpler.new
-
-#install library for DEoptim (always)
-#@r.converse "install.packages(DEoptim)"
-#@r.converse "library(DEoptim)"
-#@r.converse "library(foreach)"
-#@r.converse "library(rgenoud)"
+puts "Setting working directory ="
+puts @r.converse('setwd("/data/prototype/R")')
+puts "R working dir ="
+puts @r.converse('getwd()')
+puts "starting cluster and running"
+@r.converse "library(snow)"
 @r.converse "library(snowfall)"
-
 
 @r.command() do
 %Q{
+  #read in ipaddresses
+  ips = read.table("slave_info.sh", as.is = 1)
+  #create character list of ipaddresses
+  b <- character(length=nrow(ips))
+  for(i in 1:nrow(ips)) {b[i] = ips[i,]}
+  
   uuid <- function(uppercase=FALSE) {
     hex_digits <- c(as.character(0:9), letters[1:6])
     hex_digits <- if (uppercase) toupper(hex_digits) else hex_digits
@@ -36,16 +41,14 @@ require 'rserve/simpler'
       dir.create(dname)
       y1 <- paste(dname,"/",name,sep="")
       y <- paste("echo",x,u,">>",y1)
-      z <- shell(y) 
-      y <- paste("ruby uuid.rb",x,u)
+      z <- system(y) 
+      y <- paste("ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ uuid.rb",x,u)
       z <- system(y,intern=TRUE)
       as.numeric(x)}
      
-     library(snowfall)
-     sfInit(parallel=TRUE, cpus=8, type="SOCK", socketHosts=rep("localhost",8))     
-     sfExport("uuid")
-        
-     results <- sfLapply(rep(1:100),f)
+     sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
+     sfExport("uuid")   
+     results <- sfLapply(rep(1:100000),f)
      sfStop()
   }
 end

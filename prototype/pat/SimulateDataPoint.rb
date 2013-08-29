@@ -55,6 +55,9 @@ if loadResult.analysisObject.empty?
 end
 analysis = loadResult.analysisObject.get.to_Analysis.get
 
+# fix up paths
+# analysis.updateInputPathData(loadResult.projectDir,project_path)
+
 # load data point to run
 loadResult = OpenStudio::Analysis::loadJSON(data_point_json_path)
 if loadResult.analysisObject.empty?
