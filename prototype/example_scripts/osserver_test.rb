@@ -182,7 +182,16 @@ puts "Starting analysis #{analysisUUID}"
 success = server.start(analysisUUID)
 puts "  Success = #{success}"
 
-# TODO: server.isAnalysisRunning(analysisUUID)
+# list projects on the server
+listProjects(server)
+  
+isQueued = server.isAnalysisQueued(analysisUUID)
+puts "isQueued = #{isQueued}"
+
+# todo: wait for running 
+ 
+isRunning = server.isAnalysisRunning(analysisUUID)
+puts "isRunning = #{isRunning}"
 
 puts "Stoping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
