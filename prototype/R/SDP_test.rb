@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'rserve/simpler'
 
-
 #create an instance for R
 @r = Rserve::Simpler.new
 puts "Setting working directory ="
