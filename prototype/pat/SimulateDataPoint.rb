@@ -3,6 +3,10 @@ require 'openstudio'
 require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 
+require 'mongo'
+
+include Mongo
+
 # parse arguments with optparse
 options = Hash.new
 optparse = OptionParser.new do |opts|
@@ -109,3 +113,9 @@ data_point_json_path = directory / OpenStudio::Path.new("data_point_out.json")
 data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(project_path)
 data_point.saveJSON(data_point_json_path,data_point_options,true)
 
+#put data_point in database
+@client = MongoClient.new("192.168.33.10", 27017)
+@db     = @client['openstudio_server_development']
+@coll   = @db['data_points']
+
+@coll.insert({"data_point" => data_point.toJSON(data_point_options)})
