@@ -40,11 +40,10 @@ class DataPointsController < ApplicationController
   # POST /data_points
   # POST /data_points.json
   def create
-    @data_point = DataPoint.new(params[:data_point])
-
-    # add in the analysis ID that is already in the URL
     analysis_id = params[:analysis_id]
-    @data_point[:data_point][:analysis_id] = analysis_id
+    params[:data_point][:analysis_id] = analysis_id
+
+    @data_point = DataPoint.new(params[:data_point])
 
     respond_to do |format|
       if @data_point.save
