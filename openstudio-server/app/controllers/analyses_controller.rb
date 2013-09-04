@@ -45,10 +45,9 @@ class AnalysesController < ApplicationController
   # POST /analyses.json
   def create
     @analysis = Analysis.new(params[:analysis])
-    project_id = params[:project_id]
-    @analysis[:project_id] = project_id
 
-    logger.info("I AM HERE #{project_id}")
+    project_id = params[:project_id]
+    @analysis[:analysis][:project_id] = project_id
 
     respond_to do |format|
       if @analysis.save

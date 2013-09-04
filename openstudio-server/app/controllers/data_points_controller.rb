@@ -42,6 +42,10 @@ class DataPointsController < ApplicationController
   def create
     @data_point = DataPoint.new(params[:data_point])
 
+    # add in the analysis ID that is already in the URL
+    analysis_id = params[:analysis_id]
+    @data_point[:data_point][:analysis_id] = analysis_id
+
     respond_to do |format|
       if @data_point.save
         format.html { redirect_to @data_point, notice: 'Data point was successfully created.' }
