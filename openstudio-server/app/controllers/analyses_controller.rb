@@ -44,11 +44,10 @@ class AnalysesController < ApplicationController
   # POST /analyses
   # POST /analyses.json
   def create
-    @analysis = Analysis.new(params[:analysis])
-
     project_id = params[:project_id]
-    @analysis[:analysis][:project_id] = project_id
-
+    params[:analysis][:project_id] = project_id
+    @analysis = Analysis.new(params[:analysis])
+    
     respond_to do |format|
       if @analysis.save
         format.html { redirect_to @analysis, notice: 'Analysis was successfully created.' }
