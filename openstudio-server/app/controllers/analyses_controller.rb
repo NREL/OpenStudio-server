@@ -132,4 +132,17 @@ class AnalysesController < ApplicationController
       format.json { render json: {data_points: dps } }
     end
   end
+
+  def upload
+    @analysis = Analysis.find(params[:id])
+
+    @analysis.seed = params[:file][:data]
+
+    if @analysis.save
+      render :json => {:status => "OK"}
+    else
+      render :json => {:status => "ERROR"}
+    end
+
+  end
 end

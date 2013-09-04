@@ -27,6 +27,7 @@ OpenstudioServer::Application.routes.draw do
     resources :analyses, shallow: true do
       member do
         post :action
+        post :upload
         get :status
       end
 
