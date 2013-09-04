@@ -61,3 +61,12 @@ ps -A | grep Rserve
 ```sh
 sudo /etc/init.d/Rserved
 ```
+
+## Temporary 
+
+On the worker node, to run prototype/R/Mongo_teststart.rb
+
+```sh
+sudo gem install mongo
+sudo gem install bson_ext
+```
