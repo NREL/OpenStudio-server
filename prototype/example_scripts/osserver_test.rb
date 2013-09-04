@@ -162,7 +162,7 @@ else
     dataPointJSON = dataPoint.toJSON(options)
     
     puts "Posting DataPoint #{dataPoint.uuid()}"
-    success = server.postDataPointJSON(dataPoint.uuid(), dataPointJSON)
+    success = server.postDataPointJSON(analysisUUID, dataPointJSON)
     puts "  Success = #{success}"
   end
 
