@@ -13,11 +13,14 @@ class Analysis
   belongs_to :project
 
   has_many :data_points
-
   has_many :algorithms
   has_many :problems
 
+  # validations
   #validates_format_of :uuid, :with => /[^0-]+/
+
+  before_destroy :remove_dependencies
+
 
   def start_r_and_run_sample
 
@@ -61,5 +64,28 @@ class Analysis
 
   end
   handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }
+
+
+  protected
+
+  def remove_dependencies
+    logger.info("Found #{self.data_points.size} records")
+    self.data_points.each do |record|
+      logger.info("removing #{record.id}")
+      record.destroy
+    end
+
+    logger.info("Found #{self.algorithms.size} records")
+    self.algorithms.each do |record|
+      logger.info("removing #{record.id}")
+      record.destroy
+    end
+
+    logger.info("Found #{self.problems.size} records")
+    self.problems.each do |record|
+      logger.info("removing #{record.id}")
+      record.destroy
+    end
+  end
 
 end
