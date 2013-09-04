@@ -1,6 +1,7 @@
 class Analysis
   include Mongoid::Document
   include Mongoid::Timestamps
+  include Mongoid::Paperclip
 
   field :uuid, :type => String
   field :_id, :type => String, default: ->{ uuid || UUID.generate}
@@ -16,8 +17,11 @@ class Analysis
   has_many :algorithms
   has_many :problems
 
+  has_mongoid_attached_file :seed
+
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
+  #validates_attachment :document, content_type: { content_type: "application/zip" }
 
   before_destroy :remove_dependencies
 
