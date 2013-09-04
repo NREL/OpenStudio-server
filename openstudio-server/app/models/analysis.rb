@@ -1,7 +1,7 @@
 class Analysis
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::Paperclip
+  #include Mongoid::Paperclip
 
   field :uuid, :type => String
   field :_id, :type => String, default: ->{ uuid || UUID.generate}
@@ -17,7 +17,7 @@ class Analysis
   has_many :algorithms
   has_many :problems
 
-  has_mongoid_attached_file :seed
+  #has_mongoid_attached_file :seed
 
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
@@ -67,7 +67,7 @@ class Analysis
     self.save!
 
   end
-  handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }
+  #handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }
 
 
   protected
