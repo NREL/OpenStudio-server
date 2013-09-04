@@ -42,13 +42,13 @@ puts "starting cluster and running"
       y1 <- paste(dname,"/",name,sep="")
       y <- paste("echo",x,u,">>",y1)
       z <- system(y) 
-      y <- paste("ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ uuid.rb",x,u)
+      y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/vagrant/uuid.rb",x,u)
       z <- system(y,intern=TRUE)
       as.numeric(x)}
      
      sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
      sfExport("uuid")   
-     results <- sfLapply(rep(1:100000),f)
+     results <- sfLapply(rep(1:10),f)
      sfStop()
   }
 end
