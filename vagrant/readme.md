@@ -47,3 +47,17 @@ echo 192.168.33.10 os-server >> /etc/hosts
 exit
 sudo service networking restart
 ```
+
+back on the server @ 192.168.33.10
+
+- check that Rserve is running
+
+```sh
+ps -A | grep Rserve
+```
+
+- if no Rserve is running then start it by
+
+```sh
+sudo /etc/init.d/Rserved
+```
