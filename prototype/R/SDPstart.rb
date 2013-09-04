@@ -14,7 +14,7 @@ a.send_command("192.168.33.10",command)
 #a.shell_command("192.168.33.10",command)
 
 # Upload SimulateDataPoint
-command = "rm /home/vagrant/SimulateDataPont.rb"
+command = "rm /home/vagrant/SimulateDataPoint.rb"
 a.send_command("192.168.33.11",command) # change back to .11
 local_path = File.dirname(__FILE__) + "/../pat/SimulateDataPoint.rb"
 remote_path = "/home/vagrant/SimulateDataPoint.rb"
@@ -44,4 +44,4 @@ command = "unzip /home/vagrant/analysis.zip -d /home/vagrant/"
 a.send_command("192.168.33.11",command) # change back to .11
 
 command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /data/prototype/R/SDP_test.rb"
-# a.shell_command("192.168.33.10",command)
+ a.shell_command("192.168.33.10",command)
