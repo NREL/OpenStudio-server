@@ -6,9 +6,9 @@ class Project
   field :_id, :type => String, default: ->{ uuid || UUID.generate }
   field :name, :type => String
 
-
   has_many :analyses
 
+  before_destroy :remove_dependencies
 
   def get_problem(problem_name)
     self.analyses.first.problems.find_or_create_by(name: problem_name)
@@ -22,6 +22,16 @@ class Project
 
     problem = analysis.problems.find_or_create_by(uuid: problem_uuid)
     problem.name = problem_name
+  end
+
+  protected
+
+  def remove_dependencies
+    logger.info("Found #{self.analyses.size} sensors")
+    self.analyses.each do |analysis|
+      logger.info("removing analysis #{analysis.id}")
+      analysis.destroy
+    end
   end
 
 end

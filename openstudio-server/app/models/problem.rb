@@ -11,6 +11,8 @@ class Problem
 
   has_many :variables
 
+  before_destroy :remove_dependencies
+
   def load_variables_from_pat_json(data)
     data[:metadata][:variables].each do |datum|
       puts datum.inspect
@@ -23,6 +25,16 @@ class Problem
         variable[key] = datum[key]
       end
       variable.save!
+    end
+  end
+
+  protected
+
+  def remove_dependencies
+    logger.info("Found #{self.variables.size} records")
+    self.variables.each do |record|
+      logger.info("removing #{record.id}")
+      record.destroy
     end
   end
 end
