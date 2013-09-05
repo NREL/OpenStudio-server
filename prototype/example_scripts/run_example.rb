@@ -2,7 +2,7 @@ require 'rest-client'
 require 'json'
 require 'base64'
 
-HOSTNAME = "http://localhost:3000"
+HOSTNAME = "http://localhost:8080"
 
 
 #  --------- GET example -----------
