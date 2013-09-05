@@ -136,7 +136,7 @@ class AnalysesController < ApplicationController
   def upload
     @analysis = Analysis.find(params[:id])
 
-    @analysis.seed = params[:file]
+    @analysis.seed_zip = params[:file]
 
     respond_to do |format|
       if @analysis.save
