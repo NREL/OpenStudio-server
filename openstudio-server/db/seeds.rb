@@ -2,6 +2,10 @@
 # The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
 
 jsonfile = Dir.glob("/data/prototype/pat/analysis*/formulation.json").first
+if jsonfile.nil?
+  # try grabbing it from a relative path
+  jsonfile = Dir.glob("../prototype/pat/analysis*/formulation.json").first
+end
 if File.exists?(jsonfile)
   json = JSON.parse(File.read(jsonfile), :symbolize_names => true)
 
@@ -9,15 +13,29 @@ if File.exists?(jsonfile)
   project = Project.find_or_create_by(name: json[:analysis][:problem][:name])
   # There is no Project UUID at the moment. Just create a new one.
   #project.uuid = :uuid => UUID.generate
-  project.create_single_analysis(json[:analysis][:uuid], "PAT Example", json[:analysis][:problem][:uuid], "Batch")
+  analysis_1 = project.create_single_analysis(json[:analysis][:uuid], "PAT Example", json[:analysis][:problem][:uuid], "Batch")
   project.save!
 
   problem = project.get_problem("Batch")
   problem.load_variables_from_pat_json(json)
   problem.save!
 
+  # try saving a temp file
+  seed_file = "../prototype/pat/analysis/seed.zip"
+  if File.exists?(seed_file)
+    puts "uploading seed_file"
+    #analysis_1.seed = {file_name: seed_file}
+    analysis_1.seed = File.open(seed_file)
+    analysis_1.save!
+  end
+
   # load the datapoints from pat that need to be run
   datapoint_files = Dir.glob("/data/prototype/pat/analysis*/data_point*/data_point_in.json")
+  if datapoint_files.empty?
+    #try loading from relative path
+    datapoint_files = Dir.glob("../prototype/pat/analysis*/data_point*/data_point_in.json")
+  end
+  puts datapoint_files.inspect
   datapoint_files.each do |datapoint_file|
     puts "loading #{datapoint_file}"
     if File.exists?(datapoint_file)

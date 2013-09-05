@@ -5,10 +5,9 @@ gem 'rails', '3.2.13'
 # data modules
 gem 'json'
 
-gem 'mongoid-paperclip'
-
 # database modules
 gem 'mongoid'
+gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
 
 # R
 gem 'rserve-simpler'
