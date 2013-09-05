@@ -138,10 +138,12 @@ class AnalysesController < ApplicationController
 
     @analysis.seed = params[:file]
 
-    if @analysis.save
-      render :json => {:status => "OK"}
-    else
-      render :json => {:status => "ERROR"}
+    respond_to do |format|
+      if @analysis.save
+        format.json { render json: @analysis, status: :created, location: @analysis }
+      else
+        format.json { render json: @analysis.errors, status: :unprocessable_entity }
+      end
     end
 
   end
