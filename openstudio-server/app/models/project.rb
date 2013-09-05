@@ -22,6 +22,8 @@ class Project
 
     problem = analysis.problems.find_or_create_by(uuid: problem_uuid)
     problem.name = problem_name
+
+    analysis
   end
 
   protected
