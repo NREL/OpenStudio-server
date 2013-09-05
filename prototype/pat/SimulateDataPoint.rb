@@ -130,18 +130,7 @@ puts data_point.uuid
 data_point.variableValues.each {|value| puts value.toDouble}
 puts data_point.analysisUUID.get
 
-#ActiveSupport::Inflector.inflections do |inflect|
-# inflect.singular 'analysis', 'analysis'
-# inflect.singular 'analyses', 'analysis'
-# inflect.plural 'analysis', 'analyses'
-#end
-
 dp = DataPoint.find_or_create_by(uuid: data_point.uuid)
 dp.analysis = Analysis.find_or_create_by(uuid: data_point.analysisUUID.get)
 dp.values = data_point.variableValues.map{|v| v.toDouble}
 dp.save!
-
-#DataPoint.create(
-#    uuid: data_point.uuid,
-#    values: data_point.variableValues,
-#    analysis_id: data_point.analysisUUID.get)
