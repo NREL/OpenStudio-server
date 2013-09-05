@@ -124,5 +124,5 @@ data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(pro
 data_point.saveJSON(data_point_json_path,data_point_options,true)
 
 Mongoid.load!("/home/vagrant/mongoid/mongoid.yml", :production)
-
+puts data_point.toJSON(data_point_options)
 Mongoid.create(data_point.toJSON(data_point_options))
