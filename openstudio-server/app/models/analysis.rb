@@ -24,7 +24,7 @@ class Analysis
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
 
-  validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
+  #validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
 
   before_destroy :remove_dependencies
 

@@ -65,7 +65,7 @@ end
 if !analysis_id.nil?
   puts "uploading seed zip file"
   file = "../pat/analysis/seed.zip"
-  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
+  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
   puts resp
   puts resp.code
 
@@ -108,7 +108,7 @@ if !analysis_id.nil?
   #action_hash = { action: "stop"}
 
   # end point does not exist yet
-  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
+  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
   puts resp
 
 
