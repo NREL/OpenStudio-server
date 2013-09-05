@@ -136,7 +136,7 @@ class AnalysesController < ApplicationController
   def upload
     @analysis = Analysis.find(params[:id])
 
-    @analysis.seed = params[:file][:data]
+    @analysis.seed = params[:file]
 
     if @analysis.save
       render :json => {:status => "OK"}

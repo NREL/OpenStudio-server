@@ -2,7 +2,7 @@ require 'rest-client'
 require 'json'
 require 'base64'
 
-HOSTNAME = "http://localhost:8080"
+HOSTNAME = "http://localhost:3000"
 
 
 #  --------- GET example -----------
@@ -62,7 +62,18 @@ end
 
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?
-  file = "../pat/server_seed.zip"
+  file = "../pat/analysis/seed.zip"
+
+
+
+  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
+
+
+
+  puts resp.inspect
+
+
+
   #file_b64 = Base64.encode64(file.read)
   #file_data = {"file" =>
   #                 {
