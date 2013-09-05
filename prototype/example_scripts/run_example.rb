@@ -52,6 +52,7 @@ if !project_id.nil?
   puts analysis_hash.inspect
 
   resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", analysis_hash)
+  puts resp.inspect
 
   if resp.code == 201
     analysis_id = JSON.parse(resp)["_id"]
@@ -62,30 +63,15 @@ end
 
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?
+  puts "uploading seed zip file"
   file = "../pat/analysis/seed.zip"
-
-
-
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
+  puts resp
+  puts resp.code
 
-
-
-  puts resp.inspect
-
-
-
-  #file_b64 = Base64.encode64(file.read)
-  #file_data = {"file" =>
-  #                 {
-  #                     "file" => "#{file_b64}",
-  #                     "filesize" => "#{File.size(filename_and_path)}",
-  #                     "filename" => filename
-  #                 },
-  #}
-
-  #resp = RestClient.post("#{HOSTNAME}/anlayses/#{analysis_id}/upload.json", file_data)
-
-
+  if resp.code == 201
+    puts "Successfully uploaded ZIP file"
+  end
 end
 
 
