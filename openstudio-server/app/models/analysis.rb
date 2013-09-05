@@ -23,7 +23,8 @@ class Analysis
 
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
-  #validates_attachment :document, content_type: { content_type: "application/zip" }
+
+  validates_attachment :seed, content_type: { content_type: "application/zip" }
 
   before_destroy :remove_dependencies
 
@@ -70,7 +71,6 @@ class Analysis
 
   end
   handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }
-
 
   protected
 
