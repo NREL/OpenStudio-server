@@ -17,14 +17,14 @@ class Analysis
   has_many :algorithms
   has_many :problems
 
-  has_mongoid_attached_file :seed,
+  has_mongoid_attached_file :seed_zip,
                             :url  => "/assets/analyses/:id/:style/:basename.:extension",
                             :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
 
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
 
-  validates_attachment :seed, content_type: { content_type: "application/zip" }
+  #validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
 
   before_destroy :remove_dependencies
 
