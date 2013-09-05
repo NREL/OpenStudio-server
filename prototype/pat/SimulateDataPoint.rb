@@ -125,4 +125,4 @@ data_point.saveJSON(data_point_json_path,data_point_options,true)
 
 Mongoid.load!("/home/vagrant/mongoid/mongoid.yml", :production)
 
-Mongoid.create(data_point => data_point.toJSON(data_point_options))
+Mongoid.create(data_point.toJSON(data_point_options))
