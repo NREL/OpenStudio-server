@@ -130,6 +130,14 @@ command = "chmod 774 /home/vagrant/mongoid/workflow_step.rb"
 a.send_command("192.168.33.11",command)
 
 # Upload models/*
+local_path = File.dirname(__FILE__) + "/../../openstudio-server/config/initializers/inflections.rb"
+remote_path = "/home/vagrant/mongoid/inflections.rb"
+# Upload File to slave Instance
+a.upload_file("192.168.33.11", local_path, remote_path)
+command = "chmod 774 /home/vagrant/mongoid/inflections.rb"
+a.send_command("192.168.33.11",command)
+
+# Upload models/*
 local_path = File.dirname(__FILE__) + "/../pat/mongoid.yml"
 remote_path = "/home/vagrant/mongoid/mongoid.yml"
 # Upload File to slave Instance

@@ -15,6 +15,7 @@ require '/home/vagrant/mongoid/project'
 require '/home/vagrant/mongoid/seed'
 require '/home/vagrant/mongoid/variable'
 require '/home/vagrant/mongoid/workflow_step'
+require '/home/vagrant/mongoid/inflections'
 
 
 # parse arguments with optparse
@@ -129,11 +130,11 @@ puts data_point.uuid
 data_point.variableValues.each {|value| puts value.toDouble}
 puts data_point.analysisUUID.get
 
-ActiveSupport::Inflector.inflections do |inflect|
- inflect.singular 'analysis', 'analysis'
- inflect.singular 'analyses', 'analysis'
- inflect.plural 'analysis', 'analyses'
-end
+#ActiveSupport::Inflector.inflections do |inflect|
+# inflect.singular 'analysis', 'analysis'
+# inflect.singular 'analyses', 'analysis'
+# inflect.plural 'analysis', 'analyses'
+#end
 
 dp = DataPoint.find_or_create_by(uuid: data_point.uuid)
 dp.analysis = Analysis.find_or_create_by(uuid: data_point.analysisUUID.get)
