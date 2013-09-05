@@ -129,6 +129,13 @@ a.upload_file("192.168.33.11", local_path, remote_path)
 command = "chmod 774 /home/vagrant/mongoid/workflow_step.rb"
 a.send_command("192.168.33.11",command)
 
+# Upload models/*
+local_path = File.dirname(__FILE__) + "/../pat/mongoid.yml"
+remote_path = "/home/vagrant/mongoid/mongoid.yml"
+# Upload File to slave Instance
+a.upload_file("192.168.33.11", local_path, remote_path)
+command = "chmod 774 /home/vagrant/mongoid/mongoid.yml"
+a.send_command("192.168.33.11",command)
 
 command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /data/prototype/R/SDP_test.rb"
 a.shell_command("192.168.33.10",command)

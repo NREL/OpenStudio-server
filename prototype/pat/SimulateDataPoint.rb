@@ -4,6 +4,7 @@ require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 
 require 'mongoid'
+require 'mongoid_paperclip'
 require '/home/vagrant/mongoid/algorithm'
 require '/home/vagrant/mongoid/analysis'
 require '/home/vagrant/mongoid/data_point'
@@ -14,9 +15,6 @@ require '/home/vagrant/mongoid/project'
 require '/home/vagrant/mongoid/seed'
 require '/home/vagrant/mongoid/variable'
 require '/home/vagrant/mongoid/workflow_step'
-
-require 'mongo'
-include Mongo
 
 
 # parse arguments with optparse
@@ -125,14 +123,6 @@ data_point_json_path = directory / OpenStudio::Path.new("data_point_out.json")
 data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(project_path)
 data_point.saveJSON(data_point_json_path,data_point_options,true)
 
-    @mongo_ip = "192.168.33.10"
-    @mongo_host = 27017
-    @MONGO_POOL_CNT = 50
+Mongoid.load!("/home/vagrant/mongoid/mongoid.yml", :production)
 
-    Mongoid
-    Mongoid.configure do |config|
-      config.database = Mongo::Connection.new(@mongo_ip, @mongo_host, :pool_size => @MONGO_POOL_CNT, :w => 1).db("openstudio_server_development")
-      config.allow_dynamic_fields = true
-    end
-
-Mongoid.DataPoint.create(data_point.toJSON(data_point_options))
+Mongoid.create(data_point => data_point.toJSON(data_point_options))
