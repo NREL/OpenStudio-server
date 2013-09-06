@@ -7,6 +7,7 @@ class DataPoint
   field :name, :type => String
   field :values, :type => Array
   #field :analysis_id, :type => String
+  field :ip_address, :type => String
 
   belongs_to :analysis
 end

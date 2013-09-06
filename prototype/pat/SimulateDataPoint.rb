@@ -16,6 +16,7 @@ require '/home/vagrant/mongoid/seed'
 require '/home/vagrant/mongoid/variable'
 require '/home/vagrant/mongoid/workflow_step'
 require '/home/vagrant/mongoid/inflections'
+require 'socket'
 
 
 # parse arguments with optparse
@@ -130,7 +131,11 @@ puts data_point.uuid
 data_point.variableValues.each {|value| puts value.toDouble}
 puts data_point.analysisUUID.get
 
+host = Socket.gethostname
+puts host
+
 dp = DataPoint.find_or_create_by(uuid: data_point.uuid)
 dp.analysis = Analysis.find_or_create_by(uuid: data_point.analysisUUID.get)
 dp.values = data_point.variableValues.map{|v| v.toDouble}
+dp.ip_address = host
 dp.save!
