@@ -44,7 +44,7 @@ puts @r.converse('flag["run"]')
      f <- function(x){ 
        mongo <- mongoDbConnect("openstudio_server_development", host="192.168.33.10", port=27017)
        flag <- dbGetQuery(mongo,"control",'{"_id":1}')
-       if (flag["run"] != "TRUE" ){stop("run flag is not TRUE")}
+       if (flag["run"] != "TRUE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
        dbDisconnect(mongo)
        y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/vagrant/OS_uuid.rb")
        z <- system(y,intern=TRUE)
