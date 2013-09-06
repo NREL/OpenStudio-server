@@ -134,7 +134,11 @@ puts data_point.analysisUUID.get
 host = Socket.gethostname
 puts host
 
+#uuid = data_point.uuid
+#uuidtrim = uuid[1...-2]
+#puts uuidtrim
 dp = DataPoint.find_or_create_by(uuid: data_point.uuid)
+#dp = DataPoint.find_or_create_by(uuid: uuidtrim)
 dp.analysis = Analysis.find_or_create_by(uuid: data_point.analysisUUID.get)
 dp.values = data_point.variableValues.map{|v| v.toDouble}
 dp.ip_address = host

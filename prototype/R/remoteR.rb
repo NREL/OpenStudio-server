@@ -88,6 +88,30 @@ end
       end
     end    
     
+#======================= download file ======================#
+    # Uploads a file using SCP to an instance. 
+    # Need to pass the instance object and the path to the file (Local and Remote). 
+    def download_file(instance, remote_path, local_path)
+      # send command to instance
+      puts "downloading #{remote_path} to instance #{instance}"
+      begin
+        Net::SCP.start(instance, 'vagrant',
+                 :password => "vagrant") do |scp|
+          puts "downloading #{remote_path} on the instance #{instance}: to #{local_path}"
+          scp.upload! remote_path, local_path
+        end
+      rescue SystemCallError, Timeout::Error => e
+        # port 22 might not be available immediately after the instance finishes launching
+        sleep 1
+        puts "Not Yet"
+        retry
+      rescue
+        puts "unknown download error, retry"
+        sleep 1
+        retry    
+      end
+    end      
+    
   end
 end
 

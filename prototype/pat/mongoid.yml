@@ -5,4 +5,5 @@ development:
       hosts:
         - 192.168.33.10:27017
       options:
-        allow_dynamic_fields: true   
+        allow_dynamic_fields: true 
+        raise_not_found_error: false
