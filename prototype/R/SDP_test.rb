@@ -10,6 +10,23 @@ puts @r.converse('getwd()')
 puts "starting cluster and running"
 @r.converse "library(snow)"
 @r.converse "library(snowfall)"
+@r.converse "library(RMongo)"
+
+#set run flag to true
+@r.command() do
+%Q{
+   mongo <- mongoDbConnect("openstudio_server_development", host="192.168.33.10", port=27017)
+   output <- dbRemoveQuery(mongo,"control","{_id:1}")
+   if (output != "ok"){stop(options("show.error.messages"="TRUE"),"cannot remove control flag in Mongo")}
+   input <- dbInsertDocument(mongo,"control",'{"_id":1,"run":"TRUE"}')
+   if (input != "ok"){stop(options("show.error.messages"="TRUE"),"cannot insert control flag in Mongo")}
+   flag <- dbGetQuery(mongo,"control",'{"_id":1}')
+   if (flag["run"] != "TRUE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
+   dbDisconnect(mongo)
+}
+end
+puts "ready to run ="
+puts @r.converse('flag["run"]')
 
 @r.command() do
 %Q{
@@ -18,15 +35,22 @@ puts "starting cluster and running"
   #create character list of ipaddresses
   b <- character(length=nrow(ips))
   for(i in 1:nrow(ips)) {b[i] = ips[i,]}
-        
-  f <- function(x){ 
-      y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/vagrant/SimulateDataPoint.rb -d ~/analysis/data_point_",x,sep="")
-      z <- system(y,intern=TRUE)
-      j <- length(z)
-      z}
-     
+           
      #sfInit(parallel=TRUE, type="SOCK", socketHosts=rep("localhost",4))
      sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
+     sfLibrary(RMongo)
+  
+     f <- function(x){ 
+       #library(RMongo)
+       mongo <- mongoDbConnect("openstudio_server_development", host="192.168.33.10", port=27017)
+       flag <- dbGetQuery(mongo,"control",'{"_id":1}')
+       if (flag["run"] == "FALSE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
+       dbDisconnect(mongo)
+       y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/vagrant/SimulateDataPoint.rb -d ~/analysis/data_point_",x,sep="")
+       z <- system(y,intern=TRUE)
+       j <- length(z)
+       z}
+
      sfExport("f")
      
      dpts = read.table("data_point_uuids.txt", as.is = 1)
