@@ -46,7 +46,7 @@ lines.each do |line|
   a.send_command("192.168.33.10",command)
   
   # Unzip Analysis Zip File
-  command = "unzip " << "/home/vagrant/analysis/" << datapoint_path_zip << " -d " << datapoint_path
+  command = "unzip " << "/home/vagrant/analysis/" << datapoint_path_zip << " -d " << "/home/vagrant/analysis/"
   a.send_command("192.168.33.10",command)
   
 end
