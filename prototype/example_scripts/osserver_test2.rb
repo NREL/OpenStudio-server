@@ -46,3 +46,20 @@ analysisZipFile = project.zipFileForCloud()
 puts "Uploading analysisZipFile #{analysisZipFile}"
 success = server.uploadAnalysisFiles(analysisUUID, analysisZipFile)
 puts "  Success = #{success}"
+
+# start the analysis
+puts "Starting analysis #{analysisUUID}"
+success = server.start(analysisUUID)
+puts "  Success = #{success}"
+  
+isQueued = server.isAnalysisQueued(analysisUUID)
+puts "isQueued = #{isQueued}"
+
+# todo: wait for running 
+ 
+isRunning = server.isAnalysisRunning(analysisUUID)
+puts "isRunning = #{isRunning}"
+
+puts "Stoping analysis #{analysisUUID}"
+success = server.stop(analysisUUID)
+puts "  Success = #{success}"
