@@ -275,11 +275,6 @@ a.upload_file("192.168.33.10", local_path, remote_path)
 command = "chmod 774 /home/vagrant/downloadR.rb"
 a.send_command("192.168.33.10",command)
 
-# create analysis dir on server
-command = "rm -rf /home/vagrant/analysis"
-a.send_command("192.168.33.10",command)
-command = "mkdir /home/vagrant/analysis"
-a.send_command("192.168.33.10",command)
 
 command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /data/prototype/R/SDP_test.rb"
 a.shell_command("192.168.33.10",command)

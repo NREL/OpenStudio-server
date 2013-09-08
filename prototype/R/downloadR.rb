@@ -43,17 +43,20 @@ lines.each do |line|
   a.shell_command(dp.ip_address,command)
   
   # download datapoint
-  local_path = "/home/vagrant/analysis/" << datapoint_path_zip 
+  #local_path = "/home/vagrant/analysis/" << datapoint_path_zip 
+  local_path = analysis_dir << "/" << datapoint_path_zip 
   remote_path = "/home/vagrant/analysis/" << datapoint_path_zip
+  if File.exists?(local_path) == true
+    `rm -rf #{local_path}`
+  end
   # download File to slave Instance
   a.download_file(dp.ip_address, remote_path, local_path)
   command = "chmod 774 " << local_path
   `#{command}`
-  #a.send_command("192.168.33.10",command)
   
   # Unzip Analysis Zip File
-  command = "unzip " << "/home/vagrant/analysis/" << datapoint_path_zip << " -d " << "/home/vagrant/analysis/"
+  #command = "unzip " << "/home/vagrant/analysis/" << datapoint_path_zip << " -d " << "/home/vagrant/analysis/"
+  command = "unzip -o " << local_path << " -d " << "/home/vagrant/analysis_" << adir[1...-1]
   `#{command}`
-  #a.send_command("192.168.33.10",command)
   
 end
