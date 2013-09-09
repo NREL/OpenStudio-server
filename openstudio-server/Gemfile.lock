@@ -82,6 +82,10 @@ GEM
       paperclip (>= 2.3.6)
     moped (1.5.0)
     multi_json (1.7.7)
+    net-http-persistent (2.9)
+    net-scp (1.1.2)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.6.8)
     nokogiri (1.6.0)
       mini_portile (~> 0.5.0)
     origin (1.1.0)
@@ -179,6 +183,9 @@ DEPENDENCIES
   libv8
   mongoid
   mongoid-paperclip
+  net-http-persistent
+  net-scp
+  net-ssh
   rails (= 3.2.13)
   rserve-simpler
   rspec

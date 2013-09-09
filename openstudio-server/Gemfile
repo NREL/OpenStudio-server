@@ -13,6 +13,11 @@ gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
 gem 'rserve-simpler'
 gem 'uuid'
 
+# net-ssh
+gem 'net-http-persistent'
+gem 'net-scp'
+gem 'net-ssh'
+
 # javascript
 gem 'libv8'
 gem 'execjs'
