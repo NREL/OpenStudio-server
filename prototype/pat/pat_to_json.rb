@@ -1,6 +1,11 @@
 require 'openstudio'
 require 'fileutils'
 
+# set up log file
+logSink = OpenStudio::FileLogSink.new(OpenStudio::Path.new(File.dirname(__FILE__) + "/pat_to_json.log"))
+logSink.setLogLevel(-2)
+OpenStudio::Logger::instance.standardOutLogger.disable
+
 # Client-side process.
 # 1. Open example project
 OpenStudio::Application::instance::application
@@ -40,7 +45,7 @@ unzip.extractAllFiles(project_dir_path) # formulation.json is in here too.
 # 4. Fix up paths in formulation.json
 loaded_analysis.updateInputPathData(loaded_json.projectDir,project_dir_path)
 analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_dir_path)
-analysis.saveJSON(project_dir_path / OpenStudio::Path.new("formulation.json"),analysis_options,true)
+loaded_analysis.saveJSON(project_dir_path / OpenStudio::Path.new("formulation.json"),analysis_options,true)
 
 # Client-side process.
 # 1. Create and *post* data point requests

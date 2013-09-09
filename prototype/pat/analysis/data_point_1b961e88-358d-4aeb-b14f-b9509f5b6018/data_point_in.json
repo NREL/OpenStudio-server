@@ -7,6 +7,7 @@
   "failed" : false,
   "name" : "Reduce Lighting Load By 30 percent Only",
   "problem_uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
+  "run_type" : "Local",
   "selected" : true,
   "uuid" : "1b961e88-358d-4aeb-b14f-b9509f5b6018",
   "variable_values" : [
@@ -36,7 +37,7 @@
  "metadata" :  {
   "display_name" : "Reduce Lighting Load By 30 percent Only",
   "name" : "Reduce Lighting Load By 30 percent Only",
-  "openstudio_version" : "1.0.4",
+  "openstudio_version" : "1.0.5",
   "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/PATTest",
   "uuid" : "1b961e88-358d-4aeb-b14f-b9509f5b6018",
   "values" : [

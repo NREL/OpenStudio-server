@@ -6,6 +6,7 @@
   "failed" : false,
   "name" : "New Design Alternative 1",
   "problem_uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
+  "run_type" : "Local",
   "selected" : true,
   "uuid" : "b3e02abc-e851-4b8e-b309-bd4b83137c16",
   "variable_values" : [
@@ -35,7 +36,7 @@
  "metadata" :  {
   "display_name" : "",
   "name" : "New Design Alternative 1",
-  "openstudio_version" : "1.0.4",
+  "openstudio_version" : "1.0.5",
   "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/PATTest",
   "uuid" : "b3e02abc-e851-4b8e-b309-bd4b83137c16",
   "values" : [

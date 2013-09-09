@@ -7,6 +7,7 @@
   "failed" : false,
   "name" : "Rotate Building 270 degrees Only",
   "problem_uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
+  "run_type" : "Local",
   "selected" : true,
   "uuid" : "94134184-a026-42d5-9c6d-dd802e935e37",
   "variable_values" : [
@@ -36,7 +37,7 @@
  "metadata" :  {
   "display_name" : "Rotate Building 270 degrees Only",
   "name" : "Rotate Building 270 degrees Only",
-  "openstudio_version" : "1.0.4",
+  "openstudio_version" : "1.0.5",
   "project_dir" : "C:/projects/openstudio-server-master/prototype/pat/PATTest",
   "uuid" : "94134184-a026-42d5-9c6d-dd802e935e37",
   "values" : [

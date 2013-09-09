@@ -72,7 +72,9 @@ end
 analysis = loadResult.analysisObject.get.to_Analysis.get
 
 # fix up paths
-# analysis.updateInputPathData(loadResult.projectDir,project_path)
+analysis.updateInputPathData(loadResult.projectDir,project_path)
+analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
+analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"),analysis_options,true)
 
 # load data point to run
 loadResult = OpenStudio::Analysis::loadJSON(data_point_json_path)
@@ -80,7 +82,7 @@ if loadResult.analysisObject.empty?
   loadResult.errors.each { |error|
     warn error.logMessage
   }
-  raise "Unable to laod json file from '" + data_point_json_path.to_s + "."
+  raise "Unable to load json file from '" + data_point_json_path.to_s + "."
 end
 data_point = loadResult.analysisObject.get.to_DataPoint.get
 analysis.addDataPoint(data_point) # also hooks up real copy of problem
