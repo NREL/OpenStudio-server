@@ -64,7 +64,7 @@ sudo /etc/init.d/Rserved
 
 ## Temporary 
 
-On the worker node, to run prototype/R/Mongo_teststart.rb
+On the worker node, to run prototype/R/SDPstart.rb
 
 ```sh
 sudo -i
