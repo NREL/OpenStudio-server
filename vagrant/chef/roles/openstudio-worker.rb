@@ -4,10 +4,10 @@ description "Install and configure OpenStudio for use with Ruby on Rails"
 run_list([
              # Default iptables setup on all servers.
              "role[base]",
-             "role[ruby]",
+             "role[ruby-worker]",
              #"role[web_base]",
              "role[r-project]",
-             "recipe[mongodb::server]",
+             "recipe[mongodb::server]",   # change this to mongodb:client and test
              "recipe[openstudio]",
              "recipe[energyplus]",
          ])

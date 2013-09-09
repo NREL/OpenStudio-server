@@ -27,10 +27,6 @@ default_attributes({
                    {
                        :name => "rubygems-bundler",
                        :version => "1.2.2",
-                   },
-                   {
-                       :name => "rails",
-                       :version => "3.2.13",
                    }
                ]
            }
