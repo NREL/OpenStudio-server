@@ -121,15 +121,9 @@ class AnalysesController < ApplicationController
       dps = @analysis.data_points.where(status: params[:jobs])
     end
 
-
-
-    #@analysis.start_r_and_run_sample
-
-    #redirect_to analysis_url(@analysis)
-
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {data_points: dps } }
+      format.json { render json: {data_points: dps.map{ |k| {:_id => k.id } } } }
     end
   end
 
