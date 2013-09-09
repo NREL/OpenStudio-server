@@ -67,6 +67,8 @@ sudo /etc/init.d/Rserved
 On the worker node, to run prototype/R/Mongo_teststart.rb
 
 ```sh
-sudo gem install mongo
-sudo gem install bson_ext
+sudo -i
+gem install mongoid
+gem install mongoid-paperclip
+exit
 ```
