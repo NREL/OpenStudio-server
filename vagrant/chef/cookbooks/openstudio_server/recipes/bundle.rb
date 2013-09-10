@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: openstudio_server
-# Recipe:: default
+# Recipe:: bundle
 #
 
 include_recipe "rbenv"

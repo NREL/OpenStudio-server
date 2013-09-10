@@ -9,7 +9,7 @@ run_list([
              "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
-             "recipe[openstudio_server:bundle]",   #install the bundle first to get rails for apache passenger
+             "recipe[openstudio_server::bundle]",   #install the bundle first to get rails for apache passenger
              "role[web_base]",
              "recipe[openstudio_server]",
 
