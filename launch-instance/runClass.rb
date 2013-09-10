@@ -59,9 +59,6 @@ a.upload_file(master_instance[0], local_path, remote_path)
 
 # slaves and masters are known
 
-# TODO: need to upload the IP ADDRESSES as a file (called "ip_addresses") such as 
-#    192.168.33.10|ubuntu|ubuntu
-#
 text = ""
 #master_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
 #text << "#{master_info.ip_address}|ubuntu|ubuntu\n"
@@ -70,6 +67,10 @@ text = ""
 text << "#{master_info.dns_name}|ubuntu|ubuntu\n"
 slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
 File.open("ip_addresses", 'w+') {|f| f.write(text) }
+
+text = ""
+text << "#{master_info.dns_name}"
+File.open("master_ip_address", 'w+') {|f| f.write(text) }
 
 # Right now these paths are assuming that we are in the same directory as the files
 upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh", "R_config.rb"]
