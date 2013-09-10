@@ -5,12 +5,14 @@ run_list([
              # Default iptables setup on all servers.
              "role[base]",
              "role[ruby]",
-             "role[web_base]",
              "role[r-project]",
              "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
-             "recipe[openstudio_server]"
+             "recipe[openstudio_server:bundle]",   #install the bundle first to get rails for apache passenger
+             "role[web_base]",
+             "recipe[openstudio_server]",
+
          ])
 
 

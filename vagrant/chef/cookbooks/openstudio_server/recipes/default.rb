@@ -5,13 +5,6 @@
 
 include_recipe "passenger_apache2"
 
-# execute bundle install in directory
-bash "bundle install" do
-  code <<-EOH
-    cd #{node[:openstudio_server][:server_path]}
-    bundle install
-  EOH
-end
 
 # load the test data (eventaully make this a separate recipe - or just remove)
 bash "load default data" do
