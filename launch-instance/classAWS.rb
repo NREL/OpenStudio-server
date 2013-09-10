@@ -5,12 +5,10 @@ require 'net/scp'
 
 module AwsInterface 
   class AwsAdapter
-    #IMAGE_ID = "ami-efed9586" #-Brians
-    #IMAGE_ID = "ami-862d6aef" #-new Brians
-    IMAGE_ID = "ami-a05a1bc9"
+    IMAGE_ID_SERVER = "ami-d3074eba"
+    IMAGE_ID_WORKER = "ami-9d074ef4"
     REGION = "us-east-1"
     #IMAGE_ID = "ami-4c0d4925" #-Nicks
-    #REGION = "us-west-1"
     MASTER_USER_DATA_FILE = "master_script.sh"
     SLAVE_USER_DATA_FILE = "slave_script.sh"
       
@@ -28,7 +26,7 @@ module AwsInterface
       # Region
       puts "Region: #{REGION}"      
       # Image ID
-      puts "Image ID: #{IMAGE_ID}"
+      #puts "Image ID: #{IMAGE_ID}"
       # Set Security Credentials
       @ec2 = AWS::EC2.new(:region => REGION,
                           :ssl_verify_peer => false)                    
@@ -76,7 +74,7 @@ module AwsInterface
       #                               :security_groups => @group,
       #                               :user_data => user_data,
       #                               :instance_type => "m1.medium")
-      @instance = @ec2.instances.create(:image_id => IMAGE_ID, 
+      @instance = @ec2.instances.create(:image_id => IMAGE_ID_SERVER, 
                                         :key_pair => @key_pair, 
                                         :security_groups => @group,
                                         :user_data => user_data,
@@ -119,7 +117,7 @@ module AwsInterface
        #                                 :security_groups => @group,
        #                                 :user_data => user_data, 
        #                                 :instance_type => "m1.medium")
-        @instance = @ec2.instances.create(:image_id => IMAGE_ID, 
+        @instance = @ec2.instances.create(:image_id => IMAGE_ID_WORKER, 
                                           :key_pair => @key_pair, 
                                           :security_groups => @group,
                                           :user_data => user_data,
