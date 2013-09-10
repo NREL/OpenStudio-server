@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   config.omnibus.chef_version = :latest
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu-precise-64"
+  config.vm.box = "ubuntu-precise-64-vbox"
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   # Create a forwarded port mapping which allows access to a specific port
@@ -78,9 +78,9 @@ Vagrant.configure("2") do |config|
       # you will need to create a yaml file with these values to
       # properly deploy to ec2
       require 'yaml'
-      secretsFile = File.join(Dir.home, ".aws_secrets")
-      if File.exist? secretsFile       
-        aws_config = YAML::load_file(File.join(Dir.home, ".aws_secrets"))
+      aws_secret_file = File.join(Dir.home, ".aws_secrets")
+      if File.exist? aws_secret_file
+        aws_config = YAML::load_file(aws_secret_file)
         aws.access_key_id = aws_config.fetch("access_key_id")
         aws.secret_access_key = aws_config.fetch("secret_access_key")
         aws.keypair_name = aws_config.fetch("keypair_name")
@@ -97,7 +97,7 @@ Vagrant.configure("2") do |config|
       aws.tags = {
           'Name' => 'OpenStudio',
           'NodeType' => 'Worker',
-          'OpenStudioVersion' => '0.10.5'
+          'OpenStudioVersion' => '1.0.4'
       }
     rescue LoadError
       warn "Unable to configure AWS provider."
