@@ -1,8 +1,8 @@
-name              "passenger_apache2"
-maintainer        "Opscode, Inc."
-maintainer_email  "cookbooks@opscode.com"
-license           "Apache 2.0"
-description       "Installs passenger for Apache2"
+name              "openstudio_server"
+maintainer        "NREL"
+maintainer_email  "nicholas.long@nrel.gov"
+license           "LGPL"
+description       "Installs and configures OpenStudio web application"
 long_description  IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version           "2.0.0"
 
