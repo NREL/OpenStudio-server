@@ -29,7 +29,6 @@ Windows
 # for each cmd window set the environment variable (or set globally (for NREL only)
 set OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
 vagrant up
-vagrant provision
 ```
 
 Mac / Linux
@@ -37,31 +36,26 @@ Mac / Linux
 ```sh
 # for each cmd window set the environment variable (or set globally (for NREL only)
 OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
-vagrant provision
 ```
 
 Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
 
-- Log into Vagrant VM
+- **NREL ONLY** Disable HTTPS
+If you are inside the NREL firewall then you will need to disable HTTPS on rubygems. 
+
+Log into Vagrant VM
 
 ```sh
 vagrant ssh
 ```
 
-- Add http://rubygems.org to gem sources (NREL ONLY)
+Add http://rubygems.org to gem sources
 
 ```sh
 sudo -i
 gem sources -r https://rubygems.org/
 gem sources -a http://rubygems.org/
 
-```
-
-- If it crashes on installing rails then do
-
-```sh
-sudo -i
-gem install rails -v "3.2.13" --force --no-rdoc --no-ri
 ```
 
 - Exit the VM and then reprovision the VM
@@ -71,19 +65,6 @@ vagrant provision
 ```
 
 Note, if provisioning fails continue to call the `vagrant provision` command
-
-- Run the rails server
-By default, apache is configured to run the rails application, but the `bundle install` command has yet to be called.
-
-SSH into the vagrant machine and run bundler in the openstudio-server application directory
-
-```sh
-vagrant ssh
-cd /var/www/rails/openstudio
-sudo bundle install
-```
-
-There may be a couple other dependencies to start (i.e. delayed_job).  To see the server instructions go to [OpenStudio Rails Application](./openstudio-server/README.md)
 
 - Test the Rails application by pointing your local browser to http://localhost:8080
 
@@ -116,7 +97,9 @@ private_key_path: /Users/<user>/.ssh/amazon.pem
 vagrant up --provider=aws
 ```
 
-- vagrant ssh or vagrant ubuntu@ec2-a-b-c-d.compute-1.amazonaws.com
+Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue. There is a known issue with the dependency order of Rails and Passenger.
+
+- vagrant ssh or ssh ubuntu@ec2-a-b-c-d.compute-1.amazonaws.com
 
 - login to AWS and take a snapshot of the image
 
