@@ -40,7 +40,7 @@ command = "rm -rf /home/vagrant/analysis"
 a.send_command("192.168.33.11",command)
 
 # Unzip Analysis Zip File
-command = "unzip /home/vagrant/analysis.zip -d /home/vagrant/"
+command = "unzip -o /home/vagrant/analysis.zip -d /home/vagrant/"
 a.send_command("192.168.33.11",command)
 
 ##################################
