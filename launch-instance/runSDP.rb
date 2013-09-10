@@ -68,6 +68,10 @@ text << "#{master_info.dns_name}|ubuntu|ubuntu\n"
 slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
 File.open("ip_addresses", 'w+') {|f| f.write(text) }
 
+text = ""
+text << "#{master_info.dns_name}"
+File.open("master_ip_address", 'w+') {|f| f.write(text) }
+
 # Right now these paths are assuming that we are in the same directory as the files
 upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
 upload_files.each do |file|
@@ -120,7 +124,7 @@ slave_instances.each { |instance|
   command = "rm /home/ubuntu/SimulateDataPoint.rb"
   a.send_command(instance,command)
 }  
-local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint.rb"
+local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint_ec2.rb"
 remote_path = "/home/ubuntu/SimulateDataPoint.rb"
 # Upload File to slave Instance
 slave_instances.each { |instance|
@@ -154,6 +158,11 @@ slave_instances.each { |instance|
 # Unzip Analysis Zip File
 slave_instances.each { |instance|
   command = "unzip -o /home/ubuntu/analysis.zip -d /home/ubuntu/"
+  a.send_command(instance,command)
+}  
+# delete Analysis Zip File
+slave_instances.each { |instance|
+  command = "rm /home/ubuntu/analysis.zip"
   a.send_command(instance,command)
 }  
 
@@ -196,6 +205,15 @@ master_instance.each { |instance|
 
 # Unzip models Zip File
 command = "unzip -o /home/ubuntu/models.zip -d /home/ubuntu/"
+slave_instances.each { |instance|
+  a.send_command(instance,command)
+}  
+master_instance.each { |instance|
+  a.send_command(instance,command)
+} 
+
+# delete models Zip File
+command = "rm /home/ubuntu/models.zip"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
@@ -267,6 +285,48 @@ master_instance.each { |instance|
 }
 
 command = "chmod 774 /home/ubuntu/downloadR.rb"
+master_instance.each { |instance|
+  a.send_command(instance,command)
+}
+
+###############################
+# Upload data_point_uuids
+local_path = File.dirname(__FILE__) + "/data_point_uuids.txt"
+remote_path = "/home/ubuntu/data_point_uuids.txt"
+# Upload File to master Instance
+master_instance.each { |instance|
+  a.upload_file(instance, local_path, remote_path)
+}
+
+command = "chmod 774 /home/ubuntu/data_point_uuids.txt"
+master_instance.each { |instance|
+  a.send_command(instance,command)
+}
+
+###############################
+# Upload data_point_uuids
+local_path = File.dirname(__FILE__) + "/master_ip_address"
+remote_path = "/home/ubuntu/master_ip_address"
+# Upload File to master Instance
+master_instance.each { |instance|
+  a.upload_file(instance, local_path, remote_path)
+}
+
+command = "chmod 774 /home/ubuntu/master_ip_address"
+master_instance.each { |instance|
+  a.send_command(instance,command)
+}
+
+###############################
+# Upload SDP_EC2.rb
+local_path = File.dirname(__FILE__) + "/SDP_EC2.rb"
+remote_path = "/home/ubuntu/SDP_EC2.rb"
+# Upload File to master Instance
+master_instance.each { |instance|
+  a.upload_file(instance, local_path, remote_path)
+}
+
+command = "chmod 774 /home/ubuntu/SDP_EC2.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }

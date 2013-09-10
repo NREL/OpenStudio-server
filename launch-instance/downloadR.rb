@@ -21,7 +21,7 @@ a = Rtest.new
 Mongoid.load!("/home/ubuntu/models/mongoid.yml", :development)
 
 
-file = File.open('/data/prototype/R/data_point_uuids.txt','r')
+file = File.open('/home/ubuntu/data_point_uuids.txt','r')
 lines = file.readlines
 file.close
 lines.each do |line|
