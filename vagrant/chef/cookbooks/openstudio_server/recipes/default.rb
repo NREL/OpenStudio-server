@@ -37,6 +37,7 @@ end
 bash "restart delayed job" do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}
+    chmod 774 script/delayed_job
     ./script/delayed_job restart
   EOH
 end
