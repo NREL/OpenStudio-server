@@ -25,8 +25,8 @@ default_attributes({
            :gems => {
                "2.0.0-p195" => [
                    {
-                       :name => "rubygems-bundler",
-                       :version => "1.2.2",
+                       :name => "bundler",
+                       :version => "1.3.5",
                    }
                ]
            }
