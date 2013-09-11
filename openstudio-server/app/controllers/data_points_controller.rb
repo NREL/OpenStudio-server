@@ -87,7 +87,10 @@ class DataPointsController < ApplicationController
   def download
     @data_point = DataPoint.find(params[:id])
 
-    data_point_zip_data = File.read("#{@data_point.zip_file_name}")
+    zip_file_name = "data_point_#{@data_point.id.gsub(/{|}/,'')}.zip"
+
+    # TODO figure out the path based on vagrant vs aws
+    data_point_zip_data = File.read("/home/vagrant/analysis_a8feca85-dab9-4510-8610-651ef847781d/#{zip_file_name}")
 
     send_data data_point_zip_data, :filename => "#{@data_point.uuid}.zip", :type => 'application/zip; header=present', :disposition => "attachment"
   end

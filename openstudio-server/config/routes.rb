@@ -37,7 +37,9 @@ OpenstudioServer::Application.routes.draw do
         resources :variables, shallow: true
       end
       resources :data_points, shallow: true  do
-        get :download
+        member do
+          get :download
+        end
       end
     end
     #end
