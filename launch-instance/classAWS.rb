@@ -431,4 +431,11 @@ end
     File.open(file_name, "w") {|file| file.puts text}
   end
 
+  def prepare_mongoid_script(master_ip)
+    file_template = "mongoid_template.yml"
+    text = File.read(file_template)
+    text = text.gsub(/MASTER_IP/, master_ip)
+    File.open("mongoid.yml", "w") {|file| file.puts text}
+  end
+
 end # DONE WITH MODULE
