@@ -70,7 +70,7 @@ class Analysis
     self.save!
 
   end
-  handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }
+  handle_asynchronously :start_r_and_run_sample
 
   protected
 

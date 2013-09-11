@@ -6,8 +6,9 @@ class DataPoint
   field :_id, :type => String, default: ->{ uuid || UUID.generate }
   field :name, :type => String
   field :values, :type => Array
-  #field :analysis_id, :type => String
   field :ip_address, :type => String
+  field :zip_file_name, :type => String
+  field :output, :type => Hash
 
   belongs_to :analysis
 end

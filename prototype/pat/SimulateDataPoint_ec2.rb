@@ -4,11 +4,11 @@ require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 
 require 'mongoid'
-require 'mongoid_paperclip'
+require 'mongoid_paperclip'    #need to load the rails models
+require 'delayed_job_mongoid'  #need to load the rails models
 require '/home/ubuntu/models/algorithm'
 require '/home/ubuntu/models/analysis'
 require '/home/ubuntu/models/data_point'
-#require '/home/ubuntu/models/delayed_job_view'
 require '/home/ubuntu/models/measure'
 require '/home/ubuntu/models/problem'
 require '/home/ubuntu/models/project'
@@ -142,6 +142,7 @@ puts host
 dp = DataPoint.find_or_create_by(uuid: data_point.uuid)
 #dp = DataPoint.find_or_create_by(uuid: uuidtrim)
 dp.analysis = Analysis.find_or_create_by(uuid: data_point.analysisUUID.get)
+dp["output"] = data_point.toJSON(data_point_options)
 dp.values = data_point.variableValues.map{|v| v.toDouble}
 dp.ip_address = host
 dp.save!
