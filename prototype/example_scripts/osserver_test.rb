@@ -8,10 +8,22 @@
 
 require 'openstudio'
 
-# run the existing project or delete it and create new one
-runExisting = true
+# find paths
+serverFileName = File.dirname(__FILE__) + "/../../vagrant/server"
+workerFileName = File.dirname(__FILE__) + "/../../vagrant/worker"
+patDirName = File.dirname(__FILE__) + "/../pat/PATTest/"
 
-OpenStudio::Application::instance
+# configuration
+serverPath = OpenStudio::Path.new(serverFileName)
+serverUrl = OpenStudio::Url.new("http://localhost:8080")
+workerPath = OpenStudio::Path.new(workerFileName)
+workerUrl = OpenStudio::Url.new("http://localhost:8081")
+
+# call vagrant halt on terminate to simulate longer boot timess
+haltOnStop = false
+
+# run the existing project or delete it and create new one
+runExisting = false
 
 def listProjects(server)
 
@@ -53,54 +65,50 @@ def listProjects(server)
 
 end
 
-# find paths
-serverFileName = File.dirname(__FILE__) + "/../../vagrant/server"
-workerFileName = File.dirname(__FILE__) + "/../../vagrant/worker"
-patDirName = File.dirname(__FILE__) + "/../pat/PATTest/"
-
 # create the vagrant provider
-serverPath = OpenStudio::Path.new(serverFileName)
-serverUrl = OpenStudio::Url.new("http://localhost:8080")
-workerPath = OpenStudio::Path.new(workerFileName)
-workerUrl = OpenStudio::Url.new("http://localhost:8081")
-haltOnStop = false
-vagrantProvider = OpenStudio::VagrantProvider.new(serverPath, serverUrl, workerPath, workerUrl, haltOnStop)
+settings = OpenStudio::VagrantSettings.new()
+settings.setServerPath(serverPath)
+settings.setServerUrl(serverUrl)
+settings.setWorkerPath(workerPath)
+settings.setWorkerUrl(workerUrl)
+settings.setHaltOnStop(haltOnStop)
+
+vagrantProvider = OpenStudio::VagrantProvider.new()
+vagrantProvider.setSettings(settings)
 
 # test that it is working
-vagrantProvider.signUserAgreement(true)
-puts "userAgreementSigned = #{vagrantProvider.userAgreementSigned}"
+settings.signUserAgreement(true)
+puts "userAgreementSigned = #{settings.userAgreementSigned}"
 puts "internetAvailable = #{vagrantProvider.internetAvailable}"
 puts "serviceAvailable = #{vagrantProvider.serviceAvailable}"
 
 # start the server
-vagrantProvider.startServer
+vagrantProvider.requestStartServer
 
 puts "server starting"
 
-while (vagrantProvider.serverUrl.empty?)
-  OpenStudio::System::msleep(3000)
-  puts "waiting to boot server"
+vagrantProvider.waitForServer
+if not vagrantProvider.serverStarted
+  raise "Could not start server"
 end
 
 puts "server started"
 
+# start the workers
+vagrantProvider.requestStartWorkers
+
 puts "workers starting"
 
-# start the workers
-# TODO: point worker to server?
-vagrantProvider.startWorkers
-
-while (vagrantProvider.workerUrls.empty?)
-  OpenStudio::System::msleep(3000)
-  puts "waiting to boot workers"
+vagrantProvider.waitForWorkers
+if not vagrantProvider.workersStarted
+  raise "Could not start workers"
 end
 
 puts "workers started"
 
-# TODO: how to tell when worker is ready?
-
 # create an OSServer to talk with the server
-server = OpenStudio::OSServer.new(vagrantProvider.serverUrl.get)
+session = vagrantProvider.session
+server = OpenStudio::OSServer.new(session.serverUrl.get)
 
 while (not server.available)
   OpenStudio::System::msleep(3000)
@@ -193,18 +201,17 @@ puts "isQueued = #{isQueued}"
 isRunning = server.isAnalysisRunning(analysisUUID)
 puts "isRunning = #{isRunning}"
 
-puts "Stoping analysis #{analysisUUID}"
+puts "Stopping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
 puts "  Success = #{success}"
   
 # shut the vagrant boxes down
+vagrantProvider.requestTerminate
+
 puts "shutting down"
 
-vagrantProvider.terminate
-
-while (not vagrantProvider.terminateComplete)
-  OpenStudio::System::msleep(3000)
-  puts "waiting to shut down"
+if not vagrantProvider.waitForTerminated
+  raise "Could not shut down instances"
 end
 
 puts "goodbye"
