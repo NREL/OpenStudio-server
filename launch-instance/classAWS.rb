@@ -358,6 +358,31 @@ end
         retry    
       end
     end    
+    
+#======================= download file ======================#
+    # Uploads a file using SCP to an instance. 
+    # Need to pass the instance object and the path to the file (Local and Remote). 
+    def download_file(instance, remote_path, local_path)
+      # send command to instance
+      puts "downloading #{remote_path} from instance #{instance.instance_id}"
+      begin
+        Net::SCP.start(instance.ip_address, "ubuntu",
+                       :key_data => [@key_pair.private_key]) do |scp|
+          puts "downloading #{remote_path} on the instance #{instance.instance_id}: from #{local_path}"
+          scp.download! remote_path, local_path
+        end
+      rescue SystemCallError, Timeout::Error => e
+        # port 22 might not be available immediately after the instance finishes launching
+        sleep 1
+        puts "Not Yet"
+        retry
+      rescue
+        puts "unknown download error, retry"
+        sleep 1
+        retry    
+      end
+    end      
+    
 #======================= get status ======================#
 
     def get_status()
@@ -404,6 +429,13 @@ end
     #text = text.gsub(/MASTER_DNS/, master_dns)
     text = text.gsub(/MASTER_HOSTNAME/, master_hostname)
     File.open(file_name, "w") {|file| file.puts text}
+  end
+
+  def prepare_mongoid_script(master_ip)
+    file_template = "mongoid_template.yml"
+    text = File.read(file_template)
+    text = text.gsub(/MASTER_IP/, master_ip)
+    File.open("mongoid.yml", "w") {|file| file.puts text}
   end
 
 end # DONE WITH MODULE
