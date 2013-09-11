@@ -26,6 +26,7 @@ master_dns = master_info.dns_name
 master_hostname = "master_name"
 prepare_slave_script("slave_script.sh", master_ip, master_dns, master_hostname)
 #prepare_slave_script("master_script.sh", master_ip, master_dns, master_hostname)
+prepare_mongoid_script(master_ip)
 
 # Launch Slaves 
 slave_info = a.launch_slave(2, master_info, "slave_script.sh")
@@ -243,7 +244,7 @@ master_instance.each { |instance|
 
 ###############################
 # Upload mongoid
-local_path = File.dirname(__FILE__) + "/../prototype/pat/mongoid.yml"
+local_path = File.dirname(__FILE__) + "/mongoid.yml"
 remote_path = "/home/ubuntu/models/mongoid.yml"
 # Upload File to slave Instance
 slave_instances.each { |instance|
@@ -333,16 +334,16 @@ master_instance.each { |instance|
 
 ####################
 # run command
-#command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /data/prototype/R/SDP_test.rb"
-#master_instance.each { |instance|
-#  a.shell_command(instance, command)
-#}
+command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SDP_EC2.rb"
+master_instance.each { |instance|
+  a.shell_command(instance, command)
+}
 ####################
 # download command
-#command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/vagrant/downloadR.rb"
-#master_instance.each { |instance|
-#  a.shell_command(instance, command)
-#}
+command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/downloadR.rb"
+master_instance.each { |instance|
+  a.shell_command(instance, command)
+}
 
 # Terminate Instance
 #a.terminate_master()
