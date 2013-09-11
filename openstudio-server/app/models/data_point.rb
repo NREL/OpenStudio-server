@@ -8,7 +8,7 @@ class DataPoint
   field :values, :type => Array
   field :ip_address, :type => String
   field :zip_file_name, :type => String
-  field :output, :type => Hash
+  field :output
 
   belongs_to :analysis
 end
