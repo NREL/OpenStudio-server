@@ -5,8 +5,8 @@ require 'net/scp'
 
 module AwsInterface 
   class AwsAdapter
-    IMAGE_ID_SERVER = "ami-05bff66c"
-    IMAGE_ID_WORKER = "ami-0bbcf562"
+    IMAGE_ID_SERVER = "ami-21c88148"
+    IMAGE_ID_WORKER = "ami-ebc98082"
     REGION = "us-east-1"
     #IMAGE_ID = "ami-4c0d4925" #-Nicks
     MASTER_USER_DATA_FILE = "master_script.sh"
