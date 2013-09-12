@@ -25,7 +25,7 @@ file = File.open('/home/ubuntu/data_point_uuids.txt','r')
 lines = file.readlines
 file.close
 lines.each do |line|
-  uuid = "{" << line[0...-1] << "}"
+  uuid = line[0...-1]
   dp = DataPoint.find_by(uuid: uuid)
   puts dp.ip_address
   puts dp.uuid
