@@ -3,7 +3,7 @@ development:
     default:
       database: openstudio_server_development
       hosts:
-        - 23.22.155.139:27017
+        - 54.227.188.175:27017
       options:
         allow_dynamic_fields: true 
         raise_not_found_error: false
