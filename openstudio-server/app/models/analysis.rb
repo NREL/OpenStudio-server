@@ -3,6 +3,8 @@ class Analysis
   include Mongoid::Timestamps
   include Mongoid::Paperclip
 
+  require 'delayed_job_mongoid'
+
   field :uuid, :type => String
   field :_id, :type => String, default: ->{ uuid || UUID.generate}
   field :version_uuid
@@ -70,7 +72,7 @@ class Analysis
     self.save!
 
   end
-  handle_asynchronously :start_r_and_run_sample # :run_at => Proc.new { 10.seconds.from_now }
+  handle_asynchronously :start_r_and_run_sample
 
   protected
 

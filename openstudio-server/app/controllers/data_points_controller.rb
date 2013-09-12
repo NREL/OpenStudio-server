@@ -17,7 +17,7 @@ class DataPointsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @data_point  }
+      format.json { render json: @data_point.output  }
     end
   end
 
@@ -82,5 +82,16 @@ class DataPointsController < ApplicationController
       format.html { redirect_to data_points_url }
       format.json { head :no_content }
     end
+  end
+
+  def download
+    @data_point = DataPoint.find(params[:id])
+
+    zip_file_name = "data_point_#{@data_point.id.gsub(/{|}/,'')}.zip"
+
+    # TODO figure out the path based on vagrant vs aws
+    data_point_zip_data = File.read("/home/vagrant/analysis_a8feca85-dab9-4510-8610-651ef847781d/#{zip_file_name}")
+
+    send_data data_point_zip_data, :filename => "#{@data_point.uuid}.zip", :type => 'application/zip; header=present', :disposition => "attachment"
   end
 end
