@@ -353,10 +353,10 @@ master_instance.each { |instance|
 }
 
 # Terminate Instance
-#a.terminate_master()
-#a.terminate_slaves()
+a.terminate_master()
+a.terminate_slaves()
 
 # Delete key pair and group
-#a.clean_up()
+a.clean_up()
 
 
