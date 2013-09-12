@@ -2,6 +2,7 @@
 require 'openstudio'
 require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
+require 'json'
 
 require 'mongoid'
 require 'mongoid_paperclip'
@@ -142,6 +143,7 @@ puts host
 dp = DataPoint.find_or_create_by(uuid: data_point.uuid)
 #dp = DataPoint.find_or_create_by(uuid: uuidtrim)
 dp.analysis = Analysis.find_or_create_by(uuid: data_point.analysisUUID.get)
+dp.output = JSON.parse(data_point.toJSON(data_point_options))
 dp.values = data_point.variableValues.map{|v| v.toDouble}
 dp.ip_address = host
 dp.save!

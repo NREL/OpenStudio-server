@@ -60,6 +60,30 @@ puts "isQueued = #{isQueued}"
 isRunning = server.isAnalysisRunning(analysisUUID)
 puts "isRunning = #{isRunning}"
 
+dataPointUUIDs = server.dataPointUUIDs(analysisUUID)
+puts "#{dataPointUUIDs.size} DataPoints"
+
+runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+puts "  #{runningDataPointUUIDs.size} Running DataPoints"
+
+queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
+puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
+
+completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
+puts "  #{completeDataPointUUIDs.size} Complete DataPoints"
+
+# try to load the results
+dataPointUUIDs.each do |dataPointUUID|
+  json = server.dataPointJSON(analysisUUID, dataPointUUID)
+  result = OpenStudio::Analysis::loadJSON(json)
+  if result.analysisObject.empty? or result.analysisObject.get.to_DataPoint.empty?
+    puts "  Can't reconstruct dataPoint #{dataPointUUID}"
+  end
+end
+
+
+# todo: wait for all complete 
+
 puts "Stoping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
 puts "  Success = #{success}"

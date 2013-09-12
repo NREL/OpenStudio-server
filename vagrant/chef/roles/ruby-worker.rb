@@ -26,6 +26,12 @@ default_attributes({
                                "2.0.0-p195" => [
                                    {
                                        :name => "mongoid"
+                                   },
+                                   {
+                                       :name => "mongoid-paperclip"
+                                   },
+                                   {
+                                       :name => "delayed_job_mongoid"
                                    }
                                ]
                            }
