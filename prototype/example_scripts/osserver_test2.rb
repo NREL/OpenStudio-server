@@ -79,6 +79,12 @@ dataPointUUIDs.each do |dataPointUUID|
   if result.analysisObject.empty? or result.analysisObject.get.to_DataPoint.empty?
     puts "  Can't reconstruct dataPoint #{dataPointUUID}"
   end
+  
+  path = OpenStudio::Path.new("./#{dataPointUUID}.zip")
+  result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
+  if not result
+    puts "  Failed to download dataPoint #{dataPointUUID}"
+  end
 end
 
 
