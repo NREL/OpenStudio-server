@@ -124,16 +124,23 @@ master_instance.each { |instance|
 slave_instances.each { |instance|
   command = "rm /home/ubuntu/SimulateDataPoint.rb"
   a.send_command(instance,command)
+  command = "rm /home/ubuntu/CommunicateResults_Mongo.rb"
+  a.send_command(instance,command)
 }  
-local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint_ec2.rb"
+local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint.rb"
 remote_path = "/home/ubuntu/SimulateDataPoint.rb"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
+  command = "chmod 774 " + remote_path
+  a.send_command(instance,command)  
 }
+local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint.rb"
+remote_path = "/home/ubuntu/CommunicateResults_Mongo.rb"
 slave_instances.each { |instance|
-  command = "chmod 774 /home/ubuntu/SimulateDataPoint.rb"
-  a.send_command(instance,command)
+  a.upload_file(instance, local_path, remote_path)
+  command = "chmod 774 " + remote_path
+  a.send_command(instance,command)  
 }
 #################################################
 # Upload analysis.zip
