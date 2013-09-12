@@ -51,7 +51,7 @@ puts @r.converse('flag["run"]')
        flag <- dbGetQuery(mongo,"control",'{"_id":1}')
        if (flag["run"] == "FALSE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
        dbDisconnect(mongo)
-       y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SimulateDataPoint.rb -d ~/analysis/data_point_",x,sep="")
+       y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SimulateDataPoint.rb -d ~/analysis/data_point_",x,"-r AWS",sep="")
        z <- system(y,intern=TRUE)
        j <- length(z)
        z}

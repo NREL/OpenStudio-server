@@ -16,12 +16,19 @@ a.send_command("192.168.33.10",command)
 # Upload SimulateDataPoint
 command = "rm /home/vagrant/SimulateDataPoint.rb"
 a.send_command("192.168.33.11",command)
+command = "rm /home/vagrant/CommunicateResults_Mongo.rb"
+a.send_command("192.168.33.11",command)
 local_path = File.dirname(__FILE__) + "/../pat/SimulateDataPoint.rb"
 remote_path = "/home/vagrant/SimulateDataPoint.rb"
 # Upload File to slave Instance
 a.upload_file("192.168.33.11", local_path, remote_path)
-
-command = "chmod 774 /home/vagrant/SimulateDataPoint.rb"
+command = "chmod 774 " + remote_path
+a.send_command("192.168.33.11",command)
+local_path = File.dirname(__FILE__) + "/../pat/CommunicateResults_Mongo.rb"
+remote_path = "/home/vagrant/CommunicateResults_Mongo.rb"
+# Upload File to slave Instance
+a.upload_file("192.168.33.11", local_path, remote_path)
+command = "chmod 774 " + remote_path
 a.send_command("192.168.33.11",command)
 
 puts "make sure Rserve is running on server"
