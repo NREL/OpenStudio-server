@@ -25,20 +25,20 @@ file = File.open('/data/prototype/R/data_point_uuids.txt','r')
 lines = file.readlines
 file.close
 lines.each do |line|
-  uuid = "{" << line[0...-1] << "}"
+  uuid = line[0...-1] # removes the \n
   dp = DataPoint.find_by(uuid: uuid)
   puts dp.ip_address
   puts dp.uuid
   puts dp.values
   adir = dp.analysis_id
-  analysis_dir = "/home/vagrant/analysis_" << adir[1...-1]
+  analysis_dir = "/home/vagrant/analysis_" << adir
   if Dir.exists?(analysis_dir) == false
     Dir.mkdir(analysis_dir)
   end  
   
   # zip datapoint File
-  datapoint_path = "data_point_" << line[0...-1]
-  datapoint_path_zip = "data_point_" << line[0...-1] << ".zip"
+  datapoint_path = "data_point_" << uuid
+  datapoint_path_zip = "data_point_" << uuid << ".zip"
   command = "cd /home/vagrant/analysis ; zip -r " << datapoint_path_zip << " " << datapoint_path
   a.shell_command(dp.ip_address,command)
   

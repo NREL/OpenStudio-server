@@ -2,23 +2,6 @@
 require 'openstudio'
 require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
-require 'json'
-
-require 'mongoid'
-require 'mongoid_paperclip'
-require '/home/vagrant/mongoid/algorithm'
-require '/home/vagrant/mongoid/analysis'
-require '/home/vagrant/mongoid/data_point'
-#require '/home/vagrant/mongoid/delayed_job_view'
-require '/home/vagrant/mongoid/measure'
-require '/home/vagrant/mongoid/problem'
-require '/home/vagrant/mongoid/project'
-require '/home/vagrant/mongoid/seed'
-require '/home/vagrant/mongoid/variable'
-require '/home/vagrant/mongoid/workflow_step'
-require '/home/vagrant/mongoid/inflections'
-require 'socket'
-
 
 # parse arguments with optparse
 options = Hash.new
@@ -26,6 +9,10 @@ optparse = OptionParser.new do |opts|
 
   opts.on( '-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json." ) do |directory|
     options[:directory] = directory
+  end
+  
+  opts.on( '-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |runType|
+    options[:runType] = runType
   end
   
   options[:logLevel] = -1
@@ -40,6 +27,39 @@ if not options[:directory]
   # required argument is missing
   puts optparse
   exit
+end
+
+runType = "Local"
+if options[:runType]
+  runType = options[:runType]
+  if not ((runType == "Local") or (runType == "Vagrant") or (runType == "AWS"))
+    puts optparse
+    exit
+  end
+end
+
+if (runType == "Vagrant")
+  mongoid_path_prefix = '/home/vagrant/mongoid/'
+elsif (runType == "AWS")
+  mongoid_path_prefix = '/home/ubuntu/models/'
+  require 'delayed_job_mongoid'
+end
+
+if (runType == "Local")
+  require "#{File.dirname(__FILE__)}/CommunicateResults_Local.rb"
+else
+  require "#{File.dirname(__FILE__)}/CommunicateResults_Mongo.rb"
+  require mongoid_path_prefix + 'algorithm'
+  require mongoid_path_prefix + 'analysis'
+  require mongoid_path_prefix + 'data_point'
+  require mongoid_path_prefix + 'measure'
+  require mongoid_path_prefix + 'problem'
+  require mongoid_path_prefix + 'project'
+  require mongoid_path_prefix + 'seed'
+  require mongoid_path_prefix + 'variable'
+  require mongoid_path_prefix + 'workflow_step'
+  require mongoid_path_prefix + 'inflections'
+  Mongoid.load!(mongoid_path_prefix + "mongoid.yml", :development)
 end
 
 directory = OpenStudio::Path.new(options[:directory])
@@ -123,27 +143,6 @@ run_manager.waitForFinished
 # use the completed job to populate data_point with results
 analysis.problem.updateDataPoint(data_point,job)
 
-# for now, print the final data point json
-data_point_json_path = directory / OpenStudio::Path.new("data_point_out.json")
-data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(project_path)
-data_point.saveJSON(data_point_json_path,data_point_options,true)
+# implemented differently for Local vs. Vagrant or AWS
+communicateResults(data_point,directory)
 
-Mongoid.load!("/home/vagrant/mongoid/mongoid.yml", :development)
-#puts data_point.toJSON(data_point_options)
-puts data_point.uuid
-data_point.variableValues.each {|value| puts value.toDouble}
-puts data_point.analysisUUID.get
-
-host = Socket.gethostname
-puts host
-
-#uuid = data_point.uuid
-#uuidtrim = uuid[1...-2]
-#puts uuidtrim
-dp = DataPoint.find_or_create_by(uuid: data_point.uuid)
-#dp = DataPoint.find_or_create_by(uuid: uuidtrim)
-dp.analysis = Analysis.find_or_create_by(uuid: data_point.analysisUUID.get)
-dp.output = JSON.parse(data_point.toJSON(data_point_options))
-dp.values = data_point.variableValues.map{|v| v.toDouble}
-dp.ip_address = host
-dp.save!

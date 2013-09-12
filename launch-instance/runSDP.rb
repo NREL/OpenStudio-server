@@ -63,10 +63,10 @@ a.upload_file(master_instance[0], local_path, remote_path)
 text = ""
 #master_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
 #text << "#{master_info.ip_address}|ubuntu|ubuntu\n"
-#slave_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
+slave_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
 #File.open("ip_addresses", 'w+') {|f| f.write(text) }
-text << "#{master_info.dns_name}|ubuntu|ubuntu\n"
-slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
+#text << "#{master_info.dns_name}|ubuntu|ubuntu\n"
+#slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
 File.open("ip_addresses", 'w+') {|f| f.write(text) }
 
 text = ""
@@ -124,16 +124,23 @@ master_instance.each { |instance|
 slave_instances.each { |instance|
   command = "rm /home/ubuntu/SimulateDataPoint.rb"
   a.send_command(instance,command)
+  command = "rm /home/ubuntu/CommunicateResults_Mongo.rb"
+  a.send_command(instance,command)
 }  
-local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint_ec2.rb"
+local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint.rb"
 remote_path = "/home/ubuntu/SimulateDataPoint.rb"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
+  command = "chmod 774 " + remote_path
+  a.send_command(instance,command)  
 }
+local_path = File.dirname(__FILE__) + "/../prototype/pat/CommunicateResults_Mongo.rb"
+remote_path = "/home/ubuntu/CommunicateResults_Mongo.rb"
 slave_instances.each { |instance|
-  command = "chmod 774 /home/ubuntu/SimulateDataPoint.rb"
-  a.send_command(instance,command)
+  a.upload_file(instance, local_path, remote_path)
+  command = "chmod 774 " + remote_path
+  a.send_command(instance,command)  
 }
 #################################################
 # Upload analysis.zip
@@ -331,7 +338,7 @@ command = "chmod 774 /home/ubuntu/SDP_EC2.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
-
+exit
 ####################
 # run command
 command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SDP_EC2.rb"
@@ -346,10 +353,10 @@ master_instance.each { |instance|
 }
 
 # Terminate Instance
-#a.terminate_master()
-#a.terminate_slaves()
+a.terminate_master()
+a.terminate_slaves()
 
 # Delete key pair and group
-#a.clean_up()
+a.clean_up()
 
 
