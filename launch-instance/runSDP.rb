@@ -29,7 +29,7 @@ prepare_slave_script("slave_script.sh", master_ip, master_dns, master_hostname)
 prepare_mongoid_script(master_ip)
 
 # Launch Slaves 
-slave_info = a.launch_slave(2, master_info, "slave_script.sh")
+slave_info = a.launch_slave(8, master_info, "slave_script.sh")
 slave_instances = Array.new(0)
 slave_info.each {|struct| slave_instances.push(struct.instance)}
 
@@ -63,10 +63,10 @@ a.upload_file(master_instance[0], local_path, remote_path)
 text = ""
 #master_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
 #text << "#{master_info.ip_address}|ubuntu|ubuntu\n"
-#slave_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
+slave_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
 #File.open("ip_addresses", 'w+') {|f| f.write(text) }
-text << "#{master_info.dns_name}|ubuntu|ubuntu\n"
-slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
+#text << "#{master_info.dns_name}|ubuntu|ubuntu\n"
+#slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
 File.open("ip_addresses", 'w+') {|f| f.write(text) }
 
 text = ""
@@ -338,7 +338,7 @@ command = "chmod 774 /home/ubuntu/SDP_EC2.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
-
+exit
 ####################
 # run command
 command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SDP_EC2.rb"
@@ -353,10 +353,10 @@ master_instance.each { |instance|
 }
 
 # Terminate Instance
-#a.terminate_master()
-#a.terminate_slaves()
+a.terminate_master()
+a.terminate_slaves()
 
 # Delete key pair and group
-#a.clean_up()
+a.clean_up()
 
 
