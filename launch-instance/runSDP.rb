@@ -135,7 +135,7 @@ slave_instances.each { |instance|
   command = "chmod 774 " + remote_path
   a.send_command(instance,command)  
 }
-local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint.rb"
+local_path = File.dirname(__FILE__) + "/../prototype/pat/CommunicateResults_Mongo.rb"
 remote_path = "/home/ubuntu/CommunicateResults_Mongo.rb"
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
