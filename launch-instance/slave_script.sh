@@ -2,8 +2,8 @@
 mkdir /home/ubuntu/test
 
 # Change Host
-#echo 54.227.188.175 MASTER_DNS master_name >> /etc/hosts
-echo 54.227.188.175 master_name >> /etc/hosts
+#echo 54.242.71.153 MASTER_DNS master_name >> /etc/hosts
+echo 54.242.71.153 master_name >> /etc/hosts
 
 # Replace Hostname 
 #echo "slave1" > /etc/hostname

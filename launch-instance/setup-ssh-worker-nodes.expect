@@ -1,9 +1,22 @@
 #!/usr/bin/expect -f
-set timeout 6
+set timeout 8
 set IPADDRESS [lindex $argv 0]
 set USERNAME [lindex $argv 1]
 set PASSWORD [lindex $argv 2]
 set count 1
+
+if {[catch "spawn /usr/bin/ssh-copy-id $USERNAME@$IPADDRESS"]} {
+    puts "error"
+   }
+   expect {
+      " password:" {
+      send "$PASSWORD\r"
+      exp_continue
+     }
+     EOF {
+      puts "got EOF"
+     }
+   }
 
 while { $count < 10 } {
   puts "Testing Passwordless SSH"
@@ -33,9 +46,6 @@ while { $count < 10 } {
     "*~$ " {
       puts "worked"
       send "exit\r"
-      set ::logfile [open /home/ubuntu/ip_addresses_good a]
-      puts $::logfile $IPADDRESS
-      close $::logfile
       set count 100
     }
     timeout {
