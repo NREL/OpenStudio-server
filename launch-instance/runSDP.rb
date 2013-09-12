@@ -338,7 +338,7 @@ command = "chmod 774 /home/ubuntu/SDP_EC2.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
-exit
+
 ####################
 # run command
 command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SDP_EC2.rb"
@@ -353,10 +353,10 @@ master_instance.each { |instance|
 }
 
 # Terminate Instance
-a.terminate_master()
-a.terminate_slaves()
+#a.terminate_master()
+#a.terminate_slaves()
 
 # Delete key pair and group
-a.clean_up()
+#a.clean_up()
 
 
