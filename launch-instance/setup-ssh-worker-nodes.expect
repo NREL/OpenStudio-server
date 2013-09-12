@@ -5,7 +5,7 @@ set USERNAME [lindex $argv 1]
 set PASSWORD [lindex $argv 2]
 set count 1
 
-while { $count < 100 } {
+while { $count < 10 } {
   puts "Testing Passwordless SSH"
   puts "$USERNAME@$IPADDRESS"
   if {[catch "spawn /usr/bin/ssh $USERNAME@$IPADDRESS"]} {
@@ -33,6 +33,9 @@ while { $count < 100 } {
     "*~$ " {
       puts "worked"
       send "exit\r"
+      set ::logfile [open /home/ubuntu/ip_addresses_good a]
+      puts $::logfile $IPADDRESS
+      close $::logfile
       set count 100
     }
     timeout {
