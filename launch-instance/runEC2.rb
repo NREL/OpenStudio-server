@@ -96,6 +96,24 @@ upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh"
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
+###################################
+# create /mnt/openstudio
+command = "sudo mkdir -p /mnt/openstudio"
+slave_instances.each { |instance|
+  a.send_command(instance,command)
+}  
+master_instance.each { |instance|
+  a.send_command(instance,command)
+}
+
+command = "sudo chmod 777 /mnt/openstudio"
+slave_instances.each { |instance|
+  a.send_command(instance,command)
+}  
+master_instance.each { |instance|
+  a.send_command(instance,command)
+}
+
 
 ##################################
 # Setup SSH and Rserve Commands
@@ -140,13 +158,13 @@ master_instance.each { |instance|
 ############################################ 
 # Upload SimulateDataPoint
 slave_instances.each { |instance|
-  command = "rm /home/ubuntu/SimulateDataPoint.rb"
+  command = "rm /mnt/openstudio/SimulateDataPoint.rb"
   a.send_command(instance,command)
-  command = "rm /home/ubuntu/CommunicateResults_Mongo.rb"
+  command = "rm /mnt/openstudio/CommunicateResults_Mongo.rb"
   a.send_command(instance,command)
 }  
 local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint.rb"
-remote_path = "/home/ubuntu/SimulateDataPoint.rb"
+remote_path = "/mnt/openstudio/SimulateDataPoint.rb"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -154,7 +172,7 @@ slave_instances.each { |instance|
   a.send_command(instance,command)  
 }
 local_path = File.dirname(__FILE__) + "/../prototype/pat/CommunicateResults_Mongo.rb"
-remote_path = "/home/ubuntu/CommunicateResults_Mongo.rb"
+remote_path = "/mnt/openstudio/CommunicateResults_Mongo.rb"
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
   command = "chmod 774 " + remote_path
@@ -163,38 +181,38 @@ slave_instances.each { |instance|
 #################################################
 # Upload analysis.zip
 slave_instances.each { |instance|
-  command = "rm /home/ubuntu/analysis.zip"
+  command = "rm /mnt/openstudio/analysis.zip"
   a.send_command(instance,command)
 }  
 local_path = File.dirname(__FILE__) + "/../prototype/pat/analysis.zip"
-remote_path = "/home/ubuntu/analysis.zip"
+remote_path = "/mnt/openstudio/analysis.zip"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 slave_instances.each { |instance|
-  command = "chmod 774 /home/ubuntu/analysis.zip"
+  command = "chmod 774 /mnt/openstudio/analysis.zip"
   a.send_command(instance,command)
 }
 # Remove Previous Analysis Data
 slave_instances.each { |instance|
-  command = "rm -rf /home/ubuntu/analysis"
+  command = "rm -rf /mnt/openstudio/analysis"
   a.send_command(instance,command)
 }  
 # Unzip Analysis Zip File
 slave_instances.each { |instance|
-  command = "unzip -o /home/ubuntu/analysis.zip -d /home/ubuntu/"
+  command = "unzip -o /mnt/openstudio/analysis.zip -d /mnt/openstudio"
   a.send_command(instance,command)
 }  
 # delete Analysis Zip File
 slave_instances.each { |instance|
-  command = "rm /home/ubuntu/analysis.zip"
+  command = "rm /mnt/openstudio/analysis.zip"
   a.send_command(instance,command)
 }  
 
 ###########################
 # create models dir
-command = "rm -rf /home/ubuntu/models.zip"
+command = "rm -rf /usr/local/models.zip"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
@@ -203,7 +221,7 @@ master_instance.each { |instance|
 }  
 
 local_path = File.dirname(__FILE__) + "/../openstudio-server/app/models.zip"
-remote_path = "/home/ubuntu/models.zip"
+remote_path = "/usr/local/models.zip"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -212,7 +230,7 @@ master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/models.zip"
+command = "chmod 774 /usr/local/models.zip"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }
@@ -221,7 +239,7 @@ master_instance.each { |instance|
 } 
 
 # Remove Previous models Data
-command = "rm -rf /home/ubuntu/models"
+command = "rm -rf /usr/local/models"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 } 
@@ -230,7 +248,7 @@ master_instance.each { |instance|
 } 
 
 # Unzip models Zip File
-command = "unzip -o /home/ubuntu/models.zip -d /home/ubuntu/"
+command = "unzip -o /usr/local/models.zip -d /usr/local/rails-models"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
@@ -238,8 +256,16 @@ master_instance.each { |instance|
   a.send_command(instance,command)
 } 
 
+#command = "mv /usr/local/models /usr/local/rails-models"
+#slave_instances.each { |instance|
+#  a.send_command(instance,command)
+#}  
+#master_instance.each { |instance|
+#  a.send_command(instance,command)
+#} 
+
 # delete models Zip File
-command = "rm /home/ubuntu/models.zip"
+command = "rm /usr/local/models.zip"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
@@ -250,7 +276,7 @@ master_instance.each { |instance|
 ###############################
 # Upload inflections
 local_path = File.dirname(__FILE__) + "/../openstudio-server/config/initializers/inflections.rb"
-remote_path = "/home/ubuntu/models/inflections.rb"
+remote_path = "/usr/local/rails-models/inflections.rb"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -259,7 +285,7 @@ master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/models/inflections.rb"
+command = "chmod 774 /usr/local/rails-models/inflections.rb"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }
@@ -270,7 +296,7 @@ master_instance.each { |instance|
 ###############################
 # Upload mongoid
 local_path = File.dirname(__FILE__) + "/mongoid.yml"
-remote_path = "/home/ubuntu/models/mongoid.yml"
+remote_path = "/usr/local/rails-models/mongoid.yml"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -279,7 +305,7 @@ master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/models/mongoid.yml"
+command = "chmod 774 /usr/local/rails-models/mongoid.yml"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }
@@ -290,13 +316,13 @@ master_instance.each { |instance|
 ###############################
 # Upload remoteR
 local_path = File.dirname(__FILE__) + "/remoteR.rb"
-remote_path = "/home/ubuntu/remoteR.rb"
+remote_path = "/mtn/openstudio/remoteR.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/remoteR.rb"
+command = "chmod 774 /mtn/openstudio/remoteR.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -304,13 +330,13 @@ master_instance.each { |instance|
 ###############################
 # Upload downloadR.rb
 local_path = File.dirname(__FILE__) + "/downloadR.rb"
-remote_path = "/home/ubuntu/downloadR.rb"
+remote_path = "/mtn/openstudio/downloadR.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/downloadR.rb"
+command = "chmod 774 /mtn/openstudio/downloadR.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -318,13 +344,13 @@ master_instance.each { |instance|
 ###############################
 # Upload data_point_uuids
 local_path = File.dirname(__FILE__) + "/data_point_uuids.txt"
-remote_path = "/home/ubuntu/data_point_uuids.txt"
+remote_path = "/mtn/openstudio/data_point_uuids.txt"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/data_point_uuids.txt"
+command = "chmod 774 /mtn/openstudio/data_point_uuids.txt"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -332,13 +358,13 @@ master_instance.each { |instance|
 ###############################
 # Upload data_point_uuids
 local_path = File.dirname(__FILE__) + "/master_ip_address"
-remote_path = "/home/ubuntu/master_ip_address"
+remote_path = "/mtn/openstudio/master_ip_address"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/master_ip_address"
+command = "chmod 774 /mtn/openstudio/master_ip_address"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -346,26 +372,26 @@ master_instance.each { |instance|
 ###############################
 # Upload SDP_EC2.rb
 local_path = File.dirname(__FILE__) + "/SDP_EC2.rb"
-remote_path = "/home/ubuntu/SDP_EC2.rb"
+remote_path = "/mtn/openstudio/SDP_EC2.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /home/ubuntu/SDP_EC2.rb"
+command = "chmod 774 /mtn/openstudio/SDP_EC2.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
 
 ####################
 # run command
-command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SDP_EC2.rb"
+command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mtn/openstudio/SDP_EC2.rb"
 master_instance.each { |instance|
   a.shell_command(instance, command)
 }
 ####################
 # download command
-command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/downloadR.rb"
+command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mtn/openstudio/downloadR.rb"
 master_instance.each { |instance|
   a.shell_command(instance, command)
 }
