@@ -1,16 +1,16 @@
 require 'mongoid'
 require 'mongoid_paperclip'
-require '/usr/local/rails-models/algorithm'
-require '/usr/local/rails-models/analysis'
-require '/usr/local/rails-models/data_point'
+require '/usr/local/lib/rails-models/algorithm'
+require '/usr/local/lib/rails-models/analysis'
+require '/usr/local/lib/rails-models/data_point'
 #require '/home/ubuntu/models/delayed_job_view'
-require '/usr/local/rails-models/measure'
-require '/usr/local/rails-models/problem'
-require '/usr/local/rails-models/project'
-require '/usr/local/rails-models/seed'
-require '/usr/local/rails-models/variable'
-require '/usr/local/rails-models/workflow_step'
-require '/usr/local/rails-models/inflections'
+require '/usr/local/lib/rails-models/measure'
+require '/usr/local/lib/rails-models/problem'
+require '/usr/local/lib/rails-models/project'
+require '/usr/local/lib/rails-models/seed'
+require '/usr/local/lib/rails-models/variable'
+require '/usr/local/lib/rails-models/workflow_step'
+require '/usr/local/lib/rails-models/inflections'
 
 require './net_scp.rb'
 
@@ -18,7 +18,7 @@ include RInterface
 
 a = Rtest.new
 
-Mongoid.load!("/usr/local/rails-models/mongoid.yml", :development)
+Mongoid.load!("/usr/local/lib/rails-models/mongoid.yml", :development)
 
 
 file = File.open('/mtn/openstudio/data_point_uuids.txt','r')
