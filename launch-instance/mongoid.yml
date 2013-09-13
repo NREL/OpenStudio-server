@@ -1,9 +1,0 @@
-development:
-  sessions:
-    default:
-      database: openstudio_server_development
-      hosts:
-        - 50.17.97.153:27017
-      options:
-        allow_dynamic_fields: true 
-        raise_not_found_error: false

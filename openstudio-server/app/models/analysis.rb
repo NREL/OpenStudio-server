@@ -44,6 +44,8 @@ class Analysis
     self.status = 'running'
     self.save!
 
+    #"/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SDP_EC2.rb"
+
     @r.command() do
       %Q{
         f <- function(x){
