@@ -125,7 +125,7 @@ module AwsInterface
                                           :key_pair => @key_pair, 
                                           :security_groups => @group,
                                           :user_data => user_data,
-                                          #:instance_type => "t1.micro") 
+                                          #:instance_type => "cc2.8xlarge") 
                                           :instance_type => "c1.xlarge") 
         @instances_slave.push(@instance)
       end
