@@ -114,6 +114,23 @@ master_instance.each { |instance|
   a.send_command(instance,command)
 }
 
+###################################
+# create /mnt/openstudio
+command = "sudo mkdir -p /usr/local/lib/rails-models"
+slave_instances.each { |instance|
+  a.send_command(instance,command)
+}  
+master_instance.each { |instance|
+  a.send_command(instance,command)
+}
+
+command = "sudo chmod 777 /usr/local/lib/rails-models"
+slave_instances.each { |instance|
+  a.send_command(instance,command)
+}  
+master_instance.each { |instance|
+  a.send_command(instance,command)
+}
 
 ##################################
 # Setup SSH and Rserve Commands
@@ -221,7 +238,7 @@ master_instance.each { |instance|
 }  
 
 local_path = File.dirname(__FILE__) + "/../openstudio-server/app/models.zip"
-remote_path = "/usr/local/models.zip"
+remote_path = "/usr/local/lib/rails-models/models.zip"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -230,7 +247,7 @@ master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /usr/local/models.zip"
+command = "chmod 774 /usr/local/lib/rails-models/models.zip"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }
@@ -239,7 +256,7 @@ master_instance.each { |instance|
 } 
 
 # Remove Previous models Data
-command = "rm -rf /usr/local/models"
+command = "rm -rf /usr/local/lib/rails-models/models"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 } 
@@ -248,7 +265,7 @@ master_instance.each { |instance|
 } 
 
 # Unzip models Zip File
-command = "unzip -o /usr/local/models.zip -d /usr/local/rails-models"
+command = "unzip -o /usr/local/lib/rails-models/models.zip -d /usr/local/lib/rails-models"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
@@ -265,7 +282,7 @@ master_instance.each { |instance|
 #} 
 
 # delete models Zip File
-command = "rm /usr/local/models.zip"
+command = "rm /usr/local/lib/rails-models/models.zip"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
@@ -276,7 +293,7 @@ master_instance.each { |instance|
 ###############################
 # Upload inflections
 local_path = File.dirname(__FILE__) + "/../openstudio-server/config/initializers/inflections.rb"
-remote_path = "/usr/local/rails-models/inflections.rb"
+remote_path = "/usr/local/lib/rails-models/inflections.rb"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -285,7 +302,7 @@ master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /usr/local/rails-models/inflections.rb"
+command = "chmod 774 /usr/local/lib/rails-models/inflections.rb"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }
@@ -296,7 +313,7 @@ master_instance.each { |instance|
 ###############################
 # Upload mongoid
 local_path = File.dirname(__FILE__) + "/mongoid.yml"
-remote_path = "/usr/local/rails-models/mongoid.yml"
+remote_path = "/usr/local/lib/rails-models/mongoid.yml"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -305,7 +322,7 @@ master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /usr/local/rails-models/mongoid.yml"
+command = "chmod 774 /usr/local/lib/rails-models/mongoid.yml"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }

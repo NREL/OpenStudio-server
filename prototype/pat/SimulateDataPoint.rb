@@ -41,7 +41,7 @@ end
 if (runType == "Vagrant")
   mongoid_path_prefix = '/home/vagrant/mongoid/'
 elsif (runType == "AWS")
-  mongoid_path_prefix = '/usr/local/rails-models/'
+  mongoid_path_prefix = '/usr/local/lib/rails-models/'
   require 'delayed_job_mongoid'
 end
 
