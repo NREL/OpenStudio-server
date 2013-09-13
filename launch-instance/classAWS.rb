@@ -121,8 +121,8 @@ module AwsInterface
                                           :key_pair => @key_pair, 
                                           :security_groups => @group,
                                           :user_data => user_data,
-                                          :instance_type => "t1.micro") 
-                                          #:instance_type => "m1.medium") 
+                                          #:instance_type => "t1.micro") 
+                                          :instance_type => "c1.medium") 
         @instances_slave.push(@instance)
       end
       # sleep until ready
