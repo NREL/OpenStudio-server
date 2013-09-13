@@ -58,10 +58,14 @@ File.open(local_path, 'w+') {|f| f.write(text) }
 # Upload File to Master Instance
 a.upload_file(master_instance[0], local_path, remote_path)
 
-# Send worker IPs to Master for R setup:  m1.xlarge 4 cores
+# Send worker IPs to Master for R setup:  c1.xlarge 8 cores
 local_path = "./worker_ips"
 remote_path = "/home/ubuntu/worker_ips"
 text = ""
+slave_info.each {|info| text << "#{info.ip_address}\n"}
+slave_info.each {|info| text << "#{info.ip_address}\n"}
+slave_info.each {|info| text << "#{info.ip_address}\n"}
+slave_info.each {|info| text << "#{info.ip_address}\n"}
 slave_info.each {|info| text << "#{info.ip_address}\n"}
 slave_info.each {|info| text << "#{info.ip_address}\n"}
 slave_info.each {|info| text << "#{info.ip_address}\n"}
