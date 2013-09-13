@@ -12,7 +12,7 @@ require '/usr/local/lib/rails-models/variable'
 require '/usr/local/lib/rails-models/workflow_step'
 require '/usr/local/lib/rails-models/inflections'
 
-require 'mnt/openstudio/net_scp.rb'
+require '/mnt/openstudio/net_scp.rb'
 
 include RInterface
 
