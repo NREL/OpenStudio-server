@@ -4,7 +4,7 @@ require 'rserve/simpler'
 #create an instance for R
 @r = Rserve::Simpler.new
 puts "Setting working directory ="
-puts @r.converse('setwd("/home/ubuntu/")')
+puts @r.converse('setwd("/mnt/openstudio")')
 puts "R working dir ="
 puts @r.converse('getwd()')
 puts "starting cluster and running"
@@ -53,7 +53,7 @@ puts @r.converse('flag["run"]')
        flag <- dbGetQuery(mongo,"control",'{"_id":1}')
        if (flag["run"] == "FALSE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
        dbDisconnect(mongo)
-       y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SimulateDataPoint.rb -d /home/ubuntu/analysis/data_point_",x," -r AWS",sep="")
+       y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mtn/openstudio/SimulateDataPoint.rb -d /mtn/openstudio/analysis/data_point_",x," -r AWS",sep="")
        z <- system(y,intern=TRUE)
        j <- length(z)
        z}
