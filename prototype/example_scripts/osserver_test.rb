@@ -65,6 +65,18 @@ def listProjects(server)
 
 end
 
+def listStatus(vagrantProvider)
+  puts
+  puts "Status:"
+  puts "internetAvailable = #{vagrantProvider.internetAvailable()}"
+  puts "serviceAvailable = #{vagrantProvider.serviceAvailable()}"
+  puts "validateCredentials = #{vagrantProvider.validateCredentials()}"
+  puts "serverRunning = #{vagrantProvider.serverRunning()}"
+  puts "workersRunning = #{vagrantProvider.workersRunning()}"
+  puts "terminateCompleted = #{vagrantProvider.terminateCompleted()}"
+  puts
+end
+
 # create the vagrant provider
 settings = OpenStudio::VagrantSettings.new()
 settings.setServerPath(serverPath)
@@ -72,9 +84,13 @@ settings.setServerUrl(serverUrl)
 settings.setWorkerPath(workerPath)
 settings.setWorkerUrl(workerUrl)
 settings.setHaltOnStop(haltOnStop)
+settings.setUsername("vagrant")
+settings.setPassword("vagrant")
 
 vagrantProvider = OpenStudio::VagrantProvider.new()
 vagrantProvider.setSettings(settings)
+
+listStatus(vagrantProvider)
 
 # test that it is working
 settings.signUserAgreement(true)
@@ -94,6 +110,8 @@ end
 
 puts "server started"
 
+listStatus(vagrantProvider)
+
 # start the workers
 vagrantProvider.requestStartWorkers
 
@@ -105,6 +123,8 @@ if not vagrantProvider.workersStarted
 end
 
 puts "workers started"
+
+listStatus(vagrantProvider)
 
 # create an OSServer to talk with the server
 session = vagrantProvider.session
@@ -214,4 +234,6 @@ if not vagrantProvider.waitForTerminated
   raise "Could not shut down instances"
 end
 
-puts "goodbye"
+puts "shut down complete"
+
+listStatus(vagrantProvider)
