@@ -70,7 +70,7 @@ slave_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
 File.open("ip_addresses", 'w+') {|f| f.write(text) }
 
 text = ""
-text << "#{master_info.dns_name}"
+text << "#{master_info.dns_name}\n"
 File.open("master_ip_address", 'w+') {|f| f.write(text) }
 
 # Right now these paths are assuming that we are in the same directory as the files
