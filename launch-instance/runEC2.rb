@@ -332,8 +332,8 @@ master_instance.each { |instance|
 
 ###############################
 # Upload remoteR
-local_path = File.dirname(__FILE__) + "/remoteR.rb"
-remote_path = "/mtn/openstudio/remoteR.rb"
+local_path = File.dirname(__FILE__) + "/net_scp.rb"
+remote_path = "/mtn/openstudio/net_scp.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
@@ -346,14 +346,14 @@ master_instance.each { |instance|
 
 ###############################
 # Upload downloadR.rb
-local_path = File.dirname(__FILE__) + "/downloadR.rb"
-remote_path = "/mtn/openstudio/downloadR.rb"
+local_path = File.dirname(__FILE__) + "/transfer_simulation.rb"
+remote_path = "/mtn/openstudio/transfer_simulation.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /mtn/openstudio/downloadR.rb"
+command = "chmod 774 /mtn/openstudio/transfer_simulation.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -408,7 +408,7 @@ master_instance.each { |instance|
 }
 ####################
 # download command
-command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mtn/openstudio/downloadR.rb"
+command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mtn/openstudio/transfer_simulation.rb"
 master_instance.each { |instance|
   a.shell_command(instance, command)
 }
