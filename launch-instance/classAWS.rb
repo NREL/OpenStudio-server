@@ -122,7 +122,7 @@ module AwsInterface
                                           :security_groups => @group,
                                           :user_data => user_data,
                                           #:instance_type => "t1.micro") 
-                                          :instance_type => "c1.medium") 
+                                          :instance_type => "m1.xlarge") 
         @instances_slave.push(@instance)
       end
       # sleep until ready
