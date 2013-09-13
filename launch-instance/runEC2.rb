@@ -333,13 +333,13 @@ master_instance.each { |instance|
 ###############################
 # Upload remoteR
 local_path = File.dirname(__FILE__) + "/net_scp.rb"
-remote_path = "/mtn/openstudio/net_scp.rb"
+remote_path = "/mnt/openstudio/net_scp.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /mtn/openstudio/remoteR.rb"
+command = "chmod 774 /mnt/openstudio/net_scp.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -347,13 +347,13 @@ master_instance.each { |instance|
 ###############################
 # Upload downloadR.rb
 local_path = File.dirname(__FILE__) + "/transfer_simulation.rb"
-remote_path = "/mtn/openstudio/transfer_simulation.rb"
+remote_path = "/mnt/openstudio/transfer_simulation.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /mtn/openstudio/transfer_simulation.rb"
+command = "chmod 774 /mnt/openstudio/transfer_simulation.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -361,13 +361,13 @@ master_instance.each { |instance|
 ###############################
 # Upload data_point_uuids
 local_path = File.dirname(__FILE__) + "/data_point_uuids.txt"
-remote_path = "/mtn/openstudio/data_point_uuids.txt"
+remote_path = "/mnt/openstudio/data_point_uuids.txt"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /mtn/openstudio/data_point_uuids.txt"
+command = "chmod 774 /mnt/openstudio/data_point_uuids.txt"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -375,13 +375,13 @@ master_instance.each { |instance|
 ###############################
 # Upload data_point_uuids
 local_path = File.dirname(__FILE__) + "/master_ip_address"
-remote_path = "/mtn/openstudio/master_ip_address"
+remote_path = "/mnt/openstudio/master_ip_address"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /mtn/openstudio/master_ip_address"
+command = "chmod 774 /mnt/openstudio/master_ip_address"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
@@ -389,26 +389,26 @@ master_instance.each { |instance|
 ###############################
 # Upload SDP_EC2.rb
 local_path = File.dirname(__FILE__) + "/SDP_EC2.rb"
-remote_path = "/mtn/openstudio/SDP_EC2.rb"
+remote_path = "/mnt/openstudio/SDP_EC2.rb"
 # Upload File to master Instance
 master_instance.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
 
-command = "chmod 774 /mtn/openstudio/SDP_EC2.rb"
+command = "chmod 774 /mnt/openstudio/SDP_EC2.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
 
 ####################
 # run command
-command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mtn/openstudio/SDP_EC2.rb"
+command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SDP_EC2.rb"
 master_instance.each { |instance|
   a.shell_command(instance, command)
 }
 ####################
 # download command
-command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mtn/openstudio/transfer_simulation.rb"
+command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/transfer_simulation.rb"
 master_instance.each { |instance|
   a.shell_command(instance, command)
 }
