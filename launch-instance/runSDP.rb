@@ -7,9 +7,9 @@ require './classAWS'
 include AwsInterface
 
 # Create Instance of AwsAdapter
-a = AwsAdapter.new
+a = AwsAdapter.new #("~/.ssh/amazontest.pub")
 
-# Launch Master 
+# Launch Master
 # The file  "master_script.txt" will be passed to the 
 # instance as user-data. This file contains bash commands
 # to send set up the /etc/hosts and /etc/hostname files.
