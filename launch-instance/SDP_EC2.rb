@@ -34,8 +34,8 @@ puts @r.converse('flag["run"]')
 @r.command() do
 %Q{
   #read in ipaddresses
-  ips = read.table("hosts_slave_file.sh", as.is = 1)
-  #ips = read.table("ip_addresses_good", as.is = 1)
+  #ips = read.table("hosts_slave_file.sh", as.is = 1)
+  ips = read.table("worker_ips", as.is = 1)
 
   #create character list of ipaddresses
   b <- character(length=nrow(ips))
