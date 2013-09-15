@@ -1,4 +1,3 @@
-
 require 'openstudio'
 require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
@@ -7,19 +6,19 @@ require 'optparse'
 options = Hash.new
 optparse = OptionParser.new do |opts|
 
-  opts.on( '-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json." ) do |directory|
+  opts.on('-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json.") do |directory|
     options[:directory] = directory
   end
-  
-  opts.on( '-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |runType|
+
+  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |runType|
     options[:runType] = runType
   end
-  
+
   options[:logLevel] = -1
-  opts.on( '-l', '--logLevel LOGLEVEL', Integer, "Level of detail for project.log file. Trace = -3, Debug = -2, Info = -1, Warn = 0, Error = 1, Fatal = 2.") do |logLevel|
+  opts.on('-l', '--logLevel LOGLEVEL', Integer, "Level of detail for project.log file. Trace = -3, Debug = -2, Info = -1, Warn = 0, Error = 1, Fatal = 2.") do |logLevel|
     options[:logLevel] = logLevel
-  end  
-  
+  end
+
 end
 
 optparse.parse!
@@ -88,14 +87,14 @@ if loadResult.analysisObject.empty?
   loadResult.errors.each { |error|
     warn error.logMessage
   }
-  raise "Unable to load json file from '" + formulation_json_path.to_s + "." 
+  raise "Unable to load json file from '" + formulation_json_path.to_s + "."
 end
 analysis = loadResult.analysisObject.get.to_Analysis.get
 
 # fix up paths
-analysis.updateInputPathData(loadResult.projectDir,project_path)
+analysis.updateInputPathData(loadResult.projectDir, project_path)
 analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
-analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"),analysis_options,true)
+analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"), analysis_options, true)
 
 # load data point to run
 loadResult = OpenStudio::Analysis::loadJSON(data_point_json_path)
@@ -110,14 +109,14 @@ analysis.addDataPoint(data_point) # also hooks up real copy of problem
 
 # create a RunManager
 run_manager_path = directory / OpenStudio::Path.new("run.db")
-run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path,true,false,false)
+run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path, true, false, false)
 
 # have problem create the workflow
-workflow = analysis.problem.createWorkflow(data_point,OpenStudio::Path.new($OpenStudio_Dir));
+workflow = analysis.problem.createWorkflow(data_point, OpenStudio::Path.new($OpenStudio_Dir));
 params = OpenStudio::Runmanager::JobParams.new;
-params.append("cleanoutfiles","standard");
+params.append("cleanoutfiles", "standard");
 workflow.add(params);
-ep_hash = OpenStudio::EnergyPlus::find_energyplus(8,0)
+ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
 ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
 tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
                                                          OpenStudio::Path.new,
@@ -132,17 +131,17 @@ weather_file_path = OpenStudio::Path.new
 if (analysis.weatherFile)
   weather_file_path = analysis.weatherFile.get.path
 end
-job = workflow.create(directory,analysis.seed.path,weather_file_path,url_search_paths)
+job = workflow.create(directory, analysis.seed.path, weather_file_path, url_search_paths)
 OpenStudio::Runmanager::JobFactory::optimizeJobTree(job)
 analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
-run_manager.enqueue(job,false);
+run_manager.enqueue(job, false);
 
 # wait for the job to finish
 run_manager.waitForFinished
 
 # use the completed job to populate data_point with results
-analysis.problem.updateDataPoint(data_point,job)
+analysis.problem.updateDataPoint(data_point, job)
 
 # implemented differently for Local vs. Vagrant or AWS
-communicateResults(data_point,directory)
+communicateResults(data_point, directory)
 
