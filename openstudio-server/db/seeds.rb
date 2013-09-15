@@ -21,7 +21,7 @@ if File.exists?(jsonfile)
   problem.save!
 
   # try saving a temp file
-  seed_file = "../prototype/pat/analysis/seed.zip"
+  seed_file = "../prototype/pat/analysis.zip"
   if File.exists?(seed_file)
     puts "uploading seed_file"
     #analysis_1.seed = {file_name: seed_file}
