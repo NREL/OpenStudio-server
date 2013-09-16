@@ -95,9 +95,9 @@ Vagrant.configure("2") do |config|
       override.ssh.username = "ubuntu"
 
       aws.tags = {
-          'Name' => 'OpenStudio',
+          'Name' => 'OpenStudio-Worker',
           'NodeType' => 'Worker',
-          'OpenStudioVersion' => '1.0.4'
+          'OpenStudioVersion' => '1.0.5'
       }
     rescue LoadError
       warn "Unable to configure AWS provider."
