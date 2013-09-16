@@ -1,0 +1,1611 @@
+{
+ "data_point" :  {
+  "analysis_uuid" : "a8feca85-dab9-4510-8610-651ef847781d",
+  "complete" : true,
+  "data_point_type" : "DataPoint",
+  "display_name" : "Rotate Building 90 degrees Only",
+  "failed" : false,
+  "idf_input_data" :   {
+   "checksum_create" : "0DEC8C5D",
+   "checksum_last" : "0DEC8C5D",
+   "display_name" : "out.idf",
+   "file_type" : "IDF",
+   "name" : "analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/5-EnergyPlusPreProcess-0/out.idf",
+   "path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/5-EnergyPlusPreProcess-0/out.idf",
+   "timestamp_create" : "20130916T165032",
+   "timestamp_last" : "20130916T165033",
+   "uuid" : "9116527c-516f-40c1-ac00-660637bc3c48",
+   "version_uuid" : "83985bce-7177-4e7e-825d-c9c07b47b0e8"
+  },
+  "name" : "Rotate Building 90 degrees Only",
+  "osm_input_data" :   {
+   "checksum_create" : "9CAA8DF9",
+   "checksum_last" : "9CAA8DF9",
+   "display_name" : "out.osm",
+   "file_type" : "OSM",
+   "name" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/out.osm",
+   "path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/out.osm",
+   "timestamp_create" : "20130916T164910",
+   "timestamp_last" : "20130916T164911",
+   "uuid" : "68ceb8f4-7b42-4094-8ed1-5c5767b46a95",
+   "version_uuid" : "45a08b80-e817-49ad-8c7b-e453688c206d"
+  },
+  "output_attributes" : [
+   {
+    "name" : "Total Site Energy",
+    "units" : "GJ",
+    "uuid" : "a8a3cec3-3b9c-4550-9d49-2c2b306e2c55",
+    "value" : 74.28,
+    "value_type" : "Double",
+    "version_uuid" : "2cf279a0-bb9b-42b5-8149-a6512d3cb2d4"
+   },
+   {
+    "name" : "Net Site Energy",
+    "units" : "GJ",
+    "uuid" : "d3aaf117-07fd-4811-bfae-c38263d5f64d",
+    "value" : 74.28,
+    "value_type" : "Double",
+    "version_uuid" : "75b48d99-f0c9-4553-8188-1b6ad341221a"
+   },
+   {
+    "name" : "Total Source Energy",
+    "units" : "GJ",
+    "uuid" : "a963f5ef-c316-434a-be90-05baf6a28224",
+    "value" : 219.65,
+    "value_type" : "Double",
+    "version_uuid" : "e40d4213-e465-4324-9020-9b9e4fa9b98a"
+   },
+   {
+    "name" : "Net Source Energy",
+    "units" : "GJ",
+    "uuid" : "eb527760-e9c8-41e9-8b83-719771106f94",
+    "value" : 219.65,
+    "value_type" : "Double",
+    "version_uuid" : "65010dcb-1c64-4cba-93bd-64b7eb37f2ef"
+   },
+   {
+    "name" : "Annual Total Utility Cost",
+    "units" : "$",
+    "uuid" : "46120eb9-52a6-49b1-b768-9e6d104ac077",
+    "value" : 1166.84,
+    "value_type" : "Double",
+    "version_uuid" : "9cf6348b-6f07-47a8-8f3a-0bbde491e00f"
+   },
+   {
+    "name" : "Annual Electric Total Cost",
+    "units" : "$",
+    "uuid" : "2101c720-65f8-4cf4-b669-e7e5c67af56d",
+    "value" : 1166.84,
+    "value_type" : "Double",
+    "version_uuid" : "15aa7249-a1fb-4f84-a7d9-8d20d178295b"
+   },
+   {
+    "name" : "Annual Gas Total Cost",
+    "units" : "$",
+    "uuid" : "1a087a62-a3a7-40a5-9e34-89d889c2c24a",
+    "value" : 0.0,
+    "value_type" : "Double",
+    "version_uuid" : "c4930dd9-e864-4655-b03a-5c77df2bcb2f"
+   },
+   {
+    "name" : "Net Site Energy Use Intentsity",
+    "units" : "MJ/m^2",
+    "uuid" : "95404aef-5482-4e62-b9da-35648e0585d8",
+    "value" : 332.25,
+    "value_type" : "Double",
+    "version_uuid" : "9d20d9fc-00e0-4b7e-9b27-b37288492273"
+   },
+   {
+    "name" : "Instantaneous Peak Electricity Demand",
+    "units" : "kW",
+    "uuid" : "df2c2e70-1ccc-458b-81eb-2d1fbb8d51a1",
+    "value" : 3118.98,
+    "value_type" : "Double",
+    "version_uuid" : "80f18229-d734-4c30-bd24-8df5564e06df"
+   },
+   {
+    "name" : "Electricity Total End Uses",
+    "units" : "GJ",
+    "uuid" : "397b4a8a-3ce9-4f8d-8c4f-252e92c2efb8",
+    "value" : 47.42,
+    "value_type" : "Double",
+    "version_uuid" : "6779c328-f0b1-485f-a938-d4e36c91157e"
+   },
+   {
+    "name" : "Natural Gas Total End Uses",
+    "units" : "GJ",
+    "uuid" : "eb8a4a63-a409-47fd-a3fd-567711e2a1d8",
+    "value" : 0.0,
+    "value_type" : "Double",
+    "version_uuid" : "ea06c6ff-33b1-4ad5-8f4e-5fa0b93069ff"
+   },
+   {
+    "name" : "District Cooling Total End Uses",
+    "units" : "GJ",
+    "uuid" : "b5852e40-917f-4920-b86c-44c7cb0f6c66",
+    "value" : 10.79,
+    "value_type" : "Double",
+    "version_uuid" : "c100978f-3a24-411e-b6c5-f1705089a4b4"
+   },
+   {
+    "name" : "District Heating Total End Uses",
+    "units" : "GJ",
+    "uuid" : "ccc8dd09-ab72-431a-a949-dcb35c23e057",
+    "value" : 16.07,
+    "value_type" : "Double",
+    "version_uuid" : "72757a56-f962-440d-a3c8-4008b0805326"
+   },
+   {
+    "name" : "EndUses.Electricity.InteriorLights.General",
+    "units" : "GJ",
+    "uuid" : "55cae2c5-1bdb-45be-87d8-2e32a7ada914",
+    "value" : 25.23,
+    "value_type" : "Double",
+    "version_uuid" : "57d9121c-73c9-4b16-bd4e-902ecd5c34c2"
+   },
+   {
+    "name" : "EndUses.Electricity.InteriorEquipment.General",
+    "units" : "GJ",
+    "uuid" : "542616a0-d9b9-44df-a768-11b9c411b0f3",
+    "value" : 22.2,
+    "value_type" : "Double",
+    "version_uuid" : "d858f923-dba9-49f6-a9ce-da7e50d276e0"
+   },
+   {
+    "name" : "EndUses.DistrictCooling.Cooling.General",
+    "units" : "GJ",
+    "uuid" : "474ea5e1-0bc7-4300-91ab-f3574eb68a8e",
+    "value" : 10.79,
+    "value_type" : "Double",
+    "version_uuid" : "9c2bd949-329f-4e1d-84e9-abbd40a2b525"
+   },
+   {
+    "name" : "EndUses.DistrictHeating.Heating.General",
+    "units" : "GJ",
+    "uuid" : "598054e5-c370-46d8-9a31-f687006770f1",
+    "value" : 16.07,
+    "value_type" : "Double",
+    "version_uuid" : "31c652c2-2d1c-4772-a8f4-1816a24eb616"
+   },
+   {
+    "name" : "First Year Capital Costs",
+    "units" : "$",
+    "uuid" : "dcb94adf-3e7b-4a2d-b4ff-63f7b17def89",
+    "value" : 0.0,
+    "value_type" : "Double",
+    "version_uuid" : "065ac411-c426-4209-8913-3e38a81dca41"
+   },
+   {
+    "name" : "Total Life Cycle Cost",
+    "units" : "$",
+    "uuid" : "02132884-d04e-4a9b-80a4-a96b51738d95",
+    "value" : 20318.4,
+    "value_type" : "Double",
+    "version_uuid" : "1a39f4d7-eefc-4844-9e95-4850ac1e31eb"
+   },
+   {
+    "display_name" : "Floor Area",
+    "name" : "floorArea",
+    "units" : "m^2",
+    "uuid" : "9a4fb963-3c7d-44bb-a6d6-500caeb33ea7",
+    "value" : 223.582,
+    "value_type" : "Double",
+    "version_uuid" : "6bb9b100-104c-46cd-8973-6038c8d5dcc0"
+   },
+   {
+    "display_name" : "Conditioned Floor Area",
+    "name" : "conditionedFloorArea",
+    "units" : "m^2",
+    "uuid" : "9bf1103f-42d6-4219-a5f3-e8e86cfa8ce9",
+    "value" : 223.582,
+    "value_type" : "Double",
+    "version_uuid" : "1104c8f3-b5a2-42f0-b0c6-509aa12d1741"
+   },
+   {
+    "name" : "EndUses",
+    "uuid" : "790f8f8d-94c2-4eb4-a4ee-aa9384c28a1c",
+    "value" : [
+     {
+      "name" : "Electricity",
+      "uuid" : "88762b70-f22f-48ca-90a7-b5b027df501d",
+      "value" : [
+       {
+        "name" : "InteriorLights",
+        "uuid" : "49ca0650-764d-4e5b-8f4b-59739fb91a92",
+        "value" : [
+         {
+          "name" : "General",
+          "units" : "GJ",
+          "uuid" : "5c798a35-17c7-4498-87f3-5ca5c719c2c7",
+          "value" : 25.23,
+          "value_type" : "Double",
+          "version_uuid" : "351ffc14-5f7e-410e-86e6-2093069a0327"
+         }
+        ],
+        "value_type" : "AttributeVector",
+        "version_uuid" : "1362643e-d4d4-477c-806d-440b3543876d"
+       },
+       {
+        "name" : "InteriorEquipment",
+        "uuid" : "30f4e252-e0e9-4f45-a2c6-6db0a8a1ecdd",
+        "value" : [
+         {
+          "name" : "General",
+          "units" : "GJ",
+          "uuid" : "99b1ee00-10c7-4c1b-9a0e-c54859e3c426",
+          "value" : 22.2,
+          "value_type" : "Double",
+          "version_uuid" : "aa682d23-7fa8-4d3e-a507-27f93e3dd006"
+         }
+        ],
+        "value_type" : "AttributeVector",
+        "version_uuid" : "50f9085c-6e01-421b-ba81-89c3b04db18c"
+       }
+      ],
+      "value_type" : "AttributeVector",
+      "version_uuid" : "8f6f52e9-c1fe-4087-873a-d8352344b6e4"
+     },
+     {
+      "name" : "DistrictCooling",
+      "uuid" : "198e2e95-7d4b-47b2-b7d3-91c81ac87f90",
+      "value" : [
+       {
+        "name" : "Cooling",
+        "uuid" : "048112a9-1d13-4d35-a7b0-1215dc7e5cf2",
+        "value" : [
+         {
+          "name" : "General",
+          "units" : "GJ",
+          "uuid" : "52b7a9d8-f3eb-462a-b6a9-e4566a006ef6",
+          "value" : 10.79,
+          "value_type" : "Double",
+          "version_uuid" : "cb34abfd-a6bd-4708-9c5d-7bc752e870bb"
+         }
+        ],
+        "value_type" : "AttributeVector",
+        "version_uuid" : "f16ea79c-edd0-46b4-81b3-6a0786886906"
+       }
+      ],
+      "value_type" : "AttributeVector",
+      "version_uuid" : "8161cb6b-460b-4c08-bf50-481867f69460"
+     },
+     {
+      "name" : "DistrictHeating",
+      "uuid" : "dafdfa79-61b5-40f1-bd11-13261c987140",
+      "value" : [
+       {
+        "name" : "Heating",
+        "uuid" : "7fa1b9e7-d0f6-46fb-9af8-458066772186",
+        "value" : [
+         {
+          "name" : "General",
+          "units" : "GJ",
+          "uuid" : "73e04d63-9167-4588-a12e-5120b488b7b0",
+          "value" : 16.07,
+          "value_type" : "Double",
+          "version_uuid" : "c98d91de-f572-4ca7-8a7c-de0f87181b06"
+         }
+        ],
+        "value_type" : "AttributeVector",
+        "version_uuid" : "1aa505ad-42a5-4929-bd26-f241ee6feea2"
+       }
+      ],
+      "value_type" : "AttributeVector",
+      "version_uuid" : "06913763-2f90-4bb1-bbda-d50061254395"
+     }
+    ],
+    "value_type" : "AttributeVector",
+    "version_uuid" : "65ad9b7b-115d-4076-9c80-6a9c127f77dc"
+   },
+   {
+    "name" : "CalibrationResult",
+    "uuid" : "24a5b5b6-ca95-4a3e-aebf-bc3a41fe7b02",
+    "value" : [
+     {
+      "name" : "utilityBills",
+      "uuid" : "771e770a-faff-4638-8e9a-cd31ed472027",
+      "value" : [
+
+      ],
+      "value_type" : "AttributeVector",
+      "version_uuid" : "6e3ffc9e-8c49-4e4e-9492-0069b04df438"
+     }
+    ],
+    "value_type" : "AttributeVector",
+    "version_uuid" : "2f2cc32c-73e2-4776-8428-dfbf8cddd13e"
+   }
+  ],
+  "problem_uuid" : "412b1879-f0ee-4919-ab90-6ab642fd39ee",
+  "run_type" : "Local",
+  "selected" : true,
+  "sql_output_data" :   {
+   "checksum_create" : "4052D0FC",
+   "checksum_last" : "4052D0FC",
+   "display_name" : "eplusout.sql",
+   "file_type" : "SQL",
+   "name" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.sql",
+   "path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.sql",
+   "timestamp_create" : "20130916T165038",
+   "timestamp_last" : "20130916T165154",
+   "uuid" : "90ae1d83-20fa-4055-a442-d1cda373a2eb",
+   "version_uuid" : "cc00fe9f-cfca-40ea-bd55-55b74243ee8a"
+  },
+  "top_level_job" :   {
+   "children" : [
+    {
+     "children" : [
+      {
+       "children" : [
+        {
+         "children" : [
+          {
+           "children" : [
+            {
+             "children" : [
+              {
+               "children" : [
+                {
+                 "errors" :                  {
+                  "all_errors" : [
+
+                  ],
+                  "result" : "Success"
+                 },
+                 "job_type" : "OpenStudioPostProcess",
+                 "last_run" : "20130916T165155",
+                 "output_files" : [
+                  {
+                   "exists" : true,
+                   "file_name" : "report.xml",
+                   "full_path" : "analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/7-OpenStudioPostProcess-0/report.xml",
+                   "key" : "xml",
+                   "last_modified" : "20130916T225159"
+                  }
+                 ],
+                 "params" : [
+                  {
+                   "param" :                    {
+                    "children" : [
+                     {
+                      "param" :                       {
+                       "value" : ""
+                      },
+                      "param_index" : 0
+                     }
+                    ],
+                    "value" : "workflowjobkey"
+                   },
+                   "param_index" : 0
+                  },
+                  {
+                   "param" :                    {
+                    "children" : [
+                     {
+                      "param" :                       {
+                       "value" : ""
+                      },
+                      "param_index" : 0
+                     }
+                    ],
+                    "value" : "workflowjobkey"
+                   },
+                   "param_index" : 1
+                  }
+                 ],
+                 "status" :                  {
+                  "status" : "Idle"
+                 },
+                 "uuid" : "74031fcc-a726-45bb-b4f9-18dc735a0517"
+                }
+               ],
+               "errors" :                {
+                "all_errors" : [
+                 {
+                  "description" : "ProcessScheduleInput: Schedule:Compact=\"HVACTEMPLATE-ALWAYS 4\", Blank Schedule Type Limits Name input -- will not be validated.",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "ProcessScheduleInput: Schedule:Compact=\"TWOSEASONSCHEDULE\", Blank Schedule Type Limits Name input -- will not be validated.",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "ProcessScheduleInput: Schedule:Compact=\"TIMEOFDAYSCHEDULE\", Blank Schedule Type Limits Name input -- will not be validated.",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "GetSurfaces: Surfaces with interface to Ground found but no \"Ground Temperatures\" were input. Found first in surface=SURFACE 1 Defaults, constant throughout the year of (18.0) will be used.",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "CheckUsedConstructions: There are 9 nominally unused constructions in input. For explicit details on each unused construction, use Output:Diagnostics,DisplayExtraWarnings;",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "Output:Meter: invalid Name=\"GAS:FACILITY\" - not found.",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "LifeCycleCost:Parameters: The input field Depreciation Methodis blank. \"None\" will be used.",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "GetInputEconomicsTariff: UtilityCost:Tariff=\"LARGE CG\" missing meter Meter referenced is not present due to a lack of equipment that uses that energy source/meter:\"GAS:FACILITY                                                                                        \".",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "UtilityCost: Spaces were removed from the variable=\"SECONDARY GENERALSUMMERONPEAKENERGYCHARGE\". ...Resultant variable=\"SECONDARYGENERALSUMMERONPEAKENERGYCHARGE\".",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "UtilityCost: Spaces were removed from the variable=\"SECONDARY GENERALSUMMEROFFPEAKENERGYCHARGE\". ...Resultant variable=\"SECONDARYGENERALSUMMEROFFPEAKENERGYCHARGE\".",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "UtilityCost: Spaces were removed from the variable=\"SECONDARY GENERALWINTERONPEAKENERGYCHARGE\". ...Resultant variable=\"SECONDARYGENERALWINTERONPEAKENERGYCHARGE\".",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "UtilityCost: Spaces were removed from the variable=\"SECONDARY GENERALWINTEROFFPEAKENERGYCHARGE\". ...Resultant variable=\"SECONDARYGENERALWINTEROFFPEAKENERGYCHARGE\".",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "UtilityCost: Spaces were removed from the variable=\"SECONDARY GENERALSUMMERDEMANDCHARGE\". ...Resultant variable=\"SECONDARYGENERALSUMMERDEMANDCHARGE\".",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "UtilityCost: Spaces were removed from the variable=\"SECONDARY GENERALWINTERDEMANDCHARGE\". ...Resultant variable=\"SECONDARYGENERALWINTERDEMANDCHARGE\".",
+                  "error_type" : "Warning"
+                 },
+                 {
+                  "description" : "The following Report Variables were requested but not generated because IDF did not contain these elements or misspelled variable name -- check .rdd file",
+                  "error_type" : "Warning"
+                 }
+                ],
+                "result" : "Success"
+               },
+               "job_type" : "EnergyPlus",
+               "last_run" : "20130916T165033",
+               "output_files" : [
+                {
+                 "exists" : true,
+                 "file_name" : "Energy+.ini",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/Energy+.ini",
+                 "key" : "Energy+.ini",
+                 "last_modified" : "20130916T165035"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.audit",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.audit",
+                 "key" : "eplusout.audit",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.bnd",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.bnd",
+                 "key" : "eplusout.bnd",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.eio",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.eio",
+                 "key" : "eplusout.eio",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.end",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.end",
+                 "key" : "eplusout.end",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.err",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.err",
+                 "key" : "eplusout.err",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.eso",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.eso",
+                 "key" : "eplusout.eso",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.mdd",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.mdd",
+                 "key" : "eplusout.mdd",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.mtd",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.mtd",
+                 "key" : "eplusout.mtd",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.mtr",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.mtr",
+                 "key" : "eplusout.mtr",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.rdd",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.rdd",
+                 "key" : "eplusout.rdd",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.shd",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.shd",
+                 "key" : "eplusout.shd",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplusout.sql",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplusout.sql",
+                 "key" : "eplusout.sql",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "eplustbl.htm",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/eplustbl.htm",
+                 "key" : "eplustbl.htm",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "epluszsz.csv",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/epluszsz.csv",
+                 "key" : "epluszsz.csv",
+                 "last_modified" : "20130916T165040"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "sqlite.err",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/sqlite.err",
+                 "key" : "sqlite.err",
+                 "last_modified" : "20130916T165154"
+                },
+                {
+                 "exists" : true,
+                 "file_name" : "stdout",
+                 "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/6-EnergyPlus-0/stdout",
+                 "key" : "stdout",
+                 "last_modified" : "20130916T165155"
+                }
+               ],
+               "params" : [
+                {
+                 "param" :                  {
+                  "children" : [
+                   {
+                    "param" :                     {
+                     "value" : ""
+                    },
+                    "param_index" : 0
+                   }
+                  ],
+                  "value" : "workflowjobkey"
+                 },
+                 "param_index" : 0
+                },
+                {
+                 "param" :                  {
+                  "children" : [
+                   {
+                    "param" :                     {
+                     "value" : ""
+                    },
+                    "param_index" : 0
+                   }
+                  ],
+                  "value" : "workflowjobkey"
+                 },
+                 "param_index" : 1
+                }
+               ],
+               "status" :                {
+                "status" : "Idle"
+               },
+               "uuid" : "5bfafa79-717e-402f-a166-227ec759c9cf"
+              }
+             ],
+             "errors" :              {
+              "all_errors" : [
+
+              ],
+              "result" : "Success"
+             },
+             "job_type" : "EnergyPlusPreProcess",
+             "last_run" : "20130916T165029",
+             "output_files" : [
+              {
+               "exists" : true,
+               "file_name" : "out.idf",
+               "full_path" : "analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/5-EnergyPlusPreProcess-0/out.idf",
+               "key" : "idf",
+               "last_modified" : "20130916T225033",
+               "required_files" : [
+                {
+                 "path" : "in.epw",
+                 "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
+                }
+               ]
+              }
+             ],
+             "params" : [
+              {
+               "param" :                {
+                "children" : [
+                 {
+                  "param" :                   {
+                   "value" : ""
+                  },
+                  "param_index" : 0
+                 }
+                ],
+                "value" : "workflowjobkey"
+               },
+               "param_index" : 0
+              },
+              {
+               "param" :                {
+                "children" : [
+                 {
+                  "param" :                   {
+                   "value" : "d70bd3cbf4894eb54cf62b51bb88c560"
+                  },
+                  "param_index" : 0
+                 }
+                ],
+                "value" : "workflowkey"
+               },
+               "param_index" : 1
+              },
+              {
+               "param" :                {
+                "children" : [
+                 {
+                  "param" :                   {
+                   "value" : ""
+                  },
+                  "param_index" : 0
+                 }
+                ],
+                "value" : "workflowjobkey"
+               },
+               "param_index" : 2
+              }
+             ],
+             "status" :              {
+              "status" : "Idle"
+             },
+             "uuid" : "a522435d-96c0-4d61-81ca-a8a4aa851cc2"
+            }
+           ],
+           "errors" :            {
+            "all_errors" : [
+             {
+              "description" : "added a tariff named Secondary General",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "added a tariff named Large CG",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "set the simulation timestep to 15 min to match the demand window of the tariffs",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "removed existing lifecycle parameters named {fef176e5-20f6-429a-958b-6770126132b4}",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "added lifecycle cost parameters named FEMP LifeCycle Cost Parameters",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Distillate Oil",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Natural gas",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Residual Oil",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Coal",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "removed existing fuel escalation rates named U.S. Avg  Commercial-Electricity",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "added fuel escalation rates named U.S. Avg  Commercial-Electricity",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "added fuel escalation rates named U.S. Avg  Commercial-Distillate Oil",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "added fuel escalation rates named U.S. Avg  Commercial-Residual Oil",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "added fuel escalation rates named U.S. Avg  Commercial-Natural gas",
+              "error_type" : "Info"
+             },
+             {
+              "description" : "added fuel escalation rates named U.S. Avg  Commercial-Coal",
+              "error_type" : "Info"
+             }
+            ],
+            "result" : "Success"
+           },
+           "files" : [
+            {
+             "exists" : true,
+             "file_name" : "UserScriptAdapter.rb",
+             "full_path" : "C:/projects/openstudio-branch1/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
+             "key" : "rb",
+             "last_modified" : "20130827T225829",
+             "required_files" : [
+              {
+               "path" : "user_script.rb",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/measure.rb"
+              },
+              {
+               "path" : "Interruptible Industrial G.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Interruptible Industrial G.idf"
+              },
+              {
+               "path" : "Commercial.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Commercial.idf"
+              },
+              {
+               "path" : "Non-Xcel Commercial.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Commercial.idf"
+              },
+              {
+               "path" : "Non-Xcel Primary General.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Primary General.idf"
+              },
+              {
+               "path" : "Non-Xcel Secondary General Low Load Factor.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Secondary General Low Load Factor.idf"
+              },
+              {
+               "path" : "Non-Xcel Secondary General.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Secondary General.idf"
+              },
+              {
+               "path" : "Non-Xcel Transmission General.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Transmission General.idf"
+              },
+              {
+               "path" : "Primary General.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Primary General.idf"
+              },
+              {
+               "path" : "Residential General.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Residential General.idf"
+              },
+              {
+               "path" : "Secondary General Low Load Factor.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary General Low Load Factor.idf"
+              },
+              {
+               "path" : "Secondary General.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary General.idf"
+              },
+              {
+               "path" : "Transmission General.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Transmission General.idf"
+              },
+              {
+               "path" : "Large CG.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Large CG.idf"
+              },
+              {
+               "path" : "Residential Gas.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Residential Gas.idf"
+              },
+              {
+               "path" : "Small CG.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Small CG.idf"
+              },
+              {
+               "path" : "Secondary Photovoltaic Time-of-Use.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Secondary Photovoltaic Time-of-Use.idf"
+              },
+              {
+               "path" : "Non-Xcel Gas Firm.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Gas Firm.idf"
+              },
+              {
+               "path" : "Non-Xcel Gas Interruptible.idf",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/resources/Non-Xcel Gas Interruptible.idf"
+              },
+              {
+               "path" : "XcelEDATariffSelectionandModelSetup_Test.rb",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/XcelEDATariffSelectionandModelSetup/tests/XcelEDATariffSelectionandModelSetup_Test.rb"
+              }
+             ]
+            }
+           ],
+           "job_type" : "UserScript",
+           "last_run" : "20130916T165007",
+           "output_files" : [
+            {
+             "exists" : true,
+             "file_name" : "out.idf",
+             "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/4-UserScript-0/out.idf",
+             "key" : "out.idf",
+             "last_modified" : "20130916T165028",
+             "required_files" : [
+              {
+               "path" : "in.epw",
+               "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
+              }
+             ]
+            },
+            {
+             "exists" : true,
+             "file_name" : "result.ossr",
+             "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/4-UserScript-0/result.ossr",
+             "key" : "result.ossr",
+             "last_modified" : "20130916T165028"
+            },
+            {
+             "exists" : true,
+             "file_name" : "stdout",
+             "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/4-UserScript-0/stdout",
+             "key" : "stdout",
+             "last_modified" : "20130916T165029"
+            }
+           ],
+           "params" : [
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "value" : "--argumentName=elec_tar"
+                },
+                "param_index" : 0
+               },
+               {
+                "param" :                 {
+                 "value" : "--argumentValue=Secondary General"
+                },
+                "param_index" : 1
+               },
+               {
+                "param" :                 {
+                 "value" : "--argumentName=gas_tar"
+                },
+                "param_index" : 2
+               },
+               {
+                "param" :                 {
+                 "value" : "--argumentValue=Large CG"
+                },
+                "param_index" : 3
+               }
+              ],
+              "value" : "ruby_scriptparameters"
+             },
+             "param_index" : 0
+            },
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "children" : [
+                  {
+                   "param" :                    {
+                    "children" : [
+                     {
+                      "param" :                       {
+                       "children" : [
+                        {
+                         "param" :                          {
+                          "value" : "in.idf"
+                         },
+                         "param_index" : 0
+                        }
+                       ],
+                       "value" : ".*\\.idf"
+                      },
+                      "param_index" : 0
+                     }
+                    ],
+                    "value" : "All"
+                   },
+                   "param_index" : 0
+                  }
+                 ],
+                 "value" : "Last"
+                },
+                "param_index" : 0
+               }
+              ],
+              "value" : "ruby_inputfiles"
+             },
+             "param_index" : 1
+            },
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "value" : "-I"
+                },
+                "param_index" : 0
+               },
+               {
+                "param" :                 {
+                 "value" : "C:/projects/openstudio-branch1/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/Debug/"
+                },
+                "param_index" : 1
+               }
+              ],
+              "value" : "ruby_toolparameters"
+             },
+             "param_index" : 2
+            },
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "children" : [
+                  {
+                   "param" :                    {
+                    "children" : [
+                     {
+                      "param" :                       {
+                       "value" : ""
+                      },
+                      "param_index" : 0
+                     }
+                    ],
+                    "value" : "idf"
+                   },
+                   "param_index" : 0
+                  }
+                 ],
+                 "value" : "idf"
+                },
+                "param_index" : 0
+               }
+              ],
+              "value" : "ruby_copyrequired"
+             },
+             "param_index" : 3
+            },
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "value" : "true"
+                },
+                "param_index" : 0
+               }
+              ],
+              "value" : "ruby_isuserscriptjob"
+             },
+             "param_index" : 4
+            },
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "value" : ""
+                },
+                "param_index" : 0
+               }
+              ],
+              "value" : "workflowjobkey"
+             },
+             "param_index" : 5
+            }
+           ],
+           "status" :            {
+            "status" : "Idle"
+           },
+           "uuid" : "9103ff7e-6b56-40b7-aaba-9ca32f34759a"
+          }
+         ],
+         "errors" :          {
+          "all_errors" : [
+
+          ],
+          "result" : "Success"
+         },
+         "job_type" : "ExpandObjects",
+         "last_run" : "20130916T165005",
+         "output_files" : [
+          {
+           "exists" : true,
+           "file_name" : "expanded.idf",
+           "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/3-ExpandObjects-0/expanded.idf",
+           "key" : "expanded.idf",
+           "last_modified" : "20130916T165007",
+           "required_files" : [
+            {
+             "path" : "in.epw",
+             "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
+            }
+           ]
+          },
+          {
+           "exists" : true,
+           "file_name" : "stdout",
+           "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/3-ExpandObjects-0/stdout",
+           "key" : "stdout",
+           "last_modified" : "20130916T165007"
+          }
+         ],
+         "params" : [
+          {
+           "param" :            {
+            "children" : [
+             {
+              "param" :               {
+               "value" : ""
+              },
+              "param_index" : 0
+             }
+            ],
+            "value" : "workflowjobkey"
+           },
+           "param_index" : 0
+          },
+          {
+           "param" :            {
+            "children" : [
+             {
+              "param" :               {
+               "value" : ""
+              },
+              "param_index" : 0
+             }
+            ],
+            "value" : "workflowjobkey"
+           },
+           "param_index" : 1
+          }
+         ],
+         "status" :          {
+          "status" : "Idle"
+         },
+         "uuid" : "40ad9289-ef93-47a3-9151-0f356a4d602e"
+        }
+       ],
+       "errors" :        {
+        "all_errors" : [
+
+        ],
+        "result" : "Success"
+       },
+       "job_type" : "ModelToIdf",
+       "last_run" : "20130916T164913",
+       "output_files" : [
+        {
+         "exists" : true,
+         "file_name" : "in.idf",
+         "full_path" : "analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/2-ModelToIdf-0/in.idf",
+         "key" : "idf",
+         "last_modified" : "20130916T225001",
+         "required_files" : [
+          {
+           "path" : "in.epw",
+           "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/files/USA_CO_Golden-NREL.724666_TMY3.epw"
+          }
+         ]
+        }
+       ],
+       "params" : [
+        {
+         "param" :          {
+          "children" : [
+           {
+            "param" :             {
+             "value" : ""
+            },
+            "param_index" : 0
+           }
+          ],
+          "value" : "workflowjobkey"
+         },
+         "param_index" : 0
+        },
+        {
+         "param" :          {
+          "children" : [
+           {
+            "param" :             {
+             "value" : "9d4864298980faebecd100777216acb2"
+            },
+            "param_index" : 0
+           }
+          ],
+          "value" : "workflowkey"
+         },
+         "param_index" : 1
+        },
+        {
+         "param" :          {
+          "children" : [
+           {
+            "param" :             {
+             "value" : ""
+            },
+            "param_index" : 0
+           }
+          ],
+          "value" : "workflowjobkey"
+         },
+         "param_index" : 2
+        }
+       ],
+       "status" :        {
+        "status" : "Idle"
+       },
+       "uuid" : "7854062a-efc3-46bc-b568-82117507e9da"
+      }
+     ],
+     "errors" :      {
+      "all_errors" : [
+       {
+        "description" : "The building has been rotated by 90.0 degrees.",
+        "error_type" : "Info"
+       },
+       {
+        "description" : "The building's initial rotation was -0.0 degrees.",
+        "error_type" : "InitialCondition"
+       },
+       {
+        "description" : "The building's final rotation is 90.0 degrees.",
+        "error_type" : "FinalCondition"
+       }
+      ],
+      "result" : "Success"
+     },
+     "files" : [
+      {
+       "exists" : true,
+       "file_name" : "UserScriptAdapter.rb",
+       "full_path" : "C:/projects/openstudio-branch1/openstudiocore/ruby/openstudio/runmanager/rubyscripts/UserScriptAdapter.rb",
+       "key" : "rb",
+       "last_modified" : "20130827T225829",
+       "required_files" : [
+        {
+         "path" : "user_script.rb",
+         "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/RotateBuilding/measure.rb"
+        },
+        {
+         "path" : "RotateBuilding_TestModel_01.osm",
+         "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/RotateBuilding/tests/RotateBuilding_TestModel_01.osm"
+        },
+        {
+         "path" : "RotateBuilding_Test.rb",
+         "url" : "file:///C:/projects/openstudio-server-master/prototype/pat/analysis/scripts/RotateBuilding/tests/RotateBuilding_Test.rb"
+        }
+       ]
+      }
+     ],
+     "job_type" : "UserScript",
+     "last_run" : "20130916T164846",
+     "output_files" : [
+      {
+       "exists" : true,
+       "file_name" : "out.osm",
+       "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/out.osm",
+       "key" : "out.osm",
+       "last_modified" : "20130916T164911",
+       "required_files" : [
+        {
+         "path" : "files/USA_CO_Golden-NREL.724666_TMY3.epw",
+         "url" : "file:analysis/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw"
+        },
+        {
+         "path" : "in.epw",
+         "url" : "file:analysis/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw"
+        }
+       ]
+      },
+      {
+       "exists" : true,
+       "file_name" : "result.ossr",
+       "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/result.ossr",
+       "key" : "result.ossr",
+       "last_modified" : "20130916T164911"
+      },
+      {
+       "exists" : true,
+       "file_name" : "stdout",
+       "full_path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/1-UserScript-0/stdout",
+       "key" : "stdout",
+       "last_modified" : "20130916T164913"
+      }
+     ],
+     "params" : [
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "value" : "--argumentName=relative_building_rotation"
+          },
+          "param_index" : 0
+         },
+         {
+          "param" :           {
+           "value" : "--argumentValue=90"
+          },
+          "param_index" : 1
+         }
+        ],
+        "value" : "ruby_scriptparameters"
+       },
+       "param_index" : 0
+      },
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "children" : [
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "children" : [
+                  {
+                   "param" :                    {
+                    "value" : "in.osm"
+                   },
+                   "param_index" : 0
+                  }
+                 ],
+                 "value" : ".*\\.osm"
+                },
+                "param_index" : 0
+               }
+              ],
+              "value" : "All"
+             },
+             "param_index" : 0
+            }
+           ],
+           "value" : "Last"
+          },
+          "param_index" : 0
+         }
+        ],
+        "value" : "ruby_inputfiles"
+       },
+       "param_index" : 1
+      },
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "value" : "-I"
+          },
+          "param_index" : 0
+         },
+         {
+          "param" :           {
+           "value" : "C:/projects/openstudio-branch1/build-debug/OpenStudioCore-prefix/src/OpenStudioCore-build/ruby/Debug/"
+          },
+          "param_index" : 1
+         }
+        ],
+        "value" : "ruby_toolparameters"
+       },
+       "param_index" : 2
+      },
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "children" : [
+            {
+             "param" :              {
+              "children" : [
+               {
+                "param" :                 {
+                 "value" : ""
+                },
+                "param_index" : 0
+               }
+              ],
+              "value" : "osm"
+             },
+             "param_index" : 0
+            }
+           ],
+           "value" : "osm"
+          },
+          "param_index" : 0
+         }
+        ],
+        "value" : "ruby_copyrequired"
+       },
+       "param_index" : 3
+      },
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "value" : "true"
+          },
+          "param_index" : 0
+         }
+        ],
+        "value" : "ruby_isuserscriptjob"
+       },
+       "param_index" : 4
+      },
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "value" : ""
+          },
+          "param_index" : 0
+         }
+        ],
+        "value" : "workflowjobkey"
+       },
+       "param_index" : 5
+      },
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "value" : ""
+          },
+          "param_index" : 0
+         }
+        ],
+        "value" : "workflowjobkey"
+       },
+       "param_index" : 6
+      }
+     ],
+     "status" :      {
+      "status" : "Idle"
+     },
+     "uuid" : "938ec502-24de-42d1-a704-96e8d21e8d7c"
+    }
+   ],
+   "errors" :    {
+    "all_errors" : [
+
+    ],
+    "result" : "Success"
+   },
+   "files" : [
+    {
+     "exists" : true,
+     "file_name" : "seed.osm",
+     "full_path" : "analysis/seed/seed.osm",
+     "key" : "osm",
+     "last_modified" : "20130909T190354",
+     "required_files" : [
+      {
+       "path" : "in.epw",
+       "url" : "file:analysis/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw"
+      }
+     ]
+    }
+   ],
+   "job_type" : "Null",
+   "last_run" : "20130916T164846",
+   "params" : [
+    {
+     "param" :      {
+      "children" : [
+       {
+        "param" :         {
+         "value" : ""
+        },
+        "param_index" : 0
+       }
+      ],
+      "value" : "workflowjobkey"
+     },
+     "param_index" : 0
+    },
+    {
+     "param" :      {
+      "value" : "flatoutdir"
+     },
+     "param_index" : 1
+    },
+    {
+     "param" :      {
+      "children" : [
+       {
+        "param" :         {
+         "value" : "standard"
+        },
+        "param_index" : 0
+       }
+      ],
+      "value" : "cleanoutfiles"
+     },
+     "param_index" : 2
+    },
+    {
+     "param" :      {
+      "children" : [
+       {
+        "param" :         {
+         "value" : "analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe"
+        },
+        "param_index" : 0
+       }
+      ],
+      "value" : "outdir"
+     },
+     "param_index" : 3
+    },
+    {
+     "param" :      {
+      "children" : [
+       {
+        "param" :         {
+         "value" : "f48640d483ac9fb6b4d3f87134243527"
+        },
+        "param_index" : 0
+       }
+      ],
+      "value" : "workflowkey"
+     },
+     "param_index" : 4
+    }
+   ],
+   "status" :    {
+    "status" : "Idle"
+   },
+   "tools" : [
+    {
+     "local_bin_path" : "/EnergyPlusV8-0-0/ExpandObjects.exe",
+     "name" : "expandobjects",
+     "out_file_filter" : "expanded\\.idf",
+     "remote_archive" : "",
+     "remote_exe" : "ExpandObjects"
+    },
+    {
+     "local_bin_path" : "/EnergyPlusV8-0-0/EnergyPlus.exe",
+     "name" : "energyplus",
+     "out_file_filter" : "eplus.*",
+     "remote_archive" : "",
+     "remote_exe" : "EnergyPlus"
+    },
+    {
+     "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/slab.exe",
+     "name" : "slab",
+     "out_file_filter" : ".*\\.TXT",
+     "remote_archive" : "",
+     "remote_exe" : "slab"
+    },
+    {
+     "local_bin_path" : "/EnergyPlusV8-0-0/PreProcess/GrndTempCalc/basement.exe",
+     "name" : "basement",
+     "out_file_filter" : ".*\\.TXT",
+     "remote_archive" : "",
+     "remote_exe" : "basement"
+    },
+    {
+     "local_bin_path" : "C:/ruby/bin/ruby.exe",
+     "name" : "ruby",
+     "out_file_filter" : ".*",
+     "remote_archive" : "",
+     "remote_exe" : "ruby"
+    }
+   ],
+   "uuid" : "47dce826-5c70-4b2f-a457-5650b06a08fc"
+  },
+  "uuid" : "2ef91856-ea59-4c46-b9da-052d79e2b1fe",
+  "variable_values" : [
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 0
+   },
+   {
+    "value" : 1,
+    "value_type" : "int",
+    "variable_value_index" : 1
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 2
+   },
+   {
+    "value" : 0,
+    "value_type" : "int",
+    "variable_value_index" : 3
+   }
+  ],
+  "version_uuid" : "4d185534-eea1-4a4e-b2e1-d216e639c042",
+  "xml_output_data" : [
+   {
+    "checksum_create" : "6B84A8EF",
+    "checksum_last" : "6B84A8EF",
+    "display_name" : "report.xml",
+    "file_type" : "XML",
+    "name" : "analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/7-OpenStudioPostProcess-0/report.xml",
+    "path" : "C:/projects/openstudio-server-master/prototype/pat/analysis/data_point_2ef91856-ea59-4c46-b9da-052d79e2b1fe/7-OpenStudioPostProcess-0/report.xml",
+    "timestamp_create" : "20130916T165159",
+    "timestamp_last" : "20130916T165159",
+    "uuid" : "cfe65978-7ba6-41d6-b041-ed37977eb8d6",
+    "version_uuid" : "57623aed-0b21-4175-a73e-54c7caa7e2eb"
+   }
+  ]
+ },
+ "metadata" :  {
+  "display_name" : "Rotate Building 90 degrees Only",
+  "name" : "Rotate Building 90 degrees Only",
+  "openstudio_version" : "1.1.0",
+  "project_dir" : "analysis",
+  "uuid" : "2ef91856-ea59-4c46-b9da-052d79e2b1fe",
+  "values" : [
+   {
+    "value" : 0,
+    "variable_index" : 0,
+    "variable_uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9"
+   },
+   {
+    "value" : 1,
+    "variable_index" : 1,
+    "variable_uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5"
+   },
+   {
+    "value" : 0,
+    "variable_index" : 2,
+    "variable_uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2"
+   },
+   {
+    "value" : 0,
+    "variable_index" : 3,
+    "variable_uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7"
+   }
+  ],
+  "version_uuid" : "2ef91856-ea59-4c46-b9da-052d79e2b1fe"
+ }
+}

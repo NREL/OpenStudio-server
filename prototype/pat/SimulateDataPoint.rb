@@ -110,6 +110,9 @@ end
 data_point = loadResult.analysisObject.get.to_DataPoint.get
 analysis.addDataPoint(data_point) # also hooks up real copy of problem
 
+# let listening processes know that this data point is running
+communicateStarted(data_point, directory)
+
 # create a RunManager
 run_manager_path = directory / OpenStudio::Path.new("run.db")
 run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path, true, false, false)
