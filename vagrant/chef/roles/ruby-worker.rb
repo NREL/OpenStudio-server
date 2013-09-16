@@ -32,6 +32,15 @@ default_attributes({
                                    },
                                    {
                                        :name => "delayed_job_mongoid"
+                                   },
+				   {
+				       :name => "net-http-persistent"
+                                   },
+                                   {
+                                       :name => "net-ssh"
+                                   },
+                                   {
+                                       :name => "net-scp"
                                    }
                                ]
                            }

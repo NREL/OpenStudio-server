@@ -5,8 +5,8 @@ require 'net/scp'
 
 module AwsInterface 
   class AwsAdapter
-    IMAGE_ID_SERVER = "ami-05bff66c"
-    IMAGE_ID_WORKER = "ami-0bbcf562"
+    IMAGE_ID_SERVER = "ami-21c88148"
+    IMAGE_ID_WORKER = "ami-ebc98082"
     REGION = "us-east-1"
     #IMAGE_ID = "ami-4c0d4925" #-Nicks
     MASTER_USER_DATA_FILE = "master_script.sh"
@@ -17,7 +17,7 @@ module AwsInterface
     SECRET_ACCESS_KEY = ''
 
 #======================= initialization ======================#    
-    def initialize()
+    def initialize(keypair_path = nil)
       # Sets the AWS::EC2 client 
       # Creates Security Group
       # Creates Key Pair
@@ -47,13 +47,17 @@ module AwsInterface
       #@group.authorize_ingress(:tcp, 22, '0.0.0.0/0', '1.1.1.1/0', '2.2.2.2/0')
       # telnet
       @group.authorize_ingress(:tcp, 23, '0.0.0.0/0')
-    
-      # generate a key pair
-      @key_pair = @ec2.key_pairs.create("key-pair-#{Time.now.to_i}")
-      puts "Generated keypair #{@key_pair.name}, fingerprint: #{@key_pair.fingerprint}"
-      # save key to file
-      File.open("ec2.pem", "w") do |f| f.write(@key_pair.private_key) 
-       end
+
+      @key_pair = nil
+      if keypair_path.nil? || !File.exist?(File.expand_path(keypair_path))
+        # generate a key pair
+        @key_pair = @ec2.key_pairs.create("key-pair-#{Time.now.to_i}")
+        puts "Generated keypair #{@key_pair.name}, fingerprint: #{@key_pair.fingerprint}"
+        # save key to file
+        File.open("ec2.pem", "w") { |f| f.write(@key_pair.private_key) }
+      else
+        @key_pair = @ec2.key_pairs.import("personal_key", File.read(File.expand_path(keypair_path)))
+      end
 
       # instances array
       @instances_master = Array.new(0)
@@ -121,8 +125,8 @@ module AwsInterface
                                           :key_pair => @key_pair, 
                                           :security_groups => @group,
                                           :user_data => user_data,
-                                          :instance_type => "t1.micro") 
-                                          #:instance_type => "m1.medium") 
+                                          #:instance_type => "cc2.8xlarge") 
+                                          :instance_type => "c1.xlarge") 
         @instances_slave.push(@instance)
       end
       # sleep until ready
