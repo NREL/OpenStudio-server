@@ -28,6 +28,9 @@ if not options[:directory]
   exit
 end
 
+# TODO: NL need to remove the concept of local and vagrant... perhaps make this is mixin, but that can be later
+#       Need to have a handle to the datapoint record in mongo at all times in order to setup the status
+
 runType = "Local"
 if options[:runType]
   runType = options[:runType]
@@ -141,6 +144,8 @@ run_manager.waitForFinished
 
 # use the completed job to populate data_point with results
 analysis.problem.updateDataPoint(data_point, job)
+
+# TODO: revert this back to writing to mongo
 
 # implemented differently for Local vs. Vagrant or AWS
 communicateResults(data_point, directory)

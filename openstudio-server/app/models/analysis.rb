@@ -11,7 +11,7 @@ class Analysis
   field :name, :type => String
   field :display_name, :type => String
   field :description, :type => String
-  field :status, :type => String # enum on the status of the analysis
+  field :status, :type => String # enum on the status of the analysis (queued, running, complete)
 
   belongs_to :project
 
@@ -32,6 +32,8 @@ class Analysis
 
 
   def start_r_and_run_sample
+    # TODO: double check if the anlaysis is running, if so, then don't run
+
 
     # determine which problem to run
 
