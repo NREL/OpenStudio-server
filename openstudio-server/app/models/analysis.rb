@@ -42,6 +42,8 @@ class Analysis
     require 'uuid'
 
     #create an instance for R
+
+
     @r = Rserve::Simpler.new
     self.status = 'running'
     self.save!
@@ -99,6 +101,12 @@ class Analysis
       logger.info("removing #{record.id}")
       record.destroy
     end
+  end
+
+  private
+
+  def initialize_worker
+
   end
 
 end
