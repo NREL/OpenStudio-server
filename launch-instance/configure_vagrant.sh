@@ -7,3 +7,6 @@
 
 # need to setup the hosts file
 
+sudo ./master_script.sh
+
+
