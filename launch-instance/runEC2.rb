@@ -74,7 +74,7 @@ text << "#{master_info.dns_name}\n"
 File.open("master_ip_address", 'w+') {|f| f.write(text) }
 
 # Right now these paths are assuming that we are in the same directory as the files
-upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
+upload_files = ["ip_addresses", "setup-ssh-keys.expect", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
@@ -132,22 +132,22 @@ master_instance.each { |instance|
 
 ##################################
 # Setup SSH and Rserve Commands
-command = "chmod 774 ~/setup-ssh-keys.sh"
+command = "chmod 775 ~/setup-ssh-keys.expect"
 master_instance.each { |instance|
   a.send_command(instance, command)
 }
 
-command = "~/setup-ssh-keys.sh"
+command = "~/setup-ssh-keys.expect"
 master_instance.each { |instance|
   a.send_command(instance, command)
 }
 
-command = "chmod 774 ~/setup-ssh-worker-nodes.expect"
+command = "chmod 775 ~/setup-ssh-worker-nodes.expect"
 master_instance.each { |instance|
   a.send_command(instance, command)
 }
  
-command = "chmod 774 ~/setup-ssh-worker-nodes.sh"
+command = "chmod 775 ~/setup-ssh-worker-nodes.sh"
 master_instance.each { |instance|
   a.send_command(instance, command)
 }
