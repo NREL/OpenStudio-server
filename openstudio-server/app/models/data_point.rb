@@ -8,7 +8,7 @@ class DataPoint
   field :values, :type => Array
   field :ip_address, :type => String
   field :zip_file_name, :type => String
-  field :status, :type => String   # enum of queued, running, complete
+  field :status, :type => String   # enum of queued, started, completed
   field :output
 
   belongs_to :analysis
