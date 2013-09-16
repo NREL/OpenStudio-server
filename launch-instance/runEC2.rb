@@ -74,7 +74,7 @@ text << "#{master_info.dns_name}\n"
 File.open("master_ip_address", 'w+') {|f| f.write(text) }
 
 # Right now these paths are assuming that we are in the same directory as the files
-upload_files = ["ip_addresses", "setup-ssh-keys.sh", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
+upload_files = ["ip_addresses", "setup-ssh-keys.expect", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
@@ -132,42 +132,19 @@ master_instance.each { |instance|
 
 ##################################
 # Setup SSH and Rserve Commands
-command = "chmod 774 ~/setup-ssh-keys.sh"
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
+commands = []
+commands << "chmod 775 ~/setup-ssh-keys.expect"
+commands << "~/setup-ssh-keys.expect"
+commands << "chmod 775 ~/setup-ssh-worker-nodes.expect"
+commands << "chmod 775 ~/setup-ssh-worker-nodes.sh"
+commands << "~/setup-ssh-worker-nodes.sh ip_addresses"
 
-command = "~/setup-ssh-keys.sh"
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
-
-command = "chmod 774 ~/setup-ssh-worker-nodes.expect"
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
- 
-command = "chmod 774 ~/setup-ssh-worker-nodes.sh"
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
-
-command = "~/setup-ssh-worker-nodes.sh"
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
- 
-command = "chmod 774 ~/start_rserve.sh"
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
-
-command = "nohup ~/start_rserve.sh </dev/null >/dev/null 2>&1 &"
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
- 
-#end of setup 
+commands.each do |command|
+  master_instance.each do |instance|
+    a.send_command(instance, command)
+  end
+end
+#end of setup
 ################### 
  
 ############################################ 

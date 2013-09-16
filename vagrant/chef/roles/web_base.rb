@@ -9,7 +9,6 @@ run_list([
              "recipe[apache2::mod_ssl]",
              #"recipe[apache2::mod_rewrite]",
              #"recipe[apache2::iptables]",
-             "role[passenger_apache]",
 
              #"recipe[deploy_permissions]",
              #"recipe[deploy_permissions::apache]",
