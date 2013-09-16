@@ -123,7 +123,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {data_points: dps.map{ |k| {:_id => k.id } } } }
+      format.json { render json: { :analysis => { :status => @analysis.status}, data_points: dps.map{ |k| {:_id => k.id, :status => k.status } } } }
     end
   end
 
