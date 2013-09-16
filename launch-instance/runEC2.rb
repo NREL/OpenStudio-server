@@ -152,7 +152,7 @@ master_instance.each { |instance|
   a.send_command(instance, command)
 }
 
-command = "~/setup-ssh-worker-nodes.sh"
+command = "~/setup-ssh-worker-nodes.sh ip_addresses"
 master_instance.each { |instance|
   a.send_command(instance, command)
 }
