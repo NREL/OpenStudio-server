@@ -11,7 +11,7 @@ class Analysis
   field :name, :type => String
   field :display_name, :type => String
   field :description, :type => String
-  field :status, :type => String # enum on the status of the analysis (queued, running, complete)
+  field :status, :type => String # enum on the status of the analysis (queued, started, completed)
 
   belongs_to :project
 
@@ -105,7 +105,11 @@ class Analysis
 
   private
 
-  def initialize_worker
+  def initialize_workers
+    # copy analysis.zip to all worker nodes
+
+
+    # Copy uploaded files from server to worker after upload api,
 
   end
 

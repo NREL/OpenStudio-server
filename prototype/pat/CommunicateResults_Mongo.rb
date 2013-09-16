@@ -19,6 +19,6 @@ def communicateResults(data_point,directory)
   dp.output = JSON.parse(data_point.toJSON(data_point_options))
   dp.values = data_point.variableValues.map{|v| v.toDouble}
   dp.ip_address = host
-  dp.status = "complete"
+  dp.status = "completed"
   dp.save!
 end
