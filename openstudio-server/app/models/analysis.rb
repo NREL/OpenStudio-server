@@ -11,7 +11,7 @@ class Analysis
   field :name, :type => String
   field :display_name, :type => String
   field :description, :type => String
-  field :status, :type => String # enum on the status of the analysis (queued, running, complete)
+  field :status, :type => String # enum on the status of the analysis (queued, started, completed)
 
   belongs_to :project
 
@@ -42,6 +42,8 @@ class Analysis
     require 'uuid'
 
     #create an instance for R
+
+
     @r = Rserve::Simpler.new
     self.status = 'running'
     self.save!
@@ -99,6 +101,16 @@ class Analysis
       logger.info("removing #{record.id}")
       record.destroy
     end
+  end
+
+  private
+
+  def initialize_workers
+    # copy analysis.zip to all worker nodes
+
+
+    # Copy uploaded files from server to worker after upload api,
+
   end
 
 end

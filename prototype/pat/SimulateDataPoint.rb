@@ -150,3 +150,8 @@ analysis.problem.updateDataPoint(data_point, job)
 # implemented differently for Local vs. Vagrant or AWS
 communicateResults(data_point, directory)
 
+
+# TODO: Push results to Mongo from worker to server
+
+# TODO: push results to server node
+
