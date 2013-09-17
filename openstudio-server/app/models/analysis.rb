@@ -34,6 +34,29 @@ class Analysis
   def initialize_workers
     # load in the master and worker information if it doesn't already exist
 
+    # somehow check if this is a vagrant box
+    ip_file = "/data/launch-instance/ip_address_vagrant"
+    if File.exists?(ip_file)
+      #
+    else
+      # try to find a different file in the
+      ip_file = "/home/ubuntu/ip_addresses"
+    end
+
+    ips = File.read(ip_file).split("\n")
+    ip_count = 0
+    ips.each do |ip|
+      cols = ip.split("|")
+      ip_count += 1
+      if ip_count == 1
+        sn = MasterNode.find_or_create_by(:ip_address => cols[0])
+        sn.save!
+      else
+        wn = WorkerNode.find_or_create_by(:ip_address => cols[0])
+        wn.cores = cols[3]
+        wn.save!
+      end
+    end
   end
 
   def start_r_and_run_sample
@@ -179,13 +202,5 @@ class Analysis
   end
 
   private
-
-  def initialize_workers
-    # copy analysis.zip to all worker nodes
-
-
-    # Copy uploaded files from server to worker after upload api,
-
-  end
 
 end
