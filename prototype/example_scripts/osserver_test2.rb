@@ -63,11 +63,11 @@ puts "isRunning = #{isRunning}"
 dataPointUUIDs = server.dataPointUUIDs(analysisUUID)
 puts "#{dataPointUUIDs.size} DataPoints"
 
-runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
-puts "  #{runningDataPointUUIDs.size} Running DataPoints"
-
 queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
 puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
+
+runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+puts "  #{runningDataPointUUIDs.size} Running DataPoints"
 
 completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
 puts "  #{completeDataPointUUIDs.size} Complete DataPoints"
@@ -89,6 +89,9 @@ end
 
 
 # todo: wait for all complete 
+
+isComplete = server.isAnalysisComplete(analysisUUID)
+puts "isComplete = #{isComplete}"
 
 puts "Stoping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)

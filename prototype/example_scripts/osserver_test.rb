@@ -48,15 +48,17 @@ def listProjects(server)
         dataPointJSON = server.dataPointJSON(analysisUUID, dataPointUUID)
         puts "      JSON has #{dataPointJSON.size} characters"
         
-        # DLM: Nick I don't see the example API call for this, does it exist?
-        #TODO: server.downloadDataPoint(analysisUUID, dataPointUUID, downloadPath)
+        #result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
+        #if not result
+        #  puts "  Failed to download dataPoint #{dataPointUUID}"
+        #end 
       end
       
-      runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
-      puts "  #{runningDataPointUUIDs.size} Running DataPoints"
-
       queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
       puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
+
+      runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+      puts "  #{runningDataPointUUIDs.size} Running DataPoints"
 
       completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
       puts "  #{completeDataPointUUIDs.size} Complete DataPoints"    
@@ -97,6 +99,8 @@ settings.signUserAgreement(true)
 puts "userAgreementSigned = #{settings.userAgreementSigned}"
 puts "internetAvailable = #{vagrantProvider.internetAvailable}"
 puts "serviceAvailable = #{vagrantProvider.serviceAvailable}"
+puts "validateCredentials = #{vagrantProvider.validateCredentials}"
+puts "resourcesAvailableToStart = #{vagrantProvider.resourcesAvailableToStart}"
 
 # start the server
 vagrantProvider.requestStartServer
@@ -220,6 +224,11 @@ puts "isQueued = #{isQueued}"
  
 isRunning = server.isAnalysisRunning(analysisUUID)
 puts "isRunning = #{isRunning}"
+
+# todo: wait for complete 
+ 
+isComplete = server.isAnalysisComplete(analysisUUID)
+puts "isComplete = #{isComplete}"
 
 puts "Stopping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
