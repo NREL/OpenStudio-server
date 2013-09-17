@@ -45,10 +45,9 @@ class DataPointsController < ApplicationController
 
     @data_point = DataPoint.new(params[:data_point])
     @data_point.status = "queued"
-    @data_point.save
 
     respond_to do |format|
-      if @data_point.save
+      if @data_point.save!
         format.html { redirect_to @data_point, notice: 'Data point was successfully created.' }
         format.json { render json: @data_point, status: :created, location: @data_point }
       else
@@ -89,11 +88,7 @@ class DataPointsController < ApplicationController
   def download
     @data_point = DataPoint.find(params[:id])
 
-    zip_file_name = "data_point_#{@data_point.id.gsub(/{|}/,'')}.zip"
-
-    # TODO figure out the path based on vagrant vs aws
     data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
-
     send_data data_point_zip_data, :filename => File.basename(@data_point.openstudio_datapoint_file_name), :type => 'application/zip; header=present', :disposition => "attachment"
   end
 end

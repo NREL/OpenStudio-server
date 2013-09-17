@@ -61,7 +61,6 @@ if !project_id.nil?
   puts analysis_hash.inspect
 
   resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", analysis_hash)
-  puts resp.inspect
 
   if resp.code == 201
     analysis_id = JSON.parse(resp)["_id"]
@@ -93,6 +92,7 @@ end
 # add all the datapoints to the analysis
 if !analysis_id.nil?
   datapoints = Dir.glob("../pat/analysis*/data_point*/data_point_in.json")
+
   datapoints.each do |dp|
     puts "reading in datapoint json: #{dp}"
     dp_hash = JSON.parse(File.open(dp).read, :symbolize_names => true)
@@ -102,14 +102,17 @@ if !analysis_id.nil?
     puts dp_hash.inspect
 
     url = "#{HOSTNAME}/analyses/#{analysis_id}/data_points.json"
-    puts url
     resp = RestClient.post(url, dp_hash)
     if resp.code == 201
       puts "new datapoint created for analysis #{analysis_id}"
       puts resp
+    else
+      raise "could not create new datapoint #{resp.inspect}"
     end
   end
 end
+
+exit
 
 # run the analysis
 if !analysis_id.nil?

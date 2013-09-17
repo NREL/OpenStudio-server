@@ -22,7 +22,7 @@ class Analysis
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
-                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension" #todo: move this to /mnt/...
+                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
 
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/

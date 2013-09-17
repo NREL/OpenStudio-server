@@ -87,23 +87,6 @@ class AnalysesController < ApplicationController
     end
   end
 
-=begin
-  def action_stop
-    # TODO move this to its own method
-    elsif params[:analysis_action] == 'stop'
-    if @analysis.stop_analysis
-      result[:code] = 200
-      @analysis.status = 'queued'
-      result[:analysis] = @analysis
-    else
-      result[:code] = 500
-      @analysis.status = 'error'
-      # TODO: save off the error
-    end
-  end
-=end
-
-
   # Controller for submitting the action via post.  This right now only works with the API
   # and will only return a JSON response based on whether or not the analysis has been
   # queued into Delayed Jobs
