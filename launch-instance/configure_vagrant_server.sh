@@ -13,3 +13,5 @@ sudo ./master_script.sh
 sudo mkdir -p /mnt/openstudio
 sudo chmod 777 /mnt/openstudio
 
+# set some of the rails variables that are needed
+
