@@ -223,7 +223,6 @@ class Analysis
         logger.info(self.inspect)
         session.scp.upload!(self.seed_zip.path, "/mnt/openstudio/")
 
-
         session.exec!( "cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}" ) do |channel, stream, data|
           logger.info(data)
         end
