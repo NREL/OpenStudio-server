@@ -122,24 +122,19 @@ class AnalysesController < ApplicationController
       if !no_delay
         if @analysis.start_r_and_run_sample
           result[:code] = 200
-          @analysis.status = 'queued'
           result[:analysis] = @analysis
         else
           result[:code] = 500
-          @analysis.status = 'error'
         end
       else
         if @analysis.start_r_and_run_sample_without_delay
           result[:code] = 200
-          @analysis.status = 'queued'
           result[:analysis] = @analysis
         else
           result[:code] = 500
-          @analysis.status = 'error'
         end
       end
 
-      @analysis.save!
       respond_to do |format|
         #  format.html # new.html.erb
         format.json { render json: result }
@@ -153,14 +148,16 @@ class AnalysesController < ApplicationController
       if @analysis.stop_analysis
         result[:code] = 200
         @analysis.status = 'queued'
+        @analysis.save!
         result[:analysis] = @analysis
       else
         result[:code] = 500
         @analysis.status = 'error'
+        @analysis.save!
         # TODO: save off the error
       end
 
-      @analysis.save!
+
       respond_to do |format|
         #  format.html # new.html.erb
         format.json { render json: result }

@@ -86,7 +86,7 @@ class Analysis
     @r.converse "library(snowfall)"
     @r.converse "library(RMongo)"
 
-    self.status = 'running'
+    self.status = 'started'
     self.run_flag = true
     self.save!
 
