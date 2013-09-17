@@ -1,5 +1,9 @@
 require 'openstudio'
 
+def communicateStarted(data_point,directory)
+
+end
+
 def communicateResults(data_point,directory)
 
   data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(directory.parent_path)

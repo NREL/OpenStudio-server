@@ -4,21 +4,39 @@ require 'mongoid'
 require 'mongoid_paperclip'
 require 'socket'
 
-def communicateResults(data_point,directory)
-  host = Socket.gethostname
-  puts host
-  
-  data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(directory.parent_path)
-
+def communicateStarted(data_point,directory)
   id = OpenStudio::removeBraces(data_point.uuid)
-  puts id
   dp = DataPoint.find_or_create_by(uuid: id)
   id = OpenStudio::removeBraces(data_point.analysisUUID.get)
-  puts id
   dp.analysis = Analysis.find_or_create_by(uuid: id)
-  dp.output = JSON.parse(data_point.toJSON(data_point_options))
   dp.values = data_point.variableValues.map{|v| v.toDouble}
-  dp.ip_address = host
+  dp.ip_address = Socket.gethostname
+  dp.status = "started"
+  dp.save!  
+end
+
+def communicateResults(data_point,directory)  
+  id = OpenStudio::removeBraces(data_point.uuid)
+
+  # create zip file
+  zipFilePath = directory / OpenStudio::Path.new("data_point_" + id + ".zip")
+  zipFile = OpenStudio::ZipFile.new(zipFilePath,false)
+  zipFile.addFile(directory / OpenStudio::Path.new("openstudio.log"),
+                  OpenStudio::Path.new("openstudio.log"))
+  zipFile.addFile(directory / OpenStudio::Path.new("run.db"),
+                  OpenStudio::Path.new("run.db"))
+  Dir.foreach(directory.to_s) do |item|
+    next if item == '.' or item == '..'
+    fullPath = directory / OpenStudio::Path.new(item)
+    if File.directory?(fullPath.to_s)
+      zipFile.addDirectory(fullPath,OpenStudio::Path.new(item))
+    end    
+  end
+  
+  # let mongo know that the data point is complete
+  dp = DataPoint.find_or_create_by(uuid: id)
+  data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(directory.parent_path)
+  dp.output = JSON.parse(data_point.toJSON(data_point_options))
   dp.status = "completed"
   dp.save!
 end
