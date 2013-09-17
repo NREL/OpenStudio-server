@@ -40,16 +40,11 @@ if options[:runType]
   end
 end
 
-if (runType == "Vagrant")
-  mongoid_path_prefix = '/home/vagrant/mongoid/'
-elsif (runType == "AWS")
-  mongoid_path_prefix = '/usr/local/lib/rails-models/'
-  require 'delayed_job_mongoid'
-end
-
 if (runType == "Local")
   require "#{File.dirname(__FILE__)}/CommunicateResults_Local.rb"
 else
+  mongoid_path_prefix = '/mnt/openstudio/rails-models/'
+  require 'delayed_job_mongoid'
   require "#{File.dirname(__FILE__)}/CommunicateResults_Mongo.rb"
   require mongoid_path_prefix + 'algorithm'
   require mongoid_path_prefix + 'analysis'

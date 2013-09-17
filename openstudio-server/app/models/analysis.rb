@@ -102,6 +102,12 @@ class Analysis
     data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
     puts data_points_hash
 
+    # verify that the files are in the right place
+
+    # get the data over to the worker nodes
+
+
+
     @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
       %Q{
         #read in ipaddresses
@@ -121,10 +127,8 @@ class Analysis
           }
           dbDisconnect(mongo)
 
-          #y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
-          #y <- paste("echo /usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
+          y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
           #y <- "sleep 1; echo hello"
-          y <- "echo hello"
           z <- system(y,intern=TRUE)
           j <- length(z)
           z
@@ -137,7 +141,6 @@ class Analysis
         results <- sfLapply(dps[,1],f)
         sfStop()
       }
-
     end
 
     puts @r.converse('results')
