@@ -62,6 +62,8 @@ class Analysis
   end
 
   def start_r_and_run_sample
+
+
     # TODO: double check if the anlaysis is running, if so, then don't run
 
 
@@ -120,8 +122,6 @@ class Analysis
       }
     end
 
-    puts "going to run the analysis now"
-
     # get the worker ips
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
@@ -129,7 +129,7 @@ class Analysis
     WorkerNode.all.each do |wn|
       (1..wn.cores).each { |i| worker_ips_hash[:worker_ips] << wn.ip_address}
     end
-    puts worker_ips_hash
+    logger.info("worker ip hash: #{worker_ips_hash}")
 
     # update the status of all the datapoints and create a hash map
     data_points_hash = {}
@@ -139,7 +139,7 @@ class Analysis
       data_points_hash[:data_points] << dp.uuid
     end
     #data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
-    puts data_points_hash
+    logger.info(data_points_hash)
 
     # verify that the files are in the right place
 
