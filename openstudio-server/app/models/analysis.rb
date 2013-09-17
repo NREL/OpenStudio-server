@@ -22,7 +22,7 @@ class Analysis
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
-                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
+                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"   #todo: move this to /mnt/...
 
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
@@ -56,33 +56,48 @@ class Analysis
 
     self.status = 'running'
     self.run_flag = true
+    self.save!
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
 
-=begin
+    # get the master ip address
+    master_ip = MasterNode.first.ip_address
+
     # I think we can do this with mongoid at the moment... no reason to make this complicated until we have to send
     # the data to the worker nodes
     @r.command() do
       %Q{
-         master_ip = read.table("master_ip_address", as.is = 1)
-         ip <- character(length=nrow(master_ip))
-         ip[1] = master_ip[1,]
-         mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
-         output <- dbRemoveQuery(mongo,"control","{_id:1}")
-         if (output != "ok"){stop(options("show.error.messages"="TRUE"),"cannot remove control flag in Mongo")}
-         input <- dbInsertDocument(mongo,"control",'{"_id":1,"run":"TRUE"}')
-         if (input != "ok"){stop(options("show.error.messages"="TRUE"),"cannot insert control flag in Mongo")}
-         flag <- dbGetQuery(mongo,"control",'{"_id":1}')
-         if (flag["run"] != "TRUE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
-         dbDisconnect(mongo)
+        ip <- "#{master_ip}"
+        print(ip)
+        #mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
+        #output <- dbRemoveQuery(mongo,"control","{_id:1}")
+        #if (output != "ok"){stop(options("show.error.messages"="TRUE"),"cannot remove control flag in Mongo")}
+        #input <- dbInsertDocument(mongo,"control",'{"_id":1,"run":"TRUE"}')
+        #if (input != "ok"){stop(options("show.error.messages"="TRUE"),"cannot insert control flag in Mongo")}
+        #flag <- dbGetQuery(mongo,"control",'{"_id":1}')
+        #if (flag["run"] != "TRUE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
+        #dbDisconnect(mongo)
+
+        #test the query of getting the run_flag
+        mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
+        mongo <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
+        print(mongo)
+
+        print(mongo["run_flag"])
+        if (mongo["run_flag"] == "true"  ){
+          print("flag is set to true!")
+        }
       }
     end
-=end
 
+    puts "going to run the analysis now"
 
-    puts "ready to run ="
-    puts @r.converse('flag["run"]')
+    # get the worker ips
+    worker_ips = WorkerNode.all.map{|v| v.ip_address}
+    puts worker_ips
+
+    exit
 
     @r.command() do
       %Q{
