@@ -107,12 +107,6 @@ class Analysis
 
     @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
       %Q{
-        #read in ipaddresses
-        master_ip = "#{master_ip}"
-        print(master_ip)
-        print(ips)
-        print(ips["worker_ips"])
-
         sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
         sfLibrary(RMongo)
 
@@ -132,7 +126,6 @@ class Analysis
         }
 
         sfExport("f")
-        #sfExport("master_ip") # I dont' think i need to do this because the text is interpretted first... right?
         print(dps)
 
         results <- sfLapply(dps[,1],f)
