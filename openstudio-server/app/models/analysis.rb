@@ -22,7 +22,7 @@ class Analysis
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
-                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"   #todo: move this to /mnt/...
+                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension" #todo: move this to /mnt/...
 
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
@@ -94,16 +94,53 @@ class Analysis
     puts "going to run the analysis now"
 
     # get the worker ips
-    worker_ips = WorkerNode.all.map{|v| v.ip_address}
-    puts worker_ips
+    #worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 2}
+    worker_ips_hash = {worker_ips: ["localhost", "localhost"]}
+    puts worker_ips_hash
 
-    exit
+    data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
+    puts data_points_hash
 
-    @r.command() do
+    @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
       %Q{
         #read in ipaddresses
-        #ips = read.table("hosts_slave_file.sh", as.is = 1)
-        ips = read.table("worker_ips", as.is = 1)
+        master_ip = "#{master_ip}"
+        print(master_ip)
+        print(ips)
+        print(ips["worker_ips"])
+
+        sfInit(parallel=TRUE, type="SOCK", socketHosts=ips["worker_ips"])
+        sfLibrary(RMongo)
+
+        f <- function(x){
+          mongo <- mongoDbConnect("openstudio_server_development", host="#{master_ip}", port=27017)
+          #flag <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
+          #if (flag["run"] == "false" ){
+          #  stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")
+          #}
+          #dbDisconnect(mongo)
+
+          #y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
+          #y <- paste("echo /usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
+          y <- "sleep 5; echo hello"
+          z <- system(y,intern=TRUE)
+          j <- length(z)
+          z
+        }
+
+        sfExport("f")
+        #sfExport("master_ip") # I dont' think i need to do this because the text is interpretted first... right?
+        print(dps)
+
+        results <- sfLapply(dps[,1],f)
+        sfStop()
+      }
+
+    end
+
+    puts @r.converse('results')
+
+=begin
 
         #create character list of ipaddresses
         b <- character(length=nrow(ips))
@@ -138,11 +175,13 @@ class Analysis
     end
     puts "results ="
     puts @r.converse('results')
+=end
 
 
     self.status = 'completed'
     self.save!
   end
+
   #handle_asynchronously :start_r_and_run_sample
 
   protected
