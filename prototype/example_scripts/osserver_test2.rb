@@ -52,46 +52,46 @@ puts "Starting analysis #{analysisUUID}"
 success = server.start(analysisUUID)
 puts "  Success = #{success}"
   
-isQueued = server.isAnalysisQueued(analysisUUID)
-puts "isQueued = #{isQueued}"
+isComplete = false
+while not isComplete
+  isQueued = server.isAnalysisQueued(analysisUUID)
+  puts "isQueued = #{isQueued}"
+   
+  isRunning = server.isAnalysisRunning(analysisUUID)
+  puts "isRunning = #{isRunning}"
 
-# todo: wait for running 
- 
-isRunning = server.isAnalysisRunning(analysisUUID)
-puts "isRunning = #{isRunning}"
+  isComplete = server.isAnalysisComplete(analysisUUID)
+  puts "isComplete = #{isComplete}"
 
-dataPointUUIDs = server.dataPointUUIDs(analysisUUID)
-puts "#{dataPointUUIDs.size} DataPoints"
+  dataPointUUIDs = server.dataPointUUIDs(analysisUUID)
+  puts "#{dataPointUUIDs.size} DataPoints"
 
-queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
-puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
+  queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
+  puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
 
-runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
-puts "  #{runningDataPointUUIDs.size} Running DataPoints"
+  runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+  puts "  #{runningDataPointUUIDs.size} Running DataPoints"
 
-completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
-puts "  #{completeDataPointUUIDs.size} Complete DataPoints"
+  completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
+  puts "  #{completeDataPointUUIDs.size} Complete DataPoints"
 
-# try to load the results
-dataPointUUIDs.each do |dataPointUUID|
-  json = server.dataPointJSON(analysisUUID, dataPointUUID)
-  result = OpenStudio::Analysis::loadJSON(json)
-  if result.analysisObject.empty? or result.analysisObject.get.to_DataPoint.empty?
-    puts "  Can't reconstruct dataPoint #{dataPointUUID}"
-  end
-  
-  path = OpenStudio::Path.new("./#{dataPointUUID}.zip")
-  result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
-  if not result
-    puts "  Failed to download dataPoint #{dataPointUUID}"
+  # try to load the results
+  dataPointUUIDs.each do |dataPointUUID|
+    json = server.dataPointJSON(analysisUUID, dataPointUUID)
+    result = OpenStudio::Analysis::loadJSON(json)
+    if result.analysisObject.empty? or result.analysisObject.get.to_DataPoint.empty?
+      puts "  Can't reconstruct dataPoint #{dataPointUUID}"
+    end
+    
+    path = OpenStudio::Path.new("./#{dataPointUUID}.zip")
+    if not File.exist?(path.to_s)
+      result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
+      if not result
+        puts "  Failed to download dataPoint #{dataPointUUID}"
+      end
+    end
   end
 end
-
-
-# todo: wait for all complete 
-
-isComplete = server.isAnalysisComplete(analysisUUID)
-puts "isComplete = #{isComplete}"
 
 puts "Stoping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
