@@ -23,12 +23,6 @@ unzip rails-models.zip
 # send over the mongoid.yml file
 cp /data/prototype/pat/mongoid.yml /mnt/openstudio/rails-models/
 
-# eventually make this the file from the POST
-cp /data/prototype/pat/analysis.zip /mnt/openstudio/
-cd /mnt/openstudio
-unzip analysis.zip
-
-
 
 
 

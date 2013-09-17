@@ -86,7 +86,7 @@ class Analysis
     @r.converse "library(snowfall)"
     @r.converse "library(RMongo)"
 
-    self.status = 'running'
+    self.status = 'started'
     self.run_flag = true
     self.save!
 
@@ -180,7 +180,7 @@ class Analysis
     self.status = 'completed'
     self.save!
   end
-  #handle_asynchronously :start_r_and_run_sample
+  handle_asynchronously :start_r_and_run_sample
 
   def stop_analysis
     logger.info("stopping analysis")
@@ -222,7 +222,6 @@ class Analysis
       Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
         logger.info(self.inspect)
         session.scp.upload!(self.seed_zip.path, "/mnt/openstudio/")
-
 
         session.exec!( "cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}" ) do |channel, stream, data|
           logger.info(data)
