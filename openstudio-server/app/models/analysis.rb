@@ -174,6 +174,8 @@ class Analysis
       }
     end
 
+    #self.r_log = @r.converse(messages)
+
     self.status = 'completed'
     self.save!
   end
