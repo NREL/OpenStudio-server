@@ -94,8 +94,9 @@ class Analysis
     puts "going to run the analysis now"
 
     # get the worker ips
-    #worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 2}
-    worker_ips_hash = {worker_ips: ["localhost", "localhost"]}
+    worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 2}
+    worker_ips_hash[:worker_ips] << "localhost"
+    worker_ips_hash[:worker_ips] << "localhost"
     puts worker_ips_hash
 
     data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
@@ -109,7 +110,7 @@ class Analysis
         print(ips)
         print(ips["worker_ips"])
 
-        sfInit(parallel=TRUE, type="SOCK", socketHosts=ips["worker_ips"])
+        sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
         sfLibrary(RMongo)
 
         f <- function(x){
@@ -122,7 +123,8 @@ class Analysis
 
           #y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
           #y <- paste("echo /usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
-          y <- "sleep 1; echo hello"
+          #y <- "sleep 1; echo hello"
+          y <- "echo hello"
           z <- system(y,intern=TRUE)
           j <- length(z)
           z
