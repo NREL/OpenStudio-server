@@ -94,9 +94,7 @@ class Analysis
     puts "going to run the analysis now"
 
     # get the worker ips
-    worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 2}
-    worker_ips_hash[:worker_ips] << "localhost"
-    worker_ips_hash[:worker_ips] << "localhost"
+    worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 4}
     puts worker_ips_hash
 
     data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
@@ -105,7 +103,6 @@ class Analysis
     # verify that the files are in the right place
 
     # get the data over to the worker nodes
-
 
 
     @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
@@ -143,51 +140,10 @@ class Analysis
       }
     end
 
-    puts @r.converse('results')
-
-=begin
-
-        #create character list of ipaddresses
-        b <- character(length=nrow(ips))
-        for(i in 1:nrow(ips)) {b[i] = ips[i,]}
-        master_ip = read.table("master_ip_address", as.is = 1)
-        ip <- character(length=nrow(master_ip))
-        ip[1] = master_ip[1,]
-           #sfInit(parallel=TRUE, type="SOCK", socketHosts=rep("localhost",4))
-           sfInit(parallel=TRUE, type="SOCK", socketHosts=b)
-           sfLibrary(RMongo)
-
-           f <- function(x){
-             #library(RMongo)
-             mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
-             flag <- dbGetQuery(mongo,"control",'{"_id":1}')
-             if (flag["run"] == "FALSE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
-             dbDisconnect(mongo)
-             y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
-             z <- system(y,intern=TRUE)
-             j <- length(z)
-             z}
-
-           sfExport("f")
-           sfExport("ip")
-           dpts = read.table("data_point_uuids.txt", as.is = 1)
-           datapoints <- character(length=nrow(dpts))
-           for(i in 1:nrow(dpts)) {datapoints[i] = dpts[i,]}
-
-           results <- sfLapply(datapoints,f)
-           sfStop()
-        }
-    end
-    puts "results ="
-    puts @r.converse('results')
-=end
-
-
     self.status = 'completed'
     self.save!
   end
-
-  #handle_asynchronously :start_r_and_run_sample
+  handle_asynchronously :start_r_and_run_sample
 
   def stop_analysis
     logger.info("stopping analysis")
