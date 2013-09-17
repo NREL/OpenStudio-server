@@ -81,11 +81,11 @@ class Analysis
 
         #test the query of getting the run_flag
         mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
-        mongo <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
-        print(mongo)
+        flag <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
+        print(flag)
 
-        print(mongo["run_flag"])
-        if (mongo["run_flag"] == "true"  ){
+        print(flag["run_flag"])
+        if (flag["run_flag"] == "true"  ){
           print("flag is set to true!")
         }
       }
@@ -114,15 +114,15 @@ class Analysis
 
         f <- function(x){
           mongo <- mongoDbConnect("openstudio_server_development", host="#{master_ip}", port=27017)
-          #flag <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
-          #if (flag["run"] == "false" ){
-          #  stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")
-          #}
-          #dbDisconnect(mongo)
+          flag <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
+          if (flag["run_flag"] == "false" ){
+            stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")
+          }
+          dbDisconnect(mongo)
 
           #y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
           #y <- paste("echo /usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
-          y <- "sleep 5; echo hello"
+          y <- "sleep 1; echo hello"
           z <- system(y,intern=TRUE)
           j <- length(z)
           z
@@ -183,6 +183,13 @@ class Analysis
   end
 
   #handle_asynchronously :start_r_and_run_sample
+
+  def stop_analysis
+    logger.info("stopping analysis")
+    self.run_flag = false
+    self.status = 'completed'
+    self.save!
+  end
 
   protected
 
