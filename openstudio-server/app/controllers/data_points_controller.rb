@@ -44,7 +44,7 @@ class DataPointsController < ApplicationController
     params[:data_point][:analysis_id] = analysis_id
 
     @data_point = DataPoint.new(params[:data_point])
-    @data_point.status = "created"
+    @data_point.status = "queued"
     @data_point.save
 
     respond_to do |format|
@@ -92,8 +92,8 @@ class DataPointsController < ApplicationController
     zip_file_name = "data_point_#{@data_point.id.gsub(/{|}/,'')}.zip"
 
     # TODO figure out the path based on vagrant vs aws
-    data_point_zip_data = File.read("/home/vagrant/analysis_a8feca85-dab9-4510-8610-651ef847781d/#{zip_file_name}")
+    data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
 
-    send_data data_point_zip_data, :filename => "#{@data_point.uuid}.zip", :type => 'application/zip; header=present', :disposition => "attachment"
+    send_data data_point_zip_data, :filename => File.basename(@data_point.openstudio_datapoint_file_name), :type => 'application/zip; header=present', :disposition => "attachment"
   end
 end

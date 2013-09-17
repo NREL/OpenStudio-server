@@ -48,14 +48,21 @@ class Analysis
     ips.each do |ip|
       cols = ip.split("|")
       ip_count += 1
+
+      #192.168.33.11|os-worker-1|2|vagrant|PASSWORD
       if ip_count == 1
         sn = MasterNode.find_or_create_by(:ip_address => cols[0])
+        sn.hostname = cols[1]
+        sn.cores = cols[2]
+        sn.user = cols[3]
+        #sn.password = cols[4]
         sn.save!
       else
         wn = WorkerNode.find_or_create_by(:ip_address => cols[0])
-        wn.user = cols[1]
-        wn.password = cols[2]
-        wn.cores = cols[3]
+        wn.hostname = cols[1]
+        wn.cores = cols[2]
+        wn.user = cols[3]
+        wn.password = cols[4]
         wn.save!
 
         logger.info("Worker node #{wn.inspect}")
@@ -137,15 +144,10 @@ class Analysis
     data_points_hash[:data_points] = []
     self.data_points.all.each do |dp|
       dp.status = 'initialized'
+      dp.save!
       data_points_hash[:data_points] << dp.uuid
     end
-    #data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
     logger.info(data_points_hash)
-
-    # verify that the files are in the right place
-
-    # get the data over to the worker nodes
-
 
     @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
       %Q{
@@ -170,7 +172,7 @@ class Analysis
         sfExport("f")
         print(dps)
 
-        results <- sfLapply(dps[,1],f)
+        results <- sfLapply(dps[,1], f)
         sfStop()
       }
     end
@@ -189,6 +191,38 @@ class Analysis
     self.save!
   end
 
+  # copy back the results to the master node if they are finished
+  def download_data_from_workers
+    self.data_points.and({downloaded: false}, {status: 'completed'}).each do |dp|
+      puts "downloading #{dp.id}"
+
+      save_filename = nil
+      #look up the worker nodes ip address from database
+      wn_ip = WorkerNode.where(hostname: dp.ip_address).first
+      if !wn_ip.nil?
+        Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
+          Rails.logger.info(self.inspect)
+
+          save_filename = "/mnt/openstudio/data_point_#{dp.id}.zip"
+
+          puts "Trying to download /mnt/openstudio/analysis/data_point_#{dp.id}/data_point_#{dp.id}.zip to #{save_filename}"
+          if !session.scp.download!("/mnt/openstudio/analysis/data_point_#{dp.id}/data_point_#{dp.id}.zip", save_filename )
+            save_filename = nil
+          end
+
+          #TODO add a delete method for the results
+          #session.exec!( "cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}" ) do |channel, stream, data|
+          #  logger.info(data)
+          #end
+          #session.loop
+        end
+      end
+
+      #now add the datapoint path to the database to get it via the server
+      dp.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
+      dp.save!
+    end
+  end
   protected
 
   def remove_dependencies
@@ -211,11 +245,13 @@ class Analysis
     end
   end
 
+
+
   private
 
   # copy the zip file over the various workers and extract the file.
   # if the file already exists, then it will overwrite the file
-  # TODO verify the behaviour of the zip extraction on top of an already existing analysis.
+  # verify the behaviour of the zip extraction on top of an already existing analysis.
   def copy_data_to_workers
     # copy the datafiles over to the worker nodes
     WorkerNode.all.each do |wn|
@@ -232,9 +268,9 @@ class Analysis
     end
   end
 
-  def download_data_from_workers
 
-  end
+
+
 
 
 end

@@ -147,13 +147,9 @@ class AnalysesController < ApplicationController
     elsif params[:analysis_action] == 'stop'
       if @analysis.stop_analysis
         result[:code] = 200
-        @analysis.status = 'queued'
-        @analysis.save!
         result[:analysis] = @analysis
       else
         result[:code] = 500
-        @analysis.status = 'error'
-        @analysis.save!
         # TODO: save off the error
       end
 
