@@ -117,16 +117,24 @@ class AnalysesController < ApplicationController
       @analysis.initialize_workers
 
       logger.info("queuing up analysis #{@analysis}")
-      if @analysis.start_r_and_run_sample
-        result[:code] = 200
-        @analysis.status = 'queued'
-        result[:analysis] = @analysis
+      params[:without_delay] == 'true' ? no_delay = true : no_delay = false
+
+      if !no_delay
+        if @analysis.start_r_and_run_sample
+          result[:code] = 200
+          result[:analysis] = @analysis
+        else
+          result[:code] = 500
+        end
       else
-        result[:code] = 500
-        @analysis.status = 'error'
+        if @analysis.start_r_and_run_sample_without_delay
+          result[:code] = 200
+          result[:analysis] = @analysis
+        else
+          result[:code] = 500
+        end
       end
 
-      @analysis.save!
       respond_to do |format|
         #  format.html # new.html.erb
         format.json { render json: result }
@@ -140,14 +148,16 @@ class AnalysesController < ApplicationController
       if @analysis.stop_analysis
         result[:code] = 200
         @analysis.status = 'queued'
+        @analysis.save!
         result[:analysis] = @analysis
       else
         result[:code] = 500
         @analysis.status = 'error'
+        @analysis.save!
         # TODO: save off the error
       end
 
-      @analysis.save!
+
       respond_to do |format|
         #  format.html # new.html.erb
         format.json { render json: result }
