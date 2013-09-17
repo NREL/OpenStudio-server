@@ -3,7 +3,7 @@
 # This script is used to configure the vagrant boxes in order to test and run the examples
 
 # setup the passwordless ssh
-./setup-ssh-keys-vagrant.sh
+./setup-ssh-keys-vagrant.expect
 ./setup-ssh-worker-nodes.sh ip_address_vagrant
 
 # need to setup the hosts file

@@ -113,7 +113,6 @@ class AnalysesController < ApplicationController
 
     result = {}
     if params[:analysis_action] == 'start'
-
       logger.info("Initializing workers in database")
       @analysis.initialize_workers
 
@@ -126,18 +125,40 @@ class AnalysesController < ApplicationController
         result[:code] = 500
         @analysis.status = 'error'
       end
-    end
 
-    @analysis.save!
-    respond_to do |format|
-    #  format.html # new.html.erb
-      format.json { render json: result }
-      if result[:code] == 200
-        format.html { redirect_to @analysis, notice: 'Analysis was stopped.' }
+      @analysis.save!
+      respond_to do |format|
+        #  format.html # new.html.erb
+        format.json { render json: result }
+        if result[:code] == 200
+          format.html { redirect_to @analysis, notice: 'Analysis was started.' }
+        else
+          format.html { redirect_to @analysis, notice: 'Analysis was NOT started.' }
+        end
+      end
+    elsif params[:analysis_action] == 'stop'
+      if @analysis.stop_analysis
+        result[:code] = 200
+        @analysis.status = 'queued'
+        result[:analysis] = @analysis
       else
-        format.html { redirect_to @analysis, notice: 'Analysis was not stopped.' }
+        result[:code] = 500
+        @analysis.status = 'error'
+        # TODO: save off the error
+      end
+
+      @analysis.save!
+      respond_to do |format|
+        #  format.html # new.html.erb
+        format.json { render json: result }
+        if result[:code] == 200
+          format.html { redirect_to @analysis, notice: 'Analysis flag changed to stop. Will wait until the last run finishes.' }
+        else
+          format.html { redirect_to @analysis, notice: 'Analysis flag did NOT change.' }
+        end
       end
     end
+
   end
 
   def status
