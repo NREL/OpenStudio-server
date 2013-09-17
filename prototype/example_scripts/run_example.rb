@@ -7,14 +7,14 @@ HOSTNAME = "http://localhost:8080"
 #  --------- GET example -----------
 resp = RestClient.get("#{HOSTNAME}/projects.json")
 
-projects_json = JSON.parse(resp, :symbolize_names => true)
+projects_json = JSON.parse(resp, :symbolize_names => true, :max_nesting => false)
 
 if projects_json.count > 0
   analysis_id = projects_json[0][:analyses][0][:_id]
   puts analysis_id
 
   datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
-  puts JSON.parse(datapoints)
+  puts JSON.parse(datapoints, :max_nesting => false)
   #puts JSON.pretty_generate(JSON.parse(datapoints))
 end
 
