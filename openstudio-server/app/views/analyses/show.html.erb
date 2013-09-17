@@ -23,7 +23,7 @@
 <%= link_to "seed zip", @analysis.seed_zip.url(:original, false) unless @analysis.seed_zip.url.nil? %> </br>
 
 <h1> analysis status </h1>
-<%= @analysis.status %> <%= link_to 'stop', action_analysis_path, :id => @analysis, :method => 'action', :action => 'stop' %> </br>
+<%= @analysis.status %>
 
 
 <%= link_to 'Back', analysis_path %>
