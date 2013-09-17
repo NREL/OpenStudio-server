@@ -135,7 +135,7 @@ class Analysis
     worker_ips_hash[:worker_ips] = []
 
     WorkerNode.all.each do |wn|
-      (1..wn.cores).each { |i| worker_ips_hash[:worker_ips] << wn.ip_address}
+      (1..wn.cores).each { |i| worker_ips_hash[:worker_ips] << wn.ip_address }
     end
     logger.info("worker ip hash: #{worker_ips_hash}")
 
@@ -179,6 +179,8 @@ class Analysis
 
     #self.r_log = @r.converse(messages)
 
+    # check if there are any other datapoints that need downloaded?
+    download_data_from_workers
     self.status = 'completed'
     self.save!
   end
@@ -191,38 +193,6 @@ class Analysis
     self.save!
   end
 
-  # copy back the results to the master node if they are finished
-  def download_data_from_workers
-    self.data_points.and({downloaded: false}, {status: 'completed'}).each do |dp|
-      puts "downloading #{dp.id}"
-
-      save_filename = nil
-      #look up the worker nodes ip address from database
-      wn_ip = WorkerNode.where(hostname: dp.ip_address).first
-      if !wn_ip.nil?
-        Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
-          Rails.logger.info(self.inspect)
-
-          save_filename = "/mnt/openstudio/data_point_#{dp.id}.zip"
-
-          puts "Trying to download /mnt/openstudio/analysis/data_point_#{dp.id}/data_point_#{dp.id}.zip to #{save_filename}"
-          if !session.scp.download!("/mnt/openstudio/analysis/data_point_#{dp.id}/data_point_#{dp.id}.zip", save_filename )
-            save_filename = nil
-          end
-
-          #TODO add a delete method for the results
-          #session.exec!( "cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}" ) do |channel, stream, data|
-          #  logger.info(data)
-          #end
-          #session.loop
-        end
-      end
-
-      #now add the datapoint path to the database to get it via the server
-      dp.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
-      dp.save!
-    end
-  end
   protected
 
   def remove_dependencies
@@ -245,8 +215,6 @@ class Analysis
     end
   end
 
-
-
   private
 
   # copy the zip file over the various workers and extract the file.
@@ -259,7 +227,7 @@ class Analysis
         logger.info(self.inspect)
         session.scp.upload!(self.seed_zip.path, "/mnt/openstudio/")
 
-        session.exec!( "cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}" ) do |channel, stream, data|
+        session.exec!("cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
           logger.info(data)
         end
         session.loop
@@ -268,9 +236,12 @@ class Analysis
     end
   end
 
-
-
-
+  # copy back the results to the master node if they are finished
+  def download_data_from_workers
+    self.data_points.and({downloaded: false}, {status: 'completed'}).each do |dp|
+      dp.download_datapoint_from_worker
+    end
+  end
 
 
 end
