@@ -180,7 +180,7 @@ class Analysis
     self.status = 'completed'
     self.save!
   end
-  #handle_asynchronously :start_r_and_run_sample
+  handle_asynchronously :start_r_and_run_sample
 
   def stop_analysis
     logger.info("stopping analysis")
