@@ -117,13 +117,26 @@ class AnalysesController < ApplicationController
       @analysis.initialize_workers
 
       logger.info("queuing up analysis #{@analysis}")
-      if @analysis.start_r_and_run_sample
-        result[:code] = 200
-        @analysis.status = 'queued'
-        result[:analysis] = @analysis
+      params[:without_delay] == 'true' ? no_delay = true : no_delay = false
+
+      if !no_delay
+        if @analysis.start_r_and_run_sample
+          result[:code] = 200
+          @analysis.status = 'queued'
+          result[:analysis] = @analysis
+        else
+          result[:code] = 500
+          @analysis.status = 'error'
+        end
       else
-        result[:code] = 500
-        @analysis.status = 'error'
+        if @analysis.start_r_and_run_sample_without_delay
+          result[:code] = 200
+          @analysis.status = 'queued'
+          result[:analysis] = @analysis
+        else
+          result[:code] = 500
+          @analysis.status = 'error'
+        end
       end
 
       @analysis.save!
