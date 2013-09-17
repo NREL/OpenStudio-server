@@ -74,7 +74,7 @@ text << "#{master_info.dns_name}\n"
 File.open("master_ip_address", 'w+') {|f| f.write(text) }
 
 # Right now these paths are assuming that we are in the same directory as the files
-upload_files = ["ip_addresses", "setup-ssh-keys.expect", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect", "start_rserve.sh"]
+upload_files = ["ip_addresses", "setup-ssh-keys.expect", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect"]
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
@@ -113,7 +113,7 @@ File.open(local_path, 'w+') {|f| f.write(text) }
 a.upload_file(master_instance[0], local_path, remote_path)
 
 ###################################
-# create /mnt/openstudio
+# create /directory for the rails models
 command = "sudo mkdir -p /usr/local/lib/rails-models"
 slave_instances.each { |instance|
   a.send_command(instance,command)
