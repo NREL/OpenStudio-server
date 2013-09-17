@@ -113,6 +113,10 @@ class AnalysesController < ApplicationController
 
     result = {}
     if params[:analysis_action] == 'start'
+
+      logger.info("Initializing workers in database")
+      @analysis.initialize_workers
+
       logger.info("queuing up analysis #{@analysis}")
       if @analysis.start_r_and_run_sample
         result[:code] = 200
