@@ -3,4 +3,5 @@ class WorkerNode
   include Mongoid::Timestamps
 
   field :ip_address, :type => String
+  field :cores, :type => Integer
 end
