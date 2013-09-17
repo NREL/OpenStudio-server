@@ -115,7 +115,7 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-  action_hash = { analysis_action: "start", without_delay: "false" }
+  action_hash = { analysis_action: "start", without_delay: "true" }
   #action_hash = { action: "stop"}
 
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
