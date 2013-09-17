@@ -123,8 +123,6 @@ if !analysis_id.nil?
   puts resp.inspect
   exit
 
-
-
   # check all the queued analyses for this project (eventually move this to all analyses)
   puts
   puts "list of queued analyses"
