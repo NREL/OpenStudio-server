@@ -48,21 +48,35 @@ def listProjects(server)
         dataPointJSON = server.dataPointJSON(analysisUUID, dataPointUUID)
         puts "      JSON has #{dataPointJSON.size} characters"
         
-        # DLM: Nick I don't see the example API call for this, does it exist?
-        #TODO: server.downloadDataPoint(analysisUUID, dataPointUUID, downloadPath)
+        #result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
+        #if not result
+        #  puts "  Failed to download dataPoint #{dataPointUUID}"
+        #end 
       end
       
-      runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
-      puts "  #{runningDataPointUUIDs.size} Running DataPoints"
-
       queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
       puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
+
+      runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+      puts "  #{runningDataPointUUIDs.size} Running DataPoints"
 
       completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
       puts "  #{completeDataPointUUIDs.size} Complete DataPoints"    
     end
   end
 
+end
+
+def listStatus(vagrantProvider)
+  puts
+  puts "Status:"
+  puts "internetAvailable = #{vagrantProvider.internetAvailable()}"
+  puts "serviceAvailable = #{vagrantProvider.serviceAvailable()}"
+  puts "validateCredentials = #{vagrantProvider.validateCredentials()}"
+  puts "serverRunning = #{vagrantProvider.serverRunning()}"
+  puts "workersRunning = #{vagrantProvider.workersRunning()}"
+  puts "terminateCompleted = #{vagrantProvider.terminateCompleted()}"
+  puts
 end
 
 # create the vagrant provider
@@ -72,15 +86,21 @@ settings.setServerUrl(serverUrl)
 settings.setWorkerPath(workerPath)
 settings.setWorkerUrl(workerUrl)
 settings.setHaltOnStop(haltOnStop)
+settings.setUsername("vagrant")
+settings.setPassword("vagrant")
 
 vagrantProvider = OpenStudio::VagrantProvider.new()
 vagrantProvider.setSettings(settings)
+
+listStatus(vagrantProvider)
 
 # test that it is working
 settings.signUserAgreement(true)
 puts "userAgreementSigned = #{settings.userAgreementSigned}"
 puts "internetAvailable = #{vagrantProvider.internetAvailable}"
 puts "serviceAvailable = #{vagrantProvider.serviceAvailable}"
+puts "validateCredentials = #{vagrantProvider.validateCredentials}"
+puts "resourcesAvailableToStart = #{vagrantProvider.resourcesAvailableToStart}"
 
 # start the server
 vagrantProvider.requestStartServer
@@ -94,6 +114,8 @@ end
 
 puts "server started"
 
+listStatus(vagrantProvider)
+
 # start the workers
 vagrantProvider.requestStartWorkers
 
@@ -105,6 +127,8 @@ if not vagrantProvider.workersStarted
 end
 
 puts "workers started"
+
+listStatus(vagrantProvider)
 
 # create an OSServer to talk with the server
 session = vagrantProvider.session
@@ -201,6 +225,11 @@ puts "isQueued = #{isQueued}"
 isRunning = server.isAnalysisRunning(analysisUUID)
 puts "isRunning = #{isRunning}"
 
+# todo: wait for complete 
+ 
+isComplete = server.isAnalysisComplete(analysisUUID)
+puts "isComplete = #{isComplete}"
+
 puts "Stopping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
 puts "  Success = #{success}"
@@ -214,4 +243,6 @@ if not vagrantProvider.waitForTerminated
   raise "Could not shut down instances"
 end
 
-puts "goodbye"
+puts "shut down complete"
+
+listStatus(vagrantProvider)

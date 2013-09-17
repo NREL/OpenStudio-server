@@ -6,11 +6,12 @@ class Analysis
   require 'delayed_job_mongoid'
 
   field :uuid, :type => String
-  field :_id, :type => String, default: ->{ uuid || UUID.generate}
+  field :_id, :type => String, default: -> { uuid || UUID.generate }
   field :version_uuid
   field :name, :type => String
   field :display_name, :type => String
   field :description, :type => String
+  field :run_flag, :type => Boolean
   field :status, :type => String # enum on the status of the analysis (queued, started, completed)
 
   belongs_to :project
@@ -20,8 +21,8 @@ class Analysis
   has_many :problems
 
   has_mongoid_attached_file :seed_zip,
-                            :url  => "/assets/analyses/:id/:style/:basename.:extension",
-                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
+                            :url => "/assets/analyses/:id/:style/:basename.:extension",
+                            :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension" #todo: move this to /mnt/...
 
   # validations
   #validates_format_of :uuid, :with => /[^0-]+/
@@ -43,43 +44,106 @@ class Analysis
 
     #create an instance for R
 
-
     @r = Rserve::Simpler.new
+    puts "Setting working directory"
+    @r.converse('setwd("/mnt/openstudio")')
+    wd = @r.converse('getwd()')
+    puts "R working dir = #{wd}"
+    puts "starting cluster and running"
+    @r.converse "library(snow)"
+    @r.converse "library(snowfall)"
+    @r.converse "library(RMongo)"
+
     self.status = 'running'
+    self.run_flag = true
     self.save!
 
+    # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
+    # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
 
-    #"/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /home/ubuntu/SDP_EC2.rb"
+    # get the master ip address
+    master_ip = MasterNode.first.ip_address
 
+    # I think we can do this with mongoid at the moment... no reason to make this complicated until we have to send
+    # the data to the worker nodes
     @r.command() do
       %Q{
-        f <- function(x){
-          x1<-x[1]
-          x2<-x[2]
-          z <- (x1-1)*(x1-1) + (x2-1)*(x2-1)
-          as.numeric(z)}
+        ip <- "#{master_ip}"
+        print(ip)
+        #mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
+        #output <- dbRemoveQuery(mongo,"control","{_id:1}")
+        #if (output != "ok"){stop(options("show.error.messages"="TRUE"),"cannot remove control flag in Mongo")}
+        #input <- dbInsertDocument(mongo,"control",'{"_id":1,"run":"TRUE"}')
+        #if (input != "ok"){stop(options("show.error.messages"="TRUE"),"cannot insert control flag in Mongo")}
+        #flag <- dbGetQuery(mongo,"control",'{"_id":1}')
+        #if (flag["run"] != "TRUE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
+        #dbDisconnect(mongo)
 
-          b<-optim(c(1.5,4),f,method='L-BFGS-B',lower=c(-5,-5), upper=c(5,5))
+        #test the query of getting the run_flag
+        mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
+        flag <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
+        print(flag)
+
+        print(flag["run_flag"])
+        if (flag["run_flag"] == "true"  ){
+          print("flag is set to true!")
         }
+      }
     end
 
+    puts "going to run the analysis now"
 
-    out = @r.converse('b$par').to_ruby
+    # get the worker ips
+    worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 4}
+    puts worker_ips_hash
 
-    # for now just create the datapoints
-    out.each do |value|
-      datapoint = self.data_points.new
-      datapoint.uuid = UUID.new().generate
-      datapoint.name = "automatically generated from R #{datapoint.uuid}"
-      datapoint['values'] = [ {"variable_index" => 0, "variable_uuid" => UUID.new().generate, "value" => value}]
-      datapoint.save!
+    data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
+    puts data_points_hash
+
+    # verify that the files are in the right place
+
+    # get the data over to the worker nodes
+
+
+    @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
+      %Q{
+        sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
+        sfLibrary(RMongo)
+
+        f <- function(x){
+          mongo <- mongoDbConnect("openstudio_server_development", host="#{master_ip}", port=27017)
+          flag <- dbGetQuery(mongo, "analyses", '{_id:"#{self.id}"}')
+          if (flag["run_flag"] == "false" ){
+            stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")
+          }
+          dbDisconnect(mongo)
+
+          y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -d /mnt/openstudio/analysis/data_point_",x," -r AWS",sep="")
+          #y <- "sleep 1; echo hello"
+          z <- system(y,intern=TRUE)
+          j <- length(z)
+          z
+        }
+
+        sfExport("f")
+        print(dps)
+
+        results <- sfLapply(dps[,1],f)
+        sfStop()
+      }
     end
 
-    self.status = 'complete'
+    self.status = 'completed'
     self.save!
-
   end
   handle_asynchronously :start_r_and_run_sample
+
+  def stop_analysis
+    logger.info("stopping analysis")
+    self.run_flag = false
+    self.status = 'completed'
+    self.save!
+  end
 
   protected
 

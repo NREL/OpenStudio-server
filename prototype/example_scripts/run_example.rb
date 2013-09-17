@@ -107,7 +107,7 @@ if !analysis_id.nil?
   #action_hash = { action: "stop"}
 
   # end point does not exist yet
-  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
+  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
   puts resp
 
 
