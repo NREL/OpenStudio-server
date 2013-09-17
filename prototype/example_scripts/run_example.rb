@@ -1,22 +1,32 @@
 require 'rest-client'
 require 'json'
 
-HOSTNAME = "http://localhost:3000"
+HOSTNAME = "http://localhost:8080"
 
 
 #  --------- GET example -----------
 resp = RestClient.get("#{HOSTNAME}/projects.json")
 
-json = JSON.parse(resp)
-puts json.inspect
+projects_json = JSON.parse(resp, :symbolize_names => true)
 
-if json.count > 0
-  analysis_id = json[0]['analyses'][0]['_id']
+if projects_json.count > 0
+  analysis_id = projects_json[0][:analyses][0][:_id]
   puts analysis_id
 
   datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
-  puts JSON.pretty_generate(JSON.parse(datapoints))
+  puts JSON.parse(datapoints)
+  #puts JSON.pretty_generate(JSON.parse(datapoints))
 end
+
+# -------- DELETE Example ----------
+puts "Deleting all projects in database!"
+
+projects_json.each do |project|
+  puts "Deleting Project #{project[:uuid]}"
+  resp = RestClient.delete("#{HOSTNAME}/projects/#{project[:uuid]}.json")
+  puts resp.code
+end
+
 
 # ------- add new project and run example ----------
 project_name = "project #{(rand()*1000).round}"
@@ -63,13 +73,18 @@ end
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?
   puts "uploading seed zip file"
-  file = "../pat/analysis/seed.zip"
-  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
-  puts resp
-  puts resp.code
+  file = "../pat/analysis.zip"
 
-  if resp.code == 201
-    puts "Successfully uploaded ZIP file"
+  if File.exist?(file)
+    resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
+    puts resp
+    puts resp.code
+
+    if resp.code == 201
+      puts "Successfully uploaded ZIP file"
+    end
+  else
+    raise "Analysis zip file does not exist! #{file}"
   end
 end
 
@@ -77,16 +92,14 @@ end
 
 # add all the datapoints to the analysis
 if !analysis_id.nil?
-  datapoints = Dir.glob("../pat/analysis*/data_point*/*.json")
+  datapoints = Dir.glob("../pat/analysis*/data_point*/data_point_in.json")
   datapoints.each do |dp|
+    puts "reading in datapoint json: #{dp}"
     dp_hash = JSON.parse(File.open(dp).read, :symbolize_names => true)
 
     # merge in the analysis_id as it has to be what is in the database
     dp_hash[:data_point][:analysis_id] = analysis_id
     puts dp_hash.inspect
-
-    # rename some items for compatibility
-    # TODO
 
     url = "#{HOSTNAME}/analyses/#{analysis_id}/data_points.json"
     puts url
@@ -103,12 +116,13 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-  action_hash = { action: "start" }
+  action_hash = { analysis_action: "start" }
   #action_hash = { action: "stop"}
 
-  # end point does not exist yet
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash)
-  puts resp
+  puts resp.inspect
+  exit
+
 
 
   # check all the queued analyses for this project (eventually move this to all analyses)

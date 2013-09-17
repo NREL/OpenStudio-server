@@ -8,7 +8,8 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
-
+      #format.json { render json: @projects.to_json(:) }
+      # => { :status => @analysis.status}, data_points: dps.map{ |k| {:_id => k.id, :status => k.status } } } }
       format.json { render json: @projects.to_json(:include => :analyses ) }
     end
   end
@@ -20,6 +21,7 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
+
       format.json { render json: @project.to_json(:include => :analyses ) }
     end
   end

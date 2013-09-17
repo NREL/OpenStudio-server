@@ -1,6 +1,11 @@
 # This file should contain all the record creation needed to seed the database with its default values.
 # The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
 
+# I dont' think there is any need for this file
+
+exit
+
+
 jsonfile = Dir.glob("/data/prototype/pat/analysis*/formulation.json").first
 if jsonfile.nil?
   # try grabbing it from a relative path
