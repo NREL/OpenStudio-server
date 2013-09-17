@@ -1,18 +1,17 @@
 #!/bin/sh
-#mkdir /home/ubuntu/test
 
-# Change Host
-echo localhost localhost master >> /etc/hosts
+# Change Host File Entries
+ENTRY="localhost localhost master"
+FILE=/etc/hosts
+if grep -q "$ENTRY" $FILE; then
+  echo "entry already exists"
+else
+  echo $ENTRY >> /etc/hosts
+fi
 
-# Replace Hostname 
-#echo "slave1" > /etc/hostname
-#sudo hostname slave
-#hostname
-#replace hostname in /etc/hosts
-
-# Restart Server
 # NL Remove sudo on this command as you should already be sudo
-service networking restart
+# NL No need to restart networking if only changing host entries
+# service networking restart
  
 
 

@@ -1,10 +1,7 @@
 #!/bin/sh
 
-# Not sure why we are doing this
-mkdir /home/ubuntu/test
-
 # Change Host File Entries
-ENTRY="MASTER_IP MASTER_HOSTNAME"
+ENTRY="192.168.33.10 os-server"
 FILE=/etc/hosts
 if grep -q "$ENTRY" $FILE; then
   echo "entry already exists"

@@ -92,22 +92,40 @@ class AnalysesController < ApplicationController
   # queued into Delayed Jobs
   def action
     @analysis = Analysis.find(params[:id])
+    logger.info(params.inspect)
 
     result = {}
-    if @analysis.start_r_and_run_sample
-      result[:code] = 200
-      @analysis.status = 'queued'
-      result[:analysis] = @analysis
-    else
-      result[:code] = 500
-      @analysis.status = 'error'
-      # TODO: save off the error
+    if params[:action] == 'start'
+      if @analysis.start_r_and_run_sample
+        result[:code] = 200
+        @analysis.status = 'queued'
+        result[:analysis] = @analysis
+      else
+        result[:code] = 500
+        @analysis.status = 'error'
+        # TODO: save off the error
+      end
+    elsif params[:action] == 'stop'
+      if @analysis.stop_analysis
+        result[:code] = 200
+        @analysis.status = 'queued'
+        result[:analysis] = @analysis
+      else
+        result[:code] = 500
+        @analysis.status = 'error'
+        # TODO: save off the error
+      end
     end
 
     @analysis.save!
     respond_to do |format|
     #  format.html # new.html.erb
       format.json { render json: result }
+      if result[:code] == 200
+        format.html { redirect_to @analysis, notice: 'Analysis was stopped.' }
+      else
+        format.html { redirect_to @analysis, notice: 'Analysis was not stopped.' }
+      end
     end
   end
 
