@@ -11,7 +11,7 @@
     <th>Name</th>
     <th>Status</th>
   </tr>
-  <% @analysis.data_points.each do |dp| %>
+  <% @analysis.data_points.order_by(:name.asc).each do |dp| %>
       <tr>
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
