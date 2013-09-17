@@ -2,16 +2,7 @@
 
 ## Server Configuration
 
-Log into 192.168.33.10 either via `vagrant ssh` or putty.
-
-```sh
-cd /data/launch-instance
-./configure_vagrant_server.sh
-```
-
-## Worker Configuration
-
-Log into 192.168.33.11 either via `vagrant ssh` or putty.
+- Log into 192.168.33.10 either via `vagrant ssh` or putty.
 
 ```sh
 cd /data/launch-instance
@@ -29,3 +20,13 @@ ps -A | grep Rserve
 ```sh
 sudo /etc/init.d/Rserved
 ```
+
+## Worker Configuration
+
+- Log into 192.168.33.11 either via `vagrant ssh` or putty.
+
+```sh
+cd /data/launch-instance
+./configure_vagrant_server.sh
+```
+
