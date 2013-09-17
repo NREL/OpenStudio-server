@@ -53,19 +53,20 @@ class Analysis
         sn.save!
       else
         wn = WorkerNode.find_or_create_by(:ip_address => cols[0])
+        wn.user = cols[1]
+        wn.password = cols[2]
         wn.cores = cols[3]
         wn.save!
 
         logger.info("Worker node #{wn.inspect}")
       end
     end
+
+    copy_data_to_workers()
   end
 
   def start_r_and_run_sample
-
-
     # TODO: double check if the anlaysis is running, if so, then don't run
-
 
     # determine which problem to run
 
@@ -179,7 +180,7 @@ class Analysis
     self.status = 'completed'
     self.save!
   end
-  handle_asynchronously :start_r_and_run_sample
+  #handle_asynchronously :start_r_and_run_sample
 
   def stop_analysis
     logger.info("stopping analysis")
@@ -211,5 +212,30 @@ class Analysis
   end
 
   private
+
+  # copy the zip file over the various workers and extract the file.
+  # if the file already exists, then it will overwrite the file
+  # TODO verify the behaviour of the zip extraction on top of an already existing analysis.
+  def copy_data_to_workers
+    # copy the datafiles over to the worker nodes
+    WorkerNode.all.each do |wn|
+      Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
+        logger.info(self.inspect)
+        session.scp.upload!(self.seed_zip.path, "/mnt/openstudio/")
+
+
+        session.exec!( "cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}" ) do |channel, stream, data|
+          logger.info(data)
+        end
+        session.loop
+
+      end
+    end
+  end
+
+  def download_data_from_workers
+
+  end
+
 
 end
