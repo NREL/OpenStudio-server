@@ -55,6 +55,8 @@ class Analysis
         wn = WorkerNode.find_or_create_by(:ip_address => cols[0])
         wn.cores = cols[3]
         wn.save!
+
+        logger.info("Worker node #{wn.inspect}")
       end
     end
   end
@@ -121,7 +123,12 @@ class Analysis
     puts "going to run the analysis now"
 
     # get the worker ips
-    worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 4}
+    worker_ips_hash = {}
+    worker_ips_hash[:worker_ips] = []
+
+    WorkerNode.all.each do |wn|
+      (1..wn.cores).each { |i| worker_ips_hash[:worker_ips] << wn.ip_address}
+    end
     puts worker_ips_hash
 
     # update the status of all the datapoints and create a hash map
