@@ -6,9 +6,18 @@
 <% end %>
 
 <h1> list of datapoints for this analysis </h1>
-<% @analysis.data_points.each do |dp| %>
-    <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </br>
-<% end %>
+<table border="1">
+  <tr>
+    <th>Name</th>
+    <th>Status</th>
+  </tr>
+  <% @analysis.data_points.each do |dp| %>
+      <tr>
+        <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
+        <td> <%= dp.status %></td>
+      </tr>
+  <% end %>
+</table>
 
 <h1> uploaded zip file </h1>
 <%= link_to "seed zip", @analysis.seed_zip.url(:original, false) unless @analysis.seed_zip.url.nil? %> </br>

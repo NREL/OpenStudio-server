@@ -44,6 +44,8 @@ class DataPointsController < ApplicationController
     params[:data_point][:analysis_id] = analysis_id
 
     @data_point = DataPoint.new(params[:data_point])
+    @data_point.status = "created"
+    @data_point.save
 
     respond_to do |format|
       if @data_point.save

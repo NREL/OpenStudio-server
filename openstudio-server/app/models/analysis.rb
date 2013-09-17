@@ -31,6 +31,10 @@ class Analysis
 
   before_destroy :remove_dependencies
 
+  def initialize_workers
+    # load in the master and worker information if it doesn't already exist
+
+  end
 
   def start_r_and_run_sample
     # TODO: double check if the anlaysis is running, if so, then don't run
@@ -97,7 +101,14 @@ class Analysis
     worker_ips_hash = {worker_ips: WorkerNode.all.map{|v| v.ip_address} * 4}
     puts worker_ips_hash
 
-    data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
+    # update the status of all the datapoints and create a hash map
+    data_points_hash = {}
+    data_points_hash[:data_points] = []
+    self.data_points.all.each do |dp|
+      dp.status = 'initialized'
+      data_points_hash[:data_points] << dp.uuid
+    end
+    #data_points_hash = {data_points: self.data_points.all.map { |dp| dp.uuid }}
     puts data_points_hash
 
     # verify that the files are in the right place

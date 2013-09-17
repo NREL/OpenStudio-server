@@ -8,6 +8,7 @@ class Project
 
   has_many :analyses
 
+  after_create :verify_uuid
   before_destroy :remove_dependencies
 
   def get_problem(problem_name)
@@ -34,6 +35,11 @@ class Project
       logger.info("removing analysis #{analysis.id}")
       analysis.destroy
     end
+  end
+
+  def verify_uuid
+    self.uuid = self.id if self.uuid.nil?
+    self.save!
   end
 
 end
