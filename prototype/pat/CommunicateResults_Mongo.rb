@@ -21,7 +21,17 @@ def communicateResults(data_point,directory)
   # create zip file
   zipFilePath = directory / OpenStudio::Path.new("data_point_" + id + ".zip")
   zipFile = OpenStudio::ZipFile.new(zipFilePath,false)
-  # TODO: Add files to ZipFile.
+  zipFile.addFile(directory / OpenStudio::Path.new("openstudio.log"),
+                  OpenStudio::Path.new("openstudio.log"))
+  zipFile.addFile(directory / OpenStudio::Path.new("run.db"),
+                  OpenStudio::Path.new("run.db"))
+  Dir.foreach(directory.to_s) do |item|
+    next if item == '.' or item == '..'
+    fullPath = directory / OpenStudio::Path.new(item)
+    if File.directory?(fullPath.to_s)
+      zipFile.addDirectory(fullPath,OpenStudio::Path.new(item))
+    end    
+  end
   
   # let mongo know that the data point is complete
   dp = DataPoint.find_or_create_by(uuid: id)

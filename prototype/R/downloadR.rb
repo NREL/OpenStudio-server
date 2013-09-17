@@ -32,21 +32,16 @@ lines.each do |line|
   puts dp.values
   adir = dp.analysis_id
   analysis_dir = "/home/vagrant/analysis_" << adir
-  if Dir.exists?(analysis_dir) == false
+  if not Dir.exists?(analysis_dir)
     Dir.mkdir(analysis_dir)
   end  
   
-  # zip datapoint File
+  # download datapoint zip file
   datapoint_path = "data_point_" << uuid
   datapoint_path_zip = "data_point_" << uuid << ".zip"
-  command = "cd /home/vagrant/analysis ; zip -r " << datapoint_path_zip << " " << datapoint_path
-  a.shell_command(dp.ip_address,command)
-  
-  # download datapoint
-  #local_path = "/home/vagrant/analysis/" << datapoint_path_zip 
   local_path = analysis_dir << "/" << datapoint_path_zip 
-  remote_path = "/home/vagrant/analysis/" << datapoint_path_zip
-  if File.exists?(local_path) == true
+  remote_path = "/home/vagrant/analysis/" << datapoint_path << "/" << datapoint_path_zip
+  if File.exists?(local_path)
     `rm -rf #{local_path}`
   end
   # download File to slave Instance
@@ -54,9 +49,11 @@ lines.each do |line|
   command = "chmod 774 " << local_path
   `#{command}`
   
+  # ETH: I am not sure if or where this file should be unzipped. Commenting out for now.
   # Unzip Analysis Zip File
   #command = "unzip " << "/home/vagrant/analysis/" << datapoint_path_zip << " -d " << "/home/vagrant/analysis/"
-  command = "unzip -o " << local_path << " -d " << "/home/vagrant/analysis_" << adir[1...-1]
-  `#{command}`
+  # command = "unzip -o " << local_path << " -d " << "/home/vagrant/analysis_" << adir[1...-1]
+  #`#{command}`
   
 end
+
