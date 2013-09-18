@@ -46,6 +46,7 @@ module AwsInterface
         puts "Generated keypair #{@key_pair.name}, fingerprint: #{@key_pair.fingerprint}"
         # save key to file
         File.open("ec2.pem", "w") { |f| f.write(@key_pair.private_key) }
+        File.chmod(0600, "ec2.pem")
       else
         @key_pair = @ec2.key_pairs.import("personal_key", File.read(File.expand_path(keypair_path)))
       end
@@ -69,7 +70,8 @@ module AwsInterface
                                         :key_pair => @key_pair, 
                                         :security_groups => @group,
                                         :user_data => user_data,
-                                        :instance_type => "m1.medium")                                        
+                                        :instance_type => "m1.medium")
+      puts @instance.inspect
       
       @instances_master.push(@instance)
       
@@ -77,7 +79,7 @@ module AwsInterface
       sleep 5 while @instance.status == :pending
       
       # display launched instances
-      puts "Launched instance #{@instance.instance_id}, status: #{@instance.status}}"
+      puts "Launched instance #{@instance.instance_id}, status: #{@instance.status}"
       
       # check instance status
       exit 1 unless @instance.status == :running
@@ -277,7 +279,7 @@ end
       begin
         Net::SSH.start(instance.ip_address, "ubuntu",
                        :key_data => [@key_pair.private_key]) do |ssh|
-          puts "Running #{command} on the instance #{instance.instance_id}:"
+          puts "Running #{command} on the instance #{instance.instance_id}:#{instance.ip_address}"
           #ssh.exec!(command)
           ssh.exec(command)
           
@@ -304,7 +306,7 @@ end
       begin
         Net::SSH.start(instance.ip_address, "ubuntu",
                        :key_data => [@key_pair.private_key]) do |ssh|
-          puts "Running #{command} on the instance #{instance.instance_id}:"
+          puts "Running #{command} on the instance #{instance.instance_id}:#{instance.ip_address}"
           ssh.exec!(command)
           #ssh.exec(command)
           
@@ -327,11 +329,11 @@ end
     # Need to pass the instance object and the path to the file (Local and Remote). 
     def upload_file(instance, local_path, remote_path)
       # send command to instance
-      puts "Initializing upload of #{local_path} to instance #{instance.instance_id}"
+      puts "Initializing upload of #{local_path} to instance #{instance.instance_id}:#{instance.ip_address}"
       begin
         Net::SCP.start(instance.ip_address, "ubuntu",
                        :key_data => [@key_pair.private_key]) do |scp|
-          puts "Uploading #{local_path} on the instance #{instance.instance_id}:"
+          puts "Uploading #{local_path} on the instance #{instance.instance_id}:#{instance.ip_address}"
           scp.upload! local_path, remote_path
         end
       rescue SystemCallError, Timeout::Error => e
@@ -351,11 +353,11 @@ end
     # Need to pass the instance object and the path to the file (Local and Remote). 
     def download_file(instance, remote_path, local_path)
       # send command to instance
-      puts "downloading #{remote_path} from instance #{instance.instance_id}"
+      puts "downloading #{remote_path} from instance #{instance.instance_id}:#{instance.ip_address}"
       begin
         Net::SCP.start(instance.ip_address, "ubuntu",
                        :key_data => [@key_pair.private_key]) do |scp|
-          puts "downloading #{remote_path} on the instance #{instance.instance_id}: from #{local_path}"
+          puts "downloading #{remote_path} on the instance #{instance.instance_id}:#{instance.ip_address} from #{local_path}"
           scp.download! remote_path, local_path
         end
       rescue SystemCallError, Timeout::Error => e

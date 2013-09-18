@@ -1,4 +1,6 @@
 #!/bin/sh
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
 
 # Change Host File Entries
 ENTRY="localhost localhost master"
@@ -8,6 +10,10 @@ if grep -q "$ENTRY" $FILE; then
 else
   sudo sh -c "echo $ENTRY >> /etc/hosts"
 fi
+
+# Some debugging
+echo whoami
+echo pwd
 
 # copy all the setup scripts to the appropriate home directory
 cp /data/launch-instance/setup* ~
