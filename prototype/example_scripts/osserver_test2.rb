@@ -57,8 +57,9 @@ puts "Starting analysis #{analysisUUID}"
 success = server.start(analysisUUID)
 puts "  Success = #{success}"
   
+isRunning = true
 isComplete = false
-while not isComplete
+while isRunning and not isComplete
   isQueued = server.isAnalysisQueued(analysisUUID)
   puts "isQueued = #{isQueued}"
    
@@ -81,6 +82,8 @@ while not isComplete
   puts "#{completeDataPointUUIDs.size} Complete DataPoints"
 
   puts
+  
+  OpenStudio::System::msleep(3000)
 end
 
 completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)

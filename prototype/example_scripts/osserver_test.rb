@@ -222,8 +222,9 @@ puts "  Success = #{success}"
 # list projects on the server
 listProjects(server)
 
+isRunning = true
 isComplete = false
-while not isComplete
+while isRunning and not isComplete
   isQueued = server.isAnalysisQueued(analysisUUID)
   puts "isQueued = #{isQueued}"
 
