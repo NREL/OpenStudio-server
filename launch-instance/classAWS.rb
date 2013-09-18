@@ -413,7 +413,7 @@ end
   end
 
   def prepare_mongoid_script(master_ip)
-    file_template = "mongoid_template.yml.template"
+    file_template = "mongoid.yml.template"
     text = File.read(file_template)
     text = text.gsub(/MASTER_IP/, master_ip)
     File.open("mongoid.yml", "w") {|file| file.puts text}
