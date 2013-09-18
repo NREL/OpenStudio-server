@@ -44,25 +44,23 @@ class Analysis
     end
 
     ips = File.read(ip_file).split("\n")
-    ip_count = 0
     ips.each do |ip|
       cols = ip.split("|")
-      ip_count += 1
+      if cols[0] == "master"
+        mn = MasterNode.find_or_create_by(:ip_address => cols[1])
+        mn.hostname = cols[2]
+        mn.cores = cols[3]
+        mn.user = cols[4]
+        #mn.password = cols[5]
+        mn.save!
 
-      #192.168.33.11|os-worker-1|2|vagrant|PASSWORD
-      if ip_count == 1
-        sn = MasterNode.find_or_create_by(:ip_address => cols[0])
-        sn.hostname = cols[1]
-        sn.cores = cols[2]
-        sn.user = cols[3]
-        #sn.password = cols[4]
-        sn.save!
-      else
-        wn = WorkerNode.find_or_create_by(:ip_address => cols[0])
-        wn.hostname = cols[1]
-        wn.cores = cols[2]
-        wn.user = cols[3]
-        wn.password = cols[4]
+        logger.info("Master node #{mn.inspect}")
+      elsif cols[0] == "worker"
+        wn = WorkerNode.find_or_create_by(:ip_address => cols[1])
+        wn.hostname = cols[2]
+        wn.cores = cols[3]
+        wn.user = cols[4]
+        wn.password = cols[5]
         wn.save!
 
         logger.info("Worker node #{wn.inspect}")
