@@ -18,6 +18,7 @@ class DataPointsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @data_point.output  }
+      #format.json { render json: { :data_point => @data_point.output, :metadata =>  @data_point[:os_metadata] } }
     end
   end
 

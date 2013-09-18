@@ -73,23 +73,24 @@ if !project_id.nil?
   formulation_json[:analysis][:name] = "running from run_example.rb"
 
   # save out this file to compare
-  File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
+  #File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
 
-  conn.post do |req|
+  resp = conn.post do |req|
     req.url "projects/#{project_id}/analyses.json"
     req.headers['Content-Type'] = 'application/json'
     req.body = formulation_json.to_json
   end
 
   #resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", formulation_json)
+  puts resp.inspect
+  if resp.status == 201
+    puts "asked to create analysis with #{analysis_id}"
+    puts resp.inspect
+    analysis_id = JSON.parse(resp.body)["_id"]
 
-  if resp.code == 201
-    analysis_id = JSON.parse(resp)["_id"]
     puts "new analysis created with ID: #{analysis_id}"
   end
 end
-
-exit
 
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?

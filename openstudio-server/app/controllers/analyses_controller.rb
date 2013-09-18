@@ -21,7 +21,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: @analysis.to_json(:include => :data_points) }
+      format.json { render json: { :analysis => @analysis, :metadata => @analysis[:os_metadata] } }
     end
   end
 
@@ -47,15 +47,12 @@ class AnalysesController < ApplicationController
     project_id = params[:project_id]
     params[:analysis].merge!(:project_id => project_id)
 
-    logger.info("PARAMS_OBJECT #{params}")
-
-
     # save off the metadata as a child of the analysis right now... eventually move analysis
     # underneath metadata
     params[:analysis].merge!(:os_metadata => params[:metadata])
     File.open("received_json.json","w") { |f| f << JSON.pretty_generate(params) }
-    @analysis = Analysis.new(params[:analysis])
 
+    @analysis = Analysis.new(params[:analysis])
     respond_to do |format|
       if @analysis.save
         format.html { redirect_to @analysis, notice: 'Analysis was successfully created.' }
