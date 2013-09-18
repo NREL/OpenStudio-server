@@ -6,7 +6,7 @@ require './classAWS'
 
 include AwsInterface
 
-DEBUG = TRUE
+DEBUG = FALSE
 
 # Create Instance of AwsAdapter
 a = AwsAdapter.new #("~/.ssh/amazontest.pub")
@@ -15,6 +15,8 @@ a = AwsAdapter.new #("~/.ssh/amazontest.pub")
 # The file  "master_script.sh" will be passed to the
 # instance as user-data. This file contains bash commands
 # to send set up the /etc/hosts and /etc/hostname files.
+# The file also has basic commands to create directory and
+# copy files to the right places.
 master_info = a.launch_master("master_script.sh")
 master_instance = Array.new(0)
 master_instance.push(master_info.instance)
@@ -25,9 +27,8 @@ master_instance.push(master_info.instance)
 # to send set up the /etc/hosts and /etc/hostname files.
 master_ip = master_info.ip_address
 master_dns = master_info.dns_name
-master_hostname = "master_name"
+master_hostname = "master"
 prepare_slave_script("slave_script.sh", master_ip, master_dns, master_hostname)
-#prepare_slave_script("master_script.sh", master_ip, master_dns, master_hostname)
 prepare_mongoid_script(master_ip)
 
 # Launch Slaves 
@@ -61,7 +62,7 @@ File.open("ip_addresses", 'w+') do |f|
 end
 
 # list of files to upload to the user home directory
-a.upload_file(master_instance[0], "./ip_addresses", "./ip_addresses")
+a.upload_file(master_instance[0], "./ip_addresses", "~/ip_addresses")
 
 # Setup SSH
 commands = []
@@ -156,10 +157,6 @@ if DEBUG
       a.send_command(instance, command)
     }
   end
-
-###############################
-
-
 end
 
 # Terminate Instance

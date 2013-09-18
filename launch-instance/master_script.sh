@@ -9,6 +9,10 @@ else
   echo $ENTRY >> /etc/hosts
 fi
 
+# copy all the setup scripts to the appropriate home directory
+cp /data/launch-instance/setup* ~
+chmod 775 ~/setup*
+
 # Force the generation of various directories that are in the EBS mnt
 rm -rf /mnt/openstudio
 mkdir -p /mnt/openstudio
