@@ -63,66 +63,29 @@ end
 # list of files to upload to the user home directory
 a.upload_file(master_instance[0], "./ip_addresses", "./ip_addresses")
 
+# Setup SSH
+commands = []
+commands << "chmod 775 ~/setup-ssh-keys.expect"
+commands << "~/setup-ssh-keys.expect"
+commands << "chmod 775 ~/setup-ssh-worker-nodes.expect"
+commands << "chmod 775 ~/setup-ssh-worker-nodes.sh"
+commands << "~/setup-ssh-worker-nodes.sh ip_addresses"
+
+commands.each do |command|
+  master_instance.each do |instance|
+    a.send_command(instance, command)
+  end
+end
+
 if DEBUG
   # The code below to the end should only be used for debugging because most (if not all)
   # of the files below are already on the server.
   upload_files = ["setup-ssh-keys.expect", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect"]
   upload_files.each do |file|
-    a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
+    a.upload_file(master_instance[0], "./#{file}", "~/#{File.basename(file)}")
   end
 
-  # Do some file management
-  # create /mnt/openstudio
-  commands = []
-  commands << "sudo mkdir -p /mnt/openstudio"
-  commands << "sudo chmod 777 /mnt/openstudio"
-  commands.each do |command|
-    slave_instances.each do |instance|
-      a.send_command(instance, command)
-    end
-    master_instance.each do |instance|
-      a.send_command(instance, command)
-    end
-  end
-
-
-###################################
-# create /directory for the rails models
-  command = "sudo mkdir -p /usr/local/lib/rails-models"
-  slave_instances.each { |instance|
-    a.send_command(instance, command)
-  }
-  master_instance.each { |instance|
-    a.send_command(instance, command)
-  }
-
-  command = "sudo chmod 777 /usr/local/lib/rails-models"
-  slave_instances.each { |instance|
-    a.send_command(instance, command)
-  }
-  master_instance.each { |instance|
-    a.send_command(instance, command)
-  }
-
-##################################
-# Setup SSH and Rserve Commands
-  commands = []
-  commands << "chmod 775 ~/setup-ssh-keys.expect"
-  commands << "~/setup-ssh-keys.expect"
-  commands << "chmod 775 ~/setup-ssh-worker-nodes.expect"
-  commands << "chmod 775 ~/setup-ssh-worker-nodes.sh"
-  commands << "~/setup-ssh-worker-nodes.sh ip_addresses"
-
-  commands.each do |command|
-    master_instance.each do |instance|
-      a.send_command(instance, command)
-    end
-  end
-#end of setup
-################### 
-
-############################################ 
-# Upload SimulateDataPoint
+  # Upload SimulateDataPoint (this is already on the servers, just upload if you are in DEBUG mode)
   slave_instances.each { |instance|
     command = "rm /mnt/openstudio/SimulateDataPoint.rb"
     a.send_command(instance, command)
@@ -131,7 +94,8 @@ if DEBUG
   }
   local_path = File.dirname(__FILE__) + "/../prototype/pat/SimulateDataPoint.rb"
   remote_path = "/mnt/openstudio/SimulateDataPoint.rb"
-# Upload File to slave Instance
+
+  # Upload File to slave Instance
   slave_instances.each { |instance|
     a.upload_file(instance, local_path, remote_path)
     command = "chmod 774 " + remote_path
@@ -145,8 +109,7 @@ if DEBUG
     a.send_command(instance, command)
   }
 
-###########################
-# create rails-models dir  -- temp: this will be on the image by default
+  # create rails-models dir  -- temp: this will be on the image by default
   commands = []
   commands << "rm -rf /mnt/openstudio/rails-models/"
   commands << "mkdir -p /mnt/openstudio/rails-models"
@@ -158,7 +121,7 @@ if DEBUG
 
   local_path = File.dirname(__FILE__) + "/../prototype/pat/rails-models.zip"
   remote_path = "/mnt/openstudio/rails-models/rails-models.zip"
-# Upload File to slave Instance
+  # Upload File to slave Instance
   slave_instances.each { |instance|
     a.upload_file(instance, local_path, remote_path)
   }
