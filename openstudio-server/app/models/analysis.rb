@@ -35,7 +35,7 @@ class Analysis
     # load in the master and worker information if it doesn't already exist
 
     # somehow check if this is a vagrant box
-    ip_file = "/data/launch-instance/ip_address_vagrant"
+    ip_file = "/data/launch-instance/ip_addresses_vagrant"
     if File.exists?(ip_file)
       #
     else
