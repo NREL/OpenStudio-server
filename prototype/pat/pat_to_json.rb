@@ -25,7 +25,7 @@ analysis.saveJSON(staged_analysis_json,
 # 3. Create and *post* project zip file
 zip_local_path = project.zipFileForCloud
 staged_zip_file = staging_dir / OpenStudio::Path.new(zip_local_path.filename)
-FileUtils.copy_file(zip_local_path.to_s,(staged_zip_file).to_s)
+FileUtils.copy_file(zip_local_path.to_s, (staged_zip_file).to_s)
 
 # Server-side process.
 # 1. Read json to retrieve analysis UUID.
@@ -43,17 +43,17 @@ project_dir_path = OpenStudio::completeAndNormalize(OpenStudio::Path.new(project
 unzip = OpenStudio::UnzipFile.new(staged_zip_file)
 unzip.extractAllFiles(project_dir_path) # formulation.json is in here too.
 # 4. Fix up paths in formulation.json
-loaded_analysis.updateInputPathData(loaded_json.projectDir,project_dir_path)
+loaded_analysis.updateInputPathData(loaded_json.projectDir, project_dir_path)
 analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_dir_path)
-loaded_analysis.saveJSON(project_dir_path / OpenStudio::Path.new("formulation.json"),analysis_options,true)
+loaded_analysis.saveJSON(project_dir_path / OpenStudio::Path.new("formulation.json"), analysis_options, true)
 
 # Client-side process.
 # 1. Create and *post* data point requests
 analysis.dataPoints.each { |data_point|
-  staged_data_point_json = staging_dir / 
-                           OpenStudio::Path.new("data_point_in." + 
-                                                OpenStudio::removeBraces(data_point.uuid) + 
-                                                ".json")
+  staged_data_point_json = staging_dir /
+      OpenStudio::Path.new("data_point_in." +
+                               OpenStudio::removeBraces(data_point.uuid) +
+                               ".json")
   data_point.saveJSON(staged_data_point_json,
                       OpenStudio::Analysis::DataPointSerializationOptions.new(project.projectDir))
 }
@@ -68,5 +68,5 @@ Dir.glob(staging_dir.to_s + "/data_point_in.*.json").each { |dp_file|
   data_point_dir_path = project_dir_path / OpenStudio::Path.new(data_point_dir_name)
   FileUtils.mkdir(data_point_dir_path.to_s)
   # 3. Copy json into folder
-  FileUtils.copy_file(dp_file,(data_point_dir_path / OpenStudio::Path.new("data_point_in.json")).to_s)
+  FileUtils.copy_file(dp_file, (data_point_dir_path / OpenStudio::Path.new("data_point_in.json")).to_s)
 }
