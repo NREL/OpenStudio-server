@@ -7,8 +7,12 @@ echo "reading in ip_addresses from file"
 while read line
 do
   echo "$line"
-  ipaddress=`echo $line | awk -F'|' '{print $1}'`
-  username=`echo $line | awk -F'|' '{print $2}'`
-  password=`echo $line | awk -F'|' '{print $3}'`
-  ./setup-ssh-worker-nodes.expect $ipaddress $username $password
+  servertype=`echo $line | awk -F'|' '{print $1}'`
+  ipaddress=`echo $line | awk -F'|' '{print $2}'`
+  username=`echo $line | awk -F'|' '{print $5}'`
+  password=`echo $line | awk -F'|' '{print $6}'`
+
+  if [ $servertype == "master" ]; then
+    ./setup-ssh-worker-nodes.expect $ipaddress $username $password
+  fi
 done < ${IP_FILE}

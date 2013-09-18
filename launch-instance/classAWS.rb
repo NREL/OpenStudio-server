@@ -65,11 +65,7 @@ module AwsInterface
     def launch_master(userdata_file)
       user_data = IO.read(userdata_file)
       puts "Launching Master..."
-      #@instance = @image.run_instance(:key_pair => @key_pair,
-      #                               :security_groups => @group,
-      #                               :user_data => user_data,
-      #                               :instance_type => "m1.medium")
-      @instance = @ec2.instances.create(:image_id => IMAGE_ID_SERVER, 
+      @instance = @ec2.instances.create(:image_id => IMAGE_ID_SERVER,
                                         :key_pair => @key_pair, 
                                         :security_groups => @group,
                                         :user_data => user_data,
@@ -108,11 +104,7 @@ module AwsInterface
       # launch instances num = number of instances
       num.times do
         puts "Launching Slaves..."
-       # @instance = @image.run_instance(:key_pair => @key_pair,
-       #                                 :security_groups => @group,
-       #                                 :user_data => user_data, 
-       #                                 :instance_type => "m1.medium")
-        @instance = @ec2.instances.create(:image_id => IMAGE_ID_WORKER, 
+        @instance = @ec2.instances.create(:image_id => IMAGE_ID_WORKER,
                                           :key_pair => @key_pair, 
                                           :security_groups => @group,
                                           :user_data => user_data,
