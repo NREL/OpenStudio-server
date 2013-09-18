@@ -52,6 +52,7 @@ dns_name = a.get_dns(isMaster)
 dns_name.each { |dns| puts "DNS: #{dns}" }
 
 # create the ip address file for uploading to master and worker
+# TODO: get the number of cores and replace in this script
 File.open("ip_addresses", 'w+') do |f|
   f << "master|#{master_info.ip_address}|#{master_info.dns_name}|2|ubuntu|ubuntu\n"
   slave_info.each do |info|

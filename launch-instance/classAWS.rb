@@ -401,6 +401,7 @@ end
     text = File.read(file_template)
     text = text.gsub(/MASTER_IP/, master_ip)
     text = text.gsub(/MASTER_HOSTNAME/, master_hostname)
+    text = text.gsub(/MASTER_ALIAS/, "")
     File.open(file_name, "w") {|file| file.puts text}
   end
 
