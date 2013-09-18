@@ -1,8 +1,8 @@
-# runClass.rb 
-# This ruby script shows how to use the classAWS.rb class
-# to launch Master and Slaves EC2 instances. 
+# This ruby script shows how to use the classAWS.rb class to launch the Server and Worker nodes
+# on EC2. After the servers are configures, the latter part of the script uses the API to
+# run an example analysis.
 
-require './classAWS'
+require 'classAWS.rb'
 
 include AwsInterface
 
@@ -58,8 +58,7 @@ File.open(local_path, 'w+') {|f| f.write(text) }
 # Upload File to Master Instance
 a.upload_file(master_instance[0], local_path, remote_path)
 
-# slaves and masters are known
-#
+# slaves and masters are known (todo: merge this into one file to make it easier to read)
 text = ""
 #master_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
 #text << "#{master_info.ip_address}|ubuntu|ubuntu\n"
@@ -78,6 +77,8 @@ upload_files = ["ip_addresses", "setup-ssh-keys.expect", "setup-ssh-worker-nodes
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
+
+# Do some file management
 ###################################
 # create /mnt/openstudio
 command = "sudo mkdir -p /mnt/openstudio"
@@ -170,120 +171,34 @@ slave_instances.each { |instance|
   command = "chmod 774 " + remote_path
   a.send_command(instance,command)  
 }
-#################################################
-# Upload analysis.zip
-slave_instances.each { |instance|
-  command = "rm /mnt/openstudio/analysis.zip"
-  a.send_command(instance,command)
-}  
-local_path = File.dirname(__FILE__) + "/../prototype/pat/analysis.zip"
-remote_path = "/mnt/openstudio/analysis.zip"
-# Upload File to slave Instance
-slave_instances.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
-}
-slave_instances.each { |instance|
-  command = "chmod 774 /mnt/openstudio/analysis.zip"
-  a.send_command(instance,command)
-}
-# Remove Previous Analysis Data
-slave_instances.each { |instance|
-  command = "rm -rf /mnt/openstudio/analysis"
-  a.send_command(instance,command)
-}  
-# Unzip Analysis Zip File
-slave_instances.each { |instance|
-  command = "unzip -o /mnt/openstudio/analysis.zip -d /mnt/openstudio"
-  a.send_command(instance,command)
-}  
-# delete Analysis Zip File
-slave_instances.each { |instance|
-  command = "rm /mnt/openstudio/analysis.zip"
-  a.send_command(instance,command)
-}  
 
 ###########################
-# create models dir
-command = "rm -rf /usr/local/models.zip"
+# create rails-models dir  -- temp: this will be on the image by default
+
+cp /data/prototype/pat/rails-models.zip /mnt/openstudio/rails-models/
+
+    command = "rm -rf /mnt/openstudio/rails-models/"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
-master_instance.each { |instance|
-  a.send_command(instance,command)
-}  
 
-local_path = File.dirname(__FILE__) + "/../openstudio-server/app/models.zip"
-remote_path = "/usr/local/lib/rails-models/models.zip"
+local_path = File.dirname(__FILE__) + "/../prototype/rails-models.zip"
+remote_path = "/mnt/openstudio/rails-models/rails-models.zip"
 # Upload File to slave Instance
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
-master_instance.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
-}
 
-command = "chmod 774 /usr/local/lib/rails-models/models.zip"
-slave_instances.each { |instance|
-  a.send_command(instance,command)
-}
-master_instance.each { |instance|
-  a.send_command(instance,command)
-} 
+commands = []
+commands << "chmod 774 /mnt/openstudio/rails-models/rails-models.zip"
+commands << "unzip -o /mnt/openstudio/rails-models/rails-models.zip"
+commands << "rm /mnt/openstudio/rails-models/rails-models.zip"
 
-# Remove Previous models Data
-command = "rm -rf /usr/local/lib/rails-models/models"
-slave_instances.each { |instance|
-  a.send_command(instance,command)
-} 
-master_instance.each { |instance|
-  a.send_command(instance,command)
-} 
-
-# Unzip models Zip File
-command = "unzip -o /usr/local/lib/rails-models/models.zip -d /usr/local/lib/rails-models"
-slave_instances.each { |instance|
-  a.send_command(instance,command)
-}  
-master_instance.each { |instance|
-  a.send_command(instance,command)
-} 
-
-#command = "mv /usr/local/models /usr/local/rails-models"
-#slave_instances.each { |instance|
-#  a.send_command(instance,command)
-#}  
-#master_instance.each { |instance|
-#  a.send_command(instance,command)
-#} 
-
-# delete models Zip File
-command = "rm /usr/local/lib/rails-models/models.zip"
-slave_instances.each { |instance|
-  a.send_command(instance,command)
-}  
-master_instance.each { |instance|
-  a.send_command(instance,command)
-} 
-
-###############################
-# Upload inflections
-local_path = File.dirname(__FILE__) + "/../openstudio-server/config/initializers/inflections.rb"
-remote_path = "/usr/local/lib/rails-models/inflections.rb"
-# Upload File to slave Instance
-slave_instances.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
-}
-master_instance.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
-}
-
-command = "chmod 774 /usr/local/lib/rails-models/inflections.rb"
-slave_instances.each { |instance|
-  a.send_command(instance,command)
-}
-master_instance.each { |instance|
-  a.send_command(instance,command)
-}
+commands.each do |command|
+  slave_instances.each { |instance|
+    a.send_command(instance,command)
+  }
+end
 
 ###############################
 # Upload mongoid
@@ -335,20 +250,6 @@ master_instance.each { |instance|
 
 ###############################
 # Upload data_point_uuids
-local_path = File.dirname(__FILE__) + "/data_point_uuids.txt"
-remote_path = "/mnt/openstudio/data_point_uuids.txt"
-# Upload File to master Instance
-master_instance.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
-}
-
-command = "chmod 774 /mnt/openstudio/data_point_uuids.txt"
-master_instance.each { |instance|
-  a.send_command(instance,command)
-}
-
-###############################
-# Upload data_point_uuids
 local_path = File.dirname(__FILE__) + "/master_ip_address"
 remote_path = "/mnt/openstudio/master_ip_address"
 # Upload File to master Instance
@@ -361,32 +262,7 @@ master_instance.each { |instance|
   a.send_command(instance,command)
 }
 
-###############################
-# Upload SDP_EC2.rb
-local_path = File.dirname(__FILE__) + "/SDP_EC2.rb"
-remote_path = "/mnt/openstudio/SDP_EC2.rb"
-# Upload File to master Instance
-master_instance.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
-}
 
-command = "chmod 774 /mnt/openstudio/SDP_EC2.rb"
-master_instance.each { |instance|
-  a.send_command(instance,command)
-}
-
-####################
-# run command
-command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SDP_EC2.rb"
-master_instance.each { |instance|
-  a.shell_command(instance, command)
-}
-####################
-# download command
-command = "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/transfer_simulation.rb"
-master_instance.each { |instance|
-  a.shell_command(instance, command)
-}
 
 # Terminate Instance
 #a.terminate_master()

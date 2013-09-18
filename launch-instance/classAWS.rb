@@ -9,9 +9,7 @@ module AwsInterface
     IMAGE_ID_WORKER = "ami-ebc98082"
     REGION = "us-east-1"
     #IMAGE_ID = "ami-4c0d4925" #-Nicks
-    MASTER_USER_DATA_FILE = "master_script.sh"
-    SLAVE_USER_DATA_FILE = "slave_script.sh"
-      
+
     CONFIG_FILE = '/samples_config'
     ACCESS_KEY_ID = ''
     SECRET_ACCESS_KEY = ''
@@ -28,25 +26,18 @@ module AwsInterface
       # Image ID
       #puts "Image ID: #{IMAGE_ID}"
       # Set Security Credentials
-      @ec2 = AWS::EC2.new(:region => REGION,
-                          :ssl_verify_peer => false)                    
+      @ec2 = AWS::EC2.new(:region => REGION, :ssl_verify_peer => false)
     
       # Create Security Group
       @group = @ec2.security_groups.create("sec-group-#{Time.now.to_i}")
       puts "Group: #{@group}"
-      # web traffic
-      @group.authorize_ingress(:tcp, 80)
-      # allow ping
-      @group.allow_ping()
-      # ftp traffic
-      @group.authorize_ingress(:tcp, 20..21)
-      # ftp traffic
-      @group.authorize_ingress(:tcp, 1..65535)
-      # ssh access
-      @group.authorize_ingress(:tcp, 22, '0.0.0.0/0')
-      #@group.authorize_ingress(:tcp, 22, '0.0.0.0/0', '1.1.1.1/0', '2.2.2.2/0')
-      # telnet
-      @group.authorize_ingress(:tcp, 23, '0.0.0.0/0')
+      @group.authorize_ingress(:tcp, 80) # web traffic
+      @group.authorize_ingress(:tcp, 443) # web traffic over https
+      @group.allow_ping() # allow ping
+      @group.authorize_ingress(:tcp, 20..21) # ftp traffic
+      @group.authorize_ingress(:tcp, 1..65535) # ftp traffic
+      @group.authorize_ingress(:tcp, 22, '0.0.0.0/0') # ssh access
+      @group.authorize_ingress(:tcp, 23, '0.0.0.0/0') # telnet
 
       @key_pair = nil
       if keypair_path.nil? || !File.exist?(File.expand_path(keypair_path))
@@ -387,13 +378,6 @@ end
       end
     end      
     
-#======================= get status ======================#
-
-    def get_status()
-      # 
-      puts "status"
-    end
-
 #======================= clean up ======================#
     # Deletes the Key Pair and the Security Group Created. 
     def clean_up()
@@ -401,12 +385,6 @@ end
       @key_pair.delete()
       @group.delete()
     end
-
-#======================= struct params ======================#
-
-    def func()
-      
-    end 
 
   end
 
@@ -427,19 +405,17 @@ end
   # Overrides a template file with Master Info (IP, DNS, HOSTNAME)
   # This creates the slave_script.txt that contains bash commands for the slaves. 
   def prepare_slave_script(file_name, master_ip, master_dns, master_hostname)
-    file_template = "slave_script_template.sh"
+    file_template = "slave_script.sh.template"
     text = File.read(file_template)
     text = text.gsub(/MASTER_IP/, master_ip)
-    #text = text.gsub(/MASTER_DNS/, master_dns)
     text = text.gsub(/MASTER_HOSTNAME/, master_hostname)
     File.open(file_name, "w") {|file| file.puts text}
   end
 
   def prepare_mongoid_script(master_ip)
-    file_template = "mongoid_template.yml"
+    file_template = "mongoid_template.yml.template"
     text = File.read(file_template)
     text = text.gsub(/MASTER_IP/, master_ip)
     File.open("mongoid.yml", "w") {|file| file.puts text}
   end
-
-end # DONE WITH MODULE
+end
