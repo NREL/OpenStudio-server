@@ -5,7 +5,7 @@ server = OpenStudio::OSServer.new(serverUrl)
 patDirName = 'C:\working\openstudio-server\prototype\pat\PATTest'
 
 # delete old downloads
-Dir.glob('./datapoint*.zip').each do |p|
+Dir.glob('./datapoint_*.zip').each do |p|
   File.delete(p)
 end
 
@@ -57,9 +57,33 @@ puts "Starting analysis #{analysisUUID}"
 success = server.start(analysisUUID)
 puts "  Success = #{success}"
   
-isRunning = true
+isRunning = false
+while not isRunning
+  isQueued = server.isAnalysisQueued(analysisUUID)
+  puts "isQueued = #{isQueued}"
+
+  isRunning = server.isAnalysisRunning(analysisUUID)
+  puts "isRunning = #{isRunning}"
+   
+  isComplete = server.isAnalysisComplete(analysisUUID)
+  puts "isComplete = #{isComplete}"
+  
+  queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
+  puts "#{queuedDataPointUUIDs.size} Queued DataPoints"
+
+  runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+  puts "#{runningDataPointUUIDs.size} Running DataPoints"
+
+  completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
+  puts "#{completeDataPointUUIDs.size} Complete DataPoints"    
+      
+  puts
+  
+  OpenStudio::System::msleep(3000)
+end
+
 isComplete = false
-while isRunning and not isComplete
+while not isComplete
   isQueued = server.isAnalysisQueued(analysisUUID)
   puts "isQueued = #{isQueued}"
    
@@ -97,7 +121,7 @@ completeDataPointUUIDs.each do |dataPointUUID|
     puts "Can't reconstruct dataPoint #{dataPointUUID}"
   end
   
-  path = OpenStudio::Path.new("./#{dataPointUUID}.zip")
+  path = OpenStudio::Path.new("./datapoint_#{dataPointUUID.to_s.gsub('}','').gsub('{','')}.zip")
   if not File.exist?(path.to_s)
     result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
     if not result

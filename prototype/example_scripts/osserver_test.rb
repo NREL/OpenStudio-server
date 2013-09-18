@@ -14,7 +14,7 @@ workerFileName = File.dirname(__FILE__) + "/../../vagrant/worker"
 patDirName = File.dirname(__FILE__) + "/../pat/PATTest/"
 
 # delete old downloads
-Dir.glob('./datapoint*.zip').each do |p|
+Dir.glob('./datapoint_*.zip').each do |p|
   File.delete(p)
 end
 
@@ -222,9 +222,8 @@ puts "  Success = #{success}"
 # list projects on the server
 listProjects(server)
 
-isRunning = true
-isComplete = false
-while isRunning and not isComplete
+isRunning = false
+while not isRunning
   isQueued = server.isAnalysisQueued(analysisUUID)
   puts "isQueued = #{isQueued}"
 
@@ -235,13 +234,38 @@ while isRunning and not isComplete
   puts "isComplete = #{isComplete}"
   
   queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
-  puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
+  puts "#{queuedDataPointUUIDs.size} Queued DataPoints"
 
   runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
-  puts "  #{runningDataPointUUIDs.size} Running DataPoints"
+  puts "#{runningDataPointUUIDs.size} Running DataPoints"
 
   completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
-  puts "  #{completeDataPointUUIDs.size} Complete DataPoints"    
+  puts "#{completeDataPointUUIDs.size} Complete DataPoints"    
+      
+  puts
+  
+  OpenStudio::System::msleep(3000)
+end
+
+isComplete = false
+while not isComplete
+  isQueued = server.isAnalysisQueued(analysisUUID)
+  puts "isQueued = #{isQueued}"
+
+  isRunning = server.isAnalysisRunning(analysisUUID)
+  puts "isRunning = #{isRunning}"
+   
+  isComplete = server.isAnalysisComplete(analysisUUID)
+  puts "isComplete = #{isComplete}"
+  
+  queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
+  puts "#{queuedDataPointUUIDs.size} Queued DataPoints"
+
+  runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+  puts "#{runningDataPointUUIDs.size} Running DataPoints"
+
+  completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
+  puts "#{completeDataPointUUIDs.size} Complete DataPoints"    
       
   puts
   
@@ -259,7 +283,7 @@ completeDataPointUUIDs.each do |dataPointUUID|
     puts "Can't reconstruct dataPoint #{dataPointUUID}"
   end
   
-  path = OpenStudio::Path.new("./#{dataPointUUID}.zip")
+  path = OpenStudio::Path.new("./datapoint_#{dataPointUUID.to_s.gsub('}','').gsub('{','')}.zip")
   if not File.exist?(path.to_s)
     result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
     if not result
