@@ -10,7 +10,7 @@ include_recipe "passenger_apache2"
 bash "load default data" do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}
-    # bundle exec rake db:seed
+    bundle exec rake db:seed
   EOH
 end
 
