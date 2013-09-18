@@ -18,10 +18,10 @@ cp /data/prototype/pat/CommunicateResults_Mongo.rb /mnt/openstudio/
 mkdir -p /mnt/openstudio/rails-models
 cp /data/prototype/pat/rails-models.zip /mnt/openstudio/rails-models/
 cd /mnt/openstudio/rails-models
-unzip rails-models.zip
+unzip -o rails-models.zip
 
 # send over the mongoid.yml file
-cp /data/prototype/pat/mongoid.yml /mnt/openstudio/rails-models/
+cp /data/prototype/pat/mongoid-vagrant.yml /mnt/openstudio/rails-models/mongoid.yml
 
 
 
