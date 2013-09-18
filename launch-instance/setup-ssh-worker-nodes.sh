@@ -12,7 +12,7 @@ do
   username=`echo $line | awk -F'|' '{print $5}'`
   password=`echo $line | awk -F'|' '{print $6}'`
 
-  if [ $servertype == "master" ]; then
+  if [ $servertype != "master" ]; then
     ./setup-ssh-worker-nodes.expect $ipaddress $username $password
   fi
 done < ${IP_FILE}

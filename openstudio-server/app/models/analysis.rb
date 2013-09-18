@@ -34,11 +34,9 @@ class Analysis
   def initialize_workers
     # load in the master and worker information if it doesn't already exist
 
-    # somehow check if this is a vagrant box
-    ip_file = "/data/launch-instance/ip_addresses_vagrant"
+    ip_file = ip_file = "/home/ubuntu/ip_addresses"
     if !File.exists?(ip_file)
-      # try to find a different file in the
-      ip_file = "/home/ubuntu/ip_addresses"
+      "/data/launch-instance/ip_addresses_vagrant"   # somehow check if this is a vagrant box
     end
 
     ips = File.read(ip_file).split("\n")
@@ -98,6 +96,7 @@ class Analysis
 
     # get the master ip address
     master_ip = MasterNode.first.ip_address
+    logger.info("master ip: #{master_ip}")
 
     # I think we can do this with mongoid at the moment... no reason to make this complicated until we have to send
     # the data to the worker nodes
