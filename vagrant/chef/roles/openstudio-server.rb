@@ -5,7 +5,7 @@ run_list([
              # Default iptables setup on all servers.
              "role[base]",
              "role[ruby]",
-             "role[r-project]",
+             "role[r-project-worker]",
              "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
