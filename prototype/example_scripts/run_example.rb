@@ -1,7 +1,8 @@
 require 'rest-client'
 require 'json'
 
-HOSTNAME = "http://localhost:8080"
+#HOSTNAME = "http://localhost:8080"
+HOSTNAME = "http://ec2-23-22-216-106.compute-1.amazonaws.com"
 
 
 #  --------- GET example -----------
@@ -87,8 +88,6 @@ if !analysis_id.nil?
   end
 end
 
-
-
 # add all the datapoints to the analysis
 if !analysis_id.nil?
   datapoints = Dir.glob("../pat/analysis*/data_point*/data_point_in.json")
@@ -116,12 +115,11 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-  action_hash = { analysis_action: "start", without_delay: "false" }
+  action_hash = { analysis_action: "start", without_delay: "true" }
   #action_hash = { action: "stop"}
 
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.inspect
-  exit
 
   # check all the queued analyses for this project (eventually move this to all analyses)
   puts
@@ -129,6 +127,8 @@ if !analysis_id.nil?
   resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   puts resp
 end
+
+exit
 
 # get the status of all the entire analysis
 if !analysis_id.nil?

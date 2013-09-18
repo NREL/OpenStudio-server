@@ -6,7 +6,7 @@ FILE=/etc/hosts
 if grep -q "$ENTRY" $FILE; then
   echo "entry already exists"
 else
-  echo $ENTRY >> /etc/hosts
+  sudo sh -c "echo $ENTRY >> /etc/hosts"
 fi
 
 # copy all the setup scripts to the appropriate home directory
@@ -14,9 +14,10 @@ cp /data/launch-instance/setup* ~
 chmod 775 ~/setup*
 
 # Force the generation of various directories that are in the EBS mnt
-rm -rf /mnt/openstudio
-mkdir -p /mnt/openstudio
-chmod 777 /mnt/openstudio
+sudo rm -rf /mnt/openstudio
+sudo mkdir -p /mnt/openstudio
+sudo chmod 777 /mnt/openstudio
+sudo chmod 777 /var/www/rails/openstudio/public
 
 # save some files into the right directory
 cp /data/prototype/pat/SimulateDataPoint.rb /mnt/openstudio/
