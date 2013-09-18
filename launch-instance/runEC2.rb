@@ -77,6 +77,25 @@ commands.each do |command|
   end
 end
 
+# Upload mongoid
+local_path = File.dirname(__FILE__) + "/mongoid.yml"
+remote_path = "/mnt/openstudio/rails-models/mongoid.yml"
+# Upload File to slave Instance
+slave_instances.each { |instance|
+  a.upload_file(instance, local_path, remote_path)
+}
+master_instance.each { |instance|
+  a.upload_file(instance, local_path, remote_path)
+}
+
+command = "chmod 664 /mnt/openstudio/rails-models/mongoid.yml"
+slave_instances.each { |instance|
+  a.send_command(instance, command)
+}
+master_instance.each { |instance|
+  a.send_command(instance, command)
+}
+
 if DEBUG
   # The code below to the end should only be used for debugging because most (if not all)
   # of the files below are already on the server.
@@ -139,24 +158,7 @@ if DEBUG
   end
 
 ###############################
-# Upload mongoid
-  local_path = File.dirname(__FILE__) + "/mongoid.yml"
-  remote_path = "/usr/local/lib/rails-models/mongoid.yml"
-# Upload File to slave Instance
-  slave_instances.each { |instance|
-    a.upload_file(instance, local_path, remote_path)
-  }
-  master_instance.each { |instance|
-    a.upload_file(instance, local_path, remote_path)
-  }
 
-  command = "chmod 774 /usr/local/lib/rails-models/mongoid.yml"
-  slave_instances.each { |instance|
-    a.send_command(instance, command)
-  }
-  master_instance.each { |instance|
-    a.send_command(instance, command)
-  }
 
 end
 
