@@ -62,7 +62,7 @@ File.open("ip_addresses", 'w+') do |f|
 end
 
 # list of files to upload to the user home directory
-a.upload_file(master_instance[0], "./ip_addresses", "~/ip_addresses")
+a.upload_file(master_instance[0], "./ip_addresses", "./ip_addresses")
 
 # Setup SSH
 commands = []
