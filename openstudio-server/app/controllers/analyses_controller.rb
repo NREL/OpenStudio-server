@@ -45,9 +45,15 @@ class AnalysesController < ApplicationController
   # POST /analyses.json
   def create
     project_id = params[:project_id]
-    params[:analysis][:project_id] = project_id
+    params[:analysis].merge!(:project_id => project_id)
+
+    logger.info("PARAMS_OBJECT #{params}")
+
+    # save off the metadata as a child of the analysis right now... eventually move analysis
+    # underneath metadata
+    #params[:analysis].merge!(:metadata => params[:metadata] )
     @analysis = Analysis.new(params[:analysis])
-    
+
     respond_to do |format|
       if @analysis.save
         format.html { redirect_to @analysis, notice: 'Analysis was successfully created.' }
