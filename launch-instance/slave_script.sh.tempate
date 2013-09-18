@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Not sure why we are doing this
-mkdir /home/ubuntu/test
-
 # Change Host File Entries
 ENTRY="MASTER_IP MASTER_HOSTNAME"
 FILE=/etc/hosts
