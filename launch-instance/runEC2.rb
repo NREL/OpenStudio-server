@@ -82,22 +82,6 @@ master_instance.each { |instance|
   a.send_command(instance,command)
 }
 
-# Send worker IPs to Master for R setup:
-local_path = "./worker_ips"
-remote_path = "/mnt/openstudio/worker_ips"
-text = ""
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-File.open(local_path, 'w+') {|f| f.write(text) }
-# Upload File to Master Instance
-a.upload_file(master_instance[0], local_path, remote_path)
-
 ###################################
 # create /directory for the rails models
 command = "sudo mkdir -p /usr/local/lib/rails-models"
@@ -229,21 +213,6 @@ command = "chmod 774 /mnt/openstudio/transfer_simulation.rb"
 master_instance.each { |instance|
   a.send_command(instance,command)
 }
-
-###############################
-# Upload data_point_uuids
-local_path = File.dirname(__FILE__) + "/master_ip_address"
-remote_path = "/mnt/openstudio/master_ip_address"
-# Upload File to master Instance
-master_instance.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
-}
-
-command = "chmod 774 /mnt/openstudio/master_ip_address"
-master_instance.each { |instance|
-  a.send_command(instance,command)
-}
-
 
 
 # Terminate Instance
