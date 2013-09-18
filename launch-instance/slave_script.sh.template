@@ -8,11 +8,3 @@ if grep -q "$ENTRY" $FILE; then
 else
   echo $ENTRY >> /etc/hosts
 fi
-
-# NL Remove sudo on this command as you should already be sudo
-# NL No need to restart networking if only changing host entries
-# service networking restart
-
-
-
-
