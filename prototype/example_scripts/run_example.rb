@@ -1,8 +1,9 @@
 require 'rest-client'
 require 'json'
 
-#HOSTNAME = "http://localhost:8080"
-HOSTNAME = "http://ec2-23-22-216-106.compute-1.amazonaws.com"
+HOSTNAME = "http://localhost:8080"
+WITHOUT_DELAY=false
+#HOSTNAME = "http://ec2-23-22-216-106.compute-1.amazonaws.com"
 
 
 #  --------- GET example -----------
@@ -115,7 +116,7 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-  action_hash = { analysis_action: "start", without_delay: "true" }
+  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY }
   #action_hash = { action: "stop"}
 
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
