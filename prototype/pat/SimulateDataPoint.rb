@@ -148,6 +148,11 @@ begin
                                                            $OpenStudio_RubyExeDir,
                                                            OpenStudio::Path.new)
   workflow.add(tools)
+  
+  # DLM: Elaine somehow we need to add info to data point to avoid this error:
+  # [openstudio.analysis.AnalysisObject] <1> The json string cannot be parsed as an
+  # OpenStudio analysis framework json file, because Unable to find ToolInfo object
+  # at expected location.
 
   # queue the RunManager job
   url_search_paths = OpenStudio::URLSearchPathVector.new
