@@ -34,9 +34,9 @@ class Analysis
   def initialize_workers
     # load in the master and worker information if it doesn't already exist
 
-    ip_file = ip_file = "/home/ubuntu/ip_addresses"
+    ip_file = "/home/ubuntu/ip_addresses"
     if !File.exists?(ip_file)
-      "/data/launch-instance/ip_addresses_vagrant"   # somehow check if this is a vagrant box
+      ip_file = "/data/launch-instance/ip_addresses_vagrant"   # somehow check if this is a vagrant box
     end
 
     ips = File.read(ip_file).split("\n")
@@ -47,7 +47,7 @@ class Analysis
         mn.hostname = cols[2]
         mn.cores = cols[3]
         mn.user = cols[4]
-        #mn.password = cols[5]
+        #mn.password = cols[5].chomp
         mn.save!
 
         logger.info("Master node #{mn.inspect}")
@@ -56,7 +56,7 @@ class Analysis
         wn.hostname = cols[2]
         wn.cores = cols[3]
         wn.user = cols[4]
-        wn.password = cols[5]
+        wn.password = cols[5].chomp
         wn.save!
 
         logger.info("Worker node #{wn.inspect}")
@@ -138,7 +138,7 @@ class Analysis
     data_points_hash = {}
     data_points_hash[:data_points] = []
     self.data_points.all.each do |dp|
-      dp.status = 'initialized'
+      dp.status = 'queued'
       dp.save!
       data_points_hash[:data_points] << dp.uuid
     end
