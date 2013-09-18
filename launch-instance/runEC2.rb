@@ -28,6 +28,7 @@ master_instance.push(master_info.instance)
 master_ip = master_info.ip_address
 master_dns = master_info.dns_name
 master_hostname = "master"
+puts "master ip: #{master_ip}"
 prepare_slave_script("slave_script.sh", master_ip, master_dns, master_hostname)
 prepare_mongoid_script(master_ip)
 
@@ -64,38 +65,36 @@ end
 # list of files to upload to the user home directory
 a.upload_file(master_instance[0], "./ip_addresses", "./ip_addresses")
 
-# Setup SSH
-commands = []
-commands << "chmod 775 ~/setup-ssh-keys.expect"
-commands << "~/setup-ssh-keys.expect"
-commands << "chmod 775 ~/setup-ssh-worker-nodes.expect"
-commands << "chmod 775 ~/setup-ssh-worker-nodes.sh"
-commands << "~/setup-ssh-worker-nodes.sh ip_addresses"
-
-commands.each do |command|
-  master_instance.each do |instance|
-    a.send_command(instance, command)
-  end
-end
-
 # Upload mongoid
-local_path = File.dirname(__FILE__) + "/mongoid.yml"
+local_path = "./mongoid.yml"
 remote_path = "/mnt/openstudio/rails-models/mongoid.yml"
-# Upload File to slave Instance
+# Upload File to master and slave instance
+a.upload_file(master_instance[0], local_path, remote_path)
 slave_instances.each { |instance|
   a.upload_file(instance, local_path, remote_path)
 }
+
 master_instance.each { |instance|
-  a.upload_file(instance, local_path, remote_path)
+  a.send_command(instance, command)
 }
+slave_instances.each { |instance|
+  a.send_command(instance, command)
+}
+
+
+# Setup SSH
+#commands = []
+#commands << "~/setup-ssh-keys.expect"
+#commands << "~/setup-ssh-worker-nodes.sh ip_addresses"
+#master_instance.each do |instance|
+#  commands.each do |command|
+#    a.send_command(instance, command)
+#  end
+#end
+
 
 command = "chmod 664 /mnt/openstudio/rails-models/mongoid.yml"
-slave_instances.each { |instance|
-  a.send_command(instance, command)
-}
-master_instance.each { |instance|
-  a.send_command(instance, command)
-}
+
 
 if DEBUG
   # The code below to the end should only be used for debugging because most (if not all)

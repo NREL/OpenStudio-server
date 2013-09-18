@@ -1,8 +1,9 @@
 require 'rest-client'
 require 'json'
+require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
-WITHOUT_DELAY=false
+WITHOUT_DELAY=true
 #HOSTNAME = "http://ec2-23-22-216-106.compute-1.amazonaws.com"
 
 
@@ -12,12 +13,15 @@ resp = RestClient.get("#{HOSTNAME}/projects.json")
 projects_json = JSON.parse(resp, :symbolize_names => true, :max_nesting => false)
 
 if projects_json.count > 0
-  analysis_id = projects_json[0][:analyses][0][:_id]
-  puts analysis_id
+  if !projects_json[0][:analysis].nil?
+    analysis_id = projects_json[0][:analyses][0][:_id]
+    puts analysis_id
 
-  datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
-  puts JSON.parse(datapoints, :max_nesting => false)
-  #puts JSON.pretty_generate(JSON.parse(datapoints))
+    datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
+    puts JSON.parse(datapoints, :max_nesting => false)
+    #puts JSON.pretty_generate(JSON.parse(datapoints))
+  end
+
 end
 
 # -------- DELETE Example ----------
@@ -55,14 +59,29 @@ end
 # create a new analysis
 analysis_id = nil
 if !project_id.nil?
+  conn = Faraday.new(:url => HOSTNAME) do |faraday|
+    faraday.request  :url_encoded             # form-encode POST params
+    faraday.response :logger                  # log requests to STDOUT
+    faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+  end
+
   formulation_file = "../pat/analysis/formulation.json"
   formulation_json = JSON.parse(File.read(formulation_file), :symbolize_names => true)
+
   analysis_id = formulation_json[:analysis][:uuid]
 
-  analysis_hash = { analysis: { project_id: project_id, name: "script example", uuid: analysis_id } }
-  puts analysis_hash.inspect
+  formulation_json[:analysis][:name] = "running from run_example.rb"
 
-  resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", analysis_hash)
+  # save out this file to compare
+  File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
+
+  conn.post do |req|
+    req.url "projects/#{project_id}/analyses.json"
+    req.headers['Content-Type'] = 'application/json'
+    req.body = formulation_json.to_json
+  end
+
+  #resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", formulation_json)
 
   if resp.code == 201
     analysis_id = JSON.parse(resp)["_id"]
@@ -70,6 +89,7 @@ if !project_id.nil?
   end
 end
 
+exit
 
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?
