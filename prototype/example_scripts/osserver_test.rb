@@ -13,6 +13,11 @@ serverFileName = File.dirname(__FILE__) + "/../../vagrant/server"
 workerFileName = File.dirname(__FILE__) + "/../../vagrant/worker"
 patDirName = File.dirname(__FILE__) + "/../pat/PATTest/"
 
+# delete old downloads
+Dir.glob('./datapoint*.zip').each do |p|
+  File.delete(p)
+end
+
 # configuration
 serverPath = OpenStudio::Path.new(serverFileName)
 serverUrl = OpenStudio::Url.new("http://localhost:8080")
@@ -216,20 +221,52 @@ puts "  Success = #{success}"
 
 # list projects on the server
 listProjects(server)
+
+isComplete = false
+while not isComplete
+  isQueued = server.isAnalysisQueued(analysisUUID)
+  puts "isQueued = #{isQueued}"
+
+  isRunning = server.isAnalysisRunning(analysisUUID)
+  puts "isRunning = #{isRunning}"
+   
+  isComplete = server.isAnalysisComplete(analysisUUID)
+  puts "isComplete = #{isComplete}"
   
-isQueued = server.isAnalysisQueued(analysisUUID)
-puts "isQueued = #{isQueued}"
+  queuedDataPointUUIDs = server.queuedDataPointUUIDs(analysisUUID)
+  puts "  #{queuedDataPointUUIDs.size} Queued DataPoints"
 
-# todo: wait for running 
- 
-isRunning = server.isAnalysisRunning(analysisUUID)
-puts "isRunning = #{isRunning}"
+  runningDataPointUUIDs = server.runningDataPointUUIDs(analysisUUID)
+  puts "  #{runningDataPointUUIDs.size} Running DataPoints"
 
-# todo: wait for complete 
- 
-isComplete = server.isAnalysisComplete(analysisUUID)
-puts "isComplete = #{isComplete}"
+  completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
+  puts "  #{completeDataPointUUIDs.size} Complete DataPoints"    
+      
+  puts
+  
+  OpenStudio::System::msleep(3000)
+end
 
+completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
+puts "  #{completeDataPointUUIDs.size} Complete DataPoints"
+
+# try to load the results
+completeDataPointUUIDs.each do |dataPointUUID|
+  json = server.dataPointJSON(analysisUUID, dataPointUUID)
+  result = OpenStudio::Analysis::loadJSON(json)
+  if result.analysisObject.empty? or result.analysisObject.get.to_DataPoint.empty?
+    puts "Can't reconstruct dataPoint #{dataPointUUID}"
+  end
+  
+  path = OpenStudio::Path.new("./#{dataPointUUID}.zip")
+  if not File.exist?(path.to_s)
+    result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
+    if not result
+      puts "Failed to download dataPoint #{dataPointUUID}"
+    end
+  end
+end
+   
 puts "Stopping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
 puts "  Success = #{success}"

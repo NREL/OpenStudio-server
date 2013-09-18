@@ -27,6 +27,6 @@ sudo /etc/init.d/Rserved
 
 ```sh
 cd /data/launch-instance
-./configure_vagrant_server.sh
+./configure_vagrant_worker.sh
 ```
 
