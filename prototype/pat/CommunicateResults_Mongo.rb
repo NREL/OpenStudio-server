@@ -20,25 +20,28 @@ def getJSON(id,directory)
   project_path = directory.parent_path.parent_path
   
   dp = DataPoint.find_or_create_by(uuid: id)
-  result[0] = dp.to_json
+  data_point_hash = Hash.new
+  data_point_hash[:data_point] = dp
+  data_point_hash[:metadata] = dp[:os_metadata]
+  result[0] = data_point_hash.to_json
   
   # DLM: temp debugging code
-  data_point_json_path = directory / OpenStudio::Path.new("data_point_in.json")
-  File.open(data_point_json_path.to_s, 'w') do |f|
-    f.puts result[0]
-  end
+  #data_point_json_path = directory / OpenStudio::Path.new("data_point_in.json")
+  #File.open(data_point_json_path.to_s, 'w') do |f|
+  #  f.puts result[0]
+  #end
   
-  formulation_json_path = project_path / OpenStudio::Path.new("formulation.json")
-  raise "Required file '" + formulation_json_path.to_s + "' does not exist." if not File.exist?(formulation_json_path.to_s)
-  File.open(formulation_json_path.to_s, 'r') do |f|
-    result[1] = f.read
-  end
+  analysis = dp.analysis
+  analysis_hash = Hash.new
+  analysis_hash[:analysis] = analysis
+  analysis_hash[:metadata] = analysis[:os_metadata]
+  result[1] = analysis_hash.to_json
   
   # DLM: temp debugging code
-  formulation_json_path = directory / OpenStudio::Path.new("formulation.json")
-  File.open(formulation_json_path.to_s, 'w') do |f|
-    f.puts result[1]
-  end
+  #formulation_json_path = directory / OpenStudio::Path.new("formulation.json")
+  #File.open(formulation_json_path.to_s, 'w') do |f|
+  #  f.puts result[1]
+  #end
   
   return result
 end

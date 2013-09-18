@@ -47,13 +47,10 @@ class AnalysesController < ApplicationController
     project_id = params[:project_id]
     params[:analysis].merge!(:project_id => project_id)
 
-    logger.info("PARAMS_OBJECT #{params}")
-
-
     # save off the metadata as a child of the analysis right now... eventually move analysis
     # underneath metadata
     params[:analysis].merge!(:os_metadata => params[:metadata])
-    File.open("received_json.json","w") { |f| f << JSON.pretty_generate(params) }
+
     @analysis = Analysis.new(params[:analysis])
 
     respond_to do |format|

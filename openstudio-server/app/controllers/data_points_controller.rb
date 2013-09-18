@@ -42,7 +42,11 @@ class DataPointsController < ApplicationController
   def create
     analysis_id = params[:analysis_id]
     params[:data_point][:analysis_id] = analysis_id
-
+    
+    # save off the metadata as a child of the analysis right now... eventually move analysis
+    # underneath metadata
+    params[:data_point].merge!(:os_metadata => params[:metadata])
+    
     @data_point = DataPoint.new(params[:data_point])
     @data_point.status = "queued"
 
