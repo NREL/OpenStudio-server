@@ -2,7 +2,7 @@
 # on EC2. After the servers are configures, the latter part of the script uses the API to
 # run an example analysis.
 
-require 'classAWS.rb'
+require './classAWS'
 
 include AwsInterface
 
@@ -10,7 +10,7 @@ include AwsInterface
 a = AwsAdapter.new #("~/.ssh/amazontest.pub")
 
 # Launch Master
-# The file  "master_script.txt" will be passed to the 
+# The file  "master_script.sh" will be passed to the
 # instance as user-data. This file contains bash commands
 # to send set up the /etc/hosts and /etc/hostname files.
 master_info = a.launch_master("master_script.sh")
@@ -18,7 +18,7 @@ master_instance = Array.new(0)
 master_instance.push(master_info.instance)
 
 # Prepare SLAVE SCRIPT
-# The file  "slave_script.txt" will be passed to the 
+# The file  "slave_script.sh" will be passed to the
 # instance as user-data. This file contains bash commands
 # to send set up the /etc/hosts and /etc/hostname files.
 master_ip = master_info.ip_address
@@ -49,37 +49,22 @@ isMaster = 0
 dns_name = a.get_dns(isMaster)
 dns_name.each{|dns| puts "DNS: #{dns}"}
 
-# Send Slave IPs to Master
-local_path = "./slave_info.sh"
-remote_path = "/home/ubuntu/hosts_slave_file.sh"
-text = ""
-slave_info.each {|info| text << "#{info.ip_address}\n"}
-File.open(local_path, 'w+') {|f| f.write(text) }
-# Upload File to Master Instance
-a.upload_file(master_instance[0], local_path, remote_path)
+# create the ip address file for uploading to master and worker
+File.open("ip_addresses", 'w+') do |f|
+  f << "master|#{master_info.ip_address}|#{master_info.dns_name}|2|ubuntu|ubuntu\n"
+  slave_info.each do |info|
+    f << "worker|#{info.ip_address}|#{info.dns_name}|2|ubuntu|ubuntu\n"
+  end
+end
 
-# slaves and masters are known (todo: merge this into one file to make it easier to read)
-text = ""
-#master_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
-#text << "#{master_info.ip_address}|ubuntu|ubuntu\n"
-slave_info.each {|info| text << "#{info.ip_address}|ubuntu|ubuntu\n"}
-#File.open("ip_addresses", 'w+') {|f| f.write(text) }
-#text << "#{master_info.dns_name}|ubuntu|ubuntu\n"
-#slave_info.each {|info| text << "#{info.dns_name}|ubuntu|ubuntu\n"}
-File.open("ip_addresses", 'w+') {|f| f.write(text) }
-
-text = ""
-text << "#{master_info.dns_name}\n"
-File.open("master_ip_address", 'w+') {|f| f.write(text) }
-
-# Right now these paths are assuming that we are in the same directory as the files
+# list of files to upload to the user home directory
 upload_files = ["ip_addresses", "setup-ssh-keys.expect", "setup-ssh-worker-nodes.sh", "setup-ssh-worker-nodes.expect"]
 upload_files.each do |file|
   a.upload_file(master_instance[0], "./#{file}", "./#{File.basename(file)}")
 end
 
-# Do some file management
 ###################################
+# Do some file management
 # create /mnt/openstudio
 command = "sudo mkdir -p /mnt/openstudio"
 slave_instances.each { |instance|
@@ -97,7 +82,7 @@ master_instance.each { |instance|
   a.send_command(instance,command)
 }
 
-# Send worker IPs to Master for R setup:  c1.xlarge 8 cores
+# Send worker IPs to Master for R setup:
 local_path = "./worker_ips"
 remote_path = "/mnt/openstudio/worker_ips"
 text = ""
@@ -174,10 +159,7 @@ slave_instances.each { |instance|
 
 ###########################
 # create rails-models dir  -- temp: this will be on the image by default
-
-cp /data/prototype/pat/rails-models.zip /mnt/openstudio/rails-models/
-
-    command = "rm -rf /mnt/openstudio/rails-models/"
+command = "rm -rf /mnt/openstudio/rails-models/"
 slave_instances.each { |instance|
   a.send_command(instance,command)
 }  
