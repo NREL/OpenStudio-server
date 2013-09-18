@@ -327,7 +327,7 @@ end
     # Need to pass the instance object and the path to the file (Local and Remote). 
     def upload_file(instance, local_path, remote_path)
       # send command to instance
-      puts "Uploading #{local_path} to instance #{instance.instance_id}"
+      puts "Initializing upload of #{local_path} to instance #{instance.instance_id}"
       begin
         Net::SCP.start(instance.ip_address, "ubuntu",
                        :key_data => [@key_pair.private_key]) do |scp|
@@ -340,7 +340,7 @@ end
         puts "Not Yet"
         retry
       rescue
-        puts "unknown upload error, retry"
+        puts "Unknown upload error, retry"
         sleep 1
         retry    
       end

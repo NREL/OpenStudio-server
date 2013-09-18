@@ -36,9 +36,7 @@ class Analysis
 
     # somehow check if this is a vagrant box
     ip_file = "/data/launch-instance/ip_addresses_vagrant"
-    if File.exists?(ip_file)
-      #
-    else
+    if !File.exists?(ip_file)
       # try to find a different file in the
       ip_file = "/home/ubuntu/ip_addresses"
     end
