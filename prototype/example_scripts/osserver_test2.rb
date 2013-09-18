@@ -82,6 +82,8 @@ while not isRunning
   OpenStudio::System::msleep(3000)
 end
 
+puts "Analysis Started"
+
 isComplete = false
 while not isComplete
   isQueued = server.isAnalysisQueued(analysisUUID)
@@ -109,6 +111,8 @@ while not isComplete
   
   OpenStudio::System::msleep(3000)
 end
+
+puts "Analysis Completed"
 
 completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
 puts "  #{completeDataPointUUIDs.size} Complete DataPoints"
