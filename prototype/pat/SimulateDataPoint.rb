@@ -1,6 +1,7 @@
 require 'openstudio'
 require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
+require 'fileutils'
 
 # parse arguments with optparse
 options = Hash.new
@@ -9,7 +10,11 @@ optparse = OptionParser.new do |opts|
   opts.on('-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json.") do |directory|
     options[:directory] = directory
   end
-
+  
+  opts.on('-u', '--uuid UUID', String, "UUID of the data point to run with no braces.") do |uuid|
+    options[:uuid] = uuid
+  end
+  
   opts.on('-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |runType|
     options[:runType] = runType
   end
@@ -59,97 +64,116 @@ else
   Mongoid.load!(mongoid_path_prefix + "mongoid.yml", :development)
 end
 
+puts "Moniker"
+
 directory = OpenStudio::Path.new(options[:directory])
+
+project_path = directory.parent_path.parent_path
+
 # on linux, if directory ends in /, need to call parent_path
 if directory.stem.to_s == String.new
   directory = directory.parent_path
 end
 logLevel = options[:logLevel].to_i
 
-project_path = directory.parent_path
-
-# verify the existence of required files
-data_point_json_path = directory / OpenStudio::Path.new("data_point_in.json")
-formulation_json_path = project_path / OpenStudio::Path.new("formulation.json")
-raise "Required file '" + data_point_json_path.to_s + "' does not exist." if not File.exist?(data_point_json_path.to_s)
-raise "Required file '" + formulation_json_path.to_s + "' does not exist." if not File.exist?(formulation_json_path.to_s)
-
-# set up log file
-logSink = OpenStudio::FileLogSink.new(directory / OpenStudio::Path.new("openstudio.log"))
-logSink.setLogLevel(logLevel)
-OpenStudio::Logger::instance.standardOutLogger.disable
-
-# load problem formulation
-loadResult = OpenStudio::Analysis::loadJSON(formulation_json_path)
-if loadResult.analysisObject.empty?
-  loadResult.errors.each { |error|
-    warn error.logMessage
-  }
-  raise "Unable to load json file from '" + formulation_json_path.to_s + "."
+# get data point uuid without braces
+id = options[:uuid] # DLM: uuid as a parameter will be sent later, not currently available
+if id.nil?
+  if md = /data_point_(.*)/.match(directory.to_s)
+    id = md[1]
+  end
 end
-analysis = loadResult.analysisObject.get.to_Analysis.get
-
-# fix up paths
-analysis.updateInputPathData(loadResult.projectDir, project_path)
-analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
-analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"), analysis_options, true)
-
-# load data point to run
-loadResult = OpenStudio::Analysis::loadJSON(data_point_json_path)
-if loadResult.analysisObject.empty?
-  loadResult.errors.each { |error|
-    warn error.logMessage
-  }
-  raise "Unable to load json file from '" + data_point_json_path.to_s + "."
-end
-data_point = loadResult.analysisObject.get.to_DataPoint.get
-analysis.addDataPoint(data_point) # also hooks up real copy of problem
 
 # let listening processes know that this data point is running
-communicateStarted(data_point, directory)
+communicateStarted(id)
 
-# create a RunManager
-run_manager_path = directory / OpenStudio::Path.new("run.db")
-run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path, true, false, false)
+begin
 
-# have problem create the workflow
-workflow = analysis.problem.createWorkflow(data_point, OpenStudio::Path.new($OpenStudio_Dir));
-params = OpenStudio::Runmanager::JobParams.new;
-params.append("cleanoutfiles", "standard");
-workflow.add(params);
-ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
-ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
-tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
-                                                         OpenStudio::Path.new,
-                                                         OpenStudio::Path.new,
-                                                         $OpenStudio_RubyExeDir,
-                                                         OpenStudio::Path.new)
-workflow.add(tools)
+  # create data point directory
+  FileUtils.mkdir_p(directory.to_s)
+  
+  # set up log file
+  logSink = OpenStudio::FileLogSink.new(directory / OpenStudio::Path.new("openstudio.log"))
+  logSink.setLogLevel(logLevel)
+  OpenStudio::Logger::instance.standardOutLogger.disable
+  
+  # get json from database
+  json = getJSON(id,directory)
+  data_point_json = json[0]
+  analysis_json = json[1]
 
-# queue the RunManager job
-url_search_paths = OpenStudio::URLSearchPathVector.new
-weather_file_path = OpenStudio::Path.new
-if (analysis.weatherFile)
-  weather_file_path = analysis.weatherFile.get.path
+  # load problem formulation
+  loadResult = OpenStudio::Analysis::loadJSON(analysis_json)
+  if loadResult.analysisObject.empty?
+    loadResult.errors.each { |error|
+      warn error.logMessage
+    }
+    raise "Unable to load analysis json."
+  end
+  analysis = loadResult.analysisObject.get.to_Analysis.get
+
+  # fix up paths
+  analysis.updateInputPathData(loadResult.projectDir, project_path)
+  analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
+  analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"), analysis_options, true)
+
+  # load data point to run
+  loadResult = OpenStudio::Analysis::loadJSON(data_point_json)
+  if loadResult.analysisObject.empty?
+    loadResult.errors.each { |error|
+      warn error.logMessage
+    }
+    raise "Unable to load data point json."
+  end
+  data_point = loadResult.analysisObject.get.to_DataPoint.get
+  analysis.addDataPoint(data_point) # also hooks up real copy of problem
+
+  # update datapoint in database
+  communicateDatapoint(data_point)
+
+  # create a RunManager
+  run_manager_path = directory / OpenStudio::Path.new("run.db")
+  run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path, true, false, false)
+
+  # have problem create the workflow
+  workflow = analysis.problem.createWorkflow(data_point, OpenStudio::Path.new($OpenStudio_Dir));
+  params = OpenStudio::Runmanager::JobParams.new;
+  params.append("cleanoutfiles", "standard");
+  workflow.add(params);
+  ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
+  ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
+  tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
+                                                           OpenStudio::Path.new,
+                                                           OpenStudio::Path.new,
+                                                           $OpenStudio_RubyExeDir,
+                                                           OpenStudio::Path.new)
+  workflow.add(tools)
+
+  # queue the RunManager job
+  url_search_paths = OpenStudio::URLSearchPathVector.new
+  weather_file_path = OpenStudio::Path.new
+  if (analysis.weatherFile)
+    weather_file_path = analysis.weatherFile.get.path
+  end
+  job = workflow.create(directory, analysis.seed.path, weather_file_path, url_search_paths)
+  OpenStudio::Runmanager::JobFactory::optimizeJobTree(job)
+  analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
+  run_manager.enqueue(job, false);
+
+  # wait for the job to finish
+  run_manager.waitForFinished
+
+  # use the completed job to populate data_point with results
+  analysis.problem.updateDataPoint(data_point, job)
+
+  # implemented differently for Local vs. Vagrant or AWS
+  communicateResults(data_point, directory)
+
+rescue Exception
+
+  # need to tell mongo this failed 
+  communicateFailure(id)
+  
+  # raise last exception
+  raise
 end
-job = workflow.create(directory, analysis.seed.path, weather_file_path, url_search_paths)
-OpenStudio::Runmanager::JobFactory::optimizeJobTree(job)
-analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
-run_manager.enqueue(job, false);
-
-# wait for the job to finish
-run_manager.waitForFinished
-
-# use the completed job to populate data_point with results
-analysis.problem.updateDataPoint(data_point, job)
-
-# TODO: revert this back to writing to mongo
-
-# implemented differently for Local vs. Vagrant or AWS
-communicateResults(data_point, directory)
-
-
-# TODO: Push results to Mongo from worker to server
-
-# TODO: push results to server node
-

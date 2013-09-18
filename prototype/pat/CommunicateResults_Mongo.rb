@@ -4,16 +4,55 @@ require 'mongoid'
 require 'mongoid_paperclip'
 require 'socket'
 
-def communicateStarted(data_point,directory)
+
+def communicateStarted(id)
+  dp = DataPoint.find_or_create_by(uuid: id)
+  dp.status = "started"
+  dp.ip_address = Socket.gethostname
+  dp.save!  
+end
+
+
+def getJSON(id,directory)
+
+  result = [] # [data_point_json, analysis_json]
+  
+  project_path = directory.parent_path.parent_path
+  
+  dp = DataPoint.find_or_create_by(uuid: id)
+  result[0] = dp.to_json
+  
+  # DLM: temp debugging code
+  data_point_json_path = directory / OpenStudio::Path.new("data_point_in.json")
+  File.open(data_point_json_path.to_s, 'w') do |f|
+    f.puts result[0]
+  end
+  
+  formulation_json_path = project_path / OpenStudio::Path.new("formulation.json")
+  raise "Required file '" + formulation_json_path.to_s + "' does not exist." if not File.exist?(formulation_json_path.to_s)
+  File.open(formulation_json_path.to_s, 'r') do |f|
+    result[1] = f.read
+  end
+  
+  # DLM: temp debugging code
+  formulation_json_path = directory / OpenStudio::Path.new("formulation.json")
+  File.open(formulation_json_path.to_s, 'w') do |f|
+    f.puts result[1]
+  end
+  
+  return result
+end
+
+
+def communicateDatapoint(data_point)
   id = OpenStudio::removeBraces(data_point.uuid)
   dp = DataPoint.find_or_create_by(uuid: id)
   id = OpenStudio::removeBraces(data_point.analysisUUID.get)
   dp.analysis = Analysis.find_or_create_by(uuid: id)
   dp.values = data_point.variableValues.map{|v| v.toDouble}
-  dp.ip_address = Socket.gethostname
-  dp.status = "started"
   dp.save!  
 end
+
 
 def communicateResults(data_point,directory)  
   id = OpenStudio::removeBraces(data_point.uuid)
@@ -39,4 +78,11 @@ def communicateResults(data_point,directory)
   dp.output = JSON.parse(data_point.toJSON(data_point_options))
   dp.status = "completed"
   dp.save!
+end
+
+
+def communicateFailure(id)
+  dp = DataPoint.find_or_create_by(uuid: id)
+  dp.status = "completed"
+  dp.save!  
 end
