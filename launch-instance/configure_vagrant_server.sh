@@ -4,7 +4,7 @@
 
 # setup the passwordless ssh
 ./setup-ssh-keys-vagrant.expect
-./setup-ssh-worker-nodes.sh ip_address_vagrant
+./setup-ssh-worker-nodes.sh ip_addresses_vagrant
 
 # need to setup the hosts file
 sudo ./master_script.sh
