@@ -140,16 +140,23 @@ if !analysis_id.nil?
   # run the analysis
 
   action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY }
-  #action_hash = { action: "stop"}
+  puts action_hash.to_json
+
+  #resp = @conn.post do |req|
+  #  req.url "analyses/#{analysis_id}/action.json"
+  #  req.headers['Content-Type'] = 'application/json'
+  #  req.body = action_hash.to_json
+    #req.options[:timeout] = 180 #seconds
+  #end
+  #puts resp.status
 
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.inspect
 
   # check all the queued analyses for this project (eventually move this to all analyses)
-  puts
-  puts "list of queued analyses"
-  resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
-  puts resp
+  #puts "list of queued analyses"
+  #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
+  #puts resp
 end
 
 exit
