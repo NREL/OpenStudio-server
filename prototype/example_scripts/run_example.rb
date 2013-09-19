@@ -6,6 +6,11 @@ HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=true
 #HOSTNAME = "http://ec2-23-22-216-106.compute-1.amazonaws.com"
 
+@conn = Faraday.new(:url => HOSTNAME) do |faraday|
+  faraday.request  :url_encoded             # form-encode POST params
+  faraday.response :logger                  # log requests to STDOUT
+  faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+end
 
 #  --------- GET example -----------
 resp = RestClient.get("#{HOSTNAME}/projects.json")
@@ -59,11 +64,7 @@ end
 # create a new analysis
 analysis_id = nil
 if !project_id.nil?
-  conn = Faraday.new(:url => HOSTNAME) do |faraday|
-    faraday.request  :url_encoded             # form-encode POST params
-    faraday.response :logger                  # log requests to STDOUT
-    faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
-  end
+
 
   formulation_file = "../pat/analysis/formulation.json"
   formulation_json = JSON.parse(File.read(formulation_file), :symbolize_names => true)
@@ -75,7 +76,7 @@ if !project_id.nil?
   # save out this file to compare
   #File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
 
-  resp = conn.post do |req|
+  resp = @conn.post do |req|
     req.url "projects/#{project_id}/analyses.json"
     req.headers['Content-Type'] = 'application/json'
     req.body = formulation_json.to_json
@@ -119,14 +120,15 @@ if !analysis_id.nil?
     dp_hash = JSON.parse(File.open(dp).read, :symbolize_names => true)
 
     # merge in the analysis_id as it has to be what is in the database
-    dp_hash[:data_point][:analysis_id] = analysis_id
-    puts dp_hash.inspect
+    resp = @conn.post do |req|
+      req.url "analyses/#{analysis_id}/data_points.json"
+      req.headers['Content-Type'] = 'application/json'
+      req.body = dp_hash.to_json
+    end
 
-    url = "#{HOSTNAME}/analyses/#{analysis_id}/data_points.json"
-    resp = RestClient.post(url, dp_hash)
-    if resp.code == 201
+    if resp.status == 201
       puts "new datapoint created for analysis #{analysis_id}"
-      puts resp
+      puts resp.body
     else
       raise "could not create new datapoint #{resp.inspect}"
     end
