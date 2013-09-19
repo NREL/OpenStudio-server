@@ -1,8 +1,11 @@
 require 'openstudio'
 
+require 'fileutils'
+
 serverUrl = OpenStudio::Url.new("http://localhost:8080")
 server = OpenStudio::OSServer.new(serverUrl)
 patDirName = 'C:\working\openstudio-server\prototype\pat\PATTest'
+patExportDirName = 'C:\working\openstudio-server\prototype\pat\PATTestExport'
 
 # delete old downloads
 Dir.glob('./datapoint_*.zip').each do |p|
@@ -29,7 +32,7 @@ puts "  Success = #{success}"
 options = OpenStudio::Analysis::AnalysisSerializationOptions.new(OpenStudio::Path.new(patDirName))
 analysisJSON = analysis.toJSON(options)
 
-File.open('analysisJSON.json', 'w') do |file|
+File.open(patExportDirName + "/analysis.json", 'w') do |file|
   file.puts analysisJSON
 end
 
@@ -41,12 +44,18 @@ analysis.dataPoints().each do |dataPoint|
   options = OpenStudio::Analysis::DataPointSerializationOptions.new(OpenStudio::Path.new(patDirName))
   dataPointJSON = dataPoint.toJSON(options)
   
+  File.open(patExportDirName + "/datapoint_#{dataPoint.uuid().to_s.gsub('}','').gsub('{','')}.json", 'w') do |f|
+    f.puts dataPointJSON
+  end
+  
   puts "Posting DataPoint #{dataPoint.uuid()}"
   success = server.postDataPointJSON(analysisUUID, dataPointJSON)
   puts "  Success = #{success}"
 end
 
 analysisZipFile = project.zipFileForCloud()
+
+FileUtils.copy_file("#{analysisZipFile}", patExportDirName + "/analysis.zip")
 
 puts "Uploading analysisZipFile #{analysisZipFile}"
 success = server.uploadAnalysisFiles(analysisUUID, analysisZipFile)

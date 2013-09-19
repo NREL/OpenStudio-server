@@ -3,6 +3,8 @@ require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 require 'fileutils'
 
+puts "Parsing Input"
+
 # parse arguments with optparse
 options = Hash.new
 optparse = OptionParser.new do |opts|
@@ -26,12 +28,16 @@ optparse = OptionParser.new do |opts|
 
 end
 
+puts "Parsed Input"
+
 optparse.parse!
 if not options[:directory]
   # required argument is missing
   puts optparse
   exit
 end
+
+puts "Checking RunType"
 
 # TODO: NL need to remove the concept of local and vagrant... perhaps make this is mixin, but that can be later
 #       Need to have a handle to the datapoint record in mongo at all times in order to setup the status
@@ -44,6 +50,8 @@ if options[:runType]
     exit
   end
 end
+
+puts "RunType is #{runType}"
 
 if (runType == "Local")
   require "#{File.dirname(__FILE__)}/CommunicateResults_Local.rb"
@@ -64,8 +72,6 @@ else
   Mongoid.load!(mongoid_path_prefix + "mongoid.yml", :development)
 end
 
-puts "Moniker"
-
 directory = OpenStudio::Path.new(options[:directory])
 
 project_path = directory.parent_path.parent_path
@@ -76,6 +82,8 @@ if directory.stem.to_s == String.new
 end
 logLevel = options[:logLevel].to_i
 
+puts "Directory is #{directory}"
+
 # get data point uuid without braces
 id = options[:uuid] # DLM: uuid as a parameter will be sent later, not currently available
 if id.nil?
@@ -84,11 +92,15 @@ if id.nil?
   end
 end
 
+puts "Communicating Started #{id}"
+
 # let listening processes know that this data point is running
 communicateStarted(id)
 
 begin
 
+  puts "Making directory #{directory.to_s}"
+  
   # create data point directory
   FileUtils.mkdir_p(directory.to_s)
   
@@ -97,10 +109,14 @@ begin
   logSink.setLogLevel(logLevel)
   OpenStudio::Logger::instance.standardOutLogger.disable
   
+  puts "Getting JSON input"
+  
   # get json from database
   json = getJSON(id,directory)
   data_point_json = json[0]
   analysis_json = json[1]
+  
+  puts "Parsing Analysis JSON input"
 
   # load problem formulation
   loadResult = OpenStudio::Analysis::loadJSON(analysis_json)
@@ -117,6 +133,8 @@ begin
   analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
   analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"), analysis_options, true)
 
+  puts "Parsing DataPoint JSON input"
+  
   # load data point to run
   loadResult = OpenStudio::Analysis::loadJSON(data_point_json)
   if loadResult.analysisObject.empty?
@@ -127,10 +145,14 @@ begin
   end
   data_point = loadResult.analysisObject.get.to_DataPoint.get
   analysis.addDataPoint(data_point) # also hooks up real copy of problem
+  
+  puts "Communicating DataPoint"
 
   # update datapoint in database
   communicateDatapoint(data_point)
 
+  puts "Running Simulation"
+  
   # create a RunManager
   run_manager_path = directory / OpenStudio::Path.new("run.db")
   run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path, true, false, false)
@@ -165,16 +187,24 @@ begin
   analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
   run_manager.enqueue(job, false);
 
+  puts "Waiting for simulation to finish"
+  
   # wait for the job to finish
   run_manager.waitForFinished
+  
+  puts "Simulation finished"
 
   # use the completed job to populate data_point with results
   analysis.problem.updateDataPoint(data_point, job)
+  
+  puts "Communicating Results"
 
   # implemented differently for Local vs. Vagrant or AWS
   communicateResults(data_point, directory)
-
+  
 rescue Exception
+
+  puts "Communicating Failure"
 
   # need to tell mongo this failed 
   communicateFailure(id)
@@ -182,3 +212,8 @@ rescue Exception
   # raise last exception
   raise
 end
+
+puts "Complete"
+
+# DLM: this is where we put the objective functions
+puts "0"
