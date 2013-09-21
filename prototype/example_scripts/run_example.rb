@@ -3,7 +3,7 @@ require 'json'
 require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
-WITHOUT_DELAY=true
+WITHOUT_DELAY=false
 #HOSTNAME = "http://ec2-23-22-216-106.compute-1.amazonaws.com"
 
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|
