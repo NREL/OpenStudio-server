@@ -4,8 +4,8 @@ require 'fileutils'
 
 serverUrl = OpenStudio::Url.new("http://localhost:8080")
 server = OpenStudio::OSServer.new(serverUrl)
-patDirName = 'C:\working\openstudio-server\prototype\pat\PATTest'
-patExportDirName = 'C:\working\openstudio-server\prototype\pat\PATTestExport'
+patDirName = File.dirname(__FILE__) + '/../pat/PATTest'
+patExportDirName = File.dirname(__FILE__) + '/../pat/PATTestExport'
 
 # delete old downloads
 Dir.glob('./datapoint_*.zip').each do |p|
