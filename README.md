@@ -99,7 +99,46 @@ vagrant up --provider=aws
 
 Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue. There is a known issue with the dependency order of Rails and Passenger.
 
-- vagrant ssh or ssh ubuntu@ec2-a-b-c-d.compute-1.amazonaws.com
+- Log into the new system and do some cleanup before creating the AMI
+
+```sh
+vagrant ssh
+```
+
+-- Enable password logins on the systems
+
+```sh
+sudo vi /etc/ssh/sshd_config
+```
+set PasswordAuthentication to yes
+```sh
+sudo service ssh restart
+```
+
+-- Change owner of Rserved process
+
+```sh
+sudo vi /etc/init.d/Rserved
+:%s/vagrant/ubuntu/g
+```
+
+-- Update all packages and reboot
+```sh
+sudo apt-get upgrade -y
+sudo shutdown -r now
+```
+
+-- Remove your authorized key
+vi ~/.ssh/authorized_keys
+dd
+:x
+
+-- Remove extraneous directories
+rm -rf /data/prototype/pat
+rm -f /data/launch-instance/config.yml
+cd /var/www/rails/openstudio
+rake db:purge
+rm -rf /mnt/openstudio
 
 - login to AWS and take a snapshot of the image
 
