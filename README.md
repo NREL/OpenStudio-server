@@ -105,40 +105,52 @@ Note, if the Vagrant provision fails, run `vagrant provision` at command line ag
 vagrant ssh
 ```
 
--- Enable password logins on the systems
+### Server Changes
+- The script below does several items including
+  + Enable password login (for setting up passwordless SSH)
+  + Change owner of Rserved and restart Rserve 
+  + Update all packages and reboot
+  + Remove unneeded directories/files
+
 
 ```sh
-sudo vi /etc/ssh/sshd_config
-```
-set PasswordAuthentication to yes
-```sh
+sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
 sudo service ssh restart
-```
-
--- Change owner of Rserved process
-
-```sh
-sudo vi /etc/init.d/Rserved
-:%s/vagrant/ubuntu/g
-```
-
--- Update all packages and reboot
-```sh
-sudo apt-get upgrade -y
-sudo shutdown -r now
-```
-
--- Remove your authorized key
-vi ~/.ssh/authorized_keys
-dd
-:x
-
--- Remove extraneous directories
+sudo sed -i 's/vagrant/ubunut/g' /etc/init.d/Rserved
+sudo service Rserved restart
 rm -rf /data/prototype/pat
 rm -f /data/launch-instance/config.yml
 cd /var/www/rails/openstudio
 rake db:purge
 rm -rf /mnt/openstudio
+sudo apt-get upgrade -y
+sudo shutdown -r now
+```
+
+### Worker Changes
+  + Enable password login (for setting up passwordless SSH)
+  + Update all packages and reboot
+  + Remove unneeded directories/files
+
+
+```sh
+sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
+sudo service ssh restart
+sudo sed -i 's/vagrant/ubunut/g' /etc/init.d/Rserved
+sudo service Rserved restart
+rm -rf /data/prototype/pat
+rm -f /data/launch-instance/config.yml
+sudo apt-get upgrade -y
+sudo shutdown -r now
+```
+
+### Final Changes
+- Before creating the AMI do these last on both systems
+  + Remove authorized keys (this will prevent you from logging in again, do this last)
+
+```sh
+cat /dev/null > ~/.ssh/authorized_keys
+```
 
 - login to AWS and take a snapshot of the image
 
