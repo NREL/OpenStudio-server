@@ -116,7 +116,7 @@ vagrant ssh
 ```sh
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
 sudo service ssh restart
-sudo sed -i 's/vagrant/ubunut/g' /etc/init.d/Rserved
+sudo sed -i 's/vagrant/ubuntu/g' /etc/init.d/Rserved
 sudo service Rserved restart
 rm -rf /data/prototype/pat
 rm -f /data/launch-instance/config.yml
