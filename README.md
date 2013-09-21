@@ -118,7 +118,6 @@ sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh
 sudo service ssh restart
 sudo sed -i 's/vagrant/ubuntu/g' /etc/init.d/Rserved
 sudo service Rserved restart
-rm -rf /data/prototype/pat
 rm -f /data/launch-instance/config.yml
 cd /var/www/rails/openstudio
 rake db:purge
@@ -136,7 +135,6 @@ sudo shutdown -r now
 ```sh
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
 sudo service ssh restart
-rm -rf /data/prototype/pat
 rm -f /data/launch-instance/config.yml
 sudo apt-get upgrade -y
 sudo shutdown -r now
