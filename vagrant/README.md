@@ -18,7 +18,7 @@ ps -A | grep Rserve
 - if no Rserve is running then start it by
 
 ```sh
-sudo /etc/init.d/Rserved
+sudo service Rserved start
 ```
 
 ## Worker Configuration
