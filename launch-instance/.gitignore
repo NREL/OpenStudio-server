@@ -7,3 +7,5 @@ worker_ips
 mongoid.yml
 slave_info.sh
 slave_script.sh
+server_data.json
+worker_data.json
