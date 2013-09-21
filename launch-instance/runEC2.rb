@@ -60,6 +60,7 @@ if true
 
   start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
   server_data_str = `#{start_string}`
+  puts server_data_str
   server_data = JSON.parse(server_data_str, :symbolize_names => true)
 
   # Save off the private key for later access
