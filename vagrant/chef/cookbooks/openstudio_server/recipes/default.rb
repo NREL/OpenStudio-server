@@ -4,6 +4,7 @@
 #
 
 include_recipe "passenger_apache2"
+include_recipe "cron"
 
 
 # load the test data (eventaully make this a separate recipe - or just remove)
@@ -31,6 +32,18 @@ bash "restart delayed job" do
   EOH
 end
 
+
+# make sure that the cron has a reboot task for delayed job .
+# Note: there seems to be a bug such that this isn't called idempotently
+cron_d 'start-delayed-job-on-reboot' do
+  minute  '@reboot'
+  hour    ''
+  day     ''
+  month   ''
+  weekday ''
+  command "/bin/bash -l -c 'cd #{node[:openstudio_server][:server_path]} && RAILS_ENV=development script/delayed_job restart'"
+  user "root"
+end
 
 
 
