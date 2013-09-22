@@ -20,7 +20,7 @@ class DataPoint
 
   def download_datapoint_from_worker
     if !self.downloaded && status == 'completed'
-      puts "downloading #{self.id}"
+      logger.info "downloading #{self.id}"
 
       save_filename = nil
 
@@ -32,7 +32,7 @@ class DataPoint
 
           save_filename = "/mnt/openstudio/data_point_#{self.id}.zip"
 
-          puts "Trying to download /mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip to #{save_filename}"
+          logger.info "Trying to download /mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip to #{save_filename}"
           if !session.scp.download!("/mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip", save_filename)
             save_filename = nil
           end
@@ -46,9 +46,11 @@ class DataPoint
       end
 
       #now add the datapoint path to the database to get it via the server
-      self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
-      self.downloaded = true
-      self.save!
+      if !save_filename.nil?
+        self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
+        self.downloaded = true
+        self.save!
+      end
     end
   end
 
