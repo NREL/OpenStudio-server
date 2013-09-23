@@ -30,3 +30,11 @@ cd /data/launch-instance
 ./configure_vagrant_worker.sh
 ```
 
+## Logging Information
+
+- Rserve - /var/log/Rserve.log (print messages in R commands)
+- delayed_jobs - /var/www/rails/openstudio/log/delayed_jobs.log
+- apache 
+  + /var/log/apache2/error.log (http errors like malformed urls)
+  + /var/log/apache2/access.log (ip address, client)
+- rails - /var/www/rails/openstudio/log/development.log (rails stack)
