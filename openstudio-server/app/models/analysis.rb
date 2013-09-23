@@ -202,7 +202,6 @@ class Analysis
     end
   end
 
-
   def stop_analysis
     logger.info("stopping analysis")
     self.run_flag = false
