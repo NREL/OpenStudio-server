@@ -1,10 +1,5 @@
 <p id="notice"><%= notice %></p>
 
-<h1> list of problems for this project</h1>
-<% @analysis.problems.each do |problem| %>
-<%= link_to problem.name, problem_path(problem) %> <br>
-<% end %>
-
 <h1> list of datapoints for this analysis </h1>
 <table border="1">
   <tr>
@@ -23,7 +18,4 @@
 <%= link_to "seed zip", @analysis.seed_zip.url(:original, false) unless @analysis.seed_zip.url.nil? %> </br>
 
 <h1> analysis status </h1>
-<%= @analysis.status %>
-
-
-<%= link_to 'Back', analysis_path %>
+<%= @analysis.status %></br>

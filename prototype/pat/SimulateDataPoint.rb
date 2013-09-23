@@ -56,20 +56,11 @@ puts "RunType is #{runType}"
 if (runType == "Local")
   require "#{File.dirname(__FILE__)}/CommunicateResults_Local.rb"
 else
-  mongoid_path_prefix = '/mnt/openstudio/rails-models/'
+  mongoid_path_prefix = '/mnt/openstudio/rails-models'
   require 'delayed_job_mongoid'
   require "#{File.dirname(__FILE__)}/CommunicateResults_Mongo.rb"
-  require mongoid_path_prefix + 'algorithm'
-  require mongoid_path_prefix + 'analysis'
-  require mongoid_path_prefix + 'data_point'
-  require mongoid_path_prefix + 'measure'
-  require mongoid_path_prefix + 'problem'
-  require mongoid_path_prefix + 'project'
-  require mongoid_path_prefix + 'seed'
-  require mongoid_path_prefix + 'variable'
-  require mongoid_path_prefix + 'workflow_step'
-  require mongoid_path_prefix + 'inflections'
-  Mongoid.load!(mongoid_path_prefix + "mongoid.yml", :development)
+  Dir["#{mongoid_path_prefix}/*.rb"].each {|f| require f }
+  Mongoid.load!(mongoid_path_prefix + "/mongoid.yml", :development)
 end
 
 directory = OpenStudio::Path.new(options[:directory])

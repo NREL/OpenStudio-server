@@ -66,11 +66,7 @@ class Analysis
     copy_data_to_workers()
   end
 
-  def start_r_and_run_sample
-    # TODO: double check if the anlaysis is running, if so, then don't run
-
-    # determine which problem to run
-
+  def start
     # add into delayed job
     require 'rserve/simpler'
     require 'uuid'
@@ -179,7 +175,33 @@ class Analysis
     self.status = 'completed'
     self.save!
   end
-  handle_asynchronously :start_r_and_run_sample
+  handle_asynchronously :start, :queue => 'analysis'
+
+  def run_r_analysis(no_delay = false)
+    # check if there is already an analysis in the queue
+    dj = Delayed::Job.where(queue: 'analysis').first
+
+    if !dj.nil? || self.status == "queued" || self.status == "started"
+      logger.info("analysis is already queued with #{dj}")
+      return [false, "An analysis is already queued"]
+    else
+      logger.info("Initializing workers in database")
+      self.initialize_workers
+
+      logger.info("queuing up analysis #{@analysis}")
+      self.status = 'queued'
+      self.save!
+
+      if !no_delay
+        self.start
+      else
+        self.start_without_delay
+      end
+
+      return [true]
+    end
+  end
+
 
   def stop_analysis
     logger.info("stopping analysis")
@@ -203,11 +225,6 @@ class Analysis
       record.destroy
     end
 
-    logger.info("Found #{self.problems.size} records")
-    self.problems.each do |record|
-      logger.info("removing #{record.id}")
-      record.destroy
-    end
   end
 
   private
