@@ -1,2 +1,0 @@
-class ApiController < ApplicationController
-end

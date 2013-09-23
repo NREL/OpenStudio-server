@@ -18,7 +18,7 @@ class Analysis
 
   has_many :data_points
   has_many :algorithms
-  has_many :problems
+  #has_many :problems
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",

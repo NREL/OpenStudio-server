@@ -21,8 +21,6 @@ web_app "openstudio-server" do
   rails_env "development"
 end
 
-# restart apache?
-
 # restart (or start) delayed_job
 bash "restart delayed job" do
   code <<-EOH
@@ -34,8 +32,8 @@ end
 
 
 # make sure that the cron has a reboot task for delayed job .
-# Note: there seems to be a bug such that this isn't called idempotently
-cron_d 'start-delayed-job-on-reboot' do
+# Note: there seems to be a bug such that this isn't called idempotently and creates a new entry everytime
+cron 'start-delayed-job-on-reboot' do
   minute  '@reboot'
   hour    ''
   day     ''

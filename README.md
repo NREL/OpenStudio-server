@@ -149,6 +149,13 @@ sudo passwd -u ubuntu
 cat /dev/null > ~/.ssh/authorized_keys
 ```
 
+  + Verify that there is only one cron job for delayed jobs in the root user
+
+```sh
+sudo -i
+crontab -l
+```
+
 - login to AWS and take a snapshot of the image
 
 
