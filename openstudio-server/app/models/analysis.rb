@@ -63,6 +63,16 @@ class Analysis
       end
     end
 
+    # go over all the worker nodes and verify that we can connect over passwordless ssh
+    #Timeout = 6.seconds
+    #SSH connect ()
+    #wn.valid = false
+    #wn.save!
+    # determine a threshold on number of invalid cores
+    # rerun expect script
+
+
+    # check if this fails
     copy_data_to_workers()
   end
 
