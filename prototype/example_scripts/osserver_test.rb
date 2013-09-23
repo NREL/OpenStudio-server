@@ -13,6 +13,13 @@ serverFileName = File.dirname(__FILE__) + "/../../vagrant/server"
 workerFileName = File.dirname(__FILE__) + "/../../vagrant/worker"
 patDirName = File.dirname(__FILE__) + "/../pat/PATTest/"
 
+# if ARGV[0] is path to a directory containing osp we will use that
+doExport = true
+if not ARGV[0].nil?
+  patDirName = ARGV[0]
+  doExport = false
+end
+
 # delete old downloads
 Dir.glob('./datapoint_*.zip').each do |p|
   File.delete(p)
@@ -26,9 +33,6 @@ workerUrl = OpenStudio::Url.new("http://localhost:8081")
 
 # call vagrant halt on terminate to simulate longer boot timess
 haltOnStop = false
-
-# run the existing project or delete it and create new one
-runExisting = false
 
 def listProjects(server)
 
@@ -152,67 +156,50 @@ listProjects(server)
 # the analysis to run
 analysisUUID = nil
 
-if runExisting
-
-  # run the first analysis we find
-  server.projectUUIDs.each do |projectUUID|
-    analysisUUIDs = server.analysisUUIDs(projectUUID)
-    analysisUUID = analysisUUIDs[0]
-    break
-  end
-     
-else
-
-  # delete all projects on the server
-  server.projectUUIDs.each do |projectUUID|
-    puts "Deleting project #{projectUUID}"
-    success = server.deleteProject(projectUUID)
-    puts "  Success = #{success}"
-  end
-
-  # list projects on the server
-  listProjects(server)
-
-  # load project from disk
-  project = OpenStudio::AnalysisDriver::SimpleProject::open(OpenStudio::Path.new(patDirName)).get()
-  analysis = project.analysis
-  analysisUUID = analysis.uuid()
-
-  # post analysis
-  puts "Creating Project #{analysisUUID}"
-  success = server.createProject(analysisUUID)
+# delete all projects on the server
+server.projectUUIDs.each do |projectUUID|
+  puts "Deleting project #{projectUUID}"
+  success = server.deleteProject(projectUUID)
   puts "  Success = #{success}"
-
-  options = OpenStudio::Analysis::AnalysisSerializationOptions.new(OpenStudio::Path.new(patDirName))
-  analysisJSON = analysis.toJSON(options)
-
-  puts "Posting Analysis #{analysisUUID}"
-  success = server.postAnalysisJSON(analysisUUID, analysisJSON)
-  puts "  Success = #{success}"
-
-  File.open(patDirName + "analysisJSON.json", 'w') do |file|
-    file << analysisJSON
-  end
-
-  analysis.dataPoints().each do |dataPoint|
-    options = OpenStudio::Analysis::DataPointSerializationOptions.new(OpenStudio::Path.new(patDirName))
-    dataPointJSON = dataPoint.toJSON(options)
-    
-    puts "Posting DataPoint #{dataPoint.uuid()}"
-    success = server.postDataPointJSON(analysisUUID, dataPointJSON)
-    puts "  Success = #{success}"
-  end
-
-  analysisZipFile = project.zipFileForCloud()
-
-  puts "Uploading analysisZipFile #{analysisZipFile}"
-  success = server.uploadAnalysisFiles(analysisUUID, analysisZipFile)
-  puts "  Success = #{success}"
-
-  # list projects on the server
-  listProjects(server)
-
 end
+
+# list projects on the server
+listProjects(server)
+
+# load project from disk
+project = OpenStudio::AnalysisDriver::SimpleProject::open(OpenStudio::Path.new(patDirName)).get()
+analysis = project.analysis
+analysisUUID = analysis.uuid()
+
+# post analysis
+puts "Creating Project #{analysisUUID}"
+success = server.createProject(analysisUUID)
+puts "  Success = #{success}"
+
+options = OpenStudio::Analysis::AnalysisSerializationOptions.new(OpenStudio::Path.new(patDirName))
+analysisJSON = analysis.toJSON(options)
+
+puts "Posting Analysis #{analysisUUID}"
+success = server.postAnalysisJSON(analysisUUID, analysisJSON)
+puts "  Success = #{success}"
+
+analysis.dataPoints().each do |dataPoint|
+  options = OpenStudio::Analysis::DataPointSerializationOptions.new(OpenStudio::Path.new(patDirName))
+  dataPointJSON = dataPoint.toJSON(options)
+  
+  puts "Posting DataPoint #{dataPoint.uuid()}"
+  success = server.postDataPointJSON(analysisUUID, dataPointJSON)
+  puts "  Success = #{success}"
+end
+
+analysisZipFile = project.zipFileForCloud()
+
+puts "Uploading analysisZipFile #{analysisZipFile}"
+success = server.uploadAnalysisFiles(analysisUUID, analysisZipFile)
+puts "  Success = #{success}"
+
+# list projects on the server
+listProjects(server)
 
 # start the analysis
 puts "Starting analysis #{analysisUUID}"
@@ -288,11 +275,9 @@ completeDataPointUUIDs.each do |dataPointUUID|
   end
   
   path = OpenStudio::Path.new("./datapoint_#{dataPointUUID.to_s.gsub('}','').gsub('{','')}.zip")
-  if not File.exist?(path.to_s)
-    result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
-    if not result
-      puts "Failed to download dataPoint #{dataPointUUID}"
-    end
+  result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
+  if not result
+    puts "Failed to download dataPoint #{dataPointUUID}"
   end
 end
    

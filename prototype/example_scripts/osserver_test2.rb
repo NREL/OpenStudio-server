@@ -7,6 +7,13 @@ server = OpenStudio::OSServer.new(serverUrl)
 patDirName = File.dirname(__FILE__) + '/../pat/PATTest'
 patExportDirName = File.dirname(__FILE__) + '/../pat/PATTestExport'
 
+# if ARGV[0] is path to a directory containing osp we will use that
+doExport = true
+if not ARGV[0].nil?
+  patDirName = ARGV[0]
+  doExport = false
+end
+
 # delete old downloads
 Dir.glob('./datapoint_*.zip').each do |p|
   File.delete(p)
@@ -32,8 +39,10 @@ puts "  Success = #{success}"
 options = OpenStudio::Analysis::AnalysisSerializationOptions.new(OpenStudio::Path.new(patDirName))
 analysisJSON = analysis.toJSON(options)
 
-File.open(patExportDirName + "/analysis.json", 'w') do |file|
-  file.puts analysisJSON
+if doExport
+  File.open(patExportDirName + "/analysis.json", 'w') do |file|
+    file.puts analysisJSON
+  end
 end
 
 puts "Posting Analysis #{analysisUUID}"
@@ -44,8 +53,10 @@ analysis.dataPoints().each do |dataPoint|
   options = OpenStudio::Analysis::DataPointSerializationOptions.new(OpenStudio::Path.new(patDirName))
   dataPointJSON = dataPoint.toJSON(options)
   
-  File.open(patExportDirName + "/datapoint_#{dataPoint.uuid().to_s.gsub('}','').gsub('{','')}.json", 'w') do |f|
-    f.puts dataPointJSON
+  if doExport
+    File.open(patExportDirName + "/datapoint_#{dataPoint.uuid().to_s.gsub('}','').gsub('{','')}.json", 'w') do |f|
+      f.puts dataPointJSON
+    end
   end
   
   puts "Posting DataPoint #{dataPoint.uuid()}"
@@ -54,8 +65,9 @@ analysis.dataPoints().each do |dataPoint|
 end
 
 analysisZipFile = project.zipFileForCloud()
-
-FileUtils.copy_file("#{analysisZipFile}", patExportDirName + "/analysis.zip")
+if doExport
+  FileUtils.copy_file("#{analysisZipFile}", patExportDirName + "/analysis.zip")
+end
 
 puts "Uploading analysisZipFile #{analysisZipFile}"
 success = server.uploadAnalysisFiles(analysisUUID, analysisZipFile)
@@ -135,11 +147,9 @@ completeDataPointUUIDs.each do |dataPointUUID|
   end
   
   path = OpenStudio::Path.new("./datapoint_#{dataPointUUID.to_s.gsub('}','').gsub('{','')}.zip")
-  if not File.exist?(path.to_s)
-    result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
-    if not result
-      puts "Failed to download dataPoint #{dataPointUUID}"
-    end
+  result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
+  if not result
+    puts "Failed to download dataPoint #{dataPointUUID}"
   end
 end
 
