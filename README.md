@@ -147,6 +147,9 @@ sudo shutdown -r now
 ```sh
 sudo passwd -u ubuntu
 cat /dev/null > ~/.ssh/authorized_keys
+cat /dev/null > ~/.bash_history && history -c
+sudo -i
+cat /dev/null > ~/.bash_history && history -c
 ```
 
   + Verify that there is only one cron job for delayed jobs in the root user
