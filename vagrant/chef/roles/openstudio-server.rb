@@ -13,7 +13,6 @@ run_list([
              "recipe[openstudio_server::bundle]",   #install the bundle first to get rails for apache passenger
              "role[passenger_apache]",
              "recipe[openstudio_server]",
-
          ])
 
 

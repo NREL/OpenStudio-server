@@ -9,5 +9,5 @@ class Variable
 
   field :os_data, :type => Hash
 
-  belongs_to :problem
+ # belongs_to :problem
 end

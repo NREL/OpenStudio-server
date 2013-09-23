@@ -17,5 +17,4 @@
 //= require bootstrap_popover
 //= require bootstrap_modal
 //= require mustache
-//= require dj_mon
 
