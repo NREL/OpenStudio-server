@@ -100,26 +100,16 @@ class AnalysesController < ApplicationController
 
     result = {}
     if params[:analysis_action] == 'start'
-      logger.info("Initializing workers in database")
-      @analysis.initialize_workers
 
-      logger.info("queuing up analysis #{@analysis}")
       params[:without_delay] == 'true' ? no_delay = true : no_delay = false
 
-      if !no_delay
-        if @analysis.start_r_and_run_sample
-          result[:code] = 200
-          result[:analysis] = @analysis
-        else
-          result[:code] = 500
-        end
+      res = @analysis.run_r_analysis(no_delay)
+      if res[0]
+        result[:code] = 200
+        result[:analysis] = @analysis
       else
-        if @analysis.start_r_and_run_sample_without_delay
-          result[:code] = 200
-          result[:analysis] = @analysis
-        else
-          result[:code] = 500
-        end
+        result[:code] = 500
+        result[:error] = res[1]
       end
 
       respond_to do |format|
