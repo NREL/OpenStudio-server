@@ -7,12 +7,12 @@ require "json"
 
 # use the aws class that lives in the OpenStudio Repository now.  Make sure to update the PATH below to
 # whereever you OpenStudio checkout is (currently on the AWSProvider branch in OS)
-OS_PATH = "../../OpenStudio"
+OS_PATH = "C:/Projects/OpenStudio"
 
 # Global Options
 CREATE_SERVER=true
 CREATE_WORKER=true
-TEST_SSH=false
+TEST_SSH=true
 
 # read in the config.yml file to get the secret/private key
 config = AwsConfig.new()
@@ -21,7 +21,7 @@ config = AwsConfig.new()
 if CREATE_SERVER
   instance_data = {instance_type: "m1.medium" }
   instance_string = instance_data.to_json.gsub("\"", "\\\\\"")
-
+  
   start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
   server_data_str = `#{start_string}`
   puts server_data_str
@@ -51,7 +51,7 @@ if CREATE_WORKER
   server_json = JSON.parse(File.read("server_data.json"), :symbolize_names => true)
 
   # How many instances?
-  server_json[:instance_type] = "c1.xlarge"
+  server_json[:instance_type] = "cc2.8xlarge"
   server_json[:num] = 2
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
 
