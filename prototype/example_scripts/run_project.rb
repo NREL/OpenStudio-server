@@ -3,7 +3,7 @@ require 'openstudio'
 project_dir = File.dirname(__FILE__) + '/../pat/PATTest'
 
 # do we want to download detailed results
-getDetailedResults = false
+getDetailedResults = true
 
 # call vagrant halt on terminate to simulate longer boot timess
 haltOnStop = false
