@@ -92,16 +92,17 @@ Vagrant.configure("2") do |config|
       end
 
       aws.security_groups = ["default"]
-      aws.instance_type = "m1.small"
-      #aws.instance_type = "m1.xlarge"
-      aws.ami = "ami-d0f89fb9"
+      #aws.instance_type = "cc2.8xlarge"
+      aws.instance_type = "m2.xlarge"
+      aws.ami = "ami-d0f89fb9"   #non-cluster AMI
+      #aws.ami = "ami-55b1ff3c"    #cluster AMI
 
       override.ssh.username = "ubuntu"
 
       aws.tags = {
-          'Name' => 'OpenStudio-Server',
+          'Name' => 'OpenStudio-Server-1.0.6',
           'NodeType' => 'Server',
-          'OpenStudio Version' => '1.0.5'
+          'OpenStudio Version' => '1.0.6'
       }
     rescue LoadError
       warn "Unable to configure AWS provider."
