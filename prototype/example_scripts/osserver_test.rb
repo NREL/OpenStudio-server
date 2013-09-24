@@ -176,7 +176,7 @@ puts "Creating Project #{analysisUUID}"
 success = server.createProject(analysisUUID)
 puts "  Success = #{success}"
 
-options = OpenStudio::Analysis::AnalysisSerializationOptions.new(OpenStudio::Path.new(patDirName))
+options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project.projectDir)
 analysisJSON = analysis.toJSON(options)
 
 puts "Posting Analysis #{analysisUUID}"
