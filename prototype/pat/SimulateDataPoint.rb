@@ -90,6 +90,11 @@ communicateStarted(id)
 
 begin
 
+  if File.exist?(directory.to_s)
+    puts "Deleting directory #{directory.to_s}"
+    FileUtils.rm_rf(directory.to_s)
+  end
+
   puts "Making directory #{directory.to_s}"
   
   # create data point directory
