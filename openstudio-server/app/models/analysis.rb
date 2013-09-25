@@ -212,7 +212,9 @@ class Analysis
   handle_asynchronously :start, :queue => 'analysis'
 
   def run_r_analysis(no_delay = false)
-    # check if there is already an analysis in the queue
+    # check if there is already an analysis in the queue (this needs to move to the analysis class)
+    # there is no reason why more than one analyses can be queued at the same time.
+
     dj = Delayed::Job.where(queue: 'analysis').first
 
     if !dj.nil? || self.status == "queued" || self.status == "started"

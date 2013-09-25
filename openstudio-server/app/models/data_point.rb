@@ -12,11 +12,16 @@ class DataPoint
   field :zip_file_name, :type => String
   field :status, :type => String # enum of queued, started, completed
   field :output
+  field :results
 
   belongs_to :analysis
 
-  #after_save :download_datapoint_from_worker
+  def save_results_from_openstudio_json(json)
+    # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
+    # open structure define in the JSON
 
+
+  end
 
   def download_datapoint_from_worker
     if !self.downloaded && status == 'completed'
@@ -30,15 +35,16 @@ class DataPoint
         Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
           #Rails.logger.info(self.inspect)
 
+          remote_filename = "/mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
           save_filename = "/mnt/openstudio/data_point_#{self.id}.zip"
 
-          logger.info "Trying to download /mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip to #{save_filename}"
-          if !session.scp.download!("/mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip", save_filename)
+          logger.info "Trying to download #{remote_filename} to #{save_filename}"
+          if !session.scp.download!(remote_filename, save_filename)
             save_filename = nil
           end
 
-          #TODO add a delete method for the results
-          #session.exec!( "cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}" ) do |channel, stream, data|
+          #TODO test the deletion of the zip file
+          #session.exec!( "cd /mnt/openstudio && rm -f #{remote_filename}" ) do |channel, stream, data|
           #  logger.info(data)
           #end
           #session.loop
