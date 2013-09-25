@@ -83,10 +83,11 @@ class AnalysesController < ApplicationController
   # DELETE /analyses/1.json
   def destroy
     @analysis = Analysis.find(params[:id])
+    project_id = @analysis.project
     @analysis.destroy
 
     respond_to do |format|
-      format.html { redirect_to analyses_url }
+      format.html { redirect_to project_path(project_id) }
       format.json { head :no_content }
     end
   end
