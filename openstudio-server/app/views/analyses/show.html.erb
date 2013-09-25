@@ -1,15 +1,18 @@
 <p id="notice"><%= notice %></p>
 
 <h1> list of datapoints for this analysis </h1>
-<table border="1">
+<table class="table table-striped">
   <tr>
     <th>Name</th>
     <th>Status</th>
+    <th>EUI</th>
   </tr>
   <% @analysis.data_points.order_by(:name.asc).each do |dp| %>
       <tr>
-        <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
+        <td> <%= link_to "data point: #{dp.name}", data_point_path(dp, :format => :json) %> </td>
         <td> <%= dp.status %></td>
+        <td> <%= dp.output['data_point']['output_attributes'][0]['value'] unless dp.output.nil? %> </td>
+
       </tr>
   <% end %>
 </table>
