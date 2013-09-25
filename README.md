@@ -115,6 +115,7 @@ vagrant ssh
 
 ```sh
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
+echo StrictHostKeyChecking no > .ssh/config
 sudo service ssh restart
 sudo sed -i 's/vagrant/ubuntu/g' /etc/init.d/Rserved
 sudo service Rserved restart
@@ -134,6 +135,7 @@ sudo shutdown -r now
 
 ```sh
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
+echo StrictHostKeyChecking no > .ssh/config
 sudo service ssh restart
 rm -f /data/launch-instance/config.yml
 sudo apt-get upgrade -y

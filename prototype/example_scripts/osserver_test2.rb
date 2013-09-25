@@ -36,7 +36,7 @@ puts "Creating Project #{projectUUID}"
 success = server.createProject(projectUUID)
 puts "  Success = #{success}"
 
-options = OpenStudio::Analysis::AnalysisSerializationOptions.new(OpenStudio::Path.new(patDirName))
+options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project.projectDir)
 analysisJSON = analysis.toJSON(options)
 
 if doExport
