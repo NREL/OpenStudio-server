@@ -24,12 +24,12 @@ body {
 h1 {
   font-family: 'PT Sans Caption', sans-serif;
   color: #0079c2;
-  font-size: 39px;
+  font-size: 32px;
   font-weight: normal;
 }
 h2{
   color:#333;
-  font-size:28px;
+  font-size:26px;
   font-weight:bold;
   margin:0;
   padding: 10px 0px;
@@ -56,7 +56,7 @@ a.link, a.visited {
   font-size: 15px;
 }
 
-a:hover {
+a.hover {
   color: #C60;
 }
 
