@@ -1,21 +1,51 @@
 <p id="notice"><%= notice %></p>
 
-<h1> list of datapoints for this analysis </h1>
-<table border="1">
+<h1>Analysis Status</h1>
+<table class="table table-striped">
+  <tr>
+    <td><%= @analysis.status %></br></td>
+  </tr>
+</table>
+
+<h1>Data Points</h1>
+<table class="table table-striped">
   <tr>
     <th>Name</th>
     <th>Status</th>
+    <th>EUI</th>
+    <th>View</th>
+    <th>Action</th>
+
   </tr>
   <% @analysis.data_points.order_by(:name.asc).each do |dp| %>
       <tr>
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
+        <td> <%= dp.output['data_point']['output_attributes'][0]['value'] unless (
+        dp.output.nil? || dp.output['data_point'].nil? || dp.output['data_point']['output_attributes'].nil? ||
+                dp.output['data_point']['output_attributes'][0]['value'].nil?) %> </td>
+        <td><%= link_to 'HTML', data_point_path(dp) %>
+          | <%= link_to 'JSON', data_point_path(dp, :format => :json) %>
+          | <%= link_to 'Zip File', download_data_point_path(dp) %></td>
+        <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+
       </tr>
   <% end %>
 </table>
 
-<h1> uploaded zip file </h1>
-<%= link_to "seed zip", @analysis.seed_zip.url(:original, false) unless @analysis.seed_zip.url.nil? %> </br>
+<h1>Analysis Zip File</h1>
+<table class="table table-striped">
+  <tr>
+    <% if @analysis.seed_zip.nil? %>
+        <td>No Zip File</td>
+    <% else %>
+        <td><%= link_to @analysis.seed_zip_file_name, @analysis.seed_zip.url(:original, false) %></td>
+    <% end %>
 
-<h1> analysis status </h1>
-<%= @analysis.status %></br>
+  </tr>
+</table>
+
+<%= link_to 'Back', project_path(@analysis.project) %>
+
+
+

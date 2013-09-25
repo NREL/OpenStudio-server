@@ -12,6 +12,7 @@ class Analysis
   field :display_name, :type => String
   field :description, :type => String
   field :run_flag, :type => Boolean
+  #field :delayed_job_id  #enable this once we break up the run class
   field :status, :type => String # enum on the status of the analysis (queued, started, completed)
 
   belongs_to :project
@@ -165,15 +166,22 @@ class Analysis
 
           y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
           #y <- "sleep 1; echo hello"
-          z <- system(y,intern=TRUE)
+            z <- system(y,intern=TRUE)
           j <- length(z)
           z
         }
 
         sfExport("f")
+
+        if (nrow(dps) == 1) {
+          print("not sure what to do with only one datapoint so adding an NA")
+          dps <- rbind(dps, c(NA))
+        }
+
         print(dps)
 
         results <- sfLapply(dps[,1], f)
+
         sfStop()
       }
     end
@@ -233,6 +241,9 @@ class Analysis
       logger.info("removing #{record.id}")
       record.destroy
     end
+
+    # delete any delayed jobs items
+    Delayed::Job.delete_all #(todo: send in the delayed_job_id)
 
   end
 
