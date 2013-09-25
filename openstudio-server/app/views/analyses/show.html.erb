@@ -36,10 +36,16 @@
 <h1>Analysis Zip File</h1>
 <table class="table table-striped">
   <tr>
-    <td><%= link_to @analysis.seed_zip_file_name, @analysis.seed_zip.url(:original, false) unless @analysis.seed_zip.url.nil? %></td>
+    <% if @analysis.seed_zip.nil? %>
+        <td>No Zip File</td>
+    <% else %>
+        <td><%= link_to @analysis.seed_zip_file_name, @analysis.seed_zip.url(:original, false) %></td>
+    <% end %>
+
   </tr>
 </table>
 
+<%= link_to 'Back', project_path(@analysis.project) %>
 
 
 
