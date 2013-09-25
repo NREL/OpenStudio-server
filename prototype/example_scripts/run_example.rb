@@ -135,7 +135,7 @@ if !analysis_id.nil?
       raise "could not create new datapoint #{resp.inspect}"
     end
 
-    break if d_n >= 1
+    #break if d_n >= 1
   end
 
 
