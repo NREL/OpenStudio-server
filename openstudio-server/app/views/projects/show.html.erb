@@ -1,13 +1,9 @@
 <p id="notice"><%= notice %></p>
 
-<%= @project.inspect %>
-
 <h1> list of analyses for this project</h1>
 <% @project.analyses.each do |analysis| %>
     <%= link_to analysis.name, analysis_path(analysis) %> <br>
 <% end %>
 <br/>
-
-
 
 <%= link_to 'Back', projects_path %>
