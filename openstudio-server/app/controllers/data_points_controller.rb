@@ -82,10 +82,11 @@ class DataPointsController < ApplicationController
   # DELETE /data_points/1.json
   def destroy
     @data_point = DataPoint.find(params[:id])
+    analysis_id = @data_point.analysis
     @data_point.destroy
 
     respond_to do |format|
-      format.html { redirect_to data_points_url }
+      format.html { redirect_to analysis_path(analysis_id) }
       format.json { head :no_content }
     end
   end

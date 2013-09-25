@@ -115,7 +115,9 @@ end
 if !analysis_id.nil?
   datapoints = Dir.glob("../pat/analysis*/data_point*/data_point_in.json")
 
+  d_n = 0
   datapoints.each do |dp|
+    d_n += 1
     puts "reading in datapoint json: #{dp}"
     dp_hash = JSON.parse(File.open(dp).read, :symbolize_names => true)
 
@@ -132,7 +134,11 @@ if !analysis_id.nil?
     else
       raise "could not create new datapoint #{resp.inspect}"
     end
+
+    #break if d_n >= 1
   end
+
+
 end
 
 # run the analysis
