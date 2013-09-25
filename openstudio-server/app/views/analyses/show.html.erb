@@ -11,7 +11,9 @@
       <tr>
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp, :format => :json) %> </td>
         <td> <%= dp.status %></td>
-        <td> <%= dp.output['data_point']['output_attributes'][0]['value'] unless dp.output.nil? %> </td>
+        <td> <%= dp.output['data_point']['output_attributes'][0]['value'] unless (
+        dp.output.nil? || dp.output['data_point'].nil? || dp.output['data_point']['output_attributes'].nil? ||
+                dp.output['data_point']['output_attributes'][0]['value'].nil?) %> </td>
 
       </tr>
   <% end %>
