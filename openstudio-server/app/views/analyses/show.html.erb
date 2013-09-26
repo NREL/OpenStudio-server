@@ -8,15 +8,24 @@
 </table>
 
 <h1>Data Points</h1>
-<table class="table table-striped">
+<script>
+    $(document).ready(function () {
+                $("#datapointtable").tablesorter();
+            }
+    );
+
+</script>
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
   <tr>
     <th>Name</th>
     <th>Status</th>
     <th>EUI</th>
     <th>View</th>
     <th>Action</th>
-
   </tr>
+  </thead>
+  <tbody>
   <% @analysis.data_points.order_by(:name.asc).each do |dp| %>
       <tr>
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
@@ -31,6 +40,7 @@
 
       </tr>
   <% end %>
+  </tbody>
 </table>
 
 <h1>Analysis Zip File</h1>

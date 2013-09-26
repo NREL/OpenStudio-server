@@ -37,7 +37,7 @@ class Analysis
 
     ip_file = "/home/ubuntu/ip_addresses"
     if !File.exists?(ip_file)
-      ip_file = "/data/launch-instance/ip_addresses_vagrant"   # somehow check if this is a vagrant box
+      ip_file = "/data/launch-instance/ip_addresses_vagrant" # somehow check if this is a vagrant box
     end
 
     ips = File.read(ip_file).split("\n")
@@ -97,6 +97,7 @@ class Analysis
     # add into delayed job
     require 'rserve/simpler'
     require 'uuid'
+    require 'childprocess'
 
     #create an instance for R
 
@@ -167,6 +168,17 @@ class Analysis
     end
     logger.info(data_points_hash)
 
+    # Before kicking off the Analysis, make sure to setup the downloading of the files child process
+    process = ChildProcess.build("/usr/local/rbenv/shims/bundle","exec","rake","datapoints:download[#{self.id}]")
+    process.io.stdout = process.io.stderr = Tempfile.new("download-output.log")
+    # set the child's working directory
+    process.cwd = Rails.root
+
+    logger.info(process.inspect)
+
+    # start the process
+    process.start
+
     @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
       %Q{
         sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
@@ -186,7 +198,6 @@ class Analysis
           j <- length(z)
           z
         }
-
         sfExport("f")
 
         if (nrow(dps) == 1) {
@@ -205,14 +216,21 @@ class Analysis
     #self.r_log = @r.converse(messages)
 
     # check if there are any other datapoints that need downloaded?
+    process.stop
+
+    # Do one last check if there are any models to download
     download_data_from_workers
+
     self.status = 'completed'
     self.save!
   end
+
   handle_asynchronously :start, :queue => 'analysis'
 
   def run_r_analysis(no_delay = false)
-    # check if there is already an analysis in the queue
+    # check if there is already an analysis in the queue (this needs to move to the analysis class)
+    # there is no reason why more than one analyses can be queued at the same time.
+
     dj = Delayed::Job.where(queue: 'analysis').first
 
     if !dj.nil? || self.status == "queued" || self.status == "started"
@@ -241,6 +259,13 @@ class Analysis
     self.run_flag = false
     self.status = 'completed'
     self.save!
+  end
+
+  # copy back the results to the master node if they are finished
+  def download_data_from_workers
+    self.data_points.and({downloaded: false}, {status: 'completed'}).each do |dp|
+      dp.download_datapoint_from_worker
+    end
   end
 
   protected
@@ -281,13 +306,6 @@ class Analysis
         session.loop
 
       end
-    end
-  end
-
-  # copy back the results to the master node if they are finished
-  def download_data_from_workers
-    self.data_points.and({downloaded: false}, {status: 'completed'}).each do |dp|
-      dp.download_datapoint_from_worker
     end
   end
 

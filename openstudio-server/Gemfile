@@ -23,8 +23,6 @@ gem 'libv8'
 gem 'execjs'
 gem 'therubyracer'
 
-gem 'haml'
-
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
@@ -47,6 +45,7 @@ end
 # job queuing
 gem 'delayed_job_mongoid'
 gem 'daemons'
+gem 'childprocess'
 
 
 

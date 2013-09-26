@@ -32,6 +32,8 @@ GEM
     bootstrap-sass (2.3.2.2)
       sass (~> 3.2)
     builder (3.0.4)
+    childprocess (0.3.9)
+      ffi (~> 1.0, >= 1.0.11)
     climate_control (0.0.3)
       activesupport (>= 3.0)
     cocaine (0.5.1)
@@ -58,8 +60,7 @@ GEM
     factory_girl_rails (4.2.1)
       factory_girl (~> 4.2.0)
       railties (>= 3.0.0)
-    haml (4.0.3)
-      tilt
+    ffi (1.9.0)
     hike (1.2.3)
     i18n (0.6.1)
     journey (1.0.4)
@@ -175,12 +176,12 @@ PLATFORMS
 
 DEPENDENCIES
   bootstrap-sass (~> 2.3.2.2)
+  childprocess
   coffee-rails (~> 3.2.1)
   daemons
   delayed_job_mongoid
   execjs
   factory_girl_rails
-  haml
   jquery-rails
   json
   libv8
