@@ -37,11 +37,17 @@ class DataPoint
 
   def download_datapoint_from_worker
     if self.download_status == 'na' && status == 'completed'
-      self.download_status = 'downloading'
-      self.save!
+      #self.download_status = 'downloading'
+      #self.save!
+
       # This is becoming more of a post process that is being triggered by the "downloading" of the
       # file.  If we aren't going to download the file, then the child process can have a flag that it
       # checks similar to the downloaded flag.
+
+      # parse results
+      logger.info "post-processing the JSON data that was pushed into the database by the worker"
+      self.save_results_from_openstudio_json
+
       logger.info "downloading #{self.id}"
       save_filename = nil
 
@@ -66,10 +72,6 @@ class DataPoint
           #session.loop
         end
       end
-
-      # parse results
-      logger.info "post-processing the JSON data that was pushed into the database by the worker"
-      self.save_results_from_openstudio_json
 
       #now add the datapoint path to the database to get it via the server
       if !save_filename.nil?
