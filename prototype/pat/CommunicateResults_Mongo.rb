@@ -76,7 +76,22 @@ def communicateResults(data_point, directory)
   # let mongo know that the data point is complete
   dp = DataPoint.find_or_create_by(uuid: id)
   data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(directory.parent_path)
-  dp.output = JSON.parse(data_point.toJSON(data_point_options))
+  json_output = JSON.parse(data_point.toJSON(data_point_options), :symbolize_names => true)
+  dp.output = json_output
+
+  # parse the results flatter and persist into the results section
+  #if !json_output.output.nil? || !json_output.output['data_point'].nil? || !json_output.output['data_point']['output_attributes'].nil?
+  #  result_hash = {}
+  #  json_output.output['data_point']['output_attributes'].each do |output_hash|
+  #    unless output_hash['value_type'] == "AttributeVector"
+  #      output_hash.has_key?('display_name') ? hash_key = output_hash['display_name'].parameterize.underscore :
+  #          hash_key = output_hash['name'].parameterize.underscore
+  #      logger.info("hash name will be: #{hash_key} with value: #{output_hash['value']}")
+  #      result_hash[hash_key.to_sym] = output_hash['value']
+  #    end
+  #  end
+  #  dp.results = result_hash
+  #end
   dp.status = "completed"
   dp.save!
 end
