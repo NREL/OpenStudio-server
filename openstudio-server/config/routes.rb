@@ -17,6 +17,7 @@ OpenstudioServer::Application.routes.draw do
       #end
       resources :data_points, shallow: true  do
         member do
+          get :show_full
           get :download
         end
       end

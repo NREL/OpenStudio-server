@@ -34,7 +34,8 @@
         dp.output.nil? || dp.output['data_point'].nil? || dp.output['data_point']['output_attributes'].nil? ||
                 dp.output['data_point']['output_attributes'][0]['value'].nil?) %> </td>
         <td><%= link_to 'HTML', data_point_path(dp) %>
-          | <%= link_to 'JSON', data_point_path(dp, :format => :json) %>
+          | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
+          | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
           | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
         <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
 
