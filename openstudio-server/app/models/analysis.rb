@@ -65,7 +65,7 @@ class Analysis
         logger.info("Worker node #{wn.inspect}")
       end
     end
-
+    
     # go over all the worker nodes and verify that we can connect over passwordless ssh
     #Timeout = 6.seconds
     #SSH connect ()
@@ -73,7 +73,23 @@ class Analysis
     #wn.save!
     # determine a threshold on number of invalid cores
     # rerun expect script
-
+    
+    require 'timeout'
+    wn = WorkerNode.all
+    wn.each do |wnode|
+      begin
+       status = Timeout::timeout(5) do
+         ssh_command = "ssh #{wnode.user}@#{wnode.ip_address}"
+         responce = `#{ssh_command}`
+         logger.info("Worker node #{responce}")
+         wnode.valid = true
+         wnode.save!
+       end
+      rescue Timeout::error
+        wnode.valid = false
+        wnode.save!
+      end
+    end
 
     # check if this fails
     copy_data_to_workers()

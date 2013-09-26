@@ -44,7 +44,7 @@ class Analysis::BatchRun < Struct.new(:options)
         print(getwd())
 
         #test the query of getting the run_flag
-        mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
+        mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
         flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
         print(flag)
 
@@ -63,11 +63,13 @@ class Analysis::BatchRun < Struct.new(:options)
 
     @r.command(ips: WorkerNode.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
+        print(ips)
+
         sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
         sfLibrary(RMongo)
 
         f <- function(x){
-          mongo <- mongoDbConnect("openstudio_server_development", host="#{master_ip}", port=27017)
+          mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
           flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
           if (flag["run_flag"] == "false" ){
             stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")

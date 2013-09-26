@@ -18,7 +18,7 @@ puts "starting cluster and running"
    master_ip = read.table("master_ip_address", as.is = 1)
    ip <- character(length=nrow(master_ip))
    ip[1] = master_ip[1,]
-   mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
+   mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
    output <- dbRemoveQuery(mongo,"control","{_id:1}")
    if (output != "ok"){stop(options("show.error.messages"="TRUE"),"cannot remove control flag in Mongo")}
    input <- dbInsertDocument(mongo,"control",'{"_id":1,"run":"TRUE"}')
@@ -49,7 +49,7 @@ puts @r.converse('flag["run"]')
   
      f <- function(x){ 
        #library(RMongo)
-       mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
+       mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
        flag <- dbGetQuery(mongo,"control",'{"_id":1}')
        if (flag["run"] == "FALSE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
        dbDisconnect(mongo)
