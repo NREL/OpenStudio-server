@@ -22,6 +22,15 @@ class DataPointsController < ApplicationController
     end
   end
 
+  def show_full
+    @data_point = DataPoint.find(params[:id])
+
+    respond_to do |format|
+      format.json { render json: @data_point }
+      #format.json { render json: { :data_point => @data_point.output, :metadata =>  @data_point[:os_metadata] } }
+    end
+  end
+
   # GET /data_points/new
   # GET /data_points/new.json
   def new

@@ -95,7 +95,7 @@ class Analysis::BatchRun < Struct.new(:options)
       }
     end
 
-    @analysis.log_r = @r.converse(results)
+    @analysis.log_r = @r.converse("results")
 
     # Kill the downloading of data files process
     process.stop
