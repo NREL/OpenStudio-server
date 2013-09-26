@@ -7,4 +7,5 @@ class WorkerNode
   field :user, :type => String
   field :password, :type => String
   field :cores, :type => Integer
+  field :valid, :type => Boolean, default: false
 end
