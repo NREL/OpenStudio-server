@@ -161,6 +161,22 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def download_status
+    @analysis = Analysis.find(params[:id])
+
+    dps = nil
+    if params[:downloads].nil?
+      dps = @analysis.data_points.where(download_status: 'completed')
+    else
+      dps = @analysis.data_points.where(download_status: params[:downloads])
+    end
+
+    respond_to do |format|
+      #  format.html # new.html.erb
+      format.json { render json: { :analysis => { status: @analysis.status}, data_points: dps.map{ |k| {:_id => k.id, :status => k.status, :download_status => k.download_status } } } }
+    end
+  end
+
   def upload
     @analysis = Analysis.find(params[:id])
 

@@ -37,8 +37,8 @@ class DataPoint
 
   def download_datapoint_from_worker
     if self.download_status == 'na' && status == 'completed'
-      #self.download_status = 'downloading'
-      #self.save!
+      self.download_status = 'started'
+      self.save!
 
       # This is becoming more of a post process that is being triggered by the "downloading" of the
       # file.  If we aren't going to download the file, then the child process can have a flag that it
@@ -76,7 +76,7 @@ class DataPoint
       #now add the datapoint path to the database to get it via the server
       if !save_filename.nil?
         self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
-        self.download_status = 'finished'
+        self.download_status = 'completed'
         self.save!
       end
     end
