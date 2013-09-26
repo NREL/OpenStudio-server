@@ -7,7 +7,7 @@ class WorkerNode
   field :user, :type => String
   field :password, :type => String
   field :cores, :type => Integer
-
+  field :valid, :type => Boolean, default: false
 
   # Return all the worker IP addresses as a hash in prep for writing to a dataframe
   def self.to_hash

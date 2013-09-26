@@ -15,7 +15,7 @@ puts "starting cluster and running"
 #set run flag to true
 @r.command() do
 %Q{
-   mongo <- mongoDbConnect("openstudio_server_development", host="192.168.33.10", port=27017)
+   mongo <- mongoDbConnect("os_dev", host="192.168.33.10", port=27017)
    output <- dbRemoveQuery(mongo,"control","{_id:1}")
    if (output != "ok"){stop("cannot remove control flag in Mongo")}
    input <- dbInsertDocument(mongo,"control",'{"_id":1,"run":"TRUE"}')
