@@ -147,7 +147,7 @@ sudo shutdown -r now
   + Remove authorized keys (this will prevent you from logging in again, do this last)
 
 ```sh
-sudo passwd -u ubuntu
+sudo usermod -U ubuntu
 cat /dev/null > ~/.ssh/authorized_keys
 cat /dev/null > ~/.bash_history && history -c
 sudo -i
