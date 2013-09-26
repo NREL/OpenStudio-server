@@ -23,6 +23,10 @@ class DataPoint
 
   end
 
+  def to_hash
+
+  end
+
   def download_datapoint_from_worker
     if !self.downloaded && status == 'completed'
       logger.info "downloading #{self.id}"
