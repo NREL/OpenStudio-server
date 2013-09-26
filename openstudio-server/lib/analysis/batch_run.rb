@@ -46,7 +46,7 @@ class Analysis::BatchRun < Struct.new(:options)
         #test the query of getting the run_flag
         mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
         flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
-        print(flag)
+        #print(flag)
 
         print(flag["run_flag"])
         if (flag["run_flag"] == "true"  ){
