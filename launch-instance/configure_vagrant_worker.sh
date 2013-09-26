@@ -3,7 +3,7 @@
 # This script is used to configure the vagrant boxes (workers) in order to test and run the examples
 
 # need to setup the hosts file
-sudo ./slave_script_vagrant.sh
+sudo cd /data/launch-instance && ./slave_script_vagrant.sh
 
 # make sure that the openstudio directory for simulations exists and is writable (first blow away)
 sudo rm -rf /mnt/openstudio
