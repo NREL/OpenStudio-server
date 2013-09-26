@@ -3,11 +3,11 @@
 # This script is used to configure the vagrant boxes in order to test and run the examples
 
 # setup the passwordless ssh
-./setup-ssh-keys-vagrant.expect
-./setup-ssh-worker-nodes.sh ip_addresses_vagrant
+cd /data/launch-instance && ./setup-ssh-keys-vagrant.expect
+cd /data/launch-instance && ./setup-ssh-worker-nodes.sh ip_addresses_vagrant
 
 # need to setup the hosts file
-sudo ./master_script.sh
+sudo /data/launch-instance/master_script.sh
 
 # make sure that the openstudio directory for simulations exists and is writable
 sudo mkdir -p /mnt/openstudio
