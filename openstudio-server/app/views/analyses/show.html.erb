@@ -30,9 +30,7 @@
       <tr>
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
-        <td> <%= dp.output['data_point']['output_attributes'][0]['value'] unless (
-        dp.output.nil? || dp.output['data_point'].nil? || dp.output['data_point']['output_attributes'].nil? ||
-                dp.output['data_point']['output_attributes'][0]['value'].nil?) %> </td>
+        <td> <%= dp.results['total_site_energy'] unless dp.results.nil? %> </td>
         <td><%= link_to 'HTML', data_point_path(dp) %>
           | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
           | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
