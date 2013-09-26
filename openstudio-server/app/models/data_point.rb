@@ -12,7 +12,7 @@ class DataPoint
   field :zip_file_name, :type => String
   field :status, :type => String # enum of queued, started, completed
   field :output
-  field :results
+  field :results, :type => Hash
 
   belongs_to :analysis
 
@@ -21,18 +21,17 @@ class DataPoint
     # open structure define in the JSON
 
     if !self.output.nil? || !self.output['data_point'].nil? || !self.output['data_point']['output_attributes'].nil?
+      self.results = {}
       self.output['data_point']['output_attributes'].each do |output_hash|
         logger.info(output_hash)
-
-        # This isn't worker right now
-        self.results = {}
-        if output_hash.has_key?('name')
-          hash_key = output_hash['name'].gsub(" ","").underscore
-          logger.info("hash name will be #{hash_key}")
-          self.results[hash_key.to_sym] = output_hash['value']
+        unless output_hash['value_type'] == "AttributeVector"
+          output_hash.has_key?('display_name') ? hash_key = output_hash['display_name'].parameterize.underscore :
+              hash_key = output_hash['name'].parameterize.underscore
+          logger.info("hash name will be: #{hash_key} with value: #{output_hash['value']}")
+          self["results"][hash_key.to_sym] = output_hash['value']
         end
-        self.save!
       end
+      self.save!
     end
   end
 

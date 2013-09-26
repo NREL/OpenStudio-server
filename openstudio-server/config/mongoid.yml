@@ -31,7 +31,7 @@ development:
   options:
     # Configuration for whether or not to allow access to fields that do
     # not have a field definition on the model. (default: true)
-    # allow_dynamic_fields: true
+    allow_dynamic_fields: true
 
     # Enable the identity map, needed for eager loading. (default: false)
     # identity_map_enabled: false
