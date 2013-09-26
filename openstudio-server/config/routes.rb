@@ -10,6 +10,7 @@ OpenstudioServer::Application.routes.draw do
         post :action
         post :upload
         get :status
+        get :download_status
       end
 
       #resources :problems, shallow: true do
