@@ -18,6 +18,9 @@ options = OpenStudio::AnalysisDriver::SimpleProjectOptions.new
 options.setLogLevel(-2) # debug
 project = OpenStudio::AnalysisDriver::SimpleProject::open(OpenStudio::Path.new(project_dir), options).get
 
+# DLM: this causes script to fail if client OS version > worker OS version
+project.updateModels
+
 # create and start the vagrant provider. assumes virtual box already running.
 settings = OpenStudio::VagrantSettings.new
 settings.setServerPath(OpenStudio::Path.new(File.dirname(__FILE__) + '/../../vagrant/server'))
