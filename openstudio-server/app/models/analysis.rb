@@ -12,8 +12,10 @@ class Analysis
   field :display_name, :type => String
   field :description, :type => String
   field :run_flag, :type => Boolean
-  field :delayed_job_id  #enable this once we break up the run class
+  field :delayed_job_id # ObjectId
   field :status, :type => String # enum on the status of the analysis (queued, started, completed)
+
+  field :log_r, :type => String
 
   belongs_to :project
 
@@ -77,12 +79,23 @@ class Analysis
     copy_data_to_workers()
   end
 
+
   def start(no_delay)
+    # get the data points that are going to be run
+    data_points_hash = {}
+    data_points_hash[:data_points] = []
+    self.data_points.all.each do |dp|
+      dp.status = 'queued'
+      dp.save!
+      data_points_hash[:data_points] << dp.uuid
+    end
+    Rails.logger.info(data_points_hash)
+
     if no_delay
-      abr = Analysis::BatchRun.new(self.id)
+      abr = Analysis::BatchRun.new(self.id, data_points_hash)
       abr.perform
     else
-      job = Delayed::Job.enqueue Analysis::BatchRun.new(self.id), :queue => 'analysis'
+      job = Delayed::Job.enqueue Analysis::BatchRun.new(self.id, data_points_hash), :queue => 'analysis'
       self.delayed_job_id = job.id
       self.save!
     end
@@ -163,7 +176,6 @@ class Analysis
           logger.info(data)
         end
         session.loop
-
       end
     end
   end

@@ -1,6 +1,11 @@
 class Analysis::BatchRun < Struct.new(:options)
-  def initialize(analysis_id)
+  def initialize(analysis_id, data_points)
     @analysis_id = analysis_id
+    @data_points = data_points
+  end
+
+  def get_worker_ips
+
   end
 
   def perform
@@ -30,21 +35,13 @@ class Analysis::BatchRun < Struct.new(:options)
     master_ip = MasterNode.first.ip_address
     Rails.logger.info("master ip: #{master_ip}")
 
-    # I think we can do this with mongoid at the moment... no reason to make this complicated until we have to send
-    # the data to the worker nodes
+    # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
+    # that the run flag is true.
     @r.command() do
       %Q{
         ip <- "#{master_ip}"
         print(ip)
         print(getwd())
-        #mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
-        #output <- dbRemoveQuery(mongo,"control","{_id:1}")
-        #if (output != "ok"){stop(options("show.error.messages"="TRUE"),"cannot remove control flag in Mongo")}
-        #input <- dbInsertDocument(mongo,"control",'{"_id":1,"run":"TRUE"}')
-        #if (input != "ok"){stop(options("show.error.messages"="TRUE"),"cannot insert control flag in Mongo")}
-        #flag <- dbGetQuery(mongo,"control",'{"_id":1}')
-        #if (flag["run"] != "TRUE" ){stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")}
-        #dbDisconnect(mongo)
 
         #test the query of getting the run_flag
         mongo <- mongoDbConnect("openstudio_server_development", host=ip, port=27017)
@@ -58,37 +55,13 @@ class Analysis::BatchRun < Struct.new(:options)
       }
     end
 
-    # get the worker ips
-    worker_ips_hash = {}
-    worker_ips_hash[:worker_ips] = []
-
-    WorkerNode.all.each do |wn|
-      (1..wn.cores).each { |i| worker_ips_hash[:worker_ips] << wn.ip_address }
-    end
-    Rails.logger.info("worker ip hash: #{worker_ips_hash}")
-
-    # update the status of all the datapoints and create a hash map
-    data_points_hash = {}
-    data_points_hash[:data_points] = []
-    @analysis.data_points.all.each do |dp|
-      dp.status = 'queued'
-      dp.save!
-      data_points_hash[:data_points] << dp.uuid
-    end
-    Rails.logger.info(data_points_hash)
-
     # Before kicking off the Analysis, make sure to setup the downloading of the files child process
     process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]")
     process.io.stdout = process.io.stderr = Tempfile.new("download-output.log")
-    # set the child's working directory
-    process.cwd = Rails.root
-
-    Rails.logger.info(process.inspect)
-
-    # start the process
+    process.cwd = Rails.root # set the child's working directory where the bundler will execute
     process.start
 
-    @r.command(ips: worker_ips_hash.to_dataframe, dps: data_points_hash.to_dataframe) do
+    @r.command(ips: WorkerNode.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
         sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
         sfLibrary(RMongo)
@@ -122,18 +95,20 @@ class Analysis::BatchRun < Struct.new(:options)
       }
     end
 
-    #@analysis.r_log = @r.converse(messages)
+    @analysis.log_r = @r.converse(results)
 
-    # check if there are any other datapoints that need downloaded?
+    # Kill the downloading of data files process
     process.stop
 
-    # Do one last check if there are any models to download
+    # Do one last check if there are any data points that were not downloaded
     @analysis.download_data_from_workers
 
     @analysis.status = 'completed'
     @analysis.save!
   end
 
+  # Since this is a delayed job, if it crashes it will typically try multiple times.
+  # Fix this to 1 retry for now.
   def max_attempts
     return 1
   end
