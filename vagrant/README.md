@@ -5,8 +5,7 @@
 - Log into 192.168.33.10 either via `vagrant ssh` or putty.
 
 ```sh
-cd /data/launch-instance
-./configure_vagrant_server.sh
+/data/launch-instance/configure_vagrant_server.sh
 ```
 
 - check that Rserve is running
@@ -26,8 +25,7 @@ sudo service Rserved start
 - Log into 192.168.33.11 either via `vagrant ssh` or putty.
 
 ```sh
-cd /data/launch-instance
-./configure_vagrant_worker.sh
+/data/launch-instance/configure_vagrant_worker.sh
 ```
 
 ## Logging Information
