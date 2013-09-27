@@ -97,7 +97,10 @@ while not isRunning
 
   completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
   puts "#{completeDataPointUUIDs.size} Complete DataPoints"    
-      
+  
+  downloadReadyDataPointUUIDs = server.downloadReadyDataPointUUIDs(analysisUUID)
+  puts "#{downloadReadyDataPointUUIDs.size} Download Ready DataPoints"
+
   puts
   
   OpenStudio::System::msleep(3000)
@@ -127,6 +130,9 @@ while not isComplete
 
   completeDataPointUUIDs = server.completeDataPointUUIDs(analysisUUID)
   puts "#{completeDataPointUUIDs.size} Complete DataPoints"
+  
+  downloadReadyDataPointUUIDs = server.downloadReadyDataPointUUIDs(analysisUUID)
+  puts "#{downloadReadyDataPointUUIDs.size} Download Ready DataPoints"
 
   puts
   
@@ -145,7 +151,13 @@ completeDataPointUUIDs.each do |dataPointUUID|
   if result.analysisObject.empty? or result.analysisObject.get.to_DataPoint.empty?
     puts "Can't reconstruct dataPoint #{dataPointUUID}"
   end
-  
+end
+
+downloadReadyDataPointUUIDs = server.downloadReadyDataPointUUIDs(analysisUUID)
+puts "  #{downloadReadyDataPointUUIDs.size} Download Ready DataPoints"
+
+# try to download results
+downloadReadyDataPointUUIDs.each do |dataPointUUID|
   path = OpenStudio::Path.new("./datapoint_#{dataPointUUID.to_s.gsub('}','').gsub('{','')}.zip")
   result = server.downloadDataPoint(analysisUUID, dataPointUUID, path)
   if not result
