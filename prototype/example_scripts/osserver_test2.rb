@@ -165,6 +165,6 @@ downloadReadyDataPointUUIDs.each do |dataPointUUID|
   end
 end
 
-puts "Stoping analysis #{analysisUUID}"
+puts "Stopping analysis #{analysisUUID}"
 success = server.stop(analysisUUID)
 puts "  Success = #{success}"
