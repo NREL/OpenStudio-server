@@ -49,8 +49,10 @@ provider.waitForWorkers
 
 puts "Worker Started"
 
+session = provider.session
+
 # delete all projects on the server
-server = OpenStudio::OSServer.new(settings.serverUrl)
+server = OpenStudio::OSServer.new(session.serverUrl.get)
 server.projectUUIDs.each do |projectUUID|
   puts "Deleting project #{projectUUID}"
   success = server.deleteProject(projectUUID)
