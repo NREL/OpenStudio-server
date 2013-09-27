@@ -4,8 +4,8 @@ require 'fileutils'
 
 serverUrl = OpenStudio::Url.new("http://localhost:8080")
 server = OpenStudio::OSServer.new(serverUrl)
-patDirName = File.dirname(__FILE__) + '/../pat/PATTest'
-patExportDirName = File.dirname(__FILE__) + '/../pat/PATTestExport'
+patDirName = File.dirname(__FILE__) + '/../pat/BigPATTest'
+patExportDirName = File.dirname(__FILE__) + '/../pat/BigPATTestExport'
 
 # if ARGV[0] is path to a directory containing osp we will use that
 doExport = true
@@ -24,6 +24,8 @@ server.projectUUIDs.each do |projectUUID|
   success = server.deleteProject(projectUUID)
   puts "  Success = #{success}"
 end
+
+puts "Loading #{patDirName}"
 
 # load project from disk
 project = OpenStudio::AnalysisDriver::SimpleProject::open(OpenStudio::Path.new(patDirName)).get()
@@ -68,7 +70,7 @@ analysisZipFile = project.zipFileForCloud()
 if doExport
   FileUtils.copy_file("#{analysisZipFile}", patExportDirName + "/analysis.zip")
 end
-
+exit
 puts "Uploading analysisZipFile #{analysisZipFile}"
 success = server.uploadAnalysisFiles(analysisUUID, analysisZipFile)
 puts "  Success = #{success}"
