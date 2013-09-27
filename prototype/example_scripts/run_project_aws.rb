@@ -89,7 +89,16 @@ puts "Server running = #{provider.serverRunning}"
 
 session = provider.session
 
-puts "serverUrl = #{session.serverUrl.get}"
+server = OpenStudio::OSServer.new(session.serverUrl.get)
+
+puts "Waiting for server = #{session.serverUrl.get}"
+
+while not server.available
+  puts "Waiting"
+  OpenStudio::System::msleep(3000)
+end
+
+puts "Server available"
 
 # delete all projects on the server
 server = OpenStudio::OSServer.new(session.serverUrl.get)

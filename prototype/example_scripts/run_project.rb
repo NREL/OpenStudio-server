@@ -37,13 +37,13 @@ success = provider.requestStartServer
 
 puts "Starting Server success = #{success}"
 
-success = provider.requestStartWorkers
-
-puts "Starting Worker success = #{success}"
-
 provider.waitForServer
 
 puts "Server Started"
+
+success = provider.requestStartWorkers
+
+puts "Starting Worker success = #{success}"
 
 provider.waitForWorkers
 
