@@ -66,7 +66,7 @@ analysis_id = nil
 if !project_id.nil?
 
 
-  formulation_file = "../pat/BigPATTestExport/analysis.json"
+  formulation_file = "../pat/analysis/formulation.json"
   formulation_json = JSON.parse(File.read(formulation_file), :symbolize_names => true)
 
   analysis_id = formulation_json[:analysis][:uuid]
@@ -96,7 +96,8 @@ end
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?
   puts "uploading seed zip file"
-  file = "../pat/BigPATTestExport/analysis.zip"
+  file = "../pat/analysis.zip"
+  #file = "../pat/PAT_0925_1336_DesignAlternatives.zip"
 
   if File.exist?(file)
     resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
@@ -113,7 +114,7 @@ end
 
 # add all the datapoints to the analysis
 if !analysis_id.nil?
-  datapoints = Dir.glob("../pat/BigPATTestExport/datapoint*.json")
+  datapoints = Dir.glob("../pat/analysis*/data_point*/data_point_in.json")
 
   d_n = 0
   datapoints.each do |dp|
