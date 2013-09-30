@@ -33,7 +33,7 @@ class Analysis
   #validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
 
   before_destroy :remove_dependencies
-
+   
   def initialize_workers
     # load in the master and worker information if it doesn't already exist
 
@@ -74,21 +74,27 @@ class Analysis
     # determine a threshold on number of invalid cores
     # rerun expect script
     
-    require 'timeout'
+    #check if RSA key was made, if not, redo passwordless ssh
+    sn = MasterNode
+    if !File.exists?("/home/#{sn.user}/.ssh/id_rsa")
+      `chmod 664 /home/#{sn.user}/ip_addresses`
+      `/home/#{sn.user}/setup-ssh-keys.sh`
+      `/home/#{sn.user}/setup-ssh-worker-nodes.sh #{ip_file}`
+    end
+    
     wn = WorkerNode.all
     wn.each do |wnode|
-      begin
-       status = Timeout::timeout(5) do
-         ssh_command = "ssh #{wnode.user}@#{wnode.ip_address}"
-         responce = `#{ssh_command}`
-         logger.info("Worker node #{responce}")
+      ssh_command = "./setup-ssh-worker-nodes-again.expect #{wnode.ip_address} #{wnode.user} #{wnode.user}"
+      responce = `#{ssh_command}`
+      resp = responce.split("|")
+      if resp[1] == "true"         
          wnode.valid = true
          wnode.save!
-       end
-      rescue Timeout::error
-        wnode.valid = false
-        wnode.save!
+      else
+         wnode.valid = false
+         wnode.save!
       end
+      #logger.info("Worker node #{responce}")
     end
 
     # check if this fails
