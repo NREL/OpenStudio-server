@@ -1,7 +1,7 @@
 require 'openstudio'
 
 OpenStudio::Logger::instance.standardOutLogger.enable
-OpenStudio::Logger::instance.standardOutLogger.setLogLevel(OpenStudio::Info)
+OpenStudio::Logger::instance.standardOutLogger.setLogLevel(OpenStudio::Debug)
 
 project_dir = File.dirname(__FILE__) + '/../pat/PATTest'
 
@@ -70,31 +70,26 @@ puts "validateCredentials = #{provider.validateCredentials}"
 puts "resourcesAvailableToStart = #{provider.resourcesAvailableToStart}"
 
 success = provider.requestStartServer
-
 puts "Starting Server success = #{success}"
-
-#success = provider.requestStartWorkers
-
-#puts "Starting Workers success = #{success}"
-
-# DLM: Alex this doesn't seem to work?
-success = provider.waitForServer(120000)
-
+success = provider.waitForServer
 puts "Server Started success = #{success}"
-puts "Server running = #{provider.serverRunning}"
 
-#provider.waitForWorkers
+success = provider.requestStartWorkers
+puts "Starting Workers success = #{success}"
+success = provider.waitForWorkers
+puts "Worker Started success = #{success}"
 
-#puts "Worker Started"
+session = provider.session.to_AWSSession.get
+url = session.serverUrl.get
 
-session = provider.session
+puts "Server url = #{session.serverUrl.get}"
+File.open('./private_key', 'w') do |f|
+  f.puts session.privateKey
+end
 
 server = OpenStudio::OSServer.new(session.serverUrl.get)
-
-puts "Waiting for server = #{session.serverUrl.get}"
-
 while not server.available
-  puts "Waiting"
+  puts "Waiting for server"
   OpenStudio::System::msleep(3000)
 end
 
@@ -120,6 +115,24 @@ driver = OpenStudio::AnalysisDriver::CloudAnalysisDriver.new(provider.session, p
 
 puts "Starting run"
 
-driver.run
+success = driver.run
 
+if not success
+  puts "Restarting run 1"
+  success = driver.run
+end
+
+if not success
+  puts "Restarting run 2"
+  success = driver.run
+end
+
+if not success
+  puts "Run failed"
+end
 puts "Run finished"
+
+#success = provider.requestTerminate
+#puts "Puts terminating instances, success = #{success}"
+#success = provider.waitForTerminated
+#puts "Terminating instances complete, success = #{success}"
