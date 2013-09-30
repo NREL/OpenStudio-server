@@ -1,7 +1,8 @@
 require 'openstudio'
 
 OpenStudio::Logger::instance.standardOutLogger.enable
-OpenStudio::Logger::instance.standardOutLogger.setLogLevel(OpenStudio::Debug)
+fileLog = OpenStudio::FileLogSink.new(OpenStudio::Path.new('./run_project_aws.log'))
+fileLog.setLogLevel(OpenStudio::Debug)
 
 project_dir = File.dirname(__FILE__) + '/../pat/PATTest'
 
