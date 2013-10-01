@@ -19,8 +19,8 @@ config = AwsConfig.new()
 
 # Launch the master
 if CREATE_SERVER
-  instance_data = {instance_type: "m2.xlarge" }
-  #instance_data = {instance_type: "t1.micro" }
+  #instance_data = {instance_type: "m2.xlarge" }
+  instance_data = {instance_type: "t1.micro" }
   instance_string = instance_data.to_json.gsub("\"", "\\\\\"")
 
   start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
@@ -53,9 +53,9 @@ if CREATE_WORKER
   server_json = JSON.parse(File.read("server_data.json"), :symbolize_names => true)
 
   # How many instances?
-  server_json[:instance_type] = "cc2.8xlarge"
+  #server_json[:instance_type] = "cc2.8xlarge"
   #server_json[:instance_type] = "m2.xlarge"
-  #server_json[:instance_type] = "t1.micro"
+  server_json[:instance_type] = "t1.micro"
   server_json[:num] = 2
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
 
