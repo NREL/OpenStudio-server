@@ -4,10 +4,6 @@ class Analysis::BatchRun < Struct.new(:options)
     @data_points = data_points
   end
 
-  def get_worker_ips
-
-  end
-
   def perform
     # add into delayed job
     require 'rserve/simpler'
