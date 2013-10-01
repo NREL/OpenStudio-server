@@ -4,10 +4,6 @@ class Analysis::BatchRun < Struct.new(:options)
     @data_points = data_points
   end
 
-  def get_worker_ips
-
-  end
-
   def perform
     # add into delayed job
     require 'rserve/simpler'
@@ -60,11 +56,16 @@ class Analysis::BatchRun < Struct.new(:options)
     process.io.stdout = process.io.stderr = Tempfile.new("download-output.log")
     process.cwd = Rails.root # set the child's working directory where the bundler will execute
     process.start
-
-    @r.command(ips: WorkerNode.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+    
+    good_ips = WorkerNode.where(valid:true)
+    @analysis.log_r = "good_ips = #{good_ips}"
+    #@r.command(ips: WorkerNode.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
         print(ips)
-
+        if (nrow(ips) == 0) {
+          stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
+        }
         sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
         sfLibrary(RMongo)
 
@@ -72,7 +73,7 @@ class Analysis::BatchRun < Struct.new(:options)
           mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
           flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
           if (flag["run_flag"] == "false" ){
-            stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")
+            stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
           }
           dbDisconnect(mongo)
 
