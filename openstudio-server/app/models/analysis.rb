@@ -149,9 +149,11 @@ class Analysis
 
   # copy back the results to the master node if they are finished
   def download_data_from_workers
+    any_downloaded = false
     self.data_points.and({download_status: 'na'}, {status: 'completed'}).each do |dp|
-      dp.download_datapoint_from_worker
+      any_downloaded = any_downloaded || dp.download_datapoint_from_worker
     end
+    return any_downloaded
   end
 
   protected

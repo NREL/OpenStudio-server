@@ -9,7 +9,10 @@ namespace :datapoints do
       # Simple task to go through all the datapoints and download the results if they are complete
       if !analysis.nil?
         puts "checking datapoints on #{analysis.id}"
-        analysis.download_data_from_workers
+        any_downloaded = analysis.download_data_from_workers
+        if any_downloaded
+          puts "Downloaded at least one data point."
+        end
       end
       sleep(5)
     end

@@ -20,7 +20,7 @@ class DataPoint
     # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
     # open structure define in the JSON
 
-    if !self.output.nil? || !self.output['data_point'].nil? || !self.output['data_point']['output_attributes'].nil?
+    if !self.output.nil? && !self.output['data_point'].nil? && !self.output['data_point']['output_attributes'].nil? 
       self.results = {}
       self.output['data_point']['output_attributes'].each do |output_hash|
         logger.info(output_hash)
@@ -36,9 +36,11 @@ class DataPoint
   end
 
   def download_datapoint_from_worker
+    downloaded = false
     if self.download_status == 'na' && status == 'completed'
-      self.download_status = 'started'
-      self.save!
+      # DO NOT DO THIS
+      #self.download_status = 'started'
+      #self.save!
 
       # This is becoming more of a post process that is being triggered by the "downloading" of the
       # file.  If we aren't going to download the file, then the child process can have a flag that it
@@ -78,8 +80,11 @@ class DataPoint
         self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
         self.download_status = 'completed'
         self.save!
+        downloaded = true
       end
     end
+    
+    return downloaded
   end
 
 end
