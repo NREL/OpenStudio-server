@@ -62,6 +62,7 @@ class Analysis::BatchRun < Struct.new(:options)
     process.start
     
     good_ips = WorkerNode.where(valid:true)
+    @analysis.log_r = "good_ips = #{good_ips}"
     #@r.command(ips: WorkerNode.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
     @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
@@ -76,7 +77,7 @@ class Analysis::BatchRun < Struct.new(:options)
           mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
           flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
           if (flag["run_flag"] == "false" ){
-            stop(options("show.error.messages"="TRUE"),"run flag is not TRUE")
+            stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
           }
           dbDisconnect(mongo)
 
