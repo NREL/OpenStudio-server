@@ -50,7 +50,8 @@ class Analysis
         mn.hostname = cols[2]
         mn.cores = cols[3]
         mn.user = cols[4]
-        #mn.password = cols[5].chomp
+        mn.password = cols[5].chomp
+        
         mn.save!
 
         logger.info("Master node #{mn.inspect}")
@@ -60,6 +61,10 @@ class Analysis
         wn.cores = cols[3]
         wn.user = cols[4]
         wn.password = cols[5].chomp
+        wn.valid = false
+	if !cols[6].nil? && cols[6].chomp == "true"
+	  wn.valid = true
+        end
         wn.save!
 
         logger.info("Worker node #{wn.inspect}")
@@ -75,27 +80,37 @@ class Analysis
     # rerun expect script
     
     #check if RSA key was made, if not, redo passwordless ssh
-    sn = MasterNode
-    if !File.exists?("/home/#{sn.user}/.ssh/id_rsa")
-      `chmod 664 /home/#{sn.user}/ip_addresses`
-      `/home/#{sn.user}/setup-ssh-keys.sh`
-      `/home/#{sn.user}/setup-ssh-worker-nodes.sh #{ip_file}`
-    end
-    
-    wn = WorkerNode.all
-    wn.each do |wnode|
-      ssh_command = "./setup-ssh-worker-nodes-again.expect #{wnode.ip_address} #{wnode.user} #{wnode.user}"
-      responce = `#{ssh_command}`
-      resp = responce.split("|")
-      if resp[1] == "true"         
-         wnode.valid = true
-         wnode.save!
-      else
-         wnode.valid = false
-         wnode.save!
-      end
-      #logger.info("Worker node #{responce}")
-    end
+    #sn = MasterNode.all
+    #sn.each do |snode|
+    #  if !File.exists?("/home/#{snode.user}/.ssh/id_rsa")
+    #    ssh_command = "chmod 664 /home/#{snode.user}/ip_addresses"
+    #    `#{ssh_command}`
+    #    ssh_command = "/home/#{snode.user}/setup-ssh-keys.sh"
+    #    `#{ssh_command}`
+    #    ssh_command = "/home/#{snode.user}/setup-ssh-worker-nodes.sh #{ip_file}"
+    #    `#{ssh_command}`
+    #  end
+    #end
+    #
+    #wn = WorkerNode.all
+    #wn.each do |wnode|
+    #  ssh_command = "/home/#{wnode.user}/setup-ssh-worker-nodes-again.sh #{wnode.ip_address} #{wnode.user} #{wnode.user}"
+    #  responce = `#{ssh_command}`
+    #  logger.info("#{responce}")
+    #  resp = responce.split("|")
+    #  logger.info("here")
+    #  logger.info("#{resp[1]}")
+    #  if resp[1] == "true"  
+    #     logger.info("here 1")
+    #     wnode.valid = true
+    #     wnode.save!
+    #  else
+    #     logger.info("here 2")
+    #     wnode.valid = false
+    #     wnode.save!
+    #  end
+    #  #logger.info("Worker node #{responce}")
+    #end
 
     # check if this fails
     copy_data_to_workers()
