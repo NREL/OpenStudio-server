@@ -46,6 +46,7 @@ while { $count < 10 } {
     "*~$ " {
       puts "worked"
       send "exit\r"
+      exit 7
       set count 100
     }
     timeout {
