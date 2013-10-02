@@ -205,11 +205,12 @@ begin
   # implemented differently for Local vs. Vagrant or AWS
   communicateResults(data_point, directory)
 
-rescue Exception
-
+rescue Exception => e
   puts "Communicating Failure"
+  puts e.message
+  puts e.backtrace
 
-  # need to tell mongo this failed 
+  # need to tell mongo this failed
   communicateFailure(id)
 
   # raise last exception

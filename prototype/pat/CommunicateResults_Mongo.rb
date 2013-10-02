@@ -79,8 +79,11 @@ def communicateResults(data_point, directory)
   json_output = JSON.parse(data_point.toJSON(data_point_options), :symbolize_names => true)
   dp.output = json_output
 
+  # grab out the HTML and push it into mongo for the HTML display
+
+
   # parse the results flatter and persist into the results section
-  #if !json_output.output.nil? || !json_output.output['data_point'].nil? || !json_output.output['data_point']['output_attributes'].nil?
+  #if !json_output.output.nil? && !json_output.output['data_point'].nil? && !json_output.output['data_point']['output_attributes'].nil?
   #  result_hash = {}
   #  json_output.output['data_point']['output_attributes'].each do |output_hash|
   #    unless output_hash['value_type'] == "AttributeVector"
