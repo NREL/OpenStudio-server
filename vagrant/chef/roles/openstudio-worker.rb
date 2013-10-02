@@ -24,3 +24,8 @@ default_attributes(
     }
 )
 
+override_attributes(
+    :R => {
+        :rserve_user => "vagrant"
+    }
+)

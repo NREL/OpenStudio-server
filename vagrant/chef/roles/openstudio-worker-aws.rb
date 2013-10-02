@@ -1,18 +1,15 @@
-name "openstudio-server"
+name "openstudio-worker"
 description "Install and configure OpenStudio for use with Ruby on Rails"
 
 run_list([
              # Default iptables setup on all servers.
              "role[base]",
-             "role[ruby]",
-             "role[r-project-server]",
+             "role[ruby-worker]",
+             #"role[web_base]",
+             "role[r-project-worker]",
              "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
-             "role[web_base]",
-             "recipe[openstudio_server::bundle]", #install the bundle first to get rails for apache passenger
-             "role[passenger_apache]",
-             "recipe[openstudio_server]",
          ])
 
 
@@ -29,6 +26,6 @@ default_attributes(
 
 override_attributes(
     :R => {
-        :rserve_user => "vagrant"
+        :rserve_user => "ubuntu"
     }
 )
