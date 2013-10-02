@@ -2,9 +2,9 @@ require 'rest-client'
 require 'json'
 require 'faraday'
 
-#HOSTNAME = "http://localhost:8080"
+HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
-HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
+#HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|
   faraday.request  :url_encoded             # form-encode POST params
