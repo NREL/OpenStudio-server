@@ -53,15 +53,16 @@ settings.setNumWorkers(numWorkers)
 settings.signUserAgreement(true)
 settings.setAccessKey(accessKey)
 settings.setSecretKey(secretKey)
-    
-provider = OpenStudio::AWSProvider.new
-provider.setSettings(settings)
+settings.setRegion("us-east-1")
 if serverInstanceType
-  provider.setServerInstanceType(serverInstanceType)
+  settings.setServerInstanceType(serverInstanceType)
 end
 if workerInstanceType
-  provider.setWorkerInstanceType(workerInstanceType)
+  settings.setWorkerInstanceType(workerInstanceType)
 end
+ 
+provider = OpenStudio::AWSProvider.new
+provider.setSettings(settings)
 
 # test that it is working
 puts "userAgreementSigned = #{settings.userAgreementSigned}"
