@@ -21,7 +21,7 @@ class Analysis
 
   has_many :data_points
   has_many :algorithms
-  #has_many :problems
+                        #has_many :problems
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
@@ -33,7 +33,7 @@ class Analysis
   #validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
 
   before_destroy :remove_dependencies
-   
+
   def initialize_workers
     # load in the master and worker information if it doesn't already exist
 
@@ -51,7 +51,7 @@ class Analysis
         mn.cores = cols[3]
         mn.user = cols[4]
         mn.password = cols[5].chomp
-        
+
         mn.save!
 
         logger.info("Master node #{mn.inspect}")
@@ -62,15 +62,15 @@ class Analysis
         wn.user = cols[4]
         wn.password = cols[5].chomp
         wn.valid = false
-	if !cols[6].nil? && cols[6].chomp == "true"
-	  wn.valid = true
+        if !cols[6].nil? && cols[6].chomp == "true"
+          wn.valid = true
         end
         wn.save!
 
         logger.info("Worker node #{wn.inspect}")
       end
     end
-    
+
     # go over all the worker nodes and verify that we can connect over passwordless ssh
     #Timeout = 6.seconds
     #SSH connect ()
@@ -78,7 +78,7 @@ class Analysis
     #wn.save!
     # determine a threshold on number of invalid cores
     # rerun expect script
-    
+
     #check if RSA key was made, if not, redo passwordless ssh
     #sn = MasterNode.all
     #sn.each do |snode|
