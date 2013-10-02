@@ -5,7 +5,7 @@ run_list([
              # Default iptables setup on all servers.
              "role[base]",
              "role[ruby]",
-             "role[r-project-server]",
+             "role[r-project]",
              "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
@@ -29,6 +29,8 @@ default_attributes(
 
 override_attributes(
     :R => {
-        :rserve_user => "vagrant"
+        :rserve_start_on_boot => true,
+        :rserve_user => "vagrant",
+        :rserve_log_path => "/var/www/rails/openstudio/log/Rserve.log"
     }
 )

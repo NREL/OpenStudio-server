@@ -6,7 +6,7 @@ run_list([
              "role[base]",
              "role[ruby-worker]",
              #"role[web_base]",
-             "role[r-project-worker]",
+             "role[r-project]",
              "recipe[mongodb::server]",
              "recipe[openstudio]",
              "recipe[energyplus]",
@@ -26,6 +26,6 @@ default_attributes(
 
 override_attributes(
     :R => {
-        :rserve_user => "ubuntu"
+        :rserve_start_on_boot => false
     }
 )
