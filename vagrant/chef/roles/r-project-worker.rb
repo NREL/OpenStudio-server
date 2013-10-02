@@ -16,7 +16,7 @@ default_attributes(
         :apt_distribution => "precise/",
         :apt_key => "E084DAB9",
         :rserve_start_on_boot => false,
-        :rserve_user => "vagrant",     #todo: how do we change this based on vagrant provisioner
+        :rserve_user => "vagrant",
         :rserve_path => "/usr/bin/R/",
         :package_source_url => "http://cran.r-project.org/src/contrib",
         :packages => [
