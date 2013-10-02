@@ -15,6 +15,15 @@ class DataPointsController < ApplicationController
   def show
     @data_point = DataPoint.find(params[:id])
 
+    @html = @data_point.eplus_html
+
+    # gsub for some styling
+    #@html.gsub!(/<table .*>/, '<div class="span8"><table id="datapointtable" class="tablesorter table table-striped">')
+    #@html.gsub!(/<\/table>/, '</div></table>')
+    #@html = @data_point.eplus_html
+    #@html =  Zlib::Inflate.inflate(.to_s)
+
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @data_point.output  }
