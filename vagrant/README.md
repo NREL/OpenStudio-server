@@ -35,11 +35,14 @@ sudo ./script/delayed_job restart
 /data/launch-instance/configure_vagrant_worker.sh
 ```
 
-## Logging Information
+## Logging Information (in order of importance)
 
-- Rserve - /var/log/Rserve.log (print messages in R commands)
+- rails - /var/www/rails/openstudio/log/development.log (rails stack)
+- Rserve - /var/www/rails/openstudio/Rserve.log (print messages in R commands)
+- rails child processes
+  + download files - /tmp/download-output.log*
 - delayed_jobs - /var/www/rails/openstudio/log/delayed_jobs.log
 - apache 
   + /var/log/apache2/error.log (http errors like malformed urls)
   + /var/log/apache2/access.log (ip address, client)
-- rails - /var/www/rails/openstudio/log/development.log (rails stack)
+
