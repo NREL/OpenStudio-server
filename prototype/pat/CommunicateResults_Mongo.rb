@@ -3,6 +3,7 @@ require 'json'
 require 'mongoid'
 require 'mongoid_paperclip'
 require 'socket'
+require 'zlib'
 
 
 def communicateStarted(id)
@@ -80,7 +81,21 @@ def communicateResults(data_point, directory)
   dp.output = json_output
 
   # grab out the HTML and push it into mongo for the HTML display
+  dir =  File.join(directory.to_s)
+  puts "analysis dir: #{dir}"
+  eplus_html = Dir.glob("#{dir}/*EnergyPlus*/eplustbl.htm").last
+  unless eplus_html.nil?
+    puts "found html file #{eplus_html}"
 
+    # find the datapoint
+    dp = DataPoint.find_or_create_by(uuid: id)
+
+    # compress and save into database, just use the system zip for now
+    #compressed_string = Zlib::Deflate.deflate(eplus_html, Zlib::BEST_SPEED)
+    #dp.eplus_html = compressed_string # `gzip -f -c  #{eplus_html}`
+    dp.eplus_html = File.read(eplus_html)
+    dp.save!
+  end
 
   # parse the results flatter and persist into the results section
   #if !json_output.output.nil? && !json_output.output['data_point'].nil? && !json_output.output['data_point']['output_attributes'].nil?
@@ -95,6 +110,7 @@ def communicateResults(data_point, directory)
   #  end
   #  dp.results = result_hash
   #end
+
   dp.status = "completed"
   dp.save!
 end
