@@ -30,18 +30,21 @@ bash "restart delayed job" do
   EOH
 end
 
-
-# make sure that the cron has a reboot task for delayed job .
-# Note: there seems to be a bug such that this isn't called idempotently and creates a new entry everytime
-cron 'start-delayed-job-on-reboot' do
-  minute  '@reboot'
-  hour    ''
-  day     ''
-  month   ''
-  weekday ''
-  command "/bin/bash -l -c 'cd #{node[:openstudio_server][:server_path]} && RAILS_ENV=development script/delayed_job restart'"
-  user "root"
+template "/etc/init.d/delayed_job" do
+  source "delayed_job.erb"
+  owner "root"
+  mode "0755"
 end
 
+# go ahead and kick it off now because we aren't going to reboot
+bash "configure delayed_job daemon" do
+  code <<-EOH
+    cd /etc/init.d/
+    update-rc.d delayed_job defaults
+  EOH
+end
 
+service "delayed_job" do
+  action :restart
+end
 
