@@ -17,17 +17,19 @@ class DataPointsController < ApplicationController
 
     @html = @data_point.eplus_html
 
-    # gsub for some styling
-    if !@html.nil?
-      @html.gsub!(/<head>|<body>/,"").gsub!(/<html>|<\/html>/,"").gsub!(/<\/head>|<\/body>/, "")
-      #@html.gsub!(/<table .*>/, '<div class="span8"><table id="datapointtable" class="tablesorter table table-striped">')
-      #@html.gsub!(/<\/table>/, '</div></table>')
-      #@html = @data_point.eplus_html
-      #@html =  Zlib::Inflate.inflate(.to_s)
-    end
+
 
     respond_to do |format|
-      format.html # show.html.erb
+      format.html do
+        # gsub for some styling
+        if !@html.nil?
+          @html.gsub!(/<head>|<body>/,"").gsub!(/<html>|<\/html>/,"").gsub!(/<\/head>|<\/body>/, "")
+          #@html.gsub!(/<table .*>/, '<div class="span8"><table id="datapointtable" class="tablesorter table table-striped">')
+          #@html.gsub!(/<\/table>/, '</div></table>')
+          #@html = @data_point.eplus_html
+          #@html =  Zlib::Inflate.inflate(.to_s)
+        end
+      end
       format.json { render json: @data_point.output  }
       #format.json { render json: { :data_point => @data_point.output, :metadata =>  @data_point[:os_metadata] } }
     end

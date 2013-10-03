@@ -16,18 +16,29 @@ end
 resp = RestClient.get("#{HOSTNAME}/projects.json")
 
 projects_json = JSON.parse(resp, :symbolize_names => true, :max_nesting => false)
-
+#puts projects_json.inspect
 if projects_json.count > 0
-  if !projects_json[0][:analysis].nil?
+  if !projects_json[0][:analyses].nil?
     analysis_id = projects_json[0][:analyses][0][:_id]
     puts analysis_id
 
-    datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
-    puts JSON.parse(datapoints, :max_nesting => false)
+    #datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
+    #puts JSON.parse(datapoints, :max_nesting => false)
     #puts JSON.pretty_generate(JSON.parse(datapoints))
   end
 
+  # Uncomment this section to test the stop
+  #action_hash = { analysis_action: "stop" }
+  #puts action_hash.to_json
+
+  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
+  #puts resp.inspect
+  #exit
+
 end
+
+
+
 
 # -------- DELETE Example ----------
 puts "Deleting all projects in database!"
