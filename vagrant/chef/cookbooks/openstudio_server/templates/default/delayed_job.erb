@@ -1,9 +1,8 @@
 #!/bin/sh
-
 ### BEGIN INIT INFO
 # Provides:          delayed_job
-# Required-Start:    $syslog
-# Required-Stop:     $syslog
+# Required-Start:    $local_fs $remote_fs $network $syslog $named
+# Required-Stop:     $local_fs $remote_fs $network $syslog $named
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Start delayed_job as a service
@@ -11,6 +10,8 @@
 ### END INIT INFO
 
 # Author: nicholas long (nicholas.long@nrel.gov)
+
+set -e
 
 DESC="Run delayed_job for Rails"
 NAME=delayed_job
@@ -23,12 +24,12 @@ RBIN=/usr/bin/R
 stop_delayed_job()
 {
   # Stop the delayed_job daemon
-  RAILS_ENV=node[:openstudio_server][:rails_environment] $DAEMON stop
+  RAILS_ENV=<%= node[:openstudio_server][:rails_environment] %> $DAEMON stop
 }
 
 start_delayed_job()
 {
-  RAILS_ENV=development $DAEMON start
+  RAILS_ENV=<%= node[:openstudio_server][:rails_environment] %> $DAEMON start
 }
 
 
@@ -62,14 +63,12 @@ case "$1" in
   ;;
 
   status)
-    #status
+    status
   ;;
 
   *)
-    echo "Usage: $NAME {start|stop|restart|status}"
+    echo "Usage: $NAME {start|stop|restart}"
     exit 1
   ;;
 
 esac
-
-exit 0

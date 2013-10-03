@@ -40,7 +40,8 @@ end
 bash "configure delayed_job daemon" do
   code <<-EOH
     cd /etc/init.d/
-    update-rc.d delayed_job defaults
+    update-rc.d -f delayed_job remove
+    update-rc.d delayed_job defaults 99
   EOH
 end
 
