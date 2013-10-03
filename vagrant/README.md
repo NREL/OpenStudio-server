@@ -42,6 +42,8 @@ sudo ./script/delayed_job restart
 - rails child processes
   + download files - /tmp/download-output.log*
 - delayed_jobs - /var/www/rails/openstudio/log/delayed_jobs.log
+- download child process - /var/www/rails/openstudio/log/download.log
+- mongo - /var/www/rails/openstudio/log/mongo.log
 - apache 
   + /var/log/apache2/error.log (http errors like malformed urls)
   + /var/log/apache2/access.log (ip address, client)

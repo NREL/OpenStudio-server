@@ -4,6 +4,8 @@ class Analysis::BatchRun < Struct.new(:options)
     @data_points = data_points
   end
 
+  # Perform is the main method that is run in the background.  At the moment if this method crashes
+  # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
     # add into delayed job
     require 'rserve/simpler'
@@ -29,7 +31,9 @@ class Analysis::BatchRun < Struct.new(:options)
 
     # get the master ip address
     master_ip = MasterNode.first.ip_address
-    Rails.logger.info("master ip: #{master_ip}")
+    Rails.logger.info("Master ip: #{master_ip}")
+    Rails.logger.info("Starting Batch Run")
+    Rails.logger.info("#{Rails.root}")
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -53,8 +57,12 @@ class Analysis::BatchRun < Struct.new(:options)
 
     # Before kicking off the Analysis, make sure to setup the downloading of the files child process
     process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]")
-    process.io.stdout = process.io.stderr = Tempfile.new("download-output.log")
+    log_file = File.join(Rails.root,"log/download.log")
+    Rails.logger.info("Log file is: #{log_file}")
+    #process.io.inherit!
+    process.io.stdout = process.io.stderr = File.open(log_file,'a+')
     process.cwd = Rails.root # set the child's working directory where the bundler will execute
+    Rails.logger.info("Starting Child Process")
     process.start
     
     good_ips = WorkerNode.where(valid:true)
