@@ -23,7 +23,7 @@ if CREATE_SERVER
   instance_data = {instance_type: "t1.micro" }
   instance_string = instance_data.to_json.gsub("\"", "\\\\\"")
 
-  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
+  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
   puts "#{start_string}"
   server_data_str = `#{start_string}`
   puts server_data_str
@@ -59,7 +59,7 @@ if CREATE_WORKER
   server_json[:num] = 2
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
 
-  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_workers \"#{server_string}\""
+  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_workers \"#{server_string}\""
   worker_data_string = `#{start_string}`
   worker_data = JSON.parse(worker_data_string, :symbolize_names => true)
   File.open("worker_data.json", "w") { |f| f << JSON.pretty_generate(worker_data) }
@@ -113,6 +113,6 @@ if TEST_SSH
   end
 
   server_json = JSON.parse(File.read("server_data.json"), :symbolize_names => true)
-  puts send_command(server_json[:server_ip], 'nproc | tr -d "\n"', File.read("ec2_server_key.pem"))
+  #puts send_command(server_json[:server_ip], 'nproc | tr -d "\n"', File.read("ec2_server_key.pem"))
 end
 
