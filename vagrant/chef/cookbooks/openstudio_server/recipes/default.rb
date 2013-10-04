@@ -22,7 +22,7 @@ end
 bash "fix delayed job permissios" do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}
-    chmod 774 script/delayed_job
+    chmod 775 script/delayed_job
   EOH
 end
 
