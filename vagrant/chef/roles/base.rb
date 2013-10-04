@@ -72,8 +72,10 @@ default_attributes(
     },
     :authorization => {
         :sudo => {
-            :users => ["vagrant"],
-            :include_sudoers_d => true
+            :users => ["vagrant", "ubuntu"],
+            :include_sudoers_d => true,
+            :passwordless => true,
+            :agent_forwarding => true
         }
     },
     :deploy_permissions => {
