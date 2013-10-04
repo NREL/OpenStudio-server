@@ -19,12 +19,30 @@ web_app "openstudio-server" do
   rails_env "#{node[:openstudio_server][:rails_environment]}"
 end
 
-bash "fix delayed job permissios" do
+bash "fix delayed job permissions" do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}
     chmod 775 script/delayed_job
   EOH
 end
+
+bash "fix permissions on log files"  do
+  code <<-EOH
+    cd #{node[:openstudio_server][:server_path]}
+    find . -type d -print0 | xargs -0 chmod 777
+    find . -type f -print0 | xargs -0 chmod 777
+  EOH
+end
+
+bash "fix permissions on assets files"  do
+  code <<-EOH
+    cd #{node[:openstudio_server][:server_path]}
+    chmod -R 777 public
+    find . -type d -print0 | xargs -0 chmod 775
+    find . -type f -print0 | xargs -0 chmod 777
+  EOH
+end
+
 
 template "/etc/init.d/delayed_job" do
   source "delayed_job.erb"
