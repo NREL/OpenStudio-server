@@ -157,6 +157,9 @@ cat /dev/null > /var/www/rails/openstudio/log/download.log
 cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 cat /dev/null > /var/www/rails/openstudio/log/development.log
 cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
+rm -rf /var/www/rails/openstudio/public/assets/*
+rm -rf /data/launch-instances/integrated
+rm -rf /data/launch-instances/ec2*
 ```
 
   + Verify that there is only one cron job for delayed jobs in the root user

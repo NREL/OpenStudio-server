@@ -56,26 +56,31 @@ run_list([
              "recipe[unzip]",
 
              # Install expect for some advanced scripting
-             "recipe[expect]"
+             "recipe[expect]",
+
+             # Secure path
+             "recipe[sudo::secure_path]"
          ])
 
-default_attributes({
-                       # Rotate and compress logs daily by default.
-                       :logrotate => {
-                           :frequency => "daily",
-                           :rotate => 30,
-                           :compress => true,
-                           :delaycompress => true,
-                       },
-                       :authorization => {
-                           :sudo => {
-                               :users => ["vagrant"],
-                               :include_sudoers_d => true
-                           }
-                       },
-                       :deploy_permissions => {
-                           :group_members => [
-                               "vagrant",
-                           ],
-                       },
-                   })
+default_attributes(
+    # Rotate and compress logs daily by default.
+    :logrotate => {
+        :frequency => "daily",
+        :rotate => 30,
+        :compress => true,
+        :delaycompress => true,
+    },
+    :authorization => {
+        :sudo => {
+            :users => ["vagrant", "ubuntu"],
+            :include_sudoers_d => true,
+            :passwordless => true,
+            :agent_forwarding => true
+        }
+    },
+    :deploy_permissions => {
+        :group_members => [
+            "vagrant",
+        ],
+    },
+)
