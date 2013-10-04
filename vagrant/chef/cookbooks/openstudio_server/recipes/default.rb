@@ -19,6 +19,13 @@ web_app "openstudio-server" do
   rails_env "#{node[:openstudio_server][:rails_environment]}"
 end
 
+bash "fix delayed job permissios" do
+  code <<-EOH
+    cd #{node[:openstudio_server][:server_path]}
+    chmod 774 script/delayed_job
+  EOH
+end
+
 template "/etc/init.d/delayed_job" do
   source "delayed_job.erb"
   owner "root"
