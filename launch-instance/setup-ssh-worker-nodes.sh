@@ -18,15 +18,18 @@ do
     echo "$line" >> $TMPFILE
   fi
   if [ $servertype != "master" ]; then
-    ./setup-ssh-worker-nodes.expect $ipaddress $username $password
-    case $? in
-      7)
-       echo "$servertype|$ipaddress|$name|$core|$username|$password|true" >> $TMPFILE
-       ;;
-      *)
-       echo "$servertype|$ipaddress|$name|$core|$username|$password|false" >> $TMPFILE
-       ;;
-    esac  
-  fi
+    ping -c 4 $ipaddress
+    if [ $? -eq 0 ]; then
+      ./setup-ssh-worker-nodes.expect $ipaddress $username $password
+      case $? in
+        7)
+         echo "$servertype|$ipaddress|$name|$core|$username|$password|true" >> $TMPFILE
+         ;;
+        *)
+         echo "$servertype|$ipaddress|$name|$core|$username|$password|false" >> $TMPFILE
+         ;;
+      esac  
+    fi
+  fi  
 done < ${IP_FILE}
 mv $TMPFILE $IP_FILE
