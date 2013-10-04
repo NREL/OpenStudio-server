@@ -20,6 +20,14 @@ ps -A | grep Rserve
 sudo service Rserved start
 ```
 
+```sh
+sudo service delayed_job restart
+cat /dev/null > /var/www/rails/openstudio/log/download.log
+cat /dev/null > /var/www/rails/openstudio/log/mongo.log
+cat /dev/null > /var/www/rails/openstudio/log/development.log
+cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
+```
+
 ## Worker Configuration
 
 - Log into 192.168.33.11 either via `vagrant ssh` or putty.
