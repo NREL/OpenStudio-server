@@ -124,6 +124,7 @@ cd /var/www/rails/openstudio
 rake db:purge
 rm -rf /mnt/openstudio
 sudo apt-get upgrade -y
+sudo service delayed_job restart
 sudo shutdown -r now
 ```
 
