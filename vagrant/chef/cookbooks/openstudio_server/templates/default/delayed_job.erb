@@ -17,19 +17,18 @@ DESC="Run delayed_job for Rails"
 NAME=delayed_job
 DIRHOME=<%= node[:openstudio_server][:server_path] %>/script
 DAEMON=$DIRHOME/$NAME
-RBIN=/usr/bin/R
 
 . /lib/lsb/init-functions
 
 stop_delayed_job()
 {
   # Stop the delayed_job daemon
-  RAILS_ENV=<%= node[:openstudio_server][:rails_environment] %> $DAEMON stop
+  RAILS_ENV=<%= node[:openstudio_server][:rails_environment] %> $DAEMON --pid-dir=/var/run stop
 }
 
 start_delayed_job()
 {
-  RAILS_ENV=<%= node[:openstudio_server][:rails_environment] %> $DAEMON start
+  RAILS_ENV=<%= node[:openstudio_server][:rails_environment] %> $DAEMON --pid-dir=/var/run start
 }
 
 

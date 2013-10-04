@@ -5,3 +5,4 @@
 .DS_Store
 .Vagrantfile.swp
 openstudio-server/public/assets/*
+launch-instance/aws.log

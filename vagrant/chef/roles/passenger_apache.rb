@@ -8,7 +8,6 @@ run_list([
 default_attributes(
     :passenger => {
         :version => "4.0.8",
-        :module_path => "buildout/apache2/mod_passenger.so",
 
         # Run all passengers processes as the apache user.
         :user_switching => false,
