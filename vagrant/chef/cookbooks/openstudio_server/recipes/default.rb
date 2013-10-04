@@ -28,7 +28,7 @@ end
 
 bash "fix permissions on log files"  do
   code <<-EOH
-    cd #{node[:openstudio_server][:server_path]}
+    cd #{node[:openstudio_server][:server_path]}/log
     find . -type d -print0 | xargs -0 chmod 777
     find . -type f -print0 | xargs -0 chmod 777
   EOH
@@ -36,10 +36,9 @@ end
 
 bash "fix permissions on assets files"  do
   code <<-EOH
-    cd #{node[:openstudio_server][:server_path]}
-    chmod -R 777 public
-    find . -type d -print0 | xargs -0 chmod 775
-    find . -type f -print0 | xargs -0 chmod 777
+    cd #{node[:openstudio_server][:server_path]}/public
+    find . -type d -print0 | xargs -0 chmod 777
+    find . -type f -print0 | xargs -0 chmod 666
   EOH
 end
 
