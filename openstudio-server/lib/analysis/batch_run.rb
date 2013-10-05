@@ -33,7 +33,6 @@ class Analysis::BatchRun < Struct.new(:options)
     master_ip = MasterNode.first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
     Rails.logger.info("Starting Batch Run")
-    Rails.logger.info("#{Rails.root}")
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -112,6 +111,7 @@ class Analysis::BatchRun < Struct.new(:options)
     process.stop
 
     # Do one last check if there are any data points that were not downloaded
+    Rails.logger.info("Trying to download any remaining files from worker nodes")
     @analysis.download_data_from_workers
 
     @analysis.status = 'completed'

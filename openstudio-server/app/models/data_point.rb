@@ -8,6 +8,7 @@ class DataPoint
   field :values, :type => Array
   field :ip_address, :type => String
   field :download_status, :type => String, default: "na"
+  field :download_information, :type => String
   field :openstudio_datapoint_file_name, :type => String # make this paperclip?
   field :zip_file_name, :type => String
   field :status, :type => String # enum of queued, started, completed
@@ -39,7 +40,7 @@ class DataPoint
 
   def download_datapoint_from_worker
     downloaded = false
-    if self.download_status == 'na' && status == 'completed'
+    if self.download_status == 'na' && self.status == 'completed'
       # DO NOT DO THIS
       #self.download_status = 'started'
       #self.save!
@@ -49,11 +50,12 @@ class DataPoint
       # checks similar to the downloaded flag.
 
       # parse results
-      logger.info "post-processing the JSON data that was pushed into the database by the worker"
+      Rails.logger.info "post-processing the JSON data that was pushed into the database by the worker"
       self.save_results_from_openstudio_json
 
-      logger.info "downloading #{self.id}"
+      Rails.logger.info "trying to download #{self.id}"
       save_filename = nil
+      remote_file_exists = false
 
       #look up the worker nodes ip address from database
       wn_ip = WorkerNode.where(hostname: self.ip_address).first
@@ -64,23 +66,48 @@ class DataPoint
           remote_filename = "/mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
           save_filename = "/mnt/openstudio/data_point_#{self.id}.zip"
 
-          logger.info "Trying to download #{remote_filename} to #{save_filename}"
-          if !session.scp.download!(remote_filename, save_filename)
-            save_filename = nil
+          Rails.logger.info "Checking if the remote file exists"
+          session.exec!( "if [ -e 'SimulateDataPoinrb' ]; then echo -n 'true'; else echo -n 'false'; fi" ) do |channel, stream, data|
+            Rails.logger.info("data is #{data}")
+            if data == 'true'
+              remote_file_exists = true
+            end
           end
+          session.loop
 
-          #TODO test the deletion of the zip file
-          #session.exec!( "cd /mnt/openstudio && rm -f #{remote_filename}" ) do |channel, stream, data|
-          #  logger.info(data)
-          #end
-          #session.loop
-        end
-      end
+          Rails.logger.info "remote file exists flag is #{remote_file_exists} for #{remote_filename}"
+          if remote_file_exists
+            Rails.logger.info "Trying to download #{remote_filename} to #{save_filename}"
+            if !session.scp.download!(remote_filename, save_filename)
+              save_filename = nil
+              Rails.logger.info "ERROR trying to download datapoint from remote server"
+            end
 
+            #TODO test the deletion of the zip file
+            #session.exec!( "cd /mnt/openstudio && rm -f #{remote_filename}" ) do |channel, stream, data|
+            #  logger.info(data)
+            #end
+            #session.loop
+          end
+        end #session
+      end #wn.ipaddress
+
+      Rails.logger.info("saved file name is: #{save_filename}")
       #now add the datapoint path to the database to get it via the server
-      if !save_filename.nil?
+      if remote_file_exists && !save_filename.nil?
         self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
         self.download_status = 'completed'
+        self.save!
+        downloaded = true
+      elsif remote_file_exists
+        self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
+        self.download_status = 'completed'
+        self.download_information = 'failed to download the file'
+        self.save!
+        downloaded = true
+      else
+        self.download_status = 'completed'
+        self.download_information = 'file did not exist on remote system'
         self.save!
         downloaded = true
       end
