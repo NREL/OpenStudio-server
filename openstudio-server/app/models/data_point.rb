@@ -92,7 +92,6 @@ class DataPoint
         end #session
       end #wn.ipaddress
 
-      Rails.logger.info("saved file name is: #{save_filename}")
       #now add the datapoint path to the database to get it via the server
       if remote_file_exists && !save_filename.nil?
         self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
