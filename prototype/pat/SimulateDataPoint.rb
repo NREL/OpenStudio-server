@@ -166,6 +166,8 @@ begin
   params.append("cleanoutfiles", "standard");
   workflow.add(params);
   ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
+  # NLL: Elaine, need to check whether or not EnergyPlus was found and if not, then error out nicely.
+  # The other option is not to use the find_energyplus command and just use the known path to energyplus because it is known.
   ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
   tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
                                                            OpenStudio::Path.new,
@@ -206,7 +208,7 @@ begin
   communicateResults(data_point, directory)
 
 rescue Exception => e
-  puts "Communicating Failure"
+  puts "SimulationDataPoint Script failed"
   puts e.message
   puts e.backtrace
 
@@ -214,10 +216,10 @@ rescue Exception => e
   communicateFailure(id)
 
   # raise last exception
-  raise
+  # raise  #NL: Don't raise an exception because this will be sent to R and it will not know how to process it.
 end
 
 puts "Complete"
 
-# DLM: this is where we put the objective functions
+# DLM: this is where we put the objective functions.  NL: Note that we must return out of this nicely no matter what.
 puts "0"
