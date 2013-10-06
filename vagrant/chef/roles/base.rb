@@ -59,7 +59,11 @@ run_list([
              "recipe[expect]",
 
              # Secure path
-             "recipe[sudo::secure_path]"
+             "recipe[sudo::nrel_defaults]",
+             "recipe[sudo::secure_path]",
+
+             # OpenStudio Base Packages
+             "recipe[openstudio_server::packages]",
          ])
 
 default_attributes(

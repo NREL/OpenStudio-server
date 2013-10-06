@@ -7,6 +7,7 @@ class DataPoint
   field :name, :type => String
   field :values, :type => Array
   field :ip_address, :type => String
+  field :internal_ip_address, :type => String
   field :download_status, :type => String, default: "na"
   field :download_information, :type => String
   field :openstudio_datapoint_file_name, :type => String # make this paperclip?
@@ -59,7 +60,7 @@ class DataPoint
       remote_file_exists = false
 
       #look up the worker nodes ip address from database
-      wn_ip = WorkerNode.where(hostname: self.ip_address).first
+      wn_ip = WorkerNode.where(ip_address: self.ip_address).first
       if !wn_ip.nil?
         Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
           #Rails.logger.info(self.inspect)
@@ -107,7 +108,7 @@ class DataPoint
         downloaded = true
       else
         self.download_status = 'completed'
-        self.download_information = 'file did not exist on remote system'
+        self.download_information = 'file did not exist on remote system or could not connect to remote system'
         self.save!
         downloaded = true
       end
