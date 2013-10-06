@@ -24,6 +24,11 @@ default_attributes(
     :energyplus => {
         :version => "800008",
         #:checksum => "c1ec1499f964bad8638d3c732c9bd10793dd4052a188cd06bb49288d3d962e09"
+    },
+    :openstudio_server => {
+        :ruby_path => "/usr/local/rbenv", # this is needed for the delayed_job service
+        :server_path => "/var/www/rails/openstudio",
+        :rails_environment => "development"
     }
 )
 

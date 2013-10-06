@@ -152,6 +152,10 @@ cat /dev/null > /var/www/rails/openstudio/log/download.log
 cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 cat /dev/null > /var/www/rails/openstudio/log/development.log
 cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
+cat /dev/null > /var/log/auth.log
+cat /dev/null > /var/log/lastlog
+cat /dev/null > /var/log/kern.log
+cat /dev/null > /var/log/boot.log
 rm -rf /var/www/rails/openstudio/public/assets/*
 rm -rf /data/launch-instance/integrated
 rm -f /data/launch-instance/ec2*.*
