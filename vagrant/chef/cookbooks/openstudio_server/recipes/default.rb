@@ -5,6 +5,7 @@
 
 include_recipe "passenger_apache2"
 
+
 # load any seed data that needs to be in the database by default
 bash "load default data" do
   code <<-EOH

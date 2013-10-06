@@ -9,7 +9,21 @@ require 'zlib'
 def communicateStarted(id)
   dp = DataPoint.find_or_create_by(uuid: id)
   dp.status = "started"
-  dp.ip_address = Socket.gethostname
+
+  if Socket.gethostname =~ /os-.*/
+    # Must be on vagrant and just use the hostname
+    dp.ip_address = Socket.gethostname
+    dp.internal_ip_address = dp.ip_address
+  else
+    # On amazon, you have to hit an API to determine the IP address because
+    # of the internal/external ip addresses
+
+    public_ip_address = `curl -L http://169.254.169.254/latest/meta-data/public-ipv4`
+    internal_ip_address = `curl -L http://169.254.169.254/latest/meta-data/local-ipv4`
+    dp.ip_address = public_ip_address
+    dp.internal_ip_address = internal_ip_address
+  end
+
   dp.save!
 end
 

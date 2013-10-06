@@ -159,6 +159,7 @@ cat /dev/null > /var/log/auth.log
 cat /dev/null > /var/log/lastlog
 cat /dev/null > /var/log/kern.log
 cat /dev/null > /var/log/boot.log
+rm -f /var/www/rails/openstudio/log/test.log
 rm -rf /var/www/rails/openstudio/public/assets/*
 rm -rf /data/launch-instance/integrated
 rm -f /data/launch-instance/ec2*.*
