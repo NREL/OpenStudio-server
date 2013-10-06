@@ -117,14 +117,10 @@ vagrant ssh
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
 echo StrictHostKeyChecking no > .ssh/config
 sudo service ssh restart
-sudo sed -i 's/vagrant/ubuntu/g' /etc/init.d/Rserved
-sudo service Rserved restart
-rm -f /data/launch-instance/config.yml
 cd /var/www/rails/openstudio
 rake db:purge
 rm -rf /mnt/openstudio
 sudo apt-get upgrade -y
-sudo service delayed_job restart
 sudo shutdown -r now
 ```
 
@@ -138,7 +134,6 @@ sudo shutdown -r now
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
 echo StrictHostKeyChecking no > .ssh/config
 sudo service ssh restart
-rm -f /data/launch-instance/config.yml
 sudo apt-get upgrade -y
 sudo shutdown -r now
 ```
@@ -158,18 +153,15 @@ cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 cat /dev/null > /var/www/rails/openstudio/log/development.log
 cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
 rm -rf /var/www/rails/openstudio/public/assets/*
-rm -rf /data/launch-instances/integrated
-rm -rf /data/launch-instances/ec2*
-```
-
-  + Verify that there is only one cron job for delayed jobs in the root user
-
-```sh
-sudo -i
-crontab -l
+rm -rf /data/launch-instance/integrated
+rm -f /data/launch-instance/ec2*.*
+rm -f /data/launch-instance/config.yml
+rm -rf /data/prototype/example_scripts
+rm -rf /data/prototype/R
 ```
 
 - login to AWS and take a snapshot of the image
+  + Increase the size of the root image to 10GB in both
 
 
 
