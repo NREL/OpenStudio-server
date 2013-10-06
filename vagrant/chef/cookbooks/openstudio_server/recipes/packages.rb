@@ -8,3 +8,7 @@
 package "curl" do
   action :upgrade
 end
+
+package "zip" do
+  action :upgrade
+end
