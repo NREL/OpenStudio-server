@@ -73,6 +73,9 @@ Vagrant.configure("2") do |config|
   config.vm.provider :aws do |aws, override|
     #http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
     begin
+      override.vm.box = "dummy"
+      override.vm.box_url = "http://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
+
       require 'excon'
       Excon.defaults[:ssl_verify_peer] = false
 

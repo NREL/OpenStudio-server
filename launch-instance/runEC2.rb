@@ -7,7 +7,8 @@ require "json"
 
 # use the aws class that lives in the OpenStudio Repository now.  Make sure to update the PATH below to
 # whereever you OpenStudio checkout is (currently on the AWSProvider branch in OS)
-OS_PATH = "C:/Projects/OpenStudio"
+#OS_PATH = "C:/Projects/OpenStudio"
+OS_PATH = "/Users/nlong/Working/OpenStudio"
 
 # Global Options
 CREATE_SERVER=true
