@@ -140,7 +140,10 @@ sudo shutdown -r now
 
 ### Final Changes
 - Before creating the AMI do these last on both systems
+  + Make sure the the default use is unlocked
   + Remove authorized keys (this will prevent you from logging in again, do this last)
+  + Clear out the various logs
+  + Remove unneeded files that are in the mounted folders
 
 ```sh
 sudo usermod -U ubuntu
