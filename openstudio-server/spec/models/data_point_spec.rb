@@ -32,7 +32,7 @@ describe DataPoint do
     @data_point.output = json
     @data_point.output.should_not be_nil
     @data_point.save!
-    @data_point[:output][:data_point][:complete].should be_true
+    @data_point.output[:data_point][:complete].should be_true
 
 
   end

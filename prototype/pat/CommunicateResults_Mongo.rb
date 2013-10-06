@@ -78,12 +78,11 @@ def communicateResults(data_point, directory)
   dp = DataPoint.find_or_create_by(uuid: id)
   data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(directory.parent_path)
   json_output = JSON.parse(data_point.toJSON(data_point_options), :symbolize_names => true)
-  puts "JSON output is #{json_output}"
-  puts "JSON output is #{JSON.pretty_generate(json_output)}"
-
+  #puts "JSON output is #{json_output}"
+  #puts "JSON output is #{JSON.pretty_generate(json_output)}"
 
   # not sure what has changed here, but the data_point JSON from openstudio is no longer working
-  dp.output = json_output[:data_point]
+  dp.output = json_output
 
   # grab out the HTML and push it into mongo for the HTML display
   dir =  File.join(directory.to_s)
@@ -91,9 +90,6 @@ def communicateResults(data_point, directory)
   eplus_html = Dir.glob("#{dir}/*EnergyPlus*/eplustbl.htm").last
   unless eplus_html.nil?
     puts "found html file #{eplus_html}"
-
-    # find the datapoint
-    dp = DataPoint.find_or_create_by(uuid: id)
 
     # compress and save into database, just use the system zip for now
     #compressed_string = Zlib::Deflate.deflate(eplus_html, Zlib::BEST_SPEED)
