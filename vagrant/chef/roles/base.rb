@@ -59,7 +59,7 @@ run_list([
              "recipe[expect]",
 
              # Secure path
-             "recipe[sudo::nrel_defaults]",
+             #"recipe[sudo::nrel_defaults]", # Don't load this as the require tty will break chef and amazon
              "recipe[sudo::secure_path]",
 
              # OpenStudio Base Packages
@@ -79,7 +79,8 @@ default_attributes(
             :users => ["vagrant", "ubuntu"],
             :include_sudoers_d => true,
             :passwordless => true,
-            :agent_forwarding => true
+            :agent_forwarding => true,
+            :sudoers_defaults => ["env_reset"]
         }
     },
     :deploy_permissions => {
