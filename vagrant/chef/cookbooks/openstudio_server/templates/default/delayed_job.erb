@@ -31,6 +31,7 @@ stop_delayed_job()
 
 start_delayed_job()
 {
+  log_daemon_msg `env`
   export PATH=$RUBYENV/shims:$RUBYENV/bin:$PATH
   log_daemon_msg `env`
   RAILS_ENV=<%= node[:openstudio_server][:rails_environment] %> $DAEMON --pid-dir=/var/run start
