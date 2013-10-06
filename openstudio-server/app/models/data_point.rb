@@ -14,10 +14,11 @@ class DataPoint
   field :status, :type => String # enum of queued, started, completed
   field :eplus_html, :type => String #Moped::BSON::Binary # ABUPS Summary
   field :output
-
   field :results, :type => Hash
 
   belongs_to :analysis
+
+  after_create :verify_uuid
 
   def save_results_from_openstudio_json
     # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
@@ -67,8 +68,8 @@ class DataPoint
           save_filename = "/mnt/openstudio/data_point_#{self.id}.zip"
 
           Rails.logger.info "Checking if the remote file exists"
-          session.exec!( "if [ -e 'SimulateDataPoinrb' ]; then echo -n 'true'; else echo -n 'false'; fi" ) do |channel, stream, data|
-            Rails.logger.info("data is #{data}")
+          session.exec!( "if [ -e '#{remote_filename}' ]; then echo -n 'true'; else echo -n 'false'; fi" ) do |channel, stream, data|
+            Rails.logger.info("check remote file data is #{data}")
             if data == 'true'
               remote_file_exists = true
             end
@@ -114,5 +115,13 @@ class DataPoint
     
     return downloaded
   end
+
+  protected
+
+  def verify_uuid
+    self.uuid = self.id if self.uuid.nil?
+    self.save!
+  end
+
 
 end

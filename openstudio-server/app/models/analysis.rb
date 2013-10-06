@@ -32,6 +32,7 @@ class Analysis
 
   #validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
 
+  after_create :verify_uuid
   before_destroy :remove_dependencies
 
   def initialize_workers
@@ -198,6 +199,11 @@ class Analysis
       dj = Delayed::Job.find(self.delayed_job_id)
       dj.delete unless dj.nil?
     end
+  end
+
+  def verify_uuid
+    self.uuid = self.id if self.uuid.nil?
+    self.save!
   end
 
   private

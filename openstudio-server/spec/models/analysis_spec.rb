@@ -1,19 +1,23 @@
 require 'spec_helper'
 
 describe Analysis do
-  before :each do
-    #@project = FactoryGirl.create :project
-    @analysis = Analysis.find_by(name: "PAT Example")
+  before :all do
+    # delete all the analyses
+    Project.destroy_all
+    Analysis.destroy_all
+    @project = FactoryGirl.create :project
+    @analysis = FactoryGirl.create :analysis
   end
 
-  it "should have an analysis to run" do
-    Analysis.all.size.should eq(1), 'does not have an analysis'
+  it "should have one project" do
+    @analysis.project.should_not be_nil
   end
 
-  it "should return a value from R" do
-    result = @analysis.start_r_and_run_sample()
+  it "should have uuid and id the same" do
+    @analysis.id.should eq(@analysis.uuid)
   end
 
   after :each do
+    #@analysis.destroy
   end
 end
