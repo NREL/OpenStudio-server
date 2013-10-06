@@ -74,11 +74,16 @@ def communicateResults(data_point, directory)
     end
   end
 
-  # let mongo know that the data point is complete
+  # save the datapoint results into the JSON field named output
   dp = DataPoint.find_or_create_by(uuid: id)
   data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(directory.parent_path)
   json_output = JSON.parse(data_point.toJSON(data_point_options), :symbolize_names => true)
-  dp.output = json_output
+  puts "JSON output is #{json_output}"
+  puts "JSON output is #{JSON.pretty_generate(json_output)}"
+
+
+  # not sure what has changed here, but the data_point JSON from openstudio is no longer working
+  dp.output = json_output[:data_point]
 
   # grab out the HTML and push it into mongo for the HTML display
   dir =  File.join(directory.to_s)

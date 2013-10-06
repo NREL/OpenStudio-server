@@ -1,7 +1,5 @@
 FactoryGirl.define do
   factory :project do
-    #name "Batch Project Example"
-    #@survey = FactoryGirl.create(:survey)
-
+    name "RSpec Project"
   end
 end
