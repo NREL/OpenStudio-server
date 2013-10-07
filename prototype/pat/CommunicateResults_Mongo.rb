@@ -11,8 +11,10 @@ def communicateStarted(id)
   dp.status = "started"
 
   if Socket.gethostname =~ /os-.*/
-    # Must be on vagrant and just use the hostname
-    dp.ip_address = Socket.gethostname
+    # Maybe use this in the future: /sbin/ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print $3}'
+    # Must be on vagrant and just use the hostname to do a lookup
+    map = {"os-worker-1" => "192.168.33.11", "os-worker-2" => "192.168.33.12"}
+    dp.ip_address = map[Socket.gethostname]
     dp.internal_ip_address = dp.ip_address
   else
     # On amazon, you have to hit an API to determine the IP address because

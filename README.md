@@ -150,7 +150,6 @@ sudo usermod -U ubuntu
 cat /dev/null > ~/.ssh/authorized_keys
 cat /dev/null > ~/.bash_history && history -c
 sudo -i
-cat /dev/null > ~/.bash_history && history -c
 cat /dev/null > /var/www/rails/openstudio/log/download.log
 cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 cat /dev/null > /var/www/rails/openstudio/log/development.log
@@ -162,10 +161,14 @@ cat /dev/null > /var/log/boot.log
 rm -f /var/www/rails/openstudio/log/test.log
 rm -rf /var/www/rails/openstudio/public/assets/*
 rm -rf /data/launch-instance/integrated
-rm -f /data/launch-instance/ec2*.*
+rm -f /data/launch-instance/ec2*
 rm -f /data/launch-instance/config.yml
+rm -f /data/launch-instance/aws.log
+rm -f /data/launch-instance/*.json
 rm -rf /data/prototype/example_scripts
 rm -rf /data/prototype/R
+rm -rf /var/chef
+cat /dev/null > ~/.bash_history && history -c
 ```
 
 - login to AWS and take a snapshot of the image
