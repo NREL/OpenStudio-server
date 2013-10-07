@@ -23,7 +23,7 @@ class DataPointsController < ApplicationController
       format.html do
         # gsub for some styling
         if !@html.nil?
-          @html.gsub!(/<head>|<body>/,"").gsub!(/<html>|<\/html>/,"").gsub!(/<\/head>|<\/body>/, "")
+          @html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil).gsub!(/<head>|<body>/,"").gsub!(/<html>|<\/html>/,"").gsub!(/<\/head>|<\/body>/, "")
           #@html.gsub!(/<table .*>/, '<div class="span8"><table id="datapointtable" class="tablesorter table table-striped">')
           #@html.gsub!(/<\/table>/, '</div></table>')
           #@html = @data_point.eplus_html
