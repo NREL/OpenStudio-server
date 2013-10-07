@@ -166,8 +166,7 @@ begin
   params.append("cleanoutfiles", "standard");
   workflow.add(params);
   ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
-  # NLL: Elaine, need to check whether or not EnergyPlus was found and if not, then error out nicely.
-  # The other option is not to use the find_energyplus command and just use the known path to energyplus because it is known.
+  raise "SimulateDataPoint.rb was unable to locate EnergyPlus." if ep_hash.nil?
   ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
   tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
                                                            OpenStudio::Path.new,
