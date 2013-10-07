@@ -13,6 +13,7 @@ OS_PATH = "/Users/nlong/Working/OpenStudio"
 # Global Options
 CREATE_SERVER=true
 CREATE_WORKER=true
+WORKER_INSTANCES=1
 TEST_SSH=true
 
 # read in the config.yml file to get the secret/private key
@@ -55,9 +56,9 @@ if CREATE_WORKER
 
   # How many instances?
   #server_json[:instance_type] = "cc2.8xlarge"
-  #server_json[:instance_type] = "m2.xlarge"
-  server_json[:instance_type] = "t1.micro"
-  server_json[:num] = 2
+  server_json[:instance_type] = "m2.xlarge"
+  #server_json[:instance_type] = "t1.micro"
+  server_json[:num] = WORKER_INSTANCES
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
 
   start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_workers \"#{server_string}\""

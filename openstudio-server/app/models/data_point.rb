@@ -11,7 +11,6 @@ class DataPoint
   field :download_status, :type => String, default: "na"
   field :download_information, :type => String
   field :openstudio_datapoint_file_name, :type => String # make this paperclip?
-  field :zip_file_name, :type => String
   field :status, :type => String # enum of queued, started, completed
   field :eplus_html, :type => String #Moped::BSON::Binary # ABUPS Summary
   field :output
