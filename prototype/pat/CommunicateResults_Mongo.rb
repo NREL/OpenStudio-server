@@ -77,7 +77,7 @@ def communicateDatapoint(data_point)
 end
 
 def communicate_debug_log(data_point_id, log_message)
-  log_message = "[#{Time.now}] #{log_message}"
+  log_message = "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S")} UTC] #{log_message}"
   puts log_message
   dp = DataPoint.find_or_create_by(uuid: data_point_id)
   dp.sdp_log_file << log_message
@@ -91,7 +91,7 @@ def communicate_time_log(data_point_id, log_message, prev_time = nil)
   if !prev_time.nil?
     delta = Time.now.to_f - prev_time.to_f
   end
-  dp.run_time_log << "[#{Time.now}] delta:#{delta}s #{log_message}"
+  dp.run_time_log << "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S")} UTC] [Delta: #{delta.round(4)}s] #{log_message}"
   dp.save!
 end
 

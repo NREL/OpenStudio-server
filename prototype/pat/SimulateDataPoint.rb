@@ -40,6 +40,8 @@ if not options[:directory]
 end
 
 # TODO: The first thing this needs to do is register itself with the server to get the datapoint information
+# This also needs to only create one handle to the datapoint database object, then use that instead of hitting the
+# database to find the right record each time it wants to say something.
 
 puts "Checking UUID of #{options[:uuid]}"
 if (not options[:uuid]) || (options[:uuid] == "NA")
