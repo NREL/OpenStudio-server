@@ -122,8 +122,18 @@ def communicateResults(data_point, directory)
     #compressed_string = Zlib::Deflate.deflate(eplus_html, Zlib::BEST_SPEED)
     #dp.eplus_html = compressed_string # `gzip -f -c  #{eplus_html}`
     dp.eplus_html = File.read(eplus_html)
-    dp.save!
+    #dp.save!
   end
+
+  # grab the %{uuid}.log file and jam it into the database
+  #log_file = File.expand_path(File.join(directory.to_s,"../../#{id}.log"))
+  #puts "log file is #{log_file}"
+  #if File.exists?(log_file)
+  #  puts "log file exists"
+  #  puts File.read(log_file)
+  #  dp.sdp_log_file = File.read(log_file)
+  #end
+
 
   # parse the results flatter and persist into the results section
   #if !json_output.output.nil? && !json_output.output['data_point'].nil? && !json_output.output['data_point']['output_attributes'].nil?

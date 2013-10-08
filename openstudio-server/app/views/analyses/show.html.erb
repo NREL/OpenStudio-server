@@ -25,7 +25,7 @@
   </tbody>
 </table>
 
-<%= link_to 'List of Measures/Variables', analysis_variables_path(@analysis) %>
+<%= link_to 'List of Measures/Variables', analysis_variables_path(@analysis) %> | <%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
 
 <h1>Data Points</h1>
 <script>
@@ -62,13 +62,7 @@
           | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
           | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
         <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
-
       </tr>
   <% end %>
   </tbody>
 </table>
-
-<%= link_to 'Back', project_path(@analysis.project) %>
-
-
-
