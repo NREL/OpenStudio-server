@@ -18,6 +18,7 @@ class Analysis
   field :analysis_output, :type => Array
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
+  field :os_metadata # don't define type, keep this flexible
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
@@ -27,7 +28,7 @@ class Analysis
   belongs_to :project
   has_many :data_points
   has_many :algorithms
-  #has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
+  has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
   #has_many :problems
 
   # Indexes
@@ -147,6 +148,16 @@ class Analysis
     logger.info("stopping analysis")
     self.run_flag = false
     self.status = 'completed'
+    self.save!
+  end
+
+  def pull_out_os_variables
+    logger.info("OpenStudio Metadata is: #{self.os_metadata}")
+    if !self.os_metadata.nil? && !self.os_metadata['variables'].nil?
+      self.os_metadata['variables'].each do |variable|
+        var = Variable.create_by_os_json(self.id, variable)
+      end
+    end
     self.save!
   end
 
