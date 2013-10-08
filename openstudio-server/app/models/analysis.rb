@@ -27,6 +27,7 @@ class Analysis
   belongs_to :project
   has_many :data_points
   has_many :algorithms
+  #has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
   #has_many :problems
 
   # Indexes
@@ -113,7 +114,7 @@ class Analysis
     end
   end
 
-  def run_r_analysis(no_delay = false, analysis_type = 'batch_run')
+  def run_analysis(no_delay = false, analysis_type = 'batch_run')
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
     Rails.logger.info("running R analysis with #{analysis_type}")
