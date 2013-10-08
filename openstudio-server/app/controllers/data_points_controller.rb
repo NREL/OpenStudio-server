@@ -39,7 +39,7 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     respond_to do |format|
-      format.json { render json: @data_point }
+      format.json { render json: @data_point.to_json(:except => [:eplus_html]) }
       #format.json { render json: { :data_point => @data_point.output, :metadata =>  @data_point[:os_metadata] } }
     end
   end
