@@ -19,7 +19,7 @@
   </thead>
   <tbody>
   <tr>
-    <td><%= @rserve_log.gsub("\n", "</br>").html_safe %></td>
+    <td><%= @rserve_log.gsub("\n", "</br>").html_safe unless @rserve_log.nil?%></td>
   </tr>
   </tbody>
 </table>
