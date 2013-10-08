@@ -14,24 +14,30 @@ class Analysis
   field :run_flag, :type => Boolean
   field :delayed_job_id # ObjectId
   field :status, :type => String # enum on the status of the analysis (queued, started, completed)
-
   field :log_r, :type => String
-
-  belongs_to :project
-
-  has_many :data_points
-  has_many :algorithms
-                        #has_many :problems
-
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
                             :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
 
-  # validations
-  #validates_format_of :uuid, :with => /[^0-]+/
+  # Relationships
+  belongs_to :project
+  has_many :data_points
+  has_many :algorithms
+  #has_many :problems
 
-  #validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
+  # Indexes
+  index({uuid: 1}, unique: true)
+  index({id: 1}, unique: true)
+  index({name: 1}, unique: true)
+  index({project_id: 1})
+  index({uuid: 1, status: 1})
+  index({uuid: 1, download_status: 1})
 
+  # Validations
+  # validates_format_of :uuid, :with => /[^0-]+/
+  # validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
+
+  # Callbacks
   after_create :verify_uuid
   before_destroy :remove_dependencies
 

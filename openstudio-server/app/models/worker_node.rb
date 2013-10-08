@@ -9,6 +9,9 @@ class WorkerNode
   field :cores, :type => Integer
   field :valid, :type => Boolean, default: false
 
+  # Indexes
+  index({hostname: 1, ip_address: 1}, unique: true)
+
   # Return all the worker IP addresses as a hash in prep for writing to a dataframe
   def self.to_hash
     worker_ips_hash = {}

@@ -16,15 +16,26 @@ class DataPoint
   field :output
   field :results, :type => Hash
 
+  # Relationships
   belongs_to :analysis
 
+  # Indexes
+  index({uuid: 1}, unique: true)
+  index({id: 1}, unique: true)
+  index({name: 1}, unique: true)
+  index({status: 1})
+  index({analysis_id: 1})
+  index({uuid: 1, status: 1})
+  index({uuid: 1, download_status: 1})
+
+  # Callbacks
   after_create :verify_uuid
 
   def save_results_from_openstudio_json
     # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
     # open structure define in the JSON
 
-    if !self.output.nil? && !self.output['data_point'].nil? && !self.output['data_point']['output_attributes'].nil? 
+    if !self.output.nil? && !self.output['data_point'].nil? && !self.output['data_point']['output_attributes'].nil?
       self.results = {}
       self.output['data_point']['output_attributes'].each do |output_hash|
         logger.info(output_hash)
@@ -68,7 +79,7 @@ class DataPoint
           save_filename = "/mnt/openstudio/data_point_#{self.id}.zip"
 
           Rails.logger.info "Checking if the remote file exists"
-          session.exec!( "if [ -e '#{remote_filename}' ]; then echo -n 'true'; else echo -n 'false'; fi" ) do |channel, stream, data|
+          session.exec!("if [ -e '#{remote_filename}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |channel, stream, data|
             Rails.logger.info("check remote file data is #{data}")
             if data == 'true'
               remote_file_exists = true
@@ -112,7 +123,7 @@ class DataPoint
         downloaded = true
       end
     end
-    
+
     return downloaded
   end
 

@@ -6,8 +6,15 @@ class Project
   field :_id, :type => String, default: -> { uuid || UUID.generate }
   field :name, :type => String
 
+  # Relationships
   has_many :analyses
 
+  # Indexes
+  index({uuid: 1}, unique: true)
+  index({id: 1}, unique: true)
+  index({name: 1}, unique: true)
+
+  # Callbacks
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
