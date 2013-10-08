@@ -212,7 +212,7 @@ begin
   job_dirs = []
   prev_time = nil
   while run_manager.workPending()
-    sleep 5
+    sleep 2
     OpenStudio::Application::instance().processEvents()
 
     # check if there are any new folders that were creates
