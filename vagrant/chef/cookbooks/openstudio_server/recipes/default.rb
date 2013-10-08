@@ -5,6 +5,11 @@
 
 include_recipe "passenger_apache2"
 
+web_app "openstudio-server" do
+  docroot "#{node[:openstudio_server][:server_path]}/public"
+  server_name "openstudio-server"
+  rails_env "#{node[:openstudio_server][:rails_environment]}"
+end
 
 # load any seed data that needs to be in the database by default
 bash "load default data" do
@@ -14,10 +19,11 @@ bash "load default data" do
   EOH
 end
 
-web_app "openstudio-server" do
-  docroot "#{node[:openstudio_server][:server_path]}/public"
-  server_name "openstudio-server"
-  rails_env "#{node[:openstudio_server][:rails_environment]}"
+bash "create database indexes" do
+  code <<-EOH
+    cd #{node[:openstudio_server][:server_path]}
+    bundle exec rake db:mongoid:create_indexes
+  EOH
 end
 
 bash "fix delayed job permissions" do
