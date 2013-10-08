@@ -94,6 +94,7 @@ puts "Communicating Started #{id}"
 
 # let listening processes know that this data point is running
 communicateStarted(id)
+communicate_time_log(id, "started")
 
 begin
 
@@ -112,15 +113,16 @@ begin
   logSink.setLogLevel(logLevel)
   OpenStudio::Logger::instance.standardOutLogger.disable
 
-  puts "Getting JSON input"
+  puts "Getting Problem JSON input"
+  communicate_time_log(id, "Getting Problem JSON from database")
 
   # get json from database
-  json = getJSON(id, directory)
+  json = get_problem_json(id, directory)
   data_point_json = json[0]
   analysis_json = json[1]
 
   puts "Parsing Analysis JSON input"
-
+  communicate_time_log(id, "Reading Problem JSON into OpenStudio")
   # load problem formulation
   loadResult = OpenStudio::Analysis::loadJSON(analysis_json)
   if loadResult.analysisObject.empty?
@@ -129,14 +131,18 @@ begin
     }
     raise "Unable to load analysis json."
   end
+
+  communicate_time_log(id, "Get Analysis From OpenStudio")
   analysis = loadResult.analysisObject.get.to_Analysis.get
 
   # fix up paths
+  communicate_time_log(id, "Fix Paths")
   analysis.updateInputPathData(loadResult.projectDir, project_path)
   analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
   analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"), analysis_options, true)
 
   puts "Parsing DataPoint JSON input"
+  communicate_time_log(id, "Load DataPoint JSON")
 
   # load data point to run
   loadResult = OpenStudio::Analysis::loadJSON(data_point_json)
@@ -150,17 +156,20 @@ begin
   analysis.addDataPoint(data_point) # also hooks up real copy of problem
 
   puts "Communicating DataPoint"
+  communicate_time_log(id, "Update DataPoint Database Record")
 
   # update datapoint in database
   communicateDatapoint(data_point)
 
   puts "Running Simulation"
+  communicate_time_log(id, "Setting Up RunManager")
 
   # create a RunManager
   run_manager_path = directory / OpenStudio::Path.new("run.db")
   run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path, true, false, false)
 
   # have problem create the workflow
+  communicate_time_log(id, "Creating Workflow")
   workflow = analysis.problem.createWorkflow(data_point, OpenStudio::Path.new($OpenStudio_Dir));
   params = OpenStudio::Runmanager::JobParams.new;
   params.append("cleanoutfiles", "standard");
@@ -181,6 +190,7 @@ begin
   # at expected location.
 
   # queue the RunManager job
+  communicate_time_log(id, "Queue RunManager Job")
   url_search_paths = OpenStudio::URLSearchPathVector.new
   weather_file_path = OpenStudio::Path.new
   if (analysis.weatherFile)
@@ -192,16 +202,21 @@ begin
   run_manager.enqueue(job, false);
 
   puts "Waiting for simulation to finish"
+  communicate_time_log(id, "Starting Simulation")
 
   # wait for the job to finish
   run_manager.waitForFinished
 
   puts "Simulation finished"
+  communicate_time_log(id, "Simulation Finished")
 
   # use the completed job to populate data_point with results
+  communicate_time_log(id, "Updating OpenStudio DataPoint object")
   analysis.problem.updateDataPoint(data_point, job)
 
+
   puts "Communicating Results"
+  communicate_time_log(id, "Communicating the results back to Server")
 
   # implemented differently for Local vs. Vagrant or AWS
   communicateResults(data_point, directory)

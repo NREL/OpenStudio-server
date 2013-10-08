@@ -9,6 +9,8 @@ require 'zlib'
 def communicateStarted(id)
   dp = DataPoint.find_or_create_by(uuid: id)
   dp.status = "started"
+  dp.run_start_time = Time.now
+  dp.run_time_log = []
 
   if Socket.gethostname =~ /os-.*/
     # Maybe use this in the future: /sbin/ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print $3}'
@@ -30,7 +32,7 @@ def communicateStarted(id)
 end
 
 
-def getJSON(id, directory)
+def get_problem_json(id, directory)
 
   result = [] # [data_point_json, analysis_json]
 
@@ -73,6 +75,11 @@ def communicateDatapoint(data_point)
   dp.save!
 end
 
+def communicate_time_log(data_point_id, log_message)
+  dp = DataPoint.find_or_create_by(uuid: data_point_id)
+  dp.run_time_log << [Time.now, log_message]
+  dp.save!
+end
 
 def communicateResults(data_point, directory)
   id = OpenStudio::removeBraces(data_point.uuid)
@@ -101,7 +108,7 @@ def communicateResults(data_point, directory)
   dp.output = json_output
 
   # grab out the HTML and push it into mongo for the HTML display
-  dir =  File.join(directory.to_s)
+  dir = File.join(directory.to_s)
   puts "analysis dir: #{dir}"
   eplus_html = Dir.glob("#{dir}/*EnergyPlus*/eplustbl.htm").last
   unless eplus_html.nil?
@@ -128,6 +135,7 @@ def communicateResults(data_point, directory)
   #  dp.results = result_hash
   #end
 
+  dp.run_end_time = Time.now
   dp.status = "completed"
   dp.save!
 end
