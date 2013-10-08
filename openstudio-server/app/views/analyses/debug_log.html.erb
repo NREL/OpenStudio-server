@@ -1,0 +1,44 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Debug Log</h1>
+
+
+
+<script>
+    $(document).ready(function () {
+                $("#datapointtable").tablesorter();
+            }
+    );
+
+</script>
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>RServe Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @rserve_log.gsub("\n", "</br>").html_safe %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>Data Point Run Log Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @log_message.each do |log| %>
+      <% log.each do |lm| %>
+          <tr>
+            <td> <%= lm %> </td>
+          </tr>
+      <% end %>
+  <% end %>
+  </tbody>
+</table>
+
+
