@@ -14,7 +14,10 @@ class Analysis
   field :run_flag, :type => Boolean
   field :delayed_job_id # ObjectId
   field :status, :type => String # enum on the status of the analysis (queued, started, completed)
-  field :log_r, :type => String
+  field :analysis_output, :type => Array
+  field :start_time, :type => DateTime
+  field :end_time, :type => DateTime
+
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
                             :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
@@ -78,53 +81,12 @@ class Analysis
       end
     end
 
-    # go over all the worker nodes and verify that we can connect over passwordless ssh
-    #Timeout = 6.seconds
-    #SSH connect ()
-    #wn.valid = false
-    #wn.save!
-    # determine a threshold on number of invalid cores
-    # rerun expect script
-
-    #check if RSA key was made, if not, redo passwordless ssh
-    #sn = MasterNode.all
-    #sn.each do |snode|
-    #  if !File.exists?("/home/#{snode.user}/.ssh/id_rsa")
-    #    ssh_command = "chmod 664 /home/#{snode.user}/ip_addresses"
-    #    `#{ssh_command}`
-    #    ssh_command = "/home/#{snode.user}/setup-ssh-keys.sh"
-    #    `#{ssh_command}`
-    #    ssh_command = "/home/#{snode.user}/setup-ssh-worker-nodes.sh #{ip_file}"
-    #    `#{ssh_command}`
-    #  end
-    #end
-    #
-    #wn = WorkerNode.all
-    #wn.each do |wnode|
-    #  ssh_command = "/home/#{wnode.user}/setup-ssh-worker-nodes-again.sh #{wnode.ip_address} #{wnode.user} #{wnode.user}"
-    #  responce = `#{ssh_command}`
-    #  logger.info("#{responce}")
-    #  resp = responce.split("|")
-    #  logger.info("here")
-    #  logger.info("#{resp[1]}")
-    #  if resp[1] == "true"  
-    #     logger.info("here 1")
-    #     wnode.valid = true
-    #     wnode.save!
-    #  else
-    #     logger.info("here 2")
-    #     wnode.valid = false
-    #     wnode.save!
-    #  end
-    #  #logger.info("Worker node #{responce}")
-    #end
-
     # check if this fails
     copy_data_to_workers()
   end
 
 
-  def start(no_delay)
+  def start(no_delay, analysis_type='batch_run')
     # get the data points that are going to be run
     data_points_hash = {}
     data_points_hash[:data_points] = []
@@ -136,10 +98,10 @@ class Analysis
     Rails.logger.info(data_points_hash)
 
     if no_delay
-      abr = Analysis::BatchRun.new(self.id, data_points_hash)
+      abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash)
       abr.perform
     else
-      job = Delayed::Job.enqueue Analysis::BatchRun.new(self.id, data_points_hash), :queue => 'analysis'
+      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash), :queue => 'analysis'
       self.delayed_job_id = job.id
       self.save!
     end
@@ -155,6 +117,10 @@ class Analysis
       logger.info("analysis is already queued with #{dj}")
       return [false, "An analysis is already queued"]
     else
+      # NL: I would like to move this inside the queued analysis piece. I think
+      # we could have an issue if there are many worker nodes and this method times out.
+      self.start_time = Time.now
+
       logger.info("Initializing workers in database")
       self.initialize_workers
 

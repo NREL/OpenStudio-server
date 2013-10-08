@@ -65,7 +65,8 @@ class Analysis::BatchRun < Struct.new(:options)
     process.start
     
     good_ips = WorkerNode.where(valid:true)
-    @analysis.log_r = "good_ips = #{good_ips}"
+    @analysis.analysis_output = []
+    @analysis.analysis_output << "good_ips = #{good_ips.to_json}"
     #@r.command(ips: WorkerNode.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
     @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
@@ -105,7 +106,7 @@ class Analysis::BatchRun < Struct.new(:options)
       }
     end
 
-    @analysis.log_r = @r.converse("results")
+    @analysis.analysis_output << @r.converse("results")
 
     # Kill the downloading of data files process
     process.stop
@@ -114,6 +115,7 @@ class Analysis::BatchRun < Struct.new(:options)
     Rails.logger.info("Trying to download any remaining files from worker nodes")
     @analysis.download_data_from_workers
 
+    @analysis.end_time = Time.now
     @analysis.status = 'completed'
     @analysis.save!
   end
