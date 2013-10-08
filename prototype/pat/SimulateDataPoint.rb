@@ -210,6 +210,7 @@ begin
   # Get some introspection on what the current running job is. For now just
   # look at the directories that are being generated
   job_dirs = []
+  prev_time = nil
   while run_manager.workPending()
     sleep 5
     OpenStudio::Application::instance().processEvents()
@@ -217,8 +218,9 @@ begin
     # check if there are any new folders that were creates
     temp_dirs = Dir[File.join(directory.to_s,"*/")].map { |d| d.split("/").pop}.sort
     if (temp_dirs + job_dirs).uniq != job_dirs
-      communicate_time_log(id, (temp_dirs - job_dirs).join(","))
+      communicate_time_log(id, (temp_dirs - job_dirs).join(","), prev_time)
       job_dirs = temp_dirs
+      prev_time = Time.now
     end
   end
 

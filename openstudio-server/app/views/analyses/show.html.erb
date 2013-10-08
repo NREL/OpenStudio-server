@@ -4,23 +4,22 @@
 <table class="table table-striped">
   <thead>
   <tr>
-    <th>Analysis Status</th>
+    <th>Name</th>
+    <th>Status</th>
     <th>Start Time (UTC)</th>
     <th>End Time (UTC)</th>
+    <th>Delta Time (s)</th>
     <th>View</th>
-    <th>Zip File</th>
   <tr>
   </thead>
   <tbody>
+  <td><%= @analysis.name %></td>
   <td><%= @analysis.status %></td>
   <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
   <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>
-  <td><%= link_to 'JSON', analysis_path(@analysis, :format => :json) %></td>
-  <% if @analysis.seed_zip.nil? %>
-      <td>No Zip File</td>
-  <% else %>
-      <td><%= link_to @analysis.seed_zip_file_name, @analysis.seed_zip.url(:original, false) %></td>
-  <% end %>
+  <td><%= (@analysis.end_time.to_f - @analysis.start_time.to_f).round(2) unless @analysis.end_time.nil? || @analysis.start_time.nil? %></td>
+  <td><%= link_to 'JSON', analysis_path(@analysis, :format => :json) %>
+    | <%= link_to_if(!@analysis.seed_zip.nil?, "Zip File", @analysis.seed_zip.url(:original, false)) %> </td>
   </tbody>
 </table>
 
@@ -40,6 +39,7 @@
     <th>EUI (MJ/m²)</th>
     <th>Start Time (UTC)</th>
     <th>End Time (UTC)</th>
+    <th>Delta Time (s)</th>
     <th>View</th>
     <th>Action</th>
   </tr>
@@ -52,6 +52,7 @@
         <td> <%= dp.results['net_site_energy_use_intentsity'] unless dp.results.nil? %> </td>
         <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
         <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
+        <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
         <td><%= link_to 'HTML', data_point_path(dp) %>
           | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
           | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>

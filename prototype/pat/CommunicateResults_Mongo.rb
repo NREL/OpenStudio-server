@@ -75,9 +75,13 @@ def communicateDatapoint(data_point)
   dp.save!
 end
 
-def communicate_time_log(data_point_id, log_message)
+def communicate_time_log(data_point_id, log_message, prev_time = nil)
   dp = DataPoint.find_or_create_by(uuid: data_point_id)
-  dp.run_time_log << [Time.now, log_message]
+  delta = 0
+  if !prev_time.nil?
+    delta = Time.now.to_f - prev_time.to_f
+  end
+  dp.run_time_log << [Time.now, delta, log_message]
   dp.save!
 end
 
