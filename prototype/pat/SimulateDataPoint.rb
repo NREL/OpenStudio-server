@@ -205,7 +205,22 @@ begin
   communicate_time_log(id, "Starting Simulation")
 
   # wait for the job to finish
-  run_manager.waitForFinished
+  #run_manager.waitForFinished
+
+  # Get some introspection on what the current running job is. For now just
+  # look at the directories that are being generated
+  job_dirs = []
+  while run_manager.workPending()
+    sleep 5
+    OpenStudio::Application::instance().processEvents()
+
+    # check if there are any new folders that were creates
+    temp_dirs = Dir[File.join(directory.to_s,"*/")].map { |d| d.split("/").pop}.sort
+    if (temp_dirs + job_dirs).uniq != job_dirs
+      communicate_time_log(id, (temp_dirs - job_dirs).join(","))
+      job_dirs = temp_dirs
+    end
+  end
 
   puts "Simulation finished"
   communicate_time_log(id, "Simulation Finished")
