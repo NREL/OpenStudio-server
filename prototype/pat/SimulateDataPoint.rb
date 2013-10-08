@@ -29,6 +29,7 @@ optparse = OptionParser.new do |opts|
 end
 
 optparse.parse!
+
 puts "Parsed Input: #{optparse}"
 
 puts "Checking Arguments"
@@ -38,6 +39,7 @@ if not options[:directory]
   exit
 end
 
+# TODO: The first thing this needs to do is register itself with the server to get the datapoint information
 
 puts "Checking UUID of #{options[:uuid]}"
 if (not options[:uuid]) || (options[:uuid] == "NA")
@@ -90,20 +92,19 @@ if id.nil?
   end
 end
 
-puts "Communicating Started #{id}"
-
 # let listening processes know that this data point is running
 communicateStarted(id)
+communicate_debug_log(id, "Communicating Started #{id}")
 communicate_time_log(id, "started")
 
 begin
 
   if File.exist?(directory.to_s)
-    puts "Deleting directory #{directory.to_s}"
+    communicate_debug_log(id, "Deleting directory #{directory.to_s}")
     FileUtils.rm_rf(directory.to_s)
   end
 
-  puts "Making directory #{directory.to_s}"
+  communicate_debug_log(id, "Making directory #{directory.to_s}")
 
   # create data point directory
   FileUtils.mkdir_p(directory.to_s)
@@ -113,7 +114,7 @@ begin
   logSink.setLogLevel(logLevel)
   OpenStudio::Logger::instance.standardOutLogger.disable
 
-  puts "Getting Problem JSON input"
+  communicate_debug_log(id, "Getting Problem JSON input")
   communicate_time_log(id, "Getting Problem JSON from database")
 
   # get json from database
@@ -121,7 +122,7 @@ begin
   data_point_json = json[0]
   analysis_json = json[1]
 
-  puts "Parsing Analysis JSON input"
+  communicate_debug_log(id, "Parsing Analysis JSON input")
   communicate_time_log(id, "Reading Problem JSON into OpenStudio")
   # load problem formulation
   loadResult = OpenStudio::Analysis::loadJSON(analysis_json)
@@ -141,7 +142,7 @@ begin
   analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
   analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"), analysis_options, true)
 
-  puts "Parsing DataPoint JSON input"
+  communicate_debug_log(id, "Parsing DataPoint JSON input")
   communicate_time_log(id, "Load DataPoint JSON")
 
   # load data point to run
@@ -155,13 +156,13 @@ begin
   data_point = loadResult.analysisObject.get.to_DataPoint.get
   analysis.addDataPoint(data_point) # also hooks up real copy of problem
 
-  puts "Communicating DataPoint"
+  communicate_debug_log(id, "Communicating DataPoint")
   communicate_time_log(id, "Update DataPoint Database Record")
 
   # update datapoint in database
   communicateDatapoint(data_point)
 
-  puts "Running Simulation"
+  communicate_debug_log(id, "Running Simulation")
   communicate_time_log(id, "Setting Up RunManager")
 
   # create a RunManager
@@ -201,7 +202,7 @@ begin
   analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
   run_manager.enqueue(job, false);
 
-  puts "Waiting for simulation to finish"
+  communicate_debug_log(id,"Waiting for simulation to finish")
   communicate_time_log(id, "Starting Simulation")
 
   # wait for the job to finish
@@ -216,7 +217,7 @@ begin
     OpenStudio::Application::instance().processEvents()
 
     # check if there are any new folders that were creates
-    temp_dirs = Dir[File.join(directory.to_s,"*/")].map { |d| d.split("/").pop}.sort
+    temp_dirs = Dir[File.join(directory.to_s, "*/")].map { |d| d.split("/").pop }.sort
     if (temp_dirs + job_dirs).uniq != job_dirs
       communicate_time_log(id, (temp_dirs - job_dirs).join(","), prev_time)
       job_dirs = temp_dirs
@@ -224,7 +225,7 @@ begin
     end
   end
 
-  puts "Simulation finished"
+  communicate_debug_log(id, "Simulation finished")
   communicate_time_log(id, "Simulation Finished")
 
   # use the completed job to populate data_point with results
@@ -232,16 +233,16 @@ begin
   analysis.problem.updateDataPoint(data_point, job)
 
 
-  puts "Communicating Results"
+  communicate_debug_log(id, "Communicating Results")
   communicate_time_log(id, "Communicating the results back to Server")
 
   # implemented differently for Local vs. Vagrant or AWS
   communicateResults(data_point, directory)
 
 rescue Exception => e
-  puts "SimulationDataPoint Script failed"
-  puts e.message
-  puts e.backtrace
+  communicate_debug_log(id, "SimulationDataPoint Script failed")
+  communicate_debug_log(id, e.message)
+  communicate_debug_log(id, e.backtrace)
 
   # need to tell mongo this failed
   communicateFailure(id)
@@ -250,7 +251,7 @@ rescue Exception => e
   # raise  #NL: Don't raise an exception because this will be sent to R and it will not know how to process it.
 end
 
-puts "Complete"
+communicate_debug_log(id, "Complete")
 
 # DLM: this is where we put the objective functions.  NL: Note that we must return out of this nicely no matter what.
 puts "0"

@@ -197,9 +197,10 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     @log_message = []
-
     @analysis.data_points.each do |dp|
-      @log_message << [dp.name] + dp.run_time_log
+      unless dp.run_time_log.nil?
+        @log_message << [dp.name] + dp.run_time_log
+      end
     end
     @rserve_log = File.read(File.join(Rails.root, 'log','Rserve.log'))
 
