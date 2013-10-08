@@ -4,21 +4,7 @@ class Analysis::Lhs < Struct.new(:options)
     @analysis_id = analysis_id
     @data_points = data_points
 
-    @analysis = Analysis.find(@analysis_id)
 
-    require 'rserve/simpler'
-    require 'uuid'
-    require 'childprocess'
-
-    #create an instance for R
-    @r = Rserve::Simpler.new
-    Rails.logger.info "Setting up R for LHS"
-    @r.converse('setwd("/mnt/openstudio")')
-    @r.converse "library(snow)"
-    @r.converse "library(snowfall)"
-    @r.converse "library(RMongo)"
-    @r.converse "library(lhs)"
-    @r.converse "library(triangle)"
   end
 
   def lhs_probability(num_variables, sample_size)
@@ -90,15 +76,31 @@ class Analysis::Lhs < Struct.new(:options)
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
+    require 'rserve/simpler'
+    require 'uuid'
+    require 'childprocess'
+
+    @analysis = Analysis.find(@analysis_id)
+
+    #create an instance for R
+    @r = Rserve::Simpler.new
+    Rails.logger.info "Setting up R for LHS"
+    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse "library(snow)"
+    @r.converse "library(snowfall)"
+    @r.converse "library(lhs)"
+    @r.converse "library(triangle)"
 
     # get variables / measures
     # measure['variables'].map { |k, v| var_cnt += 1 if k['method'] == 'lhs' }
 
     # generate the probabilities for all variables [individually]
 
+
     # p = nil
     # if var_cnt > 0
     #   puts "Found #{var_cnt} variables"
+    @r.converse("print('starting lhs')")
 
     # get the probabilities and persist them for reference
     Rails.logger.info "Starting sampling"
