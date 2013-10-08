@@ -4,6 +4,7 @@ require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
+ANALYSIS_TYPE="lhs"
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|
@@ -82,7 +83,6 @@ if !project_id.nil?
     req.body = formulation_json.to_json
   end
 
-  #resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", formulation_json)
   puts resp.inspect
   if resp.status == 201
     puts "asked to create analysis with #{analysis_id}"
@@ -146,7 +146,7 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY }
+  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE }
   puts action_hash.to_json
 
   #resp = @conn.post do |req|
