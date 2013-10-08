@@ -186,6 +186,14 @@ class Analysis
       record.destroy
     end
 
+    logger.info("Found #{self.variables.size} records")
+    if !self.variables.nil?
+      self.variables.each do |record|
+        logger.info("removing #{record.id}")
+        record.destroy
+      end
+    end
+
     # delete any delayed jobs items
     if !self.delayed_job_id.nil?
       dj = Delayed::Job.find(self.delayed_job_id)
