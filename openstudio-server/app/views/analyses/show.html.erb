@@ -5,6 +5,7 @@
   <thead>
   <tr>
     <th>Name</th>
+    <th>Type</th>
     <th>Status</th>
     <th>Start Time (UTC)</th>
     <th>End Time (UTC)</th>
@@ -14,6 +15,7 @@
   </thead>
   <tbody>
   <td><%= @analysis.name %></td>
+  <td><%= @analysis.analysis_type %></td>
   <td><%= @analysis.status %></td>
   <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
   <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>

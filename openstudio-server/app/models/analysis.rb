@@ -14,6 +14,7 @@ class Analysis
   field :run_flag, :type => Boolean
   field :delayed_job_id # ObjectId
   field :status, :type => String # enum on the status of the analysis (queued, started, completed)
+  field :analysis_type, :type => String
   field :analysis_output, :type => Array
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
@@ -90,6 +91,8 @@ class Analysis
 
 
   def start(no_delay, analysis_type='batch_run')
+    Rails.logger.info("Starting #{analysis_type}")
+
     # get the data points that are going to be run
     data_points_hash = {}
     data_points_hash[:data_points] = []
@@ -110,9 +113,10 @@ class Analysis
     end
   end
 
-  def run_r_analysis(no_delay = false)
+  def run_r_analysis(no_delay = false, analysis_type = 'batch_run')
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
+    Rails.logger.info("running R analysis with #{analysis_type}")
 
     self.delayed_job_id.nil? ? dj = nil : dj = Delayed::Job.find(self.delayed_job_id)
 
@@ -128,10 +132,11 @@ class Analysis
       self.initialize_workers
 
       logger.info("queuing up analysis #{@analysis}")
+      self.analysis_type = analysis_type
       self.status = 'queued'
       self.save!
 
-      self.start(no_delay)
+      self.start(no_delay, analysis_type)
 
       return [true]
     end
