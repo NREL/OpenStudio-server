@@ -1,10 +1,27 @@
 <p id="notice"><%= notice %></p>
 
-<h1>Analysis Status</h1>
+<h1>Analysis Information</h1>
 <table class="table table-striped">
+  <thead>
   <tr>
-    <td><%= @analysis.status %></br></td>
-  </tr>
+    <th>Analysis Status</th>
+    <th>Start Time</th>
+    <th>End Time</th>
+    <th>View</th>
+    <th>Zip File</th>
+  <tr>
+  </thead>
+  <tbody>
+  <td><%= @analysis.status %></td>
+  <td><%= @analysis.start_time %></td>
+  <td><%= @analysis.end_time %></td>
+  <td><%= link_to 'JSON', analysis_path(@analysis, :format => :json) %></td>
+  <% if @analysis.seed_zip.nil? %>
+      <td>No Zip File</td>
+  <% else %>
+      <td><%= link_to @analysis.seed_zip_file_name, @analysis.seed_zip.url(:original, false) %></td>
+  <% end %>
+  </tbody>
 </table>
 
 <h1>Data Points</h1>
@@ -40,18 +57,6 @@
       </tr>
   <% end %>
   </tbody>
-</table>
-
-<h1>Analysis Zip File</h1>
-<table class="table table-striped">
-  <tr>
-    <% if @analysis.seed_zip.nil? %>
-        <td>No Zip File</td>
-    <% else %>
-        <td><%= link_to @analysis.seed_zip_file_name, @analysis.seed_zip.url(:original, false) %></td>
-    <% end %>
-
-  </tr>
 </table>
 
 <%= link_to 'Back', project_path(@analysis.project) %>
