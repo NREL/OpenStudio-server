@@ -14,8 +14,7 @@ OpenstudioServer::Application.routes.draw do
       end
 
       #resources :problems, shallow: true do
-      #  resources :variables, shallow: true
-      #end
+      resources :variables, :only => [:show, :index], shallow: true
       resources :data_points, shallow: true  do
         member do
           get :show_full

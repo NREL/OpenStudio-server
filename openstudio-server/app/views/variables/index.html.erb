@@ -1,21 +1,19 @@
-<h1>Listing variables</h1>
+<h1>Listing Variables</h1>
 
-<table>
+<table class="table table-striped">
+  <thead>
   <tr>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
-
-<% @variables.each do |variable| %>
+    <th>Name</th>
+    <th>Other</th>
   <tr>
-    <td><%= link_to 'Show', variable %></td>
-    <td><%= link_to 'Edit', edit_variable_path(variable) %></td>
-    <td><%= link_to 'Destroy', variable, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-  </tr>
-<% end %>
+  </thead>
+  <tbody>
+  <% @variables.each do |variable| %>
+      <tr>
+        <td><%= variable.name %></td>
+        <td><%= variable.minimum %>, <%= variable.maximum %>, <%= variable.uuid %>, etc </td>
+      </tr>
+  <% end %>
+  </tbody>
 </table>
 
-<br />
-
-<%= link_to 'New Variable', new_variable_path %>

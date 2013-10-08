@@ -52,6 +52,11 @@ class AnalysesController < ApplicationController
     params[:analysis].merge!(:os_metadata => params[:metadata])
 
     @analysis = Analysis.new(params[:analysis])
+
+    # Need to pull out the variables that are in this analysis so that we can stitch the problem
+    # back together when it goes to run
+    @analysis.pull_out_os_variables()
+
     respond_to do |format|
       if @analysis.save
         format.html { redirect_to @analysis, notice: 'Analysis was successfully created.' }
