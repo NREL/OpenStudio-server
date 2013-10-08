@@ -5,16 +5,16 @@
   <thead>
   <tr>
     <th>Analysis Status</th>
-    <th>Start Time</th>
-    <th>End Time</th>
+    <th>Start Time (UTC)</th>
+    <th>End Time (UTC)</th>
     <th>View</th>
     <th>Zip File</th>
   <tr>
   </thead>
   <tbody>
   <td><%= @analysis.status %></td>
-  <td><%= @analysis.start_time %></td>
-  <td><%= @analysis.end_time %></td>
+  <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
+  <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>
   <td><%= link_to 'JSON', analysis_path(@analysis, :format => :json) %></td>
   <% if @analysis.seed_zip.nil? %>
       <td>No Zip File</td>
@@ -37,7 +37,9 @@
   <tr>
     <th>Name</th>
     <th>Status</th>
-    <th>EUI</th>
+    <th>EUI (MJ/m²)</th>
+    <th>Start Time (UTC)</th>
+    <th>End Time (UTC)</th>
     <th>View</th>
     <th>Action</th>
   </tr>
@@ -47,7 +49,9 @@
       <tr>
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
-        <td> <%= dp.results['total_site_energy'] unless dp.results.nil? %> </td>
+        <td> <%= dp.results['net_site_energy_use_intentsity'] unless dp.results.nil? %> </td>
+        <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
+        <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
         <td><%= link_to 'HTML', data_point_path(dp) %>
           | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
           | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>

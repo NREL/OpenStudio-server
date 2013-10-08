@@ -15,6 +15,9 @@ class DataPoint
   field :eplus_html, :type => String #Moped::BSON::Binary # ABUPS Summary
   field :output
   field :results, :type => Hash
+  field :run_start_time, :type => DateTime
+  field :run_end_time, :type => DateTime
+  field :run_time_log, :type => Array
 
   # Relationships
   belongs_to :analysis
