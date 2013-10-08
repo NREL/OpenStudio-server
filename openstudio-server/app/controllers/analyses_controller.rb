@@ -98,13 +98,14 @@ class AnalysesController < ApplicationController
   def action
     @analysis = Analysis.find(params[:id])
     logger.info("action #{params.inspect}")
+    params[:analysis_type].nil? ? @analysis_type = 'batch_run' : @analysis_type = params[:analysis_type]
 
     result = {}
     if params[:analysis_action] == 'start'
 
       params[:without_delay] == 'true' ? no_delay = true : no_delay = false
 
-      res = @analysis.run_r_analysis(no_delay)
+      res = @analysis.run_r_analysis(no_delay, @analysis_type)
       if res[0]
         result[:code] = 200
         result[:analysis] = @analysis
