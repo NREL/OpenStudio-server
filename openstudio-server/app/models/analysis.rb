@@ -45,8 +45,11 @@ class Analysis
   before_destroy :remove_dependencies
 
   def initialize_workers
-    # load in the master and worker information if it doesn't already exist
+    # delete the master and workers and reload them
+    MasterNode.delete_all
+    WorkerNode.delete_all
 
+    # load in the master and worker information if it doesn't already exist
     ip_file = "/home/ubuntu/ip_addresses"
     if !File.exists?(ip_file)
       ip_file = "/data/launch-instance/ip_addresses_vagrant" # somehow check if this is a vagrant box
