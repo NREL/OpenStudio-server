@@ -228,7 +228,7 @@ class AnalysesController < ApplicationController
       ]
       include_fields = [
           :variables,
-          :measures
+          :measures.as_json(:include => :variables),
       ]
       #  format.html # new.html.erb
       format.json { render json: {:analysis => @analysis.as_json(:except => exclude_fields, :include => include_fields)} }

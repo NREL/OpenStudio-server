@@ -14,6 +14,7 @@ class Measure
 
   # Relationships
   belongs_to :analysis
+  has_many :variables
 
   # Indexes
   index({uuid: 1}, unique: true)
@@ -58,14 +59,14 @@ class Measure
         # just append this to an array for now...
         # jam this data into the measure for now, but this needs to get pulled out into
         # variables
-        measure[k] = v
-        measure['arguments'].each do |arg|
+        # measure[k] = v
+        v.each do |arg|
           # Create a variable definition (i.e. a variable) for each argument regardless
           # whether or not it is used
           new_var = Variable.create_by_os_argument_json(analysis_id, arg)
+          measure.variables << new_var unless measure.variables.include?(new_var)
 
-          # link the new_var from the measure -- eventually
-
+          # link the new_var from the measure
 
           if arg['value'] && arg['argument_index']
             Rails.logger.info("adding #{arg['value']}")

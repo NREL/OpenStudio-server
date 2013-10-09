@@ -17,6 +17,7 @@ class Variable
 
   # Relationships
   belongs_to :analysis
+  belongs_to :measure
 
   # Indexes
   index({uuid: 1}, unique: true)

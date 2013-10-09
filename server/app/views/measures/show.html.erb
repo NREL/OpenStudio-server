@@ -1,5 +1,18 @@
 <p id="notice"><%= notice %></p>
 
-
-<%= link_to 'Edit', edit_measure_path(@measure) %> |
-<%= link_to 'Back', measures_path %>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Field Name</th>
+    <th>Field Value</th>
+  <tr>
+  </thead>
+  <tbody>
+    <% @measure.as_document.each do |k, v| %>
+      <tr>
+        <td><%= k %></td>
+        <td><%= v %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

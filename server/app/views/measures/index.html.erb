@@ -13,10 +13,14 @@
   <tbody>
   <% @measures.each do |measure| %>
       <tr>
-        <td><%= measure.name if measure.name %></td>
+        <td><%= link_to_if(measure.name, measure.name, measure_path(measure)) %></td>
         <td><%= measure.measure_type if measure.measure_type %></td>
         <td><%= measure.description %></td>
-        <td><%= measure.arguments.map{|a| a['name'] if a['name']} if measure.arguments %></td>
+        <td>
+          <% measure.variables.each do |var| %>
+              <%= link_to var.name, variable_path(var) %></br>
+          <% end %>
+        </td>
         <td><%= measure.values if measure.values %></td>
       </tr>
   <% end %>
