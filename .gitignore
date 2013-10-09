@@ -4,5 +4,5 @@
 .ruby-version
 .DS_Store
 .Vagrantfile.swp
-openstudio-server/public/assets/*
+server/public/assets/*
 launch-instance/aws.log
