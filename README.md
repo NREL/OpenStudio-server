@@ -165,6 +165,7 @@ rm -f /data/launch-instance/ec2*
 rm -f /data/launch-instance/config.yml
 rm -f /data/launch-instance/aws.log
 rm -f /data/launch-instance/*.json
+rm -f /data/rails-models/mongoid-vagrant.yml
 rm -rf /data/prototype/example_scripts
 rm -rf /data/prototype/R
 rm -rf /var/chef

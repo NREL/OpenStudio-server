@@ -20,7 +20,7 @@ if {[catch "spawn /usr/bin/ssh-keygen -t rsa"]} {
   puts "error"
 }
 
-set timeout 30
+set timeout 8
 expect {
   "Enter file in which to save the key" {
      send -s "\r"
