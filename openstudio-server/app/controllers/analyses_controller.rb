@@ -21,7 +21,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: { :analysis => @analysis, :metadata => @analysis[:os_metadata] } }
+      format.json { render json: {:analysis => @analysis, :metadata => @analysis[:os_metadata]} }
     end
   end
 
@@ -158,7 +158,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: { :analysis => { :status => @analysis.status}, data_points: dps.map{ |k| {:_id => k.id, :status => k.status } } } }
+      format.json { render json: {:analysis => {:status => @analysis.status}, data_points: dps.map { |k| {:_id => k.id, :status => k.status} }} }
     end
   end
 
@@ -174,7 +174,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: { :analysis => { status: @analysis.status}, data_points: dps.map{ |k| {:_id => k.id, :status => k.status, :download_status => k.download_status } } } }
+      format.json { render json: {:analysis => {status: @analysis.status}, data_points: dps.map { |k| {:_id => k.id, :status => k.status, :download_status => k.download_status} }} }
     end
   end
 
@@ -202,7 +202,7 @@ class AnalysesController < ApplicationController
         @log_message << [dp.name] + dp.run_time_log
       end
     end
-    @rserve_log = File.read(File.join(Rails.root, 'log','Rserve.log'))
+    @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
     respond_to do |format|
       format.html # oh_shit.html.erb
@@ -210,4 +210,38 @@ class AnalysesController < ApplicationController
     end
 
   end
+
+  def page_data
+    @analysis = Analysis.find(params[:id])
+
+    # once we know that for all the buildings.
+    #@time_zone = "America/Denver"
+    #@data.each do |d|
+    #  time, tz_abbr = Util::Date.fake_zone_in_utc(d[:time].to_i / 1000, @time_zone)
+    #  d[:fake_tz_time] = time.to_i * 1000
+    #  d[:tz_abbr] = tz_abbr
+    #end
+
+    respond_to do |format|
+      format.json do
+        fields = [
+            :name,
+            :data_points,
+            :analysis_type,
+            :status,
+            :start_time,
+            :end_time,
+            :seed_zip,
+            :results,
+            :run_start_time,
+            :run_end_time,
+            :openstudio_datapoint_file_name
+        ]
+
+        render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ) }
+        #render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
+      end
+    end
+  end
+
 end
