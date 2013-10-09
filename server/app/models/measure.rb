@@ -31,7 +31,7 @@ class Measure
 
   def self.create_from_os_json(analysis_id, os_json)
 
-    # I really thin the BCL is the unique measure id here, not the uuid... tbd
+    # I really think the BCL is the unique measure id here, not the uuid... tbd
     measure = Measure.where({analysis_id: analysis_id, uuid: os_json['bcl_measure_uuid']}).first
     if measure
       Rails.logger.warn("Measure already exists for #{measure.name} : #{measure.uuid}")
@@ -49,19 +49,27 @@ class Measure
       end
 
       # check for null measures
-      Rails.logger.info("trying to add #{k} : #{v}")
+      #Rails.logger.info("trying to add #{k} : #{v}")
       measure[k] = v unless exclude_fields.include? k
 
       # Also pull out the value fields for each for each of these and save into a variable instance "somehow???"
-      if v == "arguments"
+      if k == "arguments"
+        Rails.logger.info("checking arguments for values")
         # just append this to an array for now...
         # jam this data into the measure for now, but this needs to get pulled out into
         # variables
         measure[k] = v
         measure['arguments'].each do |arg|
-          if arg['value']
-            logger.info("adding #{arg['value']}")
-            measure.values << arg['value']
+          # Create a variable definition (i.e. a variable) for each argument regardless
+          # whether or not it is used
+          new_var = Variable.create_by_os_argument_json(analysis_id, arg)
+
+          # link the new_var from the measure -- eventually
+
+
+          if arg['value'] && arg['argument_index']
+            Rails.logger.info("adding #{arg['value']}")
+            measure.values << [arg['argument_index'], arg['value']]
           end
         end
       end
