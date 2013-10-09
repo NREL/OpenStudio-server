@@ -218,6 +218,23 @@ class AnalysesController < ApplicationController
 
   end
 
+  def new_view
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      exclude_fields = [
+          :os_metadata,
+          :problem,
+      ]
+      include_fields = [
+          :variables,
+          :measures
+      ]
+      #  format.html # new.html.erb
+      format.json { render json: {:analysis => @analysis.as_json(:except => exclude_fields, :include => include_fields)} }
+    end
+  end
+
   def page_data
     @analysis = Analysis.find(params[:id])
 
@@ -245,7 +262,7 @@ class AnalysesController < ApplicationController
             :openstudio_datapoint_file_name
         ]
 
-        render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ) }
+        render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points)}
         #render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
