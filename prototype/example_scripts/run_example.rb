@@ -9,9 +9,9 @@ STOP_AFTER_N=nil  #set to nil if you want them all
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
 # Project data
-formulation_file = "../pat/BigPATTestExport/analysis.json"
-analysis_zip_file = "../pat/BigPATTestExport/analysis.zip"
-datapoints = Dir.glob("../pat/BigPATTestExport/datapoint*.json")
+formulation_file = "./BigPATTestExport/analysis.json"
+analysis_zip_file = "./BigPATTestExport/analysis.zip"
+datapoints = Dir.glob("./BigPATTestExport/datapoint*.json")
 
 # Try not to change data below here. If you do make sure you update the other run_example file
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|

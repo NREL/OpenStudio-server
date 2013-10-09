@@ -4,7 +4,7 @@ OpenStudio::Logger::instance.standardOutLogger.enable
 fileLog = OpenStudio::FileLogSink.new(OpenStudio::Path.new('./run_project_aws.log'))
 fileLog.setLogLevel(OpenStudio::Debug)
 
-project_dir = File.dirname(__FILE__) + '/../pat/PATTest'
+project_dir = File.dirname(__FILE__) + './pat/PATTest'
 
 # override instance types here or leave nil to use default
 serverInstanceType = 't1.micro'
