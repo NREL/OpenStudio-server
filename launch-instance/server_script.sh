@@ -29,3 +29,4 @@ sudo chmod -R 777 /mnt/openstudio
 
 #file flag the user_data has completed
 cat /dev/null > /home/ubuntu/user_data_done
+
