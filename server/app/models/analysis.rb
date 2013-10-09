@@ -55,7 +55,7 @@ class Analysis
     # load in the master and worker information if it doesn't already exist
     ip_file = "/home/ubuntu/ip_addresses"
     if !File.exists?(ip_file)
-      ip_file = "/data/launch-instance/ip_addresses_vagrant" # somehow check if this is a vagrant box
+      ip_file = "/data/launch-instance/ip_addresses" # somehow check if this is a vagrant box -- RAILS ENV?
     end
 
     ips = File.read(ip_file).split("\n")
