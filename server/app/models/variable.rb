@@ -13,6 +13,7 @@ class Variable
   field :distribution, :type => String
   field :data_type, :type => String # not sure this is needed because mongo is typed
   field :variable_index, :type => Integer # for measure groups
+  field :argument_index, :type => Integer
 
   # Relationships
   belongs_to :analysis
@@ -31,15 +32,42 @@ class Variable
   after_create :verify_uuid
   #before_destroy :remove_dependencies
 
-  def self.create_from_os_json(analysis_id, os_json)
-    var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
 
+  # Create a new variable based on the OS Variable Metadata
+  def self.create_from_os_json(analysis_id, os_json)
+    var = Variable.where({analysis_id: analysis_id, uuid: os_json['uuid']}).first
+    if var
+      Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
+    else
+      var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
+    end
+
+    exclude_fields = ['uuid','type']
     os_json.each do |k,v|
-      next if ['uuid','type'].include? k
-      var[k] = v
+      var[k] = v unless exclude_fields.include? k
     end
 
     # deal with type or any other "excluded" variables from the hash
+
+    var.save!
+
+    var
+  end
+
+  # This method is really not needed once we merge the concept of a argument
+  # and a variable
+  def self.create_by_os_argument_json(analysis_id, os_json)
+    var = Variable.where({analysis_id: analysis_id, uuid: os_json['uuid']}).first
+    if var
+      Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
+    else
+      var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
+    end
+
+    exclude_fields = ['uuid','type']
+    os_json.each do |k,v|
+      var[k] = v unless exclude_fields.include? k
+    end
 
     var.save!
 

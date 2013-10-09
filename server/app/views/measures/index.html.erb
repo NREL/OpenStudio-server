@@ -7,6 +7,7 @@
     <th>Measure Type</th>
     <th>Description</th>
     <th>Arguments/Variables</th>
+    <th>Value Instances</th>
   <tr>
   </thead>
   <tbody>
@@ -16,6 +17,7 @@
         <td><%= measure.measure_type if measure.measure_type %></td>
         <td><%= measure.description %></td>
         <td><%= measure.arguments.map{|a| a['name'] if a['name']} if measure.arguments %></td>
+        <td><%= measure.values if measure.values %></td>
       </tr>
   <% end %>
   </tbody>
