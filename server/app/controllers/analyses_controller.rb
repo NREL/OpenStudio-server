@@ -212,7 +212,7 @@ class AnalysesController < ApplicationController
     @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
     respond_to do |format|
-      format.html # oh_shit.html.erb
+      format.html # debug_log.html.erb
       format.json { render json: log_message }
     end
 
@@ -228,7 +228,7 @@ class AnalysesController < ApplicationController
       ]
       include_fields = [
           :variables,
-          :measures.as_json(:include => :variables),
+          :measures #=> {:include => :variables}
       ]
       #  format.html # new.html.erb
       format.json { render json: {:analysis => @analysis.as_json(:except => exclude_fields, :include => include_fields)} }

@@ -22,6 +22,7 @@ class DataPoint
 
   # Relationships
   belongs_to :analysis
+  has_many :variable_instances
 
   # Indexes
   index({uuid: 1}, unique: true)

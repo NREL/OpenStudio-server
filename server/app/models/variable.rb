@@ -14,6 +14,8 @@ class Variable
   field :data_type, :type => String # not sure this is needed because mongo is typed
   field :variable_index, :type => Integer # for measure groups
   field :argument_index, :type => Integer
+  field :perturbable, :type => Boolean, default: false # if eneabled, then it will be perturbed
+  scope :enabled, where(perturbable: true)
 
   # Relationships
   belongs_to :analysis

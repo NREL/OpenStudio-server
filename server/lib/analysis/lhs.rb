@@ -99,21 +99,26 @@ class Analysis::Lhs < Struct.new(:options)
     @r.converse "library(triangle)"
 
     # get variables / measures
-    #@analysis.variables.each do |variable|
-
-    #end
+    # For some reason the scored variable won't work here! ugh.
+    #@analysis.variables.enabled do |variable|
+    #@analysis.variables.count
+    # TODO: INDEX THIS
+    selected_variables = Variable.where({analysis_id: @analysis, perturbable: true})
+    Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
+    parameter_space = 1
+    if false #@analysis.problem.lhs_analysis_type = "Senstiviity"
+      parameter_space = selected_variables.count
+    end
 
     # generate the probabilities for all variables [individually]
-
 
     # p = nil
     # if var_cnt > 0
     #   puts "Found #{var_cnt} variables"
     @r.converse("print('starting lhs')")
-
     # get the probabilities and persist them for reference
     Rails.logger.info "Starting sampling"
-    p = lhs_probability(1, 100)
+    p = lhs_probability(parameter_space, 100)
     Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
     samples = samples_from_probability(p[0], "triangle", 50, 10, 30, 90)
     Rails.logger.info "Samples are #{samples}"

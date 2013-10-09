@@ -41,7 +41,7 @@ class Measure
       measure = Measure.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
     end
 
-    Rails.logger.info("updating measure #{measure.id}")
+    Rails.logger.info("adding/updating measure #{measure.id}")
     os_json.each do |k, v|
       exclude_fields = ["arguments"]
 
@@ -49,7 +49,7 @@ class Measure
       #Rails.logger.info("trying to add #{k} : #{v}")
       measure[k] = v unless exclude_fields.include? k
 
-      Rails.logger.info(k)
+      #Rails.logger.info(k)
       if k['measure_type'] && v == "NullMeasure"
         # this is a null measure--but has no name
         Rails.logger.info("Null measure found")
@@ -58,7 +58,7 @@ class Measure
 
       # Also pull out the value fields for each for each of these and save into a variable instance "somehow???"
       if k == "arguments"
-        Rails.logger.info("checking arguments for values")
+        #Rails.logger.info("checking arguments for values")
         # just append this to an array for now...
         # jam this data into the measure for now, but this needs to get pulled out into
         # variables
@@ -67,17 +67,21 @@ class Measure
           # Create a variable definition (i.e. a variable) for each argument regardless
           # whether or not it is used
           new_var = Variable.create_by_os_argument_json(analysis_id, arg)
+          #Rails.logger.info("New variable is #{new_var}")
           measure.variables << new_var unless measure.variables.include?(new_var)
 
           # link the new_var from the measure
 
+          # The measure.values field is just a list of all the set values for the
+          # measure groups which really isn't needed for LHS nor optimization.
           if arg['value'] && arg['argument_index']
-            Rails.logger.info("adding #{arg['value']}")
+            # let the system know that the variable was selected for "manipulation"
+            #Rails.logger.info("letting the system know that it can use this variable #{new_var.inspect}")
+            new_var.perturbable = true
+            new_var.save!
+
+            #Rails.logger.info("adding #{arg['value']}")
             measure.values << [arg['argument_index'], arg['value']]
-
-            # create a variable instance
-            #variable_instance.find_or_create_by()
-
           end
         end
       end

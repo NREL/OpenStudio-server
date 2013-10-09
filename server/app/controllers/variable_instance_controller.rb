@@ -1,0 +1,2 @@
+class VariableInstanceController < ApplicationController
+end

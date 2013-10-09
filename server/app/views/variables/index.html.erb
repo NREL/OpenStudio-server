@@ -10,7 +10,7 @@
   <tbody>
   <% @variables.each do |variable| %>
       <tr>
-        <td><%= variable.name %></td>
+        <td><%= link_to variable.name, variable_path(variable)%></td>
         <td><%= variable.minimum %>, <%= variable.maximum %>, <%= variable.uuid %>, etc </td>
       </tr>
   <% end %>
