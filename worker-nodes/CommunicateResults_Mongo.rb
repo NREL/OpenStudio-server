@@ -53,7 +53,7 @@ def get_problem_json(id, directory)
 
   analysis = dp.analysis
   analysis_hash = Hash.new
-  analysis_hash[:SmallTest] = analysis
+  analysis_hash[:analysis] = analysis
   analysis_hash[:metadata] = analysis[:os_metadata]
   result[1] = analysis_hash.to_json
 

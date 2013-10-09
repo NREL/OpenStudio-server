@@ -59,9 +59,9 @@ analysis_id = nil
 if !project_id.nil?
   formulation_json = JSON.parse(File.read(formulation_file), :symbolize_names => true)
 
-  analysis_id = formulation_json[:SmallTest][:uuid]
+  analysis_id = formulation_json[:analysis][:uuid]
 
-  formulation_json[:SmallTest][:name] = "running from #{File.basename(__FILE__)}"
+  formulation_json[:analysis][:name] = "running from #{File.basename(__FILE__)}"
 
   # save out this file to compare
   #File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
