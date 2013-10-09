@@ -4,43 +4,26 @@ require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
+ANALYSIS_TYPE="batch_run"
+STOP_AFTER_N=nil  #set to nil if you want them all
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
+# Project data
+formulation_file = "../pat/BigPATTestExport/analysis.json"
+analysis_zip_file = "../pat/BigPATTestExport/analysis.zip"
+datapoints = Dir.glob("../pat/BigPATTestExport/datapoint*.json")
+
+# Try not to change data below here. If you do make sure you update the other run_example file
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|
   faraday.request  :url_encoded             # form-encode POST params
   faraday.response :logger                  # log requests to STDOUT
   faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
 end
 
-#  --------- GET example -----------
+# -------- DELETE Example ----------
 resp = RestClient.get("#{HOSTNAME}/projects.json")
 
 projects_json = JSON.parse(resp, :symbolize_names => true, :max_nesting => false)
-#puts projects_json.inspect
-if projects_json.count > 0
-  if !projects_json[0][:analyses].nil?
-    analysis_id = projects_json[0][:analyses][0][:_id]
-    puts analysis_id
-
-    #datapoints = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}.json")
-    #puts JSON.parse(datapoints, :max_nesting => false)
-    #puts JSON.pretty_generate(JSON.parse(datapoints))
-  end
-
-  # Uncomment this section to test the stop
-  #action_hash = { analysis_action: "stop" }
-  #puts action_hash.to_json
-
-  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
-  #puts resp.inspect
-  #exit
-
-end
-
-
-
-
-# -------- DELETE Example ----------
 puts "Deleting all projects in database!"
 
 projects_json.each do |project|
@@ -48,7 +31,6 @@ projects_json.each do |project|
   resp = RestClient.delete("#{HOSTNAME}/projects/#{project[:uuid]}.json")
   puts resp.code
 end
-
 
 # ------- add new project and run example ----------
 project_name = "project #{(rand()*1000).round}"
@@ -75,14 +57,11 @@ end
 # create a new analysis
 analysis_id = nil
 if !project_id.nil?
-
-
-  formulation_file = "../pat/BigPATTestExport/analysis.json"
   formulation_json = JSON.parse(File.read(formulation_file), :symbolize_names => true)
 
   analysis_id = formulation_json[:analysis][:uuid]
 
-  formulation_json[:analysis][:name] = "running from run_example.rb"
+  formulation_json[:analysis][:name] = "running from #{File.basename(__FILE__)}"
 
   # save out this file to compare
   #File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
@@ -93,11 +72,10 @@ if !project_id.nil?
     req.body = formulation_json.to_json
   end
 
-  #resp = RestClient.post("#{HOSTNAME}/projects/#{project_id}/analyses.json", formulation_json)
   puts resp.inspect
   if resp.status == 201
     puts "asked to create analysis with #{analysis_id}"
-    puts resp.inspect
+    #puts resp.inspect
     analysis_id = JSON.parse(resp.body)["_id"]
 
     puts "new analysis created with ID: #{analysis_id}"
@@ -107,29 +85,25 @@ end
 # add the seed model, measures, etc to the analysis
 if !analysis_id.nil?
   puts "uploading seed zip file"
-  file = "../pat/BigPATTestExport/analysis.zip"
 
-  if File.exist?(file)
-    resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(file, 'rb'))
-    puts resp
+  if File.exist?(analysis_zip_file)
+    resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(analysis_zip_file, 'rb'))
+    #puts resp
     puts resp.code
 
     if resp.code == 201
       puts "Successfully uploaded ZIP file"
     end
   else
-    raise "Analysis zip file does not exist! #{file}"
+    raise "Analysis zip file does not exist! #{analysis_zip_file}"
   end
 end
 
 # add all the datapoints to the analysis
 if !analysis_id.nil?
-  datapoints = Dir.glob("../pat/BigPATTestExport/datapoint*.json")
-
   d_n = 0
   datapoints.each do |dp|
     d_n += 1
-    puts "reading in datapoint json: #{dp}"
     dp_hash = JSON.parse(File.open(dp).read, :symbolize_names => true)
 
     # merge in the analysis_id as it has to be what is in the database
@@ -141,12 +115,11 @@ if !analysis_id.nil?
 
     if resp.status == 201
       puts "new datapoint created for analysis #{analysis_id}"
-      puts resp.body
     else
       raise "could not create new datapoint #{resp.inspect}"
     end
 
-    #break if d_n >= 2
+    break if !STOP_AFTER_N.nil? && d_n >= STOP_AFTER_N
   end
 end
 
@@ -154,7 +127,7 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY }
+  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE }
   puts action_hash.to_json
 
   #resp = @conn.post do |req|
