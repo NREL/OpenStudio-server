@@ -8,6 +8,9 @@ class Measure
   field :name, :type => String
   field :display_name, :type => String
   field :description, :type => String
+  field :arguments  # This is really the variable? right?
+  field :measure_type, :type => String
+  field :values, :type => Array, default: []
 
   # Relationships
   belongs_to :analysis
@@ -38,13 +41,30 @@ class Measure
 
     Rails.logger.info("updating measure #{measure.id}")
     os_json.each do |k, v|
-      exclude_fields = ["uuid","bcl_measure_uuid"]
+      exclude_fields = ["uuid","bcl_measure_uuid","arguments"]
+
+      if k['measure_type'] && k['measure_type'] == "NullMeasure"
+        # this is a null measure--but has no name
+        measure.name = "NullMeasure"
+      end
 
       # check for null measures
       Rails.logger.info("trying to add #{k} : #{v}")
       measure[k] = v unless exclude_fields.include? k
 
       # Also pull out the value fields for each for each of these and save into a variable instance "somehow???"
+      if v == "arguments"
+        # just append this to an array for now...
+        # jam this data into the measure for now, but this needs to get pulled out into
+        # variables
+        measure[k] = v
+        measure['arguments'].each do |arg|
+          if arg['value']
+            logger.info("adding #{arg['value']}")
+            measure.values << arg['value']
+          end
+        end
+      end
     end
 
     # deal with type or any other "excluded" variables from the hash

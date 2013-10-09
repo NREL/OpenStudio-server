@@ -1,21 +1,23 @@
-<h1>Listing measures</h1>
+<h1>Listing Measures</h1>
 
-<table>
+<table class="table table-striped">
+  <thead>
   <tr>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
-
-<% @measures.each do |measure| %>
+    <th>Name</th>
+    <th>Measure Type</th>
+    <th>Description</th>
+    <th>Arguments/Variables</th>
   <tr>
-    <td><%= link_to 'Show', measure %></td>
-    <td><%= link_to 'Edit', edit_measure_path(measure) %></td>
-    <td><%= link_to 'Destroy', measure, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-  </tr>
-<% end %>
+  </thead>
+  <tbody>
+  <% @measures.each do |measure| %>
+      <tr>
+        <td><%= measure.name if measure.name %></td>
+        <td><%= measure.measure_type if measure.measure_type %></td>
+        <td><%= measure.description %></td>
+        <td><%= measure.arguments.map{|a| a['name'] if a['name']} if measure.arguments %></td>
+      </tr>
+  <% end %>
+  </tbody>
 </table>
 
-<br />
-
-<%= link_to 'New Measure', new_measure_path %>
