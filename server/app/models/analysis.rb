@@ -169,7 +169,7 @@ class Analysis
       end
     end
 
-    Rails.logger.error("OpenStudio Metadata is: #{self.os_metadata}")
+    #Rails.logger.error("OpenStudio Metadata is: #{self.os_metadata}")
     if self.os_metadata && self.os_metadata['variables']
       self.os_metadata['variables'].each do |variable|
         var = Variable.create_from_os_json(self.id, variable)
@@ -203,17 +203,17 @@ class Analysis
       record.destroy
     end
 
-    logger.info("Found #{self.variables.size} records")
-    if self.variables
-      self.variables.each do |record|
+    logger.info("Found #{self.measures.size} records")
+    if self.measures
+      self.measures.each do |record|
         logger.info("removing #{record.id}")
         record.destroy
       end
     end
 
-    logger.info("Found #{self.measures.size} records")
-    if self.measures
-      self.measures.each do |record|
+    logger.info("Found #{self.variables.size} records")
+    if self.variables
+      self.variables.each do |record|
         logger.info("removing #{record.id}")
         record.destroy
       end

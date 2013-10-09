@@ -24,6 +24,7 @@ class Variable
   index({id: 1}, unique: true)
   index({name: 1})
   index({analysis_id: 1})
+  index({analysis_id: 1, uuid: 1})
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/

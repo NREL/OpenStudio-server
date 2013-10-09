@@ -21,6 +21,7 @@ class Measure
   index({id: 1}, unique: true)
   index({name: 1})
   index({analysis_id: 1})
+  index({analysis_id: 1, uuid: 1})
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
@@ -33,25 +34,27 @@ class Measure
   def self.create_from_os_json(analysis_id, os_json)
 
     # I really think the BCL is the unique measure id here, not the uuid... tbd
-    measure = Measure.where({analysis_id: analysis_id, uuid: os_json['bcl_measure_uuid']}).first
+    measure = Measure.where({analysis_id: analysis_id, uuid: os_json['uuid']}).first
     if measure
       Rails.logger.warn("Measure already exists for #{measure.name} : #{measure.uuid}")
     else
-      measure = Measure.find_or_create_by({analysis_id: analysis_id, uuid: os_json['bcl_measure_uuid']})
+      measure = Measure.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
     end
 
     Rails.logger.info("updating measure #{measure.id}")
     os_json.each do |k, v|
-      exclude_fields = ["uuid","bcl_measure_uuid","arguments"]
-
-      if k['measure_type'] && k['measure_type'] == "NullMeasure"
-        # this is a null measure--but has no name
-        measure.name = "NullMeasure"
-      end
+      exclude_fields = ["arguments"]
 
       # check for null measures
       #Rails.logger.info("trying to add #{k} : #{v}")
       measure[k] = v unless exclude_fields.include? k
+
+      Rails.logger.info(k)
+      if k['measure_type'] && v == "NullMeasure"
+        # this is a null measure--but has no name
+        Rails.logger.info("Null measure found")
+        measure.name = "NullMeasure"
+      end
 
       # Also pull out the value fields for each for each of these and save into a variable instance "somehow???"
       if k == "arguments"
@@ -71,6 +74,10 @@ class Measure
           if arg['value'] && arg['argument_index']
             Rails.logger.info("adding #{arg['value']}")
             measure.values << [arg['argument_index'], arg['value']]
+
+            # create a variable instance
+            #variable_instance.find_or_create_by()
+
           end
         end
       end
