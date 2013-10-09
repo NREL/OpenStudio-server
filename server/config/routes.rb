@@ -12,6 +12,7 @@ OpenstudioServer::Application.routes.draw do
         get :page_data
         get :download_status
         get :debug_log
+        get :new_view
       end
 
       resources :measures, :only => [:show, :index], shallow: true
