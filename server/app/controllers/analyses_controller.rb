@@ -55,6 +55,7 @@ class AnalysesController < ApplicationController
 
     # Need to pull out the variables that are in this analysis so that we can stitch the problem
     # back together when it goes to run
+    logger.info("pulling out os variables")
     @analysis.pull_out_os_variables()
 
     respond_to do |format|
@@ -185,7 +186,9 @@ class AnalysesController < ApplicationController
   def upload
     @analysis = Analysis.find(params[:id])
 
-    @analysis.seed_zip = params[:file]
+    if @analysis
+      @analysis.seed_zip = params[:file]
+    end
 
     respond_to do |format|
       if @analysis.save
