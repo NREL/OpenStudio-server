@@ -30,7 +30,9 @@
   </tbody>
 </table>
 
-<%= link_to 'List of Measures/Variables', analysis_variables_path(@analysis) %> | <%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
+<%= link_to 'List of Measures', analysis_measures_path(@analysis) %> |
+<%= link_to 'List of Variables', analysis_variables_path(@analysis) %> |
+<%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
 
 <h1>Data Points</h1>
 <script>
