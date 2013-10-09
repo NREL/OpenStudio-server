@@ -4,14 +4,12 @@
 
 # setup the passwordless ssh
 cd /data/launch-instance && ./setup-ssh-keys-vagrant.expect
-cd /data/launch-instance && ./setup-ssh-worker-nodes.sh ip_addresses_vagrant
+cp -f /data/launch-instance/ip_addresses_vagrant.template /data/launch-instance/ip_addresses
+cd /data/launch-instance && ./setup-ssh-worker-nodes.sh ip_addresses
 
 # need to setup the hosts file
-sudo /data/launch-instance/master_script.sh
+sudo /data/launch-instance/server_script_vagrant.sh
 
 # make sure that the openstudio directory for simulations exists and is writable
 sudo mkdir -p /mnt/openstudio
 sudo chmod 777 /mnt/openstudio
-
-# set some of the rails variables that are needed
-

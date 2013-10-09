@@ -1,8 +1,7 @@
-# This ruby script shows how to use the classAWS.rb class to launch the Server and Worker nodes
+# This ruby script shows how to use the aws.rb.in class in OpenStudio to launch the Server and Worker nodes
 # on EC2. After the servers are configures, the latter part of the script uses the API to
 # run an example analysis.
 
-require "./AwsConfig.rb"
 require "json"
 
 # use the aws class that lives in the OpenStudio Repository now.  Make sure to update the PATH below to
