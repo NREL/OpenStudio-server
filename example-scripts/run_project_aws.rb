@@ -7,7 +7,7 @@ fileLog.setLogLevel(OpenStudio::Debug)
 project_dir = File.dirname(__FILE__) + './pat/PATTest'
 
 # override instance types here or leave nil to use default
-serverInstanceType = 't1.micro'
+serverInstanceType = 'm1.large'
 workerInstanceType = 't1.micro'
 
 # number of workers
