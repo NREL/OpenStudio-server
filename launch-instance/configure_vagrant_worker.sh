@@ -16,7 +16,7 @@ fi
 #chmod 775 ~/setup*
 #chown ubuntu:ubuntu /home/ubuntu/setup*
 
-# make sure that the openstudio directory for simulations exists and is writable (first blow away)
+# Force the generation of various directories that are in the EBS mnt
 sudo rm -rf /mnt/openstudio
 sudo mkdir -p /mnt/openstudio
 sudo chmod -R 777 /mnt/openstudio
