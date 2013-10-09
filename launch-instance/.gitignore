@@ -2,7 +2,6 @@
 /*.pem
 /*.ppk
 ip_addresses
-master_ip_address
 worker_ips
 mongoid.yml
 slave_info.sh
