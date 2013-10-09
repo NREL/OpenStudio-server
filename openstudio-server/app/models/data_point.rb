@@ -18,7 +18,7 @@ class DataPoint
   field :run_start_time, :type => DateTime
   field :run_end_time, :type => DateTime
   field :run_time_log, :type => Array
-  field :sdp_log_file, :type => String
+  field :sdp_log_file, :type => Array
 
   # Relationships
   belongs_to :analysis
