@@ -1,5 +1,4 @@
 OpenstudioServer::Application.routes.draw do
-  resources :measures  # :only => [:show, :index]
   resources :projects do
     member do
       get :status
@@ -15,7 +14,7 @@ OpenstudioServer::Application.routes.draw do
         get :debug_log
       end
 
-      #resources :problems, shallow: true do
+      resources :measures, :only => [:show, :index], shallow: true
       resources :variables, :only => [:show, :index], shallow: true
       resources :data_points, shallow: true  do
         member do

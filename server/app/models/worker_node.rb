@@ -2,6 +2,7 @@ class WorkerNode
   include Mongoid::Document
   include Mongoid::Timestamps
 
+
   field :ip_address, :type => String
   field :hostname, :type => String
   field :user, :type => String
@@ -10,7 +11,8 @@ class WorkerNode
   field :valid, :type => Boolean, default: false
 
   # Indexes
-  index({hostname: 1, ip_address: 1}, unique: true)
+  index({hostname: 1}, unique: true)
+  index({ip_address: 1}, unique: true)
 
   # Return all the worker IP addresses as a hash in prep for writing to a dataframe
   def self.to_hash
