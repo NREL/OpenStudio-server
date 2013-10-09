@@ -19,10 +19,33 @@
   </thead>
   <tbody>
   <tr>
-    <td><%= @rserve_log.gsub("\n", "</br>").html_safe %></td>
+    <td><%= @rserve_log.gsub("\n", "</br>").html_safe unless @rserve_log.nil? %></td>
   </tr>
   </tbody>
 </table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>Simulate Data Point Log Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @analysis.data_points.each do |dp| %>
+      <tr class="success">
+        <td><%= dp.name unless dp.name.nil? %></td>
+      </tr>
+      <% unless dp.sdp_log_file.nil? %>
+          <% dp.sdp_log_file.each do |dpl| %>
+              <tr>
+                <td><%= dpl %></td>
+              </tr>
+          <% end %>
+      <% end %>
+  <% end %>
+  </tbody>
+</table>
+
 
 <table id="datapointtable" class="tablesorter table table-striped">
   <thead>
@@ -31,14 +54,17 @@
   </tr>
   </thead>
   <tbody>
-  <% @log_message.each do |log| %>
-      <% log.each do |lm| %>
-          <tr>
-            <td> <%= lm %> </td>
-          </tr>
+  <% @analysis.data_points.each do |dp| %>
+      <tr class="success">
+        <td><%= dp.name unless dp.name.nil? %></td>
+      </tr>
+      <% unless dp.run_time_log.nil? %>
+          <% dp.run_time_log.each do |dpl| %>
+              <tr>
+                <td><%= dpl %></td>
+              </tr>
+          <% end %>
       <% end %>
   <% end %>
   </tbody>
 </table>
-
-
