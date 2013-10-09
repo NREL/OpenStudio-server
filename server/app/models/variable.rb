@@ -31,7 +31,7 @@ class Variable
   after_create :verify_uuid
   #before_destroy :remove_dependencies
 
-  def self.create_by_os_json(analysis_id, os_json)
+  def self.create_from_os_json(analysis_id, os_json)
     var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
 
     os_json.each do |k,v|

@@ -29,6 +29,7 @@ class Analysis
   has_many :data_points
   has_many :algorithms
   has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
+  has_many :measures
   #has_many :problems
 
   # Indexes
@@ -78,7 +79,7 @@ class Analysis
         wn.user = cols[4]
         wn.password = cols[5].chomp
         wn.valid = false
-        if !cols[6].nil? && cols[6].chomp == "true"
+        if cols[6] && cols[6].chomp == "true"
           wn.valid = true
         end
         wn.save!
@@ -122,7 +123,7 @@ class Analysis
 
     self.delayed_job_id.nil? ? dj = nil : dj = Delayed::Job.find(self.delayed_job_id)
 
-    if !dj.nil? || self.status == "queued" || self.status == "started"
+    if dj || self.status == "queued" || self.status == "started"
       logger.info("analysis is already queued with #{dj}")
       return [false, "An analysis is already queued"]
     else
@@ -152,10 +153,26 @@ class Analysis
   end
 
   def pull_out_os_variables
-    logger.info("OpenStudio Metadata is: #{self.os_metadata}")
-    if !self.os_metadata.nil? && !self.os_metadata['variables'].nil?
+    # get the measures first
+    Rails.logger.info("pulling out openstudio measures")
+    # note the measures first
+    if self['problem'] && self['problem']['workflow']
+      Rails.logger.info("found a problem and workflow")
+      self['problem']['workflow'].each do |wf|
+        # this will eventually need to be cleaned up, but the workflow is the order of applying the
+        # individual measures
+        if wf['measures']
+          wf['measures'].each do |measure|
+            new_measure = Measure.create_from_os_json(self.id, measure)
+          end
+        end
+      end
+    end
+
+    Rails.logger.error("OpenStudio Metadata is: #{self.os_metadata}")
+    if self.os_metadata && self.os_metadata['variables']
       self.os_metadata['variables'].each do |variable|
-        var = Variable.create_by_os_json(self.id, variable)
+        var = Variable.create_from_os_json(self.id, variable)
       end
     end
     self.save!
@@ -187,15 +204,23 @@ class Analysis
     end
 
     logger.info("Found #{self.variables.size} records")
-    if !self.variables.nil?
+    if self.variables
       self.variables.each do |record|
         logger.info("removing #{record.id}")
         record.destroy
       end
     end
 
+    logger.info("Found #{self.measures.size} records")
+    if self.measures
+      self.measures.each do |record|
+        logger.info("removing #{record.id}")
+        record.destroy
+      end
+    end
+
     # delete any delayed jobs items
-    if !self.delayed_job_id.nil?
+    if self.delayed_job_id
       dj = Delayed::Job.find(self.delayed_job_id)
       dj.delete unless dj.nil?
     end
