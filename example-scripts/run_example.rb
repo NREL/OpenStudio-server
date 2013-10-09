@@ -4,7 +4,7 @@ require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
-ANALYSIS_TYPE="batch_run"
+ANALYSIS_TYPE="lhs"
 STOP_AFTER_N=nil  #set to nil if you want them all
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
