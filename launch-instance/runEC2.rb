@@ -2,17 +2,18 @@
 # on EC2. After the servers are configures, the latter part of the script uses the API to
 # run an example analysis.
 
+require "./AwsConfig.rb"
 require "json"
 
 # use the aws class that lives in the OpenStudio Repository now.  Make sure to update the PATH below to
 # whereever you OpenStudio checkout is (currently on the AWSProvider branch in OS)
-#OS_PATH = "C:/Projects/OpenStudio"
-OS_PATH = "/Users/nlong/Working/OpenStudio"
+OS_PATH = "C:/Projects/OpenStudio"
+#OS_PATH = "/Users/nlong/Working/OpenStudio"
 
 # Global Options
 CREATE_SERVER=true
 CREATE_WORKER=true
-WORKER_INSTANCES=1
+WORKER_INSTANCES=2
 TEST_SSH=true
 
 # read in the config.yml file to get the secret/private key
