@@ -14,6 +14,9 @@ default_attributes(
     },
     :R => {
         :apt_distribution => "precise/",
+        :build_from_source => true,
+        :build_source_url => "http://cran.r-project.org/src/base/R-3",
+        :build_version => "3.0.2",
         :apt_key => "E084DAB9",
         :rserve_start_on_boot => false,
         :rserve_user => "vagrant",
