@@ -50,7 +50,23 @@ default_attributes(
             {
                 :name => 'snowfall',
                 :version => '1.84-4'
-            }
+            },
+            {
+                :name => 'iterators',
+                :version => '1.0.6'
+            },
+            {
+                :name => 'foreach',
+                :version => '1.4.1'
+            },
+            {
+                :name => 'doSNOW',
+                :version => '1.0.7'
+            },
+            {
+	        :name => 'DEoptim',
+	        :version => '2.2-2'
+            },
         ]
     }
 )
