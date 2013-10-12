@@ -55,7 +55,6 @@ class Analysis::BatchRun < Struct.new(:options)
       }
     end
 
-
     # Before kicking off the Analysis, make sure to setup the downloading of the files child process
     process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
     #log_file = File.join(Rails.root,"log/download.log")
