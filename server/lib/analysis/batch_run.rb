@@ -36,6 +36,7 @@ class Analysis::BatchRun < Struct.new(:options)
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
+
     @r.command() do
       %Q{
         ip <- "#{master_ip}"
@@ -44,7 +45,7 @@ class Analysis::BatchRun < Struct.new(:options)
 
         #test the query of getting the run_flag
         mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
-        flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
+        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
         #print(flag)
 
         print(flag["run_flag"])
@@ -53,6 +54,7 @@ class Analysis::BatchRun < Struct.new(:options)
         }
       }
     end
+
 
     # Before kicking off the Analysis, make sure to setup the downloading of the files child process
     process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
@@ -79,7 +81,7 @@ class Analysis::BatchRun < Struct.new(:options)
 
         f <- function(x){
           mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-          flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
+          flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
           if (flag["run_flag"] == "false" ){
             stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
           }
