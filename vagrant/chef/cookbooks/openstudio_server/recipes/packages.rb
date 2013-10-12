@@ -12,3 +12,7 @@ end
 package "zip" do
   action :upgrade
 end
+
+package "iotop" do
+  action :upgrade
+end
