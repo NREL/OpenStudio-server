@@ -25,8 +25,11 @@ def communicateStarted(id)
 
     public_ip_address = `curl -L http://169.254.169.254/latest/meta-data/public-ipv4`
     internal_ip_address = `curl -L http://169.254.169.254/latest/meta-data/local-ipv4`
+    #instance_information = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
+    #instance_information = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
     dp.ip_address = public_ip_address
     dp.internal_ip_address = internal_ip_address
+    #dp.server_information = instance_information
   end
 
   dp.save!
@@ -34,7 +37,6 @@ end
 
 
 def get_problem_json(id, directory)
-
   result = [] # [data_point_json, analysis_json]
 
   project_path = directory.parent_path.parent_path
@@ -62,6 +64,8 @@ def get_problem_json(id, directory)
   #File.open(formulation_json_path.to_s, 'w') do |f|
   #  f.puts result[1]
   #end
+
+  # delete the energyplus and post processing job for now
 
   return result
 end
