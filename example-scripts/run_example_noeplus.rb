@@ -5,11 +5,11 @@ require 'faraday'
 #HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
-STOP_AFTER_N=16  #set to nil if you want them all
+STOP_AFTER_N=nil  #set to nil if you want them all
 HOSTNAME = "http://ec2-54-211-187-190.compute-1.amazonaws.com"
 
 # Project data
-formulation_file = "./DiskIOBenchmark/analysis.json"
+formulation_file = "./DiskIOBenchmark/analysis_noeplus.json"
 analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
 datapoints = Dir.glob("./DiskIOBenchmark/datapoint*.json")
 
