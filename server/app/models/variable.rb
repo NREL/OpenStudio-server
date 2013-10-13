@@ -7,10 +7,10 @@ class Variable
   field :version_uuid, :type => String # pointless at this time
   field :name, :type => String
   field :display_name, :type => String
-  field :minimum # don't define this--it can be anything
+  field :minimum # don't define this--it can be anything  -- and remove this eventually as os uses lower bounds
   field :maximum # don't define this--it can be anything
   field :mean # don't define this--it can be anything
-  field :distribution, :type => String
+  field :uncertainty_type, :type => String
   field :data_type, :type => String # not sure this is needed because mongo is typed
   field :variable_index, :type => Integer # for measure groups
   field :argument_index, :type => Integer
@@ -75,13 +75,27 @@ class Variable
 
       if k == "argument"
         # this is main portion of the variable
+        exclude_fields_2 = ['uuid', 'version_uuid']
         v.each do |k2, v2|
-          exclude_fields_2 = ['uuid', 'version_uuid']
-          var[k2] = v2 unless exclude_fields_2.include? k
+          var[k2] = v2 unless exclude_fields_2.include? k2
         end
       end
-      if k == "undertainty_description"
+
+      if k == "uncertainty_description"
         # need to flatten this
+        var['uncertainty_type'] = v['type'] if v['type']
+        if v['attributes']
+          v['attributes'].each do |attribute|
+            # grab the name of the attribute to append the
+            # other characteristics
+            attribute['name'] ? att_name = attribute['name'] : att_name = nil
+            next if !att_name
+            attribute.each do |k2, v2|
+              exclude_fields_2 = ['uuid', 'version_uuid', 'name']
+              var["#{att_name}_#{k2}"] = v2  unless exclude_fields_2.include? k2
+            end
+          end
+        end
       end
     end
 
