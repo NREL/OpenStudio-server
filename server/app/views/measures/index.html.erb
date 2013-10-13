@@ -6,7 +6,8 @@
     <th>Name</th>
     <th>Measure Type</th>
     <th>Description</th>
-    <th>Arguments/Variables</th>
+    <th>Arguments</th>
+    <th>Variable</th>
     <th>Value Instances</th>
   <tr>
   </thead>
@@ -17,7 +18,12 @@
         <td><%= measure.measure_type if measure.measure_type %></td>
         <td><%= measure.description %></td>
         <td>
-          <% measure.variables.each do |var| %>
+          <% measure.variables.where(perturbable: false).each do |var| %>
+              <%= link_to var.name, variable_path(var) %></br>
+          <% end %>
+        </td>
+        <td>
+          <% measure.variables.where(perturbable: true).each do |var| %>
               <%= link_to var.name, variable_path(var) %></br>
           <% end %>
         </td>

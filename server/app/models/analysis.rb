@@ -21,6 +21,9 @@ class Analysis
   field :os_metadata # don't define type, keep this flexible
   field :use_shm, :type => Boolean, default: false #flag on whether or not to use SHM for analysis (impacts file uploading)
 
+  # Temp location for these vas
+  field :samples, :type => Integer
+
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
                             :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
@@ -157,28 +160,41 @@ class Analysis
   end
 
   def pull_out_os_variables
+
+    pat_json = false
     # get the measures first
     Rails.logger.info("pulling out openstudio measures")
     # note the measures first
     if self['problem'] && self['problem']['workflow']
       Rails.logger.info("found a problem and workflow")
       self['problem']['workflow'].each do |wf|
+
+        # Currently the PAT format has measures and I plan on igorning them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
         # individual measures
         if wf['measures']
-          wf['measures'].each do |measure|
-            new_measure = Measure.create_from_os_json(self.id, measure)
-          end
+          pat_json = true
+          #  wf['measures'].each do |measure|
+          #    new_measure = Measure.create_from_os_json(self.id, measure)
+          #  end
+        end
+
+        # In the "analysis" view, the worklow list is just there...
+        if !pat_json
+          new_measure = Measure.create_from_os_json(self.id, wf, pat_json)
         end
       end
     end
 
-    #Rails.logger.error("OpenStudio Metadata is: #{self.os_metadata}")
-    if self.os_metadata && self.os_metadata['variables']
-      self.os_metadata['variables'].each do |variable|
-        var = Variable.create_from_os_json(self.id, variable)
+    if pat_json
+      #Rails.logger.error("OpenStudio Metadata is: #{self.os_metadata}")
+      if self.os_metadata && self.os_metadata['variables']
+        self.os_metadata['variables'].each do |variable|
+          var = Variable.create_from_os_json(self.id, variable)
+        end
       end
     end
+
     self.save!
   end
 

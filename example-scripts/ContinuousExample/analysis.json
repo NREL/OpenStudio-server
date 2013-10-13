@@ -1,0 +1,306 @@
+{
+    "analysis": {
+        "data_points_are_invalid": false,
+        "display_name": "Ruby Continuous Variables Example Analysis",
+        "name": "Ruby Continuous Variables Example Analysis",
+        "problem": {
+            "display_name": "Ruby Continuous Variables Example Problem",
+            "name": "Ruby Continuous Variables Example Problem",
+            "problem_type": "Problem",
+            "uuid": "9676eec5-84cd-4bec-af9f-918259778f71",
+            "version_uuid": "f8b21cdd-a733-42b8-b9dd-c56a985edb0e",
+            "workflow": [
+                {
+                    "arguments": [
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+                    "bcl_measure_uuid": "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+                    "bcl_measure_version_uuid": "ac5aa597-e9d7-47ec-931a-a57ed41b9fc2",
+                    "description": "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
+                    "display_name": "Rotate Building 90 degrees",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 1,
+                    "measure_type": "RubyMeasure",
+                    "name": "Rotate Building 90 degrees",
+                    "output_file_type": "OSM",
+                    "uuid": "4839a263-d0a9-4037-93e6-b5d89bf7a659",
+                    "version_uuid": "bc58ea56-bf10-41c0-8b92-d3676530b83c",
+                    "variables": [
+                        {
+                            "argument": {
+                                "default_value": 90.0,
+                                "display_name": "Number of Degrees to Rotate Building (positive value is clockwise)",
+                                "domain_type": "Interval",
+                                "name": "relative_building_rotation",
+                                "required": false,
+                                "type": "Double",
+                                "uuid": "8e42df38-57c4-4952-8c64-a674647b2c70",
+                                "version_uuid": "4a946a09-d9ce-41b6-a9f5-70ac716814e4"
+                            },
+                            "display_name": "Building Rotation",
+                            "maximum": 359,
+                            "minimum": 0,
+                            "name": "building rotation",
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 180,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 360,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "uniform_uncertainty"
+                            },
+                            "uuid": "c12f7f8f-9b98-4971-afae-1d159d78b7d1",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "30338a34-3557-4d13-889f-b3a19788f412"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "argument_index": 0,
+                            "choices": [
+                                {
+                                    "choice_index": 0,
+                                    "display_name": "ASHRAE 189.1-2009 ClimateZone 4-8 MediumOffice",
+                                    "value": "{f4de87b0-5d1b-454c-9fc8-3f5a824ee533}"
+                                },
+                                {
+                                    "choice_index": 1,
+                                    "display_name": "*Entire Building*",
+                                    "value": "{08678ddd-175a-469b-9626-2f02c40b6916}"
+                                }
+                            ],
+                            "default_value": "{08678ddd-175a-469b-9626-2f02c40b6916}",
+                            "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model",
+                            "domain_type": "Enumeration",
+                            "name": "space_type",
+                            "required": true,
+                            "type": "Choice",
+                            "uuid": "09988191-1cf8-4217-a790-062901ee9759",
+                            "version_uuid": "64755dd1-bffd-40a9-b403-ee43d205d00c"
+                        },
+                        {
+                            "argument_index": 2,
+                            "default_value": 150.0,
+                            "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+                            "domain_type": "Interval",
+                            "name": "material_and_installation_cost",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "cab7d382-da06-4c27-89e2-fff8f7e72a6e",
+                            "version_uuid": "3e6021f1-a1a5-4916-a345-b07b242c109f"
+                        },
+                        {
+                            "argument_index": 3,
+                            "default_value": 0.0,
+                            "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+                            "domain_type": "Interval",
+                            "name": "demolition_cost",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "037842b8-bab0-4cd8-a04b-64a058f6b01b",
+                            "version_uuid": "3e57d80e-3e75-4dfe-b5dd-505daaadca3c"
+                        },
+                        {
+                            "argument_index": 4,
+                            "default_value": 0,
+                            "display_name": "Years Until Costs Start (whole years).",
+                            "domain_type": "Interval",
+                            "name": "years_until_costs_start",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "8ac455af-d9fa-48ba-a5ba-7bcff102d845",
+                            "version_uuid": "0ae73332-15d6-417c-accb-04b6bff0d1fb"
+                        },
+                        {
+                            "argument_index": 5,
+                            "default_value": "false",
+                            "display_name": "Demolition Costs Occur During Initial Construction?",
+                            "domain_type": "Enumeration",
+                            "name": "initial_demo_costs",
+                            "required": true,
+                            "type": "Boolean",
+                            "uuid": "31091352-bbae-4ac1-b0b3-97e1445ed406",
+                            "version_uuid": "83d62985-0a25-4fa7-a29d-dcfa915bd01b"
+                        },
+                        {
+                            "argument_index": 6,
+                            "default_value": 15,
+                            "display_name": "Expected Life (whole years)",
+                            "domain_type": "Interval",
+                            "name": "expected_life",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "d7310c71-493c-486f-b9b7-e6eaf38f7603",
+                            "version_uuid": "6297f50b-0fee-49be-9133-2155de03e0b1"
+                        },
+                        {
+                            "argument_index": 7,
+                            "default_value": 0.0,
+                            "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+                            "domain_type": "Interval",
+                            "name": "om_cost",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "b7ef0571-db39-41c8-b2b6-bf511282381d",
+                            "version_uuid": "01ee4d9b-aa91-434a-a967-9a00562a065b"
+                        },
+                        {
+                            "argument_index": 8,
+                            "default_value": 1,
+                            "display_name": "O & M Frequency (whole years).",
+                            "domain_type": "Interval",
+                            "name": "om_frequency",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "a413b48f-7031-43a8-b4c2-0d38c7145d3b",
+                            "version_uuid": "7658be79-7a01-466d-85e9-ad2b15224708"
+                        }
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+                    "bcl_measure_uuid": "d37b7ed5-887a-4d1f-b304-259462eadbe9",
+                    "bcl_measure_version_uuid": "b0cb5b76-61fa-465a-af14-2992dceb374c",
+                    "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
+                    "display_name": "Reduce Lighting Load By 30 percent",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 1,
+                    "measure_type": "RubyMeasure",
+                    "name": "Reduce Lighting Load By 30 percent",
+                    "output_file_type": "OSM",
+                    "uuid": "883ebc58-845f-4708-81b2-0930d9cf22e0",
+                    "version_uuid": "8725b62f-967a-4c0a-a377-c5a3e68c5295",
+                    "variables": [
+                        {
+                            "argument": {
+                                "default_value": 30.0,
+                                "display_name": "Electric Equipment Power Reduction Percentage",
+                                "domain_type": "Interval",
+                                "name": "reduction_percent",
+                                "required": true,
+                                "type": "Double",
+                                "uuid": "29580d94-43b3-4881-96e4-935fa140bcf6",
+                                "version_uuid": "0255c23a-4b07-4d05-a8a3-b093ef60880e"
+                            },
+                            "display_name": "Electric Power REduction",
+                            "maximum": 0,
+                            "minimum": 70,
+                            "name": "reduce power",
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 20,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 70,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "triangular_uncertain"
+                            },
+                            "uuid": "41cb285c-f8c1-4673-8710-3306593d465e",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "f5344c2b-6578-4bef-97ef-03c81b5035cf"
+                        }
+                    ]
+                }
+            ]
+        },
+        "results_are_invalid": false,
+        "seed": {
+            "checksum_create": "2EDE1A05",
+            "checksum_last": "2EDE1A05",
+            "display_name": "seed",
+            "file_type": "OSM",
+            "name": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
+            "path": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
+            "timestamp_create": "20130716T144225",
+            "timestamp_last": "20130917T154501",
+            "uuid": "e105d3df-8259-4257-a89c-f31cd7a62e52",
+            "version_uuid": "a7a0fa64-ec35-4df1-848d-8c7399e549c2"
+        },
+        "weather_file": {
+            "checksum_create": "72673005",
+            "checksum_last": "72673005",
+            "display_name": "USA_CO_Golden-NREL.724666_TMY3",
+            "file_type": "EPW",
+            "name": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+            "path": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+            "timestamp_create": "20130716T144225",
+            "timestamp_last": "20130917T154501",
+            "uuid": "9a6a9a9e-0cc6-4396-8373-d1736300a006",
+            "version_uuid": "69763fa2-f574-4336-9506-24d35c48fff5"
+        },
+        "uuid": "143fb5c3-5171-45e6-b6c2-9ac944b2b1df",
+        "version_uuid": "12815404-54eb-4bfe-9f7d-12bc96ed52ed"
+    },
+    "metadata": {
+        "openstudio_version": "1.0.7",
+        "variables": [
+            {
+                "display_name": "Chiller Cooling Efficiency",
+                "maximum": 1.48187,
+                "minimum": 0.518135,
+                "name": "Chiller Cooling Efficiency",
+                "type": "Double",
+                "uuid": "41cb285c-f8c1-4673-8710-3306593d465e",
+                "variable_index": 0,
+                "version_uuid": "41cb285c-f8c1-4673-8710-3306593d465e"
+            },
+            {
+                "display_name": "Orientation",
+                "maximum": 359.0,
+                "minimum": 0.0,
+                "name": "Orientation",
+                "type": "Double",
+                "uuid": "e0362f5d-cbed-4749-ab3b-5e0973323a17",
+                "variable_index": 1,
+                "version_uuid": "e0362f5d-cbed-4749-ab3b-5e0973323a17"
+            }
+        ]
+    }
+}

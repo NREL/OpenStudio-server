@@ -9,9 +9,9 @@ STOP_AFTER_N=nil  #set to nil if you want them all
                   #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
                   # Project data
-formulation_file = "./BigPATTestExport/analysis.json"
-analysis_zip_file = "./BigPATTestExport/analysis.zip"
-datapoints = Dir.glob("./BigPATTestExport/datapoint*.json")
+formulation_file = "./ContinuousExample/analysis.json"
+analysis_zip_file = "./ContinuousExample/analysis.zip"
+#datapoints = Dir.glob("./BigPATTestExport/datapoint*.json")
 
 # Try not to change data below here. If you do make sure you update the other run_example file
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|
@@ -121,24 +121,6 @@ if !analysis_id.nil?
   #puts "list of queued analyses"
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
-end
-
-exit
-
-# get the status of all the entire analysis
-if !analysis_id.nil?
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json")
-  puts "Data points (all): #{resp}"
-
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=running")
-  puts "Data points (running): #{resp}"
-
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=queued")
-  puts "Data points (queued): #{resp}"
-
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=complete")
-
-  puts "Data points (complete): #{resp}"
 end
 
 
