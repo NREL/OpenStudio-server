@@ -1,3 +1,24 @@
 <p id="notice"><%= notice %></p>
 
+<h1>EnergyPlus HTML</h1>
 <%= @html.html_safe unless @html.nil? %>
+
+<h1>Data Point Fields</h1>
+<p id="notice"><%= notice %></p>
+
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Field Name</th>
+    <th>Field Value</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @data_point.as_document.each do |k, v| %>
+      <tr>
+        <td><%= k %></td>
+        <td><%= v %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>

@@ -4,6 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
+            "number_of_samples": 100,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
@@ -70,7 +71,7 @@
                                         "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
                                     }
                                 ],
-                                "type": "uniform_uncertainty"
+                                "type": "uniform_uncertain"
                             },
                             "uuid": "c12f7f8f-9b98-4971-afae-1d159d78b7d1",
                             "variable_index": 0,
