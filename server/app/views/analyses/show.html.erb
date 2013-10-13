@@ -34,7 +34,7 @@
 <%= link_to 'List of Variables', analysis_variables_path(@analysis) %> |
 <%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
 
-<h1>Data Points</h1>
+<h1>Data Points (<%= @analysis.data_points.count if @analysis.data_points %>) </h1>
 <script>
     $(document).ready(function () {
                 $("#datapointtable").tablesorter();
