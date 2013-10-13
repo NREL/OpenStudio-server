@@ -17,10 +17,19 @@ class DataPointsController < ApplicationController
 
     @html = @data_point.eplus_html
 
-
-
     respond_to do |format|
       format.html do
+        exclude_fields = [:_id,:output,:password,:eplus_html]
+        @table_data = @data_point.as_json(:except => exclude_fields)
+        logger.info("Cleaning up the log files")
+        if @table_data["run_time_log"]
+          @table_data["run_time_log"] = @table_data["run_time_log"].join("</br>").html_safe
+        end
+        if @table_data["sdp_log_file"]
+          @table_data["sdp_log_file"] = @table_data["sdp_log_file"].join("</br>").html_safe
+        end
+
+
         # gsub for some styling
         if !@html.nil?
           @html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil).gsub!(/<head>|<body>/,"").gsub!(/<html>|<\/html>/,"").gsub!(/<\/head>|<\/body>/, "")

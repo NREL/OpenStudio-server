@@ -1,9 +1,14 @@
 <p id="notice"><%= notice %></p>
 
+<p>
+  <a href="#dp_fields">Jump to Data Point Table</a>
+</p>
+
+
 <h1>EnergyPlus HTML</h1>
 <%= @html.html_safe unless @html.nil? %>
 
-<h1>Data Point Fields</h1>
+<h1><a id="dp_fields">Data Point Fields</a></h1>
 <p id="notice"><%= notice %></p>
 
 <table class="table table-striped">
@@ -14,7 +19,7 @@
   <tr>
   </thead>
   <tbody>
-  <% @data_point.as_document.each do |k, v| %>
+  <% @table_data.each do |k, v| %>
       <tr>
         <td><%= k %></td>
         <td><%= v %></td>
