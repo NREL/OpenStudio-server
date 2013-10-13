@@ -210,8 +210,19 @@ class Analysis
           session.loop
         else
           upload_dir = "/run/shm/openstudio"
+          storage_dir = "/mnt/openstudio"
+          session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
+          session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
           session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
-            logger.info(data)
+            Rails.logger.info(data)
           end
           session.loop
 
