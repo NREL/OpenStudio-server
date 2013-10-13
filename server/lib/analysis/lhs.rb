@@ -23,7 +23,7 @@ class Analysis::Lhs < Struct.new(:options)
       o
     end
 
-    def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max)
+    def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max, save_histogram = true)
       Rails.logger.info "Creating sample from probability"
       r_dist_name = ""
       if distribution_type == 'normal'
@@ -76,7 +76,22 @@ class Analysis::Lhs < Struct.new(:options)
 
       # returns an array
       @r.converse "print(samples)"
-      @r.converse "samples"
+      save_file_name = nil
+      if save_histogram
+        # Determine where to save it
+        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
+        Rails.logger.info("R image file name is #{save_file_name}")
+        @r.command() do
+          %Q{
+            print("#{save_file_name}")
+            png(filename="#{save_file_name}")
+            hist(samples, freq=F, breaks=20)
+            dev.off()
+          }
+        end
+      end
+
+      {r: @r.converse("samples"), image_path: save_file_name}
     end
 
     require 'rserve/simpler'
@@ -125,7 +140,13 @@ class Analysis::Lhs < Struct.new(:options)
     i_var = 0
     samples = {}  # samples are in hash of arrarys
     selected_variables.each do |var|
-      samples["#{var.id}"] = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value)
+      sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value)
+      samples["#{var.id}"] = sfp[:r]
+      if sfp[:image_path]
+        pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
+        var.preflight_images << pfi unless var.preflight_images.include?(pfi)
+      end
+
       i_var += 1
     end
 

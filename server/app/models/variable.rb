@@ -20,6 +20,7 @@ class Variable
   # Relationships
   belongs_to :analysis
   belongs_to :measure
+  has_many :preflight_images
 
   # Indexes
   index({uuid: 1}, unique: true)
@@ -35,7 +36,7 @@ class Variable
 
   # Callbacks
   after_create :verify_uuid
-  #before_destroy :remove_dependencies
+  before_destroy :remove_dependencies
 
 
   # Create a new variable based on the OS Variable Metadata
@@ -109,5 +110,11 @@ class Variable
   def verify_uuid
     self.uuid = self.id if self.uuid.nil?
     self.save!
+  end
+
+  def remove_dependencies
+    self.preflight_images.each do |pfi|
+      pfi.destroy
+    end
   end
 end
