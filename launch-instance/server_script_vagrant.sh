@@ -12,7 +12,7 @@ fi
 # copy all the setup scripts to the appropriate home directory
 cp /data/launch-instance/setup* ~
 chmod 775 ~/setup*
-chown vagrant:vagrant /home/ubuntu/setup*
+chown vagrant:vagrant ~/setup*
 
 # Force the generation of various directories that are in the EBS mnt
 sudo rm -rf /mnt/openstudio

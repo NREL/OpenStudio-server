@@ -80,8 +80,10 @@ class DataPoint
         Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
           #Rails.logger.info(self.inspect)
 
-          remote_filename = "/mnt/openstudio/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
-          save_filename = "/mnt/openstudio/data_point_#{self.id}.zip"
+          # Regardless of SHM, the data points will be copied back to /mnt/openstudio (or somewhere else on RedMesa)
+          remote_file_path = "/mnt/openstudio"
+          remote_filename = "#{remote_file_path}/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
+          save_filename = "#{remote_file_path}/data_point_#{self.id}.zip"
 
           Rails.logger.info "Checking if the remote file exists"
           session.exec!("if [ -e '#{remote_filename}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |channel, stream, data|
@@ -101,7 +103,7 @@ class DataPoint
             end
 
             #TODO test the deletion of the zip file
-            #session.exec!( "cd /mnt/openstudio && rm -f #{remote_filename}" ) do |channel, stream, data|
+            #session.exec!( "cd #{remote_file_path} && rm -f #{remote_filename}" ) do |channel, stream, data|
             #  logger.info(data)
             #end
             #session.loop

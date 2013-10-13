@@ -2,6 +2,7 @@
 # on EC2. After the servers are configures, the latter part of the script uses the API to
 # run an example analysis.
 
+require "./AwsConfig.rb"
 require "json"
 
 # use the aws class that lives in the OpenStudio Repository now.  Make sure to update the PATH below to
@@ -55,7 +56,7 @@ if CREATE_WORKER
 
   # How many instances?
   #server_json[:instance_type] = "cc2.8xlarge"
-  server_json[:instance_type] = "m2.xlarge"
+  server_json[:instance_type] = "m2.4xlarge"
   #server_json[:instance_type] = "t1.micro"
   server_json[:num] = WORKER_INSTANCES
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
