@@ -20,3 +20,7 @@ end
 package "collectl" do
   action :upgrade
 end
+
+package "imagemagick" do
+  action :upgrade
+end
