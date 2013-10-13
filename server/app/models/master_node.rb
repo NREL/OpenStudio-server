@@ -9,6 +9,8 @@ class MasterNode
   field :password, :type => String
   field :cores, :type => Integer
   field :valid, :type => Boolean, default: false
+  field :ami_id, :type => String
+  field :instance_id, :type => String
 
   # Indexes
   index({hostname: 1}, unique: true)

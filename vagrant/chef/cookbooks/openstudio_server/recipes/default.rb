@@ -49,7 +49,6 @@ bash "fix permissions on assets files"  do
   EOH
 end
 
-
 template "/etc/init.d/delayed_job" do
   source "delayed_job.erb"
   owner "root"

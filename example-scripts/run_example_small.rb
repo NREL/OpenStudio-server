@@ -3,7 +3,7 @@ require 'json'
 require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
-WITHOUT_DELAY=false
+WITHOUT_DELAY=true
 ANALYSIS_TYPE="batch_run"
 STOP_AFTER_N=2  #set to nil if you want them all
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
