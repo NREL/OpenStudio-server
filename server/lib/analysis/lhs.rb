@@ -89,6 +89,8 @@ class Analysis::Lhs < Struct.new(:options)
     @analysis.run_flag = true
     @analysis.save!
 
+    @analysis.samples = '100'  # where to set this ? in the problem most likely, right?
+
     #create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for #{self.class.name}"
@@ -99,32 +101,37 @@ class Analysis::Lhs < Struct.new(:options)
     @r.converse "library(triangle)"
 
     # get variables / measures
-    # For some reason the scored variable won't work here! ugh.
+    # For some reason the scoped variable won't work here! ugh.
     #@analysis.variables.enabled do |variable|
     #@analysis.variables.count
-    # TODO: INDEX THIS
     selected_variables = Variable.where({analysis_id: @analysis, perturbable: true})
     Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
-    parameter_space = 1
-    if false #@analysis.problem.lhs_analysis_type = "Senstiviity"
-      parameter_space = selected_variables.count
-    end
+    parameter_space = selected_variables.count
 
     # generate the probabilities for all variables [individually]
 
-    # p = nil
-    # if var_cnt > 0
-    #   puts "Found #{var_cnt} variables"
     @r.converse("print('starting lhs')")
     # get the probabilities and persist them for reference
     Rails.logger.info "Starting sampling"
-    p = lhs_probability(parameter_space, 100)
+    p = lhs_probability(parameter_space, @analysis.samples)
     Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
-    samples = samples_from_probability(p[0], "triangle", 50, 10, 30, 90)
-    Rails.logger.info "Samples are #{samples}"
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
+    # For now, create a new variable_instance, create new datapoints, and add the instance reference
+
+    i_var = 0
+    selected_variables.each do |var|
+      i_var += 1
+      samples = samples_from_probability(p[i_var], var.distribution, var.mean, var.stddev, var.min, var.max)
+
+    end
+
+
+    Rails.logger.info "Samples are #{samples}"
+
+
+
 
     # create a new datapoint and define the variable_instance
     samples.each do |sample|

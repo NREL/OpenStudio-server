@@ -27,6 +27,7 @@ class Variable
   index({name: 1})
   index({analysis_id: 1})
   index({analysis_id: 1, uuid: 1})
+  index({analysis_id: 1, perturbable: 1})
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
@@ -46,8 +47,8 @@ class Variable
       var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
     end
 
-    exclude_fields = ['uuid','type']
-    os_json.each do |k,v|
+    exclude_fields = ['uuid', 'type']
+    os_json.each do |k, v|
       var[k] = v unless exclude_fields.include? k
     end
 
@@ -68,9 +69,20 @@ class Variable
       var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
     end
 
-    exclude_fields = ['uuid','type']
-    os_json.each do |k,v|
+    exclude_fields = ['uuid', 'type', 'argument', 'uncertainty_description']
+    os_json.each do |k, v|
       var[k] = v unless exclude_fields.include? k
+
+      if k == "argument"
+        # this is main portion of the variable
+        v.each do |k2, v2|
+          exclude_fields_2 = ['uuid', 'version_uuid']
+          var[k2] = v2 unless exclude_fields_2.include? k
+        end
+      end
+      if k == "undertainty_description"
+        # need to flatten this
+      end
     end
 
     var.save!
