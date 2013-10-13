@@ -86,6 +86,9 @@ class Analysis
       end
     end
 
+    # get server and worker characteristics
+    get_system_information()
+
     # check if this fails
     copy_data_to_workers()
   end
@@ -222,5 +225,54 @@ class Analysis
       end
     end
   end
-end
 
+  # During the initialization of each analysis, go to each system node and grab its information
+  def get_system_information
+    #if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
+
+    #end
+
+    Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
+
+    # For now assume that there is only one master node
+    mn = MasterNode.first
+    if mn
+      if local_host
+        mn.ami_id = "Vagrant"
+        mn.instance_id = "Vagrant"
+      else # must be on amazon -- hit the api for the answers
+        mn.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
+        mn.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
+      end
+      mn.save!
+    end
+
+    # go through the worker node
+    WorkerNode.all.each do |wn|
+      if local_host
+        wn.ami_id = "Vagrant"
+        wn.instance_id = "Vagrant"
+      else
+        # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
+        Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
+          #Rails.logger.info(self.inspect)
+
+          logger.info "Checking the configuration of the worker nodes"
+          session.exec!("curl -L http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
+            Rails.logger.info("Worker node reported back #{data}")
+            wn.ami_id = data
+          end
+          session.loop
+
+          session.exec!("curl -L http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
+            Rails.logger.info("Worker node reported back #{data}")
+            wn.instance_id = data
+          end
+          session.loop
+        end
+      end
+
+      wn.save!
+    end
+  end
+end

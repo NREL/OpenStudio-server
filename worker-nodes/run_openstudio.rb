@@ -18,7 +18,7 @@ optparse = OptionParser.new do |opts|
   end
 
   options[:runType] = "AWS"
-  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|AWS).") do |runType|
+  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where Simulate Data Point is being run (Local|AWS).") do |runType|
     options[:runType] = runType
   end
 
@@ -163,7 +163,7 @@ begin
   params.append("cleanoutfiles", "standard");
   workflow.add(params);
   ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
-  raise "SimulateDataPoint.rb was unable to locate EnergyPlus." if ep_hash.nil?
+  raise "#{File.basename(__FILE__)} was unable to locate EnergyPlus." if ep_hash.nil?
   ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
   tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
                                                            OpenStudio::Path.new,

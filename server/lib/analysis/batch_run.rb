@@ -86,7 +86,7 @@ class Analysis::BatchRun < Struct.new(:options)
           }
           dbDisconnect(mongo)
 
-          y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+          y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
           #y <- "sleep 1; echo hello"
             z <- system(y,intern=TRUE)
           j <- length(z)
