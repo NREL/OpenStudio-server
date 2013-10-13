@@ -2,8 +2,47 @@
 
 <h1>Debug Log</h1>
 
+<h2>Server Configuration</h2>
+<% if @server %>
+    <table id="datapointtable" class="tablesorter table table-striped">
+      <thead>
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @server.each do |k, v| %>
+          <tr>
+            <td><%= k %></td>
+            <td><%= v %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% end %>
 
+<h2>Worker Configuration</h2>
+<% @workers.each do |worker| %>
+    <table id="datapointtable" class="tablesorter table table-striped">
+      <thead>
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% worker.each do |k, v| %>
+          <tr>
+            <td><%= k %></td>
+            <td><%= v %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% end %>
 
+<h2>Logs</h2>
 <script>
     $(document).ready(function () {
                 $("#datapointtable").tablesorter();

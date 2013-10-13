@@ -9,7 +9,7 @@ puts "Parsing Input: #{ARGV.inspect}"
 options = Hash.new
 optparse = OptionParser.new do |opts|
 
-  opts.on('-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json.") do |directory|
+  opts.on('-d', '--directory DIRECTORY', String, "Path to the directory will run the Data Point.") do |directory|
     options[:directory] = directory
   end
 
@@ -17,7 +17,8 @@ optparse = OptionParser.new do |opts|
     options[:uuid] = uuid
   end
 
-  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |runType|
+  options[:runType] = "AWS"
+  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where Simulate Data Point is being run (Local|AWS).") do |runType|
     options[:runType] = runType
   end
 
@@ -53,14 +54,7 @@ if (not options[:uuid]) || (options[:uuid] == "NA")
 end
 
 puts "Checking RunType"
-runType = "Local"
-if options[:runType]
-  runType = options[:runType]
-  if not ((runType == "Local") or (runType == "Vagrant") or (runType == "AWS"))
-    puts optparse
-    exit
-  end
-end
+runType = options[:runType] if options[:runType]
 
 puts "RunType is #{runType}"
 
@@ -69,7 +63,7 @@ if (runType == "Local")
 else
   mongoid_path_prefix = '/mnt/openstudio/rails-models'
   require 'delayed_job_mongoid'
-  require "#{File.dirname(__FILE__)}/CommunicateResults_Mongo.rb"
+  require "/mnt/openstudio/CommunicateResults_Mongo.rb"
   Dir["#{mongoid_path_prefix}/*.rb"].each { |f| require f }
   Mongoid.load!(mongoid_path_prefix + "/mongoid.yml", :development)
 end
@@ -100,16 +94,7 @@ communicate_debug_log(id, "Communicating Started #{id}")
 communicate_time_log(id, "started")
 
 begin
-
-  if File.exist?(directory.to_s)
-    communicate_debug_log(id, "Deleting directory #{directory.to_s}")
-    FileUtils.rm_rf(directory.to_s)
-  end
-
   communicate_debug_log(id, "Making directory #{directory.to_s}")
-
-  # create data point directory
-  FileUtils.mkdir_p(directory.to_s)
 
   # set up log file
   logSink = OpenStudio::FileLogSink.new(directory / OpenStudio::Path.new("openstudio.log"))
@@ -178,7 +163,7 @@ begin
   params.append("cleanoutfiles", "standard");
   workflow.add(params);
   ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
-  raise "SimulateDataPoint.rb was unable to locate EnergyPlus." if ep_hash.nil?
+  raise "#{File.basename(__FILE__)} was unable to locate EnergyPlus." if ep_hash.nil?
   ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
   tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
                                                            OpenStudio::Path.new,
@@ -226,6 +211,31 @@ begin
       prev_time = Time.now
     end
   end
+
+  # skip the energyplus method and force it here
+
+  # now force enerygplus to run
+=begin
+  communicate_time_log(id, "running custom energyplus process")
+  dest_dir = "#{directory.to_s}/99_EnergyPlus"
+  FileUtils.mkdir_p(dest_dir)
+  #can't create symlinks because the /vagrant mount is actually a windows mount
+  FileUtils.copy("/usr/local/EnergyPlus-8-0-0/EnergyPlus", "#{dest_dir}/EnergyPlus")
+  FileUtils.copy("/usr/local/EnergyPlus-8-0-0/Energy+.idd", "#{dest_dir}/Energy+.idd")
+  # get the first energyplus file
+  idf = Dir.glob("#{directory.to_s}/*-EnergyPlusPreProcess-*/*.idf").first
+  communicate_time_log(id, "idf is #{idf}")
+  FileUtils.copy(idf, "#{dest_dir}/in.idf")
+  epw = Dir.glob("#{directory.to_s}/*-UserScript-*/**/*.epw").first
+  communicate_time_log(id, "epw is #{epw}")
+  FileUtils.copy(epw, "#{dest_dir}/in.epw")
+  Dir.chdir(dest_dir)
+
+  #create stdout
+  File.open('stdout','w') do |file|
+    IO.popen('EnergyPlus') { |io| while (line = io.gets) do file << line end }
+  end
+=end
 
   communicate_debug_log(id, "Simulation finished")
   communicate_time_log(id, "Simulation Finished")
