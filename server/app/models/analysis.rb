@@ -18,6 +18,7 @@ class Analysis
   field :analysis_output, :type => Array
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
+  field :use_shm, :type => Boolean, default: false #flag on whether or not to use SHM for analysis (impacts file uploading)
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
@@ -196,15 +197,30 @@ class Analysis
     WorkerNode.all.each do |wn|
       Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
         logger.info(self.inspect)
-        session.scp.upload!(self.seed_zip.path, "/mnt/openstudio/")
+        if !use_shm
+          upload_dir = "/mnt/openstudio"
+          session.scp.upload!(self.seed_zip.path, "#{upload_dir}/")
 
-        session.exec!("cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
-          logger.info(data)
+          session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
+            logger.info(data)
+          end
+          session.loop
+        else
+          upload_dir = "/run/shm/openstudio"
+          session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
+            logger.info(data)
+          end
+          session.loop
+
+          session.scp.upload!(self.seed_zip.path, "#{upload_dir}")
+
+          session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+            logger.info(data)
+          end
+          session.loop
         end
-        session.loop
       end
     end
   end
-
-
 end
+

@@ -1,31 +1,40 @@
-require 'openstudio'
-require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 require 'fileutils'
 
-puts "Parsing Input: #{ARGV.inspect}"
+puts "Parsing Input: #{ARGV}"
 
 # parse arguments with optparse
 options = Hash.new
 optparse = OptionParser.new do |opts|
 
-  opts.on('-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json.") do |directory|
-    options[:directory] = directory
+  #TODO Delete directory argument.  Not needed at the moment
+  opts.on('-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json.") do |s|
+    options[:directory] = s
   end
 
-  opts.on('-u', '--uuid UUID', String, "UUID of the data point to run with no braces.") do |uuid|
-    options[:uuid] = uuid
+  opts.on('-u', '--uuid UUID', String, "UUID of the data point to run with no braces.") do |s|
+    options[:uuid] = s
   end
 
-  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |runType|
-    options[:runType] = runType
+  # TODO delete AWS argument.  Not needed at the moment.
+  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |s|
+    options[:runType] = s
   end
 
   options[:logLevel] = -1
-  opts.on('-l', '--logLevel LOGLEVEL', Integer, "Level of detail for project.log file. Trace = -3, Debug = -2, Info = -1, Warn = 0, Error = 1, Fatal = 2.") do |logLevel|
-    options[:logLevel] = logLevel
+  opts.on('-l', '--logLevel LOGLEVEL', Integer, "Level of detail for project.log file. Trace = -3, Debug = -2, Info = -1, Warn = 0, Error = 1, Fatal = 2.") do |i|
+    options[:logLevel] = i
   end
 
+  options[:run_shm] = false
+  opts.on('-s', '--run-shm', "Run on SHM Volume") do
+    options[:run_shm] = true
+  end
+
+  options[:run_shm_dir] = "/run/shm"
+  opts.on('-v', '--shm-dir SHM_PATH', String, "Path of the SHM Volume on the System.") do |s|
+    options[:run_shm_dir] = s
+  end
 end
 
 optparse.parse!
@@ -33,227 +42,82 @@ optparse.parse!
 puts "Parsed Input: #{optparse}"
 
 puts "Checking Arguments"
-if not options[:directory]
+if not options[:uuid]
   # required argument is missing
   puts optparse
   exit
 end
 
-# TODO: The first thing this needs to do is register itself with the server to get the datapoint information
-# This also needs to only create one handle to the datapoint database object, then use that instead of hitting the
-# database to find the right record each time it wants to say something.
+directory = nil
+analysis_dir = "/mnt/openstudio"
+store_directory = "/mnt/openstudio/analysis/data_point_#{options[:uuid]}"
 
-puts "Checking UUID of #{options[:uuid]}"
-if (not options[:uuid]) || (options[:uuid] == "NA")
-  puts "No UUID defined"
-  if options[:uuid] == "NA"
-    puts "Recevied an NA UUID which may be because you are only trying to run one datapoint"
-  end
-  exit
-end
-
-puts "Checking RunType"
-runType = "Local"
-if options[:runType]
-  runType = options[:runType]
-  if not ((runType == "Local") or (runType == "Vagrant") or (runType == "AWS"))
-    puts optparse
-    exit
-  end
-end
-
-puts "RunType is #{runType}"
-
-if (runType == "Local")
-  require "#{File.dirname(__FILE__)}/CommunicateResults_Local.rb"
+# use /run/shm on AWS (if possible)
+if Dir.exists?(options[:run_shm_dir]) && options[:run_shm]
+  analysis_dir = "#{options[:run_shm_dir]}/openstudio"
+  directory = "#{options[:run_shm_dir]}/openstudio/analysis/data_point_#{options[:uuid]}"
 else
-  mongoid_path_prefix = '/mnt/openstudio/rails-models'
-  require 'delayed_job_mongoid'
-  require "#{File.dirname(__FILE__)}/CommunicateResults_Mongo.rb"
-  Dir["#{mongoid_path_prefix}/*.rb"].each { |f| require f }
-  Mongoid.load!(mongoid_path_prefix + "/mongoid.yml", :development)
+  run_shm = false
+  directory = store_directory
 end
 
-directory = OpenStudio::Path.new(options[:directory])
+puts "Simulation Run Directory is #{directory}"
 
-project_path = directory.parent_path.parent_path
-
-# on linux, if directory ends in /, need to call parent_path
-if directory.stem.to_s == String.new
-  directory = directory.parent_path
-end
-logLevel = options[:logLevel].to_i
-
-puts "Directory is #{directory}"
-
-# get data point uuid without braces
-id = options[:uuid] # DLM: uuid as a parameter will be sent later, not currently available
-if id.nil?
-  if md = /data_point_(.*)/.match(directory.to_s)
-    id = md[1]
-  end
+# create data point directory
+if File.exist?(directory)
+  FileUtils.rm_rf(directory)
 end
 
-# let listening processes know that this data point is running
-communicateStarted(id)
-communicate_debug_log(id, "Communicating Started #{id}")
-communicate_time_log(id, "started")
+puts "Checking if we need to copy analysis files to directory"
+if options[:run_shm] && !Dir.exists?(analysis_dir)
+  puts "Copying analysis files"
+  FileUtils.mkdir_p(analysis_dir)
+  # copy over the ZIP file and unzip it
+  FileUtils.copy("/mnt/openstudio/analysis.zip", "#{analysis_dir}/analysis.zip")
 
-begin
-
-  if File.exist?(directory.to_s)
-    communicate_debug_log(id, "Deleting directory #{directory.to_s}")
-    FileUtils.rm_rf(directory.to_s)
-  end
-
-  communicate_debug_log(id, "Making directory #{directory.to_s}")
-
-  # create data point directory
-  FileUtils.mkdir_p(directory.to_s)
-
-  # set up log file
-  logSink = OpenStudio::FileLogSink.new(directory / OpenStudio::Path.new("openstudio.log"))
-  logSink.setLogLevel(logLevel)
-  OpenStudio::Logger::instance.standardOutLogger.disable
-
-  communicate_debug_log(id, "Getting Problem JSON input")
-  communicate_time_log(id, "Getting Problem JSON from database")
-
-  # get json from database
-  json = get_problem_json(id, directory)
-  data_point_json = json[0]
-  analysis_json = json[1]
-
-  communicate_debug_log(id, "Parsing Analysis JSON input")
-  communicate_time_log(id, "Reading Problem JSON into OpenStudio")
-  # load problem formulation
-  loadResult = OpenStudio::Analysis::loadJSON(analysis_json)
-  if loadResult.analysisObject.empty?
-    loadResult.errors.each { |error|
-      warn error.logMessage
-    }
-    raise "Unable to load analysis json."
-  end
-
-  communicate_time_log(id, "Get Analysis From OpenStudio")
-  analysis = loadResult.analysisObject.get.to_Analysis.get
-
-  # fix up paths
-  communicate_time_log(id, "Fix Paths")
-  analysis.updateInputPathData(loadResult.projectDir, project_path)
-  analysis_options = OpenStudio::Analysis::AnalysisSerializationOptions.new(project_path)
-  analysis.saveJSON(directory / OpenStudio::Path.new("formulation_final.json"), analysis_options, true)
-
-  communicate_debug_log(id, "Parsing DataPoint JSON input")
-  communicate_time_log(id, "Load DataPoint JSON")
-
-  # load data point to run
-  loadResult = OpenStudio::Analysis::loadJSON(data_point_json)
-  if loadResult.analysisObject.empty?
-    loadResult.errors.each { |error|
-      warn error.logMessage
-    }
-    raise "Unable to load data point json."
-  end
-  data_point = loadResult.analysisObject.get.to_DataPoint.get
-  analysis.addDataPoint(data_point) # also hooks up real copy of problem
-
-  communicate_debug_log(id, "Communicating DataPoint")
-  communicate_time_log(id, "Update DataPoint Database Record")
-
-  # update datapoint in database
-  communicateDatapoint(data_point)
-
-  communicate_debug_log(id, "Running Simulation")
-  communicate_time_log(id, "Setting Up RunManager")
-
-  # create a RunManager
-  run_manager_path = directory / OpenStudio::Path.new("run.db")
-  run_manager = OpenStudio::Runmanager::RunManager.new(run_manager_path, true, false, false)
-
-  # have problem create the workflow
-  communicate_time_log(id, "Creating Workflow")
-  workflow = analysis.problem.createWorkflow(data_point, OpenStudio::Path.new($OpenStudio_Dir));
-  params = OpenStudio::Runmanager::JobParams.new;
-  params.append("cleanoutfiles", "standard");
-  workflow.add(params);
-  ep_hash = OpenStudio::EnergyPlus::find_energyplus(8, 0)
-  raise "SimulateDataPoint.rb was unable to locate EnergyPlus." if ep_hash.nil?
-  ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
-  tools = OpenStudio::Runmanager::ConfigOptions::makeTools(ep_path,
-                                                           OpenStudio::Path.new,
-                                                           OpenStudio::Path.new,
-                                                           $OpenStudio_RubyExeDir,
-                                                           OpenStudio::Path.new)
-  workflow.add(tools)
-
-  # DLM: Elaine somehow we need to add info to data point to avoid this error:
-  # [openstudio.analysis.AnalysisObject] <1> The json string cannot be parsed as an
-  # OpenStudio analysis framework json file, because Unable to find ToolInfo object
-  # at expected location.
-
-  # queue the RunManager job
-  communicate_time_log(id, "Queue RunManager Job")
-  url_search_paths = OpenStudio::URLSearchPathVector.new
-  weather_file_path = OpenStudio::Path.new
-  if (analysis.weatherFile)
-    weather_file_path = analysis.weatherFile.get.path
-  end
-  job = workflow.create(directory, analysis.seed.path, weather_file_path, url_search_paths)
-  OpenStudio::Runmanager::JobFactory::optimizeJobTree(job)
-  analysis.setDataPointRunInformation(data_point, job, OpenStudio::PathVector.new);
-  run_manager.enqueue(job, false);
-
-  communicate_debug_log(id,"Waiting for simulation to finish")
-  communicate_time_log(id, "Starting Simulation")
-
-  # wait for the job to finish
-  #run_manager.waitForFinished
-
-  # Get some introspection on what the current running job is. For now just
-  # look at the directories that are being generated
-  job_dirs = []
-  prev_time = nil
-  while run_manager.workPending()
-    sleep 2
-    OpenStudio::Application::instance().processEvents()
-
-    # check if there are any new folders that were creates
-    temp_dirs = Dir[File.join(directory.to_s, "*/")].map { |d| d.split("/").pop }.sort
-    if (temp_dirs + job_dirs).uniq != job_dirs
-      communicate_time_log(id, (temp_dirs - job_dirs).join(","), prev_time)
-      job_dirs = temp_dirs
-      prev_time = Time.now
-    end
-  end
-
-  communicate_debug_log(id, "Simulation finished")
-  communicate_time_log(id, "Simulation Finished")
-
-  # use the completed job to populate data_point with results
-  communicate_time_log(id, "Updating OpenStudio DataPoint object")
-  analysis.problem.updateDataPoint(data_point, job)
-
-
-  communicate_debug_log(id, "Communicating Results")
-  communicate_time_log(id, "Communicating the results back to Server")
-
-  # implemented differently for Local vs. Vagrant or AWS
-  communicateResults(data_point, directory)
-
-rescue Exception => e
-  communicate_debug_log(id, "SimulationDataPoint Script failed")
-  communicate_debug_log(id, e.message)
-  communicate_debug_log(id, e.backtrace)
-
-  # need to tell mongo this failed
-  communicateFailure(id)
-
-  # raise last exception
-  # raise  #NL: Don't raise an exception because this will be sent to R and it will not know how to process it.
+  pwd = Dir.pwd
+  Dir.chdir(analysis_dir)
+  puts `unzip -o analysis.zip`
+  Dir.chdir(pwd)
 end
 
-communicate_debug_log(id, "Complete")
+FileUtils.mkdir_p(directory)
+FileUtils.mkdir_p(store_directory)
 
-# DLM: this is where we put the objective functions.  NL: Note that we must return out of this nicely no matter what.
+puts "Analysis in #{analysis_dir}; Running in #{directory}; Storing results in #{store_directory}"
+
+# copy the file to the run directory and run
+# TODO need to have server copy the data in the right place & it needs to initialize the directory by
+# removing all the files that may have been there.
+FileUtils.copy("/mnt/openstudio/run_openstudio.rb", "#{directory}/run_openstudio.rb")
+
+# call the run openstudio script
+command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ #{directory}/run_openstudio.rb -u #{options[:uuid]} -d #{directory} -r AWS > #{directory}/#{options[:uuid]}.log"
+puts command
+result = `#{command}`
+puts result
+
+# put the data back into the "long term store"
+if run_shm
+  # only grab the zip/log files and put back in store_directory
+  zip_file = "#{directory}/data_point_#{options[:uuid]}.zip"
+  dest_zip_file = "#{store_directory}/data_point_#{options[:uuid]}.zip"
+  if File.exists?(zip_file)
+    FileUtils.rm_f(dest_zip_file) if File.exists?(dest_zip_file)
+    FileUtils.move(zip_file, dest_zip_file)
+  end
+
+  log_file = "#{directory}/#{options[:uuid]}.log"
+  dest_log_file = File.expand_path("#{store_directory}/../#{options[:uuid]}.log")
+  if File.exists?(log_file)
+    FileUtils.rm_f(dest_log_file) if File.exists?(dest_log_file)
+    FileUtils.move(log_file, dest_log_file)
+  end
+
+  FileUtils.rm_rf(directory) if Dir.exist?(directory)
+end
+
+# TODO: Need to communicate back to the database here because we can get a race condition with the download of the zip file
+
+
 puts "0"
