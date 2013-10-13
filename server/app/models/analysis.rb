@@ -21,6 +21,7 @@ class Analysis
   field :problem
   field :os_metadata # don't define type, keep this flexible
   field :use_shm, :type => Boolean, default: false #flag on whether or not to use SHM for analysis (impacts file uploading)
+  field :simulate_data_point_filename, :type => String
 
   # Temp location for these vas
   field :samples, :type => Integer

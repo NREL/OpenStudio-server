@@ -24,6 +24,12 @@ class Analysis::BatchRun < Struct.new(:options)
 
     @analysis.status = 'started'
     @analysis.run_flag = true
+
+    # Set this if not defined in the JSON
+    Rails.logger.info "F.rb is #{@analysis.simulate_data_point_filename}"
+    @analysis.simulate_data_point_filename ||= "simulate_data_point.rb"
+    @analysis.save!
+
     @analysis.save!
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
@@ -88,9 +94,9 @@ class Analysis::BatchRun < Struct.new(:options)
 
           print("#{@analysis.use_shm}")
           if ("#{@analysis.use_shm}" == "true"){
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
+            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
           } else {
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
           }
           z <- system(y,intern=TRUE)
           j <- length(z)
