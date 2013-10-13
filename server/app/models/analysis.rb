@@ -18,6 +18,7 @@ class Analysis
   field :analysis_output, :type => Array
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
+  field :use_shm, :type => Boolean, default: false #flag on whether or not to use SHM for analysis (impacts file uploading)
 
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
@@ -84,6 +85,9 @@ class Analysis
         logger.info("Worker node #{wn.inspect}")
       end
     end
+
+    # get server and worker characteristics
+    get_system_information()
 
     # check if this fails
     copy_data_to_workers()
@@ -196,15 +200,90 @@ class Analysis
     WorkerNode.all.each do |wn|
       Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
         logger.info(self.inspect)
-        session.scp.upload!(self.seed_zip.path, "/mnt/openstudio/")
+        if !use_shm
+          upload_dir = "/mnt/openstudio"
+          session.scp.upload!(self.seed_zip.path, "#{upload_dir}/")
 
-        session.exec!("cd /mnt/openstudio && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
-          logger.info(data)
+          session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
+            logger.info(data)
+          end
+          session.loop
+        else
+          upload_dir = "/run/shm/openstudio"
+          storage_dir = "/mnt/openstudio"
+          session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
+          session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
+          session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
+          session.scp.upload!(self.seed_zip.path, "#{upload_dir}")
+
+          session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+            logger.info(data)
+          end
+          session.loop
         end
-        session.loop
       end
     end
   end
 
+  # During the initialization of each analysis, go to each system node and grab its information
+  def get_system_information
+    #if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
 
+    #end
+
+    Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
+
+    # For now assume that there is only one master node
+    mn = MasterNode.first
+    if mn
+      if local_host
+        mn.ami_id = "Vagrant"
+        mn.instance_id = "Vagrant"
+      else # must be on amazon -- hit the api for the answers
+        mn.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
+        mn.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
+      end
+      mn.save!
+    end
+
+    # go through the worker node
+    WorkerNode.all.each do |wn|
+      if local_host
+        wn.ami_id = "Vagrant"
+        wn.instance_id = "Vagrant"
+      else
+        # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
+        Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
+          #Rails.logger.info(self.inspect)
+
+          logger.info "Checking the configuration of the worker nodes"
+          session.exec!("curl -L http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
+            Rails.logger.info("Worker node reported back #{data}")
+            wn.ami_id = data
+          end
+          session.loop
+
+          session.exec!("curl -L http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
+            Rails.logger.info("Worker node reported back #{data}")
+            wn.instance_id = data
+          end
+          session.loop
+        end
+      end
+
+      wn.save!
+    end
+  end
 end

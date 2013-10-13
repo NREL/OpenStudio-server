@@ -36,6 +36,7 @@ class Analysis::BatchRun < Struct.new(:options)
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
+
     @r.command() do
       %Q{
         ip <- "#{master_ip}"
@@ -44,7 +45,7 @@ class Analysis::BatchRun < Struct.new(:options)
 
         #test the query of getting the run_flag
         mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
-        flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
+        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
         #print(flag)
 
         print(flag["run_flag"])
@@ -64,10 +65,10 @@ class Analysis::BatchRun < Struct.new(:options)
     Rails.logger.info("Starting Child Process")
     process.start
     
-    good_ips = WorkerNode.where(valid:true)
+    good_ips = WorkerNode.where(valid:true) # TODO: make this a scope
     @analysis.analysis_output = []
     @analysis.analysis_output << "good_ips = #{good_ips.to_json}"
-    #@r.command(ips: WorkerNode.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+
     @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
         print(ips)
@@ -79,15 +80,19 @@ class Analysis::BatchRun < Struct.new(:options)
 
         f <- function(x){
           mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-          flag <- dbGetQuery(mongo, "analyses", '{_id:"#{@analysis.id}"}')
+          flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
           if (flag["run_flag"] == "false" ){
             stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
           }
           dbDisconnect(mongo)
 
-          y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/SimulateDataPoint.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
-          #y <- "sleep 1; echo hello"
-            z <- system(y,intern=TRUE)
+          print("#{@analysis.use_shm}")
+          if ("#{@analysis.use_shm}" == "true"){
+            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
+          } else {
+            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+          }
+          z <- system(y,intern=TRUE)
           j <- length(z)
           z
         }

@@ -2,16 +2,16 @@ require 'rest-client'
 require 'json'
 require 'faraday'
 
-HOSTNAME = "http://localhost:8080"
+#HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
-STOP_AFTER_N=nil  #set to nil if you want them all
-#HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
+STOP_AFTER_N=16  #set to nil if you want them all
+HOSTNAME = "http://ec2-54-211-187-190.compute-1.amazonaws.com"
 
 # Project data
-formulation_file = "./BigPATTestExport/analysis.json"
-analysis_zip_file = "./BigPATTestExport/analysis.zip"
-datapoints = Dir.glob("./BigPATTestExport/datapoint*.json")
+formulation_file = "./DiskIOBenchmark/analysis.json"
+analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
+datapoints = Dir.glob("./DiskIOBenchmark/datapoint*.json")
 
 # Try not to change data below here. If you do make sure you update the other run_example file
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|
