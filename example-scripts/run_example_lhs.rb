@@ -115,12 +115,18 @@ if !analysis_id.nil?
   #puts resp.status
 
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
-  puts resp.inspect
+  puts resp.code
 
   # check all the queued analyses for this project (eventually move this to all analyses)
   #puts "list of queued analyses"
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
+
+  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: 'batch_run', simulate_data_point_filename: 'simulate_data_point_lhs.rb' }
+  puts action_hash.to_json
+  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
+  puts resp.code
+
 end
 
 

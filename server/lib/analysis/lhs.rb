@@ -87,11 +87,11 @@ class Analysis::Lhs < Struct.new(:options)
     @analysis = Analysis.find(@analysis_id)
     @analysis.status = 'started'
     @analysis.run_flag = true
-    @analysis.save!
 
     # Set this if not defined in the JSON
     @analysis.problem['number_of_samples'] ||= 100
     @analysis.problem['random_seed'] ||= 1979
+    @analysis.save!
 
     # Create an instance for R
     @r = Rserve::Simpler.new
