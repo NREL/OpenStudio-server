@@ -17,7 +17,7 @@ optparse = OptionParser.new do |opts|
   end
 
   # TODO delete AWS argument.  Not needed at the moment.
-  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where SimulateDataPoint is being run (Local|Vagrant|AWS).") do |s|
+  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where simulate data point is being run (Local|Vagrant|AWS).") do |s|
     options[:runType] = s
   end
 
@@ -68,18 +68,19 @@ if File.exist?(directory)
   FileUtils.rm_rf(directory)
 end
 
-puts "Checking if we need to copy analysis files to directory"
-if options[:run_shm] && !Dir.exists?(analysis_dir)
-  puts "Copying analysis files"
-  FileUtils.mkdir_p(analysis_dir)
-  # copy over the ZIP file and unzip it
-  FileUtils.copy("/mnt/openstudio/analysis.zip", "#{analysis_dir}/analysis.zip")
-
-  pwd = Dir.pwd
-  Dir.chdir(analysis_dir)
-  puts `unzip -o analysis.zip`
-  Dir.chdir(pwd)
-end
+# NL: removed because i am testing doing this on worker node initialization
+#puts "Checking if we need to copy analysis files to directory"
+#if options[:run_shm] && !Dir.exists?(analysis_dir)
+#  puts "Copying analysis files"
+#  FileUtils.mkdir_p(analysis_dir)
+#  # copy over the ZIP file and unzip it
+#  FileUtils.copy("/mnt/openstudio/analysis.zip", "#{analysis_dir}/analysis.zip")
+#
+#  pwd = Dir.pwd
+#  Dir.chdir(analysis_dir)
+#  puts `unzip -o analysis.zip`
+#  Dir.chdir(pwd)
+#end
 
 FileUtils.mkdir_p(directory)
 FileUtils.mkdir_p(store_directory)
@@ -87,7 +88,6 @@ FileUtils.mkdir_p(store_directory)
 puts "Analysis in #{analysis_dir}; Running in #{directory}; Storing results in #{store_directory}"
 
 # copy the file to the run directory and run
-# TODO need to have server copy the data in the right place & it needs to initialize the directory by
 # removing all the files that may have been there.
 FileUtils.copy("/mnt/openstudio/run_openstudio.rb", "#{directory}/run_openstudio.rb")
 
