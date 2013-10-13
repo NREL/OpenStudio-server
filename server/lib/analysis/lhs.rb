@@ -84,7 +84,7 @@ class Analysis::Lhs < Struct.new(:options)
         @r.command() do
           %Q{
             print("#{save_file_name}")
-            png(filename="#{save_file_name}")
+            png(filename="#{save_file_name}", width = 1024, height = 1024)
             hist(samples, freq=F, breaks=20)
             dev.off()
           }

@@ -10,8 +10,7 @@ class PreflightImage
                             :path => ":rails_root/public/assets/variables/:id/:style/:basename.:extension",
                             :styles => {
                                 :original => ['1920x1680>', :png],
-                                :small => ['100x100#', :png],
-                                :medium => ['250x250', :png],
+                                :thumb => ['150x150#', :png],
                                 :large => ['500x500>', :png]
                             }
 
