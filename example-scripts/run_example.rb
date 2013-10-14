@@ -4,9 +4,9 @@ require 'faraday'
 
 #HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
-ANALYSIS_TYPE="lhs"
-STOP_AFTER_N=nil  #set to nil if you want them all
-#HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
+ANALYSIS_TYPE="batch_run"
+STOP_AFTER_N=16 #set to nil if you want them all
+HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
 
 # Project data
 formulation_file = "./DiskIOBenchmark/analysis.json"
@@ -15,9 +15,17 @@ datapoints = Dir.glob("./DiskIOBenchmark/datapoint*.json")
 
 # Try not to change data below here. If you do make sure you update the other run_example file
 @conn = Faraday.new(:url => HOSTNAME) do |faraday|
-  faraday.request  :url_encoded             # form-encode POST params
-  faraday.response :logger                  # log requests to STDOUT
-  faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+  faraday.request :url_encoded # form-encode POST params
+  faraday.response :logger # log requests to STDOUT
+  faraday.adapter Faraday.default_adapter # make requests with Net::HTTP
+end
+
+# Try not to change data below here. If you do make sure you update the other run_example file
+@conn_mp = Faraday.new(:url => HOSTNAME) do |faraday|
+  faraday.request :multipart
+  faraday.request :url_encoded # form-encode POST params
+  faraday.response :logger # log requests to STDOUT
+  faraday.adapter Faraday.default_adapter # make requests with Net::HTTP
 end
 
 # -------- DELETE Example ----------
@@ -36,7 +44,7 @@ end
 project_name = "project #{(rand()*1000).round}"
 puts project_name
 
-project_hash = { project: { name: "#{project_name}" } }
+project_hash = {project: {name: "#{project_name}"}}
 puts project_hash
 
 resp = RestClient.post("#{HOSTNAME}/projects.json", project_hash)
@@ -86,13 +94,19 @@ end
 if !analysis_id.nil?
   puts "uploading seed zip file"
 
-  if File.exist?(analysis_zip_file)
-    resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(analysis_zip_file, 'rb'))
-    #puts resp
-    puts resp.code
+  if File.exists?(analysis_zip_file)
+    payload = {:file => Faraday::UploadIO.new(analysis_zip_file, 'application/zip')}
+    resp = @conn_mp.post("analyses/#{analysis_id}/upload.json", payload)
+    puts resp.status
 
-    if resp.code == 201
+#    resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(analysis_zip_file, 'rb'))
+#    #puts resp
+#    puts resp.code
+
+    if resp.status == 201
       puts "Successfully uploaded ZIP file"
+    else
+      puts resp.inspect
     end
   else
     raise "Analysis zip file does not exist! #{analysis_zip_file}"
@@ -127,14 +141,14 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE }
+  action_hash = {analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE}
   puts action_hash.to_json
 
   #resp = @conn.post do |req|
   #  req.url "analyses/#{analysis_id}/action.json"
   #  req.headers['Content-Type'] = 'application/json'
   #  req.body = action_hash.to_json
-    #req.options[:timeout] = 180 #seconds
+  #req.options[:timeout] = 180 #seconds
   #end
   #puts resp.status
 
