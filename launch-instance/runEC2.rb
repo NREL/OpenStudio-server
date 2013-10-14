@@ -18,7 +18,7 @@ TEST_SSH=true
 
 # read in the config.yml file to get the secret/private key
 config = AwsConfig.new()
-
+a = Time.now
 # Launch the master
 if CREATE_SERVER
   instance_data = {instance_type: "m2.xlarge" }
@@ -115,6 +115,10 @@ if TEST_SSH
   end
 
   server_json = JSON.parse(File.read("server_data.json"), :symbolize_names => true)
+  
+  b = Time.now
+  delta = b.to_f - a.to_f
+  puts "startup time is #{delta}"
   #puts send_command(server_json[:server_ip], 'nproc | tr -d "\n"', File.read("ec2_server_key.pem"))
 end
 
