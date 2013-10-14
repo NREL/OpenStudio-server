@@ -158,6 +158,7 @@ cat /dev/null > /var/www/rails/openstudio/log/production.log
 cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
 rm -f /var/www/rails/openstudio/log/test.log
 rm -rf /var/www/rails/openstudio/public/assets/*
+rm -rf /var/www/rails/openstudio/tmp/*
 cat /dev/null > /var/log/auth.log
 cat /dev/null > /var/log/lastlog
 cat /dev/null > /var/log/kern.log
