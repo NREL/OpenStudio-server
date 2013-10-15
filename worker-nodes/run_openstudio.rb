@@ -76,7 +76,7 @@ begin
   ros.log_message "Getting Problem JSON input", true
 
   # get json from database
-  data_point_json, analysis_json = ros.get_problem_json()
+  data_point_json, analysis_json = ros.get_problem("json")
 
   # Get database point by index of manipulation (THIS IS NOT YET KNOWN)
 

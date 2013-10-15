@@ -4,7 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
-            "number_of_samples": 3,
+            "number_of_samples": 3000,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
@@ -15,8 +15,10 @@
                     "arguments": [
                     ],
                     "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+                    "bcl_measure_class_name_ADDME": "RotateBuilding",
                     "bcl_measure_uuid": "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
                     "bcl_measure_version_uuid": "ac5aa597-e9d7-47ec-931a-a57ed41b9fc2",
+                    "workflow_index_ADDME": 0,
                     "description": "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
                     "display_name": "Rotate Building 90 degrees",
                     "input_file_type": "OSM",
@@ -42,7 +44,9 @@
                             },
                             "display_name": "Building Rotation",
                             "maximum": 359,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 359,
                             "minimum": 0,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0,
                             "name": "building rotation",
                             "uncertainty_description": {
                                 "attributes": [
@@ -184,8 +188,10 @@
                         }
                     ],
                     "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+                    "bcl_measure_class_name_ADDME": "ReduceLightingLoadsByPercentage",
                     "bcl_measure_uuid": "d37b7ed5-887a-4d1f-b304-259462eadbe9",
                     "bcl_measure_version_uuid": "b0cb5b76-61fa-465a-af14-2992dceb374c",
+                    "workflow_index_ADDME": 1,
                     "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
                     "display_name": "Reduce Lighting Load By 30 percent",
                     "input_file_type": "OSM",
@@ -257,7 +263,7 @@
             "checksum_last": "2EDE1A05",
             "display_name": "seed",
             "file_type": "OSM",
-            "name": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
+            "name_DELETEME": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
             "path": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
             "timestamp_create": "20130716T144225",
             "timestamp_last": "20130917T154501",
