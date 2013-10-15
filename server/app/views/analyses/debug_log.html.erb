@@ -84,26 +84,3 @@
   <% end %>
   </tbody>
 </table>
-
-
-<table id="datapointtable" class="tablesorter table table-striped">
-  <thead>
-  <tr>
-    <th>Data Point Run Log Messages</th>
-  </tr>
-  </thead>
-  <tbody>
-  <% @analysis.data_points.each do |dp| %>
-      <tr class="success">
-        <td><%= dp.name unless dp.name.nil? %></td>
-      </tr>
-      <% unless dp.run_time_log.nil? %>
-          <% dp.run_time_log.each do |dpl| %>
-              <tr>
-                <td><%= dpl %></td>
-              </tr>
-          <% end %>
-      <% end %>
-  <% end %>
-  </tbody>
-</table>

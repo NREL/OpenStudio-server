@@ -94,9 +94,9 @@ class Analysis::BatchRun < Struct.new(:options)
 
           print("#{@analysis.use_shm}")
           if ("#{@analysis.use_shm}" == "true"){
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
+            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm",sep="")
           } else {
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS", sep="")
           }
           z <- system(y,intern=TRUE)
           j <- length(z)

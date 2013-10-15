@@ -103,8 +103,10 @@ end
 if !analysis_id.nil?
   # run the analysis
 
+
   action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE }
   puts action_hash.to_json
+
 
   #resp = @conn.post do |req|
   #  req.url "analyses/#{analysis_id}/action.json"
@@ -114,18 +116,31 @@ if !analysis_id.nil?
   #end
   #puts resp.status
 
+  a = Time.now
+  puts a
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.code
+  b = Time.now
+  puts b
+  puts "delta #{b.to_f - a.to_f}"
 
   # check all the queued analyses for this project (eventually move this to all analyses)
   #puts "list of queued analyses"
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
 
+
   action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: 'batch_run', simulate_data_point_filename: 'simulate_data_point_lhs.rb' }
   puts action_hash.to_json
-  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
+
+  a = Time.now
+  puts a
+  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.code
+  b = Time.now
+  puts b
+  puts "delta #{b.to_f - a.to_f}"
+
 
 end
 

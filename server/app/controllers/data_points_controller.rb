@@ -19,16 +19,16 @@ class DataPointsController < ApplicationController
 
     respond_to do |format|
       format.html do
-        exclude_fields = [:_id,:output,:password,:eplus_html]
+        exclude_fields = [:_id,:output,:password,:eplus_html,:values]
         @table_data = @data_point.as_json(:except => exclude_fields)
         logger.info("Cleaning up the log files")
-        if @table_data["run_time_log"]
-          @table_data["run_time_log"] = @table_data["run_time_log"].join("</br>").html_safe
-        end
         if @table_data["sdp_log_file"]
           @table_data["sdp_log_file"] = @table_data["sdp_log_file"].join("</br>").html_safe
         end
 
+        if @data_point.values
+          @values = @data_point.values
+        end
 
         # gsub for some styling
         if !@html.nil?

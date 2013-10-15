@@ -12,13 +12,14 @@ class DataPoint
   field :download_information, :type => String
   field :openstudio_datapoint_file_name, :type => String # make this paperclip?
   field :status, :type => String # enum of queued, started, completed
-  field :eplus_html, :type => String #Moped::BSON::Binary # ABUPS Summary
+  field :status_message, :type => String #results of the simulation
+  field :eplus_html, :type => String, default: nil #Moped::BSON::Binary # ABUPS Summary
   field :output
   field :results, :type => Hash
   field :run_start_time, :type => DateTime
   field :run_end_time, :type => DateTime
-  field :run_time_log, :type => Array
   field :sdp_log_file, :type => Array
+
 
   # Relationships
   belongs_to :analysis
