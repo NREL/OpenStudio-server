@@ -49,9 +49,7 @@ if (not options[:uuid]) || (options[:uuid] == "NA")
   exit
 end
 
-# initialize the mongo datapoint (which is held by the chauffeur)
-# How to add this file based on where the simulation is run?
-require "/mnt/openstudio/analysis_chauffeur.rb"
+require 'analysis_chauffeur'
 ros = AnalysisChauffeur.new(options[:uuid])
 
 # let listening processes know that this data point is running

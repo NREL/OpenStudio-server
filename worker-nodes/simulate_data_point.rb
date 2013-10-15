@@ -1,6 +1,5 @@
 require 'optparse'
 require 'fileutils'
-require "/mnt/openstudio/analysis_chauffeur.rb"
 
 puts "Parsing Input: #{ARGV}"
 
@@ -50,8 +49,9 @@ if not options[:uuid]
   exit
 end
 
-#libdir = File.expand_path(File.dirname(__FILE__))
-#$LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
+libdir = File.expand_path(File.dirname(__FILE__))
+$LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
+require 'analysis_chauffeur'
 
 ros = AnalysisChauffeur.new(options[:uuid])
 
@@ -91,7 +91,7 @@ begin
   FileUtils.copy("/mnt/openstudio/run_openstudio.rb", "#{directory}/run_openstudio.rb")
 
   # call the run openstudio script
-  command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ #{directory}/run_openstudio.rb -u #{options[:uuid]} -d #{directory} -r AWS "
+  command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/:#{File.dirname(__FILE__)} #{directory}/run_openstudio.rb -u #{options[:uuid]} -d #{directory} -r AWS "
   ros.log_message command, true
   result = `#{command}`
 
