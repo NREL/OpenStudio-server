@@ -129,13 +129,12 @@ if !analysis_id.nil?
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
 
-
   action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: 'batch_run', simulate_data_point_filename: 'simulate_data_point_lhs.rb' }
   puts action_hash.to_json
 
   a = Time.now
   puts a
-  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
+  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.code
   b = Time.now
   puts b
