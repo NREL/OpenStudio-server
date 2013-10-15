@@ -27,6 +27,10 @@ default_attributes(
                 :version => '0.10'
             },
             {
+	        :name => 'e1071',
+	        :version => '1.6-1'
+            },
+            {
                 :name => 'Rserve',
                 :version => '1.7-3'
             },
