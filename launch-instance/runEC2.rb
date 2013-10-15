@@ -13,7 +13,7 @@ OS_PATH = "C:/Projects/OpenStudio"
 # Global Options
 CREATE_SERVER=true
 CREATE_WORKER=true
-WORKER_INSTANCES=2
+WORKER_INSTANCES=8
 TEST_SSH=true
 
 # read in the config.yml file to get the secret/private key
@@ -55,8 +55,9 @@ if CREATE_WORKER
   server_json = JSON.parse(File.read("server_data.json"), :symbolize_names => true)
 
   # How many instances?
-  server_json[:instance_type] = "cc2.8xlarge"
+  #server_json[:instance_type] = "cc2.8xlarge"
   #server_json[:instance_type] = "m2.4xlarge"
+  server_json[:instance_type] = "m2.2xlarge"
   #server_json[:instance_type] = "t1.micro"
   server_json[:num] = WORKER_INSTANCES
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
