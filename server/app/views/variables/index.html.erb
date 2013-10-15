@@ -10,7 +10,7 @@
   <tr>
   </thead>
   <tbody>
-  <% @variables.each do |variable| %>
+  <% @variables.order_by(:perturbable.desc, :name.asc).each do |variable| %>
       <tr>
         <td><%= link_to variable.name, variable_path(variable) %></td>
         <td><%= variable.perturbable %></td>
