@@ -138,7 +138,7 @@ begin
 
   ros.communicate_complete()
 rescue Exception => e
-  log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace}"
+  log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   ros.log_message log_message, true
 
   # need to tell mongo this failed
