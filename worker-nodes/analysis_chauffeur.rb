@@ -5,7 +5,7 @@ class AnalysisChauffeur
 
   def initialize(uuid_or_path, library_path="/mnt/openstudio", communicate_method="communicate_mongo")
     if communicate_method == "communicate_mongo"
-      require "#{library_path}/#{communicate_method}.rb"
+        require "#{library_path}/#{communicate_method}.rb"
 
       require 'mongoid'
       require 'mongoid_paperclip'
