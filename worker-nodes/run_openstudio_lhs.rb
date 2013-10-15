@@ -63,6 +63,7 @@ objective_function_result = nil
 begin
   # initialize
   @model = nil
+  @weather_filename = nil
 
   ros.log_message "Getting Problem JSON input", true
 
@@ -82,7 +83,7 @@ begin
       if analysis_json[:analysis]['seed']['path']
 
         # Not sure that this is always split with last 3
-        baseline_model_path = File.expand_path(File.join(File.dirname(__FILE__),"..",analysis_json[:analysis]['seed']['path'].split("/").last(2).join("/")))
+        baseline_model_path = File.expand_path(File.join(File.dirname(__FILE__), "..", analysis_json[:analysis]['seed']['path'].split("/").last(2).join("/")))
         if File.exists?(baseline_model_path)
           ros.log_message "Reading in baseline model #{baseline_model_path}"
           translator = OpenStudio::OSVersion::VersionTranslator.new
@@ -100,15 +101,30 @@ begin
       raise "No seed model block"
     end
 
-    if analysis_json[:analysis]['problem'] && analysis_json[:analysis]['problem']['workflow']#ugh i want indifferent access
-      # iterate over the workflow and grab the measures
+    if analysis_json[:analysis]['weather_file']
+      if analysis_json[:analysis]['weather_file']['path']
+        @weather_filename = File.expand_path(File.join(File.dirname(__FILE__), "..", analysis_json[:analysis]['weather_file']['path'].split("/").last(4).join("/")))
+        if !File.exists?(@weather_filename)
+          raise "Could not find weather file for simulation #{@weather_filename}"
+        end
+
+      else
+        raise "No weather file path defined"
+      end
+    else
+      raise "No weather file block defined"
+    end
+
+
+    # iterate over the workflow and grab the measures
+    if analysis_json[:analysis]['problem'] && analysis_json[:analysis]['problem']['workflow'] #ugh i want indifferent access
       analysis_json[:analysis]['problem']['workflow'].each do |wf|
 
         # process the measure
         measure_path = wf['bcl_measure_directory'].split("/").last(2).first
         measure_name = wf['bcl_measure_class_name_ADDME']
 
-        require "#{File.expand_path(File.join(File.dirname(__FILE__),'..',measure_path,measure_name,'measure'))}"
+        require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
 
         measure = measure_name.constantize.new
         runner = OpenStudio::Ruleset::OSRunner.new
@@ -147,9 +163,9 @@ begin
               ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
               ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
 
-              result.warnings.each {|w| puts w.logMessage}
-              result.errors.each {|w| puts w.logMessage}
-              result.info.each {|w| puts w.logMessage}
+              result.warnings.each { |w| puts w.logMessage }
+              result.errors.each { |w| puts w.logMessage }
+              result.info.each { |w| puts w.logMessage }
 
               @model
             else
@@ -164,23 +180,47 @@ begin
 
   #ros.log_message @model.to_s
   a = Time.now
-  File.open("#{run_directory}/osm_out.osm", 'w') { |f| f << @model.to_s }
+  osm_filename = "#{run_directory}/osm_out.osm"
+  File.open(osm_filename, 'w') { |f| f << @model.to_s }
   b = Time.now
-  ros.log_message "Ruby write took #{b.to_f - a.to_f}"
+  ros.log_message "Ruby write took #{b.to_f - a.to_f}", true
 
   a = Time.now
-  @model.save(OpenStudio::Path.new("#{run_directory}/osm_write_out.osm"),true)
+  @model.save(OpenStudio::Path.new("#{run_directory}/osm_write_out.osm"), true)
   b = Time.now
-  ros.log_message "OpenStudio write took #{b.to_f - a.to_f}"
+  ros.log_message "OpenStudio write took #{b.to_f - a.to_f}", true
 
-  ros.log_message "Creating Run Manager", true
+  ros.log_message "Translate object to energyplus IDF", true
+  a = Time.now
+  forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new()
+  #puts "starting forward translator #{Time.now}"
+  @model_idf = forward_translator.translateModel(@model)
+  b = Time.now
+  ros.log_message "Translate object to energyplus IDF took #{b.to_f - a.to_f}", true
 
+  # Run EnergyPlus using Asset Score run energyplus script
+  idf_filename = "#{run_directory}/in.idf"
+  File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
 
-  ros.log_message "Queue RunManager Job", true
+  ros.log_message "Verifying location of Post Process Script", true
+  post_process_filename = File.expand_path(File.join(File.dirname(__FILE__),"../..","post_process.rb"))
+  if File.exists?(post_process_filename)
+    ros.log_message "Post process file is #{post_process_filename}"
+  else
+    raise "Could not file post process file #{post_process_filename}"
+  end
 
   ros.log_message "Waiting for simulation to finish", true
+  command = "ruby #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} \
+              -w #{@weather_filename} -p #{post_process_filename}"
+  #command += " -e #{run_args[:energyplus]}" unless run_args.nil?
+  #command += " --idd-path #{run_args[:idd]}" unless run_args.nil?
+  #command += " --support-files #{support_files}" unless support_files.nil?
+  ros.log_message command, true
+  result = `#{command}`
 
   ros.log_message "Simulation finished", true
+  ros.log_message "Simulation results #{result}", true
 
   # use the completed job to populate data_point with results
   ros.log_message "Updating OpenStudio DataPoint object", true
