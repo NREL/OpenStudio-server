@@ -34,7 +34,7 @@ module CommunicateMongo
     dp.save!
   end
 
-  def self.get_problem_json(dp)
+  def self.get_problem(dp, format)
     # have to remap the os_metadata back to the metadata (fix this eventually)
     data_point_hash = Hash.new
     data_point_hash[:data_point] = dp
@@ -46,7 +46,12 @@ module CommunicateMongo
     analysis_hash[:analysis] = analysis
     analysis_hash[:metadata] = analysis[:os_metadata]
 
-    [data_point_hash.to_json, analysis_hash.to_json]
+    result = nil
+    if format == "hash"
+      [data_point_hash, analysis_hash]
+    else
+      [data_point_hash.to_json, analysis_hash.to_json]
+    end
   end
 
   def self.communicate_datapoint(dp, data_point)

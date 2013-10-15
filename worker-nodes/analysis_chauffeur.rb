@@ -37,8 +37,8 @@ class AnalysisChauffeur
     @time = Time.now
   end
 
-  def get_problem_json
-    @communicate_module.get_problem_json(@communicate_object)
+  def get_problem(format="json")
+    @communicate_module.get_problem(@communicate_object, format)
   end
 
   def communicate_results(os_data_point, os_directory)
