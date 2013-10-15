@@ -112,7 +112,7 @@ begin
   end
 
 rescue Exception => e
-  log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace}"
+  log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   puts log_message
 ensure
   Dir.chdir(current_dir)

@@ -98,64 +98,19 @@ begin
 
 
   if File.exists?("eplustbl.csv")
+    puts "eplustbl.csv exists and parsing into JSON format"
     results = {}
     rowcnt = 0
-    CSV.open("eplustbl.csv", 'r') do |row|
+    CSV.foreach("eplustbl.csv", 'r') do |row|
       rowcnt += 1
       if rowcnt == 1
         colcnt = 0
         row.each do |col|
           colcnt += 1
           longname = col.gsub(/\(.*\)/, "").strip
+          short_name = longname.downcase.gsub(" ", "_")
           units = col.match(/\(.*\)/)[0].gsub("(", "").gsub(")", "").downcase
-          case col
-            when "Total Energy (MJ/m2)"
-              results["#{colcnt}"] = {:name => "eui", :units => units, :longname => longname}
-            when "Total Source Energy (MJ/m2)"
-              results["#{colcnt}"] = {:name => "eui_source", :units => units, :longname => longname}
-            when "Total Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "total_electricity", :units => units, :longname => longname}
-            when "Total Natural Gas (MJ/m2)"
-              results["#{colcnt}"] = {:name => "gas_total", :units => units, :longname => longname}
-            when "Heating Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "heating_electricity", :units => units, :longname => longname}
-            when "Heating Natural Gas (MJ/m2)"
-              results["#{colcnt}"] = {:name => "gas_heating", :units => units, :longname => longname}
-            when "Cooling Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "cooling_electricity", :units => units, :longname => longname}
-            when "Interior Lighting Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "interior_lighting_electricity", :units => units, :longname => longname}
-            when "Exterior Lighting Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "exterior_lighting_electricity", :units => units, :longname => longname}
-            when "Interior Equipment Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "interior_equipment_electricity", :units => units, :longname => longname}
-            when "Interior Equipment Natural Gas (MJ/m2)"
-              results["#{colcnt}"] = {:name => "interior_equipment_gas", :units => units, :longname => longname}
-            when "Exterior Equipment Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "exterior_equipment_electricity", :units => units, :longname => longname}
-            when "Fans Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "fans_electricity", :units => units, :longname => longname}
-            when "Pumps Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "pumps_electricity", :units => units, :longname => longname}
-            when "Heat Rejection Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "heat_rejection_electricity", :units => units, :longname => longname}
-            when "Humidification Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "humidification_electricity", :units => units, :longname => longname}
-            when "Water Systems Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "water_systems_electricity", :units => units, :longname => longname}
-            when "Water Systems Natural Gas (MJ/m2)"
-              results["#{colcnt}"] = {:name => "water_systems_gas", :units => units, :longname => longname}
-            when "Refrigeration Electricity (MJ/m2)"
-              results["#{colcnt}"] = {:name => "refrigeration_electricity", :units => units, :longname => longname}
-            when "Heating Hours Unmet (hr)"
-              results["#{colcnt}"] = {:name => "heating_hours_unmet", :units => units, :longname => longname}
-            when "Cooling Hours Unmet (hr)"
-              results["#{colcnt}"] = {:name => "cooling_hours_unmet", :units => units, :longname => longname}
-            when "Total Hours Unmet (hr)"
-              results["#{colcnt}"] = {:name => "total_hours_unmet", :units => units, :longname => longname}
-            else
-              puts 'unknown column header'
-          end
+          results["#{colcnt}"] = {:name => short_name, :units => units, :longname => longname}
         end
       elsif rowcnt == 2
         colcnt = 0
@@ -171,14 +126,15 @@ begin
     File.open('eplustbl.json', 'w') { |f| f << JSON.pretty_generate({:data => results}) }
 
   end
-rescue
+rescue Exception => e
+  log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+  puts log_message
 
 ensure
   # Always clean up
   require 'pathname'
   require 'fileutils'
   paths_to_rm = []
-
   paths_to_rm << Pathname.glob("*.osm")
   paths_to_rm << Pathname.glob("*.ini")
   paths_to_rm << Pathname.glob("*.idf")
