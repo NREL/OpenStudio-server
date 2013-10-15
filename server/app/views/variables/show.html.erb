@@ -16,3 +16,7 @@
   <% end %>
   </tbody>
 </table>
+
+<%= link_to image_tag(@variable.preflight_images.first.image.url(:large)), @variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
+
+

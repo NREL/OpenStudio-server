@@ -1,5 +1,6 @@
 require 'optparse'
 require 'fileutils'
+require "/mnt/openstudio/analysis_chauffeur.rb"
 
 puts "Parsing Input: #{ARGV}"
 
@@ -17,6 +18,7 @@ optparse = OptionParser.new do |opts|
   end
 
   # TODO delete AWS argument.  Not needed at the moment.
+  options[:runType] = "AWS"
   opts.on('-r', '--runType RUNTYPE', String, "String that indicates where simulate data point is being run (Local|Vagrant|AWS).") do |s|
     options[:runType] = s
   end
@@ -48,79 +50,99 @@ if not options[:uuid]
   exit
 end
 
-directory = nil
-analysis_dir = "/mnt/openstudio"
-store_directory = "/mnt/openstudio/analysis/data_point_#{options[:uuid]}"
+#libdir = File.expand_path(File.dirname(__FILE__))
+#$LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
-# use /run/shm on AWS (if possible)
-if Dir.exists?(options[:run_shm_dir]) && options[:run_shm]
-  analysis_dir = "#{options[:run_shm_dir]}/openstudio"
-  directory = "#{options[:run_shm_dir]}/openstudio/analysis/data_point_#{options[:uuid]}"
-else
-  directory = store_directory
-end
+ros = AnalysisChauffeur.new(options[:uuid])
 
-puts "Simulation Run Directory is #{directory}"
+# Set the result of the project for R to know that this finished
+result = nil
 
-# create data point directory
-if File.exist?(directory)
-  FileUtils.rm_rf(directory)
-end
+begin
+  ros.communicate_started() # this initializes everything as well
+  ros.log_message "Running file #{__FILE__}"
 
-# NL: removed because i am testing doing this on worker node initialization
-#puts "Checking if we need to copy analysis files to directory"
-#if options[:run_shm] && !Dir.exists?(analysis_dir)
-#  puts "Copying analysis files"
-#  FileUtils.mkdir_p(analysis_dir)
-#  # copy over the ZIP file and unzip it
-#  FileUtils.copy("/mnt/openstudio/analysis.zip", "#{analysis_dir}/analysis.zip")
-#
-#  pwd = Dir.pwd
-#  Dir.chdir(analysis_dir)
-#  puts `unzip -o analysis.zip`
-#  Dir.chdir(pwd)
-#end
+  directory = nil
+  analysis_dir = "/mnt/openstudio"
+  store_directory = "/mnt/openstudio/analysis/data_point_#{options[:uuid]}"
 
-FileUtils.mkdir_p(directory)
-FileUtils.mkdir_p(store_directory)
-
-puts "Analysis in #{analysis_dir}; Running in #{directory}; Storing results in #{store_directory}"
-
-# copy the file to the run directory and run
-# removing all the files that may have been there.
-FileUtils.copy("/mnt/openstudio/run_openstudio.rb", "#{directory}/run_openstudio.rb")
-
-# call the run openstudio script
-command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ #{directory}/run_openstudio.rb -u #{options[:uuid]} -d #{directory} -r AWS > #{directory}/#{options[:uuid]}.log"
-puts command
-result = `#{command}`
-puts "command result #{result}"
-
-# put the data back into the "long term store"
-if options[:run_shm]
-  # only grab the zip/log files and put back in store_directory
-  zip_file = "#{directory}/data_point_#{options[:uuid]}.zip"
-  dest_zip_file = "#{store_directory}/data_point_#{options[:uuid]}.zip"
-  puts "Trying to move zip file from #{zip_file} to #{dest_zip_file}"
-  if File.exists?(zip_file)
-    FileUtils.rm_f(dest_zip_file) if File.exists?(dest_zip_file)
-    puts "Moving zip file"
-    FileUtils.move(zip_file, dest_zip_file)
+  # use /run/shm on AWS (if possible)
+  if Dir.exists?(options[:run_shm_dir]) && options[:run_shm]
+    analysis_dir = "#{options[:run_shm_dir]}/openstudio"
+    directory = "#{options[:run_shm_dir]}/openstudio/analysis/data_point_#{options[:uuid]}"
+  else
+    directory = store_directory
   end
 
-  log_file = "#{directory}/#{options[:uuid]}.log"
-  dest_log_file = File.expand_path("#{store_directory}/../#{options[:uuid]}-run_os.log")
-  if File.exists?(log_file)
-    FileUtils.rm_f(dest_log_file) if File.exists?(dest_log_file)
-    FileUtils.move(log_file, dest_log_file)
+  ros.log_message "Simulation Run Directory is #{directory}", true
+
+  # create data point directory
+  if File.exist?(directory)
+    FileUtils.rm_rf(directory)
   end
 
-  puts "Removing directory from SHM #{directory}"
-  FileUtils.rm_rf(directory) if Dir.exist?(directory)
+  FileUtils.mkdir_p(directory)
+  FileUtils.mkdir_p(store_directory)
+
+  puts "Analysis in #{analysis_dir}; Running in #{directory}; Storing results in #{store_directory}"
+
+  # copy the file to the run directory and run
+  # removing all the files that may have been there.
+  FileUtils.copy("/mnt/openstudio/run_openstudio.rb", "#{directory}/run_openstudio.rb")
+
+  # call the run openstudio script
+  command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ #{directory}/run_openstudio.rb -u #{options[:uuid]} -d #{directory} -r AWS "
+  ros.log_message command, true
+  result = `#{command}`
+
+  if result
+    result = result.split("\n").last
+  end
+
+  # Save the log file
+  stdout_file_name = "#{directory}/#{options[:uuid]}.log"
+  FileUtils.rm(stdout_file_name) if File.exists?(stdout_file_name)
+  File.open(stdout_file_name, 'w') {|f| f << result}
+
+  # sense the run_openstudio method also loads the datapoint, this has to reload the datapoint
+  ros.reload
+  ros.log_message "command result is: #{result}"
+
+  # put the data back into the "long term store"
+  if options[:run_shm]
+    # only grab the zip/log files and put back in store_directory
+    zip_file = "#{directory}/data_point_#{options[:uuid]}.zip"
+    dest_zip_file = "#{store_directory}/data_point_#{options[:uuid]}.zip"
+    puts "Trying to move zip file from #{zip_file} to #{dest_zip_file}"
+    if File.exists?(zip_file)
+      FileUtils.rm_f(dest_zip_file) if File.exists?(dest_zip_file)
+      puts "Moving zip file"
+      FileUtils.move(zip_file, dest_zip_file)
+    end
+
+    log_file = "#{directory}/#{options[:uuid]}.log"
+    dest_log_file = File.expand_path("#{store_directory}/../#{options[:uuid]}-run_os.log")
+    if File.exists?(log_file)
+      FileUtils.rm_f(dest_log_file) if File.exists?(dest_log_file)
+      FileUtils.move(log_file, dest_log_file)
+    end
+
+    puts "Removing directory from SHM #{directory}"
+    FileUtils.rm_rf(directory) if Dir.exist?(directory)
+  end
+
+  # check if the simulation failed after moving the files back to the right place
+  if result == "NA"
+    raise "Simulation result was invalid"
+  end
+
+  ros.communicate_complete()
+rescue Exception => e
+  log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace}"
+  ros.log_message log_message, true
+
+  # need to tell mongo this failed
+  ros.communicate_failure()
+ensure
+  puts result
 end
-
-# TODO: WARNING SHM will cause a problem when downloading the zip until this is fixed:
-# TODO: Need to communicate back to the database here because we can get a race condition with the download of the zip file
-
-# Communicate the object function here
-puts "0"

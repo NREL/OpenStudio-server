@@ -203,12 +203,6 @@ class AnalysesController < ApplicationController
   def debug_log
     @analysis = Analysis.find(params[:id])
 
-    @log_message = []
-    @analysis.data_points.each do |dp|
-      unless dp.run_time_log.nil?
-        @log_message << [dp.name] + dp.run_time_log
-      end
-    end
     @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
     exclude_fields = [:_id,:user,:password]

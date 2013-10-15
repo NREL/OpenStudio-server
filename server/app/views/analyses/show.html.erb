@@ -22,6 +22,7 @@
   <td><%= @analysis.name %></td>
   <td><%= @analysis.analysis_type %></td>
   <td><%= @analysis.status %></td>
+
   <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
   <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>
   <td><%= (@analysis.end_time.to_f - @analysis.start_time.to_f).round(2) unless @analysis.end_time.nil? || @analysis.start_time.nil? %></td>
@@ -47,6 +48,7 @@
   <tr>
     <th>Name</th>
     <th>Status</th>
+    <th>Status Message</th>
     <th>EUI (MJ/m²)</th>
     <th>Start Time (UTC)</th>
     <th>End Time (UTC)</th>
@@ -60,6 +62,7 @@
       <tr>
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
+        <td><%=  dp.status_message if dp.status_message %></td>
         <td> <%= dp.results['net_site_energy_use_intentsity'] unless dp.results.nil? %> </td>
         <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
         <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
