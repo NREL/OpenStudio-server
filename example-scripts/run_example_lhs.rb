@@ -134,7 +134,7 @@ if !analysis_id.nil?
 
   a = Time.now
   puts a
-  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
+  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.code
   b = Time.now
   puts b

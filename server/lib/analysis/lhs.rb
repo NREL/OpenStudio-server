@@ -34,8 +34,8 @@ class Analysis::Lhs < Struct.new(:options)
       hash_values_and_weight.each do |kv|
         kv['weight'] = ave_weight if kv['weight'].nil?
       end
-      values = hash_values_and_weight.map{|k| k['value']}
-      weights = hash_values_and_weight.map{|k| k['weight']}
+      values = hash_values_and_weight.map { |k| k['value'] }
+      weights = hash_values_and_weight.map { |k| k['weight'] }
 
       Rails.logger.info("values are #{values}, weights are #{weights}")
 
@@ -153,6 +153,7 @@ class Analysis::Lhs < Struct.new(:options)
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
     @analysis.status = 'started'
+    @analysis.end_time = nil
     @analysis.run_flag = true
 
     # Set this if not defined in the JSON
@@ -197,9 +198,9 @@ class Analysis::Lhs < Struct.new(:options)
       sfp = nil
       if var.uncertainty_type == "discrete_uncertain"
         Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-        sfp = discrete_sample_from_probability(p[i_var], var.uncertainty_type, var.discrete_values_and_weights, save_histogram = true)
+        sfp = discrete_sample_from_probability(p[i_var], var.uncertainty_type, var.discrete_values_and_weights, var.type != "String")
       else
-        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value)
+        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, var.type != "String")
       end
       samples["#{var.id}"] = sfp[:r]
       if sfp[:image_path]

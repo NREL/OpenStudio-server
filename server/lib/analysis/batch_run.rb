@@ -23,6 +23,7 @@ class Analysis::BatchRun < Struct.new(:options)
     @r.converse "library(RMongo)"
 
     @analysis.status = 'started'
+    @analysis.end_time = nil
     @analysis.run_flag = true
 
     # Set this if not defined in the JSON
