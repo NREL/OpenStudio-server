@@ -23,10 +23,62 @@ class Analysis::Lhs < Struct.new(:options)
       o
     end
 
+    def discrete_sample_from_probability(probabilities_array, distribution_type, hash_values_and_weight, save_histogram = true)
+      @r.converse "print('creating discrete distribution')"
+
+      if hash_values_and_weight.nil? || hash_values_and_weight.empty?
+        raise "no hash values and weight passed"
+      end
+
+      ave_weight = 1 / hash_values_and_weight.size
+      hash_values_and_weight.each do |kv|
+        kv['weight'] = ave_weight if kv['weight'].nil?
+      end
+      values = hash_values_and_weight.map{|k| k['value']}
+      weights = hash_values_and_weight.map{|k| k['weight']}
+
+      Rails.logger.info("values are #{values}, weights are #{weights}")
+
+      dataframe = {"data" => probabilities_array}.to_dataframe
+
+      if distribution_type == 'discrete_uncertain'
+        @r.command(:df => dataframe, :values => values, :weights => weights) do
+          %Q{
+              print(values)
+              print(values)
+              samples <- qdiscrete(df$data, weights, values)
+            }
+        end
+      elsif distribution_type == 'bool_uncertain'
+
+      else
+        raise "discrete distribution type #{distribution_type} not known for R"
+      end
+
+      # returns an array
+      @r.converse "print(samples)"
+      save_file_name = nil
+      if save_histogram
+        # Determine where to save it
+        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
+        Rails.logger.info("R image file name is #{save_file_name}")
+        @r.command() do
+          %Q{
+            print("#{save_file_name}")
+            png(filename="#{save_file_name}", width = 1024, height = 1024)
+            hist(samples, freq=F, breaks=20)
+            dev.off()
+          }
+        end
+      end
+
+      {r: @r.converse("samples"), image_path: save_file_name}
+    end
+
     def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max, save_histogram = true)
       Rails.logger.info "Creating sample from probability"
       r_dist_name = ""
-      if distribution_type == 'normal'
+      if distribution_type == 'normal' || distribution_type == 'normal_uncertain'
         r_dist_name = "qnorm"
       elsif distribution_type == 'lognormal'
         r_dist_name = "qlnorm"
@@ -117,6 +169,7 @@ class Analysis::Lhs < Struct.new(:options)
     @r.converse "library(snowfall)"
     @r.converse "library(lhs)"
     @r.converse "library(triangle)"
+    @r.converse "library(e1071)"
 
     # get variables / measures
     # TODO: For some reason the scoped variable won't work here! ugh.
@@ -138,10 +191,16 @@ class Analysis::Lhs < Struct.new(:options)
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
     # For now, create a new variable_instance, create new datapoints, and add the instance reference
     i_var = 0
-    samples = {}  # samples are in hash of arrarys
+    samples = {} # samples are in hash of arrays
     # TODO: IMPLEMENT THIS in parallel
     selected_variables.each do |var|
-      sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value)
+      sfp = nil
+      if var.uncertainty_type == "discrete_uncertain"
+        Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
+        sfp = discrete_sample_from_probability(p[i_var], var.uncertainty_type, var.discrete_values_and_weights, save_histogram = true)
+      else
+        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value)
+      end
       samples["#{var.id}"] = sfp[:r]
       if sfp[:image_path]
         pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
@@ -158,7 +217,7 @@ class Analysis::Lhs < Struct.new(:options)
 
     # multiple and smash the hash of arrays to form a array of hashes
     #samples = samples.map{ |k, v| [k].product(v) }.transpose.map { |ps| {:values => Hash[ps]} }
-    samples = samples.map{ |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
+    samples = samples.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
 
     Rails.logger.info "Flipping samples around yields #{samples}"
 

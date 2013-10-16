@@ -4,7 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
-            "number_of_samples": 50,
+            "number_of_samples": 1000,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
@@ -26,7 +26,7 @@
                     "is_user_script": false,
                     "measure_group_index": 1,
                     "measure_type": "RubyMeasure",
-                    "name": "Rotate Building 90 degrees",
+                    "name": "Rotate Building",
                     "output_file_type": "OSM",
                     "uuid": "4839a263-d0a9-4037-93e6-b5d89bf7a659",
                     "version_uuid": "bc58ea56-bf10-41c0-8b92-d3676530b83c",
@@ -193,7 +193,7 @@
                     "bcl_measure_version_uuid": "b0cb5b76-61fa-465a-af14-2992dceb374c",
                     "workflow_index_ADDME": 1,
                     "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
-                    "display_name": "Reduce Lighting Load By 30 percent",
+                    "display_name": "Reduce Lighting Load by Percentage",
                     "input_file_type": "OSM",
                     "is_selected": true,
                     "is_user_script": false,
@@ -221,7 +221,7 @@
                             "name": "reduce power",
                             "uncertainty_description": {
                                 "attributes": [
-                                                                    {
+                                    {
                                         "display_name": "Mode",
                                         "name": "modes",
                                         "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
@@ -252,6 +252,220 @@
                             "variable_index": 0,
                             "variable_type": "RubyContinuousVariable",
                             "version_uuid": "f5344c2b-6578-4bef-97ef-03c81b5035cf"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "argument_index": 1,
+                            "default_value": 0.0,
+                            "display_name": "Increase in Material and Installation Costs for Construction per Area Used ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "material_cost_increase_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "4da82528-475b-4fec-a3a2-0d820e1ff24b",
+                            "value": 2.0,
+                            "version_uuid": "4108abb2-cf9e-4bc6-8df2-3a6590986374"
+                        },
+                        {
+                            "argument_index": 2,
+                            "default_value": 0.0,
+                            "display_name": "One Time Retrofit Cost to Add Insulation to Construction ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "one_time_retrofit_cost_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "c9f3bc84-e9af-47e7-9ca8-db6aea4d2c3f",
+                            "version_uuid": "63d2e910-b168-4bdf-98eb-6abfe9d424d2"
+                        },
+                        {
+                            "argument_index": 3,
+                            "default_value": 0,
+                            "display_name": "Year to Incur One Time Retrofit Cost (whole years).",
+                            "domain_type": "Interval",
+                            "name": "years_until_retrofit_cost",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "70f3b40b-bc82-4267-ab7a-0e60cadcce17",
+                            "version_uuid": "a1a37e61-cbb1-4fbd-aa77-a33c9f505f11"
+                        }
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
+                    "bcl_measure_uuid": "34877255-5bb5-45db-ad45-abd9ca80960c",
+                    "bcl_measure_version_uuid": "16aae883-e2bc-4121-a995-4bfc4c437561",
+                    "description": "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. If a wall?s insulation matches or exceeds the requested value then it will not be altered. Costs for a construction can be adjusted",
+                    "display_name": "Set R-value of Insulation for Exterior Walls to a Specific Value R-17.5",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 2,
+                    "measure_type": "RubyMeasure",
+                    "name": "Set R-value of Insulation for Exterior Walls to a Specific Value R-17.5",
+                    "output_file_type": "OSM",
+                    "uuid": "149f3f91-155b-400d-b803-b0c100e726da",
+                    "version_uuid": "5af31d5b-538c-4ce9-b588-1ccedcb32748",
+                    "variables": [
+                        {
+                            "argument": {
+                                "argument_index": 0,
+                                "default_value": 13.0,
+                                "display_name": "Insulation R-value (ft^2*h*R/Btu).",
+                                "domain_type": "Interval",
+                                "name": "r_value",
+                                "required": true,
+                                "type": "Double",
+                                "uuid": "08570be4-080e-488e-9777-c0dab35885ab",
+                                "version_uuid": "e0f2537c-7be0-4195-8a37-5282661faab2"
+                            },
+                            "display_name": "Exterior R-Value",
+                            "maximum": 50,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 50,
+                            "minimum": 5,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
+                            "name": "exterior_r_value",
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 25,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 50,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "normal_uncertain"
+                            },
+                            "uuid": "2b22eb94-6657-42ce-9c8f-2b60e610d6c1",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "4c745755-666a-4c00-b3f2-4d383d4e4e38"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "argument_index": 1,
+                            "default_value": 0.0,
+                            "display_name": "Increase in Material and Installation Costs for Construction per Area Used ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "material_cost_increase_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "c89e6f7a-995e-498d-bec5-8409d4dd1122",
+                            "value": 2.0,
+                            "version_uuid": "8123d970-7816-4d25-9afe-55076a300c7a"
+                        },
+                        {
+                            "argument_index": 2,
+                            "default_value": 0.0,
+                            "display_name": "One Time Retrofit Cost to Add Insulation to Construction ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "one_time_retrofit_cost_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "f57f8ec2-fe36-41d1-b833-6be34c6e6afa",
+                            "version_uuid": "d26edc7c-62f0-4337-b636-74428dc64283"
+                        },
+                        {
+                            "argument_index": 3,
+                            "default_value": 0,
+                            "display_name": "Year to Incur One Time Retrofit Cost (whole years).",
+                            "domain_type": "Interval",
+                            "name": "years_until_retrofit_cost",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "009b3fa8-b1f7-4f98-88f7-56cd133e2dce",
+                            "version_uuid": "36e8f8f6-b387-4abf-b061-30829339e6bf"
+                        }
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
+                    "bcl_measure_uuid": "c6b78646-be8e-425b-af79-fdbbcd0d58d5",
+                    "bcl_measure_version_uuid": "019cc5e3-aec7-417e-8b89-b47c0644c880",
+                    "description": "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
+                    "display_name": "Set R-value of Insulation for Roofs to a Specific Value R30",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 1,
+                    "measure_type": "RubyMeasure",
+                    "name": "Set R-value of Insulation for Roofs to a Specific Value R30",
+                    "output_file_type": "OSM",
+                    "uuid": "65463eba-6517-4842-9744-ee4a770044ba",
+                    "version_uuid": "14e264e0-4921-481c-8b7c-7e5dff50d7db",
+                    "variables": [
+                        {
+                            "argument": {
+                                "argument_index": 0,
+                                "default_value": 30.0,
+                                "display_name": "Roof Insulation R-value (ft^2*h*R/Btu).",
+                                "domain_type": "Interval",
+                                "name": "r_value",
+                                "required": true,
+                                "type": "Double",
+                                "uuid": "5f5322ca-3f85-45c7-bf7a-7da43a8ea3a8",
+                                "version_uuid": "9a830663-7cdd-440d-a59d-67a1a0a21c1f"
+
+                            },
+                            "display_name": "Roof R-Value",
+                            "maximum": 100,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 100,
+                            "minimum": 5,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
+                            "name": "roof   _r_value",
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "name": "discrete",
+                                        "values_and_weights": [
+                                            {
+                                                "value": 10,
+                                                "weight": 0.05
+                                            },
+                                            {
+                                                "value": 15,
+                                                "weight": 0.3
+                                            },
+                                            {
+                                                "value": 30,
+                                                "weight": 0.1
+                                            },
+                                            {
+                                                "value": 50,
+                                                "weight": 0.05
+                                            },
+                                            {
+                                                "value": 80,
+                                                "weight": 0.4
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "type": "discrete_uncertain"
+                            },
+                            "uuid": "17f4c188-4832-4e24-a9dc-aaae8f28002d",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "974ac73b-7180-4775-9e4a-a0e7e3b1279e"
                         }
                     ]
                 }

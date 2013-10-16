@@ -11,6 +11,7 @@ class Variable
   field :maximum # don't define this--it can be anything
   field :mean # don't define this--it can be anything
   field :uncertainty_type, :type => String
+  field :discrete_values_and_weights
   field :data_type, :type => String # not sure this is needed because mongo is typed
   field :variable_index, :type => Integer # for measure groups
   field :argument_index, :type => Integer
@@ -95,6 +96,8 @@ class Variable
               exclude_fields_2 = ['uuid', 'version_uuid', 'name']
               var["#{att_name}_#{k2}"] = v2  unless exclude_fields_2.include? k2
             end
+
+
           end
         end
       end
