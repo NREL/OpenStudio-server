@@ -201,10 +201,10 @@ class Analysis
   end
 
   # copy back the results to the master node if they are finished
-  def download_data_from_workers
+  def finalize_data_points
     any_downloaded = false
     self.data_points.and({download_status: 'na'}, {status: 'completed'}).each do |dp|
-      downloaded = dp.download_datapoint_from_worker
+      downloaded = dp.finalize_data_points
       any_downloaded = any_downloaded || downloaded
     end
     return any_downloaded

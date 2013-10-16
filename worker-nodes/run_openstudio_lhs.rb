@@ -223,12 +223,15 @@ begin
   ros.log_message "Simulation results #{result}", true
 
   # use the completed job to populate data_point with results
-  ros.log_message "Updating OpenStudio DataPoint object", true
+  ros.log_message "Updating OpenStudio DataPoint and Communicating Results", true
 
-  ros.log_message "Communicating Results", true
+  # First read in the eplustbl.json file
+  if File.exists("#{run_directory}/run/eplustbl.json")
+    result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
 
-  # implemented differently for Local vs. Vagrant or AWS
-  #ros.communicate_results(data_point, directory)
+    #map the result json back to a flat array
+    ros.communicate_results_json(result_json)
+  end
 
   # now set the objective function value or values
   objective_function_result = 0

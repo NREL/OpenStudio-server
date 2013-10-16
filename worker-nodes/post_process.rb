@@ -96,30 +96,19 @@ begin
     end
   end
 
-
   if File.exists?("eplustbl.csv")
     puts "eplustbl.csv exists and parsing into JSON format"
-    results = {}
-    rowcnt = 0
-    CSV.foreach("eplustbl.csv", 'r') do |row|
-      rowcnt += 1
-      if rowcnt == 1
-        colcnt = 0
-        row.each do |col|
-          colcnt += 1
-          longname = col.gsub(/\(.*\)/, "").strip
-          short_name = longname.downcase.gsub(" ", "_")
-          units = col.match(/\(.*\)/)[0].gsub("(", "").gsub(")", "").downcase
-          results["#{colcnt}"] = {:name => short_name, :units => units, :longname => longname}
-        end
-      elsif rowcnt == 2
-        colcnt = 0
-        row.each do |col|
-          colcnt += 1
-          results["#{colcnt}"][:value] = col.to_f
-        end
-      end
+    results = []
+    csv = CSV.read("eplustbl.csv")
+    csv.transpose.each do |k,v|
+      longname = k.gsub(/\(.*\)/, "").strip
+      short_name = longname.downcase.gsub(" ", "_")
+      units = k.match(/\(.*\)/)[0].gsub("(", "").gsub(")", "").downcase
+      results << { short_name.to_sym => v.to_f }
+      results << { "#{short_name}_units".to_sym => units }
+      results << { "#{short_name}_display_name".to_sym => longname }
     end
+    results = Hash[*results]
 
     puts "saving results to json"
     #save out results
