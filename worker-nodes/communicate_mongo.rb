@@ -119,7 +119,10 @@ module CommunicateMongo
 
   def self.communicate_results_json(dp, eplus_json, analysis_dir)
     # create zip file using a system call
-    `zip -r #{dp.uuid}.zip ../data_point_#{dp.uuid}/`
+    current_dir = Dir.pwd
+    Dir.chdir(analysis_dir)
+    `zip -r data_point_#{dp.uuid}.zip .`
+    Dir.chdir(current_dir)
 
     # grab out the HTML and push it into mongo for the HTML display
     puts "analysis dir: #{analysis_dir}"
