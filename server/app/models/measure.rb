@@ -94,7 +94,7 @@ class Measure
         v.each do |var|
           Rails.logger.info "variable is #{var}"
           new_var = Variable.create_by_os_argument_json(analysis_id, var)
-          new_var.perturbable = true
+
           new_var.save!
           Rails.logger.info("New REAL variable is #{new_var.inspect}")
           measure.variables << new_var unless measure.variables.include?(new_var)
