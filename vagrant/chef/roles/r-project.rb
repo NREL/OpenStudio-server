@@ -50,6 +50,18 @@ default_attributes(
             {
                 :name => 'snowfall',
                 :version => '1.84-4'
+            },
+            {
+                :name => 'R.methodsS3',
+                :version => '1.5.2'
+            },
+            {
+                :name => 'R.oo',
+                :version => '1.15.8'
+            },
+            {
+                :name => 'R.utils',
+                :version => '1.27.1'
             }
         ]
     }
