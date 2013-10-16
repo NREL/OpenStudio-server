@@ -21,6 +21,9 @@ class Analysis::BatchRun < Struct.new(:options)
     @r.converse "library(snow)"
     @r.converse "library(snowfall)"
     @r.converse "library(RMongo)"
+    @r.converse "library(R.methodsS3)"
+    @r.converse "library(R.oo)"
+    @r.converse "library(R.utils)"
 
     @analysis.status = 'started'
     @analysis.run_flag = true
@@ -52,6 +55,9 @@ class Analysis::BatchRun < Struct.new(:options)
         if (flag["run_flag"] == "true"  ){
           print("flag is set to true!")
         }
+        
+	#output <- dbInsertDocument(mongo, "analyses", '{_id:"#{@analysis.id}", r_timeout:0}')
+        dbDisconnect(mongo)
       }
     end
 
@@ -75,7 +81,23 @@ class Analysis::BatchRun < Struct.new(:options)
         if (nrow(ips) == 0) {
           stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
         }
-        sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
+        sfSetMaxCPUs(nrow(ips))
+        res <- NULL;
+	tryCatch({
+	  res <- evalWithTimeout({
+	    sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
+	     }, timeout=60);
+	 }, TimeoutException=function(ex) {
+	     cat("#{@analysis.id} Timeout\n");
+	     #mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
+	     #output <- dbInsertDocument(mongo, "analyses",  '{_id:"#{@analysis.id}"}', '{r_timeout:1}')
+	     #print(output["R_timeout"])
+             #dbDisconnect(mongo)
+	     stop(options("show.error.messages"="R Timeout"),"R Timeout")
+        })
+        print("Size of cluster is:")
+        print(sfCpus())
+        
         sfLibrary(RMongo)
 
         f <- function(x){
