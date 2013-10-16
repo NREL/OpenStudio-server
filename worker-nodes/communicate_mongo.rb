@@ -117,14 +117,13 @@ module CommunicateMongo
     dp.save! # redundant because next method calls save too.
   end
 
-  def self.communicate_results_json(dp, eplus_json)
-    # don't zip the data for this case (just yet?)
-    dp.output = eplus_json
+  def self.communicate_results_json(dp, eplus_json, analysis_dir)
+    # create zip file using a system call
+    `zip -r #{dp.uuid}.zip ../data_point_#{dp.uuid}/`
 
     # grab out the HTML and push it into mongo for the HTML display
-    dir = File.join(os_directory.to_s)
-    puts "analysis dir: #{dir}"
-    eplus_html = Dir.glob("#{dir}/*EnergyPlus*/eplustbl.htm").last
+    puts "analysis dir: #{analysis_dir}"
+    eplus_html = Dir.glob("#{analysis_dir}/*run*/eplustbl.htm").last
     if eplus_html
       puts "found html file #{eplus_html}"
 

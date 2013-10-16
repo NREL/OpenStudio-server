@@ -98,21 +98,20 @@ begin
 
   if File.exists?("eplustbl.csv")
     puts "eplustbl.csv exists and parsing into JSON format"
-    results = []
+    results = {}
     csv = CSV.read("eplustbl.csv")
-    csv.transpose.each do |k,v|
+    csv.transpose.each do |k, v|
       longname = k.gsub(/\(.*\)/, "").strip
       short_name = longname.downcase.gsub(" ", "_")
       units = k.match(/\(.*\)/)[0].gsub("(", "").gsub(")", "").downcase
-      results << { short_name.to_sym => v.to_f }
-      results << { "#{short_name}_units".to_sym => units }
-      results << { "#{short_name}_display_name".to_sym => longname }
+      results[short_name.to_sym] = v.to_f
+      results["#{short_name}_units".to_sym] = units
+      results["#{short_name}_display_name".to_sym] = longname
     end
-    results = Hash[*results]
 
     puts "saving results to json"
     #save out results
-    File.open('eplustbl.json', 'w') { |f| f << JSON.pretty_generate({:data => results}) }
+    File.open('eplustbl.json', 'w') { |f| f << JSON.pretty_generate(results) }
 
   end
 rescue Exception => e
@@ -128,7 +127,7 @@ ensure
   paths_to_rm << Pathname.glob("*.ini")
   paths_to_rm << Pathname.glob("*.idf")
   #paths_to_rm << Pathname.glob("*.sql")
-  paths_to_rm << Pathname.glob("energyplus")
+  paths_to_rm << Pathname.glob("EnergyPlus")
   paths_to_rm << Pathname.glob("*.epw")
   paths_to_rm << Pathname.glob("*.idd")
   paths_to_rm << Pathname.glob("*.audit")

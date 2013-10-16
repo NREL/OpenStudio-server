@@ -124,7 +124,7 @@ class Analysis::BatchRun < Struct.new(:options)
 
     # Do one last check if there are any data points that were not downloaded
     Rails.logger.info("Trying to download any remaining files from worker nodes")
-    @analysis.download_data_from_workers
+    @analysis.finalize_data_points
 
     @analysis.end_time = Time.now
     @analysis.status = 'completed'

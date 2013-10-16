@@ -63,7 +63,7 @@
         <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
         <td><%=  dp.status_message if dp.status_message %></td>
-        <td> <%= dp.results['net_site_energy_use_intentsity'] unless dp.results.nil? %> </td>
+        <td> <%= dp.results['net_site_energy_use_intentsity'] || dp.results['total_energy'] unless dp.results.nil? %> </td>
         <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
         <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
         <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
