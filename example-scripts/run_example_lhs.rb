@@ -3,7 +3,7 @@ require 'json'
 require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
-WITHOUT_DELAY=true
+WITHOUT_DELAY=true # NOTE that this is for only the LHS portion the batch is asynchronous.
 ANALYSIS_TYPE="lhs"
 STOP_AFTER_N=nil  #set to nil if you want them all
                   #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
@@ -129,7 +129,7 @@ if !analysis_id.nil?
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
 
-  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: 'batch_run', simulate_data_point_filename: 'simulate_data_point_lhs.rb' }
+  action_hash = { analysis_action: "start", without_delay: false, analysis_type: 'batch_run', simulate_data_point_filename: 'simulate_data_point_lhs.rb' }
   puts action_hash.to_json
 
   a = Time.now
