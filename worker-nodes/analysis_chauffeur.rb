@@ -45,6 +45,10 @@ class AnalysisChauffeur
     @communicate_module.communicate_results(@communicate_object, os_data_point, os_directory)
   end
 
+  def self.communicate_results_json(eplus_json)
+    @communicate_module.communicate_results_json(@communicate_object, eplus_json)
+  end
+
   def communicate_complete
     @communicate_module.communicate_complete(@communicate_object)
   end

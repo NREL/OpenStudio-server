@@ -114,7 +114,32 @@ module CommunicateMongo
       dp.eplus_html = File.read(eplus_html)
       #dp.save!
     end
-    dp.save!  # redundant because next method calls save too.
+    dp.save! # redundant because next method calls save too.
+  end
+
+  def self.communicate_results_json(dp, eplus_json)
+    # don't zip the data for this case (just yet?)
+    dp.output = eplus_json
+
+    # grab out the HTML and push it into mongo for the HTML display
+    dir = File.join(os_directory.to_s)
+    puts "analysis dir: #{dir}"
+    eplus_html = Dir.glob("#{dir}/*EnergyPlus*/eplustbl.htm").last
+    if eplus_html
+      puts "found html file #{eplus_html}"
+
+      # compress and save into database, just use the system zip for now
+      #compressed_string = Zlib::Deflate.deflate(eplus_html, Zlib::BEST_SPEED)
+      #dp.eplus_html = compressed_string # `gzip -f -c  #{eplus_html}`
+      dp.eplus_html = File.read(eplus_html)
+      #dp.save!
+    end
+
+    if eplus_json
+      dp.results = eplus_json
+    end
+    dp.save! # redundant because next method calls save too.
+
   end
 
   def self.communicate_complete(dp)

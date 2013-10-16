@@ -56,7 +56,7 @@ class DataPoint
     end
   end
 
-  def download_datapoint_from_worker
+  def finalize_data_points
     downloaded = false
     if self.download_status == 'na' && self.status == 'completed'
       # DO NOT DO THIS
@@ -70,6 +70,8 @@ class DataPoint
       # parse results
       Rails.logger.info "post-processing the JSON data that was pushed into the database by the worker"
       self.save_results_from_openstudio_json
+
+      # Somehow flag that we don't care about downloading the results back to the home directory
 
       Rails.logger.info "trying to download #{self.id}"
       save_filename = nil
