@@ -15,7 +15,9 @@ class Variable
   field :data_type, :type => String # not sure this is needed because mongo is typed
   field :variable_index, :type => Integer # for measure groups
   field :argument_index, :type => Integer
-  field :perturbable, :type => Boolean, default: false # if eneabled, then it will be perturbed
+  field :perturbable, :type => Boolean, default: false # if enabled, then it will be perturbed
+  field :pivot, :type => Boolean, default: false
+  field :pivot_samples # don't type for now
   scope :enabled, where(perturbable: true)
 
   # Relationships
@@ -39,7 +41,6 @@ class Variable
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
-
   # Create a new variable based on the OS Variable Metadata
   def self.create_from_os_json(analysis_id, os_json)
     var = Variable.where({analysis_id: analysis_id, uuid: os_json['uuid']}).first
@@ -55,7 +56,6 @@ class Variable
     end
 
     # deal with type or any other "excluded" variables from the hash
-
     var.save!
 
     var
@@ -83,7 +83,17 @@ class Variable
         end
       end
 
+      # if the variable has an uncertainty description, then it needs to be flagged
+      # as a perturbable (or pivot) variable
       if k == "uncertainty_description"
+        # check if this is a normal variable or a pivot variable
+        if var['pivot_ADDME']
+          var.pivot = true
+          var.pivot_samples = var['pivot_samples_ADDME']
+        else
+          var.perturbable = true
+        end
+
         # need to flatten this
         var['uncertainty_type'] = v['type'] if v['type']
         if v['attributes']

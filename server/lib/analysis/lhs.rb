@@ -23,20 +23,25 @@ class Analysis::Lhs < Struct.new(:options)
       o
     end
 
+    def map_discrete_hash_to_array(discrete_values_and_weights)
+      Rails.logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
+      ave_weight = 1 / discrete_values_and_weights.size
+      discrete_values_and_weights.each do |kv|
+        kv['weight'] = ave_weight if kv['weight'].nil?
+      end
+      values = discrete_values_and_weights.map { |k| k['value'] }
+      weights = discrete_values_and_weights.map { |k| k['weight'] }
+
+      [values, weights]
+    end
+
     def discrete_sample_from_probability(probabilities_array, distribution_type, hash_values_and_weight, save_histogram = true)
       @r.converse "print('creating discrete distribution')"
 
       if hash_values_and_weight.nil? || hash_values_and_weight.empty?
         raise "no hash values and weight passed"
       end
-
-      ave_weight = 1 / hash_values_and_weight.size
-      hash_values_and_weight.each do |kv|
-        kv['weight'] = ave_weight if kv['weight'].nil?
-      end
-      values = hash_values_and_weight.map { |k| k['value'] }
-      weights = hash_values_and_weight.map { |k| k['weight'] }
-
+      values, weights = map_discrete_hash_to_array(hash_values_and_weight)
       Rails.logger.info("values are #{values}, weights are #{weights}")
 
       dataframe = {"data" => probabilities_array}.to_dataframe
@@ -172,20 +177,33 @@ class Analysis::Lhs < Struct.new(:options)
     @r.converse "library(triangle)"
     @r.converse "library(e1071)"
 
+    # get pivot variables
+    pivot_variables = Variable.where({analysis_id: @analysis, pivot: true}).order_by(:name.asc)
+    pivot_hash = {}
+    pivot_variables.each do |var|
+      Rails.logger.info "Mapping pivot #{var.name} with #{var.discrete_values_and_weights}"
+      values, weights = map_discrete_hash_to_array(var.discrete_values_and_weights)
+      Rails.logger.info "pivot variable valuse are #{values}"
+      pivot_hash[var.uuid] = values
+    end
+    Rails.logger.info "pivot hash is #{pivot_hash}"
+    # multiple and smash the hash of arrays to form a array of hashes. This takes
+    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
+    pivot_array = pivot_hash.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] } #
+    Rails.logger.info "pivot hash is #{pivot_hash}"
+
     # get variables / measures
     # TODO: For some reason the scoped variable won't work here! ugh.
     #@analysis.variables.enabled do |variable|
-
     selected_variables = Variable.where({analysis_id: @analysis, perturbable: true}).order_by(:name.asc)
     Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
-    parameter_space = selected_variables.count
+    parameter_space_size = selected_variables.count
 
-    # generate the probabilities for all variables [individually]
-
+    # generate the probabilities for all variables as column vectors
     @r.converse("print('starting lhs')")
     # get the probabilities and persist them for reference
     Rails.logger.info "Starting sampling"
-    p = lhs_probability(parameter_space, @analysis.problem['number_of_samples'])
+    p = lhs_probability(parameter_space_size, @analysis.problem['number_of_samples'])
     Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
@@ -193,7 +211,7 @@ class Analysis::Lhs < Struct.new(:options)
     # For now, create a new variable_instance, create new datapoints, and add the instance reference
     i_var = 0
     samples = {} # samples are in hash of arrays
-    # TODO: IMPLEMENT THIS in parallel
+    # TODO: PERFORMANCE IMPLEMENT THIS in parallel
     selected_variables.each do |var|
       sfp = nil
       if var.uncertainty_type == "discrete_uncertain"
@@ -212,14 +230,23 @@ class Analysis::Lhs < Struct.new(:options)
     end
 
     Rails.logger.info "Samples are #{samples}"
-
-    # The arrays of the hash need to always have the same length
-    # TODO make sure length is consitent
-
-    # multiple and smash the hash of arrays to form a array of hashes
-    #samples = samples.map{ |k, v| [k].product(v) }.transpose.map { |ps| {:values => Hash[ps]} }
+    # multiple and smash the hash of arrays to form a array of hashes. This takes
+    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
     samples = samples.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
 
+    # each pivot variable gets the same samples
+    # take p = [{p1: 1}, {p1: 2}]
+    # with s = [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
+    # make s' = [{p1: 1, a: 1, b: 4}, {p1: 2, a: 1, b: 4}, {p1: 1, a: 2, b: 5},  {p1: 2, a: 2, b: 5}]
+    if pivot_array.size > 0
+      new_samples = []
+      pivot_array.each do |pv|
+        samples.each do |sm|
+          new_samples << pv.merge(sm)
+        end
+      end
+      samples = new_samples
+    end
     Rails.logger.info "Flipping samples around yields #{samples}"
 
     isample = 0
