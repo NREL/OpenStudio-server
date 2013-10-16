@@ -241,7 +241,8 @@ class AnalysesController < ApplicationController
 
     # Get the mappings of the variables that were used
     mappings = {}
-    p = @analysis.data_points.first if @analysis.data_points && @analysis.data_points.count > 0
+    # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
+    p = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).first
     if p
       p['values'].each_key do |key|
         v = Variable.where(uuid: key).first
@@ -254,13 +255,18 @@ class AnalysesController < ApplicationController
     # and this is just an ugly mapping, sorry all.
     @plot_data = []
     @analysis.data_points.each do |dp|
-      # lookup input value names
-      dp_values = {}
-      dp.values.each do |k,v|
-        dp_values["#{mappings[k]}"] = v
+      if dp['results']
+        dp_values = {}
+
+        # lookup input value names
+        dp.values.each do |k, v|
+          dp_values["#{mappings[k]}"] = v
+        end
+
+        # outputs
+        dp_values["energy"] = dp['results']['total_energy']
+        @plot_data << dp_values
       end
-      dp_values["energy"] = dp['results']['total_energy']
-      @plot_data << dp_values
     end
 
     respond_to do |format|
