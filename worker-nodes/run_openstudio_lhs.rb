@@ -226,11 +226,11 @@ begin
   ros.log_message "Updating OpenStudio DataPoint and Communicating Results", true
 
   # First read in the eplustbl.json file
-  if File.exists("#{run_directory}/run/eplustbl.json")
+  if File.exists?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
 
     #map the result json back to a flat array
-    ros.communicate_results_json(result_json)
+    ros.communicate_results_json(result_json, run_directory)
   end
 
   # now set the objective function value or values

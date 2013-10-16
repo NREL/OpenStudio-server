@@ -4,7 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
-            "number_of_samples": 2,
+            "number_of_samples": 50,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
