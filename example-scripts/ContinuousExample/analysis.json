@@ -293,6 +293,7 @@
                         }
                     ],
                     "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
+                    "bcl_measure_class_name_ADDME": "IncreaseInsulationRValueForExteriorWalls",
                     "bcl_measure_uuid": "34877255-5bb5-45db-ad45-abd9ca80960c",
                     "bcl_measure_version_uuid": "16aae883-e2bc-4121-a995-4bfc4c437561",
                     "description": "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. If a wall?s insulation matches or exceeds the requested value then it will not be altered. Costs for a construction can be adjusted",
@@ -399,6 +400,7 @@
                         }
                     ],
                     "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
+                    "bcl_measure_class_name_ADDME": "IncreaseInsulationRValueForRoofs",
                     "bcl_measure_uuid": "c6b78646-be8e-425b-af79-fdbbcd0d58d5",
                     "bcl_measure_version_uuid": "019cc5e3-aec7-417e-8b89-b47c0644c880",
                     "description": "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
