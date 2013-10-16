@@ -5,8 +5,9 @@ require 'faraday'
 #HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
+#STOP_AFTER_N=3  #set to nil if you want them all
 STOP_AFTER_N=64  #set to nil if you want them all
-HOSTNAME = "http://ec2-54-205-104-23.compute-1.amazonaws.com"
+HOSTNAME = "http://ec2-174-129-172-104.compute-1.amazonaws.com"
 
 # Project data
 formulation_file = "./DiskIOBenchmark/analysis.json"
