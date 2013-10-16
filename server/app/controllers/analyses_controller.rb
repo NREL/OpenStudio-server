@@ -205,8 +205,8 @@ class AnalysesController < ApplicationController
 
     @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
-    exclude_fields = [:_id,:user,:password]
-    @workers = WorkerNode.all.map{|n| n.as_json(:except => exclude_fields) }
+    exclude_fields = [:_id, :user, :password]
+    @workers = WorkerNode.all.map { |n| n.as_json(:except => exclude_fields) }
     if MasterNode.count > 0
       @server = MasterNode.first.as_json(:except => exclude_fields)
     end
@@ -233,6 +233,39 @@ class AnalysesController < ApplicationController
       ]
       #  format.html # new.html.erb
       format.json { render json: {:analysis => @analysis.as_json(:except => exclude_fields, :include => include_fields)} }
+    end
+  end
+
+  def results
+    @analysis = Analysis.find(params[:id])
+
+    # Get the mappings of the variables that were used
+    mappings = {}
+    p = @analysis.data_points.first if @analysis.data_points && @analysis.data_points.count > 0
+    if p
+      p['values'].each_key do |key|
+        v = Variable.where(uuid: key).first
+        mappings[key] = v.name.gsub(" ", "_") if v
+      end
+    end
+    Rails.logger.info mappings
+
+    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
+    # and this is just an ugly mapping, sorry all.
+    @plot_data = []
+    @analysis.data_points.each do |dp|
+      # lookup input value names
+      dp_values = {}
+      dp.values.each do |k,v|
+        dp_values["#{mappings[k]}"] = v
+      end
+      dp_values["energy"] = dp['results']['total_energy']
+      @plot_data << dp_values
+    end
+
+    respond_to do |format|
+      format.html # debug_log.html.erb
+      format.json { render json: @plot_data }
     end
   end
 
