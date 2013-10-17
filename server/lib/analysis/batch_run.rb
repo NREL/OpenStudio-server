@@ -2,7 +2,11 @@ class Analysis::BatchRun < Struct.new(:analysis_id, :data_points, :options)
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
+    options[:simulate_data_point_filename] = "simulate_data_point.rb" if options[:simulate_data_point_filename].nil?
+
     Rails.logger.info(options.inspect)
+
+    @analysis = Analysis.find(analysis_id)
 
     if options[:skip_init]
       @analysis.status = 'started'
@@ -16,8 +20,6 @@ class Analysis::BatchRun < Struct.new(:analysis_id, :data_points, :options)
     require 'uuid'
     require 'childprocess'
 
-    @analysis = Analysis.find(analysis_id)
-
     #create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
@@ -27,8 +29,9 @@ class Analysis::BatchRun < Struct.new(:analysis_id, :data_points, :options)
     @r.converse "library(RMongo)"
 
     # Set this if not defined in the JSON
+    Rails.logger.info "F.rb was #{@analysis.simulate_data_point_filename}"
+    @analysis.simulate_data_point_filename ||= options[:simulate_data_point_filename]
     Rails.logger.info "F.rb is #{@analysis.simulate_data_point_filename}"
-    @analysis.simulate_data_point_filename ||= "simulate_data_point.rb"
     @analysis.run_flag = true # this has to be set or RMongo will fail
     @analysis.save!
 
@@ -69,7 +72,7 @@ class Analysis::BatchRun < Struct.new(:analysis_id, :data_points, :options)
     #process.io.stdout = process.io.stderr = File.open(log_file,'a+')
     process.cwd = Rails.root # set the child's working directory where the bundler will execute
     Rails.logger.info("Starting Child Process")
-    process.start
+    #process.start
     
     good_ips = WorkerNode.where(valid:true) # TODO: make this a scope
     @analysis.analysis_output = []
@@ -120,14 +123,18 @@ class Analysis::BatchRun < Struct.new(:analysis_id, :data_points, :options)
     @analysis.analysis_output << @r.converse("results")
 
     # Kill the downloading of data files process
-    process.stop
+    #process.stop
 
-    # Do one last check if there are any data points that were not downloaded
+    # This can cause an issue when this method is called from another analysis becuase of permission of the file.
+    #   Either 1) we need to have delayed jobs run as a user that has the permissions
+    #          2) remove a partially downloaded
+    #          3) set permissions
     Rails.logger.info("Trying to download any remaining files from worker nodes")
-    @analysis.finalize_data_points
+    @analysis.finalize_data_points # not sure where this should go right now...
 
     # This is to handle the sequential search case. But this should really be a separate analysis for each iteration
     if options[:skip_init]
+      # Do one last check if there are any data points that were not downloaded
       @analysis.end_time = Time.now
       @analysis.status = 'completed'
       @analysis.save!
