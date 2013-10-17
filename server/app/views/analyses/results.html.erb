@@ -47,6 +47,13 @@
               //      .rangePoints([h, 0]);
               //}
 
+              if(d === "wwr_west") {
+                  y[d] = d3.scale.ordinal()
+                          .domain(d3.extent(result_data, function (p) {
+                              return p[d];
+                          }))
+                          .rangePoints([h, 0]);
+              }
               else {
                   y[d] = d3.scale.linear()
                           .domain(d3.extent(result_data, function (p) {
