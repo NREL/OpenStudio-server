@@ -4,6 +4,23 @@
   <a href="#dp_fields">Jump to Data Point Table</a>
 </p>
 
+<h1><a id="dp_fields">Variable Values</a></h1>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Field Name</th>
+    <th>Field Value</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @values.each do |k, v| %>
+      <tr>
+        <td><%= link_to(Variable.find(k).name, Variable.find(k)) %></td>
+        <td><%= v %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
 
 <h1>EnergyPlus HTML</h1>
 <%= @html.html_safe unless @html.nil? %>
@@ -28,4 +45,4 @@
   </tbody>
 </table>
 
-<%= @values.inspect %>
+
