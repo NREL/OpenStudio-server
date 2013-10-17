@@ -33,6 +33,7 @@ class DataPoint
   index({analysis_id: 1})
   index({uuid: 1, status: 1})
   index({uuid: 1, download_status: 1})
+  index({run_start_time: -1, name: 1})
 
   # Callbacks
   after_create :verify_uuid
