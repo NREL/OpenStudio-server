@@ -275,6 +275,45 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def results_scatter
+    @analysis = Analysis.find(params[:id])
+
+    # Get the mappings of the variables that were used
+    mappings = {}
+    # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
+    ps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:values)
+    ps.each do |p|
+      p['values'].each_key do |key|
+        v = Variable.where(uuid: key).first
+        mappings[key] = v.name.gsub(" ", "_") if v
+      end
+    end
+    Rails.logger.info mappings
+
+    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
+    # and this is just an ugly mapping, sorry all.
+    @plot_data = []
+    @analysis.data_points.each do |dp|
+      if dp['results']
+        dp_values = {}
+
+        # lookup input value names
+        dp.values.each do |k, v|
+          dp_values["#{mappings[k]}"] = v
+        end
+
+        # outputs
+        dp_values["energy"] = dp['results']['total_energy']
+        @plot_data << dp_values
+      end
+    end
+
+    respond_to do |format|
+      format.html # results_scatter.html.erb
+      format.json { render json: @plot_data }
+    end
+  end
+
   def page_data
     @analysis = Analysis.find(params[:id])
 
