@@ -9,6 +9,10 @@ require "json"
 # whereever you OpenStudio checkout is (currently on the AWSProvider branch in OS)
 OS_PATH = "C:/Projects/OpenStudio"
 #OS_PATH = "/Users/nlong/Working/OpenStudio"
+#OS_PATH = "C:/working/openstudio"
+
+RUBY_LOC = "ruby"
+#RUBY_LOC = "c:/ruby-2.0.0-p247-i386-mingw32/bin/ruby.exe"
 
 # Global Options
 CREATE_SERVER=true
@@ -25,7 +29,7 @@ if CREATE_SERVER
   #instance_data = {instance_type: "t1.micro" }
   instance_string = instance_data.to_json.gsub("\"", "\\\\\"")
 
-  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
+  start_string = "#{RUBY_LOC} #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
   puts "#{start_string}"
   server_data_str = `#{start_string}`
   puts server_data_str
@@ -62,7 +66,7 @@ if CREATE_WORKER
   server_json[:num] = WORKER_INSTANCES
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
 
-  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_workers \"#{server_string}\""
+  start_string = "#{RUBY_LOC} #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_workers \"#{server_string}\""
   worker_data_string = `#{start_string}`
   worker_data = JSON.parse(worker_data_string, :symbolize_names => true)
   File.open("worker_data.json", "w") { |f| f << JSON.pretty_generate(worker_data) }
