@@ -63,7 +63,7 @@ class Analysis::Lhs < Struct.new(:options)
       # returns an array
       @r.converse "print(samples)"
       save_file_name = nil
-      if save_histogram
+      if save_histogram && !values[0].kind_of?(String)
         # Determine where to save it
         save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
         Rails.logger.info("R image file name is #{save_file_name}")
@@ -134,7 +134,7 @@ class Analysis::Lhs < Struct.new(:options)
       # returns an array
       @r.converse "print(samples)"
       save_file_name = nil
-      if save_histogram
+      if save_histogram && !values[0].kind_of?(String)
         # Determine where to save it
         save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
         Rails.logger.info("R image file name is #{save_file_name}")
@@ -226,9 +226,9 @@ class Analysis::Lhs < Struct.new(:options)
       sfp = nil
       if var.uncertainty_type == "discrete_uncertain"
         Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-        sfp = discrete_sample_from_probability(p[i_var], var.uncertainty_type, var.discrete_values_and_weights, var.type != "String")
+        sfp = discrete_sample_from_probability(p[i_var], var.uncertainty_type, var.discrete_values_and_weights, true)
       else
-        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, var.type != "String")
+        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
       end
       samples["#{var.id}"] = sfp[:r]
       if sfp[:image_path]
