@@ -3,7 +3,6 @@ require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 require 'fileutils'
 
-
 puts "Parsing Input: #{ARGV.inspect}"
 
 # parse arguments with optparse
@@ -48,6 +47,8 @@ if (not options[:uuid]) || (options[:uuid] == "NA")
   end
   exit
 end
+
+CRASH_ON_NO_WORKFLOW_VARIABLE = false
 
 require 'analysis_chauffeur'
 ros = AnalysisChauffeur.new(options[:uuid])
@@ -155,7 +156,9 @@ begin
                 raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
                 argument_map[variable_name] = v.clone
               else
-                raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object"
+                raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
+                ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object",true)
+                break
               end
 
               measure.run(@model, runner, argument_map)

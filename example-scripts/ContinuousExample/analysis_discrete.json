@@ -419,8 +419,8 @@
                             "minimum": 5,
                             "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
                             "name": "roof_r_value",
-                            "pivot": true,
-                            "pivot_ADDME": true,
+                            "variable": true,
+                            "variable_ADDME": true,
                             "uncertainty_description": {
                                 "attributes": [
                                     {
