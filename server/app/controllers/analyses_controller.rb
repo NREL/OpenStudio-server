@@ -242,7 +242,7 @@ class AnalysesController < ApplicationController
     # Get the mappings of the variables that were used
     mappings = {}
     # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
-    p = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).first
+    p = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).last
     if p
       p['values'].each_key do |key|
         v = Variable.where(uuid: key).first

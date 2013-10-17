@@ -89,7 +89,7 @@ class Analysis::Lhs < Struct.new(:options)
         r_dist_name = "qlnorm"
       elsif distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
         r_dist_name = "qunif"
-      elsif distribution_type == 'triangle' || distribution_type == 'triangular_uncertain'
+      elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
         r_dist_name = "qtriangle"
       else
         raise "distribution type #{distribution_type} not known for R"
@@ -114,7 +114,7 @@ class Analysis::Lhs < Struct.new(:options)
               samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
             }
         end
-      elsif distribution_type == 'triangle' || distribution_type == 'triangular_uncertain'
+      elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
         @r.command(:df => dataframe) do
           %Q{
             print(df)
@@ -192,6 +192,10 @@ class Analysis::Lhs < Struct.new(:options)
     pivot_array = pivot_hash.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] } #
     Rails.logger.info "pivot hash is #{pivot_hash}"
 
+    # get static variables.  These must be applied after the pivot vars and before the lhs
+
+
+
     # get variables / measures
     # TODO: For some reason the scoped variable won't work here! ugh.
     #@analysis.variables.enabled do |variable|
@@ -211,7 +215,7 @@ class Analysis::Lhs < Struct.new(:options)
     # For now, create a new variable_instance, create new datapoints, and add the instance reference
     i_var = 0
     samples = {} # samples are in hash of arrays
-    # TODO: PERFORMANCE IMPLEMENT THIS in parallel
+    # TODO: peformance smell... optimize this using Parallel
     selected_variables.each do |var|
       sfp = nil
       if var.uncertainty_type == "discrete_uncertain"
