@@ -40,23 +40,24 @@ class Analysis::BatchRun < Struct.new(:options)
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
+
+
     @r.command() do
       %Q{
         ip <- "#{master_ip}"
         print(ip)
         print(getwd())
-
+        if (file.exists('/mnt/openstudio/rtimeout')) {
+          file.remove('/mnt/openstudio/rtimeout')
+        }
         #test the query of getting the run_flag
         mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
         flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
-        #print(flag)
 
         print(flag["run_flag"])
         if (flag["run_flag"] == "true"  ){
           print("flag is set to true!")
-        }
-        
-	#output <- dbInsertDocument(mongo, "analyses", '{_id:"#{@analysis.id}", r_timeout:0}')
+        }        
         dbDisconnect(mongo)
       }
     end
@@ -75,13 +76,14 @@ class Analysis::BatchRun < Struct.new(:options)
     @analysis.analysis_output = []
     @analysis.analysis_output << "good_ips = #{good_ips.to_json}"
 
-    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+    timeflag = @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
         print(ips)
         if (nrow(ips) == 0) {
           stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
         }
         sfSetMaxCPUs(nrow(ips))
+        timeflag <<- TRUE;
         res <- NULL;
 	tryCatch({
 	  res <- evalWithTimeout({
@@ -89,12 +91,16 @@ class Analysis::BatchRun < Struct.new(:options)
 	     }, timeout=60);
 	 }, TimeoutException=function(ex) {
 	     cat("#{@analysis.id} Timeout\n");
-	     #mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
-	     #output <- dbInsertDocument(mongo, "analyses",  '{_id:"#{@analysis.id}"}', '{r_timeout:1}')
-	     #print(output["R_timeout"])
-             #dbDisconnect(mongo)
+	     timeflag <<- FALSE;
+	     file.create('/mnt/openstudio/rtimeout')
 	     stop(options("show.error.messages"="R Timeout"),"R Timeout")
         })
+      }
+    end  
+  if timeflag == TRUE  
+    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+      %Q{    
+        
         print("Size of cluster is:")
         print(sfCpus())
         
@@ -132,7 +138,7 @@ class Analysis::BatchRun < Struct.new(:options)
         sfStop()
       }
     end
-
+  end  #if
     @analysis.analysis_output << @r.converse("results")
 
     # Kill the downloading of data files process
