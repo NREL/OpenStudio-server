@@ -59,6 +59,18 @@ default_attributes(
                 :version => '1.84-4'
             },
             {
+                :name => 'R.methodsS3',
+                :version => '1.5.2'
+            },
+            {
+                :name => 'R.oo',
+                :version => '1.15.8'
+            },
+            {
+                :name => 'R.utils',
+                :version => '1.27.1'
+            },
+            {
                 :name => 'iterators',
                 :version => '1.0.6'
             },
