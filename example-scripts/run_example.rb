@@ -2,7 +2,7 @@ require 'rest-client'
 require 'json'
 require 'faraday'
 
-#HOSTNAME = "http://localhost:8080"
+HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
 STOP_AFTER_N=16 #set to nil if you want them all

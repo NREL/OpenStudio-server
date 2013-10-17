@@ -1,0 +1,416 @@
+{
+    "data_point": {
+        "analysis_uuid": "4e3b61a7-aa6f-4f22-8dfe-503be6cd4e83",
+        "complete": false,
+        "data_point_type": "DataPoint",
+        "failed": false,
+        "name": "Disk IO Benchmark Template 42",
+        "problem_uuid": "8b8410a5-9f54-4036-8676-a3c314f6f57e",
+        "run_type": "Local",
+        "selected": true,
+        "uuid": "10d55211-1718-0131-6fe5-00ffc0914e0d",
+        "variable_values": [
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 0
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 1
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 2
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 3
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 4
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 5
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 6
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 7
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 8
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 9
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 10
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 11
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 12
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 13
+            },
+            {
+                "value": 1,
+                "value_type": "int",
+                "variable_value_index": 14
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 15
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 16
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 17
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 18
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 19
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 20
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 21
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 22
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 23
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 24
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 25
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 26
+            },
+            {
+                "value": 1,
+                "value_type": "int",
+                "variable_value_index": 27
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 28
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 29
+            },
+            {
+                "value": 3,
+                "value_type": "int",
+                "variable_value_index": 30
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 31
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 32
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 33
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 34
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 35
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 36
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 37
+            },
+            {
+                "value": 0,
+                "value_type": "int",
+                "variable_value_index": 38
+            }
+        ],
+        "version_uuid": "10d5c740-1718-0131-6fe7-00ffc0914e0d"
+    },
+    "metadata": {
+        "display_name": "",
+        "name": "Disk IO Benchmark Template 42",
+        "openstudio_version": "1.1.0",
+        "project_dir": "./../pat/DiskIOBenchmark",
+        "uuid": "10d55211-1718-0131-6fe5-00ffc0914e0d",
+        "values": [
+            {
+                "value": 0,
+                "variable_index": 0,
+                "variable_uuid": "b87a835d-7c42-4866-8350-3148bd8baa29"
+            },
+            {
+                "value": 3,
+                "variable_index": 1,
+                "variable_uuid": "1b178f13-8dc5-4ee3-86cf-4476bbbce770"
+            },
+            {
+                "value": 0,
+                "variable_index": 2,
+                "variable_uuid": "c39a3ee0-3c8d-4c2d-9d91-f1daa71445ff"
+            },
+            {
+                "value": 0,
+                "variable_index": 3,
+                "variable_uuid": "5093638d-6b6b-4727-8f9e-24c7edd25de5"
+            },
+            {
+                "value": 3,
+                "variable_index": 4,
+                "variable_uuid": "cc60b9cb-e4b2-4494-86c1-a6afe0a60b89"
+            },
+            {
+                "value": 3,
+                "variable_index": 5,
+                "variable_uuid": "5fefacc8-9af7-4d8d-947f-e8ec678480f8"
+            },
+            {
+                "value": 0,
+                "variable_index": 6,
+                "variable_uuid": "b048de81-9bc7-4118-854b-c5e03cd87565"
+            },
+            {
+                "value": 0,
+                "variable_index": 7,
+                "variable_uuid": "a3840fbe-efdf-4e52-b419-d89e7d762633"
+            },
+            {
+                "value": 3,
+                "variable_index": 8,
+                "variable_uuid": "a07b5885-f09e-4d0c-9088-367fd3690d62"
+            },
+            {
+                "value": 3,
+                "variable_index": 9,
+                "variable_uuid": "df78f824-e28e-4efd-84cf-3acae5c6b668"
+            },
+            {
+                "value": 3,
+                "variable_index": 10,
+                "variable_uuid": "ded29d04-56b2-4e74-bdde-db8db8379bf7"
+            },
+            {
+                "value": 3,
+                "variable_index": 11,
+                "variable_uuid": "7c0c2c88-866a-41a4-8a09-d835ea6ad2ee"
+            },
+            {
+                "value": 0,
+                "variable_index": 12,
+                "variable_uuid": "1dafa1cd-5e76-4499-ba8e-9a2a915de061"
+            },
+            {
+                "value": 3,
+                "variable_index": 13,
+                "variable_uuid": "b7a0a6d3-b50f-4b52-88c7-42b32254b3f5"
+            },
+            {
+                "value": 1,
+                "variable_index": 14,
+                "variable_uuid": "713ff9f3-e160-4be7-832d-84c4f7a8d8ab"
+            },
+            {
+                "value": 0,
+                "variable_index": 15,
+                "variable_uuid": "bb14a79c-41fe-478c-9f52-ec878e8ab639"
+            },
+            {
+                "value": 3,
+                "variable_index": 16,
+                "variable_uuid": "6ee67130-25d1-41e7-9f93-adcea76b9fc5"
+            },
+            {
+                "value": 0,
+                "variable_index": 17,
+                "variable_uuid": "2eed4503-78b3-4b98-b9ca-a3f463267876"
+            },
+            {
+                "value": 0,
+                "variable_index": 18,
+                "variable_uuid": "9f877f52-aa42-4b53-b8e0-01218c4d6df8"
+            },
+            {
+                "value": 3,
+                "variable_index": 19,
+                "variable_uuid": "5cd07fd1-ae22-46c7-a11a-56f58dd5f65f"
+            },
+            {
+                "value": 0,
+                "variable_index": 20,
+                "variable_uuid": "85422c64-0a80-471d-9e26-646efc4da23b"
+            },
+            {
+                "value": 3,
+                "variable_index": 21,
+                "variable_uuid": "b7b149b6-a73a-4267-90f3-818571965b0c"
+            },
+            {
+                "value": 3,
+                "variable_index": 22,
+                "variable_uuid": "5e4ea31c-e0e8-43a4-8427-4498f9d495a5"
+            },
+            {
+                "value": 0,
+                "variable_index": 23,
+                "variable_uuid": "40d29c7c-6eb5-4d05-8394-d2a6eb8db359"
+            },
+            {
+                "value": 0,
+                "variable_index": 24,
+                "variable_uuid": "869e2083-d247-4dd6-807a-a868133f3a30"
+            },
+            {
+                "value": 0,
+                "variable_index": 25,
+                "variable_uuid": "4f01fd30-4f79-498f-bdbb-1d30589f006d"
+            },
+            {
+                "value": 0,
+                "variable_index": 26,
+                "variable_uuid": "c0b17acd-05ac-4e82-8c63-79acaf658716"
+            },
+            {
+                "value": 1,
+                "variable_index": 27,
+                "variable_uuid": "6188be08-1b14-451f-9224-54a4ae1fb8fe"
+            },
+            {
+                "value": 0,
+                "variable_index": 28,
+                "variable_uuid": "7d36de8e-b573-4270-bdb1-06f33298a173"
+            },
+            {
+                "value": 3,
+                "variable_index": 29,
+                "variable_uuid": "c6cd37c4-3353-4d17-9c6f-63e84b8cfd8c"
+            },
+            {
+                "value": 3,
+                "variable_index": 30,
+                "variable_uuid": "3e1cc19c-69e7-403e-be9d-27c38fa7b61d"
+            },
+            {
+                "value": 0,
+                "variable_index": 31,
+                "variable_uuid": "07cb18a2-2950-4ed9-8ea6-6aa911072abc"
+            },
+            {
+                "value": 0,
+                "variable_index": 32,
+                "variable_uuid": "5e87d63d-6e08-4b79-9605-4e61507d5ce1"
+            },
+            {
+                "value": 0,
+                "variable_index": 33,
+                "variable_uuid": "6d1f236a-d6d6-4ff3-9410-27f2f45968ff"
+            },
+            {
+                "value": 0,
+                "variable_index": 34,
+                "variable_uuid": "7b7e8454-fe9e-43f8-87ec-55a44390787d"
+            },
+            {
+                "value": 0,
+                "variable_index": 35,
+                "variable_uuid": "505aaf30-826a-4960-ade2-b3adb510f984"
+            },
+            {
+                "value": 0,
+                "variable_index": 36,
+                "variable_uuid": "c9422ab6-5f1c-40b1-975a-2a3770ca1c39"
+            },
+            {
+                "value": 0,
+                "variable_index": 37,
+                "variable_uuid": "0b0ead70-1fed-4bd4-b75e-ca69f6fc884e"
+            },
+            {
+                "value": 0,
+                "variable_index": 38,
+                "variable_uuid": "359f3cb6-3c14-4482-ab6d-a12a41baf983"
+            }
+        ],
+        "version_uuid": ""
+    }
+}
