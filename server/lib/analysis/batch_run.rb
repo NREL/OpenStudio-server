@@ -45,6 +45,7 @@ class Analysis::BatchRun < Struct.new(:options)
     @r.command() do
       %Q{
         ip <- "#{master_ip}"
+        results <- NULL
         print(ip)
         print(getwd())
         if (file.exists('/mnt/openstudio/rtimeout')) {
@@ -76,7 +77,7 @@ class Analysis::BatchRun < Struct.new(:options)
     @analysis.analysis_output = []
     @analysis.analysis_output << "good_ips = #{good_ips.to_json}"
 
-    timeflag = @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
       %Q{
         print(ips)
         if (nrow(ips) == 0) {
@@ -85,60 +86,65 @@ class Analysis::BatchRun < Struct.new(:options)
         sfSetMaxCPUs(nrow(ips))
         timeflag <<- TRUE;
         res <- NULL;
-	tryCatch({
-	  res <- evalWithTimeout({
-	    sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
-	     }, timeout=60);
-	 }, TimeoutException=function(ex) {
-	     cat("#{@analysis.id} Timeout\n");
-	     timeflag <<- FALSE;
-	     file.create('/mnt/openstudio/rtimeout')
-	     stop(options("show.error.messages"="R Timeout"),"R Timeout")
+	      tryCatch({
+	        res <- evalWithTimeout({
+	          sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
+	          }, timeout=60);
+	        }, TimeoutException=function(ex) {
+	          cat("#{@analysis.id} Timeout\n");
+	          timeflag <<- FALSE;
+	          file.create('rtimeout')
+	          stop
         })
       }
-    end  
-  if timeflag == TRUE  
-    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
-      %Q{    
-        
-        print("Size of cluster is:")
-        print(sfCpus())
-        
-        sfLibrary(RMongo)
-
-        f <- function(x){
-          mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-          flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
-          if (flag["run_flag"] == "false" ){
-            stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
-          }
-          dbDisconnect(mongo)
-
-          print("#{@analysis.use_shm}")
-          if ("#{@analysis.use_shm}" == "true"){
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
-          } else {
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
-          }
-          z <- system(y,intern=TRUE)
-          j <- length(z)
-          z
-        }
-        sfExport("f")
-
-        if (nrow(dps) == 1) {
-          print("not sure what to do with only one datapoint so adding an NA")
-          dps <- rbind(dps, c(NA))
-        }
-
-        print(dps)
-
-        results <- sfLapply(dps[,1], f)
-
-        sfStop()
-      }
     end
-  end  #if
+
+    timeflag = @r.converse("timeflag")
+
+    Rails.logger.info ("Time flag was set to #{timeflag}")
+    if timeflag
+      @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+        %Q{
+          print("Size of cluster is:")
+          print(sfCpus())
+
+          sfLibrary(RMongo)
+
+          f <- function(x){
+            mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+            flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
+            if (flag["run_flag"] == "false" ){
+              stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
+            }
+            dbDisconnect(mongo)
+
+            print("#{@analysis.use_shm}")
+            if ("#{@analysis.use_shm}" == "true"){
+              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
+            } else {
+              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+            }
+            z <- system(y,intern=TRUE)
+            j <- length(z)
+            z
+          }
+          sfExport("f")
+
+          if (nrow(dps) == 1) {
+            print("not sure what to do with only one datapoint so adding an NA")
+            dps <- rbind(dps, c(NA))
+          }
+
+          print(dps)
+
+          results <- sfLapply(dps[,1], f)
+
+          sfStop()
+        }
+      end
+    else
+      # Log off some information why it didnt' start
+    end
     @analysis.analysis_output << @r.converse("results")
 
     # Kill the downloading of data files process

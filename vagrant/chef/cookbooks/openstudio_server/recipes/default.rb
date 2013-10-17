@@ -49,6 +49,14 @@ bash "fix permissions on assets files"  do
   EOH
 end
 
+bash "fix permissions on tmp files"  do
+  code <<-EOH
+    cd #{node[:openstudio_server][:server_path]}/tmp
+    find . -type d -print0 | xargs -0 chmod 777
+    find . -type f -print0 | xargs -0 chmod 666
+  EOH
+end
+
 template "/etc/init.d/delayed_job" do
   source "delayed_job.erb"
   owner "root"
