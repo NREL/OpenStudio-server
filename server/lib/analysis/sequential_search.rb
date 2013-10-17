@@ -38,7 +38,7 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
           min_y = nil
           min_point = nil
 
-          dps = @analysis.data_points.all.only(:results)
+          dps = @analysis.data_points.all.only(:results, :name, :variable_group_list, :uuid)
           dps.each do |dp|
             Rails.logger.info "checking datapoint #{dp}"
             if dp.results['total_energy'] && dp.results['interior_lighting_electricity']
@@ -68,11 +68,27 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
 
         last_dp = pareto.last
         if last_dp
-          variable_group_list = last_dp['variable_group']
-          Rails.logger.info("Last pareto front point was #{last_dp} with #{variable_group_list}")
-        end
+          variable_group_list = last_dp['variable_group_list']
+          Rails.logger.info("Last pareto front point was #{last_dp.name} with #{variable_group_list}")
 
-        # Fix the variable group in the next run_list
+          # Fix the previous variable groups in the next run
+          isample = 0
+          parameter_space.each do |id, sample|
+            isample += 1
+
+            #"915510d0-1991-0131-c0a4-080027880ca6"=>{:id=>"9155c1d0-1991-0131-c0a5-080027880ca6", :measure_id=>"883ebc58-845f-4708-81b2-0930d9cf22e0", :variables=>{"41cb285c-f8c1-4673-8710-3306593d465e"=>50}},
+            #"9156f100-1991-0131-c0b0-080027880ca6"=>{:id=>"9156f800-1991-0131-c0b1-080027880ca6", :measure_id=>"e16805f0-a2f2-4122-828f-0812d49493dd", :variables=>{"8651b16d-91df-4dc3-a07b-048ea9510058"=>80, "c7cf9cfc-abf9-43b1-a07b-048ea9510058"=>"West"}}
+
+            dp_name = "Sequential Search Iteration #{@iteration} Sample #{isample}"
+            variable_group_list.each do |variable_group|
+              parameter_space[variable_group]
+            end
+
+            run_list << {variable_group: [{id: id}], name: dp_name, variables: sample[:variables], iteration: @iteration, sample: isample}
+          end
+        else
+          # end this with a message that no point found on pareto front
+        end
       end
 
       # have to figure out what to do
