@@ -9,7 +9,7 @@ STOP_AFTER_N=nil  #set to nil if you want them all
                   #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
                   # Project data
-formulation_file = "./ContinuousExample/analysis_discrete.json"
+formulation_file = "./ContinuousExample/analysis_discrete_small.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
 #datapoints = Dir.glob("./BigPATTestExport/datapoint*.json")
 
@@ -103,18 +103,8 @@ end
 if !analysis_id.nil?
   # run the analysis
 
-
-  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE }
+  action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE, simulate_data_point_filename: 'simulate_data_point_lhs.rb' }
   puts action_hash.to_json
-
-
-  #resp = @conn.post do |req|
-  #  req.url "analyses/#{analysis_id}/action.json"
-  #  req.headers['Content-Type'] = 'application/json'
-  #  req.body = action_hash.to_json
-  #req.options[:timeout] = 180 #seconds
-  #end
-  #puts resp.status
 
   a = Time.now
   puts a
@@ -129,12 +119,12 @@ if !analysis_id.nil?
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
 
-  action_hash = { analysis_action: "start", without_delay: false, analysis_type: 'batch_run', simulate_data_point_filename: 'simulate_data_point_lhs.rb' }
+  action_hash = { analysis_action: "start", without_delay: false, analysis_type: 'batch_run',  }
   puts action_hash.to_json
 
   a = Time.now
   puts a
-  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
+  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.code
   b = Time.now
   puts b
