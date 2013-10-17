@@ -11,13 +11,12 @@
   <tr>
   </thead>
   <tbody>
-  <% @variables.order_by(:perturbable.desc, :name.asc).each do |variable| %>
+  <% @variables.order_by(:perturbable.desc, :static.desc, :pivot.desc, :name.asc).each do |variable| %>
       <tr>
         <td><%= link_to variable.name, variable_path(variable) %></td>
         <td><%= variable.perturbable %></td>
         <td><%= variable.static %></td>
         <td><%= variable.pivot %></td>
-        <td><%= variable['type'] if variable['type'] %></td>
         <% if variable.perturbable && variable.preflight_images.first %>
             <td>
               <%= link_to image_tag(variable.preflight_images.first.image.url(:thumb)), variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
