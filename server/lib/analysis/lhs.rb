@@ -25,12 +25,16 @@ class Analysis::Lhs < Struct.new(:options)
 
     def map_discrete_hash_to_array(discrete_values_and_weights)
       Rails.logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
-      ave_weight = 1 / discrete_values_and_weights.size
-      discrete_values_and_weights.each do |kv|
-        kv['weight'] = ave_weight if kv['weight'].nil?
+      ave_weight = (1.0 / discrete_values_and_weights.size)
+      Rails.logger.info "average weight is #{ave_weight}"
+      discrete_values_and_weights.each_index do |i|
+        if !discrete_values_and_weights[i].has_key? 'weight'
+          discrete_values_and_weights[i]['weight'] = ave_weight
+        end
       end
       values = discrete_values_and_weights.map { |k| k['value'] }
       weights = discrete_values_and_weights.map { |k| k['weight'] }
+      Rails.logger.info "Set values and weights to  #{values} with size #{weights}"
 
       [values, weights]
     end
@@ -42,7 +46,6 @@ class Analysis::Lhs < Struct.new(:options)
         raise "no hash values and weight passed"
       end
       values, weights = map_discrete_hash_to_array(hash_values_and_weight)
-      Rails.logger.info("values are #{values}, weights are #{weights}")
 
       dataframe = {"data" => probabilities_array}.to_dataframe
 

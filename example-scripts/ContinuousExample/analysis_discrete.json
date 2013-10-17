@@ -4,7 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
-            "number_of_samples": 100,
+            "number_of_samples": 3,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
@@ -54,31 +54,24 @@
                             "uncertainty_description": {
                                 "attributes": [
                                     {
-                                        "display_name": "Mode",
-                                        "name": "modes",
-                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
-                                        "value": 180,
-                                        "value_type": "Double",
-                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
-                                    },
-                                    {
-                                        "display_name": "Lower Bound",
-                                        "name": "lower_bounds",
-                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
-                                        "value": 0,
-                                        "value_type": "Double",
-                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
-                                    },
-                                    {
-                                        "display_name": "Upper Bound",
-                                        "name": "upper_bounds",
-                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
-                                        "value": 360,
-                                        "value_type": "Double",
-                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                        "name": "discrete",
+                                        "values_and_weights": [
+                                            {
+                                                "value": 10
+                                            },
+                                            {
+                                                "value": 30
+                                            },
+                                            {
+                                                "value": 50
+                                            },
+                                            {
+                                                "value": 150
+                                            }
+                                        ]
                                     }
                                 ],
-                                "type": "uniform_uncertain"
+                                "type": "discrete_uncertain"
                             },
                             "uuid": "c12f7f8f-9b98-4971-afae-1d159d78b7d1",
                             "variable_index": 0,
@@ -227,31 +220,24 @@
                             "uncertainty_description": {
                                 "attributes": [
                                     {
-                                        "display_name": "Mode",
-                                        "name": "modes",
-                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
-                                        "value": 20,
-                                        "value_type": "Double",
-                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
-                                    },
-                                    {
-                                        "display_name": "Lower Bound",
-                                        "name": "lower_bounds",
-                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
-                                        "value": 0,
-                                        "value_type": "Double",
-                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
-                                    },
-                                    {
-                                        "display_name": "Upper Bound",
-                                        "name": "upper_bounds",
-                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
-                                        "value": 70,
-                                        "value_type": "Double",
-                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                        "name": "discrete",
+                                        "values_and_weights": [
+                                            {
+                                                "value": 10
+                                            },
+                                            {
+                                                "value": 30
+                                            },
+                                            {
+                                                "value": 50
+                                            },
+                                            {
+                                                "value": 80
+                                            }
+                                        ]
                                     }
                                 ],
-                                "type": "triangle_uncertain"
+                                "type": "discrete_uncertain"
                             },
                             "uuid": "41cb285c-f8c1-4673-8710-3306593d465e",
                             "variable_index": 0,
@@ -336,31 +322,24 @@
                             "uncertainty_description": {
                                 "attributes": [
                                     {
-                                        "display_name": "Mode",
-                                        "name": "modes",
-                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
-                                        "value": 25,
-                                        "value_type": "Double",
-                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
-                                    },
-                                    {
-                                        "display_name": "Lower Bound",
-                                        "name": "lower_bounds",
-                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
-                                        "value": 0,
-                                        "value_type": "Double",
-                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
-                                    },
-                                    {
-                                        "display_name": "Upper Bound",
-                                        "name": "upper_bounds",
-                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
-                                        "value": 50,
-                                        "value_type": "Double",
-                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                        "name": "discrete",
+                                        "values_and_weights": [
+                                            {
+                                                "value": 10
+                                            },
+                                            {
+                                                "value": 30
+                                            },
+                                            {
+                                                "value": 50
+                                            },
+                                            {
+                                                "value": 80
+                                            }
+                                        ]
                                     }
                                 ],
-                                "type": "normal_uncertain"
+                                "type": "discrete_uncertain"
                             },
                             "uuid": "2b22eb94-6657-42ce-9c8f-2b60e610d6c1",
                             "variable_index": 0,
@@ -530,31 +509,24 @@
                             "uncertainty_description": {
                                 "attributes": [
                                     {
-                                        "display_name": "Mode",
-                                        "name": "modes",
-                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
-                                        "value": 0.4,
-                                        "value_type": "Double",
-                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
-                                    },
-                                    {
-                                        "display_name": "Lower Bound",
-                                        "name": "lower_bounds",
-                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
-                                        "value": 0.05,
-                                        "value_type": "Double",
-                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
-                                    },
-                                    {
-                                        "display_name": "Upper Bound",
-                                        "name": "upper_bounds",
-                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
-                                        "value": 0.95,
-                                        "value_type": "Double",
-                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                        "name": "discrete",
+                                        "values_and_weights": [
+                                            {
+                                                "value": 10
+                                            },
+                                            {
+                                                "value": 30
+                                            },
+                                            {
+                                                "value": 50
+                                            },
+                                            {
+                                                "value": 80
+                                            }
+                                        ]
                                     }
                                 ],
-                                "type": "triangle_uncertain"
+                                "type": "discrete_uncertain"
                             },
                             "uuid": "8651b16d-91df-4dc3-a07b-048ea9510058",
                             "variable_index": 0,
@@ -578,39 +550,30 @@
                             "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 0.9,
                             "minimum": 0.1,
                             "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0.1,
-                            "name": "wwr_west_static",
-                            "static": true,
-                            "static_ADDME": true,
-                            "static_value": "West",
-                            "static_value_ADDME": "West",
+                            "name": "wwr_facade",
+                            "variable_ADDME": true,
+                            "variable": true,
                             "uncertainty_description": {
                                 "attributes": [
                                     {
-                                        "display_name": "Mode",
-                                        "name": "modes",
-                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
-                                        "value": 0.4,
-                                        "value_type": "Double",
-                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
-                                    },
-                                    {
-                                        "display_name": "Lower Bound",
-                                        "name": "lower_bounds",
-                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
-                                        "value": 0.05,
-                                        "value_type": "Double",
-                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
-                                    },
-                                    {
-                                        "display_name": "Upper Bound",
-                                        "name": "upper_bounds",
-                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
-                                        "value": 0.95,
-                                        "value_type": "Double",
-                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                        "name": "discrete",
+                                        "values_and_weights": [
+                                            {
+                                                "value": "West"
+                                            },
+                                            {
+                                                "value": "South"
+                                            },
+                                            {
+                                                "value": "East"
+                                            },
+                                            {
+                                                "value": "West"
+                                            }
+                                        ]
                                     }
                                 ],
-                                "type": "triangle_uncertain"
+                                "type": "discrete_uncertain"
                             },
                             "uuid": "c7cf9cfc-abf9-43b1-a07b-048ea9510058",
                             "variable_index": 0,

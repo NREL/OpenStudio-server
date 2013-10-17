@@ -9,7 +9,7 @@ STOP_AFTER_N=nil  #set to nil if you want them all
                   #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
                   # Project data
-formulation_file = "./ContinuousExample/analysis_min.json"
+formulation_file = "./ContinuousExample/analysis_discrete.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
 #datapoints = Dir.glob("./BigPATTestExport/datapoint*.json")
 

@@ -47,7 +47,7 @@
               //      .rangePoints([h, 0]);
               //}
 
-              if(d === "wwr_west") {
+              if((d === "wwr_west_static") || (d === "wwr_facade")) {
                   y[d] = d3.scale.ordinal()
                           .domain(d3.extent(result_data, function (p) {
                               return p[d];
