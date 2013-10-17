@@ -2,7 +2,7 @@
 require 'uuid'
 require 'erb'
 
-number_of_instances=16
+number_of_instances=64
 
 dir = File.dirname(__FILE__)
 dp_tmp_filename = File.join(dir,"datapoint.json.erb")

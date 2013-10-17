@@ -8,7 +8,6 @@ ANALYSIS_TYPE="batch_run"
 STOP_AFTER_N=2 #set to nil if you want them all
 #HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
 
-
 # Project data
 formulation_file = "./DiskIOBenchmark/analysis.json"
 analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
@@ -100,6 +99,10 @@ if !analysis_id.nil?
     resp = @conn_mp.post("analyses/#{analysis_id}/upload.json", payload)
     puts resp.status
 
+#    resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/upload.json", :file => File.open(analysis_zip_file, 'rb'))
+#    #puts resp
+#    puts resp.code
+
     if resp.status == 201
       puts "Successfully uploaded ZIP file"
     else
@@ -137,20 +140,45 @@ end
 # run the analysis
 if !analysis_id.nil?
   # run the analysis
-  a = Time.now
-  puts a
+
   action_hash = {analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE}
-  b = Time.now
-  puts b
-  
+  puts action_hash.to_json
+
+  #resp = @conn.post do |req|
+  #  req.url "analyses/#{analysis_id}/action.json"
+  #  req.headers['Content-Type'] = 'application/json'
+  #  req.body = action_hash.to_json
+  #req.options[:timeout] = 180 #seconds
+  #end
+  #puts resp.status
+
   resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
-  puts resp.code
+  puts resp.inspect
 
   # check all the queued analyses for this project (eventually move this to all analyses)
   #puts "list of queued analyses"
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
 end
+
+exit
+
+# get the status of all the entire analysis
+if !analysis_id.nil?
+  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json")
+  puts "Data points (all): #{resp}"
+
+  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=running")
+  puts "Data points (running): #{resp}"
+
+  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=queued")
+  puts "Data points (queued): #{resp}"
+
+  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=complete")
+
+  puts "Data points (complete): #{resp}"
+end
+
 
 
 

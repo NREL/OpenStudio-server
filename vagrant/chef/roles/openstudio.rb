@@ -11,7 +11,7 @@ run_list([
 default_attributes(
     :openstudio => {
         :version => "1.1.0",
-        :version_revision => "06c98f5a6f"
+        :version_revision => "ebba9a597f"
         #:checksum => "9180659c77a7fc710cb9826d40ae67c65db0d26bb4bce1a93b64d7e63f4a1f2c"
     },
     :energyplus => {

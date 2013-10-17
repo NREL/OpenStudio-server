@@ -8,7 +8,7 @@
         "problem_uuid": "8b8410a5-9f54-4036-8676-a3c314f6f57e",
         "run_type": "Local",
         "selected": true,
-        "uuid": "df2a23a0-156f-0131-0303-14109fdf0b37",
+        "uuid": "10b17570-1718-0131-6f6f-00ffc0914e0d",
         "variable_values": [
             {
                 "value": 0,
@@ -206,14 +206,14 @@
                 "variable_value_index": 38
             }
         ],
-        "version_uuid": "df2a4370-156f-0131-0304-14109fdf0b37"
+        "version_uuid": "10b1eaa0-1718-0131-6f71-00ffc0914e0d"
     },
     "metadata": {
         "display_name": "",
         "name": "Disk IO Benchmark Template 10",
         "openstudio_version": "1.1.0",
         "project_dir": "./../pat/DiskIOBenchmark",
-        "uuid": "df2a23a0-156f-0131-0303-14109fdf0b37",
+        "uuid": "10b17570-1718-0131-6f6f-00ffc0914e0d",
         "values": [
             {
                 "value": 0,
