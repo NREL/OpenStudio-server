@@ -1,18 +1,22 @@
-class Analysis::BatchRun < Struct.new(:options)
-  def initialize(analysis_id, data_points)
-    @analysis_id = analysis_id
-    @data_points = data_points
-  end
-
+class Analysis::BatchRun < Struct.new(:analysis_id, :data_points, :options)
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
+    Rails.logger.info(options.inspect)
+
+    if options[:skip_init]
+      @analysis.status = 'started'
+      @analysis.end_time = nil
+
+      @analysis.save!
+    end
+
     # add into delayed job
     require 'rserve/simpler'
     require 'uuid'
     require 'childprocess'
 
-    @analysis = Analysis.find(@analysis_id)
+    @analysis = Analysis.find(analysis_id)
 
     #create an instance for R
     @r = Rserve::Simpler.new
@@ -22,15 +26,10 @@ class Analysis::BatchRun < Struct.new(:options)
     @r.converse "library(snowfall)"
     @r.converse "library(RMongo)"
 
-    @analysis.status = 'started'
-    @analysis.end_time = nil
-    @analysis.run_flag = true
-
     # Set this if not defined in the JSON
     Rails.logger.info "F.rb is #{@analysis.simulate_data_point_filename}"
     @analysis.simulate_data_point_filename ||= "simulate_data_point.rb"
-    @analysis.save!
-
+    @analysis.run_flag = true # this has to be set or RMongo will fail
     @analysis.save!
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
@@ -76,7 +75,7 @@ class Analysis::BatchRun < Struct.new(:options)
     @analysis.analysis_output = []
     @analysis.analysis_output << "good_ips = #{good_ips.to_json}"
 
-    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+    @r.command(ips: good_ips.to_hash.to_dataframe, dps: data_points.to_dataframe) do
       %Q{
         print(ips)
         if (nrow(ips) == 0) {
@@ -127,9 +126,12 @@ class Analysis::BatchRun < Struct.new(:options)
     Rails.logger.info("Trying to download any remaining files from worker nodes")
     @analysis.finalize_data_points
 
-    @analysis.end_time = Time.now
-    @analysis.status = 'completed'
-    @analysis.save!
+    # This is to handle the sequential search case. But this should really be a separate analysis for each iteration
+    if options[:skip_init]
+      @analysis.end_time = Time.now
+      @analysis.status = 'completed'
+      @analysis.save!
+    end
   end
 
   # Since this is a delayed job, if it crashes it will typically try multiple times.

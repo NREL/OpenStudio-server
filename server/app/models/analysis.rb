@@ -59,6 +59,8 @@ class Analysis
     MasterNode.delete_all
     WorkerNode.delete_all
 
+    Rails.logger.info "initializing workers"
+
     # load in the master and worker information if it doesn't already exist
     ip_file = "/home/ubuntu/ip_addresses"
     if !File.exists?(ip_file)
@@ -101,11 +103,25 @@ class Analysis
     copy_data_to_workers()
   end
 
+  def start(no_delay, analysis_type='batch_run', skip_init = false)
+    # NL: I would like to move this inside the queued analysis piece
+    self.start_time = Time.now
 
-  def start(no_delay, analysis_type='batch_run')
+    Rails.logger.info("SKIP_INIT flag is set to #{skip_init}")
+
+    # TODO need to check if the workers have been initialized, if so, then skip
+    if !skip_init
+      Rails.logger.info("Initializing workers in database")
+      self.initialize_workers
+
+      Rails.logger.info("Queuing up analysis #{@analysis}")
+      self.analysis_type = analysis_type
+      self.status = 'queued'
+      self.save!
+    end
+
     Rails.logger.info("Starting #{analysis_type}")
-
-    # get the data points that are going to be run
+    # NL: This hash should really be put into the analysis job.  Not sure why we need to create this here.
     data_points_hash = {}
     data_points_hash[:data_points] = []
     self.data_points.all.each do |dp|
@@ -115,11 +131,12 @@ class Analysis
     end
     Rails.logger.info(data_points_hash)
 
+    options = {skip_init: skip_init}
     if no_delay
-      abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash)
+      abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash, options)
       abr.perform
     else
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash), :queue => 'analysis'
+      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash, options), :queue => 'analysis'
       self.delayed_job_id = job.id
       self.save!
     end
@@ -136,18 +153,6 @@ class Analysis
       logger.info("analysis is already queued with #{dj}")
       return [false, "An analysis is already queued"]
     else
-      # NL: I would like to move this inside the queued analysis piece. I think
-      # we could have an issue if there are many worker nodes and this method times out.
-      self.start_time = Time.now
-
-      logger.info("Initializing workers in database")
-      self.initialize_workers
-
-      logger.info("queuing up analysis #{@analysis}")
-      self.analysis_type = analysis_type
-      self.status = 'queued'
-      self.save!
-
       self.start(no_delay, analysis_type)
 
       return [true]
