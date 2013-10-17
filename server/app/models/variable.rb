@@ -18,6 +18,8 @@ class Variable
   field :perturbable, :type => Boolean, default: false # if enabled, then it will be perturbed
   field :pivot, :type => Boolean, default: false
   field :pivot_samples # don't type for now
+  field :static, :type => Boolean, default: false
+  field :static_value # don't type this because it can take on anything (other than hashes and arrays)
   scope :enabled, where(perturbable: true)
 
   # Relationships
@@ -75,6 +77,9 @@ class Variable
     os_json.each do |k, v|
       var[k] = v unless exclude_fields.include? k
 
+      # Map these temporary terms ??
+      var.perturbable = v if k == 'variable'
+
       if k == "argument"
         # this is main portion of the variable
         exclude_fields_2 = ['uuid', 'version_uuid']
@@ -86,14 +91,6 @@ class Variable
       # if the variable has an uncertainty description, then it needs to be flagged
       # as a perturbable (or pivot) variable
       if k == "uncertainty_description"
-        # check if this is a normal variable or a pivot variable
-        if var['pivot_ADDME']
-          var.pivot = true
-          var.pivot_samples = var['pivot_samples_ADDME']
-        else
-          var.perturbable = true
-        end
-
         # need to flatten this
         var['uncertainty_type'] = v['type'] if v['type']
         if v['attributes']
@@ -104,10 +101,8 @@ class Variable
             next if !att_name
             attribute.each do |k2, v2|
               exclude_fields_2 = ['uuid', 'version_uuid', 'name']
-              var["#{att_name}_#{k2}"] = v2  unless exclude_fields_2.include? k2
+              var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
             end
-
-
           end
         end
       end

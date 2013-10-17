@@ -4,8 +4,9 @@
   <thead>
   <tr>
     <th>Name</th>
-    <th>Perturbable</th>
-    <th>Type</th>
+    <th>Variable</th>
+    <th>Static</th>
+    <th>Pivot</th>
     <th>Thumbnail</th>
   <tr>
   </thead>
@@ -14,6 +15,8 @@
       <tr>
         <td><%= link_to variable.name, variable_path(variable) %></td>
         <td><%= variable.perturbable %></td>
+        <td><%= variable.static %></td>
+        <td><%= variable.pivot %></td>
         <td><%= variable['type'] if variable['type'] %></td>
         <% if variable.perturbable && variable.preflight_images.first %>
             <td>

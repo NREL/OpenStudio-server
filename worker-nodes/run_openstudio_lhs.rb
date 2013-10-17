@@ -150,8 +150,9 @@ begin
                 ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['values'][variable_uuid]}"
                 v = argument_map[variable_name]
                 raise "Could not find argument map in measure" if not v
-                value_set = v.setValue(data_point_json[:data_point]['values'][variable_uuid])
-                raise "Could not set value on model" unless value_set
+                variable_value = data_point_json[:data_point]['values'][variable_uuid]
+                value_set = v.setValue(variable_value)
+                raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
                 argument_map[variable_name] = v.clone
               else
                 raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object"

@@ -79,8 +79,8 @@ class Measure
               if arg['value'] && arg['argument_index']
                 # let the system know that the variable was selected for "manipulation"
                 #Rails.logger.info("letting the system know that it can use this variable #{new_var.inspect}")
-                new_var.perturbable = true
-                new_var.save!
+                #new_var.perturbable = true
+                #new_var.save!
 
                 #Rails.logger.info("adding #{arg['value']}")
                 measure.values << [arg['argument_index'], arg['value']]

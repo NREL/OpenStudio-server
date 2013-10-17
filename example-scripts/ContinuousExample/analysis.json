@@ -4,7 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
-            "number_of_samples": 10,
+            "number_of_samples": 100,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
@@ -48,6 +48,8 @@
                             "minimum": 0,
                             "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0,
                             "name": "building rotation",
+                            "variable": true,
+                            "variable_ADDME": true,
                             "uncertainty_description": {
                                 "attributes": [
                                     {
@@ -219,6 +221,8 @@
                             "maximum": 0,
                             "minimum": 70,
                             "name": "reduce power",
+                            "variable": true,
+                            "variable_ADDME": true,
                             "uncertainty_description": {
                                 "attributes": [
                                     {
@@ -326,6 +330,8 @@
                             "minimum": 5,
                             "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
                             "name": "exterior_r_value",
+                            "variable": true,
+                            "variable_ADDME": true,
                             "uncertainty_description": {
                                 "attributes": [
                                     {
@@ -433,6 +439,7 @@
                             "minimum": 5,
                             "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
                             "name": "roof_r_value",
+                            "pivot": true,
                             "pivot_ADDME": true,
                             "uncertainty_description": {
                                 "attributes": [
@@ -444,16 +451,12 @@
                                                 "weight": 0.05
                                             },
                                             {
-                                                "value": 15,
-                                                "weight": 0.3
-                                            },
-                                            {
                                                 "value": 30,
                                                 "weight": 0.1
                                             },
                                             {
                                                 "value": 50,
-                                                "weight": 0.05
+                                                "weight": 0.45
                                             },
                                             {
                                                 "value": 80,
@@ -483,41 +486,8 @@
                             "type": "Double",
                             "uuid": "f61f1d6d-7d31-4c60-b885-8490ccfaa376",
                             "version_uuid": "0ed97163-5c72-4f70-81ed-c04c79159eb1"
-                        },
-                        {
-                            "argument_index": 2,
-                            "choices": [
-                                {
-                                    "choice_index": 0,
-                                    "display_name": "North",
-                                    "value": "North"
-                                },
-                                {
-                                    "choice_index": 1,
-                                    "display_name": "East",
-                                    "value": "East"
-                                },
-                                {
-                                    "choice_index": 2,
-                                    "display_name": "South",
-                                    "value": "South"
-                                },
-                                {
-                                    "choice_index": 3,
-                                    "display_name": "West",
-                                    "value": "West"
-                                }
-                            ],
-                            "default_value": "South",
-                            "set_value_ADDME": "West",
-                            "display_name": "Cardinal Direction.",
-                            "domain_type": "Enumeration",
-                            "name": "facade",
-                            "required": true,
-                            "type": "Choice",
-                            "uuid": "7b069817-b4dc-4b51-b35b-265a738fa859",
-                            "version_uuid": "55fc3de0-3a57-4062-862e-b11147ccf211"
                         }
+
                     ],
                     "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/SetWindowToWallRatioByFacade",
                     "bcl_measure_class_name_ADDME": "SetWindowToWallRatioByFacade",
@@ -553,7 +523,9 @@
                             "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 0.9,
                             "minimum": 0.1,
                             "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0.1,
-                            "name": "wwr",
+                            "name": "wwr_west",
+                            "variable_ADDME": true,
+                            "variable": true,
                             "uncertainty_description": {
                                 "attributes": [
                                     {
@@ -584,6 +556,62 @@
                                 "type": "triangle_uncertain"
                             },
                             "uuid": "8651b16d-91df-4dc3-a07b-048ea9510058",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "c7cf9cfc-abf9-43b1-9445-e7b312c9f4a7"
+                        },
+                        {
+                            "argument": {
+                                "argument_index": 2,
+                                "default_value": "South",
+                                "display_name": "Cardinal Direction.",
+                                "domain_type": "Enumeration",
+                                "name": "facade",
+                                "required": true,
+                                "type": "Choice",
+                                "uuid": "7b069817-b4dc-4b51-b35b-265a738fa859",
+                                "version_uuid": "55fc3de0-3a57-4062-862e-b11147ccf211"
+                            },
+                            "display_name": "Window to Wall Ratio West Facade",
+                            "maximum": 0.9,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 0.9,
+                            "minimum": 0.1,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0.1,
+                            "name": "wwr_west_static",
+                            "static": true,
+                            "static_ADDME": true,
+                            "static_value": "West",
+                            "static_value_ADDME": "West",
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 0.4,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0.05,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 0.95,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "triangle_uncertain"
+                            },
+                            "uuid": "c7cf9cfc-abf9-43b1-a07b-048ea9510058",
                             "variable_index": 0,
                             "variable_type": "RubyContinuousVariable",
                             "version_uuid": "c7cf9cfc-abf9-43b1-9445-e7b312c9f4a7"
