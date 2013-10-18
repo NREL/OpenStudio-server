@@ -1,10 +1,5 @@
-class Analysis::Lhs < Struct.new(:options)
-  def initialize(analysis_id, data_points)
-    # add into delayed job
-    @analysis_id = analysis_id
-    @data_points = data_points
-  end
-
+# TODO: with all these analyses modules, need to make the input just a hash.
+class Analysis::Lhs < Struct.new(:analysis_id, :data_points, :options)
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
@@ -23,6 +18,7 @@ class Analysis::Lhs < Struct.new(:options)
       o
     end
 
+    # TODO: move this to a place where we can all access, such as the variable model, because that is what this is
     def map_discrete_hash_to_array(discrete_values_and_weights)
       Rails.logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
       ave_weight = (1.0 / discrete_values_and_weights.size)
@@ -159,7 +155,7 @@ class Analysis::Lhs < Struct.new(:options)
     require 'childprocess'
 
     # get the analysis and report that it is running
-    @analysis = Analysis.find(@analysis_id)
+    @analysis = Analysis.find(analysis_id)
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true

@@ -14,6 +14,7 @@ OpenstudioServer::Application.routes.draw do
         get :debug_log
         get :new_view
         get :results
+        get :results_scatter
       end
 
       resources :measures, :only => [:show, :index], shallow: true

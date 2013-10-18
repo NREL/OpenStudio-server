@@ -11,6 +11,7 @@ class Measure
   field :arguments # This is really the variable? right?
   field :measure_type, :type => String
   field :values, :type => Array, default: []
+  field :index, :type => Integer  # how do we set the index, i guess an oncreate call back
 
   # Relationships
   belongs_to :analysis
@@ -43,6 +44,7 @@ class Measure
     end
 
     Rails.logger.info("adding/updating measure #{measure.id}")
+    i_measure = 0
     os_json.each do |k, v|
       exclude_fields = ["arguments", "variables"]
 

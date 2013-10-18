@@ -3,11 +3,10 @@ require 'json'
 require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
-WITHOUT_DELAY=false
+WITHOUT_DELAY=true
 ANALYSIS_TYPE="batch_run"
 STOP_AFTER_N=2 #set to nil if you want them all
 #HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
-
 
 # Project data
 formulation_file = "./DiskIOBenchmark/analysis.json"
@@ -141,12 +140,9 @@ end
 # run the analysis
 if !analysis_id.nil?
   # run the analysis
-  a = Time.now
-  puts a
+
   action_hash = {analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE}
-  b = Time.now
-  puts b
-  
+  puts action_hash.to_json
 
   #resp = @conn.post do |req|
   #  req.url "analyses/#{analysis_id}/action.json"

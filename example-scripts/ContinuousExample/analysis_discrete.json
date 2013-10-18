@@ -4,7 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
-            "number_of_samples": 3,
+            "number_of_samples": 30,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
@@ -419,8 +419,8 @@
                             "minimum": 5,
                             "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
                             "name": "roof_r_value",
-                            "pivot": true,
-                            "pivot_ADDME": true,
+                            "variable": true,
+                            "variable_ADDME": true,
                             "uncertainty_description": {
                                 "attributes": [
                                     {

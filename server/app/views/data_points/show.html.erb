@@ -15,7 +15,7 @@
   <tbody>
   <% @values.each do |k, v| %>
       <tr>
-        <td><%= link_to(Variable.find(k).name, Variable.find(k)) %></td>
+        <td><%= link_to(Variable.find(k).name, Variable.find(k)) if Variable.find(k) %></td>
         <td><%= v %></td>
       </tr>
   <% end %>
