@@ -7,25 +7,29 @@ require "json"
 
 # use the aws class that lives in the OpenStudio Repository now.  Make sure to update the PATH below to
 # whereever you OpenStudio checkout is (currently on the AWSProvider branch in OS)
-#OS_PATH = "C:/Projects/OpenStudio"
-OS_PATH = "/Users/nlong/Working/OpenStudio"
+OS_PATH = "C:/Projects/OpenStudio"
+#OS_PATH = "/Users/nlong/Working/OpenStudio"
+#OS_PATH = "C:/working/openstudio"
+
+RUBY_LOC = "ruby"
+#RUBY_LOC = "c:/ruby-2.0.0-p247-i386-mingw32/bin/ruby.exe"
 
 # Global Options
 CREATE_SERVER=true
 CREATE_WORKER=true
-WORKER_INSTANCES=1
+WORKER_INSTANCES=2
 TEST_SSH=true
 
 # read in the config.yml file to get the secret/private key
 config = AwsConfig.new()
-
+a = Time.now
 # Launch the master
 if CREATE_SERVER
   instance_data = {instance_type: "m2.xlarge" }
   #instance_data = {instance_type: "t1.micro" }
   instance_string = instance_data.to_json.gsub("\"", "\\\\\"")
 
-  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
+  start_string = "#{RUBY_LOC} #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_server \"#{instance_string}\""
   puts "#{start_string}"
   server_data_str = `#{start_string}`
   puts server_data_str
@@ -55,13 +59,14 @@ if CREATE_WORKER
   server_json = JSON.parse(File.read("server_data.json"), :symbolize_names => true)
 
   # How many instances?
-  #server_json[:instance_type] = "cc2.8xlarge"
-  server_json[:instance_type] = "m2.4xlarge"
+  server_json[:instance_type] = "cc2.8xlarge"
+  #server_json[:instance_type] = "m2.4xlarge"
+  #server_json[:instance_type] = "m2.2xlarge"
   #server_json[:instance_type] = "t1.micro"
   server_json[:num] = WORKER_INSTANCES
   server_string = server_json.to_json.gsub("\"", "\\\\\"")
 
-  start_string = "ruby #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_workers \"#{server_string}\""
+  start_string = "#{RUBY_LOC} #{OS_PATH}/openstudiocore/ruby/cloud/aws.rb.in #{config.access_key} #{config.secret_key} us-east-1 EC2 launch_workers \"#{server_string}\""
   worker_data_string = `#{start_string}`
   worker_data = JSON.parse(worker_data_string, :symbolize_names => true)
   File.open("worker_data.json", "w") { |f| f << JSON.pretty_generate(worker_data) }
@@ -115,6 +120,10 @@ if TEST_SSH
   end
 
   server_json = JSON.parse(File.read("server_data.json"), :symbolize_names => true)
+  
+  b = Time.now
+  delta = b.to_f - a.to_f
+  puts "startup time is #{delta}"
   #puts send_command(server_json[:server_ip], 'nproc | tr -d "\n"', File.read("ec2_server_key.pem"))
 end
 

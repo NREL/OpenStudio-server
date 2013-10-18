@@ -1,18 +1,24 @@
-class Analysis::BatchRun < Struct.new(:options)
-  def initialize(analysis_id, data_points)
-    @analysis_id = analysis_id
-    @data_points = data_points
-  end
-
+class Analysis::BatchRun < Struct.new(:analysis_id, :data_points, :options)
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
+    options[:simulate_data_point_filename] = "simulate_data_point.rb" if options[:simulate_data_point_filename].nil?
+
+    Rails.logger.info(options.inspect)
+
+    @analysis = Analysis.find(analysis_id)
+
+    if options[:skip_init]
+      @analysis.status = 'started'
+      @analysis.end_time = nil
+
+      @analysis.save!
+    end
+
     # add into delayed job
     require 'rserve/simpler'
     require 'uuid'
     require 'childprocess'
-
-    @analysis = Analysis.find(@analysis_id)
 
     #create an instance for R
     @r = Rserve::Simpler.new
@@ -21,16 +27,15 @@ class Analysis::BatchRun < Struct.new(:options)
     @r.converse "library(snow)"
     @r.converse "library(snowfall)"
     @r.converse "library(RMongo)"
-
-    @analysis.status = 'started'
-    @analysis.end_time = nil
-    @analysis.run_flag = true
+    @r.converse "library(R.methodsS3)"
+    @r.converse "library(R.oo)"
+    @r.converse "library(R.utils)"
 
     # Set this if not defined in the JSON
+    Rails.logger.info "F.rb was #{@analysis.simulate_data_point_filename}"
+    @analysis.simulate_data_point_filename ||= options[:simulate_data_point_filename]
     Rails.logger.info "F.rb is #{@analysis.simulate_data_point_filename}"
-    @analysis.simulate_data_point_filename ||= "simulate_data_point.rb"
-    @analysis.save!
-
+    @analysis.run_flag = true # this has to be set or RMongo will fail
     @analysis.save!
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
@@ -44,21 +49,26 @@ class Analysis::BatchRun < Struct.new(:options)
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
+
+
     @r.command() do
       %Q{
         ip <- "#{master_ip}"
+        results <- NULL
         print(ip)
         print(getwd())
-
+        if (file.exists('/mnt/openstudio/rtimeout')) {
+          file.remove('/mnt/openstudio/rtimeout')
+        }
         #test the query of getting the run_flag
         mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
         flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
-        #print(flag)
 
         print(flag["run_flag"])
         if (flag["run_flag"] == "true"  ){
           print("flag is set to true!")
-        }
+        }        
+        dbDisconnect(mongo)
       }
     end
 
@@ -70,66 +80,99 @@ class Analysis::BatchRun < Struct.new(:options)
     #process.io.stdout = process.io.stderr = File.open(log_file,'a+')
     process.cwd = Rails.root # set the child's working directory where the bundler will execute
     Rails.logger.info("Starting Child Process")
-    process.start
+    #process.start
     
     good_ips = WorkerNode.where(valid:true) # TODO: make this a scope
     @analysis.analysis_output = []
     @analysis.analysis_output << "good_ips = #{good_ips.to_json}"
 
-    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+    @r.command(ips: good_ips.to_hash.to_dataframe, dps: data_points.to_dataframe) do
       %Q{
         print(ips)
         if (nrow(ips) == 0) {
           stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
         }
-        sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1])
-        sfLibrary(RMongo)
-
-        f <- function(x){
-          mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-          flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
-          if (flag["run_flag"] == "false" ){
-            stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
-          }
-          dbDisconnect(mongo)
-
-          print("#{@analysis.use_shm}")
-          if ("#{@analysis.use_shm}" == "true"){
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm",sep="")
-          } else {
-            y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@analysis.simulate_data_point_filename} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS", sep="")
-          }
-          z <- system(y,intern=TRUE)
-          j <- length(z)
-          z
-        }
-        sfExport("f")
-
-        if (nrow(dps) == 1) {
-          print("not sure what to do with only one datapoint so adding an NA")
-          dps <- rbind(dps, c(NA))
-        }
-
-        print(dps)
-
-        results <- sfLapply(dps[,1], f)
-
-        sfStop()
+        sfSetMaxCPUs(nrow(ips))
+        timeflag <<- TRUE;
+        res <- NULL;
+	      tryCatch({
+	        res <- evalWithTimeout({
+	          sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
+	          }, timeout=60);
+	        }, TimeoutException=function(ex) {
+	          cat("#{@analysis.id} Timeout\n");
+	          timeflag <<- FALSE;
+	          file.create('rtimeout')
+	          stop
+        })
       }
     end
 
+    timeflag = @r.converse("timeflag")
+
+    Rails.logger.info ("Time flag was set to #{timeflag}")
+    if timeflag
+      @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+        %Q{
+          print("Size of cluster is:")
+          print(sfCpus())
+
+          sfLibrary(RMongo)
+
+          f <- function(x){
+            mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+            flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
+            if (flag["run_flag"] == "false" ){
+              stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
+            }
+            dbDisconnect(mongo)
+
+            print("#{@analysis.use_shm}")
+            if ("#{@analysis.use_shm}" == "true"){
+              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
+            } else {
+              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+            }
+            z <- system(y,intern=TRUE)
+            j <- length(z)
+            z
+          }
+          sfExport("f")
+
+          if (nrow(dps) == 1) {
+            print("not sure what to do with only one datapoint so adding an NA")
+            dps <- rbind(dps, c(NA))
+          }
+
+          print(dps)
+
+          results <- sfLapply(dps[,1], f)
+
+          sfStop()
+        }
+      end
+    else
+      # Log off some information why it didnt' start
+    end
     @analysis.analysis_output << @r.converse("results")
 
     # Kill the downloading of data files process
-    process.stop
+    #process.stop
 
-    # Do one last check if there are any data points that were not downloaded
+    # This can cause an issue when this method is called from another analysis becuase of permission of the file.
+    #   Either 1) we need to have delayed jobs run as a user that has the permissions
+    #          2) remove a partially downloaded
+    #          3) set permissions
     Rails.logger.info("Trying to download any remaining files from worker nodes")
-    @analysis.finalize_data_points
+    @analysis.finalize_data_points # not sure where this should go right now...
 
-    @analysis.end_time = Time.now
-    @analysis.status = 'completed'
-    @analysis.save!
+    # This is to handle the sequential search case. But this should really be a separate analysis for each iteration
+    if options[:skip_init]
+      # Do one last check if there are any data points that were not downloaded
+      @analysis.end_time = Time.now
+      @analysis.status = 'completed'
+      @analysis.save!
+    end
   end
 
   # Since this is a delayed job, if it crashes it will typically try multiple times.
