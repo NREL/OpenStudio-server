@@ -1,35 +1,70 @@
-class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :options)
+class Analysis::SequentialSearch
+  def initialize(analysis_id, options = {})
+    defaults = {:skip_init => false}
+    @options = defaults.merge(options)
+
+    @analysis_id = analysis_id
+  end
+
 # Perform is the main method that is run in the background.  At the moment if this method crashes
 # it will be logged as a failed delayed_job and will fail after max_attempts.
-  def perform
-    def map_discrete_hash_to_array(discrete_values_and_weights)
-      Rails.logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
-      ave_weight = (1.0 / discrete_values_and_weights.size)
-      Rails.logger.info "average weight is #{ave_weight}"
-      discrete_values_and_weights.each_index do |i|
-        if !discrete_values_and_weights[i].has_key? 'weight'
-          discrete_values_and_weights[i]['weight'] = ave_weight
-        end
-      end
-      values = discrete_values_and_weights.map { |k| k['value'] }
-      weights = discrete_values_and_weights.map { |k| k['weight'] }
-      Rails.logger.info "Set values and weights to  #{values} with size #{weights}"
+  def self.create_data_point_list(parameter_space, run_list_ids, iteration, name_moniker = "")
+    result = []
 
-      [values, weights]
+    i_sample = 0
+    run_list_ids.each do |run_list|
+      variables = {}
+      i_sample += 1
+      run_list.each do |ps_id|
+        variables = variables.merge(parameter_space[ps_id][:variables])
+      end
+      name_moniker = "Sequential Search Data Point" if name_moniker == ""
+      name = "#{name_moniker} [iteration #{iteration} sample #{i_sample}]"
+      result << {variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample}
     end
 
-    # the parameter space will keep growing (right?)
+    result
+  end
+
+  def self.mash_up_hash(selected, parameter_space)
+    result_ids = []
+    parameter_space.each do |ps_id, ps_sample|
+      group_list = []
+      # add on variables
+      if selected.size == 0
+        result_ids << [ps_id]
+      else
+        selected.each do |sel_id, sel_sample|
+          if sel_sample[:measure_id] == ps_sample[:measure_id]
+            Rails.logger.info "replacing in #{ps_id}"
+            group_list << ps_id
+          else
+            Rails.logger.info "adding in #{ps_id} including #{sel_id}"
+            group_list << ps_id << sel_id
+          end
+          Rails.logger.info group_list.inspect
+        end
+        new_run = group_list.sort.uniq
+        Rails.logger.info "Determined a new ran combination of #{new_run}"
+        result_ids << new_run
+
+        # go back a step on the assigned variable?
+      end
+    end
+
+    # delete myself eventually too--no need to process
+    result_ids.uniq
+  end
+
+  def perform
+    # need to reduce this to a call without the database
     def determine_run_list(parameter_space)
-      run_list = []
+      data_point_list = []
       Rails.logger.info "Determining run list for iteration #{@iteration}"
       if @iteration == 0
         # no need to look at anything, just return the array
-        isample = 0
-        parameter_space.each do |id, sample|
-          isample += 1
-          dp_name = "Sequential Search Iteration #{@iteration} Sample #{isample}"
-          run_list << {variable_group: [{id: id}], name: dp_name, variables: sample[:variables], iteration: @iteration, sample: isample}
-        end
+        run_list = Analysis::SequentialSearch.mash_up_hash([], parameter_space)
+        data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, 1)
       else
         pareto = []
         (0..@iteration).each do |iteration|
@@ -41,7 +76,7 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
           dps = @analysis.data_points.all.only(:results, :name, :variable_group_list, :uuid)
           dps.each do |dp|
             Rails.logger.info "checking datapoint #{dp}"
-            if dp.results['total_energy'] && dp.results['interior_lighting_electricity']
+            if dp.results && dp.results['total_energy'] && dp.results['interior_lighting_electricity']
               x = dp.results['total_energy']
               y = dp.results['interior_lighting_electricity']
               min_x ||= x
@@ -49,11 +84,8 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
               min_point ||= dp
 
               new_dp = false
-              if x < min_x
+              if x < min_x && y < min_y # add the y is > as well ()
                 min_x = x
-                new_dp = true
-              end
-              if y < min_y
                 min_y = y
                 new_dp = true
               end
@@ -72,35 +104,25 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
           Rails.logger.info("Last pareto front point was #{last_dp.name} with #{variable_group_list}")
 
           # Fix the previous variable groups in the next run
-          isample = 0
-          parameter_space.each do |id, sample|
-            isample += 1
-
-            #"915510d0-1991-0131-c0a4-080027880ca6"=>{:id=>"9155c1d0-1991-0131-c0a5-080027880ca6", :measure_id=>"883ebc58-845f-4708-81b2-0930d9cf22e0", :variables=>{"41cb285c-f8c1-4673-8710-3306593d465e"=>50}},
-            #"9156f100-1991-0131-c0b0-080027880ca6"=>{:id=>"9156f800-1991-0131-c0b1-080027880ca6", :measure_id=>"e16805f0-a2f2-4122-828f-0812d49493dd", :variables=>{"8651b16d-91df-4dc3-a07b-048ea9510058"=>80, "c7cf9cfc-abf9-43b1-a07b-048ea9510058"=>"West"}}
-
-            dp_name = "Sequential Search Iteration #{@iteration} Sample #{isample}"
-            variable_group_list.each do |variable_group|
-              parameter_space[variable_group]
-            end
-
-            run_list << {variable_group: [{id: id}], name: dp_name, variables: sample[:variables], iteration: @iteration, sample: isample}
-          end
+          run_list = Analysis::SequentialSearch.mash_up_hash(variable_group_list, parameter_space)
+          data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, 1)
         else
           # end this with a message that no point found on pareto front
         end
       end
 
       # have to figure out what to do
-      run_list
+      data_point_list
     end
 
     require 'rserve/simpler'
     require 'uuid'
     require 'childprocess'
 
+    Rails.logger.info("list of options were #{@options}")
+
     # get the analysis and report that it is running
-    @analysis = Analysis.find(analysis_id)
+    @analysis = Analysis.find(@analysis_id)
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
@@ -132,7 +154,7 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
       # mash the two variables together
       measure_values = {}
       variables.each do |variable|
-        values, weights = map_discrete_hash_to_array(variable.discrete_values_and_weights)
+        values, weights = variable.map_discrete_hash_to_array
         measure_values["#{variable._id}"] = values
       end
       Rails.logger.info "measure values with variables are #{measure_values}"
@@ -141,7 +163,7 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
       Rails.logger.info "measure values array hash is  #{measure_values}"
 
       measure_values.each do |mvs|
-        parameter_space[UUID.new.generate] = {id: UUID.new.generate, measure_id: measure._id, variables: mvs}
+        parameter_space[UUID.new.generate] = {measure_id: measure._id, variables: mvs}
       end
     end
 
@@ -152,20 +174,28 @@ class Analysis::SequentialSearch < Struct.new(:analysis_id, :data_points, :optio
     Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
 
     @run_list = determine_run_list(parameter_space) # get initial run list
+    Rails.logger.info "datapoint list is #{@run_list}"
     while not @run_list.empty?
       if @run_list.empty?
         # must have converged?
         break
       else
         @run_list.each do |run|
+          Rails.logger.info "adding new datapoint #{run[:name]} with variables #{run[:variables]}"
           dp = @analysis.data_points.new(name: run[:name])
+          Rails.logger.info "class of variables is #{run[:variables]} of class #{run[:variables].class}"
+
           dp['variable_group_list'] = run[:variable_group]
-          dp['values'] = run[:variables]
+          dp.variable_values = run[:variables]
           dp['iteration'] = run[:iteration]
           dp['sample'] = run[:sample]
-
-          dp.save!
+          if dp.save!
+          else
+            raise "could not save datapoint #{dp.errors}"
+          end
+          Rails.logger.info "Added new datapoint #{dp.inspect}"
         end
+        @analysis.save!
 
         # So why does this work? It should hit run_analysis and it should come back as analysis is queued
         Rails.logger.info("kicking off simulations for iteration #{@iteration}")

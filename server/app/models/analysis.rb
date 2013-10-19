@@ -13,7 +13,7 @@ class Analysis
   field :description, :type => String
   field :run_flag, :type => Boolean
   field :delayed_job_id # ObjectId
-  field :status, :type => String # enum on the status of the analysis (queued, started, completed)
+  field :status, :type => String
   field :analysis_type, :type => String
   field :analysis_output, :type => Array
   field :start_time, :type => DateTime
@@ -21,7 +21,6 @@ class Analysis
   field :problem
   field :os_metadata # don't define type, keep this flexible
   field :use_shm, :type => Boolean, default: false #flag on whether or not to use SHM for analysis (impacts file uploading)
-  field :simulate_data_point_filename, :type => String
 
   # Temp location for these vas
   field :samples, :type => Integer
@@ -103,14 +102,14 @@ class Analysis
     copy_data_to_workers()
   end
 
-  def start(no_delay, analysis_type='batch_run', skip_init = false)
-    # NL: I would like to move this inside the queued analysis piece
+  def start(no_delay, analysis_type='batch_run', options = {})
+    defaults = {skip_init: false}
+    options = defaults.merge(options)
+
     self.start_time = Time.now
 
-    Rails.logger.info("SKIP_INIT flag is set to #{skip_init}")
-
     # TODO need to check if the workers have been initialized, if so, then skip
-    if !skip_init
+    if !options[:skip_init]
       Rails.logger.info("Initializing workers in database")
       self.initialize_workers
 
@@ -120,32 +119,37 @@ class Analysis
       self.save!
     end
 
+
     Rails.logger.info("Starting #{analysis_type}")
     # NL: This hash should really be put into the analysis job.  Not sure why we need to create this here.
-    data_points_hash = {}
-    data_points_hash[:data_points] = []
-    self.data_points.all.each do |dp|
+    data_points_array = []
+    Rails.logger.info "Checking which datapoints to run"
+    self.data_points.where(status: 'na', download_status: 'na').each do |dp|
+      Rails.logger.info "Adding in #{dp.uuid}"
       dp.status = 'queued'
       dp.save!
-      data_points_hash[:data_points] << dp.uuid
+      data_points_array << dp.uuid
     end
-    Rails.logger.info(data_points_hash)
+    Rails.logger.info("Data point hash is #{data_points_array}")
 
-    options = {skip_init: skip_init}
+    options[:data_points] = data_points_array
     if no_delay
-      abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash, options)
+      abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options)
       abr.perform
     else
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(self.id, data_points_hash, options), :queue => 'analysis'
+      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options), :queue => 'analysis'
       self.delayed_job_id = job.id
       self.save!
     end
   end
 
-  def run_analysis(no_delay = false, analysis_type = 'batch_run')
+  def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
+    defaults = {}
+    options = defaults.merge(options)
+
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
-    Rails.logger.info("running R analysis with #{analysis_type}")
+    Rails.logger.info("running analysis of type #{analysis_type}")
 
     self.delayed_job_id.nil? ? dj = nil : dj = Delayed::Job.find(self.delayed_job_id)
 
@@ -153,7 +157,7 @@ class Analysis
       logger.info("analysis is already queued with #{dj}")
       return [false, "An analysis is already queued"]
     else
-      self.start(no_delay, analysis_type)
+      self.start(no_delay, analysis_type, options)
 
       return [true]
     end

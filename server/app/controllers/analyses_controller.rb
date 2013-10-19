@@ -105,12 +105,14 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
     logger.info("action #{params.inspect}")
     params[:analysis_type].nil? ? @analysis_type = 'batch_run' : @analysis_type = params[:analysis_type]
-    @analysis.simulate_data_point_filename = params[:simulate_data_point_filename] if params[:simulate_data_point_filename]
+
+    options = {}
+    options[:simulate_data_point_filename] = params[:simulate_data_point_filename] if params[:simulate_data_point_filename]
 
     result = {}
     if params[:analysis_action] == 'start'
       params[:without_delay] == 'true' ? no_delay = true : no_delay = false
-      res = @analysis.run_analysis(no_delay, @analysis_type)
+      res = @analysis.run_analysis(no_delay, @analysis_type, options)
       if res[0]
         result[:code] = 200
         result[:analysis] = @analysis
@@ -242,9 +244,9 @@ class AnalysesController < ApplicationController
     # Get the mappings of the variables that were used
     mappings = {}
     # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
-    ps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:values)
-    ps.each do |p|
-      p['values'].each_key do |key|
+    dps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:variable_values)
+    dps.each do |dp|
+      dp.variable_values.each_key do |key|
         v = Variable.where(uuid: key).first
         mappings[key] = v.name.gsub(" ", "_") if v
       end
@@ -259,7 +261,7 @@ class AnalysesController < ApplicationController
         dp_values = {}
 
         # lookup input value names
-        dp.values.each do |k, v|
+        dp.variable_values.each do |k, v|
           dp_values["#{mappings[k]}"] = v
         end
 
@@ -281,9 +283,9 @@ class AnalysesController < ApplicationController
     # Get the mappings of the variables that were used
     mappings = {}
     # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
-    ps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:values)
-    ps.each do |p|
-      p['values'].each_key do |key|
+    dps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:variable_values)
+    dps.each do |dp|
+      dp.variable_values.each_key do |key|
         v = Variable.where(uuid: key).first
         mappings[key] = v.name.gsub(" ", "_") if v
       end
@@ -298,7 +300,7 @@ class AnalysesController < ApplicationController
         dp_values = {}
 
         # lookup input value names
-        dp.values.each do |k, v|
+        dp.variable_values.each do |k, v|
           dp_values["#{mappings[k]}"] = v
         end
 

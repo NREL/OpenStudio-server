@@ -113,6 +113,22 @@ class Variable
     var
   end
 
+  def map_discrete_hash_to_array
+    logger.info "received map discrete values with #{self.discrete_values_and_weights} with size #{self.discrete_values_and_weights.size}"
+    ave_weight = (1.0 / self.discrete_values_and_weights.size)
+    Rails.logger.info "average weight is #{ave_weight}"
+    self.discrete_values_and_weights.each_index do |i|
+      if !self.discrete_values_and_weights[i].has_key? 'weight'
+        self.discrete_values_and_weights[i]['weight'] = ave_weight
+      end
+    end
+    values = self.discrete_values_and_weights.map { |k| k['value'] }
+    weights = self.discrete_values_and_weights.map { |k| k['weight'] }
+    logger.info "Set values and weights to  #{values} with size #{weights}"
+
+    [values, weights]
+  end
+
   protected
 
   def verify_uuid
