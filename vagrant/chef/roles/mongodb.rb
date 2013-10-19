@@ -14,3 +14,4 @@ default_attributes(
         :dbpath => "/mnt/mongodb/data"
     }
 )
+
