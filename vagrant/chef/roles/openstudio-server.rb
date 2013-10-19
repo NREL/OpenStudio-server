@@ -6,7 +6,7 @@ run_list([
              "role[base]",
              "role[ruby]",
              "role[r-project]",
-             "recipe[mongodb::server]",
+             "recipe[mongodb]",
              "role[openstudio]",
              "role[web_base]",
              "recipe[openstudio_server::bundle]", #install the bundle first to get rails for apache passenger
