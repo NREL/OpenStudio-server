@@ -40,7 +40,7 @@
 
 </style>
 
-<% if @plot_data.size == 0 %>
+<% if @plot_data %>
     <div id="graph-div">
       <p>There are no results for this analysis.</p>
     </div>
@@ -70,15 +70,15 @@
 
           var color = d3.scale.category10();
 
-          d3.json("results_scatter.json", function (error, data) {
+          d3.json("plot_data.json", function (error, data) {
               var domainByTrait = {},
-                      traits = d3.keys(data[0]).filter(function (d) {
+                      traits = d3.keys(data['data'][0]).filter(function (d) {
                           return d !== "wwr_west_static";
                       }),
                       n = traits.length;
 
               traits.forEach(function (trait) {
-                  domainByTrait[trait] = d3.extent(data, function (d) {
+                  domainByTrait[trait] = d3.extent(data['data'], function (d) {
                       return d[trait];
                   });
               });
@@ -159,7 +159,7 @@
                           .attr("height", size - padding);
 
                   cell.selectAll("circle")
-                          .data(data)
+                          .data(data['data'])
                           .enter().append("circle")
                           .attr("cx", function (d) {
                               return x(d[p.x]);

@@ -1,9 +1,10 @@
 class Analysis::SequentialSearch
   def initialize(analysis_id, options = {})
-    defaults = {:skip_init => false}
+    defaults = {skip_init: false, x_objective_function: "total_energy", y_objective_function: "interior_lighting_electricity"}
     @options = defaults.merge(options)
 
     @analysis_id = analysis_id
+    @iteration = 0
   end
 
 # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -18,7 +19,7 @@ class Analysis::SequentialSearch
       run_list.each do |ps_id|
         variables = variables.merge(parameter_space[ps_id][:variables])
       end
-      name_moniker = "Sequential Search Data Point" if name_moniker == ""
+      name_moniker = "Data Point" if name_moniker == ""
       name = "#{name_moniker} [iteration #{iteration} sample #{i_sample}]"
       result << {variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample}
     end
@@ -62,6 +63,10 @@ class Analysis::SequentialSearch
       data_point_list = []
       Rails.logger.info "Determining run list for iteration #{@iteration}"
       if @iteration == 0
+        # run the baseline
+        Rails.logger.info "setting up to run just the baseline"
+        data_point_list << {variable_group: [], name: "Baseline", variables: {}, iteration: @iteration, sample: 1}
+      elsif @iteration == 1
         # no need to look at anything, just return the array
         run_list = Analysis::SequentialSearch.mash_up_hash([], parameter_space)
         data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, 1)
@@ -75,16 +80,15 @@ class Analysis::SequentialSearch
 
           dps = @analysis.data_points.all.only(:results, :name, :variable_group_list, :uuid)
           dps.each do |dp|
-            Rails.logger.info "checking datapoint #{dp}"
-            if dp.results && dp.results['total_energy'] && dp.results['interior_lighting_electricity']
-              x = dp.results['total_energy']
-              y = dp.results['interior_lighting_electricity']
+            if dp.results && dp.results[@options[:x_objective_function]] && dp.results[@options[:y_objective_function]]
+              x = dp.results[@options[:x_objective_function]]
+              y = dp.results[@options[:y_objective_function]]
               min_x ||= x
               min_y ||= y
               min_point ||= dp
 
               new_dp = false
-              if x < min_x && y < min_y # add the y is > as well ()
+              if x < min_x && y < min_y
                 min_x = x
                 min_y = y
                 new_dp = true
@@ -101,17 +105,27 @@ class Analysis::SequentialSearch
         last_dp = pareto.last
         if last_dp
           variable_group_list = last_dp['variable_group_list']
-          Rails.logger.info("Last pareto front point was #{last_dp.name} with #{variable_group_list}")
+          # get the full ps information
+          Rails.logger.info("Last pareto front point was #{last_dp.name} with parameter space index #{variable_group_list}")
+          full_variable_group_list = parameter_space.select { |k, v| v if variable_group_list.include?(k) }
 
           # Fix the previous variable groups in the next run
-          run_list = Analysis::SequentialSearch.mash_up_hash(variable_group_list, parameter_space)
-          data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, 1)
+          run_list = Analysis::SequentialSearch.mash_up_hash(full_variable_group_list, parameter_space)
+          data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, @iteration)
         else
           # end this with a message that no point found on pareto front
         end
       end
 
-      # have to figure out what to do
+      # go through each of the run list results and delete any that have already run
+      data_point_list.reverse.each do |dp|
+        if @analysis.data_points.where(variable_values: dp[:variables]).exists?
+          Rails.logger.info("Datapoint has already run for #{dp[:name]}")
+          data_point_list.delete(dp)
+        end
+        #result << {variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample}
+      end
+
       data_point_list
     end
 
@@ -126,8 +140,7 @@ class Analysis::SequentialSearch
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
-    @analysis['iteration'] = 0
-    @iteration = @analysis['iteration']
+    @analysis['iteration'] = @iteration
 
     # Set this if not defined in the JSON
     @analysis.problem['random_seed'] ||= 1979
