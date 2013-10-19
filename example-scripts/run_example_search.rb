@@ -3,7 +3,7 @@ require 'json'
 require 'faraday'
 
 HOSTNAME = "http://localhost:8080"
-WITHOUT_DELAY=true # NOTE that this is for only the LHS portion the batch is asynchronous.
+WITHOUT_DELAY=false
 ANALYSIS_TYPE="sequential_search"
 STOP_AFTER_N=nil  #set to nil if you want them all
                   #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
@@ -121,14 +121,6 @@ if !analysis_id.nil?
 
   action_hash = { analysis_action: "start", without_delay: false, analysis_type: 'batch_run',  }
   puts action_hash.to_json
-
-  a = Time.now
-  puts a
-  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
-  puts resp.code
-  b = Time.now
-  puts b
-  puts "delta #{b.to_f - a.to_f}"
 
 
 end

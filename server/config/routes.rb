@@ -10,6 +10,7 @@ OpenstudioServer::Application.routes.draw do
         post :upload
         get :status
         get :page_data
+        get :plot_data
         get :download_status
         get :debug_log
         get :new_view

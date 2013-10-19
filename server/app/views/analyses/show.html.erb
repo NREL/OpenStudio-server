@@ -63,7 +63,7 @@
   <tbody>
   <% @analysis.data_points.order_by(:run_start_time.desc, :name.asc).each do |dp| %>
       <tr>
-        <td> <%= link_to "data point: #{dp.name}", data_point_path(dp) %> </td>
+        <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
         <td><%=  dp.status_message if dp.status_message %></td>
         <td> <%= dp.results['net_site_energy_use_intentsity'] || dp.results['total_energy'] unless dp.results.nil? %> </td>
