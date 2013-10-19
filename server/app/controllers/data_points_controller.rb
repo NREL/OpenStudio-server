@@ -26,8 +26,8 @@ class DataPointsController < ApplicationController
           @table_data["sdp_log_file"] = @table_data["sdp_log_file"].join("</br>").html_safe
         end
 
-        if @data_point.values
-          @values = @data_point.values
+        if @data_point.variable_values
+          @variable_values = @data_point.variable_values
         end
 
         # gsub for some styling

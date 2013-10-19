@@ -101,9 +101,6 @@ end
 
 # run the analysis and let LHS determine the measure group items -- at least try it.
 if !analysis_id.nil?
-  # run the analysis
-
-
   action_hash = { analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE }
   puts action_hash.to_json
 

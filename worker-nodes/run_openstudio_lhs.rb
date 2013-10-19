@@ -147,19 +147,29 @@ begin
               variable_name = wf_var['argument']['name']
 
               # get the value from the data point
-              if data_point_json[:data_point]['values'][variable_uuid]
-                ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['values'][variable_uuid]}"
-                v = argument_map[variable_name]
-                raise "Could not find argument map in measure" if not v
-                variable_value = data_point_json[:data_point]['values'][variable_uuid]
-                value_set = v.setValue(variable_value)
-                raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
-                argument_map[variable_name] = v.clone
+              ros.log_message data_point_json
+              if data_point_json[:data_point]
+                if data_point_json[:data_point]['variable_values']
+                  if data_point_json[:data_point]['variable_values'][variable_uuid]
+                    ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['variable_values'][variable_uuid]}"
+                    v = argument_map[variable_name]
+                    raise "Could not find argument map in measure" if not v
+                    variable_value = data_point_json[:data_point]['variable_values'][variable_uuid]
+                    value_set = v.setValue(variable_value)
+                    raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
+                    argument_map[variable_name] = v.clone
+                  else
+                    raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
+                    ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
+                    break
+                  end
+                else
+                  raise "No block for variable_values in data point record"
+                end
               else
-                raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
-                ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object",true)
-                break
+                raise "No block for data_point in data_point record"
               end
+
 
               measure.run(@model, runner, argument_map)
               result = runner.result
@@ -207,7 +217,7 @@ begin
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
 
   ros.log_message "Verifying location of Post Process Script", true
-  post_process_filename = File.expand_path(File.join(File.dirname(__FILE__),"../..","post_process.rb"))
+  post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "../..", "post_process.rb"))
   if File.exists?(post_process_filename)
     ros.log_message "Post process file is #{post_process_filename}"
   else

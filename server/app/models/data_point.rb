@@ -5,13 +5,13 @@ class DataPoint
   field :uuid, :type => String
   field :_id, :type => String, default: -> { uuid || UUID.generate }
   field :name, :type => String
-  field :values, :type => Array
+  field :variable_values, :type => Array
   field :ip_address, :type => String
   field :internal_ip_address, :type => String
   field :download_status, :type => String, default: "na"
   field :download_information, :type => String
   field :openstudio_datapoint_file_name, :type => String # make this paperclip?
-  field :status, :type => String # enum of queued, started, completed
+  field :status, :type => String, default: "na" # enum of queued, started, completed
   field :status_message, :type => String #results of the simulation
   field :eplus_html, :type => String, default: nil #Moped::BSON::Binary # ABUPS Summary
   field :output
