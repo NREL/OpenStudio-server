@@ -4,6 +4,7 @@ description "Install and configure OpenStudio for use with Ruby on Rails"
 run_list([
              # Default iptables setup on all servers.
              "role[base]",
+             "role[mongodb]",
              "role[ruby-worker]",
              #"role[web_base]",
              "role[r-project]",
