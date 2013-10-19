@@ -16,9 +16,6 @@
 [submodule "vagrant/chef/cookbooks/R"]
 	path = vagrant/chef/cookbooks/R
 	url = git@github.com:NREL-cookbooks/R.git
-[submodule "vagrant/chef/cookbooks/mongodb"]
-	path = vagrant/chef/cookbooks/mongodb
-	url = git@github.com:nllong/mongodb.git
 [submodule "vagrant/chef/cookbooks/ruby_build"]
 	path = vagrant/chef/cookbooks/ruby_build
 	url = git@github.com:NREL-cookbooks/chef-ruby_build.git
