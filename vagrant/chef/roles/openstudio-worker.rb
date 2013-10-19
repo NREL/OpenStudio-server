@@ -7,7 +7,7 @@ run_list([
              "role[ruby-worker]",
              #"role[web_base]",
              "role[r-project]",
-             "recipe[mongodb::server]",
+             "recipe[mongodb]",
              "role[openstudio]",
          ])
 
