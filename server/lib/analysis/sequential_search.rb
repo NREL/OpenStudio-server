@@ -64,8 +64,8 @@ class Analysis::SequentialSearch
       Rails.logger.info "Determining run list for iteration #{@iteration}"
       if @iteration == 0
         # run the baseline
-        Rails.logger.info "setting up to run just the baseline"
-        data_point_list << {variable_group: [], name: "Baseline", variables: {}, iteration: @iteration, sample: 1}
+        Rails.logger.info "setting up to run just the starting point"
+        data_point_list << {variable_group: [], name: "Starting Point", variables: {}, iteration: @iteration, sample: 1}
       elsif @iteration == 1
         # no need to look at anything, just return the array
         run_list = Analysis::SequentialSearch.mash_up_hash([], parameter_space)
@@ -73,30 +73,59 @@ class Analysis::SequentialSearch
       else
         pareto = []
         (0..@iteration).each do |iteration|
-          # Get the results for
-          min_x = nil
-          min_y = nil
-          min_point = nil
-
-          dps = @analysis.data_points.all.only(:results, :name, :variable_group_list, :uuid)
-          dps.each do |dp|
-            if dp.results && dp.results[@options[:x_objective_function]] && dp.results[@options[:y_objective_function]]
-              x = dp.results[@options[:x_objective_function]]
-              y = dp.results[@options[:y_objective_function]]
-              min_x ||= x
-              min_y ||= y
-              min_point ||= dp
-
-              new_dp = false
-              if x < min_x && y < min_y
-                min_x = x
-                min_y = y
-                new_dp = true
-              end
-
-              min_point = dp if new_dp
-              Rails.logger.info "datapoint has values of #{x} and #{y}"
+          if iteration == 0
+            # only one starting point for now, just set the value into the pareto list
+            min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
+            if min_point.size == 0
+              raise "could not find the starting point"
+            elsif min_point.size > 1
+              raise "found more than one datapoint for the initial iteration"
+            else
+              min_point = min_point.first
             end
+            Rails.logger.info "Using starting point named '#{min_point.name}'"
+          else
+            prev_min_point = pareto.last
+
+            # Initialize the variables to determine the next step
+            min_x = nil
+            min_y = nil
+            min_point = nil
+            slope = Float::MAX
+
+            # If we just iterate over every single datapoint, then there is no need for an index, other than
+            # the analysis_id index on datapoints. TODO: move some of this logic to the database if we index right.
+            dps = @analysis.data_points.all.only(:results, :name, :variable_group_list, :uuid)
+            dps.each do |dp|
+              if dp.results && dp.results[@options[:x_objective_function]] && dp.results[@options[:y_objective_function]]
+                x = dp.results[@options[:x_objective_function]]
+                y = dp.results[@options[:y_objective_function]]
+                Rails.logger.info "Evaluating datapoint #{dp.name} with x: #{x} y: #{y}"
+
+                # check for infinite slope (negative)
+                temp_slope = nil
+                if (x - min_point.results[@options[:y_objective_function]])
+                  temp_slope = Float::Min
+                else
+                  temp_slope = (y - min_point.results[@options[:y_objective_function]]) / (x - min_point.results[@options[:y_objective_function]])
+                end
+
+                if temp_slope < slope
+                  Rails.logger.info "Better point found for datapoint #{dp.name} with slope #{temp_slope}"
+                  slope = temp_slope
+                  min_point = dp
+                elsif temp_slope == slope
+                  Rails.logger.info "Datapoint has same slope as previous point #{dp.name}"
+                else
+                  Rails.logger.info "Slope was higher for #{dp.name}"
+                end
+
+                min_point = dp if min_point
+                Rails.logger.info "datapoint #{dp.name} was added to the pareto list"
+              end
+            end
+
+            # Now check for increasing y_objective_functions
 
           end
           pareto << min_point
@@ -213,9 +242,9 @@ class Analysis::SequentialSearch
         # So why does this work? It should hit run_analysis and it should come back as analysis is queued
         Rails.logger.info("kicking off simulations for iteration #{@iteration}")
         @analysis.start(true, 'batch_run', {skip_init: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"})
-        Rails.logger.info("finished simulations for iteration #{@iteration}... iterating")
       end
 
+      Rails.logger.info("finished simulations for iteration #{@iteration}... iterating")
       @iteration += 1
       @run_list = determine_run_list(parameter_space)
     end
