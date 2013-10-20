@@ -147,7 +147,6 @@ begin
               variable_name = wf_var['argument']['name']
 
               # get the value from the data point
-              ros.log_message data_point_json
               if data_point_json[:data_point]
                 if data_point_json[:data_point]['variable_values']
                   if data_point_json[:data_point]['variable_values'][variable_uuid]

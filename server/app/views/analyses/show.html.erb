@@ -53,6 +53,9 @@
     <th>Status</th>
     <th>Status Message</th>
     <th>EUI (MJ/m²)</th>
+    <% if @analysis.analysis_type == "sequential_search" %>
+        <th>2nd Obj Func</th>
+    <% end %>
     <th>Start Time (UTC)</th>
     <th>End Time (UTC)</th>
     <th>Delta Time (s)</th>
@@ -65,8 +68,11 @@
       <tr>
         <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
         <td> <%= dp.status %></td>
-        <td><%=  dp.status_message if dp.status_message %></td>
+        <td><%= dp.status_message if dp.status_message %></td>
         <td> <%= dp.results['net_site_energy_use_intentsity'] || dp.results['total_energy'] unless dp.results.nil? %> </td>
+        <% if @analysis.analysis_type == "sequential_search" %>
+            <td> <%= dp.results['interior_lighting_electricity'].round(2) if dp.results && dp.results['interior_lighting_electricity'] %> </td>
+        <% end %>
         <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
         <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
         <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
