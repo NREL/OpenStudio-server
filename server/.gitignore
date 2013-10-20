@@ -12,3 +12,6 @@
 
 # Ignore all logfiles and tempfiles.
 /log/*.log
+
+# ignore subfolders in tmp
+/tmp/*
