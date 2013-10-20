@@ -16,7 +16,7 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     @html = @data_point.eplus_html
-
+    
     respond_to do |format|
       format.html do
         exclude_fields = [:_id,:output,:password,:eplus_html,:values]
@@ -32,14 +32,14 @@ class DataPointsController < ApplicationController
 
         # gsub for some styling
         if !@html.nil?
-          @html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil).gsub!(/<head>|<body>/,"").gsub!(/<html>|<\/html>/,"").gsub!(/<\/head>|<\/body>/, "")
+          @html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil).gsub!(/<head>|<body>/, "").gsub!(/<html>|<\/html>/, "").gsub!(/<\/head>|<\/body>/, "")
           #@html.gsub!(/<table .*>/, '<div class="span8"><table id="datapointtable" class="tablesorter table table-striped">')
           #@html.gsub!(/<\/table>/, '</div></table>')
           #@html = @data_point.eplus_html
           #@html =  Zlib::Inflate.inflate(.to_s)
         end
       end
-      format.json { render json: @data_point.output  }
+      format.json { render json: @data_point.output }
       #format.json { render json: { :data_point => @data_point.output, :metadata =>  @data_point[:os_metadata] } }
     end
   end
@@ -74,11 +74,11 @@ class DataPointsController < ApplicationController
   def create
     analysis_id = params[:analysis_id]
     params[:data_point][:analysis_id] = analysis_id
-    
+
     # save off the metadata as a child of the analysis right now... eventually move analysis
     # underneath metadata
     params[:data_point].merge!(:os_metadata => params[:metadata])
-    
+
     @data_point = DataPoint.new(params[:data_point])
     @data_point.status = "queued"
 
@@ -89,6 +89,44 @@ class DataPointsController < ApplicationController
       else
         format.html { render action: "new" }
         format.json { render json: @data_point.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # POST batch_upload.json
+  def batch_upload
+    analysis_id = params[:analysis_id]
+    logger.info("parsing in a batched file upload")
+
+    uploaded_dps = 0
+    saved_dps = 0
+    error = false
+    error_message = ""
+    if params[:data_points]
+      uploaded_dps = params[:data_points].count
+      logger.info "received #{uploaded_dps} points"
+      params[:data_points].each do |dp|
+        # read in each datapoint
+        dp[:data_point].merge!(:os_metadata => dp[:metadata])
+        dp[:data_point][:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
+        dp.delete(:metadata) if dp.has_key?(:metadata)
+        @data_point = DataPoint.new(dp[:data_point])
+        @data_point.status = "queued"
+        if @data_point.save!
+          saved_dps += 1
+        else
+          error = true
+          error_message += "could not proccess #{@data_point.errors}"
+        end
+      end
+    end
+
+    respond_to do |format|
+      logger.info("error flag was set to #{error}")
+      if !error
+        format.json { render json: "Created #{saved_dps} datapoints from #{uploaded_dps} uploaded.", status: :created, location: @data_point }
+      else
+        format.json { render json: error_message, status: :unprocessable_entity }
       end
     end
   end

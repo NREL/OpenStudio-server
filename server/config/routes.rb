@@ -25,6 +25,9 @@ OpenstudioServer::Application.routes.draw do
           get :show_full
           get :download
         end
+        collection do
+          post :batch_upload
+        end
       end
     end
     #end
