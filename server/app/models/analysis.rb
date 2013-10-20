@@ -147,10 +147,16 @@ class Analysis
   end
 
   def stop_analysis
-    logger.info("stopping analysis")
-    self.run_flag = false
-    self.status = 'completed'
-    self.save!
+    logger.info("attempting to stop analysis")
+    # check if the project is running
+    if self.status == "queued" || self.status == "started"
+      self.run_flag = false
+      self.status = 'completed'
+      self.end_time = Time.now
+      # TODO: add a flag that this was killed
+    end
+
+    [self.save!, self.errors]
   end
 
   # copy back the results to the master node if they are finished

@@ -115,30 +115,30 @@ class AnalysesController < ApplicationController
       end
 
       respond_to do |format|
-        #  format.html # new.html.erb
-        format.json { render json: result }
         if result[:code] == 200
+          format.json { render json: result }
           format.html { redirect_to @analysis, notice: 'Analysis was started.' }
         else
+          format.json { render json: result }
           format.html { redirect_to @analysis, notice: 'Analysis was NOT started.' }
         end
       end
     elsif params[:analysis_action] == 'stop'
-      if @analysis.stop_analysis
+      res = @analysis.stop_analysis
+      if res[0]
         result[:code] = 200
         result[:analysis] = @analysis
       else
         result[:code] = 500
-        # TODO: save off the error
+        result[:error] = res[1]
       end
 
-
       respond_to do |format|
-        #  format.html # new.html.erb
-        format.json { render json: result }
         if result[:code] == 200
-          format.html { redirect_to @analysis, notice: 'Analysis flag changed to stop. Will wait until the last run finishes.' }
+          format.json { render json: result }
+          format.html { redirect_to @analysis, notice: 'Analysis flag changed to stop. Will wait until the last submitted run finishes before killing.' }
         else
+          format.json { render json: result }
           format.html { redirect_to @analysis, notice: 'Analysis flag did NOT change.' }
         end
       end
