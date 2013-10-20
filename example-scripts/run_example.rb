@@ -5,7 +5,7 @@ require 'faraday'
 HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=true
 ANALYSIS_TYPE="batch_run"
-STOP_AFTER_N=2 #set to nil if you want them all
+STOP_AFTER_N=nil #set to nil if you want them all
 #HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
 
 # Project data
@@ -114,6 +114,7 @@ if !analysis_id.nil?
 end
 
 # add all the datapoints to the analysis
+a = Time.now
 if !analysis_id.nil?
   d_n = 0
   datapoints.each do |dp|
@@ -136,8 +137,11 @@ if !analysis_id.nil?
     break if !STOP_AFTER_N.nil? && d_n >= STOP_AFTER_N
   end
 end
+b = Time.now
+puts "delta for data point push was #{b.to_f - a.to_f}"
 
 # run the analysis
+
 if !analysis_id.nil?
   # run the analysis
 
@@ -152,31 +156,13 @@ if !analysis_id.nil?
   #end
   #puts resp.status
 
-  resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
+  #resp = RestClient.post("#{HOSTNAME}/analyses/#{analysis_id}/action.json", action_hash, :timeout => 300)
   puts resp.inspect
 
   # check all the queued analyses for this project (eventually move this to all analyses)
   #puts "list of queued analyses"
   #resp = RestClient.get("#{HOSTNAME}/projects/#{project_id}/status.json?jobs=queued")
   #puts resp
-end
-
-exit
-
-# get the status of all the entire analysis
-if !analysis_id.nil?
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json")
-  puts "Data points (all): #{resp}"
-
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=running")
-  puts "Data points (running): #{resp}"
-
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=queued")
-  puts "Data points (queued): #{resp}"
-
-  resp = RestClient.get("#{HOSTNAME}/analyses/#{analysis_id}/status.json?jobs=complete")
-
-  puts "Data points (complete): #{resp}"
 end
 
 
