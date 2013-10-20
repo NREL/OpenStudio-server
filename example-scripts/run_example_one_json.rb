@@ -27,6 +27,3 @@ api.upload_datapoints(analysis_id, datapoint_options)
 
 run_options = {analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE}
 api.run_analysis(analysis_id, run_options)
-
-api.kill_analysis(analysis_id)
-
