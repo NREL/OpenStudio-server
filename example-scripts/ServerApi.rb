@@ -205,12 +205,11 @@ class ServerApi
     options = defaults.merge(options)
 
     puts "Run analysis is configured with #{options.to_json}"
-
     response = @conn.post do |req|
       req.url "analyses/#{analysis_id}/action.json"
       req.headers['Content-Type'] = 'application/json'
       req.body = options.to_json
-      req.options[:timeout] = 180 #seconds
+      req.options[:timeout] = 360 #seconds
     end
 
     if response.status == 200

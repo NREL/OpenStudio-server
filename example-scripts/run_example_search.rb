@@ -25,8 +25,8 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 run_options = {analysis_action: "start", without_delay: true, analysis_type: ANALYSIS_TYPE}
 api.run_analysis(analysis_id, run_options)
 
-run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run"}
-api.run_analysis(analysis_id, run_options)
+#run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run"}
+#api.run_analysis(analysis_id, run_options)
 
 #api.kill_analysis(analysis_id)
 
