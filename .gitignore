@@ -3,6 +3,4 @@
 .idea
 .ruby-version
 .DS_Store
-.Vagrantfile.swp
-server/public/assets/*
-launch-instance/aws.log
+*.swp
