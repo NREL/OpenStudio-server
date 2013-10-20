@@ -77,15 +77,16 @@ class Analysis::SequentialSearch
             # only one starting point for now, just set the value into the pareto list
             min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
             if min_point.size == 0
-              raise "could not find the starting point"
+              Rails.logger.info "could not find the starting point"
             elsif min_point.size > 1
-              raise "found more than one datapoint for the initial iteration"
+              Rails.logger.info "found more than one datapoint for the initial iteration"
             else
               min_point = min_point.first
             end
             Rails.logger.info "Using starting point named '#{min_point.name}'"
           else
             prev_min_point = pareto.last
+            puts "Previous min point was #{prev_min_point.name}"
 
             # Initialize the variables to determine the next step
             min_x = nil
@@ -97,17 +98,17 @@ class Analysis::SequentialSearch
             # the analysis_id index on datapoints. TODO: move some of this logic to the database if we index right.
             dps = @analysis.data_points.all.only(:results, :name, :variable_group_list, :uuid)
             dps.each do |dp|
-              if dp.results && dp.results[@options[:x_objective_function]] && dp.results[@options[:y_objective_function]]
-                x = dp.results[@options[:x_objective_function]]
-                y = dp.results[@options[:y_objective_function]]
+              if dp.results && dp.results[@analysis['x_objective_function']] && dp.results[@analysis['y_objective_function']]
+                x = dp.results[@analysis['x_objective_function']]
+                y = dp.results[@analysis['y_objective_function']]
                 Rails.logger.info "Evaluating datapoint #{dp.name} with x: #{x} y: #{y}"
 
                 # check for infinite slope (negative)
                 temp_slope = nil
-                if (x - min_point.results[@options[:y_objective_function]])
-                  temp_slope = Float::Min
+                if (x - prev_min_point.results[@analysis['y_objective_function']])
+                  temp_slope = Float::MIN
                 else
-                  temp_slope = (y - min_point.results[@options[:y_objective_function]]) / (x - min_point.results[@options[:y_objective_function]])
+                  temp_slope = (y - prev_min_point.results[@analysis['y_objective_function']]) / (x - prev_min_point.results[@analysis['x_objective_function']])
                 end
 
                 if temp_slope < slope
@@ -170,6 +171,8 @@ class Analysis::SequentialSearch
     @analysis.end_time = nil
     @analysis.run_flag = true
     @analysis['iteration'] = @iteration
+    @analysis['x_objective_function'] = @options[:x_objective_function]
+    @analysis['y_objective_function'] = @options[:y_objective_function]
 
     # Set this if not defined in the JSON
     @analysis.problem['random_seed'] ||= 1979

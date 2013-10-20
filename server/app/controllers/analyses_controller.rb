@@ -106,12 +106,13 @@ class AnalysesController < ApplicationController
     logger.info("action #{params.inspect}")
     params[:analysis_type].nil? ? @analysis_type = 'batch_run' : @analysis_type = params[:analysis_type]
 
+    logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
     options = {}
     options[:simulate_data_point_filename] = params[:simulate_data_point_filename] if params[:simulate_data_point_filename]
 
     result = {}
     if params[:analysis_action] == 'start'
-      params[:without_delay] == 'true' ? no_delay = true : no_delay = false
+      params[:without_delay].to_s == 'true' ? no_delay = true : no_delay = false
       res = @analysis.run_analysis(no_delay, @analysis_type, options)
       if res[0]
         result[:code] = 200
