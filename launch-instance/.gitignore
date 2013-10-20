@@ -2,6 +2,7 @@
 /*.pem
 /*.ppk
 ip_addresses
+aws.log
 worker_ips
 mongoid.yml
 slave_info.sh
