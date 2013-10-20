@@ -13,5 +13,8 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 
-# ignore subfolders in tmp
+# Ignore subfolders in tmp
 /tmp/*
+
+# Ignore all public assets
+/public/assets/*
