@@ -284,6 +284,7 @@ class AnalysesController < ApplicationController
     dps = nil
     if @analysis.analysis_type == "sequential_search"
       dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+      dps = dps.rotate(1) # put the starting point on top
     else
       dps = @analysis.data_points.all
     end
