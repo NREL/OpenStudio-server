@@ -106,10 +106,9 @@ class Analysis
     defaults = {skip_init: false}
     options = defaults.merge(options)
 
-    self.start_time = Time.now
-
-    # TODO need to check if the workers have been initialized, if so, then skip
+    # TODO need to also check if the workers have been initialized, if so, then skip
     if !options[:skip_init]
+      self.start_time = Time.now
       Rails.logger.info("Initializing workers in database")
       self.initialize_workers
 
@@ -118,7 +117,6 @@ class Analysis
       self.status = 'queued'
       self.save!
     end
-
 
     Rails.logger.info("Starting #{analysis_type}")
     # NL: This hash should really be put into the analysis job.  Not sure why we need to create this here.
