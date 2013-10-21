@@ -63,14 +63,14 @@
           d3.json("plot_data.json", function (error, data) {
               data['data'].forEach(function (d) {
                   d.total_energy = +d.total_energy;
-                  d.interior_lighting_electricity = +d.interior_lighting_electricity;
+                  d.total_life_cycle_cost = +d.total_life_cycle_cost;
               });
 
               x.domain(d3.extent(data['data'], function (d) {
                   return d.total_energy;
               })).nice();
               y.domain(d3.extent(data['data'], function (d) {
-                  return d.interior_lighting_electricity;
+                  return d.total_life_cycle_cost;
               })).nice();
 
               svg.append("g")
@@ -104,14 +104,14 @@
                           return x(d.total_energy);
                       })
                       .attr("cy", function (d) {
-                          return y(d.interior_lighting_electricity);
+                          return y(d.total_life_cycle_cost);
                       })
                       .style("fill",function (d) {
                           return color(d.iteration);
                       }).on("mouseover", function (d) {
                           return tooltip.style("visibility", "visible")
-                                  .text("Energy: " + d.total_energy.toFixed(2) +
-                                          " Lighting: " + d.interior_lighting_electricity.toFixed(2));
+                                  .text("X: " + d.total_energy.toFixed(2) +
+                                          " Y: " + d.total_life_cycle_cost.toFixed(2));
                       })
                       .on("mousemove", function () {
                           return tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");
