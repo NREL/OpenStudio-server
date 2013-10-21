@@ -122,7 +122,6 @@ rake db:purge
 rake db:mongoid:create_indexes
 rm -rf /mnt/openstudio
 sudo apt-get upgrade -y
-sudo shutdown -r now
 ```
 
 ### Worker Changes
@@ -136,7 +135,6 @@ sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh
 echo StrictHostKeyChecking no > .ssh/config
 sudo service ssh restart
 sudo apt-get upgrade -y
-sudo shutdown -r now
 ```
 
 ### Final Changes
@@ -171,6 +169,9 @@ rm -f /data/worker-nodes/README.md
 rm -f /data/worker-nodes/rails-models/mongoid-vagrant.yml
 rm -rf /var/chef
 cat /dev/null > ~/.bash_history && history -c
+apt-get clean
+
+sudo shutdown -r now
 ```
 
 - login to AWS and take a snapshot of the image
