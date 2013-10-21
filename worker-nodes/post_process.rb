@@ -4,9 +4,13 @@ require 'csv'
 require 'json'
 
 #sql_query method
-def sql_query(sql, query)
-  val = sql.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='AnnualBuildingUtilityPerformanceSummary' AND #{query}").get
-  return val
+def sql_query(sql, report_name, query)
+  val = nil
+  result = sql.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND #{query}")
+  if result
+    val = result.get
+  end
+  val
 end
 
 def add_element(hash, var_name, value, xpath = nil)
@@ -40,7 +44,7 @@ end
 def add_data(sql, query, hdr, area, val)
   row = []
   if val == nil
-    val = sql_query(sql, query)
+    val = sql_query(sql, "AnnualBuildingUtilityPerformanceSummary", query)
   end
   row << hdr
   if area == nil
@@ -56,7 +60,7 @@ begin
   sql_file = OpenStudio::SqlFile.new(OpenStudio::Path.new("eplusout.sql"))
 
   #get building area
-  bldg_area = sql_query(sql_file, "TableName='Building Area' AND RowName='Net Conditioned Building Area' AND ColumnName='Area'")
+  bldg_area = sql_query(sql_file, "AnnualBuildingUtilityPerformanceSummary", "TableName='Building Area' AND RowName='Net Conditioned Building Area' AND ColumnName='Area'")
   #populate data array
 
   tbl_data = []
@@ -79,12 +83,14 @@ begin
   tbl_data << add_data(sql_file, "TableName='End Uses' AND RowName='Water Systems' AND ColumnName='Electricity'", "Water Systems Electricity (MJ/m2)", bldg_area, nil)
   tbl_data << add_data(sql_file, "TableName='End Uses' AND RowName='Water Systems' AND ColumnName='Natural Gas'", "Water Systems Natural Gas (MJ/m2)", bldg_area, nil)
   tbl_data << add_data(sql_file, "TableName='End Uses' AND RowName='Refrigeration' AND ColumnName='Electricity'", "Refrigeration Electricity (MJ/m2)", bldg_area, nil)
-  htg_hrs = sql_query(sql_file, "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Heating' AND ColumnName='Facility'")
-  clg_hrs = sql_query(sql_file, "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Cooling' AND ColumnName='Facility'")
+  htg_hrs = sql_query(sql_file, "AnnualBuildingUtilityPerformanceSummary", "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Heating' AND ColumnName='Facility'")
+  clg_hrs = sql_query(sql_file, "AnnualBuildingUtilityPerformanceSummary", "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Cooling' AND ColumnName='Facility'")
   tot_hrs = htg_hrs + clg_hrs
   tbl_data << add_data(sql_file, nil, "Heating Hours Unmet (hr)", nil, htg_hrs)
   tbl_data << add_data(sql_file, nil, "Cooling Hours Unmet (hr)", nil, clg_hrs)
   tbl_data << add_data(sql_file, nil, "Total Hours Unmet (hr)", nil, tot_hrs)
+  total_cost = sql_query(sql_file, "Life-Cycle Cost Report", "TableName='Present Value by Category' AND RowName='Grand Total' AND ColumnName='Present Value'")
+  tbl_data << add_data(sql_file, nil, "Total Life Cycle Cost ($)", nil, total_cost)
   #close SQL file
   sql_file.close
   #transpose data

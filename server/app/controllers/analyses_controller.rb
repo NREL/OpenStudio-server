@@ -59,7 +59,7 @@ class AnalysesController < ApplicationController
     @analysis.pull_out_os_variables()
 
     respond_to do |format|
-      if @analysis.save
+      if @analysis.save!
         format.html { redirect_to @analysis, notice: 'Analysis was successfully created.' }
         format.json { render json: @analysis, status: :created, location: @analysis }
       else
@@ -109,11 +109,13 @@ class AnalysesController < ApplicationController
     logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
     options = {}
     options[:simulate_data_point_filename] = params[:simulate_data_point_filename] if params[:simulate_data_point_filename]
+    options[:x_objective_function] = @analysis['x_objective_function'] if @analysis['x_objective_function']
+    options[:y_objective_function] = @analysis['y_objective_function'] if @analysis['y_objective_function']
 
-    result = {}
     if params[:analysis_action] == 'start'
       params[:without_delay].to_s == 'true' ? no_delay = true : no_delay = false
       res = @analysis.run_analysis(no_delay, @analysis_type, options)
+      result = {}
       if res[0]
         result[:code] = 200
         result[:analysis] = @analysis
@@ -300,6 +302,7 @@ class AnalysesController < ApplicationController
         # outputs
         dp_values["total_energy"] = dp['results']['total_energy']
         dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity']
+        dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
         dp_values["iteration"] = dp["iteration"] if dp["iteration"]
 
         @plot_data << dp_values
