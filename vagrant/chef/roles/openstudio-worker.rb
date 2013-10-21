@@ -14,6 +14,7 @@ run_list([
 
 override_attributes(
     :R => {
-        :rserve_start_on_boot => false
+        :rserve_start_on_boot => false,
+        :build_from_source => false
     }
 )
