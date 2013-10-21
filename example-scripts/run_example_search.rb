@@ -6,7 +6,7 @@ HOSTNAME = "http://localhost:8080"
 ANALYSIS_TYPE="sequential_search"
 STOP_AFTER_N=nil  #set to nil if you want them all
 
-formulation_file = "./ContinuousExample/analysis_discrete_small.json"
+formulation_file = "./ContinuousExample/analysis_discrete.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
 
 options = {hostname: HOSTNAME}

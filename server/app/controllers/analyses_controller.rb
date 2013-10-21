@@ -255,6 +255,14 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def plot_xy
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      format.html # results_scatter.html.erb
+    end
+  end
+
   def plot_data
     @analysis = Analysis.find(params[:id])
 
@@ -273,7 +281,13 @@ class AnalysesController < ApplicationController
     # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
     # and this is just an ugly mapping, sorry all.
     @plot_data = []
-    @analysis.data_points.each do |dp|
+    dps = nil
+    if @analysis.analysis_type == "sequential_search"
+      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+    else
+      dps = @analysis.data_points.all
+    end
+    dps.each do |dp|
       if dp['results']
         dp_values = {}
 
@@ -285,6 +299,7 @@ class AnalysesController < ApplicationController
         # outputs
         dp_values["total_energy"] = dp['results']['total_energy']
         dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity']
+        dp_values["iteration"] = dp["iteration"] if dp["iteration"]
 
         @plot_data << dp_values
       end

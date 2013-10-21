@@ -209,7 +209,7 @@ class ServerApi
       req.url "analyses/#{analysis_id}/action.json"
       req.headers['Content-Type'] = 'application/json'
       req.body = options.to_json
-      req.options[:timeout] = 360 #seconds
+      req.options[:timeout] = 1800 #seconds
     end
 
     if response.status == 200

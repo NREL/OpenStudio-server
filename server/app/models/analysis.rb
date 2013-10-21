@@ -130,7 +130,6 @@ class Analysis
       dp.save!
       data_points_array << dp.uuid
     end
-    Rails.logger.info("Data point hash is #{data_points_array}")
 
     options[:data_points] = data_points_array
     if no_delay
