@@ -84,19 +84,28 @@ class Analysis::BatchRun < Struct.new(:options)
           stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
         }
         sfSetMaxCPUs(nrow(ips))
+        uniqueips <- unique(ips)
+        numunique <- nrow(uniqueips) * 20
+        print("max timeout is:")
+        print(numunique)
         timeflag <<- TRUE;
         res <- NULL;
-	      tryCatch({
-	        res <- evalWithTimeout({
-	          sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
-	          }, timeout=60);
-	        }, TimeoutException=function(ex) {
-	          cat("#{@analysis.id} Timeout\n");
-	          timeflag <<- FALSE;
-	          file.create('rtimeout')
-	          stop
-        })
-      }
+	starttime <- Sys.time()
+	 tryCatch({
+           res <- evalWithTimeout({
+            sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
+            }, timeout=numunique);
+            }, TimeoutException=function(ex) {
+              cat("#{@analysis.id} Timeout\n");
+              timeflag <<- FALSE;
+              file.create('rtimeout') 
+              stop
+          })
+        endtime <- Sys.time()
+	timetaken <- endtime - starttime
+        print("R cluster startup time:")
+        print(timetaken)
+        }
     end
 
     timeflag = @r.converse("timeflag")
