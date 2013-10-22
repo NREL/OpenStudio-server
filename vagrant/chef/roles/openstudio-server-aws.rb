@@ -26,7 +26,7 @@ default_attributes(
 override_attributes(
     :R => {
         :rserve_start_on_boot => true,
-        :build_from_source => false,
+        :build_from_source => true,
         :rserve_user => "ubuntu",
         :rserve_log_path => "/var/www/rails/openstudio/log/Rserve.log"
     }

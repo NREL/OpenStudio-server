@@ -10,7 +10,7 @@ run_list([
 
 default_attributes(
     :mongodb => {
-        :package_version => "2.4.6",
+        :package_version => "2.4.7",
         :dbpath => "/mnt/mongodb/data"
     }
 )
