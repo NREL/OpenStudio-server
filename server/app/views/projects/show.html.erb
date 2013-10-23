@@ -2,24 +2,29 @@
 
 <h1>Analyses</h1>
 
-<table class="table table-striped">
-  <tr>
-    <th>Name</th>
-    <th>View</th>
-    <th>Action</th>
-  </tr>
-  <% @project.analyses.each do |analysis| %>
+<% if !@project %>
+    <p>No project found thus no analyses listed</p>
+<% else %>
+
+
+    <table class="table table-striped">
       <tr>
-        <td><%= link_to analysis.name, analysis_path(analysis) %></td>
-        <td><%= link_to 'HTML', analysis_path(analysis) %>
-          | <%= link_to 'JSON', analysis_path(analysis, :format => :json) %></td>
-        <td><%= link_to 'Destroy', analysis, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+        <th>Name</th>
+        <th>View</th>
+        <th>Action</th>
       </tr>
-  <% end %>
-</table>
+      <% @project.analyses.each do |analysis| %>
+          <tr>
+            <td><%= link_to analysis.name, analysis_path(analysis) %></td>
+            <td><%= link_to 'HTML', analysis_path(analysis) %>
+              | <%= link_to 'JSON', analysis_path(analysis, :format => :json) %></td>
+            <td><%= link_to 'Destroy', analysis, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+          </tr>
+      <% end %>
+    </table>
 
 
 
-<br/>
+    <br/>
 
-<%= link_to 'Back', projects_path %>
+<% end %>

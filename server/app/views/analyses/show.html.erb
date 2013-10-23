@@ -6,83 +6,88 @@
 -->
 
 <h1>Analysis Information</h1>
-<table class="table table-striped">
-  <thead>
-  <tr>
-    <th>Name</th>
-    <th>Type</th>
-    <th>Status</th>
-    <th>Start Time (UTC)</th>
-    <th>End Time (UTC)</th>
-    <th>Delta Time (s)</th>
-    <th>View</th>
-  <tr>
-  </thead>
-  <tbody>
-  <td><%= @analysis.name %></td>
-  <td><%= @analysis.analysis_type %></td>
-  <td><%= @analysis.status %></td>
 
-  <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
-  <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>
-  <td><%= (@analysis.end_time.to_f - @analysis.start_time.to_f).round(2) unless @analysis.end_time.nil? || @analysis.start_time.nil? %></td>
-  <td><%= link_to 'JSON', analysis_path(@analysis, :format => :json) %>
-    | <%= link_to_if(!@analysis.seed_zip.nil?, "Zip File", @analysis.seed_zip.url(:original, false)) %> </td>
-  </tbody>
-</table>
-
-<%= link_to 'List of Measures', analysis_measures_path(@analysis) %> |
-<%= link_to 'List of Variables', analysis_variables_path(@analysis) %> |
-<%= link_to 'View Results', results_analysis_path(@analysis) %> |
-<%= link_to 'View Scatter Plot', results_scatter_analysis_path(@analysis) %> |
-<%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) %> |
-<%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
-
-
-<h1>Data Points (<%= @analysis.data_points.count if @analysis.data_points %>) </h1>
-<script>
-    $(document).ready(function () {
-                $("#datapointtable").tablesorter();
-            }
-    );
-
-</script>
-<table id="datapointtable" class="tablesorter table table-striped">
-  <thead>
-  <tr>
-    <th>Name</th>
-    <th>Status</th>
-    <th>Status Message</th>
-    <th>EUI (MJ/m²)</th>
-    <% if @analysis.analysis_type == "sequential_search" %>
-        <th>2nd Obj Func</th>
-    <% end %>
-    <th>Start Time (UTC)</th>
-    <th>End Time (UTC)</th>
-    <th>Delta Time (s)</th>
-    <th>View</th>
-    <th>Action</th>
-  </tr>
-  </thead>
-  <tbody>
-  <% @analysis.data_points.order_by(:run_start_time.desc, :name.asc).each do |dp| %>
+<% if !@analysis %>
+    <p>No analysis information found</p>
+<% else %>
+    <table class="table table-striped">
+      <thead>
       <tr>
-        <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
-        <td> <%= dp.status %></td>
-        <td><%= dp.status_message if dp.status_message %></td>
-        <td> <%= dp.results['net_site_energy_use_intentsity'] || dp.results['total_energy'] unless dp.results.nil? %> </td>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Start Time (UTC)</th>
+        <th>End Time (UTC)</th>
+        <th>Delta Time (s)</th>
+        <th>View</th>
+      <tr>
+      </thead>
+      <tbody>
+      <td><%= @analysis.name %></td>
+      <td><%= @analysis.analysis_type %></td>
+      <td><%= @analysis.status %></td>
+
+      <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
+      <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>
+      <td><%= (@analysis.end_time.to_f - @analysis.start_time.to_f).round(2) unless @analysis.end_time.nil? || @analysis.start_time.nil? %></td>
+      <td><%= link_to 'JSON', analysis_path(@analysis, :format => :json) %>
+        | <%= link_to_if(!@analysis.seed_zip.nil?, "Zip File", @analysis.seed_zip.url(:original, false)) %> </td>
+      </tbody>
+    </table>
+
+    <%= link_to 'List of Measures', analysis_measures_path(@analysis) %> |
+    <%= link_to 'List of Variables', analysis_variables_path(@analysis) %> |
+    <%= link_to 'View Results', results_analysis_path(@analysis) %> |
+    <%= link_to 'View Scatter Plot', results_scatter_analysis_path(@analysis) %> |
+    <%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) %> |
+    <%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
+
+
+    <h1>Data Points (<%= @analysis.data_points.count if @analysis.data_points %>) </h1>
+    <script>
+        $(document).ready(function () {
+                    $("#datapointtable").tablesorter();
+                }
+        );
+
+    </script>
+    <table id="datapointtable" class="tablesorter table table-striped">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Status Message</th>
+        <th>EUI (MJ/m²)</th>
         <% if @analysis.analysis_type == "sequential_search" %>
-            <td> <%= dp.results[@analysis['y_objective_function']].round(2) if @analysis['y_objective_function'] && dp.results && dp.results[@analysis['y_objective_function']] %></td>
+            <th>2nd Obj Func</th>
         <% end %>
-        <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
-        <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
-        <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
-        <td><%= link_to 'HTML', data_point_path(dp) %>
-          | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
-          | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
-          | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
-        <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+        <th>Start Time (UTC)</th>
+        <th>End Time (UTC)</th>
+        <th>Delta Time (s)</th>
+        <th>View</th>
+        <th>Action</th>
       </tr>
-  <% end %>
-  </tbody>
-</table>
+      </thead>
+      <tbody>
+      <% @analysis.data_points.order_by(:run_start_time.desc, :name.asc).each do |dp| %>
+          <tr>
+            <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
+            <td> <%= dp.status %></td>
+            <td><%= dp.status_message if dp.status_message %></td>
+            <td> <%= dp.results['net_site_energy_use_intentsity'] || dp.results['total_energy'] unless dp.results.nil? %> </td>
+            <% if @analysis.analysis_type == "sequential_search" %>
+                <td> <%= dp.results[@analysis['y_objective_function']].round(2) if @analysis['y_objective_function'] && dp.results && dp.results[@analysis['y_objective_function']] %></td>
+            <% end %>
+            <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
+            <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
+            <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
+            <td><%= link_to 'HTML', data_point_path(dp) %>
+              | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
+              | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
+              | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
+            <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% end %>
