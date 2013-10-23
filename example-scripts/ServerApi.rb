@@ -110,22 +110,38 @@ class ServerApi
 
     formulation_json = JSON.parse(File.read(options[:formulation_file]), :symbolize_names => true)
 
-
     # read in the analysis id from the analysis.json file
     analysis_id = nil
     if options[:reset_uuids]
       analysis_id = UUID.new.generate
       formulation_json[:analysis][:uuid] = analysis_id
+
+      formulation_json[:analysis][:problem][:workflow].each do |wf|
+        wf[:uuid] = UUID.new.generate
+        if wf[:arguments]
+          wf[:arguments].each do |arg|
+            arg[:uuid] = UUID.new.generate
+          end
+        end
+        if wf[:variables]
+          wf[:variables].each do |var|
+            var[:uuid] = UUID.new.generate
+            if var[:argument]
+              var[:argument][:uuid] = UUID.new.generate
+            end
+          end
+        end
+      end
     else
       analysis_id = formulation_json[:analysis][:uuid]
     end
     raise "No analysis id defined in analyis.json #{options[:formulation_file]}" if analysis_id.nil?
 
-      # set the analysis name
+    # set the analysis name
     formulation_json[:analysis][:name] = "#{options[:analysis_name]}"
 
     # save out this file to compare
-    #File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
+    File.open('formulation_merge.json', 'w') { |f| f << JSON.pretty_generate(formulation_json) }
 
     response = @conn.post do |req|
       req.url "projects/#{project_id}/analyses.json"

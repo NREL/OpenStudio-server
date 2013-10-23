@@ -14,20 +14,20 @@ project_id = api.new_project(project_options)
 
 
 # ===== Disk IO Benchmark =====
-formulation_file = "./DiskIOBenchmark/analysis.json"
-analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
-datapoint_files = Dir.glob("./DiskIOBenchmark/datapoint*.json").take(2)
-
-analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
-                    reset_uuids: true, analysis_name: "DiskIOBenchmark Batch Run 2 - simulations"}
-analysis_id = api.new_analysis(project_id, analysis_options)
-
-datapoint_files.each do |dp|
-  datapoint_options = {datapoint_file: dp, reset_uuids: true}
-  api.upload_datapoint(analysis_id, datapoint_options)
-end
-
-#run_options = {analysis_action: "start", without_delay: false, analysis_type: batch_run}
+#formulation_file = "./DiskIOBenchmark/analysis.json"
+#analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
+#datapoint_files = Dir.glob("./DiskIOBenchmark/datapoint*.json").take(2)
+#
+#analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
+#                    reset_uuids: true, analysis_name: "DiskIOBenchmark Batch Run 2 - simulations"}
+#analysis_id = api.new_analysis(project_id, analysis_options)
+#
+#datapoint_files.each do |dp|
+#  datapoint_options = {datapoint_file: dp, reset_uuids: true}
+#  api.upload_datapoint(analysis_id, datapoint_options)
+#end
+#
+#run_options = {analysis_action: "start", without_delay: false, analysis_type: 'batch_run'}
 #api.run_analysis(analysis_id, run_options)
 
 
