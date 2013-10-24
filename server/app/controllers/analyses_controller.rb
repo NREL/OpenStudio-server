@@ -137,6 +137,7 @@ class AnalysesController < ApplicationController
       end
     elsif params[:analysis_action] == 'stop'
       res = @analysis.stop_analysis
+      result = {}
       if res[0]
         result[:code] = 200
         result[:analysis] = @analysis
