@@ -41,9 +41,9 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 # Run the LHS -- note that this has to run in the foreground until we move the "get datapoints to run"
 # inside of the batch_run method
-run_options = {analysis_action: "start", without_delay: true, analysis_type: "lhs"}
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "lhs", allow_multiple_jobs: true}
 api.run_analysis(analysis_id, run_options)
 
-#run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run"}
-#api.run_analysis(analysis_id, run_options)
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
+api.run_analysis(analysis_id, run_options)
 

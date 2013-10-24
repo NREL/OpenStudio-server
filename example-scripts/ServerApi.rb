@@ -260,7 +260,7 @@ class ServerApi
     if response.status == 200
       puts "Killed analysis #{analysis_id}"
     else
-      raise "Could not kill the analysis with response of #{response.inspect}"
+      #raise "Could not kill the analysis with response of #{response.inspect}"
     end
 
   end

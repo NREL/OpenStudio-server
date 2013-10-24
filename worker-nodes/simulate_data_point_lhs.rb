@@ -88,11 +88,11 @@ begin
 
   # copy the file to the run directory and run
   # removing all the files that may have been there.
-  FileUtils.copy("/mnt/openstudio/run_openstudio_lhs.rb", "#{directory}/run_openstudio.rb")
+  FileUtils.copy("/mnt/openstudio/run_openstudio_lhs.rb", "#{directory}/run_openstudio_lhs.rb")
   FileUtils.copy("/mnt/openstudio/run_energyplus.rb", "#{directory}/run_energyplus.rb")
 
   # call the run openstudio script
-  command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/:#{File.dirname(__FILE__)} #{directory}/run_openstudio.rb -u #{options[:uuid]} -d #{directory} -r AWS "
+  command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/:#{File.dirname(__FILE__)} #{directory}/run_openstudio_lhs.rb -u #{options[:uuid]} -d #{directory} -r AWS "
   ros.log_message command, true
   result = `#{command}`
 
