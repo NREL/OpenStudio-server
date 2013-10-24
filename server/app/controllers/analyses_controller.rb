@@ -215,7 +215,7 @@ class AnalysesController < ApplicationController
 
     exclude_fields = [:_id, :user, :password]
     @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(:except => exclude_fields) }
-    @server = ComputeNode.where(node_type: 'server').first
+    @server = ComputeNode.where(node_type: 'server').first.as_json(:expect => exclude_fields)
 
     respond_to do |format|
       format.html # debug_log.html.erb
