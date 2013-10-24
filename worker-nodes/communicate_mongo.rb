@@ -15,7 +15,7 @@ module CommunicateMongo
     if Socket.gethostname =~ /os-.*/
       # Maybe use this in the future: /sbin/ifconfig eth1|grep inet|head -1|sed 's/\:/ /'|awk '{print $3}'
       # Must be on vagrant and just use the hostname to do a lookup
-      map = {"os-worker-1" => "192.168.33.11", "os-worker-2" => "192.168.33.12"}
+      map = {"os-server" => "192.168.33.10", "os-worker-1" => "192.168.33.11", "os-worker-2" => "192.168.33.12"}
       dp.ip_address = map[Socket.gethostname]
       dp.internal_ip_address = dp.ip_address
     else

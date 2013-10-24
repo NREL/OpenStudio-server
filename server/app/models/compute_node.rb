@@ -22,8 +22,8 @@ class ComputeNode
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
 
-    ComputeNode.where(:node_type => "worker").each do |wn|
-      (1..wn.cores).each { |i| worker_ips_hash[:worker_ips] << wn.ip_address }
+    ComputeNode.where(valid: true).each do |node|
+      (1..node.cores).each { |i| worker_ips_hash[:worker_ips] << node.ip_address }
     end
     Rails.logger.info("worker ip hash: #{worker_ips_hash}")
 

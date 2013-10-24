@@ -44,6 +44,6 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 run_options = {analysis_action: "start", without_delay: false, analysis_type: "lhs", allow_multiple_jobs: true}
 api.run_analysis(analysis_id, run_options)
 
-run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
 api.run_analysis(analysis_id, run_options)
 
