@@ -7,8 +7,7 @@
     <th>Measure Type</th>
     <th>Description</th>
     <th>Arguments</th>
-    <th>Variable</th>
-    <th>Value Instances</th>
+    <th>Variables</th>
   <tr>
   </thead>
   <tbody>
@@ -27,7 +26,6 @@
               <%= link_to var.name, variable_path(var) %></br>
           <% end %>
         </td>
-        <td><%= measure.values if measure.values %></td>
       </tr>
   <% end %>
   </tbody>

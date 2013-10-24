@@ -244,7 +244,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  def results
+  def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
@@ -252,7 +252,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  def results_scatter
+  def plot_scatter
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|

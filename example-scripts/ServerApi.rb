@@ -141,7 +141,7 @@ class ServerApi
     formulation_json[:analysis][:name] = "#{options[:analysis_name]}"
 
     # save out this file to compare
-    File.open('formulation_merge.json', 'w') { |f| f << JSON.pretty_generate(formulation_json) }
+    #File.open('formulation_merge.json', 'w') { |f| f << JSON.pretty_generate(formulation_json) }
 
     response = @conn.post do |req|
       req.url "projects/#{project_id}/analyses.json"
