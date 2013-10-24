@@ -12,7 +12,7 @@ class Analysis
   field :display_name, :type => String
   field :description, :type => String
   field :run_flag, :type => Boolean
-  field :delayed_job_id # ObjectId
+  field :delayed_job_ids, :type => Array, default: []
   field :status, :type => String
   field :analysis_type, :type => String
   field :analysis_output, :type => Array
@@ -112,7 +112,7 @@ class Analysis
       Rails.logger.info("Initializing workers in database")
       self.initialize_workers
 
-      Rails.logger.info("Queuing up analysis #{@analysis}")
+      Rails.logger.info("Queuing up analysis #{self.uuid}")
       self.analysis_type = analysis_type
       self.status = 'queued'
       self.save!
@@ -131,32 +131,37 @@ class Analysis
 
     options[:data_points] = data_points_array
     if no_delay
+      Rails.logger.info("Running in foreground analysis for #{self.uuid} with #{analysis_type}")
       abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options)
       abr.perform
     else
+      Rails.logger.info("Running in delayed jobs analysis for #{self.uuid} with #{analysis_type}")
       job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options), :queue => 'analysis'
-      self.delayed_job_id = job.id
+      self.delayed_job_ids << job.id
       self.save!
     end
   end
 
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    defaults = {}
+    defaults = {allow_multiple_jobs: false}
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
-    Rails.logger.info("running analysis of type #{analysis_type}")
+    Rails.logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
-    self.delayed_job_id.nil? ? dj = nil : dj = Delayed::Job.find(self.delayed_job_id)
-
-    if dj || self.status == "queued" || self.status == "started"
-      logger.info("analysis is already queued with #{dj}")
-      return [false, "An analysis is already queued"]
-    else
+    if options[:allow_multiple_jobs]
+      # go ahead and submit the job no matter what
       self.start(no_delay, analysis_type, options)
 
       return [true]
+    elsif self.delayed_job_ids.empty? || !Delayed::job.where(:_id.in => self.delayed_job_ids).exist? || self.status != "queued" || self.status != "started"
+      self.start(no_delay, analysis_type, options)
+
+      return [true]
+    else
+      Rails.logger.info("Analysis is already queued with #{dj} and option was not passed to allow multiple analyses")
+      return [false, "An analysis is already queued"]
     end
   end
 
@@ -254,9 +259,11 @@ class Analysis
     end
 
     # delete any delayed jobs items
-    if self.delayed_job_id
-      dj = Delayed::Job.find(self.delayed_job_id)
-      dj.delete unless dj.nil?
+    if self.delayed_job_ids
+      self.delayed_job_ids.each do |djid|
+        dj = Delayed::Job.find(djid)
+        dj.delete unless dj.nil?
+      end
     end
   end
 

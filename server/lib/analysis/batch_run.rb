@@ -1,7 +1,10 @@
-class Analysis::BatchRun < Struct.new(:options)
-  def initialize(analysis_id, data_points)
+class Analysis::BatchRun
+  def initialize(analysis_id, options = {})
+    defaults = {simulate_data_point_filename: "simulate_data_point.rb"}
+    @options = defaults.merge(options)
+
+
     @analysis_id = analysis_id
-    @data_points = data_points
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -41,6 +44,17 @@ class Analysis::BatchRun < Struct.new(:options)
     # that the run flag is true.
 
 
+    if @options[:data_points].nil? || @options[:data_points].empty?
+      Rails.logger.info "No datapoints were passed into the options, therefore checking which datapoints to run"
+      @options[:data_points] = []
+      @analysis.data_points.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid).each do |dp|
+        Rails.logger.info "Adding in #{dp.uuid}"
+        dp.status = 'queued'
+        dp.save!
+        @options[:data_points] << dp.uuid
+      end
+    end
+
     @r.command() do
       %Q{
         ip <- "#{master_ip}"
@@ -74,9 +88,10 @@ class Analysis::BatchRun < Struct.new(:options)
 
     good_ips = WorkerNode.where(valid: true) # TODO: make this a scope
     @analysis.analysis_output = []
-    @analysis.analysis_output << "good_ips = #{good_ips.to_json}"
+    @analysis.analysis_output << "good_ips = #{good_ips.to_hash}"
+    Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
 
-    @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+    @r.command(ips: good_ips.to_hash.to_dataframe) do
       %Q{
         print(ips)
         if (nrow(ips) == 0) {
@@ -111,7 +126,7 @@ class Analysis::BatchRun < Struct.new(:options)
 
     Rails.logger.info ("Time flag was set to #{timeflag}")
     if timeflag
-      @r.command(ips: good_ips.to_hash.to_dataframe, dps: @data_points.to_dataframe) do
+      @r.command(dps: {data_points: @options[:data_points]}.to_dataframe) do
         %Q{
           print("Size of cluster is:")
           print(sfCpus())
@@ -128,9 +143,9 @@ class Analysis::BatchRun < Struct.new(:options)
 
             print("#{@analysis.use_shm}")
             if ("#{@analysis.use_shm}" == "true"){
-              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
+              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@options[:simulate_data_point_filename]} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
             } else {
-              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/simulate_data_point.rb -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@options[:simulate_data_point_filename]} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
             }
             z <- system(y,intern=TRUE)
             j <- length(z)
