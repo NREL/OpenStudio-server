@@ -3,7 +3,6 @@ class Analysis::BatchRun
     defaults = {simulate_data_point_filename: "simulate_data_point.rb"}
     @options = defaults.merge(options)
 
-
     @analysis_id = analysis_id
   end
 
@@ -107,7 +106,7 @@ class Analysis::BatchRun
 	      starttime <- Sys.time()
 	      tryCatch({
            res <- evalWithTimeout({
-            sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
+            sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/snowfall.log");
             }, timeout=numunique);
             }, TimeoutException=function(ex) {
               cat("#{@analysis.id} Timeout\n");

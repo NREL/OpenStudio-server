@@ -73,46 +73,62 @@ class DataPoint
       self.save_results_from_openstudio_json
 
       # Somehow flag that we don't care about downloading the results back to the home directory
-
       Rails.logger.info "trying to download #{self.id}"
       save_filename = nil
       remote_file_exists = false
 
       #look up the worker nodes ip address from database
-      wn_ip = ComputeNode.where(ip_address: self.ip_address).first
-      if !wn_ip.nil?
-        Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
-          #Rails.logger.info(self.inspect)
+      node = ComputeNode.where(ip_address: self.ip_address).first
+      if !node.nil?
+        if node.node_type == 'server'
 
-          # Regardless of SHM, the data points will be copied back to /mnt/openstudio (or somewhere else on RedMesa)
+          # no need to download the data, just move a file
           remote_file_path = "/mnt/openstudio"
           remote_filename = "#{remote_file_path}/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
           save_filename = "#{remote_file_path}/data_point_#{self.id}.zip"
 
-          Rails.logger.info "Checking if the remote file exists"
-          session.exec!("if [ -e '#{remote_filename}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |channel, stream, data|
-            Rails.logger.info("check remote file data is #{data}")
-            if data == 'true'
-              remote_file_exists = true
-            end
+          Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{save_filename}"
+          if File.exists?(remote_filename)
+            remote_file_exists = true
+            FileUtils.mv(remote_filename, save_filename, :force => true)
+          else
+            Rails.logger.info "#{remote_filename} did not exist"
+            save_filename = nil
           end
-          session.loop
+        else
+          Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
+            #Rails.logger.info(self.inspect)
 
-          Rails.logger.info "remote file exists flag is #{remote_file_exists} for #{remote_filename}"
-          if remote_file_exists
-            Rails.logger.info "Trying to download #{remote_filename} to #{save_filename}"
-            if !session.scp.download!(remote_filename, save_filename)
-              save_filename = nil
-              Rails.logger.info "ERROR trying to download datapoint from remote server"
+            # Regardless of SHM, the data points will be copied back to /mnt/openstudio (or somewhere else on RedMesa)
+            remote_file_path = "/mnt/openstudio"
+            remote_filename = "#{remote_file_path}/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
+            save_filename = "#{remote_file_path}/data_point_#{self.id}.zip"
+
+            Rails.logger.info "Checking if the remote file exists"
+            session.exec!("if [ -e '#{remote_filename}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |channel, stream, data|
+              Rails.logger.info("check remote file data is #{data}")
+              if data == 'true'
+                remote_file_exists = true
+              end
             end
+            session.loop
 
-            #TODO test the deletion of the zip file
-            #session.exec!( "cd #{remote_file_path} && rm -f #{remote_filename}" ) do |channel, stream, data|
-            #  logger.info(data)
-            #end
-            #session.loop
-          end
-        end #session
+            Rails.logger.info "remote file exists flag is #{remote_file_exists} for #{remote_filename}"
+            if remote_file_exists
+              Rails.logger.info "Trying to download #{remote_filename} to #{save_filename}"
+              if !session.scp.download!(remote_filename, save_filename)
+                save_filename = nil
+                Rails.logger.info "ERROR trying to download datapoint from remote server"
+              end
+
+              #TODO test the deletion of the zip file
+              #session.exec!( "cd #{remote_file_path} && rm -f #{remote_filename}" ) do |channel, stream, data|
+              #  logger.info(data)
+              #end
+              #session.loop
+            end
+          end #session
+        end
       end #wn.ipaddress
 
       #now add the datapoint path to the database to get it via the server

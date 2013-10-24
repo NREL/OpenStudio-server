@@ -53,7 +53,7 @@ class Analysis
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
-  def initialize_workers
+  def initialize_workers(options = {})
     # delete the master and workers and reload them
     ComputeNode.delete_all
 
@@ -74,6 +74,11 @@ class Analysis
         node.cores = cols[3]
         node.user = cols[4]
         node.password = cols[5].chomp
+        if options[:use_server_as_worker]
+          node.valid = true
+        else
+          node.valid = false
+        end
         node.save!
 
         logger.info("Server node #{node.inspect}")
@@ -101,14 +106,14 @@ class Analysis
   end
 
   def start(no_delay, analysis_type='batch_run', options = {})
-    defaults = {skip_init: false}
+    defaults = {skip_init: false, use_server_as_worker: false}
     options = defaults.merge(options)
 
     # TODO need to also check if the workers have been initialized, if so, then skip
     if !options[:skip_init]
       self.start_time = Time.now
       Rails.logger.info("Initializing workers in database")
-      self.initialize_workers
+      self.initialize_workers(options)
 
       Rails.logger.info("Queuing up analysis #{self.uuid}")
       self.analysis_type = analysis_type
@@ -277,9 +282,23 @@ class Analysis
   # verify the behaviour of the zip extraction on top of an already existing analysis.
   def copy_data_to_workers
     # copy the datafiles over to the worker nodes
-    ComputeNode.all.each do |node|
-      if node.node_type == 'master'
+    ComputeNode.where(valid: true).each do |node|
+      if node.node_type == 'master' && false
         # copy data to local dir for analysis
+        if !use_shm
+          upload_dir = "/mnt/openstudio"
+          File.cp(self.seed_zip.path, "#{upload_dir}/")
+          shell_result = `cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}`
+        else
+          upload_dir = "/run/shm/openstudio"
+          storage_dir = "/mnt/openstudio"
+
+          shell_result = `rm -rf #{upload_dir}`
+          shell_result = `rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis`
+          shell_result = `mkdir -p #{upload_dir}`
+          File.cp(self.seed_zip.path, "#{upload_dir}/")
+          shell_result = `cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}`
+        end
       else
         Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
           logger.info(self.inspect)
@@ -335,7 +354,6 @@ class Analysis
         node.ami_id = "Vagrant"
         node.instance_id = "Vagrant"
       else
-
         if node.type == 'server'
           node.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
           node.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
