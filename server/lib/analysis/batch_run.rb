@@ -22,7 +22,7 @@ class Analysis::BatchRun
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
     @r.converse "library(snow)"
-    @r.converse "library(snowfall)"
+    #@r.converse "library(snowfall)"
     @r.converse "library(RMongo)"
     @r.converse "library(R.methodsS3)"
     @r.converse "library(R.oo)"
@@ -97,7 +97,7 @@ class Analysis::BatchRun
         if (nrow(ips) == 0) {
           stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
         }
-        sfSetMaxCPUs(nrow(ips))
+        #sfSetMaxCPUs(nrow(ips))
         uniqueips <- unique(ips)
         numunique <- nrow(uniqueips) * 20
         print("max timeout is:")
@@ -107,7 +107,8 @@ class Analysis::BatchRun
 	      starttime <- Sys.time()
 	      tryCatch({
            res <- evalWithTimeout({
-            sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
+            cl <- makeCluster(ips[,1],type="SOCK")
+            #sfInit(parallel=TRUE, type="SOCK", socketHosts=ips[,1], slaveOutfile="/mnt/openstudio/rails-models/snowfall.log");
             }, timeout=numunique);
             }, TimeoutException=function(ex) {
               cat("#{@analysis.id} Timeout\n");
@@ -128,10 +129,10 @@ class Analysis::BatchRun
     if timeflag
       @r.command(dps: {data_points: @options[:data_points]}.to_dataframe) do
         %Q{
-          print("Size of cluster is:")
-          print(sfCpus())
+          #print("Size of cluster is:")
+          #print(sfCpus())
 
-          sfLibrary(RMongo)
+          clusterEvalQ(cl,library(RMongo))
 
           f <- function(x){
             mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -151,7 +152,7 @@ class Analysis::BatchRun
             j <- length(z)
             z
           }
-          sfExport("f")
+          clusterExport(cl,"f")
 
           if (nrow(dps) == 1) {
             print("not sure what to do with only one datapoint so adding an NA")
@@ -160,9 +161,9 @@ class Analysis::BatchRun
 
           print(dps)
 
-          results <- sfLapply(dps[,1], f)
+          results <- parLapply(cl,as.array(dps[,1]), f)
 
-          sfStop()
+          stopCluster(cl)
         }
       end
     else
