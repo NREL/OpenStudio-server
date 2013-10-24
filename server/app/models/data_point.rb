@@ -79,7 +79,7 @@ class DataPoint
       remote_file_exists = false
 
       #look up the worker nodes ip address from database
-      wn_ip = WorkerNode.where(ip_address: self.ip_address).first
+      wn_ip = ComputeNode.where(ip_address: self.ip_address).first
       if !wn_ip.nil?
         Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
           #Rails.logger.info(self.inspect)
