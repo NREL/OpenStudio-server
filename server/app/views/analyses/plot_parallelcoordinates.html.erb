@@ -6,10 +6,6 @@
       <p>There are no results for this analysis.</p>
     </div>
 <% else %>
-    <%= javascript_tag do %>
-        result_data = <%= @plot_data.to_json.to_s.html_safe %>;
-    <% end %>
-
     <div id="graph-div">
       <script>
           //size of chart
