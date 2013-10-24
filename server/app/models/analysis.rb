@@ -55,8 +55,7 @@ class Analysis
 
   def initialize_workers
     # delete the master and workers and reload them
-    MasterNode.delete_all
-    WorkerNode.delete_all
+    ComputeNode.delete_all
 
     Rails.logger.info "initializing workers"
 
@@ -69,29 +68,28 @@ class Analysis
     ips = File.read(ip_file).split("\n")
     ips.each do |ip|
       cols = ip.split("|")
-      if cols[0] == "master"
-        mn = MasterNode.find_or_create_by(:ip_address => cols[1])
-        mn.hostname = cols[2]
-        mn.cores = cols[3]
-        mn.user = cols[4]
-        mn.password = cols[5].chomp
+      if cols[0] == "master" #TODO: eventually rename this from master to server
+        node = ComputeNode.find_or_create_by(node_type: "server", ip_address: cols[1])
+        node.hostname = cols[2]
+        node.cores = cols[3]
+        node.user = cols[4]
+        node.password = cols[5].chomp
+        node.save!
 
-        mn.save!
-
-        logger.info("Master node #{mn.inspect}")
+        logger.info("Server node #{node.inspect}")
       elsif cols[0] == "worker"
-        wn = WorkerNode.find_or_create_by(:ip_address => cols[1])
-        wn.hostname = cols[2]
-        wn.cores = cols[3]
-        wn.user = cols[4]
-        wn.password = cols[5].chomp
-        wn.valid = false
+        node = ComputeNode.find_or_create_by(node_type: "worker", ip_address: cols[1])
+        node.hostname = cols[2]
+        node.cores = cols[3]
+        node.user = cols[4]
+        node.password = cols[5].chomp
+        node.valid = false
         if cols[6] && cols[6].chomp == "true"
-          wn.valid = true
+          node.valid = true
         end
-        wn.save!
+        node.save!
 
-        logger.info("Worker node #{wn.inspect}")
+        logger.info("Worker node #{node.inspect}")
       end
     end
 
@@ -279,41 +277,45 @@ class Analysis
   # verify the behaviour of the zip extraction on top of an already existing analysis.
   def copy_data_to_workers
     # copy the datafiles over to the worker nodes
-    WorkerNode.all.each do |wn|
-      Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
-        logger.info(self.inspect)
-        if !use_shm
-          upload_dir = "/mnt/openstudio"
-          session.scp.upload!(self.seed_zip.path, "#{upload_dir}/")
+    ComputeNode.all.each do |node|
+      if node.node_type == 'master'
+        # copy data to local dir for analysis
+      else
+        Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
+          logger.info(self.inspect)
+          if !use_shm
+            upload_dir = "/mnt/openstudio"
+            session.scp.upload!(self.seed_zip.path, "#{upload_dir}/")
 
-          session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
-            logger.info(data)
-          end
-          session.loop
-        else
-          upload_dir = "/run/shm/openstudio"
-          storage_dir = "/mnt/openstudio"
-          session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
-            Rails.logger.info(data)
-          end
-          session.loop
+            session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
+              logger.info(data)
+            end
+            session.loop
+          else
+            upload_dir = "/run/shm/openstudio"
+            storage_dir = "/mnt/openstudio"
+            session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
+              Rails.logger.info(data)
+            end
+            session.loop
 
-          session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis") do |channel, stream, data|
-            Rails.logger.info(data)
-          end
-          session.loop
+            session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis") do |channel, stream, data|
+              Rails.logger.info(data)
+            end
+            session.loop
 
-          session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
-            Rails.logger.info(data)
-          end
-          session.loop
+            session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
+              Rails.logger.info(data)
+            end
+            session.loop
 
-          session.scp.upload!(self.seed_zip.path, "#{upload_dir}")
+            session.scp.upload!(self.seed_zip.path, "#{upload_dir}")
 
-          session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
-            logger.info(data)
+            session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+              logger.info(data)
+            end
+            session.loop
           end
-          session.loop
         end
       end
     end
@@ -327,45 +329,39 @@ class Analysis
 
     Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
 
-    # For now assume that there is only one master node
-    mn = MasterNode.first
-    if mn
-      if local_host
-        mn.ami_id = "Vagrant"
-        mn.instance_id = "Vagrant"
-      else # must be on amazon -- hit the api for the answers
-        mn.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
-        mn.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
-      end
-      mn.save!
-    end
-
     # go through the worker node
-    WorkerNode.all.each do |wn|
+    ComputeNode.all.each do |node|
       if local_host
-        wn.ami_id = "Vagrant"
-        wn.instance_id = "Vagrant"
+        node.ami_id = "Vagrant"
+        node.instance_id = "Vagrant"
       else
-        # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
-        Net::SSH.start(wn.ip_address, wn.user, :password => wn.password) do |session|
-          #Rails.logger.info(self.inspect)
 
-          logger.info "Checking the configuration of the worker nodes"
-          session.exec!("curl -L http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
-            Rails.logger.info("Worker node reported back #{data}")
-            wn.ami_id = data
-          end
-          session.loop
+        if node.type == 'server'
+          node.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
+          node.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
+        else
+          # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
+          Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
+            #Rails.logger.info(self.inspect)
 
-          session.exec!("curl -L http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
-            Rails.logger.info("Worker node reported back #{data}")
-            wn.instance_id = data
+            logger.info "Checking the configuration of the worker nodes"
+            session.exec!("curl -L http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
+              Rails.logger.info("Worker node reported back #{data}")
+              node.ami_id = data
+            end
+            session.loop
+
+            session.exec!("curl -L http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
+              Rails.logger.info("Worker node reported back #{data}")
+              node.instance_id = data
+            end
+            session.loop
           end
-          session.loop
+
         end
       end
 
-      wn.save!
+      node.save!
     end
   end
 end

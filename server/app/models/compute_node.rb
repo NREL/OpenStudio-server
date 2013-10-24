@@ -1,8 +1,8 @@
-class WorkerNode
+class ComputeNode
   include Mongoid::Document
   include Mongoid::Timestamps
 
-
+  field :node_type, :type => String
   field :ip_address, :type => String
   field :hostname, :type => String
   field :user, :type => String
@@ -15,13 +15,14 @@ class WorkerNode
   # Indexes
   index({hostname: 1}, unique: true)
   index({ip_address: 1}, unique: true)
+  index({node_type: 1})
 
   # Return all the worker IP addresses as a hash in prep for writing to a dataframe
   def self.to_hash
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
 
-    WorkerNode.all.each do |wn|
+    ComputeNode.where(:node_type => "worker").each do |wn|
       (1..wn.cores).each { |i| worker_ips_hash[:worker_ips] << wn.ip_address }
     end
     Rails.logger.info("worker ip hash: #{worker_ips_hash}")

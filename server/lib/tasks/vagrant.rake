@@ -1,15 +1,12 @@
 namespace :vagrant do
   desc 'setup the compute nodes in the database'
   task :setup => :environment do
-    MasterNode.delete_all
-    WorkerNode.delete_all
+    ComputeNode.delete_all
 
-    sn = MasterNode.find_or_create_by(:ip_address => '192.168.33.10')
-    sn.save!
-
-    # todo read this from a file (somewhere) to set the worker nodes as there may be more than 1 file
-    wn = WorkerNode.find_or_create_by(:ip_address => '192.168.33.11')
-    wn.cores = 4
-    wn.save!
+    node = ComputeNode.find_or_create_by(node_type: 'master', ip_address: '192.168.33.10')
+    node.save!
+    node = ComputeNode.find_or_create_by(node_type: 'worker', ip_address: '192.168.33.11')
+    node.cores = 4
+    node.save!
   end
 end

@@ -214,11 +214,8 @@ class AnalysesController < ApplicationController
     @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
     exclude_fields = [:_id, :user, :password]
-    @workers = WorkerNode.all.map { |n| n.as_json(:except => exclude_fields) }
-    if MasterNode.count > 0
-      @server = MasterNode.first.as_json(:except => exclude_fields)
-    end
-
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(:except => exclude_fields) }
+    @server = ComputeNode.where(node_type: 'server').first
 
     respond_to do |format|
       format.html # debug_log.html.erb

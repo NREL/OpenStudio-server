@@ -36,7 +36,7 @@ class Analysis::BatchRun
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
 
     # get the master ip address
-    master_ip = MasterNode.first.ip_address
+    master_ip = ComputeNode.where(node_type: 'server').first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
     Rails.logger.info("Starting Batch Run")
 
@@ -86,7 +86,7 @@ class Analysis::BatchRun
     Rails.logger.info("Starting Child Process")
     process.start
 
-    good_ips = WorkerNode.where(valid: true) # TODO: make this a scope
+    good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
     @analysis.analysis_output = []
     @analysis.analysis_output << "good_ips = #{good_ips.to_hash}"
     Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
