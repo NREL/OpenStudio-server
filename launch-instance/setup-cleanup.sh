@@ -125,11 +125,14 @@ sudo apt-get clean
 
 sudo rm -rf /usr/local/lib/R-3.0.2.tar.gz
 sudo rm -rf /tmp/*.tar.gz
+cd /usr/local/lib/R-3.0.2/src/gnuwin32/
+sudo make clean
+
 sudo rm /var/cache/apt/archives/*.deb
 
 
 sudo dd if=/dev/zero of=/EMPTY bs=1M
-sudo rm /EMPTY
+sudo rm -f /EMPTY
 #sudo dd if=/dev/zero of=/home/EMPTY bs=1M
 #sudo rm /home/EMPTY
 #sudo dd if=/dev/zero of=/usr/EMPTY bs=1M
