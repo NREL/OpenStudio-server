@@ -1,10 +1,8 @@
 #!/bin/sh
-#sudo apt-get remove --auto-remove texlive* -y
-#sudo apt-get purge --auto-remove texlive* -y
-#sudo apt-get remove --auto-remove chef -y
-#sudo rm -rf /opt/
-#sudo apt-get purge --auto-remove chef -y
-sudo apt-get remove gfortran -y
+
+sudo apt-get remove --auto-remove chef -y
+sudo rm -rf /opt/
+sudo apt-get purge --auto-remove chef -y
 
 sudo apt-get remove --auto-remove gir1.2-freedesktop -y
 sudo apt-get remove --auto-remove gir1.2-pango-1.0 -y
@@ -120,16 +118,79 @@ sudo apt-get purge --auto-remove xfonts-utils -y
 sudo apt-get purge --auto-remove xserver-common -y
 sudo apt-get purge --auto-remove xvfb -y
 
+sudo apt-get remove --auto-remove libblas3gf -y 
+sudo apt-get remove --auto-remove libbonobo2-0 -y
+sudo apt-get remove --auto-remove libbonobo2-common -y
+sudo apt-get remove --auto-remove libboost-iostreams1.46.1 -y 
+sudo apt-get remove --auto-remove libboost-program-options1.46.1 -y
+sudo apt-get remove --auto-remove libboost-thread1.46.1 -y
+sudo apt-get remove --auto-remove libgnome2-0 -y
+sudo apt-get remove --auto-remove liblapack3gf -y
+sudo apt-get remove --auto-remove libmail-sendmail-perl -y	
+sudo apt-get remove --auto-remove libmailtools-perl -y
+
+sudo apt-get purge --auto-remove libblas3gf -y 
+sudo apt-get purge --auto-remove libbonobo2-0 -y
+sudo apt-get purge --auto-remove libbonobo2-common -y
+sudo apt-get purge --auto-remove libboost-iostreams1.46.1 -y 
+sudo apt-get purge --auto-remove libboost-program-options1.46.1 -y
+sudo apt-get purge --auto-remove libboost-thread1.46.1 -y
+sudo apt-get purge --auto-remove libgnome2-0 -y
+sudo apt-get purge --auto-remove liblapack3gf -y
+sudo apt-get purge --auto-remove libmail-sendmail-perl -y	
+sudo apt-get purge --auto-remove libmailtools-perl -y
+
+sudo apt-get remove --auto-remove x11-common -y
+sudo apt-get remove --auto-remove x11-utils -y
+sudo apt-get remove --auto-remove x11-xserver-utils -y
+sudo apt-get remove --auto-remove x11proto-core-dev -y
+sudo apt-get remove --auto-remove x11proto-input-dev -y
+sudo apt-get remove --auto-remove x11proto-kb-dev -y	
+
+sudo apt-get purge --auto-remove x11-common -y
+sudo apt-get purge --auto-remove x11-utils -y
+sudo apt-get purge --auto-remove x11-xserver-utils -y
+sudo apt-get purge --auto-remove x11proto-core-dev -y
+sudo apt-get purge --auto-remove x11proto-input-dev -y
+sudo apt-get purge --auto-remove x11proto-kb-dev -y	
+
 sudo apt-get autoclean
 sudo apt-get clean
 
 sudo rm -rf /usr/local/lib/R-3.0.2.tar.gz
+sudo rm -rf /usr/local/lib/R-3.0.2/doc
+sudo rm -rf /usr/local/lib/R-3.0.2/tests
+sudo rm -rf /usr/lib/R/doc
 sudo rm -rf /tmp/*.tar.gz
 cd /usr/local/lib/R-3.0.2/src/gnuwin32/
 sudo make clean
 
-sudo rm /var/cache/apt/archives/*.deb
+sudo rm -rf /usr/local/EnergyPlus-8-0-0/ExampleFiles
+sudo rm -rf /usr/local/EnergyPlus-8-0-0/Documentation
+sudo rm -rf /usr/local/EnergyPlus-8-0-0/DataSets
+sudo rm -rf /usr/local/lib/ruby/site_ruby/2.0.0/openstudio/sketchup_plugin
+sudo rm -rf /usr/local/lib/ruby/site_ruby/2.0.0/openstudio/examples
+sudo rm -rf /usr/local/share/openstudio/Ruby/openstudio/sketchup_plugin
+sudo rm -rf /usr/local/share/openstudio/Ruby/openstudio/examples
+sudo rm -rf /usr/local/share/openstudio/examples
+sudo rm -rf /usr/local/share/openstudio/OSApp
 
+sudo rm -rf /usr/share/X11
+sudo rm -rf /usr/share/gnome
+
+sudo rm -rf /usr/share/doc
+
+sudo rm -rf /var/cache/apt/archives/*.deb
+sudo rm -rf /var/chef/cache/*.tar.gz
+sudo rm -rf /var/chef/cache/*.deb
+
+sudo rm -rf /var/lib/mongodb
+sudo rm -rf /tmp/*
+
+cd /var/www/rails/openstudio
+rake db:purge
+rake db:mongoid:create_indexes
+sudo rm -rf /mnt/mongodb/data/journal/*
 
 sudo dd if=/dev/zero of=/EMPTY bs=1M
 sudo rm -f /EMPTY
