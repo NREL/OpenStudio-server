@@ -1,4 +1,3 @@
-
 name "r-project"
 description "Installs and configure R"
 
@@ -27,8 +26,8 @@ default_attributes(
                 :version => '0.10'
             },
             {
-	        :name => 'e1071',
-	        :version => '1.6-1'
+                :name => 'e1071',
+                :version => '1.6-1'
             },
             {
                 :name => 'Rserve',
@@ -83,8 +82,8 @@ default_attributes(
                 :version => '1.0.7'
             },
             {
-	        :name => 'DEoptim',
-	        :version => '2.2-2'
+                :name => 'DEoptim',
+                :version => '2.2-2'
             }
         ]
     }
