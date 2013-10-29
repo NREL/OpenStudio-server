@@ -1,5 +1,3 @@
-require 'r_wrapper'
-
 class Analysis::SequentialSearch
   def initialize(analysis_id, options = {})
     defaults = {skip_init: false, x_objective_function: "total_energy", y_objective_function: "interior_lighting_electricity"}
