@@ -138,7 +138,26 @@ begin
           argument_map[v.name] = v.clone
         end
 
-        ros.log_message "iterate over variables for workflow item", true
+        ros.log_message "iterate over arguments for workflow item #{wf['name']}", true
+        if wf['arguments']
+          wf['arguments'].each do |wf_arg|
+            if wf_arg['value']
+              ros.log_message "Setting argument value #{wf_arg['name']} to #{wf_arg['value']}"
+
+              v = argument_map[wf_arg['name']]
+              raise "Could not find argument map in measure" if not v
+              value_set = v.setValue(wf_arg['value'])
+              raise "Could not set argument #{wf_arg['name']} of value #{wf_arg['value']} on model" unless value_set
+              argument_map[wf_arg['name']] = v.clone
+            else
+              raise "Value for argument '#{wf_arg['name']}' not set in argument list" if CRASH_ON_NO_WORKFLOW_VARIABLE
+              ros.log_message("Value for argument '#{wf_arg['name']}' not set in argument list therefore will use default", true)
+              break
+            end
+          end
+        end
+
+        ros.log_message "iterate over variables for workflow item #{wf['name']}", true
         if wf['variables']
           wf['variables'].each do |wf_var|
 
@@ -146,7 +165,7 @@ begin
             if wf_var['argument']
               variable_name = wf_var['argument']['name']
 
-              # get the value from the data point
+              # Get the value from the data point json that was set via R / Problem Formulation
               if data_point_json[:data_point]
                 if data_point_json[:data_point]['variable_values']
                   if data_point_json[:data_point]['variable_values'][variable_uuid]
@@ -168,25 +187,23 @@ begin
               else
                 raise "No block for data_point in data_point record"
               end
-
-
-              measure.run(@model, runner, argument_map)
-              result = runner.result
-
-              ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
-              ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
-
-              result.warnings.each { |w| puts w.logMessage }
-              result.errors.each { |w| puts w.logMessage }
-              result.info.each { |w| puts w.logMessage }
-
-              @model
             else
               raise "Variable '#{variable_name}' is defined but no argument is present"
             end
           end
         end
 
+        measure.run(@model, runner, argument_map)
+        result = runner.result
+
+        ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
+        ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
+
+        result.warnings.each { |w| puts w.logMessage }
+        result.errors.each { |w| puts w.logMessage }
+        result.info.each { |w| puts w.logMessage }
+
+        @model
       end
     end
   end
