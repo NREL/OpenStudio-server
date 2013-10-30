@@ -157,8 +157,13 @@ class Analysis::BatchRun
             print("not sure what to do with only one datapoint so adding an NA")
             dps <- rbind(dps, c(NA))
           }
+          if (nrow(dps) == 0) {
+	    print("not sure what to do with only no datapoint so adding an NA")
+	    dps <- rbind(dps, c(NA))
+	    dps <- rbind(dps, c(NA))
+          }
 
-          print(dps)
+          print(nrow(dps))
 
           results <- sfLapply(dps[,1], f)
 
