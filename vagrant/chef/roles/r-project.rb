@@ -79,7 +79,7 @@ default_attributes(
             },
             {
                 :name => 'doSNOW',
-                :version => '1.0.7'
+                :version => '1.0.9'
             },
             {
                 :name => 'DEoptim',
