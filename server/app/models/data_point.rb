@@ -96,7 +96,7 @@ class DataPoint
             save_filename = nil
           end
         else
-          Net::SSH.start(wn_ip.ip_address, wn_ip.user, :password => wn_ip.password) do |session|
+          Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
             #Rails.logger.info(self.inspect)
 
             # Regardless of SHM, the data points will be copied back to /mnt/openstudio (or somewhere else on RedMesa)
