@@ -1,6 +1,6 @@
 class Analysis::BatchRun
   def initialize(analysis_id, options = {})
-    defaults = {simulate_data_point_filename: "simulate_data_point.rb"}
+    defaults = {skip_init: false, simulate_data_point_filename: "simulate_data_point.rb"}
     @options = defaults.merge(options)
 
 
@@ -177,9 +177,13 @@ class Analysis::BatchRun
     Rails.logger.info("Trying to download any remaining files from worker nodes")
     @analysis.finalize_data_points
 
-    @analysis.end_time = Time.now
-    @analysis.status = 'completed'
-    @analysis.save!
+    # Only set this data if the anlaysis was NOT called from another anlaysis
+
+    if @options[:skip_init]
+      @analysis.end_time = Time.now
+      @analysis.status = 'completed'
+      @analysis.save!
+    end
   end
 
   # Since this is a delayed job, if it crashes it will typically try multiple times.
