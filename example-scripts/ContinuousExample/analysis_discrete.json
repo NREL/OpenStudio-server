@@ -581,6 +581,35 @@
                             "version_uuid": "c7cf9cfc-abf9-43b1-9445-e7b312c9f4a7"
                         }
                     ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "default_value": 0.0,
+                            "display_name": "Select an Electricity Tariff",
+                            "name": "elec_tar",
+                            "required": true,
+                            "type": "Double",
+                            "value": "Secondary General"
+                        },
+                        {
+                            "default_value": 0.0,
+                            "display_name": "Select a Gas Tariff",
+                            "name": "gas_tar",
+                            "required": true,
+                            "type": "Double",
+                            "value": "Large CG"
+                        }
+                    ],
+                    "name": "XcelEDATariffSelectionandModelSetup",
+                    "display_name": "Add EnergyPlus Tariffs",
+                    "measure_type": "EnergyPlusMeasure",
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/XcelEDATariffSelectionandModelSetup",
+                    "bcl_measure_class_name_ADDME": "XcelEDATariffSelectionandModelSetup",
+                    "bcl_measure_uuid": "c9898d1a-2db8-416a-9398-9aa799f4fc90",
+                    "bcl_measure_version_uuid": "86d6921c-3a2c-4df2-b6fd-5d271fffd643",
+                    "description": "Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program",
+                    "display_name": "Xcel EDA Tariff Selection and Model Setup"
                 }
             ]
         },
