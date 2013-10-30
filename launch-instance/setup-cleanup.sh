@@ -111,12 +111,18 @@ sudo rm -rf /mnt/mongodb/data/journal/*
 
 sudo dd if=/dev/zero of=/EMPTY bs=1M
 sudo rm -f /EMPTY
-#sudo dd if=/dev/zero of=/home/EMPTY bs=1M
-#sudo rm /home/EMPTY
-#sudo dd if=/dev/zero of=/usr/EMPTY bs=1M
-#sudo rm /usr/EMPTY
-#sudo dd if=/dev/zero of=/var/EMPTY bs=1M
-#sudo rm /var/EMPTY
-#sudo dd if=/dev/zero of=/tmp/EMPTY bs=1M
-#sudo rm /tmp/EMPTY
+sudo dd if=/dev/zero of=/home/EMPTY bs=1M
+sudo rm /home/EMPTY
+sudo dd if=/dev/zero of=/usr/EMPTY bs=1M
+sudo rm /usr/EMPTY
+sudo dd if=/dev/zero of=/var/EMPTY bs=1M
+sudo rm /var/EMPTY
+sudo dd if=/dev/zero of=/lib/EMPTY bs=1M
+sudo rm /lib/EMPTY
+sudo dd if=/dev/zero of=/boot/EMPTY bs=1M
+sudo rm /boot/EMPTY
+sudo dd if=/dev/zero of=/bin/EMPTY bs=1M
+sudo rm /bin/EMPTY
+sudo dd if=/dev/zero of=/etc/EMPTY bs=1M
+sudo rm /etc/EMPTY
 #exit
