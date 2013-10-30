@@ -5,26 +5,23 @@
 <% if !@project %>
     <p>No project found thus no analyses listed</p>
 <% else %>
-
-
     <table class="table table-striped">
       <tr>
         <th>Name</th>
+        <th>Next Analysis To Run</th>
+        <th>Status</th>
         <th>View</th>
         <th>Action</th>
       </tr>
       <% @project.analyses.each do |analysis| %>
           <tr>
             <td><%= link_to analysis.name, analysis_path(analysis) %></td>
+            <td><%= link_to analysis.analysis_type, analysis_path(analysis) %></td>
+            <td><%= link_to analysis.status, analysis_path(analysis) %></td>
             <td><%= link_to 'HTML', analysis_path(analysis) %>
               | <%= link_to 'JSON', analysis_path(analysis, :format => :json) %></td>
             <td><%= link_to 'Destroy', analysis, method: :delete, data: {confirm: 'Are you sure?'} %></td>
           </tr>
       <% end %>
     </table>
-
-
-
-    <br/>
-
 <% end %>
