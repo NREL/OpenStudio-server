@@ -1,6 +1,6 @@
 class Analysis::SequentialSearch
   def initialize(analysis_id, options = {})
-    defaults = {skip_init: false, x_objective_function: "total_energy", y_objective_function: "total_life_cycle_cost"}
+    defaults = {skip_init: false, max_iterations: 10000, x_objective_function: "total_energy", y_objective_function: "total_life_cycle_cost"}
     @options = defaults.merge(options)
 
     @analysis_id = analysis_id
@@ -272,6 +272,7 @@ class Analysis::SequentialSearch
     Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
 
     # determine the first list of items to run
+    final_message = ""
     @run_list = determine_run_list(parameter_space)
     Rails.logger.info "datapoint list is #{@run_list}"
     new_pareto_point = true
@@ -290,7 +291,6 @@ class Analysis::SequentialSearch
       end
       @analysis.save!
 
-      # So why does this work? It should hit run_analysis and it should come back as analysis is queued
       Rails.logger.info("Kicking off simulations for iteration #{@iteration}")
       @analysis.start(true, 'batch_run', {skip_init: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"})
       Rails.logger.info("Finished simulations for iteration #{@iteration}... checking results")
@@ -298,14 +298,18 @@ class Analysis::SequentialSearch
       Rails.logger.info("Determined pareto curve for #{@iteration} and new point flag is set to #{new_pareto_point}")
       Rails.logger.info("Finished simulations for iteration #{@iteration}... iterating")
 
-      @iteration += 1
+      if @iteration >= @options[:max_iterations]
+        final_message = "Reached max iterations of #{@options[:max_iterations]}"
+        break
+      end
+
       @run_list = determine_run_list(parameter_space)
-      break if @iteration > 1000
+      @iteration += 1
     end
 
     # todo: finish of the pareto front so that it includes all the points to the end
 
-    Rails.logger.info("#{__FILE__} finished after iteration #{@iteration}")
+    Rails.logger.info("#{__FILE__} finished after iteration #{@iteration} with message '#{final_message}'")
     # Check the results of the run
 
     # Do one last check if there are any data points that were not downloaded
