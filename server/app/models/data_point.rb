@@ -28,7 +28,7 @@ class DataPoint
   # Indexes
   index({uuid: 1}, unique: true)
   index({id: 1}, unique: true)
-  index({name: 1}, unique: true)
+  index({name: 1})
   index({status: 1})
   index({analysis_id: 1})
   index({uuid: 1, status: 1})

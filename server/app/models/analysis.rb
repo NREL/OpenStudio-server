@@ -40,7 +40,7 @@ class Analysis
   # Indexes
   index({uuid: 1}, unique: true)
   index({id: 1}, unique: true)
-  index({name: 1}, unique: true)
+  index({name: 1})
   index({project_id: 1})
   index({uuid: 1, status: 1})
   index({uuid: 1, download_status: 1})
@@ -183,7 +183,6 @@ class Analysis
   end
 
   def pull_out_os_variables
-
     pat_json = false
     # get the measures first
     Rails.logger.info("pulling out openstudio measures")
@@ -192,7 +191,7 @@ class Analysis
       Rails.logger.info("found a problem and workflow")
       self['problem']['workflow'].each do |wf|
 
-        # Currently the PAT format has measures and I plan on igorning them for now
+        # Currently the PAT format has measures and I plan on ignoring them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
         # individual measures
         if wf['measures']
@@ -210,7 +209,7 @@ class Analysis
     end
 
     if pat_json
-      #Rails.logger.error("OpenStudio Metadata is: #{self.os_metadata}")
+      Rails.logger.error("Appears to be a PAT JSON formatted file, pulling variables out of metadata for now")
       if self.os_metadata && self.os_metadata['variables']
         self.os_metadata['variables'].each do |variable|
           var = Variable.create_from_os_json(self.id, variable)
