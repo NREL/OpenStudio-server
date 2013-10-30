@@ -4,7 +4,6 @@ class Analysis::Lhs
   def initialize(analysis_id, options = {})
     defaults = {skip_init: false}
     @options = defaults.merge(options)
-
     @analysis_id = analysis_id
   end
 
@@ -30,8 +29,9 @@ class Analysis::Lhs
     @r = Rserve::Simpler.new
     #lhs = Analysis::RWrapper::Lhs.new(@r)
 
-    #todo: need to move this to the module class
+    Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
     Rails.logger.info "Setting up R for #{self.class.name}"
+    #todo: need to move this to the module class
     @r.converse('setwd("/mnt/openstudio")')
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
     @r.converse "library(snow)"
@@ -67,8 +67,6 @@ class Analysis::Lhs
     Rails.logger.info "static array is #{static_array}"
 
     # get variables / measures
-    # TODO: For some reason the scoped variable won't work here! ugh.
-    #@analysis.variables.enabled do |variable|
     selected_variables = Variable.where({analysis_id: @analysis, perturbable: true}).order_by(:name.asc)
     Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
 
@@ -144,12 +142,16 @@ class Analysis::Lhs
       dp = @analysis.data_points.new(name: dp_name)
       dp.variable_values = sample
       dp.save!
+
+      Rails.logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
     end
 
     # Do one last check if there are any data points that were not downloaded
     @analysis.end_time = Time.now
     @analysis.status = 'completed'
     @analysis.save!
+
+    Rails.logger.info("Finished running #{self.class.name}")
   end
 
   # Since this is a delayed job, if it crashes it will typically try multiple times.

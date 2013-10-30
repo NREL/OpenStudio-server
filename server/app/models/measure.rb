@@ -11,7 +11,7 @@ class Measure
   field :arguments # This is really the variable? right?
   field :measure_type, :type => String
   field :values, :type => Array, default: []
-  field :index, :type => Integer  # how do we set the index, i guess an oncreate call back
+  field :index, :type => Integer  # how do we set the index, i guess an oncreate call back :~
 
   # Relationships
   belongs_to :analysis
@@ -30,20 +30,21 @@ class Measure
 
   # Callbacks
   after_create :verify_uuid
-  #before_destroy :remove_dependencies
 
   # parse openstudio's json to get out the variables
   def self.create_from_os_json(analysis_id, os_json, pat_json)
 
-    # I really think the BCL is the unique measure id here, not the uuid... tbd
+    # The UUID is a misnomer because in measure groups the exact same measure
+    # is copied over multiple times.  The BCL UUID is the actual unique ID IMO.
     measure = Measure.where({analysis_id: analysis_id, uuid: os_json['uuid']}).first
     if measure
-      Rails.logger.warn("Measure already exists for #{measure.name} : #{measure.uuid}")
+      Rails.logger.info("Measure already exists for analysis #{analysis_id} of #{measure.name} : #{measure.uuid}")
     else
       measure = Measure.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
+      Rails.logger.info("Creating new measure for analysis #{analysis_id} of #{measure.name} : #{measure.uuid}")
     end
 
-    Rails.logger.info("adding/updating measure #{measure.id}")
+    Rails.logger.info("adding/updating measure #{measure.uuid} for analysis #{analysis_id}")
     i_measure = 0
     os_json.each do |k, v|
       exclude_fields = ["arguments", "variables"]
