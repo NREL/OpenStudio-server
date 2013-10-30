@@ -49,7 +49,7 @@ class DataPoint
         unless output_hash['value_type'] == "AttributeVector"
           output_hash.has_key?('display_name') ? hash_key = output_hash['display_name'].parameterize.underscore :
               hash_key = output_hash['name'].parameterize.underscore
-          logger.info("hash name will be: #{hash_key} with value: #{output_hash['value']}")
+          #logger.info("hash name will be: #{hash_key} with value: #{output_hash['value']}")
           self["results"][hash_key.to_sym] = output_hash['value']
         end
       end
@@ -67,8 +67,6 @@ class DataPoint
       # This is becoming more of a post process that is being triggered by the "downloading" of the
       # file.  If we aren't going to download the file, then the child process can have a flag that it
       # checks similar to the downloaded flag.
-
-      # parse results
       Rails.logger.info "post-processing the JSON data that was pushed into the database by the worker"
       self.save_results_from_openstudio_json
 
