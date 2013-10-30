@@ -184,7 +184,7 @@ class Analysis::BatchRun
 
     # Only set this data if the anlaysis was NOT called from another anlaysis
 
-    if @options[:skip_init]
+    if !@options[:skip_init]
       @analysis.end_time = Time.now
       @analysis.status = 'completed'
       @analysis.save!
