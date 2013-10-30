@@ -199,9 +199,9 @@ begin
         ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
         ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
 
-        result.warnings.each { |w| puts w.logMessage }
-        result.errors.each { |w| puts w.logMessage }
-        result.info.each { |w| puts w.logMessage }
+        result.warnings.each { |w| ros.log_message w.logMessage, true }
+        result.errors.each { |w| ros.log_message w.logMessage, true }
+        result.info.each { |w| ros.log_message w.logMessage, true }
 
         @model
       end

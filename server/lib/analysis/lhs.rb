@@ -2,7 +2,7 @@ class Analysis::Lhs
   include Analysis::R::Lhs  # include the R Lhs wrapper
 
   def initialize(analysis_id, options = {})
-    defaults = {}
+    defaults = {skip_init: false}
     @options = defaults.merge(options)
 
     @analysis_id = analysis_id

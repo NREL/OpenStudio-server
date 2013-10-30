@@ -4,7 +4,7 @@
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
         "problem": {
-            "number_of_samples": 200,
+            "number_of_samples": 2,
             "display_name": "Ruby Continuous Variables Example Problem",
             "name": "Ruby Continuous Variables Example Problem",
             "problem_type": "Problem",
@@ -488,7 +488,6 @@
                             "uuid": "f61f1d6d-7d31-4c60-b885-8490ccfaa376",
                             "version_uuid": "0ed97163-5c72-4f70-81ed-c04c79159eb1"
                         }
-
                     ],
                     "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/SetWindowToWallRatioByFacade",
                     "bcl_measure_class_name_ADDME": "SetWindowToWallRatioByFacade",

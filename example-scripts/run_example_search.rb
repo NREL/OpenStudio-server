@@ -6,10 +6,8 @@ HOSTNAME = "http://localhost:8080"
 ANALYSIS_TYPE="sequential_search"
 STOP_AFTER_N=nil  #set to nil if you want them all
 
-formulation_file = "./DiscreteWithCosts/analysis_discrete_small.json"
-analysis_zip_file = "./DiscreteWithCosts/analysis.zip"
-#formulation_file = "./ContinuousExample/analysis_discrete_small.json"
-#analysis_zip_file = "./ContinuousExample/analysis.zip"
+formulation_file = "./ContinuousExample/analysis_discrete.json"
+analysis_zip_file = "./ContinuousExample/analysis.zip"
 
 options = {hostname: HOSTNAME}
 api = ServerApi.new(options)
@@ -24,13 +22,5 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 # Run the LHS -- note that this has to run in the foreground until we move the "get datapoints to run"
 # inside of the batch_run method
-run_options = {analysis_action: "start", without_delay: true, analysis_type: ANALYSIS_TYPE}
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "sequential_search", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
 api.run_analysis(analysis_id, run_options)
-
-#run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run"}
-#api.run_analysis(analysis_id, run_options)
-
-#api.kill_analysis(analysis_id)
-
-
-
