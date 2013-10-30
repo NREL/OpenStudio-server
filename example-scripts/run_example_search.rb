@@ -2,9 +2,7 @@ require './ServerApi.rb'
 
 HOSTNAME = "http://localhost:8080"
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
-#WITHOUT_DELAY=false
 ANALYSIS_TYPE="sequential_search"
-STOP_AFTER_N=nil  #set to nil if you want them all
 
 formulation_file = "./ContinuousExample/analysis_discrete.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
