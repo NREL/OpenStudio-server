@@ -121,89 +121,94 @@ begin
     if analysis_json[:analysis]['problem'] && analysis_json[:analysis]['problem']['workflow'] #ugh i want indifferent access
       analysis_json[:analysis]['problem']['workflow'].each do |wf|
 
-        # process the measure
-        measure_path = wf['bcl_measure_directory'].split("/").last(2).first
-        measure_name = wf['bcl_measure_class_name_ADDME']
+        if wf['measure_type'] == "RubyMeasure"
+          # process the measure
+          measure_path = wf['bcl_measure_directory'].split("/").last(2).first
+          measure_name = wf['bcl_measure_class_name_ADDME']
 
-        require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
+          require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
 
-        measure = measure_name.constantize.new
-        runner = OpenStudio::Ruleset::OSRunner.new
+          measure = measure_name.constantize.new
+          runner = OpenStudio::Ruleset::OSRunner.new
 
-        arguments = measure.arguments(@model)
+          arguments = measure.arguments(@model)
 
-        # Create argument map and initialize all the arguments
-        argument_map = OpenStudio::Ruleset::OSArgumentMap.new
-        arguments.each do |v|
-          argument_map[v.name] = v.clone
-        end
+          # Create argument map and initialize all the arguments
+          argument_map = OpenStudio::Ruleset::OSArgumentMap.new
+          arguments.each do |v|
+            argument_map[v.name] = v.clone
+          end
 
-        ros.log_message "iterate over arguments for workflow item #{wf['name']}", true
-        if wf['arguments']
-          wf['arguments'].each do |wf_arg|
-            if wf_arg['value']
-              ros.log_message "Setting argument value #{wf_arg['name']} to #{wf_arg['value']}"
+          ros.log_message "iterate over arguments for workflow item #{wf['name']}", true
+          if wf['arguments']
+            wf['arguments'].each do |wf_arg|
+              if wf_arg['value']
+                ros.log_message "Setting argument value #{wf_arg['name']} to #{wf_arg['value']}"
 
-              v = argument_map[wf_arg['name']]
-              raise "Could not find argument map in measure" if not v
-              value_set = v.setValue(wf_arg['value'])
-              raise "Could not set argument #{wf_arg['name']} of value #{wf_arg['value']} on model" unless value_set
-              argument_map[wf_arg['name']] = v.clone
-            else
-              raise "Value for argument '#{wf_arg['name']}' not set in argument list" if CRASH_ON_NO_WORKFLOW_VARIABLE
-              ros.log_message("Value for argument '#{wf_arg['name']}' not set in argument list therefore will use default", true)
-              break
+                v = argument_map[wf_arg['name']]
+                raise "Could not find argument map in measure" if not v
+                value_set = v.setValue(wf_arg['value'])
+                raise "Could not set argument #{wf_arg['name']} of value #{wf_arg['value']} on model" unless value_set
+                argument_map[wf_arg['name']] = v.clone
+              else
+                raise "Value for argument '#{wf_arg['name']}' not set in argument list" if CRASH_ON_NO_WORKFLOW_VARIABLE
+                ros.log_message("Value for argument '#{wf_arg['name']}' not set in argument list therefore will use default", true)
+                break
+              end
             end
           end
-        end
 
-        ros.log_message "iterate over variables for workflow item #{wf['name']}", true
-        if wf['variables']
-          wf['variables'].each do |wf_var|
+          ros.log_message "iterate over variables for workflow item #{wf['name']}", true
+          if wf['variables']
+            wf['variables'].each do |wf_var|
 
-            variable_uuid = wf_var['uuid'] # this is what the variable value is set to
-            if wf_var['argument']
-              variable_name = wf_var['argument']['name']
+              variable_uuid = wf_var['uuid'] # this is what the variable value is set to
+              if wf_var['argument']
+                variable_name = wf_var['argument']['name']
 
-              # Get the value from the data point json that was set via R / Problem Formulation
-              if data_point_json[:data_point]
-                if data_point_json[:data_point]['variable_values']
-                  if data_point_json[:data_point]['variable_values'][variable_uuid]
-                    ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['variable_values'][variable_uuid]}"
-                    v = argument_map[variable_name]
-                    raise "Could not find argument map in measure" if not v
-                    variable_value = data_point_json[:data_point]['variable_values'][variable_uuid]
-                    value_set = v.setValue(variable_value)
-                    raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
-                    argument_map[variable_name] = v.clone
+                # Get the value from the data point json that was set via R / Problem Formulation
+                if data_point_json[:data_point]
+                  if data_point_json[:data_point]['variable_values']
+                    if data_point_json[:data_point]['variable_values'][variable_uuid]
+                      ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['variable_values'][variable_uuid]}"
+                      v = argument_map[variable_name]
+                      raise "Could not find argument map in measure" if not v
+                      variable_value = data_point_json[:data_point]['variable_values'][variable_uuid]
+                      value_set = v.setValue(variable_value)
+                      raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
+                      argument_map[variable_name] = v.clone
+                    else
+                      raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
+                      ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
+                      break
+                    end
                   else
-                    raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
-                    ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
-                    break
+                    raise "No block for variable_values in data point record"
                   end
                 else
-                  raise "No block for variable_values in data point record"
+                  raise "No block for data_point in data_point record"
                 end
               else
-                raise "No block for data_point in data_point record"
+                raise "Variable '#{variable_name}' is defined but no argument is present"
               end
-            else
-              raise "Variable '#{variable_name}' is defined but no argument is present"
             end
           end
+
+          measure.run(@model, runner, argument_map)
+          result = runner.result
+
+          ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
+          ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
+
+          result.warnings.each { |w| ros.log_message w.logMessage, true }
+          result.errors.each { |w| ros.log_message w.logMessage, true }
+          result.info.each { |w| ros.log_message w.logMessage, true }
+
+          @model
+        elsif wf['measure_type'] == "EnergyPlusMeasure"
+          # what to do here?
+
         end
-
-        measure.run(@model, runner, argument_map)
-        result = runner.result
-
-        ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
-        ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
-
-        result.warnings.each { |w| ros.log_message w.logMessage, true }
-        result.errors.each { |w| ros.log_message w.logMessage, true }
-        result.info.each { |w| ros.log_message w.logMessage, true }
-
-        @model
       end
     end
   end

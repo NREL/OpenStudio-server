@@ -111,7 +111,8 @@ class Analysis
 
     # TODO need to also check if the workers have been initialized, if so, then skip
     if !options[:skip_init]
-      self.start_time = Time.now
+      self.start_time = Time.now # this is the time it was queued, not starts
+      self.end_time = nil
       Rails.logger.info("Initializing workers in database")
       self.initialize_workers(options)
 
