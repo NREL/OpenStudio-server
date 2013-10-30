@@ -31,35 +31,39 @@ project_id = api.new_project(project_options)
 
 
 # ===== LHS Sample and Run =====
-#formulation_file = "./ContinuousExample/analysis.json"
-#analysis_zip_file = "./ContinuousExample/analysis.zip"
-#
-#analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
-#                    reset_uuids: true, analysis_name: "LHS Sample and Run"}
-#analysis_id = api.new_analysis(project_id, analysis_options)
-#
-## Run the LHS -- note that this has to run in the foreground until we move the "get datapoints to run"
-## inside of the batch_run method
-#run_options = {analysis_action: "start", without_delay: false, analysis_type: "lhs", allow_multiple_jobs: true}
-#api.run_analysis(analysis_id, run_options)
-#
-#run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
-#api.run_analysis(analysis_id, run_options)
+formulation_file = "./ContinuousExample/analysis.json"
+analysis_zip_file = "./ContinuousExample/analysis.zip"
+
+analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
+                    reset_uuids: true, analysis_name: "LHS Sample and Run"}
+analysis_id = api.new_analysis(project_id, analysis_options)
+
+run_options = {analysis_action: "start", without_delay: true, analysis_type: "lhs", allow_multiple_jobs: true}
+api.run_analysis(analysis_id, run_options)
+
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
+api.run_analysis(analysis_id, run_options)
+
+# ===== LHS Sample and Run Number 2 =====
+formulation_file = "./ContinuousExample/analysis.json"
+analysis_zip_file = "./ContinuousExample/analysis.zip"
+
+analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
+                    reset_uuids: true, analysis_name: "LHS Sample and Run 2"}
+analysis_id = api.new_analysis(project_id, analysis_options)
+
+run_options = {analysis_action: "start", without_delay: true, analysis_type: "lhs", allow_multiple_jobs: true}
+api.run_analysis(analysis_id, run_options)
+
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
+api.run_analysis(analysis_id, run_options)
 
 
 # ===== Sequential Search =====
 formulation_file = "./ContinuousExample/analysis_discrete.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
 
-options = {hostname: HOSTNAME}
-api = ServerApi.new(options)
-
-api.delete_all()
-
-project_options = {}
-project_id = api.new_project(project_options)
-
-analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file}
+analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file, reset_uuids: true, analysis_name: "Sequential Search"}
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 # Run the LHS -- note that this has to run in the foreground until we move the "get datapoints to run"

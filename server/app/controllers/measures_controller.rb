@@ -2,7 +2,7 @@ class MeasuresController < ApplicationController
   # GET /measures
   # GET /measures.json
   def index
-    @measures = Measure.all
+    @measures = Measure.where(analysis_id: params[:analysis_id]).order_by(name: 1)
 
     respond_to do |format|
       format.html # index.html.erb
