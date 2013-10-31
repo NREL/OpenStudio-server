@@ -268,14 +268,16 @@ class AnalysesController < ApplicationController
   def plot_data
     @analysis = Analysis.find(params[:id])
 
-    # Get the mappings of the variables that were used
+    # Get the mappings of the variables that were used. Move this to the datapoint class
     @mappings = {}
     # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
-    dps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:variable_values)
+    dps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:set_variable_values)
     dps.each do |dp|
-      dp.variable_values.each_key do |key|
-        v = Variable.where(uuid: key).first
-        @mappings[key] = v.name.gsub(" ", "_") if v
+      if dp.set_variable_values
+        dp.set_variable_values.each_key do |key|
+          v = Variable.where(uuid: key).first
+          @mappings[key] = v.name.gsub(" ", "_") if v
+        end
       end
     end
     Rails.logger.info @mappings
@@ -295,15 +297,19 @@ class AnalysesController < ApplicationController
         dp_values = {}
 
         # lookup input value names
-        dp.variable_values.each do |k, v|
-          dp_values["#{@mappings[k]}"] = v
+        if dp.set_variable_values
+          dp.set_variable_values.each do |k, v|
+            dp_values["#{@mappings[k]}"] = v
+          end
         end
 
-        # outputs
-        dp_values["total_energy"] = dp['results']['total_energy']
-        dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity']
+
+        # outputs -- map these by hand right now because I don't want to parse the entire results into
+        # the dp_values hash
+        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
+        dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity'] if dp['results']['interior_lighting_electricity']
         dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
-        dp_values["iteration"] = dp["iteration"] if dp["iteration"]
+        dp_values["iteration"] = dp['iteration'] if dp['iteration']
 
         @plot_data << dp_values
       end

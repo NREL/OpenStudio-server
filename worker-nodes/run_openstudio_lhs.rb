@@ -181,12 +181,12 @@ begin
 
               # Get the value from the data point json that was set via R / Problem Formulation
               if data_point_json[:data_point]
-                if data_point_json[:data_point]['variable_values']
-                  if data_point_json[:data_point]['variable_values'][variable_uuid]
-                    ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['variable_values'][variable_uuid]}"
+                if data_point_json[:data_point]['set_variable_values']
+                  if data_point_json[:data_point]['set_variable_values'][variable_uuid]
+                    ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['set_variable_values'][variable_uuid]}"
                     v = argument_map[variable_name]
                     raise "Could not find argument map in measure" if not v
-                    variable_value = data_point_json[:data_point]['variable_values'][variable_uuid]
+                    variable_value = data_point_json[:data_point]['set_variable_values'][variable_uuid]
                     value_set = v.setValue(variable_value)
                     raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
                     argument_map[variable_name] = v.clone
@@ -196,7 +196,7 @@ begin
                     break
                   end
                 else
-                  raise "No block for variable_values in data point record"
+                  raise "No block for set_variable_values in data point record"
                 end
               else
                 raise "No block for data_point in data_point record"
