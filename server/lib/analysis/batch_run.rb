@@ -1,6 +1,6 @@
 class Analysis::BatchRun
   def initialize(analysis_id, options = {})
-    defaults = {skip_init: false, simulate_data_point_filename: "simulate_data_point.rb"}
+    defaults = {skip_init: false, data_points: [], simulate_data_point_filename: "simulate_data_point.rb"}
     @options = defaults.merge(options)
 
 
@@ -43,10 +43,8 @@ class Analysis::BatchRun
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-
-    if @options[:data_points].nil? || @options[:data_points].empty?
+    if @options[:data_points].empty?
       Rails.logger.info "No datapoints were passed into the options, therefore checking which datapoints to run"
-      @options[:data_points] = []
       @analysis.data_points.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid).each do |dp|
         Rails.logger.info "Adding in #{dp.uuid}"
         dp.status = 'queued'
@@ -159,9 +157,9 @@ class Analysis::BatchRun
             dps <- rbind(dps, c(NA))
           }
           if (nrow(dps) == 0) {
-	    print("not sure what to do with only no datapoint so adding an NA")
-	    dps <- rbind(dps, c(NA))
-	    dps <- rbind(dps, c(NA))
+	          print("not sure what to do with no datapoint so adding an NA")
+	          dps <- rbind(dps, c(NA))
+	          dps <- rbind(dps, c(NA))
           }
 
           print(nrow(dps))

@@ -92,14 +92,14 @@ class DataPoint
 
         if node.node_type == 'server'
           Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
-          if File.exists?(remote_filename)
+          #if File.exists?(remote_filename)
             remote_file_exists = true
             Rails.logger.info "#{remote_filename} exists... moving to new location"
-            FileUtils.cp(remote_filename, local_filename, :force => true)
+            FileUtils.cp(remote_filename, local_filename)#, :force => true)
             remote_file_downloaded = true
-          else
+          #else
             Rails.logger.info "#{remote_filename} did not exist"
-          end
+          #end
         else
           Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
             Rails.logger.info "Checking if the remote file exists"
