@@ -3,7 +3,6 @@ require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 require 'fileutils'
 
-
 puts "Parsing Input: #{ARGV.inspect}"
 
 # parse arguments with optparse
@@ -64,6 +63,7 @@ if directory.stem.to_s == String.new
 end
 logLevel = options[:logLevel].to_i
 
+ros.log_message "Project directory is  #{project_path.to_s}", true
 ros.log_message "Run directory is #{directory.to_s}", true
 objective_function_result = nil
 

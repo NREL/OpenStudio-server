@@ -53,8 +53,10 @@ class Analysis
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
+  # Move this into the compute node class
   def initialize_workers(options = {})
-    # delete the master and workers and reload them
+
+    # delete the master and workers and reload them everysingle time an analysis is initialized
     ComputeNode.delete_all
 
     Rails.logger.info "initializing workers"
@@ -68,13 +70,13 @@ class Analysis
     ips = File.read(ip_file).split("\n")
     ips.each do |ip|
       cols = ip.split("|")
-      if cols[0] == "master" #TODO: eventually rename this from master to server
+      if cols[0] == "master" #TODO: eventually rename this from master to server. The database calls this server
         node = ComputeNode.find_or_create_by(node_type: "server", ip_address: cols[1])
         node.hostname = cols[2]
         node.cores = cols[3]
         node.user = cols[4]
         node.password = cols[5].chomp
-        if options[:use_server_as_worker]
+        if options[:use_server_as_worker] && cols[6].chomp == "true"
           node.valid = true
         else
           node.valid = false
@@ -99,10 +101,10 @@ class Analysis
     end
 
     # get server and worker characteristics
-    get_system_information()
+    ComputeNode.get_system_information
 
     # check if this fails
-    copy_data_to_workers()
+    ComputeNode.copy_data_to_workers(self)
   end
 
   def start(no_delay, analysis_type='batch_run', options = {})
@@ -123,17 +125,6 @@ class Analysis
     end
 
     Rails.logger.info("Starting #{analysis_type}")
-    # NL: This hash should really be put into the analysis job.  Not sure why we need to create this here.
-    data_points_array = []
-    Rails.logger.info "Checking which datapoints to run"
-    self.data_points.where(status: 'na', download_status: 'na').each do |dp|
-      Rails.logger.info "Adding in #{dp.uuid}"
-      dp.status = 'queued'
-      dp.save!
-      data_points_array << dp.uuid
-    end
-
-    options[:data_points] = data_points_array
     if no_delay
       Rails.logger.info("Running in foreground analysis for #{self.uuid} with #{analysis_type}")
       abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options)
@@ -275,111 +266,4 @@ class Analysis
     self.save!
   end
 
-  private
-
-  # copy the zip file over the various workers and extract the file.
-  # if the file already exists, then it will overwrite the file
-  # verify the behaviour of the zip extraction on top of an already existing analysis.
-  def copy_data_to_workers
-    # copy the datafiles over to the worker nodes
-    ComputeNode.where(valid: true).each do |node|
-      if node.node_type == 'master' && false
-        # copy data to local dir for analysis
-        if !use_shm
-          upload_dir = "/mnt/openstudio"
-          File.cp(self.seed_zip.path, "#{upload_dir}/")
-          shell_result = `cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}`
-        else
-          upload_dir = "/run/shm/openstudio"
-          storage_dir = "/mnt/openstudio"
-
-          shell_result = `rm -rf #{upload_dir}`
-          shell_result = `rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis`
-          shell_result = `mkdir -p #{upload_dir}`
-          File.cp(self.seed_zip.path, "#{upload_dir}/")
-          shell_result = `cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}`
-        end
-      else
-        Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
-          logger.info(self.inspect)
-          if !use_shm
-            upload_dir = "/mnt/openstudio"
-            session.scp.upload!(self.seed_zip.path, "#{upload_dir}/")
-
-            session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name}") do |channel, stream, data|
-              logger.info(data)
-            end
-            session.loop
-          else
-            upload_dir = "/run/shm/openstudio"
-            storage_dir = "/mnt/openstudio"
-            session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
-              Rails.logger.info(data)
-            end
-            session.loop
-
-            session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis") do |channel, stream, data|
-              Rails.logger.info(data)
-            end
-            session.loop
-
-            session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
-              Rails.logger.info(data)
-            end
-            session.loop
-
-            session.scp.upload!(self.seed_zip.path, "#{upload_dir}")
-
-            session.exec!("cd #{upload_dir} && unzip -o #{self.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
-              logger.info(data)
-            end
-            session.loop
-          end
-        end
-      end
-    end
-  end
-
-  # During the initialization of each analysis, go to each system node and grab its information
-  def get_system_information
-    #if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
-
-    #end
-
-    Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
-
-    # go through the worker node
-    ComputeNode.all.each do |node|
-      if local_host
-        node.ami_id = "Vagrant"
-        node.instance_id = "Vagrant"
-      else
-        if node.type == 'server'
-          node.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
-          node.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
-        else
-          # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
-          Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
-            #Rails.logger.info(self.inspect)
-
-            logger.info "Checking the configuration of the worker nodes"
-            session.exec!("curl -L http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
-              Rails.logger.info("Worker node reported back #{data}")
-              node.ami_id = data
-            end
-            session.loop
-
-            session.exec!("curl -L http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
-              Rails.logger.info("Worker node reported back #{data}")
-              node.instance_id = data
-            end
-            session.loop
-          end
-
-        end
-      end
-
-      node.save!
-    end
-  end
 end
