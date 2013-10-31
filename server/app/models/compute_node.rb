@@ -36,13 +36,17 @@ class ComputeNode
   def self.copy_data_to_workers(analysis)
     # copy the datafiles over to the worker nodes
     ComputeNode.where(valid: true).each do |node|
-      if node.node_type == 'master'
+      Rails.logger.info("Configuring node '#{node.node_type}'")
+      if node.node_type == 'server'
+        Rails.logger.info("Configuring and copying data to master node")
         if !analysis.use_shm
           upload_dir = "/mnt/openstudio/analysis_#{analysis.id}"
           FileUtils.mkdir_p(upload_dir)
-          #FileUtils.chmod_R(0777, upload_dir) # for some reason this isn't working
-          File.cp(analysis.seed_zip.path, "#{upload_dir}/")
+          Rails.logger.info("Analysis directory is #{upload_dir}")
+          FileUtils.chmod_R(0777, upload_dir)
+          FileUtils.copy(analysis.seed_zip.path, "#{upload_dir}/")
           shell_result = `cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}`
+          FileUtils.chmod_R(0777, upload_dir)
         else
           upload_dir = "/run/shm/openstudio/analysis_#{analysis.id}"
           storage_dir = "/mnt/openstudio/analysis_#{analysis.id}"
@@ -50,15 +54,16 @@ class ComputeNode
           shell_result = `rm -rf #{upload_dir}`
           shell_result = `rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis_#{analysis.id}`
           FileUtils.mkdir_p(upload_dir)
-          FileUtils.chown(0777, upload_dir)
+          FileUtils.chmod_R(0777, upload_dir)
           File.cp(analysis.seed_zip.path, "#{upload_dir}/")
           shell_result = `cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}`
+          FileUtils.chmod_R(0777, upload_dir)
         end
       else
         Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
           if !analysis.use_shm
             upload_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-            session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
+            session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
               Rails.logger.info(data)
             end
             session.loop
@@ -82,7 +87,7 @@ class ComputeNode
             end
             session.loop
 
-            session.exec!("mkdir -p #{upload_dir}") do |channel, stream, data|
+            session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
               Rails.logger.info(data)
             end
             session.loop
@@ -113,7 +118,7 @@ class ComputeNode
         node.ami_id = "Vagrant"
         node.instance_id = "Vagrant"
       else
-        if node.type == 'server'
+        if node.node_type == 'server'
           node.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
           node.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
         else

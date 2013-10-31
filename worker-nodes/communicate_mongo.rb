@@ -54,6 +54,7 @@ module CommunicateMongo
     end
   end
 
+  # ETH: I assume that it is okay that I removed this?
   def self.communicate_datapoint(dp, data_point)
     # I have no idea what this is doing.  Why are we putting the values
     # and assign anlaysis UUID back on the datapoint?  Vote to remove this entirely.
