@@ -10,8 +10,8 @@ run_list([
 
 default_attributes(
     :openstudio => {
-        :version => "1.1.0",
-        :version_revision => "319953bbcc"
+        :version => "1.1.1",
+        :version_revision => "dc457c51a5"
         #:checksum => "9180659c77a7fc710cb9826d40ae67c65db0d26bb4bce1a93b64d7e63f4a1f2c"
     },
     :energyplus => {
