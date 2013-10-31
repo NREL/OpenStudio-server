@@ -125,17 +125,6 @@ class Analysis
     end
 
     Rails.logger.info("Starting #{analysis_type}")
-    # NL: This hash should really be put into the analysis job.  Not sure why we need to create this here.
-    data_points_array = []
-    Rails.logger.info "Checking which datapoints to run"
-    self.data_points.where(status: 'na', download_status: 'na').each do |dp|
-      Rails.logger.info "Adding in #{dp.uuid}"
-      dp.status = 'queued'
-      dp.save!
-      data_points_array << dp.uuid
-    end
-
-    options[:data_points] = data_points_array
     if no_delay
       Rails.logger.info("Running in foreground analysis for #{self.uuid} with #{analysis_type}")
       abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options)

@@ -13,36 +13,36 @@ project_options = {}
 project_id = api.new_project(project_options)
 
 ## ===== Disk IO Benchmark - Using PAT JSON Files=====
-#formulation_file = "./DiskIOBenchmark/analysis.json"
-#analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
-#datapoint_files = Dir.glob("./DiskIOBenchmark/datapoint*.json").take(2)
-#
-#analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
-#                    reset_uuids: true, analysis_name: "DiskIOBenchmark Batch Run 2 - simulations"}
-#analysis_id = api.new_analysis(project_id, analysis_options)
-#
-#datapoint_files.each do |dp|
-#  datapoint_options = {datapoint_file: dp, reset_uuids: true}
-#  api.upload_datapoint(analysis_id, datapoint_options)
-#end
+formulation_file = "./DiskIOBenchmark/analysis.json"
+analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
+datapoint_files = Dir.glob("./DiskIOBenchmark/datapoint*.json").take(2)
 
-#run_options = {analysis_action: "start", without_delay: false, analysis_type: 'batch_run'}
-#api.run_analysis(analysis_id, run_options)
+analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
+                    reset_uuids: true, analysis_name: "DiskIOBenchmark Batch Run Only 2 Simulations"}
+analysis_id = api.new_analysis(project_id, analysis_options)
+
+datapoint_files.each do |dp|
+  datapoint_options = {datapoint_file: dp, reset_uuids: true}
+  api.upload_datapoint(analysis_id, datapoint_options)
+end
+
+run_options = {analysis_action: "start", without_delay: false, analysis_type: 'batch_run'}
+api.run_analysis(analysis_id, run_options)
 
 
 # ===== LHS Sample and Run =====
-formulation_file = "./ContinuousExample/analysis.json"
-analysis_zip_file = "./ContinuousExample/analysis.zip"
-
-analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
-                    reset_uuids: true, analysis_name: "LHS Sample and Run"}
-analysis_id = api.new_analysis(project_id, analysis_options)
-
-run_options = {analysis_action: "start", without_delay: true, analysis_type: "lhs", allow_multiple_jobs: true}
-api.run_analysis(analysis_id, run_options)
-
-run_options = {analysis_action: "start", without_delay: true, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
-api.run_analysis(analysis_id, run_options)
+#formulation_file = "./ContinuousExample/analysis.json"
+#analysis_zip_file = "./ContinuousExample/analysis.zip"
+#
+#analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
+#                    reset_uuids: true, analysis_name: "LHS Sample and Run"}
+#analysis_id = api.new_analysis(project_id, analysis_options)
+#
+#run_options = {analysis_action: "start", without_delay: true, analysis_type: "lhs", allow_multiple_jobs: true}
+#api.run_analysis(analysis_id, run_options)
+#
+#run_options = {analysis_action: "start", without_delay: true, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
+#api.run_analysis(analysis_id, run_options)
 
 # ===== LHS Sample and Run Number 2 =====
 #formulation_file = "./ContinuousExample/analysis.json"
