@@ -203,7 +203,7 @@ class Analysis::SequentialSearch
 
       # go through each of the run list results and delete any that have already run
       data_point_list.reverse.each do |dp|
-        if @analysis.data_points.where(variable_values: dp[:variables]).exists?
+        if @analysis.data_points.where(set_variable_values: dp[:variables]).exists?
           Rails.logger.info("Datapoint has already run for #{dp[:name]}")
           data_point_list.delete(dp)
         end
@@ -280,7 +280,7 @@ class Analysis::SequentialSearch
       @run_list.each do |run|
         dp = @analysis.data_points.new(name: run[:name])
         dp['variable_group_list'] = run[:variable_group]
-        dp.variable_values = run[:variables]
+        dp.set_variable_values = run[:variables]
         dp['iteration'] = run[:iteration]
         dp['sample'] = run[:sample]
         if dp.save!

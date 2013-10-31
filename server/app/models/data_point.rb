@@ -5,7 +5,8 @@ class DataPoint
   field :uuid, :type => String
   field :_id, :type => String, default: -> { uuid || UUID.generate }
   field :name, :type => String
-  field :variable_values, :type => Array
+  field :variable_values # This has been hijacked from OS DataPoint. Use set_variable_values
+  field :set_variable_values # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
   field :ip_address, :type => String
   field :internal_ip_address, :type => String
   field :download_status, :type => String, default: "na"
@@ -19,7 +20,6 @@ class DataPoint
   field :run_start_time, :type => DateTime
   field :run_end_time, :type => DateTime
   field :sdp_log_file, :type => Array
-
 
   # Relationships
   belongs_to :analysis
