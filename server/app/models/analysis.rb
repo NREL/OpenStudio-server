@@ -70,7 +70,7 @@ class Analysis
     ips = File.read(ip_file).split("\n")
     ips.each do |ip|
       cols = ip.split("|")
-      if cols[0] == "master" #TODO: eventually rename this from master to server
+      if cols[0] == "master" #TODO: eventually rename this from master to server. The database calls this server
         node = ComputeNode.find_or_create_by(node_type: "server", ip_address: cols[1])
         node.hostname = cols[2]
         node.cores = cols[3]

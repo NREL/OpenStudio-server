@@ -77,14 +77,13 @@ class DataPoint
       remote_file_downloaded = false
       local_filename = nil
 
-      #look up the worker nodes ip address from database
+      #look up the worker nodes ip address from database. Move this to ComputeNode class and pass in any potential
+      # ip addresses that may have finished
       node = ComputeNode.where(ip_address: self.ip_address).first
       if !node.nil?
         remote_filepath = "/mnt/openstudio/analysis_#{self.analysis.id}/analysis"
         remote_filename = "#{remote_filepath}/data_point_#{self.id}/data_point_#{self.id}.zip"
-        # TODO: File permissions will cause a crash if you set the directory to analysis_UUID.  Need to revisit
-        # the file permissions
-        local_filepath = "/mnt/openstudio" #/analysis_#{self.analysis.id}"
+        local_filepath = "/mnt/openstudio/analysis_#{self.analysis.id}"
         local_filename = "#{local_filepath}/data_point_#{self.id}.zip"
 
         # make sure that the local path exists
