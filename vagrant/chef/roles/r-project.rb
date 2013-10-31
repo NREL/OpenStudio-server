@@ -84,6 +84,10 @@ default_attributes(
             {
                 :name => 'DEoptim',
                 :version => '2.2-2'
+            },
+            {
+                :name => 'NMOF',
+                :version => '0.28-2'
             }
         ]
     }
