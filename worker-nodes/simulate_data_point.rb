@@ -6,10 +6,8 @@ puts "Parsing Input: #{ARGV}"
 # parse arguments with optparse
 options = Hash.new
 optparse = OptionParser.new do |opts|
-
-  #TODO Delete directory argument.  Not needed at the moment
-  opts.on('-d', '--directory DIRECTORY', String, "Path to the directory that is pre-loaded with a DataPoint json.") do |s|
-    options[:directory] = s
+  opts.on('-a', '--analysis_id UUID', String, "UUID of the analysis.") do |analysis_id|
+    options[:analysis_id] = analysis_id
   end
 
   opts.on('-u', '--uuid UUID', String, "UUID of the data point to run with no braces.") do |s|
@@ -37,7 +35,6 @@ optparse = OptionParser.new do |opts|
     options[:run_shm_dir] = s
   end
 end
-
 optparse.parse!
 
 puts "Parsed Input: #{optparse}"
@@ -64,12 +61,12 @@ begin
 
   directory = nil
   analysis_dir = "/mnt/openstudio"
-  store_directory = "/mnt/openstudio/analysis/data_point_#{options[:uuid]}"
+  store_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/analysis/data_point_#{options[:uuid]}"
 
   # use /run/shm on AWS (if possible)
   if Dir.exists?(options[:run_shm_dir]) && options[:run_shm]
     analysis_dir = "#{options[:run_shm_dir]}/openstudio"
-    directory = "#{options[:run_shm_dir]}/openstudio/analysis/data_point_#{options[:uuid]}"
+    directory = "#{options[:run_shm_dir]}/openstudio/analysis_#{options[:analysis_id]}/analysis/data_point_#{options[:uuid]}"
   else
     directory = store_directory
   end

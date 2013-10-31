@@ -252,11 +252,11 @@ begin
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
 
   ros.log_message "Verifying location of Post Process Script", true
-  post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "../..", "post_process.rb"))
+  post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "post_process.rb"))
   if File.exists?(post_process_filename)
     ros.log_message "Post process file is #{post_process_filename}"
   else
-    raise "Could not file post process file #{post_process_filename}"
+    raise "Could not find post process file #{post_process_filename}"
   end
 
   ros.log_message "Waiting for simulation to finish", true

@@ -73,36 +73,35 @@ class DataPoint
 
       # Somehow flag that we don't care about downloading the results back to the home directory
       Rails.logger.info "trying to download #{self.id}"
-      save_filename = nil
       remote_file_exists = false
+      remote_file_downloaded = false
+      local_filename = nil
 
       #look up the worker nodes ip address from database
       node = ComputeNode.where(ip_address: self.ip_address).first
       if !node.nil?
+        remote_filepath = "/mnt/openstudio/analysis_#{self.analysis.id}/analysis"
+        remote_filename = "#{remote_filepath}/data_point_#{self.id}/data_point_#{self.id}.zip"
+        # TODO: File permissions will cause a crash if you set the directory to analysis_UUID.  Need to revisit
+        # the file permissions
+        local_filepath = "/mnt/openstudio" #/analysis_#{self.analysis.id}"
+        local_filename = "#{local_filepath}/data_point_#{self.id}.zip"
+
+        # make sure that the local path exists
+        FileUtils.mkdir_p(local_filepath)
+
         if node.node_type == 'server'
-
-          # no need to download the data, just move a file
-          remote_file_path = "/mnt/openstudio"
-          remote_filename = "#{remote_file_path}/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
-          save_filename = "#{remote_file_path}/data_point_#{self.id}.zip"
-
-          Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{save_filename}"
+          Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
           if File.exists?(remote_filename)
             remote_file_exists = true
-            FileUtils.mv(remote_filename, save_filename, :force => true)
+            Rails.logger.info "#{remote_filename} exists... moving to new location"
+            FileUtils.cp(remote_filename, local_filename, :force => true)
+            remote_file_downloaded = true
           else
             Rails.logger.info "#{remote_filename} did not exist"
-            save_filename = nil
           end
         else
           Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
-            #Rails.logger.info(self.inspect)
-
-            # Regardless of SHM, the data points will be copied back to /mnt/openstudio (or somewhere else on RedMesa)
-            remote_file_path = "/mnt/openstudio"
-            remote_filename = "#{remote_file_path}/analysis/data_point_#{self.id}/data_point_#{self.id}.zip"
-            save_filename = "#{remote_file_path}/data_point_#{self.id}.zip"
-
             Rails.logger.info "Checking if the remote file exists"
             session.exec!("if [ -e '#{remote_filename}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |channel, stream, data|
               Rails.logger.info("check remote file data is #{data}")
@@ -114,10 +113,12 @@ class DataPoint
 
             Rails.logger.info "remote file exists flag is #{remote_file_exists} for #{remote_filename}"
             if remote_file_exists
-              Rails.logger.info "Trying to download #{remote_filename} to #{save_filename}"
-              if !session.scp.download!(remote_filename, save_filename)
-                save_filename = nil
+              Rails.logger.info "Trying to download #{remote_filename} to #{local_filename}"
+              if !session.scp.download!(remote_filename, local_filename)
+                remote_file_downloaded = false
                 Rails.logger.info "ERROR trying to download datapoint from remote server"
+              else
+                remote_file_downloaded = true
               end
 
               #TODO test the deletion of the zip file
@@ -131,13 +132,13 @@ class DataPoint
       end #wn.ipaddress
 
       #now add the datapoint path to the database to get it via the server
-      if remote_file_exists && !save_filename.nil?
-        self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
+      if remote_file_exists && remote_file_downloaded
+        self.openstudio_datapoint_file_name = local_filename
         self.download_status = 'completed'
         self.save!
         downloaded = true
       elsif remote_file_exists
-        self.openstudio_datapoint_file_name = save_filename if !save_filename.nil?
+        self.openstudio_datapoint_file_name = nil
         self.download_status = 'completed'
         self.download_information = 'failed to download the file'
         self.save!
