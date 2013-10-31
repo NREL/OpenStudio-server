@@ -141,11 +141,12 @@ class Analysis::BatchRun
             }
             dbDisconnect(mongo)
 
+            ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
             print("#{@analysis.use_shm}")
             if ("#{@analysis.use_shm}" == "true"){
-              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@options[:simulate_data_point_filename]} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS --run-shm > /mnt/openstudio/",x,".log",sep="")
+              y <- paste(ruby_command," /mnt/openstudio/#{@options[:simulate_data_point_filename]} -a #{@analysis.id} -u ",x," -r AWS --run-shm",sep="")
             } else {
-              y <- paste("/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/ /mnt/openstudio/#{@options[:simulate_data_point_filename]} -u ",x," -d /mnt/openstudio/analysis/data_point_",x," -r AWS > /mnt/openstudio/",x,".log",sep="")
+              y <- paste(ruby_command," /mnt/openstudio/#{@options[:simulate_data_point_filename]} -a #{@analysis.id} -u ",x," -r AWS",sep="")
             }
             z <- system(y,intern=TRUE)
             j <- length(z)
