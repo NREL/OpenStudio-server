@@ -80,7 +80,6 @@ class DataPointsController < ApplicationController
     params[:data_point].merge!(:os_metadata => params[:metadata])
 
     @data_point = DataPoint.new(params[:data_point])
-    @data_point.status = "queued"
 
     respond_to do |format|
       if @data_point.save!
@@ -111,7 +110,6 @@ class DataPointsController < ApplicationController
         dp[:data_point][:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
         dp.delete(:metadata) if dp.has_key?(:metadata)
         @data_point = DataPoint.new(dp[:data_point])
-        @data_point.status = "queued"
         if @data_point.save!
           saved_dps += 1
         else

@@ -64,7 +64,7 @@ begin
   store_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/analysis/data_point_#{options[:uuid]}"
 
   # use /run/shm on AWS (if possible)
-  if Dir.exists?(options[:run_shm_dir]) && options[:run_shm]
+  if options[:run_shm] && Dir.exists?(options[:run_shm_dir])
     analysis_dir = "#{options[:run_shm_dir]}/openstudio"
     directory = "#{options[:run_shm_dir]}/openstudio/analysis_#{options[:analysis_id]}/analysis/data_point_#{options[:uuid]}"
   else

@@ -57,12 +57,12 @@ module CommunicateMongo
   def self.communicate_datapoint(dp, data_point)
     # I have no idea what this is doing.  Why are we putting the values
     # and assign anlaysis UUID back on the datapoint?  Vote to remove this entirely.
-    id = OpenStudio::removeBraces(data_point.uuid)
-    dp = DataPoint.find_or_create_by(uuid: id)
-    id = OpenStudio::removeBraces(data_point.analysisUUID.get)
-    dp.analysis = Analysis.find_or_create_by(uuid: id)
-    dp.values = data_point.variableValues.map { |v| v.toDouble }
-    dp.save!
+    #id = OpenStudio::removeBraces(data_point.uuid)
+    #dp = DataPoint.find_or_create_by(uuid: id)
+    #id = OpenStudio::removeBraces(data_point.analysisUUID.get)
+    #dp.analysis = Analysis.find_or_create_by(uuid: id)
+    #dp.values = data_point.variableValues.map { |v| v.toDouble }
+    #dp.save!
   end
 
   def self.communicate_log_message(dp, log_message, add_delta_time=false, prev_time=nil)
