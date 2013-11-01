@@ -3,6 +3,9 @@ require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 require 'fileutils'
 
+require 'ruby-prof'
+RubyProf.start
+
 puts "Parsing Input: #{ARGV.inspect}"
 
 # parse arguments with optparse
@@ -196,6 +199,20 @@ rescue Exception => e
   ros.communicate_failure()
 ensure
   ros.log_message "#{__FILE__} Completed", true
+
+  results = RubyProf.stop
+
+  File.open "#{directory.to_s}/profile-graph.html", 'w' do |file|
+    RubyProf::GraphHtmlPrinter.new(results).print(file)
+  end
+
+  File.open "#{directory.to_s}/profile-flat.txt", 'w' do |file|
+    RubyProf::FlatPrinter.new(results).print(file)
+  end
+
+  File.open "#{directory.to_s}/profile-tree.prof", 'w' do |file|
+    RubyProf::CallTreePrinter.new(results).print(file)
+  end
 
   # DLM: this is where we put the objective functions.  NL: Note that we must return out of this file nicely no matter what.
   objective_function_result ||= "NA"

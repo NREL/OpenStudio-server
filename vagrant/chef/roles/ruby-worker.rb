@@ -41,6 +41,12 @@ default_attributes(
                 },
                 {
                     :name => "net-scp"
+                },
+                {
+                    :name => "net-scp"
+                },
+                {
+                    :name => "ruby-prof"
                 }
             ]
         }
