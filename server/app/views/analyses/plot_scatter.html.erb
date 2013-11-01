@@ -73,7 +73,7 @@
           d3.json("plot_data.json", function (error, data) {
               var domainByTrait = {},
                       traits = d3.keys(data['data'][0]).filter(function (d) {
-                          return d !== "wwr_west_static";
+                          return d !== "wwr_west_static" && d !== "data_point_uuid";
                       }),
                       n = traits.length;
 

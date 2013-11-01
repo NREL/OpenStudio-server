@@ -296,13 +296,14 @@ class AnalysesController < ApplicationController
       if dp['results']
         dp_values = {}
 
+        dp_values["data_point_uuid"] = data_point_path(dp.id)
+
         # lookup input value names
         if dp.set_variable_values
           dp.set_variable_values.each do |k, v|
             dp_values["#{@mappings[k]}"] = v
           end
         end
-
 
         # outputs -- map these by hand right now because I don't want to parse the entire results into
         # the dp_values hash

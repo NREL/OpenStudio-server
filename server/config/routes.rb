@@ -34,6 +34,8 @@ OpenstudioServer::Application.routes.draw do
     #end
   end
 
+  match '/about' => 'pages#about'
+
 
 
 
