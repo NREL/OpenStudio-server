@@ -3,9 +3,6 @@ require 'openstudio/energyplus/find_energyplus'
 require 'optparse'
 require 'fileutils'
 
-require 'ruby-prof'
-RubyProf.start
-
 puts "Parsing Input: #{ARGV.inspect}"
 
 # parse arguments with optparse
@@ -30,10 +27,19 @@ optparse = OptionParser.new do |opts|
     options[:logLevel] = logLevel
   end
 
+  options[:profile_run] = false
+  opts.on("-p", "--profile-run", "Profile the Run OpenStudio Call") do |pr|
+    options[:profile_run] = pr
+  end
 end
 optparse.parse!
 
 puts "Parsed Input: #{optparse}"
+
+if options[:profile_run]
+  require 'ruby-prof'
+  RubyProf.start
+end
 
 puts "Checking Arguments"
 if not options[:directory]
@@ -189,6 +195,13 @@ begin
   # implemented differently for Local vs. Vagrant or AWS
   ros.communicate_results(data_point, directory)
 
+  if options[:profile_run]
+    profile_results = RubyProf.stop
+    File.open("#{directory.to_s}/profile-graph.html", "w") { |f| RubyProf::GraphHtmlPrinter.new(profile_results).print(f) }
+    File.open("#{directory.to_s}/profile-flat.txt", "w") { |f| RubyProf::FlatPrinter.new(profile_results).print(f) }
+    File.open("#{directory.to_s}/profile-tree.prof", "w") { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
+  end
+
   # now set the objective function value or values
   objective_function_result = 0
 rescue Exception => e
@@ -200,19 +213,6 @@ rescue Exception => e
 ensure
   ros.log_message "#{__FILE__} Completed", true
 
-  results = RubyProf.stop
-
-  File.open "#{directory.to_s}/profile-graph.html", 'w' do |file|
-    RubyProf::GraphHtmlPrinter.new(results).print(file)
-  end
-
-  File.open "#{directory.to_s}/profile-flat.txt", 'w' do |file|
-    RubyProf::FlatPrinter.new(results).print(file)
-  end
-
-  File.open "#{directory.to_s}/profile-tree.prof", 'w' do |file|
-    RubyProf::CallTreePrinter.new(results).print(file)
-  end
 
   # DLM: this is where we put the objective functions.  NL: Note that we must return out of this file nicely no matter what.
   objective_function_result ||= "NA"

@@ -29,7 +29,6 @@ end
 run_options = {analysis_action: "start", without_delay: false, analysis_type: 'batch_run'}
 api.run_analysis(analysis_id, run_options)
 
-
 # ===== LHS Sample and Run =====
 formulation_file = "./ContinuousExample/analysis.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
