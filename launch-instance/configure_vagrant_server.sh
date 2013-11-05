@@ -16,3 +16,6 @@ sudo chmod 777 /mnt/openstudio
 sudo rm -rf /mnt/mongodb/data
 sudo mkdir -p /mnt/mongodb/data
 sudo chown mongodb:nogroup /mnt/mongodb/data
+sudo service mongodb restart
+sudo service delayed_job restart
+sudo rm -rf /var/lib/mongodb
