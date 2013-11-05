@@ -13,3 +13,6 @@ sudo /data/launch-instance/server_script_vagrant.sh
 # make sure that the openstudio directory for simulations exists and is writable
 sudo mkdir -p /mnt/openstudio
 sudo chmod 777 /mnt/openstudio
+sudo rm -rf /mnt/mongodb/data
+sudo mkdir -p /mnt/mongodb/data
+sudo chown mongodb:nogroup /mnt/mongodb/data
