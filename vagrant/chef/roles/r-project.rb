@@ -1,4 +1,3 @@
-
 name "r-project"
 description "Installs and configure R"
 
@@ -27,8 +26,8 @@ default_attributes(
                 :version => '0.10'
             },
             {
-	        :name => 'e1071',
-	        :version => '1.6-1'
+                :name => 'e1071',
+                :version => '1.6-1'
             },
             {
                 :name => 'Rserve',
@@ -69,6 +68,26 @@ default_attributes(
             {
                 :name => 'R.utils',
                 :version => '1.27.1'
+            },
+            {
+                :name => 'iterators',
+                :version => '1.0.6'
+            },
+            {
+                :name => 'foreach',
+                :version => '1.4.1'
+            },
+            {
+                :name => 'doSNOW',
+                :version => '1.0.9'
+            },
+            {
+                :name => 'DEoptim',
+                :version => '2.2-2'
+            },
+            {
+                :name => 'NMOF',
+                :version => '0.28-2'
             }
         ]
     }

@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class WorkerNodeTest < ActiveSupport::TestCase
+class ComputerNodeTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

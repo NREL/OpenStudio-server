@@ -27,6 +27,9 @@ default_attributes(
                 {
                     :name => "bundler",
                     :version => "1.3.5",
+                },
+                {
+                    :name => "ruby-prof"
                 }
             ]
         }

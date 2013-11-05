@@ -1,5 +1,4 @@
 OpenstudioServer::Application.routes.draw do
-  resources :measures  # :only => [:show, :index]
   resources :projects do
     member do
       get :status
@@ -11,13 +10,17 @@ OpenstudioServer::Application.routes.draw do
         post :upload
         get :status
         get :page_data
+        get :plot_data
         get :download_status
         get :debug_log
+        get :new_view
+        get :plot_parallelcoordinates
+        get :plot_scatter
+        get :plot_xy
       end
 
-      #resources :problems, shallow: true do
-      #  resources :variables, shallow: true
-      #end
+      resources :measures, :only => [:show, :index], shallow: true
+      resources :variables, :only => [:show, :index], shallow: true
       resources :data_points, shallow: true  do
         member do
           get :show_full
@@ -30,6 +33,8 @@ OpenstudioServer::Application.routes.draw do
     end
     #end
   end
+
+  match '/about' => 'pages#about'
 
 
 

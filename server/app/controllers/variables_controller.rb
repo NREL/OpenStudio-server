@@ -2,7 +2,7 @@ class VariablesController < ApplicationController
   # GET /variables
   # GET /variables.json
   def index
-    @variables = Variable.all
+    @variables = Variable.where(analysis_id: params[:analysis_id]).order_by(name: 1)
 
     respond_to do |format|
       format.html # index.html.erb

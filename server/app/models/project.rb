@@ -12,7 +12,7 @@ class Project
   # Indexes
   index({uuid: 1}, unique: true)
   index({id: 1}, unique: true)
-  index({name: 1}, unique: true)
+  index({name: 1})
 
   # Callbacks
   after_create :verify_uuid

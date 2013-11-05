@@ -52,8 +52,14 @@ class AnalysesController < ApplicationController
     params[:analysis].merge!(:os_metadata => params[:metadata])
 
     @analysis = Analysis.new(params[:analysis])
+
+    # Need to pull out the variables that are in this analysis so that we can stitch the problem
+    # back together when it goes to run
+    logger.info("pulling out os variables")
+    @analysis.pull_out_os_variables()
+
     respond_to do |format|
-      if @analysis.save
+      if @analysis.save!
         format.html { redirect_to @analysis, notice: 'Analysis was successfully created.' }
         format.json { render json: @analysis, status: :created, location: @analysis }
       else
@@ -100,12 +106,18 @@ class AnalysesController < ApplicationController
     logger.info("action #{params.inspect}")
     params[:analysis_type].nil? ? @analysis_type = 'batch_run' : @analysis_type = params[:analysis_type]
 
-    result = {}
+    logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
+    options = params.symbolize_keys # read the deaults from the HTTP request
+    options[:simulate_data_point_filename] = params[:simulate_data_point_filename] if params[:simulate_data_point_filename]
+    options[:x_objective_function] = @analysis['x_objective_function'] if @analysis['x_objective_function']
+    options[:y_objective_function] = @analysis['y_objective_function'] if @analysis['y_objective_function']
+
+    logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
+
     if params[:analysis_action] == 'start'
-
-      params[:without_delay] == 'true' ? no_delay = true : no_delay = false
-
-      res = @analysis.run_r_analysis(no_delay, @analysis_type)
+      params[:without_delay].to_s == 'true' ? no_delay = true : no_delay = false
+      res = @analysis.run_analysis(no_delay, @analysis_type, options)
+      result = {}
       if res[0]
         result[:code] = 200
         result[:analysis] = @analysis
@@ -125,6 +137,7 @@ class AnalysesController < ApplicationController
       end
     elsif params[:analysis_action] == 'stop'
       res = @analysis.stop_analysis
+      result = {}
       if res[0]
         result[:code] = 200
         result[:analysis] = @analysis
@@ -181,7 +194,9 @@ class AnalysesController < ApplicationController
   def upload
     @analysis = Analysis.find(params[:id])
 
-    @analysis.seed_zip = params[:file]
+    if @analysis
+      @analysis.seed_zip = params[:file]
+    end
 
     respond_to do |format|
       if @analysis.save
@@ -196,26 +211,114 @@ class AnalysesController < ApplicationController
   def debug_log
     @analysis = Analysis.find(params[:id])
 
-    @log_message = []
-    @analysis.data_points.each do |dp|
-      unless dp.run_time_log.nil?
-        @log_message << [dp.name] + dp.run_time_log
-      end
-    end
     @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
-    exclude_fields = [:_id,:user,:password]
-    @workers = WorkerNode.all.map{|n| n.as_json(:except => exclude_fields) }
-    if MasterNode.count > 0
-      @server = MasterNode.first.as_json(:except => exclude_fields)
-    end
-
+    exclude_fields = [:_id, :user, :password]
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(:except => exclude_fields) }
+    @server = ComputeNode.where(node_type: 'server').first.as_json(:expect => exclude_fields)
 
     respond_to do |format|
-      format.html # oh_shit.html.erb
+      format.html # debug_log.html.erb
       format.json { render json: log_message }
     end
 
+  end
+
+  def new_view
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      exclude_fields = [
+          :os_metadata,
+          :problem,
+      ]
+      include_fields = [
+          :variables,
+          :measures #=> {:include => :variables}
+      ]
+      #  format.html # new.html.erb
+      format.json { render json: {:analysis => @analysis.as_json(:except => exclude_fields, :include => include_fields)} }
+    end
+  end
+
+  def plot_parallelcoordinates
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      format.html # debug_log.html.erb
+    end
+  end
+
+  def plot_scatter
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      format.html # results_scatter.html.erb
+    end
+  end
+
+  def plot_xy
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      format.html # results_scatter.html.erb
+    end
+  end
+
+  def plot_data
+    @analysis = Analysis.find(params[:id])
+
+    # Get the mappings of the variables that were used. Move this to the datapoint class
+    @mappings = {}
+    # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
+    dps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:set_variable_values)
+    dps.each do |dp|
+      if dp.set_variable_values
+        dp.set_variable_values.each_key do |key|
+          v = Variable.where(uuid: key).first
+          @mappings[key] = v.name.gsub(" ", "_") if v
+        end
+      end
+    end
+    Rails.logger.info @mappings
+
+    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
+    # and this is just an ugly mapping, sorry all.
+    @plot_data = []
+    dps = nil
+    if @analysis.analysis_type == "sequential_search"
+      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+      dps = dps.rotate(1) # put the starting point on top
+    else
+      dps = @analysis.data_points.all
+    end
+    dps.each do |dp|
+      if dp['results']
+        dp_values = {}
+
+        dp_values["data_point_uuid"] = data_point_path(dp.id)
+
+        # lookup input value names
+        if dp.set_variable_values
+          dp.set_variable_values.each do |k, v|
+            dp_values["#{@mappings[k]}"] = v
+          end
+        end
+
+        # outputs -- map these by hand right now because I don't want to parse the entire results into
+        # the dp_values hash
+        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
+        dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity'] if dp['results']['interior_lighting_electricity']
+        dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
+        dp_values["iteration"] = dp['iteration'] if dp['iteration']
+
+        @plot_data << dp_values
+      end
+    end
+
+    respond_to do |format|
+      format.json { render json: {:mappings => @mappings, :data => @plot_data} }
+    end
   end
 
   def page_data
@@ -245,7 +348,7 @@ class AnalysesController < ApplicationController
             :openstudio_datapoint_file_name
         ]
 
-        render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ) }
+        render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points)}
         #render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
