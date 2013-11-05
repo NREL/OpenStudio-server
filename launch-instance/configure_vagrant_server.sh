@@ -13,3 +13,8 @@ sudo /data/launch-instance/server_script_vagrant.sh
 # rename the mongoid-vagrant template to mongoid.yml
 mv /mnt/openstudio/rails-models/mongoid-vagrant.yml /mnt/openstudio/rails-models/mongoid.yml
 
+#create mongodb dir
+sudo rm -rf /mnt/mongodb/data
+sudo mkdir -p /mnt/mongodb/data
+sudo chown mongodb:nogroup /mnt/mongodb/data
+
