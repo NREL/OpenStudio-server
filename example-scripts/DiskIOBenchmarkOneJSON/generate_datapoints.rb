@@ -20,7 +20,9 @@ one_hash = {data_points: []}
   @index = instance
   @uuid = UUID.new.generate
   @version_uuid = UUID.new.generate
-  one_hash[:data_points] << JSON.parse(dp_tmp.result)["data_point"]
+  to_add =JSON.parse(dp_tmp.result)["data_point"]
+  to_add["run_priority"] = instance
+  one_hash[:data_points] << to_add
 end
 outfile = File.join(dir, "datapoints.json")
 File.open(outfile, 'w') { |f| f << JSON.pretty_generate(one_hash) }
