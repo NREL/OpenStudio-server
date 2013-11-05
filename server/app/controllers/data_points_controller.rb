@@ -103,11 +103,17 @@ class DataPointsController < ApplicationController
       uploaded_dps = params[:data_points].count
       logger.info "received #{uploaded_dps} points"
       params[:data_points].each do |dp|
-        # read in each datapoint
-        dp[:data_point].merge!(:os_metadata => dp[:metadata])
-        dp[:data_point][:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
-        dp.delete(:metadata) if dp.has_key?(:metadata)
-        @data_point = DataPoint.new(dp[:data_point])
+        # This is the old format that can be deprecated when OpenStudio V1.1.3 is released
+        if dp[:metadata]
+          dp[:data_point].merge!(:os_metadata => dp[:metadata])
+          dp[:data_point][:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
+          dp.delete(:metadata) if dp.has_key?(:metadata)
+          @data_point = DataPoint.new(dp[:data_point])
+        else
+          dp[:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
+          @data_point = DataPoint.new(dp)
+        end
+
         if @data_point.save!
           saved_dps += 1
         else
