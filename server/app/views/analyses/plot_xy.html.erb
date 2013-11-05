@@ -1,0 +1,162 @@
+<h2>Analysis Results</h2>
+<style>
+    body {
+        font: 12px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        font: 12px sans-serif;
+        shape-rendering: crispEdges;
+    }
+
+    .dot {
+        stroke: #000;
+    }
+</style>
+
+<% if @plot_data %>
+    <div id="graph-div">
+      <p>There are no results for this analysis.</p>
+    </div>
+<% else %>
+
+    <div id="graph-div">
+      <script>
+
+          var margin = {top: 20, right: 20, bottom: 30, left: 40},
+                  width = 960 - margin.left - margin.right,
+                  height = 500 - margin.top - margin.bottom;
+
+          var x = d3.scale.linear()
+                  .range([0, width]);
+
+          var y = d3.scale.linear()
+                  .range([height, 0]);
+
+          var color = d3.scale.category20();
+
+          var xAxis = d3.svg.axis()
+                  .scale(x)
+                  .orient("bottom");
+
+          var yAxis = d3.svg.axis()
+                  .scale(y)
+                  .orient("left");
+
+          var tooltip = d3.select("body")
+                  .append("div")
+                  .style("position", "absolute")
+                  .style("z-index", "10")
+                  .style("visibility", "hidden")
+                  .text("na");
+
+          var svg = d3.select("#graph-div").append("svg")
+                  .attr("width", width + margin.left + margin.right)
+                  .attr("height", height + margin.top + margin.bottom)
+                  .append("g")
+                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          d3.json("plot_data.json", function (error, data) {
+              data['data'].forEach(function (d) {
+                  d.total_energy = +d.total_energy;
+                  d.total_life_cycle_cost = +d.total_life_cycle_cost;
+              });
+
+              x.domain(d3.extent(data['data'], function (d) {
+                  return d.total_energy;
+              })).nice();
+              y.domain(d3.extent(data['data'], function (d) {
+                  return d.total_life_cycle_cost;
+              })).nice();
+
+              svg.append("g")
+                      .attr("class", "x axis")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(xAxis)
+                      .append("text")
+                      .attr("class", "label")
+                      .attr("x", width)
+                      .attr("y", -6)
+                      .style("text-anchor", "end")
+                      .text("Site EUI");
+
+              svg.append("g")
+                      .attr("class", "y axis")
+                      .call(yAxis)
+                      .append("text")
+                      .attr("class", "label")
+                      .attr("transform", "rotate(-90)")
+                      .attr("y", 6)
+                      .attr("dy", ".71em")
+                      .style("text-anchor", "end")
+                      .text("Total LCC")
+
+              svg.selectAll("circle")
+                      .data(data['data'])
+                      .enter().append("svg:circle")
+                      .attr("class", "dot")
+                      .attr("r", 10.0)
+                      .attr("cx", function (d) {
+                          return x(d.total_energy);
+                      })
+                      .attr("cy", function (d) {
+                          return y(d.total_life_cycle_cost);
+                      })
+                      .style("fill",function (d) {
+                          return color(d.iteration);
+                      }).on("click", function (d) {
+                          return tooltip.style("visibility", "visible")
+                                  .style("background", "white")
+                                  .style("border-style", "solid")
+                                  .style("border-width", "1px")
+                                  .style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px")
+                                  .html("X: " + d.total_energy.toFixed(2) +
+                                          "</br>Y: " + d.total_life_cycle_cost.toFixed(2) +
+                                          "</br>url: <a href=" + d.data_point_uuid + ">View Data Point</a>");
+                      });
+
+              var legend = svg.selectAll(".legend")
+                      .data(color.domain())
+                      .enter().append("g")
+                      .attr("class", "legend")
+                      .attr("transform", function (d, i) {
+                          return "translate(0," + i * 20 + ")";
+                      });
+
+              legend.append("rect")
+                      .attr("x", width)
+                      .attr("width", 18)
+                      .attr("height", 18)
+                      .style("fill", color);
+
+              legend.append("text")
+                      .attr("x", width - 6)
+                      .attr("y", 9)
+                      .attr("dy", ".35em")
+                      .style("text-anchor", "end")
+                      .text(function (d) {
+                          return d;
+                      });
+
+          });
+
+          $('svg circle').tipsy({
+              gravity: 'w',
+              html: true,
+              title: function () {
+                  var d = this.__data__, c = color(d.i);
+                  return 'Hi there! My color is <span style="color:' + c + '">' + c + '</span>';
+              }
+          });
+      </script>
+
+    </div>
+
+<% end %>
+</br>
+
+
+

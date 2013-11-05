@@ -1,5 +1,6 @@
 require 'faraday'
 require 'json'
+require 'uuid'
 
 class ServerApi
 
@@ -100,7 +101,7 @@ class ServerApi
   end
 
   def new_analysis(project_id, options)
-    defaults = {analysis_name: "Test Analysis"}
+    defaults = {analysis_name: "Test Analysis", reset_uuids: false}
     options = defaults.merge(options)
 
     raise "No project id passed" if project_id.nil?
@@ -110,14 +111,37 @@ class ServerApi
     formulation_json = JSON.parse(File.read(options[:formulation_file]), :symbolize_names => true)
 
     # read in the analysis id from the analysis.json file
-    analysis_id = formulation_json[:analysis][:uuid]
+    analysis_id = nil
+    if options[:reset_uuids]
+      analysis_id = UUID.new.generate
+      formulation_json[:analysis][:uuid] = analysis_id
+
+      formulation_json[:analysis][:problem][:workflow].each do |wf|
+        wf[:uuid] = UUID.new.generate
+        if wf[:arguments]
+          wf[:arguments].each do |arg|
+            arg[:uuid] = UUID.new.generate
+          end
+        end
+        if wf[:variables]
+          wf[:variables].each do |var|
+            var[:uuid] = UUID.new.generate
+            if var[:argument]
+              var[:argument][:uuid] = UUID.new.generate
+            end
+          end
+        end
+      end
+    else
+      analysis_id = formulation_json[:analysis][:uuid]
+    end
     raise "No analysis id defined in analyis.json #{options[:formulation_file]}" if analysis_id.nil?
 
     # set the analysis name
     formulation_json[:analysis][:name] = "#{options[:analysis_name]}"
 
     # save out this file to compare
-    #File.open('formulation_merge.json','w'){|f| f << JSON.pretty_generate(formulation_json)}
+    #File.open('formulation_merge.json', 'w') { |f| f << JSON.pretty_generate(formulation_json) }
 
     response = @conn.post do |req|
       req.url "projects/#{project_id}/analyses.json"
@@ -153,7 +177,7 @@ class ServerApi
   end
 
   def upload_datapoint(analysis_id, options)
-    defaults = {}
+    defaults = {reset_uuids: false}
     options = defaults.merge(options)
 
     raise "No analysis id passed" if analysis_id.nil?
@@ -161,6 +185,11 @@ class ServerApi
     raise "No datapoints_file exists #{options[:datapoint_file]}" if !File.exists?(options[:datapoint_file])
 
     dp_hash = JSON.parse(File.open(options[:datapoint_file]).read, :symbolize_names => true)
+
+    if options[:reset_uuids]
+      dp_hash[:analysis_uuid] = analysis_id
+      dp_hash[:uuid] = UUID.new.generate
+    end
 
     # merge in the analysis_id as it has to be what is in the database
     response = @conn.post do |req|
@@ -205,12 +234,11 @@ class ServerApi
     options = defaults.merge(options)
 
     puts "Run analysis is configured with #{options.to_json}"
-
     response = @conn.post do |req|
       req.url "analyses/#{analysis_id}/action.json"
       req.headers['Content-Type'] = 'application/json'
       req.body = options.to_json
-      req.options[:timeout] = 180 #seconds
+      req.options[:timeout] = 1800 #seconds
     end
 
     if response.status == 200
@@ -232,7 +260,7 @@ class ServerApi
     if response.status == 200
       puts "Killed analysis #{analysis_id}"
     else
-      raise "Could not kill the analysis with response of #{response.inspect}"
+      #raise "Could not kill the analysis with response of #{response.inspect}"
     end
 
   end

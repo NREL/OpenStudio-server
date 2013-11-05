@@ -1,0 +1,33 @@
+<h1>Listing Measures</h1>
+
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Measure Type</th>
+    <th>Description</th>
+    <th>Arguments</th>
+    <th>Variables</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @measures.each do |measure| %>
+      <tr>
+        <td><%= link_to_if(measure.name, measure.name, measure_path(measure)) %></td>
+        <td><%= measure.measure_type if measure.measure_type %></td>
+        <td><%= measure.description %></td>
+        <td>
+          <% measure.variables.where(perturbable: false).order_by(name: 1).each do |var| %>
+              <%= link_to var.name, variable_path(var) %></br>
+          <% end %>
+        </td>
+        <td>
+          <% measure.variables.where(perturbable: true).order_by(name: 1).each do |var| %>
+              <%= link_to var.name, variable_path(var) %></br>
+          <% end %>
+        </td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+

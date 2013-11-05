@@ -5,7 +5,6 @@ HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
 
-# Project data
 formulation_file = "./DiskIOBenchmarkOneJSON/analysis.json"
 analysis_zip_file = "./DiskIOBenchmarkOneJSON/analysis.zip"
 datapoints_file = "./DiskIOBenchmarkOneJSON/datapoints.json"

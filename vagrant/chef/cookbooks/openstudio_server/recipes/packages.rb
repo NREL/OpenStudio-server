@@ -16,3 +16,7 @@ end
 package "iotop" do
   action :upgrade
 end
+
+package "imagemagick" do
+  action :upgrade
+end

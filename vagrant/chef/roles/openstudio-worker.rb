@@ -11,7 +11,6 @@ run_list([
              "role[openstudio]",
          ])
 
-
 override_attributes(
     :R => {
         :rserve_start_on_boot => false,

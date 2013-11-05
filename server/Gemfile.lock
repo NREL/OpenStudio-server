@@ -71,6 +71,8 @@ GEM
     factory_girl_rails (4.2.1)
       factory_girl (~> 4.2.0)
       railties (>= 3.0.0)
+    faraday (0.8.8)
+      multipart-post (~> 1.2.0)
     ffi (1.9.0)
     hike (1.2.3)
     i18n (0.6.1)
@@ -96,6 +98,7 @@ GEM
       paperclip (>= 2.3.6)
     moped (1.5.0)
     multi_json (1.7.7)
+    multipart-post (1.2.0)
     net-http-persistent (2.9)
     net-scp (1.1.2)
       net-ssh (>= 2.6.5)
@@ -196,6 +199,7 @@ DEPENDENCIES
   delayed_job_mongoid
   execjs
   factory_girl_rails
+  faraday
   jquery-rails
   json
   libv8
