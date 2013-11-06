@@ -21,7 +21,6 @@ one_hash = {data_points: []}
   @uuid = UUID.new.generate
   @version_uuid = UUID.new.generate
   to_add =JSON.parse(dp_tmp.result)["data_point"]
-  to_add["run_priority"] = instance
   one_hash[:data_points] << to_add
 end
 outfile = File.join(dir, "datapoints.json")
