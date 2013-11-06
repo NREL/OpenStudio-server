@@ -19,7 +19,6 @@ class DataPoint
   field :results, :type => Hash
   field :run_start_time, :type => DateTime
   field :run_end_time, :type => DateTime
-  field :run_priority, default: 0
   field :sdp_log_file, :type => Array
 
   # Relationships
@@ -32,7 +31,7 @@ class DataPoint
   index({name: 1})
   index({status: 1})
   index({analysis_id: 1})
-  index({uuid: 1, status: 1, download_status: 1, run_priority: 1})
+  index({uuid: 1, status: 1, download_status: 1})
   index({run_start_time: -1, name: 1})
   index({analysis_id:1, iteration: 1, sample: 1})
 
