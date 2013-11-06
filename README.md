@@ -54,23 +54,27 @@ OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
 If you are inside the NREL firewall then you will need to disable HTTPS on rubygems. 
 
   - Log into Vagrant VM  
+  
 ```sh
 vagrant ssh
 ```
-(Or use [PuTTy](http://stackoverflow.com/questions/9885108/ssh-to-vagrant-box-in-windows) on Windows.)
+  
+  (Or use [PuTTy](http://stackoverflow.com/questions/9885108/ssh-to-vagrant-box-in-windows) on Windows.)
 
   - Add http://rubygems.org to gem sources
+  
 ```sh
 sudo -i
 gem sources -r https://rubygems.org/
 gem sources -a http://rubygems.org/
-
 ```
 
-  - Exit the VM and then reprovision the VM  
+  - Exit the VM and then reprovision the VM
+  
 ```sh
 vagrant provision
 ```
+
   Note, if provisioning fails continue to call the `vagrant provision` command
 
 - Test the Rails application by pointing your local browser to [http://localhost:8080](http://localhost:8080)
