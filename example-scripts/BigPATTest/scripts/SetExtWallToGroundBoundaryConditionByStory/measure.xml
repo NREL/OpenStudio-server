@@ -1,0 +1,57 @@
+<measure>
+  <name>Set Ext Wall To Ground Boundary Condition By Story</name>
+  <uid>be9023ea-fefe-4074-ac03-718ccfb6d25f</uid>
+  <version_id>4b8fa557-4a1c-4f2f-871a-af267e809905</version_id>
+  <description>Use this to setup one of your building stories as a basement.</description>
+  <modeler_description>This measure will find all exterior walls for spaces on the selected building story and change their outside boundary condition to ground. Make sure surface matching has been done first, or walls intended to be interior walls will end up with a ground boundary condition.</modeler_description>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>3Story2Space.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>04F42478</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.0.0</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>B0DD563B</checksum>
+    </file>
+    <file>
+      <filename>SetExtWallToGroundByStory_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>38ADC44F</checksum>
+    </file>
+  </files>
+</measure>

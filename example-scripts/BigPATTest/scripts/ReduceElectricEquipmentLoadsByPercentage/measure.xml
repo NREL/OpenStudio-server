@@ -1,0 +1,63 @@
+<measure>
+  <name>Reduce Electric Equipment Loads by Percentage</name>
+  <uid>b93f5c07-a1a8-4741-9d47-af00a2e7e288</uid>
+  <version_id>8a052d63-6962-4cdf-ac8c-35bfd2f4bc15</version_id>
+  <description>Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.</description>
+  <modeler_description>Loop through all electric equipment objects in the specified space type or the entire building. Clone the definition if it has not already been cloned, rename and adjust the power based on the specified percentage. Link the new definition to the existing electric equipment instance. Loop through objects first in space types and then in spaces, but only for spaces that are in the specified space type, unless entire building has been chosen.</modeler_description>
+  <provenances/>
+  <tags>
+    <tag>Equipment.Electric Equipment</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>EnvelopeAndLoadTestModel_01.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>32489599</checksum>
+    </file>
+    <file>
+      <filename>ReduceElectricEquipmentLoadsByPercentage_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C39F81F3</checksum>
+    </file>
+    <file>
+      <filename>EnvelopeAndLoadTestModel_01_FullyCosted.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>EDF0AAE3</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>0.10.2</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>36A6883A</checksum>
+    </file>
+  </files>
+</measure>

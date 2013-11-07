@@ -1,0 +1,70 @@
+<measure>
+  <name>Add Cost To Supply Side HVAC Component by Air Loop</name>
+  <uid>a667a52f-aa04-4997-9292-c81671d75f84</uid>
+  <version_id>c0fd310c-4d63-429a-8699-7acb9a32c74d</version_id>
+  <description>This will add cost to HVAC components of a specified type in the selected air loop(s). It can run on all air loops or a single air loop. This measures only adds cost and doesn't alter equipment performance</description>
+  <modeler_description>Currently this measure supports the following objects:
+    CoilCoolingDXSingleSpeed
+    CoilCoolingDXTwoSpeed
+    CoilHeatingDXSingleSpeed
+    CoilHeatingElectric
+    CoilHeatingGas
+    CoilHeatingWaterBaseboard
+    FanConstantVolume
+    FanOnOff
+    FanVariableVolume
+    PumpConstantSpeed
+    PumpVariableSpeed
+    CoilCoolingWater
+    CoilHeatingWater</modeler_description>
+  <provenances/>
+  <tags>
+    <tag>Economics.Life Cycle Cost Analysis</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>HVACComponentBasic.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>94286F6C</checksum>
+    </file>
+    <file>
+      <filename>AddCostToSupplySideHVACComponentByAirLoop_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>1A599FB0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.0.3</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>D1D78226</checksum>
+    </file>
+  </files>
+</measure>

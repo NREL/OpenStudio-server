@@ -1,0 +1,65 @@
+<measure>
+  <name>Swap Lights Definition</name>
+  <uid>3bbebd1f-69fd-4d49-96fe-1284bce962f4</uid>
+  <version_id>d42b5abc-1e88-477a-b836-a9ac3b63a845</version_id>
+  <description>This measure will swap out one lights definition for another. All objects that had referred to the original definition will now refer to the new one.</description>
+  <modeler_description>This measure will not delete or change either definition, rather it just swaps out the references of one for the other. It is possible that the new definition is already used in the model elsewhere.
+    Each of these objects can be independently costed, however the measure can address demolition costs of the object being removed.
+  </modeler_description>
+  <provenances/>
+  <tags>
+    <tag>Electric Lighting.Lighting Equipment</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>EnvelopeAndLoadTestModel_01.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B6F4492B</checksum>
+    </file>
+    <file>
+      <filename>SwapLightsDefinition_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E6CF4E25</checksum>
+    </file>
+    <file>
+      <filename>EnvelopeAndLoadTestModel_01_costed.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C97E56EB</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.0.0</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>7338A7F3</checksum>
+    </file>
+  </files>
+</measure>

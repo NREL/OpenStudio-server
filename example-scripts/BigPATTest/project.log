@@ -1,0 +1,201 @@
+[openstudio.osversion.VersionTranslator] <-2> Starting translation from Version 1.0.6.
+[openstudio.osversion.VersionTranslator] <-2> Initial model has 2657 objects.
+[openstudio.osversion.VersionTranslator] <-2> Final model has 2657 objects in IDF form.
+[utilities.idf.Workspace] <-2> Workspace::isValid called.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 4, 'Maximum Air Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[utilities.idf.IdfObject] <-1> Field 10, 'Maximum Hot Water or Steam Flow Rate', of an object of type OS:AirTerminal:SingleDuct:VAV:Reheat has 'autocalculate' as its value even though it is autosizable.
+[openstudio.osversion.VersionTranslator] <-2> Final model has 2657 objects in Model form.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 2 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 2 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 19 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 2 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 2 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 19 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 23 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 11 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 23 fields.  Size of vertices is 4.
+[openstudio.model.PlanarSurface] <-2> Before setVertices have 2 fields.
+[openstudio.model.PlanarSurface] <-2> After clearExtensibleGroups in setVertices have 2 fields.
+[openstudio.model.PlanarSurface] <-2> After setVertices have 19 fields.  Size of vertices is 4.
+[utilities.idf.Workspace] <-1> Renamed Object of type 'ScheduleTypeLimits' and named 'Any Number' to '{c2581156-6d13-4559-a6a1-8241b4a52782}' to avoid a name conflict upon WorkspaceObject addition.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.
+[openstudio.analysis.Analysis] <-1> DataPoint not added to Analysis 'Simple Project Analysis', because it already exists.

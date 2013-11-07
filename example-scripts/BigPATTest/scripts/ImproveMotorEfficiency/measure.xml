@@ -1,0 +1,55 @@
+<measure>
+  <name>Improve Motor Efficiency</name>
+  <uid>e581974f-d5c7-480f-bb1e-b032f492eb97</uid>
+  <version_id>6462f504-f880-4127-860d-f4ccdd54a056</version_id>
+  <description>The assessment team observed opportunities for motor efficiency improvements on HVAC systems. These motors are asynchronous induction motors.;;&#xd;&#xd;
+;;&#xd;&#xd;
+There are currently motors on the market that are far superior to standard efficiency motors. These come in both premium efficiency and ultra-efficiency which exceed NEMA Premium standards. These motors utilize a die cast copper rotor which reduces the energy requirements of the motor and allows the motor to run cooler. The motor also features an improved heat dissipation system and new low-friction bearings; both of which help extend the life of the motor. The motor also has a smaller weight and size compared to the standard efficiency motors. These high efficiency motors are showing efficiency improvements on the order of 3-10% more efficient than current standard efficiency motors.;;&#xd;&#xd;
+;;&#xd;&#xd;
+For all of the three-phase, asynchronous induction motors feeding AHU supply fans, specify premium or ultra-efficiency motors. The belts associated with the largest motors, longest run times, and that run closest to full load should be given priority when making replacements.;;&#xd;&#xd;
+  </description>
+  <modeler_description>This measure alters motors for fans and pumps in all or a single air/plant loop in the building. The text before each user argument should include the motor location and motor HP. The default value for the user argument field will be the existing motor efficiency. After each user argument there will be a check box to specify which of the motors the calculation will be applied to. For each object with a check box, the efficiency in the user argument field is replaced as the motor efficiency.;;&#xd;&#xd;
+;;&#xd;&#xd;
+The cost arguments are user arguments that start with a default of $0. Operations and maintenance cost is applied to both baseline and new measure cash flows. Salvage value can only be applied at year 0 and only if material and installation cost for baseline measure = 0. If arguments are left blank, the user is notified that the model has not changed in the run manager. A warning is issued if the motor efficiency >96% and an error is issued if efficiency is >100%.;;&#xd;&#xd;
+  </modeler_description>
+  <provenances/>
+  <tags>
+    <tag>HVAC.Distribution</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>0320_ModelWithHVAC_01.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C12703F3</checksum>
+    </file>
+    <file>
+      <filename>ImproveMotorEfficiency_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F3DF841E</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.0.3</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>E6899F52</checksum>
+    </file>
+  </files>
+</measure>

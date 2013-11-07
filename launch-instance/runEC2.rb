@@ -17,7 +17,7 @@ RUBY_LOC = "ruby"
 # Global Options
 CREATE_SERVER=true
 CREATE_WORKER=true
-WORKER_INSTANCES=2
+WORKER_INSTANCES=1
 TEST_SSH=true
 
 # read in the config.yml file to get the secret/private key
