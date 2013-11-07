@@ -20,3 +20,12 @@ sudo chown mongodb:nogroup /mnt/mongodb/data
 sudo service mongodb restart
 sudo service delayed_job restart
 sudo rm -rf /var/lib/mongodb
+cd /var/www/rails/openstudio
+rake db:purge
+rake db:mongoid:create_indexes
+sudo -i
+cat /dev/null > /var/www/rails/openstudio/log/download.log
+cat /dev/null > /var/www/rails/openstudio/log/mongo.log
+cat /dev/null > /var/www/rails/openstudio/log/development.log
+cat /dev/null > /var/www/rails/openstudio/log/production.log
+cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
