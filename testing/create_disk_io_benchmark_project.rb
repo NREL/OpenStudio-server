@@ -1,6 +1,8 @@
 # based on BigPATTest.
 #
 # create project with 2^n >= ARGV[0].to_i identical data points
+#
+# run this script from openstudio-server/testing
 
 require 'openstudio'
 
