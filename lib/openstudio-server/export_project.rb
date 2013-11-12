@@ -4,6 +4,11 @@ require 'fileutils'
 # ARGV[0] - the name of the project to export, e.g. 'PATTest'
 #
 # This script will export the named project to ARGV[0] + 'Export'
+#
+# Run this script in the directory where the project lives, e.g.
+#
+# cd openstudio-server/testing
+# ruby ../lib/openstudio-server/export_project.rb PATTest
 
 project_dir = ARGV[0].to_s
 export_dir = project_dir + "Export"
