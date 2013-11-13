@@ -80,7 +80,7 @@ class DataPoint
       # ip addresses that may have finished
       node = ComputeNode.where(ip_address: self.ip_address).first
       if !node.nil?
-        remote_filepath = "/mnt/openstudio/analysis_#{self.analysis.id}/analysis"
+        remote_filepath = "/mnt/openstudio/analysis_#{self.analysis.id}"
         remote_filename = "#{remote_filepath}/data_point_#{self.id}/data_point_#{self.id}.zip"
         local_filepath = "/mnt/openstudio/analysis_#{self.analysis.id}"
         local_filename = "#{local_filepath}/data_point_#{self.id}.zip"
