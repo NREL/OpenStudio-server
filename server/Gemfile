@@ -51,6 +51,9 @@ gem 'childprocess'
 
 gem 'faraday'
 
+# worker node gems (because server can run as worker)
+gem 'libxml-ruby'
+
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 
