@@ -9,7 +9,8 @@ module CommunicateMongo
     dp.run_start_time = Time.now
     dp.sdp_log_file = []
 
-
+    # Todo use the ComputeNode model to pull out the information so that we can reuse the methods
+    
     # Determine what the IP address is of the worker node and save in the data point
     require 'socket'
     if Socket.gethostname =~ /os-.*/
@@ -18,6 +19,8 @@ module CommunicateMongo
       map = {"os-server" => "192.168.33.10", "os-worker-1" => "192.168.33.11", "os-worker-2" => "192.168.33.12"}
       dp.ip_address = map[Socket.gethostname]
       dp.internal_ip_address = dp.ip_address
+      
+      #TODO: add back in the instance id 
     else
       # On amazon, you have to hit an API to determine the IP address because
       # of the internal/external ip addresses
