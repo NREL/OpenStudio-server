@@ -1,4 +1,4 @@
-require './ServerApi.rb'
+require_relative '../lib/openstudio-server/ServerApi'
 
 HOSTNAME = "http://localhost:8080"
 #HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
@@ -30,8 +30,8 @@ run_options = {analysis_action: "start", without_delay: false, analysis_type: 'b
 api.run_analysis(analysis_id, run_options)
 
 # ===== LHS Sample and Run =====
-formulation_file = "./ContinuousExample/analysis.json"
-analysis_zip_file = "./ContinuousExample/analysis.zip"
+formulation_file = "../testing/ContinuousExample/analysis.json"
+analysis_zip_file = "../testing/ContinuousExample/analysis.zip"
 
 analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
                     reset_uuids: true, analysis_name: "LHS Sample and Run"}
