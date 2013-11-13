@@ -82,6 +82,7 @@ GEM
       thor (>= 0.14, < 2.0)
     json (1.8.0)
     libv8 (3.11.8.17)
+    libxml-ruby (2.7.0)
     macaddr (1.6.1)
       systemu (~> 2.5.0)
     mail (2.5.4)
@@ -203,6 +204,7 @@ DEPENDENCIES
   jquery-rails
   json
   libv8
+  libxml-ruby
   mongoid
   mongoid-paperclip
   net-http-persistent

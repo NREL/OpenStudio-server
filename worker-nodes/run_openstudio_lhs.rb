@@ -93,7 +93,7 @@ begin
       # Some reason this hash is not indifferent access
       if analysis_json[:analysis]['seed']['path']
 
-        # Not sure that this is always split with last 3
+        # This last(2) needs to be cleaned up.  Why don't we know the path of the file?
         baseline_model_path = File.expand_path(File.join(File.dirname(__FILE__), "..", analysis_json[:analysis]['seed']['path'].split("/").last(2).join("/")))
         if File.exists?(baseline_model_path)
           ros.log_message "Reading in baseline model #{baseline_model_path}"
@@ -114,6 +114,7 @@ begin
 
     if analysis_json[:analysis]['weather_file']
       if analysis_json[:analysis]['weather_file']['path']
+        # This last(4) needs to be cleaned up.  Why don't we know the path of the file?
         @weather_filename = File.expand_path(File.join(File.dirname(__FILE__), "..", analysis_json[:analysis]['weather_file']['path'].split("/").last(4).join("/")))
         if !File.exists?(@weather_filename)
           raise "Could not find weather file for simulation #{@weather_filename}"

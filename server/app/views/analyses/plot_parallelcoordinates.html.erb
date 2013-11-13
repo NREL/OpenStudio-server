@@ -32,19 +32,10 @@
               // Extract the list of dimensions and create a scale for each.
               x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
 
-                  if ((d === "_id") || (d === "building_type_id") || (d === "vintage_id") || (d === "climate_zone_id")) return false;
+                  // Don't show any of these items
+                  if ((d === "_id") || (d === "data_point_uuid") || (d === "lighting_control") || (d === "climate_zone_id")) return false;
 
-                  //these aren't implemented yet
-                  if ((d === "data_point_uuid") || (d === "daylighting_fen_treatment") || (d === "lighting_control")) return false;
-
-                  //commented out for now...this is how to do categorical data
-                  //if((d === "daylighting_fen_treatment") || (d==="lighting_control")) {
-                  //    y[d] = d3.scale.ordinal()
-                  //      .domain(data.map(function(p) { return p[d]; }))
-                  //      .rangePoints([h, 0]);
-                  //}
-
-                  if ((d === "wwr_west_static") || (d === "wwr_facade")) {
+                  if ((d === "wwr_west_static") || (d === "wwr_facade") || (d === "location")) {
                       y[d] = d3.scale.ordinal()
                               .domain(d3.extent(data['data'], function (p) {
                                   return p[d];
