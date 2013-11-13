@@ -150,7 +150,8 @@ class Analysis
       self.start(no_delay, analysis_type, options)
 
       return [true]
-    elsif self.delayed_job_ids.empty? || !Delayed::job.where(:_id.in => self.delayed_job_ids).exist? || self.status != "queued" || self.status != "started"
+    # TODO: need to test for each of these cases!
+    elsif self.delayed_job_ids.empty? || !Delayed::Job.where(:_id.in => self.delayed_job_ids).exists? || self.status != "queued" || self.status != "started"
       self.start(no_delay, analysis_type, options)
 
       return [true]
