@@ -114,7 +114,8 @@ class Variable
   end
 
   def map_discrete_hash_to_array
-    logger.info "received map discrete values with #{self.discrete_values_and_weights} with size #{self.discrete_values_and_weights.size}"
+    Rails.logger.info "Discrete values and weights are #{self.discrete_values_and_weights}"
+    Rails.logger.info "received map discrete values with #{self.discrete_values_and_weights} with size #{self.discrete_values_and_weights.size}"
     ave_weight = (1.0 / self.discrete_values_and_weights.size)
     Rails.logger.info "average weight is #{ave_weight}"
     self.discrete_values_and_weights.each_index do |i|

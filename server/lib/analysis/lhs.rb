@@ -44,12 +44,13 @@ class Analysis::Lhs
     pivot_variables = Variable.where({analysis_id: @analysis, pivot: true}).order_by(:name.asc)
     pivot_hash = {}
     pivot_variables.each do |var|
+      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
       Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
       values, weights = var.map_discrete_hash_to_array
       Rails.logger.info "pivot variable values are #{values}"
       pivot_hash[var.uuid] = values
     end
-    # multiple and smash the hash of arrays to form a array of hashes. This takes
+    # if there are multiple pivots, then smash the hash of arrays to form a array of hashes. This takes
     # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
     pivot_array = pivot_hash.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
     Rails.logger.info "pivot array is #{pivot_array}"

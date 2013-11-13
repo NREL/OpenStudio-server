@@ -31,6 +31,12 @@ default_attributes(
                     :name => "mongoid-paperclip"
                 },
                 {
+                    :name => "libxml-ruby"
+                },
+                {
+                    :name => "zip"
+                },
+                {
                     :name => "delayed_job_mongoid"
                 },
                 {
