@@ -124,9 +124,6 @@ begin
 
   ros.log_message "Communicating DataPoint", true
 
-  # update datapoint in database -- huh?
-  ros.communicate_datapoint(data_point)
-
   ros.log_message "Creating Run Manager", true
 
   # create a RunManager
