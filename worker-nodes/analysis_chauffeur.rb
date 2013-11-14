@@ -28,10 +28,6 @@ class AnalysisChauffeur
     @communicate_module.communicate_started(@communicate_object)
   end
 
-  def communicate_datapoint(os_data_point)
-    @communicate_module.communicate_datapoint(@communicate_object, os_data_point)
-  end
-
   def log_message(log_message, delta=false)
     @communicate_module.communicate_log_message(@communicate_object, log_message, delta, @time)
     @time = Time.now
