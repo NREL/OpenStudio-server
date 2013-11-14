@@ -16,10 +16,10 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     @html = @data_point.eplus_html
-    
+
     respond_to do |format|
       format.html do
-        exclude_fields = [:_id,:output,:password,:eplus_html,:values]
+        exclude_fields = [:_id, :output, :password, :eplus_html, :values]
         @table_data = @data_point.as_json(:except => exclude_fields)
         logger.info("Cleaning up the log files")
         if @table_data["sdp_log_file"]
@@ -38,7 +38,6 @@ class DataPointsController < ApplicationController
         end
       end
       format.json { render json: @data_point.output }
-      #format.json { render json: { :data_point => @data_point.output, :metadata =>  @data_point[:os_metadata] } }
     end
   end
 
@@ -47,7 +46,6 @@ class DataPointsController < ApplicationController
 
     respond_to do |format|
       format.json { render json: @data_point.to_json(:except => [:eplus_html]) }
-      #format.json { render json: { :data_point => @data_point.output, :metadata =>  @data_point[:os_metadata] } }
     end
   end
 
@@ -72,10 +70,6 @@ class DataPointsController < ApplicationController
   def create
     analysis_id = params[:analysis_id]
     params[:data_point][:analysis_id] = analysis_id
-
-    # save off the metadata as a child of the analysis right now... eventually move analysis
-    # underneath metadata
-    params[:data_point].merge!(:os_metadata => params[:metadata])
 
     @data_point = DataPoint.new(params[:data_point])
 
@@ -104,16 +98,9 @@ class DataPointsController < ApplicationController
       logger.info "received #{uploaded_dps} points"
       params[:data_points].each do |dp|
         # This is the old format that can be deprecated when OpenStudio V1.1.3 is released
-        if dp[:metadata]
-          dp[:data_point].merge!(:os_metadata => dp[:metadata])
-          dp[:data_point][:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
-          dp.delete(:metadata) if dp.has_key?(:metadata)
-          @data_point = DataPoint.new(dp[:data_point])
-        else
-          dp[:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
-          @data_point = DataPoint.new(dp)
-        end
-
+        dp[:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
+        
+        @data_point = DataPoint.new(dp)
         if @data_point.save!
           saved_dps += 1
         else

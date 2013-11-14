@@ -21,7 +21,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {:analysis => @analysis, :metadata => @analysis[:os_metadata]} }
+      format.json { render json: {:analysis => @analysis} }
     end
   end
 
@@ -46,10 +46,6 @@ class AnalysesController < ApplicationController
   def create
     project_id = params[:project_id]
     params[:analysis].merge!(:project_id => project_id)
-
-    # save off the metadata as a child of the analysis right now... eventually move analysis
-    # underneath metadata
-    params[:analysis].merge!(:os_metadata => params[:metadata])
 
     @analysis = Analysis.new(params[:analysis])
 
@@ -229,7 +225,6 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-          :os_metadata,
           :problem,
       ]
       include_fields = [
@@ -349,7 +344,6 @@ class AnalysesController < ApplicationController
         ]
 
         render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points)}
-        #render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
   end
