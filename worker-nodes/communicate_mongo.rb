@@ -35,16 +35,19 @@ module CommunicateMongo
   end
 
   def self.get_problem(dp, format)
-    # have to remap the os_metadata back to the metadata (fix this eventually)
+    # HERE - have to attach the openstudio_version?
+    # Now data_points come in as batch with openstudio_version listed once.
+    # Need to copy that element to these individual jsons.
     data_point_hash = Hash.new
     data_point_hash[:data_point] = dp
-    data_point_hash[:metadata] = dp[:os_metadata]
+    data_point_hash[:openstudio_version] = dp[:openstudio_version]
 
-    # have to remap the os_metadata back to the metadata (fix this eventually)
+    # HERE - have to attach the openstudio_version?
+    # Will it already be in analysis, or does it also have to be explicitly attached?
     analysis = dp.analysis
     analysis_hash = Hash.new
     analysis_hash[:analysis] = analysis
-    analysis_hash[:metadata] = analysis[:os_metadata]
+    analysis_hash[:openstudio_version] = analysis[:openstudio_version]
 
     result = nil
     if format == "hash"
