@@ -264,52 +264,8 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     # Get the mappings of the variables that were used. Move this to the datapoint class
-    @mappings = {}
-    # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
-    dps = @analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:set_variable_values)
-    dps.each do |dp|
-      if dp.set_variable_values
-        dp.set_variable_values.each_key do |key|
-          v = Variable.where(uuid: key).first
-          @mappings[key] = v.name.gsub(" ", "_") if v
-        end
-      end
-    end
-    Rails.logger.info @mappings
-
-    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
-    # and this is just an ugly mapping, sorry all.
-    @plot_data = []
-    dps = nil
-    if @analysis.analysis_type == "sequential_search"
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
-    else
-      dps = @analysis.data_points.all
-    end
-    dps.each do |dp|
-      if dp['results']
-        dp_values = {}
-
-        dp_values["data_point_uuid"] = data_point_path(dp.id)
-
-        # lookup input value names
-        if dp.set_variable_values
-          dp.set_variable_values.each do |k, v|
-            dp_values["#{@mappings[k]}"] = v
-          end
-        end
-
-        # outputs -- map these by hand right now because I don't want to parse the entire results into
-        # the dp_values hash
-        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
-        dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity'] if dp['results']['interior_lighting_electricity']
-        dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
-        dp_values["iteration"] = dp['iteration'] if dp['iteration']
-
-        @plot_data << dp_values
-      end
-    end
+    @mappings = get_superset_of_variables(@analysis)
+    @plot_data = get_plot_data(@analysis, @mappings)
 
     respond_to do |format|
       format.json { render json: {:mappings => @mappings, :data => @plot_data} }
@@ -344,8 +300,140 @@ class AnalysesController < ApplicationController
         ]
 
         render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points)}
+        #render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
+  end
+
+  def download_csv
+    @analysis = Analysis.find(params[:id])
+
+    write_and_send_csv(@analysis)
+  end
+
+  def download_rdata
+    @analysis = Analysis.find(params[:id])
+
+    write_and_send_rdata(@analysis)
+  end
+
+
+  protected
+
+  # This method is not optimized at all.  It iterates over all data points variable values and pulls 
+  # out the variable information.  Need to push this into the model and be much smarter 
+  # about the query.  At least the query is calling 'only'.
+  def get_superset_of_variables(analysis)
+    mappings = {}
+
+    # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
+    dps = analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:set_variable_values)
+    dps.each do |dp|
+      if dp.set_variable_values
+        dp.set_variable_values.each_key do |key|
+          v = Variable.where(uuid: key).first
+          mappings[key] = v.name.gsub(" ", "_") if v
+        end
+      end
+    end
+
+    Rails.logger.info mappings
+
+    mappings
+  end
+
+  # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
+  # a useful JSON for plotting (and exporting to CSV)
+  def get_plot_data(analysis, mappings)
+    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
+    # and this is just an ugly mapping, sorry all.
+
+    plot_data = []
+    if @analysis.analysis_type == "sequential_search"
+      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+      dps = dps.rotate(1) # put the starting point on top
+    else
+      dps = @analysis.data_points.all
+    end
+    dps.each do |dp|
+      if dp['results']
+        dp_values = {}
+
+        dp_values["data_point_uuid"] = data_point_path(dp.id)
+
+        # lookup input value names
+        if dp.set_variable_values
+          dp.set_variable_values.each do |k, v|
+            dp_values["#{mappings[k]}"] = v
+          end
+        end
+
+        # outputs -- map these by hand right now because I don't want to parse the entire results into
+        # the dp_values hash
+        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
+        dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity'] if dp['results']['interior_lighting_electricity']
+        dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
+        dp_values["iteration"] = dp['iteration'] if dp['iteration']
+
+        plot_data << dp_values
+      end
+    end
+
+    plot_data
+  end
+
+  def write_and_send_csv(analysis)
+    require 'csv'
+
+    mappings = get_superset_of_variables(analysis)
+    data = get_plot_data(analysis, mappings)
+    filename = "#{analysis.name}.csv"
+    csv_string = CSV.generate do |csv|
+      icnt = 0
+      data.each do |dp|
+        icnt += 1
+        # Write out the header if this is the first datapoint
+        csv << dp.keys if icnt == 1
+        csv << dp.values
+      end
+    end
+
+    send_data csv_string, :filename => filename, :type => 'text/csv; charset=iso-8859-1; header=present', :disposition => "attachment"
+  end
+
+
+  def write_and_send_rdata(analysis)
+    mappings = get_superset_of_variables(analysis)
+    data = get_plot_data(analysis, mappings)
+    download_filename = "#{analysis.name}.RData"
+    data_frame_name = analysis.name.downcase.gsub(" ", "_")
+    Rails.logger.info("Data frame name will be #{data_frame_name}")
+
+    # need to convert array of hash to hash of arrays
+    # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
+    out_hash = data.each_with_object(Hash.new([])) do |h1, h|
+      h1.each { |k, v| h[k] = h[k] + [v] }
+    end
+
+    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
+    require 'rserve/simpler'
+    r = Rserve::Simpler.new
+    r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
+      %Q{
+            temp <- tempfile('rdata', tmpdir="/tmp")   
+            save('#{data_frame_name}', file = temp)   
+            Sys.chmod(temp, mode = "0777", use_umask = TRUE)
+         }
+    end
+    tmp_filename = r.converse('temp')
+    
+    if File.exists?(tmp_filename)
+      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'text/csv; charset=iso-8859-1; header=present', :disposition => "attachment"
+    else
+      raise "could not create R dataframe"
+    end
+    
+
   end
 
 end
