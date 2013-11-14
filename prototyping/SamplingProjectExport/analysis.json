@@ -1,0 +1,280 @@
+{
+ "analysis" :  {
+  "data_points_are_invalid" : false,
+  "display_name" : "Simple Project Analysis",
+  "name" : "Simple Project Analysis",
+  "num_measure_groups" : 0,
+  "num_ruby_continuous_variables" : 3,
+  "problem" :   {
+   "display_name" : "Simple Project Problem",
+   "name" : "Simple Project Problem",
+   "problem_type" : "Problem",
+   "uuid" : "452aebbb-d52a-4095-b4be-3d1f3900ed2d",
+   "version_uuid" : "a8dd59fa-243a-4ebd-9da4-f14d17feff4a",
+   "workflow" : [
+    {
+     "bcl_measure_directory" : "C:/projects/openstudio-server-branch2/prototyping/SamplingProject/scripts/cfc437b9-7d41-4879-bbdd-86ecd77f2bcd",
+     "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+     "bcl_measure_version_uuid" : "cfc437b9-7d41-4879-bbdd-86ecd77f2bcd",
+     "input_file_type" : "OSM",
+     "is_selected" : true,
+     "is_user_script" : false,
+     "measure_type" : "RubyMeasure",
+     "output_file_type" : "OSM",
+     "uuid" : "b3d6b3c3-437b-4383-a478-cebda61e05cb",
+     "variables" : [
+      {
+       "argument" :        {
+        "default_value" : 90.0,
+        "display_name" : "Number of Degrees to Rotate Building (positive value is clockwise).",
+        "domain_type" : "Interval",
+        "name" : "relative_building_rotation",
+        "required" : true,
+        "type" : "Double",
+        "uuid" : "a748da24-162a-4961-9fcb-4f2fda3fd3d6",
+        "version_uuid" : "e1cd1722-32ad-4878-8aae-8920778142f0"
+       },
+       "display_name" : "Building Rotation",
+       "name" : "Building Rotation",
+       "uncertainty_description" :        {
+        "attributes" : [
+         {
+          "display_name" : "Lower Bound",
+          "name" : "lower_bounds",
+          "uuid" : "44bc1bf6-d9d6-4d06-be72-fdadd6fcd236",
+          "value" : -180.0,
+          "value_type" : "Double",
+          "version_uuid" : "9fa9d9a4-5f82-47c4-adc8-29d8df5850e0"
+         },
+         {
+          "display_name" : "Upper Bound",
+          "name" : "upper_bounds",
+          "uuid" : "215924a0-db2e-43e5-b188-7cea940bb646",
+          "value" : 179.0,
+          "value_type" : "Double",
+          "version_uuid" : "237de8ec-e2fc-4bcb-be71-2d0718609dda"
+         }
+        ],
+        "type" : "uniform_uncertain"
+       },
+       "uuid" : "51874ecd-16d1-4da6-bb68-15e702673ace",
+       "variable_index" : 0,
+       "variable_type" : "RubyContinuousVariable",
+       "version_uuid" : "bdad3780-d0cb-4b24-a849-b02c99f27797"
+      }
+     ],
+     "version_uuid" : "04e3a034-c959-400e-ae50-750497cb0971",
+     "workflow_index" : 0,
+     "workflow_step_type" : "Measure"
+    },
+    {
+     "arguments" : [
+      {
+       "argument_index" : 0,
+       "choices" : [
+        {
+         "choice_index" : 0,
+         "display_name" : "FixedDryBulb",
+         "value" : "FixedDryBulb"
+        },
+        {
+         "choice_index" : 1,
+         "display_name" : "FixedEnthalpy",
+         "value" : "FixedEnthalpy"
+        },
+        {
+         "choice_index" : 2,
+         "display_name" : "DifferentialDryBulb",
+         "value" : "DifferentialDryBulb"
+        },
+        {
+         "choice_index" : 3,
+         "display_name" : "DifferentialEnthalpy",
+         "value" : "DifferentialEnthalpy"
+        },
+        {
+         "choice_index" : 4,
+         "display_name" : "FixedDewPointAndDryBulb",
+         "value" : "FixedDewPointAndDryBulb"
+        },
+        {
+         "choice_index" : 5,
+         "display_name" : "NoEconomizer",
+         "value" : "NoEconomizer"
+        }
+       ],
+       "display_name" : "Economizer Control Type.",
+       "domain_type" : "Enumeration",
+       "name" : "economizer_type",
+       "required" : true,
+       "type" : "Choice",
+       "uuid" : "f2837f59-903d-4650-a72d-3b92a81c7c52",
+       "value" : "FixedDewPointAndDryBulb",
+       "version_uuid" : "39e12f4f-78c0-4ebd-80d7-38682df41f5a"
+      }
+     ],
+     "bcl_measure_directory" : "C:/projects/openstudio-server-branch2/prototyping/SamplingProject/scripts/3ef0abb5-6fc9-4ab6-88ba-78f933f09977",
+     "bcl_measure_uuid" : "f8cc920d-8ae3-411a-922f-e6fed3223c4d",
+     "bcl_measure_version_uuid" : "3ef0abb5-6fc9-4ab6-88ba-78f933f09977",
+     "input_file_type" : "OSM",
+     "is_selected" : true,
+     "is_user_script" : false,
+     "measure_type" : "RubyMeasure",
+     "output_file_type" : "OSM",
+     "uuid" : "302a9914-3eb2-48f3-9590-f7ca172ad225",
+     "variables" : [
+      {
+       "argument" :        {
+        "default_value" : 69.0,
+        "display_name" : "Economizer Maximum Limit Dry-Bulb Temperature (F).",
+        "domain_type" : "Interval",
+        "name" : "econoMaxDryBulbTemp",
+        "required" : true,
+        "type" : "Double",
+        "uuid" : "c68ef24f-66ef-4255-8322-6afb40fa9e66",
+        "version_uuid" : "47da7a00-b570-4068-9a4e-2eecccc3dde3"
+       },
+       "display_name" : "Economizer Maximum Dry-Bulb Temperature",
+       "name" : "Economizer Maximum Dry-Bulb Temperature",
+       "uncertainty_description" :        {
+        "attributes" : [
+         {
+          "display_name" : "Mode",
+          "name" : "modes",
+          "uuid" : "831ce9f6-c358-4d5e-9e1a-22985e281478",
+          "value" : 69.0,
+          "value_type" : "Double",
+          "version_uuid" : "09b9b00f-d97c-488d-8662-f7f6b69c07ee"
+         },
+         {
+          "display_name" : "Lower Bound",
+          "name" : "lower_bounds",
+          "uuid" : "8dcdee79-784e-46a3-aeae-4b403398d45f",
+          "value" : 65.0,
+          "value_type" : "Double",
+          "version_uuid" : "61cb7e82-943c-4d74-b9b1-9f7155b7f232"
+         },
+         {
+          "display_name" : "Upper Bound",
+          "name" : "upper_bounds",
+          "uuid" : "c5ecbf2e-f409-4fed-986d-f90b4c0b013d",
+          "value" : 72.0,
+          "value_type" : "Double",
+          "version_uuid" : "a01b43ae-3ccf-4a77-ac7f-b4ee63ef4c4d"
+         }
+        ],
+        "type" : "triangular_uncertain"
+       },
+       "uuid" : "5acbc394-46a3-41cd-833e-c8deaf1c6ac0",
+       "variable_index" : 0,
+       "variable_type" : "RubyContinuousVariable",
+       "version_uuid" : "87f9dbae-cb7e-40fe-8317-d6770a07220f"
+      },
+      {
+       "argument" :        {
+        "default_value" : 55.0,
+        "display_name" : "Economizer Maximum Limit Dewpoint Temperature (F).",
+        "domain_type" : "Interval",
+        "name" : "econoMaxDewpointTemp",
+        "required" : true,
+        "type" : "Double",
+        "uuid" : "7dfa4b20-6d0d-407d-8059-0867b80bbe55",
+        "version_uuid" : "c7837b42-fed7-4bec-8ad6-075d550458e9"
+       },
+       "display_name" : "Economizer Maximum Dewpoint Temperature",
+       "name" : "Economizer Maximum Dewpoint Temperature",
+       "uncertainty_description" :        {
+        "attributes" : [
+         {
+          "display_name" : "Mode",
+          "name" : "modes",
+          "uuid" : "b2b1c060-b0a6-4693-9e7c-2bc154a67b89",
+          "value" : 55.0,
+          "value_type" : "Double",
+          "version_uuid" : "81299540-151a-43d7-bf7c-26042cbea917"
+         },
+         {
+          "display_name" : "Lower Bound",
+          "name" : "lower_bounds",
+          "uuid" : "d8fee6ce-03d5-449a-badc-88b9287877aa",
+          "value" : 53.0,
+          "value_type" : "Double",
+          "version_uuid" : "278cbd7e-2328-48ff-9aea-f1fcf73b7fca"
+         },
+         {
+          "display_name" : "Upper Bound",
+          "name" : "upper_bounds",
+          "uuid" : "d967a1ed-4cd7-41b0-af86-9966133af40a",
+          "value" : 60.0,
+          "value_type" : "Double",
+          "version_uuid" : "2094f40f-66ff-429d-8c1b-d49a3d2cc5a2"
+         }
+        ],
+        "type" : "triangular_uncertain"
+       },
+       "uuid" : "3c05fb66-f003-40eb-9b01-58218ae20400",
+       "variable_index" : 1,
+       "variable_type" : "RubyContinuousVariable",
+       "version_uuid" : "a2cbcbc1-9247-4354-9837-6d48b91f3d06"
+      }
+     ],
+     "version_uuid" : "27cb6b9f-f8ec-4c91-a0cb-b7fe3aaf939f",
+     "workflow_index" : 1,
+     "workflow_step_type" : "Measure"
+    },
+    {
+     "params" : [
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "value" : ""
+          },
+          "param_index" : 0
+         }
+        ],
+        "value" : "workflowjobkey"
+       },
+       "param_index" : 0
+      },
+      {
+       "param" :        {
+        "children" : [
+         {
+          "param" :           {
+           "value" : "4b4c42b7df353fab12f4ebe91d350ce8"
+          },
+          "param_index" : 0
+         }
+        ],
+        "value" : "workflowkey"
+       },
+       "param_index" : 1
+      }
+     ],
+     "type" : "ModelToIdf",
+     "workflow_index" : 3,
+     "workflow_step_type" : "WorkItem"
+    }
+   ]
+  },
+  "project_dir" : "C:/projects/openstudio-server-branch2/prototyping/SamplingProject",
+  "results_are_invalid" : false,
+  "seed" :   {
+   "checksum_create" : "99A1061A",
+   "checksum_last" : "99A1061A",
+   "display_name" : "example.osm",
+   "file_type" : "OSM",
+   "name" : "C:/projects/openstudio-server-branch2/prototyping/SamplingProject/seed/example.osm",
+   "path" : "C:/projects/openstudio-server-branch2/prototyping/SamplingProject/seed/example.osm",
+   "timestamp_create" : "20131114T092223",
+   "timestamp_last" : "20131114T092223",
+   "uuid" : "0c5d4e3d-09ee-477c-8be0-3904ea7cd1e5",
+   "version_uuid" : "6d5595bc-d5fa-4d03-8eea-18a30ba0e32c"
+  },
+  "uuid" : "073bee26-62eb-4b00-b496-d7b5b0f3408a",
+  "version_uuid" : "865ab982-6739-4b87-bb14-424c83f95c89"
+ },
+ "openstudio_version" : "1.1.2"
+}
