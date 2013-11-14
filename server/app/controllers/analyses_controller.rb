@@ -392,7 +392,7 @@ class AnalysesController < ApplicationController
 
     mappings = get_superset_of_variables(analysis)
     data = get_plot_data(analysis, mappings)
-    filename = "#{analysis.uuid}.csv"
+    filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
       icnt = 0
       data.each do |dp|
