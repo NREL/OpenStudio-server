@@ -1,15 +1,17 @@
-require './ServerApi.rb'
+require_relative '../lib/openstudio-server/ServerApi.rb'
 
 HOSTNAME = "http://localhost:8080"
 #HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
-WITHOUT_DELAY=false
+WITHOUT_DELAY=true
 ANALYSIS_TYPE="batch_run"
 STOP_AFTER_N=nil # set to nil if you want them all
+                 # each may contain up to 50 data points
 
 # Project data
-formulation_file = "./DiskIOBenchmark/analysis.json"
-analysis_zip_file = "./DiskIOBenchmark/analysis.zip"
-datapoint_files = Dir.glob("./DiskIOBenchmark/datapoint*.json").take(STOP_AFTER_N || 2147483647)
+project_name = "PATTestExport"
+formulation_file = "./" + project_name + "/analysis.json"
+analysis_zip_file = "./" + project_name + "/project.zip"
+datapoint_files = Dir.glob("./" + project_name + "/data_points_*.json").take(STOP_AFTER_N || 2147483647)
 
 options = {hostname: HOSTNAME}
 api = ServerApi.new(options)

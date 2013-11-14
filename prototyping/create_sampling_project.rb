@@ -31,6 +31,9 @@ puts "Currently using OpenStudio::Model::example as the seed, but might be bette
 problem = project.analysis.problem
 
   # (pivot) variable 1: climate zone
+  # measure that takes BCL component, sets weather file and design days. 
+  # has argument asking which design days.
+  # (add ground temperatures later)
   puts "First variable should be pivot on climate zone. Need appropriate measure."
   
   # variable 2: building rotation
