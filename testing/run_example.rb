@@ -29,8 +29,6 @@ datapoint_files.each do |dp|
   api.upload_datapoints(analysis_id, datapoint_options)
 end
 
-#api.upload_datapoints(analysis_id, datapoint_options)
-
 run_options = {analysis_action: "start", without_delay: WITHOUT_DELAY, analysis_type: ANALYSIS_TYPE}
 api.run_analysis(analysis_id, run_options)
 
