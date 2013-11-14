@@ -97,8 +97,7 @@ module CommunicateMongo
     end
 
     # save the datapoint results into the JSON field named output
-    data_point_options = OpenStudio::Analysis::DataPointSerializationOptions.new(os_directory.parent_path)
-    json_output = JSON.parse(os_data_point.toJSON(data_point_options), :symbolize_names => true)
+    json_output = JSON.parse(os_data_point.toJSON(), :symbolize_names => true)
     dp.output = json_output
 
     # grab out the HTML and push it into mongo for the HTML display
