@@ -5,6 +5,7 @@
   "name" : "Simple Project Analysis",
   "num_measure_groups" : 4,
   "num_ruby_continuous_variables" : 0,
+  "openstudio_version" : "1.1.2",
   "problem" :   {
    "display_name" : "Simple Project Problem",
    "name" : "Simple Project Problem",
@@ -25,7 +26,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "ae13cbfd-1be2-4185-aff3-8903f977fbd9",
-     "version_uuid" : "35cf3d28-d93b-4cfe-ab8f-de4ceb1c1aca",
+     "version_uuid" : "e96d4c15-66fe-448b-9992-4b437dd7586a",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -131,7 +132,7 @@
      ],
      "name" : "Rotate Building",
      "uuid" : "05505496-bba2-49fc-9f86-5633ecafe0e5",
-     "version_uuid" : "405970eb-3f4a-4942-aeb9-820146225191",
+     "version_uuid" : "f4de5658-2af9-42fa-8a5e-5d312ccf6542",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -406,7 +407,7 @@
      ],
      "name" : "Reduce Lighting Load",
      "uuid" : "5ba3c9b4-2f5d-4792-9ef7-569108649aa2",
-     "version_uuid" : "d9462d04-ab53-453c-8776-c5eff6000307",
+     "version_uuid" : "bb4826c8-604b-4e09-893d-d63e051c69cd",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -606,7 +607,7 @@
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "e0fe48c7-d80b-4e5f-83a8-c1e9d69e8ce7",
-     "version_uuid" : "4a06f66b-d9c1-437f-9e3a-3161e8155fe2",
+     "version_uuid" : "cd91039b-fb7c-481d-8557-aeabd26ae0d8",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },

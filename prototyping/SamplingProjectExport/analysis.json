@@ -5,6 +5,7 @@
   "name" : "Simple Project Analysis",
   "num_measure_groups" : 0,
   "num_ruby_continuous_variables" : 3,
+  "openstudio_version" : "1.1.2",
   "problem" :   {
    "display_name" : "Simple Project Problem",
    "name" : "Simple Project Problem",
@@ -60,7 +61,7 @@
        "uuid" : "51874ecd-16d1-4da6-bb68-15e702673ace",
        "variable_index" : 0,
        "variable_type" : "RubyContinuousVariable",
-       "version_uuid" : "bdad3780-d0cb-4b24-a849-b02c99f27797"
+       "version_uuid" : "7f4dbb9b-94e6-4d35-a65d-0e4b820099e0"
       }
      ],
      "version_uuid" : "04e3a034-c959-400e-ae50-750497cb0971",
@@ -168,7 +169,7 @@
        "uuid" : "5acbc394-46a3-41cd-833e-c8deaf1c6ac0",
        "variable_index" : 0,
        "variable_type" : "RubyContinuousVariable",
-       "version_uuid" : "87f9dbae-cb7e-40fe-8317-d6770a07220f"
+       "version_uuid" : "fd3c2506-9903-40f3-8169-9bd7dbd0af39"
       },
       {
        "argument" :        {
@@ -215,7 +216,7 @@
        "uuid" : "3c05fb66-f003-40eb-9b01-58218ae20400",
        "variable_index" : 1,
        "variable_type" : "RubyContinuousVariable",
-       "version_uuid" : "a2cbcbc1-9247-4354-9837-6d48b91f3d06"
+       "version_uuid" : "e15fe9ad-0969-4c4e-b178-7242d84d1d65"
       }
      ],
      "version_uuid" : "27cb6b9f-f8ec-4c91-a0cb-b7fe3aaf939f",

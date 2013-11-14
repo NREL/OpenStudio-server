@@ -5,6 +5,7 @@
   "name" : "Simple Project Analysis",
   "num_measure_groups" : 39,
   "num_ruby_continuous_variables" : 0,
+  "openstudio_version" : "1.1.2",
   "problem" :   {
    "display_name" : "Simple Project Problem",
    "name" : "Simple Project Problem",
@@ -25,7 +26,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "da40ffe6-23f3-4eb3-8df1-285e2685d469",
-     "version_uuid" : "123aecf9-70ef-4445-b0b1-ccb669f4a2ab",
+     "version_uuid" : "0b5fa63d-40bd-42b4-a0cf-26d996d3f0f1",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -162,7 +163,7 @@
      ],
      "name" : "Rotate Building Relative to Current Orientation Group",
      "uuid" : "dad8d6da-ca50-46c1-ba01-9d6d49d49b3c",
-     "version_uuid" : "9107aff9-8050-4f7b-8648-63db1bdaf829",
+     "version_uuid" : "6c06b53f-6e5e-47b9-aa87-eed6a55ff6c6",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -235,7 +236,7 @@
      ],
      "name" : "Set Ext Wall To Ground Boundary Condition By Story Group",
      "uuid" : "413bded1-337f-47e6-9188-fc53c4eb0935",
-     "version_uuid" : "a5c1e623-3668-4412-9343-80b481ad2c72",
+     "version_uuid" : "6af1988c-bead-4021-b17a-e254754c8868",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -1688,7 +1689,7 @@
      ],
      "name" : "Set Interior Walls to Adiabatic Group",
      "uuid" : "ce89bffd-218e-46e8-9427-51d495327327",
-     "version_uuid" : "14e5f2a4-c5c3-470e-8aab-a55adc5d97ba",
+     "version_uuid" : "80a28d35-f264-43da-a292-d7c77f8c2ea7",
      "workflow_index" : 3,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -1961,7 +1962,7 @@
      ],
      "name" : "Set R-value of Insulation for Exterior Walls to a Specific Value Group",
      "uuid" : "fb468ed3-bb74-4fe0-9ce0-51e3e9995cab",
-     "version_uuid" : "75c33b65-6034-4044-bb99-c5b8e6374692",
+     "version_uuid" : "c7a0b40d-7bca-4912-9a2f-702af84666ff",
      "workflow_index" : 4,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -2233,7 +2234,7 @@
      ],
      "name" : "Set R-value of Insulation for Roofs to a Specific Value Group",
      "uuid" : "aa88f060-d191-400c-a28c-1a2e1c3c15f2",
-     "version_uuid" : "a1f7e00f-aa99-4ccf-b745-665b9e9f9ec0",
+     "version_uuid" : "872a8b72-43c9-4dcc-a4ed-6ff17e125423",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -2398,7 +2399,7 @@
      ],
      "name" : "Add Cost per Area to Construction Group",
      "uuid" : "6eef4fe6-b952-46ea-ab10-c9fee962c767",
-     "version_uuid" : "47e38eaf-441d-4e75-9cd3-1313420fcfd6",
+     "version_uuid" : "537c34cb-752e-497b-869e-db883e380ce9",
      "workflow_index" : 6,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -3898,7 +3899,7 @@
      ],
      "name" : "Add Cost per Area to Unused Construction Group",
      "uuid" : "1ed95641-420d-465d-a7b4-89c515c33ded",
-     "version_uuid" : "0b8b9681-38a7-489a-b474-84087eb04373",
+     "version_uuid" : "528102b8-5344-4f62-8006-f0651c06e920",
      "workflow_index" : 7,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -5243,7 +5244,7 @@
      ],
      "name" : "Replace Exterior Window Constructions with a Different Construction from the Model Group",
      "uuid" : "e80a8566-e958-4b5e-a6c1-32aa4d3af603",
-     "version_uuid" : "0819d9e7-2387-4495-86fe-321402259d3b",
+     "version_uuid" : "96981656-aa75-4ab2-91ee-09c473c5fc9a",
      "workflow_index" : 8,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -5556,7 +5557,7 @@
      ],
      "name" : "Set Window to Wall Ratio by Facade Group",
      "uuid" : "29321926-7e4c-4e5e-adef-8c8dd5b20d5a",
-     "version_uuid" : "b3c9d5b5-1343-49cb-9b02-763afee9d4bf",
+     "version_uuid" : "cda5dd03-84ed-4e28-95c9-90df46d22c2a",
      "workflow_index" : 9,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -10777,7 +10778,7 @@
      ],
      "name" : "Add Overhangs by Projection Factor Group",
      "uuid" : "0cd08ceb-3fa1-4e87-a06b-1cc32389b266",
-     "version_uuid" : "2edda150-654d-4856-b3e2-7a5c6b0484e8",
+     "version_uuid" : "0d763079-2e2b-4b38-9812-70bbab561b66",
      "workflow_index" : 10,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -11144,7 +11145,7 @@
      ],
      "name" : "ReduceSpaceInfiltrationByPercentage Group (Only use one infiltration Group)",
      "uuid" : "3a2c3894-41da-4537-bfdf-383036d768f4",
-     "version_uuid" : "24d8e0af-8440-45ad-9d24-1900ae51eab5",
+     "version_uuid" : "5c1c8a2b-3f46-445a-9c51-029dd7c7ba99",
      "workflow_index" : 11,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -11352,7 +11353,7 @@
      ],
      "name" : "Set Space Infiltration by Exterior Surface Area Group (Only use one infiltration Group)",
      "uuid" : "33905b3f-f302-4d2a-ad76-db20d08ca887",
-     "version_uuid" : "3c39cc46-061d-4778-91ff-6a0aea46b55f",
+     "version_uuid" : "16e7ecb7-c8e2-4743-a41d-fe8831f12ebb",
      "workflow_index" : 12,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -12081,7 +12082,7 @@
      ],
      "name" : "Reduce Night Time Lighting Loads Group",
      "uuid" : "624c58fd-a42b-40df-8771-b105a430b3c3",
-     "version_uuid" : "f6f53414-206f-491c-a95a-ce86357040d0",
+     "version_uuid" : "7c687483-15e2-4a62-8954-12d143fb6c69",
      "workflow_index" : 13,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -12319,7 +12320,7 @@
      ],
      "name" : "Add Daylight Sensor at Center of  Spaces with a Specified Space Type Assigned Group",
      "uuid" : "83264fb4-2741-4b53-bb00-7cff703e259e",
-     "version_uuid" : "1e9ba321-ba26-469f-9a13-45f0497012e0",
+     "version_uuid" : "7b8fdc08-a258-440b-a0d4-feac33b35da4",
      "workflow_index" : 14,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -12484,7 +12485,7 @@
      ],
      "name" : "Add Cost per Floor Area to Lights Group",
      "uuid" : "8f1a5be8-f46c-41ec-b9ba-3fd4305aa011",
-     "version_uuid" : "63e66cfa-7f0a-4b15-bc01-338c2a0c0be4",
+     "version_uuid" : "3aca2c99-8541-4450-9453-df5b7e612223",
      "workflow_index" : 15,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -12986,7 +12987,7 @@
      ],
      "name" : "Reduce Lighting Loads by Percentage Group",
      "uuid" : "dee12c81-5583-44e7-bd58-7dd16d5ec4a8",
-     "version_uuid" : "5108f078-42a9-49c0-9302-e089388b82d4",
+     "version_uuid" : "7862c21a-267c-4dc9-b467-733dd2a9c21f",
      "workflow_index" : 16,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -13378,7 +13379,7 @@
      ],
      "name" : "Swap Lights Definition Group",
      "uuid" : "c5f31229-08c4-4adf-b575-d57000640941",
-     "version_uuid" : "9d918458-8808-400b-94b3-31d8da89ddf9",
+     "version_uuid" : "19d2bfaf-d66e-41a0-a168-c8ec71c9a294",
      "workflow_index" : 17,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -13524,7 +13525,7 @@
      ],
      "name" : "Add Exterior Lights Group",
      "uuid" : "92727192-2653-4e3a-ad9a-973225c432e6",
-     "version_uuid" : "4ef9db0f-c3cb-4351-acb8-2a0cb396b330",
+     "version_uuid" : "f2f7a21b-3646-4b2a-97af-5f35cc3950ec",
      "workflow_index" : 18,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -14221,7 +14222,7 @@
      ],
      "name" : "Reduce Night Time Electric Equipment Loads Group",
      "uuid" : "63126f58-b6fa-43af-8b70-5d4fb357eea5",
-     "version_uuid" : "9b8e4ba5-3896-469c-a013-5be50be94e09",
+     "version_uuid" : "82a2df60-a2bd-4072-b789-0f2d79d2e957",
      "workflow_index" : 19,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -14381,7 +14382,7 @@
      ],
      "name" : "Add Cost per Floor Area to Electric Equipment Group",
      "uuid" : "db83a00f-6c45-4a23-b98c-e2aee17469fd",
-     "version_uuid" : "686c4254-5409-4dd5-926d-a76fb6a3e74f",
+     "version_uuid" : "679f356d-01e5-43e8-97bf-163a0a379ac0",
      "workflow_index" : 20,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -14883,7 +14884,7 @@
      ],
      "name" : "Reduce Electric Equipment Loads by Percentage Group",
      "uuid" : "a3b5dbd9-de4b-4c1f-9360-607854635114",
-     "version_uuid" : "1790027f-bad6-43e0-99ac-023ff452881f",
+     "version_uuid" : "00587b3d-c25d-470c-93b0-ea2286ab8737",
      "workflow_index" : 21,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -15057,7 +15058,7 @@
      ],
      "name" : "Adjust Thermostat Setpoints by Degrees Group",
      "uuid" : "174f77b8-5456-4f91-ac04-8c1374fd7fc8",
-     "version_uuid" : "26912195-e2a8-42dd-bdfb-6060323b5401",
+     "version_uuid" : "0d4e350b-c449-4929-84aa-c80b33dad55b",
      "workflow_index" : 22,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -15295,7 +15296,7 @@
      ],
      "name" : "Add Cost To Supply Side HVAC Component by Air Loop Group",
      "uuid" : "d0884f21-da1d-4067-967a-95045e32e459",
-     "version_uuid" : "48de9cdb-ca0b-49be-85b8-e6d639ce8720",
+     "version_uuid" : "b0fc1021-ea40-4478-8b92-12cda5aea44b",
      "workflow_index" : 23,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -15773,7 +15774,7 @@
      ],
      "name" : "Set COP for Two Speed DX Cooling Units Group",
      "uuid" : "a7021c4c-e8f8-4504-9669-18e7c14e4d28",
-     "version_uuid" : "7edb2db9-333f-46d6-9c2c-a96f8da897b0",
+     "version_uuid" : "0beb3c0a-88b1-4a94-91ce-912674675d69",
      "workflow_index" : 24,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -16275,7 +16276,7 @@
      ],
      "name" : "Improve Fan Belt Efficiency Group",
      "uuid" : "76ffb740-d705-4ff3-9418-a33e8e5319bc",
-     "version_uuid" : "2b0301e7-b4ae-471d-8643-c534bfe4e46e",
+     "version_uuid" : "da73b033-1985-40a1-be15-1c532affac20",
      "workflow_index" : 25,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -16822,7 +16823,7 @@
      ],
      "name" : "Improve Motor Efficiency Group",
      "uuid" : "9da19213-a103-47f2-992a-42719d819c33",
-     "version_uuid" : "9bda0cbb-702f-4b66-a25b-b69a74506734",
+     "version_uuid" : "da587900-d4b1-4400-8756-e400bd63118a",
      "workflow_index" : 26,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -16988,7 +16989,7 @@
      ],
      "name" : "Enable Demand Controlled Ventilation Group",
      "uuid" : "d4e8a360-2078-4774-b8cb-14449fcd9d7b",
-     "version_uuid" : "71290ab7-28b5-4151-a19c-68fc0695d703",
+     "version_uuid" : "e3e73af5-9da7-44db-a943-4a60afc1ac7f",
      "workflow_index" : 27,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -17713,7 +17714,7 @@
      ],
      "name" : "Enable Economizer Control Group",
      "uuid" : "c6df623c-acdb-4522-bbb5-bd4e60643c1e",
-     "version_uuid" : "9144cc82-4ec9-428c-ba6b-a7545b8ae851",
+     "version_uuid" : "da7247ef-abb1-40f0-9d19-d04bea3b9444",
      "workflow_index" : 28,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -17978,7 +17979,7 @@
      ],
      "name" : "Reduce Ventilation By Percentage Group",
      "uuid" : "5ad076f2-e3bd-46be-8ca0-18eeb8af0ea2",
-     "version_uuid" : "ecf302a3-b649-4a2e-915d-96ac114c3dd3",
+     "version_uuid" : "6e3fc4e5-8991-41f6-a9c6-43e74c16ce78",
      "workflow_index" : 29,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -19354,7 +19355,7 @@
      ],
      "name" : "Shift Schedule Profile Time Group",
      "uuid" : "0f7c007b-bb57-4a9e-8bbd-603f63e980f6",
-     "version_uuid" : "3b20e91c-f0bf-4fd5-b5b0-4a9524c7a774",
+     "version_uuid" : "ec57972c-596c-49c4-bfa0-bc5add7a0408",
      "workflow_index" : 30,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -19411,7 +19412,7 @@
      ],
      "name" : "Test Test Measure Had a Ruby Error Group",
      "uuid" : "d0aa5d2c-affd-4a30-b2a1-04e1391544f4",
-     "version_uuid" : "f1525728-092e-4999-b105-65188143d516",
+     "version_uuid" : "1fe0cde2-c55b-455c-bdf8-d927767daf98",
      "workflow_index" : 31,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -19495,7 +19496,7 @@
      ],
      "name" : "Add Output Variable Group",
      "uuid" : "c28f9736-41d9-4063-b58b-2e13b4a46ffa",
-     "version_uuid" : "b5667aae-10ed-48d8-9c42-fd99ccd770fb",
+     "version_uuid" : "df3e4365-3b52-40f8-975e-76d0c60f1abf",
      "workflow_index" : 32,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -19849,7 +19850,7 @@
      ],
      "name" : "Predicted Mean Vote Group",
      "uuid" : "356573c0-2c7d-449a-ab52-855b88ade208",
-     "version_uuid" : "e8e010fb-409e-4f7d-b923-d2cada9c2885",
+     "version_uuid" : "ba14fd63-063c-4b88-a5d6-32b1ecb92c2e",
      "workflow_index" : 33,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -19888,7 +19889,7 @@
      ],
      "name" : "Set Lifecycle Cost Parameters Group",
      "uuid" : "a170c167-4f67-43d5-821e-f7822957756f",
-     "version_uuid" : "d04d9391-dc5d-42a5-bac2-7784029b68c8",
+     "version_uuid" : "1999274f-ac94-46a9-9fa7-5af4c34afce9",
      "workflow_index" : 34,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -20017,7 +20018,7 @@
      ],
      "name" : "Add Cost per Floor Area to Building Group",
      "uuid" : "6cc4ee7d-e232-4b01-a009-f739dd01fd2e",
-     "version_uuid" : "832c28cf-f221-41f3-8a96-697edb487b21",
+     "version_uuid" : "9b17f1c9-277d-42ba-baaf-d5a6869528c8",
      "workflow_index" : 35,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -20737,7 +20738,7 @@
      ],
      "name" : "Add Simple PV to Shading Surfaces By Type Group",
      "uuid" : "da1d4b07-899c-43c2-a383-98dd3b3e7443",
-     "version_uuid" : "6baad58c-c260-4cc0-8a68-c179449ca991",
+     "version_uuid" : "97ad7488-2000-472a-9f05-79377dd46ad7",
      "workflow_index" : 38,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -20881,7 +20882,7 @@
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "dd3b55cb-3dd2-4c42-8018-8a85365bb412",
-     "version_uuid" : "8100c161-3d2f-4003-8ffc-fba6bb44843c",
+     "version_uuid" : "ceaa2944-cefb-42fd-a4ec-2e123dc45687",
      "workflow_index" : 39,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -21271,7 +21272,7 @@
      ],
      "name" : "Just the Sample Reporting Measure you get when you create a new reporting measure Group",
      "uuid" : "e2d86558-0bdb-4deb-895b-7215c5b35efd",
-     "version_uuid" : "6250e917-c6e5-483b-a61f-666ea15f34b0",
+     "version_uuid" : "5b61c709-94c3-4ba5-bb7c-30f26844b5fb",
      "workflow_index" : 42,
      "workflow_step_type" : "MeasureGroup"
     },
