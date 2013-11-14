@@ -25,8 +25,8 @@ analysis_options = {formulation_file: formulation_file, upload_file: analysis_zi
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 datapoint_files.each do |dp|
-  datapoint_options = {datapoint_file: dp}
-  api.upload_datapoint(analysis_id, datapoint_options)
+  datapoint_options = {datapoints_file: dp}
+  api.upload_datapoints(analysis_id, datapoint_options)
 end
 
 #api.upload_datapoints(analysis_id, datapoint_options)

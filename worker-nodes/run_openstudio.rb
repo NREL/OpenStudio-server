@@ -65,7 +65,7 @@ ros.log_message "File #{__FILE__} started executing on #{options[:uuid]}", true
 
 # get the directory as an openstudio path
 directory = OpenStudio::Path.new(options[:directory])
-project_path = directory.parent_path.parent_path
+project_path = directory.parent_path
 # on linux, if directory ends in /, need to call parent_path
 if directory.stem.to_s == String.new
   directory = directory.parent_path
