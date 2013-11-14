@@ -35,16 +35,12 @@ module CommunicateMongo
   end
 
   def self.get_problem(dp, format)
-    # HERE - have to attach the openstudio_version?
-    # Now data_points come in as batch with openstudio_version listed once.
-    # Need to copy that element to these individual jsons.
+    analysis = dp.analysis
+  
     data_point_hash = Hash.new
     data_point_hash[:data_point] = dp
-    data_point_hash[:openstudio_version] = dp[:openstudio_version]
+    data_point_hash[:openstudio_version] = analysis[:openstudio_version]
 
-    # HERE - have to attach the openstudio_version?
-    # Will it already be in analysis, or does it also have to be explicitly attached?
-    analysis = dp.analysis
     analysis_hash = Hash.new
     analysis_hash[:analysis] = analysis
     analysis_hash[:openstudio_version] = analysis[:openstudio_version]
