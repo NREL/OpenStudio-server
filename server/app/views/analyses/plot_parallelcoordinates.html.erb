@@ -33,9 +33,9 @@
               x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
 
                   // Don't show any of these items
-                  if ((d === "_id") || (d === "data_point_uuid") || (d === "lighting_control") || (d === "climate_zone_id")) return false;
+                  if ((d === "_id") || (d === "data_point_uuid") || (d === "lighting_control") || (d === "climate_zone_id") || (d === "wwr_west_static")) return false;
 
-                  if ((d === "wwr_west_static") || (d === "wwr_facade") || (d === "location")) {
+                  if ((d === "wwr_facade") || (d === "location")) {
                       y[d] = d3.scale.ordinal()
                               .domain(d3.extent(data['data'], function (p) {
                                   return p[d];
