@@ -1,7 +1,7 @@
 require_relative '../lib/openstudio-server/ServerApi'
 
 HOSTNAME = "http://localhost:8080"
-#HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
+#HOSTNAME = "http://ec2-50-19-154-205.compute-1.amazonaws.com"
 
 # Initialize the ServerAPI
 options = {hostname: HOSTNAME}
@@ -40,7 +40,7 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 run_options = {analysis_action: "start", without_delay: false, analysis_type: "lhs", allow_multiple_jobs: true}
 api.run_analysis(analysis_id, run_options)
 
-run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run", allow_multiple_jobs: true, use_server_as_worker: false, simulate_data_point_filename: "simulate_data_point_lhs.rb"}
 api.run_analysis(analysis_id, run_options)
 
 # ===== Sequential Search =====
@@ -57,7 +57,7 @@ run_options = {
     x_objective_function: "total_energy",
     y_objective_function: "total_life_cycle_cost",
     allow_multiple_jobs: true,
-    use_server_as_worker: true,
+    use_server_as_worker: false,
     simulate_data_point_filename: "simulate_data_point_lhs.rb",
     max_iterations: 1000
 }

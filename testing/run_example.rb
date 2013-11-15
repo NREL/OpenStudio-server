@@ -1,8 +1,8 @@
 require_relative '../lib/openstudio-server/ServerApi.rb'
 
 HOSTNAME = "http://localhost:8080"
-#HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
-WITHOUT_DELAY=true
+#HOSTNAME = "http://ec2-50-19-154-205.compute-1.amazonaws.com"
+WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
 STOP_AFTER_N=nil # set to nil if you want them all
                  # each may contain up to 50 data points
