@@ -1,0 +1,47 @@
+<measure>
+  <name>Set COP for Two Speed DX Cooling Units</name>
+  <uid>ab217b3b-4eac-4e3c-90a3-ab8800b50cfb</uid>
+  <version_id>bd89d8cd-19e2-45c8-9a5d-475f8211620e</version_id>
+  <description>This measure will find two speed DX cooling units in the model and will alter the Rated HighSpeed COP to a specified value. It can be run on a single or all air loops in the model.</description>
+  <modeler_description>Loop through air loops in the building and find and change the COP of any OS:Coil:Cooling:DX:TwoSpeed objects you find. Note the pre-adjusted COP and also the name of the loop. For the starting condition note the range of COP values for the units, and for the final condition do the same, to confirm that they were all changed.</modeler_description>
+  <provenances/>
+  <tags>
+    <tag>HVAC.Cooling</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>0320_ModelWithHVAC_01.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E8E3B807</checksum>
+    </file>
+    <file>
+      <filename>SetCOPforTwoSpeedDXCoolingUnits_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>AF95A709</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>0.10.2</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>1442027F</checksum>
+    </file>
+  </files>
+</measure>

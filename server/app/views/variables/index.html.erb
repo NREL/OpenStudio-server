@@ -1,21 +1,41 @@
-<h1>Listing variables</h1>
+<h1>Listing Variables</h1>
 
-<table>
+<table class="table table-striped">
+  <thead>
   <tr>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
-
-<% @variables.each do |variable| %>
+    <th>Name</th>
+    <th>Number of Variables/Samples</th>
+    <th>Variable</th>
+    <th>Static</th>
+    <th>Pivot</th>
+    <th>Thumbnail</th>
   <tr>
-    <td><%= link_to 'Show', variable %></td>
-    <td><%= link_to 'Edit', edit_variable_path(variable) %></td>
-    <td><%= link_to 'Destroy', variable, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-  </tr>
-<% end %>
+  </thead>
+  <tbody>
+  <% @variables.order_by(:perturbable.desc, :static.desc, :pivot.desc, :name.asc).each do |variable| %>
+      <tr>
+        <td><%= link_to variable.name, variable_path(variable) %></td>
+        <% if variable.discrete_values_and_weights %>
+            <td><%= variable.discrete_values_and_weights.size %></td>
+        <% elsif variable.uncertainty_type && variable.analysis.problem && variable.analysis.problem['number_of_samples'] %>
+            <td><%= variable.analysis.problem['number_of_samples'] %></td>
+        <% else %>
+            <td></td>
+        <% end %>
+        <td><%= variable.perturbable %></td>
+        <td><%= variable.static %></td>
+        <td><%= variable.pivot %></td>
+        <% if variable.perturbable && variable.preflight_images.first %>
+            <td>
+              <%= link_to image_tag(variable.preflight_images.first.image.url(:thumb)), variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
+            </td>
+        <% else %>
+            <td>No image</td>
+        <% end %>
+      </tr>
+  <% end %>
+  </tbody>
 </table>
 
-<br />
 
-<%= link_to 'New Variable', new_variable_path %>
+

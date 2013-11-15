@@ -5,68 +5,79 @@ The preferred development approach for this application is to use Vagrant to pro
 
 ## Instructions
 
-- Check out the git repo
+- Install [Vagrant] and [VirtualBox]  
+  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use 4.2.18 instead.*
+  
+[Vagrant]: http://www.vagrantup.com/ "Vagrant"
+[VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
 
-See the instruction on the Wiki. ** Make sure to checkout the repo with LF end-of-lines if on windows **
+- Check out the git repo: see the instruction on the Wiki.  
+  **Make sure to checkout the repo with LF end-of-lines if on windows**
 
-- Install the vagrant omnibus plugin
+- Initialize and update all Git submodules (see wiki):
+```sh
+$ git submodule init
+$ git submodule update
+```
+
+- Install the Vagrant omnibus plugin
 
 ```sh
 vagrant plugin install vagrant-omnibus
 ```
 
-- Also install the vagrant AWS plugin as the vagrant file will fail if not installed 
+- Also install the Vagrant AWS plugin as the vagrant file will fail if not installed 
 
 ```sh
 vagrant plugin install vagrant-aws
 ```
 
-- Start the VM and let it provision
+- Start VirtualBox
 
-Windows
-
-```sh
-# for each cmd window set the environment variable (or set globally (for NREL only)
+- Start the VM and let it provision:  
+  **Windows**  
+```bat
+cd \path\to\Vagrantfile
+rem for each cmd window set the environment variable (or set globally (for NREL only)
 set OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
 vagrant up
 ```
-
-Mac / Linux
-
+  **Mac / Linux**  
 ```sh
+cd /path/to/Vagrantfile
 # for each cmd window set the environment variable (or set globally (for NREL only)
 OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
 ```
-
-Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
+  Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
 
 - **NREL ONLY** Disable HTTPS
 If you are inside the NREL firewall then you will need to disable HTTPS on rubygems. 
 
-Log into Vagrant VM
-
+  - Log into Vagrant VM  
+  
 ```sh
 vagrant ssh
 ```
+  
+  (Or use [PuTTy](http://stackoverflow.com/questions/9885108/ssh-to-vagrant-box-in-windows) on Windows.)
 
-Add http://rubygems.org to gem sources
-
+  - Add http://rubygems.org to gem sources
+  
 ```sh
 sudo -i
 gem sources -r https://rubygems.org/
 gem sources -a http://rubygems.org/
-
 ```
 
-- Exit the VM and then reprovision the VM
-
+  - Exit the VM and then reprovision the VM
+  
 ```sh
 vagrant provision
 ```
 
-Note, if provisioning fails continue to call the `vagrant provision` command
+  Note, if provisioning fails continue to call the `vagrant provision` command
 
-- Test the Rails application by pointing your local browser to http://localhost:8080
+- Test the Rails application by pointing your local browser to [http://localhost:8080](http://localhost:8080)
 
 ## Deploying to Amazon EC2
 
@@ -91,7 +102,7 @@ keypair_name: key_pair_name
 private_key_path: /Users/<user>/.ssh/amazon.pem
 ```
 
-- Launch vagrant using the
+- Launch Vagrant using the
 
 ```sh
 vagrant up --provider=aws
@@ -181,7 +192,13 @@ sudo shutdown -r now
 ```
 
 - login to AWS and take a snapshot of the image
+  + Naming convention is `OpenStudio Worker Cluster OS <version of openstudio>`
   + Increase the size of the root image to 10GB in both
 
+- test the AMI using the script run_ec2
+- merge the branch into master
+- tag the release 
+  + Naming convention is to increment the minor release (e.g. V1.2.0).  Note that this number does not increment the same as openstudio because there may be intermediate patched. 
+  + Add a note in the release to which versions of OpenStudio the release supports
 
 

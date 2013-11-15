@@ -1,0 +1,60 @@
+<measure>
+  <name>Add Cost per Floor Area to Electric Equipment</name>
+  <uid>42cf1acc-c0bc-46cd-af67-8a17cadaab7b</uid>
+  <version_id>c4b1b693-343d-4adb-b206-c86e1b574584</version_id>
+  <description>This measure will create life cycle cost objects associated with electric equipment. You can choose any electric equipment definition used in the model that has a watt/area power. You can set a material &amp; installation cost, demolition cost, and O&amp;M costs. Optionally existing cost objects already associated with the selected electric equipment definition can be deleted. This measure will not affect energy use of the building.</description>
+  <modeler_description>This measure has a choice input populated with watt/area electric equipment definitions used in spaces in the model. It will add a number of life cycle cost objects and will associate them with the selected definition. In addition to the inputs for the cost values, a number of other inputs are exposed to specify when the cost first occurs and at what frequency it occurs in the future. This measure is intended to be used as an "Always Run" measure to apply costs to objects that design alternatives will impact. This will add costs to the baseline model before any design alternatives manipulate it. As an example, if you plan adjust the performance and cost of electric equipment by a percentage, you will want to use this to cost the baseline definition.&#xd;&#xd;&#xd;
+&#xd;&#xd;&#xd;
+For baseline costs, "Years Until Costs Start? indicates the year that the capital costs first occur. For new construction this will be typically be "0? and "Demolition Costs Occur During Initial Construction?? will be "false?. For a retrofit "Years Until Costs Start? is between "0? and the "Expected Life? of the object, while "Demolition Costs Occur During Initial Construction?? is "true?.  O&amp;M cost and frequency can be whatever is appropriate for the component.&#xd;&#xd;&#xd;
+  </modeler_description>
+  <provenances/>
+  <tags>
+    <tag>Economics.Life Cycle Cost Analysis</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>0416_NetArea_b.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>CB515014</checksum>
+    </file>
+    <file>
+      <filename>AddCostPerFloorAreaToElectricEquipment_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>BADAC643</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>0.11.5</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>5B56F232</checksum>
+    </file>
+  </files>
+</measure>

@@ -1,0 +1,47 @@
+<measure>
+  <name>Set Interior Walls to Adiabatic</name>
+  <uid>7e440f88-1b2d-444e-8586-9a8d1ac84b8d</uid>
+  <version_id>8111d9db-4c99-431b-ab3f-c7158a82a637</version_id>
+  <description>Set exterior walls to Adiabatic and assign a hard construction.</description>
+  <modeler_description>This was just made to cleanup a file where I removed some spaces that had some interior walls shared with spaces that remained.</modeler_description>
+  <provenances/>
+  <tags>
+    <tag>Envelope.Opaque</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>EnvelopeAndLoadTestModel_01.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>938A1BB0</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.0.4</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>8CD156C1</checksum>
+    </file>
+    <file>
+      <filename>SetInteriorWallsAndFloorsToSelectedConstruction_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9A53F9E7</checksum>
+    </file>
+  </files>
+</measure>

@@ -1,0 +1,57 @@
+<measure>
+  <name>Shift Schedule Profile Time</name>
+  <uid>4a428da9-16bb-46be-bbf0-1ad30c98d9ca</uid>
+  <version_id>2d42d422-c7a5-447e-9860-314070018f79</version_id>
+  <description>Shift a single or all schedules in the building by the specified number of hours</description>
+  <modeler_description>This measure provides an easy way to shirt the building operations by a set time, but does not alter the length of the day. It only works with RulesetSchedules. It will allter summer and winter design days in addition to other profiles that are part of the schedules.</modeler_description>
+  <provenances/>
+  <tags>
+    <tag>Whole Building.Schedules</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>3Story2Space.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>04F42478</checksum>
+    </file>
+    <file>
+      <filename>ShiftScheduleProfileTime_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3DF3B5FE</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.0.4</identifier>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>B30CD377</checksum>
+    </file>
+  </files>
+</measure>

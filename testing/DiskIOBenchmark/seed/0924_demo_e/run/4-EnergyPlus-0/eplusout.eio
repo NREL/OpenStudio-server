@@ -1,0 +1,512 @@
+Program Version,EnergyPlus-Windows-32 8.0.0.008, YMD=2013.09.24 15:24
+! <Version>, Version ID
+ Version, 8.0
+! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
+ Timesteps per Hour,  4, 15
+! <System Convergence Limits>, Minimum System TimeStep {minutes}, Max HVAC Iterations,  Minimum Plant Iterations, Maximum Plant Iterations
+ System Convergence Limits, 1, 20, 2, 8
+! <Simulation Control>, Do Zone Sizing, Do System Sizing, Do Plant Sizing, Do Design Days, Do Weather Simulation
+ Simulation Control, Yes, Yes, Yes, No, Yes
+! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time
+ Output Reporting Tolerances, 0.200, 0.200, 
+! <Site:GroundTemperature:BuildingSurface>, Months From Jan to Dec {C}
+ Site:GroundTemperature:BuildingSurface,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00
+! <Site:GroundTemperature:FCfactorMethod>, Months From Jan to Dec {C}
+ Site:GroundTemperature:FCfactorMethod,  -0.60,   1.34,   5.12,   8.69,  15.46,  19.02,  20.00,  18.20,  14.02,   8.83,   3.71,   0.32
+! <Site:GroundTemperature:Shallow>, Months From Jan to Dec {C}
+ Site:GroundTemperature:Shallow,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00
+! <Site:GroundTemperature:Deep>, Months From Jan to Dec {C}
+ Site:GroundTemperature:Deep,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00
+! <Site:GroundReflectance>, Months From Jan to Dec {dimensionless}
+ Site:GroundReflectance,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:SnowModifier>, Normal, Daylighting {dimensionless}
+ Site:GroundReflectance:SnowModifier,   1.000,   1.000
+! <Site:GroundReflectance:Snow>, Months From Jan to Dec {dimensionless}
+ Site:GroundReflectance:Snow,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:Snow:Daylighting>, Months From Jan to Dec {dimensionless}
+ Site:GroundReflectance:Snow:Daylighting,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Environment:Weather Station>,Wind Sensor Height Above Ground {m},Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Sensor Height Above Ground {m},Wind Speed Modifier Coefficient [Internal],Temperature Modifier Coefficient [Internal]
+Environment:Weather Station,10.000,0.140,270.000,1.500,1.586,9.750E-003
+! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
+Site:Location,Denver Centennial  Golden   Nr CO USA TMY3 WMO#=724666,39.74,-105.18,-7.00,1829.00,81198,0.9651
+! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
+ Building Information,Large Hotel,0.000,Suburbs,4.00000E-002,0.40000,FullExterior,25,6
+! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
+Inside Convection Algorithm,TARP
+! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
+Outside Convection Algorithm,DOE-2
+! <Sky Radiance Distribution>, Value {Anisotropic}
+Sky Radiance Distribution,Anisotropic
+! <Zone Air Solution Algorithm>, Value {ThirdOrderBackwardDifference | AnalyticalSolution | EulerMethod}
+ Zone Air Solution Algorithm, AnalyticalSolution
+! <Zone Air Contaminant Balance Simulation>, Simulation {Yes/No}, Carbon Dioxide Concentration
+ Zone Air Carbon Dioxide Balance Simulation, No,N/A
+! <Zone Air Contaminant Balance Simulation>, Simulation {Yes/No}, Generic Contaminant Concentration
+ Zone Air Generic Contaminant Balance Simulation, No,N/A
+! <Environment:Site Atmospheric Variation>,Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Gradient Coefficient {K/m}
+Environment:Site Atmospheric Variation,0.220,370.000,6.500000E-003
+! <SurfaceGeometry>,Starting Corner,Vertex Input Direction,Coordinate System,Daylight Reference Point Coordinate System,Rectangular (Simple) Surface Coordinate System
+ Surface Geometry,UpperLeftCorner,Counterclockwise,RelativeCoordinateSystem,RelativeCoordinateSystem,RelativeToZoneOrigin
+! <Surface Heat Transfer Algorithm>, Value {CTF - ConductionTransferFunction | EMPD - MoisturePenetrationDepthConductionTransferFunction | CondFD - ConductionFiniteDifference | HAMT - CombinedHeatAndMoistureFiniteElement} - Description,Inside Surface Max Temperature Limit{C}, Surface Convection Coefficient Lower Limit {W/m2-K}, Surface Convection Coefficient Upper Limit {W/m2-K}
+Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.0
+! <Shading Summary>, Number of Fixed Detached Shades, Number of Building Detached Shades, Number of Attached Shades
+ Shading Summary,0,0,0
+! <Zone Summary>, Number of Zones, Number of Zone Surfaces, Number of SubSurfaces
+ Zone Summary,13,142,40
+! <Zone Information>,Zone Name,North Axis {deg},Origin X-Coordinate {m},Origin Y-Coordinate {m},Origin Z-Coordinate {m},Centroid X-Coordinate {m},Centroid Y-Coordinate {m},Centroid Z-Coordinate {m},Type,Zone Multiplier,Zone List Multiplier,Minimum X {m},Maximum X {m},Minimum Y {m},Maximum Y {m},Minimum Z {m},Maximum Z {m},Ceiling Height {m},Volume {m3},Zone Inside Convection Algorithm {Simple-Detailed-CeilingDiffuser-TrombeWall},Zone Outside Convection Algorithm {Simple-Detailed-Tarp-MoWitt-DOE-2-BLAST}, Floor Area {m2},Exterior Gross Wall Area {m2},Exterior Net Wall Area {m2},Exterior Window Area {m2}, Number of Surfaces, Number of SubSurfaces, Number of Shading SubSurfaces,  Part of Total Building Area
+ Zone Information, THERMAL ZONE: SPACE 101,0.0,1.45,0.84,0.00,16.69,4.27,1.52,1,1,1,1.45,31.93,0.84,7.70,0.00,3.05,3.05,637.13,TARP,DOE-2,209.03,134.71,80.83,53.88,6,3,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 102 - PLUS,0.0,1.45,7.70,0.00,16.69,11.89,1.52,1,1,1,1.45,31.93,7.70,16.08,0.00,3.05,3.05,778.71,TARP,DOE-2,255.48,144.00,86.40,57.60,10,5,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 201,0.0,1.45,0.84,3.05,16.69,4.27,4.57,1,1,1,1.45,31.93,0.84,7.70,3.05,6.10,3.05,637.13,TARP,DOE-2,209.03,134.71,80.83,53.88,7,3,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 202,0.0,1.45,7.70,3.05,16.69,8.46,4.57,1,1,1,1.45,31.93,7.70,9.22,3.05,6.10,3.05,141.58,TARP,DOE-2,46.45,9.29,5.57,3.72,6,2,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 203,0.0,31.93,16.08,3.05,16.69,12.65,4.57,1,1,1,1.45,31.93,9.22,16.08,3.05,6.10,3.05,637.13,TARP,DOE-2,209.03,134.71,80.83,53.88,6,3,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 301 - PLUS,0.0,1.45,0.84,6.10,16.69,4.27,7.62,1,1,1,1.45,31.93,0.84,7.70,6.10,9.14,3.05,637.13,TARP,DOE-2,209.03,134.71,80.83,53.88,10,4,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 303,0.0,1.45,7.70,6.10,16.69,8.46,7.62,1,1,1,1.45,31.93,7.70,9.22,6.10,9.14,3.05,141.58,TARP,DOE-2,46.45,9.29,5.57,3.72,7,2,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 304,0.0,31.93,16.08,6.10,16.69,12.65,7.62,1,1,1,1.45,31.93,9.22,16.08,6.10,9.14,3.05,637.13,TARP,DOE-2,209.03,134.71,80.83,53.88,6,3,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 401 - PLUS,0.0,1.45,0.84,9.14,16.69,4.27,10.67,1,1,1,1.45,31.93,0.84,7.70,9.14,12.19,3.05,637.13,TARP,DOE-2,209.03,134.71,80.83,53.88,10,4,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 403,0.0,1.45,7.70,9.14,16.69,8.46,10.67,1,1,1,1.45,31.93,7.70,9.22,9.14,12.19,3.05,141.58,TARP,DOE-2,46.45,9.29,5.57,3.72,7,2,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 404,0.0,31.93,16.08,9.14,16.69,12.65,10.67,1,1,1,1.45,31.93,9.22,16.08,9.14,12.19,3.05,637.13,TARP,DOE-2,209.03,134.71,80.83,53.88,7,3,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 501,0.0,16.69,16.08,12.19,15.57,7.80,13.72,1,1,1,1.45,31.93,0.84,16.08,12.19,15.24,3.05,1097.28,TARP,DOE-2,360.00,211.35,126.81,84.54,11,4,0,Yes
+ Zone Information, THERMAL ZONE: SPACE 502,0.0,31.93,9.22,12.19,24.31,12.65,13.72,1,1,1,16.69,31.93,9.22,16.08,12.19,15.24,3.05,318.56,TARP,DOE-2,104.52,67.35,40.41,26.94,6,2,0,Yes
+! <Zone Internal Gains/Equipment Information - Nominal>,Zone Name, Floor Area {m2},# Occupants,Area per Occupant {m2/person},Occupant per Area {person/m2},Interior Lighting {W/m2},Electric Load {W/m2},Gas Load {W/m2},Other Load {W/m2},Hot Water Eq {W/m2},Steam Equipment {W/m2},Sum Loads per Area {W/m2},Outdoor Controlled Baseboard Heat
+ Zone Internal Gains, THERMAL ZONE: SPACE 101,209.03,18.0,11.613,8.611E-002,29.924,5.382,0.000,0.000,0.000,0.000,35.306,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 102 - PLUS,255.48,82.5,3.097,0.323,20.236,8.073,0.000,0.000,0.000,0.000,28.309,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 201,209.03,11.3,18.581,5.382E-002,16.899,10.764,0.000,0.000,0.000,0.000,27.663,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 202,46.45,2.5,18.581,5.382E-002,16.899,10.764,0.000,0.000,0.000,0.000,27.663,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 203,209.03,11.3,18.581,5.382E-002,16.899,10.764,0.000,0.000,0.000,0.000,27.663,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 301 - PLUS,209.03,8.0,26.023,3.843E-002,19.052,14.316,0.000,0.000,0.000,0.000,33.368,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 303,46.45,0.5,92.903,1.076E-002,13.132,0.000,0.000,0.000,0.000,0.000,13.132,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 304,209.03,11.3,18.581,5.382E-002,16.899,10.764,0.000,0.000,0.000,0.000,27.663,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 401 - PLUS,209.03,8.0,26.023,3.843E-002,19.052,14.316,0.000,0.000,0.000,0.000,33.368,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 403,46.45,0.5,92.903,1.076E-002,13.132,0.000,0.000,0.000,0.000,0.000,13.132,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 404,209.03,11.3,18.581,5.382E-002,16.899,10.764,0.000,0.000,0.000,0.000,27.663,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 501,360.00,259.6,1.387,0.721,27.340,60.278,0.000,0.000,0.000,0.000,87.618,No
+ Zone Internal Gains, THERMAL ZONE: SPACE 502,104.52,5.6,18.581,5.382E-002,16.361,376.737,1194.801,0.000,0.000,0.000,1587.899,No
+! <People Internal Gains - Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Number of People {},People/Floor Area {person/m2},Floor Area per person {m2/person},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Nominal Minimum Number of People,Nominal Maximum Number of People 
+ People Internal Gains, THERMAL ZONE: SPACE 303 CBECS 1980-2004 LARGEHOTEL CORRIDOR PEOPINST,LARGEHOTEL BLDG OCC,THERMAL ZONE: SPACE 303,46.45,0.5,0.5,1.076E-002,92.903,0.300,0.700,AutoCalculate,LARGEHOTEL ACTIVITY,No,3.8200E-008,0,1
+ People Internal Gains, THERMAL ZONE: SPACE 403 CBECS 1980-2004 LARGEHOTEL CORRIDOR PEOPINST,LARGEHOTEL BLDG OCC,THERMAL ZONE: SPACE 403,46.45,0.5,0.5,1.076E-002,92.903,0.300,0.700,AutoCalculate,LARGEHOTEL ACTIVITY,No,3.8200E-008,0,1
+ People Internal Gains, THERMAL ZONE: SPACE 301 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM PEOPINST,LARGEHOTEL GUESTROOM OCC,THERMAL ZONE: SPACE 301 - PLUS,209.03,8.0,8.0,3.843E-002,26.023,0.300,0.700,AutoCalculate,LARGEHOTEL ACTIVITY,No,3.8200E-008,0,8
+ People Internal Gains, THERMAL ZONE: SPACE 401 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM PEOPINST,LARGEHOTEL GUESTROOM OCC,THERMAL ZONE: SPACE 401 - PLUS,209.03,8.0,8.0,3.843E-002,26.023,0.300,0.700,AutoCalculate,LARGEHOTEL ACTIVITY,No,3.8200E-008,0,8
+ People Internal Gains, THERMAL ZONE: SPACE 102 - PLUS CBECS 1980-2004 LARGEHOTEL LOBBY PEOPINST,LARGEHOTEL LOBBY OCC,THERMAL ZONE: SPACE 102 - PLUS,255.48,82.5,82.5,0.323,3.097,0.300,0.700,AutoCalculate,LARGEHOTEL ACTIVITY,No,3.8200E-008,0,83
+ People Internal Gains, THERMAL ZONE: SPACE 501 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT DINING PEOPLE,FULLSERVICERESTAURANT_BLDG_OCC,THERMAL ZONE: SPACE 501,360.00,259.6,259.6,0.721,1.387,0.300,0.700,AutoCalculate,FULLSERVICERESTAURANT_ACTIVITY,No,3.8200E-008,0,260
+ People Internal Gains, THERMAL ZONE: SPACE 502 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT KITCHEN PEOPLE,FULLSERVICERESTAURANT_BLDG_OCC 1,THERMAL ZONE: SPACE 502,104.52,5.6,5.6,5.382E-002,18.581,0.300,0.700,AutoCalculate,FULLSERVICERESTAURANT_ACTIVITY 1,No,3.8200E-008,0,6
+ People Internal Gains, THERMAL ZONE: SPACE 201 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING PEOPLE,MEDIUM OFFICE_BLDG_OCC,THERMAL ZONE: SPACE 201,209.03,11.3,11.3,5.382E-002,18.581,0.300,0.700,AutoCalculate,MEDIUM OFFICE_ACTIVITY,No,3.8200E-008,0,11
+ People Internal Gains, THERMAL ZONE: SPACE 202 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING PEOPLE,MEDIUM OFFICE_BLDG_OCC,THERMAL ZONE: SPACE 202,46.45,2.5,2.5,5.382E-002,18.581,0.300,0.700,AutoCalculate,MEDIUM OFFICE_ACTIVITY,No,3.8200E-008,0,3
+ People Internal Gains, THERMAL ZONE: SPACE 203 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING PEOPLE,MEDIUM OFFICE_BLDG_OCC,THERMAL ZONE: SPACE 203,209.03,11.3,11.3,5.382E-002,18.581,0.300,0.700,AutoCalculate,MEDIUM OFFICE_ACTIVITY,No,3.8200E-008,0,11
+ People Internal Gains, THERMAL ZONE: SPACE 304 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING PEOPLE,MEDIUM OFFICE_BLDG_OCC,THERMAL ZONE: SPACE 304,209.03,11.3,11.3,5.382E-002,18.581,0.300,0.700,AutoCalculate,MEDIUM OFFICE_ACTIVITY,No,3.8200E-008,0,11
+ People Internal Gains, THERMAL ZONE: SPACE 404 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING PEOPLE,MEDIUM OFFICE_BLDG_OCC,THERMAL ZONE: SPACE 404,209.03,11.3,11.3,5.382E-002,18.581,0.300,0.700,AutoCalculate,MEDIUM OFFICE_ACTIVITY,No,3.8200E-008,0,11
+ People Internal Gains, THERMAL ZONE: SPACE 101 CBECS_1980-2004 CLIMATEZONE 1-8 SUPERMARKET SALES/PRODUCE PEOPLE,SUPERMARKET_BLDG_OCC 3,THERMAL ZONE: SPACE 101,209.03,18.0,18.0,8.611E-002,11.613,0.300,0.700,AutoCalculate,SUPERMARKET_ACTIVITY 3,No,3.8200E-008,0,18
+! <Lights Internal Gains - Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Lighting Level {W},Lights/Floor Area {W/m2},Lights per person {W/person},Fraction Return Air,Fraction Radiant,Fraction Short Wave,Fraction Convected,Fraction Replaceable,End-Use Category,Nominal Minimum Lighting Level {W},Nominal Maximum Lighting Level {W}
+ Lights Internal Gains, THERMAL ZONE: SPACE 303 CBECS 1980-2004 LARGEHOTEL CORRIDOR LIGHTSINST,LARGEHOTEL BLDG LIGHT,THERMAL ZONE: SPACE 303,46.45,0.5,610.000,13.132,1219.999,0.000,0.000,0.000,1.000,1.000,Lights,0.000,610.000
+ Lights Internal Gains, THERMAL ZONE: SPACE 403 CBECS 1980-2004 LARGEHOTEL CORRIDOR LIGHTSINST,LARGEHOTEL BLDG LIGHT,THERMAL ZONE: SPACE 403,46.45,0.5,610.000,13.132,1219.999,0.000,0.000,0.000,1.000,1.000,Lights,0.000,610.000
+ Lights Internal Gains, THERMAL ZONE: SPACE 301 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM LIGHTSINST,LARGEHOTEL BLDG LIGHT,THERMAL ZONE: SPACE 301 - PLUS,209.03,8.0,3982.500,19.052,495.798,0.000,0.000,0.000,1.000,1.000,Lights,0.000,3982.500
+ Lights Internal Gains, THERMAL ZONE: SPACE 401 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM LIGHTSINST,LARGEHOTEL BLDG LIGHT,THERMAL ZONE: SPACE 401 - PLUS,209.03,8.0,3982.500,19.052,495.798,0.000,0.000,0.000,1.000,1.000,Lights,0.000,3982.500
+ Lights Internal Gains, THERMAL ZONE: SPACE 102 - PLUS CBECS 1980-2004 LARGEHOTEL LOBBY LIGHTSINST,LARGEHOTEL BLDG LIGHT,THERMAL ZONE: SPACE 102 - PLUS,255.48,82.5,5170.000,20.236,62.667,0.000,0.000,0.000,1.000,1.000,Lights,0.000,5170.000
+ Lights Internal Gains, THERMAL ZONE: SPACE 501 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT DINING LIGHTS,FULLSERVICERESTAURANT_BLDG_LIGHT,THERMAL ZONE: SPACE 501,360.00,259.6,9842.500,27.340,37.910,0.000,0.000,0.000,1.000,1.000,General,0.000,9842.500
+ Lights Internal Gains, THERMAL ZONE: SPACE 502 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT KITCHEN LIGHTS,FULLSERVICERESTAURANT_BLDG_LIGHT 1,THERMAL ZONE: SPACE 502,104.52,5.6,1710.000,16.361,304.000,0.000,0.000,0.000,1.000,1.000,General,0.000,1710.000
+ Lights Internal Gains, THERMAL ZONE: SPACE 201 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING LIGHTS,MEDIUM OFFICE_BLDG_LIGHT,THERMAL ZONE: SPACE 201,209.03,11.3,3532.500,16.899,314.000,0.000,0.000,0.000,1.000,1.000,General,0.000,3532.500
+ Lights Internal Gains, THERMAL ZONE: SPACE 202 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING LIGHTS,MEDIUM OFFICE_BLDG_LIGHT,THERMAL ZONE: SPACE 202,46.45,2.5,785.000,16.899,314.000,0.000,0.000,0.000,1.000,1.000,General,0.000,785.000
+ Lights Internal Gains, THERMAL ZONE: SPACE 203 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING LIGHTS,MEDIUM OFFICE_BLDG_LIGHT,THERMAL ZONE: SPACE 203,209.03,11.3,3532.500,16.899,314.000,0.000,0.000,0.000,1.000,1.000,General,0.000,3532.500
+ Lights Internal Gains, THERMAL ZONE: SPACE 304 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING LIGHTS,MEDIUM OFFICE_BLDG_LIGHT,THERMAL ZONE: SPACE 304,209.03,11.3,3532.500,16.899,314.000,0.000,0.000,0.000,1.000,1.000,General,0.000,3532.500
+ Lights Internal Gains, THERMAL ZONE: SPACE 404 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING LIGHTS,MEDIUM OFFICE_BLDG_LIGHT,THERMAL ZONE: SPACE 404,209.03,11.3,3532.500,16.899,314.000,0.000,0.000,0.000,1.000,1.000,General,0.000,3532.500
+ Lights Internal Gains, THERMAL ZONE: SPACE 101 CBECS_1980-2004 CLIMATEZONE 1-8 SUPERMARKET SALES/PRODUCE LIGHTS,SUPERMARKET_BLDG_LIGHT 3,THERMAL ZONE: SPACE 101,209.03,18.0,6255.000,29.924,347.500,0.000,0.000,0.000,1.000,1.000,General,0.000,6255.000
+! <ElectricEquipment Internal Gains - Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 301 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM ELECINST,LARGEHOTEL GUESTROOM EQUIP,THERMAL ZONE: SPACE 301 - PLUS,209.03,8.0,2992.500,14.316,372.549,0.000,0.000,0.000,1.000,ElectricEquipment,0.000,2992.500
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 401 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM ELECINST,LARGEHOTEL GUESTROOM EQUIP,THERMAL ZONE: SPACE 401 - PLUS,209.03,8.0,2992.500,14.316,372.549,0.000,0.000,0.000,1.000,ElectricEquipment,0.000,2992.500
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 102 - PLUS CBECS 1980-2004 LARGEHOTEL LOBBY ELECINST,LARGEHOTEL BLDG EQUIP,THERMAL ZONE: SPACE 102 - PLUS,255.48,82.5,2062.500,8.073,25.000,0.000,0.000,0.000,1.000,ElectricEquipment,0.000,2062.500
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 501 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT DINING ELECTRIC EQUIPM,FULLSERVICERESTAURANT_BLDG_EQUIP,THERMAL ZONE: SPACE 501,360.00,259.6,21700.000,60.278,83.582,0.000,0.000,0.000,1.000,General,0.000,7595.000
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 502 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT KITCHEN ELECTRIC EQUIP,FULLSERVICERESTAURANT_BLDG_EQUIP 1,THERMAL ZONE: SPACE 502,104.52,5.6,39375.000,376.737,7000.000,0.000,0.000,0.000,1.000,General,0.000,13781.250
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 201 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING ELECTRIC EQUIPMEN,MEDIUM OFFICE_BLDG_EQUIP,THERMAL ZONE: SPACE 201,209.03,11.3,2250.000,10.764,200.000,0.000,0.000,0.000,1.000,General,0.000,2250.000
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 202 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING ELECTRIC EQUIPMEN,MEDIUM OFFICE_BLDG_EQUIP,THERMAL ZONE: SPACE 202,46.45,2.5,500.000,10.764,200.000,0.000,0.000,0.000,1.000,General,0.000,500.000
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 203 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING ELECTRIC EQUIPMEN,MEDIUM OFFICE_BLDG_EQUIP,THERMAL ZONE: SPACE 203,209.03,11.3,2250.000,10.764,200.000,0.000,0.000,0.000,1.000,General,0.000,2250.000
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 304 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING ELECTRIC EQUIPMEN,MEDIUM OFFICE_BLDG_EQUIP,THERMAL ZONE: SPACE 304,209.03,11.3,2250.000,10.764,200.000,0.000,0.000,0.000,1.000,General,0.000,2250.000
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 404 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING ELECTRIC EQUIPMEN,MEDIUM OFFICE_BLDG_EQUIP,THERMAL ZONE: SPACE 404,209.03,11.3,2250.000,10.764,200.000,0.000,0.000,0.000,1.000,General,0.000,2250.000
+ ElectricEquipment Internal Gains, THERMAL ZONE: SPACE 101 CBECS_1980-2004 CLIMATEZONE 1-8 SUPERMARKET SALES/PRODUCE ELECTRIC EQUIPMENT,SUPERMARKET_BLDG_EQUIP 4,THERMAL ZONE: SPACE 101,209.03,18.0,1125.000,5.382,62.500,0.000,0.000,0.000,1.000,General,0.000,1125.000
+! <GasEquipment Internal Gains - Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ GasEquipment Internal Gains, THERMAL ZONE: SPACE 502 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT KITCHEN GAS EQUIPMENT,FULLSERVICERESTAURANT_GAS_EQUIP,THERMAL ZONE: SPACE 502,104.52,5.6,124875.751,1194.801,22200.134,0.000,0.000,0.000,1.000,General,0.000,37462.725
+! <Shadowing/Sun Position Calculations> [Annual Simulations], Calculation Method,Value {days}, Allowable Number Figures in Shadow Overlap {}, Polygon Clipping Algorithm, Sky Diffuse Modeling Algorithm
+Shadowing/Sun Position Calculations,AverageOverDaysInFrequency,7,15000,SutherlandHodgman,SimpleSkyDiffuseModeling
+! <Infiltration Airflow Stats - Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s/m2},Volume Flow Rate/Exterior Surface Area {m3/s/m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 303 CBECS 1980-2004 LARGEHOTEL CORRIDOR INFIL,LARGEHOTEL INFIL QUARTER ON,THERMAL ZONE: SPACE 303,46.45,0.5,2.360E-002,5.080E-004,2.540E-003,0.600,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 403 CBECS 1980-2004 LARGEHOTEL CORRIDOR INFIL,LARGEHOTEL INFIL QUARTER ON,THERMAL ZONE: SPACE 403,46.45,0.5,2.360E-002,5.080E-004,2.540E-003,0.600,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 301 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM INFIL,LARGEHOTEL INFIL QUARTER ON,THERMAL ZONE: SPACE 301 - PLUS,209.03,8.0,0.106,5.080E-004,7.883E-004,0.600,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 401 - PLUS CBECS 1980-2004 LARGEHOTEL GUESTROOM INFIL,LARGEHOTEL INFIL QUARTER ON,THERMAL ZONE: SPACE 401 - PLUS,209.03,8.0,0.106,5.080E-004,7.883E-004,0.600,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 102 - PLUS CBECS 1980-2004 LARGEHOTEL LOBBY INFIL,LARGEHOTEL INFIL QUARTER ON,THERMAL ZONE: SPACE 102 - PLUS,255.48,82.5,0.130,5.080E-004,9.013E-004,0.600,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 501 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT DINING INFILTRATION,FULLSERVICERESTAURANT_INFIL_HALF_ON,THERMAL ZONE: SPACE 501,360.00,259.6,0.648,1.800E-003,1.134E-003,2.125,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 502 CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT KITCHEN INFILTRATION,FULLSERVICERESTAURANT_INFIL_HALF_ON 1,THERMAL ZONE: SPACE 502,104.52,5.6,0.195,1.865E-003,1.134E-003,2.202,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 201 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING INFILTRATION,MEDIUM OFFICE_INFIL_QUARTER_ON,THERMAL ZONE: SPACE 201,209.03,11.3,0.153,7.307E-004,1.134E-003,0.863,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 202 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING INFILTRATION,MEDIUM OFFICE_INFIL_QUARTER_ON,THERMAL ZONE: SPACE 202,46.45,2.5,1.053E-002,2.268E-004,1.134E-003,0.268,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 203 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING INFILTRATION,MEDIUM OFFICE_INFIL_QUARTER_ON,THERMAL ZONE: SPACE 203,209.03,11.3,0.153,7.307E-004,1.134E-003,0.863,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 304 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING INFILTRATION,MEDIUM OFFICE_INFIL_QUARTER_ON,THERMAL ZONE: SPACE 304,209.03,11.3,0.153,7.307E-004,1.134E-003,0.863,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 404 CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING INFILTRATION,MEDIUM OFFICE_INFIL_QUARTER_ON,THERMAL ZONE: SPACE 404,209.03,11.3,0.153,7.307E-004,1.134E-003,0.863,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats, THERMAL ZONE: SPACE 101 CBECS_1980-2004 CLIMATEZONE 1-8 SUPERMARKET SALES/PRODUCE INFILTRATION,SUPERMARKET_INFIL_HALF_ON 3,THERMAL ZONE: SPACE 101,209.03,18.0,0.153,7.307E-004,1.134E-003,0.863,1.000,0.000,0.000,0.000
+! <AirFlow Model>, Simple
+ AirFlow Model, Simple
+! <RoomAir Model>, Zone Name, Mixing/Mundt/UCSDDV/UCSDCV/UCSDUFI/UCSDUFE/User Defined
+RoomAir Model,THERMAL ZONE: SPACE 101,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 102 - PLUS,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 201,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 202,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 203,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 301 - PLUS,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 303,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 304,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 401 - PLUS,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 403,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 404,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 501,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SPACE 502,Mixing/Well-Stirred
+! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
+AirflowNetwork Model:Control,NoMultizoneOrDistribution
+! <Zone Volume Capacitance Multiplier>, Sensible Heat Capacity Multiplier, Moisture Capacity Multiplier, Carbon Dioxide Capacity Multiplier, Generic Contaminant Capacity Multiplier
+Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
+! <Load Timesteps in Zone Design Calculation Averaging Window>, Value
+ Load Timesteps in Zone Design Calculation Averaging Window,    4
+! <Heating Sizing Factor Information>, Sizing Factor ID, Value
+ Heating Sizing Factor Information, Global,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 101,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 102 - PLUS,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 201,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 202,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 203,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 301 - PLUS,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 303,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 304,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 401 - PLUS,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 403,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 404,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 501,   1.2500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SPACE 502,   1.2500    
+! <Cooling Sizing Factor Information>, Sizing Factor ID, Value
+ Cooling Sizing Factor Information, Global,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 101,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 102 - PLUS,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 201,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 202,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 203,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 301 - PLUS,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 303,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 304,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 401 - PLUS,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 403,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 404,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 501,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SPACE 502,   1.1500    
+! <Zone Sizing Information>, Zone Name, Load Type, Calc Des Load {W}, User Des Load {W}, Calc Des Air Flow Rate {m3/s}, User Des Air Flow Rate {m3/s}, Design Day Name, Date/Time of Peak, Temperature at Peak {C}, Humidity Ratio at Peak {kgWater/kgDryAir}, Floor Area {m2}, # Occupants, Calc Outdoor Air Flow Rate {m3/s}
+ Zone Sizing Information, THERMAL ZONE: SPACE 101, Cooling, 11258.15998, 12946.88398, 1.14340, 1.31491, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 14:15:00, 33.00000, 6.86230E-003, 209.03184, 18.00000, 0.12743
+ Zone Sizing Information, THERMAL ZONE: SPACE 101, Heating, 19358.86430, 24198.58038, 1.01918, 1.27398, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 07:00:00, -18.80000, 8.88305E-004, 209.03184, 18.00000, 0.12743
+ Zone Sizing Information, THERMAL ZONE: SPACE 102 - PLUS, Cooling, 14265.16098, 16404.93513, 1.39511, 1.60438, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 08:00:00, 21.75200, 6.86230E-003, 255.48336, 82.50000, 0.88807
+ Zone Sizing Information, THERMAL ZONE: SPACE 102 - PLUS, Heating, 15725.94685, 19657.43356, 0.82606, 1.03257, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 08:00:00, -18.80000, 8.88305E-004, 255.48336, 82.50000, 0.88807
+ Zone Sizing Information, THERMAL ZONE: SPACE 201, Cooling, 11030.00222, 12684.50255, 1.12003, 1.28804, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 14:30:00, 33.00000, 6.86230E-003, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 201, Heating, 17190.41054, 21488.01318, 0.91837, 1.14796, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 06:00:00, -18.80000, 8.88305E-004, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 202, Cooling, 2375.26539, 2731.55520, 0.24119, 0.27736, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 16:45:00, 31.17600, 6.86230E-003, 46.45152, 2.50000, 2.35974E-002
+ Zone Sizing Information, THERMAL ZONE: SPACE 202, Heating, 2180.51333, 2725.64167, 0.11659, 0.14573, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 06:00:00, -18.80000, 8.88305E-004, 46.45152, 2.50000, 2.35974E-002
+ Zone Sizing Information, THERMAL ZONE: SPACE 203, Cooling, 10183.18761, 11710.66575, 1.03405, 1.18916, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 15:45:00, 32.31600, 6.86229E-003, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 203, Heating, 17142.96736, 21428.70920, 0.91583, 1.14479, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 06:00:00, -18.80000, 8.88305E-004, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 301 - PLUS, Cooling, 12279.98195, 14121.97924, 1.24689, 1.43392, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 14:45:00, 33.00000, 6.86230E-003, 209.03184, 8.03250, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SPACE 301 - PLUS, Heating, 11755.88686, 14694.85858, 0.62858, 0.78573, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 11:45:00, -18.80000, 8.88305E-004, 209.03184, 8.03250, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SPACE 303, Cooling, 118.95474, 136.79796, 7.54810E-003, 1.17987E-002, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 17:00:00, 30.87200, 6.86230E-003, 46.45152, 0.50000, 1.17987E-002
+ Zone Sizing Information, THERMAL ZONE: SPACE 303, Heating, 567.37161, 709.21451, 2.40174E-002, 3.00218E-002, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 13:45:00, -18.80000, 8.88305E-004, 46.45152, 0.50000, 1.17987E-002
+ Zone Sizing Information, THERMAL ZONE: SPACE 304, Cooling, 10582.40034, 12169.76040, 1.07458, 1.23577, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 16:00:00, 32.08800, 6.86229E-003, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 304, Heating, 17522.06992, 21902.58741, 0.93629, 1.17036, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 22:15:00, -18.80000, 8.88305E-004, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 401 - PLUS, Cooling, 12506.86751, 14382.89764, 1.26992, 1.46041, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 14:45:00, 33.00000, 6.86230E-003, 209.03184, 8.03250, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SPACE 401 - PLUS, Heating, 11967.90610, 14959.88263, 0.63995, 0.79993, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 06:15:00, -18.80000, 8.88305E-004, 209.03184, 8.03250, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SPACE 403, Cooling, 221.60104, 254.84119, 1.40615E-002, 1.61708E-002, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 17:00:00, 30.87200, 6.86230E-003, 46.45152, 0.50000, 1.17987E-002
+ Zone Sizing Information, THERMAL ZONE: SPACE 403, Heating, 675.53668, 844.42085, 2.85987E-002, 3.57484E-002, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 06:30:00, -18.80000, 8.88305E-004, 46.45152, 0.50000, 1.17987E-002
+ Zone Sizing Information, THERMAL ZONE: SPACE 404, Cooling, 10831.57434, 12456.31049, 1.09988, 1.26487, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 16:00:00, 32.08800, 6.86229E-003, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 404, Heating, 17800.76065, 22250.95081, 0.95119, 1.18898, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 00:15:00, -18.80000, 8.88305E-004, 209.03184, 11.25000, 0.10619
+ Zone Sizing Information, THERMAL ZONE: SPACE 501, Cooling, 43908.88782, 50495.22099, 4.47131, 5.14201, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 15:30:00, 32.54400, 6.86229E-003, 359.99928, 259.62500, 2.45059
+ Zone Sizing Information, THERMAL ZONE: SPACE 501, Heating, 48809.83969, 61012.29961, 2.60770, 3.25962, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 01:00:00, -18.80000, 8.88305E-004, 359.99928, 259.62500, 2.45059
+ Zone Sizing Information, THERMAL ZONE: SPACE 502, Cooling, 48934.93174, 56275.17150, 4.13987, 4.76085, DENVER CENTENNIAL  GOLDEN   N ANN CLG .4% CONDNS DB=>MWB, 7/21 15:30:00, 32.54400, 6.86229E-003, 104.51592, 5.62500, 3.98206E-002
+ Zone Sizing Information, THERMAL ZONE: SPACE 502, Heating, 13928.86636, 17411.08295, 0.67331, 0.84164, DENVER CENTENNIAL  GOLDEN   N ANN HTG 99.6% CONDNS DB, 12/21 01:00:00, -18.80000, 8.88305E-004, 104.51592, 5.62500, 3.98206E-002
+! <System Sizing Information>, System Name, Field Description, Value
+ System Sizing Information, PACKAGED ROOFTOP AIR CONDITIONER - KITCHEN, Calculated Cooling Design Air Flow Rate [m3/s], 4.76085
+ System Sizing Information, PACKAGED ROOFTOP AIR CONDITIONER - KITCHEN, User Cooling Design Air Flow Rate [m3/s], 4.76085
+ System Sizing Information, PACKAGED ROOFTOP AIR CONDITIONER - KITCHEN, Calculated Heating Design Air Flow Rate [m3/s], 0.84164
+ System Sizing Information, PACKAGED ROOFTOP AIR CONDITIONER - KITCHEN, User Heating Design Air Flow Rate [m3/s], 0.84164
+ System Sizing Information, PACKAGED ROOFTOP VAV WITH PFP BOXES AND REHEAT - DINING, Calculated Cooling Design Air Flow Rate [m3/s], 5.14201
+ System Sizing Information, PACKAGED ROOFTOP VAV WITH PFP BOXES AND REHEAT - DINING, User Cooling Design Air Flow Rate [m3/s], 5.14201
+ System Sizing Information, PACKAGED ROOFTOP VAV WITH PFP BOXES AND REHEAT - DINING, Calculated Heating Design Air Flow Rate [m3/s], 3.25962
+ System Sizing Information, PACKAGED ROOFTOP VAV WITH PFP BOXES AND REHEAT - DINING, User Heating Design Air Flow Rate [m3/s], 3.25962
+ System Sizing Information, VAV WITH REHEAT 1ST FLOOR, Calculated Cooling Design Air Flow Rate [m3/s], 2.91929
+ System Sizing Information, VAV WITH REHEAT 1ST FLOOR, User Cooling Design Air Flow Rate [m3/s], 2.91929
+ System Sizing Information, VAV WITH REHEAT 1ST FLOOR, Calculated Heating Design Air Flow Rate [m3/s], 2.30655
+ System Sizing Information, VAV WITH REHEAT 1ST FLOOR, User Heating Design Air Flow Rate [m3/s], 2.30655
+ System Sizing Information, VAV WITH REHEAT 2ND FLOOR, Calculated Cooling Design Air Flow Rate [m3/s], 2.75456
+ System Sizing Information, VAV WITH REHEAT 2ND FLOOR, User Cooling Design Air Flow Rate [m3/s], 2.75456
+ System Sizing Information, VAV WITH REHEAT 2ND FLOOR, Calculated Heating Design Air Flow Rate [m3/s], 2.43848
+ System Sizing Information, VAV WITH REHEAT 2ND FLOOR, User Heating Design Air Flow Rate [m3/s], 2.43848
+ System Sizing Information, VAV WITH REHEAT 3RD AND 4TH FLOOR (HAND BUILT), Calculated Cooling Design Air Flow Rate [m3/s], 2.52861
+ System Sizing Information, VAV WITH REHEAT 3RD AND 4TH FLOOR (HAND BUILT), User Cooling Design Air Flow Rate [m3/s], 2.52861
+ System Sizing Information, VAV WITH REHEAT 3RD AND 4TH FLOOR (HAND BUILT), Calculated Heating Design Air Flow Rate [m3/s], 2.42511
+ System Sizing Information, VAV WITH REHEAT 3RD AND 4TH FLOOR (HAND BUILT), User Heating Design Air Flow Rate [m3/s], 2.42511
+! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 2, Maximum Air Flow Rate [m3/s], 1.31491
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 2, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.03200E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 2, Maximum Flow Fraction during Reheat [], 0.32303
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 2, Maximum Reheat Water Flow Rate [m3/s], 7.53427E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 2, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 1.27398
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 3, Design Coil Load [W], 34680.49228
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 3, Maximum Water Flow Rate [m3/s], 7.53427E-004
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 3, U-Factor Times Area Value [W/K], 749.66798
+! <Water Heating Coil Capacity Information>,Component Type,Name,Nominal Total Capacity {W}
+Water Heating Coil Capacity Information,Coil:Heating:Water,COIL HEATING WATER 3,33594.12
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 3, Maximum Air Flow Rate [m3/s], 1.60438
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 3, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.03200E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 3, Maximum Flow Fraction during Reheat [], 0.32358
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 3, Maximum Reheat Water Flow Rate [m3/s], 6.10662E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 3, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 1.03257
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 4, Design Coil Load [W], 28108.95951
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 4, Maximum Water Flow Rate [m3/s], 6.10662E-004
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 4, U-Factor Times Area Value [W/K], 914.70209
+Water Heating Coil Capacity Information,Coil:Heating:Water,COIL HEATING WATER 4,35290.66
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 4, Maximum Air Flow Rate [m3/s], 1.28804
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 4, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.03200E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 4, Maximum Flow Fraction during Reheat [], 0.32977
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 4, Maximum Reheat Water Flow Rate [m3/s], 6.78900E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 4, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 1.14796
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 6, Design Coil Load [W], 31249.96328
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 6, Maximum Water Flow Rate [m3/s], 6.78900E-004
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 6, U-Factor Times Area Value [W/K], 734.34797
+Water Heating Coil Capacity Information,Coil:Heating:Water,COIL HEATING WATER 6,32026.53
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 5, Maximum Air Flow Rate [m3/s], 0.27736
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 5, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.03200E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 5, Maximum Flow Fraction during Reheat [], 0.34031
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 5, Maximum Reheat Water Flow Rate [m3/s], 8.61869E-005
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 5, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 0.14573
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 7, Design Coil Load [W], 3967.21101
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 7, Maximum Water Flow Rate [m3/s], 8.61869E-005
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 7, U-Factor Times Area Value [W/K], 158.13323
+Water Heating Coil Capacity Information,Coil:Heating:Water,COIL HEATING WATER 7,5570.00
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 6, Maximum Air Flow Rate [m3/s], 1.18916
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 6, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.03200E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 6, Maximum Flow Fraction during Reheat [], 0.35719
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 6, Maximum Reheat Water Flow Rate [m3/s], 6.77025E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIR TERMINAL SINGLE DUCT VAV REHEAT 6, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 1.14479
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 8, Design Coil Load [W], 31163.68666
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 8, Maximum Water Flow Rate [m3/s], 6.77025E-004
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 8, U-Factor Times Area Value [W/K], 677.97331
+Water Heating Coil Capacity Information,Coil:Heating:Water,COIL HEATING WATER 8,30319.97
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 3RD FLOOR GUEST, Supply Air Flow Rate During Cooling Operation [m3/s], 1.43392
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 3RD FLOOR GUEST, Supply Air Flow Rate During Heating Operation [m3/s], 1.43392
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 3RD FLOOR GUEST, Supply Air Flow Rate When No Cooling or Heating is Needed [m3/s], 1.43392
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 3RD FLOOR GUEST, Outdoor Air Flow Rate During Cooling Operation [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 3RD FLOOR GUEST, Outdoor Air Flow Rate During Heating Operation [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 3RD FLOOR GUEST, Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 3RD FLOOR GUEST, Maximum Supply Air Temperature from Supplemental Heater [C], 40.00000
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 3, Rated Air Flow Rate [m3/s], 1.43392
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 3, Rated Total Cooling Capacity (gross) [W], 23736.43241
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 3, Rated Sensible Heat Ratio, 0.79866
+! <DX Cooling Coil Standard Rating Information>, Component Type, Component Name, Standard Rating (Net) Cooling Capacity {W}, Standard Rated Net COP {W/W}, EER {Btu/W-h}, SEER {Btu/W-h}, IEER {Btu/W-h}
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 3, 22687.4, 2.53, 8.64, 8.70, 8.70
+ Component Sizing Information, Coil:Heating:DX:SingleSpeed, OS:COIL:HEATING:DX:SINGLESPEED 2, Rated Air Flow Rate [m3/s], 1.43392
+ Component Sizing Information, Coil:Heating:DX:SingleSpeed, OS:COIL:HEATING:DX:SINGLESPEED 2, Rated Total Heating Capacity [W], 23736.43241
+! <DX Heating Coil Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF {Btu/W-h}, Region Number
+ DX Heating Coil Standard Rating Information, Coil:Heating:DX:SingleSpeed, OS:COIL:HEATING:DX:SINGLESPEED 2, 19778.0, 19118.8, 11.90, 4
+ Component Sizing Information, Fan:ConstantVolume, OS:FAN:CONSTANTVOLUME 3, Maximum Flow Rate [m3/s], 1.43392
+ Component Sizing Information, Coil:Heating:Electric, OS:COIL:HEATING:ELECTRIC 5, Nominal Capacity [W], 14694.85854
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT, Maximum Air Flow Rate [m3/s], 3.00218E-002
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 6.46304E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT, Maximum Flow Fraction during Reheat [], 1.00000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT, Maximum Reheat Water Flow Rate [m3/s], 1.52091E-005
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 3.00218E-002
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 1, Design Coil Load [W], 700.08030
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 1, Maximum Water Flow Rate [m3/s], 1.52091E-005
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 1, U-Factor Times Area Value [W/K], 15.24107
+Water Heating Coil Capacity Information,Coil:Heating:Water,OS:COIL:HEATING:WATER 1,703.16
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 1, Maximum Air Flow Rate [m3/s], 1.23577
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 1, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.03200E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 1, Maximum Flow Fraction during Reheat [], 0.34371
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 1, Maximum Reheat Water Flow Rate [m3/s], 5.92908E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 1, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 1.17036
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 3, Design Coil Load [W], 27291.71607
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 3, Maximum Water Flow Rate [m3/s], 5.92908E-004
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 3, U-Factor Times Area Value [W/K], 627.36000
+Water Heating Coil Capacity Information,Coil:Heating:Water,OS:COIL:HEATING:WATER 3,28481.90
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 4TH FLOOR GUEST, Supply Air Flow Rate During Cooling Operation [m3/s], 1.46041
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 4TH FLOOR GUEST, Supply Air Flow Rate During Heating Operation [m3/s], 1.46041
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 4TH FLOOR GUEST, Supply Air Flow Rate When No Cooling or Heating is Needed [m3/s], 1.46041
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 4TH FLOOR GUEST, Outdoor Air Flow Rate During Cooling Operation [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 4TH FLOOR GUEST, Outdoor Air Flow Rate During Heating Operation [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 4TH FLOOR GUEST, Outdoor Air Flow Rate When No Cooling or Heating is Needed [m3/s], 0.00000
+ Component Sizing Information, ZoneHVAC:PackagedTerminalHeatPump, OS:ZONEHVAC:PACKAGEDTERMINALHEATPUMP 4TH FLOOR GUEST, Maximum Supply Air Temperature from Supplemental Heater [C], 40.00000
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 4, Rated Air Flow Rate [m3/s], 1.46041
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 4, Rated Total Cooling Capacity (gross) [W], 24174.95363
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 4, Rated Sensible Heat Ratio, 0.79866
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, OS:COIL:COOLING:DX:SINGLESPEED 4, 23106.5, 2.53, 8.64, 8.70, 8.70
+ Component Sizing Information, Coil:Heating:DX:SingleSpeed, OS:COIL:HEATING:DX:SINGLESPEED 3, Rated Air Flow Rate [m3/s], 1.46041
+ Component Sizing Information, Coil:Heating:DX:SingleSpeed, OS:COIL:HEATING:DX:SINGLESPEED 3, Rated Total Heating Capacity [W], 24174.95363
+ DX Heating Coil Standard Rating Information, Coil:Heating:DX:SingleSpeed, OS:COIL:HEATING:DX:SINGLESPEED 3, 20143.4, 19472.0, 11.89, 4
+ Component Sizing Information, Fan:ConstantVolume, OS:FAN:CONSTANTVOLUME 4, Maximum Flow Rate [m3/s], 1.46041
+ Component Sizing Information, Coil:Heating:Electric, OS:COIL:HEATING:ELECTRIC 6, Nominal Capacity [W], 14957.95157
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 2, Maximum Air Flow Rate [m3/s], 3.57484E-002
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 2, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 7.69585E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 2, Maximum Flow Fraction during Reheat [], 1.00000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 2, Maximum Reheat Water Flow Rate [m3/s], 1.81102E-005
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 2, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 3.57484E-002
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 4, Design Coil Load [W], 833.61918
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 4, Maximum Water Flow Rate [m3/s], 1.81102E-005
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 4, U-Factor Times Area Value [W/K], 18.14828
+Water Heating Coil Capacity Information,Coil:Heating:Water,OS:COIL:HEATING:WATER 4,837.29
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 3, Maximum Air Flow Rate [m3/s], 1.26487
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 3, Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.03200E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 3, Maximum Flow Fraction during Reheat [], 0.33581
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 3, Maximum Reheat Water Flow Rate [m3/s], 6.02341E-004
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, AIRTERMINAL WITH HOT WATER REHEAT 3, Reheat Coil Sizing Air Volume Flow Rate [m3/s], 1.18898
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 5, Design Coil Load [W], 27725.94013
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 5, Maximum Water Flow Rate [m3/s], 6.02341E-004
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 5, U-Factor Times Area Value [W/K], 642.13034
+Water Heating Coil Capacity Information,Coil:Heating:Water,OS:COIL:HEATING:WATER 5,29086.50
+ Component Sizing Information, AirTerminal:SingleDuct:ParallelPIU:Reheat, AIR TERMINAL SINGLE DUCT PARALLEL PIU REHEAT 2, Maximum Primary Air Flow Rate [m3/s], 5.14201
+ Component Sizing Information, AirTerminal:SingleDuct:ParallelPIU:Reheat, AIR TERMINAL SINGLE DUCT PARALLEL PIU REHEAT 2, Maximum Secondary Air Flow Rate [m3/s], 5.14201
+ Component Sizing Information, AirTerminal:SingleDuct:ParallelPIU:Reheat, AIR TERMINAL SINGLE DUCT PARALLEL PIU REHEAT 2, Minimum Primary Air Flow Fraction, 0.47658
+ Component Sizing Information, AirTerminal:SingleDuct:ParallelPIU:Reheat, AIR TERMINAL SINGLE DUCT PARALLEL PIU REHEAT 2, Fan On Flow Fraction, 0.47658
+ Component Sizing Information, Fan:ConstantVolume, FAN CONSTANT VOLUME 3, Maximum Flow Rate [m3/s], 5.14201
+ Component Sizing Information, Coil:Heating:Electric, COIL HEATING ELECTRIC 3, Nominal Capacity [W], 157422.60187
+ Component Sizing Information, AirTerminal:SingleDuct:Uncontrolled, AIR TERMINAL SINGLE DUCT UNCONTROLLED 2, Maximum Air Flow Rate [m3/s], 4.76085
+ Component Sizing Information, Branch, BRANCH {A31E51AE-DE98-43B2-AFA0-0A21EACA4CFD}, Maximum Flow Rate [m3/s], 4.76085
+ Component Sizing Information, AirLoopHVAC, PACKAGED ROOFTOP AIR CONDITIONER - KITCHEN, Design Supply Air Flow Rate [m3/s], 4.76085
+ Component Sizing Information, Branch, BRANCH {42BB0641-83AE-43FF-BBCE-B8D4B60786CC}, Maximum Flow Rate [m3/s], 5.14201
+ Component Sizing Information, AirLoopHVAC, PACKAGED ROOFTOP VAV WITH PFP BOXES AND REHEAT - DINING, Design Supply Air Flow Rate [m3/s], 5.14201
+ Component Sizing Information, Branch, BRANCH {39A8AE21-E98C-41B5-935A-8ECC24144E1B}, Maximum Flow Rate [m3/s], 2.91929
+ Component Sizing Information, AirLoopHVAC, VAV WITH REHEAT 1ST FLOOR, Design Supply Air Flow Rate [m3/s], 2.91929
+ Component Sizing Information, Branch, BRANCH {F9E8411D-498F-4DAE-BE62-E072197485A0}, Maximum Flow Rate [m3/s], 2.75456
+ Component Sizing Information, AirLoopHVAC, VAV WITH REHEAT 2ND FLOOR, Design Supply Air Flow Rate [m3/s], 2.75456
+ Component Sizing Information, Branch, BRANCH {B091C554-7A6D-4C95-9911-5219ED0B6312}, Maximum Flow Rate [m3/s], 2.52861
+ Component Sizing Information, AirLoopHVAC, VAV WITH REHEAT 3RD AND 4TH FLOOR (HAND BUILT), Design Supply Air Flow Rate [m3/s], 2.52861
+!<Controller:MechanicalVentilation>,Name,Availability Schedule Name,Demand Controlled Ventilation {Yes/No},System Outdoor Air Method,Zone Maximum Outdoor Air Fraction,Number of Zones,Zone Name,DSOA Name,DSZAD Name
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 1,ALWAYS ON DISCRETE,No,ZoneSum,1.00,2,THERMAL ZONE: SPACE 101,CBECS_1980-2004 CLIMATEZONE 1-8 SUPERMARKET SALES/PRODUCE VENTILATION,THERMAL ZONE: SPACE 101 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SPACE 102 - PLUS,LARGEHOTEL LOBBY OUTDOOR AIR,THERMAL ZONE: SPACE 102 - PLUS DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 2,ALWAYS ON DISCRETE,No,ZoneSum,1.00,3,THERMAL ZONE: SPACE 201,CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING VENTILATION,THERMAL ZONE: SPACE 201 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SPACE 202,CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING VENTILATION,THERMAL ZONE: SPACE 202 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SPACE 203,CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING VENTILATION,THERMAL ZONE: SPACE 203 DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 3,ALWAYS ON DISCRETE 1,No,ZoneSum,1.00,4,THERMAL ZONE: SPACE 303,LARGEHOTEL CORRIDOR OUTDOOR AIR,THERMAL ZONE: SPACE 303 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SPACE 304,CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING VENTILATION,THERMAL ZONE: SPACE 304 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SPACE 403,LARGEHOTEL CORRIDOR OUTDOOR AIR,THERMAL ZONE: SPACE 403 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SPACE 404,CBECS_1980-2004 CLIMATEZONE 1-8 MEDIUMOFFICE WHOLEBUILDING VENTILATION,THERMAL ZONE: SPACE 404 DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 5,ALWAYS ON DISCRETE,No,ZoneSum,1.00,1,THERMAL ZONE: SPACE 501,CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT DINING VENTILATION,THERMAL ZONE: SPACE 501 DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 4,ALWAYS ON DISCRETE,No,ZoneSum,1.00,1,THERMAL ZONE: SPACE 502,CBECS_1980-2004 CLIMATEZONE 1-8 FULLSERVICERESTAURANT KITCHEN VENTILATION,THERMAL ZONE: SPACE 502 DESIGN SPEC ZONE AIR DIST
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 4, Maximum Outdoor Air Flow Rate [m3/s], 4.76085
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 4, Minimum Outdoor Air Flow Rate [m3/s], 3.98206E-002
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, Rated Air Flow Rate [m3/s], 4.76085
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, Rated Total Cooling Capacity (gross) [W], 78808.89697
+ Component Sizing Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, Rated Sensible Heat Ratio, 0.79866
+ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, COIL COOLING DX SINGLE SPEED 1, 75325.8, 2.53, 8.64, 8.70, 8.70
+ Component Sizing Information, Coil:Heating:Gas, COIL HEATING GAS 1, Nominal Capacity [W], 271475.32371
+ Component Sizing Information, Fan:ConstantVolume, FAN CONSTANT VOLUME 1, Maximum Flow Rate [m3/s], 4.76085
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 5, Maximum Outdoor Air Flow Rate [m3/s], 5.14201
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 5, Minimum Outdoor Air Flow Rate [m3/s], 2.45059
+ Component Sizing Information, Coil:Cooling:DX:TwoSpeed, COIL COOLING DX TWO SPEED 1, Rated High Speed Air Flow Rate [m3/s], 5.14201
+ Component Sizing Information, Coil:Cooling:DX:TwoSpeed, COIL COOLING DX TWO SPEED 1, Rated High Speed Total Cooling Capacity (gross) [W], 85118.48154
+ Component Sizing Information, Coil:Cooling:DX:TwoSpeed, COIL COOLING DX TWO SPEED 1, Rated High Speed Sensible Heat Ratio, 0.79866
+ Component Sizing Information, Coil:Cooling:DX:TwoSpeed, COIL COOLING DX TWO SPEED 1, Rated Low Speed Air Flow Rate [m3/s], 1.71383
+ Component Sizing Information, Coil:Cooling:DX:TwoSpeed, COIL COOLING DX TWO SPEED 1, Rated Low Speed Total Cooling Capacity (gross) [W], 28369.98990
+! <VAV DX Cooling Coil Standard Rating Information>, DX Coil Type, DX Coil Name, Fan Type, Fan Name, Standard Net Cooling Capacity {W}, Standard Net Cooling Capacity {Btu/h}, IEER {Btu/W-h}, COP 100% Capacity {W/W}, COP 75% Capacity {W/W}, COP 50% Capacity {W/W}, COP 25% Capacity {W/W}, EER 100% Capacity {Btu/W-h}, EER 75% Capacity {Btu/W-h}, EER 50% Capacity {Btu/W-h}, EER 25% Capacity {Btu/W-h}, Supply Air Flow 100% {kg/s}, Supply Air Flow 75% {kg/s},Supply Air Flow 50% {kg/s},Supply Air Flow 25% {kg/s}
+ VAV DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:TwoSpeed,COIL COOLING DX TWO SPEED 1,N/A,N/A,81286.31,277360.42,10.01,2.53,2.85,3.07,3.16,8.63,9.71,10.48,10.80,4.7660,3.5085,2.1823,0.9976,
+ Component Sizing Information, Coil:Heating:Electric, COIL HEATING ELECTRIC 1, Nominal Capacity [W], 53106.93774
+ Component Sizing Information, Fan:VariableVolume, FAN VARIABLE VOLUME 3, Maximum Flow Rate [m3/s], 5.14201
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 1, Maximum Outdoor Air Flow Rate [m3/s], 2.91929
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 1, Minimum Outdoor Air Flow Rate [m3/s], 1.01550
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Coil Load [W], 40189.56013
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Water Flow Rate [m3/s], 1.43545E-003
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Air Flow Rate [m3/s], 2.91929
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Inlet Air Temperature [C], 26.81834
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Inlet Water Temperature [C], 7.22000
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Outlet Air Temperature [C], 12.80000
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Inlet Air Humidity Ratio, 6.86230E-003
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 1, Design Outlet Air Humidity Ratio, 6.86230E-003
+! <Water Cooling Coil Capacity Information>,Component Type,Name,Nominal Total Capacity {W},Nominal Sensible Capacity {W},Nominal Latent Capacity {W},Nominal Sensible Heat Ratio, Nominal Coil UA Value {W/C}, Nominal Coil Surface Area {m2}
+Water Cooling Coil Capacity Information,Coil:Cooling:Water,COIL COOLING WATER 1,52980.67,34401.25,18579.42,0.65,4605.59,46.71
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 1, Design Coil Load [W], 26838.25390
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 1, Maximum Water Flow Rate [m3/s], 5.83056E-004
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 1, U-Factor Times Area Value [W/K], 347.78773
+Water Heating Coil Capacity Information,Coil:Heating:Water,COIL HEATING WATER 1,19524.45
+ Component Sizing Information, Fan:VariableVolume, FAN VARIABLE VOLUME 1, Maximum Flow Rate [m3/s], 2.91929
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 2, Maximum Actuated Flow [m3/s], 1.43545E-003
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 2, Controller Convergence Tolerance, 3.31735E-004
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 1, Maximum Actuated Flow [m3/s], 5.83056E-004
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 1, Controller Convergence Tolerance, 8.16715E-004
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 2, Maximum Outdoor Air Flow Rate [m3/s], 2.75456
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 2, Minimum Outdoor Air Flow Rate [m3/s], 0.23597
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Coil Load [W], 53348.49227
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Water Flow Rate [m3/s], 1.90545E-003
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Air Flow Rate [m3/s], 2.75456
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Inlet Air Temperature [C], 32.52105
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Inlet Water Temperature [C], 7.22000
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Outlet Air Temperature [C], 12.80000
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Inlet Air Humidity Ratio, 6.86230E-003
+ Component Sizing Information, Coil:Cooling:Water, COIL COOLING WATER 2, Design Outlet Air Humidity Ratio, 6.86230E-003
+Water Cooling Coil Capacity Information,Coil:Cooling:Water,COIL COOLING WATER 2,58826.48,36085.98,22740.50,0.61,4937.32,50.08
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 2, Design Coil Load [W], 25323.84927
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 2, Maximum Water Flow Rate [m3/s], 5.50156E-004
+ Component Sizing Information, Coil:Heating:Water, COIL HEATING WATER 2, U-Factor Times Area Value [W/K], 328.16308
+Water Heating Coil Capacity Information,Coil:Heating:Water,COIL HEATING WATER 2,18422.74
+ Component Sizing Information, Fan:VariableVolume, FAN VARIABLE VOLUME 2, Maximum Flow Rate [m3/s], 2.75456
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 5, Maximum Actuated Flow [m3/s], 1.90545E-003
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 5, Controller Convergence Tolerance, 2.49909E-004
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 6, Maximum Actuated Flow [m3/s], 5.50156E-004
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 6, Controller Convergence Tolerance, 8.65555E-004
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 3, Maximum Outdoor Air Flow Rate [m3/s], 2.52861
+ Component Sizing Information, Controller:OutdoorAir, CONTROLLER OUTDOOR AIR 3, Minimum Outdoor Air Flow Rate [m3/s], 0.23597
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Coil Load [W], 47863.57030
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Water Flow Rate [m3/s], 1.70955E-003
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Air Flow Rate [m3/s], 2.52861
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Inlet Air Temperature [C], 32.07455
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Inlet Water Temperature [C], 7.22000
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Outlet Air Temperature [C], 12.80000
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Inlet Air Humidity Ratio, 6.86229E-003
+ Component Sizing Information, Coil:Cooling:Water, OS:COIL:COOLING:WATER 1, Design Outlet Air Humidity Ratio, 6.86229E-003
+Water Cooling Coil Capacity Information,Coil:Cooling:Water,OS:COIL:COOLING:WATER 1,53491.45,32918.09,20573.36,0.62,4498.38,45.63
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 2, Design Coil Load [W], 26115.58368
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 2, Maximum Water Flow Rate [m3/s], 5.67356E-004
+ Component Sizing Information, Coil:Heating:Water, OS:COIL:HEATING:WATER 2, U-Factor Times Area Value [W/K], 347.52344
+Water Heating Coil Capacity Information,Coil:Heating:Water,OS:COIL:HEATING:WATER 2,19236.97
+ Component Sizing Information, Fan:VariableVolume, VARIABLE SPEED FAN, Maximum Flow Rate [m3/s], 2.52861
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 7, Maximum Actuated Flow [m3/s], 1.70955E-003
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 7, Controller Convergence Tolerance, 2.78548E-004
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 8, Maximum Actuated Flow [m3/s], 5.67356E-004
+ Component Sizing Information, Controller:WaterCoil, CONTROLLER WATER COIL 8, Controller Convergence Tolerance, 8.39315E-004
+ Component Sizing Information, Chiller:Electric:EIR, CHILLER ELECTRIC EIR 1, Reference Chilled Water Flow Rate [m3/s], 5.05045E-003
+ Component Sizing Information, Chiller:Electric:EIR, CHILLER ELECTRIC EIR 1, Reference Capacity [W], 141399.26489
+ Component Sizing Information, Chiller:Electric:EIR, CHILLER ELECTRIC EIR 1, Reference Condenser Water Flow Rate [m3/s], 7.13987E-003
+! <Chiller Standard Rating Information>, Component Type, Component Name, IPLV in SI Units {W/W}, IPLV in IP Units {Btu/W-h}
+ Chiller Standard Rating Information, Chiller:Electric:EIR, CHILLER ELECTRIC EIR 1, 7.88, 26.88
+ Component Sizing Information, PlantLoop, CHILLED WATER LOOP, Maximum Loop Flow Rate [m3/s], 5.05045E-003
+ Component Sizing Information, PlantLoop, CHILLED WATER LOOP, Plant Loop Volume [m3], 5.68176
+ Component Sizing Information, CoolingTower:SingleSpeed, COOLING TOWER SINGLE SPEED 1, Design Water Flow Rate [m3/s], 7.13987E-003
+ Component Sizing Information, CoolingTower:SingleSpeed, COOLING TOWER SINGLE SPEED 1, Fan Power at Design Air Flow Rate [W], 1754.63633
+ Component Sizing Information, CoolingTower:SingleSpeed, COOLING TOWER SINGLE SPEED 1, Design Air Flow Rate [m3/s], 5.76205
+ Component Sizing Information, CoolingTower:SingleSpeed, COOLING TOWER SINGLE SPEED 1, U-Factor Times Area Value at Design Air Flow Rate [W/C], 7691.22569
+ Component Sizing Information, CoolingTower:SingleSpeed, COOLING TOWER SINGLE SPEED 1, Air Flow Rate in Free Convection Regime [m3/s], 0.57621
+ Component Sizing Information, CoolingTower:SingleSpeed, COOLING TOWER SINGLE SPEED 1, U-Factor Times Area Value at Free Convection Air Flow Rate [W/C], 769.12257
+ Component Sizing Information, PlantLoop, CONDENSER WATER LOOP, Maximum Loop Flow Rate [m3/s], 7.13987E-003
+ Component Sizing Information, PlantLoop, CONDENSER WATER LOOP, Plant Loop Volume [m3], 8.03235
+ Component Sizing Information, Boiler:HotWater, BOILER HOT WATER 1, Nominal Capacity [W], 265021.28824
+ Component Sizing Information, Boiler:HotWater, BOILER HOT WATER 1, Design Water Flow Rate [m3/s], 5.73534E-003
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Maximum Loop Flow Rate [m3/s], 5.73534E-003
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Plant Loop Volume [m3], 6.45226
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 2, Rated Flow Rate [m3/s], 5.05045E-003
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 2, Rated Power Consumption [W], 1290.32626
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 3, Rated Flow Rate [m3/s], 7.13987E-003
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 3, Rated Power Consumption [W], 1824.14514
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 1, Rated Flow Rate [m3/s], 5.73534E-003
+ Component Sizing Information, Pump:VariableSpeed, PUMP VARIABLE SPEED 1, Rated Power Consumption [W], 1465.30534
+! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values
+! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
+! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
+! <Environment:WarmupDays>, NumberofWarmupDays
+Environment,RUN PERIOD 1,WeatherFileRunPeriod,01/01,12/31,Sunday,365,Use RunPeriod Specified Day,No ,No ,No ,Yes,Yes
+Environment:Daylight Saving,Yes,InputFile,03/12,11/05
+Environment:WarmupDays,  6
+! <Tabular Report>,Style,Unit Conversion
+Tabular Report,HTML,None
+! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
+ Warmup Convergence Information,THERMAL ZONE: SPACE 101,RunPeriod: RUN PERIOD 1,0.1162670091,0.6994409607,Pass,Pass,0.4817649170,2.2499861503,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 102 - PLUS,RunPeriod: RUN PERIOD 1,0.1074046979,0.6463148805,Pass,Pass,0.5237527902,1.6168697873,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 201,RunPeriod: RUN PERIOD 1,3.1921826849E-003,2.2475094054E-003,Pass,Pass,8.0209242065E-002,0.1694303727,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 202,RunPeriod: RUN PERIOD 1,2.1483513668E-003,1.4826475697E-003,Pass,Pass,3.5477134245E-002,3.3486983404E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 203,RunPeriod: RUN PERIOD 1,3.5816927212E-003,2.5086282066E-003,Pass,Pass,2.4631067992E-002,2.1858491854E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 301 - PLUS,RunPeriod: RUN PERIOD 1,3.2875823639E-003,1.9683528092E-002,Pass,Pass,0.1485677015,0.3420552854,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 303,RunPeriod: RUN PERIOD 1,6.2048675969E-003,2.3679171666E-002,Pass,Pass,0.3826723012,0.9715896560,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 304,RunPeriod: RUN PERIOD 1,3.9500447240E-003,2.6399170418E-003,Pass,Pass,2.2988286843E-002,2.0164466321E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 401 - PLUS,RunPeriod: RUN PERIOD 1,7.0294342578E-003,3.9130863841E-002,Pass,Pass,0.1819413783,0.5101515338,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 403,RunPeriod: RUN PERIOD 1,1.9640857913E-002,5.2604067164E-002,Pass,Pass,0.6599021100,4.3360953925,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 404,RunPeriod: RUN PERIOD 1,3.2474912062E-003,2.7810265953E-003,Pass,Pass,2.6435630887E-002,2.3537441245E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 501,RunPeriod: RUN PERIOD 1,0.1126356312,0.6782496856,Pass,Pass,0.2491818151,0.7453023131,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SPACE 502,RunPeriod: RUN PERIOD 1,6.7605410143E-002,0.2619115911,Pass,Pass,9.6582587874E-002,0.2481581371,Pass,Pass
+! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
+Program Control:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
+End of Data
