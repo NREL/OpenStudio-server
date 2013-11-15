@@ -17,7 +17,7 @@ fi
 #chown ubuntu:ubuntu /home/ubuntu/setup*
 
 # Force the generation of various directories that are in the EBS mnt
-sudo rm -rf /mnt/openstudio
+sudo rm -rf /mnt/openstudio/*
 sudo mkdir -p /mnt/openstudio
 sudo chmod -R 777 /mnt/openstudio
 

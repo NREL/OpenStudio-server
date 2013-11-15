@@ -1,5 +1,22 @@
 <p id="notice"><%= notice %></p>
 
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Field Name</th>
+    <th>Field Value</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @variable.as_document.each do |k, v| %>
+      <tr>
+        <td><%= k %></td>
+        <td><%= v %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
 
-<%= link_to 'Edit', edit_variable_path(@variable) %> |
-<%= link_to 'Back', variables_path %>
+<%= link_to(image_tag(@variable.preflight_images.first.image.url(:large)), @variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900']) unless @variable.preflight_images.first.nil? %>
+
+

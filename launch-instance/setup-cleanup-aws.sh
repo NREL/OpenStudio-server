@@ -32,9 +32,9 @@ sudo rm -rf /tmp/*.tar.gz
 cd /usr/local/lib/R-3.0.2/src/gnuwin32/
 sudo make clean
 
-sudo rm -rf /usr/local/EnergyPlus-8-0-0/ExampleFiles
-sudo rm -rf /usr/local/EnergyPlus-8-0-0/Documentation
-sudo rm -rf /usr/local/EnergyPlus-8-0-0/DataSets
+sudo rm -rf /usr/local/EnergyPlus-8-0-0/ExampleFiles/*
+sudo rm -rf /usr/local/EnergyPlus-8-0-0/Documentation/*
+sudo rm -rf /usr/local/EnergyPlus-8-0-0/DataSets/*
 sudo rm -rf /usr/local/lib/ruby/site_ruby/2.0.0/openstudio/sketchup_plugin
 sudo rm -rf /usr/local/lib/ruby/site_ruby/2.0.0/openstudio/examples
 sudo rm -rf /usr/local/share/openstudio/Ruby/openstudio/sketchup_plugin

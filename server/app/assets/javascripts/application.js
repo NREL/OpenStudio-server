@@ -18,6 +18,7 @@
 //= require bootstrap_popover
 //= require bootstrap_modal
 //= require mustache
+//= require d3.v3.min
 
 //= require underscore
 //= require backbone
