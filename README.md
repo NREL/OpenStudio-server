@@ -186,6 +186,13 @@ sudo shutdown -r now
 ```
 
 - login to AWS and take a snapshot of the image
+  + Naming convention is `OpenStudio Worker Cluster OS <version of openstudio>`
   + Increase the size of the root image to 10GB in both
+
+- test the AMI using the script run_ec2
+- merge the branch into master
+- tag the release 
+  + Naming convention is to increment the minor release (e.g. V1.2.0).  Note that this number does not increment the same as openstudio because there may be intermediate patched. 
+  + Add a note in the release to which versions of OpenStudio the release supports
 
 
