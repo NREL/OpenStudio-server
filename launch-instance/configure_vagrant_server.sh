@@ -20,9 +20,13 @@ sudo chown mongodb:nogroup /mnt/mongodb/data
 sudo service mongodb restart
 sudo service delayed_job restart
 sudo rm -rf /var/lib/mongodb
+
+# Add in the database indexes after making the db directory
 cd /var/www/rails/openstudio
 rake db:purge
 rake db:mongoid:create_indexes
+
+# Null out the logs
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/development.log
