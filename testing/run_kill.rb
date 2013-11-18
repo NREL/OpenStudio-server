@@ -9,6 +9,6 @@ HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=false
 
 options = {hostname: HOSTNAME}
-api = ServerApi.new(options)
+api = OpenStudio::Analysis::ServerApi.new(options)
 
 api.kill_all_analyses

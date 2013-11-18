@@ -14,7 +14,7 @@ analysis_zip_file = "./DiskIOBenchmarkOneJSON/analysis.zip"
 datapoints_file = "./DiskIOBenchmarkOneJSON/datapoints.json"
 
 options = {hostname: HOSTNAME}
-api = ServerApi.new(options)
+api = OpenStudio::Analysis::ServerApi.new(options)
 
 api.delete_all()
 

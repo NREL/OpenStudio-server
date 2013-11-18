@@ -16,7 +16,7 @@ analysis_zip_file = "./SmallTest/analysis.zip"
 datapoint_files = Dir.glob("./SmallTest/data_point*/data_point_in.json").take(STOP_AFTER_N || 2147483647)
 
 options = {hostname: HOSTNAME}
-api = ServerApi.new(options)
+api = OpenStudio::Analysis::ServerApi.new(options)
 
 api.delete_all()
 

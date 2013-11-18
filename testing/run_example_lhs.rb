@@ -13,7 +13,7 @@ formulation_file = "./ContinuousExample/analysis.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
 
 options = {hostname: HOSTNAME}
-api = ServerApi.new(options)
+api = OpenStudio::Analysis::ServerApi.new(options)
 
 api.delete_all()
 
