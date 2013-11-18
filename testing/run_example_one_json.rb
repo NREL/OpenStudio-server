@@ -1,4 +1,8 @@
-require './ServerApi.rb'
+# Load the gems from your bundle (do bundle install if you haven't already)
+require 'rubygems'
+require 'bundler/setup'
+
+require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
 HOSTNAME = "http://localhost:8080"
 #HOSTNAME = "http://ec2-54-237-92-10.compute-1.amazonaws.com"
