@@ -1,7 +1,7 @@
 require_relative '../lib/openstudio-server/ServerApi'
 
 HOSTNAME = "http://localhost:8080"
-#HOSTNAME = "http://ec2-50-19-154-205.compute-1.amazonaws.com"
+#HOSTNAME = "http://ec2-67-202-41-219.compute-1.amazonaws.com/"
 
 # Initialize the ServerAPI
 options = {hostname: HOSTNAME}
