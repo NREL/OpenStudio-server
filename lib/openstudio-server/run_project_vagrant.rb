@@ -34,31 +34,29 @@ provider = OpenStudio::VagrantProvider.new
 provider.setSettings(settings)
 
 success = provider.requestStartServer
-
-puts "Starting Server success = #{success}"
-
+puts "Starting server request success = #{success}"
 provider.waitForServer
-
+success = provider.serverRunning
+raise "Server is not running." if not success
 puts "Server Started"
 
 success = provider.requestStartWorkers
-
-puts "Starting Worker success = #{success}"
-
+puts "Starting workers request success = #{success}"
 provider.waitForWorkers
-
+success = provider.workersRunning
+raise "Workers are not running." if not success
 puts "Worker Started"
 
 session = provider.session
 
 # delete all projects on the server
+raise "Server URL is unavailable." if session.serverUrl.empty?
 server = OpenStudio::OSServer.new(session.serverUrl.get)
 server.projectUUIDs.each do |projectUUID|
   puts "Deleting project #{projectUUID}"
   success = server.deleteProject(projectUUID)
   puts "  Success = #{success}"
 end
-
 
 # run the project. sets the run type of each data point to CloudDetailed if true
 if getDetailedResults
