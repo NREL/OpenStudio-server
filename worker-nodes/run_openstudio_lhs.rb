@@ -145,7 +145,7 @@ begin
           end
         end
 
-        # process the measure
+        # process the measure -- TODO grab the relative directory instead of this last(2).first stuff
         measure_path = wf['bcl_measure_directory'].split("/").last(2).first
         measure_name = wf['bcl_measure_class_name_ADDME']
 
@@ -257,7 +257,7 @@ begin
     ros.log_message "Translate object to energyplus IDF took #{b.to_f - a.to_f}", true
   end
 
-  # Run EnergyPlus using Asset Score run energyplus script
+  # Run EnergyPlus using run energyplus script
   idf_filename = "#{run_directory}/in.idf"
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
 
