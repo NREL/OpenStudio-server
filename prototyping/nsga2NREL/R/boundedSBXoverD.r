@@ -1,5 +1,5 @@
 boundedSBXoverD <-
-function(parent_chromosome,lowerBounds,upperBounds,cprob,mu){
+function(parent_chromosome,lowerBounds,upperBounds,vartype,cprob,mu){
   popSize=nrow(parent_chromosome);
   varNo=ncol(parent_chromosome);
   child <- parent_chromosome;
@@ -44,8 +44,10 @@ function(parent_chromosome,lowerBounds,upperBounds,cprob,mu){
             child1 = 0.5*((y1+y2)-betaq*(y2-y1));
             child2 = 0.5*((y1+y2)+betaq*(y2-y1));
             #force discrete
-            child1 = child[which.min(abs(child1-child[,j])),j]
-            child2 = child[which.min(abs(child2-child[,j])),j]
+            if (vartype[j] == "discrete") {
+              child1 = child[which.min(abs(child1-child[,j])),j]
+              child2 = child[which.min(abs(child2-child[,j])),j]
+            }
           } else{ # abs(parent1 - parent2) <= 0.000001
             betaq = 1.0;
             y1 = parent1;
@@ -54,8 +56,10 @@ function(parent_chromosome,lowerBounds,upperBounds,cprob,mu){
             child1 = 0.5*((y1+y2)-betaq*(y2-y1));
             child2 = 0.5*((y1+y2)+betaq*(y2-y1));
             #force discrete
-            child1 = child[which.min(abs(child1-child[,j])),j]
-            child2 = child[which.min(abs(child2-child[,j])),j]
+            if (vartype[j] == "discrete") {
+              child1 = child[which.min(abs(child1-child[,j])),j]
+              child2 = child[which.min(abs(child2-child[,j])),j]
+            }
           } # abs(parent1 - parent2) ends here
           if (child1 > yu) {
             child1 = yu;    

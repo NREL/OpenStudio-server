@@ -1,5 +1,5 @@
 boundedPolyMutationD <-
-function(parent_chromosome,lowerBounds,upperBounds,mprob,mum){
+function(parent_chromosome,lowerBounds,upperBounds,vartype,mprob,mum){
   popSize=nrow(parent_chromosome);
   varNo=ncol(parent_chromosome);
   child <- parent_chromosome;
@@ -28,7 +28,10 @@ function(parent_chromosome,lowerBounds,upperBounds,mprob,mum){
               deltaq = 1.0 - val^mut_pow;
             }
             y = y + deltaq*(yu-yl);
-            y = child[which.min(abs(y-child[,j])),j]
+            #force discrete
+            if (vartype[j] == "discrete") {
+              y = child[which.min(abs(y-child[,j])),j]
+            }
             if (y > yu) {
               y = yu;
             } else if (y < yl) {
@@ -37,8 +40,12 @@ function(parent_chromosome,lowerBounds,upperBounds,mprob,mum){
             child[i,j] = y;
           } else { # y <= yl
             xy = runif(1);
-            child2 = yl + xy*(yu-yl);
-            child[i,j] = child[which.min(abs(child2-child[,j])),j]
+            child[i,j] = yl + xy*(yu-yl);            
+            #force discrete
+            if (vartype[j] == "discrete") {
+              child2 = yl + xy*(yu-yl);
+              child[i,j] = child[which.min(abs(child2-child[,j])),j]
+            }
           }  
         } # runif(1) > mprob, do not perform mutation
       } # next j

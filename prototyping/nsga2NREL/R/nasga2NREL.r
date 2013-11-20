@@ -5,7 +5,7 @@
 # system.time(nrel8 <- nsga2NREL(8,fn=zdt2_delay,2,test3,generations=40,mprob=0.8))
 
 nsga2NREL <-
-function(cl=NULL, fn, objDim, variables,
+function(cl=NULL, fn, objDim, variables, vartype=NULL,
                     tourSize=2, generations=20, cprob=0.7, XoverDistIdx=5, mprob=0.2, MuDistIdx=10) {
     cat("********** R based Nondominated Sorting Genetic Algorithm II *********")
     cat("\n")
@@ -57,10 +57,10 @@ function(cl=NULL, fn, objDim, variables,
         matingPool <- tournamentSelection(parent,popSize,tourSize);
         cat("crossover operator")
         cat("\n")  
-        childAfterX <- boundedSBXoverD(matingPool[,1:varNo],lowerBounds,upperBounds,cprob,XoverDistIdx); # Only design parameters are input as the first argument
+        childAfterX <- boundedSBXoverD(matingPool[,1:varNo],lowerBounds,upperBounds,vartype,cprob,XoverDistIdx); # Only design parameters are input as the first argument
         cat("mutation operator")
         cat("\n")
-        childAfterM <- boundedPolyMutationD(childAfterX,lowerBounds,upperBounds,mprob,MuDistIdx);
+        childAfterM <- boundedPolyMutationD(childAfterX,lowerBounds,upperBounds,vartype,mprob,MuDistIdx);
         cat("evaluate the objective fns of childAfterM")
         cat("\n")
         cat("start child parallel\n")
