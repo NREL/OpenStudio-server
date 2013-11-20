@@ -1,7 +1,7 @@
 # test3 <- cbind(seq(0,1,length.out=200),seq(0,1,length.out=200))
 # library(snow)
 # cl <- makeSOCKcluster(rep("localhost",8))
-# install.packages("~/Downloads/nsga2NREL.tar.gz", repos = NULL, type = "source")
+# install.packages("/data/launch-instance/nsga2NREL.tar.gz", repos = NULL, type = "source")
 # system.time(nrel8 <- nsga2NREL(8,fn=zdt2_delay,2,test3,generations=40,mprob=0.8))
 
 nsga2NREL <-
