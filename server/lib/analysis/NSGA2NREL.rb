@@ -1,7 +1,7 @@
 class Analysis::NSGA2NREL
   def initialize(analysis_id, options = {})
     #TODO create create_data_point.rb
-    defaults = {skip_init: false, vars: [], simulate_data_point_filename: "simulate_data_point.rb", create_data_point: "create_data_point.rb"}
+    defaults = {skip_init: false, vars: [], vartypes: [],gen: 20, simulate_data_point_filename: "simulate_data_point.rb", create_data_point: "create_data_point.rb"}
     @options = defaults.merge(options)
     @analysis_id = analysis_id
   end
@@ -122,7 +122,7 @@ class Analysis::NSGA2NREL
       #gen is the number of generations to calculate
       #varNo is the number of variables (ncol(vars))
       #popSize is the number of sample points in the variable (nrow(vars))
-      @r.command(vars.to_dataframe,gen) do
+      @r.command(vars.to_dataframe,vartypes,gen) do
         %Q{
           clusterEvalQ(cl,library(RMongo))
           
@@ -148,7 +148,7 @@ class Analysis::NSGA2NREL
           }
           clusterExport(cl,"f")
           
-          #TODO  Create g(x) such that x is vector of variable values, 
+          #g(x) such that x is vector of variable values, 
           #           create a data_point from the vector of variable values x
           #           create a UUID for that data_point and put in database
           #           call f(u) where u is UUID of data_point
@@ -178,7 +178,7 @@ class Analysis::NSGA2NREL
           }
 
           print(nrow(vars))
-          results <- nsga2NREL(cl,fn=g,2,vars[],generations=gen,mprob=0.8)
+          results <- nsga2NREL(cl=cl,fn=g,objdim=2,variables=vars[],vartype=vartypes,generations=gen,mprob=0.8)
           #results <- sfLapply(vars[,1], f)
 
           stopCluster(cl)
