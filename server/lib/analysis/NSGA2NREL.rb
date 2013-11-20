@@ -122,9 +122,10 @@ class Analysis::NSGA2NREL
       #gen is the number of generations to calculate
       #varNo is the number of variables (ncol(vars))
       #popSize is the number of sample points in the variable (nrow(vars))
-      @r.command(vars.to_dataframe, gen) do
+      @r.command(vars.to_dataframe,gen) do
         %Q{
           clusterEvalQ(cl,library(RMongo))
+          
           #f(x) takes a UUID (x) and runs the datapoint
           f <- function(x){
             mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -155,13 +156,14 @@ class Analysis::NSGA2NREL
 	    ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
 	    print("#{@analysis.use_shm}")
 	    if ("#{@analysis.use_shm}" == "true"){
-	      y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -u ",x," -r AWS --run-shm",sep="")
+	      y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -u ",x," --run-shm",sep="")
 	    } else {
-	      y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -u ",x," -r AWS",sep="")
+	      y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -u ",x,sep="")
 	    }
-	  z <- system(y,intern=TRUE)
-	  j <- length(z)
-	  z
+	    z <- system(y,intern=TRUE)
+	    j <- length(z)
+	    z
+	    f(z[j])
 	  }
           clusterExport(cl,"g")
 
