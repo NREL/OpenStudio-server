@@ -88,6 +88,10 @@ default_attributes(
             {
                 :name => 'NMOF',
                 :version => '0.28-2'
+            },
+            {
+                :name => 'mco',
+                :version => '1.0.12'
             }
         ]
     }
