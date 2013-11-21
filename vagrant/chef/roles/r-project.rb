@@ -93,7 +93,14 @@ default_attributes(
                 :name => 'mco',
                 :version => '1.0.12'
             }
-        ]
+        ],
+        :local_package_url => "/data/launch-instance",
+        :local_packages => [
+            {
+                :name => 'nsga2NREL',
+                :version => '1.0.0'
+            }
+        ]        
     }
 )
 
