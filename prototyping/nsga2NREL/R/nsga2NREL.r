@@ -9,6 +9,9 @@ function(cl=NULL, fn, objDim, variables, vartype=NULL,
                     tourSize=2, generations=20, cprob=0.7, XoverDistIdx=5, mprob=0.2, MuDistIdx=10) {
     cat("********** R based Nondominated Sorting Genetic Algorithm II *********")
     cat("\n")
+    cat("input checking")
+    if (length(vartype)!= ncol(variables) {print("vartype length not same as number of variable columns");stop}
+    
     cat("initializing the population")
     cat("\n")
     varNo = ncol(variables)
@@ -29,7 +32,7 @@ function(cl=NULL, fn, objDim, variables, vartype=NULL,
     cat("check cluster\n")
     require(snow)
     if (is.null(cl)) {print("cluster not initialized");stop}
-    #cl <- makeSOCKcluster(rep("localhost",nodes))
+
     cat("start parallel pop\n")
     parent <- cbind(parent, t(parApply(cl,parent,1,fn)));
     cat("stop\n")
@@ -101,7 +104,7 @@ function(cl=NULL, fn, objDim, variables, vartype=NULL,
             cat("\n")
         }
     }
-    stopCluster(cl)
+
     # report on nsga2 settings and results
     result = list(functions=fn, parameterDim=varNo, objectiveDim=objDim, lowerBounds=lowerBounds,
                   upperBounds=upperBounds, popSize=popSize, tournamentSize=tourSize,
