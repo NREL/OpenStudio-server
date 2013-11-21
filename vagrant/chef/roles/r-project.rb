@@ -19,7 +19,7 @@ default_attributes(
         :apt_key => "E084DAB9",
         :rserve_start_on_boot => false,
         :rserve_user => "vagrant",
-        :package_source_url => "http://cran.r-project.org/src/contrib",
+        :default_package_url => "http://cran.r-project.org/src/contrib",
         :packages => [
             {
                 :name => 'lhs',
@@ -67,7 +67,7 @@ default_attributes(
             },
             {
                 :name => 'R.utils',
-                :version => '1.27.1'
+                :version => '1.28.4'
             },
             {
                 :name => 'iterators',
