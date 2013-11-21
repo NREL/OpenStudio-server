@@ -1,19 +1,21 @@
 Package: nsga2NREL
 Type: Package
-Title: Elitist Non-dominated Sorting Genetic Algorithm based on R
-Version: 1.0
-Date: 2013-06-12
+Title: Parallel Elitist Non-dominated Sorting Genetic Algorithm based on R
+Version: 1.0.0
+Date: 2013-11-21
 Author: Ching-Shih (Vince) Tsou <cstsou@mail.ntcb.edu.tw>
-Maintainer: Ming-Chang (Alan) Lee <alan9956@ydu.edu.tw>
+Maintainer: Brian Ball <Brian.Ball@nrel.gov>
 Description: This package provide functions for box-constrained
         multiobjective optimization using the elitist non-dominated
         sorting genetic algorithm - NSGA-II. Fast non-dominated
         sorting, crowding distance, tournament selection, simulated
         binary crossover, and polynomial mutation are called in the
         main program, nsga2R, to complete the search.
-Depends: mco
+        This version is modified from the originial version in package nsga2R.
+        This version is parallelized on F evals and can take both continuous and discrete variables.
+Depends: mco, snow
 License: LGPL-3
-Packaged: 2013-06-16 05:29:35 UTC; vince
+Packaged: 2013-11-21 12:00:00 MT; Brian
 NeedsCompilation: no
-Repository: CRAN
-Date/Publication: 2013-06-16 18:26:19
+Repository: NREL
+Date/Publication: TBD

@@ -1,22 +1,23 @@
-\name{boundedPolyMutation}
-\alias{boundedPolyMutation}
+\name{boundedSBXoverD}
+\alias{boundedSBXoverD}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Bounded Polynomial Mutation Operator
+Bounded Simulated Binary Crossover Operator
 }
 \description{
-The bounded polynomial mutation operator is a real-parameter genetic operator. Like in the simulated binary crossover operator, the probability distribution is also a polynomial function instead of a normal distribution.
+The simulated binary crossover operator is a real-parameter genetic operator. It simulates the working principal of the single-point crossover operator on binary strings.
 }
 \usage{
-boundedPolyMutation(parent_chromosome, lowerBounds, upperBounds, mprob, mum)
+boundedSBXoverD(parent_chromosome, lowerBounds, upperBounds, vartype, cprob, mu)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{parent_chromosome}{Mating pool with decision variables}
   \item{lowerBounds}{Lower bounds of each decision variable}
   \item{upperBounds}{Upper bounds of each decision variable}
-  \item{mprob}{Mutation probability}
-  \item{mum}{Mutation distribution index, it can be any nonnegative real number}
+  \item{vartype}{character vector of variable type [discrete,continuous]}
+  \item{cprob}{Crossover probability}
+  \item{mu}{Crossover distribution index, it can be any nonnegative real number}
 }
 \value{
 Return the offspring population with decision variables
@@ -31,10 +32,11 @@ Ching-Shih (Vince) Tsou \email{cstsou@mail.ntcb.edu.tw}
 set.seed(1234)
 lowerBounds <- rep(0,30)
 upperBounds <- rep(1,30)
-mprob <- 0.2
-MutDistIdx <- 20
+cprob <- 0.7
+XoverDistIdx <- 20
 matingPool <- matrix(runif(1200, 0, 1), nrow=40, ncol=30)
-childAfterM <- boundedPolyMutation(matingPool,lowerBounds,upperBounds,mprob,MutDistIdx)
-childAfterM
+vartype = rep(c("discrete","continuous"),15)
+childAfterX <- boundedSBXoverD(matingPool,lowerBounds,upperBounds,vartype,cprob,XoverDistIdx)
+childAfterX
 }
 

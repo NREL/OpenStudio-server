@@ -5,12 +5,12 @@
 # system.time(nrel8 <- nsga2NREL(8,fn=zdt2_delay,2,test3,generations=40,mprob=0.8))
 
 nsga2NREL <-
-function(cl=NULL, fn, objDim, variables, vartype=NULL,
-                    tourSize=2, generations=20, cprob=0.7, XoverDistIdx=5, mprob=0.2, MuDistIdx=10) {
+function(cl, fn, objDim, variables, vartype,
+                    tourSize=2, generations=20, cprob=0.7, XoverDistIdx=5, mprob=0.5, MuDistIdx=10) {
     cat("********** R based Nondominated Sorting Genetic Algorithm II *********")
     cat("\n")
     cat("input checking")
-    if (length(vartype)!= ncol(variables) {print("vartype length not same as number of variable columns");stop}
+    if (length(vartype)!= ncol(variables)) {print("vartype length not same as number of variable columns");stop}
     
     cat("initializing the population")
     cat("\n")
@@ -30,7 +30,6 @@ function(cl=NULL, fn, objDim, variables, vartype=NULL,
     print(parent)
     
     cat("check cluster\n")
-    require(snow)
     if (is.null(cl)) {print("cluster not initialized");stop}
 
     cat("start parallel pop\n")
