@@ -4,6 +4,7 @@ class Variable
 
   field :uuid, :type => String
   field :_id, :type => String, default: -> { uuid || UUID.generate }
+  field :r_index, :type => Integer
   field :version_uuid, :type => String # pointless at this time
   field :name, :type => String
   field :display_name, :type => String
@@ -31,6 +32,7 @@ class Variable
   index({uuid: 1}, unique: true)
   index({id: 1}, unique: true)
   index({name: 1})
+  index({r_index: 1}, unique: true)
   index({analysis_id: 1})
   index({analysis_id: 1, uuid: 1})
   index({analysis_id: 1, perturbable: 1})
