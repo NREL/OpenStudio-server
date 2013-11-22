@@ -1,7 +1,14 @@
 class Analysis::NSGA2NREL
   def initialize(analysis_id, options = {})
     #TODO create create_data_point.rb
-    defaults = {skip_init: false, vars: [], vartypes: [],gen: 20, simulate_data_point_filename: "simulate_data_point.rb", create_data_point: "create_data_point.rb"}
+    defaults = {
+        skip_init: false,
+        vars: [],
+        vartypes: [],
+        gen: 20,
+        run_data_point_filename: "run_openstudio_workflow.rb",
+        create_data_point: "create_data_point.rb"
+    }
     @options = defaults.merge(options)
     @analysis_id = analysis_id
   end
@@ -122,7 +129,7 @@ class Analysis::NSGA2NREL
       #gen is the number of generations to calculate
       #varNo is the number of variables (ncol(vars))
       #popSize is the number of sample points in the variable (nrow(vars))
-      @r.command(vars.to_dataframe,vartypes,gen) do
+      @r.command(vars.to_dataframe, vartypes, gen) do
         %Q{
           clusterEvalQ(cl,library(RMongo))
           
@@ -138,9 +145,9 @@ class Analysis::NSGA2NREL
             ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
             print("#{@analysis.use_shm}")
             if ("#{@analysis.use_shm}" == "true"){
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:simulate_data_point_filename]} -a #{@analysis.id} -u ",x," -r AWS --run-shm",sep="")
+              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
             } else {
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:simulate_data_point_filename]} -a #{@analysis.id} -u ",x," -r AWS",sep="")
+              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
             }
             z <- system(y,intern=TRUE)
             j <- length(z)
