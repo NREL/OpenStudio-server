@@ -70,8 +70,9 @@ class Variable
   def self.create_by_os_argument_json(analysis_id, os_json)
     var = Variable.where({analysis_id: analysis_id, uuid: os_json['uuid']}).first
     if var
-      Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
+      Rails.logger.warn("Variable already exists for '#{var.name}' : '#{var.uuid}'")
     else
+      Rails.logger.info("Adding a new argument named: '#{os_json['name']}'")
       var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
     end
 

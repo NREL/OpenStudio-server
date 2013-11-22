@@ -1,6 +1,6 @@
 class Analysis::BatchRun
   def initialize(analysis_id, options = {})
-    defaults = {skip_init: false, data_points: [], simulate_data_point_filename: "simulate_data_point.rb"}
+    defaults = {skip_init: false, data_points: [], run_data_point_filename: "run_openstudio.rb"}
     @options = defaults.merge(options)
 
 
@@ -142,9 +142,9 @@ class Analysis::BatchRun
             ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
             print("#{@analysis.use_shm}")
             if ("#{@analysis.use_shm}" == "true"){
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:simulate_data_point_filename]} -a #{@analysis.id} -u ",x," -r AWS --run-shm",sep="")
+              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
             } else {
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:simulate_data_point_filename]} -a #{@analysis.id} -u ",x," -r AWS",sep="")
+              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
             }
             z <- system(y,intern=TRUE)
             j <- length(z)
