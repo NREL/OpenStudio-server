@@ -1,9 +1,23 @@
-# test3 <- cbind(seq(0,1,length.out=200),seq(0,1,length.out=200))
-# library(snow)
-# cl <- makeSOCKcluster(rep("localhost",8))
-# install.packages("/data/launch-instance/nsga2NREL.tar.gz", repos = NULL, type = "source")
-# system.time(nrel8 <- nsga2NREL(8,fn=zdt2_delay,2,test3,generations=40,mprob=0.8))
+#############################################################
+# Nondominated Sorting Genetic Algorithm 2 in R
+# Main Program Oct./12/2013
+# Author: Prof. Ching-Shih (Vince) Tsou, Ph.D.
+# Affiliation: Institute of Information and Decision Sciences
+#              National Taipei College of Business
+# Email: cstsou@mail.ntcb.edu.tw
+#############################################################
 
+# Arguments description
+# cl                    =  snow cluster
+# fn                    =  the objective functions
+# objDim                =  the dimension of objective space
+# variables             =  matrix of variables
+# vartype               =  list of variable types
+# tourSize              =  the tournament size of mating selection
+# generations           =  max. number of generations  
+# cprob and mprob       =  the prob. for crossover and mutation operator
+# XoverDistIdx          =  crossover index
+# MuDistIdx             =  mutation index
 nsga2NREL <-
 function(cl, fn, objDim, variables, vartype,
                     tourSize=2, generations=20, cprob=0.7, XoverDistIdx=5, mprob=0.5, MuDistIdx=10) {
