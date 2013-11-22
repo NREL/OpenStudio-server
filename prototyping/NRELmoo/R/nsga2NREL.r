@@ -1,9 +1,23 @@
-# test3 <- cbind(seq(0,1,length.out=200),seq(0,1,length.out=200))
-# library(snow)
-# cl <- makeSOCKcluster(rep("localhost",8))
-# install.packages("/data/launch-instance/nsga2NREL.tar.gz", repos = NULL, type = "source")
-# system.time(nrel8 <- nsga2NREL(8,fn=zdt2_delay,2,test3,generations=40,mprob=0.8))
+#############################################################
+# Nondominated Sorting Genetic Algorithm 2 in R
+# Main Program Oct./12/2013
+# Author: Prof. Ching-Shih (Vince) Tsou, Ph.D.
+# Affiliation: Institute of Information and Decision Sciences
+#              National Taipei College of Business
+# Email: cstsou@mail.ntcb.edu.tw
+#############################################################
 
+# Arguments description
+# cl                    =  snow cluster
+# fn                    =  the objective functions
+# objDim                =  the dimension of objective space
+# variables             =  matrix of variables
+# vartype               =  list of variable types
+# tourSize              =  the tournament size of mating selection
+# generations           =  max. number of generations  
+# cprob and mprob       =  the prob. for crossover and mutation operator
+# XoverDistIdx          =  crossover index
+# MuDistIdx             =  mutation index
 nsga2NREL <-
 function(cl, fn, objDim, variables, vartype,
                     tourSize=2, generations=20, cprob=0.7, XoverDistIdx=5, mprob=0.5, MuDistIdx=10) {
@@ -34,6 +48,9 @@ function(cl, fn, objDim, variables, vartype,
 
     cat("start parallel pop\n")
     parent <- cbind(parent, t(parApply(cl,parent,1,fn)));
+    cat("save params and objectives")
+    parameters_save <- parent[,1:varNo]
+    objectives_save <- parent[,(varNo+1):(varNo+objDim)]
     cat("stop\n")
     cat("ranking the initial population")
     cat("\n")  
@@ -67,6 +84,9 @@ function(cl, fn, objDim, variables, vartype,
         cat("\n")
         cat("start child parallel\n")
         childAfterM <- cbind(childAfterM, t(parApply(cl,childAfterM,1,fn)));
+        cat("save params and objectives")
+        parameters_save <- cbind(parameters_save,childAfterM[,1:varNo])
+        objectives_save <- cbind(objectives_save,childAfterM[,(varNo+1):(varNo+objDim)])
         cat("stop\n")
         # Consider use child again and again ...
         cat("Rt = Pt + Qt")
@@ -110,7 +130,7 @@ function(cl, fn, objDim, variables, vartype,
                   generations=generations, XoverProb=cprob, XoverDistIndex=XoverDistIdx,
                   mutationProb=mprob, mutationDistIndex=MuDistIdx, parameters=parent[,1:varNo],
                   objectives=parent[,(varNo+1):(varNo+objDim)], paretoFrontRank=parent[,varNo+objDim+1],
-                  crowdingDistance=parent[,varNo+objDim+2]);
+                  crowdingDistance=parent[,varNo+objDim+2], parameters_save=parameters_save, objectives_save=objectives_save);
     class(result)="nsga2R";
     return(result)
 }
