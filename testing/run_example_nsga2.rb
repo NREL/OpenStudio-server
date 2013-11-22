@@ -1,4 +1,4 @@
-# Load the gems from your bundle (do bundle install if you haven't already)
+# Load the gems from your bundle (do bundle install if you haven't already, bundle update if you need to update)
 require 'rubygems'
 require 'bundler/setup'
 
@@ -12,8 +12,8 @@ ANALYSIS_TYPE="NSGA2NREL"
 STOP_AFTER_N=nil # set to nil if you want them all
 # each may contain up to 50 data points
 
-formulation_file = "./ContinuousExample/medium_office.json"
-analysis_zip_file = "./ContinuousExample/medium_office.zip"
+formulation_file = "./SimpleContinuousExample/analysis.json"
+analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 
 options = {hostname: HOSTNAME}
 api = OpenStudio::Analysis::ServerApi.new(options)
