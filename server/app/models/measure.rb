@@ -41,7 +41,7 @@ class Measure
       Rails.logger.info("Measure already exists for analysis #{analysis_id} of #{measure.name} : #{measure.uuid}")
     else
       measure = Measure.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
-      Rails.logger.info("Creating new measure for analysis #{analysis_id} of #{measure.name} : #{measure.uuid}")
+      Rails.logger.info("Creating new measure for analysis #{analysis_id} with uuid '#{measure.uuid}'")
     end
 
     Rails.logger.info("adding/updating measure #{measure.uuid} for analysis #{analysis_id}")
@@ -65,10 +65,10 @@ class Measure
         #Rails.logger.info("checking arguments for values")
         # just append this to an array for now...
         # jam this data into the measure for now, but this needs to get pulled out into
-        Rails.logger.info("#{k.inspect} #{v.inspect}")
+        #Rails.logger.info("#{k.inspect} #{v.inspect}")
         if v
           v.each do |arg|
-            Rails.logger.info(arg.inspect)
+            #Rails.logger.info(arg.inspect)
 
             # Create a variable definition (i.e. a variable) for each argument regardless
             # whether or not it is used
@@ -95,11 +95,10 @@ class Measure
 
       if k == "variables"
         v.each do |var|
-          Rails.logger.info "variable is #{var}"
+          Rails.logger.info "Found a variable named '#{var[:name]}'"
           new_var = Variable.create_by_os_argument_json(analysis_id, var)
-
+          
           new_var.save!
-          Rails.logger.info("New REAL variable is #{new_var.inspect}")
           measure.variables << new_var unless measure.variables.include?(new_var)
         end
       end
