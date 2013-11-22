@@ -97,7 +97,7 @@ default_attributes(
         :local_package_url => "/data/launch-instance",
         :local_packages => [
             {
-                :name => 'nsga2NREL',
+                :name => 'NRELmoo',
                 :version => '1.0.0'
             }
         ]        
