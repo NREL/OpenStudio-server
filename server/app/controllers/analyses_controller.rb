@@ -104,7 +104,7 @@ class AnalysesController < ApplicationController
 
     logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
     options = params.symbolize_keys # read the deaults from the HTTP request
-    options[:simulate_data_point_filename] = params[:simulate_data_point_filename] if params[:simulate_data_point_filename]
+    options[:run_data_point_filename] = params[:run_data_point_filename] if params[:run_data_point_filename]
     options[:x_objective_function] = @analysis['x_objective_function'] if @analysis['x_objective_function']
     options[:y_objective_function] = @analysis['y_objective_function'] if @analysis['y_objective_function']
 
