@@ -12,8 +12,8 @@ ANALYSIS_TYPE="NSGA2NREL"
 STOP_AFTER_N=nil # set to nil if you want them all
 # each may contain up to 50 data points
 
-formulation_file = "./ContinuousExample/analysis.json"
-analysis_zip_file = "./ContinuousExample/analysis.zip"
+formulation_file = "./ContinuousExample/medium_office.json"
+analysis_zip_file = "./ContinuousExample/medium_office.zip"
 
 options = {hostname: HOSTNAME}
 api = OpenStudio::Analysis::ServerApi.new(options)

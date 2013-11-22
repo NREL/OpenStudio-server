@@ -34,12 +34,15 @@ datapoint_files.each do |dp|
   api.upload_datapoints(analysis_id, datapoint_options)
 end
 
-run_options = {analysis_action: "start", without_delay: false, analysis_type: 'batch_run'}
+run_options = {
+    analysis_action: "start", 
+    without_delay: false, 
+    analysis_type: 'batch_run'}
 api.run_analysis(analysis_id, run_options)
 
 # ===== LHS Sample and Run =====
-formulation_file = "./ContinuousExample/analysis.json"
-analysis_zip_file = "./ContinuousExample/analysis.zip"
+formulation_file = "./ContinuousExample/medium_office.json"
+analysis_zip_file = "./ContinuousExample/medium_office.zip"
 
 analysis_options = {
     formulation_file: formulation_file,

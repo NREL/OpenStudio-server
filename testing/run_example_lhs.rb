@@ -10,8 +10,8 @@ HOSTNAME = "http://localhost:8080"
 WITHOUT_DELAY=true # NOTE that this is for only the LHS portion the batch_run is asynchronous.
 ANALYSIS_TYPE="lhs"
 
-formulation_file = "./ContinuousExample/analysis.json"
-analysis_zip_file = "./ContinuousExample/analysis.zip"
+formulation_file = "./ContinuousExample/medium_office.json"
+analysis_zip_file = "./ContinuousExample/medium_office.zip"
 
 options = {hostname: HOSTNAME}
 api = OpenStudio::Analysis::ServerApi.new(options)
