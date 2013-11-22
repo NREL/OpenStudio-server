@@ -1,9 +1,11 @@
 module Analysis::R
   module Lhs
     #def r
-    #  @r ||= ...
+    #  @r ||= 
     #end
 
+    # TODO how to include libraries for R
+    
     def lhs_probability(num_variables, sample_size)
       Rails.logger.info "Start generating of LHS #{Time.now}"
       a = @r.converse "a <- randomLHS(#{sample_size}, #{num_variables})"
@@ -112,7 +114,6 @@ module Analysis::R
           %Q{
             samples <- #{r_dist_name}(df$data, #{mean}, #{stddev})
             samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
-
           }
         end
       end

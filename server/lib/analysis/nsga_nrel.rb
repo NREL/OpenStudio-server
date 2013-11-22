@@ -1,4 +1,9 @@
-class Analysis::NSGA2NREL
+# Non Sorting Genetic Algorithm
+
+class Analysis::NsgaNrel
+  #include Analysis::R::Cluster 
+  include Analysis::R::Lhs # include the R Lhs wrapper
+
   def initialize(analysis_id, options = {})
     #TODO create create_data_point.rb
     defaults = {
@@ -35,6 +40,9 @@ class Analysis::NSGA2NREL
     @r.converse "library(R.utils)"
     @r.converse "library(mco)"
     @r.converse "library(nsga2NREL)"
+    @r.converse "library(lhs)"
+    @r.converse "library(triangle)"
+    @r.converse "library(e1071)"
 
     @analysis.status = 'started'
     @analysis.run_flag = true
@@ -51,9 +59,85 @@ class Analysis::NSGA2NREL
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    if @options[:vars].empty?
+    # TODO
+
+    # Configure the variables for the analysis
+
+    # TODO Make these methods more generic as we are starting to reuse the code across algoritms
+    # get pivot variables
+    pivot_variables = Variable.where({analysis_id: @analysis, pivot: true}).order_by(:name.asc)
+    pivot_hash = {}
+    pivot_variables.each do |var|
+      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
+      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
+      values, weights = var.map_discrete_hash_to_array
+      Rails.logger.info "pivot variable values are #{values}"
+      pivot_hash[var.uuid] = values
+    end
+    # if there are multiple pivots, then smash the hash of arrays to form a array of hashes. This takes
+    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
+    pivot_array = pivot_hash.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
+    Rails.logger.info "pivot array is #{pivot_array}"
+
+    # get static variables.  These must be applied after the pivot vars and before the lhs
+    static_variables = Variable.where({analysis_id: @analysis, static: true}).order_by(:name.asc)
+    static_array = []
+    static_variables.each do |var|
+      if var.static_value
+        static_array << {"#{var.uuid}" => var.static_value}
+      else
+        raise "Asking to set a static value but none was passed for #{var.name}"
+      end
+    end
+    Rails.logger.info "static array is #{static_array}"
+
+    # get variables
+    selected_variables = Variable.where({analysis_id: @analysis, perturbable: true}).order_by(:name.asc)
+    Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
+
+    # discretize the variables using the LHS sampling method
+    @r.converse("print('starting lhs to discretize the variables')")
+    # get the probabilities and persist them for reference
+    p = lhs_probability(selected_variables.count, @analysis.problem['number_of_samples'])
+    Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
+
+    # The resulting parameter space is in the form of a hash with elements like the below
+    # "9a1dbc60-1919-0131-be3d-080027880ca6"=>{:measure_id=>"e16805f0-a2f2-4122-828f-0812d49493dd",
+    #   :variables=>{"8651b16d-91df-4dc3-a07b-048ea9510058"=>80, "c7cf9cfc-abf9-43b1-a07b-048ea9510058"=>"West"}}
+
+    i_var = 0
+    samples = {} # samples are in hash of arrays
+    var_types = []
+    # TODO: performance smell... optimize this using Parallel
+    selected_variables.each do |var|
+      sfp = nil
+      if var.uncertainty_type == "discrete_uncertain"
+        Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
+        sfp = discrete_sample_from_probability(p[i_var], var, true)
+        var_types << "discrete"
+      else
+        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
+        var_types << "continuous"
+      end
+
+      samples["#{var.id}"] = sfp[:r]
+      if sfp[:image_path]
+        pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
+        var.preflight_images << pfi unless var.preflight_images.include?(pfi)
+      end
+
+      var.r_index = i_var + 1 # r_index is 1-based 
+      var.save!
+
+      i_var += 1 
+    end
+
+    # Result of the parameter space will be column vectors of each variable
+    Rails.logger.info "Samples are #{samples}"
+
+    if samples.empty?
       Rails.logger.info "No variables were passed into the options, therefore exit"
-      #TODO exit run      
+      raise "Must have variables to run algorithm"
     end
 
     @r.command() do
@@ -123,15 +207,23 @@ class Analysis::NSGA2NREL
     end
 
     timeflag = @r.converse("timeflag")
-
     Rails.logger.info ("Time flag was set to #{timeflag}")
+
     if timeflag
       #gen is the number of generations to calculate
       #varNo is the number of variables (ncol(vars))
       #popSize is the number of sample points in the variable (nrow(vars))
-      @r.command(vars.to_dataframe, vartypes, gen) do
+      Rails.logger.info("variable types are #{var_types}")
+      @r.command(:vars => samples.to_dataframe,  :vartypes => var_types, gen: 5) do
         %Q{
-          clusterEvalQ(cl,library(RMongo))
+          clusterEvalQ(cl,library(RMongo)) 
+             
+          for (i in 1:ncol(vars)){
+            vars[,i] <- sort(vars[,i])
+          }          
+          print(vars)      
+          print(vartypes)
+
           
           #f(x) takes a UUID (x) and runs the datapoint
           f <- function(x){
@@ -151,27 +243,32 @@ class Analysis::NSGA2NREL
             }
             z <- system(y,intern=TRUE)
             j <- length(z)
-            z
+            w <- NULL
+            w[1] <- as.numeric(z[j-1])             
+            w[2] <- as.numeric(z[j]) 
+            print(w) 
+            return(w)
           }
-          clusterExport(cl,"f")
-          
+          clusterExport(cl,"f")      
+
           #g(x) such that x is vector of variable values, 
           #           create a data_point from the vector of variable values x
           #           create a UUID for that data_point and put in database
           #           call f(u) where u is UUID of data_point
-	  g <- function(x){
-	    ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
-	    print("#{@analysis.use_shm}")
-	    if ("#{@analysis.use_shm}" == "true"){
-	      y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -u ",x," --run-shm",sep="")
-	    } else {
-	      y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -u ",x,sep="")
-	    }
-	    z <- system(y,intern=TRUE)
-	    j <- length(z)
-	    z
-	    f(z[j])
-	  }
+	        g <- function(x){
+	          ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
+	          print("#{@analysis.use_shm}")         
+            w = paste(x, collapse=",")
+	          if ("#{@analysis.use_shm}" == "true"){
+	            y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -v ",w," --run-shm", sep="")
+	          } else {
+	            y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -v ",w, sep="")
+	          }
+	          z <- system(y,intern=TRUE)
+	          j <- length(z)
+	          z
+	          f(z[j])
+	        }
           clusterExport(cl,"g")
 
           if (nrow(vars) == 1) {
@@ -185,7 +282,7 @@ class Analysis::NSGA2NREL
           }
 
           print(nrow(vars))
-          results <- nsga2NREL(cl=cl,fn=g,objdim=2,variables=vars[],vartype=vartypes,generations=gen,mprob=0.8)
+          results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
           #results <- sfLapply(vars[,1], f)
 
           stopCluster(cl)

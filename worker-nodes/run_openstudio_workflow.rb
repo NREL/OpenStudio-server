@@ -300,7 +300,9 @@ begin
   end
 
   # now set the objective function value or values
-  objective_function_result = 0
+  objective_function_result = []
+  objective_function_result << 35.7
+  objective_function_result << 31297
 rescue Exception => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   ros.log_message log_message, true
@@ -311,7 +313,7 @@ ensure
   ros.log_message "#{__FILE__} Completed", true
 
   # DLM: this is where we put the objective functions.  NL: Note that we must return out of this file nicely no matter what.
-  objective_function_result ||= "NA"
+  objective_function_result ||= ["NA"]
 
   puts objective_function_result
 end

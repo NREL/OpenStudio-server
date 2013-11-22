@@ -60,7 +60,8 @@ libdir = File.expand_path(File.dirname(__FILE__))
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 require 'analysis_chauffeur'
 
-ros = AnalysisChauffeur.new(options[:uuid])
+ros = AnalysisChauffeur.new(options[:uuid])     
+ros.reload
 
 # Set the result of the project for R to know that this finished
 result = nil
