@@ -119,21 +119,21 @@ class ComputeNode
         node.instance_id = "Vagrant"
       else
         if node.node_type == 'server'
-          node.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
-          node.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
+          node.ami_id = `curl -sL http://169.254.169.254/latest/meta-data/ami-id`
+          node.instance_id = `curl -sL http://169.254.169.254/latest/meta-data/instance-id`
         else
           # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
           Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
             #Rails.logger.info(self.inspect)
 
             logger.info "Checking the configuration of the worker nodes"
-            session.exec!("curl -L http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
+            session.exec!("curl -sL http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
               Rails.logger.info("Worker node reported back #{data}")
               node.ami_id = data
             end
             session.loop
 
-            session.exec!("curl -L http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
+            session.exec!("curl -sL http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
               Rails.logger.info("Worker node reported back #{data}")
               node.instance_id = data
             end
