@@ -118,7 +118,7 @@ class Analysis::Lhs
     # For now, create a new variable_instance, create new datapoints, and add the instance reference
     i_var = 0
     samples = {} # samples are in hash of arrays
-    # TODO: peformance smell... optimize this using Parallel
+    # TODO: performance smell... optimize this using Parallel
     selected_variables.each do |var|
       sfp = nil
       if var.uncertainty_type == "discrete_uncertain"
@@ -127,6 +127,7 @@ class Analysis::Lhs
       else
         sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
       end
+      
       samples["#{var.id}"] = sfp[:r]
       if sfp[:image_path]
         pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
@@ -136,9 +137,9 @@ class Analysis::Lhs
       i_var += 1
     end
 
-    Rails.logger.info "Samples are #{samples}"
     # multiple and smash the hash of arrays to form a array of hashes. This takes
     # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
+    Rails.logger.info "Samples are #{samples}"
     samples = samples.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
     Rails.logger.info "Flipping samples around yields #{samples}"
 

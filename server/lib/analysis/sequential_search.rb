@@ -245,7 +245,7 @@ class Analysis::SequentialSearch
 
     # get variables / measures
     parameter_space = {}
-    measures = Measure.where({analysis_id: @analysis}).order_by(:name.asc) # order is not super important here becuase the analysis has has the order, right?
+    measures = Measure.where({analysis_id: @analysis}).order_by(:name.asc) # order is not super important here because the analysis has has the order, right?
     measures.each do |measure|
       variables = measure.variables.where(perturbable: true)
 

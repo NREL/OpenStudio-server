@@ -8,7 +8,7 @@ HOSTNAME = "http://localhost:8080"
 
 #HOSTNAME = "http://ec2-23-20-3-243.compute-1.amazonaws.com"
 WITHOUT_DELAY=false
-ANALYSIS_TYPE="NSGA2NREL"
+ANALYSIS_TYPE="nsga_nrel"
 STOP_AFTER_N=nil # set to nil if you want them all
 # each may contain up to 50 data points
 

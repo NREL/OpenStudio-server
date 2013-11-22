@@ -1,4 +1,4 @@
-require 'openstudio'
+require 'openstudio' # TODO: remove openstudio as a dependency of this script.  
 require 'json'
 require 'zlib' # for compressing html
 
@@ -7,7 +7,6 @@ module CommunicateMongo
     dp.status = "started"
     dp.status_message = ""
     dp.run_start_time = Time.now
-    dp.sdp_log_file = []
 
     # Todo use the ComputeNode model to pull out the information so that we can reuse the methods
     
@@ -76,6 +75,7 @@ module CommunicateMongo
 
   def self.communicate_results(dp, os_data_point, os_directory)
     # create zip file
+    # TODO: remove openstudio here and put the work back on the run_openstudio script
     zipFilePath = os_directory / OpenStudio::Path.new("data_point_" + dp.uuid + ".zip")
     zipFile = OpenStudio::ZipFile.new(zipFilePath, false)
     zipFile.addFile(os_directory / OpenStudio::Path.new("openstudio.log"), OpenStudio::Path.new("openstudio.log"))

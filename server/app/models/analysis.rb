@@ -127,11 +127,11 @@ class Analysis
     Rails.logger.info("Starting #{analysis_type}")
     if no_delay
       Rails.logger.info("Running in foreground analysis for #{self.uuid} with #{analysis_type}")
-      abr = "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options)
+      abr = "Analysis::#{analysis_type.classify}".constantize.new(self.id, options)
       abr.perform
     else
       Rails.logger.info("Running in delayed jobs analysis for #{self.uuid} with #{analysis_type}")
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(self.id, options), :queue => 'analysis'
+      job = Delayed::Job.enqueue "Analysis::#{analysis_type.classify}".constantize.new(self.id, options), :queue => 'analysis'
       self.delayed_job_ids << job.id
       self.save!
     end

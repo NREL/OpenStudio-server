@@ -20,29 +20,47 @@ optparse.parse!
 
 puts "Parsed Input: #{optparse}"
 
-puts "Checking Arguments"
-if not options[:uuid]
-  # required argument is missing
-  puts optparse
-  exit
-end
-
-
 begin
+  dp_uuid = UUID.new.generate
+  
 
-  time = Time.new
-  dp_name = UUID.new.generate
-  dp = DataPoint.new({name: dp_name, analysis_id: analysis_id})
-  sample = [] # {variable_uuid_1: value1, variable_uuid_2: value2}
+  # Load in the Mongo libraries
+  libdir = File.expand_path(File.dirname(__FILE__))
+  $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
+  require 'analysis_chauffeur'
+
+  ros = AnalysisChauffeur.new(dp_uuid)
+  ros.log_message "creating new datapoint for analysis with #{options}"
+  ros.log_message "new datapoint uuid is #{dp_uuid}"
+
+  dp = DataPoint.find_or_create_by(uuid: dp_uuid)
+  dp.name = "Autocreated on worker: #{dp_uuid}"
+  dp.analysis_id = options[:analysis_id]
+  dp.save!
+  sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
   options[:variables].each_index do |x_index|
-    uuid = Variables.where(:r_index => x_index).first.uuid
-    sample << {uuid: options[:variables][x_index]}
+    r_index_value = x_index + 1
+    ros.log_message "adding new variable value with r_index #{r_index_value} of value #{options[:variables][x_index]}"
+    
+    # todo check for nil variables
+    uuid = Variable.where(:r_index => r_index_value).first.uuid
+    
+    # need to check type of value and convert here
+    sample[uuid] = options[:variables][x_index].to_f
   end
+  ros.log_message "new variable values are #{sample}"
   dp.set_variable_values = sample
   dp.save!
   
-  Rails.logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
+rescue Exception => e
+  log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+  ros.log_message log_message, true
 
-  puts dp.uuid
+  # need to tell mongo this failed
+  ros.communicate_failure()
+ensure
+  # Must print out a dp uuid of some sort, default is NA
+  puts dp ? dp.uuid : "NA"
 end
+
 
