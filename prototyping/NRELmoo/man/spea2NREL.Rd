@@ -1,13 +1,13 @@
 \name{spea2NREL}
 \alias{spea2NREL}
 \title{
-Strength Pareto Evolutionary Algorithm II R Based
+A Parallel Strength Pareto Evolutionary Algorithm II based on R
 }
 \description{
 A fast and elitist multiobjective genetic algorithm based on R. Modified spea2R by NREL for parallel F evals and mixed continuous and discrete variables.
 }
 \usage{
-spea2NREL(cl, Fn, objDim, variables, vartype, archiveLimit = nrow(variables), 
+spea2NREL(cl, fn, objDim, variables, vartype, archiveLimit = nrow(variables), 
   tourSize = 2, generations = 50, cprob = 0.7, cidx = 20, mprob = 0.1, 
   midx = 20)
 }

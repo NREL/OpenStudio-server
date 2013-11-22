@@ -12,8 +12,7 @@ Description: This package provide functions for box-constrained
         binary crossover, and polynomial mutation are called in the
         main program, nsga2R, to complete the search.
         This version is modified from the originial version in package nsga2R.
-        This version is parallelized on F evals and can take both continuous and discrete variables.
-        
+        This version is parallelized on F evals and can take both continuous and discrete variables.     
         This package also provide functions for box-constrained
         multiobjective optimization using the Strength Pareto Evolutionary 
         Algorithm - SPEA-II. K-nearest neighbor density estimation, strength 

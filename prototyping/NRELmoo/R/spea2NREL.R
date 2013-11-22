@@ -8,7 +8,7 @@
 #############################################################
 
 # Arguments description
-# Fn               =  the objective functions
+# fn               =  the objective functions
 # varNo                 =  the dimension of decision space
 # objDim                =  the dimension of objective space
 # lowerBounds           =  the lower bounds of decision variables
@@ -22,10 +22,9 @@
 # monitorFunc           =  the monitor function for plotting the intermediate result
 
 spea2NREL <-
-function(cl, Fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourSize=2, generations=50, cprob=0.7, cidx=20, mprob=0.1, midx=20) {
+function(cl, fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourSize=2, generations=20, cprob=0.7, cidx=20, mprob=0.1, midx=20) {
   cat("########## Strength Pareto Evolutionary Algorithm 2 coded in R ##########")
   cat("\n")
-  archive <- matrix(nrow=archiveLimit, ncol=varNo);
   flag.store = character(0);            
     
   cat("\n")
@@ -48,6 +47,7 @@ function(cl, Fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourS
     parent[,i] <- sample(variables[,i],nrow(variables))
   }
   print(parent)
+  archive <- matrix(nrow=archiveLimit, ncol=varNo);
 
   cat("check cluster\n")
   if (is.null(cl)) {print("cluster not initialized");stop}
@@ -65,7 +65,7 @@ function(cl, Fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourS
     cat("Finess assignment");
     cat("\n");
     parentSize = nrow(parent); # Will parentSize less than popSize? Possible.
-    parent <- cbind(parent, t(parApply(cl,parent,1,Fn))); # objective function evaluation
+    parent <- cbind(parent, t(parApply(cl,parent,1,fn))); # objective function evaluation
     parent <- cbind(parent, strengthRawFitness(parent[,varNo+1:objDim])); # strength and raw fitness, please load strengthRawFitness functin first
     k <- round(sqrt(parentSize));   
     parent <- cbind(parent,1/(sigmaK(k,parent[,varNo+1:objDim])+2)); # density estimation, load kNNdensityEstimation.R first
@@ -113,7 +113,7 @@ function(cl, Fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourS
   } # loop for iter !!
   nonDominated <- archive[,varNo+objDim+3] < 1;
   # report on SPEA2 settings & results  
-  results <- list(functions=Fn, noParameter=varNo, noObjective=objDim, lowerBounds=lowerBounds, upperBounds=upperBounds, popSize=popSize, archiveLimit=archiveLimit, tournamentSize=tourSize, iter=iter, generations=generations, crossoverProb=cprob, mutationProb=mprob, truncateRecord=flag.store, population=parent, parameters=archive[,1:varNo], objectives=archive[,(varNo+1):(varNo+objDim)], fitness=archive[,varNo+objDim+3], nonDominated=nonDominated);                       
+  results <- list(functions=fn, noParameter=varNo, noObjective=objDim, lowerBounds=lowerBounds, upperBounds=upperBounds, popSize=popSize, archiveLimit=archiveLimit, tournamentSize=tourSize, iter=iter, generations=generations, crossoverProb=cprob, mutationProb=mprob, truncateRecord=flag.store, population=parent, parameters=archive[,1:varNo], objectives=archive[,(varNo+1):(varNo+objDim)], fitness=archive[,varNo+objDim+3], nonDominated=nonDominated);                       
   class(results)="spea2R";
   return(results);
 }
