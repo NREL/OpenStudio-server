@@ -8,7 +8,7 @@ A fast and elitist multiobjective genetic algorithm based on R. Modified spea2R 
 }
 \usage{
 spea2NREL(cl, fn, objDim, variables, vartype, archiveLimit = nrow(variables), 
-  tourSize = 2, generations = 50, cprob = 0.7, cidx = 20, mprob = 0.1, 
+  tourSize = 2, generations = 20, cprob = 0.7, cidx = 20, mprob = 0.1, 
   midx = 20)
 }
 \arguments{
