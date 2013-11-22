@@ -25,7 +25,6 @@ Deb, K., Pratap, A., Agarwal, S., and Meyarivan, T. (2002), " A fast and elitist
 Ching-Shih (Vince) Tsou \email{cstsou@mail.ntcb.edu.tw}
 }
 \examples{
-library(mco)
 tourSize <- popSize <- 10
 lowerBounds <- rep(0,30)
 upperBounds <- rep(1,30)
@@ -34,7 +33,7 @@ objDim <- 2
 set.seed(1234)
 population <- t(sapply(1:popSize, function(u) array(runif(length(lowerBounds),
   lowerBounds,upperBounds))))
-population <- cbind(population, t(apply(population,1,zdt3)))
+population <- cbind(population, t(apply(population,1,ZDT3)))
 ranking <- fastNonDominatedSorting(population[,(varNo+1):(varNo+objDim)])
 rnkIndex <- integer(popSize)
 i <- 1

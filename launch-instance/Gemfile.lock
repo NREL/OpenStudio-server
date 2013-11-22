@@ -10,6 +10,7 @@ GEM
       net-ssh (>= 2.6.5)
     net-ssh (2.6.8)
     nokogiri (1.5.10)
+    nokogiri (1.5.10-x86-mingw32)
     openstudio-aws (0.1)
       aws-sdk (~> 1.26.0)
       json
@@ -18,6 +19,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   openstudio-aws

@@ -29,7 +29,6 @@ Ching-Shih (Vince) Tsou \email{cstsou@mail.ntcb.edu.tw}
 \code{\link{fastNonDominatedSorting}}
 }
 \examples{
-library(mco)
 popSize <- 50
 lowerBounds <- rep(0,30)
 upperBounds <- rep(1,30)
@@ -38,7 +37,7 @@ objDim <- 2
 set.seed(1234)
 population <- t(sapply(1:popSize, function(u) array(runif(length(lowerBounds),
   lowerBounds,upperBounds))))
-population <- cbind(population, t(apply(population,1,zdt2)))
+population <- cbind(population, t(apply(population,1,ZDT2)))
 ranking <- fastNonDominatedSorting(population[,(varNo+1):(varNo+objDim)])
 rnkIndex <- integer(popSize)
 i <- 1
