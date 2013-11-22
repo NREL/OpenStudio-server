@@ -5,11 +5,14 @@ require 'bundler/setup'
 require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
 HOSTNAME = "http://localhost:8080"
-#HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
-ANALYSIS_TYPE="sequential_search"
+                              #HOSTNAME = "http://ec2-23-20-3-243.compute-1.amazonaws.com"
+WITHOUT_DELAY=false
+ANALYSIS_TYPE="nsga2nrel"
+STOP_AFTER_N=nil # set to nil if you want them all
+# each may contain up to 50 data points
 
-formulation_file = "./DiscreteExample/analysis.json"
-analysis_zip_file = "./DiscreteExample/analysis.zip"
+formulation_file = "./ContinuousExample/analysis.json"
+analysis_zip_file = "./ContinuousExample/analysis.zip"
 
 options = {hostname: HOSTNAME}
 api = OpenStudio::Analysis::ServerApi.new(options)
@@ -24,10 +27,14 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 # Run the LHS -- note that this has to run in the foreground until we move the "get datapoints to run"
 # inside of the batch_run method
-run_options = {analysis_action: "start", 
-               without_delay: false, 
-               analysis_type: "sequential_search", 
-               allow_multiple_jobs: true, 
-               use_server_as_worker: true, 
-               run_data_point_filename: "run_openstudio_lhs.rb"}
+run_options = {analysis_action: "start", without_delay: true, analysis_type: ANALYSIS_TYPE}
 api.run_analysis(analysis_id, run_options)
+
+run_options = {analysis_action: "start", without_delay: false, analysis_type: "batch_run"}
+api.run_analysis(analysis_id, run_options)
+
+#api.kill_analysis(analysis_id)
+
+
+
+

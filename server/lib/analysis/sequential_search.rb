@@ -292,7 +292,7 @@ class Analysis::SequentialSearch
       @analysis.save!
 
       Rails.logger.info("Kicking off simulations for iteration #{@iteration}")
-      @analysis.start(true, 'batch_run', {skip_init: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"})
+      @analysis.start(true, 'batch_run', {skip_init: true, run_data_point_filename: "run_openstudio_workflow.rb"})
       Rails.logger.info("Finished simulations for iteration #{@iteration}... checking results")
       new_pareto_point = determine_curve()
       Rails.logger.info("Determined pareto curve for #{@iteration} and new point flag is set to #{new_pareto_point}")
