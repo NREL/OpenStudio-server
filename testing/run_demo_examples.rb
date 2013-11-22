@@ -5,9 +5,10 @@ require 'bundler/setup'
 require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
 HOSTNAME = "http://localhost:8080"
-                              #HOSTNAME = "http://ec2-67-202-41-219.compute-1.amazonaws.com/"
 
-                              # Initialize the ServerAPI
+#HOSTNAME = "http://ec2-67-202-41-219.compute-1.amazonaws.com"
+
+# Initialize the ServerAPI
 options = {hostname: HOSTNAME}
 api = OpenStudio::Analysis::ServerApi.new(options)
 
@@ -21,8 +22,11 @@ formulation_file = "./PATTestExport/analysis.json"
 analysis_zip_file = "./PATTestExport/project.zip"
 datapoint_files = Dir.glob("./PATTestExport/data_points_*.json")
 
-analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
-                    reset_uuids: true, analysis_name: "PAT Export with 8 data points "}
+analysis_options = {
+    formulation_file: formulation_file,
+    upload_file: analysis_zip_file,
+    reset_uuids: true,
+    analysis_name: "PAT Export with 8 data points "}
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 datapoint_files.each do |dp|
@@ -37,11 +41,20 @@ api.run_analysis(analysis_id, run_options)
 formulation_file = "./ContinuousExample/analysis.json"
 analysis_zip_file = "./ContinuousExample/analysis.zip"
 
-analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file,
-                    reset_uuids: true, analysis_name: "LHS Sample and Run"}
+analysis_options = {
+    formulation_file: formulation_file,
+    upload_file: analysis_zip_file,
+    reset_uuids: true,
+    analysis_name: "LHS Sample and Run"
+}
 analysis_id = api.new_analysis(project_id, analysis_options)
 
-run_options = {analysis_action: "start", without_delay: false, analysis_type: "lhs", allow_multiple_jobs: true}
+run_options = {
+    analysis_action: "start",
+    without_delay: false,
+    analysis_type: "lhs",
+    allow_multiple_jobs: true
+}
 api.run_analysis(analysis_id, run_options)
 
 run_options = {
@@ -58,7 +71,12 @@ api.run_analysis(analysis_id, run_options)
 formulation_file = "./DiscreteExample/analysis.json"
 analysis_zip_file = "./DiscreteExample/analysis.zip"
 
-analysis_options = {formulation_file: formulation_file, upload_file: analysis_zip_file, reset_uuids: true, analysis_name: "Sequential Search"}
+analysis_options = {
+    formulation_file: formulation_file,
+    upload_file: analysis_zip_file,
+    reset_uuids: true,
+    analysis_name: "Sequential Search"
+}
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {

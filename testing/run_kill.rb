@@ -5,6 +5,7 @@ require 'bundler/setup'
 require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
 HOSTNAME = "http://localhost:8080"
+
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 WITHOUT_DELAY=false
 
