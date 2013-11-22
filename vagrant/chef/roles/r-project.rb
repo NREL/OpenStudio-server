@@ -67,7 +67,7 @@ default_attributes(
             },
             {
                 :name => 'R.utils',
-                :version => '1.27.1'
+                :version => '1.28.4'
             },
             {
                 :name => 'iterators',
