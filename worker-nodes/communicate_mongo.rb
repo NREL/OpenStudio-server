@@ -25,10 +25,11 @@ module CommunicateMongo
       # On amazon, you have to hit an API to determine the IP address because
       # of the internal/external ip addresses
 
-      public_ip_address = `curl -L http://169.254.169.254/latest/meta-data/public-ipv4`
-      internal_ip_address = `curl -L http://169.254.169.254/latest/meta-data/local-ipv4`
-      #instance_information = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
-      #instance_information = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
+      # NL: add the suppress 
+      public_ip_address = `curl -sL http://169.254.169.254/latest/meta-data/public-ipv4`
+      internal_ip_address = `curl -sL http://169.254.169.254/latest/meta-data/local-ipv4`
+      #instance_information = `curl -sL http://169.254.169.254/latest/meta-data/instance-id`
+      #instance_information = `curl -sL http://169.254.169.254/latest/meta-data/ami-id`
       dp.ip_address = public_ip_address
       dp.internal_ip_address = internal_ip_address
       #dp.server_information = instance_information
