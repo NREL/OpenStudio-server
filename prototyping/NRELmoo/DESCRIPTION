@@ -1,4 +1,4 @@
-Package: nsga2NREL
+Package: NRELmoo
 Type: Package
 Title: Parallel Elitist Non-dominated Sorting Genetic Algorithm based on R
 Version: 1.0.0
@@ -13,7 +13,13 @@ Description: This package provide functions for box-constrained
         main program, nsga2R, to complete the search.
         This version is modified from the originial version in package nsga2R.
         This version is parallelized on F evals and can take both continuous and discrete variables.
-Depends: mco, snow
+        
+        This package also provide functions for box-constrained
+        multiobjective optimization using the Strength Pareto Evolutionary 
+        Algorithm - SPEA-II. K-nearest neighbor density estimation, strength 
+        value and raw Fitness, truncation operator are called in the main 
+        program, spea2R, to complete the search.
+Depends: snow
 License: LGPL-3
 Packaged: 2013-11-21 12:00:00 MT; Brian
 NeedsCompilation: no

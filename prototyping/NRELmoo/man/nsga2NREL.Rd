@@ -4,8 +4,7 @@
 A parallel R Based Non-dominated Sorting Genetic Algorithm II
 }
 \description{
-A fast and elitist multiobjective genetic algorithm based on R.
-Modified nsga2R by NREL for parallel F evals and mixed continuous and discrete variables.
+A fast and elitist multiobjective genetic algorithm based on R. Modified nsga2R by NREL for parallel F evals and mixed continuous and discrete variables.
 }
 \usage{
 nsga2NREL(cl, fn, objDim, variables, vartype, tourSize = 2, generations = 20, 
@@ -44,7 +43,7 @@ library(snow)
 cl <- makeSOCKcluster(rep("localhost",8))
 vars <- cbind(seq(0,1,length.out=200),seq(0,1,length.out=200))
 vartype <- c("discrete","continuous")
-results <- nsga2NREL(cl,fn=zdt1,2,vars,vartype,generations=40,mprob=0.8)
+results <- nsga2NREL(cl,fn=ZDT1,2,vars,vartype,generations=40,mprob=0.8)
 stopCluster(cl)
 #plot(results$objectives)
 }
