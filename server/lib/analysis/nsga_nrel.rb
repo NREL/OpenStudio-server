@@ -39,7 +39,7 @@ class Analysis::NsgaNrel
     @r.converse "library(R.oo)"
     @r.converse "library(R.utils)"
     @r.converse "library(mco)"
-    @r.converse "library(nsga2NREL)"
+    @r.converse "library(NRELmoo)"
     @r.converse "library(lhs)"
     @r.converse "library(triangle)"
     @r.converse "library(e1071)"
