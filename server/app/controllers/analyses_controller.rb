@@ -305,16 +305,17 @@ class AnalysesController < ApplicationController
     end
   end
 
-  def download_csv
+  def download_data
     @analysis = Analysis.find(params[:id])
 
-    write_and_send_csv(@analysis)
-  end
-
-  def download_rdata
-    @analysis = Analysis.find(params[:id])
-
-    write_and_send_rdata(@analysis)
+    respond_to do |format|
+      format.csv do
+        write_and_send_csv(@analysis) 
+      end
+      format.rdata do
+        write_and_send_rdata(@analysis)
+      end
+    end          
   end
 
 
@@ -408,6 +409,12 @@ class AnalysesController < ApplicationController
     download_filename = "#{analysis.name}.RData"
     data_frame_name = analysis.name.downcase.gsub(" ", "_")
     Rails.logger.info("Data frame name will be #{data_frame_name}")
+    
+    respond_to do |format|
+      format.rdata do
+        
+      end
+    end
 
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
@@ -428,12 +435,10 @@ class AnalysesController < ApplicationController
     tmp_filename = r.converse('temp')
     
     if File.exists?(tmp_filename)
-      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'text/csv; charset=iso-8859-1; header=present', :disposition => "attachment"
+      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'application/rdata; header=present', :disposition => "attachment"
     else
       raise "could not create R dataframe"
     end
-    
-
   end
 
 end
