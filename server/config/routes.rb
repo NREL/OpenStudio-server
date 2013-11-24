@@ -17,8 +17,7 @@ OpenstudioServer::Application.routes.draw do
         get :plot_parallelcoordinates
         get :plot_scatter
         get :plot_xy
-        get :download_csv
-        get :download_rdata
+        get :download_data
       end
 
       resources :measures, :only => [:show, :index], shallow: true
