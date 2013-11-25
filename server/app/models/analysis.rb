@@ -15,7 +15,6 @@ class Analysis
   field :delayed_job_ids, :type => Array, default: []
   field :status, :type => String
   field :analysis_type, :type => String
-  field :analysis_output, :type => Array
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
   field :problem
