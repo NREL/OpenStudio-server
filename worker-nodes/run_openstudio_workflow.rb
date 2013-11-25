@@ -308,16 +308,16 @@ begin
       if variable['objective_function']
         ros.log_message "Found objective function for #{variable['name']}", true
         if result_json[variable['name'].to_sym]
-          objective_functions[variable['name']] = result_json[variable['name'].to_sym]
+          #objective_functions[variable['name']] = result_json[variable['name'].to_sym]
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = result_json[variable['name'].to_sym]
         else
-          objective_functions[variable['name']] = nil
+          #objective_functions[variable['name']] = nil
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
         end
       end
     end
-    
-    # ame sure that the result_json file is a superset of the other variables in the variable list
+
+    # todo: make sure that the result_json file is a superset of the other variables in the variable list
 
     # map the result json back to a flat array
     ros.communicate_results_json(result_json, run_directory)
@@ -342,6 +342,7 @@ ensure
   obj_function_array ||= ["NA"]
 
   # Print the objective functions to the screen even though the file is being used right now
-  puts obj_function_array
+  # Note as well that we can't guarantee that the csv format will be in the right order
+  puts obj_function_array.join(",")
 end
 
