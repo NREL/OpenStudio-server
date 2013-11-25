@@ -92,6 +92,10 @@ default_attributes(
             {
                 :name => 'mco',
                 :version => '1.0.12'
+            },
+            {
+                :name => 'rjson',
+                :version => '0.2.13'
             }
         ],
         :local_package_url => "/data/launch-instance",
