@@ -226,7 +226,7 @@ class Analysis::NsgaNrel
           starttime <- Sys.time()
           tryCatch({
              res <- evalWithTimeout({
-             cl <- makeSOCKcluster(ips[,1])
+             cl <- makeSOCKcluster(ips[,1], outfile="/tmp/snow.log")
               }, timeout=numunique);
               }, TimeoutException=function(ex) {
                 cat("#{@analysis.id} Timeout\n");
@@ -271,13 +271,14 @@ class Analysis::NsgaNrel
               dbDisconnect(mongo)
   
               ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
-              print("#{@analysis.use_shm}")
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
               } else {
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
-              }
+              }                 
+              print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
+              print(paste("R returned system call with:",z))
               return(z)
             }
             clusterExport(cl,"f")      
@@ -311,7 +312,7 @@ class Analysis::NsgaNrel
               obj <- NULL
               obj[1] <- as.numeric(json$objective_function_1)             
               obj[2] <- as.numeric(json$objective_function_2)    
-              print(obj)
+              print(paste("Objective function results are:",obj))   
               return(obj)
             }
             
