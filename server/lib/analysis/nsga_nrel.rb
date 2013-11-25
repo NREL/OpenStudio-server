@@ -33,7 +33,7 @@ class Analysis::NsgaNrel
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
     @r.converse "library(snow)"
-    @r.converse "library(snowfall)"
+    @r.converse "library(rjson)"
     @r.converse "library(RMongo)"
     @r.converse "library(R.methodsS3)"
     @r.converse "library(R.oo)"
@@ -242,12 +242,12 @@ class Analysis::NsgaNrel
               y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
             }
             z <- system(y,intern=TRUE)
-            j <- length(z)
-            w <- NULL
-            w[1] <- as.numeric(z[j-1])             
-            w[2] <- as.numeric(z[j]) 
+            #j <- length(z)
+            #w <- NULL
+            #w[1] <- as.numeric(z[j-1])             
+            #w[2] <- as.numeric(z[j]) 
             print(w) 
-            return(w)
+            return(z)
           }
           clusterExport(cl,"f")      
 
@@ -268,6 +268,12 @@ class Analysis::NsgaNrel
 	          j <- length(z)
 	          z
 	          f(z[j])
+	          object_file = paste("/mnt/openstudio/analysis_#{analysis.id}/data_point_",z[j],"/objectives.json",sep="")
+	          json <- fromJSON(file=object_file)
+		  obj <- NULL
+		  obj[1] <- as.numeric(json$objfunct_1)             
+                  obj[2] <- as.numeric(json$objfunct_2)
+                  return(obj)
 	        }
           clusterExport(cl,"g")
 
