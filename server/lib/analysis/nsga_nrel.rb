@@ -27,7 +27,7 @@ class Analysis::NsgaNrel
         ],
         problem: {
             algorithm: {
-                generations: 20,
+                generations: 2,
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
@@ -301,14 +301,19 @@ class Analysis::NsgaNrel
 	          z <- system(y,intern=TRUE)
 	          j <- length(z)
 	          z
-	          f(z[j])
+	          f(z[j])     
+
+            # read in the results from the objective function file
+            # TODO: verify that the file exists
+            # TODO: determine how to handle if the objective function value = nil/null
 	          object_file = paste("/mnt/openstudio/analysis_#{analysis.id}/data_point_",z[j],"/objectives.json",sep="")
 	          json <- fromJSON(file=object_file)
-		  obj <- NULL
-		  obj[1] <- as.numeric(json$objfunct_1)             
-                  obj[2] <- as.numeric(json$objfunct_2)
-                  return(obj)
+		        obj <- NULL
+		        obj[1] <- as.numeric(json$objective_function_1)             
+            obj[2] <- as.numeric(json$objective_function_2)
+            return(obj)
 	        }
+          
           clusterExport(cl,"g")
 
           if (nrow(vars) == 1) {
@@ -316,9 +321,9 @@ class Analysis::NsgaNrel
             vars <- rbind(vars, c(NA))
           }
           if (nrow(vars) == 0) {
-	          print("not sure what to do with no datapoint so adding an NA")
-	          vars <- rbind(vars, c(NA))
-	          vars <- rbind(vars, c(NA))
+            print("not sure what to do with no datapoint so adding an NA")
+            vars <- rbind(vars, c(NA))
+            vars <- rbind(vars, c(NA))
           }
 
           print(nrow(vars))
