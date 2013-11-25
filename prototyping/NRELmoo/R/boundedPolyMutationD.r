@@ -40,11 +40,12 @@ function(parent_chromosome,lowerBounds,upperBounds,vartype,mprob,mum){
             child[i,j] = y;
           } else { # y <= yl
             xy = runif(1);
-            child[i,j] = yl + xy*(yu-yl);            
+            y = yl + xy*(yu-yl);            
             #force discrete
             if (vartype[j] == "discrete") {
-              child2 = yl + xy*(yu-yl);
-              child[i,j] = child[which.min(abs(child2-child[,j])),j]
+              child[i,j] = child[which.min(abs(y-child[,j])),j]
+            } else {
+              child[i,j] = y;
             }
           }  
         } # runif(1) > mprob, do not perform mutation
