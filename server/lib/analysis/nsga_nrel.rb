@@ -5,16 +5,41 @@ class Analysis::NsgaNrel
   include Analysis::R::Lhs # include the R Lhs wrapper
 
   def initialize(analysis_id, options = {})
-    #TODO create create_data_point.rb
     defaults = {
         skip_init: false,
-        vars: [],
-        vartypes: [],
-        gen: 20,
         run_data_point_filename: "run_openstudio_workflow.rb",
-        create_data_point: "create_data_point.rb"
+        create_data_point_filename: "create_data_point.rb",
+        output_variables: [
+            {
+                display_name: "Total Site Energy (EUI)",
+                name: "total_energy",
+                objective_function: true,
+                objective_function_index: 0,
+                index: 0
+            },
+            {
+                display_name: "Total Life Cycle Cost",
+                name: "total_life_cycle_cost",
+                objective_function: true,
+                objective_function_index: 1,
+                index: 1
+            }
+        ],
+        problem: {
+            algorithm: {
+                generations: 20,
+                objective_functions: [
+                    "total_energy",
+                    "total_life_cycle_cost"
+                ]
+            }
+        }
     }
-    @options = defaults.merge(options)
+    @options = defaults.deep_merge(options)
+
+    # determine the order of preference from defaults, options, and what is already in the analysis object
+
+    # Merge in the algoritm options with what is in the analysis object 
     @analysis_id = analysis_id
   end
 
@@ -27,6 +52,18 @@ class Analysis::NsgaNrel
     require 'childprocess'
 
     @analysis = Analysis.find(@analysis_id)
+
+    # merge in the options into the analysis object which are needed for problem execution
+    @options[:output_variables].reverse.each {|v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v)}
+    @analysis.problem['algorithm'] = {} unless @analysis.problem['algorithm']
+    @analysis.problem['algorithm'].merge!(@options[:problem][:algorithm])
+    # verify that the various arrays are unique
+    @analysis.output_variables.uniq!
+    @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
+    # save the data
+    @analysis.status = 'started'
+    @analysis.run_flag = true
+    @analysis.save!
 
     #create an instance for R
     @r = Rserve::Simpler.new
@@ -44,10 +81,7 @@ class Analysis::NsgaNrel
     @r.converse "library(triangle)"
     @r.converse "library(e1071)"
 
-    @analysis.status = 'started'
-    @analysis.run_flag = true
-    @analysis.save!
-
+    
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
 
@@ -59,7 +93,7 @@ class Analysis::NsgaNrel
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    # TODO
+    # TODO preflight check
 
     # Configure the variables for the analysis
 
@@ -129,7 +163,7 @@ class Analysis::NsgaNrel
       var.r_index = i_var + 1 # r_index is 1-based 
       var.save!
 
-      i_var += 1 
+      i_var += 1
     end
 
     # Result of the parameter space will be column vectors of each variable
@@ -214,7 +248,7 @@ class Analysis::NsgaNrel
       #varNo is the number of variables (ncol(vars))
       #popSize is the number of sample points in the variable (nrow(vars))
       Rails.logger.info("variable types are #{var_types}")
-      @r.command(:vars => samples.to_dataframe,  :vartypes => var_types, gen: 5) do
+      @r.command(:vars => samples.to_dataframe, :vartypes => var_types, gen: @analysis.problem['algorithm']['generations']) do
         %Q{
           clusterEvalQ(cl,library(RMongo)) 
              
@@ -252,18 +286,18 @@ class Analysis::NsgaNrel
           clusterExport(cl,"f")      
 
           #g(x) such that x is vector of variable values, 
-          #           create a data_point from the vector of variable values x
+          #           create a data_point from the vector of variable values x and return the new data point UUID
           #           create a UUID for that data_point and put in database
           #           call f(u) where u is UUID of data_point
 	        g <- function(x){
 	          ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
-	          print("#{@analysis.use_shm}")         
-            w = paste(x, collapse=",")
-	          if ("#{@analysis.use_shm}" == "true"){
-	            y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -v ",w," --run-shm", sep="")
-	          } else {
-	            y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point]} -a #{@analysis.id} -v ",w, sep="")
-	          }
+            # convert the vector to comma separated values
+            w = paste(x, collapse=",")        
+            
+            # save off the variables file (can be used later if number of vars gets too long)
+            write.table(x, "/mnt/openstudio/input_variables_from_r.data",row.names = FALSE, col.names = FALSE)
+                                      
+            y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
 	          z <- system(y,intern=TRUE)
 	          j <- length(z)
 	          z

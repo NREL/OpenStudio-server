@@ -284,14 +284,9 @@ begin
   # use the completed job to populate data_point with results
   ros.log_message "Updating OpenStudio DataPoint and Communicating Results", true
 
-  # First read in the eplustbl.json file
-  if File.exists?("#{run_directory}/run/eplustbl.json")
-    result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
-
-    #map the result json back to a flat array
-    ros.communicate_results_json(result_json, run_directory)
-  end
-
+  # If profiling, then go ahead and get the results here.  Note that we are not profiling the 
+  # result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
+  # also ZIPs up the folder and we want the results of the performance to also be in ZIP file.
   if options[:profile_run]
     profile_results = RubyProf.stop
     File.open("#{directory.to_s}/profile-graph.html", "w") { |f| RubyProf::GraphHtmlPrinter.new(profile_results).print(f) }
@@ -299,10 +294,42 @@ begin
     File.open("#{directory.to_s}/profile-tree.prof", "w") { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
 
-  # now set the objective function value or values
-  objective_function_result = []
-  objective_function_result << 35.7
-  objective_function_result << 31297
+  # Initialize the objective function variable
+  objective_functions = {}
+
+  # First read in the eplustbl.json file
+  if File.exists?("#{run_directory}/run/eplustbl.json")
+    result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
+
+    ros.log_message "pulling out objective functions", true
+    # Save the objective functions to the object for sending back to the simulation executive
+    analysis_json[:analysis]['output_variables'].each do |variable|
+      # determine which ones are the objective functions (code smell: todo: use enumerator)
+      if variable['objective_function']
+        ros.log_message "Found objective function for #{variable['name']}", true
+        if result_json[variable['name'].to_sym]
+          objective_functions[variable['name']] = result_json[variable['name'].to_sym]
+          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = result_json[variable['name'].to_sym]
+        else
+          objective_functions[variable['name']] = nil
+          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
+        end
+      end
+    end
+    
+    # ame sure that the result_json file is a superset of the other variables in the variable list
+
+    # map the result json back to a flat array
+    ros.communicate_results_json(result_json, run_directory)
+  end
+
+  # save the objective function results
+  obj_fun_file = "#{run_directory}/objectives.json"
+  File.rm_f(obj_fun_file) if File.exists?(obj_fun_file)
+  File.open(obj_fun_file, 'w') { |f| f << JSON.pretty_generate(objective_functions) }
+
+  # map the objective function results to an array
+  obj_function_array = objective_functions.map { |k, v| v }
 rescue Exception => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   ros.log_message log_message, true
@@ -312,9 +339,9 @@ rescue Exception => e
 ensure
   ros.log_message "#{__FILE__} Completed", true
 
-  # DLM: this is where we put the objective functions.  NL: Note that we must return out of this file nicely no matter what.
-  objective_function_result ||= ["NA"]
+  obj_function_array ||= ["NA"]
 
-  puts objective_function_result
+  # Print the objective functions to the screen even though the file is being used right now
+  puts obj_function_array
 end
 
