@@ -19,6 +19,7 @@ class Analysis
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
   field :problem
+  field :output_variables, :type => Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
   field :use_shm, :type => Boolean, default: false #flag on whether or not to use SHM for analysis (impacts file uploading)
 
