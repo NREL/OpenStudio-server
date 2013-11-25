@@ -51,7 +51,9 @@ class Variable
     if var
       Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
     else
+      Rails.logger.info "create new variable for os_json['uuid']"
       var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
+      Rails.lgger.info var.inspect
     end
 
     exclude_fields = ['uuid', 'type']
@@ -72,7 +74,7 @@ class Variable
     if var
       Rails.logger.warn("Variable already exists for '#{var.name}' : '#{var.uuid}'")
     else
-      Rails.logger.info("Adding a new argument named: '#{os_json['name']}'")
+      Rails.logger.info("Adding a new variable/argument named: '#{os_json['name']}' with UUID '#{os_json['uuid']}'")
       var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
     end
 
@@ -110,7 +112,7 @@ class Variable
         end
       end
     end
-
+    
     var.save!
 
     var

@@ -94,12 +94,14 @@ class Measure
       end
 
       if k == "variables"
-        v.each do |var|
-          Rails.logger.info "Found a variable named '#{var[:name]}'"
-          new_var = Variable.create_by_os_argument_json(analysis_id, var)
+        v.each do |json_var|
+          Rails.logger.info "JSON had a variable named '#{json_var[:name]}'"
+          new_var = Variable.create_by_os_argument_json(analysis_id, json_var)
           
-          new_var.save!
-          measure.variables << new_var unless measure.variables.include?(new_var)
+          if new_var.save!
+            measure.variables << new_var  unless measure.variables.include?(new_var)
+          end
+          
         end
       end
     end
