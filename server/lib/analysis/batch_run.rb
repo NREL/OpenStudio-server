@@ -85,8 +85,6 @@ class Analysis::BatchRun
     process.start
 
     good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
-    @analysis.analysis_output = []
-    @analysis.analysis_output << "good_ips = #{good_ips.to_hash}"
     Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
 
     @r.command(ips: good_ips.to_hash.to_dataframe) do
@@ -172,7 +170,6 @@ class Analysis::BatchRun
     else
       # Log off some information why it didnt' start
     end
-    @analysis.analysis_output << @r.converse("results")
 
     # Kill the downloading of data files process
     process.stop

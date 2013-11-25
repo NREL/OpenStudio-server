@@ -80,6 +80,7 @@ class Analysis::NsgaNrel
     @r.converse "library(lhs)"
     @r.converse "library(triangle)"
     @r.converse "library(e1071)"
+    @r.converse "library(rjson)"
 
     
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
@@ -195,162 +196,164 @@ class Analysis::NsgaNrel
       }
     end
 
-    # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-    process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
-    #log_file = File.join(Rails.root,"log/download.log")
-    #Rails.logger.info("Log file is: #{log_file}")
-    process.io.inherit!
-    #process.io.stdout = process.io.stderr = File.open(log_file,'a+')
-    process.cwd = Rails.root # set the child's working directory where the bundler will execute
-    Rails.logger.info("Starting Child Process")
-    process.start
-
-    good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
-    @analysis.analysis_output = []
-    @analysis.analysis_output << "good_ips = #{good_ips.to_hash}"
-    Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
-
-    @r.command(ips: good_ips.to_hash.to_dataframe) do
-      %Q{
-        print(ips)
-        if (nrow(ips) == 0) {
-          stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
-        }
-        uniqueips <- unique(ips)
-        numunique <- nrow(uniqueips) * 180
-        print("max timeout is:")
-        print(numunique)
-        timeflag <<- TRUE;
-        res <- NULL;
-	      starttime <- Sys.time()
-	      tryCatch({
-           res <- evalWithTimeout({
-           cl <- makeSOCKcluster(ips[,1])
-            }, timeout=numunique);
-            }, TimeoutException=function(ex) {
-              cat("#{@analysis.id} Timeout\n");
-              timeflag <<- FALSE;
-              file.create('rtimeout') 
-              stop
-          })
-        endtime <- Sys.time()
-	      timetaken <- endtime - starttime
-        print("R cluster startup time:")
-        print(timetaken)
-        }
-    end
-
-    timeflag = @r.converse("timeflag")
-    Rails.logger.info ("Time flag was set to #{timeflag}")
-
-    if timeflag
-      #gen is the number of generations to calculate
-      #varNo is the number of variables (ncol(vars))
-      #popSize is the number of sample points in the variable (nrow(vars))
-      Rails.logger.info("variable types are #{var_types}")
-      @r.command(:vars => samples.to_dataframe, :vartypes => var_types, gen: @analysis.problem['algorithm']['generations']) do
+    # wrap this for now to ensure that the child process is killed
+    begin
+      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
+      process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      #log_file = File.join(Rails.root,"log/download.log")
+      #Rails.logger.info("Log file is: #{log_file}")
+      process.io.inherit!
+      #process.io.stdout = process.io.stderr = File.open(log_file,'a+')
+      process.cwd = Rails.root # set the child's working directory where the bundler will execute
+      Rails.logger.info("Starting Child Process")
+      process.start
+  
+      good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
+      Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
+  
+      @r.command(ips: good_ips.to_hash.to_dataframe) do
         %Q{
-          clusterEvalQ(cl,library(RMongo)) 
-             
-          for (i in 1:ncol(vars)){
-            vars[,i] <- sort(vars[,i])
-          }          
-          print(vars)      
-          print(vartypes)
-
-          
-          #f(x) takes a UUID (x) and runs the datapoint
-          f <- function(x){
-            mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-            flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
-            if (flag["run_flag"] == "false" ){
-              stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
-            }
-            dbDisconnect(mongo)
-
-            ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
-            print("#{@analysis.use_shm}")
-            if ("#{@analysis.use_shm}" == "true"){
-              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
-            } else {
-              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
-            }
-            z <- system(y,intern=TRUE)
-            #j <- length(z)
-            #w <- NULL
-            #w[1] <- as.numeric(z[j-1])             
-            #w[2] <- as.numeric(z[j]) 
-            print(w) 
-            return(z)
+          print(ips)
+          if (nrow(ips) == 0) {
+            stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
           }
-          clusterExport(cl,"f")      
-
-          #g(x) such that x is vector of variable values, 
-          #           create a data_point from the vector of variable values x and return the new data point UUID
-          #           create a UUID for that data_point and put in database
-          #           call f(u) where u is UUID of data_point
-	        g <- function(x){
-	          ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
-            # convert the vector to comma separated values
-            w = paste(x, collapse=",")        
-            
-            # save off the variables file (can be used later if number of vars gets too long)
-            write.table(x, "/mnt/openstudio/input_variables_from_r.data",row.names = FALSE, col.names = FALSE)
-                                      
-            y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
-	          z <- system(y,intern=TRUE)
-	          j <- length(z)
-	          z
-	          f(z[j])     
-
-            # read in the results from the objective function file
-            # TODO: verify that the file exists
-            # TODO: determine how to handle if the objective function value = nil/null
-	          object_file = paste("/mnt/openstudio/analysis_#{analysis.id}/data_point_",z[j],"/objectives.json",sep="")
-	          json <- fromJSON(file=object_file)
-		        obj <- NULL
-		        obj[1] <- as.numeric(json$objective_function_1)             
-            obj[2] <- as.numeric(json$objective_function_2)
-            return(obj)
-	        }
-          
-          clusterExport(cl,"g")
-
-          if (nrow(vars) == 1) {
-            print("not sure what to do with only one datapoint so adding an NA")
-            vars <- rbind(vars, c(NA))
+          uniqueips <- unique(ips)
+          numunique <- nrow(uniqueips) * 180
+          print("max timeout is:")
+          print(numunique)
+          timeflag <<- TRUE;
+          res <- NULL;
+          starttime <- Sys.time()
+          tryCatch({
+             res <- evalWithTimeout({
+             cl <- makeSOCKcluster(ips[,1])
+              }, timeout=numunique);
+              }, TimeoutException=function(ex) {
+                cat("#{@analysis.id} Timeout\n");
+                timeflag <<- FALSE;
+                file.create('rtimeout') 
+                stop
+            })
+          endtime <- Sys.time()
+          timetaken <- endtime - starttime
+          print("R cluster startup time:")
+          print(timetaken)
           }
-          if (nrow(vars) == 0) {
-            print("not sure what to do with no datapoint so adding an NA")
-            vars <- rbind(vars, c(NA))
-            vars <- rbind(vars, c(NA))
-          }
-
-          print(nrow(vars))
-          results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
-          #results <- sfLapply(vars[,1], f)
-
-          stopCluster(cl)
-        }
       end
-    else
-      # Log off some information why it didnt' start
-    end
-    @analysis.analysis_output << @r.converse("results")
+  
+      timeflag = @r.converse("timeflag")
+      Rails.logger.info ("Time flag was set to #{timeflag}")
+  
+      if timeflag
+        #gen is the number of generations to calculate
+        #varNo is the number of variables (ncol(vars))
+        #popSize is the number of sample points in the variable (nrow(vars))
+        Rails.logger.info("variable types are #{var_types}")
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, gen: @analysis.problem['algorithm']['generations']) do
+          %Q{
+            clusterEvalQ(cl,library(RMongo)) 
+            clusterEvalQ(cl,library(rjson)) 
+               
+            for (i in 1:ncol(vars)){
+              vars[,i] <- sort(vars[,i])
+            }          
+            print(vars)      
+            print(vartypes)
+  
+            
+            #f(x) takes a UUID (x) and runs the datapoint
+            f <- function(x){
+              mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+              flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
+              if (flag["run_flag"] == "false" ){
+                stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
+              }
+              dbDisconnect(mongo)
+  
+              ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
+              print("#{@analysis.use_shm}")
+              if ("#{@analysis.use_shm}" == "true"){
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+              } else {
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+              }
+              z <- system(y,intern=TRUE)
+              return(z)
+            }
+            clusterExport(cl,"f")      
+  
+            #g(x) such that x is vector of variable values, 
+            #           create a data_point from the vector of variable values x and return the new data point UUID
+            #           create a UUID for that data_point and put in database
+            #           call f(u) where u is UUID of data_point
+            g <- function(x){
+              ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
+              # convert the vector to comma separated values
+              w = paste(x, collapse=",")        
+              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              z <- system(y,intern=TRUE)
+              j <- length(z)
+              z
 
-    # Kill the downloading of data files process
-    process.stop
+              # Call the simulate data point method
+              f(z[j])     
+                                   
+              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")  
 
-    # Do one last check if there are any data points that were not downloaded
-    Rails.logger.info("Trying to download any remaining files from worker nodes")
-    @analysis.finalize_data_points
+              # save off the variables file (can be used later if number of vars gets too long)
+              write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
 
-    # Only set this data if the anlaysis was NOT called from another anlaysis
+              # read in the results from the objective function file
+              # TODO: verify that the file exists
+              # TODO: determine how to handle if the objective function value = nil/null    
+              object_file <- paste(data_point_directory,"/objectives.json",sep="")
+              json <- fromJSON(file=object_file)
+              obj <- NULL
+              obj[1] <- as.numeric(json$objective_function_1)             
+              obj[2] <- as.numeric(json$objective_function_2)    
+              print(obj)
+              return(obj)
+            }
+            
+            clusterExport(cl,"g")
+  
+            if (nrow(vars) == 1) {
+              print("not sure what to do with only one datapoint so adding an NA")
+              vars <- rbind(vars, c(NA))
+            }
+            if (nrow(vars) == 0) {
+              print("not sure what to do with no datapoint so adding an NA")
+              vars <- rbind(vars, c(NA))
+              vars <- rbind(vars, c(NA))
+            }
+  
+            print(nrow(vars))
+            results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
+            #results <- sfLapply(vars[,1], f)
+  
+            stopCluster(cl)
+          }
+        end
+      else
+        # Log off some information why it didnt' start
+      end
 
-    if !@options[:skip_init]
-      @analysis.end_time = Time.now
-      @analysis.status = 'completed'
-      @analysis.save!
+    ensure
+      # Kill the downloading of data files process
+      Rails.logger.info("Ensure block of analysis cleaning up any remaining processes")
+      process.stop
+
+      # Do one last check if there are any data points that were not downloaded
+      Rails.logger.info("Trying to download any remaining files from worker nodes")
+      @analysis.finalize_data_points
+
+      # Only set this data if the anlaysis was NOT called from another anlaysis
+
+      if !@options[:skip_init]
+        @analysis.end_time = Time.now
+        @analysis.status = 'completed'
+        @analysis.save!
+      end
     end
   end
 
