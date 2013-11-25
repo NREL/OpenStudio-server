@@ -35,8 +35,8 @@
       </tbody>
     </table>
 
-    <%= link_to 'List of Measures', analysis_measures_path(@analysis) %> |
-    <%= link_to 'List of Variables', analysis_variables_path(@analysis) %> |
+    <%= link_to "List of Measures (#{@analysis.measures.count})", analysis_measures_path(@analysis) %> |
+    <%= link_to "List of Variables (#{@analysis.variables.count})", analysis_variables_path(@analysis) %> |
     <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates_analysis_path(@analysis) %> |
     <%= link_to 'View Scatter Plot', plot_scatter_analysis_path(@analysis) %> |
     <%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) %> |
@@ -60,7 +60,7 @@
         <th>Status</th>
         <th>Status Message</th>
         <th>EUI (MJ/m²)</th>
-        <% if @analysis.analysis_type == "sequential_search" %>
+        <% if @analysis.analysis_type == "sequential_search" || @analysis.analysis_type =~ /nsga/ %>
             <th>2nd Obj Func</th>
         <% end %>
         <th>Start Time (UTC)</th>
@@ -77,7 +77,7 @@
             <td> <%= dp.status %></td>
             <td><%= dp.status_message if dp.status_message %></td>
             <td> <%= dp.results['net_site_energy_use_intentsity'] || dp.results['total_energy'] unless dp.results.nil? %> </td>
-            <% if @analysis.analysis_type == "sequential_search" %>
+            <% if @analysis.analysis_type == "sequential_search" || @analysis.analysis_type =~ /nsga/ %>
                 <td> <%= dp.results[@analysis['y_objective_function']].round(2) if @analysis['y_objective_function'] && dp.results && dp.results[@analysis['y_objective_function']] %></td>
             <% end %>
             <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
