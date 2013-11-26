@@ -63,13 +63,35 @@ describe Analysis::Core do
       result[0].should eq({a: 1, b: 2, s1: "a", s2: true})
     end
 
-    it "should retrun back the same objects if statics are empty" do
+    it "should return back the same objects if statics are empty" do
       result = @dummy_class.add_pivots(@samples, [])
 
       result.size.should eq(3)
       result.should eq(@samples)
     end
 
+  end
+
+  context "hashing" do
+    it "should return array of hashes" do
+      h = {a: [1, 2, 3], b: [4, 5, 6]}
+      r = @dummy_class.hash_of_array_to_array_of_hash(h)
+      r.size.should eq(h[:a].size)
+      r[0].should eq({a: 1, b: 4})
+    end
+
+    it "should not work when array length is different" do
+      h = {a: [1, 2, 3], b: [4, 5, 6, 7, 8, 9]}
+      expect { @dummy_class.hash_of_array_to_array_of_hash(h) }.to raise_error
+    end
+
+    it "should work with any type of data" do
+      h = {a: [1, 2, 3], b: ["4", "5", "6"], c: [true, false, false]}
+      r = @dummy_class.hash_of_array_to_array_of_hash(h)
+      r.size.should eq(h[:a].size)
+      r[0].should eq({a: 1, b: "4", c: true})
+
+    end
   end
 end
 
