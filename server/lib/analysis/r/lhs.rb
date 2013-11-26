@@ -6,6 +6,8 @@ module Analysis::R
 
     # TODO how to include libraries for R
     
+    # Take the number of variables and number of samples and generate the bins for
+    # a LHS sample
     def lhs_probability(num_variables, sample_size)
       Rails.logger.info "Start generating of LHS #{Time.now}"
       a = @r.converse "a <- randomLHS(#{sample_size}, #{num_variables})"

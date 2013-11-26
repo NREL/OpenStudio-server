@@ -1,5 +1,4 @@
 # Non Sorting Genetic Algorithm
-
 class Analysis::NsgaNrel
   #include Analysis::R::Cluster 
   include Analysis::R::Lhs # include the R Lhs wrapper

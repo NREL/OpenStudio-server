@@ -1,6 +1,10 @@
 class Analysis::BatchRun
   def initialize(analysis_id, options = {})
-    defaults = {skip_init: false, data_points: [], run_data_point_filename: "run_openstudio.rb"}
+    defaults = {
+        skip_init: false,
+        data_points: [],
+        run_data_point_filename: "run_openstudio.rb"
+    }
     @options = defaults.merge(options)
 
 

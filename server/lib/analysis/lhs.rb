@@ -1,47 +1,14 @@
 class Analysis::Lhs
   include Analysis::R::Lhs # include the R Lhs wrapper
+  include Analysis::Core # pivots and static vars
 
   def initialize(analysis_id, options = {})
     defaults = {
-        skip_init: false
+        skip_init: false,
+        run_data_point_filename: "run_openstudio_workflow.rb"
     }
     @options = defaults.merge(options)
     @analysis_id = analysis_id
-  end
-
-  # each pivot variable gets the same samples 
-  # take p = [{p1: 1}, {p1: 2}]
-  # with s = [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
-  # make s' = [{p1: 1, a: 1, b: 4}, {p1: 2, a: 1, b: 4}, {p1: 1, a: 2, b: 5},  {p1: 2, a: 2, b: 5}]
-  def self.add_pivots(samples, pivots)
-    new_samples = []
-    if pivots.size > 0
-      pivots.each do |pv|
-        samples.each do |sm|
-          new_samples << pv.merge(sm)
-        end
-      end
-      samples = new_samples
-    end
-
-    new_samples.empty? ? samples : new_samples
-  end
-
-  # static array of hash 
-  # take static = [{a: 1, b: 2}]
-  # with samples = [{c: 3}, {d: 4}]
-  # results is [{a:1, b:2, c:3}, {a:1, b:2, d:4}]
-  def self.add_static_variables(samples, statics)
-    # Need to test the performance of this
-    if statics.size > 0
-      samples.each do |sample|
-        statics.each do |st|
-          sample.merge!(st)
-        end
-      end
-    end
-
-    samples
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -146,12 +113,12 @@ class Analysis::Lhs
     Rails.logger.info "Flipping samples around yields #{samples}"
 
     Rails.logger.info "Fixing Pivot dimension"
-    samples = Analysis::Lhs.add_pivots(samples, pivot_array)
+    samples = add_pivots(samples, pivot_array)
     Rails.logger.info "Finished adding the pivots resulting in #{samples}"
 
 
     Rails.logger.info "Adding in static variables"
-    samples = Analysis::Lhs.add_static_variables(samples, static_array)
+    samples = add_static_variables(samples, static_array)
     Rails.logger.info "Samples after static_array #{samples}"
 
     isample = 0
