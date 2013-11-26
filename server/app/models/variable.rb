@@ -117,6 +117,20 @@ class Variable
 
     var
   end
+  
+  def self.pivots(analysis_id)
+    Variable.where({analysis_id: analysis_id, pivot: true}).order_by(:name.asc)
+  end
+
+  def self.statics(analysis_id)
+    Variable.where({analysis_id: analysis_id, static: true}).order_by(:name.asc)
+    
+  end
+  
+  def self.variables(analysis_id)
+    Variable.where({analysis_id: analysis_id, perturbable: true}).order_by(:name.asc)
+  end
+
 
   def map_discrete_hash_to_array
     Rails.logger.info "Discrete values and weights are #{self.discrete_values_and_weights}"

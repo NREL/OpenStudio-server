@@ -1,6 +1,6 @@
 # Core functions for analysis
 module Analysis::Core
-  
+
   # Take the samples and add in the pivots.  Each pivot variable
   # will get a full set of samples
   # take p = [{p1: 1}, {p1: 2}]
@@ -37,5 +37,8 @@ module Analysis::Core
     samples
   end
 
+  def flip_around_array()
+    
+  end
 end
 

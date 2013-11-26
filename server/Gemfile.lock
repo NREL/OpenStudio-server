@@ -112,6 +112,10 @@ GEM
       tzinfo (~> 0.3.29)
     mongoid-paperclip (0.0.8)
       paperclip (>= 2.3.6)
+    mongoid-rspec (1.9.0)
+      mongoid (>= 3.0.1)
+      rake
+      rspec (>= 2.14)
     moped (1.5.1)
     multi_json (1.8.2)
     multipart-post (1.2.0)
@@ -235,6 +239,7 @@ DEPENDENCIES
   meta_request
   mongoid
   mongoid-paperclip
+  mongoid-rspec
   net-http-persistent
   net-scp
   net-sftp

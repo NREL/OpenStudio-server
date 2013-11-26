@@ -39,7 +39,7 @@ gem 'jquery-rails'
 group :test do
   gem 'rspec'
   gem 'rspec-rails', '~> 2.0'
-
+  gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
 end

@@ -3,11 +3,11 @@ require 'spec_helper'
 describe Analysis::Core do
   class DummyClass
   end
-  
+
   before :each do
     @dummy_class = DummyClass.new
     @dummy_class.extend(Analysis::Core)
-    
+
     # need to populate the database with an analysis and datapoints
 
     # delete all the analyses
@@ -45,6 +45,13 @@ describe Analysis::Core do
       result.size.should eq(6)
       result[0].should eq({p1: "p1", a: 1, b: 2})
     end
+
+    it "should return the same back when pivots is empty" do
+      result = @dummy_class.add_pivots(@samples, [])
+
+      result.size.should eq(3)
+      result.should eq(@samples)
+    end
   end
 
   context "static variables" do
@@ -55,6 +62,14 @@ describe Analysis::Core do
       result.size.should eq(3)
       result[0].should eq({a: 1, b: 2, s1: "a", s2: true})
     end
+
+    it "should retrun back the same objects if statics are empty" do
+      result = @dummy_class.add_pivots(@samples, [])
+
+      result.size.should eq(3)
+      result.should eq(@samples)
+    end
+
   end
 end
 

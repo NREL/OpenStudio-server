@@ -3,12 +3,19 @@ require 'spec_helper'
 describe Analysis do
   before :all do
     # delete all the analyses
-    Project.destroy_all
-    Analysis.destroy_all
-    @project = FactoryGirl.create :project
-    @analysis = FactoryGirl.create :analysis
+    Project.delete_all
+    Analysis.delete_all
+    DataPoint.delete_all
+    FactoryGirl.create(:project_with_analyses).analyses
+
+    @project = Project.first
+    @analysis = @project.analyses.first
   end
 
+  it "should have one analysis" do
+    @project.analyses.count.should eq(1)
+  end
+  
   it "should have one project" do
     @analysis.project.should_not be_nil
   end
