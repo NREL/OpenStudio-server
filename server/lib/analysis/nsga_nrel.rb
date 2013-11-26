@@ -332,7 +332,7 @@ class Analysis::NsgaNrel
             print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
-  
+            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
             stopCluster(cl)
           }
         end
