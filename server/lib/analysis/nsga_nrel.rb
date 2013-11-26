@@ -27,19 +27,16 @@ class Analysis::NsgaNrel
         ],
         problem: {
             algorithm: {
-                generations: 2,
+                generations: 1,
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
                 ]
             }
         }
-    }
+    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-
-    # determine the order of preference from defaults, options, and what is already in the analysis object
-
-    # Merge in the algoritm options with what is in the analysis object 
+    Rails.logger.info(@options)
     @analysis_id = analysis_id
   end
 
@@ -54,9 +51,10 @@ class Analysis::NsgaNrel
     @analysis = Analysis.find(@analysis_id)
 
     # merge in the options into the analysis object which are needed for problem execution
-    @options[:output_variables].reverse.each {|v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v)}
+    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
     @analysis.problem['algorithm'] = {} unless @analysis.problem['algorithm']
     @analysis.problem['algorithm'].merge!(@options[:problem][:algorithm])
+    Rails.logger.info(@analysis.problem['algorithm'])
     # verify that the various arrays are unique
     @analysis.output_variables.uniq!
     @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
@@ -64,6 +62,7 @@ class Analysis::NsgaNrel
     @analysis.status = 'started'
     @analysis.run_flag = true
     @analysis.save!
+    @analysis.reload # after saving the data (needed for some reason yet to be determined)
 
     #create an instance for R
     @r = Rserve::Simpler.new
@@ -82,7 +81,7 @@ class Analysis::NsgaNrel
     @r.converse "library(e1071)"
     @r.converse "library(rjson)"
 
-    
+
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
 
@@ -95,6 +94,7 @@ class Analysis::NsgaNrel
     # that the run flag is true.
 
     # TODO preflight check
+    raise "Number of generations was not set or equal to zero" if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
 
     # Configure the variables for the analysis
 
@@ -207,10 +207,10 @@ class Analysis::NsgaNrel
       process.cwd = Rails.root # set the child's working directory where the bundler will execute
       Rails.logger.info("Starting Child Process")
       process.start
-  
+
       good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
       Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
-  
+
       @r.command(ips: good_ips.to_hash.to_dataframe) do
         %Q{
           print(ips)
@@ -240,16 +240,16 @@ class Analysis::NsgaNrel
           print(timetaken)
           }
       end
-  
+
       timeflag = @r.converse("timeflag")
       Rails.logger.info ("Time flag was set to #{timeflag}")
-  
+
       if timeflag
         #gen is the number of generations to calculate
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, gen: @analysis.problem['algorithm']['generations']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -328,7 +328,8 @@ class Analysis::NsgaNrel
               vars <- rbind(vars, c(NA))
             }
   
-            print(nrow(vars))
+            print(nrow(vars)) 
+            print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
   
@@ -339,6 +340,8 @@ class Analysis::NsgaNrel
         # Log off some information why it didnt' start
       end
 
+    rescue Exception => e
+      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     ensure
       # Kill the downloading of data files process
       Rails.logger.info("Ensure block of analysis cleaning up any remaining processes")
