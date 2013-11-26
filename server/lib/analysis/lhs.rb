@@ -57,9 +57,7 @@ class Analysis::Lhs
       pivot_hash[var.uuid] = values
     end
     
-    # if there are multiple pivots, then smash the hash of arrays to form a array of hashes. This takes
-    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
-    pivot_array = pivot_hash.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
+    pivot_array = hash_of_array_to_array_of_hash(pivot_hash)
     Rails.logger.info "pivot array is #{pivot_array}"
 
     # get static variables.  These must be applied after the pivot vars and before the lhs
@@ -69,7 +67,7 @@ class Analysis::Lhs
       if var.static_value
         static_array << {"#{var.uuid}" => var.static_value}
       else
-        raise "Asking to set a static value but none was passed for #{var.name}"
+        raise "Asking to set a static value but no static value was passed for #{var.name}"
       end
     end
     Rails.logger.info "static array is #{static_array}"
@@ -109,16 +107,13 @@ class Analysis::Lhs
       i_var += 1
     end
 
-    # multiple and smash the hash of arrays to form a array of hashes. This takes
-    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
     Rails.logger.info "Samples are #{samples}"
-    samples = samples.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
+    samples = hash_of_array_to_array_of_hash(samples)
     Rails.logger.info "Flipping samples around yields #{samples}"
 
     Rails.logger.info "Fixing Pivot dimension"
     samples = add_pivots(samples, pivot_array)
     Rails.logger.info "Finished adding the pivots resulting in #{samples}"
-
 
     Rails.logger.info "Adding in static variables"
     samples = add_static_variables(samples, static_array)

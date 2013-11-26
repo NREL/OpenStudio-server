@@ -37,8 +37,14 @@ module Analysis::Core
     samples
   end
 
-  def flip_around_array()
-    
+  # For sampling take hashes of array values and makes them arrays of hashes set to 
+  # each value in the array index
+  def hash_of_array_to_array_of_hash(hash_array)
+    # This takes
+    # {a: [1,2,3], b:[4,5,6]} 
+    # and makes:
+    # [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
+    result = hash_array.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
   end
 end
 
