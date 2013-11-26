@@ -86,11 +86,19 @@ run_options = {
     analysis_action: "start",
     without_delay: false,
     analysis_type: "sequential_search",
-    x_objective_function: "total_energy",
-    y_objective_function: "total_life_cycle_cost",
     allow_multiple_jobs: true,
     use_server_as_worker: false,
     run_data_point_filename: "run_openstudio_workflow.rb",
-    max_iterations: 3
+    problem: {
+        random_seed: 1979,
+        algorithm: {
+            max_iterations: 100,
+            objective_functions: [
+                "total_energy",
+                "total_life_cycle_cost"
+            ]
+        }
+    }
+
 }
 api.run_analysis(analysis_id, run_options)

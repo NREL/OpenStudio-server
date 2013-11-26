@@ -78,7 +78,7 @@
             <td><%= dp.status_message if dp.status_message %></td>
             <td> <%= dp.results['net_site_energy_use_intentsity'] || dp.results['total_energy'] unless dp.results.nil? %> </td>
             <% if @analysis.analysis_type == "sequential_search" || @analysis.analysis_type =~ /nsga/ %>
-                <td> <%= dp.results[@analysis['y_objective_function']].round(2) if @analysis['y_objective_function'] && dp.results && dp.results[@analysis['y_objective_function']] %></td>
+                <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][1]].round(2) if @analysis.problem['algorithm']['objective_functions'][1] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][1]] %></td>
             <% end %>
             <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
             <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>

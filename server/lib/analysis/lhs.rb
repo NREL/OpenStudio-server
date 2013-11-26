@@ -2,7 +2,9 @@ class Analysis::Lhs
   include Analysis::R::Lhs # include the R Lhs wrapper
 
   def initialize(analysis_id, options = {})
-    defaults = {skip_init: false}
+    defaults = {
+        skip_init: false
+    }
     @options = defaults.merge(options)
     @analysis_id = analysis_id
   end
@@ -127,7 +129,7 @@ class Analysis::Lhs
       else
         sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
       end
-      
+
       samples["#{var.id}"] = sfp[:r]
       if sfp[:image_path]
         pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])

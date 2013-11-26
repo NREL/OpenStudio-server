@@ -60,6 +60,7 @@ class Analysis::NsgaNrel
     @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
     # save the data
     @analysis.status = 'started'
+    @analysis.end_time = nil
     @analysis.run_flag = true
     @analysis.save!
     @analysis.reload # after saving the data (needed for some reason yet to be determined)
@@ -94,9 +95,9 @@ class Analysis::NsgaNrel
     # that the run flag is true.
 
     # TODO preflight check
-    raise "Number of generations was not set or equal to zero" if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
-
-    # Configure the variables for the analysis
+    if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
+      raise "Number of generations was not set or equal to zero (must be 1 or greater)"
+    end
 
     # TODO Make these methods more generic as we are starting to reuse the code across algoritms
     # get pivot variables
