@@ -1,6 +1,6 @@
 class Analysis::Lhs
-  include Analysis::R::Lhs # include the R Lhs wrapper
   include Analysis::Core # pivots and static vars
+  include Analysis::R::Lhs # include the R Lhs wrapper
 
   def initialize(analysis_id, options = {})
     defaults = {

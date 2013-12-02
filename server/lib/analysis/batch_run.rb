@@ -1,4 +1,4 @@
-class Analysis::BatchRun
+  class Analysis::BatchRun
   def initialize(analysis_id, options = {})
     defaults = {
         skip_init: false,
