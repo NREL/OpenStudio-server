@@ -2,7 +2,6 @@
 
 sudo usermod -U ubuntu
 cat /dev/null > ~/.ssh/authorized_keys
-cat /dev/null > ~/.bash_history && history -c
 sudo -i
 cat /dev/null > /var/www/rails/openstudio/log/download.log
 cat /dev/null > /var/www/rails/openstudio/log/mongo.log
