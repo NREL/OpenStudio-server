@@ -117,6 +117,32 @@ vagrant ssh
 ```
 
 ### Server Changes
+
+```sh
+cd /data/launch-instance
+chmod 777 setup-server-changes.sh
+sudo ./setup-server-changes.sh
+chmod 777 setup-final-changes.sh
+sudo ./setup-final-changes.sh
+exit
+cat /dev/null > ~/.bash_history && history -c
+sudo shutdown -r now
+```
+
+### Worker Changes
+
+```sh
+cd /data/launch-instance
+chmod 777 setup-worker-changes.sh
+sudo ./setup-worker-changes.sh
+chmod 777 setup-final-changes.sh
+sudo ./setup-final-changes.sh
+exit
+cat /dev/null > ~/.bash_history && history -c
+sudo shutdown -r now
+```
+
+### Server Changes
 - The script below does several items including
   + Enable password login (for setting up passwordless SSH)
   + Change owner of Rserved and restart Rserve 
