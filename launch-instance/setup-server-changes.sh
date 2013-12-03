@@ -1,7 +1,7 @@
 #!/bin/sh
 
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
-echo StrictHostKeyChecking no > .ssh/config
+echo StrictHostKeyChecking no > /home/ubuntu/.ssh/config
 sudo service ssh restart
 cd /var/www/rails/openstudio
 rake db:purge
