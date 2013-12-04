@@ -1,6 +1,6 @@
 # Non Sorting Genetic Algorithm
 class Analysis::NsgaNrel
-  #include Analysis::R::Cluster 
+  include Analysis::R
   include Analysis::R::Lhs # include the R Lhs wrapper
 
   def initialize(analysis_id, options = {})
@@ -68,9 +68,10 @@ class Analysis::NsgaNrel
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
-    @r.converse "library(snow)"
+    # Comment these out for now as they will be loaded in the R::Cluster class
+    #@r.converse "library(snow)"
+    #@r.converse "library(RMongo)"
     @r.converse "library(rjson)"
-    @r.converse "library(RMongo)"
     @r.converse "library(R.methodsS3)"
     @r.converse "library(R.oo)"
     @r.converse "library(R.utils)"
@@ -175,25 +176,9 @@ class Analysis::NsgaNrel
       raise "Must have variables to run algorithm"
     end
 
-    @r.command() do
-      %Q{
-        ip <- "#{master_ip}"
-        results <- NULL
-        print(ip)
-        print(getwd())
-        if (file.exists('/mnt/openstudio/rtimeout')) {
-          file.remove('/mnt/openstudio/rtimeout')
-        }
-        #test the query of getting the run_flag
-        mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
-        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
-
-        print(flag["run_flag"])
-        if (flag["run_flag"] == "true"  ){
-          print("flag is set to true!")
-        }        
-        dbDisconnect(mongo)
-      }
+    cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+    if !cluster.configure(master_ip)
+      raise "could not configure R cluster"
     end
 
     # wrap this for now to ensure that the child process is killed
@@ -211,40 +196,10 @@ class Analysis::NsgaNrel
       good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
       Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
 
-      @r.command(ips: good_ips.to_hash.to_dataframe) do
-        %Q{
-          print(ips)
-          if (nrow(ips) == 0) {
-            stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
-          }
-          uniqueips <- unique(ips)
-          numunique <- nrow(uniqueips) * 180
-          print("max timeout is:")
-          print(numunique)
-          timeflag <<- TRUE;
-          res <- NULL;
-          starttime <- Sys.time()
-          tryCatch({
-             res <- evalWithTimeout({
-             cl <- makeSOCKcluster(ips[,1], outfile="/tmp/snow.log")
-              }, timeout=numunique);
-              }, TimeoutException=function(ex) {
-                cat("#{@analysis.id} Timeout\n");
-                timeflag <<- FALSE;
-                file.create('rtimeout') 
-                stop
-            })
-          endtime <- Sys.time()
-          timetaken <- endtime - starttime
-          print("R cluster startup time:")
-          print(timetaken)
-          }
-      end
+      cluster_started = cluster.start(good_ips.to_hash)
+      Rails.logger.info ("Time flag was set to #{cluster_started}")
 
-      timeflag = @r.converse("timeflag")
-      Rails.logger.info ("Time flag was set to #{timeflag}")
-
-      if timeflag
+      if cluster_started
         #gen is the number of generations to calculate
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
@@ -338,17 +293,21 @@ class Analysis::NsgaNrel
             print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
-            stopCluster(cl)
+            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
+
+          
         end
       else
-        # Log off some information why it didnt' start
+        raise "could not start the cluster (most likely timed out)"
       end
 
     rescue Exception => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     ensure
+      # ensure that the cluster is stopped
+      cluster.stop if cluster_started
+      
       # Kill the downloading of data files process
       Rails.logger.info("Ensure block of analysis cleaning up any remaining processes")
       process.stop

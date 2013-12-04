@@ -46,5 +46,9 @@ module Analysis::Core
     # [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
     result = hash_array.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
   end
+  
+  module BackgroundTasks
+    
+  end
 end
 
