@@ -40,8 +40,6 @@ class Analysis::SequentialSearch
     @pareto = []
   end
 
-  # Perform is the main method that is run in the background.  At the moment if this method crashes
-  # it will be logged as a failed delayed_job and will fail after max_attempts.
   def self.create_data_point_list(parameter_space, run_list_ids, iteration, name_moniker = "")
     result = []
 
@@ -274,26 +272,20 @@ class Analysis::SequentialSearch
     @analysis.reload # after saving the data (needed for some reason yet to be determined)
 
     # get static variables.  These must be applied after the pivot vars and before the lhs
-    static_variables = Variable.where({analysis_id: @analysis, static: true}).order_by(:name.asc)
-    static_array = []
-    static_variables.each do |var|
-      if var.static_value
-        static_array << {:"#{var.uuid}" => var.static_value}
-      else
-        raise "Asking to set a static value but none was passed #{var.name}"
-      end
-    end
-    Rails.logger.info "Static array is #{static_array}"
-
-    # get variables / measures
+    pivot_array = Variable.pivot_array(@analysis.id)
+    static_array = Variable.static_array(@analysis.id)
+    selected_variables = Variable.variables(@analysis.id)
+    
+    # the sequential search operates on measures so get variables / measures
     parameter_space = {}
     measures = Measure.where({analysis_id: @analysis}).order_by(:name.asc) # order is not super important here because the analysis has has the order, right?
     measures.each do |measure|
       variables = measure.variables.where(perturbable: true)
 
-      # mash the two variables together
+      # mash the two variables together if there are more than 1 variable in a measure. This is a simple combinatorial
       measure_values = {}
       variables.each do |variable|
+        # if the variable is continuous then discretize it before running
         values, weights = variable.map_discrete_hash_to_array
         measure_values["#{variable._id}"] = values
       end
@@ -306,11 +298,6 @@ class Analysis::SequentialSearch
         parameter_space[UUID.new.generate] = {measure_id: measure._id, variables: mvs}
       end
     end
-
-    # The resulting parameter space is in the form of a hash with elements like the below
-    # "9a1dbc60-1919-0131-be3d-080027880ca6"=>{:measure_id=>"e16805f0-a2f2-4122-828f-0812d49493dd",
-    #   :variables=>{"8651b16d-91df-4dc3-a07b-048ea9510058"=>80, "c7cf9cfc-abf9-43b1-a07b-048ea9510058"=>"West"}}
-
     Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
 
     # determine the first list of items to run
