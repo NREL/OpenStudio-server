@@ -8,11 +8,22 @@ module Analysis::R
       @r.converse "print('Configuring R Cluster - Loading Libraries')"
       @r.converse "library(snow)"
       @r.converse "library(RMongo)"
+      
+      # determine the database name based on the environment
+      if Rails.env == "development"
+        @db = "os_test"
+      elsif Rails.env == "production"
+        @db = "os_prod"
+      elsif Rails.env == "test"
+        @db = "os_test"
+      end
+      
     end
 
 
-    # configure the cluster, return a bool on the success of the configuration
+    # configure the r session, returns true if the flag variable was readable (and true)
     def configure(master_ip)
+      result = false
       @r.command() do
         %Q{
             ip <- "#{master_ip}"
@@ -22,8 +33,8 @@ module Analysis::R
             if (file.exists('/mnt/openstudio/rtimeout')) {
               file.remove('/mnt/openstudio/rtimeout')
             }
-            #test the query of getting the run_flag
-            mongo <- mongoDbConnect("os_dev", host=ip, port=27017)
+            #test the query of getting the run_flag    
+            mongo <- mongoDbConnect("#{@db}", host=ip, port=27017)
             flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis_id}"}', '{run_flag:1}')
     
             print(flag["run_flag"])
@@ -34,6 +45,10 @@ module Analysis::R
           }
       end
 
+      out = @r.converse "flag['run_flag'][,1]"
+      result = out == "true" ? true : false 
+      
+      result
     end
 
     # return a bool whether or not the cluster appears to be "up-and-running"
