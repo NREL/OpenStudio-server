@@ -168,18 +168,22 @@ class Analysis::NsgaNrel
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
 
-    if samples.empty?
-      Rails.logger.info "No variables were passed into the options, therefore exit"
-      raise "Must have variables to run algorithm"
-    end
-
-    cluster = Analysis::R::Cluster.new(@r, @analysis.id)
-    if !cluster.configure(master_ip)
-      raise "could not configure R cluster"
-    end
-
-    # wrap this for now to ensure that the child process is killed
+    # Initialize some variables that are in the rescue/ensure blocks
+    cluster_started = false
+    cluster = nil
+    process = nil
     begin
+      if samples.empty? || samples.size <= 1
+        Rails.logger.info "No variables were passed into the options, therefore exit"
+        raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      end
+  
+      # Start up the cluster and perform the analysis
+      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      if !cluster.configure(master_ip)
+        raise "could not configure R cluster"
+      end
+
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
       process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       #log_file = File.join(Rails.root,"log/download.log")
@@ -301,13 +305,16 @@ class Analysis::NsgaNrel
 
     rescue Exception => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+      puts log_message
+      @analysis.status_message = log_message
+      @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster_started
+      cluster.stop if cluster && cluster_started
       
       # Kill the downloading of data files process
       Rails.logger.info("Ensure block of analysis cleaning up any remaining processes")
-      process.stop
+      process.stop if process
 
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info("Trying to download any remaining files from worker nodes")
@@ -318,8 +325,9 @@ class Analysis::NsgaNrel
       if !@options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
-        @analysis.save!
       end
+
+      @analysis.save!
     end
   end
 
