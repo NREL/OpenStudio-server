@@ -35,21 +35,22 @@ run_options = {
     problem: {
         random_seed: 1979,
         algorithm: {
-            number_of_samples: 5,
-            sample_method: "all_variables"
+            number_of_samples: 3,
+            #sample_method: "all_variables"
+            sample_method: "individual_variables"
         }
     }
 }
 
 api.run_analysis(analysis_id, run_options)
-#
-#run_options = {
-#    analysis_action: "start",
-#    run_data_point_filename: "run_openstudio_workflow.rb",
-#    without_delay: false,
-#    analysis_type: "batch_run"
-#}
-#api.run_analysis(analysis_id, run_options)
+
+run_options = {
+    analysis_action: "start",
+    run_data_point_filename: "run_openstudio_workflow.rb",
+    without_delay: false,
+    analysis_type: "batch_run"
+}
+api.run_analysis(analysis_id, run_options)
 
 
 

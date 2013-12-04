@@ -46,18 +46,29 @@ module Analysis::Core
     # [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
     result = hash_array.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
   end
-  module_function :hash_of_array_to_array_of_hash  # export this function for use outside of class extension
-  
-  
+
+  module_function :hash_of_array_to_array_of_hash # export this function for use outside of class extension
+
+  # return the single dimension samples of the array.  This also runs a dedupe method.
+  def hash_of_array_to_array_of_hash_non_combined(hash_array)
+    # This takes
+    # h = {a: [1, 2, 3], b: ["4", "5", "6"], c: [true, false, false]}
+    # and makes
+    # [{a:1}, {a:2}, {a:3}, {b:"4"}, ... {c: true}, {c: false}] 
+    result = hash_array.map { |k, v| v.map { |value| {:"#{k}" => value} } }.flatten.uniq
+  end
+
+  module_function :hash_of_array_to_array_of_hash_non_combined # export this function for use outside of class extension
+
   # The module method will take continuous variables and discretize the values and save them into the 
   # values hash (with weights if applicable) in order to be used with discrete algorithms
   def discretize_variables()
-    
+
   end
-  
+
   # I put this here expecting to put the child download process here... need to move it eventually
   module BackgroundTasks
-    
+
   end
 end
 
