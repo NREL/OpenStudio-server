@@ -67,9 +67,8 @@ class Analysis::NsgaNrel
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
-    # Comment these out for now as they will be loaded in the R::Cluster class
-    #@r.converse "library(snow)"
-    #@r.converse "library(RMongo)"
+    
+    # R libraries needed for this algorithm
     @r.converse "library(rjson)"
     @r.converse "library(mco)"
     @r.converse "library(NRELmoo)"
