@@ -12,7 +12,7 @@ module Analysis::R
       
       # determine the database name based on the environment
       if Rails.env == "development"
-        @db = "os_test"
+        @db = "os_dev"
       elsif Rails.env == "production"
         @db = "os_prod"
       elsif Rails.env == "test"
@@ -29,12 +29,13 @@ module Analysis::R
         %Q{
             ip <- "#{master_ip}"
             results <- NULL
-            print(ip)
-            print(getwd())
+            print(paste("master ip address is",ip))
+            print(paste("working directory is",getwd()))
             if (file.exists('/mnt/openstudio/rtimeout')) {
               file.remove('/mnt/openstudio/rtimeout')
             }
-            #test the query of getting the run_flag    
+            #test the query of getting the run_flag  
+            print(paste("connecting to mongo database: #{@db}")) 
             mongo <- mongoDbConnect("#{@db}", host=ip, port=27017)
             flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis_id}"}', '{run_flag:1}')
     
