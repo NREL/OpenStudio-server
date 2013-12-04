@@ -361,9 +361,14 @@ class AnalysesController < ApplicationController
         dp_values["data_point_uuid"] = data_point_path(dp.id)
 
         # lookup input value names
+
         if dp.set_variable_values
-          dp.set_variable_values.each do |k, v|
-            dp_values["#{mappings[k]}"] = v
+          mappings.each do |k, v|
+            if dp.set_variable_values[k]
+              dp_values[v] = dp.set_variable_values[k]
+            else
+              dp_values[v] = nil
+            end
           end
         end
 
@@ -408,17 +413,13 @@ class AnalysesController < ApplicationController
     data_frame_name = analysis.name.downcase.gsub(" ", "_")
     Rails.logger.info("Data frame name will be #{data_frame_name}")
     
-    respond_to do |format|
-      format.rdata do
-        
-      end
-    end
-
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
     out_hash = data.each_with_object(Hash.new([])) do |h1, h|
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
+    
+    Rails.logger.info("outhash is #{out_hash}")
 
     # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
