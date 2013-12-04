@@ -75,21 +75,33 @@ describe Analysis::Core do
   context "hashing" do
     it "should return array of hashes" do
       h = {a: [1, 2, 3], b: [4, 5, 6]}
-      r = @dummy_class.hash_of_array_to_array_of_hash(h)
+      r = Analysis::Core.hash_of_array_to_array_of_hash(h)
       r.size.should eq(h[:a].size)
       r[0].should eq({a: 1, b: 4})
     end
 
     it "should not work when array length is different" do
       h = {a: [1, 2, 3], b: [4, 5, 6, 7, 8, 9]}
-      expect { @dummy_class.hash_of_array_to_array_of_hash(h) }.to raise_error
+      expect { Analysis::Core.hash_of_array_to_array_of_hash(h) }.to raise_error
     end
 
     it "should work with any type of data" do
       h = {a: [1, 2, 3], b: ["4", "5", "6"], c: [true, false, false]}
-      r = @dummy_class.hash_of_array_to_array_of_hash(h)
+      r = Analysis::Core.hash_of_array_to_array_of_hash(h)
       r.size.should eq(h[:a].size)
       r[0].should eq({a: 1, b: "4", c: true})
+    end
+
+    it "should return non-combined hashes" do
+      h = {a: [1, 2, 3], b: ["4", "5", "6"], c: [true, false, false]}
+      r = Analysis::Core.hash_of_array_to_array_of_hash_non_combined(h)
+      puts "Non combined hash returned with #{r.inspect}"
+      r.size.should eq(8)
+      r[0].should eq({a: 1})
+      r[5].should eq({b: "6"})
+      r[6].should eq({c: true})
+      r[7].should eq({c: false})
+
 
     end
   end
