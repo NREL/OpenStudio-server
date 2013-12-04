@@ -8,6 +8,7 @@ module Analysis::R
       @r.converse "print('Configuring R Cluster - Loading Libraries')"
       @r.converse "library(snow)"
       @r.converse "library(RMongo)"
+      @r.converse "library(R.utils)"
       
       # determine the database name based on the environment
       if Rails.env == "development"
@@ -48,16 +49,14 @@ module Analysis::R
       out = @r.converse "flag['run_flag'][,1]"
       result = out == "true" ? true : false 
       
+      # note that if result is false it may be because the Rserve session wasn't running right, or the analysis 
+      # database record was not found
+      
       result
     end
 
-    # return a bool whether or not the cluster appears to be "up-and-running"
-    def test_cluster
-
-    end
-
     # start the cluster.  Returns true if the cluster was started, false
-    # if the cluster timed out or failed
+    # if the cluster timed out or failed. The IP addresses are passed as a hash of an arrays a["ip"] = ["ip1", "ip2", ...]
     def start(ip_addresses)
       result = false
       @r.command(ips: ip_addresses.to_dataframe) do
@@ -96,8 +95,10 @@ module Analysis::R
       result = false
       @r.command() do
         %Q{
-            stopCluster(cl)
-            }
+            print("Stopping cluster")
+            stopCluster(cl)          
+            print("Cluster stopped")
+          }
       end
 
       # todo: how to test if it successfully stopped the cluster
