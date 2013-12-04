@@ -193,7 +193,7 @@ class Analysis::NsgaNrel
       Rails.logger.info("Starting Child Process")
       process.start
 
-      good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
+      good_ips = ComputeNode.where(valid: true)
       Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
 
       cluster_started = cluster.start(good_ips.to_hash)
