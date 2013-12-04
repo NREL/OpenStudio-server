@@ -103,7 +103,7 @@ class Analysis::NsgaNrel
     Rails.logger.info "starting lhs to discretize the variables"
     
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types = lhs.sample_variables(selected_variables, @analysis.problem['number_of_samples'])
+    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['number_of_samples'])
     
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
