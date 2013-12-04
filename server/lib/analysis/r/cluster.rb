@@ -18,9 +18,7 @@ module Analysis::R
       elsif Rails.env == "test"
         @db = "os_test"
       end
-      
     end
-
 
     # configure the r session, returns true if the flag variable was readable (and true)
     def configure(master_ip)
