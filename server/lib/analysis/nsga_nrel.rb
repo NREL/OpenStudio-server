@@ -1,7 +1,6 @@
 # Non Sorting Genetic Algorithm
 class Analysis::NsgaNrel
   include Analysis::R
-  include Analysis::R::Lhs # include the R Lhs wrapper
 
   def initialize(analysis_id, options = {})
     defaults = {
@@ -74,11 +73,6 @@ class Analysis::NsgaNrel
     @r.converse "library(rjson)"
     @r.converse "library(mco)"
     @r.converse "library(NRELmoo)"
-    @r.converse "library(lhs)"
-    @r.converse "library(triangle)"
-    @r.converse "library(e1071)"
-    @r.converse "library(rjson)"
-
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -91,80 +85,27 @@ class Analysis::NsgaNrel
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    # TODO preflight check
+    # TODO preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
       raise "Number of generations was not set or equal to zero (must be 1 or greater)"
     end
-
-    # TODO Make these methods more generic as we are starting to reuse the code across algoritms
-    # get pivot variables
-    pivot_variables = Variable.where({analysis_id: @analysis, pivot: true}).order_by(:name.asc)
-    pivot_hash = {}
-    pivot_variables.each do |var|
-      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
-      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
-      values, weights = var.map_discrete_hash_to_array
-      Rails.logger.info "pivot variable values are #{values}"
-      pivot_hash[var.uuid] = values
+    
+    if @analysis.problem['number_of_samples'].nil? || @analysis.problem['number_of_samples'] == 0
+      raise "Must have number of samples to discretize the parameter space"
     end
-    # if there are multiple pivots, then smash the hash of arrays to form a array of hashes. This takes
-    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
-    pivot_array = pivot_hash.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
-    Rails.logger.info "pivot array is #{pivot_array}"
 
-    # get static variables.  These must be applied after the pivot vars and before the lhs
-    static_variables = Variable.where({analysis_id: @analysis, static: true}).order_by(:name.asc)
-    static_array = []
-    static_variables.each do |var|
-      if var.static_value
-        static_array << {"#{var.uuid}" => var.static_value}
-      else
-        raise "Asking to set a static value but none was passed for #{var.name}"
-      end
-    end
-    Rails.logger.info "static array is #{static_array}"
-
-    # get variables
-    selected_variables = Variable.where({analysis_id: @analysis, perturbable: true}).order_by(:name.asc)
-    Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
+    pivot_array = Variable.pivot_array(@analysis.id)
+    static_array = Variable.static_array(@analysis.id)
+    selected_variables = Variable.variables(@analysis.id)
+    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
-    # get the probabilities and persist them for reference
-    p = lhs_probability(selected_variables.count, @analysis.problem['number_of_samples'])
-    Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
-
-    # The resulting parameter space is in the form of a hash with elements like the below
-    # "9a1dbc60-1919-0131-be3d-080027880ca6"=>{:measure_id=>"e16805f0-a2f2-4122-828f-0812d49493dd",
-    #   :variables=>{"8651b16d-91df-4dc3-a07b-048ea9510058"=>80, "c7cf9cfc-abf9-43b1-a07b-048ea9510058"=>"West"}}
-
-    i_var = 0
-    samples = {} # samples are in hash of arrays
-    var_types = []
-    # TODO: performance smell... optimize this using Parallel
-    selected_variables.each do |var|
-      sfp = nil
-      if var.uncertainty_type == "discrete_uncertain"
-        Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-        sfp = discrete_sample_from_probability(p[i_var], var, true)
-        var_types << "discrete"
-      else
-        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
-        var_types << "continuous"
-      end
-
-      samples["#{var.id}"] = sfp[:r]
-      if sfp[:image_path]
-        pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
-        var.preflight_images << pfi unless var.preflight_images.include?(pfi)
-      end
-
-      var.r_index = i_var + 1 # r_index is 1-based 
-      var.save!
-
-      i_var += 1
-    end
-
+    Rails.logger.info "starting lhs to discretize the variables"
+    
+    lhs = Analysis::R::Lhs.new(@r)
+    samples, var_types = lhs.sample_variables(selected_variables, @analysis.problem['number_of_samples'])
+    
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
 
