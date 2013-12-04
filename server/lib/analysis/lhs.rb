@@ -4,9 +4,17 @@ class Analysis::Lhs
   def initialize(analysis_id, options = {})
     defaults = {
         skip_init: false,
-        run_data_point_filename: "run_openstudio_workflow.rb"
-    }
-    @options = defaults.merge(options)
+        run_data_point_filename: "run_openstudio_workflow.rb",
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                number_of_samples: 100,
+                sample_method: "all_variables"
+            }
+        }
+    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    @options = defaults.deep_merge(options)
+    Rails.logger.info(@options)
     @analysis_id = analysis_id
   end
 
@@ -22,23 +30,19 @@ class Analysis::Lhs
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
-
-    # Set this if not defined in the JSON
-    @analysis.problem['number_of_samples'] ||= 100
-    @analysis.problem['random_seed'] ||= 1979
     @analysis.save!
+    @analysis.reload # after saving the data (needed for some reason yet to be determined)
 
     # Create an instance for R
     @r = Rserve::Simpler.new
-    #lhs = Analysis::RWrapper::Lhs.new(@r)
 
     Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
     Rails.logger.info "Setting up R for #{self.class.name}"
     #todo: need to move this to the module class
     @r.converse('setwd("/mnt/openstudio")')
-    
+
     # make this a core method
-    @r.converse("set.seed(#{@analysis.problem['random_seed']})")
+    @r.converse("set.seed(#{@options[:problem][:random_seed]})")
 
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
@@ -49,8 +53,14 @@ class Analysis::Lhs
     @r.converse("print('starting lhs')")
     Rails.logger.info "Starting sampling"
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types = lhs.sample_variables(selected_variables, @analysis.problem['number_of_samples'])
-    
+    if @options[:problem][:algorithm][:sample_method] == "all_variables"
+      samples, var_types = lhs.sample_all_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
+    elsif @options[:problem][:algorithm][:sample_method] == "individual_variables"
+      samples, var_types = lhs.sample_individual_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
+    else
+      raise "no sampling method defined (all_variables or individual_variables)"
+    end
+
     # Do the work to mash up the samples, pivots, and static variables before creating the data points
     Rails.logger.info "Samples are #{samples}"
     samples = hash_of_array_to_array_of_hash(samples)
