@@ -83,8 +83,7 @@ module Analysis::R
             })
           endtime <- Sys.time()
           timetaken <- endtime - starttime
-          print("R cluster startup time:")
-          print(timetaken)
+          print(paste("R cluster startup time:",timetaken))
           }
       end
       result = @r.converse("timeflag")
