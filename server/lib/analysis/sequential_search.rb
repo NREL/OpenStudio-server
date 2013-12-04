@@ -327,7 +327,7 @@ class Analysis::SequentialSearch
       Rails.logger.info("Determined pareto curve for #{@iteration} and new point flag is set to #{new_pareto_point}")
       Rails.logger.info("Finished simulations for iteration #{@iteration}... iterating")
 
-      if @iteration >= @options[:max_iterations]
+      if @iteration >= @options[:problem][:algorithm][:max_iterations]
         final_message = "Reached max iterations of #{@analysis.problem['algorithm']['max_iterations']}"
         break
       end
