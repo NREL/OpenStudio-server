@@ -1,13 +1,20 @@
 class Analysis::Lhs
   include Analysis::Core # pivots and static vars
-  include Analysis::R::Lhs # include the R Lhs wrapper
 
   def initialize(analysis_id, options = {})
     defaults = {
         skip_init: false,
-        run_data_point_filename: "run_openstudio_workflow.rb"
-    }
-    @options = defaults.merge(options)
+        run_data_point_filename: "run_openstudio_workflow.rb",
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                number_of_samples: 100,
+                sample_method: "all_variables"
+            }
+        }
+    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    @options = defaults.deep_merge(options)
+    Rails.logger.info(@options)
     @analysis_id = analysis_id
   end
 
@@ -23,93 +30,47 @@ class Analysis::Lhs
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
-
-    # Set this if not defined in the JSON
-    @analysis.problem['number_of_samples'] ||= 100
-    @analysis.problem['random_seed'] ||= 1979
     @analysis.save!
+    @analysis.reload # after saving the data (needed for some reason yet to be determined)
 
     # Create an instance for R
     @r = Rserve::Simpler.new
-    #lhs = Analysis::RWrapper::Lhs.new(@r)
 
     Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
     Rails.logger.info "Setting up R for #{self.class.name}"
     #todo: need to move this to the module class
     @r.converse('setwd("/mnt/openstudio")')
-    @r.converse("set.seed(#{@analysis.problem['random_seed']})")
-    @r.converse "library(snow)"
-    @r.converse "library(snowfall)"
-    @r.converse "library(lhs)"
-    @r.converse "library(triangle)"
-    @r.converse "library(e1071)"
 
-    # discretize the variables and save into hashes
-    
-    # get pivot variables
-    pivot_variables = Variable.pivots(@analysis.id) 
-    pivot_hash = {}
-    pivot_variables.each do |var|
-      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
-      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
-      values, weights = var.map_discrete_hash_to_array
-      Rails.logger.info "pivot variable values are #{values}"
-      pivot_hash[var.uuid] = values
-    end
-    
-    pivot_array = hash_of_array_to_array_of_hash(pivot_hash)
-    Rails.logger.info "pivot array is #{pivot_array}"
+    # make this a core method
+    @r.converse("set.seed(#{@options[:problem][:random_seed]})")
 
-    # get static variables.  These must be applied after the pivot vars and before the lhs
-    static_variables = Variable.statics(@analysis.id)
-    static_array = []
-    static_variables.each do |var|
-      if var.static_value
-        static_array << {"#{var.uuid}" => var.static_value}
-      else
-        raise "Asking to set a static value but no static value was passed for #{var.name}"
-      end
-    end
-    Rails.logger.info "static array is #{static_array}"
-
-    # get variables / measures
+    pivot_array = Variable.pivot_array(@analysis.id)
+    static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
+    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
     # generate the probabilities for all variables as column vectors
     @r.converse("print('starting lhs')")
-    # get the probabilities and persist them for reference
     Rails.logger.info "Starting sampling"
-    p = lhs_probability(selected_variables.count, @analysis.problem['number_of_samples'])
-    Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
+    lhs = Analysis::R::Lhs.new(@r)
+    samples = nil
+    if @options[:problem][:algorithm][:sample_method] == "all_variables"
+      samples, var_types = lhs.sample_all_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
 
-    # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
-    # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
-    # For now, create a new variable_instance, create new datapoints, and add the instance reference
-    i_var = 0
-    samples = {} # samples are in hash of arrays
-    # TODO: performance smell... optimize this using Parallel
-    selected_variables.each do |var|
-      sfp = nil
-      if var.uncertainty_type == "discrete_uncertain"
-        Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-        sfp = discrete_sample_from_probability(p[i_var], var, true)
-      else
-        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
-      end
+      # Do the work to mash up the samples, pivots, and static variables before creating the data points
+      Rails.logger.info "Samples are #{samples}"
+      samples = hash_of_array_to_array_of_hash(samples)
+      Rails.logger.info "Flipping samples around yields #{samples}"
+    elsif @options[:problem][:algorithm][:sample_method] == "individual_variables"
+      samples, var_types = lhs.sample_individual_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
 
-      samples["#{var.id}"] = sfp[:r]
-      if sfp[:image_path]
-        pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
-        var.preflight_images << pfi unless var.preflight_images.include?(pfi)
-      end
-
-      i_var += 1
+      # Do the work to mash up the samples, pivots, and static variables before creating the data points
+      Rails.logger.info "Samples are #{samples}"
+      samples = hash_of_array_to_array_of_hash_non_combined(samples)
+      Rails.logger.info "Non-combined samples yields #{samples}"
+    else
+      raise "no sampling method defined (all_variables or individual_variables)"
     end
-
-    Rails.logger.info "Samples are #{samples}"
-    samples = hash_of_array_to_array_of_hash(samples)
-    Rails.logger.info "Flipping samples around yields #{samples}"
 
     Rails.logger.info "Fixing Pivot dimension"
     samples = add_pivots(samples, pivot_array)

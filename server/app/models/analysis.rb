@@ -18,6 +18,7 @@ class Analysis
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
   field :problem
+  field :status_message, :type => String # the resulting message from the analysis
   field :output_variables, :type => Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
   field :use_shm, :type => Boolean, default: false #flag on whether or not to use SHM for analysis (impacts file uploading)
@@ -53,7 +54,7 @@ class Analysis
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
-  # Move this into the compute node class
+  # TODO: Move this into the compute node class and call this with delayed jobs if applicable
   def initialize_workers(options = {})
 
     # delete the master and workers and reload them everysingle time an analysis is initialized
