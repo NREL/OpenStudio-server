@@ -72,9 +72,6 @@ class Analysis::NsgaNrel
     #@r.converse "library(snow)"
     #@r.converse "library(RMongo)"
     @r.converse "library(rjson)"
-    @r.converse "library(R.methodsS3)"
-    @r.converse "library(R.oo)"
-    @r.converse "library(R.utils)"
     @r.converse "library(mco)"
     @r.converse "library(NRELmoo)"
     @r.converse "library(lhs)"
@@ -193,10 +190,10 @@ class Analysis::NsgaNrel
       Rails.logger.info("Starting Child Process")
       process.start
 
-      good_ips = ComputeNode.where(valid: true)
-      Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
+      worker_ips = ComputeNode.worker_ips
+      Rails.logger.info("Found the following good ips #{worker_ips}")
 
-      cluster_started = cluster.start(good_ips.to_hash)
+      cluster_started = cluster.start(worker_ips)
       Rails.logger.info ("Time flag was set to #{cluster_started}")
 
       if cluster_started

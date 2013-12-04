@@ -53,7 +53,7 @@ class Analysis
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
-  # Move this into the compute node class
+  # TODO: Move this into the compute node class and call this with delayed jobs if applicable
   def initialize_workers(options = {})
 
     # delete the master and workers and reload them everysingle time an analysis is initialized

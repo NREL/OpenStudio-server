@@ -17,8 +17,8 @@ class ComputeNode
   index({ip_address: 1}, unique: true)
   index({node_type: 1})
 
-  # Return all the worker IP addresses as a hash in prep for writing to a dataframe
-  def self.to_hash
+  # Return all the valid IP addresses as a hash in prep for writing to a dataframe
+  def self.worker_ips
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
 
@@ -29,7 +29,7 @@ class ComputeNode
 
     worker_ips_hash
   end
-
+  
   # copy the zip file over the various workers and extract the file.
   # if the file already exists, then it will overwrite the file
   # verify the behaviour of the zip extraction on top of an already existing analysis.

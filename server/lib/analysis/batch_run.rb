@@ -88,10 +88,10 @@ class Analysis::BatchRun
     Rails.logger.info("Starting Child Process")
     process.start
 
-    good_ips = ComputeNode.where(valid: true) # TODO: make this a scope
-    Rails.logger.info("Found the following good ips #{good_ips.to_hash}")
+    worker_ips = ComputeNode.worker_ips 
+    Rails.logger.info("Found the following good ips #{worker_ips}")
 
-    @r.command(ips: good_ips.to_hash.to_dataframe) do
+    @r.command(ips: worker_ips.to_dataframe) do
       %Q{
         print(ips)
         if (nrow(ips) == 0) {
