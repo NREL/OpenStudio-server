@@ -17,7 +17,7 @@ ps -A | grep Rserve
 - if no Rserve is running then start it by
 
 ```sh
-sudo service Rserved start
+sudo service Rserve start
 ```
 
 ```sh
@@ -26,6 +26,7 @@ cat /dev/null > /var/www/rails/openstudio/log/download.log
 cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 cat /dev/null > /var/www/rails/openstudio/log/development.log
 cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
+cat /dev/null > /var/www/rails/openstudio/log/Rserve.log
 ```
 
 ## Worker Configuration
