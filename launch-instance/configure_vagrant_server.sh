@@ -13,18 +13,30 @@ sudo /data/launch-instance/server_script_vagrant.sh
 # rename the mongoid-vagrant template to mongoid.yml
 mv /mnt/openstudio/rails-models/mongoid-vagrant.yml /mnt/openstudio/rails-models/mongoid.yml
 
-#create mongodb dir
-sudo rm -rf /mnt/mongodb/data
+# stop the various services that use mongo
+sudo service delayed_job stop
+sudo service apache2 stop
+sudo service mongodb stop
+
+# remove mongo db & add it back
+# sudo rm -rf /mnt/mongodb/data
 sudo mkdir -p /mnt/mongodb/data
 sudo chown mongodb:nogroup /mnt/mongodb/data
-sudo service mongodb restart
-sudo service delayed_job restart
 sudo rm -rf /var/lib/mongodb
+
+# restart mongo
+sudo service mongodb start
+
+# restart the rails application
+sudo service apache2 start
 
 # Add in the database indexes after making the db directory
 cd /var/www/rails/openstudio
 rake db:purge
 rake db:mongoid:create_indexes
+
+# restart delayed jobs
+sudo service delayed_job start
 
 # Null out the logs
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
