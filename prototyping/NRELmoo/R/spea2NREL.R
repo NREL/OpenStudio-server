@@ -42,7 +42,7 @@ function(cl, fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourS
     upperBounds[i] = max(variables[,i])
   }
   #setup parent population from input variables and randomly reorder them.
-  parent <- variables
+  parent <- data.matrix(variables)
   for (i in 1:varNo) {
     parent[,i] <- sample(variables[,i],nrow(variables))
   }
@@ -50,8 +50,9 @@ function(cl, fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourS
   archive <- matrix(nrow=archiveLimit, ncol=varNo);
 
   #setup save objects
-  parameters_save <- matrix(NA,nrow=(popSize+archiveLimit),ncol=(varNo)*generations)
-  objectives_save <- matrix(NA,nrow=(popSize+archiveLimit),ncol=(objDim)*generations)
+  parameters.save <- matrix(NA,nrow=(popSize+archiveLimit),ncol=(varNo)*generations)
+  objectives.save <- matrix(NA,nrow=(popSize+archiveLimit),ncol=(objDim)*generations)
+  
   cat("check cluster\n")
   if (is.null(cl)) {print("cluster not initialized");stop}
   
@@ -69,10 +70,9 @@ function(cl, fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourS
     cat("\n");
     parentSize = nrow(parent); # Will parentSize less than popSize? Possible.
     parent <- cbind(parent, t(parApply(cl,parent,1,fn))); # objective function evaluation
-    
-    cat("save params and objectives")
-    parameters_save[1:nrow(parent),((iter-1)*varNo+1):(varNo*iter)] = parent[,1:varNo]
-    objectives_save[1:nrow(parent),((iter-1)*objDim+1):(objDim*iter)] = parent[,(varNo+1):(varNo+objDim)]
+    cat("save params and objectives\n")
+    parameters.save[1:nrow(parent),((iter-1)*varNo+1):(varNo*iter)] <- as.vector(parent[,1:varNo])
+    objectives.save[1:nrow(parent),((iter-1)*objDim+1):(objDim*iter)] <- as.vector(parent[,(varNo+1):(varNo+objDim)])
 
     parent <- cbind(parent, strengthRawFitness(parent[,varNo+1:objDim])); # strength and raw fitness, please load strengthRawFitness functin first
     k <- round(sqrt(parentSize));   
@@ -119,10 +119,12 @@ function(cl, fn, objDim, variables, vartype, archiveLimit=nrow(variables), tourS
     cat("Variation - mutation operator");
     cat("\n");
     parent <- boundedPolyMutationD(childAfterX,lowerBounds,upperBounds,vartype,mprob,midx);
+        print(nrow(parent))
+        print(ncol(parent))
   } # loop for iter !!
   nonDominated <- archive[,varNo+objDim+3] < 1;
   # report on SPEA2 settings & results  
-        results <- list(functions=fn, noParameter=varNo, noObjective=objDim, lowerBounds=lowerBounds, upperBounds=upperBounds, popSize=popSize, archiveLimit=archiveLimit, tournamentSize=tourSize, iter=iter, generations=generations, crossoverProb=cprob, mutationProb=mprob, truncateRecord=flag.store, population=parent, parameters=archive[,1:varNo], objectives=archive[,(varNo+1):(varNo+objDim)], fitness=archive[,varNo+objDim+3], nonDominated=nonDominated, parameters_save=parameters_save, objectives_save=objectives_save);                       
+        results <- list(functions=fn, noParameter=varNo, noObjective=objDim, lowerBounds=lowerBounds, upperBounds=upperBounds, popSize=popSize, archiveLimit=archiveLimit, tournamentSize=tourSize, iter=iter, generations=generations, crossoverProb=cprob, mutationProb=mprob, truncateRecord=flag.store, population=parent, parameters=archive[,1:varNo], objectives=archive[,(varNo+1):(varNo+objDim)], fitness=archive[,varNo+objDim+3], nonDominated=nonDominated, parameters.save=parameters.save, objectives.save=objectives.save);                       
   class(results)="spea2R";
   return(results);
 }

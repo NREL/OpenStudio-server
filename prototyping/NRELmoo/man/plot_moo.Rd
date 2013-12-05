@@ -5,6 +5,7 @@
 \description{plot parameters and objectives for nsga2NREL}
 \usage{
 plot_objectives(objectives_save, objDim)
+compplot_objectives(obj1, obj2, objDim)
 plot_parameters(parameters_save, noVars)
 }
 \arguments{
@@ -12,6 +13,7 @@ plot_parameters(parameters_save, noVars)
   \item{parameters_save}{Number of objective functions}
   \item{objDim}{Number of objective functions}
   \item{noVars}{Number of objective functions}
+  \item{obj1}{obj2}{objDim}
 }
 
 \author{

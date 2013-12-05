@@ -37,7 +37,7 @@ function(cl, fn, objDim, variables, vartype,
       upperBounds[i] = max(variables[,i])
     }
     #setup parent population from input variables and randomly reorder them.
-    parent <- variables
+    parent <- data.matrix(variables)
     for (i in 1:varNo) {
       parent[,i] <- sample(variables[,i],nrow(variables))
     }
