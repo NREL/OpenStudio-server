@@ -67,7 +67,7 @@ class Analysis::NsgaNrel
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
-    
+    @r.converse('set.seed(1979)')    
     # R libraries needed for this algorithm
     @r.converse "library(rjson)"
     @r.converse "library(mco)"
