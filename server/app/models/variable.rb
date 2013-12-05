@@ -32,7 +32,7 @@ class Variable
   index({uuid: 1}, unique: true)
   index({id: 1}, unique: true)
   index({name: 1})
-  index({r_index: 1}, unique: true)
+  index({r_index: 1})
   index({analysis_id: 1})
   index({analysis_id: 1, uuid: 1})
   index({analysis_id: 1, perturbable: 1})
