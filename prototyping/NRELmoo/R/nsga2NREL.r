@@ -49,8 +49,8 @@ function(cl, fn, objDim, variables, vartype,
     cat("start parallel pop\n")
     parent <- cbind(parent, t(parApply(cl,parent,1,fn)));
     cat("save params and objectives")
-    parameters_save <- parent[,1:varNo]
-    objectives_save <- parent[,(varNo+1):(varNo+objDim)]
+    parametersSave <- parent[,1:varNo]
+    objectivesSave <- parent[,(varNo+1):(varNo+objDim)]
     cat("stop\n")
     cat("ranking the initial population")
     cat("\n")  
@@ -85,8 +85,8 @@ function(cl, fn, objDim, variables, vartype,
         cat("start child parallel\n")
         childAfterM <- cbind(childAfterM, t(parApply(cl,childAfterM,1,fn)));
         cat("save params and objectives")
-        parameters_save <- cbind(parameters_save,childAfterM[,1:varNo])
-        objectives_save <- cbind(objectives_save,childAfterM[,(varNo+1):(varNo+objDim)])
+        parametersSave <- cbind(parametersSave,childAfterM[,1:varNo])
+        objectivesSave <- cbind(objectivesSave,childAfterM[,(varNo+1):(varNo+objDim)])
         cat("stop\n")
         # Consider use child again and again ...
         cat("Rt = Pt + Qt")
@@ -130,7 +130,7 @@ function(cl, fn, objDim, variables, vartype,
                   generations=generations, XoverProb=cprob, XoverDistIndex=XoverDistIdx,
                   mutationProb=mprob, mutationDistIndex=MuDistIdx, parameters=parent[,1:varNo],
                   objectives=parent[,(varNo+1):(varNo+objDim)], paretoFrontRank=parent[,varNo+objDim+1],
-                  crowdingDistance=parent[,varNo+objDim+2], parameters_save=parameters_save, objectives_save=objectives_save);
+                  crowdingDistance=parent[,varNo+objDim+2], parametersSave=parametersSave, objectivesSave=objectivesSave);
     class(result)="nsga2R";
     return(result)
 }
