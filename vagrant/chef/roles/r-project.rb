@@ -102,7 +102,7 @@ default_attributes(
         :local_packages => [
             {
                 :name => 'NRELmoo',
-                :version => '1.1.2'
+                :version => '1.1.3'
             },
             {
                 :name => 'Swift',
