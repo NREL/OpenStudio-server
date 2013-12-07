@@ -96,6 +96,10 @@ default_attributes(
             {
                 :name => 'rjson',
                 :version => '0.2.13'
+            },
+            {
+                :name => 'rgenoud',
+                :version => '5.7-12'
             }
         ],
         :local_package_url => "/data/launch-instance",
