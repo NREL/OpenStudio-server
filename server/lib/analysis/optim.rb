@@ -29,7 +29,8 @@ class Analysis::Optim
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
-                ]
+                ],
+                epsilonGradient: 1e-1
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -67,7 +68,7 @@ class Analysis::Optim
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
-    @r.converse('set.seed(1979)')    
+    @r.converse('set.seed(1979)')
     # R libraries needed for this algorithm
     @r.converse "library(rjson)"
     #@r.converse "library(mco)"
@@ -145,8 +146,9 @@ class Analysis::Optim
         #gen is the number of generations to calculate
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
+        #epsilonGradient is epsilon in numerical gradient calc
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :epsilonGradient => @analysis.problem['algorithm']['epsilonGradient']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -242,7 +244,7 @@ class Analysis::Optim
             gn <- g
             clusterExport(cl,"gn")
             parallelGradient <- function(params, ...) { # Now use the cluster 
-	        dp = cbind(rep(0,length(params)),diag(params * 1e-1));   
+	        dp = cbind(rep(0,length(params)),diag(params * epsilonGradient));   
 	        Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
 	        return((Fout[-1]-Fout[1])/diag(dp[,-1]));                  #
             }

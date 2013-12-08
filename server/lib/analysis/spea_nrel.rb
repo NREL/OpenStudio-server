@@ -26,6 +26,11 @@ class Analysis::SpeaNrel
         problem: {
             algorithm: {
                 generations: 1,
+                tourSize: 2,
+                cprob: 0.7,
+                cidx: 5,
+		midx: 10,
+                mprob: 0.5,
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
@@ -145,7 +150,7 @@ class Analysis::SpeaNrel
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :cidx => @analysis.problem['algorithm']['cidx'], :midx => @analysis.problem['algorithm']['midx'], :mprob => @analysis.problem['algorithm']['mprob']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -230,9 +235,9 @@ class Analysis::SpeaNrel
               print("SPEA2 needs more than one variable")
               stop
             }
-            
+             
             print(paste("Number of generations set to:",gen))
-            results <- spea2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
+            results <- spea2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/spea2_#{@analysis.id}.R")    
           }

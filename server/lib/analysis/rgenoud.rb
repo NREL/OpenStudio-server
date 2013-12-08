@@ -233,8 +233,18 @@ class Analysis::Rgenoud
             for (i in 2:ncol(vars)){
               dom <- rbind(dom,c(min(vars[,i]),max(vars[,i])))
             }
+            
+            print("setup gradient")
+	    gn <- g
+	    clusterExport(cl,"gn")
+	    parallelGradient <- function(params, ...) { # Now use the cluster 
+	      dp = cbind(rep(0,length(params)),diag(params * 1e-1));   
+	      Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
+	      return((Fout[-1]-Fout[1])/diag(dp[,-1]));                  #
+            }
+            
             print(paste("Number of generations set to:",gen))
-            results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
+            results <- genoud(fn=g,nvars=ncol(vars),gr=parallelGradient,pop.size=30,max.generations=gen,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
