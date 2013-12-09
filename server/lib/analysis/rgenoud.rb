@@ -7,6 +7,7 @@ class Analysis::Rgenoud
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
+        use_server_as_worker: true,
         output_variables: [
             {
                 display_name: "Total Site Energy (EUI)",
@@ -26,13 +27,17 @@ class Analysis::Rgenoud
         problem: {
             algorithm: {
                 generations: 1,
+                waitGenerations=1,
                 popSize: 30,
                 boundaryEnforcement: 2,
                 printLevel: 2,
+                balance: false,
+                solutionTolerance: 0.001,
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
-                ]
+                ],
+                epsilonGradient: 1e-1
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -148,7 +153,8 @@ class Analysis::Rgenoud
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel']) do
+        
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -242,13 +248,13 @@ class Analysis::Rgenoud
 	    gn <- g
 	    clusterExport(cl,"gn")
 	    parallelGradient <- function(params, ...) { # Now use the cluster 
-	      dp = cbind(rep(0,length(params)),diag(params * 1e-1));   
+	      dp = cbind(rep(0,length(params)),diag(params * epsilonGradient));   
 	      Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
 	      return((Fout[-1]-Fout[1])/diag(dp[,-1]));                  #
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- genoud(fn=g,nvars=ncol(vars),gr=parallelGradient,pop.size=popSize,max.generations=gen,Domains=dom,boundary.enforcement=boundaryEnforcement,print.level=printLevel,cluster=cl)
+            results <- genoud(fn=g,nvars=ncol(vars),gr=parallelGradient,pop.size=popSize,max.generations=gen,Domains=dom,boundary.enforcement=boundaryEnforcement,print.level=printLevel,cluster=cl,balance=balance,solution.tolerance:solutionTolerance, wait.generations=waitGenerations)
             #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
