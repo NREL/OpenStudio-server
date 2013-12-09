@@ -33,6 +33,7 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 run_options = {
     analysis_action: "start",
     without_delay: false,
+    use_server_as_worker: true,
     analysis_type: ANALYSIS_TYPE,
     problem: {
         algorithm: {

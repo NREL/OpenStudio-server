@@ -37,7 +37,8 @@ run_options = {
     analysis_type: ANALYSIS_TYPE,
     problem: {
         algorithm: {
-            generations: 25
+            generations: 25,
+            epsilonGradient: 1e-1
         }
     }
 }
