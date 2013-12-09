@@ -102,7 +102,7 @@ default_attributes(
                 :version => '5.7-12'
             }
         ],
-        :local_package_url => "/data/launch-instance",
+        :local_package_url => "/data/R-packages",
         :local_packages => [
             {
                 :name => 'NRELmoo',
