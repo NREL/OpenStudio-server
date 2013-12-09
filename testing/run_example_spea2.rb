@@ -30,6 +30,16 @@ analysis_options = {
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
+#
+#  Possible SPEA2 algorithm options
+#
+#generations: 1,   Number of generations
+#tourSize: 2,      Size of tournament
+#cprob: 0.7,       Crossover probability
+#cidx: 5,  Crossover distribution index, it can be any nonnegative real number
+#mprob: 0.5,       Mutation probability
+#midx: 10,    Mutation distribution index, it can be any nonnegative real number
+
 run_options = {
     analysis_action: "start",
     without_delay: false,

@@ -30,6 +30,19 @@ analysis_options = {
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
+#
+#  Possible rgenoud algorithm options
+#
+#generations: 1,              Number of generations
+#waitGenerations=1            If there is no improvement in the objective function in this number of generations, algorithm will terminate
+#popSize: 30,                 Population Size
+#boundaryEnforcement: 2,      0: Anything Goes, 1: partial enforcement, 2: No trespassing
+#printLevel: 2,               0 (minimal printing), 1 (normal), 2 (detailed), and 3 (debug)
+#epsilonGradient: 1e-1
+#solutionTolerance: 0.001     This is the tolerance level used by genoud.
+#balance: false               Load balance the Cluster
+#use_server_as_worker: true   Must have server_as_worker set to true
+
 run_options = {
     analysis_action: "start",
     without_delay: false,
