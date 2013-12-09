@@ -26,6 +26,9 @@ class Analysis::Rgenoud
         problem: {
             algorithm: {
                 generations: 1,
+                popSize: 30,
+                boundaryEnforcement: 2,
+                printLevel: 2,
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
@@ -145,7 +148,7 @@ class Analysis::Rgenoud
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -245,7 +248,7 @@ class Analysis::Rgenoud
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- genoud(fn=g,nvars=ncol(vars),gr=parallelGradient,pop.size=30,max.generations=gen,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
+            results <- genoud(fn=g,nvars=ncol(vars),gr=parallelGradient,pop.size=popSize,max.generations=gen,Domains=dom,boundary.enforcement=boundaryEnforcement,print.level=printLevel,cluster=cl)
             #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
