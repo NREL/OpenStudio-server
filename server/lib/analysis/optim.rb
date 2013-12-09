@@ -26,6 +26,10 @@ class Analysis::Optim
         problem: {
             algorithm: {
                 generations: 1,
+                method: "L-BFGS-B",
+                parscale: 1,
+                ndeps: 1e-3,
+                maxit: 100,
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
