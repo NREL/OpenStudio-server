@@ -7,6 +7,7 @@ class Analysis::Rgenoud
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
+        use_server_as_worker: true,
         output_variables: [
             {
                 display_name: "Total Site Energy (EUI)",
@@ -153,7 +154,7 @@ class Analysis::Rgenoud
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
         
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations'], :epsilonGradient => @analysis.problem['algorithm']['epsilonGradient']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -253,7 +254,7 @@ class Analysis::Rgenoud
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- genoud(fn=g,nvars=ncol(vars),gr=parallelGradient,pop.size=popSize,max.generations=gen,Domains=dom,boundary.enforcement=boundaryEnforcement,print.level=printLevel,cluster=cl,balance=balance,solution.tolerance:solutionTolerance, wait.generations=waitGenerations)
+            results <- genoud(fn=g, nvars=ncol(vars), gr=parallelGradient, pop.size=popSize, max.generations=gen, Domains=dom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations)
             #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
