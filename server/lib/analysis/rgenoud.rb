@@ -202,7 +202,8 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               # TODO: verify that the file exists
-              # TODO: determine how to handle if the objective function value = nil/null    
+              # TODO: determine how to handle if the objective function value = nil/null 
+              # TODO: handle switching objective functions
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
