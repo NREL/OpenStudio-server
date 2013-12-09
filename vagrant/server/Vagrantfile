@@ -35,6 +35,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../server", "/var/www/rails/openstudio", :nfs => !is_windows
   config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => !is_windows
   config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => !is_windows
+  config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => !is_windows
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
