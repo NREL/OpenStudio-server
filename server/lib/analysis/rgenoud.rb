@@ -7,7 +7,6 @@ class Analysis::Rgenoud
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
-        use_server_as_worker: true,
         output_variables: [
             {
                 display_name: "Total Site Energy (EUI)",
@@ -27,17 +26,17 @@ class Analysis::Rgenoud
         problem: {
             algorithm: {
                 generations: 1,
-                waitGenerations=1,
+                waitGenerations: 1,
                 popSize: 30,
                 boundaryEnforcement: 2,
                 printLevel: 2,
                 balance: false,
                 solutionTolerance: 0.001,
+                epsilonGradient: 1e-1,
                 objective_functions: [
                     "total_energy",
                     "total_life_cycle_cost"
-                ],
-                epsilonGradient: 1e-1
+                ]
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
