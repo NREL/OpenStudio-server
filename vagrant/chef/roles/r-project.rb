@@ -19,7 +19,7 @@ default_attributes(
         :apt_key => "E084DAB9",
         :rserve_start_on_boot => false,
         :rserve_user => "vagrant",
-        :package_source_url => "http://cran.r-project.org/src/contrib",
+        :default_package_url => "http://cran.r-project.org/src/contrib",
         :packages => [
             {
                 :name => 'lhs',
@@ -39,7 +39,7 @@ default_attributes(
             },
             {
                 :name => 'rJava',
-                :version => '0.9-4'
+                :version => '0.9-5'
             },
             {
                 :name => 'RUnit',
@@ -88,8 +88,31 @@ default_attributes(
             {
                 :name => 'NMOF',
                 :version => '0.28-2'
+            },
+            {
+                :name => 'mco',
+                :version => '1.0.12'
+            },
+            {
+                :name => 'rjson',
+                :version => '0.2.13'
+            },
+            {
+                :name => 'rgenoud',
+                :version => '5.7-12'
             }
-        ]
+        ],
+        :local_package_url => "/data/R-packages",
+        :local_packages => [
+            {
+                :name => 'NRELmoo',
+                :version => '1.1.3'
+            },
+            {
+                :name => 'Swift',
+                :version => '0.3.1'
+            }
+        ]        
     }
 )
 

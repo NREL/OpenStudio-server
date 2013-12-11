@@ -1,0 +1,25 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    aws-sdk (1.26.0)
+      json (~> 1.4)
+      nokogiri (>= 1.4.4, < 1.6.0)
+      uuidtools (~> 2.1)
+    json (1.8.1)
+    net-scp (1.1.2)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.6.8)
+    nokogiri (1.5.10)
+    nokogiri (1.5.10-x86-mingw32)
+    openstudio-aws (0.1)
+      aws-sdk (~> 1.26.0)
+      json
+      net-scp
+    uuidtools (2.1.4)
+
+PLATFORMS
+  ruby
+  x86-mingw32
+
+DEPENDENCIES
+  openstudio-aws

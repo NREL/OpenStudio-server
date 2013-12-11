@@ -1,15 +1,45 @@
 class Analysis::SequentialSearch
   def initialize(analysis_id, options = {})
-    defaults = {skip_init: false, max_iterations: 10000, x_objective_function: "total_energy", y_objective_function: "total_life_cycle_cost"}
-    @options = defaults.merge(options)
-
+    defaults = {
+        skip_init: false,
+        run_data_point_filename: "run_openstudio_workflow.rb",
+        create_data_point_filename: "create_data_point.rb",
+        output_variables: [
+            {
+                display_name: "Total Site Energy (EUI)",
+                name: "total_energy",
+                objective_function: true,
+                objective_function_index: 0,
+                index: 0
+            },
+            {
+                display_name: "Total Life Cycle Cost",
+                name: "total_life_cycle_cost",
+                objective_function: true,
+                objective_function_index: 1,
+                index: 1
+            }
+        ],
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                max_iterations: 1000,
+                objective_functions: [
+                    "total_energy",
+                    "total_life_cycle_cost"
+                ]
+            }
+        }
+    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    @options = defaults.deep_merge(options)
+    Rails.logger.info(@options)
     @analysis_id = analysis_id
+
+    # Initialize some algorithm instance variables
     @iteration = 0
     @pareto = []
   end
 
-# Perform is the main method that is run in the background.  At the moment if this method crashes
-# it will be logged as a failed delayed_job and will fail after max_attempts.
   def self.create_data_point_list(parameter_space, run_list_ids, iteration, name_moniker = "")
     result = []
 
@@ -101,24 +131,25 @@ class Analysis::SequentialSearch
           dps.each do |dp|
             next if dp._id == pareto_point._id # don't evaluate the same point
 
-            if dp.results && dp.results[@analysis['x_objective_function']] && dp.results[@analysis['y_objective_function']]
-              x = dp.results[@analysis['x_objective_function']]
-              y = dp.results[@analysis['y_objective_function']]
+            if dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][0]] && dp.results[@analysis.problem['algorithm']['objective_functions'][1]]
+              x = dp.results[@analysis.problem['algorithm']['objective_functions'][0]]
+              y = dp.results[@analysis.problem['algorithm']['objective_functions'][1]]
 
               # check for infinite slope
               temp_slope = nil
-              if (x - pareto_point.results[@analysis['x_objective_function']]) == 0
+              if (x - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]]) == 0
                 # check if this has the same value, if so, then don't add#
                 # todo: this should really cause a derivative analysis to kick off that would
                 # then use this point as a potential path as well.
-                if y == pareto_point.results[@analysis['y_objective_function']]
+                if y == pareto_point.results[@analysis.problem['algorithm']['objective_functions'][1]]
                   temp_slope = -Float::MAX
                 else
                   temp_slope = Float::MAX
                 end
               else
-                if x < pareto_point.results[@analysis['x_objective_function']]
-                  temp_slope = (y - pareto_point.results[@analysis['y_objective_function']]) / (x - pareto_point.results[@analysis['x_objective_function']])
+                if x < pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]]
+                  temp_slope = (y - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][1]]) /
+                      (x - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]])
                 else
                   temp_slope = -Float::MAX # set this to an invalid point to consider
                 end
@@ -146,8 +177,10 @@ class Analysis::SequentialSearch
             elsif min_point == @pareto[i_pareto+1]
               Rails.logger.info "Pareto search found the same point or values"
               new_curve << min_point # just add in the same point to the new curve
-            elsif min_point.results[@analysis['x_objective_function']] == @pareto[i_pareto+1].results[@analysis['x_objective_function']] \
-                && min_point.results[@analysis['y_objective_function']] == @pareto[i_pareto+1].results[@analysis['y_objective_function']]
+            elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] == 
+                @pareto[i_pareto+1].results[@analysis.problem['algorithm']['objective_functions'][0]] \
+                && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] == 
+                @pareto[i_pareto+1].results[@analysis.problem['algorithm']['objective_functions'][1]]
               Rails.logger.info "Found the same objective function values in array, skipping"
                                      #new_curve << min_point # just add in the same point to the new curve
             else
@@ -223,35 +256,40 @@ class Analysis::SequentialSearch
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
-    @analysis['iteration'] = @iteration
-    @analysis['x_objective_function'] = @options[:x_objective_function]
-    @analysis['y_objective_function'] = @options[:y_objective_function]
+    
+    # add in the default problem/algorithm options into the analysis object
+    # anything at at the root level of the options are not designed to override the database object.
+    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
-    # Set this if not defined in the JSON
-    @analysis.problem['random_seed'] ||= 1979
+    # merge in the output variables and objective functions into the analysis object which are needed for problem execution
+    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
+    @analysis.output_variables.uniq!
+    
+    # verify that the objective_functions are unique
+    @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
+    
+    # some algorithm specific data to be stored in the database
+    @analysis['iteration'] = @iteration
+    
+    # save the data
     @analysis.save!
+    @analysis.reload # after saving the data (needed for some reason yet to be determined)
 
     # get static variables.  These must be applied after the pivot vars and before the lhs
-    static_variables = Variable.where({analysis_id: @analysis, static: true}).order_by(:name.asc)
-    static_array = []
-    static_variables.each do |var|
-      if var.static_value
-        static_array << {:"#{var.uuid}" => var.static_value}
-      else
-        raise "Asking to set a static value but none was passed #{var.name}"
-      end
-    end
-    Rails.logger.info "Static array is #{static_array}"
-
-    # get variables / measures
+    pivot_array = Variable.pivot_array(@analysis.id)
+    static_array = Variable.static_array(@analysis.id)
+    selected_variables = Variable.variables(@analysis.id)
+    
+    # the sequential search operates on measures so get variables / measures
     parameter_space = {}
-    measures = Measure.where({analysis_id: @analysis}).order_by(:name.asc) # order is not super important here becuase the analysis has has the order, right?
+    measures = Measure.where({analysis_id: @analysis}).order_by(:name.asc) # order is not super important here because the analysis has has the order, right?
     measures.each do |measure|
       variables = measure.variables.where(perturbable: true)
 
-      # mash the two variables together
+      # mash the two variables together if there are more than 1 variable in a measure. This is a simple combinatorial
       measure_values = {}
       variables.each do |variable|
+        # if the variable is continuous then discretize it before running
         values, weights = variable.map_discrete_hash_to_array
         measure_values["#{variable._id}"] = values
       end
@@ -264,11 +302,6 @@ class Analysis::SequentialSearch
         parameter_space[UUID.new.generate] = {measure_id: measure._id, variables: mvs}
       end
     end
-
-    # The resulting parameter space is in the form of a hash with elements like the below
-    # "9a1dbc60-1919-0131-be3d-080027880ca6"=>{:measure_id=>"e16805f0-a2f2-4122-828f-0812d49493dd",
-    #   :variables=>{"8651b16d-91df-4dc3-a07b-048ea9510058"=>80, "c7cf9cfc-abf9-43b1-a07b-048ea9510058"=>"West"}}
-
     Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
 
     # determine the first list of items to run
@@ -292,14 +325,14 @@ class Analysis::SequentialSearch
       @analysis.save!
 
       Rails.logger.info("Kicking off simulations for iteration #{@iteration}")
-      @analysis.start(true, 'batch_run', {skip_init: true, simulate_data_point_filename: "simulate_data_point_lhs.rb"})
+      @analysis.start(true, 'batch_run', {skip_init: true, run_data_point_filename: "run_openstudio_workflow.rb"})
       Rails.logger.info("Finished simulations for iteration #{@iteration}... checking results")
       new_pareto_point = determine_curve()
       Rails.logger.info("Determined pareto curve for #{@iteration} and new point flag is set to #{new_pareto_point}")
       Rails.logger.info("Finished simulations for iteration #{@iteration}... iterating")
 
-      if @iteration >= @options[:max_iterations]
-        final_message = "Reached max iterations of #{@options[:max_iterations]}"
+      if @iteration >= @options[:problem][:algorithm][:max_iterations]
+        final_message = "Reached max iterations of #{@analysis.problem['algorithm']['max_iterations']}"
         break
       end
 

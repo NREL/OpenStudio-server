@@ -1,0 +1,707 @@
+{
+    "analysis": {
+        "data_points_are_invalid": false,
+        "display_name": "Ruby Continuous Variables Example Analysis",
+        "name": "Ruby Continuous Variables Example Analysis",
+        "problem": {
+            "number_of_samples": 8,
+            "display_name": "Ruby Continuous Variables Example Problem",
+            "name": "Ruby Continuous Variables Example Problem",
+            "problem_type": "Problem",
+            "uuid": "9676eec5-84cd-4bec-af9f-918259778f71",
+            "version_uuid": "f8b21cdd-a733-42b8-b9dd-c56a985edb0e",
+            "workflow": [
+
+                {
+                    "arguments": [
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/PATTest/scripts/RotateBuilding",
+                    "bcl_measure_class_name_ADDME": "RotateBuilding",
+                    "bcl_measure_uuid": "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+                    "bcl_measure_version_uuid": "ac5aa597-e9d7-47ec-931a-a57ed41b9fc2",
+                    "workflow_index_ADDME": 0,
+                    "description": "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
+                    "display_name": "Rotate Building 90 degrees",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 1,
+                    "measure_type": "RubyMeasure",
+                    "name": "Rotate Building",
+                    "output_file_type": "OSM",
+                    "uuid": "4839a263-d0a9-4037-93e6-b5d89bf7a659",
+                    "version_uuid": "bc58ea56-bf10-41c0-8b92-d3676530b83c",
+                    "variables": [
+                        {
+                            "argument": {
+                                "default_value": 90.0,
+                                "display_name": "Number of Degrees to Rotate Building (positive value is clockwise)",
+                                "domain_type": "Interval",
+                                "name": "relative_building_rotation",
+                                "required": false,
+                                "type": "Double",
+                                "uuid": "8e42df38-57c4-4952-8c64-a674647b2c70",
+                                "version_uuid": "4a946a09-d9ce-41b6-a9f5-70ac716814e4"
+                            },
+                            "display_name": "Building Rotation",
+                            "maximum": 359,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 359,
+                            "minimum": 0,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0,
+                            "name": "building_rotation",
+                            "name_NOTE": "needs to be snake case",
+                            "variable": true,
+                            "variable_ADDME": true,
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 180,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 360,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "uniform_uncertain"
+                            },
+                            "uuid": "c12f7f8f-9b98-4971-afae-1d159d78b7d1",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "30338a34-3557-4d13-889f-b3a19788f412"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "argument_index": 0,
+                            "choices": [
+                                {
+                                    "choice_index": 0,
+                                    "display_name": "ASHRAE 189.1-2009 ClimateZone 4-8 MediumOffice",
+                                    "value": "{f4de87b0-5d1b-454c-9fc8-3f5a824ee533}"
+                                },
+                                {
+                                    "choice_index": 1,
+                                    "display_name": "*Entire Building*",
+                                    "value": "{08678ddd-175a-469b-9626-2f02c40b6916}"
+                                }
+                            ],
+                            "default_value": "{08678ddd-175a-469b-9626-2f02c40b6916}",
+                            "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model",
+                            "domain_type": "Enumeration",
+                            "name": "space_type",
+                            "required": true,
+                            "type": "Choice",
+                            "uuid": "09988191-1cf8-4217-a790-062901ee9759",
+                            "version_uuid": "64755dd1-bffd-40a9-b403-ee43d205d00c"
+                        },
+                        {
+                            "argument_index": 2,
+                            "default_value": 150.0,
+                            "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+                            "domain_type": "Interval",
+                            "name": "material_and_installation_cost",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "cab7d382-da06-4c27-89e2-fff8f7e72a6e",
+                            "version_uuid": "3e6021f1-a1a5-4916-a345-b07b242c109f"
+                        },
+                        {
+                            "argument_index": 3,
+                            "default_value": 0.0,
+                            "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+                            "domain_type": "Interval",
+                            "name": "demolition_cost",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "037842b8-bab0-4cd8-a04b-64a058f6b01b",
+                            "version_uuid": "3e57d80e-3e75-4dfe-b5dd-505daaadca3c"
+                        },
+                        {
+                            "argument_index": 4,
+                            "default_value": 0,
+                            "display_name": "Years Until Costs Start (whole years).",
+                            "domain_type": "Interval",
+                            "name": "years_until_costs_start",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "8ac455af-d9fa-48ba-a5ba-7bcff102d845",
+                            "version_uuid": "0ae73332-15d6-417c-accb-04b6bff0d1fb"
+                        },
+                        {
+                            "argument_index": 5,
+                            "default_value": "false",
+                            "display_name": "Demolition Costs Occur During Initial Construction?",
+                            "domain_type": "Enumeration",
+                            "name": "initial_demo_costs",
+                            "required": true,
+                            "type": "Boolean",
+                            "uuid": "31091352-bbae-4ac1-b0b3-97e1445ed406",
+                            "version_uuid": "83d62985-0a25-4fa7-a29d-dcfa915bd01b"
+                        },
+                        {
+                            "argument_index": 6,
+                            "default_value": 15,
+                            "display_name": "Expected Life (whole years)",
+                            "domain_type": "Interval",
+                            "name": "expected_life",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "d7310c71-493c-486f-b9b7-e6eaf38f7603",
+                            "version_uuid": "6297f50b-0fee-49be-9133-2155de03e0b1"
+                        },
+                        {
+                            "argument_index": 7,
+                            "default_value": 0.0,
+                            "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+                            "domain_type": "Interval",
+                            "name": "om_cost",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "b7ef0571-db39-41c8-b2b6-bf511282381d",
+                            "version_uuid": "01ee4d9b-aa91-434a-a967-9a00562a065b"
+                        },
+                        {
+                            "argument_index": 8,
+                            "default_value": 1,
+                            "display_name": "O & M Frequency (whole years).",
+                            "domain_type": "Interval",
+                            "name": "om_frequency",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "a413b48f-7031-43a8-b4c2-0d38c7145d3b",
+                            "version_uuid": "7658be79-7a01-466d-85e9-ad2b15224708"
+                        }
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/PATTest/scripts/ReduceLightingLoadsByPercentage",
+                    "bcl_measure_class_name_ADDME": "ReduceLightingLoadsByPercentage",
+                    "bcl_measure_uuid": "d37b7ed5-887a-4d1f-b304-259462eadbe9",
+                    "bcl_measure_version_uuid": "b0cb5b76-61fa-465a-af14-2992dceb374c",
+                    "workflow_index_ADDME": 1,
+                    "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
+                    "display_name": "Reduce Lighting Load by Percentage",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 1,
+                    "measure_type": "RubyMeasure",
+                    "name": "Reduce Lighting Load By 30 percent",
+                    "output_file_type": "OSM",
+                    "uuid": "883ebc58-845f-4708-81b2-0930d9cf22e0",
+                    "version_uuid": "8725b62f-967a-4c0a-a377-c5a3e68c5295",
+                    "variables": [
+                        {
+                            "argument": {
+                                "default_value": 30.0,
+                                "display_name": "Electric Equipment Power Reduction Percentage",
+                                "domain_type": "Interval",
+                                "name": "reduction_percent",
+                                "required": true,
+                                "type": "Double",
+                                "uuid": "29580d94-43b3-4881-96e4-935fa140bcf6",
+                                "version_uuid": "0255c23a-4b07-4d05-a8a3-b093ef60880e"
+                            },
+                            "display_name": "Electric Power REduction",
+                            "maximum": 0,
+                            "minimum": 70,
+                            "name": "reduce_power",
+                            "variable": true,
+                            "variable_ADDME": true,
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 20,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 70,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "triangle_uncertain"
+                            },
+                            "uuid": "41cb285c-f8c1-4673-8710-3306593d465e",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "f5344c2b-6578-4bef-97ef-03c81b5035cf"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "argument_index": 1,
+                            "default_value": 0.0,
+                            "display_name": "Increase in Material and Installation Costs for Construction per Area Used ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "material_cost_increase_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "4da82528-475b-4fec-a3a2-0d820e1ff24b",
+                            "value": 2.0,
+                            "version_uuid": "4108abb2-cf9e-4bc6-8df2-3a6590986374"
+                        },
+                        {
+                            "argument_index": 2,
+                            "default_value": 0.0,
+                            "display_name": "One Time Retrofit Cost to Add Insulation to Construction ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "one_time_retrofit_cost_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "c9f3bc84-e9af-47e7-9ca8-db6aea4d2c3f",
+                            "version_uuid": "63d2e910-b168-4bdf-98eb-6abfe9d424d2"
+                        },
+                        {
+                            "argument_index": 3,
+                            "default_value": 0,
+                            "display_name": "Year to Incur One Time Retrofit Cost (whole years).",
+                            "domain_type": "Interval",
+                            "name": "years_until_retrofit_cost",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "70f3b40b-bc82-4267-ab7a-0e60cadcce17",
+                            "version_uuid": "a1a37e61-cbb1-4fbd-aa77-a33c9f505f11"
+                        }
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
+                    "bcl_measure_class_name_ADDME": "IncreaseInsulationRValueForExteriorWalls",
+                    "bcl_measure_uuid": "34877255-5bb5-45db-ad45-abd9ca80960c",
+                    "bcl_measure_version_uuid": "16aae883-e2bc-4121-a995-4bfc4c437561",
+                    "description": "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. If a wall?s insulation matches or exceeds the requested value then it will not be altered. Costs for a construction can be adjusted",
+                    "display_name": "Set R-value of Insulation for Exterior Walls to a Specific Value R-17.5",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 2,
+                    "measure_type": "RubyMeasure",
+                    "name": "Set R-value of Insulation for Exterior Walls to a Specific Value R-17.5",
+                    "output_file_type": "OSM",
+                    "uuid": "149f3f91-155b-400d-b803-b0c100e726da",
+                    "version_uuid": "5af31d5b-538c-4ce9-b588-1ccedcb32748",
+                    "variables": [
+                        {
+                            "argument": {
+                                "argument_index": 0,
+                                "default_value": 13.0,
+                                "display_name": "Insulation R-value (ft^2*h*R/Btu).",
+                                "domain_type": "Interval",
+                                "name": "r_value",
+                                "required": true,
+                                "type": "Double",
+                                "uuid": "08570be4-080e-488e-9777-c0dab35885ab",
+                                "version_uuid": "e0f2537c-7be0-4195-8a37-5282661faab2"
+                            },
+                            "display_name": "Exterior R-Value",
+                            "maximum": 50,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 50,
+                            "minimum": 5,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
+                            "name": "exterior_r_value",
+                            "variable": true,
+                            "variable_ADDME": true,
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 25,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 50,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "normal_uncertain"
+                            },
+                            "uuid": "2b22eb94-6657-42ce-9c8f-2b60e610d6c1",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "4c745755-666a-4c00-b3f2-4d383d4e4e38"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "argument_index": 1,
+                            "default_value": 0.0,
+                            "display_name": "Increase in Material and Installation Costs for Construction per Area Used ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "material_cost_increase_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "c89e6f7a-995e-498d-bec5-8409d4dd1122",
+                            "value": 2.0,
+                            "version_uuid": "8123d970-7816-4d25-9afe-55076a300c7a"
+                        },
+                        {
+                            "argument_index": 2,
+                            "default_value": 0.0,
+                            "display_name": "One Time Retrofit Cost to Add Insulation to Construction ($/ft^2).",
+                            "domain_type": "Interval",
+                            "name": "one_time_retrofit_cost_ip",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "f57f8ec2-fe36-41d1-b833-6be34c6e6afa",
+                            "version_uuid": "d26edc7c-62f0-4337-b636-74428dc64283"
+                        },
+                        {
+                            "argument_index": 3,
+                            "default_value": 0,
+                            "display_name": "Year to Incur One Time Retrofit Cost (whole years).",
+                            "domain_type": "Interval",
+                            "name": "years_until_retrofit_cost",
+                            "required": true,
+                            "type": "Integer",
+                            "uuid": "009b3fa8-b1f7-4f98-88f7-56cd133e2dce",
+                            "version_uuid": "36e8f8f6-b387-4abf-b061-30829339e6bf"
+                        }
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
+                    "bcl_measure_class_name_ADDME": "IncreaseInsulationRValueForRoofs",
+                    "bcl_measure_uuid": "c6b78646-be8e-425b-af79-fdbbcd0d58d5",
+                    "bcl_measure_version_uuid": "019cc5e3-aec7-417e-8b89-b47c0644c880",
+                    "description": "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
+                    "display_name": "Set R-value of Insulation for Roofs to a Specific Value R30",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 1,
+                    "measure_type": "RubyMeasure",
+                    "name": "Set R-value of Insulation for Roofs to a Specific Value R30",
+                    "output_file_type": "OSM",
+                    "uuid": "65463eba-6517-4842-9744-ee4a770044ba",
+                    "version_uuid": "14e264e0-4921-481c-8b7c-7e5dff50d7db",
+                    "variables": [
+                        {
+                            "argument": {
+                                "argument_index": 0,
+                                "default_value": 30.0,
+                                "display_name": "Roof Insulation R-value (ft^2*h*R/Btu).",
+                                "domain_type": "Interval",
+                                "name": "r_value",
+                                "required": true,
+                                "type": "Double",
+                                "uuid": "5f5322ca-3f85-45c7-bf7a-7da43a8ea3a8",
+                                "version_uuid": "9a830663-7cdd-440d-a59d-67a1a0a21c1f"
+                            },
+                            "display_name": "Roof R-Value",
+                            "maximum": 100,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 100,
+                            "minimum": 5,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 5,
+                            "name": "roof_r_value",
+                            "pivot": true,
+                            "pivot_ADDME": true,
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "name": "discrete",
+                                        "values_and_weights": [
+                                            {
+                                                "value": 10,
+                                                "weight": 0.05
+                                            },
+                                            {
+                                                "value": 30,
+                                                "weight": 0.1
+                                            },
+                                            {
+                                                "value": 50,
+                                                "weight": 0.45
+                                            },
+                                            {
+                                                "value": 80,
+                                                "weight": 0.4
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "type": "discrete_uncertain"
+                            },
+                            "uuid": "17f4c188-4832-4e24-a9dc-aaae8f28002d",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "974ac73b-7180-4775-9e4a-a0e7e3b1279e"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "argument_index": 1,
+                            "default_value": 30.0,
+                            "display_name": "Sill Height (in).",
+                            "domain_type": "Interval",
+                            "name": "sillHeight",
+                            "required": true,
+                            "type": "Double",
+                            "uuid": "f61f1d6d-7d31-4c60-b885-8490ccfaa376",
+                            "version_uuid": "0ed97163-5c72-4f70-81ed-c04c79159eb1"
+                        }
+                    ],
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/SetWindowToWallRatioByFacade",
+                    "bcl_measure_class_name_ADDME": "SetWindowToWallRatioByFacade",
+                    "bcl_measure_uuid": "f347ae80-48b4-4c40-bfd4-6c5139b38136",
+                    "bcl_measure_version_uuid": "251c491c-1fc5-4d13-b713-546808b1a353",
+                    "description": "This measure will set the window to wall ratio for exterior surfaces with a specified orientation. If one or more windows exist on an affected wall, they will be removed and replaced with a single ribbon window. Doors will not be removed. If the requested ratio can?t be achieved then the wall will remain un-touched.",
+                    "display_name": "Set Window to Wall Ratio by Facade 0.25 South",
+                    "input_file_type": "OSM",
+                    "is_selected": true,
+                    "is_user_script": false,
+                    "measure_group_index": 2,
+                    "measure_type": "RubyMeasure",
+                    "name": "Set Window to Wall Ratio by Facade",
+                    "output_file_type": "OSM",
+                    "uuid": "e16805f0-a2f2-4122-828f-0812d49493dd",
+                    "version_uuid": "ca5428cb-a714-4f14-bbf7-035cafcd920b",
+                    "variables": [
+                        {
+                            "argument": {
+                                "argument_index": 0,
+                                "default_value": 0.4,
+                                "display_name": "Window to Wall Ratio (fraction).",
+                                "domain_type": "Interval",
+                                "name": "wwr",
+                                "required": true,
+                                "type": "Double",
+                                "uuid": "b711ad26-1239-4fea-8e9c-e4dd5ae555d2",
+                                "value": 0.25,
+                                "version_uuid": "8f539689-0930-4669-b648-c5a14f0a7fc3"
+                            },
+                            "display_name": "Window to Wall Ratio",
+                            "maximum": 0.9,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 0.9,
+                            "minimum": 0.1,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0.1,
+                            "name": "wwr_west",
+                            "variable_ADDME": true,
+                            "variable": true,
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 0.4,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0.05,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 0.95,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "triangle_uncertain"
+                            },
+                            "uuid": "8651b16d-91df-4dc3-a07b-048ea9510058",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "c7cf9cfc-abf9-43b1-9445-e7b312c9f4a7"
+                        },
+                        {
+                            "argument": {
+                                "argument_index": 2,
+                                "default_value": "South",
+                                "display_name": "Cardinal Direction.",
+                                "domain_type": "Enumeration",
+                                "name": "facade",
+                                "required": true,
+                                "type": "Choice",
+                                "uuid": "7b069817-b4dc-4b51-b35b-265a738fa859",
+                                "version_uuid": "55fc3de0-3a57-4062-862e-b11147ccf211"
+                            },
+                            "display_name": "Window to Wall Ratio West Facade",
+                            "maximum": 0.9,
+                            "maximum_MOVE_THIS_UNDER_UNCERTAINTY": 0.9,
+                            "minimum": 0.1,
+                            "minimum_MOVE_THIS_UNDER_UNCERTAINTY": 0.1,
+                            "name": "wwr_west_static",
+                            "static": true,
+                            "static_ADDME": true,
+                            "static_value": "West",
+                            "static_value_ADDME": "West",
+                            "uncertainty_description": {
+                                "attributes": [
+                                    {
+                                        "display_name": "Mode",
+                                        "name": "modes",
+                                        "uuid": "e2cb20aa-fd3b-4e43-b3f7-80ae54e374ca",
+                                        "value": 0.4,
+                                        "value_type": "Double",
+                                        "version_uuid": "740359d8-2aa4-46bc-b02e-3434e75c38e6"
+                                    },
+                                    {
+                                        "display_name": "Lower Bound",
+                                        "name": "lower_bounds",
+                                        "uuid": "3b76576b-60a3-43f4-9fcb-2ef64d30a344",
+                                        "value": 0.05,
+                                        "value_type": "Double",
+                                        "version_uuid": "569ed342-4945-49cd-988b-7c30ed44736a"
+                                    },
+                                    {
+                                        "display_name": "Upper Bound",
+                                        "name": "upper_bounds",
+                                        "uuid": "84194a35-b0a3-4f37-8b08-dc7633ae5336",
+                                        "value": 0.95,
+                                        "value_type": "Double",
+                                        "version_uuid": "b02cba0e-0dce-40e7-ad5b-6fe0a8088316"
+                                    }
+                                ],
+                                "type": "triangle_uncertain"
+                            },
+                            "uuid": "c7cf9cfc-abf9-43b1-a07b-048ea9510058",
+                            "variable_index": 0,
+                            "variable_type": "RubyContinuousVariable",
+                            "version_uuid": "c7cf9cfc-abf9-43b1-9445-e7b312c9f4a7"
+                        }
+                    ]
+                },
+                {
+                    "arguments": [
+                        {
+                            "default_value": 0.0,
+                            "display_name": "Select an Electricity Tariff",
+                            "name": "elec_tar",
+                            "required": true,
+                            "type": "Double",
+                            "value": "Secondary General"
+                        },
+                        {
+                            "default_value": 0.0,
+                            "display_name": "Select a Gas Tariff",
+                            "name": "gas_tar",
+                            "required": true,
+                            "type": "Double",
+                            "value": "Large CG"
+                        }
+                    ],
+                    "name": "XcelEDATariffSelectionandModelSetup",
+                    "display_name": "Add EnergyPlus Tariffs",
+                    "measure_type": "EnergyPlusMeasure",
+                    "bcl_measure_directory": "C:/working/openstudio-server/prototype/pat/BigPATTest/scripts/XcelEDATariffSelectionandModelSetup",
+                    "bcl_measure_class_name_ADDME": "XcelEDATariffSelectionandModelSetup",
+                    "bcl_measure_uuid": "c9898d1a-2db8-416a-9398-9aa799f4fc90",
+                    "bcl_measure_version_uuid": "86d6921c-3a2c-4df2-b6fd-5d271fffd643",
+                    "description": "Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program",
+                    "display_name": "Xcel EDA Tariff Selection and Model Setup"
+                }
+            ]
+        },
+        "results_are_invalid": false,
+        "seed": {
+            "checksum_create": "2EDE1A05",
+            "checksum_last": "2EDE1A05",
+            "display_name": "seed",
+            "file_type": "OSM",
+            "name_DELETEME": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
+            "path": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed.osm",
+            "timestamp_create": "20130716T144225",
+            "timestamp_last": "20130917T154501",
+            "uuid": "e105d3df-8259-4257-a89c-f31cd7a62e52",
+            "version_uuid": "a7a0fa64-ec35-4df1-848d-8c7399e549c2"
+        },
+        "weather_file": {
+            "checksum_create": "72673005",
+            "checksum_last": "72673005",
+            "display_name": "USA_CO_Golden-NREL.724666_TMY3",
+            "file_type": "EPW",
+            "name_DELETEME": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+            "path": "C:/working/openstudio-server/prototype/pat/PATTest/seed/seed/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+            "path_QUESTION": "why is this seed/seeed -- make this relative",
+            "timestamp_create": "20130716T144225",
+            "timestamp_last": "20130917T154501",
+            "uuid": "9a6a9a9e-0cc6-4396-8373-d1736300a006",
+            "version_uuid": "69763fa2-f574-4336-9506-24d35c48fff5"
+        },
+        "uuid": "143fb5c3-5171-45e6-b6c2-9ac944b2b1df",
+        "version_uuid": "12815404-54eb-4bfe-9f7d-12bc96ed52ed"
+    },
+    "metadata": {
+        "openstudio_version": "1.0.7",
+        "variables": [
+            {
+                "display_name": "Chiller Cooling Efficiency",
+                "maximum": 1.48187,
+                "minimum": 0.518135,
+                "name": "Chiller Cooling Efficiency",
+                "type": "Double",
+                "uuid": "41cb285c-f8c1-4673-8710-3306593d465e",
+                "variable_index": 0,
+                "version_uuid": "41cb285c-f8c1-4673-8710-3306593d465e"
+            },
+            {
+                "display_name": "Orientation",
+                "maximum": 359.0,
+                "minimum": 0.0,
+                "name": "Orientation",
+                "type": "Double",
+                "uuid": "e0362f5d-cbed-4749-ab3b-5e0973323a17",
+                "variable_index": 1,
+                "version_uuid": "e0362f5d-cbed-4749-ab3b-5e0973323a17"
+            }
+        ]
+    }
+}

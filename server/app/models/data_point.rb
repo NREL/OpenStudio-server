@@ -19,7 +19,7 @@ class DataPoint
   field :results, :type => Hash
   field :run_start_time, :type => DateTime
   field :run_end_time, :type => DateTime
-  field :sdp_log_file, :type => Array
+  field :sdp_log_file, :type => Array, default: []
 
   # Relationships
   belongs_to :analysis

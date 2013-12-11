@@ -17,8 +17,8 @@ class ComputeNode
   index({ip_address: 1}, unique: true)
   index({node_type: 1})
 
-  # Return all the worker IP addresses as a hash in prep for writing to a dataframe
-  def self.to_hash
+  # Return all the valid IP addresses as a hash in prep for writing to a dataframe
+  def self.worker_ips
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
 
@@ -29,7 +29,7 @@ class ComputeNode
 
     worker_ips_hash
   end
-
+  
   # copy the zip file over the various workers and extract the file.
   # if the file already exists, then it will overwrite the file
   # verify the behaviour of the zip extraction on top of an already existing analysis.
@@ -119,21 +119,21 @@ class ComputeNode
         node.instance_id = "Vagrant"
       else
         if node.node_type == 'server'
-          node.ami_id = `curl -L http://169.254.169.254/latest/meta-data/ami-id`
-          node.instance_id = `curl -L http://169.254.169.254/latest/meta-data/instance-id`
+          node.ami_id = `curl -sL http://169.254.169.254/latest/meta-data/ami-id`
+          node.instance_id = `curl -sL http://169.254.169.254/latest/meta-data/instance-id`
         else
           # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
           Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
             #Rails.logger.info(self.inspect)
 
             logger.info "Checking the configuration of the worker nodes"
-            session.exec!("curl -L http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
+            session.exec!("curl -sL http://169.254.169.254/latest/meta-data/ami-id") do |channel, stream, data|
               Rails.logger.info("Worker node reported back #{data}")
               node.ami_id = data
             end
             session.loop
 
-            session.exec!("curl -L http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
+            session.exec!("curl -sL http://169.254.169.254/latest/meta-data/instance-id") do |channel, stream, data|
               Rails.logger.info("Worker node reported back #{data}")
               node.instance_id = data
             end

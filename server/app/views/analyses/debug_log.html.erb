@@ -53,6 +53,19 @@
 <table id="datapointtable" class="tablesorter table table-striped">
   <thead>
   <tr>
+    <th>Analysis Status Message(s)</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @analysis.status_message if @analysis.status_message %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
     <th>RServe Messages</th>
   </tr>
   </thead>

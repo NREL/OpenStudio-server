@@ -53,6 +53,9 @@ default_attributes(
                 },
                 {
                     :name => "ruby-prof"
+                },
+                {
+                    :name => "uuid"
                 }
             ]
         }

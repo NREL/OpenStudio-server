@@ -9,6 +9,7 @@ run_list([
              "role[r-project]",
              "role[openstudio]",
              "role[web_base]",
+             "recipe[openstudio_server::bashprofile]",
              "recipe[openstudio_server::bundle]", #install the bundle first to get rails for apache passenger
              "role[passenger_apache]",
              "recipe[openstudio_server]",
@@ -19,7 +20,8 @@ default_attributes(
     :openstudio_server => {
         :ruby_path => "/usr/local/rbenv", # this is needed for the delayed_job service
         :server_path => "/var/www/rails/openstudio",
-        :rails_environment => "development"
+        :rails_environment => "development",
+        :bash_profile_user => "vagrant"
     }
 )
 

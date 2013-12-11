@@ -5,7 +5,7 @@ class AnalysisChauffeur
 
   def initialize(uuid_or_path, library_path="/mnt/openstudio", communicate_method="communicate_mongo")
     if communicate_method == "communicate_mongo"
-        require "#{library_path}/#{communicate_method}.rb"
+      require "#{library_path}/#{communicate_method}.rb"
 
       require 'mongoid'
       require 'mongoid_paperclip'
@@ -13,7 +13,6 @@ class AnalysisChauffeur
       Dir["#{library_path}/rails-models/*.rb"].each { |f| require f }
       Mongoid.load!("#{library_path}/rails-models/mongoid.yml", :development)
 
-      # right now this is always a path, but need a regex or flag to decipher right
       @communicate_object = get_datapoint(uuid_or_path)
     else
       raise "No Communicate Module found for #{communicate_method} in #{__FILE__}"
@@ -60,7 +59,7 @@ class AnalysisChauffeur
   private
 
   def get_datapoint(id)
-    # TODO : make this not a find_or_create, but rather a find or crash (not sure about optimization though... ugh.)
+    # TODO : make this a conditional on when to create one vs when to error out.
     @communicate_object = DataPoint.find_or_create_by(uuid: id)
   end
 

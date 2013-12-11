@@ -1,9 +1,15 @@
 module Analysis::R
-  module Lhs
-    #def r
-    #  @r ||= ...
-    #end
+  class Lhs
+    def initialize(r_session)
+      @r = r_session
 
+      @r.converse "library(lhs)"
+      @r.converse "library(triangle)"
+      @r.converse "library(e1071)"
+    end
+    
+    # Take the number of variables and number of samples and generate the bins for
+    # a LHS sample
     def lhs_probability(num_variables, sample_size)
       Rails.logger.info "Start generating of LHS #{Time.now}"
       a = @r.converse "a <- randomLHS(#{sample_size}, #{num_variables})"
@@ -112,15 +118,14 @@ module Analysis::R
           %Q{
             samples <- #{r_dist_name}(df$data, #{mean}, #{stddev})
             samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
-
           }
         end
       end
 
       # returns an array
-      smaples = @r.converse "print(samples)"
+      samples = @r.converse "print(samples)"
       save_file_name = nil
-      if save_histogram && !smaples[0].kind_of?(String)
+      if save_histogram && !samples[0].kind_of?(String)
         # Determine where to save it
         save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
         Rails.logger.info("R image file name is #{save_file_name}")
@@ -136,6 +141,44 @@ module Analysis::R
 
       {r: @r.converse("samples"), image_path: save_file_name}
     end
+
+    def sample_all_variables(selected_variables, number_of_samples)
+      samples = {}
+      var_types = []
+
+      # get the probabilities
+      p = lhs_probability(selected_variables.count, number_of_samples)
+      Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
+
+      # TODO: performance smell... optimize this using Parallel
+      i_var = 0
+      selected_variables.each do |var|
+        Rails.logger.info "sampling variable #{var.name}"
+        sfp = nil
+        if var.uncertainty_type == "discrete_uncertain"
+          Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
+          sfp = discrete_sample_from_probability(p[i_var], var, true)
+          var_types << "discrete"
+        else
+          sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
+          var_types << "continuous"
+        end
+
+        samples["#{var.id}"] = sfp[:r]
+        if sfp[:image_path]
+          pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
+          var.preflight_images << pfi unless var.preflight_images.include?(pfi)
+        end
+
+        var.r_index = i_var + 1 # r_index is 1-based 
+        var.save!
+
+        i_var += 1
+      end
+
+      [samples, var_types]
+    end
   end
 end
+
 
