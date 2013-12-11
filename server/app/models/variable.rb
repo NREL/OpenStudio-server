@@ -4,6 +4,7 @@ class Variable
 
   field :uuid, :type => String
   field :_id, :type => String, default: -> { uuid || UUID.generate }
+  field :r_index, :type => Integer
   field :version_uuid, :type => String # pointless at this time
   field :name, :type => String
   field :display_name, :type => String
@@ -31,6 +32,7 @@ class Variable
   index({uuid: 1}, unique: true)
   index({id: 1}, unique: true)
   index({name: 1})
+  index({r_index: 1})
   index({analysis_id: 1})
   index({analysis_id: 1, uuid: 1})
   index({analysis_id: 1, perturbable: 1})
@@ -49,7 +51,9 @@ class Variable
     if var
       Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
     else
+      Rails.logger.info "create new variable for os_json['uuid']"
       var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
+      Rails.lgger.info var.inspect
     end
 
     exclude_fields = ['uuid', 'type']
@@ -68,8 +72,9 @@ class Variable
   def self.create_by_os_argument_json(analysis_id, os_json)
     var = Variable.where({analysis_id: analysis_id, uuid: os_json['uuid']}).first
     if var
-      Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
+      Rails.logger.warn("Variable already exists for '#{var.name}' : '#{var.uuid}'")
     else
+      Rails.logger.info("Adding a new variable/argument named: '#{os_json['name']}' with UUID '#{os_json['uuid']}'")
       var = Variable.find_or_create_by({analysis_id: analysis_id, uuid: os_json['uuid']})
     end
 
@@ -107,11 +112,60 @@ class Variable
         end
       end
     end
-
+    
     var.save!
 
     var
   end
+  
+  def self.pivots(analysis_id)
+    Variable.where({analysis_id: analysis_id, pivot: true}).order_by(:name.asc)
+  end
+  
+  # start with a hash and then create the hash_of_arrays
+  def self.pivot_array(analysis_id)
+    pivot_variables = Variable.pivots(analysis_id)
+    
+    pivot_hash = {}
+    pivot_variables.each do |var|
+      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
+      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
+      values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
+      Rails.logger.info "pivot variable values are #{values}" 
+      pivot_hash[var.uuid] = values
+    end
+
+    # if there are multiple pivots, then smash the hash of arrays to form a array of hashes
+    pivot_array = Analysis::Core.hash_of_array_to_array_of_hash(pivot_hash)
+    Rails.logger.info "pivot array is #{pivot_array}"
+
+    pivot_array
+  end
+
+  def self.statics(analysis_id)
+    Variable.where({analysis_id: analysis_id, static: true}).order_by(:name.asc)
+  end
+  
+  def self.static_array(analysis_id)
+    # get static variables.  These must be applied after the pivot vars and before the lhs
+    static_variables = Variable.statics(analysis_id)
+    static_array = []
+    static_variables.each do |var|
+      if var.static_value
+        static_array << {"#{var.uuid}" => var.static_value}
+      else
+        raise "Asking to set a static value but none was passed for #{var.name}"
+      end
+    end
+    Rails.logger.info "static array is #{static_array}"
+    
+    static_array
+  end
+  
+  def self.variables(analysis_id)
+    Variable.where({analysis_id: analysis_id, perturbable: true}).order_by(:name.asc)
+  end
+
 
   def map_discrete_hash_to_array
     Rails.logger.info "Discrete values and weights are #{self.discrete_values_and_weights}"

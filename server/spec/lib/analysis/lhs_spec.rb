@@ -6,13 +6,9 @@ describe Analysis::Lhs do
 
     # delete all the analyses
 
-    # take static = [{a: 1, b: 2}]
-    # with samples = [{c: 3}, {d: 4}]
-    # results is [{a:1, b:2, c:3}, {a:1, b:2, d:4}]
-
-    # take p = [{p1: 1}, {p1: 2}]
-    # with s = [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
-    # make s' = [{p1: 1, a: 1, b: 4}, {p1: 2, a: 1, b: 4}, {p1: 1, a: 2, b: 5},  {p1: 2, a: 2, b: 5}]
+    analysis_id = "abcd"
+    @lhs = Analysis::Lhs.new(analysis_id, {})
+    
     @pivots = [{p1: "p1"}, {p1: "p2"}]
     @samples = [{a: 1, b: 2}, {a: 3, b: 4}, {e: 5}]
     @statics = [{s1: "a"}, {s2: true}]
@@ -25,7 +21,7 @@ describe Analysis::Lhs do
   end
 
   it "static result should return the same length" do
-    result = Analysis::Lhs.add_static_variables(@samples, @statics)
+    result = @lhs.add_static_variables(@samples, @statics)
     puts "Static hash returned with #{result.inspect}"
 
     result.size.should eq(3)
@@ -33,7 +29,7 @@ describe Analysis::Lhs do
   end
 
   it "pivot result should have double the length" do
-    result = Analysis::Lhs.add_pivots(@samples, @pivots)
+    result = @lhs.add_pivots(@samples, @pivots)
     puts "Pivot hash returned with #{result.inspect}"
 
     result.size.should eq(6)

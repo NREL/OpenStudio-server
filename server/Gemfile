@@ -28,7 +28,7 @@ gem 'backbone-on-rails'
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
-  gem 'sass-rails',   '~> 3.2.3'
+  gem 'sass-rails', '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
   gem 'bootstrap-sass', '~> 2.3.2.2'
   gem 'uglifier', '>= 1.0.3'
@@ -39,7 +39,7 @@ gem 'jquery-rails'
 group :test do
   gem 'rspec'
   gem 'rspec-rails', '~> 2.0'
-
+  gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
 end
@@ -54,17 +54,13 @@ gem 'faraday'
 # worker node gems (because server can run as worker)
 gem 'libxml-ruby'
 
-# To use ActiveModel has_secure_password
-# gem 'bcrypt-ruby', '~> 3.0.0'
-
-# To use Jbuilder templates for JSON
-# gem 'jbuilder'
-
-# Use unicorn as the app server
-# gem 'unicorn'
+group :development do
+  gem 'better_errors'
+  gem 'binding_of_caller'
+  gem 'meta_request'
+  #gem 'ruby-debug' if RAILS_VERSION > "2.0.0"
+end
 
 # Deploy with Capistrano
-# gem 'capistrano'
+gem 'capistrano'
 
-# To use debugger
-#gem 'ruby-debug' if RAILS_VERSION > "2.0.0"

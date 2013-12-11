@@ -1,45 +1,26 @@
 class Analysis::Lhs
-  include Analysis::R::Lhs # include the R Lhs wrapper
+  include Analysis::Core # pivots and static vars
 
   def initialize(analysis_id, options = {})
-    defaults = {skip_init: false}
-    @options = defaults.merge(options)
+    # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of 
+    #   the script below and are not necessarily persisted to the database.
+    #   Options under problem will be merged together and persisted into the database.  The order of 
+    #   preference is objects in the database, objects passed via options, then the defaults below.  
+    #   Parameters posted in the API become the options hash that is passed into this initializer.
+    defaults = {
+        skip_init: false,
+        run_data_point_filename: "run_openstudio_workflow.rb",
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                number_of_samples: 100,
+                sample_method: "all_variables"
+            }
+        }
+    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    @options = defaults.deep_merge(options)
+
     @analysis_id = analysis_id
-  end
-
-  # each pivot variable gets the same samples 
-  # take p = [{p1: 1}, {p1: 2}]
-  # with s = [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
-  # make s' = [{p1: 1, a: 1, b: 4}, {p1: 2, a: 1, b: 4}, {p1: 1, a: 2, b: 5},  {p1: 2, a: 2, b: 5}]
-  def self.add_pivots(samples, pivots)
-    new_samples = []
-    if pivots.size > 0
-      pivots.each do |pv|
-        samples.each do |sm|
-          new_samples << pv.merge(sm)
-        end
-      end
-      samples = new_samples
-    end
-
-    new_samples.empty? ? samples : new_samples
-  end
-
-  # static array of hash 
-  # take static = [{a: 1, b: 2}]
-  # with samples = [{c: 3}, {d: 4}]
-  # results is [{a:1, b:2, c:3}, {a:1, b:2, d:4}]
-  def self.add_static_variables(samples, statics)
-    # Need to test the performance of this
-    if statics.size > 0
-      samples.each do |sample|
-        statics.each do |st|
-          sample.merge!(st)
-        end
-      end
-    end
-
-    samples
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -54,112 +35,73 @@ class Analysis::Lhs
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
+    
+    # add in the default problem/algorithm options into the analysis object
+    # anything at at the root level of the options are not designed to override the database object.
+    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
-    # Set this if not defined in the JSON
-    @analysis.problem['number_of_samples'] ||= 100
-    @analysis.problem['random_seed'] ||= 1979
+    # save all the changes into the database and reload the object (which is required)
     @analysis.save!
+    @analysis.reload
 
     # Create an instance for R
     @r = Rserve::Simpler.new
-    #lhs = Analysis::RWrapper::Lhs.new(@r)
 
     Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
     Rails.logger.info "Setting up R for #{self.class.name}"
     #todo: need to move this to the module class
     @r.converse('setwd("/mnt/openstudio")')
+
+    # make this a core method
+    Rails.logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
-    @r.converse "library(snow)"
-    @r.converse "library(snowfall)"
-    @r.converse "library(lhs)"
-    @r.converse "library(triangle)"
-    @r.converse "library(e1071)"
 
-    # get pivot variables
-    pivot_variables = Variable.where({analysis_id: @analysis, pivot: true}).order_by(:name.asc)
-    pivot_hash = {}
-    pivot_variables.each do |var|
-      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
-      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
-      values, weights = var.map_discrete_hash_to_array
-      Rails.logger.info "pivot variable values are #{values}"
-      pivot_hash[var.uuid] = values
-    end
-    # if there are multiple pivots, then smash the hash of arrays to form a array of hashes. This takes
-    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
-    pivot_array = pivot_hash.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
-    Rails.logger.info "pivot array is #{pivot_array}"
-
-    # get static variables.  These must be applied after the pivot vars and before the lhs
-    static_variables = Variable.where({analysis_id: @analysis, static: true}).order_by(:name.asc)
-    static_array = []
-    static_variables.each do |var|
-      if var.static_value
-        static_array << {"#{var.uuid}" => var.static_value}
-      else
-        raise "Asking to set a static value but none was passed for #{var.name}"
-      end
-    end
-    Rails.logger.info "static array is #{static_array}"
-
-    # get variables / measures
-    selected_variables = Variable.where({analysis_id: @analysis, perturbable: true}).order_by(:name.asc)
-    Rails.logger.info "Found #{selected_variables.count} Variables to perturb"
+    pivot_array = Variable.pivot_array(@analysis.id)
+    static_array = Variable.static_array(@analysis.id)
+    selected_variables = Variable.variables(@analysis.id)
+    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
     # generate the probabilities for all variables as column vectors
     @r.converse("print('starting lhs')")
-    # get the probabilities and persist them for reference
     Rails.logger.info "Starting sampling"
-    p = lhs_probability(selected_variables.count, @analysis.problem['number_of_samples'])
-    Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
+    lhs = Analysis::R::Lhs.new(@r)
+    samples = nil
+    if @analysis.problem['algorithm']['sample_method'] == "all_variables"
+      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-    # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
-    # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
-    # For now, create a new variable_instance, create new datapoints, and add the instance reference
-    i_var = 0
-    samples = {} # samples are in hash of arrays
-    # TODO: peformance smell... optimize this using Parallel
-    selected_variables.each do |var|
-      sfp = nil
-      if var.uncertainty_type == "discrete_uncertain"
-        Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-        sfp = discrete_sample_from_probability(p[i_var], var, true)
-      else
-        sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
-      end
-      samples["#{var.id}"] = sfp[:r]
-      if sfp[:image_path]
-        pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
-        var.preflight_images << pfi unless var.preflight_images.include?(pfi)
-      end
+      # Do the work to mash up the samples, pivots, and static variables before creating the data points
+      Rails.logger.info "Samples are #{samples}"
+      samples = hash_of_array_to_array_of_hash(samples)
+      Rails.logger.info "Flipping samples around yields #{samples}"
+    elsif @analysis.problem['algorithm']['sample_method'] == "individual_variables"
+      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-      i_var += 1
+      # Do the work to mash up the samples, pivots, and static variables before creating the data points
+      Rails.logger.info "Samples are #{samples}"
+      samples = hash_of_array_to_array_of_hash_non_combined(samples)
+      Rails.logger.info "Non-combined samples yields #{samples}"
+    else
+      raise "no sampling method defined (all_variables or individual_variables)"
     end
 
-    Rails.logger.info "Samples are #{samples}"
-    # multiple and smash the hash of arrays to form a array of hashes. This takes
-    # {a: [1,2,3], b:[4,5,6]} to [{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}]
-    samples = samples.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
-    Rails.logger.info "Flipping samples around yields #{samples}"
-
     Rails.logger.info "Fixing Pivot dimension"
-    samples = Analysis::Lhs.add_pivots(samples, pivot_array)
+    samples = add_pivots(samples, pivot_array)
     Rails.logger.info "Finished adding the pivots resulting in #{samples}"
 
-
     Rails.logger.info "Adding in static variables"
-    samples = Analysis::Lhs.add_static_variables(samples, static_array)
+    samples = add_static_variables(samples, static_array)
     Rails.logger.info "Samples after static_array #{samples}"
-
+                                                                                          
+    # Add the data points to the database
     isample = 0
-    samples.each do |sample| # do this in parallel. need to figure out how to map index to variable
+    samples.each do |sample| # do this in parallel
       isample += 1
       dp_name = "LHS Autogenerated #{isample}"
       dp = @analysis.data_points.new(name: dp_name)
       dp.set_variable_values = sample
       dp.save!
 
-      Rails.logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
+      Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
     end
 
     # Do one last check if there are any data points that were not downloaded

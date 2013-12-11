@@ -104,9 +104,7 @@ class AnalysesController < ApplicationController
 
     logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
     options = params.symbolize_keys # read the deaults from the HTTP request
-    options[:simulate_data_point_filename] = params[:simulate_data_point_filename] if params[:simulate_data_point_filename]
-    options[:x_objective_function] = @analysis['x_objective_function'] if @analysis['x_objective_function']
-    options[:y_objective_function] = @analysis['y_objective_function'] if @analysis['y_objective_function']
+    options[:run_data_point_filename] = params[:run_data_point_filename] if params[:run_data_point_filename]
 
     logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
 
@@ -305,16 +303,17 @@ class AnalysesController < ApplicationController
     end
   end
 
-  def download_csv
+  def download_data
     @analysis = Analysis.find(params[:id])
 
-    write_and_send_csv(@analysis)
-  end
-
-  def download_rdata
-    @analysis = Analysis.find(params[:id])
-
-    write_and_send_rdata(@analysis)
+    respond_to do |format|
+      format.csv do
+        write_and_send_csv(@analysis) 
+      end
+      format.rdata do
+        write_and_send_rdata(@analysis)
+      end
+    end          
   end
 
 
@@ -362,9 +361,14 @@ class AnalysesController < ApplicationController
         dp_values["data_point_uuid"] = data_point_path(dp.id)
 
         # lookup input value names
+
         if dp.set_variable_values
-          dp.set_variable_values.each do |k, v|
-            dp_values["#{mappings[k]}"] = v
+          mappings.each do |k, v|
+            if dp.set_variable_values[k]
+              dp_values[v] = dp.set_variable_values[k]
+            else
+              dp_values[v] = nil
+            end
           end
         end
 
@@ -408,12 +412,14 @@ class AnalysesController < ApplicationController
     download_filename = "#{analysis.name}.RData"
     data_frame_name = analysis.name.downcase.gsub(" ", "_")
     Rails.logger.info("Data frame name will be #{data_frame_name}")
-
+    
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
     out_hash = data.each_with_object(Hash.new([])) do |h1, h|
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
+    
+    Rails.logger.info("outhash is #{out_hash}")
 
     # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
@@ -428,12 +434,10 @@ class AnalysesController < ApplicationController
     tmp_filename = r.converse('temp')
     
     if File.exists?(tmp_filename)
-      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'text/csv; charset=iso-8859-1; header=present', :disposition => "attachment"
+      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'application/rdata; header=present', :disposition => "attachment"
     else
       raise "could not create R dataframe"
     end
-    
-
   end
 
 end
