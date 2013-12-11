@@ -9,8 +9,11 @@ HOSTNAME = "http://localhost:8080"
 #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 ANALYSIS_TYPE="sequential_search"
 
-formulation_file = "./DiscreteExample/analysis.json"
-analysis_zip_file = "./DiscreteExample/analysis.zip"
+#formulation_file = "./DiscreteExample/analysis.json"
+#analysis_zip_file = "./DiscreteExample/analysis.zip"
+
+formulation_file = "./SimpleContinuousExample/analysis.json"
+analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 
 options = {hostname: HOSTNAME}
 api = OpenStudio::Analysis::ServerApi.new(options)
