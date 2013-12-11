@@ -9,7 +9,14 @@ run_list([
              #"role[web_base]",
              "role[r-project]",
              "role[openstudio]",
+             "recipe[openstudio_server::bashprofile]",
          ])
+
+default_attributes(
+    :openstudio_server => {
+        :bash_profile_user => "vagrant"
+    }
+)
 
 override_attributes(
     :R => {
