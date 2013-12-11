@@ -123,9 +123,9 @@ module Analysis::R
       end
 
       # returns an array
-      smaples = @r.converse "print(samples)"
+      samples = @r.converse "print(samples)"
       save_file_name = nil
-      if save_histogram && !smaples[0].kind_of?(String)
+      if save_histogram && !samples[0].kind_of?(String)
         # Determine where to save it
         save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
         Rails.logger.info("R image file name is #{save_file_name}")
@@ -150,51 +150,10 @@ module Analysis::R
       p = lhs_probability(selected_variables.count, number_of_samples)
       Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
 
-      # The resulting parameter space is in the form of a hash with elements like the below
-      # "9a1dbc60-1919-0131-be3d-080027880ca6"=>{:measure_id=>"e16805f0-a2f2-4122-828f-0812d49493dd",
-      #   :variables=>{"8651b16d-91df-4dc3-a07b-048ea9510058"=>80, "c7cf9cfc-abf9-43b1-a07b-048ea9510058"=>"West"}}
-
-      i_var = 0
       # TODO: performance smell... optimize this using Parallel
-      selected_variables.each do |var|
-        sfp = nil
-        if var.uncertainty_type == "discrete_uncertain"
-          Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-          sfp = discrete_sample_from_probability(p[i_var], var, true)
-          var_types << "discrete"
-        else
-          sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
-          var_types << "continuous"
-        end
-
-        samples["#{var.id}"] = sfp[:r]
-        if sfp[:image_path]
-          pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
-          var.preflight_images << pfi unless var.preflight_images.include?(pfi)
-        end
-
-        var.r_index = i_var + 1 # r_index is 1-based 
-        var.save!
-
-        i_var += 1
-      end
-
-      [samples, var_types]
-    end
-
-    
-    # Take each variable and sample it compared to looking at all the variables and sampling them together
-    def sample_individual_variables(selected_variables, number_of_samples)
-      samples = {}
-      var_types = []
-
-      # get the probabilities
-      p = lhs_probability(selected_variables.count, number_of_samples)
-      Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
-
       i_var = 0
-      # TODO: performance smell... optimize this using Parallel
       selected_variables.each do |var|
+        Rails.logger.info "sampling variable #{var.name}"
         sfp = nil
         if var.uncertainty_type == "discrete_uncertain"
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
