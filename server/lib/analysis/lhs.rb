@@ -2,6 +2,11 @@ class Analysis::Lhs
   include Analysis::Core # pivots and static vars
 
   def initialize(analysis_id, options = {})
+    # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of 
+    #   the script below and are not necessarily persisted to the database.
+    #   Options under problem will be merged together and persisted into the database.  The order of 
+    #   preference is objects in the database, objects passed via options, then the defaults below.  
+    #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = {
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
@@ -13,9 +18,8 @@ class Analysis::Lhs
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
-    Rails.logger.info "Pre-merge with defaults #{options}"
     @options = defaults.deep_merge(options)
-    Rails.logger.info("After-merge with defaults #{@options}")
+
     @analysis_id = analysis_id
   end
 
@@ -31,8 +35,14 @@ class Analysis::Lhs
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
+    
+    # add in the default problem/algorithm options into the analysis object
+    # anything at at the root level of the options are not designed to override the database object.
+    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # save all the changes into the database and reload the object (which is required)
     @analysis.save!
-    @analysis.reload # after saving the data (needed for some reason yet to be determined)
+    @analysis.reload
 
     # Create an instance for R
     @r = Rserve::Simpler.new
@@ -43,7 +53,8 @@ class Analysis::Lhs
     @r.converse('setwd("/mnt/openstudio")')
 
     # make this a core method
-    @r.converse("set.seed(#{@options[:problem][:random_seed]})")
+    Rails.logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
+    @r.converse("set.seed(#{@analysis.problem['random_seed']})")
 
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
@@ -55,15 +66,15 @@ class Analysis::Lhs
     Rails.logger.info "Starting sampling"
     lhs = Analysis::R::Lhs.new(@r)
     samples = nil
-    if @options[:problem][:algorithm][:sample_method] == "all_variables"
-      samples, var_types = lhs.sample_all_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
+    if @analysis.problem['algorithm']['sample_method'] == "all_variables"
+      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
       # Do the work to mash up the samples, pivots, and static variables before creating the data points
       Rails.logger.info "Samples are #{samples}"
       samples = hash_of_array_to_array_of_hash(samples)
       Rails.logger.info "Flipping samples around yields #{samples}"
-    elsif @options[:problem][:algorithm][:sample_method] == "individual_variables"
-      samples, var_types = lhs.sample_all_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
+    elsif @analysis.problem['algorithm']['sample_method'] == "individual_variables"
+      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
       # Do the work to mash up the samples, pivots, and static variables before creating the data points
       Rails.logger.info "Samples are #{samples}"

@@ -3,7 +3,8 @@ class Analysis::BatchRun
     defaults = {
         skip_init: false,
         data_points: [],
-        run_data_point_filename: "run_openstudio.rb"
+        run_data_point_filename: "run_openstudio.rb",
+        problem: {}
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)
@@ -19,16 +20,25 @@ class Analysis::BatchRun
     require 'uuid'
     require 'childprocess'
 
+    # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
+    @analysis.status = 'started'
+    @analysis.end_time = nil
+    @analysis.run_flag = true
+
+    # add in the default problem/algorithm options into the analysis object
+    # anything at at the root level of the options are not designed to override the database object.
+    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # save all the changes into the database and reload the object (which is required)
+    @analysis.save!
+    @analysis.reload
+
 
     #create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
-
-    @analysis.status = 'started'
-    @analysis.run_flag = true
-    @analysis.save!
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.

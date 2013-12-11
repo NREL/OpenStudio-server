@@ -51,23 +51,30 @@ class Analysis::SpeaNrel
     require 'uuid'
     require 'childprocess'
 
+    # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-
-    # merge in the options into the analysis object which are needed for problem execution
-    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
-    @analysis.problem['algorithm'] = {} unless @analysis.problem['algorithm']
-    @analysis.problem['algorithm'].merge!(@options[:problem][:algorithm])
-    Rails.logger.info(@analysis.problem['algorithm'])
-    # verify that the various arrays are unique
-    @analysis.output_variables.uniq!
-    @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
-    # save the data
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
+
+    # add in the default problem/algorithm options into the analysis object
+    # anything at at the root level of the options are not designed to override the database object.
+    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # merge in the output variables and objective functions into the analysis object which are needed for problem execution
+    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
+    @analysis.output_variables.uniq!
+
+    # verify that the objective_functions are unique
+    @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
+
+    # some algorithm specific data to be stored in the database
+    @analysis['iteration'] = @iteration
+
+    # save the data
     @analysis.save!
     @analysis.reload # after saving the data (needed for some reason yet to be determined)
-
+    
     #create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
