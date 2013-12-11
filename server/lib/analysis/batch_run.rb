@@ -4,9 +4,9 @@ class Analysis::BatchRun
         skip_init: false,
         data_points: [],
         run_data_point_filename: "run_openstudio.rb"
-    }
-    @options = defaults.merge(options)
-
+    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    @options = defaults.deep_merge(options)
+    Rails.logger.info(@options)
 
     @analysis_id = analysis_id
   end

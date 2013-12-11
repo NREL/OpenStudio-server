@@ -13,8 +13,9 @@ class Analysis::Lhs
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    Rails.logger.info "Pre-merge with defaults #{options}"
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
+    Rails.logger.info("After-merge with defaults #{@options}")
     @analysis_id = analysis_id
   end
 
@@ -62,7 +63,7 @@ class Analysis::Lhs
       samples = hash_of_array_to_array_of_hash(samples)
       Rails.logger.info "Flipping samples around yields #{samples}"
     elsif @options[:problem][:algorithm][:sample_method] == "individual_variables"
-      samples, var_types = lhs.sample_individual_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
+      samples, var_types = lhs.sample_all_variables(selected_variables, @options[:problem][:algorithm][:number_of_samples])
 
       # Do the work to mash up the samples, pivots, and static variables before creating the data points
       Rails.logger.info "Samples are #{samples}"
@@ -79,7 +80,7 @@ class Analysis::Lhs
     Rails.logger.info "Adding in static variables"
     samples = add_static_variables(samples, static_array)
     Rails.logger.info "Samples after static_array #{samples}"
-
+                                                                                          
     # Add the data points to the database
     isample = 0
     samples.each do |sample| # do this in parallel
