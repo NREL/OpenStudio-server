@@ -19,9 +19,9 @@ AWS.config(
 @aws = AWS::EC2.new
 
 vms = [
-    {id: 1, name: "server_aws", cleanup: "server_cleanup.sh", ami_name: "OpenStudio-Server OS-1.1.4 V1.3.1c"},
-    {id: 2, name: "worker_aws", cleanup: "worker_cleanup.sh", ami_name: "OpenStudio-Worker OS-1.1.4 V1.3.1c"},
-    {id: 3, name: "worker_cluster_aws", cleanup: "worker_cleanup.sh", ami_name: "OpenStudio-Cluster OS-1.1.4 V1.3.1c"}
+    {id: 1, name: "server_aws", cleanup: "setup-server-changes.sh", ami_name: "OpenStudio-Server OS-1.1.4 V1.3.1c"},
+    {id: 2, name: "worker_aws", cleanup: "setup-worker-changes.sh", ami_name: "OpenStudio-Worker OS-1.1.4 V1.3.1c"},
+    {id: 3, name: "worker_cluster_aws", cleanup: "setup-worker-changes.sh", ami_name: "OpenStudio-Cluster OS-1.1.4 V1.3.1c"}
 ]
 
 $threads = []
@@ -52,7 +52,7 @@ def process(element, &block)
   end
   $mutex.unlock if $mutex.owned?
   puts "#{element[:id]}: chef is complete"
-  
+
   # Reprovision (how many times?)
   $mutex.lock
   puts "#{element[:id]}: entering reprovisioning (which requires Rsyncing again)"
@@ -75,16 +75,16 @@ def process(element, &block)
   command = "cd ./#{element[:name]} && vagrant ssh -c 'curl -sL http://169.254.169.254/latest/meta-data/instance-id'"
   element[:instance_id] = `#{command}`
   puts "#{element[:id]}: Finished getting element ID"
-  
-  # cleanup the box by calling the cleanup scripts
-  $mutex.lock # i don't think we have to lock these, but i am not sure about virtualbox and multiple hits with vagrant ssh
-  puts "#{element[:id]}: cleaning up the machines"
-  command = "cd ./#{element[:name]} && vagrant ssh -c /data/launch-instance/#{element[:cleanup]}"
-  system_call(command) do |message|
-    puts "#{element[:id]}: #{message}"
-  end
 
-  # Call the method to create the AMIs
+  # cleanup the box by calling the cleanup scripts
+  #$mutex.lock # i don't think we have to lock these, but i am not sure about virtualbox and multiple hits with vagrant ssh
+  puts "#{element[:id]}: cleaning up the machines"
+  command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
+  system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+  command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/#{element[:cleanup]}' && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
+  system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+
+# Call the method to create the AMIs
   puts "#{element[:id]}: creating AMI"
   begin
     i = @aws.images.create(instance_id: element[:instance_id], name: element[:ami_name])
