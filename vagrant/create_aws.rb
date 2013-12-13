@@ -7,8 +7,6 @@
 # TODOs
 #   - write out to logger
 #   - use server-api gem to talk to AWS for API
-#   - add additional tags to AMIs
-#   - print out JSON at the end in the format of the amis.json on developer
 #   - delete items that we don't want to rsync (but make sure not to delete them from git)
 #   - i don't think the writing back to the VM array hash is threadsafe... check it
 
@@ -17,8 +15,8 @@ require 'aws-sdk'
 require 'thread'
 
 # Versioning (change these each build)
-os_version = "1.1.4"
-os_server_version= "1.3.1"
+os_version = "1.1.3"
+os_server_version= "1.2.0"
 revision_id = "" # with preceding . 
 
 
@@ -134,7 +132,7 @@ def create_ami(element)
   i = @aws.images.create(instance_id: element[:instance_id], name: element[:ami_name])
   puts "#{element[:id]}: waiting for AMI to become available"
   while (i.state != :available) && (i.state != :failed) do
-    puts "."
+    puts "#{element[:id]}: ..."
     sleep 5
   end
 
@@ -195,8 +193,8 @@ def process(element, &block)
           puts "#{element[:id]}: making new AMI public"
           i.public = true
           element[:ami_id] = i.image_id
-          i.add_tag("autobuild")
-          i.add_tag("sucessfully_created")
+          i.add_tag("autobuilt")
+          i.add_tag("sucessfully_created", :value => true)
           puts "#{element[:id]}: finished creating AMI"
         end
       }
@@ -243,8 +241,8 @@ if good_build
   amis_hash = {}
   amis_hash[os_version] = {}
   amis_hash[os_version]["server"] = vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
-  amis_hash[os_version]["worker"] = vms.select { |vm| vm[:name] == "worker" }.first[:ami_id]
-  amis_hash[os_version]["cc2worker"] = vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
+  amis_hash[os_version]["worker"] = vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
+  amis_hash[os_version]["cc2worker"] = vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
 
   puts JSON.pretty_generate(amis_hash.to_json)
 else
