@@ -81,10 +81,14 @@ def process(element, &block)
   puts "#{element[:id]}: cleaning up the machines"
   command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
   system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-  command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/#{element[:cleanup]}' && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
+  command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/#{element[:cleanup]}'"
+  system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+  command = "cd ./#{element[:name]} && vagrant reload" 
+  system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+  command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
   system_call(command) { |message| puts "#{element[:id]}: #{message}" }
 
-# Call the method to create the AMIs
+  # Call the method to create the AMIs
   puts "#{element[:id]}: creating AMI"
   begin
     i = @aws.images.create(instance_id: element[:instance_id], name: element[:ami_name])
