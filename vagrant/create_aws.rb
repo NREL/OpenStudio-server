@@ -10,6 +10,9 @@
 #   - add additional tags to AMIs
 #   - print out JSON at the end in the format of the amis.json on developer
 #   - delete items that we don't want to rsync (but make sure not to delete them from git)
+#   - return an overall status of each AMI (did it error out?)
+#   - i don't think the writing back to the VM array hash is threadsafe... check it
+#   - add timeout on thread
 
 # This also uses the AWS gem in order to create the amazon image dynamically
 require 'aws-sdk'
@@ -113,10 +116,9 @@ def process(element, &block)
       i = @aws.images.create(instance_id: element[:instance_id], name: element[:ami_name])
       puts "#{element[:id]}: waiting for AMI to become available"
       while i.state != :available do
-        print "."
+        puts "."
         sleep 5
       end
-      puts
       puts "#{element[:id]}: making new AMI public"
       i.public = true
     rescue AWS::EC2::Errors::InvalidAMIName::Duplicate => e
@@ -143,7 +145,6 @@ vms.each do |vm|
   end
 end
 $threads.each { |t| t.join }
-
 
 puts vms.inspect
 
