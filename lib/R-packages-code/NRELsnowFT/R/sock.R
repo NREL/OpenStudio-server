@@ -2,10 +2,10 @@
 # Socket Implementation
 #
 
-makeSOCKclusterFT <- function(spec, names=NULL, ..., options = defaultClusterOptions) {
-    all.names <- names
-    names <- if (is.null(names)) spec else names[1:spec]
-    cl <- makeSOCKcluster(names, ..., options=options)
+makeSOCKclusterFT <- function(ipList=NULL) {
+    all.names <- ipList
+    names <- if (is.null(ipList)) stop('names is size null')
+    cl <- makeSOCKcluster(ipList)
     attr(cl, 'all.hosts') <- all.names
     cl
 }
@@ -47,14 +47,14 @@ addtoCluster.SOCKcluster <- function(cl, spec, ...,
   for (i in seq(along=cl)) {
     newcl[[i]] <- cl[[i]]
     # remove hosts from the list that are already in the cluster
-    which.idx <- which.max(cl[[i]]$host == names)
-    names <- names[-which.idx]
+    #which.idx <- which.max(cl[[i]]$host == names)
+    #names <- names[-which.idx]
   }
-  j <- 1
+  #j <- 1
   for (i in (n+1):(n+spec)) {
-    newcl[[i]] <- newSOCKnode(names[[j]], options = options)
+    newcl[[i]] <- newSOCKnode(names[[i]], options = options, rank=i)
     newcl[[i]]$replic <- 0
-    j <- j+1
+  #  j <- j+1
   }
   class(newcl) <- class(cl)
     attr(newcl, 'all.hosts') <- attr(cl, 'all.hosts')

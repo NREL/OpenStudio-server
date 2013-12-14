@@ -57,13 +57,13 @@ printClusterInfo <- function(cl) {
 # Cluster Functions
 #
 
-makeClusterFT <- function(spec, type = getClusterOption("type"), names=NULL, 
+makeClusterFT <- function(type = getClusterOption("type"), ipList=NULL, 
 				ft_verbose=FALSE, ...) {
     if (is.null(type))
         stop("need to specify a cluster type")
-    cat('names:',names,'\n')    
+    cat('ipList:',ipList,'\n')    
     cl <- switch(type,
-        SOCK = makeSOCKclusterFT(spec, names, ...),
+        SOCK = makeSOCKclusterFT(ipList),
         #PVM = makePVMcluster(spec, ...),
         #MPI = makeMPIcluster(spec, ...),
         stop("unknown cluster type"))
@@ -262,76 +262,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
   	return(list(val,cl))
 }
 
-performSequential <- function (x, fun, initfun = NULL, exitfun =NULL,
-                            printfun=NULL,printargs=NULL,
-                            printrepl=max(length(x)/10,1),
-                            cltype = getClusterOption("type"),
-                            gentype="None", seed=sample(1:9999999,6),
-                            prngkind="default", para=0,
-                            ft_verbose=FALSE, ...) {
-  RNGnames <- c("RNGstream", "SPRNG", "None")
-  rng <- pmatch (gentype, RNGnames)
-  if (is.na(rng))
-    stop(paste("'", gentype,
-               "' is not a valid choice. Choose 'RNGstream', 'SPRNG' or 'None'.",
-               sep = ""))
-  gentype <- RNGnames[rng]
-  n <- length(x)
-  if (ft_verbose) {
-     cat("\nFunction performSequential:\n")
-  }
-  if (!is.null(initfun)) {
-    if (ft_verbose) 
-        cat("   calling initfun ...\n")
-    initfun()
-  }
-
-  if (RNGnames[rng] != "None") {
-    if (ft_verbose) { 
-        cat("   initializing RNG ...\n")
-		cat("     gentype:",gentype,"\n")
-        cat("     seed:   ",seed,"\n")
-    }
-    if (rng == 1) {
-        invisible(initRNGstreamNodeRepli(seed=seed, n=n))
-    } else {
-	invisible(checkSPRNG(prngkind=prngkind))
-    }
-  } else {
-    if (ft_verbose) 
-        cat("   no RNG initialized\n")
-  }
-
-  # run the function sequentially in a loop
-  if (ft_verbose)
-    cat("   process fun in a loop ...\n")
-
-  results = list()
-  val <- vector("list", n)
-  for (repl in 1:n) {
-    if (gentype != "None")
-      oldrng <- initStream (gentype, as.character(repl), nstream=n,streamno=repl-1,
-                              seed=seed,kind=prngkind, para=para)
-    this.result <- try(fun(x[repl], ...))
-    val[repl] <- list(this.result)
-    if (gentype != "None")
-      freeStream(gentype, oldrng)
-    if (!is.null(printfun) & ((repl %% printrepl) == 0))
-      try(printfun(val,repl,printargs))
-    results <- c(results, val[repl])
-  }
-  if (ft_verbose)
-    cat("   loop finished.\n")
-  if (!is.null(exitfun)) {
-     if (ft_verbose) 
-        cat("   calling exitfun ...\n")
-     exitfun()
-  }
-
-  return(results)
-}
-
-performParallel <- function(count, x, fun, initfun = NULL, exitfun =NULL,
+performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
                             printfun=NULL,printargs=NULL,
                             printrepl=max(length(x)/10,1),
                             cltype = getClusterOption("type"),
@@ -350,15 +281,6 @@ performParallel <- function(count, x, fun, initfun = NULL, exitfun =NULL,
 
   gentype <- RNGnames[rng]
 
-  if (count == 0) { # run a sequential version of the code
-     return (performSequential(x, fun, initfun = initfun, exitfun = exitfun,
-                            printfun=printfun, printargs=printargs,
-                            printrepl=printrepl,
-                            gentype=gentype, seed=seed,
-                            prngkind=prngkind, para=para,
-                            ft_verbose=ft_verbose, ...))
-  }
-
   if (ft_verbose) {
      cat("\nFunction performParallel:\n")
      cat("   creating cluster ...\n")
@@ -368,8 +290,7 @@ performParallel <- function(count, x, fun, initfun = NULL, exitfun =NULL,
   	cltype <- 'SOCK'
   }
   cat('ipList:',ipList,'\n')
-  cl <- do.call('makeClusterFT', c(list(min(count,length(x)), cltype, names=ipList, ft_verbose=ft_verbose), 
-				cluster.args))
+  cl <- do.call('makeClusterFT', c(list(cltype, ipList=ipList, ft_verbose=ft_verbose),cluster.args))
 
   if (!is.null(initfun)) {
     if (ft_verbose) 
