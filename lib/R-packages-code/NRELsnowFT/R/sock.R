@@ -88,8 +88,8 @@ do.administration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfi
                     break
                 }
                 p <- newp              
-                d <- recvOneResultFT(clall,'t',time=5) # wait for a result for
-                                                       # 5 sec
+                d <- recvOneResultFT(clall,'t',time=1) # wait for a result for
+                                                       # 1 sec
                 if (length(d) > 0) break # some results arrived, if not
                                          # do administration again
             }  # end of while loop ****************************
