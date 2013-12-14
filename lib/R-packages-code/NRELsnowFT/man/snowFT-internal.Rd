@@ -22,7 +22,6 @@
 %\alias{getNodeID.PVMnode}
 \alias{getNodeID.SOCKnode}
 \alias{initRNGstreamNodeRepli}
-\alias{performSequential} 
 \alias{processStatus.MPInode} 
 %\alias{processStatus.PVMnode}
 \alias{processStatus.SOCKnode}
