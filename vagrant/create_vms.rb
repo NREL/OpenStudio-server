@@ -12,6 +12,7 @@
 # This also uses the AWS gem in order to create the amazon image dynamically
 
 require 'thread'
+require 'timeout'
 
 # Versioning (change these each build)
 os_version = "1.1.3"
@@ -24,6 +25,7 @@ if ARGV[0]
     @provider = "aws".to_sym
   end
 end
+puts "Lauching #{__FILE__} with provider: #{@provider}"
 
 if @provider == :aws
   require 'aws-sdk'
@@ -42,28 +44,28 @@ end
 # List of VMS to provision
 @vms = []
 if @provider == :vagrant
-  vms << {
+  @vms << {
       id: 1, name: "server", postflight_script_1: "configure_vagrant_server.sh", error_message: "",
       ami_name: "OpenStudio-Server OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
-  vms << {
+  @vms << {
       id: 2, name: "worker", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
-  vms << {
+  @vms << {
       id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
       ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
 elsif @provider == :aws
-  vms << {
+  @vms << {
       id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh",
       ami_name: "OpenStudio-Server OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
-  vms << {
+  @vms << {
       id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh",
       ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
-  vms << {
+  @vms << {
       id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh",
       ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
