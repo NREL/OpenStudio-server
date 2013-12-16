@@ -17,8 +17,9 @@ require 'timeout'
 # Versioning (change these each build)
 os_version = "1.1.3"
 os_server_version= "1.2.0"
-revision_id = "" # with preceding . 
+revision_id = "" # with preceding . (i.e. .1 or .a) 
 
+start_time = Time.now
 @provider = "vagrant".to_sym
 if ARGV[0]
   if ARGV[0] == "aws"
@@ -52,21 +53,21 @@ if @provider == :vagrant
       id: 2, name: "worker", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
-  @vms << {
-      id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
-  }
+  #@vms << {
+  #    id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
+  #    ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
+  #}
 elsif @provider == :aws
   @vms << {
-      id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh",
+      id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
       ami_name: "OpenStudio-Server OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
-      id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh",
+      id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
-      id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh",
+      id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
   }
 end
@@ -80,6 +81,10 @@ def system_call(command, &block)
       yield line
     end
   end
+
+  exit_code = $?.exitstatus
+  puts "System call of #{command} exited with #{exit_code}"
+  exit_code
 end
 
 def run_vagrant_up(element)
@@ -88,11 +93,11 @@ def run_vagrant_up(element)
   begin
     Timeout::timeout(2400) {
       puts "#{element[:id]}: starting process on #{element}"
-      command = "cd ./#{element[:name]} && vagrant up"
+      command = "cd ./#{element[:name]} && vagrant up --no-provision"
       if @provider == :aws
         command += " --provider=aws"
       end
-      system_call(command) do |message|
+      exit_code = system_call(command) do |message|
         puts "#{element[:id]}: #{message}"
         if message =~ /Running chef-solo.../i
           puts "#{element[:id]}: chef running - you can go on now"
@@ -104,6 +109,7 @@ def run_vagrant_up(element)
           puts "Error found during provisioning"
         end
       end
+      success = false if exit_code != 0
     }
   rescue TimeoutError
     # DO NOT raise an error if timeout, just timeout
@@ -111,6 +117,9 @@ def run_vagrant_up(element)
     puts error
     element[:error_message] += error
     success = false
+  rescue RuntimeError => e
+    error = "#{element[:id]} #{e.message}"
+    element[:error_message] += error
   rescue Exception => e
     # DO NOT raise an excpetion if it crashed out 
     puts "#{element[:id]}: ERROR in vagrant up with #{e.message}"
@@ -124,14 +133,14 @@ def run_vagrant_up(element)
   success
 end
 
-def run_vagrant_reprovision(element)
-  success = false
+def run_vagrant_provision(element)
+  success = true
   $mutex.lock
   begin
     Timeout::timeout(2400) {
       puts "#{element[:id]}: entering provisioning (which requires syncing folders)"
       command = "cd ./#{element[:name]} && vagrant provision"
-      system_call(command) do |message|
+      exit_code = system_call(command) do |message|
         puts "#{element[:id]}: #{message}"
         if message =~ /Running chef-solo.../i
           puts "#{element[:id]}: chef running - you can go on now"
@@ -143,7 +152,9 @@ def run_vagrant_reprovision(element)
           puts "Error found during provisioning"
         end
       end
-      success = true
+      if exit_code != 0
+        success = false
+      end
     }
   rescue TimeoutError
     # DO NOT raise an error if timeout, just timeout
@@ -151,14 +162,17 @@ def run_vagrant_reprovision(element)
     puts error
     element[:error_message] += error
     success = false
+  rescue NameError => e
+    error = "#{element[:id]} #{e.message}"
+    element[:error_message] += error
   rescue Exception => e
     # DO NOT raise an excpetion if it crashed out 
-    error = "#{element[:id]}: ERROR reprovisioning box with #{e.message}"
+    error = "#{element[:id]}: ERROR provisioning box with #{e.message}"
     puts error
     element[:error_message] += error
     success = false
   end
-  puts "#{element[:id]}: Finished reprovisioning"
+  puts "#{element[:id]}: Finished provisioning"
   $mutex.unlock if $mutex.owned?
 
   success
@@ -209,19 +223,27 @@ def create_ami(element)
     puts "#{element[:id]}: ..."
     sleep 5
   end
+  puts "#{element[:id]}: finished create_ami block with result #{i.inspect}"
 
   return i
 end
 
 def process(element, &block)
   begin
-    # starts and call provision if now. If it is already running it just says running...
+    # Only starts the machine and mounts the drives, but does not call provision
     run_vagrant_up(element)
 
-    # Reprovision (how many times?)
-    2.times {
-      run_vagrant_reprovision(element) # how do we test that this was successful?
-    }
+    # Call this up to 3 times
+    retries = 0
+    while true
+      retries += 1
+      if retries <= 3
+        success = run_vagrant_provision(element)
+        break if success
+      else
+        raise "ERROR reached maximum number of retries in vagrant provision"
+      end
+    end
 
     # Append the instance id to the element
     if @provider == :aws
@@ -241,13 +263,11 @@ def process(element, &block)
       raise TimeoutError, "Error running initial cleanup, #{e.message}"
     end
 
-    # Reboot the box if on Amazon because of kernel updates
     if @provider == :aws
+      # Reboot the box if on Amazon because of kernel updates
       run_vagrant_reload(element)
-    end
 
-    # finish up AMI cleanup 
-    if @provider == :aws
+      # finish up AMI cleanup 
       begin
         Timeout::timeout(900) {
           command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
@@ -260,10 +280,11 @@ def process(element, &block)
       end
 
       begin
-        Timeout::timeout(900) {
+        Timeout::timeout(1800) {
           i = create_ami(element)
           # check if the ami was create--if not change the ami_name and rerun    
           if i.nil? || i.state == :failed
+            puts "#{element[:id]}: AMI creation failed, retrying"
             retries = 0
             while retries < 3 && i.state == :available
               retries += 1
@@ -273,20 +294,24 @@ def process(element, &block)
             end
           end
 
-          if i.state == :available
-            puts "#{element[:id]}: making new AMI public"
-            i.public = true
-            element[:ami_id] = i.image_id
-            i.add_tag("autobuilt")
-            i.add_tag("sucessfully_created", :value => true)
-            puts "#{element[:id]}: finished creating AMI"
+          if i
+            if i.state == :available
+              puts "#{element[:id]}: making new AMI public"
+              i.public = true
+              element[:ami_id] = i.image_id
+              i.add_tag("autobuilt")
+              i.add_tag("sucessfully_created", :value => true)
+              i.add_tag("created_on", :value => Time.now)
+              puts "#{element[:id]}: finished creating AMI"
+            end
+          else
+            element[:error_message] += "AMI did not get created"
           end
         }
       rescue Exception => e
-        raise TimeoutError, "Error creating AMI. AMI state: #{i.state}, #{e.message}"
+        raise "Error creating AMI. #{e.message}, #{e.backtrace}"
       end
     end
-
 
     # Do some testing the machines in the future, otherwise, if it got here it is assumed good
     element[:good_ami] = true
@@ -295,7 +320,7 @@ def process(element, &block)
 
     # make it clear that the setup is invalid
     element[:good_ami] = false
-    element[:error_message] += "Exception message, #{e.message}"
+    element[:error_message] += "Exception message, #{e.message}, #{e.backtrace}"
   ensure
     # Be sure to alwys kill the instances if using AWS
     if @provider == :aws
@@ -321,7 +346,8 @@ $threads.each { |t| t.join }
 end
 
 puts "================"
-good_build = @vms.all? { |vm| vm[:good_ami] }
+end_time = Time.now
+good_build = @vms.all? { |vm| vm[:good_ami] && vm[:error_message] == "" }
 if good_build
   puts "All machines appear to be good"
 
@@ -339,3 +365,6 @@ if good_build
 else
   puts "AMIs had errors"
 end
+
+puts
+puts "Took #{end_time - start_time}s to build."
