@@ -11,7 +11,6 @@ require 'openstudio-aws'
 # Global Options
 WORKER_INSTANCES=2
 
-#require 'openstudio-aws'
 aws = OpenStudio::Aws::Aws.new()
 #server_options = {instance_type: "t1.micro" } # 1 core ($0.02/hour) ! NOT RECOMMENDED WILL FAIL IF RUNNING ANYTHING 
 #server_options = {instance_type: "m1.small"}  # 1 core ($0.06/hour)
