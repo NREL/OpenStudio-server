@@ -32,8 +32,7 @@ is.manageable.SOCKcluster <- function(cl) {
 	return (c(cluster.size=TRUE, monitor.procs=TRUE, repair=FALSE))
 }
 
-addtoCluster.SOCKcluster <- function(cl, spec, ...,
-                                    options = defaultClusterOptions) {
+addtoCluster.SOCKcluster <- function(cl, spec, ..., options = defaultClusterOptions) {
     names <- attr(cl, 'all.hosts')
     options <- addClusterOptions(options, list(...))
   n <- length(cl)

@@ -22,7 +22,7 @@ recvOneDataFT <- function(cl,type,time) UseMethod("recvOneDataFT")
 addtoCluster <- function(cl, spec, ..., options = defaultClusterOptions)
   UseMethod("addtoCluster") 
 
-repairCluster <- function(cl, nodes, ..., options = defaultClusterOptions)
+repairCluster <- function(cl, nodes, options = defaultClusterOptions)
   UseMethod("repairCluster")
 
 removefromCluster  <- function(cl, nodes, ft_verbose=FALSE) {
@@ -58,7 +58,7 @@ printClusterInfo <- function(cl) {
 #
 
 makeClusterFT <- function(type = getClusterOption("type"), ipList=NULL, 
-				ft_verbose=FALSE, ...) {
+				ft_verbose=FALSE) {
     if (is.null(type))
         stop("need to specify a cluster type")
     cat('ipList:',ipList,'\n')    
@@ -242,27 +242,17 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
                             printfun=NULL,printargs=NULL,
                             printrepl=max(length(x)/10,1),
                             cltype = getClusterOption("type"),
-                            cluster.args=NULL, ipList=NULL,
-                            gentype="None", seed=sample(1:9999999,6),
-                            prngkind="default", para=0, 
+                            cluster.args=NULL, ipList=NULL, 
 			    mngtfiles=c(".clustersize",".proc",".proc_fail"),
-                            ft_verbose=FALSE, ...) {
+                            ft_verbose=FALSE) {
 
-  RNGnames <- c("RNGstream", "SPRNG", "None")
-  rng <- pmatch (gentype, RNGnames)
-  if (is.na(rng))
-    stop(paste("'", gentype,
-               "' is not a valid choice. Choose 'RNGstream', 'SPRNG' or 'None'.",
-               sep = ""))
-
-  gentype <- RNGnames[rng]
 
   if (ft_verbose) {
      cat("\nFunction performParallel:\n")
      cat("   creating cluster ...\n")
   }
-  if(cltype=="PVM") {
-  	warning('PVM layer is currently unavailable. Using SOCK layer.')
+  if(cltype!="SOCK") {
+  	warning('Cluster type is currently unavailable. Using SOCK layer.')
   	cltype <- 'SOCK'
   }
   cat('ipList:',ipList,'\n')
@@ -274,15 +264,6 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
     clusterCall(cl, initfun)
   }
 
-  if (RNGnames[rng] != "None") {
-    if (ft_verbose) 
-	cat("   initializing RNG ...\n")
-    clusterSetupRNG.FT(cl, type=gentype, streamper="replicate", seed=seed,
-                    n=length(x), prngkind=prngkind)
-  } else {
-    if (ft_verbose) 
-	cat("   no RNG initialized\n")
-  }
   if (ft_verbose) 
      cat("   calling clusterApplyFT ...\n")
  
@@ -306,127 +287,6 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
   return(checkForRemoteErrors(val))
 }
 
-clusterSetupRNG.FT <- function (cl, type="RNGstream", streamper="replicate", ...) {
-  RNGnames <- c("RNGstream", "SPRNG")
-  rng <- pmatch (type, RNGnames)
-  if (is.na(rng))
-    stop(paste("'", type,
-               "' is not a valid choice. Choose 'RNGstream' or 'SPRNG'.",
-               sep = ""))
-  modus <- c("node", "replicate")
-  stream <- pmatch(streamper,modus)
-  if (is.na(stream))
-    stop(paste("'", streamper,
-               "' is not a valid choice. Choose '",modus[1], "' or '",
-               modus[2],"'.", sep = ""))
-  type <- RNGnames[rng]
-  streamper <- modus[stream]
-  if (rng == 1) {
-    switch (streamper,
-            cluster = clusterSetupRNGstream(cl, ...),
-            replicate = clusterSetupRNGstreamRepli(cl, ...)
-            )
-  } else {
-    switch (streamper,
-            cluster = clusterSetupSPRNG(cl, ...),
-            replicate = clusterCheckSPRNG (cl, ...)
-            )
-  }
-  c(type,streamper)
-}
-
-
-#
-# Cluster SPRNG Support 
-#
-
-clusterCheckSPRNG <- function (cl, prngkind = "default", ...) 
-{
-  # for purposes of reproducible results. Like clusterSetupSPRNG, but makes
-  # only a check,the initialization happens with each replication call
-  # in clusterApplyFT
-  checkSPRNG(prngkind, ...)
-  clusterCall(cl, checkSprngNode)
-}
-
-checkSPRNG <- function(prngkind = "default", ...) {
-#  if (! require(rsprng))
-#    stop("the `rsprng' package is needed for SPRNG support.")
-  if (!is.character(prngkind) || length(prngkind) > 1)
-    stop("'rngkind' must be a character string of length 1.")
-  if (!is.na(pmatch(prngkind, "default")))
-    prngkind <- "LFG"
-  prngnames <- c("LFG", "LCG", "LCG64", "CMRG", "MLFG", "PMLCG")
-  kind <- pmatch(prngkind, prngnames) - 1
-  if (is.na(kind))
-    stop(paste("'", prngkind, "' is not a valid choice", sep = ""))
-}
-
-checkSprngNode <- function () 
-{
-  if (! require(rsprng))
-    stop("the `rsprng' package is needed for SPRNG support.")
-  RNGkind("user")
-}
-
-#
-# rlecuyer support
-#
-
-
-clusterSetupRNGstreamRepli <- function (cl, seed=rep(12345,6), n, ...){
-  # creates on all nodes one stream per replication.  
-    if (! require(rlecuyer))
-        stop("the `rlecuyer' package is needed for RNGstream support.")
-    .lec.init()
-    .lec.SetPackageSeed(seed)
-    nc <- length(cl)
-#    names <- as.character(1:n)
-#    .lec.CreateStream(names)
-    for (i in 1:nc) {
-        invisible(sendCall(cl[[i]],initRNGstreamNodeRepli,
-                           c(list(seed),list(n))))
-      }
-    invisible(lapply(cl[1:nc], recvResult))
-  }
-
-initRNGstreamNodeRepli <- function (seed, n) {
-    if (! require(rlecuyer))
-        stop("the `rlecuyer' package is needed for RNGstream support.") 
-    .lec.init()
-    .lec.SetPackageSeed(seed)
-    names <- as.character(1:n)
-    .lec.CreateStream(names)
-    return(1)
-  }
-
-initStream <- function (type="RNGstream", name, ...) {
-  oldrng <- switch(type,
-                   RNGstream = .lec.CurrentStream(name),
-                   SPRNG = initSprngNode(...)
-                   )
-  return(oldrng)
-}
-
-freeStream <- function (type="RNGstream", oldrng) {
-  switch(type,
-         RNGstream = .lec.CurrentStreamEnd(oldrng),
-         SPRNG = free.sprng()
-         )
-}
-
-resetRNG <- function(cl, nodes, repl, gentype="RNGstream",seed=rep(123456,6))
-	 # resets the RNG on selected nodes of cluster cl 
-  {
-    if(gentype == "RNGstream") {
-      for (i in 1:length(nodes)) 
-        invisible(sendCall(cl[[nodes[i]]],initRNGstreamNodeRepli,
-                           c(list(seed),list(repl))))
-      invisible(lapply(cl[nodes], recvResult))
-    } else {
-      clusterCallpart(cl, nodes, checkSprngNode)
-    }
-  }
 
 getNodeID <- function (node) UseMethod("getNodeID")
 
