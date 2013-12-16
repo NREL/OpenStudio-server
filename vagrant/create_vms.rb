@@ -356,9 +356,9 @@ if good_build
     puts " === amis.json format ====="
     amis_hash = {}
     amis_hash[os_version] = {}
-    amis_hash[os_version]["server"] = vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
-    amis_hash[os_version]["worker"] = vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
-    amis_hash[os_version]["cc2worker"] = vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
+    amis_hash[os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
+    amis_hash[os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
+    amis_hash[os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash.to_json)
   end
