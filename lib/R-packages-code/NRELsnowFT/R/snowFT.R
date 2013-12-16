@@ -163,18 +163,12 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
   	val <- NULL
 
   	if (n > 0 && p > 0) {
-    	wrap <- function(x, i, n, gentype, seed, prngkind, ...){
-      		if (gentype != "None")
-        		oldrng <- initStream (gentype, as.character(i), nstream=n,streamno=i-1,
-                              seed=seed,kind=prngkind, para=para)
-      		value <- try(fun(x, ...))
-      		if (gentype != "None")
-        		freeStream(gentype, oldrng)
+    	wrap <- function(x, i, n){
+      		value <- try(fun(x))
       		return(list(value = value, index = i))
     	}
-    	submit <- function(node, job, n, gentype, seed, prngkind) {
-      		args <- c(list(x[[job]]), list(job), list(n), list(gentype),
-                list(seed),list(prngkind),list(...))
+    	submit <- function(node, job, n) {
+      		args <- c(list(x[[job]]), list(job), list(n))
       		sendCall(cl[[node]], wrap, args)
     	}
 
@@ -193,7 +187,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
       		}
       		for (i in 1 : min(n, p)) {         
         		repl <- replvec[i]
-        		submit(i, repl,n,gennames[gen],seed,kind)
+        		submit(i, repl,n)
         		cl[[i]]$replic <- repl
       		}
       		clall<-cl
@@ -247,7 +241,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
             			try(printfun(val,fin,printargs))
         		}
         		if (it <= n) {
-          			submit(freenodes[1], repl, n, gennames[gen],seed,kind)
+          			submit(freenodes[1], repl, n)
           			cl[[freenodes[1]]]$replic <- repl
           			clall <- updatecl(clall,cl[[freenodes[1]]])
           			freenodes <- freenodes[-1]
@@ -522,31 +516,36 @@ writetomngtfile <- function(cl, file) {
   write(repl,file)
 }
 
-manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, 
-									freenodes, initfun, gentype, seed, ft_verbose=FALSE) {
-	newp <- if (manage['cluster.size']) 
-				scan(file=mngtfiles[1],what=integer(),nlines=1, quiet=TRUE) 
-			else p
+manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, freenodes, initfun, gentype, seed, ft_verbose=FALSE) {
+	if (manage['cluster.size']){ 
+          scanresize <- try(scan(file=mngtfiles[1],what=integer(),nlines=1, quiet=TRUE))
+          if (!inherits(scanresize,'try-error')){
+            newp <- scanresize
+          } else {
+            newp <- p
+          }
+        } else {
+          newp <- p
+        }
 	if (manage['monitor.procs'])
-  		# write the currently processed replications into a file 
-        writetomngtfile(cl,mngtfiles[2])
-    cluster.increased <- FALSE
-    if (newp > p) { # increase the degree of parallelism
-    	cl<-addtoCluster(cl, newp-p)
-    	clusterEvalQpart(cl,(p+1):newp,require(snowFT))
-        if(ft_verbose)
-            printClusterInfo(cl)
-       if (!is.null(initfun))
-        	clusterCallpart(cl,(p+1):newp,initfun)
-       if (gentype != "None")
-        	resetRNG(cl,(p+1):newp,n,gentype,seed)
-        clall<-combinecl(clall,cl[(p+1):newp])
-        freenodes<-c(freenodes,(p+1):newp)
-        p <- newp
-        cluster.increased <- TRUE
+  	   # write the currently processed replications into a file 
+           writetomngtfile(cl,mngtfiles[2])
+        cluster.increased <- FALSE
+        if (newp > p) { # increase the degree of parallelism
+           cl<-addtoCluster(cl, newp-p)
+           clusterEvalQpart(cl,(p+1):newp,require(snowFT))
+           if(ft_verbose)
+             printClusterInfo(cl)
+           if (!is.null(initfun))
+             clusterCallpart(cl,(p+1):newp,initfun)
+           if (gentype != "None")
+             resetRNG(cl,(p+1):newp,n,gentype,seed)
+           clall<-combinecl(clall,cl[(p+1):newp])
+           freenodes<-c(freenodes,(p+1):newp)
+           p <- newp
+           cluster.increased <- TRUE
 	}
-	return(list(cluster.increased=cluster.increased, 
-			cl=cl, clall=clall, freenodes=freenodes, p=p, newp=newp))
+	return(list(cluster.increased=cluster.increased, cl=cl, clall=clall, freenodes=freenodes, p=p, newp=newp))
 }
 
 #
