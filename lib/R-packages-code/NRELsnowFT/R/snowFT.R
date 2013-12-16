@@ -94,10 +94,8 @@ recvOneResultFT <- function(cl,type='b',time=0) {
 clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
                              printfun=NULL, printargs=NULL,
                              printrepl=max(length(x)/10,1),
-                             gentype="None", seed=rep(123456,6),
-                             prngkind="default", para=0,
                              mngtfiles=c(".clustersize",".proc",".proc_fail"),
-                             ft_verbose=FALSE, ...) {
+                             ft_verbose=FALSE) {
 
 # This function is a combination of clusterApplyLB and FPSS
 # (Framework for parallel statistical simulations), written by
@@ -126,18 +124,6 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
 
 	if (length(cl)<=0) 
     	stop("No cluster created!")
- 
-	if (!is.na(pmatch(prngkind, "default")))
-    	prngkind <- "LFG"
-  	prngnames <- c("LFG", "LCG", "LCG64", "CMRG", "MLFG", "PMLCG")
-  	kind <- pmatch(prngkind, prngnames)
-  	gennames <- c("RNGstream", "SPRNG", "None")
-  	gen <- pmatch(gentype,gennames)
-  	if (is.na(gen))
-    	stop(paste("'", gentype,
-               "' is not a valid choice. Choose 'RNGstream', 'SPRNG' or 'None'.",
-               sep = ""))
-  	gentype <- gennames[gen]
 
   	lmng <- length(mngtfiles)
   	if (lmng < 3)
@@ -145,8 +131,6 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
   	manage <- is.manageable(cl) & (nchar(mngtfiles) > 0)
   	if (ft_verbose) {
     	cat("\nFunction clusterApplyFT:\n")
-     	cat("   gentype:",gentype,"\n")
-     	cat("   seed:   ",seed,"\n")
      	if(sum(manage) > 0)
      		cat("   Management files:\n")
      	if(manage['cluster.size'])
@@ -206,9 +190,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
                			((it > n) && fin < (n-length(frep)))) { # all nodes busy
                                         # or wait for remaining results
           			d <- recvOneResultFT(clall,'n') # look if there is any result
-          			admin <- do.administration(cl, clall, d, p, it, n, manage, mngtfiles, 
-									x, frep, freenodes, initfun, 
-									gentype, seed, ft_verbose)
+          			admin <- do.administration(cl, clall, d, p, it, n, manage, mngtfiles, x, frep, freenodes, initfun,ft_verbose)
 					cl <- admin$cl
 					clall <- admin$clall
 					d <- admin$d
@@ -306,10 +288,8 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
  
   res <- clusterApplyFT (cl, x, fun, initfun=initfun, exitfun=exitfun,
                            printfun=printfun, printargs=printargs,
-                           printrepl=printrepl, gentype=gentype,
-                           seed=seed, prngkind=prngkind,
-                           para=para, mngtfiles=mngtfiles, 
-			   ft_verbose=ft_verbose, ...)
+                           printrepl=printrepl, mngtfiles=mngtfiles, 
+			   ft_verbose=ft_verbose)
 
   if (ft_verbose) 
      cat("   clusterApplyFT finished.\n")
@@ -516,7 +496,7 @@ writetomngtfile <- function(cl, file) {
   write(repl,file)
 }
 
-manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, freenodes, initfun, gentype, seed, ft_verbose=FALSE) {
+manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, freenodes, initfun, ft_verbose=FALSE) {
 	if (manage['cluster.size']){ 
           scanresize <- try(scan(file=mngtfiles[1],what=integer(),nlines=1, quiet=TRUE))
           if (!inherits(scanresize,'try-error')){
@@ -532,14 +512,13 @@ manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfi
            writetomngtfile(cl,mngtfiles[2])
         cluster.increased <- FALSE
         if (newp > p) { # increase the degree of parallelism
+           cat('resizing cluster\n')
            cl<-addtoCluster(cl, newp-p)
            clusterEvalQpart(cl,(p+1):newp,require(snowFT))
            if(ft_verbose)
              printClusterInfo(cl)
            if (!is.null(initfun))
              clusterCallpart(cl,(p+1):newp,initfun)
-           if (gentype != "None")
-             resetRNG(cl,(p+1):newp,n,gentype,seed)
            clall<-combinecl(clall,cl[(p+1):newp])
            freenodes<-c(freenodes,(p+1):newp)
            p <- newp
