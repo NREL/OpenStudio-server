@@ -57,6 +57,7 @@ compPlotObjectives <- function(obj1, obj2, objDim){
     }
 }   
 
+#saveGIF(plot_obj(results$objectives_save,2,40),video.name="NSGA2.gif",img.name="NSGA",convert="convert",interval=0.25)
 compPlotObjectivesGIF <- function(obj1, obj2, objDim){ 
    
     if (ncol(obj1)%%objDim != 0) {
