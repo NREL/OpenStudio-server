@@ -8,6 +8,5 @@ rake db:purge
 rake db:mongoid:create_indexes
 rm -rf /mnt/openstudio
 sudo apt-get upgrade -y
-cd /data/launch-instance
-chmod 777 setup-cleanup-aws.sh
-sudo ./setup-cleanup-aws.sh
+chmod +x /data/launch-instance/setup-cleanup-aws.sh
+sudo /data/launch-instance/setup-cleanup-aws.sh
