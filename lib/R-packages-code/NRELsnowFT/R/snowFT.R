@@ -22,8 +22,8 @@ recvOneDataFT <- function(cl,type,time) UseMethod("recvOneDataFT")
 addtoCluster <- function(cl, spec, ..., options = defaultClusterOptions)
   UseMethod("addtoCluster") 
 
-repairCluster <- function(cl, nodes, options = defaultClusterOptions)
-  UseMethod("repairCluster")
+#repairCluster <- function(cl, nodes, options = defaultClusterOptions)
+#  UseMethod("repairCluster")
 
 removefromCluster  <- function(cl, nodes, ft_verbose=FALSE) {
   newcl <- vector("list",length(cl)-length(nodes))
@@ -374,7 +374,7 @@ manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfi
         if (newp > p) { # increase the degree of parallelism
            cat('resizing cluster\n')
            cl<-addtoCluster(cl, newp-p)
-           clusterEvalQpart(cl,(p+1):newp,require(snowFT))
+           clusterEvalQpart(cl,(p+1):newp,require(NRELsnowFT))
            if(ft_verbose)
              printClusterInfo(cl)
            if (!is.null(initfun))

@@ -26,28 +26,39 @@
 \alias{printClusterInfo}
 \alias{makeClusterFT}
 \alias{makeSOCKclusterFT}
+\alias{addtoCluster} 
+\alias{removefromCluster}
+\alias{findFailedNodes}
+\alias{processStatus}
+
+\description{
+  Functions that extend the collection of cluster-level functions of the
+  \pkg{snow} package while providing fault tolerance, reproducibility and additional
+  management features. The heart of the package is the function
+  \code{performParallel}. 
+}
 
 \usage{
-performParallel(count, x, fun, initfun = NULL, exitfun = NULL, 
+performParallel(x, fun, initfun = NULL, exitfun = NULL, 
                 printfun = NULL, printargs = NULL, 
                 printrepl = max(length(x)/10,1), 
                 cltype = getClusterOption("type"),
-                cluster.args = NULL, 
+                cluster.args = NULL, ipList = NULL,
                 mngtfiles = c(".clustersize",".proc",".proc_fail"),
-                ft_verbose = FALSE, ...)
+                ft_verbose = FALSE)
 
 clusterApplyFT(cl, x, fun, initfun = NULL, exitfun = NULL, 
                printfun = NULL, printargs = NULL, 
                printrepl = max(length(x)/10,1), 
                mngtfiles = c(".clustersize",".proc",".proc_fail"), 
-               ft_verbose = FALSE, ...)
+               ft_verbose = FALSE)
 
 clusterEvalQpart(cl, nodes, expr)
 
 printClusterInfo(cl)
 }
 \arguments{
-  \item{count}{Number of cluster nodes. If \code{count=0}, the process runs sequentially.}
+  \item{ipList}{list of cluster nodes IP addresses.}
   \item{cl}{Cluster object.}
   \item{x}{Vector of values to be passed to function \code{fun}. 
   	Its length determines how many times \code{fun} is to
