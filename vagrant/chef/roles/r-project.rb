@@ -100,6 +100,10 @@ default_attributes(
             {
                 :name => 'rgenoud',
                 :version => '5.7-12'
+            },
+            {
+                :name => 'snowFT',
+                :version => '1.3-0'
             }
         ],
         :local_package_url => "/data/R-packages",
@@ -111,6 +115,10 @@ default_attributes(
             {
                 :name => 'Swift',
                 :version => '0.3.1'
+            },
+            {
+                :name => 'NRELsnowFT',
+                :version => '1.1.6'
             }
         ]        
     }
