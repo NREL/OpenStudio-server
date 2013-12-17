@@ -5,7 +5,7 @@
 processStatus <- function(node) UseMethod("processStatus")
 
 # Administration
-do.administration <- function(cl, ...) UseMethod("do.administration")
+doAdministration <- function(cl, clall, d, p, it, n, manage, mngtfiles, x, frep, freenodes, initfun,ft_verbose) UseMethod("doAdministration")
 is.manageable <- function(cl) UseMethod("is.manageable")
 
 #
@@ -190,7 +190,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
                			((it > n) && fin < (n-length(frep)))) { # all nodes busy
                                         # or wait for remaining results
           			d <- recvOneResultFT(clall,'n') # look if there is any result
-          			admin <- do.administration(cl, clall, d, p, it, n, manage, mngtfiles, x, frep, freenodes, initfun,ft_verbose)
+          			admin <- doAdministration(cl, clall, d, p, it, n, manage, mngtfiles, x, frep, freenodes, initfun,ft_verbose)
 					cl <- admin$cl
 					clall <- admin$clall
 					d <- admin$d
