@@ -16,7 +16,7 @@ require 'timeout'
 
 # Versioning (change these each build)
 os_version = "1.1.3"
-os_server_version= "1.2.0"
+os_server_version= "1.2.1"
 revision_id = "" # with preceding . (i.e. .1 or .a) 
 
 start_time = Time.now
@@ -75,6 +75,9 @@ end
 $threads = []
 $mutex = Mutex.new
 
+class AllJobsInvalid < StandardError
+end
+
 def system_call(command, &block)
   IO.popen(command) do |io|
     while (line = io.gets) do
@@ -106,7 +109,12 @@ def run_vagrant_up(element)
           puts "#{element[:id]}: machines already running -- go to vagrant provision"
           $mutex.unlock
         elsif message =~ /.*ERROR:/
-          puts "Error found during provisioning"
+          puts "#{element[:id]}Error found during provisioning"
+        elsif message =~ /InsufficientInstanceCapacity/
+          puts "#{element[:id]}No resources available"
+          $mutex.unlock
+          raise AllJobsInvalid # call this after unlocking
+                               #InsufficientInstanceCapacity => Insufficient capacity.
         end
       end
       success = false if exit_code != 0
@@ -215,15 +223,20 @@ end
 
 def create_ami(element)
   i = nil
-  # Call the method to create the AMIs
-  puts "#{element[:id]}: creating AMI #{element[:ami_name]}"
-  i = @aws.images.create(instance_id: element[:instance_id], name: element[:ami_name])
-  puts "#{element[:id]}: waiting for AMI to become available"
-  while (i.state != :available) && (i.state != :failed) do
-    puts "#{element[:id]}: ..."
-    sleep 5
+  begin
+    # Call the method to create the AMIs
+    puts "#{element[:id]}: creating AMI #{element[:ami_name]}"
+    i = @aws.images.create(instance_id: element[:instance_id], name: element[:ami_name])
+    puts "#{element[:id]}: waiting for AMI to become available"
+    while (i.state != :available) && (i.state != :failed) do
+      puts "#{element[:id]}: ..."
+      sleep 5
+    end
+    puts "#{element[:id]}: finished create_ami block with result #{i.inspect}"
+  rescue Exception => e
+    puts "#{element[:id]}: expection during AMI generation with #{e.message}"
+    i = nil
   end
-  puts "#{element[:id]}: finished create_ami block with result #{i.inspect}"
 
   return i
 end
@@ -286,7 +299,7 @@ def process(element, &block)
           if i.nil? || i.state == :failed
             puts "#{element[:id]}: AMI creation failed, retrying"
             retries = 0
-            while retries < 3 && i.state == :available
+            while retries < 3 && i.state != nil && i.state == :available
               retries += 1
               # update the name of the ami in case the old one is still around
               element[:ami_name] += Time.now.strftime("%Y%m%d-%H%M%S")
@@ -315,9 +328,14 @@ def process(element, &block)
 
     # Do some testing the machines in the future, otherwise, if it got here it is assumed good
     element[:good_ami] = true
+  rescue AllJobsInvalid
+    element[:good_ami] = false
+    element[:error_message] += "One of the images failed, killing all threads"
+
+    puts "Found error in one of the images therefore killing all threads"
+    $threads.each { |t| t.exit }
   rescue Exception => e
     puts e.message
-
     # make it clear that the setup is invalid
     element[:good_ami] = false
     element[:error_message] += "Exception message, #{e.message}, #{e.backtrace}"
@@ -360,7 +378,7 @@ if good_build
     amis_hash[os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
     amis_hash[os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
 
-    puts JSON.pretty_generate(amis_hash.to_json)
+    puts JSON.pretty_generate(amis_hash)
   end
 else
   puts "AMIs had errors"
