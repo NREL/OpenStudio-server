@@ -5,7 +5,7 @@
 processStatus <- function(node) UseMethod("processStatus")
 
 # Administration
-doAdministration <- function(cl, clall, d, p, it, n, manage, mngtfiles, x, frep, freenodes, initfun,ft_verbose) UseMethod("doAdministration")
+doAdministration <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipfile, x, frep, freenodes, initfun,ft_verbose) UseMethod("doAdministration")
 is.manageable <- function(cl) UseMethod("is.manageable")
 
 #
@@ -19,7 +19,7 @@ recvOneDataFT <- function(cl,type,time) UseMethod("recvOneDataFT")
 #  Cluster Modification
 #
 
-addtoCluster <- function(cl, spec, ..., options = defaultClusterOptions)
+addtoCluster <- function(cl, spec, ipfile, options = defaultClusterOptions)
   UseMethod("addtoCluster") 
 
 #repairCluster <- function(cl, nodes, options = defaultClusterOptions)
@@ -94,7 +94,7 @@ recvOneResultFT <- function(cl,type='b',time=0) {
 clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
                              printfun=NULL, printargs=NULL,
                              printrepl=max(length(x)/10,1),
-                             mngtfiles=c(".clustersize",".proc",".proc_fail"),
+                             mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile="newIPs",
                              ft_verbose=FALSE) {
 
 # This function is a combination of clusterApplyLB and FPSS
@@ -190,7 +190,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
                			((it > n) && fin < (n-length(frep)))) { # all nodes busy
                                         # or wait for remaining results
           			d <- recvOneResultFT(clall,'n') # look if there is any result
-          			admin <- doAdministration(cl, clall, d, p, it, n, manage, mngtfiles, x, frep, freenodes, initfun,ft_verbose)
+          			admin <- doAdministration(cl, clall, d, p, it, n, manage, mngtfiles, ipfile, x, frep, freenodes, initfun,ft_verbose)
 					cl <- admin$cl
 					clall <- admin$clall
 					d <- admin$d
@@ -243,7 +243,7 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
                             printrepl=max(length(x)/10,1),
                             cltype = getClusterOption("type"),
                             cluster.args=NULL, ipList=NULL, 
-			    mngtfiles=c(".clustersize",".proc",".proc_fail"),
+			    mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile="newIPs",
                             ft_verbose=FALSE) {
 
 
@@ -356,7 +356,7 @@ writetomngtfile <- function(cl, file) {
   write(repl,file)
 }
 
-manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, freenodes, initfun, ft_verbose=FALSE) {
+manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, ipfile, freenodes, initfun, ft_verbose=FALSE) {
 	if (manage['cluster.size']){ 
           scanresize <- try(scan(file=mngtfiles[1],what=integer(),nlines=1, quiet=TRUE))
           if (!inherits(scanresize,'try-error')){
@@ -373,7 +373,7 @@ manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfi
         cluster.increased <- FALSE
         if (newp > p) { # increase the degree of parallelism
            cat('resizing cluster\n')
-           cl<-addtoCluster(cl, newp-p)
+           cl<-addtoCluster(cl, newp-p, ipfile=ipfile)
            clusterEvalQpart(cl,(p+1):newp,require(NRELsnowFT))
            if(ft_verbose)
              printClusterInfo(cl)

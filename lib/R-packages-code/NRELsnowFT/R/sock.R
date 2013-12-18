@@ -32,31 +32,39 @@ is.manageable.SOCKcluster <- function(cl) {
 	return (c(cluster.size=TRUE, monitor.procs=TRUE, repair=FALSE))
 }
 
-addtoCluster.SOCKcluster <- function(cl, spec, ..., options = defaultClusterOptions) {
-    names <- attr(cl, 'all.hosts')
-    options <- addClusterOptions(options, list(...))
+addtoCluster.SOCKcluster <- function(cl, spec, ipfile, options = defaultClusterOptions) {
+  names <- attr(cl, 'all.hosts')
+  options <- addClusterOptions(options,list())
   n <- length(cl)
   newcl <- vector("list",n+spec)
-  if (!is.null(names)) {
-  	if (length(names) < n+spec) names <- rep(names,n+spec)
+  cat('ipfile is:',ipfile,'\n')
+  addIPs <- try(scan(file=ipfile, what=character(), nlines=spec, quiet=TRUE))
+  if (!inherits(addIPs,'try-error')){
+    newIPs <- addIPs
   } else {
-        names <- rep('localhost', n+spec)
-    }
-    names <- names[1:(n+spec)]
+    newIPs <- NULL
+  }
+  if (length(newIPs) == spec){
+    names[(n+1):(n+spec)] <- newIPs[1:(spec)]
+  } else {
+    names[(n+1):(n+spec)] <- NULL
+  }
   for (i in seq(along=cl)) {
     newcl[[i]] <- cl[[i]]
     # remove hosts from the list that are already in the cluster
     #which.idx <- which.max(cl[[i]]$host == names)
     #names <- names[-which.idx]
   }
-  #j <- 1
+  j <- (n+1)
   for (i in (n+1):(n+spec)) {
-    newcl[[i]] <- newSOCKnode(names[[i]], options = options, rank=i)
-    newcl[[i]]$replic <- 0
-  #  j <- j+1
+    if (!is.null(names[[i]])){
+      newcl[[j]] <- newSOCKnode(names[[j]], options = options, rank=j)
+      newcl[[j]]$replic <- 0
+      j <- j+1
+    }
   }
   class(newcl) <- class(cl)
-    attr(newcl, 'all.hosts') <- attr(cl, 'all.hosts')
+  attr(newcl, 'all.hosts') <- names
   newcl
 }
 
@@ -68,13 +76,13 @@ getNodeID.SOCKnode <- function(node) {
   return(node$con)
 }
 
-doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfiles, x, frep, freenodes, initfun,ft_verbose) {
+doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipfile, x, frep, freenodes, initfun,ft_verbose) {
 	free.nodes <- FALSE
         if (length(d) <= 0) { # no results arrived yet
             while (TRUE) {
                 # do the administration in the waiting time
                 # ***************************************
-	        updated.values <- manage.replications.and.cluster.size(cl, clall, p, n, manage, mngtfiles, freenodes, initfun, ft_verbose=ft_verbose)
+	        updated.values <- manage.replications.and.cluster.size(cl, clall, p, n, manage, mngtfiles, ipfile, freenodes, initfun, ft_verbose=ft_verbose)
                 newp <- updated.values$newp
                 if (updated.values$cluster.increased) {
                     p <- updated.values$p
