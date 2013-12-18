@@ -14,8 +14,8 @@
 \alias{repairCluster.SOCKcluster} 
 \alias{updatecl}
 \alias{writetomngtfile}
-\alias{do.administration}
-\alias{do.administration.SOCKcluster}
+\alias{doAdministration}
+\alias{doAdministration.SOCKcluster}
 \alias{is.manageable}
 \alias{is.manageable.SOCKcluster}
 \alias{manage.replications.and.cluster.size}
@@ -44,13 +44,13 @@ performParallel(x, fun, initfun = NULL, exitfun = NULL,
                 printrepl = max(length(x)/10,1), 
                 cltype = getClusterOption("type"),
                 cluster.args = NULL, ipList = NULL,
-                mngtfiles = c(".clustersize",".proc",".proc_fail"),
+                mngtfiles = c(".clustersize",".proc",".proc_fail"), ipfile,
                 ft_verbose = FALSE)
 
 clusterApplyFT(cl, x, fun, initfun = NULL, exitfun = NULL, 
                printfun = NULL, printargs = NULL, 
                printrepl = max(length(x)/10,1), 
-               mngtfiles = c(".clustersize",".proc",".proc_fail"), 
+               mngtfiles = c(".clustersize",".proc",".proc_fail"), ipfile, 
                ft_verbose = FALSE)
 
 clusterEvalQpart(cl, nodes, expr)
@@ -58,7 +58,7 @@ clusterEvalQpart(cl, nodes, expr)
 printClusterInfo(cl)
 }
 \arguments{
-  \item{ipList}{list of cluster nodes IP addresses.}
+  \item{ipfile}{list of cluster nodes IP addresses.}
   \item{cl}{Cluster object.}
   \item{x}{Vector of values to be passed to function \code{fun}. 
   	Its length determines how many times \code{fun} is to
