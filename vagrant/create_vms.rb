@@ -299,11 +299,13 @@ def process(element, &block)
           if i.nil? || i.state == :failed
             puts "#{element[:id]}: AMI creation failed, retrying"
             retries = 0
-            while retries < 3 && i && i.state == :available
+            while retries < 3 
               retries += 1
-              # update the name of the ami in case the old one is still around
-              element[:ami_name] += Time.now.strftime("%Y%m%d-%H%M%S")
+              
+              element[:ami_name] += Time.now.strftime(" %Y%m%d-%H%M%S")
               i = create_ami(element)
+              # update the name of the ami in case the old one is still around
+              break if i && i.state == :available
             end
           end
 
