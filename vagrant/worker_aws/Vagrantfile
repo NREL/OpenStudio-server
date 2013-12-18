@@ -90,8 +90,8 @@ Vagrant.configure("2") do |config|
       
       aws.security_groups = ["default"]
       aws.region = "us-east-1"
-      aws.instance_type = "m2.xlarge"
-      #aws.ami = "ami-d0f89fb9" #orig non-cluster AMI
+      aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
+
       aws.ami = "ami-995a06f0"  #16GB version
 
       override.ssh.username = "ubuntu"
