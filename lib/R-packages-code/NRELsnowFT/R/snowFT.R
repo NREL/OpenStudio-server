@@ -94,7 +94,7 @@ recvOneResultFT <- function(cl,type='b',time=0) {
 clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
                              printfun=NULL, printargs=NULL,
                              printrepl=max(length(x)/10,1),
-                             mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile="newIPs",
+                             mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile=".newips",
                              ft_verbose=FALSE) {
 
 # This function is a combination of clusterApplyLB and FPSS
@@ -243,7 +243,7 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
                             printrepl=max(length(x)/10,1),
                             cltype = getClusterOption("type"),
                             cluster.args=NULL, ipList=NULL, 
-			    mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile="newIPs",
+			    mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile=".newips",
                             ft_verbose=FALSE) {
 
 

@@ -47,7 +47,8 @@ addtoCluster.SOCKcluster <- function(cl, spec, ipfile, options = defaultClusterO
   if (length(newIPs) == spec){
     names[(n+1):(n+spec)] <- newIPs[1:(spec)]
   } else {
-    names[(n+1):(n+spec)] <- NULL
+    names[(n+1):(n+length(newIPs))] <- newIPs[1:(length(newIPs))]
+    cat('length of newIP file', length(newIPs),'is not same as number requested',spec,'\n')
   }
   for (i in seq(along=cl)) {
     newcl[[i]] <- cl[[i]]
