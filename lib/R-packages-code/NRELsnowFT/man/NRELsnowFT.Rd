@@ -59,7 +59,7 @@ printClusterInfo(cl)
 }
 \arguments{
   \item{ipfile}{file list of new cluster nodes IP addresses.}
-  \item{ipLile}{list of cluster nodes IP addresses.}
+  \item{ipList}{list of cluster nodes IP addresses.}
   \item{cl}{Cluster object.}
   \item{x}{Vector of values to be passed to function \code{fun}. 
   	Its length determines how many times \code{fun} is to
