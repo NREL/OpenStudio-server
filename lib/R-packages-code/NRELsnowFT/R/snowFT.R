@@ -269,7 +269,7 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
  
   res <- clusterApplyFT (cl, x, fun, initfun=initfun, exitfun=exitfun,
                            printfun=printfun, printargs=printargs,
-                           printrepl=printrepl, mngtfiles=mngtfiles, 
+                           printrepl=printrepl, mngtfiles=mngtfiles, ipfile=ipfile,
 			   ft_verbose=ft_verbose)
 
   if (ft_verbose) 
