@@ -1,7 +1,7 @@
 <measure>
   <name>Xcel EDA Tariff Selection and Model Setup</name>
   <uid>c5ab60e9-b8e5-4653-a502-5ed030f1335d</uid>
-  <version_id>099b54de-509d-4b59-9478-c1a3d867a3ca</version_id>
+  <version_id>da7b99e8-7ee7-494c-b7af-baa5666f760b</version_id>
   <description>Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program.</description>
   <modeler_description>Adds the .idf text for the selected Xcel Energy tariffs, sets the timestep to 15min so that the demand window and the timestep align, and sets the lifecycle costing parameters to use NIST 2012 inflation and fuel escalation numbers.  These NIST numbers will not affect the Xcel EDA results.</modeler_description>
   <provenances/>
@@ -35,97 +35,121 @@
       <filename>Interruptible Industrial G.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>08200009</checksum>
+      <checksum>884E6A20</checksum>
     </file>
     <file>
       <filename>Commercial.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>81C294F3</checksum>
+      <checksum>9B75162C</checksum>
     </file>
     <file>
       <filename>Non-Xcel Commercial.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>05C822D1</checksum>
+      <checksum>70FB9743</checksum>
     </file>
     <file>
       <filename>Non-Xcel Primary General.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>C7EC0D02</checksum>
+      <checksum>F5EC8B91</checksum>
     </file>
     <file>
       <filename>Non-Xcel Secondary General Low Load Factor.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>BAF4BC43</checksum>
+      <checksum>C3BBBC73</checksum>
     </file>
     <file>
       <filename>Non-Xcel Secondary General.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>607DD17C</checksum>
+      <checksum>9818E1BA</checksum>
     </file>
     <file>
       <filename>Non-Xcel Transmission General.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>5C841F61</checksum>
+      <checksum>7EB243B1</checksum>
     </file>
     <file>
       <filename>Primary General.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>EB0AFBEB</checksum>
+      <checksum>213A826C</checksum>
     </file>
     <file>
       <filename>Residential General.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>E1B6E36E</checksum>
+      <checksum>C5C74836</checksum>
     </file>
     <file>
       <filename>Secondary General Low Load Factor.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>9E85463A</checksum>
+      <checksum>E6FD0043</checksum>
     </file>
     <file>
       <filename>Secondary General.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>84FB5327</checksum>
+      <checksum>C82A875A</checksum>
     </file>
     <file>
       <filename>Transmission General.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>49B18A54</checksum>
+      <checksum>E84733E7</checksum>
     </file>
     <file>
       <filename>Large CG.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>2E3F9B2A</checksum>
+      <checksum>6442881E</checksum>
     </file>
     <file>
       <filename>Residential Gas.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>55A5F595</checksum>
+      <checksum>1776476E</checksum>
     </file>
     <file>
       <filename>Small CG.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>AE5A5DB4</checksum>
+      <checksum>5F10A112</checksum>
     </file>
     <file>
       <filename>Secondary Photovoltaic Time-of-Use.idf</filename>
       <filetype>idf</filetype>
       <usage_type>resource</usage_type>
-      <checksum>A3542ECC</checksum>
+      <checksum>DF02B165</checksum>
+    </file>
+    <file>
+      <filename>Non-Xcel Gas Firm.idf</filename>
+      <filetype>idf</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>7D6D16A1</checksum>
+    </file>
+    <file>
+      <filename>Non-Xcel Gas Interruptible.idf</filename>
+      <filetype>idf</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>3543130F</checksum>
+    </file>
+    <file>
+      <filename>XcelEDATariffSelectionandModelSetup_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0CD65FA6</checksum>
+    </file>
+    <file>
+      <filename>EnvelopeAndLoadTestModel_01.osm</filename>
+      <filetype>osm</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A669937A</checksum>
     </file>
     <file>
       <version>
@@ -135,25 +159,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>5BFA9CBB</checksum>
-    </file>
-    <file>
-      <filename>Non-Xcel Gas Firm.idf</filename>
-      <filetype>idf</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>59FA2FFE</checksum>
-    </file>
-    <file>
-      <filename>Non-Xcel Gas Interruptible.idf</filename>
-      <filetype>idf</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>868FEA8D</checksum>
-    </file>
-    <file>
-      <filename>XcelEDATariffSelectionandModelSetup_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>6442F50F</checksum>
+      <checksum>D4840763</checksum>
     </file>
   </files>
 </measure>

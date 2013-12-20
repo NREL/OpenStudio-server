@@ -40,7 +40,7 @@ class XcelEDATariffSelectionandModelSetup < OpenStudio::Ruleset::WorkspaceUserSc
     elec_chs << "Non-Xcel Secondary General"
     elec_chs << "Non-Xcel Transmission General"
     elec_tar = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('elec_tar', elec_chs, true)
-    elec_tar.setDisplayName("Select an Electricity Tariff")
+    elec_tar.setDisplayName("Select an Electricity Tariff.")
     elec_tar.setDefaultValue("Secondary General")
     args << elec_tar
     
@@ -53,7 +53,7 @@ class XcelEDATariffSelectionandModelSetup < OpenStudio::Ruleset::WorkspaceUserSc
     gas_chs << "Non-Xcel Gas Firm"
     gas_chs << "Non-Xcel Gas Interruptible"
     gas_tar = OpenStudio::Ruleset::OSArgument::makeChoiceArgument('gas_tar', gas_chs, true)
-    gas_tar.setDisplayName("Select a Gas Tariff")    
+    gas_tar.setDisplayName("Select a Gas Tariff.")
     gas_tar.setDefaultValue("Large CG")
     args << gas_tar
     
@@ -77,18 +77,30 @@ class XcelEDATariffSelectionandModelSetup < OpenStudio::Ruleset::WorkspaceUserSc
     [elec_tar,gas_tar].each do |tar|
     
       #load the idf file containing the electric tariff
-      tar_path = OpenStudio::Path.new("#{Dir.pwd}/#{tar}.idf")
+      tar_path = OpenStudio::Path.new("#{File.dirname(__FILE__)}/resources/#{tar}.idf")
       tar_file = OpenStudio::IdfFile::load(tar_path)
-      if tar_file.empty?   
+
+      #in OpenStudio PAT in 1.1.0 and earlier all resource files are moved up a directory.
+      #below is a temporary workaround for this before issuing an error.
+      if tar_file.empty?
+        tar_path = OpenStudio::Path.new("#{File.dirname(__FILE__)}/#{tar}.idf")
+        tar_file = OpenStudio::IdfFile::load(tar_path)
+      end
+
+      if tar_file.empty?
         runner.registerError("Unable to find the file #{tar}.idf")
         return false
       else
         tar_file = tar_file.get
       end
   
+
+      #add the schedule type limits
+      workspace.addObjects(tar_file.getObjectsByType("ScheduleTypeLimits".to_IddObjectType))	
+  
       #add the schedules
       workspace.addObjects(tar_file.getObjectsByType("Schedule:Compact".to_IddObjectType))
-      
+        
       #add the tariffs
       workspace.addObjects(tar_file.getObjectsByType("UtilityCost:Tariff".to_IddObjectType))
       
@@ -104,8 +116,12 @@ class XcelEDATariffSelectionandModelSetup < OpenStudio::Ruleset::WorkspaceUserSc
     end
     
     #set the simulation timestep to 15min (4 per hour) to match the demand window of the tariffs
-    workspace.getObjectsByType("Timestep".to_IddObjectType)[0].setString(0,"4")
-    runner.registerInfo("set the simulation timestep to 15 min to match the demand window of the tariffs")
+    if not workspace.getObjectsByType("Timestep".to_IddObjectType).empty?
+      workspace.getObjectsByType("Timestep".to_IddObjectType)[0].setString(0,"4")
+      runner.registerInfo("set the simulation timestep to 15 min to match the demand window of the tariffs")
+    else
+      runner.registerError("there was no timestep object to alter")
+    end
     
     #remove any existing lifecycle cost parameters
     workspace.getObjectsByType("LifeCycleCost:Parameters".to_IddObjectType).each do |object|
@@ -126,7 +142,9 @@ class XcelEDATariffSelectionandModelSetup < OpenStudio::Ruleset::WorkspaceUserSc
       2011,                                   !- Base Date Year
       ,                                       !- Service Date Month
       2011,                                   !- Service Date Year
-      25;                                     !- Length of Study Period in Years
+      25,                                     !- Length of Study Period in Years
+      ,                                       !- Tax rate
+      None;                                   !- Depreciation Method	  
     "  
     life_cycle_params = OpenStudio::IdfObject::load(life_cycle_params_string).get
     workspace.addObject(life_cycle_params)

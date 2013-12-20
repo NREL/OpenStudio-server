@@ -3,7 +3,7 @@ Version,
   7.2.0.006;                              ! Version Identifier
 
 UtilityCost:Tariff,
-  Interruptible Industrial G,             !- Name
+  InterruptibleIndustrialG,             !- Name
   Gas:Facility,                           !- Output Meter Name
   MMBtu,                                  !- Conversion Factor Choice
   ,                                       !- Energy Conversion Factor
@@ -16,7 +16,7 @@ UtilityCost:Tariff,
 
 UtilityCost:Charge:Simple,
   FlatEnergyCharge-Gas,                   !- Name
-  Interruptible Industrial G,             !- Tariff Name
+  InterruptibleIndustrialG,             !- Tariff Name
   totalEnergy,                            !- Source Variable
   Annual,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
@@ -24,7 +24,7 @@ UtilityCost:Charge:Simple,
 
 UtilityCost:Charge:Simple,
   FlatDemandCharge-Gas,                   !- Name
-  Interruptible Industrial G,             !- Tariff Name
+  InterruptibleIndustrialG,             !- Tariff Name
   totalDemand,                            !- Source Variable
   Annual,                                 !- Season
   DemandCharges,                          !- Category Variable Name

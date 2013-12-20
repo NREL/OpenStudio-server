@@ -93,3 +93,10 @@ Schedule:Compact,
   Until: 24:00,                           ! Field 10
   3;                                      !- Field 7
 
+ScheduleTypeLimits,
+  number,                  !- Name
+  0,                       !- Lower Limit Value
+  ,                        !- Upper Limit Value
+  Continuous,              !- Numeric Type
+  Dimensionless;           !- Unit Type
+  
