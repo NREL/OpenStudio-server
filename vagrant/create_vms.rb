@@ -102,23 +102,27 @@ def run_vagrant_up(element)
       end
       exit_code = system_call(command) do |message|
         puts "#{element[:id]}: #{message}"
-        if message =~ /Running chef-solo.../i
-          puts "#{element[:id]}: chef running - you can go on now"
+        if message =~ /Installing Chef.*\d*.\d*.\d*.*Omnibus package/i
+          puts "#{element[:id]}: chef is installing - you can go on now"
           $mutex.unlock
         elsif message =~ /The machine is already created/i
           puts "#{element[:id]}: machines already running -- go to vagrant provision"
           $mutex.unlock
         elsif message =~ /.*ERROR:/
           puts "#{element[:id]}Error found during provisioning"
-        elsif message =~ /InsufficientInstanceCapacity/
-          puts "#{element[:id]}No resources available"
-          $mutex.unlock
-          raise AllJobsInvalid # call this after unlocking
-                               #InsufficientInstanceCapacity => Insufficient capacity.
         end
       end
-      success = false if exit_code != 0
+      if exit_code != 0
+        # this can happen when AWS isn't available or insufficient capacity in AWS
+        #InsufficientInstanceCapacity => Insufficient capacity.
+        success = false
+        $mutex.unlock
+        raise AllJobsInvalid # call this after unlocking
+      end
     }
+  rescue AllJobsInvalid
+    # pass the exception through
+    raise AllJobsInvalid
   rescue TimeoutError
     # DO NOT raise an error if timeout, just timeout
     error = "#{element[:id]}: ERROR TimeoutError running vagrant up"
@@ -347,7 +351,7 @@ def process(element, &block)
       puts "#{element[:id]}: terminating instance"
       command = "cd ./#{element[:name]} && vagrant destroy -f"
       system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-      puts "#{element[:id]}: instance terminated and exiting thread"
+      puts "#{element[:id]}: instance terminated and  thread"
     end
   end
 end
