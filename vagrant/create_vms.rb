@@ -15,8 +15,8 @@ require 'thread'
 require 'timeout'
 
 # Versioning (change these each build)
-os_version = "1.1.3"
-os_server_version= "1.2.1"
+os_version = "1.2.0" # todo: how to automatically set this?
+os_server_version= "1.3.0"  # todo: how to automatically set this?
 revision_id = "" # with preceding . (i.e. .1 or .a) 
 
 start_time = Time.now
