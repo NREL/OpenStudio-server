@@ -11,6 +11,9 @@
 
 # This also uses the AWS gem in order to create the amazon image dynamically
 
+require 'bundler'
+Bundler.require(:default)
+
 require 'thread'
 require 'timeout'
 
@@ -18,6 +21,9 @@ require 'timeout'
 os_version = "1.2.0" # todo: how to automatically set this?
 os_server_version= "1.3.0"  # todo: how to automatically set this?
 revision_id = "" # with preceding . (i.e. .1 or .a) 
+
+test_amis_filename = "test_amis.json"
+File.delete(test_amis_filename) if File.exists?(test_amis_filename)
 
 start_time = Time.now
 @provider = "vagrant".to_sym
@@ -385,10 +391,15 @@ if good_build
     amis_hash[os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash)
+    
+    # save it to a file for use in integration test
+    File.open(test_amis_filename) {|f| f << JSON.pretty_generate(amis_hash)}
   end
 else
   puts "AMIs had errors"
+  exit 1
 end
 
 puts
 puts "Took #{end_time - start_time}s to build."
+exit 0
