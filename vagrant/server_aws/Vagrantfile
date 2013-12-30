@@ -32,10 +32,10 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder "../../server", "/var/www/rails/openstudio", :nfs => !is_windows
-  config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => !is_windows
-  config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => !is_windows
-  config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => !is_windows
+  config.vm.synced_folder "../../server", "/var/www/rails/openstudio", :nfs => false
+  config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => false
+  config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => false 
+  config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => false
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -99,9 +99,8 @@ Vagrant.configure("2") do |config|
       override.ssh.username = "ubuntu"
 
       aws.tags = {
-          'Name' => 'OpenStudio-server',
+          'Name' => 'Vagrant OpenStudio-server',
           'NodeType' => 'Server',
-          'OpenStudio Version' => '1.1.1'
       }
     rescue LoadError
       warn "Unable to configure AWS provider."
