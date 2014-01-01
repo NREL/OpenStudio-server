@@ -22,7 +22,7 @@ describe Analysis::R::Cluster do
       @r.should_not be_nil
     end
     
-    it "should configure the cluster with an analysis run_flagr" do
+    it "should configure the cluster with an analysis run_flag" do
       @analysis.id.should_not be_nil
       
       cluster_class = Analysis::R::Cluster.new(@r, @analysis.id)
@@ -30,7 +30,7 @@ describe Analysis::R::Cluster do
       
       #get the master cluster IP address
       master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-      master_ip.should eq("192.168.33.10")
+      master_ip.should eq("localhost")
       
       cf = cluster_class.configure(master_ip)
       cf.should eq(true)
@@ -44,7 +44,7 @@ describe Analysis::R::Cluster do
 
       #get the master cluster IP address
       master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-      master_ip.should eq("192.168.33.10")
+      master_ip.should eq("localhost")
       
       ip_addresses = ComputeNode.worker_ips
       ip_addresses[:worker_ips].size.should eq(2)
