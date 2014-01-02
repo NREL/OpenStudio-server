@@ -19,7 +19,7 @@ recvOneDataFT <- function(cl,type,time) UseMethod("recvOneDataFT")
 #  Cluster Modification
 #
 
-addtoCluster <- function(cl, spec, ipfile, options = defaultClusterOptions)
+addtoCluster <- function(cl, spec, newIPs, options = defaultClusterOptions)
   UseMethod("addtoCluster") 
 
 #repairCluster <- function(cl, nodes, options = defaultClusterOptions)
@@ -269,7 +269,7 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
  
   res <- clusterApplyFT (cl, x, fun, initfun=initfun, exitfun=exitfun,
                            printfun=printfun, printargs=printargs,
-                           printrepl=printrepl, mngtfiles=mngtfiles, 
+                           printrepl=printrepl, mngtfiles=mngtfiles, ipfile=ipfile,
 			   ft_verbose=ft_verbose)
 
   if (ft_verbose) 
@@ -367,13 +367,28 @@ manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfi
         } else {
           newp <- p
         }
+        if (newp > p){    #test if number of IPs in file is same as increase
+          cat('ipfile is:',ipfile,'\n')
+  	  addIPs <- try(scan(file=ipfile, what=character(), quiet=TRUE))
+	  if (!inherits(addIPs,'try-error')){
+            newIPs <- addIPs
+          } else {
+            newIPs <- NULL
+          }
+          if(length(newIPs)!= (newp-p)){
+            cat('length of ipfile:',length(newIPs),' is not equal to length of new cluster size:',newp-p,'\n')
+            newp <- p
+          }
+          
+        }
+        
 	if (manage['monitor.procs'])
   	   # write the currently processed replications into a file 
            writetomngtfile(cl,mngtfiles[2])
         cluster.increased <- FALSE
         if (newp > p) { # increase the degree of parallelism
            cat('resizing cluster\n')
-           cl<-addtoCluster(cl, newp-p, ipfile=ipfile)
+           cl<-addtoCluster(cl, newp-p, newIPs=newIPs)
            clusterEvalQpart(cl,(p+1):newp,require(NRELsnowFT))
            if(ft_verbose)
              printClusterInfo(cl)

@@ -4,3 +4,4 @@
 .ruby-version
 .DS_Store
 *.swp
+/vagrant/test_amis.json

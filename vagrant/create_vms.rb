@@ -22,7 +22,7 @@ os_version = "1.2.0" # todo: how to automatically set this?
 os_server_version= "1.3.0"  # todo: how to automatically set this?
 revision_id = "" # with preceding . (i.e. .1 or .a) 
 
-test_amis_filename = "test_amis.json"
+test_amis_filename = "amis_openstudio.json"
 File.delete(test_amis_filename) if File.exists?(test_amis_filename)
 
 start_time = Time.now
@@ -391,9 +391,12 @@ if good_build
     amis_hash[os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash)
-    
+	
+    puts "Saving ami infomration to file"    
     # save it to a file for use in integration test
-    File.open(test_amis_filename) {|f| f << JSON.pretty_generate(amis_hash)}
+    File.open(test_amis_filename, 'w') {|f| f << JSON.pretty_generate(amis_hash)}
+    
+    # Todo: save some of these results to a database?
   end
 else
   puts "AMIs had errors"
