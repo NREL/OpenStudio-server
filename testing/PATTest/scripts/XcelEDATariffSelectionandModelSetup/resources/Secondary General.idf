@@ -3,7 +3,7 @@ Version,
   7.2.0.006;                              ! Version Identifier
 
 UtilityCost:Tariff,
-  Secondary General,                      !- Name
+  SecondaryGeneral,                      !- Name
   ElectricityPurchased:Facility,          !- Output Meter Name
   kWh,                                    !- Conversion Factor Choice
   ,                                       !- Energy Conversion Factor
@@ -15,48 +15,48 @@ UtilityCost:Tariff,
   0.0;                                    !- Monthly Charge or Variable Name
 
 UtilityCost:Charge:Simple,
-  Secondary GeneralSummerOnPeakEnergyCharge, !- Name
-  Secondary General,                      !- Tariff Name
+  SecondaryGeneralSummerOnPeakEnergyCharge, !- Name
+  SecondaryGeneral,                      !- Tariff Name
   peakEnergy,                             !- Source Variable
   summer,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0327568563;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Secondary GeneralSummerOffPeakEnergyCharge, !- Name
-  Secondary General,                      !- Tariff Name
+  SecondaryGeneralSummerOffPeakEnergyCharge, !- Name
+  SecondaryGeneral,                      !- Tariff Name
   offPeakEnergy,                          !- Source Variable
   summer,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0327568563;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Secondary GeneralWinterOnPeakEnergyCharge, !- Name
-  Secondary General,                      !- Tariff Name
+  SecondaryGeneralWinterOnPeakEnergyCharge, !- Name
+  SecondaryGeneral,                      !- Tariff Name
   peakEnergy,                             !- Source Variable
   winter,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0359035563;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Secondary GeneralWinterOffPeakEnergyCharge, !- Name
-  Secondary General,                      !- Tariff Name
+  SecondaryGeneralWinterOffPeakEnergyCharge, !- Name
+  SecondaryGeneral,                      !- Tariff Name
   offPeakEnergy,                          !- Source Variable
   winter,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0359035563;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Secondary GeneralSummerDemandCharge,    !- Name
-  Secondary General,                      !- Tariff Name
+  SecondaryGeneralSummerDemandCharge,    !- Name
+  SecondaryGeneral,                      !- Tariff Name
   totalDemand,                            !- Source Variable
   summer,                                 !- Season
   DemandCharges,                          !- Category Variable Name
   21.205698;                              !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Secondary GeneralWinterDemandCharge,    !- Name
-  Secondary General,                      !- Tariff Name
+  SecondaryGeneralWinterDemandCharge,    !- Name
+  SecondaryGeneral,                      !- Tariff Name
   totalDemand,                            !- Source Variable
   winter,                                 !- Season
   DemandCharges,                          !- Category Variable Name
@@ -93,3 +93,10 @@ Schedule:Compact,
   Until: 24:00,                           ! Field 10
   3;                                      !- Field 7
 
+ScheduleTypeLimits,
+  number,                  !- Name
+  0,                       !- Lower Limit Value
+  ,                        !- Upper Limit Value
+  Continuous,              !- Numeric Type
+  Dimensionless;           !- Unit Type
+  

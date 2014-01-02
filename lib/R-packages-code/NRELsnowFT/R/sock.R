@@ -32,24 +32,14 @@ is.manageable.SOCKcluster <- function(cl) {
 	return (c(cluster.size=TRUE, monitor.procs=TRUE, repair=FALSE))
 }
 
-addtoCluster.SOCKcluster <- function(cl, spec, ipfile, options = defaultClusterOptions) {
+addtoCluster.SOCKcluster <- function(cl, spec, newIPs, options = defaultClusterOptions) {
   names <- attr(cl, 'all.hosts')
   options <- addClusterOptions(options,list())
   n <- length(cl)
   newcl <- vector("list",n+spec)
-  cat('ipfile is:',ipfile,'\n')
-  addIPs <- try(scan(file=ipfile, what=character(), nlines=spec, quiet=TRUE))
-  if (!inherits(addIPs,'try-error')){
-    newIPs <- addIPs
-  } else {
-    newIPs <- NULL
-  }
-  if (length(newIPs) == spec){
-    names[(n+1):(n+spec)] <- newIPs[1:(spec)]
-  } else {
-    names[(n+1):(n+length(newIPs))] <- newIPs[1:(length(newIPs))]
-    cat('length of newIP file', length(newIPs),'is not same as number requested',spec,'\n')
-  }
+
+  names[(n+1):(n+spec)] <- newIPs[1:(spec)]
+
   for (i in seq(along=cl)) {
     newcl[[i]] <- cl[[i]]
     # remove hosts from the list that are already in the cluster

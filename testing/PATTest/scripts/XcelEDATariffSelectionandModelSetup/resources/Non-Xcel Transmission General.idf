@@ -3,7 +3,7 @@ Version,
   7.2.0.006;                              ! Version Identifier
 
 UtilityCost:Tariff,
-  Non-Xcel Transmission General,          !- Name
+  Non-XcelTransmissionGeneral,          !- Name
   ElectricityPurchased:Facility,          !- Output Meter Name
   kWh,                                    !- Conversion Factor Choice
   ,                                       !- Energy Conversion Factor
@@ -15,48 +15,48 @@ UtilityCost:Tariff,
   0.0;                                    !- Monthly Charge or Variable Name
 
 UtilityCost:Charge:Simple,
-  Non-Xcel Transmission GeneralSummerOnPeakEnergyCharge, !- Name
-  Non-Xcel Transmission General,          !- Tariff Name
+  Non-XcelTransmissionGeneralSummerOnPeakEnergyCharge, !- Name
+  Non-XcelTransmissionGeneral,          !- Tariff Name
   peakEnergy,                             !- Source Variable
   summer,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0370195281;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Non-Xcel Transmission GeneralSummerOffPeakEnergyCharge, !- Name
-  Non-Xcel Transmission General,          !- Tariff Name
+  Non-XcelTransmissionGeneralSummerOffPeakEnergyCharge, !- Name
+  Non-XcelTransmissionGeneral,          !- Tariff Name
   offPeakEnergy,                          !- Source Variable
   summer,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0279466281;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Non-Xcel Transmission GeneralWinterOnPeakEnergyCharge, !- Name
-  Non-Xcel Transmission General,          !- Tariff Name
+  Non-XcelTransmissionGeneralWinterOnPeakEnergyCharge, !- Name
+  Non-XcelTransmissionGeneral,          !- Tariff Name
   peakEnergy,                             !- Source Variable
   winter,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0406915281;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Non-Xcel Transmission GeneralWinterOffPeakEnergyCharge, !- Name
-  Non-Xcel Transmission General,          !- Tariff Name
+  Non-XcelTransmissionGeneralWinterOffPeakEnergyCharge, !- Name
+  Non-XcelTransmissionGeneral,          !- Tariff Name
   offPeakEnergy,                          !- Source Variable
   winter,                                 !- Season
   EnergyCharges,                          !- Category Variable Name
   0.0305680281;                           !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Non-Xcel Transmission GeneralSummerDemandCharge, !- Name
-  Non-Xcel Transmission General,          !- Tariff Name
+  Non-XcelTransmissionGeneralSummerDemandCharge, !- Name
+  Non-XcelTransmissionGeneral,          !- Tariff Name
   totalDemand,                            !- Source Variable
   summer,                                 !- Season
   DemandCharges,                          !- Category Variable Name
   13.7666408;                             !- Cost per Unit Value or Variable Name
 
 UtilityCost:Charge:Simple,
-  Non-Xcel Transmission GeneralWinterDemandCharge, !- Name
-  Non-Xcel Transmission General,          !- Tariff Name
+  Non-XcelTransmissionGeneralWinterDemandCharge, !- Name
+  Non-XcelTransmissionGeneral,          !- Tariff Name
   totalDemand,                            !- Source Variable
   winter,                                 !- Season
   DemandCharges,                          !- Category Variable Name
@@ -93,3 +93,10 @@ Schedule:Compact,
   Until: 24:00,                           ! Field 10
   3;                                      !- Field 7
 
+ScheduleTypeLimits,
+  number,                  !- Name
+  0,                       !- Lower Limit Value
+  ,                        !- Upper Limit Value
+  Continuous,              !- Numeric Type
+  Dimensionless;           !- Unit Type
+  

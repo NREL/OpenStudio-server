@@ -77,9 +77,17 @@ class XcelEDATariffSelectionandModelSetup < OpenStudio::Ruleset::WorkspaceUserSc
     [elec_tar,gas_tar].each do |tar|
     
       #load the idf file containing the electric tariff
-      tar_path = OpenStudio::Path.new("#{File.dirname(__FILE__)}/#{tar}.idf")
+      tar_path = OpenStudio::Path.new("#{File.dirname(__FILE__)}/resources/#{tar}.idf")
       tar_file = OpenStudio::IdfFile::load(tar_path)
-      if tar_file.empty?   
+
+      #in OpenStudio PAT in 1.1.0 and earlier all resource files are moved up a directory.
+      #below is a temporary workaround for this before issuing an error.
+      if tar_file.empty?
+        tar_path = OpenStudio::Path.new("#{File.dirname(__FILE__)}/#{tar}.idf")
+        tar_file = OpenStudio::IdfFile::load(tar_path)
+      end
+
+      if tar_file.empty?
         runner.registerError("Unable to find the file #{tar}.idf")
         return false
       else
