@@ -59,7 +59,7 @@ default_attributes(
             },
             {
                 :name => 'R.methodsS3',
-                :version => '1.5.2'
+                :version => '1.6.1'
             },
             {
                 :name => 'R.oo',
