@@ -17,6 +17,7 @@ Bundler.require(:default)
 require 'thread'
 require 'timeout'
 require 'optparse'
+require 'github'
 
 @options = {}
 OptionParser.new do |opts|
