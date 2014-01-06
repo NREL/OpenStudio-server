@@ -17,8 +17,16 @@ Bundler.require(:default)
 require 'thread'
 require 'timeout'
 
+# Grab the openstudio version out of the vagrant rols
+openstudio_role = File.read("./chef/roles/openstudio.rb")
+json_string = openstudio_role.scan(/default_attributes\((.*)\)/m).first.join
+json_obj = eval("{ #{json_string} }")
+@os_version = json_obj[:openstudio][:version] 
+@os_version_sha = json_obj[:openstudio][:version_revision]
+puts "OpenStudio Version is: #{@os_version}"
+puts "OpenStudio SHA is: #{@os_version_sha}"
+
 # Versioning (change these each build)
-os_version = "1.2.0" # todo: how to automatically set this?
 os_server_version= "1.3.0"  # todo: how to automatically set this?
 revision_id = "" # with preceding . (i.e. .1 or .a) 
 
@@ -53,11 +61,11 @@ end
 if @provider == :vagrant
   @vms << {
       id: 1, name: "server", postflight_script_1: "configure_vagrant_server.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
       id: 2, name: "worker", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   #@vms << {
   #    id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
@@ -66,15 +74,15 @@ if @provider == :vagrant
 elsif @provider == :aws
   @vms << {
       id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
       id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
       id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
 end
 
@@ -327,6 +335,8 @@ def process(element, &block)
               i.add_tag("autobuilt")
               i.add_tag("sucessfully_created", :value => true)
               i.add_tag("created_on", :value => Time.now)
+              i.add_age("openstudio_version", @os_version)
+              i.add_age("openstudio_version_sha", @os_version_sha)
               puts "#{element[:id]}: finished creating AMI"
             end
           else
@@ -385,10 +395,10 @@ if good_build
     puts
     puts " === amis.json format ====="
     amis_hash = {}
-    amis_hash[os_version] = {}
-    amis_hash[os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
-    amis_hash[os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
-    amis_hash[os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
+    amis_hash[@os_version] = {}
+    amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
+    amis_hash[@os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
+    amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash)
 	
