@@ -16,25 +16,58 @@ Bundler.require(:default)
 
 require 'thread'
 require 'timeout'
+require 'optparse'
+require 'github'
+
+@options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: create_vms [options]"
+  @options[:provider] = :vagrant
+  @options[:version] = nil
+
+  opts.on("-p", "--provider [name_of_provider]", String, "Name of provider [vagrant of aws]") do |s|
+    @options[:provider] = s.to_sym
+  end
+
+  opts.on("-v", "--version [version]", String, "Version of OpenStudio Server Build (i.e. 1.5.2)") do |s|
+    @options[:version] = s
+  end
+
+  opts.on("-r", "--revision [version]", String, "Specific revision of build with preceding period (e.g. .1 or .a)") do |s|
+    @options[:version] = s
+  end
+end.parse!
+puts "options = #{@options.inspect}"
+
+if @options[:version].nil? && @options[:provider] == :aws
+  puts "Version required when building with AWS"
+  exit 1
+end
+
+# Grab the openstudio version out of the vagrant rols
+if File.exists?("./chef/roles/openstudio.rb")
+  openstudio_role = File.read("./chef/roles/openstudio.rb")
+  json_string = openstudio_role.scan(/default_attributes\((.*)\)/m).first.join
+  json_obj = eval("{ #{json_string} }")
+  @os_version = json_obj[:openstudio][:version]
+  @os_version_sha = json_obj[:openstudio][:version_revision]
+  puts "OpenStudio Version is: #{@os_version}"
+  puts "OpenStudio SHA is: #{@os_version_sha}"
+else
+  raise "Could not find OpenStudio.rb chef role in ./chef/roles/openstudio.rb"
+end
 
 # Versioning (change these each build)
-os_version = "1.2.0" # todo: how to automatically set this?
-os_server_version= "1.3.0"  # todo: how to automatically set this?
-revision_id = "" # with preceding . (i.e. .1 or .a) 
+os_server_version = @options[:version]
+revision_id = @options[:version] # with preceding . (i.e. .1 or .a) 
 
 test_amis_filename = "amis_openstudio.json"
 File.delete(test_amis_filename) if File.exists?(test_amis_filename)
 
 start_time = Time.now
-@provider = "vagrant".to_sym
-if ARGV[0]
-  if ARGV[0] == "aws"
-    @provider = "aws".to_sym
-  end
-end
-puts "Lauching #{__FILE__} with provider: #{@provider}"
+puts "Lauching #{__FILE__} with provider: #{@options[:provider]}"
 
-if @provider == :aws
+if @options[:provider] == :aws
   require 'aws-sdk'
 
   # read in the AWS config settings
@@ -50,31 +83,31 @@ end
 
 # List of VMS to provision
 @vms = []
-if @provider == :vagrant
+if @options[:provider] == :vagrant
   @vms << {
       id: 1, name: "server", postflight_script_1: "configure_vagrant_server.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
       id: 2, name: "worker", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   #@vms << {
   #    id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
   #    ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
   #}
-elsif @provider == :aws
+elsif @options[:provider] == :aws
   @vms << {
       id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
       id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
   @vms << {
       id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{os_server_version}#{revision_id}"
   }
 end
 
@@ -103,7 +136,7 @@ def run_vagrant_up(element)
     Timeout::timeout(2400) {
       puts "#{element[:id]}: starting process on #{element}"
       command = "cd ./#{element[:name]} && vagrant up --no-provision"
-      if @provider == :aws
+      if @options[:provider] == :aws
         command += " --provider=aws"
       end
       exit_code = system_call(command) do |message|
@@ -155,7 +188,7 @@ def run_vagrant_provision(element)
   success = true
   $mutex.lock
   begin
-    Timeout::timeout(2400) {
+    Timeout::timeout(3600) {
       puts "#{element[:id]}: entering provisioning (which requires syncing folders)"
       command = "cd ./#{element[:name]} && vagrant provision"
       exit_code = system_call(command) do |message|
@@ -309,9 +342,9 @@ def process(element, &block)
           if i.nil? || i.state == :failed
             puts "#{element[:id]}: AMI creation failed, retrying"
             retries = 0
-            while retries < 3 
+            while retries < 3
               retries += 1
-              
+
               element[:ami_name] += Time.now.strftime(" %Y%m%d-%H%M%S")
               i = create_ami(element)
               # update the name of the ami in case the old one is still around
@@ -327,6 +360,8 @@ def process(element, &block)
               i.add_tag("autobuilt")
               i.add_tag("sucessfully_created", :value => true)
               i.add_tag("created_on", :value => Time.now)
+              i.add_age("openstudio_version", @os_version)
+              i.add_age("openstudio_version_sha", @os_version_sha)
               puts "#{element[:id]}: finished creating AMI"
             end
           else
@@ -385,17 +420,17 @@ if good_build
     puts
     puts " === amis.json format ====="
     amis_hash = {}
-    amis_hash[os_version] = {}
-    amis_hash[os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
-    amis_hash[os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
-    amis_hash[os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
+    amis_hash[@os_version] = {}
+    amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
+    amis_hash[@os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
+    amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash)
-	
-    puts "Saving ami infomration to file"    
+
+    puts "Saving ami infomration to file"
     # save it to a file for use in integration test
-    File.open(test_amis_filename, 'w') {|f| f << JSON.pretty_generate(amis_hash)}
-    
+    File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
+
     # Todo: save some of these results to a database?
   end
 else
