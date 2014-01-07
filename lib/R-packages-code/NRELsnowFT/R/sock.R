@@ -90,7 +90,7 @@ doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfil
             }  # end of while loop ****************************
             if ((length(freenodes) > 0) && (it <= n)) free.nodes <- TRUE
         }
-        return(list(cl=cl, clall=clall, frep=frep, freenodes=freenodes, p=p, d=d, is.free.node=free.nodes))
+        return(list(cl=cl, clall=clall, frep=frep, freenodes=freenodes, p=p, newp=newp, d=d, is.free.node=free.nodes))
 }
 
 

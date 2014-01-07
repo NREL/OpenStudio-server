@@ -197,6 +197,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
 					frep <- admin$frep
 					freenodes <- admin$freenodes
 					p <- admin$p
+					newp <- admin$newp
 					if (admin$is.free.node) break
 					if (!is.list(d$value))
 						stop(paste('Error in received results:\n', paste(d, collapse='\n')))
