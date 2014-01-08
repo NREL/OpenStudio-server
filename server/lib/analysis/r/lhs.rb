@@ -62,11 +62,11 @@ module Analysis::R
         Rails.logger.info("R image file name is #{save_file_name}")
         @r.command() do
           %Q{
-          print("#{save_file_name}")
-          png(filename="#{save_file_name}", width = 1024, height = 1024)
-          hist(samples, freq=F, breaks=20)
-          dev.off()
-        }
+            print("#{save_file_name}")
+            png(filename="#{save_file_name}", width = 1024, height = 1024)
+            hist(samples, freq=F, breaks=20)
+            dev.off()
+          }
         end
       end
 
