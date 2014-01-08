@@ -67,14 +67,16 @@ getNodeID.SOCKnode <- function(node) {
   return(node$con)
 }
 
-doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipfile, x, frep, freenodes, initfun,ft_verbose) {
+doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun,ft_verbose, removeIPs=removeIPs) {
 	free.nodes <- FALSE
+	newp <- NULL
         if (length(d) <= 0) { # no results arrived yet
             while (TRUE) {
                 # do the administration in the waiting time
                 # ***************************************
-	        updated.values <- manage.replications.and.cluster.size(cl, clall, p, n, manage, mngtfiles, ipfile, freenodes, initfun, ft_verbose=ft_verbose)
+	        updated.values <- manage.replications.and.cluster.size(cl, clall, p, n, manage, mngtfiles, ipFile, resizeFile, freenodes, initfun, ft_verbose=ft_verbose, removeIPs=removeIPs)
                 newp <- updated.values$newp
+                removeIPs <- updated.values$removeIPs
                 if (updated.values$cluster.increased) {
                     p <- updated.values$p
                     cl <- updated.values$cl
@@ -90,7 +92,7 @@ doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfil
             }  # end of while loop ****************************
             if ((length(freenodes) > 0) && (it <= n)) free.nodes <- TRUE
         }
-        return(list(cl=cl, clall=clall, frep=frep, freenodes=freenodes, p=p, newp=newp, d=d, is.free.node=free.nodes))
+        return(list(cl=cl, clall=clall, frep=frep, freenodes=freenodes, p=p, newp=newp, d=d, is.free.node=free.nodes, removeIPs=removeIPs))
 }
 
 
