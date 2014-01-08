@@ -24,6 +24,7 @@ class Analysis::NsgaNrel
             }
         ],
         problem: {
+            random_seed: 1979,
             algorithm: {
                 generations: 1,
                 tourSize: 2,
@@ -79,7 +80,9 @@ class Analysis::NsgaNrel
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
-    @r.converse('set.seed(1979)')    
+    
+    # todo: deal better with random seeds
+    @r.converse("set.seed(#{@analysis.problem['random_seed']})")  
     # R libraries needed for this algorithm
     @r.converse "library(rjson)"
     @r.converse "library(mco)"
@@ -100,7 +103,7 @@ class Analysis::NsgaNrel
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
       raise "Number of generations was not set or equal to zero (must be 1 or greater)"
     end
-    
+
     if @analysis.problem['number_of_samples'].nil? || @analysis.problem['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
@@ -113,10 +116,10 @@ class Analysis::NsgaNrel
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
     Rails.logger.info "starting lhs to discretize the variables"
-    
+
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['number_of_samples'])
-    
+
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
 
@@ -129,7 +132,7 @@ class Analysis::NsgaNrel
         Rails.logger.info "No variables were passed into the options, therefore exit"
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
-  
+
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       if !cluster.configure(master_ip)
@@ -249,7 +252,7 @@ class Analysis::NsgaNrel
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 
-          
+
         end
       else
         raise "could not start the cluster (most likely timed out)"
@@ -263,7 +266,7 @@ class Analysis::NsgaNrel
     ensure
       # ensure that the cluster is stopped
       cluster.stop if cluster && cluster_started
-      
+
       # Kill the downloading of data files process
       Rails.logger.info("Ensure block of analysis cleaning up any remaining processes")
       process.stop if process

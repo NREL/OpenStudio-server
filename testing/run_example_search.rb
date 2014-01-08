@@ -29,8 +29,6 @@ analysis_options = {
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
-# Run the LHS -- note that this has to run in the foreground until we move the "get datapoints to run"
-# inside of the batch_run method
 run_options = {
     analysis_action: "start",
     without_delay: false,
@@ -41,6 +39,7 @@ run_options = {
     problem: {
         random_seed: 1979,
         algorithm: {
+            number_of_samples: 4, # to discretize any continuous variables
             max_iterations: 100,
             objective_functions: [
                 "total_energy",

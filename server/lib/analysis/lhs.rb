@@ -65,17 +65,13 @@ class Analysis::Lhs
     @r.converse("print('starting lhs')")
     Rails.logger.info "Starting sampling"
     lhs = Analysis::R::Lhs.new(@r)
-    samples = nil
+    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
     if @analysis.problem['algorithm']['sample_method'] == "all_variables"
-      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-
       # Do the work to mash up the samples, pivots, and static variables before creating the data points
       Rails.logger.info "Samples are #{samples}"
       samples = hash_of_array_to_array_of_hash(samples)
       Rails.logger.info "Flipping samples around yields #{samples}"
     elsif @analysis.problem['algorithm']['sample_method'] == "individual_variables"
-      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-
       # Do the work to mash up the samples, pivots, and static variables before creating the data points
       Rails.logger.info "Samples are #{samples}"
       samples = hash_of_array_to_array_of_hash_non_combined(samples)
