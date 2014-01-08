@@ -63,7 +63,7 @@ default_attributes(
             },
             {
                 :name => 'R.oo',
-                :version => '1.15.8'
+                :version => '1.17.0'
             },
             {
                 :name => 'R.utils',
@@ -118,7 +118,7 @@ default_attributes(
             },
             {
                 :name => 'NRELsnowFT',
-                :version => '1.3.2'
+                :version => '1.3.11'
             }
         ]        
     }

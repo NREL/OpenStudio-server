@@ -5,7 +5,7 @@
 processStatus <- function(node) UseMethod("processStatus")
 
 # Administration
-doAdministration <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipfile, x, frep, freenodes, initfun,ft_verbose) UseMethod("doAdministration")
+doAdministration <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun,ft_verbose,removeIPs) UseMethod("doAdministration")
 is.manageable <- function(cl) UseMethod("is.manageable")
 
 #
@@ -27,6 +27,7 @@ addtoCluster <- function(cl, spec, newIPs, options = defaultClusterOptions)
 
 removefromCluster  <- function(cl, nodes, ft_verbose=FALSE) {
   newcl <- vector("list",length(cl)-length(nodes))
+  hostNames <- attr(cl, 'all.hosts')
   j<-0
   for (i in seq(along=cl)) {
     if (length(nodes[nodes == i])>0) 
@@ -39,6 +40,10 @@ removefromCluster  <- function(cl, nodes, ft_verbose=FALSE) {
     for(clattr in names(attributes(cl))){
         attr(newcl, clattr) <- attr(cl, clattr)
     }
+    cat('hostNames before:',hostNames,'\n')
+    hostNames <- hostNames[-nodes]
+    cat('hostNames after:',hostNames,'\n')
+    attr(newcl, 'all.hosts') <- hostNames
     if(ft_verbose) printClusterInfo(newcl)
   newcl
 }
@@ -94,7 +99,7 @@ recvOneResultFT <- function(cl,type='b',time=0) {
 clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
                              printfun=NULL, printargs=NULL,
                              printrepl=max(length(x)/10,1),
-                             mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile=".newips",
+                             mngtfiles=c(".clustersize",".proc",".proc_fail"), ipFile=".newips", resizeFile=".resizeFile",
                              ft_verbose=FALSE) {
 
 # This function is a combination of clusterApplyLB and FPSS
@@ -159,6 +164,9 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
     	val <- vector("list", n)
     	if (manage['cluster.size'])
       		write(p, file=mngtfiles[1])
+      	# check to see if the resizeFile exists and remove it.	
+      	if (file.exists(resizeFile))
+      		file.remove(resizeFile)
     	replvec <- 1:n
     	maxit <- if(manage['repair']) 3 else 1 # second and third run is for restarting failed
             	           					# replications
@@ -181,53 +189,64 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
         		write(frep,mngtfiles[3])
       		startit<-min(n, p)
       		freenodes<-c()
+   		removeIPs <- c()
       		it<-startit
       		while(fin < (n-length(frep))) {
         		it <- it+1
         		if (it <= n) 
-          			repl<-replvec[it]
-        		while ((length(freenodes) <= 0) ||
-               			((it > n) && fin < (n-length(frep)))) { # all nodes busy
-                                        # or wait for remaining results
+          		  repl<-replvec[it]
+        		while ((length(freenodes) <= 0) || ((it > n) && fin < (n-length(frep)))) { # all nodes busy or wait for remaining results
           			d <- recvOneResultFT(clall,'n') # look if there is any result
-          			admin <- doAdministration(cl, clall, d, p, it, n, manage, mngtfiles, ipfile, x, frep, freenodes, initfun,ft_verbose)
-					cl <- admin$cl
-					clall <- admin$clall
-					d <- admin$d
-					frep <- admin$frep
-					freenodes <- admin$freenodes
-					p <- admin$p
-					newp <- admin$newp
-					if (admin$is.free.node) break
-					if (!is.list(d$value))
-						stop(paste('Error in received results:\n', paste(d, collapse='\n')))
-					val[d$value$index] <- list(d$value$value)
+          			admin <- doAdministration(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun,ft_verbose, removeIPs=removeIPs)
+          			removeIPs <- admin$removeIPs
+				cl <- admin$cl
+				clall <- admin$clall
+				d <- admin$d
+				frep <- admin$frep
+				freenodes <- admin$freenodes
+				p <- admin$p
+				newp <- admin$newp
+				if (admin$is.free.node) break
+				if (!is.list(d$value))
+				  stop(paste('Error in received results:\n', paste(d, collapse='\n')))
+				val[d$value$index] <- list(d$value$value)
           			node <- GetNodefromReplic(cl,d$value$index)
           			if (node > 0) {
-            			if (length(cl) > p) { # decrease the degree of parallelism
-            					if (ft_verbose) 
-									cat('\nDecreasing cluster size from', length(cl), 'to', p)
-              				if (!is.null(exitfun))
-                					clusterCallpart(cl,node,exitfun)
-              				clall<-removecl(clall,c(cl[[node]]$replic))
-              				cl <- removefromCluster(cl,node, ft_verbose=ft_verbose)
-            			} else {
-              				freenodes <- c(freenodes,node)
-              				cl[[node]]$replic<-0
-            			}
+          			  #start reduce cluster
+          			  if (cl[[node]]$host %in% removeIPs) {
+          			    if (length(cl)-length(node) > 0) {
+          			      cat('removing',cl[[node]]$host,' from ', removeIPs,'\n')
+          			      which.idx <- which.max(removeIPs == cl[[node]]$host)
+                                      removeIPs <- removeIPs[-which.idx]
+            			      if (ft_verbose) 
+				        cat('\nRemove cluster node', cl[[node]]$host, '\n')
+              			      if (!is.null(exitfun))
+                		        clusterCallpart(cl,node,exitfun)
+              			      clall<-removecl(clall,c(cl[[node]]$replic))
+              			      cl <- removefromCluster(cl,node, ft_verbose=ft_verbose)
+              			      p <- length(cl)
+              			    } else {
+              			      cat('NOT reducing cluster size, size must remain positive\n')
+              			      freenodes <- c(freenodes,node)
+              			      cl[[node]]$replic<-0
+              			    }#end reduce cluster
+            			  } else {
+              			    freenodes <- c(freenodes,node)
+              			    cl[[node]]$replic<-0
+            			  }
           			} else { # result from a failed node
-            			frep <- frep[-which(frep == d$value$index)]
-            			clall <- removecl(clall,c(d$value$index))
+            			  frep <- frep[-which(frep == d$value$index)]
+            			  clall <- removecl(clall,c(d$value$index))
           			}
           			fin <- fin + 1
           			if (!is.null(printfun) & ((fin %% printrepl) == 0))
-            			try(printfun(val,fin,printargs))
+            			  try(printfun(val,fin,printargs))
         		}
         		if (it <= n) {
-          			submit(freenodes[1], repl, n)
-          			cl[[freenodes[1]]]$replic <- repl
-          			clall <- updatecl(clall,cl[[freenodes[1]]])
-          			freenodes <- freenodes[-1]
+          		  submit(freenodes[1], repl, n)
+          		  cl[[freenodes[1]]]$replic <- repl
+          		  clall <- updatecl(clall,cl[[freenodes[1]]])
+          		  freenodes <- freenodes[-1]
         		}
       		}
       		if (length(frep) <= 0) break # everything went well, no need to go
@@ -244,7 +263,7 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
                             printrepl=max(length(x)/10,1),
                             cltype = getClusterOption("type"),
                             cluster.args=NULL, ipList=NULL, 
-			    mngtfiles=c(".clustersize",".proc",".proc_fail"), ipfile=".newips",
+			    mngtfiles=c(".clustersize",".proc",".proc_fail"), ipFile=".newips", resizeFile=".resizeFile",
                             ft_verbose=FALSE) {
 
 
@@ -270,7 +289,7 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
  
   res <- clusterApplyFT (cl, x, fun, initfun=initfun, exitfun=exitfun,
                            printfun=printfun, printargs=printargs,
-                           printrepl=printrepl, mngtfiles=mngtfiles, ipfile=ipfile,
+                           printrepl=printrepl, mngtfiles=mngtfiles, ipFile=ipFile, resizeFile=resizeFile,
 			   ft_verbose=ft_verbose)
 
   if (ft_verbose) 
@@ -357,50 +376,58 @@ writetomngtfile <- function(cl, file) {
   write(repl,file)
 }
 
-manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, ipfile, freenodes, initfun, ft_verbose=FALSE) {
+manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, ipFile, resizeFile, freenodes, initfun, ft_verbose=FALSE, removeIPs=removeIPs) {
+        addIPs <- NULL
+        newp <- NULL
 	if (manage['cluster.size']){ 
-          scanresize <- try(scan(file=mngtfiles[1],what=integer(),nlines=1, quiet=TRUE))
-          if (!inherits(scanresize,'try-error')){
-            newp <- scanresize
-          } else {
-            newp <- p
-          }
-        } else {
+	  if(file.exists(resizeFile)){
+	    tempIPs <- try(scan(file=ipFile, what=character(), quiet=TRUE))
+	    if (!inherits(tempIPs,'try-error')){
+	      newIPs <- tempIPs
+	      currentIPs <- attr(cl, 'all.hosts')
+	      cat('currentIPs:',currentIPs,'\n')
+	      #find add and remove nodes
+              addIPs <- newIPs[!newIPs%in%currentIPs]
+              cat('addIPs:',addIPs,'\n')
+              removeIPs <- append(removeIPs,currentIPs[!currentIPs%in%newIPs])
+              cat('removeIPs:',removeIPs,'\n')
+              deleteFile <- try(file.remove(resizeFile))
+              if (inherits(deleteFile,'try-error'))
+                cat('could not delete resizeFile',resizeFile,'\n')
+              newp <- p + length(addIPs)  
+	    } else { #fail to read ipFile
+	      newIPs <- NULL
+	      newp <- p
+            }
+	  } else { #no resizeFile
+	    newp <- p
+	  }
+        } else { #no manage['cluster.size']
           newp <- p
-        }
-        if (newp > p){    #test if number of IPs in file is same as increase
-          cat('ipfile is:',ipfile,'\n')
-  	  addIPs <- try(scan(file=ipfile, what=character(), quiet=TRUE))
-	  if (!inherits(addIPs,'try-error')){
-            newIPs <- addIPs
-          } else {
-            newIPs <- NULL
-          }
-          if(length(newIPs)!= (newp-p)){
-            cat('length of ipfile:',length(newIPs),' is not equal to length of new cluster size:',newp-p,'\n')
-            newp <- p
-          }
-          
         }
         
 	if (manage['monitor.procs'])
-  	   # write the currently processed replications into a file 
-           writetomngtfile(cl,mngtfiles[2])
+  	   writetomngtfile(cl,mngtfiles[2]) # write the currently processed replications into a file 
+  	   
         cluster.increased <- FALSE
-        if (newp > p) { # increase the degree of parallelism
-           cat('resizing cluster\n')
-           cl<-addtoCluster(cl, newp-p, newIPs=newIPs)
-           clusterEvalQpart(cl,(p+1):newp,require(NRELsnowFT))
+        if (length(addIPs) > 0) { # increase the degree of parallelism
+           cat('\n resizing cluster \n')
+           cat('\n current cluster \n')
+           if(ft_verbose) printClusterInfo(cl)
+           cl<-addtoCluster(cl, length(addIPs), newIPs=addIPs)
+           cat('\n after addtoCluster \n')
+           if(ft_verbose) printClusterInfo(cl)
+           clusterEvalQpart(cl,(p+1):(p+length(addIPs)),require(NRELsnowFT))
            if(ft_verbose)
              printClusterInfo(cl)
            if (!is.null(initfun))
-             clusterCallpart(cl,(p+1):newp,initfun)
-           clall<-combinecl(clall,cl[(p+1):newp])
-           freenodes<-c(freenodes,(p+1):newp)
-           p <- newp
+             clusterCallpart(cl,(p+1):(p+length(addIPs)),initfun)
+           clall<-combinecl(clall,cl[(p+1):(p+length(addIPs))])
+           freenodes<-c(freenodes,(p+1):(p+length(addIPs)))
+           p <- p + length(addIPs)
            cluster.increased <- TRUE
 	}
-	return(list(cluster.increased=cluster.increased, cl=cl, clall=clall, freenodes=freenodes, p=p, newp=newp))
+	return(list(cluster.increased=cluster.increased, cl=cl, clall=clall, freenodes=freenodes, p=p, newp=newp, removeIPs=removeIPs))
 }
 
 #
