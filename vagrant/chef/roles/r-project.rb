@@ -63,7 +63,7 @@ default_attributes(
             },
             {
                 :name => 'R.oo',
-                :version => '1.15.8'
+                :version => '1.17.0'
             },
             {
                 :name => 'R.utils',
