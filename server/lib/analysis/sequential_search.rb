@@ -1,4 +1,6 @@
 class Analysis::SequentialSearch
+  include Analysis::Core # pivots and static vars
+
   def initialize(analysis_id, options = {})
     defaults = {
         skip_init: false,
@@ -23,6 +25,7 @@ class Analysis::SequentialSearch
         problem: {
             random_seed: 1979,
             algorithm: {
+                number_of_samples: 10, # to discretize any continuous variables
                 max_iterations: 1000,
                 objective_functions: [
                     "total_energy",
@@ -177,9 +180,9 @@ class Analysis::SequentialSearch
             elsif min_point == @pareto[i_pareto+1]
               Rails.logger.info "Pareto search found the same point or values"
               new_curve << min_point # just add in the same point to the new curve
-            elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] == 
+            elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] ==
                 @pareto[i_pareto+1].results[@analysis.problem['algorithm']['objective_functions'][0]] \
-                && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] == 
+                && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
                 @pareto[i_pareto+1].results[@analysis.problem['algorithm']['objective_functions'][1]]
               Rails.logger.info "Found the same objective function values in array, skipping"
                                      #new_curve << min_point # just add in the same point to the new curve
@@ -256,7 +259,7 @@ class Analysis::SequentialSearch
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
-    
+
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
@@ -264,13 +267,13 @@ class Analysis::SequentialSearch
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
     @analysis.output_variables.uniq!
-    
+
     # verify that the objective_functions are unique
     @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
-    
+
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
-    
+
     # save the data
     @analysis.save!
     @analysis.reload # after saving the data (needed for some reason yet to be determined)
@@ -279,7 +282,17 @@ class Analysis::SequentialSearch
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
-    
+
+    if pivot_array.size > 1
+      Rails.logger.warn "Pivot arrays are not implemented in sequential search at the moment. Any pivot values will be ignored"
+    end
+
+    # Create an instance for R
+    @r = Rserve::Simpler.new
+
+    # setup an LHS instance for sampling the continuous variables
+    lhs = Analysis::R::Lhs.new(@r)
+
     # the sequential search operates on measures so get variables / measures
     parameter_space = {}
     measures = Measure.where({analysis_id: @analysis}).order_by(:name.asc) # order is not super important here because the analysis has has the order, right?
@@ -289,9 +302,18 @@ class Analysis::SequentialSearch
       # mash the two variables together if there are more than 1 variable in a measure. This is a simple combinatorial
       measure_values = {}
       variables.each do |variable|
-        # if the variable is continuous then discretize it before running
-        values, weights = variable.map_discrete_hash_to_array
-        measure_values["#{variable._id}"] = values
+        values = nil
+        if variable['uncertainty_type'] =~ /discrete_uncertain/ # not sure what to do with bool_uncertain at the moment
+          values, weights = variable.map_discrete_hash_to_array
+        else
+          # if the variable is continuous then discretize it before running. Pass in as an array of 1 because it 
+          # expects all variables but we are pinning it to discretize the variables one-by-one.
+          values, var_types = lhs.sample_all_variables([variable], @analysis.problem['algorithm']['number_of_samples'])
+        end
+
+        # Return the values as an array which requires returning the values portion of the hash then flatten to remove
+        # the outer array.
+        measure_values["#{variable._id}"] = values.values.flatten
       end
       Rails.logger.info "measure values with variables are #{measure_values}"
       # TODO, test the length of each measure value array
