@@ -44,13 +44,13 @@ performParallel(x, fun, initfun = NULL, exitfun = NULL,
                 printrepl = max(length(x)/10,1), 
                 cltype = getClusterOption("type"),
                 cluster.args = NULL, ipList = NULL,
-                mngtfiles = c(".clustersize",".proc",".proc_fail"), ipfile,
+                mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile, resizeFile,
                 ft_verbose = FALSE)
 
 clusterApplyFT(cl, x, fun, initfun = NULL, exitfun = NULL, 
                printfun = NULL, printargs = NULL, 
                printrepl = max(length(x)/10,1), 
-               mngtfiles = c(".clustersize",".proc",".proc_fail"), ipfile, 
+               mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile, resizeFile, 
                ft_verbose = FALSE)
 
 clusterEvalQpart(cl, nodes, expr)
@@ -58,7 +58,8 @@ clusterEvalQpart(cl, nodes, expr)
 printClusterInfo(cl)
 }
 \arguments{
-  \item{ipfile}{file list of new cluster nodes IP addresses.}
+  \item{ipFile}{file list of new cluster nodes IP addresses.}
+  \item{resizeFile}{file flag for resizing cluster.}
   \item{ipList}{list of cluster nodes IP addresses.}
   \item{cl}{Cluster object.}
   \item{x}{Vector of values to be passed to function \code{fun}. 
