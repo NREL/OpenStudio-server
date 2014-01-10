@@ -23,6 +23,7 @@
 \alias{clusterApplyFT}
 \alias{clusterCallpart}
 \alias{clusterEvalQpart}
+\alias{clusterExportpart}
 \alias{printClusterInfo}
 \alias{makeClusterFT}
 \alias{makeSOCKclusterFT}
@@ -70,8 +71,13 @@ printClusterInfo(cl)
 \item{initfun}{Function or character string naming a
 function with no
   arguments that is to
-  be called on each node prior to the computation. 
+  be exported to each node prior to the computation. 
   It can be used for example for loading required libraries.}
+\item{initlibrary}{Function or character string naming a
+function with no
+  arguments that is to
+  be called on each node prior to the computation. 
+  It can be used for example for loading required libraries.}  
 \item{exitfun}{Function or character string naming a function with no
   arguments that is to
   be called on each node after the computation is completed.}
@@ -98,7 +104,22 @@ the non-finished
   \item{ft_verbose}{If TRUE, debugging messages are sent to standard output.}
   \item{nodes}{Indices of cluster nodes.}
   \item{expr}{Expression to evaluate.}
-
   \item{...}{Additional arguments to pass to function \code{fun}.}
 }
+\examples{
+#library(NRELsnowFT)
+#test <- seq(1,100,length=100)
+#f <- function(x){Sys.sleep(0.01);return(x)}
+#ips <- c("192.168.33.12","192.168.33.12","192.168.33.11","192.168.33.11")
+#ips <- c("192.168.33.12","192.168.33.12")
+#ips <- rep("localhost",3)
+#cl <- do.call('makeClusterFT', c(list("SOCK", ipList=ips, ft_verbose=TRUE, outfile="/mnt/openstudio/snow.log")))
+#clusterExport(cl,"f")
+#results <- clusterApplyFT(cl, test, f, initfun="f",mngtfiles=c(".clustersize",".proc",".proc_fail"), ipFile="/mnt/openstudio/.newIPs", resizeFile="/mnt/openstudio/.resizeFile", ft_verbose=TRUE, outfile="/mnt/openstudio/snow.log")
+
+
+#performParallel(test, f, ipList=ips, cltype = "SOCK", mngtfiles=c(".clustersize",".proc",".proc_fail"),ipFile="newIPs",resizeFile="resizeFile" ,ft_verbose=TRUE)
+
+}
+
 \keyword{NRELsnowFT}

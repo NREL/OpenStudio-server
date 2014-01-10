@@ -73,7 +73,7 @@ makeClusterFT <- function(type = getClusterOption("type"), ipList=NULL,
         #MPI = makeMPIcluster(spec, ...),
         stop("unknown cluster type"))
     clusterEvalQ(cl, require(NRELsnowFT))
-    clusterEvalQ(cl, require(RMongo))
+   # clusterEvalQ(cl, require(RMongo))
     if(ft_verbose) {
         cat('\nCluster successfully created.')
         printClusterInfo(cl)
@@ -289,6 +289,12 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL, initlibrary=N
   cat('ipList:',ipList,'\n')
   cl <- do.call('makeClusterFT', c(list(cltype, ipList=ipList, ft_verbose=ft_verbose),cluster.args))
 
+  if (!is.null(initlibrary)) {
+    if (ft_verbose) 
+	cat("   calling initlibrary ...\n")
+    clusterCall(cl, initlibrary)
+  }
+
   if (!is.null(initfun)) {
     if (ft_verbose) 
 	cat("   calling initfun ...\n")
@@ -432,10 +438,14 @@ manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfi
            clusterEvalQpart(cl,(p+1):(p+length(addIPs)),require(RMongo))
            if(ft_verbose)
              printClusterInfo(cl)
+           #if (!is.null(initlibrary)) { 
+           #  cat('initlibrary: ',initlibrary,'\n')
+           #  clusterEvalQpart(cl,(p+1):(p+length(addIPs)),as.expression(initlibrary))
+           #  #clusterExportpart(cl,(p+1):(p+length(addIPs)),initlibrary)
+           #  cl
+           #}
            if (!is.null(initfun))
              clusterExportpart(cl,(p+1):(p+length(addIPs)),initfun)
-           #if (!is.null(initlibrary))  
-           #  clusterEvalQpart(cl,(p+1):(p+length(addIPs)),initlibrary)
            clall<-combinecl(clall,cl[(p+1):(p+length(addIPs))])
            freenodes<-c(freenodes,(p+1):(p+length(addIPs)))
            p <- p + length(addIPs)
