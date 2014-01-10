@@ -126,7 +126,7 @@ class Analysis::BatchRunft
             }
   
             print(paste("number of datapoints is:",nrow(dps)))
-            results <- clusterApplyFT(cl, dps[,1], f, mngtfiles=c(".clustersize",".proc",".proc_fail"), ipFile="/mnt/openstudio/.newIPs", resizeFile="/mnt/openstudio/.resizeFile", ft_verbose=TRUE)
+            results <- clusterApplyFT(cl, dps[,1], f, initfun="f",mngtfiles=c(".clustersize",".proc",".proc_fail"), ipFile="/mnt/openstudio/.newIPs", resizeFile="/mnt/openstudio/.resizeFile", ft_verbose=TRUE, outfile="/mnt/openstudio/snow.log")
             #results <- parLapply(cl, dps[,1], f)
           }
         end

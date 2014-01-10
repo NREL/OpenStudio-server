@@ -74,7 +74,7 @@ module Analysis::R
           starttime <- Sys.time()
           tryCatch({
              res <- evalWithTimeout({
-             cl <- do.call('makeClusterFT', c(list("SOCK", ipList=ips[,1], ft_verbose=TRUE)))
+             cl <- do.call('makeClusterFT', c(list("SOCK", ipList=ips[,1], ft_verbose=TRUE, outfile="/mnt/openstudio/snow.log")))
              #cl <- makeSOCKcluster(ips[,1], outfile="/tmp/snow.log")
               }, timeout=numunique);
               }, TimeoutException=function(ex) {

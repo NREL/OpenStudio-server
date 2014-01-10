@@ -5,7 +5,7 @@
 processStatus <- function(node) UseMethod("processStatus")
 
 # Administration
-doAdministration <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun,ft_verbose,removeIPs) UseMethod("doAdministration")
+doAdministration <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun, initlibrary, ft_verbose,removeIPs,...) UseMethod("doAdministration")
 is.manageable <- function(cl) UseMethod("is.manageable")
 
 #
@@ -19,7 +19,7 @@ recvOneDataFT <- function(cl,type,time) UseMethod("recvOneDataFT")
 #  Cluster Modification
 #
 
-addtoCluster <- function(cl, spec, newIPs, options = defaultClusterOptions)
+addtoCluster <- function(cl, spec, newIPs, ...,options = defaultClusterOptions)
   UseMethod("addtoCluster") 
 
 #repairCluster <- function(cl, nodes, options = defaultClusterOptions)
@@ -63,16 +63,17 @@ printClusterInfo <- function(cl) {
 #
 
 makeClusterFT <- function(type = getClusterOption("type"), ipList=NULL, 
-				ft_verbose=FALSE) {
+				ft_verbose=FALSE, ...) {
     if (is.null(type))
         stop("need to specify a cluster type")
     cat('ipList:',ipList,'\n')    
     cl <- switch(type,
-        SOCK = makeSOCKclusterFT(ipList),
+        SOCK = makeSOCKclusterFT(ipList, ...),
         #PVM = makePVMcluster(spec, ...),
         #MPI = makeMPIcluster(spec, ...),
         stop("unknown cluster type"))
     clusterEvalQ(cl, require(NRELsnowFT))
+    clusterEvalQ(cl, require(RMongo))
     if(ft_verbose) {
         cat('\nCluster successfully created.')
         printClusterInfo(cl)
@@ -88,6 +89,16 @@ clusterCallpart  <- function(cl, nodes, fun, ...) {
 
 clusterEvalQpart <- function(cl, nodes, expr)
     clusterCallpart(cl, nodes, eval, substitute(expr), env=.GlobalEnv)
+    
+clusterExportpart <- local({
+    gets <- function(n, v) { assign(n, v, envir = .GlobalEnv); NULL }
+    function(cl, nodes, list, envir = .GlobalEnv) {
+        ## do this with only one clusterCall--loop on slaves?
+        for (name in list) {
+            clusterCallpart(cl, nodes, gets, name, get(name, envir = envir))
+        }
+    }
+})
 
 
 recvOneResultFT <- function(cl,type='b',time=0) {
@@ -96,11 +107,11 @@ recvOneResultFT <- function(cl,type='b',time=0) {
     return(list(value = v$value$value, node=v$node))
 }
 
-clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
+clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL, initlibrary=NULL,
                              printfun=NULL, printargs=NULL,
                              printrepl=max(length(x)/10,1),
                              mngtfiles=c(".clustersize",".proc",".proc_fail"), ipFile=".newips", resizeFile=".resizeFile",
-                             ft_verbose=FALSE) {
+                             ft_verbose=FALSE,...) {
 
 # This function is a combination of clusterApplyLB and FPSS
 # (Framework for parallel statistical simulations), written by
@@ -197,7 +208,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
           		  repl<-replvec[it]
         		while ((length(freenodes) <= 0) || ((it > n) && fin < (n-length(frep)))) { # all nodes busy or wait for remaining results
           			d <- recvOneResultFT(clall,'n') # look if there is any result
-          			admin <- doAdministration(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun,ft_verbose, removeIPs=removeIPs)
+          			admin <- doAdministration(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun, initlibrary, ft_verbose, removeIPs=removeIPs, ...)
           			removeIPs <- admin$removeIPs
 				cl <- admin$cl
 				clall <- admin$clall
@@ -258,7 +269,7 @@ clusterApplyFT <- function(cl, x, fun, initfun = NULL, exitfun=NULL,
   	return(list(val,cl))
 }
 
-performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
+performParallel <- function(x, fun, initfun = NULL, exitfun =NULL, initlibrary=NULL,
                             printfun=NULL,printargs=NULL,
                             printrepl=max(length(x)/10,1),
                             cltype = getClusterOption("type"),
@@ -287,10 +298,10 @@ performParallel <- function(x, fun, initfun = NULL, exitfun =NULL,
   if (ft_verbose) 
      cat("   calling clusterApplyFT ...\n")
  
-  res <- clusterApplyFT (cl, x, fun, initfun=initfun, exitfun=exitfun,
+  res <- clusterApplyFT (cl, x, fun, initfun=initfun, exitfun=exitfun, initlibrary=initlibrary,
                            printfun=printfun, printargs=printargs,
                            printrepl=printrepl, mngtfiles=mngtfiles, ipFile=ipFile, resizeFile=resizeFile,
-			   ft_verbose=ft_verbose)
+			   ft_verbose=ft_verbose,cluster.args=cluster.args)
 
   if (ft_verbose) 
      cat("   clusterApplyFT finished.\n")
@@ -376,7 +387,7 @@ writetomngtfile <- function(cl, file) {
   write(repl,file)
 }
 
-manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, ipFile, resizeFile, freenodes, initfun, ft_verbose=FALSE, removeIPs=removeIPs) {
+manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfiles, ipFile, resizeFile, freenodes, initfun, initlibrary, ft_verbose=FALSE, removeIPs=removeIPs, ...) {
         addIPs <- NULL
         newp <- NULL
 	if (manage['cluster.size']){ 
@@ -414,14 +425,17 @@ manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfi
            cat('\n resizing cluster \n')
            cat('\n current cluster \n')
            if(ft_verbose) printClusterInfo(cl)
-           cl<-addtoCluster(cl, length(addIPs), newIPs=addIPs)
+           cl<-addtoCluster(cl, length(addIPs), newIPs=addIPs, ...)
            cat('\n after addtoCluster \n')
            if(ft_verbose) printClusterInfo(cl)
            clusterEvalQpart(cl,(p+1):(p+length(addIPs)),require(NRELsnowFT))
+           clusterEvalQpart(cl,(p+1):(p+length(addIPs)),require(RMongo))
            if(ft_verbose)
              printClusterInfo(cl)
            if (!is.null(initfun))
-             clusterCallpart(cl,(p+1):(p+length(addIPs)),initfun)
+             clusterExportpart(cl,(p+1):(p+length(addIPs)),initfun)
+           #if (!is.null(initlibrary))  
+           #  clusterEvalQpart(cl,(p+1):(p+length(addIPs)),initlibrary)
            clall<-combinecl(clall,cl[(p+1):(p+length(addIPs))])
            freenodes<-c(freenodes,(p+1):(p+length(addIPs)))
            p <- p + length(addIPs)

@@ -39,19 +39,19 @@
 }
 
 \usage{
-performParallel(x, fun, initfun = NULL, exitfun = NULL, 
+performParallel(x, fun, initfun = NULL, exitfun = NULL, initlibrary=NULL,
                 printfun = NULL, printargs = NULL, 
                 printrepl = max(length(x)/10,1), 
                 cltype = getClusterOption("type"),
                 cluster.args = NULL, ipList = NULL,
-                mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile, resizeFile,
+                mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile = ".newips", resizeFile = ".resizeFile",
                 ft_verbose = FALSE)
 
-clusterApplyFT(cl, x, fun, initfun = NULL, exitfun = NULL, 
+clusterApplyFT(cl, x, fun, initfun = NULL, exitfun = NULL, initlibrary=NULL,
                printfun = NULL, printargs = NULL, 
                printrepl = max(length(x)/10,1), 
-               mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile, resizeFile, 
-               ft_verbose = FALSE)
+               mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile = ".newips", resizeFile = ".resizeFile", 
+               ft_verbose = FALSE, ...)
 
 clusterEvalQpart(cl, nodes, expr)
 
