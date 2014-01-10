@@ -96,7 +96,7 @@ module Analysis::R
       @r.command() do
         %Q{
             print("Stopping cluster")
-            stopCluster(cl)          
+            stopClusterFT(cl)          
             print("Cluster stopped")
           }
       end

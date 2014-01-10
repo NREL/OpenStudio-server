@@ -118,7 +118,7 @@ default_attributes(
             },
             {
                 :name => 'NRELsnowFT',
-                :version => '1.3.31'
+                :version => '1.3.32'
             }
         ]        
     }

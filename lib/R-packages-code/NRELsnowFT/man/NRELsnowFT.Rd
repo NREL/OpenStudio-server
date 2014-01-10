@@ -31,6 +31,7 @@
 \alias{removefromCluster}
 \alias{findFailedNodes}
 \alias{processStatus}
+\alias{stopClusterFT}
 
 \description{
   Functions that extend the collection of cluster-level functions of the

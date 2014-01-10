@@ -13,7 +13,14 @@ is.manageable <- function(cl) UseMethod("is.manageable")
 #
 
 recvOneDataFT <- function(cl,type,time) UseMethod("recvOneDataFT")
-    
+
+#stopCluster
+stopClusterFT <- function(cl) {
+    for (n in cl) {
+      if (isOpen(n$con))
+        stopNode(n)
+    }
+}    
 
 #
 #  Cluster Modification
