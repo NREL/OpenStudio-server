@@ -1,6 +1,6 @@
 Package: NRELsnowFT
 Title: Fault Tolerant Simple Network of Workstations
-Version: 1.3.11
+Version: 1.3.21
 Author: Hana Sevcikova, A. J. Rossini
 Description: Extension of the snow package supporting fault tolerant
         and reproducible applications, as well as supporting

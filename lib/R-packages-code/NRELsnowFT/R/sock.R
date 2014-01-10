@@ -2,10 +2,10 @@
 # Socket Implementation
 #
 
-makeSOCKclusterFT <- function(ipList=NULL) {
+makeSOCKclusterFT <- function(ipList=NULL, ..., options = defaultClusterOptions) {
     all.names <- ipList
     names <- if (is.null(ipList)) stop('names is size null')
-    cl <- makeSOCKcluster(ipList)
+    cl <- makeSOCKcluster(ipList, ..., options=options)
     attr(cl, 'all.hosts') <- all.names
     cl
 }
@@ -32,7 +32,7 @@ is.manageable.SOCKcluster <- function(cl) {
 	return (c(cluster.size=TRUE, monitor.procs=TRUE, repair=FALSE))
 }
 
-addtoCluster.SOCKcluster <- function(cl, spec, newIPs, options = defaultClusterOptions) {
+addtoCluster.SOCKcluster <- function(cl, spec, newIPs, ...,options = defaultClusterOptions) {
   names <- attr(cl, 'all.hosts')
   options <- addClusterOptions(options,list())
   n <- length(cl)
@@ -49,7 +49,7 @@ addtoCluster.SOCKcluster <- function(cl, spec, newIPs, options = defaultClusterO
   j <- (n+1)
   for (i in (n+1):(n+spec)) {
     if (!is.null(names[[i]])){
-      newcl[[j]] <- newSOCKnode(names[[j]], options = options, rank=j)
+      newcl[[j]] <- newSOCKnode(names[[j]], ...,options = options, rank=j)
       newcl[[j]]$replic <- 0
       j <- j+1
     }
@@ -67,14 +67,14 @@ getNodeID.SOCKnode <- function(node) {
   return(node$con)
 }
 
-doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun,ft_verbose, removeIPs=removeIPs) {
+doAdministration.SOCKcluster <- function(cl, clall, d, p, it, n, manage, mngtfiles, ipFile, resizeFile, x, frep, freenodes, initfun, initlibrary, ft_verbose, removeIPs=removeIPs,...) {
 	free.nodes <- FALSE
 	newp <- NULL
         if (length(d) <= 0) { # no results arrived yet
             while (TRUE) {
                 # do the administration in the waiting time
                 # ***************************************
-	        updated.values <- manage.replications.and.cluster.size(cl, clall, p, n, manage, mngtfiles, ipFile, resizeFile, freenodes, initfun, ft_verbose=ft_verbose, removeIPs=removeIPs)
+	        updated.values <- manage.replications.and.cluster.size(cl, clall, p, n, manage, mngtfiles, ipFile, resizeFile, freenodes, initfun, initlibrary, ft_verbose=ft_verbose, removeIPs=removeIPs,...)
                 newp <- updated.values$newp
                 removeIPs <- updated.values$removeIPs
                 if (updated.values$cluster.increased) {
