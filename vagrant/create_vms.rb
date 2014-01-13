@@ -34,7 +34,7 @@ OptionParser.new do |opts|
   end
 
   opts.on("-r", "--revision [version]", String, "Specific revision of build with preceding period (e.g. .1 or .a)") do |s|
-    @options[:version] = s
+    @options[:revision] = s
   end
 end.parse!
 puts "options = #{@options.inspect}"
@@ -59,7 +59,7 @@ end
 
 # Versioning (change these each build)
 os_server_version = @options[:version]
-revision_id = @options[:version] # with preceding . (i.e. .1 or .a) 
+revision_id = @options[:revision] # with preceding . (i.e. .1 or .a) 
 
 test_amis_filename = "amis_openstudio.json"
 File.delete(test_amis_filename) if File.exists?(test_amis_filename)
