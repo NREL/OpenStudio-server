@@ -6,3 +6,4 @@ sudo service ssh restart
 sudo apt-get upgrade -y
 chmod +x /data/launch-instance/setup-cleanup-aws.sh
 sudo /data/launch-instance/setup-cleanup-aws.sh
+sudo passwd -u ubuntu
