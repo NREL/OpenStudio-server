@@ -17,8 +17,8 @@
         <td><%= link_to variable.name, variable_path(variable) %></td>
         <% if variable.discrete_values_and_weights %>
             <td><%= variable.discrete_values_and_weights.size %></td>
-        <% elsif variable.uncertainty_type && variable.analysis.problem && variable.analysis.problem['number_of_samples'] %>
-            <td><%= variable.analysis.problem['number_of_samples'] %></td>
+        <% elsif variable.uncertainty_type && variable.analysis.problem && variable.analysis.problem['algorithm'] && variable.analysis.problem['algorithm']['number_of_samples'] %>
+            <td><%= variable.analysis.problem['algorithm']['number_of_samples'] %></td>
         <% else %>
             <td></td>
         <% end %>

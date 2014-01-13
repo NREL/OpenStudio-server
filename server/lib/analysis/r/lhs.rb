@@ -62,11 +62,11 @@ module Analysis::R
         Rails.logger.info("R image file name is #{save_file_name}")
         @r.command() do
           %Q{
-          print("#{save_file_name}")
-          png(filename="#{save_file_name}", width = 1024, height = 1024)
-          hist(samples, freq=F, breaks=20)
-          dev.off()
-        }
+            print("#{save_file_name}")
+            png(filename="#{save_file_name}", width = 1024, height = 1024)
+            hist(samples, freq=F, breaks=20)
+            dev.off()
+          }
         end
       end
 
@@ -147,6 +147,7 @@ module Analysis::R
       var_types = []
 
       # get the probabilities
+      Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
       p = lhs_probability(selected_variables.count, number_of_samples)
       Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
 
@@ -155,6 +156,8 @@ module Analysis::R
       selected_variables.each do |var|
         Rails.logger.info "sampling variable #{var.name}"
         sfp = nil
+        
+        # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
         if var.uncertainty_type == "discrete_uncertain"
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           sfp = discrete_sample_from_probability(p[i_var], var, true)
