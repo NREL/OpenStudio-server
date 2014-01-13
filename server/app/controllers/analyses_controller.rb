@@ -103,7 +103,7 @@ class AnalysesController < ApplicationController
     params[:analysis_type].nil? ? @analysis_type = 'batch_run' : @analysis_type = params[:analysis_type]
 
     logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
-    options = params.symbolize_keys # read the deaults from the HTTP request
+    options = params.symbolize_keys # read the defaults from the HTTP request
     options[:run_data_point_filename] = params[:run_data_point_filename] if params[:run_data_point_filename]
 
     logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")

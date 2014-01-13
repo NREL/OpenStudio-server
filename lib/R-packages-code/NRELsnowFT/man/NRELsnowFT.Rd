@@ -23,6 +23,7 @@
 \alias{clusterApplyFT}
 \alias{clusterCallpart}
 \alias{clusterEvalQpart}
+\alias{clusterExportpart}
 \alias{printClusterInfo}
 \alias{makeClusterFT}
 \alias{makeSOCKclusterFT}
@@ -30,6 +31,7 @@
 \alias{removefromCluster}
 \alias{findFailedNodes}
 \alias{processStatus}
+\alias{stopClusterFT}
 
 \description{
   Functions that extend the collection of cluster-level functions of the
@@ -39,26 +41,27 @@
 }
 
 \usage{
-performParallel(x, fun, initfun = NULL, exitfun = NULL, 
+performParallel(x, fun, initfun = NULL, exitfun = NULL, initlibrary=NULL,
                 printfun = NULL, printargs = NULL, 
                 printrepl = max(length(x)/10,1), 
                 cltype = getClusterOption("type"),
                 cluster.args = NULL, ipList = NULL,
-                mngtfiles = c(".clustersize",".proc",".proc_fail"), ipfile,
+                mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile = ".newips", resizeFile = ".resizeFile",
                 ft_verbose = FALSE)
 
-clusterApplyFT(cl, x, fun, initfun = NULL, exitfun = NULL, 
+clusterApplyFT(cl, x, fun, initfun = NULL, exitfun = NULL, initlibrary=NULL,
                printfun = NULL, printargs = NULL, 
                printrepl = max(length(x)/10,1), 
-               mngtfiles = c(".clustersize",".proc",".proc_fail"), ipfile, 
-               ft_verbose = FALSE)
+               mngtfiles = c(".clustersize",".proc",".proc_fail"), ipFile = ".newips", resizeFile = ".resizeFile", 
+               ft_verbose = FALSE, ...)
 
 clusterEvalQpart(cl, nodes, expr)
 
 printClusterInfo(cl)
 }
 \arguments{
-  \item{ipfile}{file list of new cluster nodes IP addresses.}
+  \item{ipFile}{file list of new cluster nodes IP addresses.}
+  \item{resizeFile}{file flag for resizing cluster.}
   \item{ipList}{list of cluster nodes IP addresses.}
   \item{cl}{Cluster object.}
   \item{x}{Vector of values to be passed to function \code{fun}. 
@@ -69,8 +72,13 @@ printClusterInfo(cl)
 \item{initfun}{Function or character string naming a
 function with no
   arguments that is to
-  be called on each node prior to the computation. 
+  be exported to each node prior to the computation. 
   It can be used for example for loading required libraries.}
+\item{initlibrary}{Function or character string naming a
+function with no
+  arguments that is to
+  be called on each node prior to the computation. 
+  It can be used for example for loading required libraries.}  
 \item{exitfun}{Function or character string naming a function with no
   arguments that is to
   be called on each node after the computation is completed.}
@@ -97,7 +105,22 @@ the non-finished
   \item{ft_verbose}{If TRUE, debugging messages are sent to standard output.}
   \item{nodes}{Indices of cluster nodes.}
   \item{expr}{Expression to evaluate.}
-
   \item{...}{Additional arguments to pass to function \code{fun}.}
 }
+\examples{
+#library(NRELsnowFT)
+#test <- seq(1,100,length=100)
+#f <- function(x){Sys.sleep(0.01);return(x)}
+#ips <- c("192.168.33.12","192.168.33.12","192.168.33.11","192.168.33.11")
+#ips <- c("192.168.33.12","192.168.33.12")
+#ips <- rep("localhost",3)
+#cl <- do.call('makeClusterFT', c(list("SOCK", ipList=ips, ft_verbose=TRUE, outfile="/mnt/openstudio/snow.log")))
+#clusterExport(cl,"f")
+#results <- clusterApplyFT(cl, test, f, initfun="f",mngtfiles=c(".clustersize",".proc",".proc_fail"), ipFile="/mnt/openstudio/.newIPs", resizeFile="/mnt/openstudio/.resizeFile", ft_verbose=TRUE, outfile="/mnt/openstudio/snow.log")
+
+
+#performParallel(test, f, ipList=ips, cltype = "SOCK", mngtfiles=c(".clustersize",".proc",".proc_fail"),ipFile="newIPs",resizeFile="resizeFile" ,ft_verbose=TRUE)
+
+}
+
 \keyword{NRELsnowFT}

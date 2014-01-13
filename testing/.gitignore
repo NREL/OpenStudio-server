@@ -1,4 +1,5 @@
 Gemfile.lock
+.bundle
 /private_key
 /run_project_aws.log
 
