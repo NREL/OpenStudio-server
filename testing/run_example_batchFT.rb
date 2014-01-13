@@ -8,12 +8,12 @@ HOSTNAME = "http://localhost:8080"
 
 #HOSTNAME = "http://ec2-23-20-3-243.compute-1.amazonaws.com"
 WITHOUT_DELAY=false
-ANALYSIS_TYPE="batch_run"
-STOP_AFTER_N=4 # set to nil if you want them all
+ANALYSIS_TYPE="batch_runft"
+STOP_AFTER_N=nil # set to nil if you want them all
 # each may contain up to 50 data points
 
 # Project data
-project_name = "PATTestExport"
+project_name = "BigPATTestExport"
 formulation_file = "./" + project_name + "/analysis.json"
 analysis_zip_file = "./" + project_name + "/project.zip"
 datapoint_files = Dir.glob("./" + project_name + "/data_points_*.json").take(STOP_AFTER_N || 2147483647)

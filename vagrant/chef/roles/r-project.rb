@@ -27,7 +27,7 @@ default_attributes(
             },
             {
                 :name => 'e1071',
-                :version => '1.6-1'
+                :version => '1.6-2'
             },
             {
                 :name => 'Rserve',
@@ -118,7 +118,7 @@ default_attributes(
             },
             {
                 :name => 'NRELsnowFT',
-                :version => '1.3.11'
+                :version => '1.3.32'
             }
         ]        
     }
