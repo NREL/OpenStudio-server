@@ -41,6 +41,7 @@ cd \path\to\Vagrantfile
 rem for each cmd window set the environment variable (or set globally (for NREL only)
 set OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
 vagrant up
+
 ```
   **Mac / Linux**  
 ```sh
