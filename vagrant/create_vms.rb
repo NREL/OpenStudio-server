@@ -428,8 +428,9 @@ if good_build
     puts JSON.pretty_generate(amis_hash)
 
     puts "Saving ami infomration to file"
+    outfile = File.join(File.dirname(__FILE__),test_amis_filename)
     # save it to a file for use in integration test
-    File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
+    File.open(outfile, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
 
     # Todo: save some of these results to a database?
   end
