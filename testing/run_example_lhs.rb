@@ -5,7 +5,7 @@ require 'bundler/setup'
 require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
 HOSTNAME = "http://localhost:8080"
-                              #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
+#HOSTNAME = "http://ec2-184-73-66-103.compute-1.amazonaws.com"
 
 # fast models (~10 secs) with pivots
 formulation_file = "./SimpleContinuousExample/analysis.json"
@@ -40,9 +40,10 @@ run_options = {
     problem: {
         random_seed: 1979,
         algorithm: {
+            #number_of_samples: 100,
             number_of_samples: 3,
-            #sample_method: "all_variables"
-            sample_method: "individual_variables"
+            sample_method: "all_variables"
+            #sample_method: "individual_variables"
         }
     }
 }
