@@ -7,7 +7,7 @@ run_list([
              "role[ruby]",
              "role[mongodb]",
              "role[r-project]",
-             #"role[radiance]",
+             "role[radiance]",
              "role[openstudio]",
              "role[web_base]",
              "recipe[openstudio_server::bashprofile]",
