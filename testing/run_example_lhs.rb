@@ -7,8 +7,13 @@ require 'openstudio-analysis' # Need to install openstudio-analysis gem
 HOSTNAME = "http://localhost:8080"
                               #HOSTNAME = "http://ec2-107-22-88-62.compute-1.amazonaws.com"
 
-formulation_file = "./ContinuousExample/medium_office.json"
-analysis_zip_file = "./ContinuousExample/medium_office.zip"
+# fast models (~10 secs) with pivots
+formulation_file = "./SimpleContinuousExample/analysis.json"
+analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
+
+# these models are good but take 80+ seconds to run
+#formulation_file = "./ContinuousExample/medium_office.json"
+#analysis_zip_file = "./ContinuousExample/medium_office.zip"
 
 options = {hostname: HOSTNAME}
 api = OpenStudio::Analysis::ServerApi.new(options)
