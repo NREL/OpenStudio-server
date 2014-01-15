@@ -94,3 +94,12 @@
 [submodule "vagrant/chef/cookbooks/aws"]
 	path = vagrant/chef/cookbooks/aws
 	url = git@github.com:NREL-cookbooks/aws.git
+[submodule "vagrant/chef/cookbooks/radiance"]
+	path = vagrant/chef/cookbooks/radiance
+	url = git@github.com:NREL-cookbooks/radiance.git
+[submodule "vagrant/chef/cookbooks/ark"]
+	path = vagrant/chef/cookbooks/ark
+	url = git@github.com:NREL-cookbooks/ark.git
+[submodule "vagrant/chef/cookbooks/cmake"]
+	path = vagrant/chef/cookbooks/cmake
+	url = git@github.com:phlipper/chef-cmake.git
