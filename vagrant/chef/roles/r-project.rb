@@ -10,7 +10,7 @@ default_attributes(
         :install_method => "source",
         :add_r_to_path => true,
         :prefix_bin => "/usr/local/bin",
-        :config_opts => ["--enable-R-shlib"], # build with x11 support (remove "--with-x=no",)
+        
         :libraries => [
             {
                 :name => "snow"
@@ -94,7 +94,11 @@ default_attributes(
     }
 )
 
-override_attributes()
+override_attributes(
+    :r => {
+        :config_opts => ["--enable-R-shlib"] # build with x11 support (removes "--with-x=no",)
+    }
+)
 
 run_list(
     [
