@@ -100,3 +100,6 @@
 [submodule "vagrant/chef/cookbooks/cmake"]
 	path = vagrant/chef/cookbooks/cmake
 	url = git@github.com:phlipper/chef-cmake.git
+[submodule "new-r"]
+	path = vagrant/chef/cookbooks/r
+	url = git@github.com:NREL-cookbooks/cookbook-r.git
