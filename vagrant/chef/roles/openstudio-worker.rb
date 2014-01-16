@@ -19,8 +19,7 @@ default_attributes(
 )
 
 override_attributes(
-    :R => {
+    :r => {
         :rserve_start_on_boot => false,
-        :build_from_source => true
     }
 )

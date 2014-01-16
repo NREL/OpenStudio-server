@@ -76,10 +76,10 @@ default_attributes(
                 :name => "snowFT"
             },
             {
-            :name => 'NRELmoo',
-            :package_path => "/data/R-packages",
-            :version => '1.1.3'
-        },
+                :name => 'NRELmoo',
+                :package_path => "/data/R-packages",
+                :version => '1.1.3'
+            },
             {
                 :name => 'Swift',
                 :package_path => "/data/R-packages",
