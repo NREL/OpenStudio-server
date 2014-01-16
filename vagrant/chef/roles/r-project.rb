@@ -1,128 +1,105 @@
 name "r-project"
-description "Installs and configure R"
-
-run_list([
-             "recipe[java]",
-             "recipe[R]",
-         ])
-
+description "install r"
 
 default_attributes(
     :java => {
         :set_java_home => false
     },
-    :R => {
-        :apt_distribution => "precise/",
-        :build_from_source => true,
-        :build_source_url => "http://cran.r-project.org/src/base/R-3",
-        :build_version => "3.0.2",
-        :apt_key => "E084DAB9",
-        :rserve_start_on_boot => false,
-        :rserve_user => "vagrant",
-        :default_package_url => "http://cran.r-project.org/src/contrib",
-        :packages => [
+    :r => {
+        :install_repo => false,
+        :install_method => "source",
+        :add_r_to_path => true,
+        :prefix_bin => "/usr/local/bin",
+        :config_opts => ["--with-x=no", "--enable-R-shlib"],
+        :libraries => [
             {
-                :name => 'lhs',
-                :version => '0.10'
+                :name => "snow"
             },
             {
-                :name => 'e1071',
-                :version => '1.6-2'
+                :name => "Rserve"
             },
             {
-                :name => 'Rserve',
-                :version => '1.7-3'
+                :name => "lhs"
             },
             {
-                :name => 'triangle',
-                :version => '0.8'
+                :name => "e1071"
             },
             {
-                :name => 'rJava',
-                :version => '0.9-6'
+                :name => "triangle"
             },
             {
-                :name => 'RUnit',
-                :version => '0.4.26'
+                :name => "rJava"
             },
             {
-                :name => 'RMongo',
-                :version => '0.0.25'
+                :name => "RUnit"
             },
             {
-                :name => 'snow',
-                :version => '0.3-13'
+                :name => "RMongo"
             },
             {
-                :name => 'snowfall',
-                :version => '1.84-6'
+                :name => "snowfall"
             },
             {
-                :name => 'R.methodsS3',
-                :version => '1.6.1'
+                :name => "R.methodsS3"
             },
             {
-                :name => 'R.oo',
-                :version => '1.17.0'
+                :name => "R.oo"
             },
             {
-                :name => 'R.utils',
-                :version => '1.28.4'
+                :name => "R.utils"
             },
             {
-                :name => 'iterators',
-                :version => '1.0.6'
+                :name => "iterators"
             },
             {
-                :name => 'foreach',
-                :version => '1.4.1'
+                :name => "foreach"
             },
             {
-                :name => 'doSNOW',
-                :version => '1.0.9'
+                :name => "doSNOW"
             },
             {
-                :name => 'DEoptim',
-                :version => '2.2-2'
+                :name => "DEoptim"
             },
             {
-                :name => 'NMOF',
-                :version => '0.28-2'
+                :name => "NMOF"
             },
             {
-                :name => 'mco',
-                :version => '1.0.12'
+                :name => "mco"
             },
             {
-                :name => 'rjson',
-                :version => '0.2.13'
+                :name => "rjson"
             },
             {
-                :name => 'rgenoud',
-                :version => '5.7-12'
+                :name => "rgenoud"
             },
             {
-                :name => 'snowFT',
-                :version => '1.3-0'
-            }
-        ],
-        :local_package_url => "/data/R-packages",
-        :local_packages => [
-            {
-                :name => 'NRELmoo',
-                :version => '1.1.3'
+                :name => "snowFT"
             },
+            {
+            :name => 'NRELmoo',
+            :package_path => "/data/R-packages",
+            :version => '1.1.3'
+        },
             {
                 :name => 'Swift',
+                :package_path => "/data/R-packages",
                 :version => '0.3.1'
             },
             {
                 :name => 'NRELsnowFT',
+                :package_path => "/data/R-packages",
                 :version => '1.3.32'
             }
-        ]        
+        ]
     }
 )
 
+override_attributes()
 
+run_list(
+    [
+        "recipe[java]",
+        "recipe[r::default]",
+        "recipe[r::rserve]",
+    ])
 
