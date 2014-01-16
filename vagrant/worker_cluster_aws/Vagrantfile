@@ -94,7 +94,8 @@ Vagrant.configure("2") do |config|
       #cc2.8xlarge	$2.40 	32 cores
       aws.instance_type = "c3.xlarge" # c3.xlarge	$0.30 	4 cores
       #aws.ami = "ami-55b1ff3c" #default version
-      aws.ami = "ami-c14915a8" #16GB version 
+      #aws.ami = "ami-c14915a8" #16GB version
+      aws.ami = "ami-1313207a"  #updated ami-c14915a8 for grub upgrade
 
       override.ssh.username = "ubuntu"
 
