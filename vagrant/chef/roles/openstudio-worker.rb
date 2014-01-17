@@ -6,10 +6,10 @@ run_list([
              "role[base]",
              "role[ruby-worker]",
              "role[mongodb]",
-             "role[radiance]",
              "role[r-project]",
              "role[openstudio]",
              "recipe[openstudio_server::bashprofile]",
+             "role[radiance]",
          ])
 
 default_attributes(
