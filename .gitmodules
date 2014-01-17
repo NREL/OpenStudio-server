@@ -13,9 +13,6 @@
 [submodule "vagrant/chef/cookbooks/energyplus"]
 	path = vagrant/chef/cookbooks/energyplus
 	url = git@github.com:NREL-cookbooks/energyplus.git
-[submodule "vagrant/chef/cookbooks/R"]
-	path = vagrant/chef/cookbooks/R
-	url = git@github.com:NREL-cookbooks/R.git
 [submodule "vagrant/chef/cookbooks/ruby_build"]
 	path = vagrant/chef/cookbooks/ruby_build
 	url = git@github.com:NREL-cookbooks/chef-ruby_build.git
@@ -103,3 +100,6 @@
 [submodule "vagrant/chef/cookbooks/cmake"]
 	path = vagrant/chef/cookbooks/cmake
 	url = git@github.com:phlipper/chef-cmake.git
+[submodule "new-r"]
+	path = vagrant/chef/cookbooks/r
+	url = git@github.com:NREL-cookbooks/cookbook-r.git

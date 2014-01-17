@@ -7,8 +7,8 @@ run_list([
              "role[ruby]",
              "role[mongodb]",
              "role[r-project]",
-             "role[radiance]",
              "role[openstudio]",
+             "role[radiance]",
              "role[web_base]",
              "recipe[openstudio_server::bashprofile]",
              "recipe[openstudio_server::bundle]", #install the bundle first to get rails for apache passenger
@@ -27,9 +27,8 @@ default_attributes(
 )
 
 override_attributes(
-    :R => {
+    :r => {
         :rserve_start_on_boot => true,
-        :build_from_source => true,
         :rserve_user => "ubuntu",
         :rserve_log_path => "/var/www/rails/openstudio/log/Rserve.log"
     }
