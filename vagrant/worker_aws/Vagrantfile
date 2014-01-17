@@ -99,6 +99,7 @@ Vagrant.configure("2") do |config|
       aws.tags = {
           'Name' => 'Vagrant OpenStudio-worker',
           'NodeType' => 'Worker',
+          'UserUUID' => ENV["VAGRANT_AWS_USER_UUID"] || 'unknown_user_uuid'
       }
     rescue LoadError
       warn "Unable to configure AWS provider."
