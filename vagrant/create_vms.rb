@@ -18,6 +18,7 @@ require 'thread'
 require 'timeout'
 require 'optparse'
 require 'github'
+require 'securerandom'
 
 @options = {}
 OptionParser.new do |opts|
@@ -35,6 +36,11 @@ OptionParser.new do |opts|
 
   opts.on("-r", "--revision [version]", String, "Specific revision of build with preceding period (e.g. .1 or .a)") do |s|
     @options[:revision] = s
+  end
+
+  @options[:user_uuid] = SecureRandom.uuid
+  opts.on("-u", "--user-id [uuid]", String, "User UUID to know which AMI/Instances are yours") do |s|
+    @options[:user_uuid] = s
   end
 end.parse!
 puts "options = #{@options.inspect}"
@@ -135,7 +141,7 @@ def run_vagrant_up(element)
   begin
     Timeout::timeout(2400) {
       puts "#{element[:id]}: starting process on #{element}"
-      command = "cd ./#{element[:name]} && vagrant up --no-provision"
+      command = "cd ./#{element[:name]} && VAGRANT_AWS_USER_UUID=#{@options[:user_uuid]} vagrant up --no-provision"
       if @options[:provider] == :aws
         command += " --provider=aws"
       end
@@ -302,7 +308,7 @@ def process(element, &block)
     end
 
     # Append the instance id to the element
-    if @provider == :aws
+    if @options[:provider] == :aws
       get_instance_id(element)
     end
 
@@ -319,9 +325,9 @@ def process(element, &block)
       raise TimeoutError, "Error running initial cleanup, #{e.message}"
     end
 
-    if @provider == :aws
+    if @options[:provider] == :aws
       # Reboot the box if on Amazon because of kernel updates
-      run_vagrant_reload(element)
+      run_vagrant_reload(element) # todo: can i remove this?
 
       # finish up AMI cleanup 
       begin
@@ -360,8 +366,9 @@ def process(element, &block)
               i.add_tag("autobuilt")
               i.add_tag("sucessfully_created", :value => true)
               i.add_tag("created_on", :value => Time.now)
-              i.add_age("openstudio_version", @os_version)
-              i.add_age("openstudio_version_sha", @os_version_sha)
+              i.add_tag("openstudio_version", :value => @os_version)
+              i.add_tag("openstudio_version_sha", :value => @os_version_sha)
+              i.add_tag("user_uuid", :value => @options[:user_uuid])
               puts "#{element[:id]}: finished creating AMI"
             end
           else
@@ -388,7 +395,7 @@ def process(element, &block)
     element[:error_message] += "Exception message, #{e.message}, #{e.backtrace}"
   ensure
     # Be sure to alwys kill the instances if using AWS
-    if @provider == :aws
+    if @options[:provider] == :aws
       puts "#{element[:id]}: terminating instance"
       command = "cd ./#{element[:name]} && vagrant destroy -f"
       system_call(command) { |message| puts "#{element[:id]}: #{message}" }
@@ -416,7 +423,7 @@ good_build = @vms.all? { |vm| vm[:good_ami] && vm[:error_message] == "" }
 if good_build
   puts "All machines appear to be good"
 
-  if @provider == :aws
+  if @options[:provider] == :aws
     puts
     puts " === amis.json format ====="
     amis_hash = {}
