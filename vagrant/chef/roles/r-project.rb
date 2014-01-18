@@ -2,15 +2,13 @@ name "r-project"
 description "install r"
 
 default_attributes(
-    :java => {
-        :set_java_home => false
-    },
     :r => {
         :install_repo => false,
         :install_method => "source",
         :add_r_to_path => true,
+        :add_ld_path => true,
         :prefix_bin => "/usr/local/bin",
-        
+        :make_opts => ["-j4"],
         :libraries => [
             {
                 :name => "snow"
