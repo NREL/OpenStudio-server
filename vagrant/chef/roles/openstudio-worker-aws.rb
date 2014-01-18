@@ -6,10 +6,10 @@ run_list([
              "role[base]",
              "role[ruby-worker]",
              "role[mongodb]",
-             #"role[web_base]",
              "role[r-project]",
              "role[openstudio]",
              "recipe[openstudio_server::bashprofile]",
+             "role[radiance]",
          ])
 
 default_attributes(
@@ -19,8 +19,7 @@ default_attributes(
 )
 
 override_attributes(
-    :R => {
+    :r => {
         :rserve_start_on_boot => false,
-        :build_from_source => true
     }
 )
