@@ -260,6 +260,12 @@ begin
   # Run EnergyPlus using run energyplus script
   idf_filename = "#{run_directory}/in.idf"
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
+  
+  ros.log_message "adding monthly report to energyplus IDF", true
+  to_append = File.read(File.join(File.dirname(__FILE__), "monthly_report.rb"))
+  File.open(idf_filename, 'a') do |handle|
+      handle.puts to_append
+  end    
 
   ros.log_message "Verifying location of Post Process Script", true
   post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "post_process.rb"))
