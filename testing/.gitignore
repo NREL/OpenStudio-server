@@ -1,5 +1,7 @@
 Gemfile.lock
+faraday.log
 .bundle
+faraday.log
 /private_key
 /run_project_aws.log
 

@@ -101,6 +101,8 @@ begin
   # Copy over a copy other files that are used for the workflow based (not openstudio runmanager) based execution
   FileUtils.copy("/mnt/openstudio/run_energyplus.rb", "#{directory}/run_energyplus.rb")
   FileUtils.copy("/mnt/openstudio/post_process.rb", "#{directory}/post_process.rb")
+  FileUtils.copy("/mnt/openstudio/post_process.rb", "#{directory}/post_process_monthly.rb")
+  FileUtils.copy("/mnt/openstudio/monthly_report.rb", "#{directory}/monthly_report.rb")
   
   # call the run openstudio script
   command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/:#{File.dirname(__FILE__)} #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory} -r AWS"
