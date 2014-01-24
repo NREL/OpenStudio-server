@@ -4,6 +4,7 @@
 .ruby-version
 .DS_Store
 .bundle
+release.log
 *.swp
 Gemfile.lock
 /vagrant/test_amis.json
