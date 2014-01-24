@@ -257,6 +257,14 @@ class AnalysesController < ApplicationController
       format.html # results_scatter.html.erb
     end
   end
+  
+  def plot_xy2
+     @analysis = Analysis.find(params[:id])
+  
+      respond_to do |format|
+        format.html # results_scatter.html.erb
+      end
+  end
 
   def plot_data
     @analysis = Analysis.find(params[:id])
@@ -378,6 +386,10 @@ class AnalysesController < ApplicationController
         dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity'] if dp['results']['interior_lighting_electricity']
         dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
         dp_values["iteration"] = dp['iteration'] if dp['iteration']
+        dp_values["heating_natural_gas"] = dp['results']['heating_natural_gas'] if dp['results']['heating_natural_gas']
+        dp_values["cooling_electricity"] = dp['results']['cooling_electricity'] if dp['results']['cooling_electricity']
+        dp_values["interior_equipment_electricity"] = dp['results']['interior_equipment_electricity'] if dp['results']['interior_equipment_electricity']
+        dp_values["fans_electricity"] = dp['results']['fans_electricity'] if dp['results']['fans_electricity']
 
         plot_data << dp_values
       end
