@@ -39,7 +39,7 @@ puts "options = #{@options.inspect}"
 
 # Versioning (change these each build)
 require_relative "../server/lib/version"
-os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
+@os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 
 os_role_file = "./chef/roles/openstudio.rb" # Grab the openstudio version out of the vagrant rols
 if File.exists?(os_role_file)
@@ -53,7 +53,7 @@ else
   raise "Could not find OpenStudio.rb chef role in #{os_role_file}"
 end
 
-puts "OpenStudio Server Version is: #{os_server_version}"
+puts "OpenStudio Server Version is: #{@os_server_version}"
 puts "OpenStudio Version is: #{@os_version}"
 puts "OpenStudio SHA is: #{@os_version_sha}"
 
@@ -82,11 +82,11 @@ end
 if @options[:provider] == :vagrant
   @vms << {
       id: 1, name: "server", postflight_script_1: "configure_vagrant_server.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 2, name: "worker", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
   }
   #@vms << {
   #    id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
@@ -95,15 +95,15 @@ if @options[:provider] == :vagrant
 elsif @options[:provider] == :aws
   @vms << {
       id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{os_server_version}"
+      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
   }
 end
 
@@ -356,6 +356,7 @@ def process(element, &block)
               i.add_tag("autobuilt")
               i.add_tag("sucessfully_created", :value => true)
               i.add_tag("created_on", :value => Time.now)
+              i.add_tag("openstudio_server_version", :value => @os_server_version)
               i.add_tag("openstudio_version", :value => @os_version)
               i.add_tag("openstudio_version_sha", :value => @os_version_sha)
               i.add_tag("user_uuid", :value => @options[:user_uuid])
@@ -425,7 +426,7 @@ if good_build
     puts JSON.pretty_generate(amis_hash)
 
     puts "Saving ami infomration to file"
-    outfile = File.join(File.dirname(__FILE__),test_amis_filename)
+    outfile = File.join(File.dirname(__FILE__), test_amis_filename)
     # save it to a file for use in integration test
     File.open(outfile, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
 
