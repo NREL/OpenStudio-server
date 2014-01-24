@@ -6,6 +6,7 @@ require "git"
 require "logger"
 require "rspec/core/rake_task"
 
+# To release new version, increment the value in the ./server/lib/version file
 require_relative "server/lib/version"
 
 # todo: enable a second part of this that waits for testing of the amis before this is formally released
