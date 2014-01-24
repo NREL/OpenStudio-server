@@ -46,6 +46,7 @@ task :release do
   # push the tags
   g.push("origin", "master", true)
 
+  # push the code to the BUILD BRANCH
   g.checkout(AMI_BUILD_BRANCH)
   g.pull
   g.merge("origin/master")
