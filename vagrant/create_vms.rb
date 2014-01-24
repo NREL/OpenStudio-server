@@ -30,14 +30,6 @@ OptionParser.new do |opts|
     @options[:provider] = s.to_sym
   end
 
-  opts.on("-v", "--version [version]", String, "Version of OpenStudio Server Build (i.e. 1.5.2)") do |s|
-    @options[:version] = s
-  end
-
-  opts.on("-r", "--revision [version]", String, "Specific revision of build with preceding period (e.g. .1 or .a)") do |s|
-    @options[:revision] = s
-  end
-
   @options[:user_uuid] = SecureRandom.uuid
   opts.on("-u", "--user-id [uuid]", String, "User UUID to know which AMI/Instances are yours") do |s|
     @options[:user_uuid] = s
@@ -45,27 +37,25 @@ OptionParser.new do |opts|
 end.parse!
 puts "options = #{@options.inspect}"
 
-if @options[:version].nil? && @options[:provider] == :aws
-  puts "Version required when building with AWS"
-  exit 1
-end
+# Versioning (change these each build)
+require_relative "../server/lib/version"
+@os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 
-# Grab the openstudio version out of the vagrant rols
-if File.exists?("./chef/roles/openstudio.rb")
-  openstudio_role = File.read("./chef/roles/openstudio.rb")
+os_role_file = "./chef/roles/openstudio.rb" # Grab the openstudio version out of the vagrant rols
+if File.exists?(os_role_file)
+  openstudio_role = File.read(os_role_file)
   json_string = openstudio_role.scan(/default_attributes\((.*)\)/m).first.join
   json_obj = eval("{ #{json_string} }")
   @os_version = json_obj[:openstudio][:version]
   @os_version_sha = json_obj[:openstudio][:version_revision]
-  puts "OpenStudio Version is: #{@os_version}"
-  puts "OpenStudio SHA is: #{@os_version_sha}"
+
 else
-  raise "Could not find OpenStudio.rb chef role in ./chef/roles/openstudio.rb"
+  raise "Could not find OpenStudio.rb chef role in #{os_role_file}"
 end
 
-# Versioning (change these each build)
-os_server_version = @options[:version]
-revision_id = @options[:revision] # with preceding . (i.e. .1 or .a) 
+puts "OpenStudio Server Version is: #{@os_server_version}"
+puts "OpenStudio Version is: #{@os_version}"
+puts "OpenStudio SHA is: #{@os_version_sha}"
 
 test_amis_filename = "amis_openstudio.json"
 File.delete(test_amis_filename) if File.exists?(test_amis_filename)
@@ -92,28 +82,28 @@ end
 if @options[:provider] == :vagrant
   @vms << {
       id: 1, name: "server", postflight_script_1: "configure_vagrant_server.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 2, name: "worker", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
   }
   #@vms << {
   #    id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
-  #    ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}#{revision_id}"
+  #    ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}"
   #}
 elsif @options[:provider] == :aws
   @vms << {
       id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Server OS-#{@os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{os_server_version}#{revision_id}"
+      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
   }
 end
 
@@ -366,6 +356,7 @@ def process(element, &block)
               i.add_tag("autobuilt")
               i.add_tag("sucessfully_created", :value => true)
               i.add_tag("created_on", :value => Time.now)
+              i.add_tag("openstudio_server_version", :value => @os_server_version)
               i.add_tag("openstudio_version", :value => @os_version)
               i.add_tag("openstudio_version_sha", :value => @os_version_sha)
               i.add_tag("user_uuid", :value => @options[:user_uuid])
@@ -435,7 +426,7 @@ if good_build
     puts JSON.pretty_generate(amis_hash)
 
     puts "Saving ami infomration to file"
-    outfile = File.join(File.dirname(__FILE__),test_amis_filename)
+    outfile = File.join(File.dirname(__FILE__), test_amis_filename)
     # save it to a file for use in integration test
     File.open(outfile, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
 
