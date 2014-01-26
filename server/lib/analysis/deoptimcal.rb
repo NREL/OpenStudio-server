@@ -1,5 +1,5 @@
 # Non Sorting Genetic Algorithm
-class Analysis::NsgaNrelcal
+class Analysis::Deoptimcal
   include Analysis::R
 
   def initialize(analysis_id, options = {})
@@ -9,29 +9,23 @@ class Analysis::NsgaNrelcal
         create_data_point_filename: "create_data_point.rb",
         output_variables: [
             {
-                display_name: "Heating Natural Gas (MJ/m2)",
-                name: "heating_natural_gas",
-                objective_function: true,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: "Cooling Electricity (MJ/m2)",
-                name: "cooling_electricity",
-                objective_function: true,
-                objective_function_index: 1,
-                index: 1
+	      display_name: "Heating Natural Gas (MJ/m2)",
+	      name: "heating_natural_gas",
+	      objective_function: true,
+	      objective_function_index: 0,
+	      index: 0
+	    },
+	    {
+	      display_name: "Cooling Electricity (MJ/m2)",
+	      name: "cooling_electricity",
+	      objective_function: true,
+	      objective_function_index: 1,
+	      index: 1
             }
         ],
         problem: {
-            random_seed: 1979,
             algorithm: {
                 generations: 1,
-                tourSize: 2,
-                cprob: 0.7,
-                XoverDistIdx: 5,
-                MuDistIdx: 10,
-                mprob: 0.5,
                 objective_functions: [
                     "heating_natural_gas",
                     "cooling_electricity"
@@ -75,18 +69,17 @@ class Analysis::NsgaNrelcal
     # save the data
     @analysis.save!
     @analysis.reload # after saving the data (needed for some reason yet to be determined)
-
+    
     #create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Batch Run"
     @r.converse('setwd("/mnt/openstudio")')
-    
-    # todo: deal better with random seeds
-    @r.converse("set.seed(#{@analysis.problem['random_seed']})")  
+    @r.converse('set.seed(1979)')    
     # R libraries needed for this algorithm
     @r.converse "library(rjson)"
     @r.converse "library(mco)"
-    @r.converse "library(NRELmoo)"
+    @r.converse "library(DEoptim)"
+    @r.converse "library(doSNOW)"
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -103,7 +96,7 @@ class Analysis::NsgaNrelcal
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
       raise "Number of generations was not set or equal to zero (must be 1 or greater)"
     end
-
+    
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
@@ -116,10 +109,10 @@ class Analysis::NsgaNrelcal
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
     Rails.logger.info "starting lhs to discretize the variables"
-
+    
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-
+    
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
 
@@ -132,7 +125,7 @@ class Analysis::NsgaNrelcal
         Rails.logger.info "No variables were passed into the options, therefore exit"
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
-
+  
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       if !cluster.configure(master_ip)
@@ -160,7 +153,7 @@ class Analysis::NsgaNrelcal
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -221,10 +214,11 @@ class Analysis::NsgaNrelcal
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
-              obj[1] <- abs(as.numeric(json$objective_function_1) - 462.1635)
+              obj[1] <- abs(as.numeric(json$objective_function_1) - 462.1635)             
               obj[2] <- abs(as.numeric(json$objective_function_2) - 84.16202)
-              print(paste("Objective function results are:",obj))   
-              return(obj)
+              objsum <- obj[1] + obj[2]
+              print(paste("Objective function results are:",objsum))   
+              return(objsum)
             }
             
             clusterExport(cl,"g")
@@ -245,14 +239,22 @@ class Analysis::NsgaNrelcal
               print("NSGA2 needs more than one variable")
               stop
             }
-            
+            varMin <- c(min(vars[,1]))
+            varMax <- c(max(vars[,1]))
+            for (i in 2:ncol(vars)){
+              varMin <- rbind(varMin,c(min(vars[,i])))
+              varMax <- rbind(varMax,c(max(vars[,i])))
+            }
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
+            registerDoSNOW(cl)
+            results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
+            #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
+            #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 
-
+          
         end
       else
         raise "could not start the cluster (most likely timed out)"
@@ -266,7 +268,7 @@ class Analysis::NsgaNrelcal
     ensure
       # ensure that the cluster is stopped
       cluster.stop if cluster && cluster_started
-
+      
       # Kill the downloading of data files process
       Rails.logger.info("Ensure block of analysis cleaning up any remaining processes")
       process.stop if process
