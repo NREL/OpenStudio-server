@@ -1,5 +1,5 @@
 # Non Sorting Genetic Algorithm
-class Analysis::NsgaNrelcal
+class Analysis::NsgaNrelcal4
   include Analysis::R
 
   def initialize(analysis_id, options = {})
@@ -21,6 +21,20 @@ class Analysis::NsgaNrelcal
                 objective_function: true,
                 objective_function_index: 1,
                 index: 1
+            },
+            {
+                display_name: "Interior Equipment Electricity (MJ/m2)",
+                name: "interior_equipment_electricity",
+                objective_function: true,
+                objective_function_index: 2,
+                index: 2
+            },
+            {
+                display_name: "Fans Electricity (MJ/m2)",
+                name: "fans_electricity",
+                objective_function: true,
+                objective_function_index: 3,
+                index: 3
             }
         ],
         problem: {
@@ -34,7 +48,9 @@ class Analysis::NsgaNrelcal
                 mprob: 0.5,
                 objective_functions: [
                     "heating_natural_gas",
-                    "cooling_electricity"
+                    "cooling_electricity",
+                    "interior_equipment_electricity",
+                    "fans_electricity"
                 ]
             }
         }
@@ -223,6 +239,8 @@ class Analysis::NsgaNrelcal
               obj <- NULL
               obj[1] <- abs(as.numeric(json$objective_function_1) - 462.1635)
               obj[2] <- abs(as.numeric(json$objective_function_2) - 84.16202)
+              obj[3] <- abs(as.numeric(json$objective_function_3) - 121.9985)
+              obj[4] <- abs(as.numeric(json$objective_function_4) - 87.92142)
               print(paste("Objective function results are:",obj))   
               return(obj)
             }
@@ -247,7 +265,7 @@ class Analysis::NsgaNrelcal
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
+            results <- nsga2NREL(cl=cl, fn=g, objDim=4, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }

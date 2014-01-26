@@ -61,15 +61,15 @@
 
           d3.json("plot_data.json", function (error, data) {
               data['data'].forEach(function (d) {
-                  d.heating_natural_gas = +d.heating_natural_gas;
-                  d.cooling_electricity = +d.cooling_electricity;
+                  d.interior_equipment_electricity = +d.interior_equipment_electricity;
+                  d.fans_electricity = +d.fans_electricity;
               });
 
               x.domain(d3.extent(data['data'], function (d) {
-                  return d.heating_natural_gas;
+                  return d.interior_equipment_electricity;
               })).nice();
               y.domain(d3.extent(data['data'], function (d) {
-                  return d.cooling_electricity;
+                  return d.fans_electricity;
               })).nice();
 
               svg.append("g")
@@ -81,7 +81,7 @@
                       .attr("x", width)
                       .attr("y", -6)
                       .style("text-anchor", "end")
-                      .text("Heating Gas");
+                      .text("Interior Equipment Electricity");
 
               svg.append("g")
                       .attr("class", "y axis")
@@ -92,7 +92,7 @@
                       .attr("y", 6)
                       .attr("dy", ".71em")
                       .style("text-anchor", "end")
-                      .text("Cooling Electricity")
+                      .text("Fan Electricity")
 
               svg.selectAll("circle")
                       .data(data['data'])
@@ -100,10 +100,10 @@
                       .attr("class", "dot")
                       .attr("r", 10.0)
                       .attr("cx", function (d) {
-                          return x(d.heating_natural_gas);
+                          return x(d.interior_equipment_electricity);
                       })
                       .attr("cy", function (d) {
-                          return y(d.cooling_electricity);
+                          return y(d.fans_electricity);
                       })
                       .style("fill",function (d) {
                           return color(d.iteration);
@@ -113,8 +113,8 @@
                                   .style("border-style", "solid")
                                   .style("border-width", "1px")
                                   .style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px")
-                                  .html("X: " + d.heating_natural_gas.toFixed(2) +
-                                          "</br>Y: " + d.cooling_electricity.toFixed(2) +
+                                  .html("X: " + d.interior_equipment_electricity.toFixed(2) +
+                                          "</br>Y: " + d.fans_electricity.toFixed(2) +
                                           "</br>url: <a href=" + d.data_point_uuid + ">View Data Point</a>");
                       });
 
