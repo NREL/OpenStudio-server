@@ -1,5 +1,6 @@
 source 'http://rubygems.org'
 
 gem 'unf' 
-gem "aws-sdk", "~> 1.31.3"
-gem "github"
+gem 'aws-sdk', '~> 1.31.3'
+gem 'github'
+gem 'openstudio-aws', '~> 0.1.15'

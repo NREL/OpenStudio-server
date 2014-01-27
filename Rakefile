@@ -37,7 +37,7 @@ task :release do
   # do a git pull to make sure that we are up-to-date with tags
   g.pull
 
-  # check if the current tag already existins
+  # check if the current tag already existing
   ts = g.tags
   if ts.find { |t| t.name == OPENSTUDIO_SERVER_VERSION }
     raise "Version already tags. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}"
