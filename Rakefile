@@ -39,12 +39,12 @@ task :release do
 
   # check if the current tag already existins
   ts = g.tags
-  if ts.find { |t| t.name == OpenstudioServer::VERSION }
-    raise "Version already tags. Please increment your version.  Current version is #{OpenstudioServer::VERSION}"
+  if ts.find { |t| t.name == OPENSTUDIO_SERVER_VERSION }
+    raise "Version already tags. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}"
   end
 
   # add the new tag
-  g.add_tag(OpenstudioServer::VERSION)
+  g.add_tag(OPENSTUDIO_SERVER_VERSION)
 
   # push the tags
   g.push("origin", "master", true)
