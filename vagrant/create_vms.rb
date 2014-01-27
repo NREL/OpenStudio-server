@@ -34,8 +34,34 @@ OptionParser.new do |opts|
   opts.on("-u", "--user-id [uuid]", String, "User UUID to know which AMI/Instances are yours") do |s|
     @options[:user_uuid] = s
   end
+
+  @options[:list_amis] = false
+  opts.on("-l", "--list-amis", "Create AMI JSON lists") do |s|
+    @options[:list_amis] = true
+  end
 end.parse!
 puts "options = #{@options.inspect}"
+
+if @options[:list_amis]
+  puts "Listing available AMIs from AWS"
+  
+  require 'openstudio-aws'
+  
+  @aws = OpenStudio::Aws::Aws.new
+  
+  json_version_1 = @aws.os_aws.create_new_ami_json(1)
+  json_version_2 = @aws.os_aws.create_new_ami_json(2)
+
+  test_amis_filename = "amis_v1.json"
+  File.delete(test_amis_filename) if File.exists?(test_amis_filename)
+  File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(json_version_1) }
+
+  test_amis_filename = "amis_v2.json"
+  File.delete(test_amis_filename) if File.exists?(test_amis_filename)
+  File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(json_version_2) }
+
+  exit 0
+end
 
 # Versioning (change these each build)
 require_relative "../server/lib/version"
@@ -57,7 +83,7 @@ puts "OpenStudio Server Version is: #{@os_server_version}"
 puts "OpenStudio Version is: #{@os_version}"
 puts "OpenStudio SHA is: #{@os_version_sha}"
 
-test_amis_filename = "amis_openstudio.json"
+test_amis_filename = "test_amis_openstudio.json"
 File.delete(test_amis_filename) if File.exists?(test_amis_filename)
 
 start_time = Time.now
@@ -436,7 +462,6 @@ else
   puts "AMIs had errors"
   exit 1
 end
-
 puts
 puts "Took #{end_time - start_time}s to build."
 exit 0
