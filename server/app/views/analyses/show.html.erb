@@ -64,7 +64,7 @@
         <% if @analysis.analysis_type == "sequential_search" || @analysis.analysis_type =~ /nsga/ || @analysis.analysis_type == "deoptimcal" || @analysis.analysis_type == "optimcal" %>
             <th>2nd Obj Func</th>
         <% end %>
-        <% if @analysis.analysis_type == "nsga_nrelcal4" %>
+        <% if @analysis.analysis_type =~ /nsga_nrelcal4/ %>
 	    <th>3rd Obj Func</th>
 	    <th>4th Obj Func</th>
         <% end %>
@@ -85,7 +85,7 @@
             <% if @analysis.analysis_type == "sequential_search" || @analysis.analysis_type =~ /nsga/ || @analysis.analysis_type == "deoptimcal" || @analysis.analysis_type == "optimcal" %>
                 <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][1]].round(2) if @analysis.problem['algorithm']['objective_functions'][1] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][1]] %></td>
             <% end %>
-            <% if @analysis.analysis_type == "nsga_nrelcal4" %>
+            <% if @analysis.analysis_type =~ /nsga_nrelcal4/ %>
                 <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][2]].round(2) if @analysis.problem['algorithm']['objective_functions'][2] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][2]] %></td>
                 <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][3]].round(2) if @analysis.problem['algorithm']['objective_functions'][3] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][3]] %></td>
             <% end %> 

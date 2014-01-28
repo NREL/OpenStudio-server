@@ -7,11 +7,12 @@ class Analysis::NsgaNrelcal4
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
-        output_variables: [
+        output_variables: [            
             {
                 display_name: "Heating Natural Gas (MJ/m2)",
                 name: "heating_natural_gas",
                 objective_function: true,
+                objective_function_target: 462.1635,
                 objective_function_index: 0,
                 index: 0
             },
@@ -19,6 +20,7 @@ class Analysis::NsgaNrelcal4
                 display_name: "Cooling Electricity (MJ/m2)",
                 name: "cooling_electricity",
                 objective_function: true,
+                objective_function_target: 84.16202,
                 objective_function_index: 1,
                 index: 1
             },
@@ -26,6 +28,7 @@ class Analysis::NsgaNrelcal4
                 display_name: "Interior Equipment Electricity (MJ/m2)",
                 name: "interior_equipment_electricity",
                 objective_function: true,
+                objective_function_target: 121.9985,
                 objective_function_index: 2,
                 index: 2
             },
@@ -33,6 +36,7 @@ class Analysis::NsgaNrelcal4
                 display_name: "Fans Electricity (MJ/m2)",
                 name: "fans_electricity",
                 objective_function: true,
+                objective_function_target: 87.92142,
                 objective_function_index: 3,
                 index: 3
             }
@@ -176,18 +180,21 @@ class Analysis::NsgaNrelcal4
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
+            
+            objDim <- length(objfun)
+            print(paste("objDim:",objDim))
+            clusterExport(cl,"objDim")          
                
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
             }          
             print(vars)      
             print(vartypes)
-  
-            
+
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -237,10 +244,13 @@ class Analysis::NsgaNrelcal4
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
-              obj[1] <- abs(as.numeric(json$objective_function_1) - 462.1635)
-              obj[2] <- abs(as.numeric(json$objective_function_2) - 84.16202)
-              obj[3] <- abs(as.numeric(json$objective_function_3) - 121.9985)
-              obj[4] <- abs(as.numeric(json$objective_function_4) - 87.92142)
+              for (i in 1:objDim){
+                objfuntemp <- paste("objective_function_",i,sep="")
+                objtemp <- as.numeric(json[objfuntemp])
+                objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                objtemp2 <- as.numeric(json[objfuntargtemp])
+                obj[i] <- abs(objtemp - objtemp2)
+              }
               print(paste("Objective function results are:",obj))   
               return(obj)
             }
@@ -265,7 +275,7 @@ class Analysis::NsgaNrelcal4
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=4, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
+            results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
