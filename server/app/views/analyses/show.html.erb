@@ -60,10 +60,8 @@
         <th>Name</th>
         <th>Status</th>
         <th>Status Message</th>
-        <% @analysis.output_variables.each do |ov| %>
-          <% if ov["objective_function"] == true %>
+        <% @objective_functions.each do |ov| %>
             <th>Obj Func <%= ov['display_name'] %> </th>
-          <% end %>  
         <% end %>  
         <th>Start Time (UTC)</th>
         <th>End Time (UTC)</th>
@@ -78,14 +76,9 @@
             <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
             <td> <%= dp.status %></td>
             <td><%= dp.status_message if dp.status_message %></td>
-            <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][0]].round(2) if @analysis.problem['algorithm']['objective_functions'][0] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][0]] %></td>
-            <% if @analysis.analysis_type == "sequential_search" || @analysis.analysis_type =~ /nsga/ || @analysis.analysis_type == "deoptimcal" || @analysis.analysis_type == "optimcal" %>
-                <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][1]].round(2) if @analysis.problem['algorithm']['objective_functions'][1] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][1]] %></td>
+            <% @objective_functions.each do |ov| %>
+                <td><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']] : "NA" %>  </td>
             <% end %>
-            <% if @analysis.analysis_type =~ /nsga_nrelcal4/ %>
-                <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][2]].round(2) if @analysis.problem['algorithm']['objective_functions'][2] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][2]] %></td>
-                <td> <%= dp.results[@analysis.problem['algorithm']['objective_functions'][3]].round(2) if @analysis.problem['algorithm']['objective_functions'][3] && dp.results && dp.results[@analysis.problem['algorithm']['objective_functions'][3]] %></td>
-            <% end %> 
             <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
             <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
             <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
