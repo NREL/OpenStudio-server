@@ -18,6 +18,19 @@ class AnalysesController < ApplicationController
   # GET /analyses/1.json
   def show
     @analysis = Analysis.find(params[:id])
+    
+    @objective_functions = []
+    if @analysis.output_variables
+      @analysis.output_variables.each do |ov|
+        if ov['objective_function'] 
+          @objective_functions << ov
+        end
+      end
+    end
+    
+    if @objective_functions.empty?
+      @objective_functions << {display_name: "Total Site EUI", name: "total_site_energy"}
+    end
 
     respond_to do |format|
       format.html # show.html.erb
