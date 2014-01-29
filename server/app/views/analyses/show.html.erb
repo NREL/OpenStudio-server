@@ -77,7 +77,7 @@
             <td> <%= dp.status %></td>
             <td><%= dp.status_message if dp.status_message %></td>
             <% @objective_functions.each do |ov| %>
-                <td><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']] : "NA" %>  </td>
+                <td><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']].round(2) : "NA" %>  </td>
             <% end %>
             <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
             <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
