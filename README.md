@@ -125,7 +125,7 @@ ruby create_vms.rb --aws
 - Update the Server version in ./server/lib/version.rb using semantic versioning.
 - Commit/push your code
 - Run the `rake release` in the root. 
-This will tag the version in git, push the tags, then push the code to ami-build.  Jenkins will take over the generation of the AMIs.
+  This will tag the version in git, push the tags, then push the code to ami-build.  Jenkins will take over the generation of the AMIs.
 
 
 ## Old Amazon Image Instructions
