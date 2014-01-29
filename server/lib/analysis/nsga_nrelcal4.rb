@@ -9,7 +9,8 @@ class Analysis::NsgaNrelcal4
         create_data_point_filename: "create_data_point.rb",
         output_variables: [            
             {
-                display_name: "Heating Natural Gas (MJ/m2)",
+                display_name: "Heating Natural Gas",
+                units: "MJ/m2",
                 name: "heating_natural_gas",
                 objective_function: true,
                 objective_function_target: 462.1635,
@@ -17,7 +18,8 @@ class Analysis::NsgaNrelcal4
                 index: 0
             },
             {
-                display_name: "Cooling Electricity (MJ/m2)",
+                display_name: "Cooling Electricity",
+                units: "MJ/m2",
                 name: "cooling_electricity",
                 objective_function: true,
                 objective_function_target: 84.16202,
@@ -25,7 +27,8 @@ class Analysis::NsgaNrelcal4
                 index: 1
             },
             {
-                display_name: "Interior Equipment Electricity (MJ/m2)",
+                display_name: "Interior Equipment Electricity",
+                units: "MJ/m2",
                 name: "interior_equipment_electricity",
                 objective_function: true,
                 objective_function_target: 121.9985,
@@ -33,7 +36,8 @@ class Analysis::NsgaNrelcal4
                 index: 2
             },
             {
-                display_name: "Fans Electricity (MJ/m2)",
+                display_name: "Fans Electricity",
+                units: "MJ/m2",
                 name: "fans_electricity",
                 objective_function: true,
                 objective_function_target: 87.92142,

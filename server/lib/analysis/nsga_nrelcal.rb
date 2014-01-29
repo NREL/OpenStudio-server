@@ -9,7 +9,8 @@ class Analysis::NsgaNrelcal
         create_data_point_filename: "create_data_point.rb",
         output_variables: [
             {
-                display_name: "Heating Natural Gas (MJ/m2)",
+                display_name: "Heating Natural Gas",
+                units: "MJ/m2",
                 name: "heating_natural_gas",
                 objective_function: true,
                 objective_function_target: 0.0,
@@ -17,7 +18,8 @@ class Analysis::NsgaNrelcal
                 index: 0
             },
             {
-                display_name: "Cooling Electricity (MJ/m2)",
+                display_name: "Cooling Electricity",
+                units: "MJ/m2",
                 name: "cooling_electricity",
                 objective_function: true,
                 objective_function_target: 0.0,
