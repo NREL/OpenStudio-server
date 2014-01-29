@@ -302,7 +302,8 @@ class AnalysesController < ApplicationController
             :results,
             :run_start_time,
             :run_end_time,
-            :openstudio_datapoint_file_name
+            :openstudio_datapoint_file_name,
+            :output_variables
         ]
 
         render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points)}
