@@ -9,7 +9,8 @@ class Analysis::NsgaNrel
         create_data_point_filename: "create_data_point.rb",
         output_variables: [
             {
-                display_name: "Total Site Energy (EUI)",
+                display_name: "Total Site Energy",
+                units: "EUI",
                 name: "total_energy",
                 objective_function: true,
                 objective_function_target: 0.0,
@@ -18,6 +19,7 @@ class Analysis::NsgaNrel
             },
             {
                 display_name: "Total Life Cycle Cost",
+                units: "USD",
                 name: "total_life_cycle_cost",
                 objective_function: true,
                 objective_function_target: 0.0,
