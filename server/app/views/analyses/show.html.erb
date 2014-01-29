@@ -60,14 +60,11 @@
         <th>Name</th>
         <th>Status</th>
         <th>Status Message</th>
-        <th>1st Obj Func</th>
-        <% if @analysis.analysis_type == "sequential_search" || @analysis.analysis_type =~ /nsga/ || @analysis.analysis_type == "deoptimcal" || @analysis.analysis_type == "optimcal" %>
-            <th>2nd Obj Func</th>
-        <% end %>
-        <% if @analysis.analysis_type =~ /nsga_nrelcal4/ %>
-	    <th>3rd Obj Func</th>
-	    <th>4th Obj Func</th>
-        <% end %>
+        <% @analysis.output_variables.each do |ov| %>
+          <% if ov["objective_function"] == true %>
+            <th>Obj Func <%= ov['display_name'] %> </th>
+          <% end %>  
+        <% end %>  
         <th>Start Time (UTC)</th>
         <th>End Time (UTC)</th>
         <th>Delta Time (s)</th>
