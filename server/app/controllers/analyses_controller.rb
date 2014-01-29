@@ -284,10 +284,11 @@ class AnalysesController < ApplicationController
 
     # Get the mappings of the variables that were used. Move this to the datapoint class
     @mappings = get_superset_of_variables(@analysis)
+    @plotvars = get_plot_variables(@analysis)
     @plot_data = get_plot_data(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: {:mappings => @mappings, :data => @plot_data} }
+      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data} }
     end
   end
 
@@ -361,6 +362,18 @@ class AnalysesController < ApplicationController
     Rails.logger.info mappings
 
     mappings
+  end
+
+  def get_plot_variables(analysis)
+    plotvars = []
+    ovs = @analysis.output_variables
+    ovs.each do |ov|
+      if ov['objective_function']
+        plotvars << ov['name']
+      end
+    end  
+    Rails.logger.info plotvars
+    plotvars
   end
 
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
