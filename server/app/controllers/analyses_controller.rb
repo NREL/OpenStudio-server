@@ -271,7 +271,7 @@ class AnalysesController < ApplicationController
     end
   end
   
-  def plot_xy2
+  def plot_radar
      @analysis = Analysis.find(params[:id])
   
       respond_to do |format|
