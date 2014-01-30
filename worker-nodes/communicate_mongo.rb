@@ -75,7 +75,7 @@ module CommunicateMongo
 
   def self.communicate_results(dp, os_data_point, os_directory)
     # create zip file
-    # TODO: remove openstudio here and put the work back on the run_openstudio script
+    # TODO: remove openstudio here
     zipFilePath = os_directory / OpenStudio::Path.new("data_point_" + dp.uuid + ".zip")
     zipFile = OpenStudio::ZipFile.new(zipFilePath, false)
     zipFile.addFile(os_directory / OpenStudio::Path.new("openstudio.log"), OpenStudio::Path.new("openstudio.log"))
@@ -132,7 +132,6 @@ module CommunicateMongo
       dp.results = eplus_json
     end
     dp.save! # redundant because next method calls save too.
-
   end
 
   def self.communicate_complete(dp)

@@ -29,7 +29,8 @@ class AnalysesController < ApplicationController
     end
     
     if @objective_functions.empty?
-      @objective_functions << {display_name: "Total Site EUI", name: "total_site_energy"}
+      @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_energy", 'units' => "EUI"}
+      @objective_functions << {'display_name' => "Total Life Cycle Cost", 'name' => "total_life_cycle_cost", 'units' => "USD"}
     end
 
     respond_to do |format|

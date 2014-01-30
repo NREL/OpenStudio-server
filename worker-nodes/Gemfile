@@ -1,0 +1,26 @@
+source 'http://rubygems.org'
+
+# Add any Gem dependencies into this list.  TODO: need to call all ruby calls with this bundle exec 
+
+# database modules
+gem 'mongoid', '~> 3.1.6'
+gem 'paperclip', '3.5.2' # do not upgrade because breaks the after_commit 
+gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
+gem 'delayed_job_mongoid'
+
+# R
+gem 'rserve-simpler'
+
+# net-*
+gem 'net-http-persistent'
+gem 'net-scp'
+gem 'net-ssh'
+
+# other 
+gem 'uuid'
+gem 'zip'
+gem 'libxml-ruby'
+
+# test
+gem 'ruby-prof'
+
