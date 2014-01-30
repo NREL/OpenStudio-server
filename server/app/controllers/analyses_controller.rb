@@ -20,10 +20,13 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
     
     @objective_functions = []
-    if @analysis.output_variables
-      @analysis.output_variables.each do |ov|
-        if ov['objective_function'] 
-          @objective_functions << ov
+    
+    if not @analysis.nil?    
+      if @analysis.output_variables
+        @analysis.output_variables.each do |ov|
+          if ov['objective_function'] 
+            @objective_functions << ov
+          end
         end
       end
     end
