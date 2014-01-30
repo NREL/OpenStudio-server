@@ -108,7 +108,8 @@ class Analysis::BatchRun
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
               } else {
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
-              }
+              }                           
+              print(paste("Run command",y))
               z <- system(y,intern=TRUE)
               j <- length(z)
               z

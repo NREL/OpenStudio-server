@@ -14,7 +14,6 @@ describe PreflightImage do
     new_var = Variable.new
     new_var.save!
     @analysis.variables << new_var 
-    puts new_var.inspect
     pfi = PreflightImage.add_from_disk(new_var.id, "histogram", "../files/r_plot_histogram.png")
     new_var.preflight_images << pfi unless new_var.preflight_images.include?(pfi)
     

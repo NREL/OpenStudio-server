@@ -1,12 +1,13 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.13'
+gem 'rails', '3.2.16'
 
 # data modules
 gem 'json'
 
 # database modules
 gem 'mongoid'
+gem 'paperclip', '3.5.2' # do not upgrade because breaks the after_commit 
 gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
 
 # R

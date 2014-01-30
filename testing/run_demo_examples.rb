@@ -6,7 +6,7 @@ require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
 HOSTNAME = "http://localhost:8080"
 
-#HOSTNAME = "http://ec2-67-202-41-219.compute-1.amazonaws.com"
+#HOSTNAME = "http://ec2-107-20-82-197.compute-1.amazonaws.com"
 
 # Initialize the ServerAPI
 options = {hostname: HOSTNAME}
@@ -41,44 +41,118 @@ run_options = {
 api.run_analysis(analysis_id, run_options)
 
 # ===== LHS Sample and Run =====
-formulation_file = "./ContinuousExample/medium_office.json"
-analysis_zip_file = "./ContinuousExample/medium_office.zip"
+# fast models (~10 secs) with pivots
+formulation_file = "./SimpleContinuousExample/analysis.json"
+analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
+
+# these models are good but take 80+ seconds to run
+#formulation_file = "./ContinuousExample/medium_office.json"
+#analysis_zip_file = "./ContinuousExample/medium_office.zip"
+
+options = {hostname: HOSTNAME}
+api = OpenStudio::Analysis::ServerApi.new(options)
+
+api.delete_all()
+
+project_options = {}
+project_id = api.new_project(project_options)
 
 analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
-    reset_uuids: true,
-    analysis_name: "LHS Sample and Run"
+    reset_uuids: true
+
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: false,
+    without_delay: true,
     analysis_type: "lhs",
-    allow_multiple_jobs: true
+    allow_multiple_jobs: false,
+    use_server_as_worker: false,
+    problem: {
+        random_seed: 1979,
+        algorithm: {
+            number_of_samples: 100,
+            #number_of_samples: 3,
+            sample_method: "all_variables"
+            #sample_method: "individual_variables"
+        }
+    }
 }
+
 api.run_analysis(analysis_id, run_options)
 
 run_options = {
     analysis_action: "start",
+    run_data_point_filename: "run_openstudio_workflow.rb",
     without_delay: false,
-    analysis_type: "batch_run",
     allow_multiple_jobs: true,
-    use_server_as_worker: false,
-    run_data_point_filename: "run_openstudio_workflow.rb"
+    analysis_type: "batch_run"
 }
 api.run_analysis(analysis_id, run_options)
 
-# ===== Sequential Search =====
-formulation_file = "./DiscreteExample/analysis.json"
-analysis_zip_file = "./DiscreteExample/analysis.zip"
+
+# === NSGA2 ==
+formulation_file = "./SimpleContinuousExample/analysis.json"
+analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
+
+options = {hostname: HOSTNAME}
+api = OpenStudio::Analysis::ServerApi.new(options)
+
+#api.delete_all()
+
+project_options = {}
+project_id = api.new_project(project_options)
 
 analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
-    reset_uuids: true,
-    analysis_name: "Sequential Search"
+    reset_uuids: true
+}
+analysis_id = api.new_analysis(project_id, analysis_options)
+
+#
+#  Possible NSGA2 algorithm options
+#
+#generations: 1,   Number of generations
+#tourSize: 2,      Size of tournament
+#cprob: 0.7,       Crossover probability
+#XoverDistIdx: 5,  Crossover distribution index, it can be any nonnegative real number
+#mprob: 0.5,       Mutation probability
+#MuDistIdx: 10,    Mutation distribution index, it can be any nonnegative real number
+
+run_options = {
+    analysis_action: "start",
+    without_delay: false,
+    allow_multiple_jobs: true,
+    analysis_type: "nsga_nrel",
+    problem: {
+        algorithm: {
+            generations: 25
+        }
+    }
+}
+api.run_analysis(analysis_id, run_options)
+
+# ===== Sequential Search =====
+formulation_file = "./SimpleContinuousExample/analysis.json"
+analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
+
+options = {hostname: HOSTNAME}
+api = OpenStudio::Analysis::ServerApi.new(options)
+
+
+#api.delete_all()
+
+project_options = {}
+project_id = api.new_project(project_options)
+
+analysis_options = {
+    formulation_file: formulation_file,
+    upload_file: analysis_zip_file,
+    reset_uuids: true
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -92,6 +166,7 @@ run_options = {
     problem: {
         random_seed: 1979,
         algorithm: {
+            number_of_samples: 4, # to discretize any continuous variables
             max_iterations: 100,
             objective_functions: [
                 "total_energy",
@@ -99,6 +174,5 @@ run_options = {
             ]
         }
     }
-
 }
 api.run_analysis(analysis_id, run_options)
