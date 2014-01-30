@@ -392,19 +392,17 @@ class AnalysesController < ApplicationController
     end
     dps.each do |dp|
       if dp['results']
+        plot_data = []
         ovs.each do |ov|
-          if ov['objective_function']
-            plot_data = []
+          if ov['objective_function']     
             dp_values = {}
             dp_values["axis"] = ov['name']
             dp_values["value"] = dp['results'][ov['name']]
             plot_data << dp_values
-            plot_data_radar << plot_data
+            
           end
         end
-
-     #dp_values["fans_electricity"] = dp['results']['fans_electricity'] if dp['results']['fans_electricity']
-
+      plot_data_radar << plot_data  
       end
     end
 
