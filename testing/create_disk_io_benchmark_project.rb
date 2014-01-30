@@ -67,6 +67,11 @@ if not (combinatorial_size == 2**n)
   raise "Expected problem to have combinatorial size of " + (2**n).to_s + ", but is " + 
         (combinatorial_size).to_s + "."
 end
+
+# make sure standard reporting measure is in there
+if project.getStandardReportWorkflowStep.empty?
+  project.insertStandardReportWorkflowStep
+end
   
 # set design of experiments algorithm, and create data points with .createIteration
 analysis = project.analysis

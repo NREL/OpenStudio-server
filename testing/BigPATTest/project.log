@@ -1,1 +1,2 @@
 [openstudio.runmanager.RunManager] <0> User requested to not initialize UI but left status GUI enabled. Disabling status GUI
+[openstudio.runmanager.RubyJobUtils] <1> Input file type is "Unknown" unable to add it.
