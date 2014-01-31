@@ -290,9 +290,10 @@ class AnalysesController < ApplicationController
     @mappings = get_superset_of_variables(@analysis)
     @plotvars = get_plot_variables(@analysis)
     @plot_data = get_plot_data(@analysis, @mappings)
+    @plot_data_radar = get_plot_data_radar(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data} }
+      format.json { render json: {:mappings => @mappings, :radardata => @plot_data_radar, :plotvars => @plotvars, :data => @plot_data} }
     end
   end
 
@@ -380,6 +381,38 @@ class AnalysesController < ApplicationController
     plotvars
   end
 
+  def get_plot_data_radar(analysis, mappings)
+    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
+    # and this is just an ugly mapping, sorry all.
+
+    ovs = @analysis.output_variables
+    plot_data_radar = []
+    if @analysis.analysis_type == "sequential_search"
+      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+      dps = dps.rotate(1) # put the starting point on top
+    else
+      dps = @analysis.data_points.all
+    end
+    dps.each do |dp|
+      if dp['results']
+        plot_data = []
+        ovs.each do |ov|
+          if ov['objective_function']     
+            dp_values = {}
+            dp_values["axis"] = ov['name']
+            dp_values["value"] = dp['results'][ov['name']]
+            plot_data << dp_values
+          end
+        end
+
+        plot_data_radar << plot_data  
+      end
+    end
+
+    plot_data_radar
+  end
+
+
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
   # a useful JSON for plotting (and exporting to CSV)
   def get_plot_data(analysis, mappings)
@@ -420,14 +453,14 @@ class AnalysesController < ApplicationController
 
         # outputs -- map these by hand right now because I don't want to parse the entire results into
         # the dp_values hash
-        #dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
+        dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
+        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
         #dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity'] if dp['results']['interior_lighting_electricity']
-        #dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
         #dp_values["iteration"] = dp['iteration'] if dp['iteration']
         #dp_values["heating_natural_gas"] = dp['results']['heating_natural_gas'] if dp['results']['heating_natural_gas']
         #dp_values["cooling_electricity"] = dp['results']['cooling_electricity'] if dp['results']['cooling_electricity']
         #dp_values["interior_equipment_electricity"] = dp['results']['interior_equipment_electricity'] if dp['results']['interior_equipment_electricity']
-        #dp_values["fans_electricity"] = dp['results']['fans_electricity'] if dp['results']['fans_electricity']
+     #dp_values["fans_electricity"] = dp['results']['fans_electricity'] if dp['results']['fans_electricity']
 
         plot_data << dp_values
       end
