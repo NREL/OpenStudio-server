@@ -1,5 +1,8 @@
-#todo: check if we are on vagrant or using the git repo and require correctly
-require "/data/worker-nodes/analysis_chauffeur"
+if File.exists?("/data/worker-nodes/analysis_chauffeur.rb")
+  require "/data/worker-nodes/analysis_chauffeur"
+else
+  require_relative "../../../../worker-nodes/analysis_chauffeur"
+end
 
 describe AnalysisChauffeur do
   before :all do
