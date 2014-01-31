@@ -25,7 +25,7 @@
 <h1><a id="dp_fields">Data Point Information</h1>
 <%= link_to 'View Full JSON', show_full_data_point_path(@data_point, :format => :json) %></br>
 <%= link_to 'View OS JSON', data_point_path(@data_point, :format => :json) %></br>
-<%= link_to_if(!@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name), "Download Zip File", download_data_point_path(@data_point)) %></br>
+<%= link_to_if(!@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name), "Download Data Point", download_data_point_path(@data_point)) %></br>
 
 <h1><a id="dp_fields">EnergyPlus HTML</h1>
 <%= @html.html_safe unless @html.nil? %>
