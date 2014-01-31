@@ -4,16 +4,24 @@ require 'bundler/setup'
 
 require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
-HOSTNAME = "http://localhost:8080"
+project_name = "./PATTestExport"
+if not ARGV[0].nil?
+  project_name = ARGV[0]
+end
 
-#HOSTNAME = "http://ec2-23-20-3-243.compute-1.amazonaws.com"
+# default is vagrant. for aws, pass in address like 'http://ec2-23-20-3-243.compute-1.amazonaws.com'
+# (available from AWS console).
+HOSTNAME = "http://localhost:8080"
+if not ARGV[1].nil?
+  HOSTNAME = ARGV[1]
+end
+
 WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
-STOP_AFTER_N=4 # set to nil if you want them all
+STOP_AFTER_N=nil # set to nil if you want them all
 # each may contain up to 50 data points
 
 # Project data
-project_name = "PATTestExport"
 formulation_file = "./" + project_name + "/analysis.json"
 analysis_zip_file = "./" + project_name + "/project.zip"
 datapoint_files = Dir.glob("./" + project_name + "/data_points_*.json").take(STOP_AFTER_N || 2147483647)
@@ -45,3 +53,5 @@ run_options = {
 api.run_analysis(analysis_id, run_options)
 
 #api.kill_analysis(analysis_id)
+
+# TODO: Wait for finished so can use outputs in test statements.

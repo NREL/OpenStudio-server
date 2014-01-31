@@ -1,6 +1,6 @@
 require 'openstudio'
 
-project_dir = File.dirname(__FILE__) + './PATTest'
+project_dir = File.dirname(__FILE__) + '../../testing/PATTest'
 
 # do we want to download detailed results
 getDetailedResults = true

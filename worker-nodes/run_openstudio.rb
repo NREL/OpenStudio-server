@@ -57,11 +57,9 @@ if (not options[:uuid]) || (options[:uuid] == "NA")
   exit
 end
 
-require 'analysis_chauffeur'
-ros = AnalysisChauffeur.new(options[:uuid])
-
-# let listening processes know that this data point is running
-ros.log_message "File #{__FILE__} started executing on #{options[:uuid]}", true
+if options[:runType]
+  runType = options[:runType].to_s
+end
 
 # get the directory as an openstudio path
 directory = OpenStudio::Path.new(options[:directory])
@@ -71,6 +69,17 @@ if directory.stem.to_s == String.new
   directory = directory.parent_path
 end
 logLevel = options[:logLevel].to_i
+
+require 'analysis_chauffeur'
+ros = nil
+if runType == "Local"
+  ros = AnalysisChauffeur.new(directory.to_s,"","","communicate_local")
+else
+  ros = AnalysisChauffeur.new(options[:uuid],"communicate_mongo")
+end
+
+# let listening processes know that this data point is running
+ros.log_message "File #{__FILE__} started executing on #{options[:uuid]}", true
 
 ros.log_message "Project directory is  #{project_path.to_s}", true
 ros.log_message "Run directory is #{directory.to_s}", true

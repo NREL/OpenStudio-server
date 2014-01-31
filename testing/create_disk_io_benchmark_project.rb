@@ -86,6 +86,13 @@ if not (num_data_points == 2**n)
   raise "Expected to create " + (2**n).to_s + " data points, but have " + num_data_points.to_s + "."
 end
 
+# add names
+i = 1
+analysis.dataPoints.each { |data_point|
+  data_point.setName("Data Point #{i}")
+  i += 1
+}
+
 # clear algorithm and save
 analysis.clearAlgorithm
 project.save
