@@ -38,6 +38,9 @@ rake db:mongoid:create_indexes
 # restart delayed jobs
 sudo service delayed_job start
 
+# restart rserve
+sudo service Rserve restart
+
 # Null out the logs
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/mongo.log
