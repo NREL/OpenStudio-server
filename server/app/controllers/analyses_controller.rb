@@ -399,10 +399,10 @@ class AnalysesController < ApplicationController
             dp_values["axis"] = ov['name']
             dp_values["value"] = dp['results'][ov['name']]
             plot_data << dp_values
-            
           end
         end
-      plot_data_radar << plot_data  
+
+        plot_data_radar << plot_data  
       end
     end
 
@@ -448,6 +448,15 @@ class AnalysesController < ApplicationController
           end
         end
 
+        # outputs -- map these by hand right now because I don't want to parse the entire results into
+        # the dp_values hash
+        dp_values["total_life_cycle_cost"] = dp['results']['total_life_cycle_cost']
+        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
+        #dp_values["interior_lighting_electricity"] = dp['results']['interior_lighting_electricity'] if dp['results']['interior_lighting_electricity']
+        #dp_values["iteration"] = dp['iteration'] if dp['iteration']
+        #dp_values["heating_natural_gas"] = dp['results']['heating_natural_gas'] if dp['results']['heating_natural_gas']
+        #dp_values["cooling_electricity"] = dp['results']['cooling_electricity'] if dp['results']['cooling_electricity']
+        #dp_values["interior_equipment_electricity"] = dp['results']['interior_equipment_electricity'] if dp['results']['interior_equipment_electricity']
      #dp_values["fans_electricity"] = dp['results']['fans_electricity'] if dp['results']['fans_electricity']
 
         plot_data << dp_values
