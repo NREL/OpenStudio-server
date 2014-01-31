@@ -7,26 +7,7 @@ class Analysis::NsgaNrel
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
-        output_variables: [
-            {
-                display_name: "Total Site Energy",
-                units: "EUI",
-                name: "total_energy",
-                objective_function: true,
-                objective_function_target: 0.0,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: "Total Life Cycle Cost",
-                units: "USD",
-                name: "total_life_cycle_cost",
-                objective_function: true,
-                objective_function_target: 0.0,
-                objective_function_index: 1,
-                index: 1
-            }
-        ],
+        output_variables: [],
         problem: {
             random_seed: 1979,
             algorithm: {
@@ -36,10 +17,7 @@ class Analysis::NsgaNrel
                 XoverDistIdx: 5,
                 MuDistIdx: 10,
                 mprob: 0.5,
-                objective_functions: [
-                    "total_energy",
-                    "total_life_cycle_cost"
-                ]
+                objective_functions: []
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
