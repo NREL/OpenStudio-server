@@ -17,12 +17,7 @@ class Analysis::NsgaNrelcal4
                 XoverDistIdx: 5,
                 MuDistIdx: 10,
                 mprob: 0.5,
-                objective_functions: [
-                    "heating_natural_gas",
-                    "cooling_electricity",
-                    "interior_equipment_electricity",
-                    "fans_electricity"
-                ]
+                objective_functions: []
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
