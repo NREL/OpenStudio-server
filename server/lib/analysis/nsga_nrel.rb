@@ -111,7 +111,19 @@ class Analysis::NsgaNrel
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
-
+    
+    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
+      raise "Must have at least two objective functions defined"
+    end    
+    
+    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
+      raise "Must have at least two output_variables"
+    end
+    
+    if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
+      raise "number of objective functions must equal"
+    end
+    
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
