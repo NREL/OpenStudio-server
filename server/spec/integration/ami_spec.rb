@@ -45,7 +45,7 @@ describe "AmiIntegration" do
       test_file = File.expand_path("../testing/run_demo_examples.rb")
       puts test_file
       if File.exists?(test_file)
-        call_cmd = "bundle exec ruby #{test_file} 'http://#{@aws.os_aws.server.data[:dns]}'" 
+        call_cmd = "cd ../testing && bundle exec ruby #{test_file} 'http://#{@aws.os_aws.server.data[:dns]}'" 
         puts "Calling: #{call_cmd}"
         
         res = system(call_cmd)
