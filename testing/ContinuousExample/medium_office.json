@@ -22,9 +22,7 @@
               "machine_name": "apply_the_measure_to_a_specific_space_type_or_to_the_entire_model.",
               "name": "space_type",
               "value": "*Entire Building*",
-              "uuid_DELETEME": "2704fdb0-336d-0131-37cc-14109fdf0b37",
               "uuid": "27051eb0-336d-0131-37cd-14109fdf0b37",
-              "version_uuid_DELETEME": "27054b40-336d-0131-37ce-14109fdf0b37",
               "version_uuid": "27056ec0-336d-0131-37cf-14109fdf0b37"
             },
             {
@@ -32,9 +30,7 @@
               "machine_name": "increase_in_material_and_installation_cost_for_lighting_per_floor_area_(%).",
               "name": "material_and_installation_cost",
               "value": 0.0,
-              "uuid_DELETEME": "27077550-336d-0131-37d0-14109fdf0b37",
               "uuid": "27079350-336d-0131-37d1-14109fdf0b37",
-              "version_uuid_DELETEME": "2707b230-336d-0131-37d2-14109fdf0b37",
               "version_uuid": "2707d190-336d-0131-37d3-14109fdf0b37"
             },
             {
@@ -42,9 +38,7 @@
               "machine_name": "increase_in_demolition_costs_for_lighting_per_floor_area_(%).",
               "name": "demolition_cost",
               "value": 0.0,
-              "uuid_DELETEME": "2707f170-336d-0131-37d4-14109fdf0b37",
               "uuid": "27080e50-336d-0131-37d5-14109fdf0b37",
-              "version_uuid_DELETEME": "27082b60-336d-0131-37d6-14109fdf0b37",
               "version_uuid": "27084640-336d-0131-37d7-14109fdf0b37"
             },
             {
@@ -52,9 +46,7 @@
               "machine_name": "years_until_costs_start_(whole_years).",
               "name": "years_until_costs_start",
               "value": 0,
-              "uuid_DELETEME": "27086360-336d-0131-37d8-14109fdf0b37",
               "uuid": "27088c70-336d-0131-37d9-14109fdf0b37",
-              "version_uuid_DELETEME": "2708a6b0-336d-0131-37da-14109fdf0b37",
               "version_uuid": "2708c1c0-336d-0131-37db-14109fdf0b37"
             },
             {
@@ -62,9 +54,7 @@
               "machine_name": "demolition_costs_occur_during_initial_construction?",
               "name": "demo_cost_initial_const",
               "value": true,
-              "uuid_DELETEME": "2708e2e0-336d-0131-37dc-14109fdf0b37",
               "uuid": "2708ffa0-336d-0131-37dd-14109fdf0b37",
-              "version_uuid_DELETEME": "27091f70-336d-0131-37de-14109fdf0b37",
               "version_uuid": "27093ed0-336d-0131-37df-14109fdf0b37"
             },
             {
@@ -72,9 +62,7 @@
               "machine_name": "expected_life_(whole_years).",
               "name": "expected_life",
               "value": 15,
-              "uuid_DELETEME": "27096770-336d-0131-37e0-14109fdf0b37",
               "uuid": "27098ac0-336d-0131-37e1-14109fdf0b37",
-              "version_uuid_DELETEME": "2709a680-336d-0131-37e2-14109fdf0b37",
               "version_uuid": "2709c950-336d-0131-37e3-14109fdf0b37"
             },
             {
@@ -82,9 +70,7 @@
               "machine_name": "increase_o_&_m_costs_for_lighting_per_floor_area_(%).",
               "name": "om_cost",
               "value": 0.0,
-              "uuid_DELETEME": "2709e860-336d-0131-37e4-14109fdf0b37",
               "uuid": "270a0340-336d-0131-37e5-14109fdf0b37",
-              "version_uuid_DELETEME": "270a1c90-336d-0131-37e6-14109fdf0b37",
               "version_uuid": "270a4290-336d-0131-37e7-14109fdf0b37"
             },
             {
@@ -92,9 +78,7 @@
               "machine_name": "o_&_m_frequency_(whole_years).",
               "name": "om_frequency",
               "value": 1,
-              "uuid_DELETEME": "270a63f0-336d-0131-37e8-14109fdf0b37",
               "uuid": "270a8050-336d-0131-37e9-14109fdf0b37",
-              "version_uuid_DELETEME": "270a9f30-336d-0131-37ea-14109fdf0b37",
               "version_uuid": "270ac6c0-336d-0131-37eb-14109fdf0b37"
             }
           ],
@@ -165,9 +149,7 @@
               "machine_name": "apply_the_measure_to_a_specific_space_type_or_to_the_entire_model.",
               "name": "space_type",
               "value": "*Entire Building*",
-              "uuid_DELETEME": "270b9240-336d-0131-37f2-14109fdf0b37",
               "uuid": "270baed0-336d-0131-37f3-14109fdf0b37",
-              "version_uuid_DELETEME": "270bcd10-336d-0131-37f4-14109fdf0b37",
               "version_uuid": "270be610-336d-0131-37f5-14109fdf0b37"
             },
             {
@@ -175,9 +157,7 @@
               "machine_name": "increase_in_material_and_installation_costs_for_building_per_affected_floor_area_($/ft^2).",
               "name": "material_and_installation_cost",
               "value": 0.0,
-              "uuid_DELETEME": "270c0990-336d-0131-37f6-14109fdf0b37",
               "uuid": "270c21c0-336d-0131-37f7-14109fdf0b37",
-              "version_uuid_DELETEME": "270c3b20-336d-0131-37f8-14109fdf0b37",
               "version_uuid": "270c55a0-336d-0131-37f9-14109fdf0b37"
             },
             {
@@ -185,9 +165,7 @@
               "machine_name": "o_&_m_costs_for_construction_per_affected_floor_area_($/ft^2).",
               "name": "om_cost",
               "value": 0.0,
-              "uuid_DELETEME": "270c7270-336d-0131-37fa-14109fdf0b37",
               "uuid": "270c8ab0-336d-0131-37fb-14109fdf0b37",
-              "version_uuid_DELETEME": "270ca250-336d-0131-37fc-14109fdf0b37",
               "version_uuid": "270cd260-336d-0131-37fd-14109fdf0b37"
             },
             {
@@ -195,9 +173,7 @@
               "machine_name": "o_&_m_frequency_(whole_years).",
               "name": "om_frequency",
               "value": 1,
-              "uuid_DELETEME": "270cf350-336d-0131-37fe-14109fdf0b37",
               "uuid": "270d0ff0-336d-0131-37ff-14109fdf0b37",
-              "version_uuid_DELETEME": "270d32f0-336d-0131-3800-14109fdf0b37",
               "version_uuid": "270d4e70-336d-0131-3801-14109fdf0b37"
             }
           ],
@@ -332,9 +308,7 @@
               "machine_name": "sill_height_(in).",
               "name": "sillHeight",
               "value": 30.0,
-              "uuid_DELETEME": "270ef2a0-336d-0131-380e-14109fdf0b37",
               "uuid": "270f0fc0-336d-0131-380f-14109fdf0b37",
-              "version_uuid_DELETEME": "270f2b50-336d-0131-3810-14109fdf0b37",
               "version_uuid": "270f4880-336d-0131-3811-14109fdf0b37"
             },
             {
@@ -342,9 +316,7 @@
               "machine_name": "cardinal_direction.",
               "name": "facade",
               "value": "South",
-              "uuid_DELETEME": "270f66e0-336d-0131-3812-14109fdf0b37",
               "uuid": "270f8130-336d-0131-3813-14109fdf0b37",
-              "version_uuid_DELETEME": "270f9bc0-336d-0131-3814-14109fdf0b37",
               "version_uuid": "270fb730-336d-0131-3815-14109fdf0b37"
             }
           ],
@@ -415,9 +387,7 @@
               "machine_name": "sill_height_(in).",
               "name": "sillHeight",
               "value": 30.0,
-              "uuid_DELETEME": "27109580-336d-0131-381c-14109fdf0b37",
               "uuid": "2710b350-336d-0131-381d-14109fdf0b37",
-              "version_uuid_DELETEME": "2710d010-336d-0131-381e-14109fdf0b37",
               "version_uuid": "2710eee0-336d-0131-381f-14109fdf0b37"
             },
             {
@@ -425,9 +395,7 @@
               "machine_name": "cardinal_direction.",
               "name": "facade",
               "value": "West",
-              "uuid_DELETEME": "27111360-336d-0131-3820-14109fdf0b37",
               "uuid": "27113c30-336d-0131-3821-14109fdf0b37",
-              "version_uuid_DELETEME": "271165b0-336d-0131-3822-14109fdf0b37",
               "version_uuid": "27118d10-336d-0131-3823-14109fdf0b37"
             }
           ],

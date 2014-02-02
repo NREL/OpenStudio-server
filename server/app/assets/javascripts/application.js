@@ -19,6 +19,7 @@
 //= require bootstrap_modal
 //= require mustache
 //= require d3.v3.min
+//= require radarchart
 
 //= require underscore
 //= require backbone

@@ -3,15 +3,15 @@
 class AnalysisChauffeur
   attr_accessor :communicate_object
 
-  def initialize(uuid_or_path, library_path="/mnt/openstudio", communicate_method="communicate_mongo")
+  def initialize(uuid_or_path, library_path="/mnt/openstudio", rails_model_path="/mnt/openstudio/rails-models", communicate_method="communicate_mongo")
     if communicate_method == "communicate_mongo"
       require "#{library_path}/#{communicate_method}.rb"
 
       require 'mongoid'
       require 'mongoid_paperclip'
       require 'delayed_job_mongoid'
-      Dir["#{library_path}/rails-models/*.rb"].each { |f| require f }
-      Mongoid.load!("#{library_path}/rails-models/mongoid.yml", :development)
+      Dir["#{rails_model_path}/*.rb"].each { |f| require f }
+      Mongoid.load!("#{rails_model_path}/mongoid.yml", :development)
 
       @communicate_object = get_datapoint(uuid_or_path)
     else
@@ -21,7 +21,7 @@ class AnalysisChauffeur
     @communicate_module = communicate_method.camelcase(:upper).constantize
     @time = Time.now # make this a module method
   end
-
+  
   def communicate_started
     #communicate_method.camelize.constantize
     @communicate_module.communicate_started(@communicate_object)
