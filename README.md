@@ -32,22 +32,27 @@ vagrant plugin install vagrant-omnibus
 vagrant plugin install vagrant-aws
 ```
 
-- Start VirtualBox
+- Start VirtualBox (Windows only)
 
-- Start the VM and let it provision:  
+- **NREL ONLY** Set environment variables or bypass SSL proxy
+Either login to the SSL Developer VPN or set the environment variables below.
   **Windows**  
 ```bat
 cd \path\to\Vagrantfile
 rem for each cmd window set the environment variable (or set globally (for NREL only)
 set OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
-vagrant up
 
 ```
   **Mac / Linux**  
 ```sh
 cd /path/to/Vagrantfile
 # for each cmd window set the environment variable (or set globally (for NREL only)
-OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh vagrant up
+OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
+```
+
+- Start the VM and let it provision:  
+```sh
+vagrant up
 ```
   Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
 
@@ -62,7 +67,7 @@ vagrant ssh
   
   (Or use [PuTTy](http://stackoverflow.com/questions/9885108/ssh-to-vagrant-box-in-windows) on Windows.)
 
-  - Add http://rubygems.org to gem sources
+- Add http://rubygems.org to gem sources
   
 ```sh
 sudo -i
@@ -70,7 +75,7 @@ gem sources -r https://rubygems.org/
 gem sources -a http://rubygems.org/
 ```
 
-  - Exit the VM and then reprovision the VM
+- Exit the VM and then reprovision the VM
   
 ```sh
 vagrant provision
@@ -82,11 +87,15 @@ vagrant provision
 
 ## Deploying to Amazon EC2
 
-- Install the Vagrant AWS plug-in
+### Development/Test AMIs
+
+- Install the Vagrant AWS plug-in 
 
 ```sh
 vagrant plugin install vagrant-aws
 ```
+
+- **NREL ONLY** Login to the SSL Developer VPN
 
 - Install Vagrant Omnibus plug-in to automatically install chef on the destination system
 
@@ -103,13 +112,24 @@ keypair_name: key_pair_name
 private_key_path: /Users/<user>/.ssh/amazon.pem
 ```
 
-- Launch Vagrant using the
+- Run the create_vms.rb script
 
-```sh
-vagrant up --provider=aws
+```
+cd vagrant
+ruby create_vms.rb --aws
 ```
 
-Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue. There is a known issue with the dependency order of Rails and Passenger.
+### Official AMI Generation
+
+- Push all code to master
+- Update the Server version in ./server/lib/version.rb using semantic versioning.
+- Commit/push your code
+- Run the `rake release` in the root. 
+  This will tag the version in git, push the tags, then push the code to ami-build.  Jenkins will take over the generation of the AMIs.
+
+
+## Old Amazon Image Instructions
+
 
 - Log into the new system and do some cleanup before creating the AMI
 

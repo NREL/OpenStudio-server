@@ -316,9 +316,14 @@ begin
         if result_json[variable['name'].to_sym]
           #objective_functions[variable['name']] = result_json[variable['name'].to_sym]
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = result_json[variable['name'].to_sym]
+          if variable['objective_function_target']
+            ros.log_message "Found objective function target for #{variable['name']}", true
+            objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = variable['objective_function_target'].to_f
+          end
         else
           #objective_functions[variable['name']] = nil
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
         end
       end
     end

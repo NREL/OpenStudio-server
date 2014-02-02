@@ -7,36 +7,7 @@ class Analysis::NsgaNrelcal4
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
-        output_variables: [
-            {
-                display_name: "Heating Natural Gas (MJ/m2)",
-                name: "heating_natural_gas",
-                objective_function: true,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: "Cooling Electricity (MJ/m2)",
-                name: "cooling_electricity",
-                objective_function: true,
-                objective_function_index: 1,
-                index: 1
-            },
-            {
-                display_name: "Interior Equipment Electricity (MJ/m2)",
-                name: "interior_equipment_electricity",
-                objective_function: true,
-                objective_function_index: 2,
-                index: 2
-            },
-            {
-                display_name: "Fans Electricity (MJ/m2)",
-                name: "fans_electricity",
-                objective_function: true,
-                objective_function_index: 3,
-                index: 3
-            }
-        ],
+        output_variables: [],
         problem: {
             random_seed: 1979,
             algorithm: {
@@ -46,12 +17,7 @@ class Analysis::NsgaNrelcal4
                 XoverDistIdx: 5,
                 MuDistIdx: 10,
                 mprob: 0.5,
-                objective_functions: [
-                    "heating_natural_gas",
-                    "cooling_electricity",
-                    "interior_equipment_electricity",
-                    "fans_electricity"
-                ]
+                objective_functions: []
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -124,6 +90,18 @@ class Analysis::NsgaNrelcal4
       raise "Must have number of samples to discretize the parameter space"
     end
 
+    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
+      raise "Must have at least two objective functions defined"
+    end    
+    
+    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
+      raise "Must have at least two output_variables"
+    end
+    
+    if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
+      raise "number of objective functions must equal"
+    end
+
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
@@ -176,18 +154,21 @@ class Analysis::NsgaNrelcal4
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
+            
+            objDim <- length(objfun)
+            print(paste("objDim:",objDim))
+            clusterExport(cl,"objDim")          
                
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
             }          
             print(vars)      
             print(vartypes)
-  
-            
+
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -233,14 +214,26 @@ class Analysis::NsgaNrelcal4
 
               # read in the results from the objective function file
               # TODO: verify that the file exists
-              # TODO: determine how to handle if the objective function value = nil/null    
+              # TODO: determine how to handle if the objective function value = nil/null 
+              #       Right now it sets everything to 0.0
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
-              obj[1] <- abs(as.numeric(json$objective_function_1) - 462.1635)
-              obj[2] <- abs(as.numeric(json$objective_function_2) - 84.16202)
-              obj[3] <- abs(as.numeric(json$objective_function_3) - 121.9985)
-              obj[4] <- abs(as.numeric(json$objective_function_4) - 87.92142)
+              for (i in 1:objDim){
+                objfuntemp <- paste("objective_function_",i,sep="")
+                if (json[objfuntemp] != "nil"){
+                  objtemp <- as.numeric(json[objfuntemp])
+                } else {
+                  objtemp <- 0.0
+                }
+                objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                if (json[objfuntargtemp] != "nil"){
+                  objtemp2 <- as.numeric(json[objfuntargtemp])
+                } else {
+                  objtemp2 <- 0.0
+                }
+                obj[i] <- abs(objtemp - objtemp2)
+              }
               print(paste("Objective function results are:",obj))   
               return(obj)
             }
@@ -265,7 +258,7 @@ class Analysis::NsgaNrelcal4
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=4, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
+            results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }

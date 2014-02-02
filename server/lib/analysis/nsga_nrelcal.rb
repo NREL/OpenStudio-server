@@ -9,16 +9,20 @@ class Analysis::NsgaNrelcal
         create_data_point_filename: "create_data_point.rb",
         output_variables: [
             {
-                display_name: "Heating Natural Gas (MJ/m2)",
+                display_name: "Heating Natural Gas",
+                units: "MJ/m2",
                 name: "heating_natural_gas",
                 objective_function: true,
+                objective_function_target: 0.0,
                 objective_function_index: 0,
                 index: 0
             },
             {
-                display_name: "Cooling Electricity (MJ/m2)",
+                display_name: "Cooling Electricity",
+                units: "MJ/m2",
                 name: "cooling_electricity",
                 objective_function: true,
+                objective_function_target: 0.0,
                 objective_function_index: 1,
                 index: 1
             }
@@ -107,6 +111,18 @@ class Analysis::NsgaNrelcal
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
+    
+    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
+      raise "Must have at least two objective functions defined"
+    end    
+    
+    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
+      raise "Must have at least two output_variables"
+    end
+    
+    if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
+      raise "number of objective functions must equal"
+    end
 
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
@@ -160,10 +176,14 @@ class Analysis::NsgaNrelcal
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
+            
+            objDim <- length(objfun)
+            print(paste("objDim:",objDim))
+            clusterExport(cl,"objDim")          
                
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
@@ -217,12 +237,26 @@ class Analysis::NsgaNrelcal
 
               # read in the results from the objective function file
               # TODO: verify that the file exists
-              # TODO: determine how to handle if the objective function value = nil/null    
+              # TODO: determine how to handle if the objective function value = nil/null 
+              #       Right now it sets everything to 0.0
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
-              obj[1] <- abs(as.numeric(json$objective_function_1) - 462.1635)
-              obj[2] <- abs(as.numeric(json$objective_function_2) - 84.16202)
+              for (i in 1:objDim){
+                objfuntemp <- paste("objective_function_",i,sep="")
+                if (json[objfuntemp] != "nil"){
+                  objtemp <- as.numeric(json[objfuntemp])
+                } else {
+                  objtemp <- 0.0
+                }
+                objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                if (json[objfuntargtemp] != "nil"){
+                  objtemp2 <- as.numeric(json[objfuntargtemp])
+                } else {
+                  objtemp2 <- 0.0
+                }
+                obj[i] <- abs(objtemp - objtemp2)
+              }
               print(paste("Objective function results are:",obj))   
               return(obj)
             }
@@ -247,7 +281,7 @@ class Analysis::NsgaNrelcal
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
+            results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
