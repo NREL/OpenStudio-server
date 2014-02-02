@@ -60,8 +60,9 @@ task :release do
 end
 
 RSpec::Core::RakeTask.new("spec") do |spec|
-  spec.rspec_opts = %w(--format progress --format CI::Reporter::RSpec)
-  spec.pattern = "server/spec/**/*_spec.rb"
+  pwd = Dir.pwd 
+  #Dir.chdir("./server")
+  #`bundle exec rspec`
 end
 
 task :default => :spec

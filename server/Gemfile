@@ -43,7 +43,12 @@ group :test do
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
-  gem "ci_reporter", "~> 1.9.0"
+  gem 'ci_reporter', '~> 1.9.0'
+
+  # these two openstudio gems are needed for starting up the cluster
+  # and running the analysis in the integration tests
+  gem 'openstudio-aws'
+  gem 'openstudio-analysis'
 end
 
 # job queuing
@@ -51,6 +56,7 @@ gem 'delayed_job_mongoid'
 gem 'daemons'
 gem 'childprocess'
 
+# http(s) requests
 gem 'faraday'
 
 # worker node gems (because server can run as worker)
