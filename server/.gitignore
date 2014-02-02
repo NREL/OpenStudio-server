@@ -19,5 +19,7 @@
 # Ignore all public assets
 /public/assets/*
 
-# testing results
+# testing artifacts
 /spec/reports
+/*.pem
+/*.json

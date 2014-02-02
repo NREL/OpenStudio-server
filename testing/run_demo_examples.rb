@@ -4,12 +4,12 @@ require 'bundler/setup'
 
 require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
-HOSTNAME = "http://localhost:8080"
+hostname = ARGV[0] || "http://localhost:8080"
 
 #HOSTNAME = "http://ec2-107-20-82-197.compute-1.amazonaws.com"
 
 # Initialize the ServerAPI
-options = {hostname: HOSTNAME}
+options = {hostname: hostname}
 api = OpenStudio::Analysis::ServerApi.new(options)
 
 api.delete_all()
@@ -49,10 +49,8 @@ analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 #formulation_file = "./ContinuousExample/medium_office.json"
 #analysis_zip_file = "./ContinuousExample/medium_office.zip"
 
-options = {hostname: HOSTNAME}
+options = {hostname: hostname}
 api = OpenStudio::Analysis::ServerApi.new(options)
-
-api.delete_all()
 
 project_options = {}
 project_id = api.new_project(project_options)
@@ -98,7 +96,7 @@ api.run_analysis(analysis_id, run_options)
 formulation_file = "./SimpleContinuousExample/analysis.json"
 analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 
-options = {hostname: HOSTNAME}
+options = {hostname: hostname}
 api = OpenStudio::Analysis::ServerApi.new(options)
 
 #api.delete_all()
@@ -140,7 +138,7 @@ api.run_analysis(analysis_id, run_options)
 formulation_file = "./SimpleContinuousExample/analysis.json"
 analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 
-options = {hostname: HOSTNAME}
+options = {hostname: hostname}
 api = OpenStudio::Analysis::ServerApi.new(options)
 
 
