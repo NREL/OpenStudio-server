@@ -380,7 +380,8 @@ def process(element, &block)
               i.public = true
               element[:ami_id] = i.image_id
               i.add_tag("autobuilt")
-              i.add_tag("sucessfully_created", :value => true)
+              i.add_tag("created", :value => true)
+              i.add_tag("tested", :value => false)
               i.add_tag("created_on", :value => Time.now)
               i.add_tag("openstudio_server_version", :value => @os_server_version)
               i.add_tag("openstudio_version", :value => @os_version)
