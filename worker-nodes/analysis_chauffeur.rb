@@ -1,8 +1,6 @@
-require 'rubygems' if RUBY_VERSION <= '1.8.7'
-require 'active_support/core_ext'
-
 # Abstract class to communicate the state of the analysis. Currently only the
 # Mongo communicator has been implemented/tested
+
 class AnalysisChauffeur
   attr_accessor :communicate_object
 
@@ -16,6 +14,9 @@ class AnalysisChauffeur
       Dir["#{rails_model_path}/*.rb"].each { |f| require f }
       Mongoid.load!("#{rails_model_path}/mongoid.yml", :development)
     elsif communicate_method == "communicate_local"
+      require 'rubygems' if RUBY_VERSION <= '1.8.7'
+      require 'active_support/core_ext'
+      
       if library_path.empty?
         # TODO: Make this the default and make communicate_mongo the first option after uuid_or_path
         # (Too high risk to do right now.)
