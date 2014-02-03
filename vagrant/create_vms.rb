@@ -343,7 +343,7 @@ def process(element, &block)
 
     if @options[:provider] == :aws
       # Reboot the box if on Amazon because of kernel updates
-      run_vagrant_reload(element) # todo: can i remove this?
+      #run_vagrant_reload(element) # todo: can i remove this?
 
       # finish up AMI cleanup 
       begin

@@ -7,7 +7,7 @@ include_recipe "rbenv"
 
 # execute bundle install in directory
 execute 'bundle install' do
-  cwd'/data/worker-nodes'
+  cwd '/data/worker-nodes'
 end
 
 # rehash rbenv

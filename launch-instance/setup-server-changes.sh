@@ -3,6 +3,11 @@
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
 echo StrictHostKeyChecking no > /home/ubuntu/.ssh/config
 sudo service ssh restart
+
+#reset permissions on files
+sudo chown -R ubuntu.www-data /var/www/rails/openstudio 
+sudo chmod -R g+w /var/www/rails/openstudio/tmp
+
 cd /var/www/rails/openstudio
 rake db:purge
 rake db:mongoid:create_indexes
