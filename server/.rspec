@@ -1,1 +1,2 @@
 --color
+--pattern "spec/models/**/*_spec.rb,spec/lib/**/*_spec.rb"
