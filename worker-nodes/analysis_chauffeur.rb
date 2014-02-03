@@ -1,4 +1,5 @@
-require 'openstudio'
+require 'rubygems' if RUBY_VERSION <= '1.8.7'
+require 'active_support/core_ext'
 
 # Abstract class to communicate the state of the analysis. Currently only the
 # Mongo communicator has been implemented/tested
@@ -27,44 +28,44 @@ class AnalysisChauffeur
 
     # @communicate_model = communicate_method.camelcase(:upper).constantize
     # neither camelcase nor constantize work locally - looks like those are rails-isms
-    @communicate_module = OpenStudio::toUpperCamelCase(communicate_method)
+    @communicate_module = communicate_method.camelcase(:upper).constantize
     @time = Time.now # make this a module method
     
-    @communicate_object = eval(@communicate_module + ".get_datapoint(uuid_or_path)")
+    @communicate_object = @communicate_module.get_datapoint(uuid_or_path)
   end
   
   def communicate_started
     #communicate_method.camelize.constantize
-    eval(@communicate_module + ".communicate_started(@communicate_object)")
+    @communicate_module.communicate_started(@communicate_object)
   end
 
   def log_message(log_message, delta=false)
-    eval(@communicate_module + ".communicate_log_message(@communicate_object, log_message, delta, @time)")
+    @communicate_module.communicate_log_message(@communicate_object, log_message, delta, @time)
     @time = Time.now
   end
 
   def get_problem(format="json")
-    eval(@communicate_module + ".get_problem(@communicate_object, format)")
+    @communicate_module.get_problem(@communicate_object, format)
   end
 
   def communicate_results(os_data_point, os_directory)
-    eval(@communicate_module + ".communicate_results(@communicate_object, os_data_point, os_directory)")
+    @communicate_module.communicate_results(@communicate_object, os_data_point, os_directory)
   end
 
   def communicate_results_json(eplus_json, analysis_dir)
-    eval(@communicate_module + ".communicate_results_json(@communicate_object, eplus_json, analysis_dir)")
+    @communicate_module.communicate_results_json(@communicate_object, eplus_json, analysis_dir)
   end
 
   def communicate_complete
-    eval(@communicate_module + ".communicate_complete(@communicate_object)")
+    @communicate_module.communicate_complete(@communicate_object)
   end
 
   def communicate_failure
-    eval(@communicate_module + ".communicate_failure(@communicate_object)")
+    @communicate_module.communicate_failure(@communicate_object)
   end
 
   def reload
-    eval(@communicate_module + ".reload(@communicate_object)")
+    @communicate_module.reload(@communicate_object)
   end
 
 end
