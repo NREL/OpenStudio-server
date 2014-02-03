@@ -1,6 +1,6 @@
 require 'openstudio'
 
-project_dir = File.dirname(__FILE__) + './PATTest'
+project_dir = File.dirname(__FILE__) + '../../testing/PATTest'
 
 # do we want to download detailed results
 getDetailedResults = true
@@ -13,10 +13,38 @@ if not ARGV[0].nil?
   project_dir = ARGV[0]
 end
 
+copy_to_dir = nil
+if not ARGV[1].nil?
+  copy_to_dir = ARGV[1]
+end
+
+# number of points to run
+n = nil
+if not ARGV[2].nil?
+  n = ARGV[2].to_i
+end
+
 # open the project. the project log should pick up everything.
 options = OpenStudio::AnalysisDriver::SimpleProjectOptions.new
 options.setLogLevel(-2) # debug
-project = OpenStudio::AnalysisDriver::SimpleProject::open(OpenStudio::Path.new(project_dir), options).get
+project = OpenStudio::AnalysisDriver::SimpleProject::open(project_dir,options).get
+
+if not copy_to_dir.nil?
+  # save project as copy_to_dir, run there instead
+  if File.exists?(copy_to_dir)
+    OpenStudio::removeDirectory(copy_to_dir)
+  end
+  project = OpenStudio::AnalysisDriver::saveAs(project,copy_to_dir).get
+  project_dir = copy_to_dir
+end
+
+# de-select some data points
+if not n.nil?
+  data_points = project.analysis.dataPoints
+  for i in n..(data_points.size - 1)
+    data_points[i].setSelected(false)
+  end
+end
 
 # DLM: this causes script to fail if client OS version > worker OS version
 project.updateModels

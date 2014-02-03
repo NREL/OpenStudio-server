@@ -1,3 +1,6 @@
+require 'rubygems' if RUBY_VERSION <= '1.8.7'
+require 'active_support/core_ext'
+
 # Abstract class to communicate the state of the analysis. Currently only the
 # Mongo communicator has been implemented/tested
 class AnalysisChauffeur
@@ -12,14 +15,23 @@ class AnalysisChauffeur
       require 'delayed_job_mongoid'
       Dir["#{rails_model_path}/*.rb"].each { |f| require f }
       Mongoid.load!("#{rails_model_path}/mongoid.yml", :development)
-
-      @communicate_object = get_datapoint(uuid_or_path)
+    elsif communicate_method == "communicate_local"
+      if library_path.empty?
+        # TODO: Make this the default and make communicate_mongo the first option after uuid_or_path
+        # (Too high risk to do right now.)
+        library_path = File.dirname(__FILE__) 
+      end
+      require "#{library_path}/#{communicate_method}"      
     else
       raise "No Communicate Module found for #{communicate_method} in #{__FILE__}"
     end
 
+    # @communicate_model = communicate_method.camelcase(:upper).constantize
+    # neither camelcase nor constantize work locally - looks like those are rails-isms
     @communicate_module = communicate_method.camelcase(:upper).constantize
     @time = Time.now # make this a module method
+    
+    @communicate_object = @communicate_module.get_datapoint(uuid_or_path)
   end
   
   def communicate_started
@@ -54,13 +66,6 @@ class AnalysisChauffeur
 
   def reload
     @communicate_module.reload(@communicate_object)
-  end
-
-  private
-
-  def get_datapoint(id)
-    # TODO : make this a conditional on when to create one vs when to error out.
-    @communicate_object = DataPoint.find_or_create_by(uuid: id)
   end
 
 end
