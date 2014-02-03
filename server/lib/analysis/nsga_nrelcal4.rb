@@ -7,44 +7,7 @@ class Analysis::NsgaNrelcal4
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
-        output_variables: [            
-            {
-                display_name: "Heating Natural Gas",
-                units: "MJ/m2",
-                name: "heating_natural_gas",
-                objective_function: true,
-                objective_function_target: 462.1635,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: "Cooling Electricity",
-                units: "MJ/m2",
-                name: "cooling_electricity",
-                objective_function: true,
-                objective_function_target: 84.16202,
-                objective_function_index: 1,
-                index: 1
-            },
-            {
-                display_name: "Interior Equipment Electricity",
-                units: "MJ/m2",
-                name: "interior_equipment_electricity",
-                objective_function: true,
-                objective_function_target: 121.9985,
-                objective_function_index: 2,
-                index: 2
-            },
-            {
-                display_name: "Fans Electricity",
-                units: "MJ/m2",
-                name: "fans_electricity",
-                objective_function: true,
-                objective_function_target: 87.92142,
-                objective_function_index: 3,
-                index: 3
-            }
-        ],
+        output_variables: [],
         problem: {
             random_seed: 1979,
             algorithm: {
@@ -54,12 +17,7 @@ class Analysis::NsgaNrelcal4
                 XoverDistIdx: 5,
                 MuDistIdx: 10,
                 mprob: 0.5,
-                objective_functions: [
-                    "heating_natural_gas",
-                    "cooling_electricity",
-                    "interior_equipment_electricity",
-                    "fans_electricity"
-                ]
+                objective_functions: []
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -130,6 +88,18 @@ class Analysis::NsgaNrelcal4
 
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
+    end
+
+    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
+      raise "Must have at least two objective functions defined"
+    end    
+    
+    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
+      raise "Must have at least two output_variables"
+    end
+    
+    if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
+      raise "number of objective functions must equal"
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
