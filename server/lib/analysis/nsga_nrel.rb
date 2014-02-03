@@ -7,26 +7,7 @@ class Analysis::NsgaNrel
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
-        output_variables: [
-            {
-                display_name: "Total Site Energy",
-                units: "EUI",
-                name: "total_energy",
-                objective_function: true,
-                objective_function_target: 0.0,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: "Total Life Cycle Cost",
-                units: "USD",
-                name: "total_life_cycle_cost",
-                objective_function: true,
-                objective_function_target: 0.0,
-                objective_function_index: 1,
-                index: 1
-            }
-        ],
+        output_variables: [],
         problem: {
             random_seed: 1979,
             algorithm: {
@@ -36,10 +17,7 @@ class Analysis::NsgaNrel
                 XoverDistIdx: 5,
                 MuDistIdx: 10,
                 mprob: 0.5,
-                objective_functions: [
-                    "total_energy",
-                    "total_life_cycle_cost"
-                ]
+                objective_functions: []
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -111,7 +89,19 @@ class Analysis::NsgaNrel
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
-
+    
+    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
+      raise "Must have at least two objective functions defined"
+    end    
+    
+    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
+      raise "Must have at least two output_variables"
+    end
+    
+    if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
+      raise "number of objective functions must equal"
+    end
+    
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
