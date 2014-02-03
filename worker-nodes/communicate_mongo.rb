@@ -36,6 +36,11 @@ module CommunicateMongo
 
     dp.save!
   end
+  
+  def self.get_datapoint(id)
+    # TODO : make this a conditional on when to create one vs when to error out.
+    return DataPoint.find_or_create_by(uuid: id)
+  end  
 
   def self.get_problem(dp, format)
     analysis = dp.analysis
@@ -153,5 +158,3 @@ module CommunicateMongo
   end
 
 end
-
-
