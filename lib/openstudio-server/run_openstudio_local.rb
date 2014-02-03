@@ -32,6 +32,8 @@ data_point.saveJSON(dp_json)
 # run_openstudio.rb
 worker_library_path = File.dirname(__FILE__) + '/../../worker-nodes'
 run_openstudio_path = worker_library_path + '/run_openstudio.rb'
-system("#{$OpenStudio_RubyExe} -I'#{$OpenStudio_Dir}' -I'#{worker_library_path}' '#{run_openstudio_path}' -d '#{run_dir}' -u #{OpenStudio::removeBraces(data_point.uuid)} -r Local")
+call_str = "#{$OpenStudio_RubyExe} -I'#{$OpenStudio_Dir}' -I'#{worker_library_path}' '#{run_openstudio_path}' -d '#{run_dir}' -u #{OpenStudio::removeBraces(data_point.uuid)} -r Local"
+puts call_str
+system(call_str)
 
 
