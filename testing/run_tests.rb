@@ -13,8 +13,8 @@ api = OpenStudio::Analysis::ServerApi.new(options)
 api.delete_all()
 
 # ===== LHS Sample and Run =====
-formulation_file = "./HouseExample/analysis.json" # fast models (~10 secs) with pivots
-analysis_zip_file = "./HouseExample/analysis.zip"
+formulation_file = "./MediumOffice/medium_office.json" # fast models (~10 secs) with pivots
+analysis_zip_file = "./MediumOffice/medium_office.zip"
 
 project_options = {:project_name => "LHS"}
 project_id = api.new_project(project_options)
@@ -30,14 +30,16 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: false,
+    without_delay: true,
     analysis_type: "lhs",
     allow_multiple_jobs: true,
     use_server_as_worker: false,
+    run_data_point_filename: "run_openstudio_workflow.rb",
+    simulate_data_point_filename: "simulate_data_point.rb",
     problem: {
         random_seed: 1979,
         algorithm: {
-            number_of_samples: 2,
+            number_of_samples: 10,
             sample_method: "all_variables"
             #sample_method: "individual_variables"
         }
@@ -49,7 +51,9 @@ api.run_analysis(analysis_id, run_options)
 run_options = {
     analysis_action: "start",
     run_data_point_filename: "run_openstudio_workflow.rb",
-    without_delay: false,
+    simulate_data_point_filename: "simulate_data_point.rb",
+    without_delay: true,
+    use_server_as_worker: false,
     allow_multiple_jobs: true,
     analysis_type: "batch_run"
 }
@@ -78,7 +82,7 @@ end
 
 run_options = {
     analysis_action: "start",
-    without_delay: false,
+    without_delay: true,
     analysis_type: 'batch_run'}
 api.run_analysis(analysis_id, run_options)
 
@@ -108,8 +112,8 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: false,
-    allow_multiple_jobs: true,
+    without_delay: true,
+    allow_multiple_jobs: false,
     analysis_type: "nsga_nrel",
     simulate_data_point_filename: "simulate_data_point.rb",
     run_data_point_filename: "run_openstudio_workflow.rb",
@@ -141,9 +145,9 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: false,
+    without_delay: true,
     analysis_type: "sequential_search",
-    allow_multiple_jobs: true,
+    allow_multiple_jobs: false,
     use_server_as_worker: false,
     run_data_point_filename: "run_openstudio_workflow.rb",
     problem: {
