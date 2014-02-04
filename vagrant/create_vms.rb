@@ -322,6 +322,9 @@ def process(element, &block)
         raise "ERROR reached maximum number of retries in vagrant provision"
       end
     end
+    
+    # run vagrant provision one more time to make sure that it completes (mainly to catch the passenger error)
+    run_vagrant_provision(element)
 
     # Append the instance id to the element
     if @options[:provider] == :aws
