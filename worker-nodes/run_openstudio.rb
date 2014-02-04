@@ -73,14 +73,14 @@ logLevel = options[:logLevel].to_i
 require 'analysis_chauffeur'
 ros = nil
 if runType == "Local"
-  ros = AnalysisChauffeur.new(directory.to_s,"","","communicate_local")
+  ros = AnalysisChauffeur.new(directory.to_s, "", "", "communicate_local")
 else
-  ros = AnalysisChauffeur.new(options[:uuid],"communicate_mongo")
+  # just load the defaults which is mongo in the expected path
+  ros = AnalysisChauffeur.new(options[:uuid])
 end
 
 # let listening processes know that this data point is running
 ros.log_message "File #{__FILE__} started executing on #{options[:uuid]}", true
-
 ros.log_message "Project directory is  #{project_path.to_s}", true
 ros.log_message "Run directory is #{directory.to_s}", true
 objective_function_result = nil
