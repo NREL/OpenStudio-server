@@ -32,7 +32,7 @@ run_options = {
     analysis_action: "start",
     without_delay: false,
     analysis_type: "lhs",
-    allow_multiple_jobs: false,
+    allow_multiple_jobs: true,
     use_server_as_worker: false,
     problem: {
         random_seed: 1979,
@@ -111,8 +111,12 @@ run_options = {
     without_delay: false,
     allow_multiple_jobs: true,
     analysis_type: "nsga_nrel",
+    simulate_data_point_filename: "simulate_data_point.rb",
+    run_data_point_filename: "run_openstudio_workflow.rb"
     problem: {
         algorithm: {
+            number_of_samples: 10,
+            sample_method: "all_variables",
             generations: 2,
             objective_functions: [
                 "total_energy",

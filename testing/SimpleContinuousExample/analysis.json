@@ -3,6 +3,24 @@
         "data_points_are_invalid": false,
         "display_name": "Ruby Continuous Variables Example Analysis",
         "name": "Ruby Continuous Variables Example Analysis",
+	"output_variables": [
+	  {
+		"display_name": "total_energy",
+		"name": "total_energy",
+		"units": "MJ/m2",
+		"objective_function": true,
+		"objective_function_target": 0,
+		"objective_function_index": 0
+	  },
+	  {
+		"display_name": "total_life_cycle_cost",
+		"name": "total_life_cycle_cost",
+		"units": "MJ/m3",
+		"objective_function": true,
+		"objective_function_target": 0,
+		"objective_function_index": 1
+	  },
+	],        
         "problem": {
             "number_of_samples": 8,
             "display_name": "Ruby Continuous Variables Example Problem",
