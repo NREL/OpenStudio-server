@@ -49,7 +49,7 @@ describe "AmiIntegration" do
       expect(res.body).to include "OpenStudio Cloud Management Console"
 
       puts Dir.pwd
-      test_file = File.expand_path("../testing/run_demo_examples.rb")
+      test_file = File.expand_path("../testing/run_tests.rb")
       puts test_file
       if File.exists?(test_file)
         call_cmd = "cd ../testing && bundle exec ruby #{test_file} 'http://#{@aws.os_aws.server.data[:dns]}'"
