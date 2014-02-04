@@ -1,0 +1,568 @@
+{
+  "analysis": {
+    "display_name": "housecal",
+    "name": "housecal",
+    "parameter_space": [
+
+    ],
+    "output_variables": [
+      {
+        "display_name": "Heating Natural Gas",
+        "name": "heating_natural_gas",
+        "units": "MJ/m2",
+        "objective_function": true,
+        "objective_function_target": 462.1635,
+        "objective_function_index": 0
+      },
+      {
+        "display_name": "Cooling Electricity",
+        "name": "cooling_electricity",
+        "units": "MJ/m3",
+        "objective_function": true,
+        "objective_function_target": 84.16202,
+        "objective_function_index": 1
+      },
+      {
+        "display_name": "Interior Equipment Electricity",
+        "name": "interior_equipment_electricity",
+        "units": "MJ/m4",
+        "objective_function": true,
+        "objective_function_target": 121.9985,
+        "objective_function_index": 2
+      },
+      {
+        "display_name": "Fans Electricity",
+        "name": "fans_electricity",
+        "units": "MJ/m5",
+        "objective_function": true,
+        "objective_function_target": 87.92142,
+        "objective_function_index": 3
+      }
+    ],
+    "problem": {
+      "algorithm": {
+        "sample_method": "all_variables",
+        "number_of_samples": 10,
+        "generations": 10,
+        "cprob": 0.9,
+        "xoverdistidx": 2,
+        "mudistidx": 2,
+        "mprob": 0.9,
+        "objective_functions": [
+          "heating_natural_gas",
+          "cooling_electricity",
+          "interior_equipment_electricity",
+          "fans_electricity"
+        ]
+      },
+      "name": "Problem",
+      "workflow": [
+        {
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "machine_name": "apply_the_measure_to_a_specific_space_type_or_to_the_entire_model.",
+              "name": "space_type",
+              "value": "*Entire Building*",
+              "uuid": "cf2df230-700b-0131-69cc-00ffc0914e0d",
+              "version_uuid": "cf2e7af0-700b-0131-69ce-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_material_and_installation_cost_for_lighting_per_floor_area_(%).",
+              "name": "material_and_installation_cost",
+              "value": 0.0,
+              "uuid": "cf2f2ab0-700b-0131-69d0-00ffc0914e0d",
+              "version_uuid": "cf2fb380-700b-0131-69d2-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_demolition_costs_for_lighting_per_floor_area_(%).",
+              "name": "demolition_cost",
+              "value": 0.0,
+              "uuid": "cf303c40-700b-0131-69d4-00ffc0914e0d",
+              "version_uuid": "cf30c500-700b-0131-69d6-00ffc0914e0d"
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "machine_name": "years_until_costs_start_(whole_years).",
+              "name": "years_until_costs_start",
+              "value": 0,
+              "uuid": "cf314db0-700b-0131-69d8-00ffc0914e0d",
+              "version_uuid": "cf31d680-700b-0131-69da-00ffc0914e0d"
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "machine_name": "demolition_costs_occur_during_initial_construction?",
+              "name": "demo_cost_initial_const",
+              "value": true,
+              "uuid": "cf325f40-700b-0131-69dc-00ffc0914e0d",
+              "version_uuid": "cf32fb80-700b-0131-69de-00ffc0914e0d"
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "machine_name": "expected_life_(whole_years).",
+              "name": "expected_life",
+              "value": 15,
+              "uuid": "cf338440-700b-0131-69e0-00ffc0914e0d",
+              "version_uuid": "cf342080-700b-0131-69e2-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_o_&_m_costs_for_lighting_per_floor_area_(%).",
+              "name": "om_cost",
+              "value": 0.0,
+              "uuid": "cf34a951-700b-0131-69e3-00ffc0914e0d",
+              "version_uuid": "cf34f770-700b-0131-69e5-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "machine_name": "o_&_m_frequency_(whole_years).",
+              "name": "om_frequency",
+              "value": 1,
+              "uuid": "cf358030-700b-0131-69e7-00ffc0914e0d",
+              "version_uuid": "cf3608e0-700b-0131-69e9-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/reduce_electric_equipment_loads_by_percentage",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/reduce_electric_equipment_loads_by_percentage",
+          "bcl_measure_class_name_ADDME": "ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_class_name_CHANGE_TO_ME": "ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_class_name": "ReduceElectricEquipmentLoadsByPercentage",
+          "bcl_measure_uuid": "cf2a96a0-700b-0131-69c0-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "cf2b1f60-700b-0131-69c2-00ffc0914e0d",
+          "bcl_measure_version_uuid": "cf2ba820-700b-0131-69c4-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "cf2c4470-700b-0131-69c6-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "reduceelectricequipmentloadsbypercentage",
+          "display_name": "ReduceElectricEquipmentLoadsByPercentage",
+          "uuid": "cf2ccd20-700b-0131-69c8-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Electric Equipment Power Reduction",
+                "machine_name": "electric_equipment_power_reduction",
+                "name": "elecequip_power_reduction_percent",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Electric Equipment Power Reduction",
+              "machine_name": "electric_equipment_power_reduction",
+              "name": "electric_equipment_power_reduction",
+              "minimum": -25.0,
+              "maximum": 25.0,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": -25.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 25.0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 8.333333333333334
+                  }
+                ],
+                "type": "uniform_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "cf2d6970-700b-0131-69ca-00ffc0914e0d",
+          "workflow_index": 0,
+          "workflow_step_type": "Measure"
+        },
+        {
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "machine_name": "apply_the_measure_to_a_specific_space_type_or_to_the_entire_model.",
+              "name": "space_type",
+              "value": "*Entire Building*",
+              "uuid": "cf39d9a0-700b-0131-69f6-00ffc0914e0d",
+              "version_uuid": "cf3a75f0-700b-0131-69f8-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Material and Installation Costs for Building per Affected Floor Area ($/ft^2).",
+              "machine_name": "increase_in_material_and_installation_costs_for_building_per_affected_floor_area_($/ft^2).",
+              "name": "material_and_installation_cost",
+              "value": 0.0,
+              "uuid": "cf3b1241-700b-0131-69f9-00ffc0914e0d",
+              "version_uuid": "cf3b6061-700b-0131-69fa-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Costs for Construction per Affected Floor Area ($/ft^2).",
+              "machine_name": "o_&_m_costs_for_construction_per_affected_floor_area_($/ft^2).",
+              "name": "om_cost",
+              "value": 0.0,
+              "uuid": "cf3bae80-700b-0131-69fc-00ffc0914e0d",
+              "version_uuid": "cf3c3740-700b-0131-69fe-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "machine_name": "o_&_m_frequency_(whole_years).",
+              "name": "om_frequency",
+              "value": 1,
+              "uuid": "cf3cd380-700b-0131-6a00-00ffc0914e0d",
+              "version_uuid": "cf3d48c0-700b-0131-6a02-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/reduce_space_infiltration_by_percentage",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/reduce_space_infiltration_by_percentage",
+          "bcl_measure_class_name_ADDME": "ReduceSpaceInfiltrationByPercentage",
+          "measure_definition_class_name_CHANGE_TO_ME": "ReduceSpaceInfiltrationByPercentage",
+          "measure_definition_class_name": "ReduceSpaceInfiltrationByPercentage",
+          "bcl_measure_uuid": "cf36b8b0-700b-0131-69eb-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "cf375500-700b-0131-69ed-00ffc0914e0d",
+          "bcl_measure_version_uuid": "cf37ddc0-700b-0131-69ef-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "cf387a11-700b-0131-69f0-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "reducespaceinfiltrationbypercentage",
+          "display_name": "ReduceSpaceInfiltrationByPercentage",
+          "uuid": "cf38b4a0-700b-0131-69f2-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Space Infiltration Power Reduction",
+                "machine_name": "space_infiltration_power_reduction",
+                "name": "space_infiltration_reduction_percent",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Space Infiltration Power Reduction",
+              "machine_name": "space_infiltration_power_reduction",
+              "name": "space_infiltration_power_reduction",
+              "minimum": -25.0,
+              "maximum": 25.0,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": -25.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 25.0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 8.333333333333334
+                  }
+                ],
+                "type": "uniform_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "cf3950f0-700b-0131-69f4-00ffc0914e0d",
+          "workflow_index": 1,
+          "workflow_step_type": "Measure"
+        },
+        {
+          "arguments": [
+            {
+              "display_name": "Choose an Air Loop with a two speed DX Cooling Unit to Alter.",
+              "machine_name": "choose_an_air_loop_with_a_two_speed_dx_cooling_unit_to_alter.",
+              "name": "object",
+              "value": "*All Air Loops*",
+              "uuid": "cf411980-700b-0131-6a0f-00ffc0914e0d",
+              "version_uuid": "cf41b5d0-700b-0131-6a11-00ffc0914e0d"
+            },
+            {
+              "display_name": "Remove Baseline Costs From Effected Cooling Coil DX Two Speed Units?",
+              "machine_name": "remove_baseline_costs_from_effected_cooling_coil_dx_two_speed_units?",
+              "name": "remove_costs",
+              "value": true,
+              "uuid": "cf423e80-700b-0131-6a13-00ffc0914e0d",
+              "version_uuid": "cf42c740-700b-0131-6a15-00ffc0914e0d"
+            },
+            {
+              "display_name": "Material and Installation Costs per Cooling Coil DX Two Speed Unit ($).",
+              "machine_name": "material_and_installation_costs_per_cooling_coil_dx_two_speed_unit_($).",
+              "name": "material_cost",
+              "value": 0,
+              "uuid": "cf436390-700b-0131-6a17-00ffc0914e0d",
+              "version_uuid": "cf43ec50-700b-0131-6a19-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_demolition_costs_for_lighting_per_floor_area_(%).",
+              "name": "demolition_cost",
+              "value": 0,
+              "uuid": "cf447511-700b-0131-6a1a-00ffc0914e0d",
+              "version_uuid": "cf44c330-700b-0131-6a1c-00ffc0914e0d"
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "machine_name": "years_until_costs_start_(whole_years).",
+              "name": "years_until_costs_start",
+              "value": 0,
+              "uuid": "cf455f80-700b-0131-6a1e-00ffc0914e0d",
+              "version_uuid": "cf45e830-700b-0131-6a20-00ffc0914e0d"
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "machine_name": "demolition_costs_occur_during_initial_construction?",
+              "name": "demo_cost_initial_const",
+              "value": false,
+              "uuid": "cf4670f0-700b-0131-6a22-00ffc0914e0d",
+              "version_uuid": "cf46f9c1-700b-0131-6a23-00ffc0914e0d"
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "machine_name": "expected_life_(whole_years).",
+              "name": "expected_life",
+              "value": 20,
+              "uuid": "cf4747e1-700b-0131-6a24-00ffc0914e0d",
+              "version_uuid": "cf479601-700b-0131-6a25-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_o_&_m_costs_for_lighting_per_floor_area_(%).",
+              "name": "om_cost",
+              "value": 0.0,
+              "uuid": "cf47e420-700b-0131-6a27-00ffc0914e0d",
+              "version_uuid": "cf486ce0-700b-0131-6a29-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "machine_name": "o_&_m_frequency_(whole_years).",
+              "name": "om_frequency",
+              "value": 1,
+              "uuid": "cf490920-700b-0131-6a2b-00ffc0914e0d",
+              "version_uuid": "cf4991e0-700b-0131-6a2d-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/set_gas_burner_efficiency",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/set_gas_burner_efficiency",
+          "bcl_measure_class_name_ADDME": "SetGasBurnerEfficiency",
+          "measure_definition_class_name_CHANGE_TO_ME": "SetGasBurnerEfficiency",
+          "measure_definition_class_name": "SetGasBurnerEfficiency",
+          "bcl_measure_uuid": "cf3e0c10-700b-0131-6a04-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "cf3ea860-700b-0131-6a06-00ffc0914e0d",
+          "bcl_measure_version_uuid": "cf3f3121-700b-0131-6a07-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "cf3f7f40-700b-0131-6a09-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "setgasburnerefficiency",
+          "display_name": "SetGasBurnerEfficiency",
+          "uuid": "cf400800-700b-0131-6a0b-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Burner Efficiency (fractional)",
+                "machine_name": "burner_efficiency_(fractional)",
+                "name": "eff",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Burner Efficiency (fractional)",
+              "machine_name": "burner_efficiency_(fractional)",
+              "name": "burner_efficiency_(fractional)",
+              "minimum": 0.7,
+              "maximum": 0.9,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 0.8
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.7
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 0.9
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 0.03333333333333335
+                  }
+                ],
+                "type": "uniform_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "cf4090c0-700b-0131-6a0d-00ffc0914e0d",
+          "workflow_index": 2,
+          "workflow_step_type": "Measure"
+        },
+        {
+          "arguments": [
+            {
+              "display_name": "Choose an Air Loop with a two speed DX Cooling Unit to Alter.",
+              "machine_name": "choose_an_air_loop_with_a_two_speed_dx_cooling_unit_to_alter.",
+              "name": "object",
+              "value": "*All Air Loops*",
+              "uuid": "cf4d62b0-700b-0131-6a3a-00ffc0914e0d",
+              "version_uuid": "cf4deb70-700b-0131-6a3c-00ffc0914e0d"
+            },
+            {
+              "display_name": "Remove Baseline Costs From Effected Cooling Coil DX Two Speed Units?",
+              "machine_name": "remove_baseline_costs_from_effected_cooling_coil_dx_two_speed_units?",
+              "name": "remove_costs",
+              "value": true,
+              "uuid": "cf4e87b0-700b-0131-6a3e-00ffc0914e0d",
+              "version_uuid": "cf4f1070-700b-0131-6a40-00ffc0914e0d"
+            },
+            {
+              "display_name": "Material and Installation Costs per Cooling Coil DX Two Speed Unit ($).",
+              "machine_name": "material_and_installation_costs_per_cooling_coil_dx_two_speed_unit_($).",
+              "name": "material_cost",
+              "value": 0,
+              "uuid": "cf4facb0-700b-0131-6a42-00ffc0914e0d",
+              "version_uuid": "cf504900-700b-0131-6a44-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_demolition_costs_for_lighting_per_floor_area_(%).",
+              "name": "demolition_cost",
+              "value": 0,
+              "uuid": "cf50d1c0-700b-0131-6a46-00ffc0914e0d",
+              "version_uuid": "cf515a80-700b-0131-6a48-00ffc0914e0d"
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "machine_name": "years_until_costs_start_(whole_years).",
+              "name": "years_until_costs_start",
+              "value": 0,
+              "uuid": "cf51f6c0-700b-0131-6a4a-00ffc0914e0d",
+              "version_uuid": "cf527f80-700b-0131-6a4c-00ffc0914e0d"
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "machine_name": "demolition_costs_occur_during_initial_construction?",
+              "name": "demo_cost_initial_const",
+              "value": false,
+              "uuid": "cf530840-700b-0131-6a4e-00ffc0914e0d",
+              "version_uuid": "cf539100-700b-0131-6a50-00ffc0914e0d"
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "machine_name": "expected_life_(whole_years).",
+              "name": "expected_life",
+              "value": 20,
+              "uuid": "cf542d50-700b-0131-6a52-00ffc0914e0d",
+              "version_uuid": "cf54b610-700b-0131-6a54-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_o_&_m_costs_for_lighting_per_floor_area_(%).",
+              "name": "om_cost",
+              "value": 0.0,
+              "uuid": "cf555250-700b-0131-6a56-00ffc0914e0d",
+              "version_uuid": "cf55db10-700b-0131-6a58-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "machine_name": "o_&_m_frequency_(whole_years).",
+              "name": "om_frequency",
+              "value": 1,
+              "uuid": "cf5663d0-700b-0131-6a5a-00ffc0914e0d",
+              "version_uuid": "cf570020-700b-0131-6a5c-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/set_co_pfor_single_speed_dx_cooling_units",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/set_co_pfor_single_speed_dx_cooling_units",
+          "bcl_measure_class_name_ADDME": "SetCOPforSingleSpeedDXCoolingUnits",
+          "measure_definition_class_name_CHANGE_TO_ME": "SetCOPforSingleSpeedDXCoolingUnits",
+          "measure_definition_class_name": "SetCOPforSingleSpeedDXCoolingUnits",
+          "bcl_measure_uuid": "cf4a41c1-700b-0131-6a2e-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "cf4a8fe0-700b-0131-6a30-00ffc0914e0d",
+          "bcl_measure_version_uuid": "cf4b18a0-700b-0131-6a32-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "cf4ba160-700b-0131-6a34-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "setcopforsinglespeeddxcoolingunits",
+          "display_name": "SetCOPforSingleSpeedDXCoolingUnits",
+          "uuid": "cf4c3da0-700b-0131-6a36-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Rated COP",
+                "machine_name": "rated_cop",
+                "name": "cop",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Rated COP",
+              "machine_name": "rated_cop",
+              "name": "rated_cop",
+              "minimum": 2.0,
+              "maximum": 4.0,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 3.0
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 2.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 4.0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 0.3333333333333333
+                  }
+                ],
+                "type": "uniform_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "cf4cc660-700b-0131-6a38-00ffc0914e0d",
+          "workflow_index": 3,
+          "workflow_step_type": "Measure"
+        }
+      ],
+      "analysis_type": "nsga_nrel"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seed/House1203_a_ver112.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/SPtMasterTable_57167_2012_amy.epw"
+    }
+  }
+}

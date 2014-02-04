@@ -13,8 +13,8 @@ api = OpenStudio::Analysis::ServerApi.new(options)
 api.delete_all()
 
 # ===== LHS Sample and Run =====
-formulation_file = "./SimpleContinuousExample/analysis.json" # fast models (~10 secs) with pivots
-analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
+formulation_file = "./HouseExample/analysis.json" # fast models (~10 secs) with pivots
+analysis_zip_file = "./HouseExample/analysis.zip"
 
 project_options = {:project_name => "LHS"}
 project_id = api.new_project(project_options)
@@ -87,8 +87,8 @@ api.run_analysis(analysis_id, run_options)
 project_options = {:project_name => "Optimizations"}
 project_id = api.new_project(project_options)
 
-formulation_file = "./SimpleContinuousExample/analysis.json"
-analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
+formulation_file = "./HouseExample/analysis.json"
+analysis_zip_file = "./HouseExample/analysis.zip"
 analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
@@ -112,15 +112,15 @@ run_options = {
     allow_multiple_jobs: true,
     analysis_type: "nsga_nrel",
     simulate_data_point_filename: "simulate_data_point.rb",
-    run_data_point_filename: "run_openstudio_workflow.rb"
+    run_data_point_filename: "run_openstudio_workflow.rb",
     problem: {
         algorithm: {
             number_of_samples: 10,
             sample_method: "all_variables",
             generations: 2,
             objective_functions: [
-                "total_energy",
-                "total_life_cycle_cost"
+                "heating_natural_gas",
+                "cooling_electricity"
             ]
         }
     }
@@ -128,8 +128,8 @@ run_options = {
 api.run_analysis(analysis_id, run_options)
 
 # ===== Sequential Search =====
-formulation_file = "./SimpleContinuousExample/analysis.json"
-analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
+formulation_file = "./HouseExample/analysis.json"
+analysis_zip_file = "./HouseExample/analysis.zip"
 
 analysis_options = {
     formulation_file: formulation_file,
@@ -152,8 +152,8 @@ run_options = {
             number_of_samples: 4, # to discretize any continuous variables
             max_iterations: 2,
             objective_functions: [
-                "total_energy",
-                "total_life_cycle_cost"
+                "heating_natural_gas",
+                "cooling_electricity"
             ]
         }
     }
