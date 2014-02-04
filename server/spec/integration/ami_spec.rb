@@ -5,12 +5,19 @@ require 'openstudio-analysis'
 require 'openstudio-aws'
 
 describe "AmiIntegration" do
-  context "most recent AMIs" do
+  context "most recent AMIs from Jenkins" do
     before(:all) do
-      aws_options = {:ami_lookup_version => 2}
+
+      # todo: should check if the jenkins server AMI list is available (i.e. inside nrel's firewall),
+      # else 
+      aws_options = {
+          :ami_lookup_version => 2,
+          :host => "cbr-jenkins-01.nrel.gov",
+          :url => "/job/OpenStudio%20AMI%20List/lastSuccessfulBuild/artifact/vagrant"
+      }
       @aws = OpenStudio::Aws::Aws.new(aws_options)
     end
-    
+
     it "should have the most recent AMIs" do
       puts @aws.default_amis
       expect(@aws.default_amis).not_to be_nil
@@ -36,48 +43,43 @@ describe "AmiIntegration" do
         faraday.response :logger
         faraday.adapter Faraday.default_adapter # make requests with Net::HTTP
       end
-      
+
       res = f.get('/')
       expect(res.status).to eq(200)
       expect(res.body).to include "OpenStudio Cloud Management Console"
-      
+
       puts Dir.pwd
-      test_file = File.expand_path("../testing/run_demo_examples.rb")
+      test_file = File.expand_path("../testing/run_tests.rb")
       puts test_file
       if File.exists?(test_file)
-        call_cmd = "cd ../testing && bundle exec ruby #{test_file} 'http://#{@aws.os_aws.server.data[:dns]}'" 
+        call_cmd = "cd ../testing && bundle exec ruby #{test_file} 'http://#{@aws.os_aws.server.data[:dns]}'"
         puts "Calling: #{call_cmd}"
-        
+
         res = system(call_cmd)
 
         exitcode = $?.exitstatus
         expect(exitcode).to eq(0)
-        
+
       end
       puts res
+
+      #todo: same test but use the Analysis Gem
+
     end
 
     it "should be able to ping the server" do
     end
-    
+
     it "should be able to load the server/worker from file" do
     end
-    
-    #it "should be able to submit a project and analysis" do
-    #  # how to test this?
-    #end
-    #
-    #it "should kill running instances" do
-    #  # how to test this?
-    #end
   end
-  
+
   context "fixed AMI versions" do
     before(:all) do
       aws_options = {:ami_lookup_version => 2, :openstudio_server_version => "1.3.1"}
       @aws = OpenStudio::Aws::Aws.new(aws_options)
     end
-    
+
     it "should have fixed AMIs" do
       expect(@aws.default_amis[:cc2worker]).to eq("ami-4bbb8722")
       expect(@aws.default_amis[:server]).to eq("ami-a9bb87c0")

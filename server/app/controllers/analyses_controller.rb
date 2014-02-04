@@ -18,18 +18,27 @@ class AnalysesController < ApplicationController
   # GET /analyses/1.json
   def show
     @analysis = Analysis.find(params[:id])
-    
+
     @objective_functions = []
-    if @analysis.output_variables
-      @analysis.output_variables.each do |ov|
-        if ov['objective_function'] 
-          @objective_functions << ov
+
+    #todo: move this to the page_data or another secondary call
+    if not @analysis.nil?
+      if @analysis.output_variables
+        @analysis.output_variables.each do |ov|
+          if ov['objective_function']
+            @objective_functions << ov
+          end
         end
       end
     end
-    
+
     if @objective_functions.empty?
-      @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_energy", 'units' => "EUI"}
+      # todo: we need to standardize on the result of this
+      if @analysis['num_measure_groups']
+        @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_site_energy", 'units' => "EUI"}
+      else
+        @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_energy", 'units' => "EUI"}
+      end
       @objective_functions << {'display_name' => "Total Life Cycle Cost", 'name' => "total_life_cycle_cost", 'units' => "USD"}
     end
 
@@ -271,13 +280,13 @@ class AnalysesController < ApplicationController
       format.html # results_scatter.html.erb
     end
   end
-  
+
   def plot_radar
-     @analysis = Analysis.find(params[:id])
-  
-      respond_to do |format|
-        format.html # results_scatter.html.erb
-      end
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      format.html # results_scatter.html.erb
+    end
   end
 
   def plot_data
@@ -333,12 +342,12 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.csv do
-        write_and_send_csv(@analysis) 
+        write_and_send_csv(@analysis)
       end
       format.rdata do
         write_and_send_rdata(@analysis)
       end
-    end          
+    end
   end
 
 
@@ -373,7 +382,7 @@ class AnalysesController < ApplicationController
       if ov['objective_function']
         plotvars << ov['name']
       end
-    end  
+    end
     Rails.logger.info plotvars
     plotvars
   end
@@ -394,7 +403,7 @@ class AnalysesController < ApplicationController
       if dp['results']
         plot_data = []
         ovs.each do |ov|
-          if ov['objective_function']     
+          if ov['objective_function']
             dp_values = {}
             dp_values["axis"] = ov['name']
             dp_values["value"] = dp['results'][ov['name']]
@@ -402,7 +411,7 @@ class AnalysesController < ApplicationController
           end
         end
 
-        plot_data_radar << plot_data  
+        plot_data_radar << plot_data
       end
     end
 
@@ -457,7 +466,7 @@ class AnalysesController < ApplicationController
         #dp_values["heating_natural_gas"] = dp['results']['heating_natural_gas'] if dp['results']['heating_natural_gas']
         #dp_values["cooling_electricity"] = dp['results']['cooling_electricity'] if dp['results']['cooling_electricity']
         #dp_values["interior_equipment_electricity"] = dp['results']['interior_equipment_electricity'] if dp['results']['interior_equipment_electricity']
-     #dp_values["fans_electricity"] = dp['results']['fans_electricity'] if dp['results']['fans_electricity']
+        #dp_values["fans_electricity"] = dp['results']['fans_electricity'] if dp['results']['fans_electricity']
 
         plot_data << dp_values
       end
@@ -492,13 +501,13 @@ class AnalysesController < ApplicationController
     download_filename = "#{analysis.name}.RData"
     data_frame_name = analysis.name.downcase.gsub(" ", "_")
     Rails.logger.info("Data frame name will be #{data_frame_name}")
-    
+
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
     out_hash = data.each_with_object(Hash.new([])) do |h1, h|
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
-    
+
     Rails.logger.info("outhash is #{out_hash}")
 
     # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
@@ -512,7 +521,7 @@ class AnalysesController < ApplicationController
          }
     end
     tmp_filename = r.converse('temp')
-    
+
     if File.exists?(tmp_filename)
       send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'application/rdata; header=present', :disposition => "attachment"
     else
