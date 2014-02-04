@@ -120,16 +120,16 @@ if @options[:provider] == :vagrant
   #}
 elsif @options[:provider] == :aws
   @vms << {
+      id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
+      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
+  }
+  @vms << {
       id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
       ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
-  }
-  @vms << {
-      id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
   }
 end
 
@@ -322,6 +322,9 @@ def process(element, &block)
         raise "ERROR reached maximum number of retries in vagrant provision"
       end
     end
+    
+    # run vagrant provision one more time to make sure that it completes (mainly to catch the passenger error)
+    run_vagrant_provision(element)
 
     # Append the instance id to the element
     if @options[:provider] == :aws
@@ -343,7 +346,7 @@ def process(element, &block)
 
     if @options[:provider] == :aws
       # Reboot the box if on Amazon because of kernel updates
-      run_vagrant_reload(element) # todo: can i remove this?
+      #run_vagrant_reload(element) # todo: can i remove this?
 
       # finish up AMI cleanup 
       begin

@@ -26,7 +26,4 @@ RSpec.configure do |config|
   config.order = "random"
 
   config.filter_run_excluding :broken => true
-  
-  #todo: test this. i'm not sure this is doing anything
-  config.pattern = Dir['spec/*/**/*_spec.rb'].reject{ |f| f['/api/v1'] || f['/integration'] }
 end
