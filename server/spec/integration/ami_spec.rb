@@ -26,33 +26,34 @@ describe "AmiIntegration" do
     it "should create a cluster and submit a job" do
       # use the default instance type
       server_options = {instance_type: "m1.large"}
-
+      
       @aws.create_server(server_options)
       expect(@aws.os_aws.server).not_to be_nil
-
+      
       worker_options = {instance_type: "m1.large"}
-
+      
       @aws.create_workers(1, worker_options)
-
+      
       expect(@aws.os_aws.workers).to have(1).thing
       expect(@aws.os_aws.workers[0].data[:dns]).not_to be_nil
-
+      
       # use faraday to do the test here
       f = Faraday.new(:url => "http://#{@aws.os_aws.server.data[:dns]}") do |faraday|
         faraday.request :url_encoded # form-encode POST params
         faraday.response :logger
         faraday.adapter Faraday.default_adapter # make requests with Net::HTTP
       end
-
+      
       res = f.get('/')
       expect(res.status).to eq(200)
       expect(res.body).to include "OpenStudio Cloud Management Console"
 
       puts Dir.pwd
-      test_file = File.expand_path("../testing/run_tests.rb")
+      #test_file = File.expand_path("../testing/run_tests.rb")
+      test_file = File.expand_path("../testing/run_example_lhs.rb")
       puts test_file
       if File.exists?(test_file)
-        call_cmd = "cd ../testing && bundle exec ruby #{test_file} 'http://#{@aws.os_aws.server.data[:dns]}'"
+        call_cmd = "cd ../testing && bundle update && bundle exec ruby #{test_file} 'http://#{@aws.os_aws.server.data[:dns]}'"
         puts "Calling: #{call_cmd}"
 
         res = system(call_cmd)
