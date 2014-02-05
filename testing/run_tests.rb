@@ -30,7 +30,7 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     analysis_type: "lhs",
     allow_multiple_jobs: true,
     use_server_as_worker: false,
@@ -52,7 +52,7 @@ run_options = {
     analysis_action: "start",
     run_data_point_filename: "run_openstudio_workflow.rb",
     simulate_data_point_filename: "simulate_data_point.rb",
-    without_delay: true,
+    without_delay: false,
     use_server_as_worker: false,
     allow_multiple_jobs: true,
     analysis_type: "batch_run"
@@ -82,7 +82,7 @@ end
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     analysis_type: 'batch_run'}
 api.run_analysis(analysis_id, run_options)
 
@@ -112,7 +112,7 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     allow_multiple_jobs: false,
     analysis_type: "nsga_nrel",
     simulate_data_point_filename: "simulate_data_point.rb",
@@ -145,7 +145,7 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     analysis_type: "sequential_search",
     allow_multiple_jobs: false,
     use_server_as_worker: false,
