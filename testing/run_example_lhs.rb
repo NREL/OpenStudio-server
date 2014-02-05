@@ -4,8 +4,7 @@ require 'bundler/setup'
 
 require 'openstudio-analysis' # Need to install openstudio-analysis gem
 
-HOSTNAME = "http://localhost:8080"
-#HOSTNAME = "http://ec2-184-73-66-103.compute-1.amazonaws.com"
+hostname = ARGV[0] || "http://localhost:8080"
 
 # fast models (~10 secs) with pivots
 formulation_file = "./SimpleContinuousExample/analysis.json"
@@ -15,19 +14,19 @@ analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 #formulation_file = "./ContinuousExample/medium_office.json"
 #analysis_zip_file = "./ContinuousExample/medium_office.zip"
 
-options = {hostname: HOSTNAME}
+options = {hostname: hostname}
 api = OpenStudio::Analysis::ServerApi.new(options)
 
 api.delete_all()
 
-project_options = {}
+project_options = {project_name: "LHS Project"}
 project_id = api.new_project(project_options)
 
 analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
-    reset_uuids: true
-
+    reset_uuids: true,
+    analysis_name: "simple LHS example"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
