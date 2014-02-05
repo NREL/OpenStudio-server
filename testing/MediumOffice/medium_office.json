@@ -1,0 +1,498 @@
+{
+  "analysis": {
+    "display_name": "LHS Example Project",
+    "name": "lhs_example_project",
+    "parameter_space": [
+
+    ],
+    "output_variables": [
+      {
+        "display_name": "Heating Natural Gas",
+        "name": "heating_natural_gas",
+        "units": "MJ/m2",
+        "objective_function": false,
+        "objective_function_target": 462.1635,
+        "objective_function_index": 0
+      },
+      {
+        "display_name": "Cooling Electricity",
+        "name": "cooling_electricity",
+        "units": "MJ/m2",
+        "objective_function": false,
+        "objective_function_target": 84.16202,
+        "objective_function_index": 1
+      }
+    ],
+    "problem": {
+      "algorithm": {
+        "sample_method": "all_variables",
+        "number_of_samples": 100,
+        "number_of_generations": 20,
+        "objective_functions": [
+
+        ]
+      },
+      "name": "Problem",
+      "workflow": [
+        {
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "machine_name": "apply_the_measure_to_a_specific_space_type_or_to_the_entire_model.",
+              "name": "space_type",
+              "value": "*Entire Building*",
+              "uuid": "3ecb0640-7016-0131-6cb6-00ffc0914e0d",
+              "version_uuid": "3ecb8f00-7016-0131-6cb8-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_material_and_installation_cost_for_lighting_per_floor_area_(%).",
+              "name": "material_and_installation_cost",
+              "value": 0.0,
+              "uuid": "3ecc2b40-7016-0131-6cba-00ffc0914e0d",
+              "version_uuid": "3eccb3f0-7016-0131-6cbc-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_demolition_costs_for_lighting_per_floor_area_(%).",
+              "name": "demolition_cost",
+              "value": 0.0,
+              "uuid": "3ecd5030-7016-0131-6cbe-00ffc0914e0d",
+              "version_uuid": "3ecdd8f0-7016-0131-6cc0-00ffc0914e0d"
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "machine_name": "years_until_costs_start_(whole_years).",
+              "name": "years_until_costs_start",
+              "value": 0,
+              "uuid": "3ece7530-7016-0131-6cc2-00ffc0914e0d",
+              "version_uuid": "3ecefde0-7016-0131-6cc4-00ffc0914e0d"
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "machine_name": "demolition_costs_occur_during_initial_construction?",
+              "name": "demo_cost_initial_const",
+              "value": true,
+              "uuid": "3ecf86a0-7016-0131-6cc6-00ffc0914e0d",
+              "version_uuid": "3ed022e0-7016-0131-6cc8-00ffc0914e0d"
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "machine_name": "expected_life_(whole_years).",
+              "name": "expected_life",
+              "value": 15,
+              "uuid": "3ed0ab90-7016-0131-6cca-00ffc0914e0d",
+              "version_uuid": "3ed147d0-7016-0131-6ccc-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_o_&_m_costs_for_lighting_per_floor_area_(%).",
+              "name": "om_cost",
+              "value": 0.0,
+              "uuid": "3ed1d090-7016-0131-6cce-00ffc0914e0d",
+              "version_uuid": "3ed26cd0-7016-0131-6cd0-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "machine_name": "o_&_m_frequency_(whole_years).",
+              "name": "om_frequency",
+              "value": 1,
+              "uuid": "3ed2f580-7016-0131-6cd2-00ffc0914e0d",
+              "version_uuid": "3ed37e40-7016-0131-6cd4-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/reduce_lighting_loads_by_percentage",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/reduce_lighting_loads_by_percentage",
+          "bcl_measure_class_name_ADDME": "ReduceLightingLoadsByPercentage",
+          "measure_definition_class_name_CHANGE_TO_ME": "ReduceLightingLoadsByPercentage",
+          "measure_definition_class_name": "ReduceLightingLoadsByPercentage",
+          "bcl_measure_uuid": "3ec7d1f0-7016-0131-6caa-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "3ec833a0-7016-0131-6cac-00ffc0914e0d",
+          "bcl_measure_version_uuid": "3ec8bc50-7016-0131-6cae-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "3ec95890-7016-0131-6cb0-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "reduce_lighting_loads_by_percentage",
+          "display_name": "Reduce Lighting Loads by Percentage",
+          "uuid": "3ec9e150-7016-0131-6cb2-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Lighting Power Reduction",
+                "machine_name": "lighting_power_reduction",
+                "name": "lighting_power_reduction_percent",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Lighting Power Reduction",
+              "machine_name": "lighting_power_reduction",
+              "name": "lighting_power_reduction",
+              "minimum": 0.0,
+              "maximum": 50.0,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 40.0
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 50.0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 8.333333333333334
+                  }
+                ],
+                "type": "triangle_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "3eca7d90-7016-0131-6cb4-00ffc0914e0d",
+          "workflow_index": 0,
+          "workflow_step_type": "Measure"
+        },
+        {
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "machine_name": "apply_the_measure_to_a_specific_space_type_or_to_the_entire_model.",
+              "name": "space_type",
+              "value": "*Entire Building*",
+              "uuid": "3ed7b070-7016-0131-6ce2-00ffc0914e0d",
+              "version_uuid": "3ed84cb0-7016-0131-6ce4-00ffc0914e0d"
+            },
+            {
+              "display_name": "Increase in Material and Installation Costs for Building per Affected Floor Area ($/ft^2).",
+              "machine_name": "increase_in_material_and_installation_costs_for_building_per_affected_floor_area_($/ft^2).",
+              "name": "material_and_installation_cost",
+              "value": 0.0,
+              "uuid": "3ed8e8f0-7016-0131-6ce6-00ffc0914e0d",
+              "version_uuid": "3ed971b0-7016-0131-6ce8-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Costs for Construction per Affected Floor Area ($/ft^2).",
+              "machine_name": "o_&_m_costs_for_construction_per_affected_floor_area_($/ft^2).",
+              "name": "om_cost",
+              "value": 0.0,
+              "uuid": "3ed9fa60-7016-0131-6cea-00ffc0914e0d",
+              "version_uuid": "3eda96a0-7016-0131-6cec-00ffc0914e0d"
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "machine_name": "o_&_m_frequency_(whole_years).",
+              "name": "om_frequency",
+              "value": 1,
+              "uuid": "3edb1f60-7016-0131-6cee-00ffc0914e0d",
+              "version_uuid": "3edbbba0-7016-0131-6cf0-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/reduce_space_infiltration_by_percentage",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/reduce_space_infiltration_by_percentage",
+          "bcl_measure_class_name_ADDME": "ReduceSpaceInfiltrationByPercentage",
+          "measure_definition_class_name_CHANGE_TO_ME": "ReduceSpaceInfiltrationByPercentage",
+          "measure_definition_class_name": "ReduceSpaceInfiltrationByPercentage",
+          "bcl_measure_uuid": "3ed44190-7016-0131-6cd6-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "3ed4ddd0-7016-0131-6cd8-00ffc0914e0d",
+          "bcl_measure_version_uuid": "3ed56680-7016-0131-6cda-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "3ed5ef40-7016-0131-6cdc-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "reducespaceinfiltrationbypercentage",
+          "display_name": "ReduceSpaceInfiltrationByPercentage",
+          "uuid": "3ed68b80-7016-0131-6cde-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Space Infiltration Power Reduction",
+                "machine_name": "space_infiltration_power_reduction",
+                "name": "space_infiltration_reduction_percent",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Space Infiltration Power Reduction",
+              "machine_name": "space_infiltration_power_reduction",
+              "name": "space_infiltration_power_reduction",
+              "minimum": 0.0,
+              "maximum": 30.0,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 10.0
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 30.0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 5.0
+                  }
+                ],
+                "type": "uniform_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "3ed71430-7016-0131-6ce0-00ffc0914e0d",
+          "workflow_index": 1,
+          "workflow_step_type": "Measure"
+        },
+        {
+          "arguments": [
+
+          ],
+          "bcl_measure_directory": "./measures/rotate_building",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/rotate_building",
+          "bcl_measure_class_name_ADDME": "RotateBuilding",
+          "measure_definition_class_name_CHANGE_TO_ME": "RotateBuilding",
+          "measure_definition_class_name": "RotateBuilding",
+          "bcl_measure_uuid": "3edc6b60-7016-0131-6cf2-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "3edd07a0-7016-0131-6cf4-00ffc0914e0d",
+          "bcl_measure_version_uuid": "3edd9060-7016-0131-6cf6-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "3ede1910-7016-0131-6cf8-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "rotate_building_relative_to_current_orientation",
+          "display_name": "Rotate Building Relative to Current Orientation",
+          "uuid": "3edeb550-7016-0131-6cfa-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Number of Degrees to Rotate Building",
+                "machine_name": "number_of_degrees_to_rotate_building",
+                "name": "relative_building_rotation",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Number of Degrees to Rotate Building",
+              "machine_name": "number_of_degrees_to_rotate_building",
+              "name": "number_of_degrees_to_rotate_building",
+              "minimum": 0.0,
+              "maximum": 259.0,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 180.0
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 259.0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 43.166666666666664
+                  }
+                ],
+                "type": "uniform_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "3edf5190-7016-0131-6cfc-00ffc0914e0d",
+          "workflow_index": 2,
+          "workflow_step_type": "Measure"
+        },
+        {
+          "arguments": [
+            {
+              "display_name": "Sill Height (in).",
+              "machine_name": "sill_height_(in).",
+              "name": "sillHeight",
+              "value": 30.0,
+              "uuid": "3ee37040-7016-0131-6d0a-00ffc0914e0d",
+              "version_uuid": "3ee40c80-7016-0131-6d0c-00ffc0914e0d"
+            },
+            {
+              "display_name": "Cardinal Direction.",
+              "machine_name": "cardinal_direction.",
+              "name": "facade",
+              "value": "South",
+              "uuid": "3ee49540-7016-0131-6d0e-00ffc0914e0d",
+              "version_uuid": "3ee53180-7016-0131-6d10-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/set_window_to_wall_ratio_by_facade",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/set_window_to_wall_ratio_by_facade",
+          "bcl_measure_class_name_ADDME": "SetWindowToWallRatioByFacade",
+          "measure_definition_class_name_CHANGE_TO_ME": "SetWindowToWallRatioByFacade",
+          "measure_definition_class_name": "SetWindowToWallRatioByFacade",
+          "bcl_measure_uuid": "3ee00160-7016-0131-6cfe-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "3ee09da0-7016-0131-6d00-00ffc0914e0d",
+          "bcl_measure_version_uuid": "3ee12650-7016-0131-6d02-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "3ee1af10-7016-0131-6d04-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "set_south_wwr",
+          "display_name": "Set South WWR",
+          "uuid": "3ee24b50-7016-0131-6d06-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "South WWR",
+                "machine_name": "south_wwr",
+                "name": "wwr",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "South WWR",
+              "machine_name": "south_wwr",
+              "name": "south_wwr",
+              "minimum": 0.0,
+              "maximum": 0.8,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 0.4
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 0.8
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 0.13333333333333333
+                  }
+                ],
+                "type": "triangle_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "3ee2d400-7016-0131-6d08-00ffc0914e0d",
+          "workflow_index": 3,
+          "workflow_step_type": "Measure"
+        },
+        {
+          "arguments": [
+            {
+              "display_name": "Sill Height (in).",
+              "machine_name": "sill_height_(in).",
+              "name": "sillHeight",
+              "value": 30.0,
+              "uuid": "3ee93ca0-7016-0131-6d1e-00ffc0914e0d",
+              "version_uuid": "3ee9c560-7016-0131-6d20-00ffc0914e0d"
+            },
+            {
+              "display_name": "Cardinal Direction.",
+              "machine_name": "cardinal_direction.",
+              "name": "facade",
+              "value": "West",
+              "uuid": "3eea61a0-7016-0131-6d22-00ffc0914e0d",
+              "version_uuid": "3eeaea50-7016-0131-6d24-00ffc0914e0d"
+            }
+          ],
+          "bcl_measure_directory": "./measures/set_window_to_wall_ratio_by_facade",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/set_window_to_wall_ratio_by_facade",
+          "bcl_measure_class_name_ADDME": "SetWindowToWallRatioByFacade",
+          "measure_definition_class_name_CHANGE_TO_ME": "SetWindowToWallRatioByFacade",
+          "measure_definition_class_name": "SetWindowToWallRatioByFacade",
+          "bcl_measure_uuid": "3ee5e140-7016-0131-6d12-00ffc0914e0d",
+          "measure_definition_uuid_CHANGE_TO_ME": "3ee66a00-7016-0131-6d14-00ffc0914e0d",
+          "bcl_measure_version_uuid": "3ee6f2b0-7016-0131-6d16-00ffc0914e0d",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "3ee78ef0-7016-0131-6d18-00ffc0914e0d",
+          "measure_type": "RubyMeasure",
+          "name": "set_west_wwr",
+          "display_name": "Set West WWR",
+          "uuid": "3ee817b0-7016-0131-6d1a-00ffc0914e0d",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "West WWR",
+                "machine_name": "west_wwr",
+                "name": "wwr",
+                "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "West WWR",
+              "machine_name": "west_wwr",
+              "name": "west_wwr",
+              "minimum": 0.0,
+              "maximum": 0.8,
+              "units": "",
+              "variable": true,
+              "variable_ADDME": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 0.4
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 0.8
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 0.13333333333333333
+                  }
+                ],
+                "type": "triangle_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "3ee8a060-7016-0131-6d1c-00ffc0914e0d",
+          "workflow_index": 4,
+          "workflow_step_type": "Measure"
+        }
+      ],
+      "analysis_type": "lhs"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seed/medium_office.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/SPtMasterTable_57167_2012_amy.epw"
+    }
+  }
+}

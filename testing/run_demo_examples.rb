@@ -14,7 +14,7 @@ api = OpenStudio::Analysis::ServerApi.new(options)
 
 api.delete_all()
 
-project_options = {}
+project_options = {:project_name => "PAT Export"}
 project_id = api.new_project(project_options)
 
 # ===== Disk IO Benchmark - Using PAT JSON Files=====
@@ -26,7 +26,8 @@ analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
     reset_uuids: true,
-    analysis_name: "PAT Export with 8 data points "}
+    analysis_name: "PAT Export with 8 data points"
+}
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 datapoint_files.each do |dp|
@@ -41,7 +42,7 @@ run_options = {
 api.run_analysis(analysis_id, run_options)
 
 # ===== LHS Sample and Run =====
-# fast models (~10 secs) with pivots
+formulation_file = "./SimpleContinuousExample/analysis.json" # fast models (~10 secs) with pivots
 formulation_file = "./SimpleContinuousExample/analysis.json"
 analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 
@@ -52,14 +53,14 @@ analysis_zip_file = "./SimpleContinuousExample/analysis.zip"
 options = {hostname: hostname}
 api = OpenStudio::Analysis::ServerApi.new(options)
 
-project_options = {}
+project_options = {:project_name => "LHS"}
 project_id = api.new_project(project_options)
 
 analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
-    reset_uuids: true
-
+    reset_uuids: true,
+    analysis_name: "Simple LHS Sample and Run with Pivot"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -73,7 +74,6 @@ run_options = {
         random_seed: 1979,
         algorithm: {
             number_of_samples: 100,
-            #number_of_samples: 3,
             sample_method: "all_variables"
             #sample_method: "individual_variables"
         }
@@ -101,13 +101,14 @@ api = OpenStudio::Analysis::ServerApi.new(options)
 
 #api.delete_all()
 
-project_options = {}
+project_options = {:project_name => "Optimizations"}
 project_id = api.new_project(project_options)
 
 analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
-    reset_uuids: true
+    reset_uuids: true,
+    analysis_name: "NSGA2"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -150,7 +151,8 @@ project_id = api.new_project(project_options)
 analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
-    reset_uuids: true
+    reset_uuids: true,
+    analysis_name: "Sequential Search"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -164,7 +166,7 @@ run_options = {
     problem: {
         random_seed: 1979,
         algorithm: {
-            number_of_samples: 4, # to discretize any continuous variables
+            number_of_samples: 10, # to discretize any continuous variables
             max_iterations: 100,
             objective_functions: [
                 "total_energy",

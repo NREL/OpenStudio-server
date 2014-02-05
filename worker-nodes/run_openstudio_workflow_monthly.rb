@@ -268,7 +268,7 @@ begin
   end    
 
   ros.log_message "Verifying location of Post Process Script", true
-  post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "post_process.rb"))
+  post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "post_process_monthly.rb"))
   if File.exists?(post_process_filename)
     ros.log_message "Post process file is #{post_process_filename}"
   else
@@ -302,11 +302,15 @@ begin
 
   # Initialize the objective function variable
   objective_functions = {}
-
+  puts "test"
+  ros.log_message "test log"
   # First read in the eplustbl.json file
   if File.exists?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
-
+    ros.log_message "result_json\n"
+    ros.log_message "#{result_json}"
+    ros.log_message "analysis_json[:analysis]['output_variables']\n"
+    ros.log_message "#{analysis_json[:analysis]['output_variables']}"
     ros.log_message "pulling out objective functions", true
     # Save the objective functions to the object for sending back to the simulation executive
     analysis_json[:analysis]['output_variables'].each do |variable|
