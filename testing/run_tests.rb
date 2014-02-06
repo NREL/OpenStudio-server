@@ -116,7 +116,7 @@ run_options = {
     allow_multiple_jobs: false,
     analysis_type: "nsga_nrel",
     simulate_data_point_filename: "simulate_data_point.rb",
-    run_data_point_filename: "run_openstudio_workflow.rb",
+    run_data_point_filename: "run_openstudio_workflow_monthly.rb",
     problem: {
         algorithm: {
             number_of_samples: 10,
