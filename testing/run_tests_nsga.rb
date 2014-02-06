@@ -48,9 +48,15 @@ run_options = {
             number_of_samples: 10,
             sample_method: "all_variables",
             generations: 2,
+	    cprob: 0.9,
+	    xoverdistidx: 2,
+	    mudistidx: 2,
+            mprob: 0.9,
             objective_functions: [
                 "heating_natural_gas",
-                "cooling_electricity"
+                "cooling_electricity",
+                "interior_equipment_electricity",
+                "fans_electricity"
             ]
         }
     }
