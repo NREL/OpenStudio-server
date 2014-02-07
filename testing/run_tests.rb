@@ -23,8 +23,9 @@ analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
     reset_uuids: true,
-    analysis_name: "Simple LHS Sample and Run with Pivot"
-
+    analysis_name: "Simple LHS Sample and Run with Pivot",
+    display_name: "LHS Example Project",
+    name: "lhs_example_project"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -97,7 +98,9 @@ analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
     reset_uuids: true,
-    analysis_name: "NSGA2"
+    analysis_name: "NSGA2",
+    display_name: "housecal",
+    name: "housecal"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -143,6 +146,8 @@ analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
     reset_uuids: true,
+    display_name: "seq search",
+    name: "seqsearch",
     analysis_name: "Sequential Search"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)

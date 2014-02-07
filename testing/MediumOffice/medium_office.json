@@ -1,10 +1,6 @@
 {
   "analysis": {
-    "display_name": "LHS Example Project",
-    "name": "lhs_example_project",
-    "parameter_space": [
-
-    ],
+    "parameter_space": [],
     "output_variables": [
       {
         "display_name": "Heating Natural Gas",
@@ -25,12 +21,7 @@
     ],
     "problem": {
       "algorithm": {
-        "sample_method": "all_variables",
-        "number_of_samples": 100,
-        "number_of_generations": 20,
-        "objective_functions": [
-
-        ]
+        "objective_functions": []
       },
       "name": "Problem",
       "workflow": [

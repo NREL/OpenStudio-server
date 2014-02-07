@@ -1,10 +1,6 @@
 {
   "analysis": {
-    "display_name": "housecal",
-    "name": "housecal",
-    "parameter_space": [
-
-    ],
+    "parameter_space": [],
     "output_variables": [
       {
         "display_name": "Heating Natural Gas",
