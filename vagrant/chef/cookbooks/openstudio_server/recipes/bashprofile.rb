@@ -2,9 +2,16 @@
 # Cookbook Name:: openstudio_server
 # Recipe:: bashprofile
 #
+
+
 ruby_block "update bash_profile" do
   block do
-    bash_filename = "/home/#{node[:openstudio_server][:bash_profile_user]}/.bash_profile"
+    bash_filename = nil
+    if platform_family?("debian")
+      bash_filename = "/home/#{node[:openstudio_server][:bash_profile_user]}/.bash_aliases"
+    else
+      bash_filename = "/home/#{node[:openstudio_server][:bash_profile_user]}/.bash_profile"
+    end
 
     if !File.exists?(bash_filename)
       File.open(bash_filename, "w") { |f| f << "# Chef autocreated bash_profile" }
