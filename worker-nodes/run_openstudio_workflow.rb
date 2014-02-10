@@ -201,8 +201,8 @@ begin
                     raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
                     argument_map[variable_name] = v.clone
                   else
-                    raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
-                    ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
+                    raise "[ERROR] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
+                    ros.log_message("[WARNING] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
                     break
                   end
                 else
