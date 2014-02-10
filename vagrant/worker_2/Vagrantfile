@@ -3,7 +3,7 @@
 
 Vagrant.configure("2") do |config|
   is_windows = (RUBY_PLATFORM =~ /mswin|mingw|cygwin/)
-
+  
   config.omnibus.chef_version = :latest
 
   # Every Vagrant virtual environment requires a box to build off of.
@@ -30,9 +30,9 @@ Vagrant.configure("2") do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   #config.vm.synced_folder "../../", "/vagrant", :nfs => !is_windows
-  config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => !is_windows
-  config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => !is_windows
-  config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => !is_windows
+  config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => use_nfs
+  config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => use_nfs
+  config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => use_nfs
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
