@@ -1,5 +1,6 @@
 <p id="notice"><%= notice %></p>
 
+<h2>Variable Information</h2>
 <table class="table table-striped">
   <thead>
   <tr>
@@ -18,5 +19,27 @@
 </table>
 
 <%= link_to(image_tag(@variable.preflight_images.first.image.url(:large)), @variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900']) unless @variable.preflight_images.first.nil? %>
+
+<br/>
+
+<h2>Data Points with this Variable</h2>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Data Point Name</th>
+    <th>Variable Value</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @dps.each do |dp| %>
+      <tr>
+        <td><%= link_to dp.name, dp %></td>
+        <td><%= dp.set_variable_values[@variable.id] %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+  
+  
 
 

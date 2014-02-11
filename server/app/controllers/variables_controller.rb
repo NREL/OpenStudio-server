@@ -14,6 +14,9 @@ class VariablesController < ApplicationController
   # GET /variables/1.json
   def show
     @variable = Variable.find(params[:id])
+    
+    # get all the datapoints that have this variable in the set_variable_values
+    @dps = DataPoint.exists("set_variable_values.#{@variable.id}" => true)
 
     respond_to do |format|
       format.html # show.html.erb
