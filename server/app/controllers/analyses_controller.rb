@@ -22,7 +22,7 @@ class AnalysesController < ApplicationController
     @objective_functions = []
 
     #todo: move this to the page_data or another secondary call
-    if not @analysis.nil?
+    if @analysis
       if @analysis.output_variables
         @analysis.output_variables.each do |ov|
           if ov['objective_function']
@@ -30,17 +30,18 @@ class AnalysesController < ApplicationController
           end
         end
       end
+
+      if @objective_functions.empty?
+        # todo: we need to standardize on the result of this
+        if @analysis['num_measure_groups']
+          @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_site_energy", 'units' => "EUI"}
+        else
+          @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_energy", 'units' => "EUI"}
+        end
+        @objective_functions << {'display_name' => "Total Life Cycle Cost", 'name' => "total_life_cycle_cost", 'units' => "USD"}
+      end
     end
 
-    if @objective_functions.empty?
-      # todo: we need to standardize on the result of this
-      if @analysis['num_measure_groups']
-        @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_site_energy", 'units' => "EUI"}
-      else
-        @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_energy", 'units' => "EUI"}
-      end
-      @objective_functions << {'display_name' => "Total Life Cycle Cost", 'name' => "total_life_cycle_cost", 'units' => "USD"}
-    end
 
     respond_to do |format|
       format.html # show.html.erb
