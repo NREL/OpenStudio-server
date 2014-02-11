@@ -61,8 +61,6 @@ OptionParser.new do |opts|
 end.parse!
 puts "options = #{options.inspect}"
 
-
-
 current_dir = Dir.pwd
 puts "current directory is: #{current_dir}"
 Dir.chdir(options[:path])
@@ -91,19 +89,25 @@ begin
   Dir.chdir(dest_dir)
   logger.info "Starting simulation in run directory: #{Dir.pwd}"
 
-  File.open('stdout-expandobject','w') do |file|
-    IO.popen('ExpandObjects') { |io| while (line = io.gets) do file << line end }
+  File.open('stdout-expandobject', 'w') do |file|
+    IO.popen('ExpandObjects') { |io|
+      while (line = io.gets) do
+        file << line
+      end }
   end
 
   # Check if expand objects did anythying
   if File.exists?("expanded.idf")
     FileUtils.mv("in.idf", "pre-expand.idf", force: true) if File.exists?("in.idf")
-    FileUtils.mv("expanded.idf", "in.idf", force: true )
+    FileUtils.mv("expanded.idf", "in.idf", force: true)
   end
 
   #create stdout
-  File.open('stdout-energyplus','w') do |file|
-    IO.popen('EnergyPlus') { |io| while (line = io.gets) do file << line end }
+  File.open('stdout-energyplus', 'w') do |file|
+    IO.popen('EnergyPlus') { |io|
+      while (line = io.gets) do
+        file << line
+      end }
   end
 
   if !options[:postprocess].nil?
@@ -113,7 +117,10 @@ begin
       FileUtils.copy(support_file, File.basename(support_file))
     end
 
-    IO.popen("ruby -I#{options[:os_path]} post_process.rb") { |io| while (line = io.gets) do puts line end }
+    IO.popen("ruby -I#{options[:os_path]} post_process.rb") { |io|
+      while (line = io.gets) do
+        puts line
+      end }
   end
 
 rescue Exception => e
