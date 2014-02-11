@@ -142,7 +142,8 @@ module Analysis::R
       {r: @r.converse("samples"), image_path: save_file_name}
     end
 
-    def sample_all_variables(selected_variables, number_of_samples)
+    def sample_all_variables(selected_variables, number_of_samples, grouped_by_measure = false)
+      grouped = {}
       samples = {}
       var_types = []
 
@@ -154,7 +155,7 @@ module Analysis::R
       # TODO: performance smell... optimize this using Parallel
       i_var = 0
       selected_variables.each do |var|
-        Rails.logger.info "sampling variable #{var.name}"
+        Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
         sfp = nil
         
         # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
@@ -167,6 +168,8 @@ module Analysis::R
           var_types << "continuous"
         end
 
+        grouped["#{var.measure.id}"] = {} if !grouped.has_key?(var.measure.id)
+        grouped["#{var.measure.id}"]["#{var.id}"] = sfp[:r]
         samples["#{var.id}"] = sfp[:r]
         if sfp[:image_path]
           pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
@@ -179,6 +182,13 @@ module Analysis::R
         i_var += 1
       end
 
+      if grouped_by_measure
+        grouped.each do |g|
+          Rails.logger.info "Groud ID: #{g.inspect}"
+        end
+        samples = grouped 
+      end
+      Rails.logger.info "Grouped variables are #{grouped}"
       [samples, var_types]
     end
   end
