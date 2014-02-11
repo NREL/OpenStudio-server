@@ -2,6 +2,7 @@
 require 'optparse'
 require 'fileutils'
 require 'pathname'
+require 'logger'
 
 options = {}
 OptionParser.new do |opts|
@@ -58,8 +59,9 @@ OptionParser.new do |opts|
     options[:support_files] = path
   end
 end.parse!
-
 puts "options = #{options.inspect}"
+
+
 
 current_dir = Dir.pwd
 puts "current directory is: #{current_dir}"
@@ -68,7 +70,10 @@ puts "changed directory to analysis: #{Dir.pwd}"
 dest_dir = "./run"
 FileUtils.mkdir_p(dest_dir) #create run folder to either execute the simulations, or to copy back
 
+logger = Logger.new("#{dest_dir}/run_energyplus.log")
+
 #can't create symlinks because the /vagrant mount is actually a windows mount
+logger.info "Copying files to run directory: #{dest_dir}"
 epath = File.dirname(options[:energyplus])
 FileUtils.copy("#{epath}/libbcvtb.so", "#{dest_dir}/libbcvtb.so")
 FileUtils.copy("#{epath}/libepexpat.so", "#{dest_dir}/libepexpat.so")
@@ -82,9 +87,9 @@ FileUtils.copy(options[:osm], "#{dest_dir}/in.osm")
 FileUtils.copy(options[:idf], "#{dest_dir}/in.idf")
 FileUtils.copy(options[:weather], "#{dest_dir}/in.epw")
 
-
 begin
   Dir.chdir(dest_dir)
+  logger.info "Starting simulation in run directory: #{Dir.pwd}"
 
   File.open('stdout-expandobject','w') do |file|
     IO.popen('ExpandObjects') { |io| while (line = io.gets) do file << line end }

@@ -77,8 +77,8 @@ def create_osm_from_xml(xml, run_path, weather_path, space_lib_path, logger)
 
   osxt = Main.new(weather_path, space_lib_path)
   osm, idf, new_xml, building_name, weather_file = osxt.process(xml.to_s, false, true)
-  if osm 
-    File.open("#{run_path}/xml_out.osm", 'w') {|f| f << osm}
+  if osm
+    File.open("#{run_path}/xml_out.osm", 'w') { |f| f << osm }
 
     logger.log_message "Finished XML to OSM translation", true
   else
@@ -105,7 +105,7 @@ begin
   @space_lib_path = File.expand_path(File.join(File.dirname(__FILE__), "../lib/openstudio_xml/space_types"))
 
   ros.log_message "Space Type Library set to #{@space_lib_path}"
-  
+
   ros.log_message "Getting Problem JSON input", true
 
   # get json from database
@@ -150,7 +150,7 @@ begin
         ros.log_message "Initial weather file name is #{@weather_fqp}", true
         @weather_filename = File.basename(@weather_fqp)
         @weather_path = File.dirname(@weather_fqp)
-        
+
         ros.log_message "Weather file path is #{@weather_path}", true
 
         if !File.exists?(@weather_filename)
@@ -175,7 +175,7 @@ begin
 
           ros.log_message "XML Measure path is #{measure_path}"
           ros.log_message "XML Measure name is #{measure_name}"
-          
+
           # this should only include the file if it has not already been included
           require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, 'measure'))}"
 
@@ -195,6 +195,7 @@ begin
           end
 
           ros.log_message "iterate over variables for workflow item #{wf['name']}", true
+          variables_found = false
           if wf['variables']
             wf['variables'].each do |wf_var|
 
@@ -216,9 +217,10 @@ begin
                         ros.log_message "VERY SPECIFIC case to change the location to #{data_point_json[:data_point]['set_variable_values'][variable_uuid]}"
                         @weather_filename = data_point_json[:data_point]['set_variable_values'][variable_uuid]
                       end
+                      variables_found = true
                     else
-                      raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
                       ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
+                      raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
                       break
                     end
                   else
@@ -231,8 +233,13 @@ begin
             end
           end
 
-          # Run the XML Measure
-          xml_changed = measure.run(@xml_model, nil, args)
+          # Run the XML Measure        
+          if variables_found
+            xml_changed = measure.run(@xml_model, nil, args)
+          else
+            ros.log_message("No variable for measure... skipping")
+          end
+          
 
           ros.log_message "Finished applying measure workflow #{wf['name']} with change flag set to '#{xml_changed}'", true
 
@@ -260,7 +267,7 @@ begin
           measure_path = wf['bcl_measure_directory'].split("/").last(2).first
           measure_name = wf['bcl_measure_class_name_ADDME']
 
-          
+
           require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
 
           measure = measure_name.constantize.new
@@ -389,8 +396,8 @@ begin
   end
 
   ros.log_message "Waiting for simulation to finish", true
-  command = "ruby #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} \
-              -w #{@weather_path}/#{@weather_filename} -p #{post_process_filename}"
+  command = "ruby #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} "\
+            "-w #{@weather_path}/#{@weather_filename} -p #{post_process_filename}"
   #command += " -e #{run_args[:energyplus]}" unless run_args.nil?
   #command += " --idd-path #{run_args[:idd]}" unless run_args.nil?
   #command += " --support-files #{support_files}" unless support_files.nil?
