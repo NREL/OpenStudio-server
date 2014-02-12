@@ -35,7 +35,7 @@ class Analysis::Lhs
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
-    
+
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
@@ -57,25 +57,45 @@ class Analysis::Lhs
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
 
     pivot_array = Variable.pivot_array(@analysis.id)
-    static_array = Variable.static_array(@analysis.id)
+
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
     # generate the probabilities for all variables as column vectors
     @r.converse("print('starting lhs')")
+    samples = nil
+    var_types = nil
+    static_array = nil
     Rails.logger.info "Starting sampling"
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-    if @analysis.problem['algorithm']['sample_method'] == "all_variables"
-      # Do the work to mash up the samples, pivots, and static variables before creating the data points
-      Rails.logger.info "Samples are #{samples}"
-      samples = hash_of_array_to_array_of_hash(samples)
-      Rails.logger.info "Flipping samples around yields #{samples}"
-    elsif @analysis.problem['algorithm']['sample_method'] == "individual_variables"
-      # Do the work to mash up the samples, pivots, and static variables before creating the data points
-      Rails.logger.info "Samples are #{samples}"
-      samples = hash_of_array_to_array_of_hash_non_combined(samples)
-      Rails.logger.info "Non-combined samples yields #{samples}"
+    if @analysis.problem['algorithm']['sample_method'] == "all_variables" ||
+        @analysis.problem['algorithm']['sample_method'] == "individual_variables"
+      static_array = Variable.static_array(@analysis.id)
+      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+      if @analysis.problem['algorithm']['sample_method'] == "all_variables"
+        # Do the work to mash up the samples, pivots, and static variables before creating the data points
+        Rails.logger.info "Samples are #{samples}"
+        samples = hash_of_array_to_array_of_hash(samples)
+        Rails.logger.info "Flipping samples around yields #{samples}"
+      elsif @analysis.problem['algorithm']['sample_method'] == "individual_variables"
+        # Do the work to mash up the samples, pivots, and static variables before creating the data points
+        Rails.logger.info "Samples are #{samples}"
+        samples = hash_of_array_to_array_of_hash_non_combined(samples)
+        Rails.logger.info "Non-combined samples yields #{samples}"
+      end
+
+      # For all variables and individual_variables, the static variables can be added afterwards because they are (or 
+      # should be) independent of the actual variables
+      Rails.logger.info "Adding in static variables"
+      samples = add_static_variables(samples, static_array)
+      Rails.logger.info "Samples after static_array #{samples}"
+    elsif @analysis.problem['algorithm']['sample_method'] == "individual_measures"
+      # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is 
+      # useful when you need each measure to be evaluated individually.  The variables are then linked.
+      static_array_grouped = Variable.static_array(@analysis.id, true)
+      samples_grouped, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'], true)
+      samples = grouped_hash_of_array_to_array_of_hash(samples_grouped, static_array_grouped)
+      Rails.logger.info "Grouped samples are #{samples}"
     else
       raise "no sampling method defined (all_variables or individual_variables)"
     end
@@ -84,10 +104,6 @@ class Analysis::Lhs
     samples = add_pivots(samples, pivot_array)
     Rails.logger.info "Finished adding the pivots resulting in #{samples}"
 
-    Rails.logger.info "Adding in static variables"
-    samples = add_static_variables(samples, static_array)
-    Rails.logger.info "Samples after static_array #{samples}"
-                                                                                          
     # Add the data points to the database
     isample = 0
     samples.each do |sample| # do this in parallel
