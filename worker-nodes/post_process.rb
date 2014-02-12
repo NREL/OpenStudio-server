@@ -8,7 +8,13 @@ def sql_query(sql, report_name, query)
   val = nil
   result = sql.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND #{query}")
   if result
-    val = result.get
+    begin
+      val = result.get
+    rescue Exception=>e
+      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+      puts log_message
+      val = 10e9
+    end
   end
   val
 end
