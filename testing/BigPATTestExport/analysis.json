@@ -5,7 +5,7 @@
   "name" : "Simple Project Analysis",
   "num_measure_groups" : 39,
   "num_ruby_continuous_variables" : 0,
-  "openstudio_version" : "1.2.3",
+  "openstudio_version" : "1.2.4",
   "problem" :   {
    "display_name" : "Simple Project Problem",
    "name" : "Simple Project Problem",
@@ -26,7 +26,7 @@
      ],
      "name" : "Alternative Model",
      "uuid" : "b87a835d-7c42-4866-8350-3148bd8baa29",
-     "version_uuid" : "82b9948a-1071-48cc-989e-c60a2071c993",
+     "version_uuid" : "ef6b0879-bfad-4c07-b032-111f7f62f707",
      "workflow_index" : 0,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -55,9 +55,9 @@
          "version_uuid" : "c49fbbc7-53f4-4666-9234-bbe247e1b758"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "80566a0d-27dd-41ae-8168-2173d1e5bd71",
+       "bcl_measure_version_uuid" : "e67b926e-ee35-47e9-b870-f679b2c31431",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building Relative to Current Orientation 5",
        "input_file_type" : "OSM",
@@ -85,9 +85,9 @@
          "version_uuid" : "dd44c9b6-c3a6-4fd3-ac3b-28aba0b320d7"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "80566a0d-27dd-41ae-8168-2173d1e5bd71",
+       "bcl_measure_version_uuid" : "e67b926e-ee35-47e9-b870-f679b2c31431",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building Relative to Current Orientation 10",
        "input_file_type" : "OSM",
@@ -115,9 +115,9 @@
          "version_uuid" : "22c5d91b-44a6-46db-9a6a-63ed6aec6298"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/RotateBuilding",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/RotateBuilding",
        "bcl_measure_uuid" : "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
-       "bcl_measure_version_uuid" : "80566a0d-27dd-41ae-8168-2173d1e5bd71",
+       "bcl_measure_version_uuid" : "e67b926e-ee35-47e9-b870-f679b2c31431",
        "description" : "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
        "display_name" : "Rotate Building Relative to Current Orientation 15",
        "input_file_type" : "OSM",
@@ -133,7 +133,7 @@
      ],
      "name" : "Rotate Building Relative to Current Orientation Group",
      "uuid" : "1b178f13-8dc5-4ee3-86cf-4476bbbce770",
-     "version_uuid" : "20ffd249-0d86-4c60-8363-404b97dc0361",
+     "version_uuid" : "4ca2342b-b03e-4423-98b4-ced493d86c21",
      "workflow_index" : 1,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -188,9 +188,9 @@
          "version_uuid" : "6e22b845-40ee-406b-9c1c-365dd99942dc"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetExtWallToGroundBoundaryConditionByStory",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetExtWallToGroundBoundaryConditionByStory",
        "bcl_measure_uuid" : "be9023ea-fefe-4074-ac03-718ccfb6d25f",
-       "bcl_measure_version_uuid" : "0880f161-a232-46a1-a2eb-a2f25584c4e6",
+       "bcl_measure_version_uuid" : "0cd23cc7-bbc5-448a-9d6f-129760009d94",
        "description" : "Exterior walls can't have sub surfaces",
        "display_name" : "Set Ext Wall To Ground Boundary Condition By Story (E+ should fail)",
        "input_file_type" : "OSM",
@@ -206,7 +206,7 @@
      ],
      "name" : "Set Ext Wall To Ground Boundary Condition By Story Group",
      "uuid" : "c39a3ee0-3c8d-4c2d-9d91-f1daa71445ff",
-     "version_uuid" : "7213d75c-4b12-45ca-9ead-945639a2c3d4",
+     "version_uuid" : "a6c671ec-5039-4ffa-bfce-0704e024bde9",
      "workflow_index" : 2,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -1641,9 +1641,9 @@
          "version_uuid" : "63e0ab4d-4436-4e72-93d9-6c40363a52f3"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetInteriorWallsAndFloorsToAdiabatic",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetInteriorWallsAndFloorsToAdiabatic",
        "bcl_measure_uuid" : "7e440f88-1b2d-444e-8586-9a8d1ac84b8d",
-       "bcl_measure_version_uuid" : "16d86450-070f-4323-9e6d-8e411fe358f6",
+       "bcl_measure_version_uuid" : "e6fa5cea-fac3-4eb8-8d9c-a6af548becc3",
        "description" : "Set exterior walls to Adiabatic and assign a hard construction.",
        "display_name" : "Set Interior Walls to Adiabatic Alternative",
        "input_file_type" : "OSM",
@@ -1659,7 +1659,7 @@
      ],
      "name" : "Set Interior Walls to Adiabatic Group",
      "uuid" : "5093638d-6b6b-4727-8f9e-24c7edd25de5",
-     "version_uuid" : "54474352-12b5-4c0a-9eda-0a2a24671574",
+     "version_uuid" : "fe9c8740-738b-44cc-99dd-21165722bd46",
      "workflow_index" : 3,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -1722,9 +1722,9 @@
          "version_uuid" : "3a893189-ec22-4c09-a221-d807e0df3ddd"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
        "bcl_measure_uuid" : "34877255-5bb5-45db-ad45-abd9ca80960c",
-       "bcl_measure_version_uuid" : "503a1a04-01aa-4098-a75b-cc7d2d002552",
+       "bcl_measure_version_uuid" : "f9b8bfc9-e828-457d-97ee-95aa5964c77a",
        "description" : "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. If a wall?s insulation matches or exceeds the requested value then it will not be altered. Costs for a construction can be adjusted",
        "display_name" : "Set R-value of Insulation for Exterior Walls to a Specific Value R-15",
        "input_file_type" : "OSM",
@@ -1786,9 +1786,9 @@
          "version_uuid" : "a1a37e61-cbb1-4fbd-aa77-a33c9f505f11"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
        "bcl_measure_uuid" : "34877255-5bb5-45db-ad45-abd9ca80960c",
-       "bcl_measure_version_uuid" : "503a1a04-01aa-4098-a75b-cc7d2d002552",
+       "bcl_measure_version_uuid" : "f9b8bfc9-e828-457d-97ee-95aa5964c77a",
        "description" : "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. If a wall?s insulation matches or exceeds the requested value then it will not be altered. Costs for a construction can be adjusted",
        "display_name" : "Set R-value of Insulation for Exterior Walls to a Specific Value R-17.5",
        "input_file_type" : "OSM",
@@ -1850,9 +1850,9 @@
          "version_uuid" : "b824e924-fc3d-474e-b6bf-0e04a486a9ff"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForExteriorWalls",
        "bcl_measure_uuid" : "34877255-5bb5-45db-ad45-abd9ca80960c",
-       "bcl_measure_version_uuid" : "503a1a04-01aa-4098-a75b-cc7d2d002552",
+       "bcl_measure_version_uuid" : "f9b8bfc9-e828-457d-97ee-95aa5964c77a",
        "description" : "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls. If a wall?s insulation matches or exceeds the requested value then it will not be altered. Costs for a construction can be adjusted",
        "display_name" : "Set R-value of Insulation for Exterior Walls to a Specific Value R-20",
        "input_file_type" : "OSM",
@@ -1868,7 +1868,7 @@
      ],
      "name" : "Set R-value of Insulation for Exterior Walls to a Specific Value Group",
      "uuid" : "cc60b9cb-e4b2-4494-86c1-a6afe0a60b89",
-     "version_uuid" : "87a2672e-7482-48fc-8389-b7859a200d3b",
+     "version_uuid" : "dd090676-ddfb-4ec5-b7ba-46639dfb8f4c",
      "workflow_index" : 4,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -1930,9 +1930,9 @@
          "version_uuid" : "36e8f8f6-b387-4abf-b061-30829339e6bf"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
        "bcl_measure_uuid" : "c6b78646-be8e-425b-af79-fdbbcd0d58d5",
-       "bcl_measure_version_uuid" : "414f3cff-3ee7-434a-bcfb-2fda195c4007",
+       "bcl_measure_version_uuid" : "226c8b1a-24ba-413f-8f9d-d38da39db424",
        "description" : "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
        "display_name" : "Set R-value of Insulation for Roofs to a Specific Value R30",
        "input_file_type" : "OSM",
@@ -1994,9 +1994,9 @@
          "version_uuid" : "ef2d201b-3d76-48bb-9567-dce108c97a6c"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
        "bcl_measure_uuid" : "c6b78646-be8e-425b-af79-fdbbcd0d58d5",
-       "bcl_measure_version_uuid" : "414f3cff-3ee7-434a-bcfb-2fda195c4007",
+       "bcl_measure_version_uuid" : "226c8b1a-24ba-413f-8f9d-d38da39db424",
        "description" : "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
        "display_name" : "Set R-value of Insulation for Roofs to a Specific Value R40",
        "input_file_type" : "OSM",
@@ -2058,9 +2058,9 @@
          "version_uuid" : "7f1acd8c-0118-48db-a3c3-f3a014ccedb2"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/IncreaseInsulationRValueForRoofs",
        "bcl_measure_uuid" : "c6b78646-be8e-425b-af79-fdbbcd0d58d5",
-       "bcl_measure_version_uuid" : "414f3cff-3ee7-434a-bcfb-2fda195c4007",
+       "bcl_measure_version_uuid" : "226c8b1a-24ba-413f-8f9d-d38da39db424",
        "description" : "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
        "display_name" : "Set R-value of Insulation for Roofs to a Specific Value R-50",
        "input_file_type" : "OSM",
@@ -2076,7 +2076,7 @@
      ],
      "name" : "Set R-value of Insulation for Roofs to a Specific Value Group",
      "uuid" : "5fefacc8-9af7-4d8d-947f-e8ec678480f8",
-     "version_uuid" : "18956d6f-45f6-47d8-a3d6-c617f89d1955",
+     "version_uuid" : "c259349b-8181-4160-84d4-fc25f72d47a2",
      "workflow_index" : 5,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -2223,9 +2223,9 @@
          "version_uuid" : "46cfa3e3-83fa-44c5-8c22-28414f26e0b3"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerAreaToConstruction",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerAreaToConstruction",
        "bcl_measure_uuid" : "bf6ac5d5-6348-4012-b7b4-1200a672e377",
-       "bcl_measure_version_uuid" : "6365fa55-000a-4180-8ede-9d4ec8095987",
+       "bcl_measure_version_uuid" : "1d230554-cc8d-4153-929f-a73bd7cf34fc",
        "description" : "This measure will create life cycle cost objects associated with a the building. You can set a material & installation cost, demolition cost, and O&M costs. Optionally existing cost objects already associated with building can be deleted. This measure will not affect energy use of the building.",
        "display_name" : "Add Cost per Area to Construction",
        "input_file_type" : "OSM",
@@ -2241,7 +2241,7 @@
      ],
      "name" : "Add Cost per Area to Construction Group",
      "uuid" : "b048de81-9bc7-4118-854b-c5e03cd87565",
-     "version_uuid" : "9424745f-db4d-4778-878c-5e71936e4a00",
+     "version_uuid" : "59ef05d4-43dc-426f-b47e-3450db50cfaa",
      "workflow_index" : 6,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -3723,9 +3723,9 @@
          "version_uuid" : "143cdfd2-2b01-45b2-b2cb-8f0fb19bae22"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostperAreatoUnusedConstruction",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostperAreatoUnusedConstruction",
        "bcl_measure_uuid" : "ad632782-125f-45c8-a9cf-516e184b418a",
-       "bcl_measure_version_uuid" : "f922c365-ab79-40da-b7d4-77c3f32088e4",
+       "bcl_measure_version_uuid" : "1eceafd1-8eb0-49d4-bdd3-772962daea67",
        "description" : "This measure is the same as \"Add Cost per Area to Construction\" except that it only offers constructions that are not used on any surfaces in the baseline construction.",
        "display_name" : "Add Cost per Area to Unused Construction",
        "input_file_type" : "OSM",
@@ -3741,7 +3741,7 @@
      ],
      "name" : "Add Cost per Area to Unused Construction Group",
      "uuid" : "a3840fbe-efdf-4e52-b419-d89e7d762633",
-     "version_uuid" : "5e484dc1-f6dc-4b8c-8cd3-7849183f7bdb",
+     "version_uuid" : "400f813e-1b1e-4c92-9773-fdfd588dcc56",
      "workflow_index" : 7,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -4072,9 +4072,9 @@
          "version_uuid" : "a8120a32-2fd2-4931-808e-f1ccb7bf66e8"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReplaceExteriorWindowConstruction",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReplaceExteriorWindowConstruction",
        "bcl_measure_uuid" : "e9cc8132-fe83-4cd6-a168-8c7637b04e12",
-       "bcl_measure_version_uuid" : "d905ca7b-1556-406f-bcb8-98f3ad7e85dd",
+       "bcl_measure_version_uuid" : "fe340f1c-ceec-418d-b73e-4a73870692fa",
        "description" : "Replace existing windows with different windows to change thermal or lighting performance.  Window technology has improved drastically over the years, and double or triple-pane high performance windows currently on the market can cut down on envelope loads greatly.  Window frames with thermal breaks reduce the considerable energy that can transfer through thermally unbroken frames.  High performance windows typically also come with low-emissivity (low?e) glass to keep radiant heat on the same side of the glass from where the heat originated. This means that during the cooling months a low-e glass would tend to keep radiant heat from the sun on the outside of the window, which would keep the inside of a building cooler. Conversely, during heating months low-e glass helps keep radiant heat from inside the building on the inside, which would keep the inside of a building warmer.  Life cycle cost values may be added for the new window applied by the measure.",
        "display_name" : "Replace Exterior Window Constructions with a Different Construction from the Model Alternative",
        "input_file_type" : "OSM",
@@ -4404,9 +4404,9 @@
          "version_uuid" : "1b7e5fa7-88c9-47a7-b07a-1b3d178f4992"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReplaceExteriorWindowConstruction",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReplaceExteriorWindowConstruction",
        "bcl_measure_uuid" : "e9cc8132-fe83-4cd6-a168-8c7637b04e12",
-       "bcl_measure_version_uuid" : "d905ca7b-1556-406f-bcb8-98f3ad7e85dd",
+       "bcl_measure_version_uuid" : "fe340f1c-ceec-418d-b73e-4a73870692fa",
        "description" : "Replace existing windows with different windows to change thermal or lighting performance.  Window technology has improved drastically over the years, and double or triple-pane high performance windows currently on the market can cut down on envelope loads greatly.  Window frames with thermal breaks reduce the considerable energy that can transfer through thermally unbroken frames.  High performance windows typically also come with low-emissivity (low?e) glass to keep radiant heat on the same side of the glass from where the heat originated. This means that during the cooling months a low-e glass would tend to keep radiant heat from the sun on the outside of the window, which would keep the inside of a building cooler. Conversely, during heating months low-e glass helps keep radiant heat from inside the building on the inside, which would keep the inside of a building warmer.  Life cycle cost values may be added for the new window applied by the measure.",
        "display_name" : "Replace Exterior Window Constructions with a Different Construction from the Model Alternative 1",
        "input_file_type" : "OSM",
@@ -4736,9 +4736,9 @@
          "version_uuid" : "281fa1b4-f333-4068-b2a8-5ed9d0778cc9"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReplaceExteriorWindowConstruction",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReplaceExteriorWindowConstruction",
        "bcl_measure_uuid" : "e9cc8132-fe83-4cd6-a168-8c7637b04e12",
-       "bcl_measure_version_uuid" : "d905ca7b-1556-406f-bcb8-98f3ad7e85dd",
+       "bcl_measure_version_uuid" : "fe340f1c-ceec-418d-b73e-4a73870692fa",
        "description" : "Replace existing windows with different windows to change thermal or lighting performance.  Window technology has improved drastically over the years, and double or triple-pane high performance windows currently on the market can cut down on envelope loads greatly.  Window frames with thermal breaks reduce the considerable energy that can transfer through thermally unbroken frames.  High performance windows typically also come with low-emissivity (low?e) glass to keep radiant heat on the same side of the glass from where the heat originated. This means that during the cooling months a low-e glass would tend to keep radiant heat from the sun on the outside of the window, which would keep the inside of a building cooler. Conversely, during heating months low-e glass helps keep radiant heat from inside the building on the inside, which would keep the inside of a building warmer.  Life cycle cost values may be added for the new window applied by the measure.",
        "display_name" : "Replace Exterior Window Constructions with a Different Construction from the Model Alternative 2",
        "input_file_type" : "OSM",
@@ -4754,7 +4754,7 @@
      ],
      "name" : "Replace Exterior Window Constructions with a Different Construction from the Model Group",
      "uuid" : "a07b5885-f09e-4d0c-9088-367fd3690d62",
-     "version_uuid" : "23ebb67f-ea6b-480e-a044-823e99c7bf1a",
+     "version_uuid" : "4049cb7f-90b5-452f-a290-dee355ce901f",
      "workflow_index" : 8,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -4827,9 +4827,9 @@
          "version_uuid" : "651a0c9b-d31f-4fa7-8541-d13d157ef6ff"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetWindowToWallRatioByFacade",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetWindowToWallRatioByFacade",
        "bcl_measure_uuid" : "f347ae80-48b4-4c40-bfd4-6c5139b38136",
-       "bcl_measure_version_uuid" : "f6ce83d6-cb8f-4a6a-9fad-7cdbeec4fb91",
+       "bcl_measure_version_uuid" : "e1feb91f-b77f-4ace-acea-480542e074ae",
        "description" : "This measure will set the window to wall ratio for exterior surfaces with a specified orientation. If one or more windows exist on an affected wall, they will be removed and replaced with a single ribbon window. Doors will not be removed. If the requested ratio can?t be achieved then the wall will remain un-touched.",
        "display_name" : "Set Window to Wall Ratio by Facade 0.3 South",
        "input_file_type" : "OSM",
@@ -4901,9 +4901,9 @@
          "version_uuid" : "55fc3de0-3a57-4062-862e-b11147ccf211"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetWindowToWallRatioByFacade",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetWindowToWallRatioByFacade",
        "bcl_measure_uuid" : "f347ae80-48b4-4c40-bfd4-6c5139b38136",
-       "bcl_measure_version_uuid" : "f6ce83d6-cb8f-4a6a-9fad-7cdbeec4fb91",
+       "bcl_measure_version_uuid" : "e1feb91f-b77f-4ace-acea-480542e074ae",
        "description" : "This measure will set the window to wall ratio for exterior surfaces with a specified orientation. If one or more windows exist on an affected wall, they will be removed and replaced with a single ribbon window. Doors will not be removed. If the requested ratio can?t be achieved then the wall will remain un-touched.",
        "display_name" : "Set Window to Wall Ratio by Facade 0.25 South",
        "input_file_type" : "OSM",
@@ -4975,9 +4975,9 @@
          "version_uuid" : "d8666918-e7b5-46cf-8be4-10af216ce61d"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetWindowToWallRatioByFacade",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetWindowToWallRatioByFacade",
        "bcl_measure_uuid" : "f347ae80-48b4-4c40-bfd4-6c5139b38136",
-       "bcl_measure_version_uuid" : "f6ce83d6-cb8f-4a6a-9fad-7cdbeec4fb91",
+       "bcl_measure_version_uuid" : "e1feb91f-b77f-4ace-acea-480542e074ae",
        "description" : "This measure will set the window to wall ratio for exterior surfaces with a specified orientation. If one or more windows exist on an affected wall, they will be removed and replaced with a single ribbon window. Doors will not be removed. If the requested ratio can?t be achieved then the wall will remain un-touched.",
        "display_name" : "Set Window to Wall Ratio by Facade 0.2 South",
        "input_file_type" : "OSM",
@@ -4993,7 +4993,7 @@
      ],
      "name" : "Set Window to Wall Ratio by Facade Group",
      "uuid" : "df78f824-e28e-4efd-84cf-3acae5c6b668",
-     "version_uuid" : "6c5361ad-616d-40c9-8abb-07cba8c4bf86",
+     "version_uuid" : "1b7a6e3d-f483-40c9-a4f4-2104ad747546",
      "workflow_index" : 9,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -6293,9 +6293,9 @@
          "version_uuid" : "6dca5c37-7013-4423-9cee-1eae4db715fc"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOverhangsByProjectionFactor",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOverhangsByProjectionFactor",
        "bcl_measure_uuid" : "1e29e117-3916-4368-b24d-75da54045956",
-       "bcl_measure_version_uuid" : "266ff7d9-d680-4b30-82d3-cd0afa082d94",
+       "bcl_measure_version_uuid" : "98dfdddc-6af3-455b-97e8-7b5235244b64",
        "description" : "Add overhangs by projection factor to specified windows. The projection factor is the overhang depth divided by the window height. This can be applied to windows by the closest cardinal direction. If baseline model contains overhangs made by this measure, they will be replaced. Optionally the measure can delete any pre-existing space shading surfaces.",
        "display_name" : "Add Overhangs by Projection Factor 0.15 South",
        "input_file_type" : "OSM",
@@ -7594,9 +7594,9 @@
          "version_uuid" : "e155256d-c949-486c-9733-3ef28b4809cf"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOverhangsByProjectionFactor",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOverhangsByProjectionFactor",
        "bcl_measure_uuid" : "1e29e117-3916-4368-b24d-75da54045956",
-       "bcl_measure_version_uuid" : "266ff7d9-d680-4b30-82d3-cd0afa082d94",
+       "bcl_measure_version_uuid" : "98dfdddc-6af3-455b-97e8-7b5235244b64",
        "description" : "Add overhangs by projection factor to specified windows. The projection factor is the overhang depth divided by the window height. This can be applied to windows by the closest cardinal direction. If baseline model contains overhangs made by this measure, they will be replaced. Optionally the measure can delete any pre-existing space shading surfaces.",
        "display_name" : "Add Overhangs by Projection Factor 0.2 South",
        "input_file_type" : "OSM",
@@ -8895,9 +8895,9 @@
          "version_uuid" : "a4838128-0228-4190-abde-86b5dc772162"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOverhangsByProjectionFactor",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOverhangsByProjectionFactor",
        "bcl_measure_uuid" : "1e29e117-3916-4368-b24d-75da54045956",
-       "bcl_measure_version_uuid" : "266ff7d9-d680-4b30-82d3-cd0afa082d94",
+       "bcl_measure_version_uuid" : "98dfdddc-6af3-455b-97e8-7b5235244b64",
        "description" : "Add overhangs by projection factor to specified windows. The projection factor is the overhang depth divided by the window height. This can be applied to windows by the closest cardinal direction. If baseline model contains overhangs made by this measure, they will be replaced. Optionally the measure can delete any pre-existing space shading surfaces.",
        "display_name" : "Add Overhangs by Projection Factor 0.25 South",
        "input_file_type" : "OSM",
@@ -8913,7 +8913,7 @@
      ],
      "name" : "Add Overhangs by Projection Factor Group",
      "uuid" : "ded29d04-56b2-4e74-bdde-db8db8379bf7",
-     "version_uuid" : "a82c8027-e772-47cc-9eff-2ad0b0219b75",
+     "version_uuid" : "38d85fd8-ef7c-4957-b72f-ec94433ed1b4",
      "workflow_index" : 10,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -9028,9 +9028,9 @@
          "version_uuid" : "59cb6780-7930-4faf-9ce9-70b626332961"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceSpaceInfiltrationByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceSpaceInfiltrationByPercentage",
        "bcl_measure_uuid" : "d8161857-8b77-4e1a-a76c-ae5deab7c1e0",
-       "bcl_measure_version_uuid" : "d8754ee5-7136-4f4d-8ab9-4baade5d7cda",
+       "bcl_measure_version_uuid" : "dffc57bd-2752-4681-8c63-ad9fadd976a1",
        "description" : "This measure will reduce space infiltration rates by the requested percentage. A cost per square foot of building area can be added to the model.",
        "display_name" : "ReduceSpaceInfiltrationByPercentage 30%",
        "input_file_type" : "OSM",
@@ -9145,9 +9145,9 @@
          "version_uuid" : "8e1d6a87-cda7-49e5-8cc0-8fbc06b9ae2a"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceSpaceInfiltrationByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceSpaceInfiltrationByPercentage",
        "bcl_measure_uuid" : "d8161857-8b77-4e1a-a76c-ae5deab7c1e0",
-       "bcl_measure_version_uuid" : "d8754ee5-7136-4f4d-8ab9-4baade5d7cda",
+       "bcl_measure_version_uuid" : "dffc57bd-2752-4681-8c63-ad9fadd976a1",
        "description" : "This measure will reduce space infiltration rates by the requested percentage. A cost per square foot of building area can be added to the model.",
        "display_name" : "ReduceSpaceInfiltrationByPercentage 50%",
        "input_file_type" : "OSM",
@@ -9262,9 +9262,9 @@
          "version_uuid" : "134bb9bc-48f8-4d4c-8f7e-4ef2a7fae049"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceSpaceInfiltrationByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceSpaceInfiltrationByPercentage",
        "bcl_measure_uuid" : "d8161857-8b77-4e1a-a76c-ae5deab7c1e0",
-       "bcl_measure_version_uuid" : "d8754ee5-7136-4f4d-8ab9-4baade5d7cda",
+       "bcl_measure_version_uuid" : "dffc57bd-2752-4681-8c63-ad9fadd976a1",
        "description" : "This measure will reduce space infiltration rates by the requested percentage. A cost per square foot of building area can be added to the model.",
        "display_name" : "ReduceSpaceInfiltrationByPercentage 70%",
        "input_file_type" : "OSM",
@@ -9280,7 +9280,7 @@
      ],
      "name" : "ReduceSpaceInfiltrationByPercentage Group (Only use one infiltration Group)",
      "uuid" : "7c0c2c88-866a-41a4-8a09-d835ea6ad2ee",
-     "version_uuid" : "2178ceee-ed0c-48cb-804e-e9dd5b81abb1",
+     "version_uuid" : "d7423833-df24-4db2-bc70-fb3f66111aee",
      "workflow_index" : 11,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -9342,9 +9342,9 @@
          "version_uuid" : "bdf189de-5ca8-4333-aaf4-4f128d73a515"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetSpaceInfiltrationByExteriorSurfaceArea",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetSpaceInfiltrationByExteriorSurfaceArea",
        "bcl_measure_uuid" : "b43adf2d-1e8f-48a4-9470-bde1b1444b4f",
-       "bcl_measure_version_uuid" : "7b49b803-9fd0-4635-ae24-6b400aa298ea",
+       "bcl_measure_version_uuid" : "a35da533-1ff7-437c-a8ed-4a0caa961902",
        "description" : "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\r\n  ",
        "display_name" : "Set Space Infiltration by Exterior Surface Area 0.05 cfm/ft^2",
        "input_file_type" : "OSM",
@@ -9406,9 +9406,9 @@
          "version_uuid" : "b3c8795d-0463-465b-b683-26a049cd567e"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetSpaceInfiltrationByExteriorSurfaceArea",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetSpaceInfiltrationByExteriorSurfaceArea",
        "bcl_measure_uuid" : "b43adf2d-1e8f-48a4-9470-bde1b1444b4f",
-       "bcl_measure_version_uuid" : "7b49b803-9fd0-4635-ae24-6b400aa298ea",
+       "bcl_measure_version_uuid" : "a35da533-1ff7-437c-a8ed-4a0caa961902",
        "description" : "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\r\n  ",
        "display_name" : "Set Space Infiltration by Exterior Surface Area 0.03 cfm/ft^2",
        "input_file_type" : "OSM",
@@ -9470,9 +9470,9 @@
          "version_uuid" : "6ba801ae-d117-4c60-aa6f-ea8ee72353e8"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetSpaceInfiltrationByExteriorSurfaceArea",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetSpaceInfiltrationByExteriorSurfaceArea",
        "bcl_measure_uuid" : "b43adf2d-1e8f-48a4-9470-bde1b1444b4f",
-       "bcl_measure_version_uuid" : "7b49b803-9fd0-4635-ae24-6b400aa298ea",
+       "bcl_measure_version_uuid" : "a35da533-1ff7-437c-a8ed-4a0caa961902",
        "description" : "Replace all Space Infiltration objects with a new one that has a prescribed flow rate per exterior surface area.  There are many strategies that can be used to reduce infiltration.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nSeal Windows ? Seal all windows and doors with weather strip and fill any air gaps with insulation and caulking to prevent air infiltration.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nInstall Revolving Doors on the Inner Door Entrance - Replace the high traffic entrance doors with revolving doors.  This will reduce the air infiltration associated with the doors.  Notice that loading dock doors and handicapped accessible entrances cannot be replaced with revolving doors.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nInstall an Air Curtain for the Loading Dock Door - An air curtain should be installed in the entryway of loading dock doors.  This will greatly reduce outside air from infiltrating during periods of time when loading dock doors are open.\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\nIdentify and seal other sources of infiltration ? Look for other uncontrolled infiltration sources and work to air seal.  These could be former electrical chases, abandoned HVAC ducting, general envelope deterioration, or many other sources.\r\r\r\r\r\r\r\n  ",
        "display_name" : "Set Space Infiltration by Exterior Surface Area 0.01 cfm/ft^2",
        "input_file_type" : "OSM",
@@ -9488,7 +9488,7 @@
      ],
      "name" : "Set Space Infiltration by Exterior Surface Area Group (Only use one infiltration Group)",
      "uuid" : "1dafa1cd-5e76-4499-ba8e-9a2a915de061",
-     "version_uuid" : "7e415662-07bf-4d6f-a55b-0f90c668b544",
+     "version_uuid" : "462e1e00-db01-473a-8cb8-6254a9b75a40",
      "workflow_index" : 12,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -9725,9 +9725,9 @@
          "version_uuid" : "d80c0019-3edc-4a54-994f-46ea1b903f1e"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeLightingLoads",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeLightingLoads",
        "bcl_measure_uuid" : "93461778-59a1-49ca-8bbb-f4b939e4a9d8",
-       "bcl_measure_version_uuid" : "add47f92-5c84-452a-bc43-07d969fd0949",
+       "bcl_measure_version_uuid" : "10edd771-ef58-4fc3-8d15-5b46f8e2a134",
        "description" : "This measure lets you set the lighting schedule profile values for a specific time of day, and for specific days of the week.  This can be run across the entire model or a specific space type. Cost can be added per each light object.",
        "display_name" : "Reduce Night Time Lighting Loads Guest  0.2",
        "input_file_type" : "OSM",
@@ -9962,9 +9962,9 @@
          "version_uuid" : "1868e60b-a1e8-498f-abda-9ec712fc5027"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeLightingLoads",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeLightingLoads",
        "bcl_measure_uuid" : "93461778-59a1-49ca-8bbb-f4b939e4a9d8",
-       "bcl_measure_version_uuid" : "add47f92-5c84-452a-bc43-07d969fd0949",
+       "bcl_measure_version_uuid" : "10edd771-ef58-4fc3-8d15-5b46f8e2a134",
        "description" : "This measure lets you set the lighting schedule profile values for a specific time of day, and for specific days of the week.  This can be run across the entire model or a specific space type. Cost can be added per each light object.",
        "display_name" : "Reduce Night Time Lighting Loads  Guest  0.1",
        "input_file_type" : "OSM",
@@ -10199,9 +10199,9 @@
          "version_uuid" : "8da47172-fcf7-4569-b6eb-331e09df8137"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeLightingLoads",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeLightingLoads",
        "bcl_measure_uuid" : "93461778-59a1-49ca-8bbb-f4b939e4a9d8",
-       "bcl_measure_version_uuid" : "add47f92-5c84-452a-bc43-07d969fd0949",
+       "bcl_measure_version_uuid" : "10edd771-ef58-4fc3-8d15-5b46f8e2a134",
        "description" : "This measure lets you set the lighting schedule profile values for a specific time of day, and for specific days of the week.  This can be run across the entire model or a specific space type. Cost can be added per each light object.",
        "display_name" : "Reduce Night Time Lighting Loads  Hotel  0.05",
        "input_file_type" : "OSM",
@@ -10217,7 +10217,7 @@
      ],
      "name" : "Reduce Night Time Lighting Loads Group",
      "uuid" : "b7a0a6d3-b50f-4b52-88c7-42b32254b3f5",
-     "version_uuid" : "1eb5d36f-f7b2-42e5-81a9-24ecb46aa5d5",
+     "version_uuid" : "5b1d29cf-febd-4254-bda0-147bda177338",
      "workflow_index" : 13,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -10437,9 +10437,9 @@
          "version_uuid" : "16c8b485-6eef-4bc6-857c-caf0f2bfc705"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddDaylightSensors",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddDaylightSensors",
        "bcl_measure_uuid" : "62babdc7-c81e-4dfd-96e8-af1628a55167",
-       "bcl_measure_version_uuid" : "55c7c56e-be13-4a8e-a6a6-ddfbefb4e279",
+       "bcl_measure_version_uuid" : "a672ea92-607a-4158-98d9-cfc07ff0e3ed",
        "description" : "This measure will add daylighting controls to spaces that that have space types assigned with names containing the string in the argument. You can also add a cost per space for sensors added to the model.",
        "display_name" : "Add Daylight Sensor at Center of  Spaces with a Specified Space Type Assigned Alternative",
        "input_file_type" : "OSM",
@@ -10455,7 +10455,7 @@
      ],
      "name" : "Add Daylight Sensor at Center of  Spaces with a Specified Space Type Assigned Group",
      "uuid" : "713ff9f3-e160-4be7-832d-84c4f7a8d8ab",
-     "version_uuid" : "5905e085-bc31-4596-a81e-8615bb1239a0",
+     "version_uuid" : "7bb6ecd0-6715-421b-b907-533a9e9fe426",
      "workflow_index" : 14,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -10602,9 +10602,9 @@
          "version_uuid" : "d6d4845d-1efb-4753-b5d3-2cc85e7e38e4"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerFloorAreaToLights",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerFloorAreaToLights",
        "bcl_measure_uuid" : "eeec5adf-b3a8-498a-b0d1-eabd81ca0620",
-       "bcl_measure_version_uuid" : "87f6245f-b255-4214-9b23-5159ef6f6723",
+       "bcl_measure_version_uuid" : "f2295b63-03d1-48f6-8d3c-7adb082383c9",
        "description" : "This measure will create life cycle cost objects associated with lights. You can choose any light definition used in the model that has a watt/area power. You can set a material & installation cost, demolition cost, and O&M costs. Optionally existing cost objects already associated with the selected light definition can be deleted. This measure will not affect energy use of the building.",
        "display_name" : "Add Cost per Floor Area to Lights",
        "input_file_type" : "OSM",
@@ -10620,7 +10620,7 @@
      ],
      "name" : "Add Cost per Floor Area to Lights Group",
      "uuid" : "bb14a79c-41fe-478c-9f52-ec878e8ab639",
-     "version_uuid" : "8a9c1e0f-1b76-443f-8151-ccf35ac2934f",
+     "version_uuid" : "6bd51b03-d87d-44dc-9e54-c6692540cb31",
      "workflow_index" : 15,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -10780,9 +10780,9 @@
          "version_uuid" : "70459998-b0e8-4bc9-9afb-6862be3f0455"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-       "bcl_measure_version_uuid" : "091b5116-af0b-4493-a98b-16bbf6df83d5",
+       "bcl_measure_version_uuid" : "e3f918e8-70e9-4165-8f71-f7946f08002c",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Loads by Percentage Office 30%",
        "input_file_type" : "OSM",
@@ -10942,9 +10942,9 @@
          "version_uuid" : "4ac3a6b0-4a51-440c-bcbc-a7ff71998d44"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-       "bcl_measure_version_uuid" : "091b5116-af0b-4493-a98b-16bbf6df83d5",
+       "bcl_measure_version_uuid" : "e3f918e8-70e9-4165-8f71-f7946f08002c",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Loads by Percentage Office 50%",
        "input_file_type" : "OSM",
@@ -11104,9 +11104,9 @@
          "version_uuid" : "7bd9ca57-dca4-458d-bfba-62cf27843949"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceLightingLoadsByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceLightingLoadsByPercentage",
        "bcl_measure_uuid" : "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-       "bcl_measure_version_uuid" : "091b5116-af0b-4493-a98b-16bbf6df83d5",
+       "bcl_measure_version_uuid" : "e3f918e8-70e9-4165-8f71-f7946f08002c",
        "description" : "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
        "display_name" : "Reduce Lighting Loads by Percentage Office 70%",
        "input_file_type" : "OSM",
@@ -11122,7 +11122,7 @@
      ],
      "name" : "Reduce Lighting Loads by Percentage Group",
      "uuid" : "6ee67130-25d1-41e7-9f93-adcea76b9fc5",
-     "version_uuid" : "69693fc5-b69d-445b-bf5c-aa2a44466cb8",
+     "version_uuid" : "26510e19-fceb-4a2e-94ab-c3820a5eb1a0",
      "workflow_index" : 16,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -11496,9 +11496,9 @@
          "version_uuid" : "80d338d6-5eb0-40de-b9b5-e6886d8b315c"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SwapLightsDefinition",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SwapLightsDefinition",
        "bcl_measure_uuid" : "3bbebd1f-69fd-4d49-96fe-1284bce962f4",
-       "bcl_measure_version_uuid" : "bafa31f0-f84e-4009-ab6b-17158a6c1af1",
+       "bcl_measure_version_uuid" : "d570c232-1786-410f-8742-d350726fd251",
        "description" : "This measure will swap out one lights definition for another. All objects that had referred to the original definition will now refer to the new one.",
        "display_name" : "Swap Lights Definition Swap Banquet Lights for Lobby Lights",
        "input_file_type" : "OSM",
@@ -11514,7 +11514,7 @@
      ],
      "name" : "Swap Lights Definition Group",
      "uuid" : "2eed4503-78b3-4b98-b9ca-a3f463267876",
-     "version_uuid" : "7c38d909-6d70-4975-8870-65f5ba491008",
+     "version_uuid" : "4157c4e6-d5e4-4604-8811-528db47c1f2b",
      "workflow_index" : 17,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -11642,9 +11642,9 @@
          "version_uuid" : "a0ab148d-0781-4c9c-b69d-3459bd3da96c"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddExteriorLights",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddExteriorLights",
        "bcl_measure_uuid" : "34f9050c-5f8f-4d10-8e46-30ca8333114d",
-       "bcl_measure_version_uuid" : "01866144-da41-4748-b9c3-467a6f5c13a6",
+       "bcl_measure_version_uuid" : "20e0d295-a211-4208-8113-0c573ddb17ba",
        "description" : "Add exterior lighting to the building.  This may be in addition to or in place of existing exterior lighting.  This lighting will run from sunset to sunrise. Optionally you can add costs to the lights.",
        "display_name" : "Add Exterior Lights Alternative",
        "input_file_type" : "OSM",
@@ -11660,7 +11660,7 @@
      ],
      "name" : "Add Exterior Lights Group",
      "uuid" : "9f877f52-aa42-4b53-b8e0-01218c4d6df8",
-     "version_uuid" : "3497ceba-204c-4625-af00-e747d789d64a",
+     "version_uuid" : "c27d48f0-3563-4622-beaf-1c93fc7a7dd4",
      "workflow_index" : 18,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -11886,9 +11886,9 @@
          "version_uuid" : "2f154e0c-a91d-4e57-8a9e-c0566361951b"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeElectricEquipmentLoads",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeElectricEquipmentLoads",
        "bcl_measure_uuid" : "b446301d-8f0e-41fc-9245-c3851b8732ff",
-       "bcl_measure_version_uuid" : "b573301f-82f9-4979-b46d-1d4722e8678c",
+       "bcl_measure_version_uuid" : "21f7551d-ef8a-4a3f-9cbb-e585fa752742",
        "description" : "This measure lets you set the electric equipment schedule profile values for a specific time of day, and for specific days of the week.  This can be run across the entire model or a specific space type. Cost can be added per each equipment object.",
        "display_name" : "Reduce Night Time Electric Equipment Loads Office 0.3",
        "input_file_type" : "OSM",
@@ -12113,9 +12113,9 @@
          "version_uuid" : "19512d62-da3c-40fd-81cc-f6b3edaccea0"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeElectricEquipmentLoads",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeElectricEquipmentLoads",
        "bcl_measure_uuid" : "b446301d-8f0e-41fc-9245-c3851b8732ff",
-       "bcl_measure_version_uuid" : "b573301f-82f9-4979-b46d-1d4722e8678c",
+       "bcl_measure_version_uuid" : "21f7551d-ef8a-4a3f-9cbb-e585fa752742",
        "description" : "This measure lets you set the electric equipment schedule profile values for a specific time of day, and for specific days of the week.  This can be run across the entire model or a specific space type. Cost can be added per each equipment object.",
        "display_name" : "Reduce Night Time Electric Equipment Loads Office 0.2",
        "input_file_type" : "OSM",
@@ -12339,9 +12339,9 @@
          "version_uuid" : "1eaaa73e-9d86-4187-b02c-34d82b46f5a4"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeElectricEquipmentLoads",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceNightTimeElectricEquipmentLoads",
        "bcl_measure_uuid" : "b446301d-8f0e-41fc-9245-c3851b8732ff",
-       "bcl_measure_version_uuid" : "b573301f-82f9-4979-b46d-1d4722e8678c",
+       "bcl_measure_version_uuid" : "21f7551d-ef8a-4a3f-9cbb-e585fa752742",
        "description" : "This measure lets you set the electric equipment schedule profile values for a specific time of day, and for specific days of the week.  This can be run across the entire model or a specific space type. Cost can be added per each equipment object.",
        "display_name" : "Reduce Night Time Electric Equipment Loads Office 0.1",
        "input_file_type" : "OSM",
@@ -12357,7 +12357,7 @@
      ],
      "name" : "Reduce Night Time Electric Equipment Loads Group",
      "uuid" : "5cd07fd1-ae22-46c7-a11a-56f58dd5f65f",
-     "version_uuid" : "e2981526-c9e1-4d03-a0de-114ee537678d",
+     "version_uuid" : "dec80141-504a-4f87-a29b-0c7cb8030eac",
      "workflow_index" : 19,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -12499,9 +12499,9 @@
          "version_uuid" : "0f43fb32-2e70-44df-aa2c-9cfbaf2c4a79"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerFloorAreaToElectricEquipment",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerFloorAreaToElectricEquipment",
        "bcl_measure_uuid" : "42cf1acc-c0bc-46cd-af67-8a17cadaab7b",
-       "bcl_measure_version_uuid" : "e4add3de-abb0-46a1-93d4-87322e5667c0",
+       "bcl_measure_version_uuid" : "597aea82-ef2f-4a17-8c91-3ce18d531e37",
        "description" : "This measure will create life cycle cost objects associated with electric equipment. You can choose any electric equipment definition used in the model that has a watt/area power. You can set a material & installation cost, demolition cost, and O&M costs. Optionally existing cost objects already associated with the selected electric equipment definition can be deleted. This measure will not affect energy use of the building.",
        "display_name" : "Add Cost per Floor Area to Electric Equipment",
        "input_file_type" : "OSM",
@@ -12517,7 +12517,7 @@
      ],
      "name" : "Add Cost per Floor Area to Electric Equipment Group",
      "uuid" : "85422c64-0a80-471d-9e26-646efc4da23b",
-     "version_uuid" : "9d6c6b80-241d-4e96-966f-aba3b1d2ecc6",
+     "version_uuid" : "5e409e5f-cffa-472d-8956-ce1a4639d96d",
      "workflow_index" : 20,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -12677,9 +12677,9 @@
          "version_uuid" : "aa4d6bb9-e4bb-43b9-ab9b-3a2d75c2fc43"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceElectricEquipmentLoadsByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceElectricEquipmentLoadsByPercentage",
        "bcl_measure_uuid" : "b93f5c07-a1a8-4741-9d47-af00a2e7e288",
-       "bcl_measure_version_uuid" : "a40fdc3a-5d5a-4b85-bfa2-58ef5b263d28",
+       "bcl_measure_version_uuid" : "814922d5-eaf7-47f8-962b-937955d20366",
        "description" : "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
        "display_name" : "Reduce Electric Equipment Loads by Percentage Dining 30%",
        "input_file_type" : "OSM",
@@ -12839,9 +12839,9 @@
          "version_uuid" : "8c1cc400-a641-450a-8b89-703eecc4edfd"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceElectricEquipmentLoadsByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceElectricEquipmentLoadsByPercentage",
        "bcl_measure_uuid" : "b93f5c07-a1a8-4741-9d47-af00a2e7e288",
-       "bcl_measure_version_uuid" : "a40fdc3a-5d5a-4b85-bfa2-58ef5b263d28",
+       "bcl_measure_version_uuid" : "814922d5-eaf7-47f8-962b-937955d20366",
        "description" : "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
        "display_name" : "Reduce Electric Equipment Loads by Percentage Dining 40%",
        "input_file_type" : "OSM",
@@ -13001,9 +13001,9 @@
          "version_uuid" : "c7983589-ba0d-420e-87f2-77729de16ea7"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceElectricEquipmentLoadsByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceElectricEquipmentLoadsByPercentage",
        "bcl_measure_uuid" : "b93f5c07-a1a8-4741-9d47-af00a2e7e288",
-       "bcl_measure_version_uuid" : "a40fdc3a-5d5a-4b85-bfa2-58ef5b263d28",
+       "bcl_measure_version_uuid" : "814922d5-eaf7-47f8-962b-937955d20366",
        "description" : "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
        "display_name" : "Reduce Electric Equipment Loads by Percentage Dining 50%",
        "input_file_type" : "OSM",
@@ -13019,7 +13019,7 @@
      ],
      "name" : "Reduce Electric Equipment Loads by Percentage Group",
      "uuid" : "b7b149b6-a73a-4267-90f3-818571965b0c",
-     "version_uuid" : "9fb2e5b0-ee70-4e31-91e5-7d2d58d22277",
+     "version_uuid" : "d57ee7cd-7012-4a0d-a173-9055fbeffd2f",
      "workflow_index" : 21,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -13069,9 +13069,9 @@
          "version_uuid" : "535d04c1-a9e6-4fdc-adf9-dc1cf362a4f3"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AdjustThermostatSetpointsByDegrees",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AdjustThermostatSetpointsByDegrees",
        "bcl_measure_uuid" : "6e1f34f9-92e1-44ea-9279-de0b9b64f6a1",
-       "bcl_measure_version_uuid" : "59f6e144-ecaa-4b8f-a10d-496863b4c957",
+       "bcl_measure_version_uuid" : "04fe3597-b343-425f-b02e-87fd54726649",
        "description" : "This measure adjusts heating and cooling setpoints by a user specified number of degrees. This is applied throughout the entire building.",
        "display_name" : "Adjust Thermostat Setpoints by Degrees 1 deg F",
        "input_file_type" : "OSM",
@@ -13122,9 +13122,9 @@
          "version_uuid" : "3dd961cb-a42a-4b21-8734-b74f0f7e7999"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AdjustThermostatSetpointsByDegrees",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AdjustThermostatSetpointsByDegrees",
        "bcl_measure_uuid" : "6e1f34f9-92e1-44ea-9279-de0b9b64f6a1",
-       "bcl_measure_version_uuid" : "59f6e144-ecaa-4b8f-a10d-496863b4c957",
+       "bcl_measure_version_uuid" : "04fe3597-b343-425f-b02e-87fd54726649",
        "description" : "This measure adjusts heating and cooling setpoints by a user specified number of degrees. This is applied throughout the entire building.",
        "display_name" : "Adjust Thermostat Setpoints by Degrees 1.5 deg F",
        "input_file_type" : "OSM",
@@ -13175,9 +13175,9 @@
          "version_uuid" : "30581d27-fbc9-4019-a45c-f4dd14bf72e9"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AdjustThermostatSetpointsByDegrees",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AdjustThermostatSetpointsByDegrees",
        "bcl_measure_uuid" : "6e1f34f9-92e1-44ea-9279-de0b9b64f6a1",
-       "bcl_measure_version_uuid" : "59f6e144-ecaa-4b8f-a10d-496863b4c957",
+       "bcl_measure_version_uuid" : "04fe3597-b343-425f-b02e-87fd54726649",
        "description" : "This measure adjusts heating and cooling setpoints by a user specified number of degrees. This is applied throughout the entire building.",
        "display_name" : "Adjust Thermostat Setpoints by Degrees 2 deg F",
        "input_file_type" : "OSM",
@@ -13193,7 +13193,7 @@
      ],
      "name" : "Adjust Thermostat Setpoints by Degrees Group",
      "uuid" : "5e4ea31c-e0e8-43a4-8427-4498f9d495a5",
-     "version_uuid" : "574ae93b-f9d5-4d4f-bc66-3a34b55c3b59",
+     "version_uuid" : "f930ac2b-3cd1-4839-87f3-c0ebe3d49be5",
      "workflow_index" : 22,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -13413,9 +13413,9 @@
          "version_uuid" : "acf32e80-2629-445d-91e2-5b312461b634"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostToSupplySideHVACComponentByAirLoop",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostToSupplySideHVACComponentByAirLoop",
        "bcl_measure_uuid" : "a667a52f-aa04-4997-9292-c81671d75f84",
-       "bcl_measure_version_uuid" : "8a045712-ff46-4334-a418-332b691c96b7",
+       "bcl_measure_version_uuid" : "29592cb0-bdcc-408d-b4d9-be11a178a864",
        "description" : "This will add cost to HVAC components of a specified type in the selected air loop(s). It can run on all air loops or a single air loop. This measures only adds cost and doesn't alter equipment performance",
        "display_name" : "Add Cost To Supply Side HVAC Component by Air Loop",
        "input_file_type" : "OSM",
@@ -13431,7 +13431,7 @@
      ],
      "name" : "Add Cost To Supply Side HVAC Component by Air Loop Group",
      "uuid" : "40d29c7c-6eb5-4d05-8394-d2a6eb8db359",
-     "version_uuid" : "84fc13c4-5cc4-4a4e-a75e-e4fc446bf18d",
+     "version_uuid" : "caa8adb3-22f8-455a-b162-8bb3380dd354",
      "workflow_index" : 23,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -13585,9 +13585,9 @@
          "version_uuid" : "e60a67a5-9bc4-486f-aa02-2862d039a8f7"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetCOPforTwoSpeedDXCoolingUnits",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetCOPforTwoSpeedDXCoolingUnits",
        "bcl_measure_uuid" : "ab217b3b-4eac-4e3c-90a3-ab8800b50cfb",
-       "bcl_measure_version_uuid" : "01fcc126-af97-4b8f-8d01-6f0988fed6bd",
+       "bcl_measure_version_uuid" : "adf7f58a-bd70-4239-b7ba-d93baff2a84f",
        "description" : "This measure will find two speed DX cooling units in the model and will alter the Rated HighSpeed COP to a specified value. It can be run on a single or all air loops in the model.",
        "display_name" : "Set COP for Two Speed DX Cooling Units Dining COP 3.5",
        "input_file_type" : "OSM",
@@ -13737,9 +13737,9 @@
          "version_uuid" : "102041b1-719d-4dc9-885b-8ddc17fff410"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetCOPforTwoSpeedDXCoolingUnits",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetCOPforTwoSpeedDXCoolingUnits",
        "bcl_measure_uuid" : "ab217b3b-4eac-4e3c-90a3-ab8800b50cfb",
-       "bcl_measure_version_uuid" : "01fcc126-af97-4b8f-8d01-6f0988fed6bd",
+       "bcl_measure_version_uuid" : "adf7f58a-bd70-4239-b7ba-d93baff2a84f",
        "description" : "This measure will find two speed DX cooling units in the model and will alter the Rated HighSpeed COP to a specified value. It can be run on a single or all air loops in the model.",
        "display_name" : "Set COP for Two Speed DX Cooling Units Dining COP 4",
        "input_file_type" : "OSM",
@@ -13891,9 +13891,9 @@
          "version_uuid" : "01ea1924-2726-4635-9b6c-41948fc12700"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetCOPforTwoSpeedDXCoolingUnits",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetCOPforTwoSpeedDXCoolingUnits",
        "bcl_measure_uuid" : "ab217b3b-4eac-4e3c-90a3-ab8800b50cfb",
-       "bcl_measure_version_uuid" : "01fcc126-af97-4b8f-8d01-6f0988fed6bd",
+       "bcl_measure_version_uuid" : "adf7f58a-bd70-4239-b7ba-d93baff2a84f",
        "description" : "This measure will find two speed DX cooling units in the model and will alter the Rated HighSpeed COP to a specified value. It can be run on a single or all air loops in the model.",
        "display_name" : "Set COP for Two Speed DX Cooling Units Dining COP 4.5",
        "input_file_type" : "OSM",
@@ -13909,7 +13909,7 @@
      ],
      "name" : "Set COP for Two Speed DX Cooling Units Group",
      "uuid" : "869e2083-d247-4dd6-807a-a868133f3a30",
-     "version_uuid" : "8ad35435-bcf7-4a53-af81-27814d0f38a8",
+     "version_uuid" : "cfbd44d8-6a69-44a4-b630-55b2ab63381f",
      "workflow_index" : 24,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -14069,9 +14069,9 @@
          "version_uuid" : "0645326d-75ab-4a21-ad27-1bf277620166"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveFanBeltEfficiency",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveFanBeltEfficiency",
        "bcl_measure_uuid" : "724ef0bb-49ab-4697-bcab-09a8846a3714",
-       "bcl_measure_version_uuid" : "7b09ce31-f293-465d-8c41-d8f5478cc8dc",
+       "bcl_measure_version_uuid" : "c20f9850-f6d3-4440-a11e-c852b86aee88",
        "description" : "The assessment team observed opportunities for fan belt improvements on HVAC fan drives. These motors are asynchronous induction motors.\r\r\r\n\r\r\r\nImprovements in belt efficiency result in energy savings at the motor. The three common belt efficiency measures are belt tightening (1%-5% savings per motor), replace standard v-belts with cogged v-belts (2% savings per motor), and replace standard belts with synchronous belts (3% savings per motor).\r\r\r\n\r\r\r\nWell-adjusted belts run cooler, last longer, and operate at higher efficiency than standard belts. The belts associated with the largest motors, longest run times, and that are run closest to full load should be given priority when making replacements.\r\r\r\n  ",
        "display_name" : "Improve Fan Belt Efficiency 3% motor eff increase",
        "input_file_type" : "OSM",
@@ -14231,9 +14231,9 @@
          "version_uuid" : "9ec9b3f6-1f85-43e6-aaf1-0354e3398551"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveFanBeltEfficiency",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveFanBeltEfficiency",
        "bcl_measure_uuid" : "724ef0bb-49ab-4697-bcab-09a8846a3714",
-       "bcl_measure_version_uuid" : "7b09ce31-f293-465d-8c41-d8f5478cc8dc",
+       "bcl_measure_version_uuid" : "c20f9850-f6d3-4440-a11e-c852b86aee88",
        "description" : "The assessment team observed opportunities for fan belt improvements on HVAC fan drives. These motors are asynchronous induction motors.\r\r\r\n\r\r\r\nImprovements in belt efficiency result in energy savings at the motor. The three common belt efficiency measures are belt tightening (1%-5% savings per motor), replace standard v-belts with cogged v-belts (2% savings per motor), and replace standard belts with synchronous belts (3% savings per motor).\r\r\r\n\r\r\r\nWell-adjusted belts run cooler, last longer, and operate at higher efficiency than standard belts. The belts associated with the largest motors, longest run times, and that are run closest to full load should be given priority when making replacements.\r\r\r\n  ",
        "display_name" : "Improve Fan Belt Efficiency 4% motor eff increase",
        "input_file_type" : "OSM",
@@ -14393,9 +14393,9 @@
          "version_uuid" : "ce497d4f-45fa-4ba5-bc82-448a85a69746"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveFanBeltEfficiency",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveFanBeltEfficiency",
        "bcl_measure_uuid" : "724ef0bb-49ab-4697-bcab-09a8846a3714",
-       "bcl_measure_version_uuid" : "7b09ce31-f293-465d-8c41-d8f5478cc8dc",
+       "bcl_measure_version_uuid" : "c20f9850-f6d3-4440-a11e-c852b86aee88",
        "description" : "The assessment team observed opportunities for fan belt improvements on HVAC fan drives. These motors are asynchronous induction motors.\r\r\r\n\r\r\r\nImprovements in belt efficiency result in energy savings at the motor. The three common belt efficiency measures are belt tightening (1%-5% savings per motor), replace standard v-belts with cogged v-belts (2% savings per motor), and replace standard belts with synchronous belts (3% savings per motor).\r\r\r\n\r\r\r\nWell-adjusted belts run cooler, last longer, and operate at higher efficiency than standard belts. The belts associated with the largest motors, longest run times, and that are run closest to full load should be given priority when making replacements.\r\r\r\n  ",
        "display_name" : "Improve Fan Belt Efficiency 5% motor eff increase",
        "input_file_type" : "OSM",
@@ -14411,7 +14411,7 @@
      ],
      "name" : "Improve Fan Belt Efficiency Group",
      "uuid" : "4f01fd30-4f79-498f-bdbb-1d30589f006d",
-     "version_uuid" : "b6bf349c-f168-4c27-86c6-9273a14879a9",
+     "version_uuid" : "23cd8ef3-de76-4b97-9cdd-91ce671b0a82",
      "workflow_index" : 25,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -14587,9 +14587,9 @@
          "version_uuid" : "6bdc6246-b77c-4db6-8abf-fd9922149ac0"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveMotorEfficiency",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveMotorEfficiency",
        "bcl_measure_uuid" : "e581974f-d5c7-480f-bb1e-b032f492eb97",
-       "bcl_measure_version_uuid" : "2a0f85da-b8c1-42f8-9651-0384f241b91a",
+       "bcl_measure_version_uuid" : "d6dd7ea3-9b5f-488c-aadc-b953d67429f3",
        "description" : "The assessment team observed opportunities for motor efficiency improvements on HVAC systems. These motors are asynchronous induction motors.;;\r\r\r\n;;\r\r\r\nThere are currently motors on the market that are far superior to standard efficiency motors. These come in both premium efficiency and ultra-efficiency which exceed NEMA Premium standards. These motors utilize a die cast copper rotor which reduces the energy requirements of the motor and allows the motor to run cooler. The motor also features an improved heat dissipation system and new low-friction bearings; both of which help extend the life of the motor. The motor also has a smaller weight and size compared to the standard efficiency motors. These high efficiency motors are showing efficiency improvements on the order of 3-10% more efficient than current standard efficiency motors.;;\r\r\r\n;;\r\r\r\nFor all of the three-phase, asynchronous induction motors feeding AHU supply fans, specify premium or ultra-efficiency motors. The belts associated with the largest motors, longest run times, and that run closest to full load should be given priority when making replacements.;;\r\r\r\n  ",
        "display_name" : "Improve Motor Efficiency Chiller Pump Motor 93%",
        "input_file_type" : "OSM",
@@ -14764,9 +14764,9 @@
          "version_uuid" : "751127ee-0eee-4b23-9f80-2ffbd36ece28"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveMotorEfficiency",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveMotorEfficiency",
        "bcl_measure_uuid" : "e581974f-d5c7-480f-bb1e-b032f492eb97",
-       "bcl_measure_version_uuid" : "2a0f85da-b8c1-42f8-9651-0384f241b91a",
+       "bcl_measure_version_uuid" : "d6dd7ea3-9b5f-488c-aadc-b953d67429f3",
        "description" : "The assessment team observed opportunities for motor efficiency improvements on HVAC systems. These motors are asynchronous induction motors.;;\r\r\r\n;;\r\r\r\nThere are currently motors on the market that are far superior to standard efficiency motors. These come in both premium efficiency and ultra-efficiency which exceed NEMA Premium standards. These motors utilize a die cast copper rotor which reduces the energy requirements of the motor and allows the motor to run cooler. The motor also features an improved heat dissipation system and new low-friction bearings; both of which help extend the life of the motor. The motor also has a smaller weight and size compared to the standard efficiency motors. These high efficiency motors are showing efficiency improvements on the order of 3-10% more efficient than current standard efficiency motors.;;\r\r\r\n;;\r\r\r\nFor all of the three-phase, asynchronous induction motors feeding AHU supply fans, specify premium or ultra-efficiency motors. The belts associated with the largest motors, longest run times, and that run closest to full load should be given priority when making replacements.;;\r\r\r\n  ",
        "display_name" : "Improve Motor Efficiency Chiller Pump Motor 95%",
        "input_file_type" : "OSM",
@@ -14940,9 +14940,9 @@
          "version_uuid" : "9557ec25-e8b2-41a3-b06c-99ceb196b6e6"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveMotorEfficiency",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ImproveMotorEfficiency",
        "bcl_measure_uuid" : "e581974f-d5c7-480f-bb1e-b032f492eb97",
-       "bcl_measure_version_uuid" : "2a0f85da-b8c1-42f8-9651-0384f241b91a",
+       "bcl_measure_version_uuid" : "d6dd7ea3-9b5f-488c-aadc-b953d67429f3",
        "description" : "The assessment team observed opportunities for motor efficiency improvements on HVAC systems. These motors are asynchronous induction motors.;;\r\r\r\n;;\r\r\r\nThere are currently motors on the market that are far superior to standard efficiency motors. These come in both premium efficiency and ultra-efficiency which exceed NEMA Premium standards. These motors utilize a die cast copper rotor which reduces the energy requirements of the motor and allows the motor to run cooler. The motor also features an improved heat dissipation system and new low-friction bearings; both of which help extend the life of the motor. The motor also has a smaller weight and size compared to the standard efficiency motors. These high efficiency motors are showing efficiency improvements on the order of 3-10% more efficient than current standard efficiency motors.;;\r\r\r\n;;\r\r\r\nFor all of the three-phase, asynchronous induction motors feeding AHU supply fans, specify premium or ultra-efficiency motors. The belts associated with the largest motors, longest run times, and that run closest to full load should be given priority when making replacements.;;\r\r\r\n  ",
        "display_name" : "Improve Motor Efficiency Chiller Pump Motor 97%",
        "input_file_type" : "OSM",
@@ -14958,7 +14958,7 @@
      ],
      "name" : "Improve Motor Efficiency Group",
      "uuid" : "c0b17acd-05ac-4e82-8c63-79acaf658716",
-     "version_uuid" : "4662245f-fba1-4380-b3b9-b58abf26a216",
+     "version_uuid" : "ab5cb195-1aae-4d3e-a81f-d15586cf25b2",
      "workflow_index" : 26,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -15106,9 +15106,9 @@
          "version_uuid" : "ffde0b4c-fce4-4ae0-b658-fd14f2cb7171"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableDemandControlledVentilation",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableDemandControlledVentilation",
        "bcl_measure_uuid" : "3ff4b412-8689-4b11-a588-935c621dc97d",
-       "bcl_measure_version_uuid" : "1c5ade1a-7d91-4019-b248-8a69e4420dac",
+       "bcl_measure_version_uuid" : "c8b63ed5-67f3-4c5b-929b-079fef4cfb3b",
        "description" : "The facility currently does not have a demand controlled ventilation system or CO2 sensors in the air delivery system. Outside air is introduced and conditioned at a fixed rate based on the maximum design. Since the building occupancy fluctuates and is often less than the maximum design occupancy, it is being over-ventilated and consuming more energy than necessary. The building CO2 level is closely related to the occupancy. The typical outside CO2 level is relatively low concentration, around 400 to 500 ppm, and is used to dilute the higher indoor CO2 levels.;\r\r\r\r\n    Demand controlled ventilation could be implemented by deploying CO2 sensors located in each AHU return air duct and in densely occupied spaces, such as conference rooms. Implementation of this ECM will require:;\r\r\r\r\n    -Rebalance the open/closed outside air dampers to a lower minimum ventilation rate.;\r\r\r\r\n    -Program demand ventilation controls into each AHU, controlling modulating dampers in mixed air AHUs and VFDs in outside air units. Ventilation will be generally controlled from return air sensors, but will be increased as needed based on densely occupied space sensors.;\r\r\r\r\n    -Commission the project.;\r\r\r\r\n  ",
        "display_name" : "Enable Demand Controlled Ventilation Alternative",
        "input_file_type" : "OSM",
@@ -15124,7 +15124,7 @@
      ],
      "name" : "Enable Demand Controlled Ventilation Group",
      "uuid" : "6188be08-1b14-451f-9224-54a4ae1fb8fe",
-     "version_uuid" : "f834f831-61aa-43f1-a05c-0c3d2f9333bc",
+     "version_uuid" : "2f9406a6-b625-4bd6-a41f-7c6089d73317",
      "workflow_index" : 27,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -15359,9 +15359,9 @@
          "version_uuid" : "97159356-d02e-44d4-8dbd-a853319cb898"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableEconomizerControl",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableEconomizerControl",
        "bcl_measure_uuid" : "f8cc920d-8ae3-411a-922f-e6fed3223c4d",
-       "bcl_measure_version_uuid" : "6bc67bad-90f5-4586-a4b7-ee8cf8283ad9",
+       "bcl_measure_version_uuid" : "a69283d0-29d3-4a61-aa8e-fc70dd094a09",
        "description" : "There is currently not a functioning air side economizer enabled in the building. Air side economizers use cold outside air to either assist the mechanical cooling system, or if the air is cold enough, provide all of the cooling for a facility.\r\r\r\r\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\r\r\r\r\nIn order for an air side economizer to function properly, all of the outside air damper actuators need to have modulating capabilities. In addition to that, new control sequences need to be written into the building automation control system to enable the air-side economizer when outside air temperatures are below 60?F-65?F and the interior space temperatures are calling for cooling.\r\r\r\r\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\r\r\r\r\nThe building would realize the following operational benefits by utilizing an air-side economizer:\r\r\r\r\r\r\r\r\r\r\r\n    -Reduction in cooling system energy use\r\r\r\r\r\r\r\r\r\r\r\n    -Reduction in mechanical cooling system run time\r\r\r\r\r\r\r\r\r\r\r\n    -Possible improvement in indoor air quality\r\r\r\r\r\r\r\r\r\r\r\n  ",
        "display_name" : "Enable Economizer Control Fixed Dry Bulb",
        "input_file_type" : "OSM",
@@ -15595,9 +15595,9 @@
          "version_uuid" : "afc25fea-f98c-42e7-9d81-a685dcea1da6"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableEconomizerControl",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableEconomizerControl",
        "bcl_measure_uuid" : "f8cc920d-8ae3-411a-922f-e6fed3223c4d",
-       "bcl_measure_version_uuid" : "6bc67bad-90f5-4586-a4b7-ee8cf8283ad9",
+       "bcl_measure_version_uuid" : "a69283d0-29d3-4a61-aa8e-fc70dd094a09",
        "description" : "There is currently not a functioning air side economizer enabled in the building. Air side economizers use cold outside air to either assist the mechanical cooling system, or if the air is cold enough, provide all of the cooling for a facility.\r\r\r\r\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\r\r\r\r\nIn order for an air side economizer to function properly, all of the outside air damper actuators need to have modulating capabilities. In addition to that, new control sequences need to be written into the building automation control system to enable the air-side economizer when outside air temperatures are below 60?F-65?F and the interior space temperatures are calling for cooling.\r\r\r\r\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\r\r\r\r\nThe building would realize the following operational benefits by utilizing an air-side economizer:\r\r\r\r\r\r\r\r\r\r\r\n    -Reduction in cooling system energy use\r\r\r\r\r\r\r\r\r\r\r\n    -Reduction in mechanical cooling system run time\r\r\r\r\r\r\r\r\r\r\r\n    -Possible improvement in indoor air quality\r\r\r\r\r\r\r\r\r\r\r\n  ",
        "display_name" : "Enable Economizer Control Differential Enthalpy",
        "input_file_type" : "OSM",
@@ -15831,9 +15831,9 @@
          "version_uuid" : "71ca8260-2c40-4218-8498-d28e8d08bea5"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableEconomizerControl",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/EnableEconomizerControl",
        "bcl_measure_uuid" : "f8cc920d-8ae3-411a-922f-e6fed3223c4d",
-       "bcl_measure_version_uuid" : "6bc67bad-90f5-4586-a4b7-ee8cf8283ad9",
+       "bcl_measure_version_uuid" : "a69283d0-29d3-4a61-aa8e-fc70dd094a09",
        "description" : "There is currently not a functioning air side economizer enabled in the building. Air side economizers use cold outside air to either assist the mechanical cooling system, or if the air is cold enough, provide all of the cooling for a facility.\r\r\r\r\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\r\r\r\r\nIn order for an air side economizer to function properly, all of the outside air damper actuators need to have modulating capabilities. In addition to that, new control sequences need to be written into the building automation control system to enable the air-side economizer when outside air temperatures are below 60?F-65?F and the interior space temperatures are calling for cooling.\r\r\r\r\r\r\r\r\r\r\r\n\r\r\r\r\r\r\r\r\r\r\r\nThe building would realize the following operational benefits by utilizing an air-side economizer:\r\r\r\r\r\r\r\r\r\r\r\n    -Reduction in cooling system energy use\r\r\r\r\r\r\r\r\r\r\r\n    -Reduction in mechanical cooling system run time\r\r\r\r\r\r\r\r\r\r\r\n    -Possible improvement in indoor air quality\r\r\r\r\r\r\r\r\r\r\r\n  ",
        "display_name" : "Enable Economizer Control Fixed Dewpoint and Dry Bulb",
        "input_file_type" : "OSM",
@@ -15849,7 +15849,7 @@
      ],
      "name" : "Enable Economizer Control Group",
      "uuid" : "7d36de8e-b573-4270-bdb1-06f33298a173",
-     "version_uuid" : "c0722d76-a63d-4a93-808b-9f0ccbd77af3",
+     "version_uuid" : "1dc2f950-13c9-49ec-85e7-42d5a349693f",
      "workflow_index" : 28,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -15930,9 +15930,9 @@
          "version_uuid" : "4a4b92ca-830a-460d-83f8-ad0ab4449d91"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceVentilationByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceVentilationByPercentage",
        "bcl_measure_uuid" : "cecf490d-7146-4055-85c7-a7901b9a7dc0",
-       "bcl_measure_version_uuid" : "5710d530-035d-4d93-ae29-f28d8160867f",
+       "bcl_measure_version_uuid" : "2f49f905-0ded-4475-a83a-1e9a4c6c0ca5",
        "description" : "This measure will reduce space ventilation rates by the requested percentage. A cost per square foot of building area can be added to the model.",
        "display_name" : "Reduce Ventilation By Percentage 30% ",
        "input_file_type" : "OSM",
@@ -16013,9 +16013,9 @@
          "version_uuid" : "8bce7467-7131-4292-ae04-b3ae057e50cb"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceVentilationByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceVentilationByPercentage",
        "bcl_measure_uuid" : "cecf490d-7146-4055-85c7-a7901b9a7dc0",
-       "bcl_measure_version_uuid" : "5710d530-035d-4d93-ae29-f28d8160867f",
+       "bcl_measure_version_uuid" : "2f49f905-0ded-4475-a83a-1e9a4c6c0ca5",
        "description" : "This measure will reduce space ventilation rates by the requested percentage. A cost per square foot of building area can be added to the model.",
        "display_name" : "Reduce Ventilation By Percentage 40%",
        "input_file_type" : "OSM",
@@ -16096,9 +16096,9 @@
          "version_uuid" : "862fc02e-2268-4e04-84f7-b49f799cd197"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceVentilationByPercentage",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ReduceVentilationByPercentage",
        "bcl_measure_uuid" : "cecf490d-7146-4055-85c7-a7901b9a7dc0",
-       "bcl_measure_version_uuid" : "5710d530-035d-4d93-ae29-f28d8160867f",
+       "bcl_measure_version_uuid" : "2f49f905-0ded-4475-a83a-1e9a4c6c0ca5",
        "description" : "This measure will reduce space ventilation rates by the requested percentage. A cost per square foot of building area can be added to the model.",
        "display_name" : "Reduce Ventilation By Percentage 50%",
        "input_file_type" : "OSM",
@@ -16114,7 +16114,7 @@
      ],
      "name" : "Reduce Ventilation By Percentage Group",
      "uuid" : "c6cd37c4-3353-4d17-9c6f-63e84b8cfd8c",
-     "version_uuid" : "08801426-27b1-4f99-aef9-47006fb602a5",
+     "version_uuid" : "a7ac88bf-b51b-4e1c-95a1-b4ce6519db66",
      "workflow_index" : 29,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -16566,9 +16566,9 @@
          "version_uuid" : "36901994-f7e0-4351-84fd-b60b6422dfdb"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ShiftScheduleProfileTime",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ShiftScheduleProfileTime",
        "bcl_measure_uuid" : "4a428da9-16bb-46be-bbf0-1ad30c98d9ca",
-       "bcl_measure_version_uuid" : "b7fcd724-a1c8-4fdc-922b-2ee27af6e77b",
+       "bcl_measure_version_uuid" : "0a720719-5606-4753-859d-f35feac0ad24",
        "description" : "Shift a single or all schedules in the building by the specified number of hours",
        "display_name" : "Shift Schedule Profile Time 1hr late",
        "input_file_type" : "OSM",
@@ -17019,9 +17019,9 @@
          "version_uuid" : "bd9341ec-9a92-41a8-98fe-22523f210418"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ShiftScheduleProfileTime",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ShiftScheduleProfileTime",
        "bcl_measure_uuid" : "4a428da9-16bb-46be-bbf0-1ad30c98d9ca",
-       "bcl_measure_version_uuid" : "b7fcd724-a1c8-4fdc-922b-2ee27af6e77b",
+       "bcl_measure_version_uuid" : "0a720719-5606-4753-859d-f35feac0ad24",
        "description" : "Shift a single or all schedules in the building by the specified number of hours",
        "display_name" : "Shift Schedule Profile Time 2hr late",
        "input_file_type" : "OSM",
@@ -17472,9 +17472,9 @@
          "version_uuid" : "723e0805-034a-4ef2-80f6-f1920c80f2d8"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ShiftScheduleProfileTime",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/ShiftScheduleProfileTime",
        "bcl_measure_uuid" : "4a428da9-16bb-46be-bbf0-1ad30c98d9ca",
-       "bcl_measure_version_uuid" : "b7fcd724-a1c8-4fdc-922b-2ee27af6e77b",
+       "bcl_measure_version_uuid" : "0a720719-5606-4753-859d-f35feac0ad24",
        "description" : "Shift a single or all schedules in the building by the specified number of hours",
        "display_name" : "Shift Schedule Profile Time 3hr late",
        "input_file_type" : "OSM",
@@ -17490,7 +17490,7 @@
      ],
      "name" : "Shift Schedule Profile Time Group",
      "uuid" : "3e1cc19c-69e7-403e-be9d-27c38fa7b61d",
-     "version_uuid" : "fd7f1fe3-6fd6-4e0f-85ab-c4328d722f66",
+     "version_uuid" : "f8922a5f-9dee-4059-ad4d-1d88c0c0b920",
      "workflow_index" : 30,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -17529,9 +17529,9 @@
          "version_uuid" : "b079cf05-f573-4abc-a124-3ea172ef3d70"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/TestTestMeasureHadaRubyError",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/TestTestMeasureHadaRubyError",
        "bcl_measure_uuid" : "161e177f-bf00-4f8d-bda3-033b7b369d49",
-       "bcl_measure_version_uuid" : "361bb519-2b5e-4509-8cb9-7963f27d43a5",
+       "bcl_measure_version_uuid" : "883f6bac-683c-4b2a-a518-a69dab2fd663",
        "description" : "This is a dummy measure just to test ruby failure on cloud demo",
        "display_name" : "Test Test Measure Had a Ruby Error Alternative",
        "input_file_type" : "OSM",
@@ -17547,7 +17547,7 @@
      ],
      "name" : "Test Test Measure Had a Ruby Error Group",
      "uuid" : "07cb18a2-2950-4ed9-8ea6-6aa911072abc",
-     "version_uuid" : "b96f7231-1846-4fe4-8d99-08856e333510",
+     "version_uuid" : "77d2ac34-7052-4c51-9f01-8d5185b12ce5",
      "workflow_index" : 31,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -17613,9 +17613,9 @@
          "version_uuid" : "edd65ea5-ef6b-410c-859d-a1f2ba7e2b4e"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOutputVariable",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddOutputVariable",
        "bcl_measure_uuid" : "2a058afb-e349-49ae-a4bf-2c56a42b4352",
-       "bcl_measure_version_uuid" : "e1faddf8-6d19-49c5-a201-839ed2f64947",
+       "bcl_measure_version_uuid" : "f7cb4b0e-c664-4871-8810-4945729af375",
        "description" : "This measure adds an output variable at the requested reporting frequency.",
        "display_name" : "Add Output Variable Alternative",
        "input_file_type" : "OSM",
@@ -17631,7 +17631,7 @@
      ],
      "name" : "Add Output Variable Group",
      "uuid" : "5e87d63d-6e08-4b79-9605-4e61507d5ce1",
-     "version_uuid" : "a470983c-4da2-41b4-a72d-eb0b717127a5",
+     "version_uuid" : "7fc1103d-8189-44f4-919d-a58676bf1fac",
      "workflow_index" : 32,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -17967,9 +17967,9 @@
          "version_uuid" : "4ccce8f5-38fd-43c7-92e6-e86eb47da8b0"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/PredictedMeanVote",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/PredictedMeanVote",
        "bcl_measure_uuid" : "d26890c0-1281-4384-a676-5d38fa2e9e75",
-       "bcl_measure_version_uuid" : "276e29b3-d86c-4cc6-903f-1fe9bf1de10d",
+       "bcl_measure_version_uuid" : "ff68892a-9389-463c-aa63-582d2c2257fb",
        "description" : "This measure adds the necessary data to people objects to support Predicted Mean Vote output data. It also adds the variable request.",
        "display_name" : "Predicted Mean Vote Alternative",
        "input_file_type" : "OSM",
@@ -17985,7 +17985,7 @@
      ],
      "name" : "Predicted Mean Vote Group",
      "uuid" : "6d1f236a-d6d6-4ff3-9410-27f2f45968ff",
-     "version_uuid" : "2a4e99fb-cc43-4bcf-a293-7171659c0714",
+     "version_uuid" : "b47ea105-9cc9-4b9c-95eb-a54f682f6491",
      "workflow_index" : 33,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -18006,9 +18006,9 @@
          "version_uuid" : "81755f79-770c-4cbf-9a0b-93bc755f4f1e"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetLifecycleCostParameters",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/SetLifecycleCostParameters",
        "bcl_measure_uuid" : "2c6aee30-6e8f-49d3-99fb-7ea0b674bf6a",
-       "bcl_measure_version_uuid" : "fad697eb-e876-46e0-b7a8-bc687f97c72a",
+       "bcl_measure_version_uuid" : "156f7ffc-f5e4-471b-8c28-2b0ef1f86282",
        "description" : "This measure sets the analysis type to \"FEMP\" and has an argument for the length of the study period in years.",
        "display_name" : "Set Lifecycle Cost Parameters",
        "input_file_type" : "OSM",
@@ -18024,7 +18024,7 @@
      ],
      "name" : "Set Lifecycle Cost Parameters Group",
      "uuid" : "7b7e8454-fe9e-43f8-87ec-55a44390787d",
-     "version_uuid" : "96a8be0e-5a35-4d78-b3e7-8e728e3f5b39",
+     "version_uuid" : "9fd74a5b-8725-43d1-83ca-e7d2e3bf2a3a",
      "workflow_index" : 34,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -18135,9 +18135,9 @@
          "version_uuid" : "a46f6684-12e7-4f34-95f4-ca9714d58b10"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerFloorAreaToBuilding",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddCostPerFloorAreaToBuilding",
        "bcl_measure_uuid" : "153992bb-0202-424b-9fbb-57fcf0285e65",
-       "bcl_measure_version_uuid" : "e9cacc16-f81b-4af8-9d64-03ffbc9e5073",
+       "bcl_measure_version_uuid" : "cd9e4e8b-7b6d-4629-a909-23b7fe49ac39",
        "description" : "This measure will create life cycle cost objects associated with a the building. You can set a material & installation cost, demolition cost, and O&M costs. Optionally existing cost objects already associated with building can be deleted. This measure will not affect energy use of the building.",
        "display_name" : "Add Cost per Floor Area to Building",
        "input_file_type" : "OSM",
@@ -18153,7 +18153,7 @@
      ],
      "name" : "Add Cost per Floor Area to Building Group",
      "uuid" : "505aaf30-826a-4960-ade2-b3adb510f984",
-     "version_uuid" : "b8e35087-b9c0-46b1-b189-db9d6861af6a",
+     "version_uuid" : "674bd2a7-8719-4827-91d3-631ed59a02bc",
      "workflow_index" : 35,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -18573,9 +18573,9 @@
          "version_uuid" : "01403781-ee39-452a-aa6e-8e7e0a28598f"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddSimplePvToShadingSurfacesByType",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddSimplePvToShadingSurfacesByType",
        "bcl_measure_uuid" : "27627c16-75d4-4fc3-add9-2d7d538c0130",
-       "bcl_measure_version_uuid" : "e18039ec-11cf-4a82-aec5-afaf3b5474ec",
+       "bcl_measure_version_uuid" : "6f5d6261-2b63-4b46-98e7-b9c0dd1007f7",
        "description" : "This measure will add Simple PV objects to site, building or space/zone shading surfaces. This will not create any new geometry, but will just make PV objects out of existing shading geometry. Optionally a cost can be added for the PV.",
        "display_name" : "Add Simple PV to Shading Surfaces By Type 40% 12%eff",
        "input_file_type" : "IDF",
@@ -18686,9 +18686,9 @@
          "version_uuid" : "f02bd87d-ee5a-435b-a0a5-02658e3a43e7"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddSimplePvToShadingSurfacesByType",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddSimplePvToShadingSurfacesByType",
        "bcl_measure_uuid" : "27627c16-75d4-4fc3-add9-2d7d538c0130",
-       "bcl_measure_version_uuid" : "e18039ec-11cf-4a82-aec5-afaf3b5474ec",
+       "bcl_measure_version_uuid" : "6f5d6261-2b63-4b46-98e7-b9c0dd1007f7",
        "description" : "This measure will add Simple PV objects to site, building or space/zone shading surfaces. This will not create any new geometry, but will just make PV objects out of existing shading geometry. Optionally a cost can be added for the PV.",
        "display_name" : "Add Simple PV to Shading Surfaces By Type 60% 12%eff",
        "input_file_type" : "IDF",
@@ -18799,9 +18799,9 @@
          "version_uuid" : "b14f6eda-56b2-4ed7-990b-ccd83fc3d63c"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddSimplePvToShadingSurfacesByType",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/AddSimplePvToShadingSurfacesByType",
        "bcl_measure_uuid" : "27627c16-75d4-4fc3-add9-2d7d538c0130",
-       "bcl_measure_version_uuid" : "e18039ec-11cf-4a82-aec5-afaf3b5474ec",
+       "bcl_measure_version_uuid" : "6f5d6261-2b63-4b46-98e7-b9c0dd1007f7",
        "description" : "This measure will add Simple PV objects to site, building or space/zone shading surfaces. This will not create any new geometry, but will just make PV objects out of existing shading geometry. Optionally a cost can be added for the PV.",
        "display_name" : "Add Simple PV to Shading Surfaces By Type 80% 12%eff",
        "input_file_type" : "IDF",
@@ -18817,7 +18817,7 @@
      ],
      "name" : "Add Simple PV to Shading Surfaces By Type Group",
      "uuid" : "c9422ab6-5f1c-40b1-975a-2a3770ca1c39",
-     "version_uuid" : "aaf91f4e-0257-4e4a-bc50-51a33a3a8347",
+     "version_uuid" : "6fefaacd-3f3b-4573-806b-989c11cc3514",
      "workflow_index" : 38,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -18943,9 +18943,9 @@
          "version_uuid" : "c5b0ba95-666a-4fb6-b8a6-f17031a1916c"
         }
        ],
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/XcelEDATariffSelectionandModelSetup",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/XcelEDATariffSelectionandModelSetup",
        "bcl_measure_uuid" : "c5ab60e9-b8e5-4653-a502-5ed030f1335d",
-       "bcl_measure_version_uuid" : "1e237fee-22dd-41cc-a975-88a4a73a5185",
+       "bcl_measure_version_uuid" : "fd5ecdc4-3419-471b-a480-c1b6d881c2b4",
        "description" : "Add the selected Xcel utility rate, as well as set the timestep and lifecycle costing parameters as required by the Xcel EDA program.",
        "display_name" : "Xcel EDA Tariff Selection and Model Setup",
        "input_file_type" : "IDF",
@@ -18961,7 +18961,7 @@
      ],
      "name" : "Xcel EDA Tariff Selection and Model Setup Group",
      "uuid" : "0b0ead70-1fed-4bd4-b75e-ca69f6fc884e",
-     "version_uuid" : "fb5a48ed-0f83-4ef2-87b0-96642d09a3f1",
+     "version_uuid" : "56063365-5280-4d13-b5d4-d43a155e05fc",
      "workflow_index" : 39,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -19277,9 +19277,9 @@
      "display_name" : "Just the Sample Reporting Measure you get when you create a new reporting measure Group",
      "measures" : [
       {
-       "bcl_measure_directory" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/JusttheSampleReportingMeasureyougetwhenyoucreateanewreportingmeasure",
+       "bcl_measure_directory" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/scripts/JusttheSampleReportingMeasureyougetwhenyoucreateanewreportingmeasure",
        "bcl_measure_uuid" : "17f78b20-cddb-4ab2-9b4e-9cbdb5613711",
-       "bcl_measure_version_uuid" : "815e0331-d740-4880-9a23-58f591784700",
+       "bcl_measure_version_uuid" : "b8104673-8817-4588-87fd-de5c3e4b0b1a",
        "description" : "Replace this text with an explanation of what the measure does in terms that can be understood by a general building professional audience (building owners, architects, engineers, contractors, etc.).  This description will be used to create reports aimed at convincing the owner and/or design team to implement the measure in the actual building design.  For this reason, the description may include details about how the measure would be implemented, along with explanations of qualitative benefits associated with the measure.  It is good practice to include citations in the measure if the description is taken from a known source or if specific benefits are listed.",
        "display_name" : "Just the Sample Reporting Measure you get when you create a new reporting measure",
        "input_file_type" : "Unknown",
@@ -19295,7 +19295,7 @@
      ],
      "name" : "Just the Sample Reporting Measure you get when you create a new reporting measure Group",
      "uuid" : "359f3cb6-3c14-4482-ab6d-a12a41baf983",
-     "version_uuid" : "0b2e1b9f-6117-4e8d-aa83-6c9ad7f437a3",
+     "version_uuid" : "16e6cc41-6c50-4bff-9134-016718911ab8",
      "workflow_index" : 42,
      "workflow_step_type" : "MeasureGroup"
     },
@@ -19462,7 +19462,7 @@
     }
    ]
   },
-  "project_dir" : "C:/projects/openstudio-server-branch1/testing/BigPATTest",
+  "project_dir" : "c:/projects/openstudio-server-branch1/testing/BigPATTest",
   "results_are_invalid" : false,
   "seed" :   {
    "checksum_create" : "B2B085D2",
@@ -19470,11 +19470,11 @@
    "display_name" : "0924_demo_e.osm",
    "file_type" : "OSM",
    "name" : "C:/Users/dgoldwas/Documents/Working/PAT 0924 2344/seed/0924_demo_e.osm",
-   "path" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/seed/0924_demo_e.osm",
+   "path" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/seed/0924_demo_e.osm",
    "timestamp_create" : "20130925T133705",
-   "timestamp_last" : "20140130T121548",
+   "timestamp_last" : "20140212T162155",
    "uuid" : "3c96c21f-71b6-47c6-a8fb-fa8b4de4ecba",
-   "version_uuid" : "b5c21313-8ba5-4efb-99fb-56321c99e984"
+   "version_uuid" : "21de1281-6187-4da9-aee4-c72cafc802c6"
   },
   "uuid" : "4e3b61a7-aa6f-4f22-8dfe-503be6cd4e83",
   "version_uuid" : "dbf5226d-8dff-4103-a455-24effed30434",
@@ -19484,12 +19484,12 @@
    "display_name" : "USA_CO_Golden-NREL.724666_TMY3.epw",
    "file_type" : "EPW",
    "name" : "C:/Users/dgoldwas/Documents/Working/PAT 0924 2344/seed/0924_demo_e/files/USA_CO_Golden-NREL.724666_TMY3.epw",
-   "path" : "C:/projects/openstudio-server-branch1/testing/BigPATTest/seed/0924_demo_e/files/USA_CO_Golden-NREL.724666_TMY3.epw",
+   "path" : "c:/projects/openstudio-server-branch1/testing/BigPATTest/seed/0924_demo_e/files/USA_CO_Golden-NREL.724666_TMY3.epw",
    "timestamp_create" : "20130925T133705",
-   "timestamp_last" : "20140130T121548",
+   "timestamp_last" : "20140212T162155",
    "uuid" : "4ddee523-1444-4797-b318-0c4d8cf70d53",
-   "version_uuid" : "01d224eb-359c-47a6-aae5-6f454cfeab4e"
+   "version_uuid" : "2267750e-3cac-4b9a-af87-e8541d49d7ba"
   }
  },
- "openstudio_version" : "1.2.3"
+ "openstudio_version" : "1.2.4"
 }
