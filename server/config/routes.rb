@@ -36,9 +36,13 @@ OpenstudioServer::Application.routes.draw do
     #end
   end
 
+  match 'admin/backup_database' => 'admin#backup_database', :via => :get
+  resources :admin, :only => [:index] do
+    get :backup_database
+  end
+
   match '/about' => 'pages#about'
-
-
+  
 
 
   # The priority is based upon order of creation:
