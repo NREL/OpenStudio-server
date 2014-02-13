@@ -183,9 +183,6 @@ module Analysis::R
       end
 
       if grouped_by_measure
-        grouped.each do |g|
-          Rails.logger.info "Groud ID: #{g.inspect}"
-        end
         samples = grouped 
       end
       Rails.logger.info "Grouped variables are #{grouped}"
