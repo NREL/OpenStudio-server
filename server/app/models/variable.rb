@@ -20,6 +20,7 @@ class Variable
   field :pivot, :type => Boolean, default: false
   field :pivot_samples # don't type for now
   field :static, :type => Boolean, default: false
+  field :relation_to_output => String, default: "standard"  # or can be inverse
   field :static_value # don't type this because it can take on anything (other than hashes and arrays)
   scope :enabled, where(perturbable: true)
 

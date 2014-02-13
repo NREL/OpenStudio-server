@@ -183,6 +183,16 @@ begin
 
           ros.log_message "iterate over arguments for workflow item #{wf['name']}", true
 
+
+          # The Argument hash in the workflow json file looks like the following
+          # {
+          #    "display_name": "Set XPath",
+          #    "machine_name": "set_xpath",
+          #    "name": "xpath",
+          #    "value": "/building/blocks/block/envelope/surfaces/window/layout/wwr",
+          #    "uuid": "440dcce0-7663-0131-41f1-14109fdf0b37",
+          #    "version_uuid": "440e4bd0-7663-0131-41f2-14109fdf0b37"
+          #}
           args = {}
           if wf['arguments']
             wf['arguments'].each do |wf_arg|
@@ -190,6 +200,7 @@ begin
                 ros.log_message "Setting argument value #{wf_arg['name']} to #{wf_arg['value']}", true
                 # Note that these measures have symbolized hash keys and not strings.  I really want indifferential access here!
                 args[wf_arg['name'].to_sym] = wf_arg['value']
+                # args["#{wf_arg['name']}_machine_name".to_sym] = wf_arg['machine_name'] # i really don't want to save this...
               end
             end
           end
@@ -198,7 +209,14 @@ begin
           variables_found = false
           if wf['variables']
             wf['variables'].each do |wf_var|
-
+              # Argument hash in workflow looks like the following
+              # "argument": {
+              #    "display_name": "Window-To-Wall Ratio",
+              #    "machine_name": "window_to_wall_ratio",
+              #    "name": "value",
+              #    "uuid": "a0618d15-bb0b-4494-a72f-8ad628693a7e",
+              #    "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              #},
               variable_uuid = wf_var['uuid'] # this is what the variable value is set to
               if wf_var['argument']
                 variable_name = wf_var['argument']['name']
@@ -211,6 +229,9 @@ begin
 
                       # Note that these measures have symbolized hash keys and not strings.  I really want indifferential access here!
                       args[wf_var['argument']['name'].to_sym] = data_point_json[:data_point]['set_variable_values'][variable_uuid]
+                      args["#{wf_var['argument']['name']}_machine_name".to_sym] = wf_var['argument']['machine_name']
+                      args["#{wf_var['argument']['name']}_type".to_sym] = wf_var['value_type'] if wf_var['value_type']
+                      ros.log_message "Setting the machine name for argument '#{wf_var['argument']['name']}' to '#{args["#{wf_var['argument']['name']}_machine_name".to_sym]}'"
 
                       # Catch a very specific case where the weather file has to be changed
                       if wf['name'] == "location"
@@ -236,10 +257,16 @@ begin
           # Run the XML Measure        
           if variables_found
             xml_changed = measure.run(@xml_model, nil, args)
+
+            # save the JSON with the changed values
+            # the measure has to implement the "results_to_json" method
+            measure.results_to_json("#{run_directory}/#{wf['name']}_results.json")
+            # also save directly to the database
+            ros.communicate_intermediate_result(measure.variable_values)
           else
             ros.log_message("No variable for measure... skipping")
           end
-          
+
 
           ros.log_message "Finished applying measure workflow #{wf['name']} with change flag set to '#{xml_changed}'", true
 

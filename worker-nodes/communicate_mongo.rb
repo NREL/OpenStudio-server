@@ -113,6 +113,14 @@ module CommunicateMongo
     dp.save! # redundant because next method calls save too.
   end
 
+  # report intermediate results to the database (typically these are measure initial and final values)
+  def self.communicate_intermediate_result(dp, h)
+    if h
+      dp.results ? dp.results.merge!(h) : dp.results = h
+      dp.save!
+    end
+  end      
+  
   def self.communicate_results_json(dp, eplus_json, analysis_dir)
     # create zip file using a system call
     current_dir = Dir.pwd
@@ -134,7 +142,7 @@ module CommunicateMongo
     end
 
     if eplus_json
-      dp.results = eplus_json
+      dp.results ? dp.results.merge!(eplus_json) : dp.results = eplus_json
     end
     dp.save! # redundant because next method calls save too.
   end
