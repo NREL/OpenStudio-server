@@ -98,19 +98,19 @@ class Analysis::Preflight
       mode_sample = {}
       selected_variables.each do |variable|
         if variable.relation_to_output == "inverse"
-          min_sample["#{variable.id}"] = variable.maximum 
-          max_sample["#{variable.id}"] = variable.minimum 
+          min_sample["#{variable.id}"] = variable.maximum
+          max_sample["#{variable.id}"] = variable.minimum
         else
-          min_sample["#{variable.id}"] = variable.minimum 
-          max_sample["#{variable.id}"] = variable.maximum 
+          min_sample["#{variable.id}"] = variable.minimum
+          max_sample["#{variable.id}"] = variable.maximum
         end
-        mode_sample["#{variable.id}"] = variable.modes_value 
+        mode_sample["#{variable.id}"] = variable.modes_value
       end
-      
+
       Rails.logger.info "Minimum sample is: #{min_sample}"
       Rails.logger.info "Maximum sample is: #{max_sample}"
       Rails.logger.info "Mode sample is: #{mode_sample}"
-      
+
       samples << min_sample if @analysis.problem['algorithm']['run_min']
       samples << max_sample if @analysis.problem['algorithm']['run_max']
       samples << mode_sample if @analysis.problem['algorithm']['run_mode']
@@ -121,29 +121,57 @@ class Analysis::Preflight
     elsif @analysis.problem['algorithm']['sample_method'] == "individual_measures"
       # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is 
       # useful when you need each measure to be evaluated individually.  The variables are then linked.
-     
-      
-      #  static_array_grouped = Variable.static_array(@analysis.id, true)
-      #  samples_grouped, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'], true)
-      #  samples = grouped_hash_of_array_to_array_of_hash(samples_grouped, static_array_grouped)
-      #  Rails.logger.info "Grouped samples are #{samples}"
-      #  else
+      grouped = {:min => {}, :max => {}, :mode => {}}
+      Rails.logger.info "Sampling individual measures"
+      min_sample = {} #{:name => 'Minimum'}
+      max_sample = {} #{:name => 'Maximim'}
+      mode_sample = {}
+      selected_variables.each do |variable|
+        grouped[:min]["#{variable.measure.id}"] = {} if !grouped[:min].has_key?(variable.measure.id)
+        grouped[:max]["#{variable.measure.id}"] = {} if !grouped[:max].has_key?(variable.measure.id)
+        grouped[:mode]["#{variable.measure.id}"] = {} if !grouped[:mode].has_key?(variable.measure.id)
+        
+        if variable.relation_to_output == "inverse"
+          grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
+          grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
+        else
+          grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
+          grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
+        end
+        grouped[:mode]["#{variable.measure.id}"]["#{variable.id}"] = variable.modes_value
+      end
 
-      #end 
+      # add in the static values for each measure group
+      static_grouped = Variable.static_array(@analysis.id, true, false)
+      # will return {"a"=>{"b"=>0.56}}
+      static_grouped.each do |k, v|
+        Rails.logger.info "static group is #{k}"
+        grouped[:min][k].merge!(v) if grouped[:min].has_key?(k)
+        grouped[:max][k].merge!(v) if grouped[:max].has_key?(k)
+        grouped[:mode][k].merge!(v) if grouped[:mode].has_key?(k)
+      end
+      
+      # Hash will look like this now:
+      # {
+      # {:min=>{"m_a"=>{"v_1"=>0.2161572052401747}, "m_b"=>{"v_2"=>0.21428571428571425, "v_3"=>0.56}}}
+      # }
+      # So add the min,max,mode values
+      samples += grouped[:min].map{|_,v| v}.flatten if @analysis.problem['algorithm']['run_min'] 
+      samples += grouped[:max].map{|_,v| v}.flatten if @analysis.problem['algorithm']['run_max'] 
+      samples += grouped[:mode].map{|_,v| v}.flatten if @analysis.problem['algorithm']['run_mode'] 
+      Rails.logger.info "Final grouped hash is: #{samples}"
     else
       raise "no sampling method defined (all_variables or individual_variables)"
     end
-    
+
     # add in the starting point if requested.  Note that the static variables are not added to the 
     # starting point.
     samples << {} if @analysis.problem['algorithm']['run_starting_point']
 
-    # Always add in the pivot variables for now.  This allows the location to be set if it is a 
-    # pivot
+    # Always add in the pivot variables for now.  This allows the location to be set if it is a pivot
     Rails.logger.info "Fixing Pivot dimension"
     samples = add_pivots(samples, pivot_array)
     Rails.logger.info "Finished adding the pivots resulting in #{samples}"
-
 
     # Add the data points to the database
     isample = 0
