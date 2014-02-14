@@ -5,13 +5,14 @@ module ApplicationHelper
     active = ' class="active"'.html_safe
 
     case
-      when path == '/'
-        active if page == 'home'
-      when path == '/start'
-        active if page == 'start'
-      #when path == '/about'
-      #  active if page == 'about'
+      when path == '/projects'
+        active if page == 'Projects'
+      when path == '/admin'
+        active if page == 'Admin'
+      when path == '/about'
+        active if page == 'About'
     end
   end
 
 end
+

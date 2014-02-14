@@ -18,6 +18,10 @@ class AnalysesController < ApplicationController
   # GET /analyses/1.json
   def show
     @analysis = Analysis.find(params[:id])
+    @completed_sims = @analysis.data_points.where(:status => "completed")
+    @running_sims = @analysis.data_points.where(:status => "running")
+    @queued_sims = @analysis.data_points.where(:status => "queued")
+    @na_sims = @analysis.data_points.where(:status => "initialized")
 
     @objective_functions = []
 
