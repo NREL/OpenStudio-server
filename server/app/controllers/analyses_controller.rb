@@ -496,7 +496,7 @@ class AnalysesController < ApplicationController
     Rails.logger.info("Data frame name will be #{data_frame_name}")
 
     # need to convert array of hash to hash of arrays
-    # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
+    # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]} 
     out_hash = data.each_with_object(Hash.new([])) do |h1, h|
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
