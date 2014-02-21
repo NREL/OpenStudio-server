@@ -350,6 +350,20 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def download_variables
+    @analysis = Analysis.find(params[:id])
+
+    respond_to do |format|
+      format.csv do
+        redirect_to @analysis, notice: "CSV not yet supported for downloading variables" 
+        #write_and_send_csv(@analysis)
+      end
+      format.rdata do
+        write_and_send_input_variables_rdata(@analysis)
+      end
+    end
+  end
+
   protected
 
   def get_plot_variables(analysis)
@@ -471,6 +485,59 @@ class AnalysesController < ApplicationController
     send_data csv_string, :filename => filename, :type => 'text/csv; charset=iso-8859-1; header=present', :disposition => "attachment"
   end
 
+  def write_and_send_input_variables_rdata(analysis)
+    variable_mappings = analysis.get_superset_of_input_variables
+    download_filename = "#{analysis.name}_input_variables.RData"
+    data_frame_name = "#{analysis.name.downcase.gsub(" ", "_")}_input_variables"
+    Rails.logger.info("Data frame name will be #{data_frame_name}")
+
+    # need to convert array of hash to hash of arrays
+    out_hash = {}
+    out_hash['measure_name'] = []
+    out_hash['variable_name'] = []
+    out_hash['variable_display_name'] = []
+    out_hash['value_type'] = []
+    out_hash['units'] = []
+    out_hash['type_of_variable'] = []
+
+    variable_mappings.each do |k, v|
+      variable = Variable.find(k)
+      out_hash['measure_name'] << variable.measure.name ? variable.measure.name : nil
+      out_hash['variable_name'] << variable.name ? variable.name : nil
+      out_hash['variable_display_name'] << variable['display_name'] ? variable['display_name'] : nil
+      out_hash['value_type'] << variable['value_type'] ? variable['value_type'] : nil
+      out_hash['units'] << variable['units'] ? variable['units'] : nil
+      if variable['variable']
+        out_hash['type_of_variable'] << 'variable'
+      elsif variable['pivot']
+        out_hash['type_of_variable'] << 'pivot'
+      elsif variable['static']
+        out_hash['type_of_variable'] << 'static'
+      else
+        out_hash['type_of_variable'] << 'other'
+      end
+    end
+
+    Rails.logger.info("outhash is #{out_hash}")
+
+    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
+    require 'rserve/simpler'
+    r = Rserve::Simpler.new
+    r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
+      %Q{
+            temp <- tempfile('rdata', tmpdir="/tmp")   
+            save('#{data_frame_name}', file = temp)   
+            Sys.chmod(temp, mode = "0777", use_umask = TRUE)
+         }
+    end
+    tmp_filename = r.converse('temp')
+
+    if File.exists?(tmp_filename)
+      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'application/rdata; header=present', :disposition => "attachment"
+    else
+      raise "could not create R dataframe"
+    end
+  end
 
   def write_and_send_rdata(analysis)
     variable_mappings = analysis.get_superset_of_input_variables
