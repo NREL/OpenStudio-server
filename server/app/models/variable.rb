@@ -178,8 +178,7 @@ class Variable
   def self.variables(analysis_id)
     Variable.where({analysis_id: analysis_id, perturbable: true}).order_by(:name.asc)
   end
-
-
+  
   def map_discrete_hash_to_array
     Rails.logger.info "Discrete values and weights are #{self.discrete_values_and_weights}"
     Rails.logger.info "received map discrete values with #{self.discrete_values_and_weights} with size #{self.discrete_values_and_weights.size}"

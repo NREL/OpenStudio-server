@@ -19,6 +19,7 @@ OpenstudioServer::Application.routes.draw do
         get :plot_xy
         get :plot_radar
         get :download_data
+        get :download_variables
       end
 
       resources :measures, :only => [:show, :index], shallow: true
