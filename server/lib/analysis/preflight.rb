@@ -17,7 +17,8 @@ class Analysis::Preflight
                 run_max: true,
                 run_min: true,
                 run_mode: true,
-                run_starting_point: true
+                run_starting_point: true,
+                run_all_samples_for_pivots: true
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -167,13 +168,19 @@ class Analysis::Preflight
     # add in the starting point if requested.  Note that the static variables are not added to the 
     # starting point.
     #samples << {:name => "Starting Point"} if @analysis.problem['algorithm']['run_starting_point']
-    samples << {} if @analysis.problem['algorithm']['run_starting_point']
+    
+    if @analysis.problem['algorithm']['run_all_samples_for_pivots']
+      samples << {} if @analysis.problem['algorithm']['run_starting_point']
 
-    # Always add in the pivot variables for now.  This allows the location to be set if it is a pivot
-    Rails.logger.info "Fixing Pivot dimension"
-    samples = add_pivots(samples, pivot_array)
-    Rails.logger.info "Finished adding the pivots resulting in #{samples}"
-
+      # Always add in the pivot variables for now.  This allows the location to be set if it is a pivot
+      Rails.logger.info "Fixing Pivot dimension"
+      samples = add_pivots(samples, pivot_array)
+      Rails.logger.info "Finished adding the pivots resulting in #{samples}"
+    else
+      # only grab one of the pivots for now
+      # todo: run all baselines, but only sample for the "default pivot" 
+    end
+    
     # Add the data points to the database
     isample = 0
     samples.each do |sample| # do this in parallel
