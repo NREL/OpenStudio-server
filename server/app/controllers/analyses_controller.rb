@@ -293,7 +293,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     # Get the mappings of the variables that were used. Move this to the datapoint class
-    @mappings = get_superset_of_variables(@analysis)
+    @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
     @plot_data = get_plot_data(@analysis, @mappings)
     @plot_data_radar = get_plot_data_radar(@analysis, @mappings)
@@ -350,30 +350,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-
   protected
-
-  # This method is not optimized at all.  It iterates over all data points variable values and pulls 
-  # out the variable information.  Need to push this into the model and be much smarter 
-  # about the query.  At least the query is calling 'only'.
-  def get_superset_of_variables(analysis)
-    mappings = {}
-
-    # this is a little silly right now.  a datapoint is really really complete after the download status and status are set to complete
-    dps = analysis.data_points.where({download_status: 'completed', status: 'completed'}).only(:set_variable_values)
-    dps.each do |dp|
-      if dp.set_variable_values
-        dp.set_variable_values.each_key do |key|
-          v = Variable.where(uuid: key).first
-          mappings[key] = v.name.gsub(" ", "_") if v
-        end
-      end
-    end
-
-    Rails.logger.info mappings
-
-    mappings
-  end
 
   def get_plot_variables(analysis)
     plotvars = []
@@ -420,12 +397,10 @@ class AnalysesController < ApplicationController
 
 
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
-  # a useful JSON for plotting (and exporting to CSV)
-  def get_plot_data(analysis, mappings)
-    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
-    # and this is just an ugly mapping, sorry all.
-
-    ovs = @analysis.output_variables
+  # a useful JSON for plotting (and exporting to CSV/R-dataframe)
+  # The results is the same as the varaibles hash which defines which results to export.  If nil it will only
+  # export the results that in the output_variables hash
+  def get_plot_data(analysis, variables, results = nil)
     plot_data = []
     if @analysis.analysis_type == "sequential_search"
       dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
@@ -433,32 +408,39 @@ class AnalysesController < ApplicationController
     else
       dps = @analysis.data_points.all
     end
+
+    # load in the output variables that are requested (including objective functions)
+    ovs = @analysis.output_variables
+
     dps.each do |dp|
+      # the datapoint is considered complete if it has results set
       if dp['results']
         dp_values = {}
 
         dp_values["data_point_uuid"] = data_point_path(dp.id)
 
-        # lookup input value names
-
+        # lookup input value names (from set_variable_values)
+        # todo: push this work into the database
         if dp.set_variable_values
-          mappings.each do |k, v|
-            if dp.set_variable_values[k]
-              dp_values[v] = dp.set_variable_values[k]
-            else
-              dp_values[v] = nil
-            end
+          variables.each do |k, v|
+            dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
           end
         end
 
-        ovs.each do |ov|
-          if ov['objective_function']
+        if results
+          # this will eventually be two levels (which will need to be collapsable for column vectors)
+          results.each do |key, _|
+            dp_values[key] = dp.results[key] ? dp.results[key] : nil
+          end
+        else
+          # output all output variables in the array of hashes (regardless if it is an objective function or not)
+          ovs.each do |ov|
             dp_values[ov['name']] = dp['results'][ov['name']] if dp['results'][ov['name']]
           end
         end
 
-        # outputs -- map these by hand right now because I don't want to parse the entire results into
-        # the dp_values hash
+
+        # TEMP -- put out the total_energy in the JSON in case it isn't in the output_variables hash
         dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
 
         plot_data << dp_values
@@ -471,8 +453,10 @@ class AnalysesController < ApplicationController
   def write_and_send_csv(analysis)
     require 'csv'
 
-    mappings = get_superset_of_variables(analysis)
-    data = get_plot_data(analysis, mappings)
+    variable_mappings = analysis.get_superset_of_input_variables
+    result_mappings = analysis.get_superset_of_result_variables
+    Rails.logger.info "RESULTS MAPPING was #{result_mappings}"
+    data = get_plot_data(analysis, variable_mappings, result_mappings)
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
       icnt = 0
@@ -489,8 +473,9 @@ class AnalysesController < ApplicationController
 
 
   def write_and_send_rdata(analysis)
-    mappings = get_superset_of_variables(analysis)
-    data = get_plot_data(analysis, mappings)
+    variable_mappings = analysis.get_superset_of_input_variables
+    result_mappings = analysis.get_superset_of_result_variables
+    data = get_plot_data(analysis, variable_mappings, result_mappings)
     download_filename = "#{analysis.name}.RData"
     data_frame_name = analysis.name.downcase.gsub(" ", "_")
     Rails.logger.info("Data frame name will be #{data_frame_name}")

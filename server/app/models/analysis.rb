@@ -17,6 +17,7 @@ class Analysis
   field :analysis_type, :type => String
   field :start_time, :type => DateTime
   field :end_time, :type => DateTime
+  field :results, :type => Hash, default: nil
   field :problem
   field :status_message, :type => String # the resulting message from the analysis
   field :output_variables, :type => Array, default: [] # list of variable that are needed for output including objective functions
@@ -151,7 +152,7 @@ class Analysis
       self.start(no_delay, analysis_type, options)
 
       return [true]
-    # TODO: need to test for each of these cases!
+      # TODO: need to test for each of these cases!
     elsif self.delayed_job_ids.empty? || !Delayed::Job.where(:_id.in => self.delayed_job_ids).exists? || self.status != "queued" || self.status != "started"
       self.start(no_delay, analysis_type, options)
 
@@ -213,7 +214,73 @@ class Analysis
     self.save!
   end
 
-  # copy back the results to the master node if they are finished
+
+  # Method goes through all the data_points in an analysis and finds all the input variables (set_variable_values)
+  # It uses map/reduce putting the load on the database to do the unique check.
+  # Result is a hash of ids and variable names in the form of:
+  #   { "uuid": "variable_name", "uuid2": "variable_name_2"}
+  # 2013-02-20: NL Moved to Analysis Model. Updated to use map/reduce.  This runs in 62.8ms on a smallish sized collection compared to 461ms on the
+  # same collection
+  def get_superset_of_input_variables
+
+    mappings = {}
+    start = Time.now
+
+    map = %Q{
+      function() {
+        for (var key in this.set_variable_values) { emit(key, null); }
+      }
+    }
+
+    reduce = %Q{
+      function(key, nothing) { return null; }
+    }
+
+    # todo: do we want to filter this on only completed simulations--i don't think so anymore.
+    #   old query .where({download_status: 'completed', status: 'completed'})
+    var_ids = self.data_points.map_reduce(map, reduce).out(inline: true)
+    var_ids.each do |var|
+      v = Variable.where(uuid: var['_id']).only(:name).first
+      # todo: can we delete the gsub'ing -- as i think the v.name is always the machine name now
+      mappings[var['_id']] = v.name.gsub(" ", "_") if v
+    end
+    Rails.logger.info "Mappings created in #{Time.now - start}" #with the values of: #{mappings}"
+
+    # sort before sending back
+    Hash[mappings.sort_by {|_, v| v}]
+  end
+
+  # This returns a slighly different format compared to the method above.  This returs
+  # all the result variables that are avaiable in the form:
+  # {"air_handler_fan_efficiency_final"=>true, "air_handler_fan_efficiency_initial"=>true, ...
+  def get_superset_of_result_variables
+    mappings = {}
+    start = Time.now
+
+    map = %Q{
+      function() {
+        for (var key in this.results) { emit(key, null); }
+      }
+    }
+
+    reduce = %Q{
+      function(key, nothing) { return null; }
+    }
+
+    # todo: do we want to filter this on only completed simulations--i don't think so anymore.
+    #   old query .where({download_status: 'completed', status: 'completed'})
+    var_ids = self.data_points.map_reduce(map, reduce).out(inline: true)
+    var_ids.each do |var|
+      mappings[var['_id']] = true
+    end
+    Rails.logger.info "Result mappings created in #{Time.now - start}" #with the values of: #{mappings}"
+
+    # sort before sending back
+    Hash[mappings.sort]
+  end
+
+
+# copy back the results to the master node if they are finished
   def finalize_data_points
     any_downloaded = false
     self.data_points.and({download_status: 'na'}, {status: 'completed'}).each do |dp|
@@ -224,6 +291,7 @@ class Analysis
   end
 
   protected
+
 
   def remove_dependencies
     logger.info("Found #{self.data_points.size} records")
