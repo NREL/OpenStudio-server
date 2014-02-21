@@ -24,3 +24,5 @@ gem 'libxml-ruby'
 # test
 gem 'ruby-prof'
 
+# other gems for various analyses
+gem 'os'
