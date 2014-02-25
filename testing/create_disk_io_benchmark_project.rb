@@ -14,6 +14,7 @@ puts "Creating DiskIOBenchmark from BigPATTest. Want at least " + min_points.to_
      " identical data points."
 
 # open BigPATTest and save as DiskIOBenchmark
+OpenStudio::Application::instance.processEvents
 if File.exists?(project_dir)
   OpenStudio::removeDirectory(OpenStudio::Path.new(project_dir))
 end
