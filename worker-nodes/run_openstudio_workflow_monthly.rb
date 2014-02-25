@@ -324,10 +324,15 @@ begin
             ros.log_message "Found objective function target for #{variable['name']}", true
             objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = variable['objective_function_target'].to_f
           end
+          if variable['scaling_factor']
+            ros.log_message "Found scaling factor for #{variable['name']}", true
+            objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = variable['scaling_factor'].to_f
+          end          
         else
           #objective_functions[variable['name']] = nil
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = nil
         end
       end
     end
