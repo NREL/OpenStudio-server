@@ -234,6 +234,8 @@ begin
     end
   end
 
+  
+
   #ros.log_message @model.to_s
   a = Time.now
   osm_filename = "#{run_directory}/osm_out.osm"
@@ -284,6 +286,37 @@ begin
   # use the completed job to populate data_point with results
   ros.log_message "Updating OpenStudio DataPoint and Communicating Results", true
 
+
+  # HARD CODE the running of the report measure --- eventually loop of the workflow and
+  # run any post processing
+  ros.log_message "Running OpenStudio Post Processing"
+  measure_path = "./packaged_measures"
+  measure_name = "StandardReports"
+        
+  # when full workflow then do this
+  # require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
+  require "#{File.expand_path(File.join(File.dirname(__FILE__), measure_path, measure_name, 'measure'))}"
+
+  measure = measure_name.constantize.new
+  runner = OpenStudio::Ruleset::OSRunner.new
+  arguments = measure.arguments
+
+  ros.log_message "Run directory for post process: #{run_directory}"
+  runner.setLastOpenStudioModel(@model)
+  runner.setLastEnergyPlusSqlFilePath("#{run_directory}/run/eplusout.sql")
+
+  # set argument values to good values and run the measure
+  argument_map = OpenStudio::Ruleset::OSArgumentMap.new
+  measure.run(runner, argument_map)
+  result = runner.result
+
+  ros.log_message "Finished OpenStudio Post Processing"
+  ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
+  result.errors.each { |w| ros.log_message w.logMessage, true }
+  report_json = JSON.parse(OpenStudio::toJSON(result.attributes), :symbolize_names => true)
+  ros.log_message "JSON file is #{report_json}"
+  File.open("#{run_directory}/standard_report.json",'w') {|f| f << JSON.pretty_generate(report_json)}
+
   # If profiling, then go ahead and get the results here.  Note that we are not profiling the 
   # result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
   # also ZIPs up the folder and we want the results of the performance to also be in ZIP file.
@@ -300,8 +333,7 @@ begin
   # First read in the eplustbl.json file
   if File.exists?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
-    ros.log_message "result_json\n"
-    ros.log_message "#{result_json}"
+    ros.log_message "Result JSON is: #{result_json}"
     ros.log_message "analysis_json[:analysis]['output_variables']\n"
     ros.log_message "#{analysis_json[:analysis]['output_variables']}"
     ros.log_message "pulling out objective functions", true

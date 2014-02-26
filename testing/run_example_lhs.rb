@@ -40,7 +40,7 @@ run_options = {
         random_seed: 1979,
         algorithm: {
             #number_of_samples: 100,
-            number_of_samples: 3,
+            number_of_samples: 2, # do not set to one -- todo: fix this!
             sample_method: "all_variables"
             #sample_method: "individual_variables"
         }
