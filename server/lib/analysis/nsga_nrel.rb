@@ -215,8 +215,6 @@ class Analysis::NsgaNrel
 
               # read in the results from the objective function file
               # TODO: verify that the file exists
-              # TODO: determine how to handle if the objective function value = nil/null 
-              #       Right now it sets everything to 0.0
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
@@ -225,7 +223,7 @@ class Analysis::NsgaNrel
                 if (json[objfuntemp] != "nil"){
                   objtemp <- as.numeric(json[objfuntemp])
                 } else {
-                  objtemp <- 0.0
+                  objtemp <- 1.0e9
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
                 if (json[objfuntargtemp] != "nil"){
@@ -233,7 +231,14 @@ class Analysis::NsgaNrel
                 } else {
                   objtemp2 <- 0.0
                 }
-                obj[i] <- abs(objtemp - objtemp2)
+                scalingfactor <- paste("scaling_factor_",i,sep="")
+                sclfactor <- 1.0
+                if (json[scalingfactor] != "NULL"){
+                  sclfactor <- as.numeric(json[scalingfactor])
+                } else {
+                  sclfactor <- 1.0
+                }                
+                obj[i] <- abs(objtemp - objtemp2)/sclfactor
               }
               print(paste("Objective function results are:",obj))   
               return(obj)
