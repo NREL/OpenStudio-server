@@ -75,6 +75,8 @@ begin
   @model = nil
   @model_idf = nil
   @weather_filename = nil
+  @output_attributes = []
+  @report_measures = []
 
   ros.log_message "Getting Problem JSON input", true
 
@@ -221,6 +223,8 @@ begin
           measure.run(@model, runner, argument_map)
         elsif wf['measure_type'] == "EnergyPlusMeasure"
           measure.run(@model_idf, runner, argument_map)
+        elsif wf['measure_type'] == "ReportingMeasure"
+          report_measures << measure
         end
         result = runner.result
 
@@ -230,6 +234,7 @@ begin
         result.warnings.each { |w| ros.log_message w.logMessage, true }
         result.errors.each { |w| ros.log_message w.logMessage, true }
         result.info.each { |w| ros.log_message w.logMessage, true }
+        result.attributes.each { |att| @output_attributes << att }
       end
     end
   end
@@ -299,6 +304,14 @@ begin
     File.open("#{directory.to_s}/profile-flat.txt", "w") { |f| RubyProf::FlatPrinter.new(profile_results).print(f) }
     File.open("#{directory.to_s}/profile-tree.prof", "w") { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
+  
+  # TODO: Run Standard Reporting Measure and extract attributes
+  # attach sql file to runner
+  
+  @report_measures.each { |report_measure|
+    # run the reporting measures
+    
+  }
 
   # Initialize the objective function variable
   objective_functions = {}
@@ -324,10 +337,15 @@ begin
             ros.log_message "Found objective function target for #{variable['name']}", true
             objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = variable['objective_function_target'].to_f
           end
+          if variable['scaling_factor']
+            ros.log_message "Found scaling factor for #{variable['name']}", true
+            objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = variable['scaling_factor'].to_f
+          end          
         else
           #objective_functions[variable['name']] = nil
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = nil
         end
       end
     end

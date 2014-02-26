@@ -1,0 +1,11 @@
+FALSE,Add Simple PV to Shading Surfaces By Type,AddSimplePvToShadingSurfacesByType,RubyMeasure
+"",argument,Choose the Type of Shading Surfaces to add PV to,shading_type,static,String,"",Building Shading,"|Site Shading,Building Shading,Space/Zone Shading|"
+"",argument,Fraction of Included Surface Area with PV,fraction_surfacearea_with_pv,static,Double,"",0.4
+"",argument,Fractional Value for Cell Efficiency,value_for_cell_efficiency,static,Double,"",0.12
+"",argument,Material and Installation Costs for the PV ($).,material_cost,static,Double,"",0
+"",argument,Expected Life (whole years).,expected_life,static,Integer,"",20
+"",argument,O & M Costs for the PV ($).,om_cost,static,Double,"",0
+"",argument,O & M Frequency (whole years).,om_frequency,static,Integer,"",1
+FALSE,Xcel EDA Tariff Selection and Model Setup,XcelEDATariffSelectionandModelSetup,RubyMeasure
+"",argument,Select an Electricity Tariff.,elec_tar,static,String,"",Secondary General,"|Residential General,Commercial,Primary General,Secondary General Low Load Factor,Secondary General,Secondary Photovoltaic Time-of-Use,Transmission General,Non-Xcel Commercial,Non-Xcel Primary General,Non-Xcel Secondary General Low Load Factor,Non-Xcel Secondary General,Non-Xcel Transmission General|"
+"",argument,Select a Gas Tariff.,gas_tar,static,String,"",Large CG,"|Residential Gas,Small CG,Large CG,Interruptible Industrial G,Non-Xcel Gas Firm,Non-Xcel Gas Interruptible|"
