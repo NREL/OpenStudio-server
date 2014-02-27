@@ -73,7 +73,14 @@ module Analysis::R
       {r: @r.converse("samples"), image_path: save_file_name}
     end
 
+    # Take the values/probabilities from the LHS sample and transform them into 
+    # the other distribution using the quantiles of the other distribution.  
+    # Note that the probabilities and the samples must be an array so there are 
+    # checks to make sure that it is.  If R only has one sample, then it will not 
+    # wrap it in an array.
     def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max, save_histogram = true)
+      probabilities_array = [probability_array] unless probabilities_array.kind_of? Array # ensure array
+
       Rails.logger.info "Creating sample from probability"
       r_dist_name = ""
       if distribution_type == 'normal' || distribution_type == 'normal_uncertain'
@@ -122,8 +129,9 @@ module Analysis::R
         end
       end
 
-      # returns an array
-      samples = @r.converse "print(samples)"
+      # Should return an array. Always return an array, even if it is one value. 
+      samples = @r.converse "samples"
+      samples = [samples] unless samples.kind_of? Array
       save_file_name = nil
       if save_histogram && !samples[0].kind_of?(String)
         # Determine where to save it
@@ -139,7 +147,9 @@ module Analysis::R
         end
       end
 
-      {r: @r.converse("samples"), image_path: save_file_name}
+      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+      
+      {r: samples, image_path: save_file_name}
     end
 
     def sample_all_variables(selected_variables, number_of_samples, grouped_by_measure = false)

@@ -1,5 +1,9 @@
 <h1>List of Variables</h1>
 
+<% if @variables && @variables.first %>
+    <%= link_to 'Download Variables as R Data Frame', download_variables_analysis_path(@variables.first.analysis, format: :rdata) %> |
+    <%= link_to 'Download Variables as CSV', download_variables_analysis_path(@variables.first.analysis, format: :csv) %> 
+<% end %>
 
 <h2>Pivot Variables</h2>
 <table class="table table-striped">
