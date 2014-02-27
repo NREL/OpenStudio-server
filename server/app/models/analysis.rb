@@ -223,6 +223,23 @@ class Analysis
     return any_downloaded
   end
 
+  def search(search, status)
+    if search
+      if status == 'all'
+        self.data_points.where(:name => /#{search}/i)
+      else
+        self.data_points.where(:name => /#{search}/i, :status => status)
+      end
+
+    else
+      if status == 'all'
+        self.data_points
+      else
+        self.data_points.where(:status => status)
+      end
+    end
+  end
+
   protected
 
   def remove_dependencies
@@ -267,6 +284,7 @@ class Analysis
     self.uuid = self.id if self.uuid.nil?
     self.save!
   end
+
 
 
 end
