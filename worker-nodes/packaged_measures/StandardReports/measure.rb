@@ -125,11 +125,21 @@ class StandardReports < OpenStudio::Ruleset::ReportingUserScript
     end
     energy = energy[0..-3]
     energy << "\n};\n"
+    
     if (os_version >= min_version_feature1)
-      runner.registerValue("site_energy_use_si",OpenStudio::convert(site_energy_use,"J","GJ").get,"GJ")
-      runner.registerValue("site_energy_use_ip",OpenStudio::convert(site_energy_use,"J","MBtu").get,"MBtu")
+      report_optional_value(runner, "hours_simulated", "hr", sqlFile.hoursSimulated)
+      report_optional_value(runner, "net_site_energy", "GJ", sqlFile.netSiteEnergy)
+      report_optional_value(runner, "net_source_energy", "GJ", sqlFile.netSourceEnergy)
+      report_optional_value(runner, "total_site_energy", "GJ", sqlFile.totalSiteEnergy)
+      report_optional_value(runner, "total_source_energy", "GJ", sqlFile.totalSourceEnergy)
+      report_optional_value(runner, "annual_total_utility_cost", "$", sqlFile.annualTotalUtilityCost)
+      
+      endUses = sqlFile.endUses
+      if not endUses.empty?
+        runner.registerAttribute(endUses.get.attribute)
+      end
     end
-
+    
     # echo out our values
     #runner.registerInfo("This building is named #{building_name}.")
 
