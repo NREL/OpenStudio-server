@@ -109,18 +109,20 @@ input[type='text'] {
 
 .navbar {
 
+  background: #f9f9f9;
+
  .navbar-inner {
   padding: 0;
 
  }
   .nav > li {
-    padding-left:20px;
-    padding-right:20px;
-    font-size:130%;
+    padding-left:30px;
+    padding-right:30px;
+    font-size:120%;
   }
   .nav > li.active > a{
     color: #000;
-    background: #ccc;
+    background: #e7e7e7;
     &:hover {
       color:#fff
     }
@@ -129,7 +131,7 @@ input[type='text'] {
 
   .nav > li > a {
     color: $button-grey;
-    background: #ebecec; /* Old browsers */
+    background: #f9f9f9; /* Old browsers */
     &:hover {
       color: black;
     }
@@ -141,9 +143,43 @@ input[type='text'] {
   font-size:110%;
 }
 
+.dropdown-menu {
+  margin-left:30px;
+
+}
+.dropdown-menu > .active > a {
+  background: #e7e7e7;
+  color:#333;
+}
+
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+  background: #e7e7e7;
+  color:#fff;
+}
+
+
+.dropdown-menu > li > a {
+  color: $button-grey;
+  font-size:90%;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+
+  color: #333;
+  background: #e7e7e7;
+}
+
 .top-pad {
   padding-top: 10px;
 }
+
+.pagination > .current {
+  background: #e7e7e7;
+  padding: 3px 2px;
+}
+
 #blue-line-and-fade {
   height: 10px;
   min-height: 0;

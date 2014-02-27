@@ -268,4 +268,5 @@ class Analysis
     self.save!
   end
 
+
 end

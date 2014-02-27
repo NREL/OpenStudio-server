@@ -1,3 +1,4 @@
+<div id='<%= "#{status || ''}simulations"%>'>
 <% if simulations.size == 0 %>
  <p style="padding-top:10px;">There are no simulations to display.</p>
 <% else %>
@@ -18,7 +19,8 @@
       </tr>
       </thead>
       <tbody>
-      <% simulations.order_by(:run_start_time.desc, :name.asc).each do |dp| %>
+      <!--<#% simulations.order_by(:run_start_time.desc, :name.asc).each do |dp| %> -->
+      <% simulations.each do |dp| %>
           <tr>
             <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
             <td> <%= dp.status %></td>
@@ -38,4 +40,8 @@
       <% end %>
       </tbody>
     </table>
- <% end %>
+    <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :running_page => running_page, :queued_page => queued_page, :na_page => na_page } %>
+
+
+<% end %>
+</div>
