@@ -39,8 +39,8 @@
     <%= link_to "List of Variables (#{@analysis.variables.count})", analysis_variables_path(@analysis) %> |
     <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates_analysis_path(@analysis) %> |
     <%= link_to 'View Scatter Plot', plot_scatter_analysis_path(@analysis) %> |
-    <%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) if @objective_functions.count <= 2 %> |
-    <%= link_to 'View Radar Plot', plot_radar_analysis_path(@analysis) if @objective_functions.count > 2 %> |
+    <% if @objective_functions.count <= 2 %><%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) %> |<% end %>
+    <% if @objective_functions.count > 2  %><%= link_to 'View Radar Plot', plot_radar_analysis_path(@analysis)  %> |<% end %>
     <%= link_to 'Download CSV', download_data_analysis_path(@analysis, format: :csv) %> |
     <%= link_to 'Download R Data Frame', download_data_analysis_path(@analysis, format: :rdata) %> |
     <%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
@@ -49,41 +49,47 @@
     <h1>Simulations (<%= @analysis.data_points.count if @analysis.data_points %>) </h1>
 
     <ul class="nav nav-tabs">
-      <li class="active"><a data-toggle="tab" href="#sectionAll">All</a></li>
-      <li><a data-toggle="tab" href="#sectionCompleted">Completed</a></li>
-      <li><a data-toggle="tab" href="#sectionRunning">Running</a></li>
-      <li><a data-toggle="tab" href="#sectionQueued">Queued</a></li>
-      <li><a data-toggle="tab" href="#sectionNA">Initialized</a></li>
+      <li <% if @status == 'all' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionAll">All</a></li>
+      <li <% if @status == 'completed' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionCompleted">Completed</a></li>
+      <li <% if @status == 'running' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionRunning">Running</a></li>
+      <li <% if @status == 'queued' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionQueued">Queued</a></li>
+      <li <% if @status == 'na' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionNA">Initialized</a></li>
     </ul>
     <div class="tab-content">
-      <div id="sectionAll" class="tab-pane fade in active">
+      <div id="sectionAll" class="tab-pane fade <% if @status == 'all' %>in active<% end %>">
         <div class="tab-container">
             <h3>All Simulations</h3>
-            <%= render(:partial => "analyses/table", :locals => {:simulations => @analysis.data_points})%>
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @all_sims, :status => 'all', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
+
         </div>
       </div>
-      <div id="sectionCompleted" class="tab-pane fade">
+      <div id="sectionCompleted" class="tab-pane fade  <% if @status == 'completed' %> in active <% end %>">
         <div class="tab-container">
             <h3>Completed</h3>
-            <%= render(:partial => "analyses/table", :locals => {:simulations => @completed_sims})%>
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @completed_sims, :status => 'completed', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
       </div>
-      <div id="sectionRunning" class="tab-pane fade">
+      <div id="sectionRunning" class="tab-pane fade  <% if @status == 'running' %>in active<% end %>">
         <div class="tab-container">
             <h3>Running</h3>
-            <%= render(:partial => "analyses/table", :locals => {:simulations => @running_sims})%>
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @running_sims, :status => 'running', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
       </div>
-      <div id="sectionQueued" class="tab-pane fade">
+      <div id="sectionQueued" class="tab-pane fade  <% if @status == 'queued' %>in active <% end %>">
         <div class="tab-container">
             <h3>Queued</h3>
-            <%= render(:partial => "analyses/table", :locals => {:simulations => @queued_sims})%>
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @queued_sims, :status => 'queued', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
       </div>
-      <div id="sectionNA" class="tab-pane fade">
+      <div id="sectionNA" class="tab-pane fade  <% if @status == 'na' %>in active<% end %>">
         <div class="tab-container">
             <h3>Initialized</h3>
-            <%= render(:partial => "analyses/table", :locals => {:simulations => @na_sims})%>
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @na_sims, :status => 'na', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
       </div>
     </div>

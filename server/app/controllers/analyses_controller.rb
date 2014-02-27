@@ -1,4 +1,6 @@
+require 'will_paginate/array'
 class AnalysesController < ApplicationController
+
   # GET /analyses
   # GET /analyses.json
   def index
@@ -17,11 +19,61 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
+    per_page = 50
+
     @analysis = Analysis.find(params[:id])
-    @completed_sims = @analysis.data_points.where(:status => "completed")
-    @running_sims = @analysis.data_points.where(:status => "running")
-    @queued_sims = @analysis.data_points.where(:status => "queued")
-    @na_sims = @analysis.data_points.where(:status => "initialized")
+
+    #tab status
+    @status = 'all'
+    if !params[:status].nil?
+        @status = params[:status]
+    end
+
+    logger.debug "!!STATUS: #{@status}"
+
+    @all_page = @status == 'all' ? params[:page] : params[:all_page]
+    @completed_page = @status == 'completed' ? params[:page] : params[:completed_page]
+    @running_page = @status == 'running' ? params[:page] : params[:running_page]
+    @queued_page = @status == 'queued' ? params[:page] : params[:queued_page]
+    @na_page = @status == 'na' ? params[:page] : params[:na_page]
+
+    logger.debug "!! RUNNING PAGE: #{@running_page}"
+
+    @all_sims_count = @analysis.data_points
+    @completed_sims_count = @analysis.data_points.where(:status => "completed")
+    @running_sims_count = @analysis.data_points.where(:status => "running")
+    @queued_sims_count = @analysis.data_points.where(:status => "queued")
+    @na_sims_count = @analysis.data_points.where(:status => "na")
+
+    #@status_simulations = @all_sims = @analysis.data_points.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims.count) if !request.xhr? || @status.blank? || @status == 'all'
+    #@status_simulations = @completed_sims = @analysis.data_points.where(:status => "completed").paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims.count) if !request.xhr?  || @status == 'completed'
+    #@status_simulations = @running_sims = @analysis.data_points.where(:status => "running").paginate(:page => @running_page, :per_page => per_page, :total_entries => @running_sims.count) if !request.xhr?  || @status == 'running'
+    #@status_simulations = @queued_sims = @analysis.data_points.where(:status => "queued").paginate(:page => @queued_page, :per_page => per_page, :total_entries => @queued_sims.count) if !request.xhr?  || @status == 'queued'
+    #@status_simulations = @na_sims = @analysis.data_points.where(:status => "na").paginate(:page => @na_page, :per_page => per_page, :total_entries => @na_sims.count) if !request.xhr?  || @status == 'na'
+    #@status_simulations = @analysis.data_points.paginate(:page => params[:page], :per_page => per_page, :total_entries => @all_sims.count)
+
+    @all_sims = @analysis.data_points.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims_count.count)
+    @completed_sims = @analysis.data_points.where(:status => "completed").paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims_count.count)
+    @running_sims = @analysis.data_points.where(:status => "running").paginate(:page => @running_page, :per_page => per_page, :total_entries => @running_sims_count.count)
+    @queued_sims = @analysis.data_points.where(:status => "queued").paginate(:page => @queued_page, :per_page => per_page, :total_entries => @queued_sims_count.count)
+    @na_sims = @analysis.data_points.where(:status => "na").paginate(:page => @na_page, :per_page => per_page, :total_entries => @na_sims_count.count)
+
+
+    case @status
+    when 'all'
+      @status_simulations = @all_sims
+    when 'completed'
+      @status_simulations = @completed_sims
+    when 'running'
+      @status_simulations = @running_sims
+    when 'queued'
+      @status_simulations = @queued_sims
+    when 'na'
+      @status_simulations = @na_sims
+    end
+
+    logger.debug "!!STATUS SIMS: #{@status_simulations.first.status}, #{@status_simulations.last.status}"
+    logger.debug "!!STATUS: #{@status}"
 
     @objective_functions = []
 
@@ -49,6 +101,7 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: {:analysis => @analysis} }
+      format.js
     end
   end
 
