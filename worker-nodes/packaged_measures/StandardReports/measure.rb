@@ -17,7 +17,13 @@ class StandardReports < OpenStudio::Ruleset::ReportingUserScript
 
     return args
   end #end the arguments method
-
+  
+  def report_optional_value(runner, name, units, optional_value)
+    if not optional_value.empty?
+      runner.registerValue(name, optional_value.get, units)
+    end
+  end
+  
   #define what happens when the measure is run
   def run(runner, user_arguments)
     super(runner, user_arguments)
