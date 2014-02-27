@@ -103,3 +103,9 @@
 [submodule "new-r"]
 	path = vagrant/chef/cookbooks/r
 	url = git@github.com:NREL-cookbooks/cookbook-r.git
+[submodule "vagrant/chef/cookbooks/gdebi"]
+	path = vagrant/chef/cookbooks/gdebi
+	url = https://github.com/bakins/cookbook-gdebi.git
+[submodule "vagrant/chef/cookbooks/yum-epel"]
+	path = vagrant/chef/cookbooks/yum-epel
+	url = https://github.com/opscode-cookbooks/yum-epel.git
