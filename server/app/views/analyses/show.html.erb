@@ -58,7 +58,6 @@
     <div class="tab-content">
       <div id="sectionAll" class="tab-pane fade <% if @status == 'all' %>in active<% end %>">
         <div class="tab-container">
-            <h3>All Simulations</h3>
 
             <%= render(:partial => "analyses/table", :locals => {:simulations => @all_sims, :status => 'all', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
 
@@ -66,28 +65,24 @@
       </div>
       <div id="sectionCompleted" class="tab-pane fade  <% if @status == 'completed' %> in active <% end %>">
         <div class="tab-container">
-            <h3>Completed</h3>
 
             <%= render(:partial => "analyses/table", :locals => {:simulations => @completed_sims, :status => 'completed', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
       </div>
       <div id="sectionRunning" class="tab-pane fade  <% if @status == 'running' %>in active<% end %>">
         <div class="tab-container">
-            <h3>Running</h3>
 
             <%= render(:partial => "analyses/table", :locals => {:simulations => @running_sims, :status => 'running', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
       </div>
       <div id="sectionQueued" class="tab-pane fade  <% if @status == 'queued' %>in active <% end %>">
         <div class="tab-container">
-            <h3>Queued</h3>
 
             <%= render(:partial => "analyses/table", :locals => {:simulations => @queued_sims, :status => 'queued', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
       </div>
       <div id="sectionNA" class="tab-pane fade  <% if @status == 'na' %>in active<% end %>">
         <div class="tab-container">
-            <h3>Initialized</h3>
 
             <%= render(:partial => "analyses/table", :locals => {:simulations => @na_sims, :status => 'na', :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page})%>
         </div>
