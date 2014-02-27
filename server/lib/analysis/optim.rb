@@ -7,34 +7,17 @@ class Analysis::Optim
         skip_init: false,
         run_data_point_filename: "run_openstudio_workflow.rb",
         create_data_point_filename: "create_data_point.rb",
-        output_variables: [
-            {
-                display_name: "Total Site Energy (EUI)",
-                name: "total_energy",
-                objective_function: true,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: "Total Life Cycle Cost",
-                name: "total_life_cycle_cost",
-                objective_function: true,
-                objective_function_index: 1,
-                index: 1
-            }
-        ],
+        output_variables: [],
         problem: {
+	    random_seed: 1979,
             algorithm: {
                 generations: 1,
                 method: "L-BFGS-B",
                 parscale: 1,
                 ndeps: 1e-3,
                 maxit: 100,
-                objective_functions: [
-                    "total_energy",
-                    "total_life_cycle_cost"
-                ],
-                epsilonGradient: 1e-1
+                objective_functions: [],
+                epsilonGradient: 1e-4
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -77,14 +60,15 @@ class Analysis::Optim
 
     #create an instance for R
     @r = Rserve::Simpler.new
-    Rails.logger.info "Setting up R for Batch Run"
+    Rails.logger.info "Setting up R for Optim Run"
     @r.converse('setwd("/mnt/openstudio")')
-    @r.converse('set.seed(1979)')
+
+    # todo: deal better with random seeds
+    @r.converse("set.seed(#{@analysis.problem['random_seed']})") 
     # R libraries needed for this algorithm
     @r.converse "library(rjson)"
-    #@r.converse "library(mco)"
-    #@r.converse "library(DEoptim)"
-    #@r.converse "library(doSNOW)"
+    @r.converse "library(mco)"
+    @r.converse "library(NRELmoo)"
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -98,14 +82,22 @@ class Analysis::Optim
     # that the run flag is true.
 
     # TODO preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
-      raise "Number of generations was not set or equal to zero (must be 1 or greater)"
+    if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
+      raise "Number of max iterations was not set or equal to zero (must be 1 or greater)"
     end
-    
-    if @analysis.problem['number_of_samples'].nil? || @analysis.problem['number_of_samples'] == 0
+
+    if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
 
+    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size > 1
+      raise "Must have only one objective function defined"
+    end    
+       
+    if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
+      raise "number of objective functions must equal"
+    end
+    
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
@@ -116,8 +108,8 @@ class Analysis::Optim
     Rails.logger.info "starting lhs to discretize the variables"
     
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['number_of_samples'])
-    
+    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
 
@@ -126,9 +118,9 @@ class Analysis::Optim
     cluster = nil
     process = nil
     begin
-      if samples.empty? || samples.size <= 1
+      if samples.empty? || samples.size < 1
         Rails.logger.info "No variables were passed into the options, therefore exit"
-        raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+        raise "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
       end
   
       # Start up the cluster and perform the analysis
@@ -152,17 +144,26 @@ class Analysis::Optim
 
       cluster_started = cluster.start(worker_ips)
       Rails.logger.info ("Time flag was set to #{cluster_started}")
-
+      
+      if !var_types.all? {|t| t.downcase == 'continuous'}
+        Rails.logger.info "Must have all continous variables to run algorithm, therefore exit"
+        raise "Must have all continous variables to run algorithm.  Found #{var_types}"
+      end
+      
       if cluster_started
-        #gen is the number of generations to calculate
+        #maxit is the max number of iterations to calculate
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilonGradient is epsilon in numerical gradient calc
-        Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :gen => @analysis.problem['algorithm']['generations'], :epsilonGradient => @analysis.problem['algorithm']['epsilonGradient']) do
+
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilonGradient => @analysis.problem['algorithm']['epsilonGradient']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
+            
+            objDim <- length(objfun)
+            print(paste("objDim:",objDim))
+            clusterExport(cl,"objDim")          
                
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
@@ -220,7 +221,28 @@ class Analysis::Optim
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
-              obj[1] <- as.numeric(json$objective_function_1)                 
+              for (i in 1:objDim){
+                objfuntemp <- paste("objective_function_",i,sep="")
+                if (json[objfuntemp] != "nil"){
+                  objtemp <- as.numeric(json[objfuntemp])
+                } else {
+                  objtemp <- 1.0e9
+                }
+                objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                if (json[objfuntargtemp] != "nil"){
+                  objtemp2 <- as.numeric(json[objfuntargtemp])
+                } else {
+                  objtemp2 <- 0.0
+                }
+                scalingfactor <- paste("scaling_factor_",i,sep="")
+                sclfactor <- 1.0
+                if (json[scalingfactor] != "NULL"){
+                  sclfactor <- as.numeric(json[scalingfactor])
+                } else {
+                  sclfactor <- 1.0
+                }                
+                obj[i] <- abs(objtemp - objtemp2)/sclfactor
+              }
               print(paste("Objective function results are:",obj))   
               return(obj)
             }
@@ -239,33 +261,34 @@ class Analysis::Optim
   
             print(nrow(vars))
             print(ncol(vars))
-            if (ncol(vars) == 1) {
-              print("NSGA2 needs more than one variable")
-              stop
-            }
+
             varMin <- c(min(vars[,1]))
             varMax <- c(max(vars[,1]))
             varMean <- c(mean(vars[,1]))
-            for (i in 2:ncol(vars)){
-              varMin <- rbind(varMin,c(min(vars[,i])))
-              varMax <- rbind(varMax,c(max(vars[,i])))
-              varMean <- rbind(varMean,c(max(vars[,i])))
+            if (ncol(vars) > 1) {
+              for (i in 2:ncol(vars)){
+                varMin <- rbind(varMin,c(min(vars[,i])))
+                varMax <- rbind(varMax,c(max(vars[,i])))
+                varMean <- rbind(varMean,c(max(vars[,i])))
+              }
             }
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
+            
             parallelGradient <- function(params, ...) { # Now use the cluster 
 	        dp = cbind(rep(0,length(params)),diag(params * epsilonGradient));   
 	        Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
 	        return((Fout[-1]-Fout[1])/diag(dp[,-1]));                  #
             }
 
-            print(paste("Number of generations set to:",gen))
-            results <- optim(varMean,g,gr=parallelGradient,method='L-BFGS-B',lower=varMin, upper=varMax)
+            vectorGradient <- function(x, ...) { # Now use the cluster 
+	        vectorgrad(func=gn, x=x, method="four", eps=epsilonGradient,cl=cl, ...);
+            }
+            #print(paste("Number of generations set to:",gen))
+            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
             #results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
-            #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
-            #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 

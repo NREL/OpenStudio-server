@@ -60,7 +60,7 @@ class Analysis::NsgaNrel
 
     #create an instance for R
     @r = Rserve::Simpler.new
-    Rails.logger.info "Setting up R for Batch Run"
+    Rails.logger.info "Setting up R for NSGA2 Run"
     @r.converse('setwd("/mnt/openstudio")')
     
     # todo: deal better with random seeds
@@ -215,8 +215,6 @@ class Analysis::NsgaNrel
 
               # read in the results from the objective function file
               # TODO: verify that the file exists
-              # TODO: determine how to handle if the objective function value = nil/null 
-              #       Right now it sets everything to 0.0
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
               json <- fromJSON(file=object_file)
               obj <- NULL
@@ -225,7 +223,7 @@ class Analysis::NsgaNrel
                 if (json[objfuntemp] != "nil"){
                   objtemp <- as.numeric(json[objfuntemp])
                 } else {
-                  objtemp <- 0.0
+                  objtemp <- 1.0e9
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
                 if (json[objfuntargtemp] != "nil"){
@@ -233,7 +231,14 @@ class Analysis::NsgaNrel
                 } else {
                   objtemp2 <- 0.0
                 }
-                obj[i] <- abs(objtemp - objtemp2)
+                scalingfactor <- paste("scaling_factor_",i,sep="")
+                sclfactor <- 1.0
+                if (json[scalingfactor] != "NULL"){
+                  sclfactor <- as.numeric(json[scalingfactor])
+                } else {
+                  sclfactor <- 1.0
+                }                
+                obj[i] <- abs(objtemp - objtemp2)/sclfactor
               }
               print(paste("Objective function results are:",obj))   
               return(obj)
@@ -260,7 +265,6 @@ class Analysis::NsgaNrel
             
             print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
-            #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 
