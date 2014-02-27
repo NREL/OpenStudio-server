@@ -47,3 +47,4 @@ sudo cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/development.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/production.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
+sudo cat /dev/null > /var/www/rails/openstudio/log/Rserve.log
