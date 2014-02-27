@@ -74,9 +74,12 @@ default_attributes(
                 :name => "snowFT"
             },
             {
+	        :name => "doParallel"
+            },
+            {
                 :name => 'NRELmoo',
                 :package_path => "/data/R-packages",
-                :version => '1.1.3'
+                :version => '1.1.4'
             },
             {
                 :name => 'Swift',
@@ -87,7 +90,7 @@ default_attributes(
                 :name => 'NRELsnowFT',
                 :package_path => "/data/R-packages",
                 :version => '1.3.32'
-            }
+            },
         ]
     }
 )

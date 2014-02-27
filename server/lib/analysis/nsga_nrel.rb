@@ -60,7 +60,7 @@ class Analysis::NsgaNrel
 
     #create an instance for R
     @r = Rserve::Simpler.new
-    Rails.logger.info "Setting up R for Batch Run"
+    Rails.logger.info "Setting up R for NSGA2 Run"
     @r.converse('setwd("/mnt/openstudio")')
     
     # todo: deal better with random seeds
@@ -265,7 +265,6 @@ class Analysis::NsgaNrel
             
             print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
-            #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 
