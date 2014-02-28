@@ -10,9 +10,11 @@ run_list([
 
 default_attributes(
     :openstudio => {
-        :version => "1.2.5",
-        :version_revision => "8fa575db69",
-        :platform => "Linux-Ruby2.0"
+        :installer => {
+            :version => "1.2.5",
+            :version_revision => "8fa575db69",
+            :platform => "Linux-Ruby2.0"
+        }
     },
     :energyplus => {
         :version => "800009",
