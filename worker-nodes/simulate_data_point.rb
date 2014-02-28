@@ -30,6 +30,11 @@ optparse = OptionParser.new do |opts|
     options[:run_shm] = true
   end
 
+  options[:debug] = false
+  opts.on('--debug', "Set the debug flag") do
+    options[:debug] = true
+  end
+
   options[:run_shm_dir] = "/run/shm"
   opts.on('-D', '--shm-dir SHM_PATH', String, "Path of the SHM Volume on the System.") do |s|
     options[:run_shm_dir] = s
@@ -68,7 +73,7 @@ result = nil
 
 begin
   ros.communicate_started() # this initializes everything as well
-  ros.log_message "Running file #{__FILE__}"
+  ros.log_message "Running Simulate Data Point: #{__FILE__}", true
 
   directory = nil
   analysis_dir = "/mnt/openstudio"
@@ -82,46 +87,37 @@ begin
     directory = store_directory
   end
 
+  ros.log_message "Analysis Directory is #{analysis_dir}", true
   ros.log_message "Simulation Run Directory is #{directory}", true
+  ros.log_message "Simulation Storage Directory is #{store_directory}", true
 
   # create data point directory
-  if File.exist?(directory)
-    FileUtils.rm_rf(directory)
-  end
-
+  FileUtils.rm_rf(directory) if File.exist?(directory)
   FileUtils.mkdir_p(directory)
   FileUtils.mkdir_p(store_directory)
 
-  puts "Analysis in #{analysis_dir}; Running in #{directory}; Storing results in #{store_directory}"
-
-  # copy the file to the run directory and run
-  # removing all the files that may have been there.
+  # copy the files that are needed over to the run directory
   FileUtils.copy("/mnt/openstudio/#{options[:run_data_point_filename]}", "#{directory}/#{options[:run_data_point_filename]}")
-  
-  # Copy over a copy other files that are used for the workflow based (not openstudio runmanager) based execution
   FileUtils.copy("/mnt/openstudio/run_energyplus.rb", "#{directory}/run_energyplus.rb")
-  FileUtils.copy("/mnt/openstudio/post_process.rb", "#{directory}/post_process.rb")
-  FileUtils.copy("/mnt/openstudio/post_process_monthly.rb", "#{directory}/post_process_monthly.rb")
+  FileUtils.copy("/mnt/openstudio/post_process.rb", "#{directory}/post_process.rb") # todo: remove
+  FileUtils.copy("/mnt/openstudio/post_process_monthly.rb", "#{directory}/post_process_monthly.rb") # todo: remove
   FileUtils.copy("/mnt/openstudio/monthly_report.rb", "#{directory}/monthly_report.rb")
   FileUtils.cp_r("/mnt/openstudio/packaged_measures", "#{directory}/packaged_measures")
 
-  
-  # call the run openstudio script
-  command = "ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/:#{File.dirname(__FILE__)} #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory} -r AWS"
-  
-  ros.log_message command, true
+  # call the run data point script
+  # todo: do i need the -I?
+  command = "ruby -I#{File.dirname(__FILE__)} #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory} -r AWS"
+  ros.log_message "Calling #{command}", true
   result = `#{command}`
 
-  if result
-    result = result.split("\n").last
-  end
+  result = result.split("\n").last if result
 
-  # Save the log file
+  # Save the results file
   stdout_file_name = "#{directory}/#{options[:uuid]}.log"
   FileUtils.rm(stdout_file_name) if File.exists?(stdout_file_name)
   File.open(stdout_file_name, 'w') {|f| f << result}
 
-  # since the run_openstudio method also loads the data point, this has to reload the data point to get the data refreshed
+  # since the run_openstudio method also loads the data point, this is to reload the data point to get the data refreshed
   ros.reload
   ros.log_message "command result is: #{result}"
 
@@ -161,5 +157,7 @@ rescue Exception => e
   # need to tell mongo this failed
   ros.communicate_failure()
 ensure
+  
+  # always print the objective function result or NA
   puts result
 end
