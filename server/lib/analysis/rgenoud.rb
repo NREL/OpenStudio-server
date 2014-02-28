@@ -182,7 +182,7 @@ class Analysis::Rgenoud
               }
               dbDisconnect(mongo)
   
-              ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
+              ruby_command <- "/usr/local/rbenv/shims/ruby"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
               } else {
@@ -200,7 +200,7 @@ class Analysis::Rgenoud
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
+              ruby_command <- "/usr/local/rbenv/shims/ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")        
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
