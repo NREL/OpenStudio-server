@@ -3,9 +3,12 @@
 # This script is used to configure the vagrant boxes in order to test and run the examples
 
 # setup the passwordless ssh
+
+
 cd /data/launch-instance && ./setup-ssh-keys-vagrant.expect
 cp -f /data/launch-instance/ip_addresses_vagrant.template /data/launch-instance/ip_addresses
 cd /data/launch-instance && ./setup-ssh-worker-nodes.sh ip_addresses
+
 
 # need to setup the hosts file and the local paths for writing results
 sudo /data/launch-instance/server_script_vagrant.sh
@@ -40,6 +43,9 @@ sudo service delayed_job start
 
 # restart rserve
 sudo service Rserve restart
+
+# Copy over the worker data to the run directory
+cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 # Null out the logs
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
