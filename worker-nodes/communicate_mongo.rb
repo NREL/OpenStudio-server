@@ -124,27 +124,36 @@ module CommunicateMongo
   def self.communicate_results_json(dp, eplus_json, analysis_dir)
     # create zip file using a system call
     current_dir = Dir.pwd
+    communicate_log_message dp, "Zipping up Analysis Directory #{current_dir}:#{analysis_dir}" 
     Dir.chdir(analysis_dir)
     `zip -r data_point_#{dp.uuid}.zip .`
     Dir.chdir(current_dir)
+    
 
     # grab out the HTML and push it into mongo for the HTML display
-    puts "analysis dir: #{analysis_dir}"
     eplus_html = Dir.glob("#{analysis_dir}/*run*/eplustbl.htm").last
+    communicate_log_message dp, "Checking for HTML Report: #{eplus_html}" 
     if eplus_html
-      puts "found html file #{eplus_html}"
+      communicate_log_message dp, "Found HTML report file"
 
       # compress and save into database, just use the system zip for now
       #compressed_string = Zlib::Deflate.deflate(eplus_html, Zlib::BEST_SPEED)
       #dp.eplus_html = compressed_string # `gzip -f -c  #{eplus_html}`
-      dp.eplus_html = File.read(eplus_html)
+      #dp.eplus_html = File.read(eplus_html)
       #dp.save!
+      communicate_log_message dp, "Finished sending HTML Report" 
     end
 
+    communicate_log_message dp, "Saving EnergyPlus JSON file" 
     if eplus_json
       dp.results ? dp.results.merge!(eplus_json) : dp.results = eplus_json
     end
-    dp.save! # redundant because next method calls save too.
+    result = dp.save! # redundant because next method calls save too.
+    if result 
+      communicate_log_message dp, "Successfully saved result to database" 
+    else
+      communicate_log_message dp, "ERROR saving result to database" 
+    end
   end
 
   def self.communicate_complete(dp)
