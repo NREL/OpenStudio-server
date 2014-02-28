@@ -31,6 +31,11 @@ optparse = OptionParser.new do |opts|
   opts.on("-p", "--profile-run", "Profile the Run OpenStudio Call") do |pr|
     options[:profile_run] = pr
   end
+
+  options[:debug] = false
+  opts.on('--debug', "Set the debug flag") do
+    options[:debug] = true
+  end
 end
 optparse.parse!
 
