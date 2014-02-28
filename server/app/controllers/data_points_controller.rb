@@ -18,9 +18,9 @@ class DataPointsController < ApplicationController
     respond_to do |format|
       if @data_point
         format.html do
-          exclude_fields = [:_id, :output, :password, :eplus_html, :values]
+          exclude_fields = [:_id, :output, :password, :values]
           @table_data = @data_point.as_json(:except => exclude_fields)
-          @html = @data_point.eplus_html
+          
           logger.info("Cleaning up the log files")
           if @table_data["sdp_log_file"]
             @table_data["sdp_log_file"] = @table_data["sdp_log_file"].join("</br>").html_safe
@@ -28,14 +28,9 @@ class DataPointsController < ApplicationController
 
           @data_point.set_variable_values ? @set_variable_values = @data_point.set_variable_values : @set_variable_values = []
 
-          # gsub for some styling
-          if !@html.nil?
-            @html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil).gsub!(/<head>|<body>/, "").gsub!(/<html>|<\/html>/, "").gsub!(/<\/head>|<\/body>/, "")
-            #@html.gsub!(/<table .*>/, '<div class="span8"><table id="datapointtable" class="tablesorter table table-striped">')
-            #@html.gsub!(/<\/table>/, '</div></table>')
-            #@html = @data_point.eplus_html
-            #@html =  Zlib::Inflate.inflate(.to_s)
-          end
+          html_filename = @data_point.openstudio_datapoint_file_name.to_s.gsub("#{@data_point.id}.zip","#{@data_point.id}/reports/eplustbl.html")
+          logger.info "HTML file is #{html_filename}"
+          File.exists?(html_filename) ? @html = File.read(html_filename) : nil
         end
         format.json { render json: @data_point.output }
       else
@@ -50,7 +45,7 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     respond_to do |format|
-      format.json { render json: @data_point.to_json(:except => [:eplus_html]) }
+      format.json { render json: @data_point.to_json }
     end
   end
 

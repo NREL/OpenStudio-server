@@ -234,7 +234,6 @@ begin
     end
   end
 
-  
 
   #ros.log_message @model.to_s
   a = Time.now
@@ -261,7 +260,7 @@ begin
 
   # Run EnergyPlus using run energyplus script
   idf_filename = "#{run_directory}/in.idf"
-  File.open(idf_filename, 'w') { |f| f << @model_idf.to_s } 
+  File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
 
   ros.log_message "Verifying location of Post Process Script", true
   post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "post_process.rb"))
@@ -292,7 +291,7 @@ begin
   ros.log_message "Running OpenStudio Post Processing"
   measure_path = "./packaged_measures"
   measure_name = "StandardReports"
-        
+
   # when full workflow then do this
   # require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
   require "#{File.expand_path(File.join(File.dirname(__FILE__), measure_path, measure_name, 'measure'))}"
@@ -315,7 +314,7 @@ begin
   result.errors.each { |w| ros.log_message w.logMessage, true }
   report_json = JSON.parse(OpenStudio::toJSON(result.attributes), :symbolize_names => true)
   ros.log_message "JSON file is #{report_json}"
-  File.open("#{run_directory}/standard_report.json",'w') {|f| f << JSON.pretty_generate(report_json)}
+  File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
 
   # If profiling, then go ahead and get the results here.  Note that we are not profiling the 
   # result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
@@ -327,10 +326,10 @@ begin
     File.open("#{directory.to_s}/profile-tree.prof", "w") { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
 
+  
+
   # Initialize the objective function variable
   objective_functions = {}
-
-  # First read in the eplustbl.json file
   if File.exists?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
     ros.log_message "Result JSON is: #{result_json}"
