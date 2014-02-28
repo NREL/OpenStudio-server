@@ -333,7 +333,7 @@ begin
     # Save the objective functions to the object for sending back to the simulation executive
     analysis_json[:analysis]['output_variables'].each do |variable|
       # determine which ones are the objective functions (code smell: todo: use enumerator)
-      if variable['objective_function']
+      if variable['objective_function'] == true
         ros.log_message "Found objective function for #{variable['name']}", true
         if result_json[variable['name'].to_sym]
           #objective_functions[variable['name']] = result_json[variable['name'].to_sym]
@@ -356,13 +356,17 @@ begin
     end
 
     # todo: make sure that the result_json file is a superset of the other variables in the variable list
-
+    ros.log_message "Communicating data back to server"
     # map the result json back to a flat array
+    ros.log_message "Result JSON #{result_json}"
     ros.communicate_results_json(result_json, run_directory)
+    ros.log_message "After communicate_results_json()"
   end
 
   # save the objective function results
   obj_fun_file = "#{run_directory}/objectives.json"
+  ros.log_message "Saving objective function file #{obj_fun_file}"
+  ros.log_message "Objective Function JSON is #{objective_functions}"
   File.rm_f(obj_fun_file) if File.exists?(obj_fun_file)
   File.open(obj_fun_file, 'w') { |f| f << JSON.pretty_generate(objective_functions) }
 
