@@ -35,6 +35,7 @@ end
 run_options = {
     analysis_action: "start",
     without_delay: false,
+    use_server_as_worker: true,
     analysis_type: 'batch_run'}
 api.run_analysis(analysis_id, run_options)
 
