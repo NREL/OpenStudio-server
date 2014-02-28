@@ -9,7 +9,7 @@ module CommunicateMongo
     dp.run_start_time = Time.now
 
     # Todo use the ComputeNode model to pull out the information so that we can reuse the methods
-    
+
     # Determine what the IP address is of the worker node and save in the data point
     require 'socket'
     if Socket.gethostname =~ /os-.*/
@@ -18,7 +18,7 @@ module CommunicateMongo
       map = {"os-server" => "192.168.33.10", "os-worker-1" => "192.168.33.11", "os-worker-2" => "192.168.33.12"}
       dp.ip_address = map[Socket.gethostname]
       dp.internal_ip_address = dp.ip_address
-      
+
       #TODO: add back in the instance id 
     else
       # On amazon, you have to hit an API to determine the IP address because
@@ -36,15 +36,15 @@ module CommunicateMongo
 
     dp.save!
   end
-  
+
   def self.get_datapoint(id)
     # TODO : make this a conditional on when to create one vs when to error out.
     return DataPoint.find_or_create_by(uuid: id)
-  end  
+  end
 
   def self.get_problem(dp, format)
     analysis = dp.analysis
-  
+
     data_point_hash = Hash.new
     data_point_hash[:data_point] = dp
     data_point_hash[:openstudio_version] = analysis[:openstudio_version]
@@ -79,37 +79,13 @@ module CommunicateMongo
   end
 
   def self.communicate_results(dp, os_data_point, os_directory)
-    # create zip file
-    # TODO: remove openstudio here
-    zipFilePath = os_directory / OpenStudio::Path.new("data_point_" + dp.uuid + ".zip")
-    zipFile = OpenStudio::ZipFile.new(zipFilePath, false)
-    zipFile.addFile(os_directory / OpenStudio::Path.new("openstudio.log"), OpenStudio::Path.new("openstudio.log"))
-    zipFile.addFile(os_directory / OpenStudio::Path.new("run.db"), OpenStudio::Path.new("run.db"))
-    Dir.foreach(os_directory.to_s) do |item|
-      next if item == '.' or item == '..'
-      fullPath = os_directory / OpenStudio::Path.new(item)
-      if File.directory?(fullPath.to_s)
-        zipFile.addDirectory(fullPath, OpenStudio::Path.new(item))
-      end
-    end
+    os_directory = os_directory.to_s
+    zip_results(dp, os_directory, 'runmanager')
 
     # save the datapoint results into the JSON field named output
     json_output = JSON.parse(os_data_point.toJSON(), :symbolize_names => true)
     dp.output = json_output
 
-    # grab out the HTML and push it into mongo for the HTML display
-    dir = File.join(os_directory.to_s)
-    puts "analysis dir: #{dir}"
-    eplus_html = Dir.glob("#{dir}/*EnergyPlus*/eplustbl.htm").last
-    if eplus_html
-      puts "found html file #{eplus_html}"
-
-      # compress and save into database, just use the system zip for now
-      #compressed_string = Zlib::Deflate.deflate(eplus_html, Zlib::BEST_SPEED)
-      #dp.eplus_html = compressed_string # `gzip -f -c  #{eplus_html}`
-      dp.eplus_html = File.read(eplus_html)
-      #dp.save!
-    end
     dp.save! # redundant because next method calls save too.
   end
 
@@ -119,40 +95,20 @@ module CommunicateMongo
       dp.results ? dp.results.merge!(h) : dp.results = h
       dp.save!
     end
-  end      
-  
+  end
+
   def self.communicate_results_json(dp, eplus_json, analysis_dir)
-    # create zip file using a system call
-    current_dir = Dir.pwd
-    communicate_log_message dp, "Zipping up Analysis Directory #{current_dir}:#{analysis_dir}" 
-    Dir.chdir(analysis_dir)
-    `zip -r data_point_#{dp.uuid}.zip .`
-    Dir.chdir(current_dir)
+    zip_results(dp, analysis_dir, 'workflow')
     
-
-    # grab out the HTML and push it into mongo for the HTML display
-    eplus_html = Dir.glob("#{analysis_dir}/*run*/eplustbl.htm").last
-    communicate_log_message dp, "Checking for HTML Report: #{eplus_html}" 
-    if eplus_html
-      communicate_log_message dp, "Found HTML report file"
-
-      # compress and save into database, just use the system zip for now
-      #compressed_string = Zlib::Deflate.deflate(eplus_html, Zlib::BEST_SPEED)
-      #dp.eplus_html = compressed_string # `gzip -f -c  #{eplus_html}`
-      #dp.eplus_html = File.read(eplus_html)
-      #dp.save!
-      communicate_log_message dp, "Finished sending HTML Report" 
-    end
-
-    communicate_log_message dp, "Saving EnergyPlus JSON file" 
+    communicate_log_message dp, "Saving EnergyPlus JSON file"
     if eplus_json
       dp.results ? dp.results.merge!(eplus_json) : dp.results = eplus_json
     end
     result = dp.save! # redundant because next method calls save too.
-    if result 
-      communicate_log_message dp, "Successfully saved result to database" 
+    if result
+      communicate_log_message dp, "Successfully saved result to database"
     else
-      communicate_log_message dp, "ERROR saving result to database" 
+      communicate_log_message dp, "ERROR saving result to database"
     end
   end
 
@@ -172,6 +128,46 @@ module CommunicateMongo
 
   def self.reload(dp)
     dp.reload
+  end
+
+  def self.zip_results(dp, analysis_dir, analysis_type = 'workflow')
+    eplus_search_path = nil
+    current_dir = Dir.pwd
+    FileUtils.mkdir_p "#{analysis_dir}/reports"
+    case analysis_type
+      when 'workflow'
+        eplus_search_path = "#{analysis_dir}/*run*/eplustbl.htm"
+      when 'runmanager'
+        eplus_search_path = "#{analysis_dir}/*EnergyPlus*/eplustbl.htm"
+
+    end
+
+    # copy some files into a report folder
+    eplus_html = Dir.glob(eplus_search_path).last || nil
+    communicate_log_message dp, "Checking for HTML Report: #{eplus_html}" if eplus_html
+    if File.exists? eplus_html
+      # do some encoding on the html if possible
+      html = File.read(eplus_html)
+      html = html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil)
+      File.open("#{analysis_dir}/reports/eplustbl.html", 'w') { |f| f << html }
+    end
+
+    # create zip file using a system call
+    communicate_log_message dp, "Zipping up Analysis Directory #{analysis_dir}"
+    if File.directory? analysis_dir
+      Dir.chdir(analysis_dir)
+      `zip -r data_point_#{dp.uuid}.zip .`
+    end
+
+    # zip up only the reports folder
+    report_dir = "#{analysis_dir}"
+    communicate_log_message dp, "Zipping up Analysis Reports Directory #{report_dir}/reports"
+    if File.directory? report_dir
+      Dir.chdir(report_dir)
+      `zip -r data_point_#{dp.uuid}_reports.zip reports`
+    end
+    Dir.chdir(current_dir)
+
   end
 
 end

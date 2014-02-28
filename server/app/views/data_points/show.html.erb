@@ -62,12 +62,14 @@
 
 
 
-<h1><a id="dp_fields">EnergyPlus HTML</h1>
-<%= @html.html_safe unless @html.nil? %>
+<h1><a id="dp_fields">EnergyPlus HTML</a></h1>
+<% if @html %>
+    <%= @html.html_safe %>
+<% else %>
+    <p>No HTML file found.</p>
+<% end %>
 
 <h1><a id="dp_fields">Data Point Fields</a></h1>
-<p id="notice"><%= notice %></p>
-
 <table class="table table-striped">
   <thead>
   <tr>

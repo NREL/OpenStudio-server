@@ -53,6 +53,7 @@ run_options = {
     analysis_action: "start",
     run_data_point_filename: "run_openstudio_workflow.rb",
     without_delay: false,
+    use_server_as_worker: false,
     analysis_type: "batch_run"
 }
 api.run_analysis(analysis_id, run_options)
