@@ -26,10 +26,6 @@ OptionParser.new do |opts|
     options[:idd] = path
   end
 
-  opts.on("--os-path [path]", String, "Path to OpenStudio Ruby Path") do |path|
-    options[:os_path] = path
-  end
-
   opts.on("-a", "--analysis-path [path]", String, "Path to directory to run") do |path|
     options[:path] = path
   end
@@ -58,6 +54,12 @@ OptionParser.new do |opts|
   opts.on("--support-files [list_of_support_files]", Array, "Paths of Support Files") do |path|
     options[:support_files] = path
   end
+  
+  options[:debug] = false
+  opts.on('--debug', "Set the debug flag") do
+    options[:debug] = true
+  end
+  
 end.parse!
 puts "options = #{options.inspect}"
 
@@ -117,7 +119,7 @@ begin
       FileUtils.copy(support_file, File.basename(support_file))
     end
 
-    IO.popen("ruby -I#{options[:os_path]} post_process.rb") { |io|
+    IO.popen("ruby post_process.rb") { |io|
       while (line = io.gets) do
         puts line
       end }
