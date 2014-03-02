@@ -85,10 +85,11 @@ module Analysis::R
           timetaken <- endtime - starttime
           print(paste("R cluster startup time:",timetaken))   
 
-          print(paste(system('whoami')))   
+          print(paste("Who am I is",system('whoami', intern = TRUE)))   
           print(paste("PATH is",Sys.getenv("PATH")))
-          print(paste("Sys.getenv("R_HOME"))
-          print(Sys.getenv("R_ENVIRON"))
+          print(paste("RUBYLIB is",Sys.getenv("RUBYLIB")))
+          print(paste("R_HOME is",Sys.getenv("R_HOME")))
+          print(paste("R_ENVIRON is",Sys.getenv("R_ENVIRON")))
         }
       end
       result = @r.converse("timeflag")
