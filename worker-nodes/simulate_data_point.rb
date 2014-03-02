@@ -105,7 +105,7 @@ begin
   FileUtils.cp_r("/mnt/openstudio/packaged_measures", "#{directory}/packaged_measures")
 
   # call the run data point script
-  # todo: do i need the -I?
+  # run from the /mnt/openstudio directory to get analysis chauffeur loaded
   command = "ruby -I#{File.dirname(__FILE__)} #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory} -r AWS"
   ros.log_message "Calling #{command}", true
   result = `#{command}`
