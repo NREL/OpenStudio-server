@@ -35,7 +35,7 @@ run_options = {
     without_delay: true,
     analysis_type: "lhs",
     allow_multiple_jobs: false,
-    use_server_as_worker: false,
+    use_server_as_worker: true,
     problem: {
         random_seed: 1979,
         algorithm: {
@@ -52,8 +52,8 @@ api.run_analysis(analysis_id, run_options)
 run_options = {
     analysis_action: "start",
     run_data_point_filename: "run_openstudio_workflow.rb",
-    without_delay: false,
-    use_server_as_worker: false,
+    without_delay: true,
+    use_server_as_worker: true,
     analysis_type: "batch_run"
 }
 api.run_analysis(analysis_id, run_options)
