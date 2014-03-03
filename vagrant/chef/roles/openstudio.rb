@@ -11,7 +11,7 @@ run_list([
 default_attributes(
     :openstudio => {
         :version => "1.2.5",
-        :version_revision => "51597e1653",
+        :version_revision => "72702a015b",
         :platform => "Linux-Ruby2.0"
         #:checksum => "9180659c77a7fc710cb9826d40ae67c65db0d26bb4bce1a93b64d7e63f4a1f2c"
     },
