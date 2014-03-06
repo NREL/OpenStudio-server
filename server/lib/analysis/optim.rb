@@ -62,6 +62,7 @@ class Analysis::Optim
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for Optim Run"
     @r.converse('setwd("/mnt/openstudio")')
+    @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
 
     # todo: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})") 
@@ -127,8 +128,10 @@ class Analysis::Optim
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       if !cluster.configure(master_ip)
         raise "could not configure R cluster"
-      end
-
+      else
+	    Rails.logger.info "Successfuly configured cluster"
+	  end
+		
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
       process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       #log_file = File.join(Rails.root,"log/download.log")
@@ -163,6 +166,10 @@ class Analysis::Optim
             
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
+            if (objDim >1) {
+               print("optim objective function must be length 1")
+               stop(options("show.error.messages"="optim objective function must be length 1"),"optim objective function must be length 1")
+            }
             clusterExport(cl,"objDim")          
                
             for (i in 1:ncol(vars)){
@@ -199,7 +206,8 @@ class Analysis::Optim
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "/usr/local/rbenv/shims/ruby"
+              ruby_command <- "/usr/local/rbenv/shims/ruby"         
+              
               # convert the vector to comma separated values
               w = paste(x, collapse=",")        
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
@@ -275,6 +283,7 @@ class Analysis::Optim
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
+            clusterExport(cl,"epsilonGradient")
             
             parallelGradient <- function(params, ...) { # Now use the cluster 
 	        dp = cbind(rep(0,length(params)),diag(params * epsilonGradient));   
@@ -286,7 +295,14 @@ class Analysis::Optim
 	        vectorgrad(func=gn, x=x, method="four", eps=epsilonGradient,cl=cl, ...);
             }
             #print(paste("Number of generations set to:",gen))
-            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
+            
+#            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
+            #results <- optim(par=varMean, fn=g, gr=parallelGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
+            results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax)
+            
+            #cll <- makeSOCKcluster(c("localhost"))
+            #clusterCall(cll,optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax))
+            
             #results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
@@ -300,7 +316,7 @@ class Analysis::Optim
 
     rescue Exception => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      puts log_message
+      Rails.logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
     ensure
