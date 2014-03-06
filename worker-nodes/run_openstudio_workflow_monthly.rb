@@ -310,9 +310,6 @@ begin
     File.open("#{directory.to_s}/profile-tree.prof", "w") { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
   
-  # TODO: Run Standard Reporting Measure and extract attributes
-  # attach sql file to runner
-  
   @report_measures.each { |report_measure|
     # run the reporting measures
     
@@ -320,20 +317,16 @@ begin
 
   # Initialize the objective function variable
   objective_functions = {}
-  puts "test"
-  ros.log_message "test log"
-  # First read in the eplustbl.json file
   if File.exists?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
-    ros.log_message "result_json\n"
-    ros.log_message "#{result_json}"
+    ros.log_message "Result JSON is: #{result_json}"
     ros.log_message "analysis_json[:analysis]['output_variables']\n"
     ros.log_message "#{analysis_json[:analysis]['output_variables']}"
     ros.log_message "pulling out objective functions", true
     # Save the objective functions to the object for sending back to the simulation executive
     analysis_json[:analysis]['output_variables'].each do |variable|
       # determine which ones are the objective functions (code smell: todo: use enumerator)
-      if variable['objective_function'] == true
+      if variable['objective_function']
         ros.log_message "Found objective function for #{variable['name']}", true
         if result_json[variable['name'].to_sym]
           #objective_functions[variable['name']] = result_json[variable['name'].to_sym]
