@@ -246,7 +246,6 @@ begin
     end
   end
 
-#ros.log_message @model.to_s
   a = Time.now
   osm_filename = "#{run_directory}/osm_out.osm"
   File.open(osm_filename, 'w') { |f| f << @model.to_s }
@@ -258,7 +257,7 @@ begin
   b = Time.now
   ros.log_message "OpenStudio write took #{b.to_f - a.to_f}", true
 
-# Check if we have an already translated idf because of an energyplus measure (most likely)
+  # Check if we have an already translated idf because of an energyplus measure (most likely)
   if @model_idf.nil?
     ros.log_message "Translate object to energyplus IDF", true
     a = Time.now
@@ -269,7 +268,7 @@ begin
     ros.log_message "Translate object to energyplus IDF took #{b.to_f - a.to_f}", true
   end
 
-# Run EnergyPlus using run energyplus script
+  # Run EnergyPlus using run energyplus script
   idf_filename = "#{run_directory}/in.idf"
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
 
@@ -284,27 +283,27 @@ begin
   ros.log_message "Waiting for simulation to finish", true
   command = "ruby #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} \
               -w #{@weather_filename} -p #{post_process_filename}"
-#command += " -e #{run_args[:energyplus]}" unless run_args.nil?
-#command += " --idd-path #{run_args[:idd]}" unless run_args.nil?
-#command += " --support-files #{support_files}" unless support_files.nil?
+  #command += " -e #{run_args[:energyplus]}" unless run_args.nil?
+  #command += " --idd-path #{run_args[:idd]}" unless run_args.nil?
+  #command += " --support-files #{support_files}" unless support_files.nil?
   ros.log_message command, true
   result = `#{command}`
 
   ros.log_message "Simulation finished", true
   ros.log_message "Simulation results #{result}", true
 
-# use the completed job to populate data_point with results
+  # use the completed job to populate data_point with results
   ros.log_message "Updating OpenStudio DataPoint and Communicating Results", true
 
 
-# HARD CODE the running of the report measure --- eventually loop of the workflow and
-# run any post processing
+  # HARD CODE the running of the report measure --- eventually loop of the workflow and
+  # run any post processing
   ros.log_message "Running OpenStudio Post Processing"
   measure_path = "./packaged_measures"
   measure_name = "StandardReports"
 
-# when full workflow then do this
-# require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
+  # when full workflow then do this
+  # require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
   require "#{File.expand_path(File.join(File.dirname(__FILE__), measure_path, measure_name, 'measure'))}"
 
   measure = measure_name.constantize.new
@@ -315,7 +314,7 @@ begin
   runner.setLastOpenStudioModel(@model)
   runner.setLastEnergyPlusSqlFilePath("#{run_directory}/run/eplusout.sql")
 
-# set argument values to good values and run the measure
+  # set argument values to good values and run the measure
   argument_map = OpenStudio::Ruleset::OSArgumentMap.new
   measure.run(runner, argument_map)
   result = runner.result
@@ -327,9 +326,9 @@ begin
   ros.log_message "JSON file is #{report_json}"
   File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
 
-# If profiling, then go ahead and get the results here.  Note that we are not profiling the 
-# result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
-# also ZIPs up the folder and we want the results of the performance to also be in ZIP file.
+  # If profiling, then go ahead and get the results here.  Note that we are not profiling the 
+  # result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
+  # also ZIPs up the folder and we want the results of the performance to also be in ZIP file.
   if options[:profile_run]
     profile_results = RubyProf.stop
     File.open("#{directory.to_s}/profile-graph.html", "w") { |f| RubyProf::GraphHtmlPrinter.new(profile_results).print(f) }
@@ -342,7 +341,7 @@ begin
 
   }
 
-# Initialize the objective function variable
+  # Initialize the objective function variable
   objective_functions = {}
   if File.exists?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
@@ -383,28 +382,28 @@ begin
     ros.log_message "After communicate_results_json()"
   end
 
-# save the objective function results
+  # save the objective function results
   obj_fun_file = "#{run_directory}/objectives.json"
   ros.log_message "Saving objective function file #{obj_fun_file}"
   ros.log_message "Objective Function JSON is #{objective_functions}"
   File.rm_f(obj_fun_file) if File.exists?(obj_fun_file)
   File.open(obj_fun_file, 'w') { |f| f << JSON.pretty_generate(objective_functions) }
 
-# map the objective function results to an array
+  # map the objective function results to an array
   obj_function_array = objective_functions.map { |k, v| v }
 rescue Exception => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   ros.log_message log_message, true
 
-# need to tell the system that this failed
+  # need to tell the system that this failed
   ros.communicate_failure()
 ensure
   ros.log_message "#{__FILE__} Completed", true
 
   obj_function_array ||= ["NA"]
 
-# Print the objective functions to the screen even though the file is being used right now
-# Note as well that we can't guarantee that the csv format will be in the right order
+  # Print the objective functions to the screen even though the file is being used right now
+  # Note as well that we can't guarantee that the csv format will be in the right order
   puts obj_function_array.join(",")
 end
 
