@@ -17,7 +17,7 @@ class Analysis::Optim
                 ndeps: 1e-3,
                 maxit: 100,
                 objective_functions: [],
-                epsilonGradient: 1e-4
+                epsilongradient: 1e-4
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -157,9 +157,9 @@ class Analysis::Optim
         #maxit is the max number of iterations to calculate
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
-        #epsilonGradient is epsilon in numerical gradient calc
+        #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilonGradient => @analysis.problem['algorithm']['epsilonGradient']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -194,9 +194,9 @@ class Analysis::Optim
               } else {
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
               }                 
-              print(paste("R is calling system command as:",y))
+              #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
-              print(paste("R returned system call with:",z))
+              #print(paste("R returned system call with:",z))
               return(z)
             }
             clusterExport(cl,"f")      
@@ -283,22 +283,35 @@ class Analysis::Optim
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
-            clusterExport(cl,"epsilonGradient")
+            clusterExport(cl,"epsilongradient")
             
             parallelGradient <- function(params, ...) { # Now use the cluster 
-	        dp = cbind(rep(0,length(params)),diag(params * epsilonGradient));   
+                print(paste("params:",params))
+                print(paste("epsilongradient:",epsilongradient))
+                if (length(params) > 1) {
+ 	          dp = cbind(rep(0,length(params)),diag(params * epsilongradient)); 
+ 	        } else {
+ 	          dp = cbind(rep(0,length(params)),(params * epsilongradient));
+ 	        }
 	        Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
-	        return((Fout[-1]-Fout[1])/diag(dp[,-1]));                  #
+	        if (length(params) > 1) {
+	           return((Fout[-1]-Fout[1])/diag(dp[,-1])); 
+	        } else {
+	           return((Fout[-1]-Fout[1])/(dp[,-1]));
+	        }
             }
 
             vectorGradient <- function(x, ...) { # Now use the cluster 
-	        vectorgrad(func=gn, x=x, method="four", eps=epsilonGradient,cl=cl, ...);
+	        vectorgrad(func=gn, x=x, method="four", eps=epsilongradient,cl=cl, ...);
             }
-            #print(paste("Number of generations set to:",gen))
+            print(paste("Lower Bounds set to:",varMin))
+            print(paste("Upper Bounds set to:",varMax))
+            print(paste("varMean set to:",varMean))
             
-#            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
-            #results <- optim(par=varMean, fn=g, gr=parallelGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
-            results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax)
+            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
+            #results <- optim(par=varMean, fn=g, gr=parallelGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
+            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, ndeps = 1.0))
+            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
             
             #cll <- makeSOCKcluster(c("localhost"))
             #clusterCall(cll,optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax))
