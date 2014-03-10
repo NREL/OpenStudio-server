@@ -302,7 +302,7 @@ class Analysis::Optim
             }
 
             vectorGradient <- function(x, ...) { # Now use the cluster 
-	        vectorgrad(func=gn, x=x, method="four", eps=epsilongradient,cl=cl, ...);
+	        vectorgrad(func=gn, x=x, method="two", eps=epsilongradient,cl=cl, debug=TRUE);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
