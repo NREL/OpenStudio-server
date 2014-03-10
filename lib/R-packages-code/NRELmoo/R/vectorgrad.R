@@ -1,4 +1,4 @@
-vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL){
+vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE){
     
     n <- length(x)     #number of variables in argument
     df <- rep(NA,n)
@@ -10,6 +10,7 @@ vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL){
           dp <- cbind(rep(0,n),(x*eps))
         }
         Fout <- parCapply(cl, dp, function(x1) func(x + x1))
+        if (debug == TRUE) print(paste("Fout:",Fout))
         if (n > 1){
           df <- (Fout[-1] - Fout[1])/(diag(dp[,-1]))
         } else {
@@ -23,6 +24,7 @@ vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL){
           dp <- cbind((x*eps),(-x*eps))
         }
         Fout <- parCapply(cl, dp, function(x1) func(x + x1))
+        if (debug == TRUE) print(paste("Fout:",Fout))
         if (n > 1){
           df <- (Fout[(1:n)] - Fout[-(1:n)])/(2*diag(dp[,(1:n)]))
         } else {
@@ -40,6 +42,7 @@ vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL){
           dp <- cbind((2*x*eps),dp)
         }
         Fout <- parCapply(cl, dp, function(x1) func(x + x1))
+        if (debug == TRUE) print(paste("Fout:",Fout))
         if (n > 1){
           df <- (-1*Fout[(1:n)] + 8*Fout[((n+1):(2*n))] -8*Fout[((2*n+1):(3*n))] + Fout[((3*n+1):(4*n))])/(12*diag(dp[,((n+1):(2*n))]))
         } else {
