@@ -12,11 +12,13 @@ class Analysis::NsgaNrel
             random_seed: 1979,
             algorithm: {
                 generations: 1,
-                tourSize: 2,
+                toursize: 2,
                 cprob: 0.7,
-                XoverDistIdx: 5,
-                MuDistIdx: 10,
+                xoverdistidx: 5,
+                mudistidx: 10,
                 mprob: 0.5,
+                normtype: "minkowski",
+                ppower: 2,
                 objective_functions: []
             }
         }
@@ -89,6 +91,15 @@ class Analysis::NsgaNrel
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
+
+    #TODO add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    #if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    #  raise "P Norm must be non-negative"
+    #end    
+       
+    if @analysis.problem['algorithm']['ppower'] <= 0
+      raise "P Norm must be non-negative"
+    end
     
     if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
       raise "Must have at least two objective functions defined"
@@ -131,8 +142,10 @@ class Analysis::NsgaNrel
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       if !cluster.configure(master_ip)
         raise "could not configure R cluster"
+      else
+	    Rails.logger.info "Successfuly configured cluster"
       end
-
+		
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
       process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       #log_file = File.join(Rails.root,"log/download.log")
@@ -154,15 +167,21 @@ class Analysis::NsgaNrel
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :tourSize => @analysis.problem['algorithm']['tourSize'], :cprob => @analysis.problem['algorithm']['cprob'], :XoverDistIdx => @analysis.problem['algorithm']['XoverDistIdx'], :MuDistIdx => @analysis.problem['algorithm']['MuDistIdx'], :mprob => @analysis.problem['algorithm']['mprob']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :toursize => @analysis.problem['algorithm']['toursize'], :cprob => @analysis.problem['algorithm']['cprob'], :xoverdistidx => @analysis.problem['algorithm']['xoverdistidx'], :mudistidx => @analysis.problem['algorithm']['mudistidx'], :mprob => @analysis.problem['algorithm']['mprob']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
+            clusterEvalQ(cl,library(R.utils)) 
             
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
-            clusterExport(cl,"objDim")          
-               
+            print(paste("normtype:",normtype))
+            print(paste("ppower:",ppower))
+ 
+            clusterExport(cl,"objDim")
+            clusterExport(cl,"normtype")
+            clusterExport(cl,"ppower")
+                    
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
             }          
@@ -185,9 +204,9 @@ class Analysis::NsgaNrel
               } else {
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
               }                 
-              print(paste("R is calling system command as:",y))
+              #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
-              print(paste("R returned system call with:",z))
+              #print(paste("R returned system call with:",z))
               return(z)
             }
             clusterExport(cl,"f")      
@@ -214,33 +233,69 @@ class Analysis::NsgaNrel
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
 
               # read in the results from the objective function file
-              # TODO: verify that the file exists
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-              json <- fromJSON(file=object_file)
+	      tryCatch({
+	        res <- evalWithTimeout({
+	          json <- fromJSON(file=object_file)
+	        }, timeout=5);
+	        }, TimeoutException=function(ex) {
+	           cat(data_point_directory," No objectives.json: Timeout\n");
+                   return(1e19)
+              })
+              #json <- fromJSON(file=object_file)
               obj <- NULL
+              objvalue <- NULL
+              objtarget <- NULL
+              sclfactor <- NULL
+              objgroup <- NULL
+              group_count <- 1
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "nil"){
-                  objtemp <- as.numeric(json[objfuntemp])
+                  objvalue[i] <- as.numeric(json[objfuntemp])
                 } else {
-                  objtemp <- 1.0e9
+                  objvalue[i] <- 1.0e19
+                  cat(data_point_directory," Missing ", objfuntemp,"\n");
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
                 if (json[objfuntargtemp] != "nil"){
-                  objtemp2 <- as.numeric(json[objfuntargtemp])
+                  objtarget[i] <- as.numeric(json[objfuntargtemp])
                 } else {
-                  objtemp2 <- 0.0
+                  objtarget[i] <- 0.0
                 }
                 scalingfactor <- paste("scaling_factor_",i,sep="")
-                sclfactor <- 1.0
+                sclfactor[i] <- 1.0
                 if (json[scalingfactor] != "NULL"){
-                  sclfactor <- as.numeric(json[scalingfactor])
+                  sclfactor[i] <- as.numeric(json[scalingfactor])
+                  if (sclfactor[i] == 0.0) {
+                    print(paste(scalingfactor," is ZERO, overwriting\n"))
+                    sclfactor[i] = 1.0
+                  }
                 } else {
-                  sclfactor <- 1.0
+                  sclfactor[i] <- 1.0
+                }
+                objfungrouptemp <- paste("objective_function_group_",i,sep="")
+                if (json[objfungrouptemp] != "nil"){
+                  objgroup[i] <- as.numeric(json[objfungrouptemp])
+                } else {
+                  objgroup[i] <- group_count
+                  group_count <- group_count + 1
                 }                
-                obj[i] <- abs(objtemp - objtemp2)/sclfactor
               }
-              print(paste("Objective function results are:",obj))   
+              print(paste("Objective function results are:",objvalue))
+              print(paste("Objective function targets are:",objtarget))
+              print(paste("Objective function scaling factors are:",sclfactor))             
+              objvalue <- objvalue / sclfactor
+              objtarget <- objtarget / sclfactor
+
+              ug <- length(unique(objgroup))
+              for (i in 1:ug){
+                obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
+              }
+              #for (i in 1:objDim){
+              #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
+              #}  
+              print(paste("Objective function Norm:",obj))
               return(obj)
             }
             
@@ -264,7 +319,7 @@ class Analysis::NsgaNrel
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=tourSize, cprob=cprob, XoverDistIdx=XoverDistIdx, MuDistIdx=MuDistIdx, mprob=mprob)
+            results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 
@@ -276,7 +331,7 @@ class Analysis::NsgaNrel
 
     rescue Exception => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      puts log_message
+      Rails.logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
     ensure
