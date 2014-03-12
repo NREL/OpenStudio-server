@@ -188,10 +188,10 @@ begin
           end
         end
 
+        variable_found = false
         ros.log_message "iterate over variables for workflow item #{wf['name']}", true
         if wf['variables']
           wf['variables'].each do |wf_var|
-
             variable_uuid = wf_var['uuid'] # this is what the variable value is set to
             if wf_var['argument']
               variable_name = wf_var['argument']['name']
@@ -207,6 +207,7 @@ begin
                     value_set = v.setValue(variable_value)
                     raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
                     argument_map[variable_name] = v.clone
+                    variable_found = true
                   else
                     raise "[ERROR] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
                     ros.log_message("[WARNING] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
@@ -224,22 +225,24 @@ begin
           end
         end
 
-        if wf['measure_type'] == "RubyMeasure"
-          measure.run(@model, runner, argument_map)
-        elsif wf['measure_type'] == "EnergyPlusMeasure"
-          measure.run(@model_idf, runner, argument_map)
-        elsif wf['measure_type'] == "ReportingMeasure"
-          report_measures << measure
+        if variable_found
+          if wf['measure_type'] == "RubyMeasure"
+            measure.run(@model, runner, argument_map)
+          elsif wf['measure_type'] == "EnergyPlusMeasure"
+            measure.run(@model_idf, runner, argument_map)
+          elsif wf['measure_type'] == "ReportingMeasure"
+            report_measures << measure
+          end
+          result = runner.result
+
+          ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
+          ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
+
+          result.warnings.each { |w| ros.log_message w.logMessage, true }
+          result.errors.each { |w| ros.log_message w.logMessage, true }
+          result.info.each { |w| ros.log_message w.logMessage, true }
+          result.attributes.each { |att| @output_attributes << att }
         end
-        result = runner.result
-
-        ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
-        ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
-
-        result.warnings.each { |w| ros.log_message w.logMessage, true }
-        result.errors.each { |w| ros.log_message w.logMessage, true }
-        result.info.each { |w| ros.log_message w.logMessage, true }
-        result.attributes.each { |att| @output_attributes << att }
       end
     end
   end
@@ -270,12 +273,12 @@ begin
   # Run EnergyPlus using run energyplus script
   idf_filename = "#{run_directory}/in.idf"
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
-  
+
   ros.log_message "adding monthly report to energyplus IDF", true
   to_append = File.read(File.join(File.dirname(__FILE__), "monthly_report.rb"))
   File.open(idf_filename, 'a') do |handle|
-      handle.puts to_append
-  end    
+    handle.puts to_append
+  end
 
   ros.log_message "Verifying location of Post Process Script", true
   post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "post_process_monthly.rb"))
@@ -309,10 +312,10 @@ begin
     File.open("#{directory.to_s}/profile-flat.txt", "w") { |f| RubyProf::FlatPrinter.new(profile_results).print(f) }
     File.open("#{directory.to_s}/profile-tree.prof", "w") { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
-  
+
   @report_measures.each { |report_measure|
     # run the reporting measures
-    
+
   }
 
   # Initialize the objective function variable
@@ -338,7 +341,7 @@ begin
           if variable['scaling_factor']
             ros.log_message "Found scaling factor for #{variable['name']}", true
             objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = variable['scaling_factor'].to_f
-          end          
+          end
         else
           #objective_functions[variable['name']] = nil
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil

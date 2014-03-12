@@ -16,8 +16,10 @@ class Analysis::Optim
                 parscale: 1,
                 ndeps: 1e-3,
                 maxit: 100,
+                normtype: "minkowski",
+                ppower: 2,
                 objective_functions: [],
-                epsilonGradient: 1e-4
+                epsilongradient: 1e-4
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -91,10 +93,15 @@ class Analysis::Optim
       raise "Must have number of samples to discretize the parameter space"
     end
 
-    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size > 1
-      raise "Must have only one objective function defined"
-    end    
+    #TODO add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    #if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    #  raise "P Norm must be non-negative"
+    #end    
        
+    if @analysis.problem['algorithm']['ppower'] <= 0
+      raise "P Norm must be non-negative"
+    end  
+    
     if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
       raise "number of objective functions must equal"
     end
@@ -130,7 +137,7 @@ class Analysis::Optim
         raise "could not configure R cluster"
       else
 	    Rails.logger.info "Successfuly configured cluster"
-	  end
+      end
 		
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
       process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
@@ -157,21 +164,23 @@ class Analysis::Optim
         #maxit is the max number of iterations to calculate
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
-        #epsilonGradient is epsilon in numerical gradient calc
+        #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilonGradient => @analysis.problem['algorithm']['epsilonGradient']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
+            clusterEvalQ(cl,library(R.utils)) 
             
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
-            if (objDim >1) {
-               print("optim objective function must be length 1")
-               stop(options("show.error.messages"="optim objective function must be length 1"),"optim objective function must be length 1")
-            }
-            clusterExport(cl,"objDim")          
-               
+            print(paste("normtype:",normtype))
+            print(paste("ppower:",ppower))
+ 
+            clusterExport(cl,"objDim")
+            clusterExport(cl,"normtype")
+            clusterExport(cl,"ppower")
+                    
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
             }          
@@ -194,9 +203,9 @@ class Analysis::Optim
               } else {
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
               }                 
-              print(paste("R is calling system command as:",y))
+              #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
-              print(paste("R returned system call with:",z))
+              #print(paste("R returned system call with:",z))
               return(z)
             }
             clusterExport(cl,"f")      
@@ -224,34 +233,53 @@ class Analysis::Optim
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
 
               # read in the results from the objective function file
-              # TODO: verify that the file exists
-              # TODO: determine how to handle if the objective function value = nil/null    
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-              json <- fromJSON(file=object_file)
+	      tryCatch({
+	        res <- evalWithTimeout({
+	          json <- fromJSON(file=object_file)
+	        }, timeout=5);
+	        }, TimeoutException=function(ex) {
+	           cat(data_point_directory," No objectives.json: Timeout\n");
+                   return(1e19)
+              })
+              #json <- fromJSON(file=object_file)
               obj <- NULL
+              objvalue <- NULL
+              objtarget <- NULL
+              sclfactor <- NULL
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "nil"){
-                  objtemp <- as.numeric(json[objfuntemp])
+                  objvalue[i] <- as.numeric(json[objfuntemp])
                 } else {
-                  objtemp <- 1.0e9
+                  objvalue[i] <- 1.0e19
+                  cat(data_point_directory," Missing ", objfuntemp,"\n");
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
                 if (json[objfuntargtemp] != "nil"){
-                  objtemp2 <- as.numeric(json[objfuntargtemp])
+                  objtarget[i] <- as.numeric(json[objfuntargtemp])
                 } else {
-                  objtemp2 <- 0.0
+                  objtarget[i] <- 0.0
                 }
                 scalingfactor <- paste("scaling_factor_",i,sep="")
-                sclfactor <- 1.0
+                sclfactor[i] <- 1.0
                 if (json[scalingfactor] != "NULL"){
-                  sclfactor <- as.numeric(json[scalingfactor])
+                  sclfactor[i] <- as.numeric(json[scalingfactor])
+                  if (sclfactor[i] == 0.0) {
+                    print(paste(scalingfactor," is ZERO, overwriting\n"))
+                    sclfactor[i] = 1.0
+                  }
                 } else {
-                  sclfactor <- 1.0
+                  sclfactor[i] <- 1.0
                 }                
-                obj[i] <- abs(objtemp - objtemp2)/sclfactor
               }
-              print(paste("Objective function results are:",obj))   
+              print(paste("Objective function results are:",objvalue))
+              print(paste("Objective function targets are:",objtarget))
+              print(paste("Objective function scaling factors are:",sclfactor))             
+              objvalue <- objvalue / sclfactor
+              objtarget <- objtarget / sclfactor
+              obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
+              print(paste("Objective function Norm:",obj))
               return(obj)
             }
             
@@ -283,22 +311,35 @@ class Analysis::Optim
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
-            clusterExport(cl,"epsilonGradient")
+            clusterExport(cl,"epsilongradient")
             
             parallelGradient <- function(params, ...) { # Now use the cluster 
-	        dp = cbind(rep(0,length(params)),diag(params * epsilonGradient));   
+                print(paste("params:",params))
+                print(paste("epsilongradient:",epsilongradient))
+                if (length(params) > 1) {
+ 	          dp = cbind(rep(0,length(params)),diag(params * epsilongradient)); 
+ 	        } else {
+ 	          dp = cbind(rep(0,length(params)),(params * epsilongradient));
+ 	        }
 	        Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
-	        return((Fout[-1]-Fout[1])/diag(dp[,-1]));                  #
+	        if (length(params) > 1) {
+	           return((Fout[-1]-Fout[1])/diag(dp[,-1])); 
+	        } else {
+	           return((Fout[-1]-Fout[1])/(dp[,-1]));
+	        }
             }
 
             vectorGradient <- function(x, ...) { # Now use the cluster 
-	        vectorgrad(func=gn, x=x, method="four", eps=epsilonGradient,cl=cl, ...);
+	        vectorgrad(func=gn, x=x, method="two", eps=epsilongradient,cl=cl, debug=TRUE);
             }
-            #print(paste("Number of generations set to:",gen))
+            print(paste("Lower Bounds set to:",varMin))
+            print(paste("Upper Bounds set to:",varMax))
+            print(paste("varMean set to:",varMean))
             
-#            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
-            #results <- optim(par=varMean, fn=g, gr=parallelGradient, method='L-BFGS-B',lower=varMin, upper=varMax)
-            results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax)
+            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
+            #results <- optim(par=varMean, fn=g, gr=parallelGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
+            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, ndeps = 1.0))
+            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
             
             #cll <- makeSOCKcluster(c("localhost"))
             #clusterCall(cll,optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax))
