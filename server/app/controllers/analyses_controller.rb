@@ -23,61 +23,61 @@ class AnalysesController < ApplicationController
 
     @analysis = Analysis.find(params[:id])
 
-    #tab status
-    @status = 'all'
-    if !params[:status].nil?
-        @status = params[:status]
-    end
-
-    logger.debug("!!!!params STATUS is: #{params[:status]}")
-    logger.debug("!!ALL SEARCH: #{params[:all_search]}")
-
-    #blanks should be saved as nil or it will crash
-    @all_page = @status == 'all' ? params[:page] : params[:all_page]
-    @all_page = @all_page == '' ? nil : @all_page
-    @completed_page = @status == 'completed' ? params[:page] : params[:completed_page]
-    @completed_page = @completed_page == '' ? nil : @completed_page
-    @running_page = @status == 'running' ? params[:page] : params[:running_page]
-    @running_page = @running_page == '' ? nil : @running_page
-    @queued_page = @status == 'queued' ? params[:page] : params[:queued_page]
-    @queued_page = @queued_page == '' ? nil : @queued_page
-    @na_page = @status == 'na' ? params[:page] : params[:na_page]
-    @na_page = @na_page == '' ? nil : @na_page
-
-    @all_sims_total = @analysis.search(params[:all_search], 'all')
-    @all_sims = @all_sims_total.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims_total.count)
-
-    @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
-    logger.debug("!!! @completed_sims_total: #{@completed_sims_total.count}")
-    @completed_sims = @completed_sims_total.paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims_total.count)
-
-    @running_sims_total = @analysis.search(params[:running_search],'started')
-    @running_sims = @running_sims_total.paginate(:page => @running_page, :per_page => per_page, :total_entries => @running_sims_total.count)
-
-    @queued_sims_total = @analysis.search(params[:queued_search], 'queued')
-    @queued_sims = @queued_sims_total.paginate(:page => @queued_page, :per_page => per_page, :total_entries => @queued_sims_total.count)
-
-    @na_sims_total = @analysis.search(params[:na_search], 'na')
-    @na_sims = @na_sims_total.paginate(:page => @na_page, :per_page => per_page, :total_entries => @na_sims_total.count)
-
-
-    case @status
-    when 'all'
-      @status_simulations = @all_sims
-    when 'completed'
-      @status_simulations = @completed_sims
-    when 'running'
-      @status_simulations = @running_sims
-    when 'queued'
-      @status_simulations = @queued_sims
-    when 'na'
-      @status_simulations = @na_sims
-    end
-
-    @objective_functions = []
-
-    #todo: move this to the page_data or another secondary call
     if @analysis
+
+      #tab status
+      @status = 'all'
+      if !params[:status].nil?
+        @status = params[:status]
+      end
+
+      logger.debug("!!!!params STATUS is: #{params[:status]}")
+      logger.debug("!!ALL SEARCH: #{params[:all_search]}")
+
+      #blanks should be saved as nil or it will crash
+      @all_page = @status == 'all' ? params[:page] : params[:all_page]
+      @all_page = @all_page == '' ? nil : @all_page
+      @completed_page = @status == 'completed' ? params[:page] : params[:completed_page]
+      @completed_page = @completed_page == '' ? nil : @completed_page
+      @running_page = @status == 'running' ? params[:page] : params[:running_page]
+      @running_page = @running_page == '' ? nil : @running_page
+      @queued_page = @status == 'queued' ? params[:page] : params[:queued_page]
+      @queued_page = @queued_page == '' ? nil : @queued_page
+      @na_page = @status == 'na' ? params[:page] : params[:na_page]
+      @na_page = @na_page == '' ? nil : @na_page
+
+      @all_sims_total = @analysis.search(params[:all_search], 'all')
+      @all_sims = @all_sims_total.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims_total.count)
+
+      @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
+      logger.debug("!!! @completed_sims_total: #{@completed_sims_total.count}")
+      @completed_sims = @completed_sims_total.paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims_total.count)
+
+      @running_sims_total = @analysis.search(params[:running_search], 'started')
+      @running_sims = @running_sims_total.paginate(:page => @running_page, :per_page => per_page, :total_entries => @running_sims_total.count)
+
+      @queued_sims_total = @analysis.search(params[:queued_search], 'queued')
+      @queued_sims = @queued_sims_total.paginate(:page => @queued_page, :per_page => per_page, :total_entries => @queued_sims_total.count)
+
+      @na_sims_total = @analysis.search(params[:na_search], 'na')
+      @na_sims = @na_sims_total.paginate(:page => @na_page, :per_page => per_page, :total_entries => @na_sims_total.count)
+
+
+      case @status
+        when 'all'
+          @status_simulations = @all_sims
+        when 'completed'
+          @status_simulations = @completed_sims
+        when 'running'
+          @status_simulations = @running_sims
+        when 'queued'
+          @status_simulations = @queued_sims
+        when 'na'
+          @status_simulations = @na_sims
+      end
+
+      @objective_functions = []
+
       if @analysis.output_variables
         @analysis.output_variables.each do |ov|
           if ov['objective_function']
@@ -411,7 +411,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.csv do
-        redirect_to @analysis, notice: "CSV not yet supported for downloading variables" 
+        redirect_to @analysis, notice: "CSV not yet supported for downloading variables"
         #write_and_send_csv(@analysis)
       end
       format.rdata do
