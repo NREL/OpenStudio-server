@@ -305,7 +305,7 @@ class Analysis::Optim
               for (i in 2:ncol(vars)){
                 varMin <- rbind(varMin,c(min(vars[,i])))
                 varMax <- rbind(varMax,c(max(vars[,i])))
-                varMean <- rbind(varMean,c(max(vars[,i])))
+                varMean <- rbind(varMean,c(mean(vars[,i])))
               }
             }
             print("setup gradient")
