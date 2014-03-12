@@ -8,19 +8,30 @@
 </head>
 <body>
 
-<%#= render 'layouts/nav' %>
+
+
+
 <div class="fluid-container">
+  <%= render 'layouts/nav' %>
   <div class="row-fluid header-row">
     <div class="span12">
       <h1 class="sitename"><%= link_to 'OpenStudio Cloud Management Console', projects_path, :class => 'sitename' %></h1>
     </div>
+
   </div>
   <div id="blue-line-and-fade" class="row-fluid header-row">
+
     <div class="span12">
       <hr class='top-blue '>
-      <div class="below-header"></div>
+      <div class="below-header">
+
+      </div>
+
     </div>
   </div>
+
+
+
   <div class="row-fluid header-row">
     <%#= render 'layouts/flash_messages' %>
   </div>

@@ -1,0 +1,3 @@
+$("#<%= @status %>simulations").html('
+<%= escape_javascript render(:partial => "analyses/table", :locals => { users: @status_simulations, status: @status, :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page, :page => params[:page] }) %>
+');
