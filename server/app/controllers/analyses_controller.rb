@@ -51,7 +51,7 @@ class AnalysesController < ApplicationController
     logger.debug("!!! @completed_sims_total: #{@completed_sims_total.count}")
     @completed_sims = @completed_sims_total.paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims_total.count)
 
-    @running_sims_total = @analysis.search(params[:running_search],'running')
+    @running_sims_total = @analysis.search(params[:running_search],'started')
     @running_sims = @running_sims_total.paginate(:page => @running_page, :per_page => per_page, :total_entries => @running_sims_total.count)
 
     @queued_sims_total = @analysis.search(params[:queued_search], 'queued')
