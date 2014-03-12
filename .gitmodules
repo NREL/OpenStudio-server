@@ -112,3 +112,6 @@
 [submodule "vagrant/chef/cookbooks/rsyslog"]
 	path = vagrant/chef/cookbooks/rsyslog
 	url = git@github.com:NREL-cookbooks/rsyslog.git
+[submodule "vagrant/chef/cookbooks/perl"]
+	path = vagrant/chef/cookbooks/perl
+	url = git@github.com:NREL-cookbooks/perl.git
