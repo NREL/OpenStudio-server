@@ -365,11 +365,16 @@ begin
             ros.log_message "Found scaling factor for #{variable['name']}", true
             objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = variable['scaling_factor'].to_f
           end
+          if variable['objective_function_group']
+            ros.log_message "Found objective function group for #{variable['name']}", true
+            objective_functions["objective_function_group_#{variable['objective_function_index'] + 1}"] = variable['objective_function_group'].to_f
+          end          
         else
           #objective_functions[variable['name']] = nil
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["objective_function_group_#{variable['objective_function_index'] + 1}"] = nil
         end
       end
     end

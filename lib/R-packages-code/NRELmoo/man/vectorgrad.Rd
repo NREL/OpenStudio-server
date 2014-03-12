@@ -3,7 +3,7 @@
 \title{vectorgrad}
 \description{vectorized gradient}
 \usage{
-vectorgrad(func, x, method="one", eps=1e-4, cl=NULL)
+vectorgrad(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE)
 }
 \arguments{
   \item{func}{f}
@@ -11,6 +11,7 @@ vectorgrad(func, x, method="one", eps=1e-4, cl=NULL)
   \item{method}{one|two|four}
   \item{eps}{epsilon}
   \item{cl}{cluster object}
+  \item{debug}{debug flag}
 }
 \value{
   numerical gradient of f.
