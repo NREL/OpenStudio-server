@@ -109,3 +109,9 @@
 [submodule "vagrant/chef/cookbooks/yum-epel"]
 	path = vagrant/chef/cookbooks/yum-epel
 	url = https://github.com/opscode-cookbooks/yum-epel.git
+[submodule "vagrant/chef/cookbooks/python"]
+	path = vagrant/chef/cookbooks/python
+	url = git@github.com:NREL-cookbooks/python.git
+[submodule "vagrant/chef/cookbooks/rsyslog"]
+	path = vagrant/chef/cookbooks/rsyslog
+	url = git@github.com:NREL-cookbooks/rsyslog.git
