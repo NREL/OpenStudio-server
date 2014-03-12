@@ -115,3 +115,6 @@
 [submodule "vagrant/chef/cookbooks/perl"]
 	path = vagrant/chef/cookbooks/perl
 	url = git@github.com:NREL-cookbooks/perl.git
+[submodule "vagrant/chef/cookbooks/pacman"]
+	path = vagrant/chef/cookbooks/pacman
+	url = git@github.com:jesseadams/pacman.git
