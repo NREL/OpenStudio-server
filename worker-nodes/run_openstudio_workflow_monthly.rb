@@ -31,6 +31,11 @@ optparse = OptionParser.new do |opts|
   opts.on("-p", "--profile-run", "Profile the Run OpenStudio Call") do |pr|
     options[:profile_run] = pr
   end
+
+  options[:debug] = false
+  opts.on('--debug', "Set the debug flag") do
+    options[:debug] = true
+  end
 end
 optparse.parse!
 
@@ -75,12 +80,13 @@ begin
   @model = nil
   @model_idf = nil
   @weather_filename = nil
+  @output_attributes = []
+  @report_measures = []
 
   ros.log_message "Getting Problem JSON input", true
 
   # get json from database
   data_point_json, analysis_json = ros.get_problem("hash")
-
 
   ros.log_message "Parsing Analysis JSON input & Applying Measures", true
   # by hand for now, go and get the information about the measures
@@ -181,10 +187,10 @@ begin
           end
         end
 
+        variable_found = false
         ros.log_message "iterate over variables for workflow item #{wf['name']}", true
         if wf['variables']
           wf['variables'].each do |wf_var|
-
             variable_uuid = wf_var['uuid'] # this is what the variable value is set to
             if wf_var['argument']
               variable_name = wf_var['argument']['name']
@@ -200,9 +206,10 @@ begin
                     value_set = v.setValue(variable_value)
                     raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
                     argument_map[variable_name] = v.clone
+                    variable_found = true
                   else
-                    raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
-                    ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
+                    raise "[ERROR] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
+                    ros.log_message("[WARNING] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
                     break
                   end
                 else
@@ -217,24 +224,28 @@ begin
           end
         end
 
-        if wf['measure_type'] == "RubyMeasure"
-          measure.run(@model, runner, argument_map)
-        elsif wf['measure_type'] == "EnergyPlusMeasure"
-          measure.run(@model_idf, runner, argument_map)
+        if variable_found
+          if wf['measure_type'] == "RubyMeasure"
+            measure.run(@model, runner, argument_map)
+          elsif wf['measure_type'] == "EnergyPlusMeasure"
+            measure.run(@model_idf, runner, argument_map)
+          elsif wf['measure_type'] == "ReportingMeasure"
+            report_measures << measure
+          end
+          result = runner.result
+
+          ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
+          ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
+
+          result.warnings.each { |w| ros.log_message w.logMessage, true }
+          result.errors.each { |w| ros.log_message w.logMessage, true }
+          result.info.each { |w| ros.log_message w.logMessage, true }
+          result.attributes.each { |att| @output_attributes << att }
         end
-        result = runner.result
-
-        ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
-        ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
-
-        result.warnings.each { |w| ros.log_message w.logMessage, true }
-        result.errors.each { |w| ros.log_message w.logMessage, true }
-        result.info.each { |w| ros.log_message w.logMessage, true }
       end
     end
   end
 
-  #ros.log_message @model.to_s
   a = Time.now
   osm_filename = "#{run_directory}/osm_out.osm"
   File.open(osm_filename, 'w') { |f| f << @model.to_s }
@@ -260,12 +271,12 @@ begin
   # Run EnergyPlus using run energyplus script
   idf_filename = "#{run_directory}/in.idf"
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
-  
+
   ros.log_message "adding monthly report to energyplus IDF", true
   to_append = File.read(File.join(File.dirname(__FILE__), "monthly_report.rb"))
   File.open(idf_filename, 'a') do |handle|
-      handle.puts to_append
-  end    
+    handle.puts to_append
+  end
 
   ros.log_message "Verifying location of Post Process Script", true
   post_process_filename = File.expand_path(File.join(File.dirname(__FILE__), "post_process_monthly.rb"))
@@ -290,6 +301,37 @@ begin
   # use the completed job to populate data_point with results
   ros.log_message "Updating OpenStudio DataPoint and Communicating Results", true
 
+
+  # HARD CODE the running of the report measure --- eventually loop of the workflow and
+  # run any post processing
+  ros.log_message "Running OpenStudio Post Processing"
+  measure_path = "./packaged_measures"
+  measure_name = "StandardReports"
+
+  # when full workflow then do this
+  # require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
+  require "#{File.expand_path(File.join(File.dirname(__FILE__), measure_path, measure_name, 'measure'))}"
+
+  measure = measure_name.constantize.new
+  runner = OpenStudio::Ruleset::OSRunner.new
+  arguments = measure.arguments
+
+  ros.log_message "Run directory for post process: #{run_directory}"
+  runner.setLastOpenStudioModel(@model)
+  runner.setLastEnergyPlusSqlFilePath("#{run_directory}/run/eplusout.sql")
+
+  # set argument values to good values and run the measure
+  argument_map = OpenStudio::Ruleset::OSArgumentMap.new
+  measure.run(runner, argument_map)
+  result = runner.result
+
+  ros.log_message "Finished OpenStudio Post Processing"
+  ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
+  result.errors.each { |w| ros.log_message w.logMessage, true }
+  report_json = JSON.parse(OpenStudio::toJSON(result.attributes), :symbolize_names => true)
+  ros.log_message "JSON file is #{report_json}"
+  File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
+
   # If profiling, then go ahead and get the results here.  Note that we are not profiling the 
   # result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
   # also ZIPs up the folder and we want the results of the performance to also be in ZIP file.
@@ -300,15 +342,16 @@ begin
     File.open("#{directory.to_s}/profile-tree.prof", "w") { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
 
+  @report_measures.each { |report_measure|
+    # run the reporting measures
+
+  }
+
   # Initialize the objective function variable
   objective_functions = {}
-  puts "test"
-  ros.log_message "test log"
-  # First read in the eplustbl.json file
   if File.exists?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), :symbolize_names => true)
-    ros.log_message "result_json\n"
-    ros.log_message "#{result_json}"
+    ros.log_message "Result JSON is: #{result_json}"
     ros.log_message "analysis_json[:analysis]['output_variables']\n"
     ros.log_message "#{analysis_json[:analysis]['output_variables']}"
     ros.log_message "pulling out objective functions", true
@@ -324,22 +367,36 @@ begin
             ros.log_message "Found objective function target for #{variable['name']}", true
             objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = variable['objective_function_target'].to_f
           end
+          if variable['scaling_factor']
+            ros.log_message "Found scaling factor for #{variable['name']}", true
+            objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = variable['scaling_factor'].to_f
+          end
+          if variable['objective_function_group']
+            ros.log_message "Found objective function group for #{variable['name']}", true
+            objective_functions["objective_function_group_#{variable['objective_function_index'] + 1}"] = variable['objective_function_group'].to_f
+          end          
         else
           #objective_functions[variable['name']] = nil
           objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["objective_function_group_#{variable['objective_function_index'] + 1}"] = nil
         end
       end
     end
 
     # todo: make sure that the result_json file is a superset of the other variables in the variable list
-
+    ros.log_message "Communicating data back to server"
     # map the result json back to a flat array
+    ros.log_message "Result JSON #{result_json}"
     ros.communicate_results_json(result_json, run_directory)
+    ros.log_message "After communicate_results_json()"
   end
 
   # save the objective function results
   obj_fun_file = "#{run_directory}/objectives.json"
+  ros.log_message "Saving objective function file #{obj_fun_file}"
+  ros.log_message "Objective Function JSON is #{objective_functions}"
   File.rm_f(obj_fun_file) if File.exists?(obj_fun_file)
   File.open(obj_fun_file, 'w') { |f| f << JSON.pretty_generate(objective_functions) }
 

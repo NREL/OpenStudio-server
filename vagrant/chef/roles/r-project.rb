@@ -9,6 +9,10 @@ default_attributes(
         :add_ld_path => true,
         :prefix_bin => "/usr/local/bin",
         :make_opts => ["-j4"],
+        :r_environment_site => {
+            :rubylib => "/usr/local/lib/ruby/site_ruby/2.0.0",
+            :path_additions => ["/usr/local/radiance/bin", "/usr/local/rbenv/shims"]
+        },
         :libraries => [
             {
                 :name => "snow"
@@ -74,20 +78,26 @@ default_attributes(
                 :name => "snowFT"
             },
             {
+                :name => "doParallel"
+            },
+            {
                 :name => 'NRELmoo',
                 :package_path => "/data/R-packages",
-                :version => '1.1.3'
+                :version => '1.1.7',
+                :update_method => 'always_update'
             },
             {
                 :name => 'Swift',
                 :package_path => "/data/R-packages",
-                :version => '0.3.1'
+                :version => '0.3.1',
+                :update_method => 'always_update'
             },
             {
                 :name => 'NRELsnowFT',
                 :package_path => "/data/R-packages",
-                :version => '1.3.32'
-            }
+                :version => '1.3.32',
+                :update_method => 'always_update'
+            },
         ]
     }
 )

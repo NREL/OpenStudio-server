@@ -1,33 +1,139 @@
-<h1>Listing Variables</h1>
+<h1>List of Variables</h1>
 
+<% if @variables && @variables.first %>
+    <%= link_to 'Download Variables as R Data Frame', download_variables_analysis_path(@variables.first.analysis, format: :rdata) %> |
+    <%= link_to 'Download Variables as CSV', download_variables_analysis_path(@variables.first.analysis, format: :csv) %> 
+<% end %>
+
+<h2>Pivot Variables</h2>
 <table class="table table-striped">
   <thead>
   <tr>
-    <th>Name</th>
-    <th>Number of Variables/Samples</th>
-    <th>Variable</th>
-    <th>Static</th>
-    <th>Pivot</th>
+    <th>Display Name</th>
+    <th>Machine Name</th>
+    <th>Number of Samples</th>
     <th>Thumbnail</th>
   <tr>
   </thead>
   <tbody>
-  <% @variables.order_by(:perturbable.desc, :static.desc, :pivot.desc, :name.asc).each do |variable| %>
+  <% @pivots.each do |v| %>
       <tr>
-        <td><%= link_to variable.name, variable_path(variable) %></td>
-        <% if variable.discrete_values_and_weights %>
-            <td><%= variable.discrete_values_and_weights.size %></td>
-        <% elsif variable.uncertainty_type && variable.analysis.problem && variable.analysis.problem['algorithm'] && variable.analysis.problem['algorithm']['number_of_samples'] %>
-            <td><%= variable.analysis.problem['algorithm']['number_of_samples'] %></td>
+        <td><%= link_to v.display_name, variable_path(v) %></td>
+        <td><%= v.name %></td>
+        <% if v.discrete_values_and_weights %>
+            <td><%= v.discrete_values_and_weights.size %></td>
+        <% elsif v.uncertainty_type && v.analysis.problem && v.analysis.problem['algorithm'] && v.analysis.problem['algorithm']['number_of_samples'] %>
+            <td><%= v.analysis.problem['algorithm']['number_of_samples'] %></td>
         <% else %>
             <td></td>
         <% end %>
-        <td><%= variable.perturbable %></td>
-        <td><%= variable.static %></td>
-        <td><%= variable.pivot %></td>
-        <% if variable.perturbable && variable.preflight_images.first %>
+        <% if v.perturbable && v.preflight_images.first %>
             <td>
-              <%= link_to image_tag(variable.preflight_images.first.image.url(:thumb)), variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
+              <%= link_to image_tag(v.preflight_images.first.image.url(:thumb)), v.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
+            </td>
+        <% else %>
+            <td>No image</td>
+        <% end %>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+
+
+<h2>Variables Variables</h2>
+
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Display Name</th>
+    <th>Machine Name</th>
+    <th>Number of Samples</th>
+    <th>Thumbnail</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @variables.each do |v| %>
+      <tr>
+        <td><%= link_to v.display_name, variable_path(v) %></td>
+        <td><%= v.name %></td>
+        <% if v.discrete_values_and_weights %>
+            <td><%= v.discrete_values_and_weights.size %></td>
+        <% elsif v.uncertainty_type && v.analysis.problem && v.analysis.problem['algorithm'] && v.analysis.problem['algorithm']['number_of_samples'] %>
+            <td><%= v.analysis.problem['algorithm']['number_of_samples'] %></td>
+        <% else %>
+            <td></td>
+        <% end %>
+        <% if v.perturbable && v.preflight_images.first %>
+            <td>
+              <%= link_to image_tag(v.preflight_images.first.image.url(:thumb)), v.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
+            </td>
+        <% else %>
+            <td>No image</td>
+        <% end %>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<h2>Static Variables</h2>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Display Name</th>
+    <th>Machine Name</th>
+    <th>Number of Samples</th>
+    <th>Thumbnail</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @statics.each do |v| %>
+      <tr>
+        <td><%= link_to v.display_name, variable_path(v) %></td>
+        <td><%= v.name %></td>
+        <% if v.discrete_values_and_weights %>
+            <td><%= v.discrete_values_and_weights.size %></td>
+        <% elsif v.uncertainty_type && v.analysis.problem && v.analysis.problem['algorithm'] && v.analysis.problem['algorithm']['number_of_samples'] %>
+            <td><%= v.analysis.problem['algorithm']['number_of_samples'] %></td>
+        <% else %>
+            <td></td>
+        <% end %>
+        <% if v.perturbable && v.preflight_images.first %>
+            <td>
+              <%= link_to image_tag(v.preflight_images.first.image.url(:thumb)), v.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
+            </td>
+        <% else %>
+            <td>No image</td>
+        <% end %>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<h2>Other Variables/Arguments</h2>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Display Name</th>
+    <th>Machine Name</th>
+    <th>Number of Samples</th>
+    <th>Thumbnail</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @others.each do |v| %>
+      <tr>
+        <td><%= link_to v.display_name, variable_path(v) %></td>
+        <td><%= v.name %></td>
+        <% if v.discrete_values_and_weights %>
+            <td><%= v.discrete_values_and_weights.size %></td>
+        <% elsif v.uncertainty_type && v.analysis.problem && v.analysis.problem['algorithm'] && v.analysis.problem['algorithm']['number_of_samples'] %>
+            <td><%= v.analysis.problem['algorithm']['number_of_samples'] %></td>
+        <% else %>
+            <td></td>
+        <% end %>
+        <% if v.perturbable && v.preflight_images.first %>
+            <td>
+              <%= link_to image_tag(v.preflight_images.first.image.url(:thumb)), v.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
             </td>
         <% else %>
             <td>No image</td>

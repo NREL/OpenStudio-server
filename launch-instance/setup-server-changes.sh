@@ -4,8 +4,11 @@ sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh
 echo StrictHostKeyChecking no > /home/ubuntu/.ssh/config
 sudo service ssh restart
 
-#reset permissions on files
-sudo chown -R ubuntu.www-data /var/www/rails/openstudio 
+#reset permissions on files - add sticky bit for public data
+sudo chown -R ubuntu.www-data /var/www/rails/openstudio
+sudo chown -R ubuntu.www-data /var/www/rails/public
+sudo chmod -R g+w /var/www/rails/openstudio/public
+sudo chmod +t /var/www/rails/openstudio/public
 sudo chmod -R g+w /var/www/rails/openstudio/tmp
 
 cd /var/www/rails/openstudio

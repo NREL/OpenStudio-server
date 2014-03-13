@@ -11,7 +11,8 @@ class PreflightImage
                             :styles => {
                                 :original => ['1920x1680>', :png],
                                 :thumb => ['150x150#', :png],
-                                :large => ['500x500>', :png]
+                                :large => ['500x500>', :png],
+                                :small => ['360x360>', :png]
                             }
 
   belongs_to :variable

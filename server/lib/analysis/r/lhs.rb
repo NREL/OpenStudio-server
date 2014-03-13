@@ -73,7 +73,14 @@ module Analysis::R
       {r: @r.converse("samples"), image_path: save_file_name}
     end
 
+    # Take the values/probabilities from the LHS sample and transform them into 
+    # the other distribution using the quantiles of the other distribution.  
+    # Note that the probabilities and the samples must be an array so there are 
+    # checks to make sure that it is.  If R only has one sample, then it will not 
+    # wrap it in an array.
     def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max, save_histogram = true)
+      probabilities_array = [probability_array] unless probabilities_array.kind_of? Array # ensure array
+
       Rails.logger.info "Creating sample from probability"
       r_dist_name = ""
       if distribution_type == 'normal' || distribution_type == 'normal_uncertain'
@@ -122,8 +129,9 @@ module Analysis::R
         end
       end
 
-      # returns an array
-      samples = @r.converse "print(samples)"
+      # Should return an array. Always return an array, even if it is one value. 
+      samples = @r.converse "samples"
+      samples = [samples] unless samples.kind_of? Array
       save_file_name = nil
       if save_histogram && !samples[0].kind_of?(String)
         # Determine where to save it
@@ -139,10 +147,13 @@ module Analysis::R
         end
       end
 
-      {r: @r.converse("samples"), image_path: save_file_name}
+      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+      
+      {r: samples, image_path: save_file_name}
     end
 
-    def sample_all_variables(selected_variables, number_of_samples)
+    def sample_all_variables(selected_variables, number_of_samples, grouped_by_measure = false)
+      grouped = {}
       samples = {}
       var_types = []
 
@@ -154,7 +165,7 @@ module Analysis::R
       # TODO: performance smell... optimize this using Parallel
       i_var = 0
       selected_variables.each do |var|
-        Rails.logger.info "sampling variable #{var.name}"
+        Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
         sfp = nil
         
         # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
@@ -167,6 +178,8 @@ module Analysis::R
           var_types << "continuous"
         end
 
+        grouped["#{var.measure.id}"] = {} if !grouped.has_key?(var.measure.id)
+        grouped["#{var.measure.id}"]["#{var.id}"] = sfp[:r]
         samples["#{var.id}"] = sfp[:r]
         if sfp[:image_path]
           pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
@@ -179,6 +192,10 @@ module Analysis::R
         i_var += 1
       end
 
+      if grouped_by_measure
+        samples = grouped 
+      end
+      Rails.logger.info "Grouped variables are #{grouped}"
       [samples, var_types]
     end
   end

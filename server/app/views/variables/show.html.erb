@@ -1,22 +1,51 @@
 <p id="notice"><%= notice %></p>
 
-<table class="table table-striped">
-  <thead>
-  <tr>
-    <th>Field Name</th>
-    <th>Field Value</th>
-  <tr>
-  </thead>
-  <tbody>
-  <% @variable.as_document.each do |k, v| %>
+<div class="row-fluid">
+  <div class="span8">
+    <h2>Variable Information</h2>
+    <table class="table table-striped">
+      <thead>
       <tr>
-        <td><%= k %></td>
-        <td><%= v %></td>
-      </tr>
-  <% end %>
-  </tbody>
-</table>
+        <th>Field Name</th>
+        <th>Field Value</th>
+      <tr>
+      </thead>
+      <tbody>
+      <% @variable.as_document.each do |k, v| %>
+          <tr>
+            <td><%= k %></td>
+            <td><%= v %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
 
-<%= link_to(image_tag(@variable.preflight_images.first.image.url(:large)), @variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900']) unless @variable.preflight_images.first.nil? %>
+    <h2>Data Points with this Variable</h2>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th>Data Point Name</th>
+        <th>Variable Value</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @dps.each do |dp| %>
+          <tr>
+            <td><%= link_to dp.name, dp %></td>
+            <td><%= dp.set_variable_values[@variable.id] %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+
+  </div>
+  <div class="span4">
+    <%= link_to(image_tag(@variable.preflight_images.first.image.url(:small)), @variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900']) unless @variable.preflight_images.first.nil? %>
+  </div>
+</div>
+
+
+
+  
 
 

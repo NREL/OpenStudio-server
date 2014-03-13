@@ -19,6 +19,7 @@ OpenstudioServer::Application.routes.draw do
         get :plot_xy
         get :plot_radar
         get :download_data
+        get :download_variables
       end
 
       resources :measures, :only => [:show, :index], shallow: true
@@ -36,11 +37,15 @@ OpenstudioServer::Application.routes.draw do
     #end
   end
 
+  match 'admin/backup_database' => 'admin#backup_database', :via => :get
+  match 'admin/restore_database' => 'admin#restore_database', :via => :post
+  resources :admin, :only => [:index] do
+    get :backup_database
+    post :restore_database
+  end
+
   match '/about' => 'pages#about'
-
-
-
-
+  
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

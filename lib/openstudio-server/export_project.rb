@@ -16,6 +16,8 @@ batch_size = 50
 
 puts "exporting " + project_dir + " to " + export_dir
 
+OpenStudio::Application::instance.processEvents
+
 # load project from disk
 project = OpenStudio::AnalysisDriver::SimpleProject::open(OpenStudio::Path.new(project_dir)).get
 
