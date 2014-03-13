@@ -102,7 +102,7 @@ class Analysis::BatchRunft
               }
               dbDisconnect(mongo)
   
-              ruby_command <- "/usr/local/rbenv/shims/ruby -I/usr/local/lib/ruby/site_ruby/2.0.0/"
+              ruby_command <- "/usr/local/rbenv/shims/ruby"
               print("#{@analysis.use_shm}")
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")

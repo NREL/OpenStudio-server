@@ -2,7 +2,10 @@ class VariablesController < ApplicationController
   # GET /variables
   # GET /variables.json
   def index
-    @variables = Variable.where(analysis_id: params[:analysis_id]).order_by(name: 1)
+    @variables = Variable.where({analysis_id: params[:analysis_id], perturbable: true}).order_by(name: 1)
+    @statics = Variable.where({analysis_id: params[:analysis_id], static: true}).order_by(name: 1)
+    @pivots = Variable.where({analysis_id: params[:analysis_id], pivot: true}).order_by(name: 1)
+    @others = Variable.where({analysis_id: params[:analysis_id], pivot: false, perturbable: false, static: false}).order_by(name: 1)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -14,6 +17,9 @@ class VariablesController < ApplicationController
   # GET /variables/1.json
   def show
     @variable = Variable.find(params[:id])
+    
+    # get all the datapoints that have this variable in the set_variable_values
+    @dps = DataPoint.exists("set_variable_values.#{@variable.id}" => true)
 
     respond_to do |format|
       format.html # show.html.erb

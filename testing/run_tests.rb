@@ -23,14 +23,15 @@ analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
     reset_uuids: true,
-    analysis_name: "Simple LHS Sample and Run with Pivot"
-
+    analysis_name: "Simple LHS Sample and Run with Pivot",
+    display_name: "LHS Example Project",
+    name: "lhs_example_project"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     analysis_type: "lhs",
     allow_multiple_jobs: true,
     use_server_as_worker: false,
@@ -52,7 +53,7 @@ run_options = {
     analysis_action: "start",
     run_data_point_filename: "run_openstudio_workflow.rb",
     simulate_data_point_filename: "simulate_data_point.rb",
-    without_delay: true,
+    without_delay: false,
     use_server_as_worker: false,
     allow_multiple_jobs: true,
     analysis_type: "batch_run"
@@ -82,7 +83,7 @@ end
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     analysis_type: 'batch_run'}
 api.run_analysis(analysis_id, run_options)
 
@@ -97,7 +98,9 @@ analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
     reset_uuids: true,
-    analysis_name: "NSGA2"
+    analysis_name: "NSGA2",
+    display_name: "housecal",
+    name: "housecal"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -112,19 +115,23 @@ analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     allow_multiple_jobs: false,
     analysis_type: "nsga_nrel",
     simulate_data_point_filename: "simulate_data_point.rb",
-    run_data_point_filename: "run_openstudio_workflow.rb",
+    run_data_point_filename: "run_openstudio_workflow_monthly.rb",
     problem: {
         algorithm: {
             number_of_samples: 10,
             sample_method: "all_variables",
             generations: 2,
+	    cprob: 0.9,
+	    xoverdistidx: 2,
+	    mudistidx: 2,
+            mprob: 0.9,
             objective_functions: [
                 "heating_natural_gas",
-                "cooling_electricity"
+                "cooling_electricity",
             ]
         }
     }
@@ -139,13 +146,15 @@ analysis_options = {
     formulation_file: formulation_file,
     upload_file: analysis_zip_file,
     reset_uuids: true,
+    display_name: "seq search",
+    name: "seqsearch",
     analysis_name: "Sequential Search"
 }
 analysis_id = api.new_analysis(project_id, analysis_options)
 
 run_options = {
     analysis_action: "start",
-    without_delay: true,
+    without_delay: false,
     analysis_type: "sequential_search",
     allow_multiple_jobs: false,
     use_server_as_worker: false,

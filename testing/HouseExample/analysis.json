@@ -1,10 +1,6 @@
 {
   "analysis": {
-    "display_name": "housecal",
-    "name": "housecal",
-    "parameter_space": [
-
-    ],
+    "parameter_space": [],
     "output_variables": [
       {
         "display_name": "Heating Natural Gas",
@@ -40,21 +36,7 @@
       }
     ],
     "problem": {
-      "algorithm": {
-        "sample_method": "all_variables",
-        "number_of_samples": 10,
-        "generations": 10,
-        "cprob": 0.9,
-        "xoverdistidx": 2,
-        "mudistidx": 2,
-        "mprob": 0.9,
-        "objective_functions": [
-          "heating_natural_gas",
-          "cooling_electricity",
-          "interior_equipment_electricity",
-          "fans_electricity"
-        ]
-      },
+      "algorithm": {},
       "name": "Problem",
       "workflow": [
         {

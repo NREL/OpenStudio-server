@@ -1,0 +1,10 @@
+<p id="notice"><%= notice %></p>
+<h1>Admin</h1>
+
+<%= link_to 'Backup Database', admin_backup_database_path %><br/><br/><br/>
+
+<%= form_tag 'admin/restore_database', :multipart => true do %>
+    <p>Upload Previous Database Dump (targz)</p> <%= file_field_tag "file" %><br/>
+    <%= submit_tag "Upload and Restore Database" %>
+<% end %>
+

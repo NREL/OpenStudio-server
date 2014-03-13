@@ -20,6 +20,7 @@ class Variable
   field :pivot, :type => Boolean, default: false
   field :pivot_samples # don't type for now
   field :static, :type => Boolean, default: false
+  field :relation_to_output => String, default: "standard" # or can be inverse
   field :static_value # don't type this because it can take on anything (other than hashes and arrays)
   scope :enabled, where(perturbable: true)
 
@@ -112,26 +113,26 @@ class Variable
         end
       end
     end
-    
+
     var.save!
 
     var
   end
-  
+
   def self.pivots(analysis_id)
     Variable.where({analysis_id: analysis_id, pivot: true}).order_by(:name.asc)
   end
-  
+
   # start with a hash and then create the hash_of_arrays
   def self.pivot_array(analysis_id)
     pivot_variables = Variable.pivots(analysis_id)
-    
+
     pivot_hash = {}
     pivot_variables.each do |var|
       Rails.logger.info "Adding variable '#{var.name}' to pivot list"
       Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
       values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
-      Rails.logger.info "pivot variable values are #{values}" 
+      Rails.logger.info "pivot variable values are #{values}"
       pivot_hash[var.uuid] = values
     end
 
@@ -145,28 +146,39 @@ class Variable
   def self.statics(analysis_id)
     Variable.where({analysis_id: analysis_id, static: true}).order_by(:name.asc)
   end
-  
-  def self.static_array(analysis_id)
+
+  def self.static_array(analysis_id, grouped=false, array_around_grouped_value = true)
     # get static variables.  These must be applied after the pivot vars and before the lhs
     static_variables = Variable.statics(analysis_id)
+    grouped_hash = {}
     static_array = []
     static_variables.each do |var|
       if var.static_value
-        static_array << {"#{var.uuid}" => var.static_value}
+        if grouped
+          grouped_hash["#{var.measure.id}"] = {} if !grouped_hash.has_key?(var.measure.id)
+          if array_around_grouped_value
+            grouped_hash["#{var.measure.id}"]["#{var.id}"] = [var.static_value]
+          else
+            grouped_hash["#{var.measure.id}"]["#{var.id}"] = var.static_value
+          end
+        else
+          static_array << {"#{var.id}" => var.static_value}
+        end
       else
         raise "Asking to set a static value but none was passed for #{var.name}"
       end
     end
     Rails.logger.info "static array is #{static_array}"
-    
+    Rails.logger.info "grouped static hash is #{grouped_hash}"
+
+    static_array = grouped_hash if grouped
     static_array
   end
-  
+
   def self.variables(analysis_id)
     Variable.where({analysis_id: analysis_id, perturbable: true}).order_by(:name.asc)
   end
-
-
+  
   def map_discrete_hash_to_array
     Rails.logger.info "Discrete values and weights are #{self.discrete_values_and_weights}"
     Rails.logger.info "received map discrete values with #{self.discrete_values_and_weights} with size #{self.discrete_values_and_weights.size}"

@@ -48,7 +48,11 @@ class AnalysisChauffeur
   def get_problem(format="json")
     @communicate_module.get_problem(@communicate_object, format)
   end
-
+              
+  def communicate_intermediate_result(h)
+    @communicate_module.communicate_intermediate_result(@communicate_object, h)
+  end
+  
   def communicate_results(os_data_point, os_directory)
     @communicate_module.communicate_results(@communicate_object, os_data_point, os_directory)
   end

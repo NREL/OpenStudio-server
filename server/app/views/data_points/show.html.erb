@@ -1,10 +1,15 @@
 <p id="notice"><%= notice %></p>
 
 <p>
-  <a href="#dp_fields">Jump to Data Point Table</a>
+  <a href="#dp_fields">Jump to EnergyPlus Results</a>
 </p>
 
-<h1><a id="dp_fields">Variable Values</a></h1>
+<h1>Data Point Information</h1>
+<%= link_to 'View Full JSON', show_full_data_point_path(@data_point, :format => :json) %></br>
+<%= link_to 'View OS JSON', data_point_path(@data_point, :format => :json) %></br>
+<%= link_to_if(!@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name), "Download Data Point", download_data_point_path(@data_point)) %></br>
+
+<h1>Variable Values</h1>
 <table class="table table-striped">
   <thead>
   <tr>
@@ -22,17 +27,49 @@
   </tbody>
 </table>
 
-<h1><a id="dp_fields">Data Point Information</h1>
-<%= link_to 'View Full JSON', show_full_data_point_path(@data_point, :format => :json) %></br>
-<%= link_to 'View OS JSON', data_point_path(@data_point, :format => :json) %></br>
-<%= link_to_if(!@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name), "Download Data Point", download_data_point_path(@data_point)) %></br>
+<h1>High Level Results</h1>
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Display Name</th>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Units</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% if @data_point.results %>
+      <% @data_point.results.sort().each do |k, v| %>
+          <% next if k =~ /(_display_name|_units)$/ %>
+          <tr>
+            <% if k =~ /(_final|_initial)$/ %>
+                <% var = Variable.where(:analysis_id => @data_point.analysis_id, :name => k.gsub(/(_final|_initial)/, "")).first %>
+                <td><%= var.display_name if var && var.display_name %></td>
+                <td><%= k %></td>
+                <td><%= v %></td>
+                <td><%= var.units if var && var.units %></td>
+            <% else %>
+                <td><%= @data_point.results["#{k}_display_name"] if @data_point.results.has_key?("#{k}_display_name") %></td>
+                <td><%= k %></td>
+                <td><%= v %></td>
+                <td><%= @data_point.results["#{k}_units"] if @data_point.results.has_key?("#{k}_units") %></td>
+            <% end %>
+          </tr>
+      <% end %>
+  <% end %>
+  </tbody>
+</table>
 
-<h1><a id="dp_fields">EnergyPlus HTML</h1>
-<%= @html.html_safe unless @html.nil? %>
+
+
+<h1><a id="dp_fields">EnergyPlus HTML</a></h1>
+<% if @html %>
+    <%= @html.html_safe %>
+<% else %>
+    <p>No HTML file found.</p>
+<% end %>
 
 <h1><a id="dp_fields">Data Point Fields</a></h1>
-<p id="notice"><%= notice %></p>
-
 <table class="table table-striped">
   <thead>
   <tr>

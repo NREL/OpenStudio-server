@@ -8,7 +8,13 @@ def sql_query(sql, report_name, query)
   val = nil
   result = sql.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND #{query}")
   if result
-    val = result.get
+    begin
+      val = result.get
+    rescue Exception=>e
+      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+      puts log_message
+      val = 10e9
+    end
   end
   val
 end
@@ -118,8 +124,8 @@ begin
     puts "saving results to json"
     #save out results
     File.open('eplustbl.json', 'w') { |f| f << JSON.pretty_generate(results) }
-
   end
+
 rescue Exception => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   puts log_message
@@ -132,7 +138,6 @@ ensure
   paths_to_rm << Pathname.glob("*.osm")
   paths_to_rm << Pathname.glob("*.ini")
   paths_to_rm << Pathname.glob("*.idf")
-  #paths_to_rm << Pathname.glob("*.sql")
   paths_to_rm << Pathname.glob("EnergyPlus")
   paths_to_rm << Pathname.glob("*.epw")
   paths_to_rm << Pathname.glob("*.idd")
@@ -140,5 +145,5 @@ ensure
   paths_to_rm << Pathname.glob("*.bnd")
   paths_to_rm << Pathname.glob("*.mtd")
   paths_to_rm << Pathname.glob("*.rdd")
-  paths_to_rm.each { |p| FileUtils.rm_rf(p) }
+  #paths_to_rm.each { |p| FileUtils.rm_rf(p) }
 end
