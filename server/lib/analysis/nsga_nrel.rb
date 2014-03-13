@@ -109,6 +109,9 @@ class Analysis::NsgaNrel
       raise "Must have at least two output_variables"
     end
     
+    ug = @analysis.output_variables.uniq{|v| v['objective_function_group']}
+    Rails.logger.info "Number of objective function groups are #{ug.size}"
+     
     if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
       raise "number of objective functions must equal"
     end
@@ -167,21 +170,24 @@ class Analysis::NsgaNrel
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :toursize => @analysis.problem['algorithm']['toursize'], :cprob => @analysis.problem['algorithm']['cprob'], :xoverdistidx => @analysis.problem['algorithm']['xoverdistidx'], :mudistidx => @analysis.problem['algorithm']['mudistidx'], :mprob => @analysis.problem['algorithm']['mprob']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :toursize => @analysis.problem['algorithm']['toursize'], :cprob => @analysis.problem['algorithm']['cprob'], :xoverdistidx => @analysis.problem['algorithm']['xoverdistidx'], :mudistidx => @analysis.problem['algorithm']['mudistidx'], :mprob => @analysis.problem['algorithm']['mprob'], :uniquegroups => ug.size) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
             clusterEvalQ(cl,library(R.utils)) 
             
+            print(paste("objfun:",objfun))           
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
+            print(paste("UniqueGroups:",uniquegroups))
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
  
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
-                    
+            clusterExport(cl,"uniquegroups")
+            
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
             }          
@@ -251,14 +257,14 @@ class Analysis::NsgaNrel
               group_count <- 1
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "nil"){
+                if (json[objfuntemp] != "NULL"){
                   objvalue[i] <- as.numeric(json[objfuntemp])
                 } else {
                   objvalue[i] <- 1.0e19
                   cat(data_point_directory," Missing ", objfuntemp,"\n");
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "nil"){
+                if (json[objfuntargtemp] != "NULL"){
                   objtarget[i] <- as.numeric(json[objfuntargtemp])
                 } else {
                   objtarget[i] <- 0.0
@@ -275,7 +281,7 @@ class Analysis::NsgaNrel
                   sclfactor[i] <- 1.0
                 }
                 objfungrouptemp <- paste("objective_function_group_",i,sep="")
-                if (json[objfungrouptemp] != "nil"){
+                if (json[objfungrouptemp] != "NULL"){
                   objgroup[i] <- as.numeric(json[objfungrouptemp])
                 } else {
                   objgroup[i] <- group_count
@@ -284,14 +290,20 @@ class Analysis::NsgaNrel
               }
               print(paste("Objective function results are:",objvalue))
               print(paste("Objective function targets are:",objtarget))
-              print(paste("Objective function scaling factors are:",sclfactor))             
+              print(paste("Objective function scaling factors are:",sclfactor)) 
+              
               objvalue <- objvalue / sclfactor
               objtarget <- objtarget / sclfactor
-
+              
               ug <- length(unique(objgroup))
+              if (ug != uniquegroups) {
+                 print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
+              }
+              
               for (i in 1:ug){
                 obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
               }
+              
               #for (i in 1:objDim){
               #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
               #}  
@@ -319,7 +331,7 @@ class Analysis::NsgaNrel
             }
             
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=objDim, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
+            results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 
