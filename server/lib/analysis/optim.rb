@@ -14,7 +14,7 @@ class Analysis::Optim
                 generations: 1,
                 method: "L-BFGS-B",
                 parscale: 1,
-                ndeps: 1e-3,
+                reltol: 1e-4,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -166,7 +166,7 @@ class Analysis::Optim
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :reltol => @analysis.problem['algorithm']['reltol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -334,11 +334,11 @@ class Analysis::Optim
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
-            print(paste("varMean set to:",varMean))
+            print(paste("Initial iterate set to:",varMean))
             
-            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
+            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, reltol=reltol, maxit=maxit))
             #results <- optim(par=varMean, fn=g, gr=parallelGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
-            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, ndeps = 1.0))
+            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, reltol = 1.0))
             #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
             
             #cll <- makeSOCKcluster(c("localhost"))
