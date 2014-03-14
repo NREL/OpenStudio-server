@@ -72,8 +72,8 @@ if File.exists?(os_role_file)
   openstudio_role = File.read(os_role_file)
   json_string = openstudio_role.scan(/default_attributes\((.*)\)/m).first.join
   json_obj = eval("{ #{json_string} }")
-  @os_version = json_obj[:openstudio][:version]
-  @os_version_sha = json_obj[:openstudio][:version_revision]
+  @os_version = json_obj[:openstudio][:installer][:version]
+  @os_version_sha = json_obj[:openstudio][:installer][:version_revision]
 
 else
   raise "Could not find OpenStudio.rb chef role in #{os_role_file}"
