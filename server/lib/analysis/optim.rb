@@ -13,8 +13,8 @@ class Analysis::Optim
             algorithm: {
                 generations: 1,
                 method: "L-BFGS-B",
-                pgtol: 1e-1,
-                factr: 1e15,
+                pgtol: 1e-2,
+                factr: 4.5036e13,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -116,7 +116,9 @@ class Analysis::Optim
     Rails.logger.info "starting lhs to discretize the variables"
     
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+    samples, var_types, mins_maxes = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+
+    Rails.logger.info "mins_maxes: #{mins_maxes}"
 
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
@@ -166,7 +168,7 @@ class Analysis::Optim
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'],:pgtol => @analysis.problem['algorithm']['pgtol']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -176,15 +178,18 @@ class Analysis::Optim
             print(paste("objDim:",objDim))
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
+            
+            print(paste("min:",mins))
+            print(paste("max:",maxes))
  
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
                     
-            for (i in 1:ncol(vars)){
-              vars[,i] <- sort(vars[,i])
-            }          
-            print(vars)      
+            #for (i in 1:ncol(vars)){
+            #  vars[,i] <- sort(vars[,i])
+            #}          
+            #print(vars)      
             print(vartypes)
   
             
@@ -285,29 +290,23 @@ class Analysis::Optim
             
             clusterExport(cl,"g")
   
-            if (nrow(vars) == 1) {
-              print("not sure what to do with only one datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-            }
-            if (nrow(vars) == 0) {
-              print("not sure what to do with no datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-              vars <- rbind(vars, c(NA))
-            }
+            #if (nrow(vars) == 1) {
+            #  print("not sure what to do with only one datapoint so adding an NA")
+            #  vars <- rbind(vars, c(NA))
+            #}
+            #if (nrow(vars) == 0) {
+            #  print("not sure what to do with no datapoint so adding an NA")
+            #  vars <- rbind(vars, c(NA))
+            #  vars <- rbind(vars, c(NA))
+            #}
   
-            print(nrow(vars))
-            print(ncol(vars))
+            #print(nrow(vars))
+            #print(ncol(vars))
 
-            varMin <- c(min(vars[,1]))
-            varMax <- c(max(vars[,1]))
-            varMean <- c(mean(vars[,1]))
-            if (ncol(vars) > 1) {
-              for (i in 2:ncol(vars)){
-                varMin <- rbind(varMin,c(min(vars[,i])))
-                varMax <- rbind(varMax,c(max(vars[,i])))
-                varMean <- rbind(varMean,c(mean(vars[,i])))
-              }
-            }
+            varMin <- mins
+            varMax <- maxes
+            varMean <- (mins+maxes)/2.0
+
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
