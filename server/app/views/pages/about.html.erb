@@ -1,4 +1,29 @@
-<h1>About</h1>
+<h2>About</h2>
+
+<div class="row-fluid">
+  <div class="span4">
+    <br/>
+    <p>
+      OpenStudio Server is a framework that enables measure-based analyses of OpenStudio models on the cloud.
+      This framework takes advantage of parallel computing to run analyses such as sampling, calibration, and optimization.
+      The OpenStudio Cloud Management Console allows users to manage analysis runs and visualize results through a variety of charts.
+    </p>
+
+    <p>
+      OpenStudio Server is implemented in Ruby and uses R for statistical computations as well as dispatching runs to OpenStudio and EnergyPlus.
+      Resulting data is then stored in a Mongo database and can be visualized in the Ruby on Rails web application.
+    </p>
+
+    <p>
+      Before running analyses on the OpenStudio Server framework, an OpenStudio model must first be created via the <%=link_to "OpenStudio client application suite", "http://openstudio.nrel.gov" %>.
+      The Parametric Analysis Tool (PAT) interface is then used to find and download BCL measures to be applied to the model.
+      This information is then exported to a spreadsheet format and the cloud analysis can then be run, as shown in the figure on the right.
+    </p>
+
+  </div>
+  <div class="span8">
+    <%= image_tag("framework.png", :size => "700x464") %>
+  </div>
 
 
-<%= image_tag("framework.png", size: "800x600") %>
+</div>
