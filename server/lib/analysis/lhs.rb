@@ -1,133 +1,210 @@
-class Analysis::Lhs
-  include Analysis::Core # pivots and static vars
+module Analysis::R
+  class Lhs
+    def initialize(r_session)
+      @r = r_session
 
-  def initialize(analysis_id, options = {})
-    # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of 
-    #   the script below and are not necessarily persisted to the database.
-    #   Options under problem will be merged together and persisted into the database.  The order of 
-    #   preference is objects in the database, objects passed via options, then the defaults below.  
-    #   Parameters posted in the API become the options hash that is passed into this initializer.
-    defaults = {
-        skip_init: false,
-        run_data_point_filename: "run_openstudio_workflow.rb",
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                number_of_samples: 100,
-                sample_method: "all_variables"
-            }
-        }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
-    @options = defaults.deep_merge(options)
+      @r.converse "library(lhs)"
+      @r.converse "library(triangle)"
+      @r.converse "library(e1071)"
+    end
+    
+    # Take the number of variables and number of samples and generate the bins for
+    # a LHS sample
+    def lhs_probability(num_variables, sample_size)
+      Rails.logger.info "Start generating of LHS #{Time.now}"
+      a = @r.converse "a <- randomLHS(#{sample_size}, #{num_variables})"
 
-    @analysis_id = analysis_id
-  end
-
-  # Perform is the main method that is run in the background.  At the moment if this method crashes
-  # it will be logged as a failed delayed_job and will fail after max_attempts.
-  def perform
-    require 'rserve/simpler'
-    require 'uuid'
-    require 'childprocess'
-
-    # get the analysis and report that it is running
-    @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
-    @analysis.run_flag = true
-
-    # add in the default problem/algorithm options into the analysis object
-    # anything at at the root level of the options are not designed to override the database object.
-    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
-
-    # save all the changes into the database and reload the object (which is required)
-    @analysis.save!
-    @analysis.reload
-
-    # Create an instance for R
-    @r = Rserve::Simpler.new
-
-    Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
-    Rails.logger.info "Setting up R for #{self.class.name}"
-    #todo: need to move this to the module class
-    @r.converse('setwd("/mnt/openstudio")')
-
-    # make this a core method
-    Rails.logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
-    @r.converse("set.seed(#{@analysis.problem['random_seed']})")
-
-    pivot_array = Variable.pivot_array(@analysis.id)
-
-    selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
-
-    # generate the probabilities for all variables as column vectors
-    @r.converse("print('starting lhs')")
-    samples = nil
-    var_types = nil
-    static_array = nil
-    Rails.logger.info "Starting sampling"
-    lhs = Analysis::R::Lhs.new(@r)
-    if @analysis.problem['algorithm']['sample_method'] == "all_variables" ||
-        @analysis.problem['algorithm']['sample_method'] == "individual_variables"
-      static_array = Variable.static_array(@analysis.id)
-      samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-      if @analysis.problem['algorithm']['sample_method'] == "all_variables"
-        # Do the work to mash up the samples, pivots, and static variables before creating the data points
-        Rails.logger.info "Samples are #{samples}"
-        samples = hash_of_array_to_array_of_hash(samples)
-        Rails.logger.info "Flipping samples around yields #{samples}"
-      elsif @analysis.problem['algorithm']['sample_method'] == "individual_variables"
-        # Do the work to mash up the samples, pivots, and static variables before creating the data points
-        Rails.logger.info "Samples are #{samples}"
-        samples = hash_of_array_to_array_of_hash_non_combined(samples)
-        Rails.logger.info "Non-combined samples yields #{samples}"
+      #returns a matrix so convert over to an ordered hash so that we can send back to R when needed
+      o = {}
+      (0..a.column_size-1).each do |col|
+        o[col] = a.column(col).to_a
       end
 
-      # For all variables and individual_variables, the static variables can be added afterwards because they are (or 
-      # should be) independent of the actual variables
-      Rails.logger.info "Adding in static variables"
-      samples = add_static_variables(samples, static_array)
-      Rails.logger.info "Samples after static_array #{samples}"
-    elsif @analysis.problem['algorithm']['sample_method'] == "individual_measures"
-      # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is 
-      # useful when you need each measure to be evaluated individually.  The variables are then linked.
-      static_array_grouped = Variable.static_array(@analysis.id, true)
-      samples_grouped, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'], true)
-      samples = grouped_hash_of_array_to_array_of_hash(samples_grouped, static_array_grouped)
-      Rails.logger.info "Grouped samples are #{samples}"
-    else
-      raise "no sampling method defined (all_variables or individual_variables)"
+      #return as an ordered hash
+      Rails.logger.info "Finished generating of LHS #{Time.now}"
+      o
     end
 
-    Rails.logger.info "Fixing Pivot dimension"
-    samples = add_pivots(samples, pivot_array)
-    Rails.logger.info "Finished adding the pivots resulting in #{samples}"
+    def discrete_sample_from_probability(probabilities_array, var, save_histogram = true)
+      @r.converse "print('creating discrete distribution')"
+      if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
+        raise "no hash values and weight passed"
+      end
+      values, weights = var.map_discrete_hash_to_array
 
-    # Add the data points to the database
-    isample = 0
-    samples.each do |sample| # do this in parallel
-      isample += 1
-      dp_name = "LHS Autogenerated #{isample}"
-      dp = @analysis.data_points.new(name: dp_name)
-      dp.set_variable_values = sample
-      dp.save!
+      dataframe = {"data" => probabilities_array}.to_dataframe
 
-      Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+      if var.uncertainty_type == 'discrete_uncertain'
+        @r.command(:df => dataframe, :values => values, :weights => weights) do
+          %Q{
+            print(values)
+            samples <- qdiscrete(df$data, weights, values)
+          }
+        end
+      elsif var.uncertainty_type == 'bool_uncertain'
+        raise "bool_uncertain needs some updating to map from bools"
+        @r.command(:df => dataframe, :values => values, :weights => weights) do
+          %Q{
+            print(values)
+            samples <- qdiscrete(df$data, weights, values)
+          }
+        end
+      else
+        raise "discrete distribution type #{var.uncertainty_type} not known for R"
+      end
+
+      # returns an array
+      @r.converse "print(samples)"
+      save_file_name = nil
+      if save_histogram && !values[0].kind_of?(String)
+        # Determine where to save it
+        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
+        Rails.logger.info("R image file name is #{save_file_name}")
+        @r.command() do
+          %Q{
+            print("#{save_file_name}")
+            png(filename="#{save_file_name}", width = 1024, height = 1024)
+            hist(samples, freq=F, breaks=20)
+            dev.off()
+          }
+        end
+      end
+
+      {r: @r.converse("samples"), image_path: save_file_name}
     end
 
-    # Do one last check if there are any data points that were not downloaded
-    @analysis.end_time = Time.now
-    @analysis.status = 'completed'
-    @analysis.save!
+    # Take the values/probabilities from the LHS sample and transform them into 
+    # the other distribution using the quantiles of the other distribution.  
+    # Note that the probabilities and the samples must be an array so there are 
+    # checks to make sure that it is.  If R only has one sample, then it will not 
+    # wrap it in an array.
+    def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max, save_histogram = true)
+      probabilities_array = [probability_array] unless probabilities_array.kind_of? Array # ensure array
 
-    Rails.logger.info("Finished running #{self.class.name}")
-  end
+      Rails.logger.info "Creating sample from probability"
+      r_dist_name = ""
+      if distribution_type == 'normal' || distribution_type == 'normal_uncertain'
+        r_dist_name = "qnorm"
+      elsif distribution_type == 'lognormal'
+        r_dist_name = "qlnorm"
+      elsif distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
+        r_dist_name = "qunif"
+      elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
+        r_dist_name = "qtriangle"
+      else
+        raise "distribution type #{distribution_type} not known for R"
+      end
 
-  # Since this is a delayed job, if it crashes it will typically try multiple times.
-  # Fix this to 1 retry for now.
-  def max_attempts
-    return 1
+      @r.converse "print('creating distribution')"
+      dataframe = {"data" => probabilities_array}.to_dataframe
+
+      if distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
+        @r.command(:df => dataframe) do
+          %Q{
+            samples <- #{r_dist_name}(df$data, #{min}, #{max})
+          }
+        end
+      elsif distribution_type == 'lognormal'
+        @r.command(:df => dataframe) do
+          %Q{
+            sigma <- sqrt(log(#{stddev}/(#{mean}^2)+1))
+            mu <- log((#{mean}^2)/sqrt(#{stddev}+#{mean}^2))
+            samples <- #{r_dist_name}(df$data, mu, sigma)
+            samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
+          }
+        end
+      elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
+        @r.command(:df => dataframe) do
+          %Q{
+          print(df)
+          samples <- #{r_dist_name}(df$data, #{min}, #{max}, #{mean})
+        }
+        end
+      else
+        @r.command(:df => dataframe) do
+          %Q{
+            samples <- #{r_dist_name}(df$data, #{mean}, #{stddev})
+            samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
+          }
+        end
+      end
+
+      # Should return an array. Always return an array, even if it is one value. 
+      samples = @r.converse "samples"
+      samples = [samples] unless samples.kind_of? Array
+      save_file_name = nil
+      if save_histogram && !samples[0].kind_of?(String)
+        # Determine where to save it
+        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
+        Rails.logger.info("R image file name is #{save_file_name}")
+        @r.command() do
+          %Q{
+          print("#{save_file_name}")
+          png(filename="#{save_file_name}", width = 1024, height = 1024)
+          hist(samples, freq=F, breaks=20)
+          dev.off()
+        }
+        end
+      end
+
+      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+      
+      {r: samples, image_path: save_file_name}
+    end
+
+    def sample_all_variables(selected_variables, number_of_samples, grouped_by_measure = false)
+      grouped = {}
+      samples = {}
+      var_types = []
+      min_max = {}
+      min_max[:min] = []
+      min_max[:max] = []
+
+      # get the probabilities
+      Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
+      p = lhs_probability(selected_variables.count, number_of_samples)
+      Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
+
+      # TODO: performance smell... optimize this using Parallel
+      i_var = 0
+      selected_variables.each do |var|
+        Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
+        sfp = nil
+        
+        # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
+        if var.uncertainty_type == "discrete_uncertain"
+          Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
+          sfp = discrete_sample_from_probability(p[i_var], var, true)
+          var_types << "discrete"
+        else
+          sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
+          var_types << "continuous"
+        end
+        
+        min_max[:min] << var.lower_bounds_value
+        min_max[:max] << var.upper_bounds_value
+
+        grouped["#{var.measure.id}"] = {} if !grouped.has_key?(var.measure.id)
+        grouped["#{var.measure.id}"]["#{var.id}"] = sfp[:r]
+        samples["#{var.id}"] = sfp[:r]
+        if sfp[:image_path]
+          pfi = PreflightImage.add_from_disk(var.id, "histogram", sfp[:image_path])
+          var.preflight_images << pfi unless var.preflight_images.include?(pfi)
+        end
+
+        var.r_index = i_var + 1 # r_index is 1-based 
+        var.save!
+
+        i_var += 1
+      end
+
+      if grouped_by_measure
+        samples = grouped 
+      end
+      Rails.logger.info "Grouped variables are #{grouped}"
+      [samples, var_types, min_max]
+    end
   end
 end
+
 

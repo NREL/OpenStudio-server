@@ -97,9 +97,6 @@
 [submodule "vagrant/chef/cookbooks/ark"]
 	path = vagrant/chef/cookbooks/ark
 	url = git@github.com:NREL-cookbooks/ark.git
-[submodule "vagrant/chef/cookbooks/cmake"]
-	path = vagrant/chef/cookbooks/cmake
-	url = git@github.com:phlipper/chef-cmake.git
 [submodule "new-r"]
 	path = vagrant/chef/cookbooks/r
 	url = git@github.com:NREL-cookbooks/cookbook-r.git
@@ -109,3 +106,15 @@
 [submodule "vagrant/chef/cookbooks/yum-epel"]
 	path = vagrant/chef/cookbooks/yum-epel
 	url = https://github.com/opscode-cookbooks/yum-epel.git
+[submodule "vagrant/chef/cookbooks/python"]
+	path = vagrant/chef/cookbooks/python
+	url = git@github.com:NREL-cookbooks/python.git
+[submodule "vagrant/chef/cookbooks/rsyslog"]
+	path = vagrant/chef/cookbooks/rsyslog
+	url = git@github.com:NREL-cookbooks/rsyslog.git
+[submodule "vagrant/chef/cookbooks/perl"]
+	path = vagrant/chef/cookbooks/perl
+	url = git@github.com:NREL-cookbooks/perl.git
+[submodule "vagrant/chef/cookbooks/pacman"]
+	path = vagrant/chef/cookbooks/pacman
+	url = git@github.com:jesseadams/pacman.git

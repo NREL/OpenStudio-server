@@ -1,0 +1,72 @@
+<div id='<%= "#{status || ''}simulations"%>'>
+
+
+
+<% if simulations.size == 0 %>
+  <p style="padding-top:10px;">There are no simulations to display.</p>
+<% else %>
+  <div class="row-fluid">
+    <div class="span9">
+      <h3><% if status == 'na' %>Initialized <% else %><%= status.humanize %><% end %> Simulations</h3>
+    </div>
+    <div class="span3">
+      <%= form_tag analysis_path(@analysis), :method => 'get' do %>
+          <p>
+            <%= text_field_tag "#{status}_search", params["#{status}_search"] %>
+            <%= hidden_field_tag('status', status) %>
+            <%= hidden_field_tag('all_page', all_page) %>
+            <%= hidden_field_tag('completed_page', completed_page) %>
+            <%= hidden_field_tag('running_page', running_page) %>
+            <%= hidden_field_tag('queued_page', queued_page) %>
+            <%= hidden_field_tag('na_page', na_page) %>
+            <%= submit_tag "Search", :name => nil %>
+          </p>
+      <% end %>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="table-pad">
+      <table id="datapointtable" class="tablesorter table table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Status Message</th>
+          <% @objective_functions.each do |ov| %>
+              <th>Obj Func <%= ov['display_name'] %> </th>
+          <% end %>
+          <th>Start Time (UTC)</th>
+          <th>End Time (UTC)</th>
+          <th>Delta Time (s)</th>
+          <th>View</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!--<#% simulations.order_by(:run_start_time.desc, :name.asc).each do |dp| %> -->
+        <% simulations.each do |dp| %>
+            <tr>
+              <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
+              <td> <%= dp.status %></td>
+              <td><%= dp.status_message if dp.status_message %></td>
+              <% @objective_functions.each do |ov| %>
+                  <td><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']].round(2) : "" %>  </td>
+              <% end %>
+              <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
+              <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
+              <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
+              <td><%= link_to 'HTML', data_point_path(dp) %>
+                | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
+                | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
+                | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
+              <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+            </tr>
+        <% end %>
+        </tbody>
+      </table>
+    </div>
+    <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :running_page => running_page, :queued_page => queued_page, :na_page => na_page } %>
+  </div>
+
+<% end %>
+</div>
