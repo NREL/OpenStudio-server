@@ -30,6 +30,7 @@ class Analysis
   has_mongoid_attached_file :seed_zip,
                             :url => "/assets/analyses/:id/:style/:basename.:extension",
                             :path => ":rails_root/public/assets/analyses/:id/:style/:basename.:extension"
+  
 
   # Relationships
   belongs_to :project
@@ -49,7 +50,8 @@ class Analysis
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
-  # validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
+  
+  validates_attachment_content_type :seed_zip, :content_type => %w(application/zip)
 
   # Callbacks
   after_create :verify_uuid
