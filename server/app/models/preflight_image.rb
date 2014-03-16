@@ -17,6 +17,8 @@ class PreflightImage
 
   belongs_to :variable
 
+  validates_attachment_content_type :image, :content_type => %w(image/png)
+
   def self.add_from_disk(var_id, image_type, filename)
     pfi = PreflightImage.new(variable_id: var_id, image_type: image_type)
 
