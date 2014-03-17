@@ -106,7 +106,7 @@ GEM
     json (1.8.1)
     libv8 (3.16.14.3)
     libxml-ruby (2.7.0)
-    macaddr (1.6.5)
+    macaddr (1.6.7)
       systemu (~> 2.6.2)
     mail (2.5.4)
       mime-types (~> 1.16)
@@ -122,14 +122,14 @@ GEM
       moped (~> 1.4)
       origin (~> 1.0)
       tzinfo (~> 0.3.29)
-    mongoid-paperclip (0.0.8)
+    mongoid-paperclip (0.0.9)
       paperclip (>= 2.3.6)
     mongoid-rspec (1.11.0)
       mongoid (~> 3.1.6)
       rake
       rspec (>= 2.14)
     moped (1.5.2)
-    multi_json (1.8.4)
+    multi_json (1.9.0)
     multi_xml (0.5.5)
     multipart-post (1.2.0)
     net-http-persistent (2.9.4)
@@ -151,7 +151,7 @@ GEM
       net-scp (~> 1.1.2)
       semantic (~> 1.3.0)
     origin (1.1.0)
-    paperclip (3.5.2)
+    paperclip (4.1.1)
       activemodel (>= 3.0.0)
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
@@ -230,7 +230,7 @@ GEM
       net-scp (>= 1.1.2)
       net-ssh
       term-ansicolor
-    systemu (2.6.3)
+    systemu (2.6.4)
     term-ansicolor (1.3.0)
       tins (~> 1.0)
     therubyracer (0.12.1)
@@ -242,8 +242,8 @@ GEM
     treetop (1.4.15)
       polyglot
       polyglot (>= 0.3.1)
-    tzinfo (0.3.38)
-    uglifier (2.4.0)
+    tzinfo (0.3.39)
+    uglifier (2.5.0)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
     uuid (2.3.7)
@@ -281,7 +281,7 @@ DEPENDENCIES
   net-ssh
   openstudio-analysis
   openstudio-aws
-  paperclip (= 3.5.2)
+  paperclip (~> 4.1.1)
   rails (= 3.2.17)
   rserve-simpler
   rspec

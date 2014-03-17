@@ -156,6 +156,9 @@ module Analysis::R
       grouped = {}
       samples = {}
       var_types = []
+      min_max = {}
+      min_max[:min] = []
+      min_max[:max] = []
 
       # get the probabilities
       Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
@@ -177,6 +180,9 @@ module Analysis::R
           sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
           var_types << "continuous"
         end
+        
+        min_max[:min] << var.lower_bounds_value
+        min_max[:max] << var.upper_bounds_value
 
         grouped["#{var.measure.id}"] = {} if !grouped.has_key?(var.measure.id)
         grouped["#{var.measure.id}"]["#{var.id}"] = sfp[:r]
@@ -196,7 +202,7 @@ module Analysis::R
         samples = grouped 
       end
       Rails.logger.info "Grouped variables are #{grouped}"
-      [samples, var_types]
+      [samples, var_types, min_max]
     end
   end
 end
