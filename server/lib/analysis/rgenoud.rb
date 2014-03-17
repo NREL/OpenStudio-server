@@ -21,7 +21,8 @@ class Analysis::Rgenoud
                 normtype: "minkowski",
                 ppower: 2,
                 objective_functions: [],
-                reltol: 1e-4,
+                pgtol: 1e-1,
+                factr: 1e15,
                 maxit: 100,
                 epsilongradient: 1e-4
             }
@@ -171,7 +172,7 @@ class Analysis::Rgenoud
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
         
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :reltol => @analysis.problem['algorithm']['reltol']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'],:pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -335,9 +336,11 @@ class Analysis::Rgenoud
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
             print(paste("Initial iterate set to:",varMean))
+            print(paste("factr set to:",factr))
+            print(paste("pgtol set to:",pgtol))
             
             print(paste("Number of generations set to:",gen))
-            results <- genoud(fn=g, nvars=ncol(vars), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=dom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, reltol=reltol, maxit=maxit))
+            results <- genoud(fn=g, nvars=ncol(vars), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=dom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
             #results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, reltol=reltol, maxit=maxit))
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
