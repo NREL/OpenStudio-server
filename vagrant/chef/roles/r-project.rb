@@ -83,7 +83,7 @@ default_attributes(
             {
                 :name => 'NRELmoo',
                 :package_path => "/data/R-packages",
-                :version => '1.1.7',
+                :version => '1.2.0',
                 :update_method => 'always_update'
             },
             {

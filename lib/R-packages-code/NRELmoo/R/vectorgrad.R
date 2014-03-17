@@ -25,11 +25,18 @@ vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE){
         }
         Fout <- parCapply(cl, dp, function(x1) func(x + x1))
         if (debug == TRUE) print(paste("Fout:",Fout))
+        if (debug == TRUE) print(paste("diag(dp):",diag(dp[,(1:n)])))
+        diag(dp[,(1:n)]) <- replace(diag(dp[,(1:n)]), diag(dp[,(1:n)])==0.0, 1e-16)
+        if (debug == TRUE) print(paste("diag(dp):",diag(dp[,(1:n)])))
         if (n > 1){
           df <- (Fout[(1:n)] - Fout[-(1:n)])/(2*diag(dp[,(1:n)]))
         } else {
           df <- (Fout[(1:n)] - Fout[-(1:n)])/(2*(dp[,(1:n)]))
         }
+        if (debug == TRUE) print(paste("df:",df))
+        df <- replace(df, df==Inf, 1e16)
+        df <- replace(df, df==NaN, 1e16)
+        if (debug == TRUE) print(paste("df:",df))
         return(df)
     } else if(method=="four"){
         if (n > 1){
