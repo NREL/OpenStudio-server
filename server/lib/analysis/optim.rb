@@ -256,14 +256,14 @@ class Analysis::Optim
               sclfactor <- NULL
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "nil"){
+                if (json[objfuntemp] != "NULL"){
                   objvalue[i] <- as.numeric(json[objfuntemp])
                 } else {
                   objvalue[i] <- 1.0e19
                   cat(data_point_directory," Missing ", objfuntemp,"\n");
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "nil"){
+                if (json[objfuntargtemp] != "NULL"){
                   objtarget[i] <- as.numeric(json[objfuntargtemp])
                 } else {
                   objtarget[i] <- 0.0
