@@ -17,7 +17,7 @@
                   dragging = {};
 
           var line = d3.svg.line(),
-                  axis = d3.svg.axis().orient("left"),
+                  axis = d3.svg.axis().ticks(5).tickFormat(d3.format("s")).orient("left"),
                   background,
                   foreground;
 
