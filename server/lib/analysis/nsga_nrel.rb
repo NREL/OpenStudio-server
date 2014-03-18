@@ -64,7 +64,8 @@ class Analysis::NsgaNrel
     @r = Rserve::Simpler.new
     Rails.logger.info "Setting up R for NSGA2 Run"
     @r.converse('setwd("/mnt/openstudio")')
-    
+    @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
+
     # todo: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")  
     # R libraries needed for this algorithm
@@ -126,7 +127,10 @@ class Analysis::NsgaNrel
     Rails.logger.info "starting lhs to discretize the variables"
 
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+
+    Rails.logger.info "mins_maxes: #{mins_maxes}"
+    Rails.logger.info "var_names: #{var_names}"
 
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
@@ -170,7 +174,7 @@ class Analysis::NsgaNrel
         #varNo is the number of variables (ncol(vars))
         #popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :toursize => @analysis.problem['algorithm']['toursize'], :cprob => @analysis.problem['algorithm']['cprob'], :xoverdistidx => @analysis.problem['algorithm']['xoverdistidx'], :mudistidx => @analysis.problem['algorithm']['mudistidx'], :mprob => @analysis.problem['algorithm']['mprob'], :uniquegroups => ug.size) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :toursize => @analysis.problem['algorithm']['toursize'], :cprob => @analysis.problem['algorithm']['cprob'], :xoverdistidx => @analysis.problem['algorithm']['xoverdistidx'], :mudistidx => @analysis.problem['algorithm']['mudistidx'], :mprob => @analysis.problem['algorithm']['mprob'], :uniquegroups => ug.size) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -182,6 +186,9 @@ class Analysis::NsgaNrel
             print(paste("UniqueGroups:",uniquegroups))
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
+            
+            print(paste("min:",mins))
+            print(paste("max:",maxes))
  
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
@@ -191,8 +198,8 @@ class Analysis::NsgaNrel
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
             }          
-            print(vars)      
-            print(vartypes)
+            print(paste("vartypes:",vartypes))
+	    print(paste("varnames:",varnames))
   
             
             #f(x) takes a UUID (x) and runs the datapoint
