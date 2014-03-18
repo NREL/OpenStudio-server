@@ -1,4 +1,4 @@
 module OpenstudioServer
-  VERSION = "1.4.3"
+  VERSION = "1.4.4"
   VERSION_EXT = "" # with preceding - or +
 end
