@@ -14,7 +14,7 @@ class Analysis::Optim
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
-                factr: 4.5036e13,
+                factr: 4.5036e12,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -116,9 +116,10 @@ class Analysis::Optim
     Rails.logger.info "starting lhs to discretize the variables"
     
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types, mins_maxes = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
     Rails.logger.info "mins_maxes: #{mins_maxes}"
+    Rails.logger.info "var_names: #{var_names}"
 
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
@@ -168,7 +169,7 @@ class Analysis::Optim
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -190,7 +191,8 @@ class Analysis::Optim
             #  vars[,i] <- sort(vars[,i])
             #}          
             #print(vars)      
-            print(vartypes)
+            print(paste("vartypes:",vartypes))
+            print(paste("varnames:",varnames))
   
             
             #f(x) takes a UUID (x) and runs the datapoint
@@ -254,14 +256,14 @@ class Analysis::Optim
               sclfactor <- NULL
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "nil"){
+                if (json[objfuntemp] != "NULL"){
                   objvalue[i] <- as.numeric(json[objfuntemp])
                 } else {
                   objvalue[i] <- 1.0e19
                   cat(data_point_directory," Missing ", objfuntemp,"\n");
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "nil"){
+                if (json[objfuntargtemp] != "NULL"){
                   objtarget[i] <- as.numeric(json[objfuntargtemp])
                 } else {
                   objtarget[i] <- 0.0

@@ -83,13 +83,7 @@ default_attributes(
             {
                 :name => 'NRELmoo',
                 :package_path => "/data/R-packages",
-                :version => '1.1.7',
-                :update_method => 'always_update'
-            },
-            {
-                :name => 'Swift',
-                :package_path => "/data/R-packages",
-                :version => '0.3.1',
+                :version => '1.2.2',
                 :update_method => 'always_update'
             },
             {
