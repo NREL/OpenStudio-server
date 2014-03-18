@@ -16,7 +16,7 @@
             <%= hidden_field_tag('status', status) %>
             <%= hidden_field_tag('all_page', all_page) %>
             <%= hidden_field_tag('completed_page', completed_page) %>
-            <%= hidden_field_tag('running_page', running_page) %>
+            <%= hidden_field_tag('started_page', started_page) %>
             <%= hidden_field_tag('queued_page', queued_page) %>
             <%= hidden_field_tag('na_page', na_page) %>
             <%= submit_tag "Search", :name => nil %>
@@ -65,7 +65,7 @@
         </tbody>
       </table>
     </div>
-    <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :running_page => running_page, :queued_page => queued_page, :na_page => na_page } %>
+    <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page } %>
   </div>
 
 <% end %>
