@@ -1,0 +1,79 @@
+<h2>Analysis Results</h2>
+<style>
+    body {
+        font: 12px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        font: 12px sans-serif;
+        shape-rendering: crispEdges;
+    }
+
+    .dot {
+        stroke: #000;
+    }
+</style>
+
+<% if @plot_data %>
+    <div id="graph-div">
+      <p>There are no results for this analysis.</p>
+    </div>
+<% else %>
+
+    <div id="graph-div">
+      <script>
+var w = 500,
+	h = 500;
+
+var colorscale = d3.scale.category10();
+
+//Legend titles
+//var LegendOptions = ['Smartphone','Tablet'];
+
+//Data
+var data;
+
+//d3.json("/assets/analyses/2469caf0-6c01-0131-193c-00ffc0914e0d/testdata.json", function (data) {
+d3.json("plot_data.json", function (data) {
+         console.log(data)
+         data = data['radardata'];
+
+    	      
+
+//Options for the Radar chart, other than default
+var mycfg = {
+  w: w,
+  h: h,
+  maxValue: 0.6,
+  levels: 6,
+  ExtraWidthX: 300
+}
+
+//Call function to draw the Radar chart
+//Will expect that data is in %'s
+RadarChart.draw("#graph-div", data, mycfg);
+
+////////////////////////////////////////////
+/////////// Initiate legend ////////////////
+////////////////////////////////////////////
+
+var svg = d3.select('#graph-div')
+	.selectAll('svg')
+	.append('svg')
+	.attr("width", w+300)
+	.attr("height", h)
+
+	
+        })    
+      </script>
+
+    </div>
+
+<% end %>
+</br>
+
+
+

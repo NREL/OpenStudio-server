@@ -1,0 +1,145 @@
+<!-- vars for javascript -->
+<%= javascript_tag do %>
+  statuses = <%= raw @js_results.to_json %>;
+  total_cnts = <%= raw @totals.to_json %>;
+<% end %>
+
+
+<div class="row-fluid gray-header">
+  <div class="span3"><h2>Dashboard</h2></div>
+  <div class="span2"><div class="large_text"><%= link_to "#{@projects.count} Projects", projects_path %> </div></div>
+  <div class="span2"><div class="large_text"><%= @analyses.count %> Analyses</div></div>
+  <div class="span2"><div class="large_text"><%= @completed_perc %>% Completed </div></div>
+  <div class="span2"><div class="large_text"><%= @failed_perc %>% Failed </div></div>
+</div>
+
+<% rowcnt = 0 %>
+<div class="row-fluid">
+  <% @results.each_with_index do |res, index| %>
+    <div class="span3">
+      <div class="analysis-container">
+      <div class="analysis-header"><%= link_to(res["name"], analysis_path(res["id"])) %></div>
+      <p>Project: <%= link_to(res["project_name"], project_path(res["project_id"])) %></p>
+      <p>Date Started: <%= res["created_at"].strftime("%m/%d/%Y") %></p>
+      <div id="pie<%= index %>" class="pie"></div>
+      </div>
+    </div>
+  <% end %>
+
+
+</div>
+
+
+<%= @test %>
+
+
+<script type="text/javascript">
+
+  function make_pie_chart(data, cnt, index){
+    var w = 230,                        //width
+        h = 230,                            //height
+        r = 110,                            //radius
+        radius = 115,                          //to center on svg
+        color = d3.scale.category20();     //builtin range of colors
+
+   // data = [{"label":"one", "value":20},
+   //   {"label":"two", "value":50},
+   //   {"label":"three", "value":30}];
+
+         var vis = d3.select("#pie" + j)
+        .append("svg:svg")              //create the SVG element inside the <body>
+        .data([data])                   //associate our data with the document
+        .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+        .attr("height", h)
+        .append("svg:g")                //make a group to hold our pie chart
+        .attr("transform", "translate(" + radius + "," + radius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+
+    var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+        .outerRadius(r);
+
+    var pie = d3.layout.pie()           //this will create arc data for us given a list of values
+        .value(function(d) { return d.value; });    //we must tell it out to access the value of each element in our data array
+
+    var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+        .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
+        .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+        .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+        .attr("class", "slice");    //allow us to style things in the slices (like text)
+
+    arcs.append("svg:path")
+        .attr("fill", function(d, i) { return color(i); } ) //set the color for each slice to be chosen from the color function defined above
+        .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+
+    //arcs.append("svg:text")                                     //add a label to each slice
+    //    .attr("transform", function(d) {                    //set the label's origin to the center of the arc
+      //      //we have to make sure to set these before calling arc.centroid
+      //      d.innerRadius = 0;
+    //      d.outerRadius = r;
+    //      return "translate(" + arc.centroid(d) + ")";        //this gives us a pair of coordinates like [50, 50]
+    //    })
+    //    .attr("text-anchor", "middle")                          //center the text on it's origin
+    //    .text(function(d, i) { return data[i].label; });        //get the label from our original data array
+
+    var legend = d3.select("#pie" + index).append("svg")
+        .attr("class", "legend")
+        .attr("width", w)
+        .attr("height", 100)
+        .selectAll("g")
+        .data(color.domain().slice())
+        .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(10," + (i * 20 + 20) + ")"; });
+
+    legend.append("rect")
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", color);
+
+    legend.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .text(function(d, i) { return data[i].label + " (" + data[i].value + ")"; });
+
+    var total = d3.select("#pie" + index).append("svg")
+        .attr("width", w)
+        .attr("height", 20)
+        .attr("class", "total")
+    total.append("text")
+        .attr("x", 33)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .text(function(d) { return "TOTAL (" + cnt + ")"; });
+  }
+
+  //call pie_chart function multiple times when page loads
+  function addLoadEvent(func) {
+    var oldonload = window.onload;
+    if (typeof window.onload != 'function') {
+      window.onload = func;
+    } else {
+      window.onload = function() {
+        if (oldonload) {
+          oldonload();
+        }
+        func();
+      }
+    }
+  }
+
+  addLoadEvent(function() {
+
+    //go through data array and dispatch chart rendering
+    data = [];
+
+    for(j=0; j < statuses.length; j++)
+    {
+      data = statuses[j];
+      cnt = total_cnts[j];
+
+      make_pie_chart(data, cnt, j);
+
+    }
+
+  });
+
+</script>

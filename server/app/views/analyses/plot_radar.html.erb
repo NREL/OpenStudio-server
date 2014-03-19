@@ -1,79 +1,121 @@
 <h2>Analysis Results</h2>
 <style>
-    body {
-        font: 12px sans-serif;
-    }
 
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        font: 12px sans-serif;
-        shape-rendering: crispEdges;
-    }
+body {
+  font: 10px sans-serif;
+}
 
-    .dot {
-        stroke: #000;
-    }
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+  display: none;
+}
+
 </style>
+<body>
+<script>
 
-<% if @plot_data %>
-    <div id="graph-div">
-      <p>There are no results for this analysis.</p>
-    </div>
-<% else %>
+var margin = {top: 20, right: 20, bottom: 20, left: 40},
+width = 1000 - margin.left - margin.right,
+height = 600 - margin.top - margin.bottom;
 
-    <div id="graph-div">
-      <script>
-var w = 500,
-	h = 500;
+var x = d3.scale.ordinal()
+.rangeRoundBands([0, width], .1);
 
-var colorscale = d3.scale.category10();
+var y = d3.scale.linear()
+.rangeRound([height, 0]);
 
-//Legend titles
-//var LegendOptions = ['Smartphone','Tablet'];
+var color = d3.scale.ordinal()
+.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
-//Data
-var data;
+var xAxis = d3.svg.axis()
+.scale(x)     
+.orient("bottom");
 
-//d3.json("/assets/analyses/2469caf0-6c01-0131-193c-00ffc0914e0d/testdata.json", function (data) {
+var yAxis = d3.svg.axis()
+.scale(y)
+.orient("left")
+.tickFormat(d3.format(".2s"));
+
+var svg = d3.select("body").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 d3.json("plot_data.json", function (data) {
          console.log(data)
          data = data['radardata'];
 
-    	      
+color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Time"; }));
 
-//Options for the Radar chart, other than default
-var mycfg = {
-  w: w,
-  h: h,
-  maxValue: 0.6,
-  levels: 6,
-  ExtraWidthX: 300
-}
+data.forEach(function(d) {
+var y0 = 0;
+d.concent = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
+d.total = d.concent[d.concent.length - 1].y1;
+});
 
-//Call function to draw the Radar chart
-//Will expect that data is in %'s
-RadarChart.draw("#graph-div", data, mycfg);
+x.domain(data.map(function(d) { return d.Time; }));
+y.domain([0, d3.max(data, function(d) { return d.total; })]);
 
-////////////////////////////////////////////
-/////////// Initiate legend ////////////////
-////////////////////////////////////////////
+ svg.append("g")
+.attr("class", "x axis")
+.attr("transform", "translate(0," + height + ")")
+.call(xAxis);
 
-var svg = d3.select('#graph-div')
-	.selectAll('svg')
-	.append('svg')
-	.attr("width", w+300)
-	.attr("height", h)
+svg.append("g")
+.attr("class", "y axis")
+.call(yAxis)
+.append("text")
+.attr("transform", "rotate(-90)")
+.attr("y", 6)
+.attr("dy", ".71em")
+.style("text-anchor", "end")
+.text("Objective Functions");
 
-	
-        })    
-      </script>
+var time = svg.selectAll(".time")
+.data(data)
+.enter().append("g")
+.attr("class", "g")
+.attr("transform", function(d) { return "translate(" + x(d.Time) + ",0)"; });
 
-    </div>
+time.selectAll("rect")
+.data(function(d) { return d.concent; })
+.enter().append("rect")
+.attr("width", x.rangeBand())
+.attr("y", function(d) { return y(d.y1); })
+.attr("height", function(d) { return y(d.y0) - y(d.y1); })
+.style("fill", function(d) { return color(d.name); });
 
-<% end %>
-</br>
+var legend = svg.selectAll(".legend")
+.data(color.domain().slice().reverse())
+.enter().append("g")
+.attr("class", "legend")
+.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
+legend.append("rect")
+.attr("x", width - 18)
+.attr("width", 0.1)
+.attr("height", 0.1)
+.style("fill", color);
 
+legend.append("text")
+.attr("x", width - 24)
+.attr("y", 9)
+.attr("dy", ".15em")
+.style("text-anchor", "end")
+.text(function(d) { return d; });
+
+})
+
+</script>
 
