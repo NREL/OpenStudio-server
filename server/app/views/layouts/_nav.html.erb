@@ -2,6 +2,7 @@
   <div class="container-fluid">
     <div class="collapse nav-collapse">
     <ul class="nav navbar-nav">
+      <li<%= active_nav('Home') %>><%= link_to 'Home', root_path %></li>
       <li<%= active_nav('Projects') %>><%= link_to 'Projects', projects_path %></li>
 
          <li  class="dropdown <%= active_nav('Analyses') %>">
