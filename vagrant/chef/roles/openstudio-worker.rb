@@ -9,7 +9,7 @@ run_list([
              "role[r-project]",
              "role[openstudio]",
              "recipe[openstudio_server::bashprofile]",
-             #"role[radiance]",
+             "role[radiance]",
              "recipe[openstudio_server::worker]",
          ])
 
