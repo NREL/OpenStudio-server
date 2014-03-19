@@ -444,21 +444,31 @@ class AnalysesController < ApplicationController
       dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
       dps = dps.rotate(1) # put the starting point on top
     else
-      dps = @analysis.data_points.all
+      dps = @analysis.data_points.all.order_by(:run_end_time.desc)
     end
     dps.each do |dp|
       if dp['results']
         plot_data = []
+        plot_data2 = []
+        dp_values = {}
+        dp_values2 = {}
+        dp_values["Time"] = "model"
+        dp_values2["Time"] = "target"
         ovs.each do |ov|
-          if ov['objective_function']
-            dp_values = {}
-            dp_values["axis"] = ov['name']
-            dp_values["value"] = dp['results'][ov['name']]
-            plot_data << dp_values
+          if ov['objective_function']    
+            dp_values[ov['name']] = dp['results'][ov['name']]            
           end
         end
-
+        plot_data << dp_values
+        ovs.each do |ov|
+          if ov['objective_function']            
+            dp_values2[ov['name']] = ov['objective_function_target']            
+          end
+        end
+        plot_data2 << dp_values2
         plot_data_radar << plot_data
+        plot_data_radar << plot_data2
+        break
       end
     end
 
