@@ -340,13 +340,24 @@ class Analysis::Optim
             print(paste("pgtol set to:",pgtol))
             
             results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
-            #results <- optim(par=varMean, fn=g, gr=parallelGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
-            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, reltol = 1.0))
-            #results <- optim(par=varMean, fn=g, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6))
-            
-            #cll <- makeSOCKcluster(c("localhost"))
-            #clusterCall(cll,optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax))
-            
+	    
+	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+            Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
+            print(paste("Iterations:",Iteration))
+            print(Rlog[grep('L =',Rlog)])
+	    print(Rlog[grep('X0 =',Rlog)])
+            print(Rlog[grep('U =',Rlog)])
+            Xlog <- Rlog[grep('X =',Rlog)]
+            print("Iteration parameters:")
+            print(Xlog[-grep('Cauchy',Xlog)])
+            print(Rlog[grep('norm of step',Rlog)])
+            print(Rlog[grep('Objective function Norm',Rlog)])
+            print(results$message)
+            print(results$convergence)
+            print(results$counts)
+            print(results$par)
+            print(results$value)
+            flush.console()            
             #results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
