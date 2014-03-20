@@ -346,9 +346,18 @@ class AnalysesController < ApplicationController
   end
 
   def plot_bar
+
     @analysis = Analysis.find(params[:id])
-    @plot_data = get_plot_data_bar(@analysis)
-    logger.info("HEY! PLOT DATA: #{@plot_data.inspect}")
+    if !params[:datapoint_id].nil?
+
+      #plot a specific datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
+    else
+      #plot the latest datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis)
+    end
+
+
 
     respond_to do |format|
       format.html # plot_bar.html.erb
@@ -373,17 +382,20 @@ class AnalysesController < ApplicationController
   # Data for Bar chart of objective functions actual values vs target values
   # "% error"-like, but negative when actual is less than target and positive when it is more than target
   # for now: only plots the latest datapoint
-  def get_plot_data_bar(analysis)
-
-    # Get the mappings of the variables that were used. Move this to the datapoint class
-    @mappings = analysis.get_superset_of_input_variables
+  def get_plot_data_bar(analysis, datapoint_id = nil)
 
     ovs = analysis.output_variables
     plot_data_bar = []
-    if analysis.analysis_type == "sequential_search"
-      dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+
+    if !datapoint_id.nil?
+      logger.info('datapoint was NIL')
+      dp = analysis.data_points.find(datapoint_id)
     else
-      dp = analysis.data_points.all.order_by(:run_end_time.desc).first
+      if analysis.analysis_type == "sequential_search"
+        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
     end
 
     if dp['results']
@@ -398,7 +410,7 @@ class AnalysesController < ApplicationController
 
     end
 
-    plot_data_bar
+    return plot_data_bar, dp
 
   end
 
