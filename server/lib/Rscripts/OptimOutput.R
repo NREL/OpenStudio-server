@@ -1,6 +1,7 @@
 Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
 Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
 Iteration
+Rlog[grep('varnames:',Rlog)]
 Rlog[grep('L =',Rlog)]
 Rlog[grep('X0 =',Rlog)]
 Rlog[grep('U =',Rlog)]
