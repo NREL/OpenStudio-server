@@ -46,7 +46,7 @@
         <!--<#% simulations.order_by(:run_start_time.desc, :name.asc).each do |dp| %> -->
         <% simulations.each do |dp| %>
             <tr>
-              <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
+              <td> <%= link_to "#{dp.name}", data_point_path(dp) %> <br> <% if status == 'completed' %><%= link_to('View Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %><% end %> </td>
               <td> <%= dp.status %></td>
               <td><%= dp.status_message if dp.status_message %></td>
               <% @objective_functions.each do |ov| %>

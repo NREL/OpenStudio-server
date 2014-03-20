@@ -4,7 +4,7 @@
 <% end %>
 
 <h2>Analysis Results</h2>
-
+<h3> Results for datapoint: <%= link_to(@datapoint.name, data_point_path(@datapoint.id)) %></h3>
 
 <% if @plot_data.nil? %>
   <div id="bar-div">
