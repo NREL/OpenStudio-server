@@ -37,3 +37,36 @@ svg {
   width: 1280px;
   height: 1000px;
 }
+
+#bar-div {
+    padding:20px 10px;
+    width: 1200;
+    height: 800;
+}
+
+.bar.positive {
+    fill: #0079C2;
+}
+
+.bar.negative {
+    fill: #F7A11A;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+#bar-div .x.axis text {
+ text-anchor: start !important;
+
+}
+
+#bar-div .axis line,
+#bar-div .axis path {
+    fill: none;
+    stroke: #000;
+    stroke-width:1px;
+    shape-rendering: crispEdges;
+}
