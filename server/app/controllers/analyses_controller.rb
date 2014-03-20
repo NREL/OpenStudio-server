@@ -454,7 +454,12 @@ class AnalysesController < ApplicationController
           if ov['objective_function']  
             dp_values = {}
             dp_values["axis"] = ov['name'] 
-            dp_values["value"] = dp['results'][ov['name']] 
+            if !ov['scaling_factor'].nil?
+            	dp_values["value"] = dp['results'][ov['name']].to_f / ov['scaling_factor'].to_f 
+            else
+            	dp_values["value"] = dp['results'][ov['name']]
+            end
+            logger.info(" HEY!! #{dp_values['value']}, #{ov['scaling_factor']}")
             plot_data << dp_values
           end
         end     
@@ -462,7 +467,11 @@ class AnalysesController < ApplicationController
           if ov['objective_function'] 
             dp_values2 = {}
             dp_values2["axis"] = ov['name'] 
-            dp_values2["value"] = ov['objective_function_target'] 
+            if !ov['scaling_factor'].nil?
+            	dp_values2["value"] = ov['objective_function_target'].to_f / ov['scaling_factor'].to_f
+            else
+            	dp_values2["value"] = ov['objective_function_target']
+            end
             plot_data2 << dp_values2
           end
         end      
