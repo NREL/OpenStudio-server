@@ -139,17 +139,18 @@ module CommunicateMongo
         eplus_search_path = "#{analysis_dir}/*run*/eplustbl.htm"
       when 'runmanager'
         eplus_search_path = "#{analysis_dir}/*EnergyPlus*/eplustbl.htm"
-
     end
 
     # copy some files into a report folder
     eplus_html = Dir.glob(eplus_search_path).last || nil
-    communicate_log_message dp, "Checking for HTML Report: #{eplus_html}" if eplus_html
-    if File.exists? eplus_html
-      # do some encoding on the html if possible
-      html = File.read(eplus_html)
-      html = html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil)
-      File.open("#{analysis_dir}/reports/eplustbl.html", 'w') { |f| f << html }
+    if eplus_html
+      communicate_log_message dp, "Checking for HTML Report: #{eplus_html}" 
+      if File.exists? eplus_html
+        # do some encoding on the html if possible
+        html = File.read(eplus_html)
+        html = html.force_encoding("ISO-8859-1").encode("utf-8", replace: nil)
+        File.open("#{analysis_dir}/reports/eplustbl.html", 'w') { |f| f << html }
+      end
     end
 
     # create zip file using a system call

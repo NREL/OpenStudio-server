@@ -449,32 +449,25 @@ class AnalysesController < ApplicationController
     dps.each do |dp|
       if dp['results']
         plot_data = []
-        plot_data2 = []
-        dp_values = {}
-        dp_values2 = {}
-        dp_values["Time"] = "model"
-        dp_values2["Time"] = "target"
+        plot_data2 = []      
         ovs.each do |ov|
-          if ov['objective_function']    
-            dp_values[ov['name']] = dp['results'][ov['name']]            
+          if ov['objective_function']  
+            dp_values = {}
+            dp_values["axis"] = ov['name'] 
+            if !ov['scaling_factor'].nil?
+            	dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+            else
+            	dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+            end
+            plot_data << dp_values
           end
-        end
-        plot_data << dp_values
-        ovs.each do |ov|
-          if ov['objective_function']            
-            dp_values2[ov['name']] = ov['objective_function_target']            
-          end
-        end
-        plot_data2 << dp_values2
+        end          
         plot_data_radar << plot_data
-        plot_data_radar << plot_data2
         break
       end
     end
-
     plot_data_radar
   end
-
 
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
   # a useful JSON for plotting (and exporting to CSV/R-dataframe)

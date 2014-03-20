@@ -47,6 +47,7 @@ ruby_block "update bash_profile" do
          "alias td='tail -f /var/www/rails/openstudio/log/development.log'",
          "alias tm='tail -f /var/www/rails/openstudio/log/mongo.log'",
          "alias tr='tail -f /var/www/rails/openstudio/log/Rserve.log'",
+         "alias oo='Rscript /var/www/rails/openstudio/lib/Rscripts/OptimOutput.R'",
          "alias cdr='cd /var/www/rails/openstudio'"].join("\n")
     )
     file.write_file
