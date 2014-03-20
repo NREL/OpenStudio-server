@@ -344,9 +344,14 @@ class Analysis::Optim
 	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
             print(paste("Iterations:",Iteration))
+            print(Rlog[grep('L =',Rlog)])
+	    print(Rlog[grep('X0 =',Rlog)])
+            print(Rlog[grep('U =',Rlog)])
             Xlog <- Rlog[grep('X =',Rlog)]
             print("Iteration parameters:")
             print(Xlog[-grep('Cauchy',Xlog)])
+            print(Rlog[grep('norm of step',Rlog)])
+            print(Rlog[grep('Objective function Norm',Rlog)])
             print(results$message)
             print(results$convergence)
             print(results$counts)
