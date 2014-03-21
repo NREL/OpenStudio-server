@@ -210,7 +210,7 @@ input[type='text'] {
   margin-bottom: 0px;
   margin: 5px 0 0 0;
 }
-.btn {
+.btn2 {
   text-shadow: none;
   text-align: left;
   border-radius: 0;
@@ -225,7 +225,7 @@ input[type='text'] {
   &:hover {
     background: #69c1ed;
   }
-  .btn-txt {
+  .btn2-txt {
     font-family: 'PT Sans Narrow';
     font-weigt: bold;
     font-size: 24px;
@@ -238,7 +238,7 @@ input[type='text'] {
     width: 185px;
     height: 14px;
   }
-  .btn {
+  .btn2 {
     font-family: 'PT Sans Narrow';
     font-weigt: bold;
     font-size: 17px;
@@ -248,13 +248,13 @@ input[type='text'] {
     margin-bottom: 10px;
   }
 }
-.btn.blue-border {
+.btn2.blue-border {
   border: 2px solid $border-blue;
 }
-.btn.yellow-border {
+.btn2.yellow-border {
   border: 2px solid #ffc425;
 }
-.btn.shadow {
+.btn2.shadow {
   box-shadow: 6px 5px 15px rgba(0, 0, 0, 0.3);
 }
 h2.header-large {
