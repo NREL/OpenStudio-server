@@ -45,8 +45,8 @@ Vagrant.configure("2") do |config|
     # vb.gui = true
 
     # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", 1024*7, "--cpus", 7]
-    #vb.customize ["modifyvm", :id, "--memory", 1024, "--cpus", 1]
+    #vb.customize ["modifyvm", :id, "--memory", 1024*7, "--cpus", 7]
+    vb.customize ["modifyvm", :id, "--memory", 1024, "--cpus", 1]
 
     # Disable DNS proxy.
     # Causes slowness: https://github.com/rubygems/rubygems/issues/513
