@@ -31,8 +31,8 @@ class AnalysesController < ApplicationController
         @status = params[:status]
       end
 
-      logger.debug("!!!!params STATUS is: #{params[:status]}")
-      logger.debug("!!ALL SEARCH: #{params[:all_search]}")
+      #logger.debug("!!!!params STATUS is: #{params[:status]}")
+      #logger.debug("!!ALL SEARCH: #{params[:all_search]}")
 
       #blanks should be saved as nil or it will crash
       @all_page = @status == 'all' ? params[:page] : params[:all_page]
@@ -317,7 +317,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
-      format.html # debug_log.html.erb
+      format.html # plot_parallelcoordinates.html.erb
     end
   end
 
@@ -325,7 +325,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
-      format.html # results_scatter.html.erb
+      format.html # plot_scatter.html.erb
     end
   end
 
@@ -333,7 +333,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
-      format.html # results_scatter.html.erb
+      format.html # plot_xy.html.erb
     end
   end
 
@@ -345,6 +345,26 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def plot_bar
+
+    @analysis = Analysis.find(params[:id])
+    if !params[:datapoint_id].nil?
+
+      #plot a specific datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
+    else
+      #plot the latest datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis)
+    end
+
+
+
+    respond_to do |format|
+      format.html # plot_bar.html.erb
+    end
+  end
+
+
   def plot_data
     @analysis = Analysis.find(params[:id])
 
@@ -355,9 +375,45 @@ class AnalysesController < ApplicationController
     @plot_data_radar = get_plot_data_radar(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: {:mappings => @mappings, :radardata => @plot_data_radar, :plotvars => @plotvars, :data => @plot_data} }
+      format.json { render json: {:mappings => @mappings, :radardata => @plot_data_radar, :plotvars => @plotvars, :data => @plot_data}}
     end
   end
+
+  # Data for Bar chart of objective functions actual values vs target values
+  # "% error"-like, but negative when actual is less than target and positive when it is more than target
+  # for now: only plots the latest datapoint
+  def get_plot_data_bar(analysis, datapoint_id = nil)
+
+    ovs = analysis.output_variables
+    plot_data_bar = []
+
+    if !datapoint_id.nil?
+      logger.info('datapoint was NIL')
+      dp = analysis.data_points.find(datapoint_id)
+    else
+      if analysis.analysis_type == "sequential_search"
+        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
+    end
+
+    if dp['results']
+      ovs.each do |ov|
+        if ov['objective_function']
+          dp_values = []
+          dp_values << ov['name']
+          dp_values << ((dp['results'][ov['name']]- ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
+          plot_data_bar << dp_values
+        end
+      end
+
+    end
+
+    return plot_data_bar, dp
+
+  end
+
 
   def page_data
     @analysis = Analysis.find(params[:id])
