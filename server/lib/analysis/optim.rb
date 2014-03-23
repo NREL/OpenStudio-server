@@ -14,7 +14,7 @@ class Analysis::Optim
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
-                factr: 4.5036e7,
+                fctr: 4.5036e7,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -169,7 +169,7 @@ class Analysis::Optim
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['fctr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 

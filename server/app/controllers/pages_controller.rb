@@ -12,9 +12,17 @@ class PagesController < ApplicationController
     failed_runs = DataPoint.where(:status_message => 'datapoint failure').count
     total_runs = DataPoint.all.count
     completed_cnt = DataPoint.where(:status => 'completed').count
-    @failed_perc = (failed_runs.to_f/total_runs.to_f * 100).round(0)
-    @completed_perc = (completed_cnt.to_f/total_runs.to_f * 100).round(0)
 
+    if !failed_runs == 0 and !total_runs == 0
+      @failed_perc = (failed_runs.to_f/total_runs.to_f * 100).round(0)
+    else
+      @failed_perc = 0
+    end
+    if !completed_cnt == 0 and !total_runs == 0
+      @completed_perc = (completed_cnt.to_f/total_runs.to_f * 100).round(0)
+    else
+      @completed_perc = 0
+    end
     # data for each analysis
     # can only aggregate over entire collection, so do that first then parse out results
     aggregated_results = DataPoint.collection.aggregate("$group" => { "_id" => {"analysis_id" => "$analysis_id", "status" => "$status"}, count: {"$sum" =>  1} })

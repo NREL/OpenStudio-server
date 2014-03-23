@@ -18,6 +18,7 @@ OpenstudioServer::Application.routes.draw do
         get :plot_scatter
         get :plot_xy
         get :plot_radar
+        get :plot_bar
         get :download_data
         get :download_variables
       end
