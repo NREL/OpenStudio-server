@@ -1,16 +1,7 @@
-<%= javascript_tag do %>
-  data = <%= raw @plot_data.to_json %>;
-
-<% end %>
 
 <h2>Analysis Results</h2>
 <h3> Results for datapoint: <%= link_to(@datapoint.name, data_point_path(@datapoint.id)) %></h3>
 
-<% if @plot_data.nil? %>
-  <div id="bar-div">
-    <p>There are no results for this analysis.</p>
-  </div>
-<% else %>
   <p>Relative percent error of the actual values of the selected objective functions with respect to their target values.  Negative values indicate an actual value smaller than its target value.</p>
   <div id="bar-div">
 
@@ -20,16 +11,21 @@
 
       var colorscale = d3.scale.category10();
 
-      //data is passed via rails -> js above
-      console.log(data)
+      var data;
 
-      d3.select("#bar-div")
+      d3.json("plot_data_bar.json", function (data2) {
+        console.log(data2)
+        data = data2['bardata'];
+
+        d3.select("#bar-div")
           .datum(data)
           .call(columnChart()
               .width(w)
               .height(h)
               .x(function(d, i) { return d[0]; })
               .y(function(d, i) { return d[1]; }));
+
+      });
 
       function columnChart() {
         var margin = {top: 30, right: 50, bottom: 150, left: 50},
@@ -172,4 +168,4 @@
 
   </div>
 
-<% end %>
+

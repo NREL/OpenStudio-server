@@ -341,7 +341,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
-      format.html # results_scatter.html.erb
+      format.html # plot_radar.html.erb
     end
   end
 
@@ -349,21 +349,36 @@ class AnalysesController < ApplicationController
 
     @analysis = Analysis.find(params[:id])
     if !params[:datapoint_id].nil?
-
-      #plot a specific datapoint
-      @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
+       @datapoint = DataPoint.find(params[:datapoint_id])
     else
-      #plot the latest datapoint
-      @plot_data, @datapoint = get_plot_data_bar(@analysis)
+
+      if @analysis.analysis_type == "sequential_search"
+        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
     end
-
-
 
     respond_to do |format|
       format.html # plot_bar.html.erb
     end
   end
 
+
+  def plot_data_bar
+    @analysis = Analysis.find(params[:id])
+    if !params[:datapoint_id].nil?
+      #plot a specific datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
+    else
+      #plot the latest datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis)
+    end
+    respond_to do |format|
+      format.json { render json: {:datapoint => {:id => @datapoint.id, :name => @datapoint.name}, :bardata => @plot_data }}
+    end
+
+  end
 
   def plot_data
     @analysis = Analysis.find(params[:id])
