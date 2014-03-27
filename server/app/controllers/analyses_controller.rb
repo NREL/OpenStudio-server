@@ -19,6 +19,8 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
+
+    #for pagination
     per_page = 50
 
     @analysis = Analysis.find(params[:id])
@@ -30,9 +32,6 @@ class AnalysesController < ApplicationController
       if !params[:status].nil?
         @status = params[:status]
       end
-
-      #logger.debug("!!!!params STATUS is: #{params[:status]}")
-      #logger.debug("!!ALL SEARCH: #{params[:all_search]}")
 
       #blanks should be saved as nil or it will crash
       @all_page = @status == 'all' ? params[:page] : params[:all_page]
@@ -47,10 +46,16 @@ class AnalysesController < ApplicationController
       @na_page = @na_page == '' ? nil : @na_page
 
       @all_sims_total = @analysis.search(params[:all_search], 'all')
-      @all_sims = @all_sims_total.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims_total.count)
+      #if "view_all" param is set, use @all_sims_total instead of @all_sims (for ALL tab only)
+      @view_all = 0
+      if !params[:view_all].nil? and params[:view_all] == "1"
+          @all_sims = @all_sims_total
+          @view_all = 1
+      else
+        @all_sims = @all_sims_total.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims_total.count)
+      end
 
       @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
-      logger.debug("!!! @completed_sims_total: #{@completed_sims_total.count}")
       @completed_sims = @completed_sims_total.paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims_total.count)
 
       @started_sims_total = @analysis.search(params[:started_search], 'started')

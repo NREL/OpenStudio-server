@@ -292,6 +292,7 @@ class Analysis
     return any_downloaded
   end
 
+  # filter results on analysis show page (per status)
   def search(search, status)
     if search
       if status == 'all'
