@@ -7,7 +7,7 @@
 <% else %>
   <div class="row-fluid">
     <div class="span9">
-      <h3><% if status == 'na' %>Initialized <% else %><%= status.humanize %><% end %> Simulations</h3>
+      <h3><% if status == 'na' %>Initialized <% else %><%= status.humanize %><% end %> Simulations </h3>
     </div>
     <div class="span3">
       <%= form_tag analysis_path(@analysis), :method => 'get' do %>
@@ -27,11 +27,26 @@
   <div class="row-fluid">
     <div class="table-pad">
       <!--toggle obj function is there are more than 3-->
+
       <% class_var = "" %>
       <% if @objective_functions.count > 3 %>
+        <div class="button-container">
+          <button class="btn btn-mini" id="toggle-button">Toggle Obj Functions</button>
+          <% class_var = "obj-function-col"%>
+        </div>
+      <% end %>
 
-        <button class="btn btn-mini" id="toggle-button">Toggle Obj Functions</button>
-        <% class_var = "obj-function-col"%>
+      <!--toggle view_all on ALL page -->
+      <br/>
+
+      <% if status == 'all' and @view_all == 0 %>
+        <div class="button-container">
+          <%= link_to("View All", analysis_path(:id => @analysis, :view_all => 1, :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page), :class => "btn btn-mini") %></button>
+        </div>
+      <% elsif status == 'all' and @view_all == 1 %>
+        <div class="button-container">
+          <%= link_to("Paginate", analysis_path(:id => @analysis.id, :status => status, :view_all => 0), :class => "btn btn-mini") %>
+        </div>
       <% end %>
 
       <table id="datapointtable" class="tablesorter table table-striped">
@@ -72,7 +87,10 @@
         </tbody>
       </table>
     </div>
-    <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page } %>
+
+    <% if !status == 'all' or @view_all != 1 %>
+      <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page } %>
+    <% end %>
   </div>
 
 <% end %>
