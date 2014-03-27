@@ -366,7 +366,11 @@ class AnalysesController < ApplicationController
 
 
   def plot_data_bar
+
+    logger.info("***PARAMS!!*** #{params.inspect}")
+
     @analysis = Analysis.find(params[:id])
+
     if !params[:datapoint_id].nil?
       #plot a specific datapoint
       @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
