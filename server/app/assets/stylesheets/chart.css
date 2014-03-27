@@ -70,3 +70,8 @@ svg {
     stroke-width:1px;
     shape-rendering: crispEdges;
 }
+
+.wide-table {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
