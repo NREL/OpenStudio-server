@@ -642,7 +642,7 @@ class AnalysesController < ApplicationController
 
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
   # a useful JSON for plotting (and exporting to CSV/R-dataframe)
-  # The results is the same as the varaibles hash which defines which results to export.  If nil it will only
+  # The results is the same as the variables hash which defines which results to export.  If nil it will only
   # export the results that in the output_variables hash
   def get_plot_data(analysis, variables, results = nil)
     plot_data = []
@@ -654,7 +654,7 @@ class AnalysesController < ApplicationController
     end
 
     # load in the output variables that are requested (including objective functions)
-    ovs = @analysis.output_variables
+    ovs = get_plot_variables(@analysis)
 
     dps.each do |dp|
       # the datapoint is considered complete if it has results set
@@ -679,13 +679,9 @@ class AnalysesController < ApplicationController
         else
           # output all output variables in the array of hashes (regardless if it is an objective function or not)
           ovs.each do |ov|
-            dp_values[ov['name']] = dp['results'][ov['name']] if dp['results'][ov['name']]
+            dp_values[ov] = dp['results'][ov] if dp['results'][ov]
           end
         end
-
-
-        # TEMP -- put out the total_energy in the JSON in case it isn't in the output_variables hash
-        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
 
         plot_data << dp_values
       end
