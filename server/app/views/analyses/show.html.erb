@@ -37,7 +37,7 @@
 
     <%= link_to "List of Measures (#{@analysis.measures.count})", analysis_measures_path(@analysis) %> |
     <%= link_to "List of Variables (#{@analysis.variables.count})", analysis_variables_path(@analysis) %> |
-    <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates_analysis_path(@analysis) %> |
+    <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates2_analysis_path(@analysis) %> |
     <%= link_to 'View Scatter Plot', plot_scatter_analysis_path(@analysis) %> |
     <% if @objective_functions.count <= 2 %><%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) %> |<% end %>
     <% if @objective_functions.count > 2  %><%= link_to 'View Radar Plot', plot_radar_analysis_path(@analysis)  %> |<% end %>
