@@ -325,6 +325,94 @@ class AnalysesController < ApplicationController
       format.html # plot_parallelcoordinates.html.erb
     end
   end
+  # other version with form to control what data to plot
+  def plot_parallelcoordinates2
+
+    @analysis = Analysis.find(params[:id])
+    #mappings + plotvars make the superset of chart variables
+    @mappings = @analysis.get_superset_of_input_variables
+    @plotvars = get_plot_variables(@analysis)
+
+    #variables represent the variables we want graphed. Nil = all
+    @variables = params[:variables] ? params[:variables] : nil
+
+    #whatever is defined as variables here should be the only returned data
+    @plot_data = get_plot_data2(@analysis, @mappings, @plotvars, @variables)
+
+
+
+    respond_to do |format|
+      format.html # plot_parallelcoordinates.html.erb
+    end
+  end
+
+
+  # The results is the same as the variables hash which defines which results to export.  If nil it will only
+  # export the results that are in the output_variables hash
+  def get_plot_data2(analysis, variables, outputs, results = nil)
+    plot_data = []
+    if @analysis.analysis_type == "sequential_search"
+      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+      dps = dps.rotate(1) # put the starting point on top
+    else
+      dps = @analysis.data_points.all
+    end
+
+    # load in the output variables that are requested (including objective functions)
+    # this includes "total_energy"
+    #ovs =  get_plot_variables(@analysis)
+    #logger.info("OVS! #{ovs}")
+
+    dps.each do |dp|
+      # the datapoint is considered complete if it has results set
+      if dp['results']
+        dp_values = {}
+        dp_values["data_point_uuid"] = data_point_path(dp.id)
+
+        if results
+
+          #iterate through results (variables from form) and retrieve (output values first)
+          results.each do |key, _|
+            #TEMP: special case for "total_energy" (could also be called total_site_energy)
+            if key == "total_energy" and !dp.results[key]
+              dp_values[key] = dp['results']["total_site_energy"]
+            else
+              dp_values[key] = dp['results'][key] ? dp['results'][key] : nil
+            end
+
+          end
+          #other mappings now: these variables are not in dp['results']?
+          if dp.set_variable_values
+            variables.each do |k, v|
+              if results.include?(v)
+                dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
+              end
+            end
+          end
+        else
+
+          #go through variables and output variables
+          if dp.set_variable_values
+            variables.each do |k, v|
+              dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
+            end
+          end
+          outputs.each do |ov|
+            #TEMP: special case for "total_energy" (could be called total_site_energy)
+            if ov == "total_energy" and !dp['results'][ov]
+              dp_values["total_energy"] = dp['results']['total_site_energy']
+            else
+              dp_values[ov] = dp['results'][ov] if dp['results'][ov]
+            end
+          end
+        end
+
+        plot_data << dp_values
+      end
+    end
+
+    plot_data
+  end
 
   def plot_scatter
     @analysis = Analysis.find(params[:id])
@@ -371,8 +459,6 @@ class AnalysesController < ApplicationController
 
 
   def plot_data_bar
-
-    logger.info("***PARAMS!!*** #{params.inspect}")
 
     @analysis = Analysis.find(params[:id])
 
@@ -437,7 +523,6 @@ class AnalysesController < ApplicationController
     return plot_data_bar, dp
 
   end
-
 
   def page_data
     @analysis = Analysis.find(params[:id])
@@ -510,6 +595,12 @@ class AnalysesController < ApplicationController
         plotvars << ov['name']
       end
     end
+
+    #add "total energy" if it's not already in the output variables
+    if !plotvars.include?("total_energy")
+      plotvars.insert(0, "total_energy")
+    end
+
     Rails.logger.info plotvars
     plotvars
   end
