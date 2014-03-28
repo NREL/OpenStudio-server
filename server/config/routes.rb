@@ -22,7 +22,10 @@ OpenstudioServer::Application.routes.draw do
         get :plot_data_bar
         get :download_data
         get :download_variables
+        match "plot_parallelcoordinates2" => "analyses#plot_parallelcoordinates2", :via => [:get, :post]
       end
+
+
 
       resources :measures, :only => [:show, :index], shallow: true
       resources :variables, :only => [:show, :index], shallow: true

@@ -415,7 +415,22 @@ h2.header-large {
 .button-container {
   padding: 5px 0px;
 }
+.submit-form {
+  text-align:center;
+  padding:20px 0px;
+}
 
+.chart-text {
+  padding:20px 0px;
+  p {
+    font-size:110%;
+    font-weight:bold;
+  }
+  label {
+    font-weight:normal;
+  }
+
+}
 
 //re-pasting this from bootstrap
 .btn, a.btn {
