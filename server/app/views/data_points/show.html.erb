@@ -6,6 +6,7 @@
 
 <h2>Data Point Information</h2>
 <strong>Name:</strong> <%= @data_point.name %><br/>
+<strong>Analysis:</strong> <%= link_to @data_point.analysis.name, analysis_path(@data_point.analysis) %><br/>
 <%= link_to 'View Full JSON', show_full_data_point_path(@data_point, :format => :json) %></br>
 <%= link_to 'View OS JSON', data_point_path(@data_point, :format => :json) %></br>
 <%= link_to_if(!@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name), "Download Data Point", download_data_point_path(@data_point)) %></br>
