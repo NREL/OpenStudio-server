@@ -7,10 +7,10 @@
 <h2>Data Point Information</h2>
 <strong>Name:</strong> <%= @data_point.name %><br/>
 <strong>Analysis:</strong> <%= link_to @data_point.analysis.name, analysis_path(@data_point.analysis) %><br/>
-<%= link_to 'View Full JSON', show_full_data_point_path(@data_point, :format => :json) %></br>
-<%= link_to 'View OS JSON', data_point_path(@data_point, :format => :json) %></br>
-<%= link_to_if(!@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name), "Download Data Point", download_data_point_path(@data_point)) %></br>
-<%= link_to_if(@data_point.status == 'completed', "View Bar Chart", plot_bar_analysis_path(:id => @data_point.analysis.id, :datapoint_id => @data_point.id)) %>
+<%= link_to 'View Full JSON', show_full_data_point_path(@data_point, :format => :json) %><br/>
+<%= link_to 'View OS JSON', data_point_path(@data_point, :format => :json) %><br/>
+<% if !@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name) %><%= link_to("Download Data Point", download_data_point_path(@data_point)) %><br/><% end %>
+<% if @data_point.status == 'completed' %><%= link_to( "View Bar Chart", plot_bar_analysis_path(:id => @data_point.analysis.id, :datapoint_id => @data_point.id)) %><% end %>
 
 <h2>Variable Values</h2>
 <table class="table table-striped">
