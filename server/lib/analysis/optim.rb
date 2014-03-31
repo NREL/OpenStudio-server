@@ -14,7 +14,7 @@ class Analysis::Optim
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
-                fctr: 4.5036e7,
+                fctr: 4.5036e10,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -280,6 +280,8 @@ class Analysis::Optim
                   sclfactor[i] <- 1.0
                 }                
               }
+              options(digits=8)
+              options(scipen=-2)
               print(paste("Objective function results are:",objvalue))
               print(paste("Objective function targets are:",objtarget))
               print(paste("Objective function scaling factors are:",sclfactor))             
@@ -338,6 +340,9 @@ class Analysis::Optim
             print(paste("Initial iterate set to:",varMean))
             print(paste("factr set to:",factr))
             print(paste("pgtol set to:",pgtol))
+            
+            options(digits=8)
+            options(scipen=-2)
             
             results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 	    
