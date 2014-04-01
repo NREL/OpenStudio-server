@@ -384,27 +384,26 @@ class AnalysesController < ApplicationController
         dp_values["data_point_uuid"] = data_point_path(dp.id)
 
         if results
-
-          #iterate through results (variables from form) and retrieve (output values first)
-          results.each do |key, _|
-            #TEMP: special case for "total_energy" (could also be called total_site_energy)
-            if key == "total_energy" and !dp.results[key]
-              dp_values[key] = dp['results']["total_site_energy"]
-            else
-              dp_values[key] = dp['results'][key] ? dp['results'][key] : nil
-            end
-
-          end
-          #other mappings now: these variables are not in dp['results']?
+          #input variables: not in dp['results']
           if dp.set_variable_values
             variables.each do |k, v|
               if results.include?(v)
+                logger.info("value: #{dp.set_variable_values[k]}")
                 dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
               end
             end
           end
-        else
+          #output variables. Don't overwrite input variables from above
+          results.each do |key, _|
+            #TEMP: special case for "total_energy" (could also be called total_site_energy)
+            if key == "total_energy" and !dp.results[key]
+              dp_values[key] = dp['results']["total_site_energy"]
+            elsif !dp_values[key]
+              dp_values[key] = dp['results'][key] ? dp['results'][key] : nil
+            end
+          end
 
+        else
           #go through variables and output variables
           if dp.set_variable_values
             variables.each do |k, v|
