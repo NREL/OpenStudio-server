@@ -8,6 +8,7 @@ OpenstudioServer::Application.routes.draw do
       member do
         post :action
         post :upload
+        get :stop
         get :status
         get :page_data
         get :plot_data

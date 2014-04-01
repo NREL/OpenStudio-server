@@ -178,6 +178,20 @@ class AnalysesController < ApplicationController
     end
   end
 
+  #stop analysis button action
+  def stop
+    @analysis = Analysis.find(params[:id])
+    res = @analysis.stop_analysis
+
+    respond_to do |format|
+      if res[0]
+        format.html { redirect_to @analysis, notice: 'Analysis flag changed to stop. Will wait until the last submitted run finishes before killing.' }
+      else
+        format.html { redirect_to @analysis, notice: 'Analysis flag did NOT change.' }
+      end
+    end
+  end
+
   # Controller for submitting the action via post.  This right now only works with the API
   # and will only return a JSON response based on whether or not the analysis has been
   # queued into Delayed Jobs
