@@ -160,6 +160,7 @@ module Analysis::R
       min_max = {}
       min_max[:min] = []
       min_max[:max] = []
+      min_max[:eps] = []
 
       # get the probabilities
       Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
@@ -184,6 +185,7 @@ module Analysis::R
         
         min_max[:min] << var.lower_bounds_value
         min_max[:max] << var.upper_bounds_value
+        min_max[:eps] << var.delta_x_value
 
         grouped["#{var.measure.id}"] = {} if !grouped.has_key?(var.measure.id)
         grouped["#{var.measure.id}"]["#{var.id}"] = sfp[:r]

@@ -169,7 +169,7 @@ class Analysis::Optim
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['fctr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :varseps => mins_maxes[:eps], :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['fctr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -182,15 +182,11 @@ class Analysis::Optim
             
             print(paste("min:",mins))
             print(paste("max:",maxes))
- 
+             
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
-                    
-            #for (i in 1:ncol(vars)){
-            #  vars[,i] <- sort(vars[,i])
-            #}          
-            #print(vars)      
+                          
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
   
@@ -304,40 +300,29 @@ class Analysis::Optim
             #  vars <- rbind(vars, c(NA))
             #}
   
-            #print(nrow(vars))
-            #print(ncol(vars))
 
             varMin <- mins
             varMax <- maxes
             varMean <- (mins+maxes)/2.0
+            varDomain <- maxes - mins
+            varEps <- varDomain*epsilongradient
+            print(paste("varseps:",varseps))
+            print(paste("varEps:",varEps))
+            varEps <- ifelse(varseps!=0,varseps,varEps)
+            print(paste("merged varEps:",varEps))
 
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
-            clusterExport(cl,"epsilongradient")
+            clusterExport(cl,"varEps")
             
-            parallelGradient <- function(params, ...) { # Now use the cluster 
-                print(paste("params:",params))
-                print(paste("epsilongradient:",epsilongradient))
-                if (length(params) > 1) {
- 	          dp = cbind(rep(0,length(params)),diag(params * epsilongradient)); 
- 	        } else {
- 	          dp = cbind(rep(0,length(params)),(params * epsilongradient));
- 	        }
-	        Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
-	        if (length(params) > 1) {
-	           return((Fout[-1]-Fout[1])/diag(dp[,-1])); 
-	        } else {
-	           return((Fout[-1]-Fout[1])/(dp[,-1]));
-	        }
-            }
-
             vectorGradient <- function(x, ...) { # Now use the cluster 
-	        vectorgrad(func=gn, x=x, method="two", eps=epsilongradient,cl=cl, debug=TRUE);
+	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
             print(paste("Initial iterate set to:",varMean))
+            print(paste("Length of variable domain:",varDomain))
             print(paste("factr set to:",factr))
             print(paste("pgtol set to:",pgtol))
             
