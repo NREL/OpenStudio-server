@@ -185,25 +185,6 @@
       </div>
       <div class="row-fluid">
         <%= form_tag("/analyses/#{@analysis.id}/plot_parallelcoordinates2") do  %>
-        <div class="span3">
-
-          <% @plotvars.each_with_index do |var, index|  %>
-            <% if @plotvars.count/2.floor == index %>
-              </div>
-              <div class="span3">
-
-            <% end %>
-            <p>
-              <% if @variables.nil? or (!@variables.nil? and @variables.include?(var))   %>
-                <% checked_str =  true %>
-              <% else %>
-                <% checked_str = false %>
-              <% end %>
-              <%=  check_box_tag "variables[]", var, checked_str, :id => "variables_#{index}" %>
-              <%= label_tag("variables_#{index}", var) %>
-            </p>
-          <% end %>
-        </div>
         <div class="span5">
         <% @mappings.each do |var|  %>
           <p>
@@ -216,10 +197,30 @@
              <%= label_tag("variables_#{var[0]}", var[1]) %>
           </p>
         <% end %>
-        <p>
-         <div class="submit-form"> <%= submit_tag "Update Chart" %>  </div>
-        </p>
+
         </div>
+          <div class="span3">
+
+            <% @plotvars.each_with_index do |var, index|  %>
+              <% if @plotvars.count/2.floor == index %>
+                </div>
+                <div class="span3">
+
+              <% end %>
+              <p>
+                <% if @variables.nil? or (!@variables.nil? and @variables.include?(var))   %>
+                  <% checked_str =  true %>
+                <% else %>
+                  <% checked_str = false %>
+                <% end %>
+                <%=  check_box_tag "variables[]", var, checked_str, :id => "variables_#{index}" %>
+                <%= label_tag("variables_#{index}", var) %>
+              </p>
+            <% end %>
+            <p>
+              <div class="submit-form"> <%= submit_tag "Update Chart" %>  </div>
+            </p>
+            </div>
       <% end %>
 
       </div>
