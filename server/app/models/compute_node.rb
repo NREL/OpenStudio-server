@@ -113,6 +113,7 @@ class ComputeNode
     if node
       remote_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
       remote_filename = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}.zip"
+      remote_datapoint_path = "#{remote_filepath}/data_point_#{data_point_id}"
       remote_filename_reports = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}_reports.zip" 
       local_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
       local_filename = "#{local_filepath}/data_point_#{data_point_id}.zip"
@@ -124,15 +125,15 @@ class ComputeNode
       if node.node_type == 'server'
         Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
         Rails.logger.info "#{remote_filename} exists... moving to new location"
-        FileUtils.cp(remote_filename, local_filename)
-        FileUtils.cp(remote_filename_reports, local_filename_reports)
+        FileUtils.mv(remote_filename, local_filename)
+        FileUtils.mv(remote_filename_reports, local_filename_reports)
 
         remote_file_downloaded = true
         remote_file_exists = true
       else
         Rails.logger.info "Zip file on worker node. scp over to server #{remote_filename} to #{local_filename}"
-        a, b = node.scp_download_file(remote_filename_reports, local_filename_reports)
-        remote_file_exists, remote_file_downloaded  = node.scp_download_file(remote_filename, local_filename)
+        a, b = node.scp_download_file(remote_filename_reports, local_filename_reports, remote_datapoint_path)
+        remote_file_exists, remote_file_downloaded  = node.scp_download_file(remote_filename, local_filename, remote_datapoint_path)
         
         # unzip the contents of the remote file if it existed
         if a && b 
@@ -192,7 +193,7 @@ class ComputeNode
     end
   end
   
-  def scp_download_file(remote_file, local_file)
+  def scp_download_file(remote_file, local_file, remote_file_path)
     remote_file_exists = false
     remote_file_downloaded = false
     Rails.logger.info "entering scp_download_file"
@@ -211,16 +212,20 @@ class ComputeNode
         Rails.logger.info "Trying to download #{remote_file} to #{local_file}"
         if !session.scp.download!(remote_file, local_file)
           remote_file_downloaded = false
-          Rails.logger.info "ERROR trying to download datapoint from remote server"
+          Rails.logger.info "ERROR trying to download datapoint from remote worker"
         else
           remote_file_downloaded = true
         end
 
         #todo: test the deletion of the zip file
-        #session.exec!( "cd #{remote_file_path} && rm -f #{remote_filename}" ) do |channel, stream, data|
-        #  logger.info(data)
-        #end
-        #session.loop
+        if remote_file_downloaded
+          session.exec!( "cd #{remote_file_path} && rm -f #{remote_file}" ) do |channel, stream, data|
+            Rails.logger.info "deleting datapoint from remote worker"
+            Rails.logger.info "#{data}"
+            logger.info(data)
+          end
+          session.loop
+        end  
       end
     end #session
     
