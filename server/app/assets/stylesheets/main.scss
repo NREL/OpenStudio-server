@@ -210,7 +210,7 @@ input[type='text'] {
   margin-bottom: 0px;
   margin: 5px 0 0 0;
 }
-.btn {
+.btn2 {
   text-shadow: none;
   text-align: left;
   border-radius: 0;
@@ -225,7 +225,7 @@ input[type='text'] {
   &:hover {
     background: #69c1ed;
   }
-  .btn-txt {
+  .btn2-txt {
     font-family: 'PT Sans Narrow';
     font-weigt: bold;
     font-size: 24px;
@@ -238,7 +238,7 @@ input[type='text'] {
     width: 185px;
     height: 14px;
   }
-  .btn {
+  .btn2 {
     font-family: 'PT Sans Narrow';
     font-weigt: bold;
     font-size: 17px;
@@ -248,13 +248,13 @@ input[type='text'] {
     margin-bottom: 10px;
   }
 }
-.btn.blue-border {
+.btn2.blue-border {
   border: 2px solid $border-blue;
 }
-.btn.yellow-border {
+.btn2.yellow-border {
   border: 2px solid #ffc425;
 }
-.btn.shadow {
+.btn2.shadow {
   box-shadow: 6px 5px 15px rgba(0, 0, 0, 0.3);
 }
 h2.header-large {
@@ -380,6 +380,82 @@ h2.header-large {
     color:#000;
     font-weight:bold;
   }
+}
+
+//remove this if you want traditional pagination
+.pagination {
+  background: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  text-align: center;
+  padding: 1em;
+  cursor: default;
+  margin: 0px 0px;}
+.pagination a, .pagination span {
+  padding: 0.2em 0.3em; }
+.pagination .disabled {
+  color: #aaaaaa; }
+.pagination .current {
+  font-style: normal;
+  font-weight: bold;
+  background-color: #bebebe;
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  line-height: 1.2;
+  -moz-border-radius: 1em;
+  -webkit-border-radius: 1em;
+  border-radius: 1em;
+  text-shadow: rgba(255, 255, 255, 0.8) 1px 1px 1px; }
+.pagination a {
+  text-decoration: none;
+  color: black; }
+.pagination a:hover, .pagination a:focus {
+  text-decoration: underline; }
+
+.button-container {
+  padding: 5px 0px;
+}
+.submit-form {
+  text-align:center;
+  padding:20px 0px;
+}
+.update-button {
+  padding:20px 50px;
+}
+
+.chart-text {
+  padding:20px 0px;
+  p {
+    font-size:110%;
+    font-weight:bold;
+  }
+  label {
+    font-weight:normal;
+  }
+
+}
+
+//re-pasting this from bootstrap
+.btn, a.btn {
+  display: inline-block;
+  padding: 8px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.428571429;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  color:#000;
+  background-color:#d5d5d5;
 }
 
 

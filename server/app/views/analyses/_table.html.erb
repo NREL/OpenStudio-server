@@ -7,7 +7,7 @@
 <% else %>
   <div class="row-fluid">
     <div class="span9">
-      <h3><% if status == 'na' %>Initialized <% else %><%= status.humanize %><% end %> Simulations</h3>
+      <h3><% if status == 'na' %>Initialized <% else %><%= status.humanize %><% end %> Simulations </h3>
     </div>
     <div class="span3">
       <%= form_tag analysis_path(@analysis), :method => 'get' do %>
@@ -26,47 +26,95 @@
   </div>
   <div class="row-fluid">
     <div class="table-pad">
+      <!--toggle obj function is there are more than 3-->
+
+      <% class_var = "" %>
+      <% if @objective_functions.count > 3 %>
+        <div class="button-container">
+          <button class="btn btn-mini" id="toggle-button">Toggle Obj Functions</button>
+          <% class_var = "obj-function-col"%>
+        </div>
+      <% end %>
+
+      <!--toggle view_all on ALL page -->
+      <br/>
+
+      <% if status == 'all' and @view_all == 0 %>
+        <div class="button-container">
+          <%= link_to("View All", analysis_path(:id => @analysis, :view_all => 1, :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page), :class => "btn btn-mini") %></button>
+        </div>
+      <% elsif status == 'all' and @view_all == 1 %>
+        <div class="button-container">
+          <%= link_to("Paginate", analysis_path(:id => @analysis.id, :status => status, :view_all => 0), :class => "btn btn-mini") %>
+        </div>
+      <% end %>
+
       <table id="datapointtable" class="tablesorter table table-striped">
         <thead>
         <tr>
           <th>Name</th>
-          <th>Status</th>
-          <th>Status Message</th>
+          <th class="other-col">Status</th>
+          <th class="other-col">Status Message</th>
           <% @objective_functions.each do |ov| %>
-              <th>Obj Func <%= ov['display_name'] %> </th>
+              <th class="<%= class_var %>">Obj Func <%= ov['display_name'] %> </th>
           <% end %>
-          <th>Start Time (UTC)</th>
-          <th>End Time (UTC)</th>
-          <th>Delta Time (s)</th>
+          <th class="other-col">Start Time (UTC)</th>
+          <th class="other-col">End Time (UTC)</th>
+          <th class="other-col">Delta Time (s)</th>
           <th>View</th>
-          <th>Action</th>
+          <th class="other-col">Action</th>
         </tr>
         </thead>
         <tbody>
-        <!--<#% simulations.order_by(:run_start_time.desc, :name.asc).each do |dp| %> -->
         <% simulations.each do |dp| %>
             <tr>
-              <td> <%= link_to "#{dp.name}", data_point_path(dp) %> <br> <% if status == 'completed' %><%= link_to('View Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %><% end %> </td>
-              <td> <%= dp.status %></td>
-              <td><%= dp.status_message if dp.status_message %></td>
+              <td> <%= link_to "#{dp.name}", data_point_path(dp) %></td>
+              <td class="other-col"><%= dp.status %><% if dp.status == 'completed' %><br/><br/><%= link_to('View Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %><% end %></td>
+              <td class="other-col"><%= dp.status_message if dp.status_message %></td>
               <% @objective_functions.each do |ov| %>
-                  <td><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']].round(2) : "" %>  </td>
+                  <td class="<%= class_var %>"><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']].round(2) : "" %>  </td>
               <% end %>
-              <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
-              <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
-              <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
+              <td class="other-col"> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
+              <td class="other-col"> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
+              <td class="other-col"><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
               <td><%= link_to 'HTML', data_point_path(dp) %>
                 | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
                 | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
                 | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
-              <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+              <td class="other-col"><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
             </tr>
         <% end %>
         </tbody>
       </table>
     </div>
-    <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page } %>
+
+    <% if !status == 'all' or @view_all != 1 %>
+      <%= will_paginate simulations, :params => { :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page } %>
+    <% end %>
   </div>
 
 <% end %>
 </div>
+
+
+<script>
+  $(document).ready(function(){
+
+    $(".obj-function-col").each(function(i){
+      var cur = $(this);
+      cur.hide();
+    });
+  });
+
+  $( "#toggle-button" ).click(function() {
+    $( ".obj-function-col" ).each(function(i){
+      var cur = $(this);
+      cur.toggle();
+    });
+    $( ".other-col" ).each(function(i){
+      var cur = $(this);
+      cur.toggle();
+    });
+  });
+
+</script>
