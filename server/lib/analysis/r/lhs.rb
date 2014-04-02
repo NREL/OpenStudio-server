@@ -185,7 +185,11 @@ module Analysis::R
         
         min_max[:min] << var.lower_bounds_value
         min_max[:max] << var.upper_bounds_value
-        min_max[:eps] << var.delta_x_value
+        if var.delta_x_value
+          min_max[:eps] << var.delta_x_value
+        else
+          min_max[:eps] << 0
+        end
 
         grouped["#{var.measure.id}"] = {} if !grouped.has_key?(var.measure.id)
         grouped["#{var.measure.id}"]["#{var.id}"] = sfp[:r]
