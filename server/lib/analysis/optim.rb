@@ -9,12 +9,12 @@ class Analysis::Optim
         create_data_point_filename: "create_data_point.rb",
         output_variables: [],
         problem: {
-	    random_seed: 1979,
+	      random_seed: 1979,
             algorithm: {
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
-                fctr: 4.5036e10,
+                factr: 4.5036e10,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -24,7 +24,6 @@ class Analysis::Optim
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
     @analysis_id = analysis_id
   end
 
@@ -42,6 +41,7 @@ class Analysis::Optim
     @analysis.end_time = nil
     @analysis.run_flag = true
 
+    
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
@@ -169,7 +169,9 @@ class Analysis::Optim
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :varseps => mins_maxes[:eps], :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['fctr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint 
+        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :varseps => mins_maxes[:eps], :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
