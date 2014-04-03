@@ -10,9 +10,13 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyses <b class="caret"></b></a>
 
         <ul class="dropdown-menu">
+
           <% analyses_nav.each do |item| %>
 
             <li <%= active_subnav(item.id)%>><%= link_to item.name, analysis_path(item.id) %></li>
+          <% end %>
+          <% if analyses_nav.count > 1 %>
+            <li <%= active_subnav('all') %>><%= link_to "Show All", analyses_path %></li>
           <% end %>
         </ul>
 

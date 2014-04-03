@@ -6,8 +6,12 @@ class AnalysesController < ApplicationController
   def index
     if params[:project_id].nil?
       @analyses = Analysis.all
+      @project = nil
+
     else
-      @analysis = Project.find(params[:project_id]).analyses
+      @project = Project.find(params[:project_id])
+      @analyses = @project.analyses
+
     end
 
     respond_to do |format|
