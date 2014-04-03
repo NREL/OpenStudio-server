@@ -1,3 +1,6 @@
+<%= javascript_tag do %>
+  datapoint_id = '<%= j @datapoint.id %>';
+<% end %>
 <h2>Analysis Results</h2>
 <style>
     body {
@@ -17,92 +20,91 @@
     }
 </style>
 
-<% if @plot_data %>
-    <div id="graph-div">
-      <p>There are no results for this analysis.</p>
-    </div>
+<% if @datapoint.status != 'completed' %>
+  <p>Datapoint <%= link_to(@datapoint.name, data_point_path(@datapoint.id)) %> has not completed.  There are no results available yet.</p>
 <% else %>
 
-    <div id="graph-div">
-      <script>
-var w = 500,
-	h = 500;
+  <h3> Results for datapoint: <%= link_to(@datapoint.name, data_point_path(@datapoint.id)) %></h3>
 
-var colorscale = d3.scale.category10();
+  <div id="radar-div">
+    <script>
+      var w = 500,
+	    h = 500;
 
-//Legend titles
-var LegendOptions = ['Relative Error (%)'];
+      var colorscale = d3.scale.category10();
 
-//Data
-var data;
+      //Legend titles
+      var LegendOptions = ['Relative Error (%)'];
 
-//d3.json("/assets/analyses/2469caf0-6c01-0131-193c-00ffc0914e0d/testdata.json", function (data) {
-d3.json("plot_data.json", function (data) {
-         console.log(data)
-         data = data['radardata'];
+      //Data
+      var data;
 
-    	      
+      d3.json("plot_data_radar.json?datapoint_id=" + datapoint_id ,  function (data2) {
 
-//Options for the Radar chart, other than default
-var mycfg = {
-  w: w,
-  h: h,
-  maxValue: 0.6,
-  levels: 6,
-  ExtraWidthX: 300
-}
+               data = data2['radardata'];
+               console.log(data);
 
-//Call function to draw the Radar chart
-//Will expect that data is in %'s
-RadarChart.draw("#graph-div", data, mycfg);
 
-////////////////////////////////////////////
-/////////// Initiate legend ////////////////
-////////////////////////////////////////////
+      //Options for the Radar chart, other than default
+      var mycfg = {
+        w: w,
+        h: h,
+        maxValue: 0.6,
+        levels: 6,
+        ExtraWidthX: 300
+      }
 
-var svg = d3.select('#graph-div')
-	.selectAll('svg')
-	.append('svg')
-	.attr("width", w+300)
-	.attr("height", h)
-	
-//Initiate Legend	
-var legend = svg.append("g")
-	.attr("class", "legend")
-	.attr("height", 100)
-	.attr("width", 200)
-	.attr('transform', 'translate(90,20)') 
-	;
-	//Create colour squares
-	legend.selectAll('rect')
-	  .data(LegendOptions)
-	  .enter()
-	  .append("rect")
-	  .attr("x", w - 65)
-	  .attr("y", function(d, i){ return i * 20;})
-	  .attr("width", 10)
-	  .attr("height", 10)
-	  .style("fill", function(d, i){ return colorscale(i);})
-	  ;
-	//Create text next to squares
-	legend.selectAll('text')
-	  .data(LegendOptions)
-	  .enter()
-	  .append("text")
-	  .attr("x", w - 52)
-	  .attr("y", function(d, i){ return i * 20 + 9;})
-	  .attr("font-size", "11px")
-	  .attr("fill", "#737373")
-	  .text(function(d) { return d; })
-	  ;	
-	
-        })    
+      //Call function to draw the Radar chart
+      //Will expect that data is in %'s
+      RadarChart.draw("#radar-div", data, mycfg);
+
+      ////////////////////////////////////////////
+      /////////// Initiate legend ////////////////
+      ////////////////////////////////////////////
+
+      var svg = d3.select('#radar-div')
+        .selectAll('svg')
+        .append('svg')
+        .attr("width", w+300)
+        .attr("height", h)
+
+      //Initiate Legend
+      var legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("height", 100)
+        .attr("width", 200)
+        .attr('transform', 'translate(90,20)')
+        ;
+        //Create colour squares
+        legend.selectAll('rect')
+          .data(LegendOptions)
+          .enter()
+          .append("rect")
+          .attr("x", w - 65)
+          .attr("y", function(d, i){ return i * 20;})
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", function(d, i){ return colorscale(i);})
+          ;
+        //Create text next to squares
+        legend.selectAll('text')
+          .data(LegendOptions)
+          .enter()
+          .append("text")
+          .attr("x", w - 52)
+          .attr("y", function(d, i){ return i * 20 + 9;})
+          .attr("font-size", "11px")
+          .attr("fill", "#737373")
+          .text(function(d) { return d; })
+          ;
+
+              })
       </script>
 
     </div>
 
 <% end %>
-</br>
+<%= link_to("Back to Analysis", analysis_path(@analysis)) %>
 
 
 

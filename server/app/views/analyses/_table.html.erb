@@ -69,7 +69,7 @@
         <% simulations.each do |dp| %>
             <tr>
               <td> <%= link_to "#{dp.name}", data_point_path(dp) %></td>
-              <td class="other-col"><%= dp.status %><% if dp.status == 'completed' %><br/><br/><%= link_to('View Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %><% end %></td>
+              <td class="other-col"><%= dp.status %></td>
               <td class="other-col"><%= dp.status_message if dp.status_message %></td>
               <% @objective_functions.each do |ov| %>
                   <td class="<%= class_var %>"><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']].round(2) : "" %>  </td>
@@ -80,7 +80,13 @@
               <td><%= link_to 'HTML', data_point_path(dp) %>
                 | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
                 | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
-                | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
+                  <% if !dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name) %>
+                    | <%= link_to( "Zip File", download_data_point_path(dp)) %>
+                  <% end %>
+                <% if dp.status == 'completed' %>
+                  | <%= link_to('Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>
+                  | <%= link_to('Radar Plot', plot_radar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>
+                <% end %>
               <td class="other-col"><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
             </tr>
         <% end %>

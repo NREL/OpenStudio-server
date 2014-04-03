@@ -38,6 +38,12 @@ svg {
   height: 1000px;
 }
 
+#radar-div {
+    padding:20px 10px;
+    width: 1200;
+    height: 600;
+}
+
 #bar-div {
     padding:20px 10px;
     width: 1200;
