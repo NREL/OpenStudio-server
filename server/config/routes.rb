@@ -1,5 +1,5 @@
 OpenstudioServer::Application.routes.draw do
-  resources :projects do
+  resources :projects, shallow: true do
     member do
       get :status
     end
@@ -52,6 +52,7 @@ OpenstudioServer::Application.routes.draw do
   end
 
   match '/about' => 'pages#about'
+  match '/analyses' => 'analyses#index'
   
   # The priority is based upon order of creation:
   # first created -> highest priority.
