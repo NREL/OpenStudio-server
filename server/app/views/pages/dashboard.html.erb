@@ -8,20 +8,25 @@
 <div class="row-fluid gray-header">
   <div class="span3"><h2>Dashboard</h2></div>
   <div class="span2"><div class="large_text"><%= link_to "#{@projects.count} Projects", projects_path %> </div></div>
-  <div class="span2"><div class="large_text"><%= @analyses.count %> Analyses</div></div>
+  <div class="span2"><div class="large_text"><%= link_to "#{@analyses.count} Analyses", analyses_path %> </div></div>
   <div class="span2"><div class="large_text"><%= @completed_perc %>% Completed </div></div>
   <div class="span2"><div class="large_text"><%= @failed_perc %>% Failed </div></div>
 </div>
 
 <% rowcnt = 0 %>
 <div class="row-fluid">
+  <!--new row -->
   <% @results.each_with_index do |res, index| %>
+    <% if index % 4 == 0 %>
+      </div>
+      <div class="row-fluid">
+    <% end %>
     <div class="span3">
       <div class="analysis-container">
-      <div class="analysis-header"><%= link_to(res["name"], analysis_path(res["id"])) %></div>
-      <p>Project: <%= link_to(res["project_name"], project_path(res["project_id"])) %></p>
-      <p>Date Started: <%= res["created_at"].strftime("%m/%d/%Y") %></p>
-      <div id="pie<%= index %>" class="pie"></div>
+        <div class="analysis-header"><%= link_to(res["name"], analysis_path(res["id"])) %></div>
+        <p>Project: <%= link_to(res["project_name"], project_path(res["project_id"])) %></p>
+        <p>Date Started: <%= res["created_at"].strftime("%m/%d/%Y") %></p>
+        <div id="pie<%= index %>" class="pie"></div>
       </div>
     </div>
   <% end %>

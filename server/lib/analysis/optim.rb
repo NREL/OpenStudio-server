@@ -9,12 +9,12 @@ class Analysis::Optim
         create_data_point_filename: "create_data_point.rb",
         output_variables: [],
         problem: {
-	    random_seed: 1979,
+	      random_seed: 1979,
             algorithm: {
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
-                fctr: 4.5036e7,
+                factr: 4.5036e10,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -24,7 +24,6 @@ class Analysis::Optim
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
     @analysis_id = analysis_id
   end
 
@@ -42,6 +41,7 @@ class Analysis::Optim
     @analysis.end_time = nil
     @analysis.run_flag = true
 
+    
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
@@ -169,7 +169,9 @@ class Analysis::Optim
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
 
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['fctr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint 
+        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :varseps => mins_maxes[:eps], :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'], :pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -182,15 +184,11 @@ class Analysis::Optim
             
             print(paste("min:",mins))
             print(paste("max:",maxes))
- 
+             
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
-                    
-            #for (i in 1:ncol(vars)){
-            #  vars[,i] <- sort(vars[,i])
-            #}          
-            #print(vars)      
+                          
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
   
@@ -280,6 +278,8 @@ class Analysis::Optim
                   sclfactor[i] <- 1.0
                 }                
               }
+              options(digits=8)
+              options(scipen=-2)
               print(paste("Objective function results are:",objvalue))
               print(paste("Objective function targets are:",objtarget))
               print(paste("Objective function scaling factors are:",sclfactor))             
@@ -302,42 +302,34 @@ class Analysis::Optim
             #  vars <- rbind(vars, c(NA))
             #}
   
-            #print(nrow(vars))
-            #print(ncol(vars))
 
             varMin <- mins
             varMax <- maxes
             varMean <- (mins+maxes)/2.0
+            varDomain <- maxes - mins
+            varEps <- varDomain*epsilongradient
+            print(paste("varseps:",varseps))
+            print(paste("varEps:",varEps))
+            varEps <- ifelse(varseps!=0,varseps,varEps)
+            print(paste("merged varEps:",varEps))
 
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
-            clusterExport(cl,"epsilongradient")
+            clusterExport(cl,"varEps")
             
-            parallelGradient <- function(params, ...) { # Now use the cluster 
-                print(paste("params:",params))
-                print(paste("epsilongradient:",epsilongradient))
-                if (length(params) > 1) {
- 	          dp = cbind(rep(0,length(params)),diag(params * epsilongradient)); 
- 	        } else {
- 	          dp = cbind(rep(0,length(params)),(params * epsilongradient));
- 	        }
-	        Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
-	        if (length(params) > 1) {
-	           return((Fout[-1]-Fout[1])/diag(dp[,-1])); 
-	        } else {
-	           return((Fout[-1]-Fout[1])/(dp[,-1]));
-	        }
-            }
-
             vectorGradient <- function(x, ...) { # Now use the cluster 
-	        vectorgrad(func=gn, x=x, method="two", eps=epsilongradient,cl=cl, debug=TRUE);
+	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
             print(paste("Initial iterate set to:",varMean))
+            print(paste("Length of variable domain:",varDomain))
             print(paste("factr set to:",factr))
             print(paste("pgtol set to:",pgtol))
+            
+            options(digits=8)
+            options(scipen=-2)
             
             results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 	    

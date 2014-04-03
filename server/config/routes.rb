@@ -1,5 +1,5 @@
 OpenstudioServer::Application.routes.draw do
-  resources :projects do
+  resources :projects, shallow: true do
     member do
       get :status
     end
@@ -8,6 +8,7 @@ OpenstudioServer::Application.routes.draw do
       member do
         post :action
         post :upload
+        get :stop
         get :status
         get :page_data
         get :plot_data
@@ -19,9 +20,14 @@ OpenstudioServer::Application.routes.draw do
         get :plot_xy
         get :plot_radar
         get :plot_bar
+        get :plot_data_bar
+        get :plot_data_radar
         get :download_data
         get :download_variables
+        match "plot_parallelcoordinates2" => "analyses#plot_parallelcoordinates2", :via => [:get, :post]
       end
+
+
 
       resources :measures, :only => [:show, :index], shallow: true
       resources :variables, :only => [:show, :index], shallow: true
@@ -46,6 +52,7 @@ OpenstudioServer::Application.routes.draw do
   end
 
   match '/about' => 'pages#about'
+  match '/analyses' => 'analyses#index'
   
   # The priority is based upon order of creation:
   # first created -> highest priority.

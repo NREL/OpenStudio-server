@@ -14,6 +14,7 @@
       <thead>
       <tr>
         <th>Name</th>
+        <th>Project</th>
         <th>Type</th>
         <th>Status</th>
         <th>Start Time (UTC)</th>
@@ -23,10 +24,10 @@
       <tr>
       </thead>
       <tbody>
-      <td><%= @analysis.name %></td>
+      <td><%= @analysis.display_name %></td>
+      <td><%= link_to(@analysis.project.name, project_path(@analysis.project)) %></td>
       <td><%= @analysis.analysis_type %></td>
       <td><%= @analysis.status %></td>
-
       <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
       <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>
       <td><%= (@analysis.end_time.to_f - @analysis.start_time.to_f).round(2) unless @analysis.end_time.nil? || @analysis.start_time.nil? %></td>
@@ -34,20 +35,18 @@
         | <%= link_to_if(!@analysis.seed_zip.nil?, "Zip File", @analysis.seed_zip.url(:original, false)) %> </td>
       </tbody>
     </table>
-
     <%= link_to "List of Measures (#{@analysis.measures.count})", analysis_measures_path(@analysis) %> |
     <%= link_to "List of Variables (#{@analysis.variables.count})", analysis_variables_path(@analysis) %> |
-    <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates_analysis_path(@analysis) %> |
+    <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates2_analysis_path(@analysis) %> |
     <%= link_to 'View Scatter Plot', plot_scatter_analysis_path(@analysis) %> |
     <% if @objective_functions.count <= 2 %><%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) %> |<% end %>
-    <% if @objective_functions.count > 2  %><%= link_to 'View Radar Plot', plot_radar_analysis_path(@analysis)  %> |<% end %>
-    <%= link_to 'View Bar Chart', plot_bar_analysis_path(@analysis) %> |
     <%= link_to 'Download CSV', download_data_analysis_path(@analysis, format: :csv) %> |
     <%= link_to 'Download R Data Frame', download_data_analysis_path(@analysis, format: :rdata) %> |
     <%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
 
+    <% if @analysis.status == 'started' %> <div class="button-container"><%= link_to("Stop Analysis", stop_analysis_path(@analysis), :class => "btn btn-mini") %></div><% end %>
 
-    <h2>Simulations (<%= @analysis.data_points.count if @analysis.data_points %>) </h2>
+    <h2 class="pad-top-30">Simulations (<%= @analysis.data_points.count if @analysis.data_points %>) </h2>
 
     <ul class="nav nav-tabs">
       <li <% if @status == 'all' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionAll">All</a></li>
@@ -92,9 +91,12 @@
 
     <script>
         $(document).ready(function () {
-                    $("#datapointtable").tablesorter();
-                }
-        );
+          $("#datapointtable_all").tablesorter();
+          $("#datapointtable_completed").tablesorter();
+          $("#datapointtable_started").tablesorter();
+          $("#datapointtable_queued").tablesorter();
+          $("#datapointtable_na").tablesorter();
+         });
 
     </script>
 

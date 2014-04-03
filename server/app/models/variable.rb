@@ -11,6 +11,7 @@ class Variable
   field :minimum # don't define this--it can be anything  -- and remove this eventually as os uses lower bounds
   field :maximum # don't define this--it can be anything
   field :mean # don't define this--it can be anything
+  field :delta_x_value # don't define this--it can be anything
   field :uncertainty_type, :type => String
   field :discrete_values_and_weights
   field :data_type, :type => String # not sure this is needed because mongo is typed
