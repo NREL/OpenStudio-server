@@ -1,7 +1,21 @@
-vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE){
+vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE, lb=NULL, ub=NULL){
     
     n <- length(x)     #number of variables in argument
     df <- rep(NA,n)
+    if (length(eps) == 1) {eps <- rep(eps,n)}
+    if(length(eps) != n){print("length of EPS not equal length of X in gradient; using 1e-4");eps <- rep(1e-4,n)}
+    if(length(ub) != 0){
+      if (length(ub) == n)    
+        {eps <- ifelse(x+eps>ub,ub-x,eps)}
+      else
+        {print("upper bound length not same as x")}
+    }
+    if(length(lb) != 0){
+      if (length(lb) == n)    
+        {eps <- ifelse(x-eps<lb,lb-x,eps)}
+      else
+        {print("lower bound length not same as x")}
+    }
     
     if(method=="one"){
         if (n > 1){
@@ -19,9 +33,9 @@ vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE){
         return(df)
     } else if(method=="two"){
         if (n > 1){
-          dp <- cbind(diag((x+1)*eps),diag(-(x+1)*eps))
+          dp <- cbind(diag((1)*eps),diag(-(1)*eps))
         } else {
-          dp <- cbind(((x+1)*eps),(-(x+1)*eps))
+          dp <- cbind(((1)*eps),(-(1)*eps))
         }
         Fout <- parCapply(cl, dp, function(x1) func(x + x1))
         if (debug == TRUE) print(paste("Fout:",Fout))

@@ -38,6 +38,12 @@ svg {
   height: 1000px;
 }
 
+#radar-div {
+    padding:20px 10px;
+    width: 1200;
+    height: 600;
+}
+
 #bar-div {
     padding:20px 10px;
     width: 1200;
@@ -69,4 +75,9 @@ svg {
     stroke: #000;
     stroke-width:1px;
     shape-rendering: crispEdges;
+}
+
+.wide-table {
+    table-layout: fixed;
+    word-wrap: break-word;
 }
