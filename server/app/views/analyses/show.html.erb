@@ -91,9 +91,12 @@
 
     <script>
         $(document).ready(function () {
-                    $("#datapointtable").tablesorter();
-                }
-        );
+          $("#datapointtable_all").tablesorter();
+          $("#datapointtable_completed").tablesorter();
+          $("#datapointtable_started").tablesorter();
+          $("#datapointtable_queued").tablesorter();
+          $("#datapointtable_na").tablesorter();
+         });
 
     </script>
 
