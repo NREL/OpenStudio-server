@@ -445,6 +445,16 @@ class AnalysesController < ApplicationController
 
   def plot_radar
     @analysis = Analysis.find(params[:id])
+    if !params[:datapoint_id].nil?
+      @datapoint = DataPoint.find(params[:datapoint_id])
+    else
+
+      if @analysis.analysis_type == "sequential_search"
+        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
+    end
 
     respond_to do |format|
       format.html # plot_radar.html.erb
@@ -472,7 +482,7 @@ class AnalysesController < ApplicationController
 
 
   def plot_data_bar
-
+    #TODO: this should always take a datapoint param
     @analysis = Analysis.find(params[:id])
 
     if !params[:datapoint_id].nil?
@@ -488,6 +498,23 @@ class AnalysesController < ApplicationController
 
   end
 
+  def plot_data_radar
+    #TODO: this should always take a datapoint param
+    @analysis = Analysis.find(params[:id])
+
+    if !params[:datapoint_id].nil?
+      #plot a specific datapoint
+      @plot_data, @datapoint = get_plot_data_radar(@analysis, params[:datapoint_id])
+    else
+      #plot the latest datapoint
+      @plot_data, @datapoint = get_plot_data_radar(@analysis)
+    end
+    respond_to do |format|
+      format.json { render json: {:datapoint => {:id => @datapoint.id, :name => @datapoint.name}, :radardata => @plot_data }}
+    end
+
+  end
+
   def plot_data
     @analysis = Analysis.find(params[:id])
 
@@ -495,47 +522,12 @@ class AnalysesController < ApplicationController
     @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
     @plot_data = get_plot_data(@analysis, @mappings)
-    @plot_data_radar = get_plot_data_radar(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: {:mappings => @mappings, :radardata => @plot_data_radar, :plotvars => @plotvars, :data => @plot_data}}
+      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data}}
     end
   end
 
-  # Data for Bar chart of objective functions actual values vs target values
-  # "% error"-like, but negative when actual is less than target and positive when it is more than target
-  # for now: only plots the latest datapoint
-  def get_plot_data_bar(analysis, datapoint_id = nil)
-
-    ovs = analysis.output_variables
-    plot_data_bar = []
-
-    if !datapoint_id.nil?
-      logger.info('datapoint was NIL')
-      dp = analysis.data_points.find(datapoint_id)
-    else
-      if analysis.analysis_type == "sequential_search"
-        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
-
-    if dp['results']
-      ovs.each do |ov|
-        if ov['objective_function']
-          dp_values = []
-          dp_values << ov['name']
-          dp_values << ((dp['results'][ov['name']]- ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
-          plot_data_bar << dp_values
-        end
-      end
-
-    end
-
-    return plot_data_bar, dp
-
-  end
 
   def page_data
     @analysis = Analysis.find(params[:id])
@@ -618,39 +610,77 @@ class AnalysesController < ApplicationController
     plotvars
   end
 
-  def get_plot_data_radar(analysis, mappings)
-    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
-    # and this is just an ugly mapping, sorry all.
+  # Data for Bar chart of objective functions actual values vs target values
+  # "% error"-like, but negative when actual is less than target and positive when it is more than target
+  # for now: only plots the latest datapoint
+  def get_plot_data_bar(analysis, datapoint_id = nil)
 
-    ovs = @analysis.output_variables
-    plot_data_radar = []
-    if @analysis.analysis_type == "sequential_search"
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
+    ovs = analysis.output_variables
+    plot_data_bar = []
+
+    if !datapoint_id.nil?
+      dp = analysis.data_points.find(datapoint_id)
     else
-      dps = @analysis.data_points.all.order_by(:run_end_time.desc)
-    end
-    dps.each do |dp|
-      if dp['results']
-        plot_data = []
-        plot_data2 = []      
-        ovs.each do |ov|
-          if ov['objective_function']  
-            dp_values = {}
-            dp_values["axis"] = ov['name'] 
-            if !ov['scaling_factor'].nil?
-            	dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
-            else
-            	dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
-            end
-            plot_data << dp_values
-          end
-        end          
-        plot_data_radar << plot_data
-        break
+      if analysis.analysis_type == "sequential_search"
+        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
       end
     end
-    plot_data_radar
+
+    if dp['results']
+      ovs.each do |ov|
+        if ov['objective_function']
+          dp_values = []
+          dp_values << ov['name']
+          dp_values << ((dp['results'][ov['name']]- ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
+          plot_data_bar << dp_values
+        end
+      end
+
+    end
+
+    return plot_data_bar, dp
+
+  end
+
+  #get data for radar chart
+  def get_plot_data_radar(analysis, datapoint_id = nil)
+    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
+    # and this is just an ugly mapping, sorry all.
+    # TODO: not sure why this is doubly nested array, but it's necessary for the radar plot code
+
+    ovs = analysis.output_variables
+    plot_data_radar = []
+
+    if !datapoint_id.nil?
+      dp = analysis.data_points.find(datapoint_id)
+    else
+      if analysis.analysis_type == "sequential_search"
+        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
+    end
+
+    if dp['results']
+      plot_data = []
+      ovs.each do |ov|
+        if ov['objective_function']
+          dp_values = {}
+          dp_values["axis"] = ov['name']
+          if !ov['scaling_factor'].nil?
+            dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+          else
+            dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+          end
+          plot_data << dp_values
+        end
+      end
+    end
+    plot_data_radar << plot_data
+
+    return plot_data_radar, dp
   end
 
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
