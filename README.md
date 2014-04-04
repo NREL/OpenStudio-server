@@ -1,3 +1,6 @@
+# NOTE: THIS REPO HAS BEEN MOVED. THE REPO IS NOW HERE: https://github.com/nrel/openstudio-server
+#       DO NOT COMMIT TO THIS REPO
+
 # OpenStudio Server
 
 ## Description
