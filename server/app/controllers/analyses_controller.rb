@@ -336,6 +336,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  #TODO: this can be deprecated?
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
 
@@ -343,6 +344,7 @@ class AnalysesController < ApplicationController
       format.html # plot_parallelcoordinates.html.erb
     end
   end
+
   # other version with form to control what data to plot
   def plot_parallelcoordinates2
 
@@ -364,6 +366,43 @@ class AnalysesController < ApplicationController
     end
   end
 
+  #interactive XY plot: choose x and y variables
+  def plot_xy_interactive
+    @analysis = Analysis.find(params[:id])
+
+    @mappings = @analysis.get_superset_of_input_variables
+    @plotvars = get_plot_variables(@analysis)
+
+    @allvars = []
+    @mappings.each do |key, val|
+      @allvars << val
+    end
+    @plotvars.each do |val|
+      @allvars << val
+    end
+
+    #variables represent the variables we want graphed. Nil = all
+    @variables = []
+    if params[:variables].nil?
+      @variables << @plotvars[0] << @plotvars[1]
+    else
+      if !params[:variables][:x].nil?
+        @variables << params[:variables][:x]
+      else
+        @variables << @plotvars[0]
+      end
+      if !params[:variables][:y].nil?
+        @variables << params[:variables][:y]
+      else
+        @variables << @plotvars[0]
+      end
+    end
+
+    respond_to do |format|
+      format.html # plot_xy.html.erb
+    end
+  end
+
 
   # The results is the same as the variables hash which defines which results to export.  If nil it will only
   # export the results that are in the output_variables hash
@@ -375,11 +414,6 @@ class AnalysesController < ApplicationController
     else
       dps = @analysis.data_points.all
     end
-
-    # load in the output variables that are requested (including objective functions)
-    # this includes "total_energy"
-    #ovs =  get_plot_variables(@analysis)
-    #logger.info("OVS! #{ovs}")
 
     dps.each do |dp|
       # the datapoint is considered complete if it has results set
@@ -429,6 +463,27 @@ class AnalysesController < ApplicationController
     end
 
     plot_data
+  end
+
+  def plot_data_xy
+    #TODO: either figure out how to ajaxify the json directly to reduce db calls
+    #TODO: or remove data from the @plot_data variable (we are returning everything for now)
+    @analysis = Analysis.find(params[:id])
+
+    # Get the mappings of the variables that were used. Move this to the datapoint class
+    @mappings = @analysis.get_superset_of_input_variables
+
+    # if no variables are specified, use first one(s) in the list
+    if params[:variables].nil?
+      @plotvars = get_plot_variables(@analysis)
+    else
+      @plotvars = params[:variables].split(",")
+    end
+    @plot_data = get_plot_data(@analysis, @mappings)
+
+    respond_to do |format|
+      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data}}
+    end
   end
 
   def plot_scatter
