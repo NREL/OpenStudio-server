@@ -1,6 +1,5 @@
 # Non Sorting Genetic Algorithm
 class Analysis::NsgaNrel
-class Analysis::NsgaNrel
   include Analysis::R
 
   def initialize(analysis_id, options = {})
