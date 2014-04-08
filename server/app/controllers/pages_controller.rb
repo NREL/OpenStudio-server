@@ -34,11 +34,11 @@ class PagesController < ApplicationController
 
     @analyses.each do |run|
       row = {}
-      row["id"] = run.id
-      row["name"] = run.name
-      row["project_name"] = run.project.name
-      row["project_id"] = run.project.id
-      row["created_at"] = run.created_at
+      row["id"] = run.id.nil? ? nil : run.id
+      row["name"] = run.name.nil? ? nil : run.name
+      row["project_name"] = run.project.nil? ? nil : run.project.name
+      row["project_id"] = run.project.nil? ? nil : run.project.id
+      row["created_at"] = run.created_at.nil? ? nil : run.created_at
       row["failed"] = run.data_points.where(:status_message => 'datapoint failure').count
       @results << row
 
