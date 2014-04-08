@@ -324,11 +324,14 @@ class Analysis::Rgenoud
 	    print(paste("varEps:",varEps))
 	    varEps <- ifelse(varseps!=0,varseps,varEps)
             print(paste("merged varEps:",varEps))
+            varDom <- cbind(varMin,varMax)
+            print(paste("varDom:",varDom))
 
             dom <- c(min(vars[,1]),max(vars[,1]))
             for (i in 2:ncol(vars)){
               dom <- rbind(dom,c(min(vars[,i]),max(vars[,i])))
             }
+            print(paste("dom:",dom))
             
             print("setup gradient")
             gn <- g
