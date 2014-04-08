@@ -35,10 +35,8 @@
 
       var tooltip = d3.select("#xy-div")
           .append("div")
-          .style("position", "absolute")
-          .style("z-index", "10")
-          .style("visibility", "hidden")
-          .text("na");
+          .attr("class", "tooltip")
+          .style("opacity", 0)
 
       var svg = d3.select("#xy-div").append("svg")
           .attr("width", width + margin.left + margin.right)
@@ -77,7 +75,6 @@
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
             .attr("y", -40)
-            //.attr("dy", ".71em")
             .style("text-anchor", "end")
             .text(y_variable)
             .style("font-size","14px");
@@ -96,14 +93,13 @@
             .style("fill",function (d) {
               return color(d.iteration);
             }).on("click", function (d) {
-              return tooltip.style("visibility", "visible")
-                  .style("background", "white")
-                  .style("border-style", "solid")
-                  .style("border-width", "1px")
-                  .style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px")
+
+              tooltip.transition().duration(200).style("opacity", .9);
+              return tooltip.style("left", (d3.event.pageX - 190) + "px")
+                  .style("top", (d3.event.pageY - 60) + "px")
                   .html("X: " + d[x_variable].toFixed(2) +
                       "</br>Y: " + d[y_variable].toFixed(2) +
-                      "</br>url: <a href=" + d.data_point_uuid + ">View Data Point</a>");
+                      "</br><a href=" + d.data_point_uuid + ">View Data Point</a>");
             });
 
         });

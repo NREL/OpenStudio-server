@@ -90,6 +90,19 @@ svg {
     shape-rendering: crispEdges;
 }
 
+#xy-div .tooltip {
+    position: absolute;
+    text-align: center;
+    width: 100px;
+    height: 50px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: #e7e7e7;
+    border: 0px;
+    border-radius: 8px;
+    color:black;
+}
+
 .dot {
   stroke: #000;
 }
