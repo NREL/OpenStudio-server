@@ -1,5 +1,5 @@
 svg {
-  font: 10px sans-serif;
+  font: 12px sans-serif;
 }
 
 .background path {
@@ -58,12 +58,6 @@ svg {
     fill: #F7A11A;
 }
 
-.axis path, .axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-
 #bar-div .x.axis text {
  text-anchor: start !important;
 
@@ -84,8 +78,16 @@ svg {
 
 #xy-div {
   padding:20px 10px;
-  width: 800;
-  height: 500;
+  width: 1200;
+  height: 1000;
+}
+
+#xy-div .axis line,
+#xy-div .axis path {
+    fill: none;
+    stroke: #000;
+    stroke-width:2px;
+    shape-rendering: crispEdges;
 }
 
 .dot {

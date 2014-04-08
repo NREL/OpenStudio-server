@@ -1,6 +1,5 @@
 <h2>Analysis Results &mdash; <%= link_to @analysis.name, analysis_path(@analysis) %></h2>
 
-
 <% if @plot_data %>
   <div id="xy-div">
     <p>There are no results for this analysis.</p>
@@ -14,9 +13,9 @@
   <div id="xy-div">
     <script>
 
-      var margin = {top: 20, right: 20, bottom: 30, left: 40},
-          width = 900 - margin.left - margin.right,
-          height = 500 - margin.top - margin.bottom;
+      var margin = {top: 20, right: 20, bottom: 50, left: 50},
+          width = 900 - margin.left - margin.right + 1,
+          height = 600 - margin.top - margin.bottom - 1;
 
       var x = d3.scale.linear()
           .range([0, width]);
@@ -34,7 +33,7 @@
           .scale(y)
           .orient("left");
 
-      var tooltip = d3.select("body")
+      var tooltip = d3.select("#xy-div")
           .append("div")
           .style("position", "absolute")
           .style("z-index", "10")
@@ -49,18 +48,15 @@
 
       d3.json(encodeURI("plot_data_xy.json?variables=" + variables), function (error, data) {
 
-            console.log(data['plotvars'][0])
-            x_variable = data['plotvars'][0]
-            x.domain(d3.extent(data['data'], function (d) {
-              return d[data['plotvars'][0]];
-            })).nice();
+        x_variable = data['plotvars'][0]
+        x.domain(d3.extent(data['data'], function (d) {
+           return d[data['plotvars'][0]];
+        })).nice();
 
-
-            y_variable = data['plotvars'][1]
-            y.domain(d3.extent(data['data'], function (d) {
-              return d[data['plotvars'][1]];
-            })).nice();
-
+        y_variable = data['plotvars'][1]
+          y.domain(d3.extent(data['data'], function (d) {
+           return d[data['plotvars'][1]];
+        })).nice();
 
         svg.append("g")
             .attr("class", "x axis")
@@ -69,9 +65,10 @@
             .append("text")
             .attr("class", "label")
             .attr("x", width)
-            .attr("y", -6)
+            .attr("y", 40)
             .style("text-anchor", "end")
-            .text(x_variable);
+            .text(x_variable)
+            .style("font-size","14px");
 
         svg.append("g")
             .attr("class", "y axis")
@@ -79,10 +76,11 @@
             .append("text")
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
+            .attr("y", -40)
+            //.attr("dy", ".71em")
             .style("text-anchor", "end")
             .text(y_variable)
+            .style("font-size","14px");
 
         svg.selectAll("circle")
             .data(data['data'])
@@ -108,8 +106,7 @@
                       "</br>url: <a href=" + d.data_point_uuid + ">View Data Point</a>");
             });
 
-
-      });
+        });
 
     </script>
 
