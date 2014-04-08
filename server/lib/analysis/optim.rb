@@ -14,7 +14,7 @@ class Analysis::Optim
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
-                factr: 4.5036e10,
+                factr: 4.5036e13,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
