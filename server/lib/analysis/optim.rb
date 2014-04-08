@@ -14,7 +14,7 @@ class Analysis::Optim
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
-                factr: 4.5036e10,
+                factr: 4.5036e13,
                 maxit: 100,
                 normtype: "minkowski",
                 ppower: 2,
@@ -202,7 +202,7 @@ class Analysis::Optim
               }
               dbDisconnect(mongo)
   
-              ruby_command <- "/usr/local/rbenv/shims/ruby"
+              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
               } else {
@@ -220,7 +220,7 @@ class Analysis::Optim
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "/usr/local/rbenv/shims/ruby"         
+              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"         
               
               # convert the vector to comma separated values
               w = paste(x, collapse=",")        
