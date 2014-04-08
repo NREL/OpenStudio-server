@@ -71,13 +71,24 @@ svg {
 
 #bar-div .axis line,
 #bar-div .axis path {
-    fill: none;
-    stroke: #000;
-    stroke-width:1px;
-    shape-rendering: crispEdges;
+  fill: none;
+  stroke: #000;
+  stroke-width:1px;
+  shape-rendering: crispEdges;
 }
 
 .wide-table {
-    table-layout: fixed;
-    word-wrap: break-word;
+  table-layout: fixed;
+  word-wrap: break-word;
 }
+
+#xy-div {
+  padding:20px 10px;
+  width: 800;
+  height: 500;
+}
+
+.dot {
+  stroke: #000;
+}
+
