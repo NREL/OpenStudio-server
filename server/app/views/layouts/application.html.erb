@@ -33,7 +33,8 @@
 
 
   <div class="row-fluid header-row">
-    <%#= render 'layouts/flash_messages' %>
+    <!-- notices -->
+    <%= render 'layouts/flash_messages' if !flash.empty? %>
   </div>
   <%= yield %>
 
