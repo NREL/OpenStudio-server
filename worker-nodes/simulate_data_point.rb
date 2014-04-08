@@ -106,7 +106,7 @@ begin
 
   # call the run data point script
   # run from the /mnt/openstudio directory to get analysis chauffeur loaded
-  command = "ruby -I#{File.dirname(__FILE__)} #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory} -r AWS"
+  command = "ruby -W0 -I#{File.dirname(__FILE__)} #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory} -r AWS"
   ros.log_message "Calling #{command}", true
   result = `#{command}`
 
