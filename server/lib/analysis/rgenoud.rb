@@ -21,8 +21,8 @@ class Analysis::Rgenoud
                 normtype: "minkowski",
                 ppower: 2,
                 objective_functions: [],
-                pgtol: 1e-1,
-                factr: 1e15,
+                pgtol: 1e-2,
+                factr: 4.5036e13,
                 maxit: 100,
                 epsilongradient: 1e-4
             }
@@ -122,7 +122,10 @@ class Analysis::Rgenoud
     Rails.logger.info "starting lhs to discretize the variables"
     
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+
+    Rails.logger.info "mins_maxes: #{mins_maxes}"
+    Rails.logger.info "var_names: #{var_names}"
 
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
@@ -172,7 +175,9 @@ class Analysis::Rgenoud
         #popSize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
         
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'],:pgtol => @analysis.problem['algorithm']['pgtol']) do
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint 
+        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
+        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :varseps => mins_maxes[:eps], :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'],:pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -182,7 +187,10 @@ class Analysis::Rgenoud
             print(paste("objDim:",objDim))
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
- 
+            
+            print(paste("min:",mins))
+            print(paste("max:",maxes))
+             
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
@@ -190,8 +198,9 @@ class Analysis::Rgenoud
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
             }          
-            print(vars)      
-            print(vartypes)
+            print(paste("vars:",vars))
+            print(paste("vartypes:",vartypes))
+            print(paste("varnames:",varnames))
   
             
             #f(x) takes a UUID (x) and runs the datapoint
@@ -255,14 +264,14 @@ class Analysis::Rgenoud
               sclfactor <- NULL
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "nil"){
+                if (json[objfuntemp] != "NULL"){
                   objvalue[i] <- as.numeric(json[objfuntemp])
                 } else {
                   objvalue[i] <- 1.0e19
                   cat(data_point_directory," Missing ", objfuntemp,"\n");
                 }
                 objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "nil"){
+                if (json[objfuntargtemp] != "NULL"){
                   objtarget[i] <- as.numeric(json[objfuntargtemp])
                 } else {
                   objtarget[i] <- 0.0
@@ -279,6 +288,8 @@ class Analysis::Rgenoud
                   sclfactor[i] <- 1.0
                 }                
               }
+              options(digits=8)
+              options(scipen=-2)
               print(paste("Objective function results are:",objvalue))
               print(paste("Objective function targets are:",objtarget))
               print(paste("Objective function scaling factors are:",sclfactor))             
@@ -301,8 +312,18 @@ class Analysis::Rgenoud
               vars <- rbind(vars, c(NA))
             }
   
-            print(nrow(vars))
-            print(ncol(vars))
+            print(paste("nrow(vars):",nrow(vars)))
+            print(paste("ncol(vars):",ncol(vars)))
+            
+            varMin <- mins
+	    varMax <- maxes
+	    varMean <- (mins+maxes)/2.0
+	    varDomain <- maxes - mins
+	    varEps <- varDomain*epsilongradient
+	    print(paste("varseps:",varseps))
+	    print(paste("varEps:",varEps))
+	    varEps <- ifelse(varseps!=0,varseps,varEps)
+            print(paste("merged varEps:",varEps))
 
             dom <- c(min(vars[,1]),max(vars[,1]))
             for (i in 2:ncol(vars)){
@@ -312,30 +333,15 @@ class Analysis::Rgenoud
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
-            clusterExport(cl,"epsilongradient")
+            clusterExport(cl,"varEps")
             
-            parallelGradient <- function(params, ...) { # Now use the cluster 
-                print(paste("params:",params))
-                print(paste("epsilongradient:",epsilongradient))
-                if (length(params) > 1) {
- 	          dp = cbind(rep(0,length(params)),diag(params * epsilongradient)); 
- 	        } else {
- 	          dp = cbind(rep(0,length(params)),(params * epsilongradient));
- 	        }
-	        Fout = parCapply(cl, dp, function(x) gn(params + x,...)); # Parallel 
-	        if (length(params) > 1) {
-	           return((Fout[-1]-Fout[1])/diag(dp[,-1])); 
-	        } else {
-	           return((Fout[-1]-Fout[1])/(dp[,-1]));
-	        }
-            }
-
             vectorGradient <- function(x, ...) { # Now use the cluster 
-	        vectorgrad(func=gn, x=x, method="two", eps=epsilongradient,cl=cl, debug=TRUE);
+	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
             print(paste("Initial iterate set to:",varMean))
+            print(paste("Length of variable domain:",varDomain))
             print(paste("factr set to:",factr))
             print(paste("pgtol set to:",pgtol))
             
