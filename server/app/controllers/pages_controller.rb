@@ -63,21 +63,5 @@ class PagesController < ApplicationController
 
     end
 
-    #@completed_runs = @analysis.data_points.where(:status => 'completed', :status_message => 'completed normal').count
-    #@queued_runs = @analysis.data_points.where(:status => 'queued').count
-    #@running_runs = @analysis.data_points.where(:status => 'running').count
-    #@na_runs = @analysis.data_points.where(:status => 'na').count
-    #@failed_runs = @analysis.data_points.where(:status_message => 'datapoint failure').count
-
-    # count each type of simulation
-    #@status_cnt = @analysis.data_points.collection.aggregate("$group" => { "_id" => "$status", count: {"$sum" =>  1} })
-    #@failed_cnt = @analysis.data_points.where(:status_message => 'datapoint failure').count
-
-
-
-
-
-
-
   end
 end
