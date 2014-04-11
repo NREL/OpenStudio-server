@@ -1,5 +1,5 @@
 svg {
-  font: 10px sans-serif;
+  font: 12px sans-serif;
 }
 
 .background path {
@@ -58,12 +58,6 @@ svg {
     fill: #F7A11A;
 }
 
-.axis path, .axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-
 #bar-div .x.axis text {
  text-anchor: start !important;
 
@@ -71,13 +65,45 @@ svg {
 
 #bar-div .axis line,
 #bar-div .axis path {
+  fill: none;
+  stroke: #000;
+  stroke-width:1px;
+  shape-rendering: crispEdges;
+}
+
+.wide-table {
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
+#xy-div {
+  padding:20px 10px;
+  width: 1200;
+  height: 1000;
+}
+
+#xy-div .axis line,
+#xy-div .axis path {
     fill: none;
     stroke: #000;
     stroke-width:1px;
     shape-rendering: crispEdges;
 }
 
-.wide-table {
-    table-layout: fixed;
-    word-wrap: break-word;
+#xy-div .tooltip {
+    position: absolute;
+    text-align: center;
+    width: 100px;
+    height: 50px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: #e7e7e7;
+    border: 0px;
+    border-radius: 8px;
+    color:black;
 }
+
+.dot {
+  stroke: #000;
+}
+

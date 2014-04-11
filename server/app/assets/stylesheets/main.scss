@@ -351,9 +351,11 @@ h2.header-large {
 }
 
 .analysis-container {
-  padding:10px;
+  padding:15px;
   margin:10px 0px;
-  border:1px solid black;
+  width:100%;
+  border:10px solid #e7e7e7;
+  background-color:#f9f9f9;
   text-align:center;
   .pie {
     padding:0px 5px;
@@ -461,4 +463,12 @@ h2.header-large {
 
 .pad-top-30 {
   padding-top:30px;
+}
+
+
+#flash_messages {
+  color: green;
+  padding:20px;
+  margin-top:10px;
+  border: 3px solid green;
 }

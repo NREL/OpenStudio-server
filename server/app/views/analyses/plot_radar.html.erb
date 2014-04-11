@@ -1,24 +1,7 @@
 <%= javascript_tag do %>
   datapoint_id = '<%= j @datapoint.id %>';
 <% end %>
-<h2>Analysis Results</h2>
-<style>
-    body {
-        font: 12px sans-serif;
-    }
-
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        font: 12px sans-serif;
-        shape-rendering: crispEdges;
-    }
-
-    .dot {
-        stroke: #000;
-    }
-</style>
+<h2>Analysis Results &mdash; <%= link_to @analysis.name, analysis_path(@analysis) %></h2>
 
 <% if @datapoint.status != 'completed' %>
   <p>Datapoint <%= link_to(@datapoint.name, data_point_path(@datapoint.id)) %> has not completed.  There are no results available yet.</p>
@@ -104,7 +87,6 @@
     </div>
 
 <% end %>
-<%= link_to("Back to Analysis", analysis_path(@analysis)) %>
 
 
 
