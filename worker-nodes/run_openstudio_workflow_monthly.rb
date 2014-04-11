@@ -287,7 +287,7 @@ begin
   end
 
   ros.log_message "Waiting for simulation to finish", true
-  command = "ruby #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} \
+  command = "ruby -W0 #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} \
               -w #{@weather_filename} -p #{post_process_filename}"
   #command += " -e #{run_args[:energyplus]}" unless run_args.nil?
   #command += " --idd-path #{run_args[:idd]}" unless run_args.nil?
@@ -410,6 +410,28 @@ rescue Exception => e
   ros.communicate_failure()
 ensure
   ros.log_message "#{__FILE__} Completed", true
+  
+    # Always clean up
+    require 'pathname'
+    require 'fileutils'
+    paths_to_rm = []
+    paths_to_rm << Pathname.glob("*.osm")
+    paths_to_rm << Pathname.glob("*.ini")
+    paths_to_rm << Pathname.glob("*.idf")
+    paths_to_rm << Pathname.glob("*.idd")
+    paths_to_rm << Pathname.glob("EnergyPlus")
+    paths_to_rm << Pathname.glob("ExpandObjects")
+    paths_to_rm << Pathname.glob("*.epw")
+    paths_to_rm << Pathname.glob("*.eso")
+    paths_to_rm << Pathname.glob("*.so")
+    paths_to_rm << Pathname.glob("*.idd")
+    paths_to_rm << Pathname.glob("*.audit")
+    paths_to_rm << Pathname.glob("*.bnd")
+    paths_to_rm << Pathname.glob("*.mtd")
+    paths_to_rm << Pathname.glob("*.mtr")
+    paths_to_rm << Pathname.glob("*.rdd")
+    paths_to_rm << Pathname.glob("*.sql")
+  paths_to_rm.each { |p| FileUtils.rm_rf(p) }
 
   # Always clean up
   require 'pathname'
