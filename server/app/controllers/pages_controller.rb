@@ -34,11 +34,11 @@ class PagesController < ApplicationController
 
     @analyses.each do |run|
       row = {}
-      row["id"] = run.id
-      row["name"] = run.name
-      row["project_name"] = run.project.name
-      row["project_id"] = run.project.id
-      row["created_at"] = run.created_at
+      row["id"] = run.id.nil? ? nil : run.id
+      row["name"] = run.name.nil? ? nil : run.name
+      row["project_name"] = run.project.nil? ? nil : run.project.name
+      row["project_id"] = run.project.nil? ? nil : run.project.id
+      row["created_at"] = run.created_at.nil? ? nil : run.created_at
       row["failed"] = run.data_points.where(:status_message => 'datapoint failure').count
       @results << row
 
@@ -62,22 +62,6 @@ class PagesController < ApplicationController
       @totals << cnt
 
     end
-
-    #@completed_runs = @analysis.data_points.where(:status => 'completed', :status_message => 'completed normal').count
-    #@queued_runs = @analysis.data_points.where(:status => 'queued').count
-    #@running_runs = @analysis.data_points.where(:status => 'running').count
-    #@na_runs = @analysis.data_points.where(:status => 'na').count
-    #@failed_runs = @analysis.data_points.where(:status_message => 'datapoint failure').count
-
-    # count each type of simulation
-    #@status_cnt = @analysis.data_points.collection.aggregate("$group" => { "_id" => "$status", count: {"$sum" =>  1} })
-    #@failed_cnt = @analysis.data_points.where(:status_message => 'datapoint failure').count
-
-
-
-
-
-
 
   end
 end

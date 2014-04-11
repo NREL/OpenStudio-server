@@ -12,18 +12,19 @@ class Analysis::Rgenoud
 	    random_seed: 1979,
             algorithm: {
                 generations: 1,
-                waitGenerations: 1,
-                popSize: 30,
-                boundaryEnforcement: 2,
-                printLevel: 2,
+                waitgenerations: 3,
+                popsize: 30,
+                boundaryenforcement: 2,
+                bfgsburnin: 2,
+                printlevel: 2,
                 balance: false,
-                solutionTolerance: 0.0001,
+                solutiontolerance: 0.01,
                 normtype: "minkowski",
                 ppower: 2,
                 objective_functions: [],
-                pgtol: 1e-2,
-                factr: 4.5036e13,
-                maxit: 100,
+                pgtol: 1e-1,
+                factr: 4.5036e14,
+                maxit: 5,
                 epsilongradient: 1e-4
             }
         }
@@ -95,7 +96,7 @@ class Analysis::Rgenoud
       raise "Number of max iterations was not set or equal to zero (must be 1 or greater)"
     end
 
-    if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
+    if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
       raise "Must have number of samples to discretize the parameter space"
     end
 
@@ -122,22 +123,22 @@ class Analysis::Rgenoud
     Rails.logger.info "starting lhs to discretize the variables"
     
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
 
     Rails.logger.info "mins_maxes: #{mins_maxes}"
     Rails.logger.info "var_names: #{var_names}"
 
     # Result of the parameter space will be column vectors of each variable
-    Rails.logger.info "Samples are #{samples}"
+    #Rails.logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster_started = false
     cluster = nil
     process = nil
     begin
-      if samples.empty? || samples.size < 1
+      if var_names.empty? || var_names.size < 1
         Rails.logger.info "No variables were passed into the options, therefore exit"
-        raise "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
+        raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
       end
   
       # Start up the cluster and perform the analysis
@@ -172,12 +173,12 @@ class Analysis::Rgenoud
       if cluster_started
         #maxit is the max number of iterations to calculate
         #varNo is the number of variables (ncol(vars))
-        #popSize is the number of sample points in the variable (nrow(vars))
+        #popsize is the number of sample points in the variable (nrow(vars))
         #epsilongradient is epsilon in numerical gradient calc
         
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint 
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :varseps => mins_maxes[:eps], :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popSize'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryEnforcement'],:printLevel => @analysis.problem['algorithm']['printLevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutionTolerance'], :waitGenerations => @analysis.problem['algorithm']['waitGenerations'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'],:pgtol => @analysis.problem['algorithm']['pgtol']) do
+        @r.command(:vartypes => var_types, :varnames => var_names, :varseps => mins_maxes[:eps], :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :popSize => @analysis.problem['algorithm']['popsize'], :BFGSburnin => @analysis.problem['algorithm']['bfgsburnin'], :boundaryEnforcement => @analysis.problem['algorithm']['boundaryenforcement'],:printLevel => @analysis.problem['algorithm']['printlevel'],:balance => @analysis.problem['algorithm']['balance'], :solutionTolerance => @analysis.problem['algorithm']['solutiontolerance'], :waitGenerations => @analysis.problem['algorithm']['waitgenerations'], :maxit => @analysis.problem['algorithm']['maxit'], :epsilongradient => @analysis.problem['algorithm']['epsilongradient'], :factr => @analysis.problem['algorithm']['factr'],:pgtol => @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo)) 
             clusterEvalQ(cl,library(rjson)) 
@@ -195,10 +196,6 @@ class Analysis::Rgenoud
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
                     
-            for (i in 1:ncol(vars)){
-              vars[,i] <- sort(vars[,i])
-            }          
-            print(paste("vars:",vars))
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
   
@@ -212,7 +209,7 @@ class Analysis::Rgenoud
               }
               dbDisconnect(mongo)
   
-              ruby_command <- "/usr/local/rbenv/shims/ruby"
+              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
               } else {
@@ -230,7 +227,7 @@ class Analysis::Rgenoud
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "/usr/local/rbenv/shims/ruby"         
+              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"         
               
               # convert the vector to comma separated values
               w = paste(x, collapse=",")        
@@ -301,20 +298,7 @@ class Analysis::Rgenoud
             }
             
             clusterExport(cl,"g")
-  
-            if (nrow(vars) == 1) {
-              print("not sure what to do with only one datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-            }
-            if (nrow(vars) == 0) {
-              print("not sure what to do with no datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-              vars <- rbind(vars, c(NA))
-            }
-  
-            print(paste("nrow(vars):",nrow(vars)))
-            print(paste("ncol(vars):",ncol(vars)))
-            
+              
             varMin <- mins
 	    varMax <- maxes
 	    varMean <- (mins+maxes)/2.0
@@ -326,13 +310,7 @@ class Analysis::Rgenoud
             print(paste("merged varEps:",varEps))
             varDom <- cbind(varMin,varMax)
             print(paste("varDom:",varDom))
-
-            dom <- c(min(vars[,1]),max(vars[,1]))
-            for (i in 2:ncol(vars)){
-              dom <- rbind(dom,c(min(vars[,i]),max(vars[,i])))
-            }
-            print(paste("dom:",dom))
-            
+           
             print("setup gradient")
             gn <- g
             clusterExport(cl,"gn")
@@ -347,11 +325,23 @@ class Analysis::Rgenoud
             print(paste("Length of variable domain:",varDomain))
             print(paste("factr set to:",factr))
             print(paste("pgtol set to:",pgtol))
+            print(paste("BFGSburnin set to:",BFGSburnin))
             
             print(paste("Number of generations set to:",gen))
-            results <- genoud(fn=g, nvars=ncol(vars), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=dom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
+            #results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
+            results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-            #results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, reltol=reltol, maxit=maxit))
+	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+	    Rlog[grep('vartypes:',Rlog)]
+            Rlog[grep('varnames:',Rlog)]
+            Rlog[grep('<=',Rlog)]
+            print(paste("popsize:",results$pop.size))
+            print(paste("peakgeneration:",results$peakgeneration))
+            print(paste("generations:",results$generations))
+            print(paste("gradients:",results$gradients))
+            print(paste("par:",results$par))
+            print(paste("value:",results$value))
+            flush.console() 
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
           }
 

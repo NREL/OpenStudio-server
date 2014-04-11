@@ -1,0 +1,2 @@
+#!/bin/bash
+(/usr/local/rbenv/shims/ruby.orig "$@" 3>&1 1>&2 2>&3 | grep -v 'Insecure world writable dir'; exit ${PIPESTATUS[0]}) 3>&1 1>&2 2>&3
