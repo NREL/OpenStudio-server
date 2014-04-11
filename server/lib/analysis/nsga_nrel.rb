@@ -11,6 +11,8 @@ class Analysis::NsgaNrel
         problem: {
             random_seed: 1979,
             algorithm: {
+                number_of_samples: 30,
+                sample_method: "individual_variables",
                 generations: 1,
                 toursize: 2,
                 cprob: 0.7,

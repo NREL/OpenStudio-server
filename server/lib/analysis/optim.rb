@@ -11,6 +11,8 @@ class Analysis::Optim
         problem: {
 	      random_seed: 1979,
             algorithm: {
+                number_of_samples: 3,
+                sample_method: "individual_variables",
                 generations: 1,
                 method: "L-BFGS-B",
                 pgtol: 1e-2,
