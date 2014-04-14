@@ -1,4 +1,4 @@
 master|192.168.33.10|os-server|2|vagrant|vagrant|true
-worker|192.168.33.11|os-worker-1|7|vagrant|vagrant|true
+worker|192.168.33.11|os-worker-1|2|vagrant|vagrant|true
 worker|192.168.33.12|os-worker-2|2|vagrant|vagrant|true
 worker|192.168.33.13|os-worker-3|2|vagrant|vagrant|true
