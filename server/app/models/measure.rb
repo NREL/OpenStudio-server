@@ -93,7 +93,8 @@ class Measure
         end
       end
 
-      if k == "variables"
+      if k == "variables" && v
+        #Rails.logger.info "How do i get the values here: #{v.inspect}"
         v.each do |json_var|
           Rails.logger.info "JSON had a variable named '#{json_var[:name]}'"
           new_var = Variable.create_by_os_argument_json(analysis_id, json_var)
