@@ -141,9 +141,9 @@ ensure
   paths_to_rm << Pathname.glob("EnergyPlus")
   paths_to_rm << Pathname.glob("*.epw")
   paths_to_rm << Pathname.glob("*.idd")
-  paths_to_rm << Pathname.glob("*.audit")
-  paths_to_rm << Pathname.glob("*.bnd")
+  #paths_to_rm << Pathname.glob("*.audit")
+  #paths_to_rm << Pathname.glob("*.bnd")
   paths_to_rm << Pathname.glob("*.mtd")
   paths_to_rm << Pathname.glob("*.rdd")
-  #paths_to_rm.each { |p| FileUtils.rm_rf(p) }
+  paths_to_rm.each { |p| FileUtils.rm_rf(p) }
 end
