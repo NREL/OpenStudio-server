@@ -157,7 +157,7 @@ module CommunicateMongo
     communicate_log_message dp, "Zipping up Analysis Directory #{analysis_dir}"
     if File.directory? analysis_dir
       Dir.chdir(analysis_dir)
-      `zip -r data_point_#{dp.uuid}.zip .`
+      `zip -9 -r --exclude=*.rb* data_point_#{dp.uuid}.zip .`
     end
 
     # zip up only the reports folder
@@ -168,7 +168,6 @@ module CommunicateMongo
       `zip -r data_point_#{dp.uuid}_reports.zip reports`
     end
     Dir.chdir(current_dir)
-
   end
 
 end
