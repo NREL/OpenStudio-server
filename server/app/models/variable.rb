@@ -23,6 +23,7 @@ class Variable
   field :static, :type => Boolean, default: false
   field :relation_to_output => String, default: "standard" # or can be inverse
   field :static_value # don't type this because it can take on anything (other than hashes and arrays)
+  
   scope :enabled, where(perturbable: true)
 
   # Relationships
