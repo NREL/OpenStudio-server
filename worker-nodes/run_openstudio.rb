@@ -202,7 +202,7 @@ begin
 
   ros.log_message "Communicating Results", true
 
-  # implemented differently for Local vs. Vagrant or AWS
+  # implemented differently for Local vs. Vagrant or AWS. This zips up the directory as well
   ros.communicate_results(data_point, directory)
 
   if options[:profile_run]
