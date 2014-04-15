@@ -36,6 +36,7 @@ class PagesController < ApplicationController
       row = {}
       row["id"] = run.id.nil? ? nil : run.id
       row["name"] = run.name.nil? ? nil : run.name
+      row["display_name"] = run.display_name.nil? ? nil : run.display_name
       row["project_name"] = run.project.nil? ? nil : run.project.name
       row["project_id"] = run.project.nil? ? nil : run.project.id
       row["created_at"] = run.created_at.nil? ? nil : run.created_at

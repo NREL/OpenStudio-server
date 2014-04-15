@@ -24,9 +24,9 @@
     <div class="span4">
       <div class="analysis-container">
         <div class="analysis-content">
-          <div class="analysis-header"><%= link_to(res["name"], analysis_path(res["id"])) %></div>
+          <div class="analysis-header"><%= link_to(res["display_name"], analysis_path(res["id"])) %></div>
           <p>Project: <%= link_to(res["project_name"], project_path(res["project_id"])) %></p>
-          <p>Date Started: <% unless res["created_at"].nil? %><%= res["created_at"].strftime("%m/%d/%Y") %><% end %></p>
+          <p>Date Started: <% unless res["created_at"].nil? %><%= res["created_at"].strftime("%m/%d/%Y %H:%M:%S") %><% end %></p>
           <div id="pie<%= index %>" class="pie"></div>
         </div>
       </div>
