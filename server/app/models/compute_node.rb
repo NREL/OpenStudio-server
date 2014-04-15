@@ -36,69 +36,47 @@ class ComputeNode
   def self.copy_data_to_workers(analysis)
     # copy the datafiles over to the worker nodes
     ComputeNode.where(valid: true).each do |node|
-      Rails.logger.info("Configuring node '#{node.node_type}'")
-      if node.node_type == 'server'
-        Rails.logger.info("Configuring and copying data to master node")
+      Rails.logger.info("Configuring node '#{node.ip_address}'")
+      # removed the entire section where I pivoted on type of server and now using SSH even to talk
+      # to the server node to better manage the permissions
+      Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
         if !analysis.use_shm
           upload_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-          FileUtils.mkdir_p(upload_dir)
-          Rails.logger.info("Analysis directory is #{upload_dir}")
-          FileUtils.chmod_R(0777, upload_dir)
-          FileUtils.copy(analysis.seed_zip.path, "#{upload_dir}/")
-          shell_result = `cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}`
-          FileUtils.chmod_R(0777, upload_dir)
+          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
+          session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}/")
+
+          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}") do |channel, stream, data|
+            logger.info(data)
+          end
+          session.loop
         else
           upload_dir = "/run/shm/openstudio/analysis_#{analysis.id}"
           storage_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-
-          shell_result = `rm -rf #{upload_dir}`
-          shell_result = `rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis_#{analysis.id}`
-          FileUtils.mkdir_p(upload_dir)
-          FileUtils.chmod_R(0777, upload_dir)
-          File.cp(analysis.seed_zip.path, "#{upload_dir}/")
-          shell_result = `cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}`
-          FileUtils.chmod_R(0777, upload_dir)
-        end
-      else
-        Net::SSH.start(node.ip_address, node.user, :password => node.password) do |session|
-          if !analysis.use_shm
-            upload_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-            session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
-              Rails.logger.info(data)
-            end
-            session.loop
-
-            session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}/")
-
-            session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}") do |channel, stream, data|
-              logger.info(data)
-            end
-            session.loop
-          else
-            upload_dir = "/run/shm/openstudio/analysis_#{analysis.id}"
-            storage_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-            session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
-              Rails.logger.info(data)
-            end
-            session.loop
-
-            session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis_#{analysis.id}") do |channel, stream, data|
-              Rails.logger.info(data)
-            end
-            session.loop
-
-            session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
-              Rails.logger.info(data)
-            end
-            session.loop
-
-            session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}")
-
-            session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
-              logger.info(data)
-            end
-            session.loop
+          session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
+            Rails.logger.info(data)
           end
+          session.loop
+
+          session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis_#{analysis.id}") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
+          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+            Rails.logger.info(data)
+          end
+          session.loop
+
+          session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}")
+
+          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+            logger.info(data)
+          end
+          session.loop
         end
       end
     end
@@ -127,7 +105,7 @@ class ComputeNode
         Rails.logger.info "#{remote_filename} exists... moving to new location"
         FileUtils.mv(remote_filename, local_filename)
         FileUtils.mv(remote_filename_reports, local_filename_reports)
-
+      
         remote_file_downloaded = true
         remote_file_exists = true
       else
