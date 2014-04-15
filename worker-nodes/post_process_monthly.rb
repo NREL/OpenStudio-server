@@ -34,7 +34,7 @@ def add_element(hash, var_name, value, xpath = nil)
   else
     test = value.to_s
     value = test.match('\.').nil? ? Integer(test) : Float(test) rescue test.to_s
-    if value.is_a?(Fixnum) or value.is_a?(Float)
+    if value.is_a?(Fixnum) or zip -9 -r --exclude=*.rb* --exclude=EnergyPlus data_point_#{dp.uuid}.zip .value.is_a?(Float)
       store_val = value.to_f
     else
       store_val = value.to_s
@@ -210,9 +210,9 @@ ensure
   paths_to_rm << Pathname.glob("EnergyPlus")
   paths_to_rm << Pathname.glob("*.epw")
   paths_to_rm << Pathname.glob("*.idd")
-  paths_to_rm << Pathname.glob("*.audit")
-  paths_to_rm << Pathname.glob("*.bnd")
+  #paths_to_rm << Pathname.glob("*.audit")
+  #paths_to_rm << Pathname.glob("*.bnd")
   paths_to_rm << Pathname.glob("*.mtd")
   paths_to_rm << Pathname.glob("*.rdd")
-  #paths_to_rm.each { |p| FileUtils.rm_rf(p) }
+  paths_to_rm.each { |p| FileUtils.rm_rf(p) }
 end
