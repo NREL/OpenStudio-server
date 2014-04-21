@@ -11,8 +11,8 @@ run_list([
 default_attributes(
     :openstudio => {
         :installer => {
-            :version => "1.3.1",
-            :version_revision => "cf41a5d03b",
+            :version => "1.3.2",
+            :version_revision => "386caf0e00",
             :platform => "Linux-Ruby2.0"
         }
     },
