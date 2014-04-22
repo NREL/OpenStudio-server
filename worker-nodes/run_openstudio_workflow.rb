@@ -320,6 +320,10 @@ begin
   ros.log_message "JSON file is #{report_json}"
   File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
 
+  # report the attributes of each of the measures
+  ros.log_message "Measure output attributes are #{@output_attributes}"
+  File.open("#{run_directory}/measure_attributes.json", 'w') { |f| f << JSON.pretty_generate(@output_attributes) }
+
   # If profiling, then go ahead and get the results here.  Note that we are not profiling the 
   # result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
   # also ZIPs up the folder and we want the results of the performance to also be in ZIP file.
