@@ -34,6 +34,10 @@ class AnalysisChauffeur
     
     @communicate_object = @communicate_module.get_datapoint(uuid_or_path)
   end
+
+  def datapoint
+    @communicate_object
+  end
   
   def communicate_started
     #communicate_method.camelize.constantize
