@@ -1,0 +1,189 @@
+{
+  "analysis": {
+    "display_name": "Ruby Continuous Variables Example Problem",
+    "name": "ruby_continuous_variables_example_problem",
+    "output_variables": [
+      {
+        "display_name": "Heating Natural Gas",
+        "name": "heating_natural_gas",
+        "units": "MJ/m2",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": 462.1635,
+        "scaling_factor": null,
+        "objective_function_group": 1
+      },
+      {
+        "display_name": "Cooling Electricity",
+        "name": "cooling_electricity",
+        "units": "MJ/m2",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": 84.16202,
+        "scaling_factor": null,
+        "objective_function_group": 2
+      }
+    ],
+    "problem": {
+      "algorithm": {
+        "sample_method": "all_variables",
+        "number_of_samples": 2,
+        "objective_functions": [
+
+        ]
+      },
+      "name": "Problem",
+      "workflow": [
+        {
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "machine_name": "apply_the_measure_to_a_specific_space_type_or_to_the_entire_model.",
+              "name": "space_type",
+              "value": "*Entire Building*",
+              "value_type": "choice",
+              "uuid": "7e85d590-ac91-0131-71cc-14109fdf0b37",
+              "version_uuid": "7e85daa0-ac91-0131-71cd-14109fdf0b37"
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_material_and_installation_cost_for_lighting_per_floor_area_(%).",
+              "name": "material_and_installation_cost",
+              "value": 150.0,
+              "value_type": "double",
+              "uuid": "7e85f380-ac91-0131-71cf-14109fdf0b37",
+              "version_uuid": "7e85f890-ac91-0131-71d0-14109fdf0b37"
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_in_demolition_costs_for_lighting_per_floor_area_(%).",
+              "name": "demolition_cost",
+              "value": 0.0,
+              "value_type": "double",
+              "uuid": "7e8600b0-ac91-0131-71d1-14109fdf0b37",
+              "version_uuid": "7e860840-ac91-0131-71d2-14109fdf0b37"
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "machine_name": "years_until_costs_start_(whole_years).",
+              "name": "years_until_costs_start",
+              "value": 0,
+              "value_type": "integer",
+              "uuid": "7e861210-ac91-0131-71d3-14109fdf0b37",
+              "version_uuid": "7e861770-ac91-0131-71d4-14109fdf0b37"
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "machine_name": "demolition_costs_occur_during_initial_construction?",
+              "name": "demo_cost_initial_const",
+              "value": false,
+              "value_type": "bool",
+              "uuid": "7e862020-ac91-0131-71d5-14109fdf0b37",
+              "version_uuid": "7e862570-ac91-0131-71d6-14109fdf0b37"
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "machine_name": "expected_life_(whole_years).",
+              "name": "expected_life",
+              "value": 15,
+              "value_type": "integer",
+              "uuid": "7e862da0-ac91-0131-71d7-14109fdf0b37",
+              "version_uuid": "7e8633d0-ac91-0131-71d8-14109fdf0b37"
+            },
+            {
+              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
+              "machine_name": "increase_o_&_m_costs_for_lighting_per_floor_area_(%).",
+              "name": "om_cost",
+              "value": 0.0,
+              "value_type": "double",
+              "uuid": "7e863c70-ac91-0131-71d9-14109fdf0b37",
+              "version_uuid": "7e8641f0-ac91-0131-71da-14109fdf0b37"
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "machine_name": "o_&_m_frequency_(whole_years).",
+              "name": "om_frequency",
+              "value": 1,
+              "value_type": "integer",
+              "uuid": "7e864a30-ac91-0131-71db-14109fdf0b37",
+              "version_uuid": "7e864f60-ac91-0131-71dc-14109fdf0b37"
+            }
+          ],
+          "bcl_measure_directory": "./measures/reduce_lighting_loads_by_percentage",
+          "measure_definition_directory_CHANGE_TO_ME": "./measures/reduce_lighting_loads_by_percentage",
+          "bcl_measure_class_name_ADDME": "ReduceLightingLoadsByPercentage",
+          "measure_definition_class_name_CHANGE_TO_ME": "ReduceLightingLoadsByPercentage",
+          "measure_definition_class_name": "ReduceLightingLoadsByPercentage",
+          "bcl_measure_uuid": "7e8567e0-ac91-0131-71c6-14109fdf0b37",
+          "measure_definition_uuid_CHANGE_TO_ME": "7e85adc0-ac91-0131-71c7-14109fdf0b37",
+          "bcl_measure_version_uuid": "7e85b8c0-ac91-0131-71c8-14109fdf0b37",
+          "measure_definition_version_uuid_CHANGE_TO_ME": "7e85bf40-ac91-0131-71c9-14109fdf0b37",
+          "measure_type": "RubyMeasure",
+          "name": "reduce_lighting_loads_by_percentage",
+          "display_name": "Reduce Lighting Loads by Percentage",
+          "uuid": "7e85c4c0-ac91-0131-71ca-14109fdf0b37",
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Lighting Power Reduction",
+                "machine_name": "lighting_power_reduction",
+                "name": "lighting_power_reduction_percent",
+                "uuid": "7e85e7f0-ac91-0131-71ce-14109fdf0b37",
+                "version_uuid": "b33cf6b0-f1aa-4706-afab-9470e6bd1912"
+              },
+              "display_name": "Lighting Power Reduction",
+              "machine_name": "lighting_power_reduction",
+              "name": "lighting_power_reduction",
+              "minimum": 0.0,
+              "maximum": 70.0,
+              "units": "",
+              "value_type": "double",
+              "variable": true,
+              "relation_to_output": "",
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "modes",
+                    "value": 20.0
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 70.0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 11.666666666666666
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": null
+                  }
+                ],
+                "type": "triangle_uncertain"
+              },
+              "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
+              "variable_type": "RubyContinuousVariable",
+              "version_uuid": "26e7d8de-83e3-4a53-938b-45d3e0f29953"
+            }
+          ],
+          "version_uuid": "7e85ca10-ac91-0131-71cb-14109fdf0b37",
+          "workflow_index": 0,
+          "workflow_step_type": "Measure"
+        }
+      ],
+      "analysis_type": "lhs"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seed/seed.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw"
+    }
+  }
+}
