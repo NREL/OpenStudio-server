@@ -1,6 +1,4 @@
-require 'openstudio' # TODO: remove openstudio as a dependency of this script.  
 require 'json'
-require 'zlib' # for compressing html
 
 module CommunicateMongo
   def self.communicate_started(dp)
@@ -67,9 +65,9 @@ module CommunicateMongo
       if prev_time
         delta = Time.now.to_f - prev_time.to_f
       end
-      log_message = "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S")} UTC] [Delta: #{delta.round(4)}s] #{log_message}"
+      log_message = "[#{Time.now.strftime('%Y-%m-%d %H:%M:%S')} UTC] [Delta: #{delta.round(4)}s] #{log_message}"
     else
-      log_message = "[#{Time.now.strftime("%Y-%m-%d %H:%M:%S")} UTC] #{log_message}"
+      log_message = "[#{Time.now.strftime('%Y-%m-%d %H:%M:%S')} UTC] #{log_message}"
     end
 
     puts log_message #print the message to screen
