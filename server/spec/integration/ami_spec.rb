@@ -12,7 +12,7 @@ describe "AmiIntegration" do
       # else 
       aws_options = {
           :ami_lookup_version => 2,
-          :host => "cbr-jenkins-01.nrel.gov",
+          :host => "cbr-jenkins.nrel.gov",
           :url => "/job/OpenStudio%20AMI%20List/lastSuccessfulBuild/artifact/vagrant"
       }
       @aws = OpenStudio::Aws::Aws.new(aws_options)

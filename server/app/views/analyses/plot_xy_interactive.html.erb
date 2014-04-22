@@ -1,0 +1,140 @@
+<h2>Analysis Results &mdash; <%= link_to @analysis.name, analysis_path(@analysis) %></h2>
+
+<% if @plot_data %>
+  <div id="xy-div">
+    <p>There are no results for this analysis.</p>
+  </div>
+<% else %>
+
+  <%= javascript_tag do %>
+    variables = <%=raw @variables.to_json %>;
+  <% end %>
+
+  <div id="xy-div">
+    <script>
+
+      var margin = {top: 20, right: 20, bottom: 50, left: 50},
+          width = 900 - margin.left - margin.right + 1,
+          height = 600 - margin.top - margin.bottom - 1;
+
+      var x = d3.scale.linear()
+          .range([0, width]);
+
+      var y = d3.scale.linear()
+          .range([height, 0]);
+
+      var color = d3.scale.category20();
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+      var tooltip = d3.select("#xy-div")
+          .append("div")
+          .attr("class", "tooltip")
+          .style("opacity", 0)
+
+      var svg = d3.select("#xy-div").append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.json(encodeURI("plot_data_xy.json?variables=" + variables), function (error, data) {
+
+        x_variable = data['plotvars'][0]
+        x.domain(d3.extent(data['data'], function (d) {
+           return d[data['plotvars'][0]];
+        })).nice();
+
+        y_variable = data['plotvars'][1]
+          y.domain(d3.extent(data['data'], function (d) {
+           return d[data['plotvars'][1]];
+        })).nice();
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", 40)
+            .style("text-anchor", "end")
+            .text(x_variable)
+            .style("font-size","14px");
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -40)
+            .style("text-anchor", "end")
+            .text(y_variable)
+            .style("font-size","14px");
+
+        svg.selectAll("circle")
+            .data(data['data'])
+            .enter().append("svg:circle")
+            .attr("class", "dot")
+            .attr("r", 6)
+            .attr("cx", function (d) {
+              return x(d[x_variable]);
+            })
+            .attr("cy", function (d) {
+              return y(d[y_variable]);
+            })
+            .style("fill",function (d) {
+              return color(d.iteration);
+            }).on("click", function (d) {
+
+              tooltip.transition().duration(200).style("opacity", .9);
+              return tooltip.style("left", (d3.event.pageX - 190) + "px")
+                  .style("top", (d3.event.pageY - 60) + "px")
+                  .html("X: " + d[x_variable].toFixed(2) +
+                      "</br>Y: " + d[y_variable].toFixed(2) +
+                      "</br><a href=" + d.data_point_uuid + ">View Data Point</a>");
+            });
+
+        });
+
+    </script>
+
+  </div>
+
+  <div id="chart-form">
+    <div class="chart-text">
+      <p>Select the x and y variables to plot below.</p>
+      <div class="row-fluid">
+        <%= form_tag("/analyses/#{@analysis.id}/plot_xy_interactive") do  %>
+          <div class="span5">
+            <fieldset>
+            <%= label_tag("variables[x]", "X axis:") %>
+            <%= select_tag "variables[x]", options_for_select(@allvars, @variables.first) %>
+            </fieldset>
+            <fieldset>
+            <%= label_tag("variables[y]", "Y axis:") %>
+            <%= select_tag "variables[y]", options_for_select(@allvars, @variables.last) %>
+            </fieldset>
+            <p>
+            <div class="submit-form"> <%= submit_tag "Update Chart" %>  </div>
+            </p>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+
+
+<% end %>
+
+
+
+

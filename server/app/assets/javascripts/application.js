@@ -22,6 +22,7 @@
 //= require radarchart
 
 //= require underscore
+//= require bootstrap
 //= require backbone
 //= require openstudio_server
 //= require_tree ../templates
@@ -29,3 +30,11 @@
 //= require_tree ./collections
 //= require_tree ./views
 //= require_tree ./routers
+
+/*
+$(document).ready(function () {
+    $(".pagination").find("a").livequery(function () {
+        $(this).attr("data-remote", true);
+    });
+});
+*/

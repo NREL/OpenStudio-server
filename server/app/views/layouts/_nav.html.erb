@@ -1,18 +1,34 @@
-<div class="navbar navbar-inverse navbar-fixed-top">
-  <div class="navbar-inner">
-    <div class="fluid-container">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
-      <div class="nav-collapse collapse">
-        <ul class="nav">
-          <li<%= active_nav('home') %>><%= link_to 'Home', projects_path %></li>
-          <!--<li<%#= active_nav('about') %>><%#= link_to 'About', about_path %> </li>-->
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <div class="collapse nav-collapse">
+    <ul class="nav navbar-nav">
+      <li<%= active_nav('Home') %>><%= link_to 'Home', root_path %></li>
+      <li<%= active_nav('Projects') %>><%= link_to 'Projects', projects_path %></li>
+
+         <li  class="dropdown <%= active_nav('Analyses') %>">
+
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyses <b class="caret"></b></a>
+
+        <ul class="dropdown-menu">
+
+          <% analyses_nav.each do |item| %>
+
+            <li <%= active_subnav(item.id)%>><%= link_to item.name, analysis_path(item.id) %></li>
+          <% end %>
+          <% if analyses_nav.count > 1 %>
+            <li <%= active_subnav('all') %>><%= link_to "Show All", analyses_path %></li>
+          <% end %>
         </ul>
 
-      </div><!--/.nav-collapse -->
-    </div>
-  </div>
-</div>
+      </li>
+
+
+      <li<%= active_nav('Admin') %>><%= link_to 'Admin', admin_index_path %></li>
+      <li<%= active_nav('About') %>><%= link_to 'About', about_path %></li>
+
+    </ul>
+   </div>
+   </div><!-- /.container-fluid -->
+</nav>
+
+

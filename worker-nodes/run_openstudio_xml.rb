@@ -32,6 +32,11 @@ optparse = OptionParser.new do |opts|
   opts.on("-p", "--profile-run", "Profile the Run OpenStudio Call") do |pr|
     options[:profile_run] = pr
   end
+
+  options[:debug] = false
+  opts.on('--debug', "Set the debug flag") do
+    options[:debug] = true
+  end
 end
 optparse.parse!
 
@@ -102,6 +107,8 @@ begin
   @model = nil
   @model_idf = nil
   @weather_filename = nil
+  @output_attributes = []
+  @report_measures = []
   @space_lib_path = File.expand_path(File.join(File.dirname(__FILE__), "../lib/openstudio_xml/space_types"))
 
   ros.log_message "Space Type Library set to #{@space_lib_path}"
@@ -110,6 +117,7 @@ begin
 
   # get json from database
   data_point_json, analysis_json = ros.get_problem("hash")
+
 
   ros.log_message "Parsing Analysis JSON input & Applying Measures", true
   # by hand for now, go and get the information about the measures
@@ -182,7 +190,6 @@ begin
           measure = measure_name.constantize.new
 
           ros.log_message "iterate over arguments for workflow item #{wf['name']}", true
-
 
           # The Argument hash in the workflow json file looks like the following
           # {
@@ -294,7 +301,6 @@ begin
           measure_path = wf['bcl_measure_directory'].split("/").last(2).first
           measure_name = wf['bcl_measure_class_name_ADDME']
 
-
           require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
 
           measure = measure_name.constantize.new
@@ -327,6 +333,7 @@ begin
             end
           end
 
+          variable_found = false
           ros.log_message "iterate over variables for workflow item #{wf['name']}", true
           if wf['variables']
             wf['variables'].each do |wf_var|
@@ -346,6 +353,7 @@ begin
                       value_set = v.setValue(variable_value)
                       raise "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
                       argument_map[variable_name] = v.clone
+                      variable_found = true
                     else
                       raise "Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
                       ros.log_message("Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
@@ -363,21 +371,25 @@ begin
             end
           end
 
-          if wf['measure_type'] == "RubyMeasure"
-            measure.run(@model, runner, argument_map)
-          elsif wf['measure_type'] == "EnergyPlusMeasure"
-            measure.run(@model_idf, runner, argument_map)
+          if variable_found
+            if wf['measure_type'] == "RubyMeasure"
+              measure.run(@model, runner, argument_map)
+            elsif wf['measure_type'] == "EnergyPlusMeasure"
+              measure.run(@model_idf, runner, argument_map)
+            elsif wf['measure_type'] == "ReportingMeasure"
+              report_measures << measure
+            end
+            result = runner.result
+
+            ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
+            ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
+
+            result.warnings.each { |w| ros.log_message w.logMessage, true }
+            result.errors.each { |w| ros.log_message w.logMessage, true }
+            result.info.each { |w| ros.log_message w.logMessage, true }
+            result.attributes.each { |att| @output_attributes << att }
           end
-          result = runner.result
-
-          ros.log_message result.initialCondition.get.logMessage, true if !result.initialCondition.empty?
-          ros.log_message result.finalCondition.get.logMessage, true if !result.finalCondition.empty?
-
-          result.warnings.each { |w| ros.log_message w.logMessage, true }
-          result.errors.each { |w| ros.log_message w.logMessage, true }
-          result.info.each { |w| ros.log_message w.logMessage, true }
         end
-
       end
     end
   end
