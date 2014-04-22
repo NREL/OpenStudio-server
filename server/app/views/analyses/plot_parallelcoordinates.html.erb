@@ -1,4 +1,4 @@
-<h2>Analysis Results</h2>
+<h2>Analysis Results for <%= link_to @analysis.name, analysis_path(@analysis) %></h2>
 
 <% if @plot_data %>
     <div id="graph-div">
@@ -8,16 +8,16 @@
     <div id="graph-div">
       <script>
           //size of chart
-          var m = [30, 10, 10, 10],
-                  w = 1200 - m[1] - m[3],
-                  h = 800 - m[0] - m[2];
+          var m = [230, 20, 50, 20],
+                  w = 1260 - m[1] - m[3],
+                  h = 1000 - m[0] - m[2];
 
           var x = d3.scale.ordinal().rangePoints([0, w], 1),
                   y = {},
                   dragging = {};
 
           var line = d3.svg.line(),
-                  axis = d3.svg.axis().orient("left"),
+                  axis = d3.svg.axis().ticks(5).tickFormat(d3.format("s")).orient("left"),
                   background,
                   foreground;
 
@@ -112,8 +112,9 @@
                           d3.select(this).call(axis.scale(y[d]));
                       })
                       .append("svg:text")
-                      .attr("text-anchor", "middle")
+                      .attr("text-anchor", "start")
                       .attr("y", -9)
+                      .attr("transform", "rotate(-45)")
                       .text(String);
 
               // Add and store a brush for each axis.
@@ -125,6 +126,8 @@
                       .selectAll("rect")
                       .attr("x", -8)
                       .attr("width", 16);
+
+
           });
           function position(d) {
               var v = dragging[d];
@@ -160,6 +163,7 @@
       </script>
 
     </div>
+
 
 <% end %>
 </br>

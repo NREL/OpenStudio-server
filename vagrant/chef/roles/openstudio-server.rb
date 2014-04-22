@@ -29,6 +29,6 @@ default_attributes(
 override_attributes(
     :r => {
         :rserve_start_on_boot => true,
-        :rserve_log_path => "/var/www/rails/openstudio/log/Rserve.log"
+        :rserve_log_path => "/var/www/rails/openstudio/log/Rserve.log",
     }
 )

@@ -1,11 +1,17 @@
+require 'will_paginate/array'
 class AnalysesController < ApplicationController
+
   # GET /analyses
   # GET /analyses.json
   def index
     if params[:project_id].nil?
       @analyses = Analysis.all
+      @project = nil
+
     else
-      @analysis = Project.find(params[:project_id]).analyses
+      @project = Project.find(params[:project_id])
+      @analyses = @project.analyses
+
     end
 
     respond_to do |format|
@@ -17,12 +23,70 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
+
+    #for pagination
+    per_page = 50
+
     @analysis = Analysis.find(params[:id])
 
-    @objective_functions = []
-
-    #todo: move this to the page_data or another secondary call
     if @analysis
+
+      #tab status
+      @status = 'all'
+      if !params[:status].nil?
+        @status = params[:status]
+      end
+
+      #blanks should be saved as nil or it will crash
+      @all_page = @status == 'all' ? params[:page] : params[:all_page]
+      @all_page = @all_page == '' ? nil : @all_page
+      @completed_page = @status == 'completed' ? params[:page] : params[:completed_page]
+      @completed_page = @completed_page == '' ? nil : @completed_page
+      @started_page = @status == 'started' ? params[:page] : params[:started_page]
+      @started_page = @started_page == '' ? nil : @started_page
+      @queued_page = @status == 'queued' ? params[:page] : params[:queued_page]
+      @queued_page = @queued_page == '' ? nil : @queued_page
+      @na_page = @status == 'na' ? params[:page] : params[:na_page]
+      @na_page = @na_page == '' ? nil : @na_page
+
+      @all_sims_total = @analysis.search(params[:all_search], 'all')
+      #if "view_all" param is set, use @all_sims_total instead of @all_sims (for ALL tab only)
+      @view_all = 0
+      if !params[:view_all].nil? and params[:view_all] == "1"
+          @all_sims = @all_sims_total
+          @view_all = 1
+      else
+        @all_sims = @all_sims_total.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims_total.count)
+      end
+
+      @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
+      @completed_sims = @completed_sims_total.paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims_total.count)
+
+      @started_sims_total = @analysis.search(params[:started_search], 'started')
+      @started_sims = @started_sims_total.paginate(:page => @started_page, :per_page => per_page, :total_entries => @started_sims_total.count)
+
+      @queued_sims_total = @analysis.search(params[:queued_search], 'queued')
+      @queued_sims = @queued_sims_total.paginate(:page => @queued_page, :per_page => per_page, :total_entries => @queued_sims_total.count)
+
+      @na_sims_total = @analysis.search(params[:na_search], 'na')
+      @na_sims = @na_sims_total.paginate(:page => @na_page, :per_page => per_page, :total_entries => @na_sims_total.count)
+
+
+      case @status
+        when 'all'
+          @status_simulations = @all_sims
+        when 'completed'
+          @status_simulations = @completed_sims
+        when 'started'
+          @status_simulations = @started_sims
+        when 'queued'
+          @status_simulations = @queued_sims
+        when 'na'
+          @status_simulations = @na_sims
+      end
+
+      @objective_functions = []
+
       if @analysis.output_variables
         @analysis.output_variables.each do |ov|
           if ov['objective_function']
@@ -45,6 +109,7 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: {:analysis => @analysis} }
+      format.js
     end
   end
 
@@ -114,6 +179,20 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.html { redirect_to project_path(project_id) }
       format.json { head :no_content }
+    end
+  end
+
+  #stop analysis button action
+  def stop
+    @analysis = Analysis.find(params[:id])
+    res = @analysis.stop_analysis
+
+    respond_to do |format|
+      if res[0]
+        format.html { redirect_to @analysis, notice: 'Analysis flag changed to stop. Will wait until the last submitted run finishes before killing.' }
+      else
+        format.html { redirect_to @analysis, notice: 'Analysis flag did NOT change.' }
+      end
     end
   end
 
@@ -257,11 +336,153 @@ class AnalysesController < ApplicationController
     end
   end
 
+  #TODO: this can be deprecated?
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
-      format.html # debug_log.html.erb
+      format.html # plot_parallelcoordinates.html.erb
+    end
+  end
+
+  # other version with form to control what data to plot
+  def plot_parallelcoordinates2
+
+    @analysis = Analysis.find(params[:id])
+    #mappings + plotvars make the superset of chart variables
+    @mappings = @analysis.get_superset_of_input_variables
+    @plotvars = get_plot_variables(@analysis)
+
+    #variables represent the variables we want graphed. Nil = all
+    @variables = params[:variables] ? params[:variables] : nil
+
+    #whatever is defined as variables here should be the only returned data
+    @plot_data = get_plot_data2(@analysis, @mappings, @plotvars, @variables)
+
+
+
+    respond_to do |format|
+      format.html # plot_parallelcoordinates.html.erb
+    end
+  end
+
+  #interactive XY plot: choose x and y variables
+  def plot_xy_interactive
+    @analysis = Analysis.find(params[:id])
+
+    @mappings = @analysis.get_superset_of_input_variables
+    @plotvars = get_plot_variables(@analysis)
+
+    @allvars = []
+    @mappings.each do |key, val|
+      @allvars << val
+    end
+    @plotvars.each do |val|
+      @allvars << val
+    end
+
+    #variables represent the variables we want graphed. Nil = all
+    @variables = []
+    if params[:variables].nil?
+      @variables << @plotvars[0] << @plotvars[1]
+    else
+      if !params[:variables][:x].nil?
+        @variables << params[:variables][:x]
+      else
+        @variables << @plotvars[0]
+      end
+      if !params[:variables][:y].nil?
+        @variables << params[:variables][:y]
+      else
+        @variables << @plotvars[0]
+      end
+    end
+
+    respond_to do |format|
+      format.html # plot_xy.html.erb
+    end
+  end
+
+
+  # The results is the same as the variables hash which defines which results to export.  If nil it will only
+  # export the results that are in the output_variables hash
+  def get_plot_data2(analysis, variables, outputs, results = nil)
+    plot_data = []
+    if @analysis.analysis_type == "sequential_search"
+      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+      dps = dps.rotate(1) # put the starting point on top
+    else
+      dps = @analysis.data_points.all
+    end
+
+    dps.each do |dp|
+      # the datapoint is considered complete if it has results set
+      if dp['results']
+        dp_values = {}
+        dp_values["data_point_uuid"] = data_point_path(dp.id)
+
+        if results
+          #input variables: not in dp['results']
+          if dp.set_variable_values
+            variables.each do |k, v|
+              if results.include?(v)
+                logger.info("value: #{dp.set_variable_values[k]}")
+                dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
+              end
+            end
+          end
+          #output variables. Don't overwrite input variables from above
+          results.each do |key, _|
+            #TEMP: special case for "total_energy" (could also be called total_site_energy)
+            if key == "total_energy" and !dp.results[key]
+              dp_values[key] = dp['results']["total_site_energy"]
+            elsif !dp_values[key]
+              dp_values[key] = dp['results'][key] ? dp['results'][key] : nil
+            end
+          end
+
+        else
+          #go through variables and output variables
+          if dp.set_variable_values
+            variables.each do |k, v|
+              dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
+            end
+          end
+          outputs.each do |ov|
+            #TEMP: special case for "total_energy" (could be called total_site_energy)
+            if ov == "total_energy" and !dp['results'][ov]
+              dp_values["total_energy"] = dp['results']['total_site_energy']
+            else
+              dp_values[ov] = dp['results'][ov] if dp['results'][ov]
+            end
+          end
+        end
+
+        plot_data << dp_values
+      end
+    end
+
+    plot_data
+  end
+
+  def plot_data_xy
+    #TODO: either figure out how to ajaxify the json directly to reduce db calls
+    #TODO: or remove data from the @plot_data variable (we are returning everything for now)
+    @analysis = Analysis.find(params[:id])
+
+    # Get the mappings of the variables that were used. Move this to the datapoint class
+    @mappings = @analysis.get_superset_of_input_variables
+
+    # if no variables are specified, use first one(s) in the list
+    if params[:variables].nil?
+      @plotvars = get_plot_variables(@analysis)
+    else
+      @plotvars = params[:variables].split(",")
+    end
+    @plot_data = get_plot_data(@analysis, @mappings)
+
+    respond_to do |format|
+      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data}}
     end
   end
 
@@ -269,7 +490,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
-      format.html # results_scatter.html.erb
+      format.html # plot_scatter.html.erb
     end
   end
 
@@ -277,16 +498,80 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
-      format.html # results_scatter.html.erb
+      format.html # plot_xy.html.erb
     end
   end
 
   def plot_radar
     @analysis = Analysis.find(params[:id])
+    if !params[:datapoint_id].nil?
+      @datapoint = DataPoint.find(params[:datapoint_id])
+    else
+
+      if @analysis.analysis_type == "sequential_search"
+        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
+    end
 
     respond_to do |format|
-      format.html # results_scatter.html.erb
+      format.html # plot_radar.html.erb
     end
+  end
+
+  def plot_bar
+
+    @analysis = Analysis.find(params[:id])
+    if !params[:datapoint_id].nil?
+       @datapoint = DataPoint.find(params[:datapoint_id])
+    else
+
+      if @analysis.analysis_type == "sequential_search"
+        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
+    end
+
+    respond_to do |format|
+      format.html # plot_bar.html.erb
+    end
+  end
+
+
+  def plot_data_bar
+    #TODO: this should always take a datapoint param
+    @analysis = Analysis.find(params[:id])
+
+    if !params[:datapoint_id].nil?
+      #plot a specific datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
+    else
+      #plot the latest datapoint
+      @plot_data, @datapoint = get_plot_data_bar(@analysis)
+    end
+    respond_to do |format|
+      format.json { render json: {:datapoint => {:id => @datapoint.id, :name => @datapoint.name}, :bardata => @plot_data }}
+    end
+
+  end
+
+  def plot_data_radar
+    #TODO: this should always take a datapoint param
+    @analysis = Analysis.find(params[:id])
+
+    if !params[:datapoint_id].nil?
+      #plot a specific datapoint
+      @plot_data, @datapoint = get_plot_data_radar(@analysis, params[:datapoint_id])
+    else
+      #plot the latest datapoint
+      @plot_data, @datapoint = get_plot_data_radar(@analysis)
+    end
+    respond_to do |format|
+      format.json { render json: {:datapoint => {:id => @datapoint.id, :name => @datapoint.name}, :radardata => @plot_data }}
+    end
+
   end
 
   def plot_data
@@ -296,12 +581,12 @@ class AnalysesController < ApplicationController
     @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
     @plot_data = get_plot_data(@analysis, @mappings)
-    @plot_data_radar = get_plot_data_radar(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: {:mappings => @mappings, :radardata => @plot_data_radar, :plotvars => @plotvars, :data => @plot_data} }
+      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data}}
     end
   end
+
 
   def page_data
     @analysis = Analysis.find(params[:id])
@@ -355,7 +640,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.csv do
-        redirect_to @analysis, notice: "CSV not yet supported for downloading variables" 
+        redirect_to @analysis, notice: "CSV not yet supported for downloading variables"
         #write_and_send_csv(@analysis)
       end
       format.rdata do
@@ -374,45 +659,92 @@ class AnalysesController < ApplicationController
         plotvars << ov['name']
       end
     end
+
+    #add "total energy" if it's not already in the output variables
+    if !plotvars.include?("total_energy")
+      plotvars.insert(0, "total_energy")
+    end
+
     Rails.logger.info plotvars
     plotvars
   end
 
-  def get_plot_data_radar(analysis, mappings)
-    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
-    # and this is just an ugly mapping, sorry all.
+  # Data for Bar chart of objective functions actual values vs target values
+  # "% error"-like, but negative when actual is less than target and positive when it is more than target
+  # for now: only plots the latest datapoint
+  def get_plot_data_bar(analysis, datapoint_id = nil)
 
-    ovs = @analysis.output_variables
-    plot_data_radar = []
-    if @analysis.analysis_type == "sequential_search"
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
+    ovs = analysis.output_variables
+    plot_data_bar = []
+
+    if !datapoint_id.nil?
+      dp = analysis.data_points.find(datapoint_id)
     else
-      dps = @analysis.data_points.all
-    end
-    dps.each do |dp|
-      if dp['results']
-        plot_data = []
-        ovs.each do |ov|
-          if ov['objective_function']
-            dp_values = {}
-            dp_values["axis"] = ov['name']
-            dp_values["value"] = dp['results'][ov['name']]
-            plot_data << dp_values
-          end
-        end
-
-        plot_data_radar << plot_data
+      if analysis.analysis_type == "sequential_search"
+        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
       end
     end
 
-    plot_data_radar
+    if dp['results']
+      ovs.each do |ov|
+        if ov['objective_function']
+          dp_values = []
+          dp_values << ov['name']
+          dp_values << ((dp['results'][ov['name']]- ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
+          plot_data_bar << dp_values
+        end
+      end
+
+    end
+
+    return plot_data_bar, dp
+
   end
 
+  #get data for radar chart
+  def get_plot_data_radar(analysis, datapoint_id = nil)
+    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
+    # and this is just an ugly mapping, sorry all.
+    # TODO: not sure why this is doubly nested array, but it's necessary for the radar plot code
+
+    ovs = analysis.output_variables
+    plot_data_radar = []
+
+    if !datapoint_id.nil?
+      dp = analysis.data_points.find(datapoint_id)
+    else
+      if analysis.analysis_type == "sequential_search"
+        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
+    end
+
+    if dp['results']
+      plot_data = []
+      ovs.each do |ov|
+        if ov['objective_function']
+          dp_values = {}
+          dp_values["axis"] = ov['name']
+          if !ov['scaling_factor'].nil?
+            dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+          else
+            dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+          end
+          plot_data << dp_values
+        end
+      end
+    end
+    plot_data_radar << plot_data
+
+    return plot_data_radar, dp
+  end
 
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
   # a useful JSON for plotting (and exporting to CSV/R-dataframe)
-  # The results is the same as the varaibles hash which defines which results to export.  If nil it will only
+  # The results is the same as the variables hash which defines which results to export.  If nil it will only
   # export the results that in the output_variables hash
   def get_plot_data(analysis, variables, results = nil)
     plot_data = []
@@ -424,7 +756,7 @@ class AnalysesController < ApplicationController
     end
 
     # load in the output variables that are requested (including objective functions)
-    ovs = @analysis.output_variables
+    ovs = get_plot_variables(@analysis)
 
     dps.each do |dp|
       # the datapoint is considered complete if it has results set
@@ -449,13 +781,9 @@ class AnalysesController < ApplicationController
         else
           # output all output variables in the array of hashes (regardless if it is an objective function or not)
           ovs.each do |ov|
-            dp_values[ov['name']] = dp['results'][ov['name']] if dp['results'][ov['name']]
+            dp_values[ov] = dp['results'][ov] if dp['results'][ov]
           end
         end
-
-
-        # TEMP -- put out the total_energy in the JSON in case it isn't in the output_variables hash
-        dp_values["total_energy"] = dp['results']['total_energy'] || dp['results']['total_site_energy']
 
         plot_data << dp_values
       end

@@ -1,5 +1,5 @@
 svg {
-  font: 10px sans-serif;
+  font: 12px sans-serif;
 }
 
 .background path {
@@ -34,6 +34,76 @@ svg {
 
 #graph-div {
   padding: 20px 10px;
-  width: 900px;
-  height: 500px;
+  width: 1280px;
+  height: 1000px;
 }
+
+#radar-div {
+    padding:20px 10px;
+    width: 1200;
+    height: 600;
+}
+
+#bar-div {
+    padding:20px 10px;
+    width: 1200;
+    height: 800;
+}
+
+.bar.positive {
+    fill: #0079C2;
+}
+
+.bar.negative {
+    fill: #F7A11A;
+}
+
+#bar-div .x.axis text {
+ text-anchor: start !important;
+
+}
+
+#bar-div .axis line,
+#bar-div .axis path {
+  fill: none;
+  stroke: #000;
+  stroke-width:1px;
+  shape-rendering: crispEdges;
+}
+
+.wide-table {
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
+#xy-div {
+  padding:20px 10px;
+  width: 1200;
+  height: 1000;
+}
+
+#xy-div .axis line,
+#xy-div .axis path {
+    fill: none;
+    stroke: #000;
+    stroke-width:1px;
+    shape-rendering: crispEdges;
+}
+
+#xy-div .tooltip {
+    position: absolute;
+    text-align: center;
+    width: 100px;
+    height: 50px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: #e7e7e7;
+    border: 0px;
+    border-radius: 8px;
+    color:black;
+}
+
+.dot {
+  stroke: #000;
+}
+

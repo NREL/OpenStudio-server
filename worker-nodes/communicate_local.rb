@@ -22,13 +22,13 @@ module CommunicateLocal
     
     # verify the existence of required files
     data_point_json_path = run_dir / OpenStudio::Path.new("data_point_in.json")
-    raise "Required file '" + data_point_json_path.to_s + "' does not exist." if not File.exist?(data_point_json_path.to_s)
+    raise "Required file '" + data_point_json_path.to_s + "' does not exist." unless File.exist?(data_point_json_path.to_s)
     File.open(data_point_json_path.to_s, 'r') do |f|
       result[0] = f.read
     end
     
     formulation_json_path = project_path / OpenStudio::Path.new("formulation.json")
-    raise "Required file '" + formulation_json_path.to_s + "' does not exist." if not File.exist?(formulation_json_path.to_s)
+    raise "Required file '" + formulation_json_path.to_s + "' does not exist." unless File.exist?(formulation_json_path.to_s)
     File.open(formulation_json_path.to_s, 'r') do |f|
       result[1] = f.read
     end

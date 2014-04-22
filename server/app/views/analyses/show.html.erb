@@ -1,11 +1,11 @@
-<p id="notice"><%= notice %></p>
+
 
 <!-- <script type="text/javascript" charset="utf-8">
     <%#= render 'page_data.js' %>
 </script>
 -->
 
-<h1>Analysis Information</h1>
+<h2>Analysis Information</h2>
 
 <% if !@analysis %>
     <p>No analysis information found</p>
@@ -14,6 +14,7 @@
       <thead>
       <tr>
         <th>Name</th>
+        <th>Project</th>
         <th>Type</th>
         <th>Status</th>
         <th>Start Time (UTC)</th>
@@ -23,10 +24,10 @@
       <tr>
       </thead>
       <tbody>
-      <td><%= @analysis.name %></td>
+      <td><%= @analysis.display_name %></td>
+      <td><%= link_to(@analysis.project.name, project_path(@analysis.project)) %></td>
       <td><%= @analysis.analysis_type %></td>
       <td><%= @analysis.status %></td>
-
       <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.start_time.nil? %></td>
       <td><%= @analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless @analysis.end_time.nil? %></td>
       <td><%= (@analysis.end_time.to_f - @analysis.start_time.to_f).round(2) unless @analysis.end_time.nil? || @analysis.start_time.nil? %></td>
@@ -34,61 +35,70 @@
         | <%= link_to_if(!@analysis.seed_zip.nil?, "Zip File", @analysis.seed_zip.url(:original, false)) %> </td>
       </tbody>
     </table>
-
     <%= link_to "List of Measures (#{@analysis.measures.count})", analysis_measures_path(@analysis) %> |
     <%= link_to "List of Variables (#{@analysis.variables.count})", analysis_variables_path(@analysis) %> |
-    <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates_analysis_path(@analysis) %> |
+    <%= link_to 'View Parallel Coordinates Plot', plot_parallelcoordinates2_analysis_path(@analysis) %> |
     <%= link_to 'View Scatter Plot', plot_scatter_analysis_path(@analysis) %> |
-    <%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) if @objective_functions.count <= 2 %> |
-    <%= link_to 'View Radar Plot', plot_radar_analysis_path(@analysis) if @objective_functions.count > 2 %> |
+    <% if @objective_functions.count <= 2 %><%= link_to 'View XY Plot', plot_xy_analysis_path(@analysis) %> |<% end %>
+    <%= link_to 'Interactive XY Plot', plot_xy_interactive_analysis_path(@analysis) %> |
     <%= link_to 'Download CSV', download_data_analysis_path(@analysis, format: :csv) %> |
     <%= link_to 'Download R Data Frame', download_data_analysis_path(@analysis, format: :rdata) %> |
     <%= link_to "Debug Log", debug_log_analysis_path(@analysis) %>
 
+    <% if @analysis.status == 'started' %> <div class="button-container"><%= link_to("Stop Analysis", stop_analysis_path(@analysis), :class => "btn btn-mini") %></div><% end %>
 
-    <h1>Data Points (<%= @analysis.data_points.count if @analysis.data_points %>) </h1>
+    <h2 class="pad-top-30">Simulations (<%= @analysis.data_points.count if @analysis.data_points %>) </h2>
+
+    <ul class="nav nav-tabs">
+      <li <% if @status == 'all' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionAll">All</a></li>
+      <li <% if @status == 'completed' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionCompleted">Completed</a></li>
+      <li <% if @status == 'started' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionStarted">Started</a></li>
+      <li <% if @status == 'queued' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionQueued">Queued</a></li>
+      <li <% if @status == 'na' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionNA">Initialized</a></li>
+    </ul>
+    <div class="tab-content">
+      <div id="sectionAll" class="tab-pane fade <% if @status == 'all' %>in active<% end %>">
+        <div class="tab-container">
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @all_sims, :status => 'all', :all_page => @all_page, :completed_page => @completed_page, :started_page => @started_page, :queued_page => @queued_page, :na_page => @na_page})%>
+
+        </div>
+      </div>
+      <div id="sectionCompleted" class="tab-pane fade  <% if @status == 'completed' %> in active <% end %>">
+        <div class="tab-container">
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @completed_sims, :status => 'completed', :all_page => @all_page, :completed_page => @completed_page, :started_page => @started_page, :queued_page => @queued_page, :na_page => @na_page})%>
+        </div>
+      </div>
+      <div id="sectionStarted" class="tab-pane fade  <% if @status == 'started' %>in active<% end %>">
+        <div class="tab-container">
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @started_sims, :status => 'started', :all_page => @all_page, :completed_page => @completed_page, :started_page => @started_page, :queued_page => @queued_page, :na_page => @na_page})%>
+        </div>
+      </div>
+      <div id="sectionQueued" class="tab-pane fade  <% if @status == 'queued' %>in active <% end %>">
+        <div class="tab-container">
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @queued_sims, :status => 'queued', :all_page => @all_page, :completed_page => @completed_page, :started_page => @started_page, :queued_page => @queued_page, :na_page => @na_page})%>
+        </div>
+      </div>
+      <div id="sectionNA" class="tab-pane fade  <% if @status == 'na' %>in active<% end %>">
+        <div class="tab-container">
+
+            <%= render(:partial => "analyses/table", :locals => {:simulations => @na_sims, :status => 'na', :all_page => @all_page, :completed_page => @completed_page, :started_page => @started_page, :queued_page => @queued_page, :na_page => @na_page})%>
+        </div>
+      </div>
+    </div>
+
     <script>
         $(document).ready(function () {
-                    $("#datapointtable").tablesorter();
-                }
-        );
+          $("#datapointtable_all").tablesorter();
+          $("#datapointtable_completed").tablesorter();
+          $("#datapointtable_started").tablesorter();
+          $("#datapointtable_queued").tablesorter();
+          $("#datapointtable_na").tablesorter();
+         });
 
     </script>
-    <table id="datapointtable" class="tablesorter table table-striped">
-      <thead>
-      <tr>
-        <th>Name</th>
-        <th>Status</th>
-        <th>Status Message</th>
-        <% @objective_functions.each do |ov| %>
-            <th>Obj Func <%= ov['display_name'] %> </th>
-        <% end %>  
-        <th>Start Time (UTC)</th>
-        <th>End Time (UTC)</th>
-        <th>Delta Time (s)</th>
-        <th>View</th>
-        <th>Action</th>
-      </tr>
-      </thead>
-      <tbody>
-      <% @analysis.data_points.order_by(:run_start_time.desc, :name.asc).each do |dp| %>
-          <tr>
-            <td> <%= link_to "#{dp.name}", data_point_path(dp) %> </td>
-            <td> <%= dp.status %></td>
-            <td><%= dp.status_message if dp.status_message %></td>
-            <% @objective_functions.each do |ov| %>
-                <td><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']].round(2) : "" %>  </td>
-            <% end %>
-            <td> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
-            <td> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
-            <td><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
-            <td><%= link_to 'HTML', data_point_path(dp) %>
-              | <%= link_to 'OS JSON', data_point_path(dp, :format => :json) %>
-              | <%= link_to 'Full JSON', show_full_data_point_path(dp, :format => :json) %>
-              | <%= link_to_if(!dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name), "Zip File", download_data_point_path(dp)) %>
-            <td><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
-          </tr>
-      <% end %>
-      </tbody>
-    </table>
+
 <% end %>

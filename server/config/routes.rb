@@ -1,5 +1,5 @@
 OpenstudioServer::Application.routes.draw do
-  resources :projects do
+  resources :projects, shallow: true do
     member do
       get :status
     end
@@ -8,6 +8,7 @@ OpenstudioServer::Application.routes.draw do
       member do
         post :action
         post :upload
+        get :stop
         get :status
         get :page_data
         get :plot_data
@@ -18,9 +19,17 @@ OpenstudioServer::Application.routes.draw do
         get :plot_scatter
         get :plot_xy
         get :plot_radar
+        get :plot_bar
+        get :plot_data_bar
+        get :plot_data_radar
+        get :plot_data_xy
         get :download_data
         get :download_variables
+        match "plot_parallelcoordinates2" => "analyses#plot_parallelcoordinates2", :via => [:get, :post]
+        match "plot_xy_interactive" => "analyses#plot_xy_interactive", :via => [:get, :post]
       end
+
+
 
       resources :measures, :only => [:show, :index], shallow: true
       resources :variables, :only => [:show, :index], shallow: true
@@ -45,6 +54,7 @@ OpenstudioServer::Application.routes.draw do
   end
 
   match '/about' => 'pages#about'
+  match '/analyses' => 'analyses#index'
   
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -95,7 +105,7 @@ OpenstudioServer::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  root :to => 'projects#index'
+  root :to => 'pages#dashboard'
 
   # See how all your routes lay out with "rake routes"
 

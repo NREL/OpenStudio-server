@@ -31,6 +31,11 @@ optparse = OptionParser.new do |opts|
   opts.on("-p", "--profile-run", "Profile the Run OpenStudio Call") do |pr|
     options[:profile_run] = pr
   end
+
+  options[:debug] = false
+  opts.on('--debug', "Set the debug flag") do
+    options[:debug] = true
+  end
 end
 optparse.parse!
 
@@ -197,7 +202,7 @@ begin
 
   ros.log_message "Communicating Results", true
 
-  # implemented differently for Local vs. Vagrant or AWS
+  # implemented differently for Local vs. Vagrant or AWS. This zips up the directory as well
   ros.communicate_results(data_point, directory)
 
   if options[:profile_run]

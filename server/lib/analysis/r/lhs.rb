@@ -156,6 +156,11 @@ module Analysis::R
       grouped = {}
       samples = {}
       var_types = []
+      var_names = []
+      min_max = {}
+      min_max[:min] = []
+      min_max[:max] = []
+      min_max[:eps] = []
 
       # get the probabilities
       Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
@@ -167,7 +172,7 @@ module Analysis::R
       selected_variables.each do |var|
         Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
         sfp = nil
-        
+        var_names << var.name
         # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
         if var.uncertainty_type == "discrete_uncertain"
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
@@ -176,6 +181,14 @@ module Analysis::R
         else
           sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
           var_types << "continuous"
+        end
+        
+        min_max[:min] << var.lower_bounds_value
+        min_max[:max] << var.upper_bounds_value
+        if var.delta_x_value
+          min_max[:eps] << var.delta_x_value
+        else
+          min_max[:eps] << 0
         end
 
         grouped["#{var.measure.id}"] = {} if !grouped.has_key?(var.measure.id)
@@ -196,7 +209,7 @@ module Analysis::R
         samples = grouped 
       end
       Rails.logger.info "Grouped variables are #{grouped}"
-      [samples, var_types]
+      [samples, var_types, min_max, var_names]
     end
   end
 end
