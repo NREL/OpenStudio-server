@@ -17,6 +17,11 @@ optparse = OptionParser.new do |opts|
     options[:uuid] = uuid
   end
 
+  options[:problem_formulation] = nil
+  opts.on('--problem', String, "Optional problem formulation file which will override value in mongo") do |pr|
+      options[:problem_formulation] = pr
+  end
+
   options[:logLevel] = -1
   opts.on('-l', '--logLevel LOGLEVEL', Integer, "Level of detail for project.log file. Trace = -3, Debug = -2, Info = -1, Warn = 0, Error = 1, Fatal = 2.") do |logLevel|
     options[:logLevel] = logLevel

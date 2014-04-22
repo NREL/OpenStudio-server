@@ -44,19 +44,22 @@ module CommunicateMongo
     analysis = dp.analysis
 
     data_point_hash = Hash.new
-    data_point_hash[:data_point] = dp
-    data_point_hash[:openstudio_version] = analysis[:openstudio_version]
-
     analysis_hash = Hash.new
-    analysis_hash[:analysis] = analysis
-    analysis_hash[:openstudio_version] = analysis[:openstudio_version]
+    if analysis
+      data_point_hash[:data_point] = dp
+      data_point_hash[:openstudio_version] = analysis[:openstudio_version]
 
-    result = nil
+
+      analysis_hash[:analysis] = analysis
+      analysis_hash[:openstudio_version] = analysis[:openstudio_version]
+    end
+
     if format == "hash"
       [data_point_hash, analysis_hash]
     else
       [data_point_hash.to_json, analysis_hash.to_json]
     end
+
   end
 
   def self.communicate_log_message(dp, log_message, add_delta_time=false, prev_time=nil)
@@ -87,7 +90,7 @@ module CommunicateMongo
     dp.save! # redundant because next method calls save too.
   end
 
-  # report intermediate results to the database (typically these are measure initial and final values)
+# report intermediate results to the database (typically these are measure initial and final values)
   def self.communicate_intermediate_result(dp, h)
     if h
       dp.results ? dp.results.merge!(h) : dp.results = h
@@ -97,7 +100,7 @@ module CommunicateMongo
 
   def self.communicate_results_json(dp, eplus_json, analysis_dir)
     zip_results(dp, analysis_dir, 'workflow')
-    
+
     communicate_log_message dp, "Saving EnergyPlus JSON file"
     if eplus_json
       dp.results ? dp.results.merge!(eplus_json) : dp.results = eplus_json
@@ -142,7 +145,7 @@ module CommunicateMongo
     # copy some files into a report folder
     eplus_html = Dir.glob(eplus_search_path).last || nil
     if eplus_html
-      communicate_log_message dp, "Checking for HTML Report: #{eplus_html}" 
+      communicate_log_message dp, "Checking for HTML Report: #{eplus_html}"
       if File.exists? eplus_html
         # do some encoding on the html if possible
         html = File.read(eplus_html)
