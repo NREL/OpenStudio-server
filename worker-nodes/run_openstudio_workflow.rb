@@ -17,11 +17,6 @@ optparse = OptionParser.new do |opts|
     options[:uuid] = uuid
   end
 
-  options[:runType] = "AWS"
-  opts.on('-r', '--runType RUNTYPE', String, "String that indicates where Simulate Data Point is being run (Local|AWS).") do |runType|
-    options[:runType] = runType
-  end
-
   options[:logLevel] = -1
   opts.on('-l', '--logLevel LOGLEVEL', Integer, "Level of detail for project.log file. Trace = -3, Debug = -2, Info = -1, Warn = 0, Error = 1, Fatal = 2.") do |logLevel|
     options[:logLevel] = logLevel
@@ -125,7 +120,6 @@ begin
         if !File.exists?(@weather_filename)
           raise "Could not find weather file for simulation #{@weather_filename}"
         end
-
       else
         raise "No weather file path defined"
       end

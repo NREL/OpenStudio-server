@@ -71,6 +71,9 @@ ros.reload
 # Set the result of the project for R to know that this finished
 result = nil
 
+# load in the workflow helpers module
+require_relative 'workflow_helpers'
+
 begin
   ros.communicate_started() # this initializes everything as well
   ros.log_message "Running Simulate Data Point: #{__FILE__}", true
@@ -78,6 +81,7 @@ begin
   directory = nil
   analysis_dir = "/mnt/openstudio"
   store_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{options[:uuid]}"
+  FileUtils.mkdir_p(store_directory)
 
   # use /run/shm on AWS (if possible)
   if options[:run_shm] && Dir.exists?(options[:run_shm_dir])
@@ -91,22 +95,11 @@ begin
   ros.log_message "Simulation Run Directory is #{directory}", true
   ros.log_message "Simulation Storage Directory is #{store_directory}", true
 
-  # create data point directory
-  FileUtils.rm_rf(directory) if File.exist?(directory)
-  FileUtils.mkdir_p(directory)
-  FileUtils.mkdir_p(store_directory)
-
   # copy the files that are needed over to the run directory
-  FileUtils.copy("/mnt/openstudio/#{options[:run_data_point_filename]}", "#{directory}/#{options[:run_data_point_filename]}")
-  FileUtils.copy("/mnt/openstudio/run_energyplus.rb", "#{directory}/run_energyplus.rb")
-  FileUtils.copy("/mnt/openstudio/post_process.rb", "#{directory}/post_process.rb") # todo: remove
-  FileUtils.copy("/mnt/openstudio/post_process_monthly.rb", "#{directory}/post_process_monthly.rb") # todo: remove
-  FileUtils.copy("/mnt/openstudio/monthly_report.rb", "#{directory}/monthly_report.rb")
-  FileUtils.cp_r("/mnt/openstudio/packaged_measures", "#{directory}/packaged_measures")
+  WorkflowHelpers.prepare_run_directory("/mnt/openstudio", directory, options)
 
-  # call the run data point script
-  # run from the /mnt/openstudio directory to get analysis chauffeur loaded
-  command = "ruby -W0 -I#{File.dirname(__FILE__)} #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory} -r AWS"
+  # construct the command to be called
+  command = "ruby -I/mnt/openstudio #{directory}/#{options[:run_data_point_filename]} -u #{options[:uuid]} -d #{directory}"
   ros.log_message "Calling #{command}", true
   result = `#{command}`
 
