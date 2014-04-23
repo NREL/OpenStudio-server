@@ -4,7 +4,7 @@ describe 'AnalysisChauffeur' do
   before :all do
     @library_path = '/data/worker-nodes'
     unless Dir.exists?(@library_path)
-      @library_path = File.expand_path('../../worker-nodes')
+      @library_path = File.expand_path('../worker-nodes')
     end
     FileUtils.cp("#{@library_path}/rails-models/mongoid-vagrant.yml", "#{@library_path}/rails-models/mongoid.yml")
     puts "Library path is #{@library_path}"
