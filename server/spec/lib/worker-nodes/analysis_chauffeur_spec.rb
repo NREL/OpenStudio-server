@@ -6,7 +6,9 @@ describe 'AnalysisChauffeur' do
     unless Dir.exists?(@library_path)
       @library_path = File.expand_path('../worker-nodes')
     end
-    FileUtils.cp("#{@library_path}/rails-models/mongoid-vagrant.yml", "#{@library_path}/rails-models/mongoid.yml")
+    puts Dir.getwd
+    # copy over the server's mongoid file
+    FileUtils.cp("config/mongoid.yml", "#{@library_path}/rails-models/mongoid.yml")
     puts "Library path is #{@library_path}"
     require "#{@library_path}/analysis_chauffeur"
   end

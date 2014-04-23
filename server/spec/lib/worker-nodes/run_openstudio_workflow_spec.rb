@@ -16,7 +16,7 @@ describe 'RunOpenStudioWorkflow' do
     # need to create an example project
   end
 
-  it "should not run an unknown model" do
+  it "should not run an unknown model", :broken => true do
     options =  {:run_data_point_filename => 'run_openstudio_workflow.rb', :uuid => "bad_model"}
     WorkflowHelpers.prepare_run_directory(@library_path, "#{@library_path}/test/#{options[:uuid]}", options)
 
@@ -27,7 +27,7 @@ describe 'RunOpenStudioWorkflow' do
     expect(result).to eq('NA')
   end
 
-  it "should run a known model" do
+  it "should run a known model", :broken => true do
     options =  {:run_data_point_filename => 'run_openstudio_workflow.rb', :uuid => "example1"}
     WorkflowHelpers.prepare_run_directory(@library_path, "#{@library_path}/test/#{options[:uuid]}", options)
 
