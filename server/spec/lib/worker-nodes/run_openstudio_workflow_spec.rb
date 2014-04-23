@@ -8,7 +8,7 @@ describe 'RunOpenStudioWorkflow' do
     # create a directory to run the simulation with the required files
     @library_path = '/data/worker-nodes'
     unless Dir.exists?(@library_path)
-      @library_path = File.expand_path('../../worker-nodes')
+      @library_path = File.expand_path('../worker-nodes')
     end
 
     require "#{@library_path}/workflow_helpers"
