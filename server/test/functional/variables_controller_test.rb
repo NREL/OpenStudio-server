@@ -5,7 +5,7 @@ class VariablesControllerTest < ActionController::TestCase
     @variable = variables(:one)
   end
 
-  test "should get index" do
+  test '"should get index"' do
     get :index
     assert_response :success
     assert_not_nil assigns(:variables)
@@ -18,7 +18,7 @@ class VariablesControllerTest < ActionController::TestCase
 
   test "should create variable" do
     assert_difference('Variable.count') do
-      post :create, variable: {  }
+      post :create, variable: {}
     end
 
     assert_redirected_to variable_path(assigns(:variable))
@@ -35,7 +35,7 @@ class VariablesControllerTest < ActionController::TestCase
   end
 
   test "should update variable" do
-    put :update, id: @variable, variable: {  }
+    put :update, id: @variable, variable: {}
     assert_redirected_to variable_path(assigns(:variable))
   end
 
