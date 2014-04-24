@@ -7,13 +7,13 @@ describe Analysis::SequentialSearch do
     # delete all the analyses
     #parameter_space[UUID.new.generate] = {id: UUID.new.generate, measure_id: measure._id, variables: mvs}
     @ps = {}
-    @ps["1"] = {:id => "1", :measure_id => "roof", :variables => {"r_value" => 5}}
-    @ps["2"] = {:id => "2", :measure_id => "roof", :variables => {"r_value" => 70, "cool" => true}}
-    @ps["3"] = {:id => "3", :measure_id => "hvac", :variables => {"efficiency" => 1.2}}
-    @ps["4"] = {:id => "4", :measure_id => "hvac", :variables => {"efficiency" => 2.5}}
-    @ps["5"] = {:id => "5", :measure_id => "hvac", :variables => {"efficiency" => 3.5}}
-    @ps["6"] = {:id => "6", :measure_id => "hvac", :variables => {"efficiency" => 4}}
-    @ps["7"] = {:id => "7", :measure_id => "lpd", :variables => {"reduction" => 30}}
+    @ps["1"] = {:id => "1", :measure_id => "roof", :variables => {"r_value" => 5} }
+    @ps["2"] = {:id => "2", :measure_id => "roof", :variables => {"r_value" => 70, "cool" => true} }
+    @ps["3"] = {:id => "3", :measure_id => "hvac", :variables => {"efficiency" => 1.2} }
+    @ps["4"] = {:id => "4", :measure_id => "hvac", :variables => {"efficiency" => 2.5} }
+    @ps["5"] = {:id => "5", :measure_id => "hvac", :variables => {"efficiency" => 3.5} }
+    @ps["6"] = {:id => "6", :measure_id => "hvac", :variables => {"efficiency" => 4} }
+    @ps["7"] = {:id => "7", :measure_id => "lpd", :variables => {"reduction" => 30} }
   end
 
   it "should have 3 parameters" do
@@ -44,7 +44,7 @@ describe Analysis::SequentialSearch do
 
 
   it "if 'vgl=1' then result should be ?" do
-    vgl_ids= ["1"]
+    vgl_ids = ["1"]
 
     # get the full ps information
     vgls = @ps.select { |k, v| v if vgl_ids.include?(k) }
@@ -66,7 +66,7 @@ describe Analysis::SequentialSearch do
   end
 
   it "if 'vgl=1' then result should be ?" do
-    vgl_ids= ["1","3"]
+    vgl_ids= ["1", "3"]
 
     # get the full ps information
     vgls = @ps.select { |k, v| v if vgl_ids.include?(k) }
@@ -75,7 +75,7 @@ describe Analysis::SequentialSearch do
 
     puts "run list of size of #{run_list.size} is #{run_list.uniq}"
     run_list.size.should eq(6) # only six for now because we aren't pulling out the values
-    run_list.should eq([["1", "3"], ["2", "3"], ["1", "4"], ["1", "5"], ["1", "6"], ["1", "3", "7"]]  )
+    run_list.should eq([["1", "3"], ["2", "3"], ["1", "4"], ["1", "5"], ["1", "6"], ["1", "3", "7"]])
 
     # now create the run list data
     data_point_list = Analysis::SequentialSearch.create_data_point_list(@ps, run_list, 1)
