@@ -1,6 +1,5 @@
 require 'will_paginate/array'
 class AnalysesController < ApplicationController
-
   # GET /analyses
   # GET /analyses.json
   def index
@@ -23,21 +22,20 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
-
-    #for pagination
+    # for pagination
     per_page = 50
 
     @analysis = Analysis.find(params[:id])
 
     if @analysis
 
-      #tab status
+      # tab status
       @status = 'all'
-      if !params[:status].nil?
+      unless params[:status].nil?
         @status = params[:status]
       end
 
-      #blanks should be saved as nil or it will crash
+      # blanks should be saved as nil or it will crash
       @all_page = @status == 'all' ? params[:page] : params[:all_page]
       @all_page = @all_page == '' ? nil : @all_page
       @completed_page = @status == 'completed' ? params[:page] : params[:completed_page]
@@ -50,27 +48,26 @@ class AnalysesController < ApplicationController
       @na_page = @na_page == '' ? nil : @na_page
 
       @all_sims_total = @analysis.search(params[:all_search], 'all')
-      #if "view_all" param is set, use @all_sims_total instead of @all_sims (for ALL tab only)
+      # if "view_all" param is set, use @all_sims_total instead of @all_sims (for ALL tab only)
       @view_all = 0
-      if !params[:view_all].nil? and params[:view_all] == "1"
-          @all_sims = @all_sims_total
-          @view_all = 1
+      if params[:view_all] && params[:view_all] == '1'
+        @all_sims = @all_sims_total
+        @view_all = 1
       else
-        @all_sims = @all_sims_total.paginate(:page => @all_page, :per_page => per_page, :total_entries => @all_sims_total.count)
+        @all_sims = @all_sims_total.paginate(page: @all_page, per_page: per_page, total_entries: @all_sims_total.count)
       end
 
       @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
-      @completed_sims = @completed_sims_total.paginate(:page => @completed_page, :per_page => per_page, :total_entries => @completed_sims_total.count)
+      @completed_sims = @completed_sims_total.paginate(page: @completed_page, per_page: per_page, total_entries: @completed_sims_total.count)
 
       @started_sims_total = @analysis.search(params[:started_search], 'started')
-      @started_sims = @started_sims_total.paginate(:page => @started_page, :per_page => per_page, :total_entries => @started_sims_total.count)
+      @started_sims = @started_sims_total.paginate(page: @started_page, per_page: per_page, total_entries: @started_sims_total.count)
 
       @queued_sims_total = @analysis.search(params[:queued_search], 'queued')
-      @queued_sims = @queued_sims_total.paginate(:page => @queued_page, :per_page => per_page, :total_entries => @queued_sims_total.count)
+      @queued_sims = @queued_sims_total.paginate(page: @queued_page, per_page: per_page, total_entries: @queued_sims_total.count)
 
       @na_sims_total = @analysis.search(params[:na_search], 'na')
-      @na_sims = @na_sims_total.paginate(:page => @na_page, :per_page => per_page, :total_entries => @na_sims_total.count)
-
+      @na_sims = @na_sims_total.paginate(page: @na_page, per_page: per_page, total_entries: @na_sims_total.count)
 
       case @status
         when 'all'
@@ -98,17 +95,17 @@ class AnalysesController < ApplicationController
       if @objective_functions.empty?
         # todo: we need to standardize on the result of this
         if @analysis['num_measure_groups']
-          @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_site_energy", 'units' => "EUI"}
+          @objective_functions << { 'display_name' => 'Total Site Energy (EUI)', 'name' => 'total_site_energy', 'units' => 'EUI' }
         else
-          @objective_functions << {'display_name' => "Total Site Energy (EUI)", 'name' => "total_energy", 'units' => "EUI"}
+          @objective_functions << { 'display_name' => 'Total Site Energy (EUI)', 'name' => 'total_energy', 'units' => 'EUI' }
         end
-        @objective_functions << {'display_name' => "Total Life Cycle Cost", 'name' => "total_life_cycle_cost", 'units' => "USD"}
+        @objective_functions << { 'display_name' => 'Total Life Cycle Cost', 'name' => 'total_life_cycle_cost', 'units' => 'USD' }
       end
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {:analysis => @analysis} }
+      format.json { render json: { analysis: @analysis } }
       format.js
     end
   end
@@ -133,21 +130,21 @@ class AnalysesController < ApplicationController
   # POST /analyses.json
   def create
     project_id = params[:project_id]
-    params[:analysis].merge!(:project_id => project_id)
+    params[:analysis].merge!(project_id: project_id)
 
     @analysis = Analysis.new(params[:analysis])
 
     # Need to pull out the variables that are in this analysis so that we can stitch the problem
     # back together when it goes to run
-    logger.info("pulling out os variables")
-    @analysis.pull_out_os_variables()
+    logger.info('pulling out os variables')
+    @analysis.pull_out_os_variables
 
     respond_to do |format|
       if @analysis.save!
         format.html { redirect_to @analysis, notice: 'Analysis was successfully created.' }
         format.json { render json: @analysis, status: :created, location: @analysis }
       else
-        format.html { render action: "new" }
+        format.html { render action: 'new' }
         format.json { render json: @analysis.errors, status: :unprocessable_entity }
       end
     end
@@ -163,7 +160,7 @@ class AnalysesController < ApplicationController
         format.html { redirect_to @analysis, notice: 'Analysis was successfully updated.' }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @analysis.errors, status: :unprocessable_entity }
       end
     end
@@ -182,7 +179,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  #stop analysis button action
+  # stop analysis button action
   def stop
     @analysis = Analysis.find(params[:id])
     res = @analysis.stop_analysis
@@ -252,7 +249,6 @@ class AnalysesController < ApplicationController
         end
       end
     end
-
   end
 
   def status
@@ -267,7 +263,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {:analysis => {:status => @analysis.status}, data_points: dps.map { |k| {:_id => k.id, :status => k.status} }} }
+      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status } } } }
     end
   end
 
@@ -283,7 +279,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {:analysis => {status: @analysis.status}, data_points: dps.map { |k| {:_id => k.id, :status => k.status, :download_status => k.download_status} }} }
+      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
     end
   end
 
@@ -301,7 +297,6 @@ class AnalysesController < ApplicationController
         format.json { render json: @analysis.errors, status: :unprocessable_entity }
       end
     end
-
   end
 
   def debug_log
@@ -310,14 +305,13 @@ class AnalysesController < ApplicationController
     @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
     exclude_fields = [:_id, :user, :password]
-    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(:except => exclude_fields) }
-    @server = ComputeNode.where(node_type: 'server').first.as_json(:expect => exclude_fields)
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
+    @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
 
     respond_to do |format|
       format.html # debug_log.html.erb
       format.json { render json: log_message }
     end
-
   end
 
   def new_view
@@ -325,18 +319,18 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-          :problem,
+        :problem,
       ]
       include_fields = [
-          :variables,
-          :measures #=> {:include => :variables}
+        :variables,
+        :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: {:analysis => @analysis.as_json(:except => exclude_fields, :include => include_fields)} }
+      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
     end
   end
 
-  #TODO: this can be deprecated?
+  # TODO: this can be deprecated?
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
 
@@ -347,26 +341,23 @@ class AnalysesController < ApplicationController
 
   # other version with form to control what data to plot
   def plot_parallelcoordinates2
-
     @analysis = Analysis.find(params[:id])
-    #mappings + plotvars make the superset of chart variables
+    # mappings + plotvars make the superset of chart variables
     @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
 
-    #variables represent the variables we want graphed. Nil = all
+    # variables represent the variables we want graphed. Nil = all
     @variables = params[:variables] ? params[:variables] : nil
 
-    #whatever is defined as variables here should be the only returned data
+    # whatever is defined as variables here should be the only returned data
     @plot_data = get_plot_data2(@analysis, @mappings, @plotvars, @variables)
-
-
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
     end
   end
 
-  #interactive XY plot: choose x and y variables
+  # interactive XY plot: choose x and y variables
   def plot_xy_interactive
     @analysis = Analysis.find(params[:id])
 
@@ -381,17 +372,17 @@ class AnalysesController < ApplicationController
       @allvars << val
     end
 
-    #variables represent the variables we want graphed. Nil = all
+    # variables represent the variables we want graphed. Nil = all
     @variables = []
     if params[:variables].nil?
       @variables << @plotvars[0] << @plotvars[1]
     else
-      if !params[:variables][:x].nil?
+      if params[:variables][:x]
         @variables << params[:variables][:x]
       else
         @variables << @plotvars[0]
       end
-      if !params[:variables][:y].nil?
+      if params[:variables][:y]
         @variables << params[:variables][:y]
       else
         @variables << @plotvars[0]
@@ -403,12 +394,11 @@ class AnalysesController < ApplicationController
     end
   end
 
-
   # The results is the same as the variables hash which defines which results to export.  If nil it will only
   # export the results that are in the output_variables hash
   def get_plot_data2(analysis, variables, outputs, results = nil)
     plot_data = []
-    if @analysis.analysis_type == "sequential_search"
+    if @analysis.analysis_type == 'sequential_search'
       dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
       dps = dps.rotate(1) # put the starting point on top
     else
@@ -419,10 +409,10 @@ class AnalysesController < ApplicationController
       # the datapoint is considered complete if it has results set
       if dp['results']
         dp_values = {}
-        dp_values["data_point_uuid"] = data_point_path(dp.id)
+        dp_values['data_point_uuid'] = data_point_path(dp.id)
 
         if results
-          #input variables: not in dp['results']
+          # input variables: not in dp['results']
           if dp.set_variable_values
             variables.each do |k, v|
               if results.include?(v)
@@ -431,27 +421,27 @@ class AnalysesController < ApplicationController
               end
             end
           end
-          #output variables. Don't overwrite input variables from above
+          # output variables. Don't overwrite input variables from above
           results.each do |key, _|
-            #TEMP: special case for "total_energy" (could also be called total_site_energy)
-            if key == "total_energy" and !dp.results[key]
-              dp_values[key] = dp['results']["total_site_energy"]
+            # TEMP: special case for "total_energy" (could also be called total_site_energy)
+            if key == 'total_energy' and !dp.results[key]
+              dp_values[key] = dp['results']['total_site_energy']
             elsif !dp_values[key]
               dp_values[key] = dp['results'][key] ? dp['results'][key] : nil
             end
           end
 
         else
-          #go through variables and output variables
+          # go through variables and output variables
           if dp.set_variable_values
             variables.each do |k, v|
               dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
             end
           end
           outputs.each do |ov|
-            #TEMP: special case for "total_energy" (could be called total_site_energy)
-            if ov == "total_energy" and !dp['results'][ov]
-              dp_values["total_energy"] = dp['results']['total_site_energy']
+            # TEMP: special case for "total_energy" (could be called total_site_energy)
+            if ov == 'total_energy' and !dp['results'][ov]
+              dp_values['total_energy'] = dp['results']['total_site_energy']
             else
               dp_values[ov] = dp['results'][ov] if dp['results'][ov]
             end
@@ -466,8 +456,8 @@ class AnalysesController < ApplicationController
   end
 
   def plot_data_xy
-    #TODO: either figure out how to ajaxify the json directly to reduce db calls
-    #TODO: or remove data from the @plot_data variable (we are returning everything for now)
+    # TODO: either figure out how to ajaxify the json directly to reduce db calls
+    # TODO: or remove data from the @plot_data variable (we are returning everything for now)
     @analysis = Analysis.find(params[:id])
 
     # Get the mappings of the variables that were used. Move this to the datapoint class
@@ -477,12 +467,12 @@ class AnalysesController < ApplicationController
     if params[:variables].nil?
       @plotvars = get_plot_variables(@analysis)
     else
-      @plotvars = params[:variables].split(",")
+      @plotvars = params[:variables].split(',')
     end
     @plot_data = get_plot_data(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data}}
+      format.json { render json: { mappings: @mappings, plotvars: @plotvars, data: @plot_data } }
     end
   end
 
@@ -504,11 +494,11 @@ class AnalysesController < ApplicationController
 
   def plot_radar
     @analysis = Analysis.find(params[:id])
-    if !params[:datapoint_id].nil?
+    if params[:datapoint_id]
       @datapoint = DataPoint.find(params[:datapoint_id])
     else
 
-      if @analysis.analysis_type == "sequential_search"
+      if @analysis.analysis_type == 'sequential_search'
         @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
       else
         @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
@@ -521,13 +511,12 @@ class AnalysesController < ApplicationController
   end
 
   def plot_bar
-
     @analysis = Analysis.find(params[:id])
-    if !params[:datapoint_id].nil?
-       @datapoint = DataPoint.find(params[:datapoint_id])
+    if params[:datapoint_id]
+      @datapoint = DataPoint.find(params[:datapoint_id])
     else
 
-      if @analysis.analysis_type == "sequential_search"
+      if @analysis.analysis_type == 'sequential_search'
         @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
       else
         @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
@@ -539,39 +528,36 @@ class AnalysesController < ApplicationController
     end
   end
 
-
   def plot_data_bar
-    #TODO: this should always take a datapoint param
+    # TODO: this should always take a datapoint param
     @analysis = Analysis.find(params[:id])
 
-    if !params[:datapoint_id].nil?
-      #plot a specific datapoint
+    if params[:datapoint_id]
+      # plot a specific datapoint
       @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
     else
-      #plot the latest datapoint
+      # plot the latest datapoint
       @plot_data, @datapoint = get_plot_data_bar(@analysis)
     end
     respond_to do |format|
-      format.json { render json: {:datapoint => {:id => @datapoint.id, :name => @datapoint.name}, :bardata => @plot_data }}
+      format.json { render json: { datapoint: { id: @datapoint.id, name: @datapoint.name }, bardata: @plot_data } }
     end
-
   end
 
   def plot_data_radar
-    #TODO: this should always take a datapoint param
+    # TODO: this should always take a datapoint param
     @analysis = Analysis.find(params[:id])
 
-    if !params[:datapoint_id].nil?
-      #plot a specific datapoint
+    if params[:datapoint_id]
+      # plot a specific datapoint
       @plot_data, @datapoint = get_plot_data_radar(@analysis, params[:datapoint_id])
     else
-      #plot the latest datapoint
+      # plot the latest datapoint
       @plot_data, @datapoint = get_plot_data_radar(@analysis)
     end
     respond_to do |format|
-      format.json { render json: {:datapoint => {:id => @datapoint.id, :name => @datapoint.name}, :radardata => @plot_data }}
+      format.json { render json: { datapoint: { id: @datapoint.id, name: @datapoint.name }, radardata: @plot_data } }
     end
-
   end
 
   def plot_data
@@ -583,41 +569,40 @@ class AnalysesController < ApplicationController
     @plot_data = get_plot_data(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: {:mappings => @mappings, :plotvars => @plotvars, :data => @plot_data}}
+      format.json { render json: { mappings: @mappings, plotvars: @plotvars, data: @plot_data } }
     end
   end
-
 
   def page_data
     @analysis = Analysis.find(params[:id])
 
     # once we know that for all the buildings.
-    #@time_zone = "America/Denver"
-    #@data.each do |d|
+    # @time_zone = "America/Denver"
+    # @data.each do |d|
     #  time, tz_abbr = Util::Date.fake_zone_in_utc(d[:time].to_i / 1000, @time_zone)
     #  d[:fake_tz_time] = time.to_i * 1000
     #  d[:tz_abbr] = tz_abbr
-    #end
+    # end
 
     respond_to do |format|
       format.json do
         fields = [
-            :name,
-            :data_points,
-            :analysis_type,
-            :status,
-            :start_time,
-            :end_time,
-            :seed_zip,
-            :results,
-            :run_start_time,
-            :run_end_time,
-            :openstudio_datapoint_file_name,
-            :output_variables
+          :name,
+          :data_points,
+          :analysis_type,
+          :status,
+          :start_time,
+          :end_time,
+          :seed_zip,
+          :results,
+          :run_start_time,
+          :run_end_time,
+          :openstudio_datapoint_file_name,
+          :output_variables
         ]
 
-        render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points)}
-        #render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
+        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
+        # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
   end
@@ -640,8 +625,8 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.csv do
-        redirect_to @analysis, notice: "CSV not yet supported for downloading variables"
-        #write_and_send_csv(@analysis)
+        redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
+        # write_and_send_csv(@analysis)
       end
       format.rdata do
         write_and_send_input_variables_rdata(@analysis)
@@ -660,9 +645,9 @@ class AnalysesController < ApplicationController
       end
     end
 
-    #add "total energy" if it's not already in the output variables
-    if !plotvars.include?("total_energy")
-      plotvars.insert(0, "total_energy")
+    # add "total energy" if it's not already in the output variables
+    unless plotvars.include?('total_energy')
+      plotvars.insert(0, 'total_energy')
     end
 
     Rails.logger.info plotvars
@@ -673,14 +658,13 @@ class AnalysesController < ApplicationController
   # "% error"-like, but negative when actual is less than target and positive when it is more than target
   # for now: only plots the latest datapoint
   def get_plot_data_bar(analysis, datapoint_id = nil)
-
     ovs = analysis.output_variables
     plot_data_bar = []
 
-    if !datapoint_id.nil?
+    if datapoint_id
       dp = analysis.data_points.find(datapoint_id)
     else
-      if analysis.analysis_type == "sequential_search"
+      if analysis.analysis_type == 'sequential_search'
         dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
       else
         dp = analysis.data_points.all.order_by(:run_end_time.desc).first
@@ -692,18 +676,17 @@ class AnalysesController < ApplicationController
         if ov['objective_function']
           dp_values = []
           dp_values << ov['name']
-          dp_values << ((dp['results'][ov['name']]- ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
+          dp_values << ((dp['results'][ov['name']] - ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
           plot_data_bar << dp_values
         end
       end
 
     end
 
-    return plot_data_bar, dp
-
+    [plot_data_bar, dp]
   end
 
-  #get data for radar chart
+  # get data for radar chart
   def get_plot_data_radar(analysis, datapoint_id = nil)
     # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
     # and this is just an ugly mapping, sorry all.
@@ -712,10 +695,10 @@ class AnalysesController < ApplicationController
     ovs = analysis.output_variables
     plot_data_radar = []
 
-    if !datapoint_id.nil?
+    if datapoint_id
       dp = analysis.data_points.find(datapoint_id)
     else
-      if analysis.analysis_type == "sequential_search"
+      if analysis.analysis_type == 'sequential_search'
         dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
       else
         dp = analysis.data_points.all.order_by(:run_end_time.desc).first
@@ -727,11 +710,11 @@ class AnalysesController < ApplicationController
       ovs.each do |ov|
         if ov['objective_function']
           dp_values = {}
-          dp_values["axis"] = ov['name']
-          if !ov['scaling_factor'].nil?
-            dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+          dp_values['axis'] = ov['name']
+          if ov['scaling_factor']
+            dp_values['value'] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
           else
-            dp_values["value"] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
+            dp_values['value'] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
           end
           plot_data << dp_values
         end
@@ -739,7 +722,7 @@ class AnalysesController < ApplicationController
     end
     plot_data_radar << plot_data
 
-    return plot_data_radar, dp
+    [plot_data_radar, dp]
   end
 
   # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
@@ -748,7 +731,7 @@ class AnalysesController < ApplicationController
   # export the results that in the output_variables hash
   def get_plot_data(analysis, variables, results = nil)
     plot_data = []
-    if @analysis.analysis_type == "sequential_search"
+    if @analysis.analysis_type == 'sequential_search'
       dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
       dps = dps.rotate(1) # put the starting point on top
     else
@@ -763,7 +746,7 @@ class AnalysesController < ApplicationController
       if dp['results']
         dp_values = {}
 
-        dp_values["data_point_uuid"] = data_point_path(dp.id)
+        dp_values['data_point_uuid'] = data_point_path(dp.id)
 
         # lookup input value names (from set_variable_values)
         # todo: push this work into the database
@@ -810,7 +793,7 @@ class AnalysesController < ApplicationController
       end
     end
 
-    send_data csv_string, :filename => filename, :type => 'text/csv; charset=iso-8859-1; header=present', :disposition => "attachment"
+    send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
   end
 
   def write_and_send_input_variables_rdata(analysis)
@@ -853,17 +836,17 @@ class AnalysesController < ApplicationController
     r = Rserve::Simpler.new
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %Q{
-            temp <- tempfile('rdata', tmpdir="/tmp")   
-            save('#{data_frame_name}', file = temp)   
+            temp <- tempfile('rdata', tmpdir="/tmp")
+            save('#{data_frame_name}', file = temp)
             Sys.chmod(temp, mode = "0777", use_umask = TRUE)
          }
     end
     tmp_filename = r.converse('temp')
 
-    if File.exists?(tmp_filename)
-      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'application/rdata; header=present', :disposition => "attachment"
+    if File.exist?(tmp_filename)
+      send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
     else
-      raise "could not create R dataframe"
+      fail 'could not create R dataframe'
     end
   end
 
@@ -872,11 +855,11 @@ class AnalysesController < ApplicationController
     result_mappings = analysis.get_superset_of_result_variables
     data = get_plot_data(analysis, variable_mappings, result_mappings)
     download_filename = "#{analysis.name}.RData"
-    data_frame_name = analysis.name.downcase.gsub(" ", "_")
+    data_frame_name = analysis.name.downcase.gsub(' ', '_')
     Rails.logger.info("Data frame name will be #{data_frame_name}")
 
     # need to convert array of hash to hash of arrays
-    # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]} 
+    # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
     out_hash = data.each_with_object(Hash.new([])) do |h1, h|
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
@@ -888,18 +871,17 @@ class AnalysesController < ApplicationController
     r = Rserve::Simpler.new
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %Q{
-            temp <- tempfile('rdata', tmpdir="/tmp")   
-            save('#{data_frame_name}', file = temp)   
+            temp <- tempfile('rdata', tmpdir="/tmp")
+            save('#{data_frame_name}', file = temp)
             Sys.chmod(temp, mode = "0777", use_umask = TRUE)
          }
     end
     tmp_filename = r.converse('temp')
 
-    if File.exists?(tmp_filename)
-      send_data File.open(tmp_filename).read, :filename => download_filename, :type => 'application/rdata; header=present', :disposition => "attachment"
+    if File.exist?(tmp_filename)
+      send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
     else
-      raise "could not create R dataframe"
+      fail 'could not create R dataframe'
     end
   end
-
 end

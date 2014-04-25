@@ -10,11 +10,11 @@ describe DataPoint do
     @data_point = @analysis.data_points.first
   end
 
-  it "should have an analysis" do
+  it 'should have an analysis' do
     @project.analyses.should_not be_nil
   end
 
-  it "should have uuid and id the same" do
+  it 'should have uuid and id the same' do
     @data_point.id.should eq(@data_point.uuid)
   end
 

@@ -6,18 +6,14 @@ module DelayedJobView
       def used_backend
         @@used_backend ||= begin
 
-
           DelayedJobView::Backend::Mongoid
         rescue
-          raise "Delayed Job Viewer has no backend for Mongoid"
+          raise 'Delayed Job Viewer has no backend for Mongoid'
         end
       end
 
-      BACKEND_METHODS << {:to => :used_backend}
+      BACKEND_METHODS << { to: :used_backend }
       delegate *BACKEND_METHODS
-
-
     end
   end
-
 end

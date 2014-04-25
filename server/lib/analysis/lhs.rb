@@ -2,19 +2,19 @@ class Analysis::Lhs
   include Analysis::Core # pivots and static vars
 
   def initialize(analysis_id, options = {})
-    # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of 
+    # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.
-    #   Options under problem will be merged together and persisted into the database.  The order of 
-    #   preference is objects in the database, objects passed via options, then the defaults below.  
+    #   Options under problem will be merged together and persisted into the database.  The order of
+    #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = {
-        skip_init: false,
-        run_data_point_filename: "run_openstudio_workflow.rb",
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                number_of_samples: 100,
-                sample_method: "all_variables"
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      problem: {
+        random_seed: 1979,
+        algorithm: {
+          number_of_samples: 100,
+          sample_method: 'all_variables'
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -49,7 +49,7 @@ class Analysis::Lhs
 
     Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
     Rails.logger.info "Setting up R for #{self.class.name}"
-    #todo: need to move this to the module class
+    # todo: need to move this to the module class
     @r.converse('setwd("/mnt/openstudio")')
 
     # make this a core method
@@ -66,41 +66,41 @@ class Analysis::Lhs
     samples = nil
     var_types = nil
     static_array = nil
-    Rails.logger.info "Starting sampling"
+    Rails.logger.info 'Starting sampling'
     lhs = Analysis::R::Lhs.new(@r)
-    if @analysis.problem['algorithm']['sample_method'] == "all_variables" ||
-        @analysis.problem['algorithm']['sample_method'] == "individual_variables"
+    if @analysis.problem['algorithm']['sample_method'] == 'all_variables' ||
+        @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
       static_array = Variable.static_array(@analysis.id)
       samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-      if @analysis.problem['algorithm']['sample_method'] == "all_variables"
+      if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
         # Do the work to mash up the samples, pivots, and static variables before creating the data points
         Rails.logger.info "Samples are #{samples}"
         samples = hash_of_array_to_array_of_hash(samples)
         Rails.logger.info "Flipping samples around yields #{samples}"
-      elsif @analysis.problem['algorithm']['sample_method'] == "individual_variables"
+      elsif @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
         # Do the work to mash up the samples, pivots, and static variables before creating the data points
         Rails.logger.info "Samples are #{samples}"
         samples = hash_of_array_to_array_of_hash_non_combined(samples)
         Rails.logger.info "Non-combined samples yields #{samples}"
       end
 
-      # For all variables and individual_variables, the static variables can be added afterwards because they are (or 
+      # For all variables and individual_variables, the static variables can be added afterwards because they are (or
       # should be) independent of the actual variables
-      Rails.logger.info "Adding in static variables"
+      Rails.logger.info 'Adding in static variables'
       samples = add_static_variables(samples, static_array)
       Rails.logger.info "Samples after static_array #{samples}"
-    elsif @analysis.problem['algorithm']['sample_method'] == "individual_measures"
-      # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is 
+    elsif @analysis.problem['algorithm']['sample_method'] == 'individual_measures'
+      # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is
       # useful when you need each measure to be evaluated individually.  The variables are then linked.
       static_array_grouped = Variable.static_array(@analysis.id, true)
       samples_grouped, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'], true)
       samples = grouped_hash_of_array_to_array_of_hash(samples_grouped, static_array_grouped)
       Rails.logger.info "Grouped samples are #{samples}"
     else
-      raise "no sampling method defined (all_variables or individual_variables)"
+      fail 'no sampling method defined (all_variables or individual_variables)'
     end
 
-    Rails.logger.info "Fixing Pivot dimension"
+    Rails.logger.info 'Fixing Pivot dimension'
     samples = add_pivots(samples, pivot_array)
     Rails.logger.info "Finished adding the pivots resulting in #{samples}"
 
@@ -127,7 +127,6 @@ class Analysis::Lhs
   # Since this is a delayed job, if it crashes it will typically try multiple times.
   # Fix this to 1 retry for now.
   def max_attempts
-    return 1
+    1
   end
 end
-

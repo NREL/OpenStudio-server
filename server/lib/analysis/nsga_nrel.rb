@@ -4,24 +4,24 @@ class Analysis::NsgaNrel
 
   def initialize(analysis_id, options = {})
     defaults = {
-        skip_init: false,
-        run_data_point_filename: "run_openstudio_workflow.rb",
-        create_data_point_filename: "create_data_point.rb",
-        output_variables: [],
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                number_of_samples: 30,
-                sample_method: "individual_variables",
-                generations: 1,
-                toursize: 2,
-                cprob: 0.7,
-                xoverdistidx: 5,
-                mudistidx: 10,
-                mprob: 0.5,
-                normtype: "minkowski",
-                ppower: 2,
-                objective_functions: []
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        random_seed: 1979,
+        algorithm: {
+          number_of_samples: 30,
+          sample_method: 'individual_variables',
+          generations: 1,
+          toursize: 2,
+          cprob: 0.7,
+          xoverdistidx: 5,
+          mudistidx: 10,
+          mprob: 0.5,
+          normtype: 'minkowski',
+          ppower: 2,
+          objective_functions: []
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -62,18 +62,18 @@ class Analysis::NsgaNrel
     @analysis.save!
     @analysis.reload # after saving the data (needed for some reason yet to be determined)
 
-    #create an instance for R
+    # create an instance for R
     @r = Rserve::Simpler.new
-    Rails.logger.info "Setting up R for NSGA2 Run"
+    Rails.logger.info 'Setting up R for NSGA2 Run'
     @r.converse('setwd("/mnt/openstudio")')
     @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
 
     # todo: deal better with random seeds
-    @r.converse("set.seed(#{@analysis.problem['random_seed']})")  
+    @r.converse("set.seed(#{@analysis.problem['random_seed']})")
     # R libraries needed for this algorithm
-    @r.converse "library(rjson)"
-    @r.converse "library(mco)"
-    @r.converse "library(NRELmoo)"
+    @r.converse 'library(rjson)'
+    @r.converse 'library(mco)'
+    @r.converse 'library(NRELmoo)'
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -81,44 +81,44 @@ class Analysis::NsgaNrel
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info("Starting Batch Run")
+    Rails.logger.info('Starting Batch Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
     # TODO preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
-      raise "Number of generations was not set or equal to zero (must be 1 or greater)"
+      fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
-      raise "Must have number of samples to discretize the parameter space"
+      fail 'Must have number of samples to discretize the parameter space'
     end
 
-    #TODO add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    #if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    # TODO add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
     #  raise "P Norm must be non-negative"
-    #end    
-       
+    # end
+
     if @analysis.problem['algorithm']['ppower'] <= 0
-      raise "P Norm must be non-negative"
+      fail 'P Norm must be non-negative'
     end
-    
+
     if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
-      raise "Must have at least two objective functions defined"
-    end    
-    
+      fail 'Must have at least two objective functions defined'
+    end
+
     if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
-      raise "Must have at least two output_variables"
+      fail 'Must have at least two output_variables'
     end
-    
-    ug = @analysis.output_variables.uniq{|v| v['objective_function_group']}
+
+    ug = @analysis.output_variables.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
-     
-    if @analysis.output_variables.find_all{|v| v['objective_function'] == true}.size != @analysis.problem['algorithm']['objective_functions'].size
-      raise "number of objective functions must equal"
+
+    if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
+      fail 'number of objective functions must equal'
     end
-    
+
     pivot_array = Variable.pivot_array(@analysis.id)
     static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
@@ -126,7 +126,7 @@ class Analysis::NsgaNrel
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
-    Rails.logger.info "starting lhs to discretize the variables"
+    Rails.logger.info 'starting lhs to discretize the variables'
 
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
@@ -143,26 +143,26 @@ class Analysis::NsgaNrel
     process = nil
     begin
       if samples.empty? || samples.size <= 1
-        Rails.logger.info "No variables were passed into the options, therefore exit"
-        raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+        Rails.logger.info 'No variables were passed into the options, therefore exit'
+        fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
 
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       if !cluster.configure(master_ip)
-        raise "could not configure R cluster"
+        fail 'could not configure R cluster'
       else
-	    Rails.logger.info "Successfuly configured cluster"
+	       Rails.logger.info 'Successfuly configured cluster'
       end
-		
+
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build("/usr/local/rbenv/shims/bundle", "exec", "rake", "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
-      #log_file = File.join(Rails.root,"log/download.log")
-      #Rails.logger.info("Log file is: #{log_file}")
+      process = ChildProcess.build('/usr/local/rbenv/shims/bundle', 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      # log_file = File.join(Rails.root,"log/download.log")
+      # Rails.logger.info("Log file is: #{log_file}")
       process.io.inherit!
-      #process.io.stdout = process.io.stderr = File.open(log_file,'a+')
+      # process.io.stdout = process.io.stderr = File.open(log_file,'a+')
       process.cwd = Rails.root # set the child's working directory where the bundler will execute
-      Rails.logger.info("Starting Child Process")
+      Rails.logger.info('Starting Child Process')
       process.start
 
       worker_ips = ComputeNode.worker_ips
@@ -172,38 +172,38 @@ class Analysis::NsgaNrel
       Rails.logger.info ("Time flag was set to #{cluster_started}")
 
       if cluster_started
-        #gen is the number of generations to calculate
-        #varNo is the number of variables (ncol(vars))
-        #popSize is the number of sample points in the variable (nrow(vars))
+        # gen is the number of generations to calculate
+        # varNo is the number of variables (ncol(vars))
+        # popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
-        @r.command(:vars => samples.to_dataframe, :vartypes => var_types, :varnames => var_names, :mins => mins_maxes[:min], :maxes => mins_maxes[:max], :normtype => @analysis.problem['algorithm']['normtype'], :ppower => @analysis.problem['algorithm']['ppower'], :objfun => @analysis.problem['algorithm']['objective_functions'], :gen => @analysis.problem['algorithm']['generations'], :toursize => @analysis.problem['algorithm']['toursize'], :cprob => @analysis.problem['algorithm']['cprob'], :xoverdistidx => @analysis.problem['algorithm']['xoverdistidx'], :mudistidx => @analysis.problem['algorithm']['mudistidx'], :mprob => @analysis.problem['algorithm']['mprob'], :uniquegroups => ug.size) do
+        @r.command(vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'], xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'], mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
           %Q{
-            clusterEvalQ(cl,library(RMongo)) 
-            clusterEvalQ(cl,library(rjson)) 
-            clusterEvalQ(cl,library(R.utils)) 
-            
-            print(paste("objfun:",objfun))           
+            clusterEvalQ(cl,library(RMongo))
+            clusterEvalQ(cl,library(rjson))
+            clusterEvalQ(cl,library(R.utils))
+
+            print(paste("objfun:",objfun))
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
             print(paste("UniqueGroups:",uniquegroups))
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
-            
+
             print(paste("min:",mins))
             print(paste("max:",maxes))
- 
+
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
             clusterExport(cl,"uniquegroups")
-            
+
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
-            }          
+            }
             print(paste("vartypes:",vartypes))
 	    print(paste("varnames:",varnames))
-  
-            
+
+
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -212,37 +212,37 @@ class Analysis::NsgaNrel
                 stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
-  
+
               ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
               } else {
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
-              }                 
+              }
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               #print(paste("R returned system call with:",z))
               return(z)
             }
-            clusterExport(cl,"f")      
-  
-            #g(x) such that x is vector of variable values, 
+            clusterExport(cl,"f")
+
+            #g(x) such that x is vector of variable values,
             #           create a data_point from the vector of variable values x and return the new data point UUID
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
               ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
               # convert the vector to comma separated values
-              w = paste(x, collapse=",")        
+              w = paste(x, collapse=",")
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
 
               # Call the simulate data point method
-              f(z[j])     
-                                   
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")  
+              f(z[j])
+
+              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -295,33 +295,33 @@ class Analysis::NsgaNrel
                 } else {
                   objgroup[i] <- group_count
                   group_count <- group_count + 1
-                }                
+                }
               }
               print(paste("Objective function results are:",objvalue))
               print(paste("Objective function targets are:",objtarget))
-              print(paste("Objective function scaling factors are:",sclfactor)) 
-              
+              print(paste("Objective function scaling factors are:",sclfactor))
+
               objvalue <- objvalue / sclfactor
               objtarget <- objtarget / sclfactor
-              
+
               ug <- length(unique(objgroup))
               if (ug != uniquegroups) {
                  print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
               }
-              
+
               for (i in 1:ug){
                 obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
               }
-              
+
               #for (i in 1:objDim){
               #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
-              #}  
+              #}
               print(paste("Objective function Norm:",obj))
               return(obj)
             }
-            
+
             clusterExport(cl,"g")
-  
+
             if (nrow(vars) == 1) {
               print("not sure what to do with only one datapoint so adding an NA")
               vars <- rbind(vars, c(NA))
@@ -331,23 +331,22 @@ class Analysis::NsgaNrel
               vars <- rbind(vars, c(NA))
               vars <- rbind(vars, c(NA))
             }
-  
+
             print(nrow(vars))
             print(ncol(vars))
             if (ncol(vars) == 1) {
               print("NSGA2 needs more than one variable")
               stop
             }
-            
+
             print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")    
+            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
           }
-
 
         end
       else
-        raise "could not start the cluster (most likely timed out)"
+        fail 'could not start the cluster (most likely timed out)'
       end
 
     rescue Exception => e
@@ -360,16 +359,16 @@ class Analysis::NsgaNrel
       cluster.stop if cluster && cluster_started
 
       # Kill the downloading of data files process
-      Rails.logger.info("Ensure block of analysis cleaning up any remaining processes")
+      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
 
       # Do one last check if there are any data points that were not downloaded
-      Rails.logger.info("Trying to download any remaining files from worker nodes")
+      Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
       # Only set this data if the anlaysis was NOT called from another anlaysis
 
-      if !@options[:skip_init]
+      unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
@@ -381,7 +380,6 @@ class Analysis::NsgaNrel
   # Since this is a delayed job, if it crashes it will typically try multiple times.
   # Fix this to 1 retry for now.
   def max_attempts
-    return 1
+    1
   end
 end
-

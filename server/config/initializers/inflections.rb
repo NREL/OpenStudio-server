@@ -14,7 +14,6 @@
 #   inflect.acronym 'RESTful'
 # end
 
-
 # Fix the anlaysis inflector
 ActiveSupport::Inflector.inflections do |inflect|
  # inflect.irregular 'analysis', 'analyses'
