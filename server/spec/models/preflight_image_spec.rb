@@ -10,13 +10,13 @@ describe PreflightImage do
     @analysis = @project.analyses.first
   end
 
-  it "should add a variable and preflight image" do
+  it 'should add a variable and preflight image' do
     new_var = Variable.new
     new_var.save!
-    @analysis.variables << new_var 
-    pfi = PreflightImage.add_from_disk(new_var.id, "histogram", "../files/r_plot_histogram.png")
+    @analysis.variables << new_var
+    pfi = PreflightImage.add_from_disk(new_var.id, 'histogram', '../files/r_plot_histogram.png')
     new_var.preflight_images << pfi unless new_var.preflight_images.include?(pfi)
-    
+
     expect(new_var.preflight_images.count).to eq(1)
   end
-end   
+end

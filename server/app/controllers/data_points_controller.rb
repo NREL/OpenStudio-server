@@ -19,27 +19,26 @@ class DataPointsController < ApplicationController
       if @data_point
         format.html do
           exclude_fields = [:_id, :output, :password, :values]
-          @table_data = @data_point.as_json(:except => exclude_fields)
-          
-          logger.info("Cleaning up the log files")
-          if @table_data["sdp_log_file"]
-            @table_data["sdp_log_file"] = @table_data["sdp_log_file"].join("</br>").html_safe
+          @table_data = @data_point.as_json(except: exclude_fields)
+
+          logger.info('Cleaning up the log files')
+          if @table_data['sdp_log_file']
+            @table_data['sdp_log_file'] = @table_data['sdp_log_file'].join('</br>').html_safe
           end
 
           @data_point.set_variable_values ? @set_variable_values = @data_point.set_variable_values : @set_variable_values = []
 
-          html_filename = @data_point.openstudio_datapoint_file_name.to_s.gsub("#{@data_point.id}.zip","#{@data_point.id}/reports/eplustbl.html")
+          html_filename = @data_point.openstudio_datapoint_file_name.to_s.gsub("#{@data_point.id}.zip", "#{@data_point.id}/reports/eplustbl.html")
           logger.info "HTML file is #{html_filename}"
-          File.exists?(html_filename) ? @html = File.read(html_filename) : nil
+          File.exist?(html_filename) ? @html = File.read(html_filename) : nil
         end
         format.json { render json: @data_point.output }
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: {:error => "No Data Point"}, status: :unprocessable_entity }
+        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
       end
     end
   end
-
 
   def show_full
     @data_point = DataPoint.find(params[:id])
@@ -78,7 +77,7 @@ class DataPointsController < ApplicationController
         format.html { redirect_to @data_point, notice: 'Data point was successfully created.' }
         format.json { render json: @data_point, status: :created, location: @data_point }
       else
-        format.html { render action: "new" }
+        format.html { render action: 'new' }
         format.json { render json: @data_point.errors, status: :unprocessable_entity }
       end
     end
@@ -87,12 +86,12 @@ class DataPointsController < ApplicationController
   # POST batch_upload.json
   def batch_upload
     analysis_id = params[:analysis_id]
-    logger.info("parsing in a batched file upload")
+    logger.info('parsing in a batched file upload')
 
     uploaded_dps = 0
     saved_dps = 0
     error = false
-    error_message = ""
+    error_message = ''
     if params[:data_points]
       uploaded_dps = params[:data_points].count
       logger.info "received #{uploaded_dps} points"
@@ -130,7 +129,7 @@ class DataPointsController < ApplicationController
         format.html { redirect_to @data_point, notice: 'Data point was successfully updated.' }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @data_point.errors, status: :unprocessable_entity }
       end
     end
@@ -153,6 +152,6 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
-    send_data data_point_zip_data, :filename => File.basename(@data_point.openstudio_datapoint_file_name), :type => 'application/zip; header=present', :disposition => "attachment"
+    send_data data_point_zip_data, filename: File.basename(@data_point.openstudio_datapoint_file_name), type: 'application/zip; header=present', disposition: 'attachment'
   end
 end

@@ -11,12 +11,12 @@ class VariablesControllerTest < ActionController::TestCase
     assert_not_nil assigns(:variables)
   end
 
-  test "should get new" do
+  test 'should get new' do
     get :new
     assert_response :success
   end
 
-  test "should create variable" do
+  test 'should create variable' do
     assert_difference('Variable.count') do
       post :create, variable: {}
     end
@@ -24,22 +24,22 @@ class VariablesControllerTest < ActionController::TestCase
     assert_redirected_to variable_path(assigns(:variable))
   end
 
-  test "should show variable" do
+  test 'should show variable' do
     get :show, id: @variable
     assert_response :success
   end
 
-  test "should get edit" do
+  test 'should get edit' do
     get :edit, id: @variable
     assert_response :success
   end
 
-  test "should update variable" do
+  test 'should update variable' do
     put :update, id: @variable, variable: {}
     assert_redirected_to variable_path(assigns(:variable))
   end
 
-  test "should destroy variable" do
+  test 'should destroy variable' do
     assert_difference('Variable.count', -1) do
       delete :destroy, id: @variable
     end
