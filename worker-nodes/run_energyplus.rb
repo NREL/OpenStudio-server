@@ -112,7 +112,7 @@ begin
       end }
   end
 
-  if !options[:postprocess].nil?
+  if options[:postprocess]
     puts "running post process script"
     FileUtils.copy(options[:postprocess], "./post_process.rb")
     options[:support_files].each do |support_file|
