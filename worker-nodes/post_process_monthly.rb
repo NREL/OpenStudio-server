@@ -34,7 +34,7 @@ def add_element(hash, var_name, value, xpath = nil)
   else
     test = value.to_s
     value = test.match('\.').nil? ? Integer(test) : Float(test) rescue test.to_s
-    if value.is_a?(Fixnum) or value.is_a?(Float)
+    if value.is_a?(Fixnum) || value.is_a?(Float)
       store_val = value.to_f
     else
       store_val = value.to_s
