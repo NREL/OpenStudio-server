@@ -1,7 +1,5 @@
 class AdminController < ApplicationController
-
   def index
-
   end
 
   def backup_database
@@ -13,9 +11,9 @@ class AdminController < ApplicationController
 
     reload_database(uploaded_file)
 
-    redirect_to admin_index_path, :notice => "Dropped and Reloaded Database with #{uploaded_file.original_filename}"
+    redirect_to admin_index_path, notice: "Dropped and Reloaded Database with #{uploaded_file.original_filename}"
   end
-  
+
   private
 
   def reload_database(database_file)
@@ -25,17 +23,17 @@ class AdminController < ApplicationController
     FileUtils.mkdir_p(extract_dir)
 
     resp = `tar xvzf #{database_file.tempfile.path} -C #{extract_dir}`
-    if $?.exitstatus == 0
-      logger.info "Successfully extracted uploaded database dump"
+    if $CHILD_STATUS.exitstatus == 0
+      logger.info 'Successfully extracted uploaded database dump'
 
       `mongo os_dev --eval "db.dropDatabase();"`
-      if $?.exitstatus == 0
+      if $CHILD_STATUS.exitstatus == 0
         `mongorestore -d os_dev #{extract_dir}/os_dev`
-        if $?.exitstatus == 0
-          logger.info "Restored mongo database"
+        if $CHILD_STATUS.exitstatus == 0
+          logger.info 'Restored mongo database'
           success = true
         else
-          logger.info "Error trying to reload mongo database"
+          logger.info 'Error trying to reload mongo database'
         end
       end
     end
@@ -43,29 +41,29 @@ class AdminController < ApplicationController
     success
   end
 
-  def write_and_send_data(file_prefix = "mongodump")
+  def write_and_send_data(file_prefix = 'mongodump')
     success = false
 
     time_stamp = Time.now.to_i
     dump_dir = "/tmp/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    #mongodump  -u admin -p '' --port 30017 -d os_dev -o $BACKUP_DUMP
+    # mongodump  -u admin -p '' --port 30017 -d os_dev -o $BACKUP_DUMP
     resp = `mongodump -db os_dev --out #{dump_dir}`
 
-    if $?.exitstatus == 0
+    if $CHILD_STATUS.exitstatus == 0
       output_file = "/tmp/#{file_prefix}_#{time_stamp}.tar.gz"
       resp_2 = `tar czf #{output_file} -C #{dump_dir} os_dev`
-      if $?.exitstatus == 0
+      if $CHILD_STATUS.exitstatus == 0
         success = true
       end
     end
 
-    if File.exists?(output_file)
-      send_data File.open(output_file).read, :filename => File.basename(output_file), :type => 'application/targz; header=present', :disposition => "attachment"
+    if File.exist?(output_file)
+      send_data File.open(output_file).read, filename: File.basename(output_file), type: 'application/targz; header=present', disposition: 'attachment'
       success = true
     else
-      raise "could not create dump"
+      fail 'could not create dump'
     end
 
     success

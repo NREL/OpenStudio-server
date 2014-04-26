@@ -4,13 +4,13 @@ class ProjectsController < ApplicationController
   def index
     @projects = Project.all
 
-    logger.info(@projects.to_json(:include => :analyses ))
+    logger.info(@projects.to_json(include: :analyses))
 
     respond_to do |format|
       format.html # index.html.erb
-      #format.json { render json: @projects.to_json(:) }
+      # format.json { render json: @projects.to_json(:) }
       # => { :status => @analysis.status}, data_points: dps.map{ |k| {:_id => k.id, :status => k.status } } } }
-      format.json { render json: @projects.to_json(:include => :analyses ) }
+      format.json { render json: @projects.to_json(include: :analyses) }
     end
   end
 
@@ -22,7 +22,7 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
 
-      format.json { render json: @project.to_json(:include => :analyses ) }
+      format.json { render json: @project.to_json(include: :analyses) }
     end
   end
 
@@ -52,7 +52,7 @@ class ProjectsController < ApplicationController
         format.html { redirect_to @project, notice: 'Project was successfully created.' }
         format.json { render json: @project, status: :created, location: @project }
       else
-        format.html { render action: "new" }
+        format.html { render action: 'new' }
         format.json { render json: @project.errors, status: :unprocessable_entity }
       end
     end
@@ -68,7 +68,7 @@ class ProjectsController < ApplicationController
         format.html { redirect_to @project, notice: 'Project was successfully updated.' }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @project.errors, status: :unprocessable_entity }
       end
     end
@@ -99,7 +99,7 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {analyses: q } }
+      format.json { render json: { analyses: q } }
     end
   end
 end
