@@ -272,7 +272,7 @@ begin
   File.open(idf_filename, 'w') { |f| f << @model_idf.to_s }
 
   ros.log_message 'adding monthly report to energyplus IDF', true
-  to_append = File.read(File.join(File.dirname(__FILE__), 'monthly_report.rb'))
+  to_append = File.read(File.join(File.dirname(__FILE__), 'monthly_report.idf'))
   File.open(idf_filename, 'a') do |handle|
     handle.puts to_append
   end
