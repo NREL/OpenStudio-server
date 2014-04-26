@@ -12,19 +12,19 @@ describe Analysis do
     @analysis = @project.analyses.first
   end
 
-  it "should have one analysis" do
+  it 'should have one analysis' do
     @project.analyses.count.should eq(1)
   end
-  
-  it "should have one project" do
+
+  it 'should have one project' do
     @analysis.project.should_not be_nil
   end
 
-  it "should have uuid and id the same" do
+  it 'should have uuid and id the same' do
     @analysis.id.should eq(@analysis.uuid)
   end
 
   after :each do
-    #@analysis.destroy
+    # @analysis.destroy
   end
 end

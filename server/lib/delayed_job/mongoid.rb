@@ -3,7 +3,7 @@ module DelayedJobView
     module Mongoid
       class << self
         def limited
-          self #TODO: Implement me! See activerecord.rb
+          self # TODO: Implement me! See activerecord.rb
         end
 
         def all
@@ -19,15 +19,15 @@ module DelayedJobView
         end
 
         def queued
-          Delayed::Job.where(:failed_at => nil, :locked_by => nil)
+          Delayed::Job.where(failed_at: nil, locked_by: nil)
         end
 
-        def destroy id
+        def destroy(id)
           dj = Delayed::Job.find(id)
           dj.destroy if dj
         end
 
-        def retry id
+        def retry(id)
           dj = Delayed::Job.find(id)
           dj.update_attribute :failed_at, nil if dj
         end

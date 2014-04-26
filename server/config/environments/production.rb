@@ -61,6 +61,6 @@ OpenstudioServer::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  Mongoid.logger = Logger.new(File.join(Rails.root,"log/mongo.log"))
-  Moped.logger = Logger.new(File.join(Rails.root,"log/mongo.log"))
+  Mongoid.logger = Logger.new(File.join(Rails.root, 'log/mongo.log'))
+  Moped.logger = Logger.new(File.join(Rails.root, 'log/mongo.log'))
 end

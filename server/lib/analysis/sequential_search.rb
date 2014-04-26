@@ -3,34 +3,31 @@ class Analysis::SequentialSearch
 
   def initialize(analysis_id, options = {})
     defaults = {
-        skip_init: false,
-        run_data_point_filename: "run_openstudio_workflow.rb",
-        create_data_point_filename: "create_data_point.rb",
-        output_variables: [
-            {
-                display_name: "Total Site Energy (EUI)",
-                name: "total_energy",
-                objective_function: true,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: "Total Life Cycle Cost",
-                name: "total_life_cycle_cost",
-                objective_function: true,
-                objective_function_index: 1,
-                index: 1
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [
+        {
+          display_name: 'Total Site Energy (EUI)',
+          name: 'total_energy',
+          objective_function: true,
+          objective_function_index: 0,
+          index: 0
+        },
+        {
+          display_name: 'Total Life Cycle Cost',
+          name: 'total_life_cycle_cost',
+          objective_function: true,
+          objective_function_index: 1,
+          index: 1
+        }
         ],
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                number_of_samples: 10, # to discretize any continuous variables
-                max_iterations: 1000,
-                objective_functions: [
-                    "total_energy",
-                    "total_life_cycle_cost"
-                ]
+      problem: {
+        random_seed: 1979,
+        algorithm: {
+          number_of_samples: 10, # to discretize any continuous variables
+          max_iterations: 1000,
+          objective_functions: %w(total_energy total_life_cycle_cost)
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -43,7 +40,7 @@ class Analysis::SequentialSearch
     @pareto = []
   end
 
-  def self.create_data_point_list(parameter_space, run_list_ids, iteration, name_moniker = "")
+  def self.create_data_point_list(parameter_space, run_list_ids, iteration, name_moniker = '')
     result = []
 
     i_sample = 0
@@ -53,9 +50,9 @@ class Analysis::SequentialSearch
       run_list.each do |ps_id|
         variables = variables.merge(parameter_space[ps_id][:variables])
       end
-      name_moniker = "Data Point" if name_moniker == ""
+      name_moniker = 'Data Point' if name_moniker == ''
       name = "#{name_moniker} [iteration #{iteration} sample #{i_sample}]"
-      result << {variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample}
+      result << { variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample }
     end
 
     result
@@ -92,7 +89,7 @@ class Analysis::SequentialSearch
   end
 
   def perform
-    def determine_curve()
+    def determine_curve
       new_point_to_evaluate = false
       Rails.logger.info "Determine the Pareto Front for iteration #{@iteration}"
       Rails.logger.info "Current pareto front is: #{@pareto.map { |p| p.name }}"
@@ -100,9 +97,9 @@ class Analysis::SequentialSearch
         # just add the point to the pareto curve
         min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
         if min_point.size == 0
-          Rails.logger.info "could not find the starting point"
+          Rails.logger.info 'could not find the starting point'
         elsif min_point.size > 1
-          Rails.logger.info "found more than one datapoint for the initial iteration"
+          Rails.logger.info 'found more than one datapoint for the initial iteration'
         else
           min_point = min_point.first
         end
@@ -110,7 +107,7 @@ class Analysis::SequentialSearch
         @pareto << min_point
         new_point_to_evaluate = true
       else
-        Rails.logger.info "Iterating over pareto front"
+        Rails.logger.info 'Iterating over pareto front'
         i_pareto = -1
         orphaning = false
         new_curve = []
@@ -164,9 +161,9 @@ class Analysis::SequentialSearch
                 slope = temp_slope
                 min_point = dp
               elsif temp_slope == slope
-                #Rails.logger.info "Datapoint has same slope as previous point #{dp.name} with slope #{temp_slope}"
+                # Rails.logger.info "Datapoint has same slope as previous point #{dp.name} with slope #{temp_slope}"
               else
-                #Rails.logger.info "Slope was lower for #{dp.name} with slope #{temp_slope}"
+                # Rails.logger.info "Slope was lower for #{dp.name} with slope #{temp_slope}"
               end
             end
           end
@@ -177,18 +174,18 @@ class Analysis::SequentialSearch
               Rails.logger.info "At the end of the pareto array but found a new point, adding #{min_point.name}"
               new_curve << min_point
               new_point_to_evaluate = true
-            elsif min_point == @pareto[i_pareto+1]
-              Rails.logger.info "Pareto search found the same point or values"
+            elsif min_point == @pareto[i_pareto + 1]
+              Rails.logger.info 'Pareto search found the same point or values'
               new_curve << min_point # just add in the same point to the new curve
             elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] ==
-                @pareto[i_pareto+1].results[@analysis.problem['algorithm']['objective_functions'][0]] \
+                @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][0]] \
                 && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
-                @pareto[i_pareto+1].results[@analysis.problem['algorithm']['objective_functions'][1]]
-              Rails.logger.info "Found the same objective function values in array, skipping"
-                                     #new_curve << min_point # just add in the same point to the new curve
+                @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
+              Rails.logger.info 'Found the same objective function values in array, skipping'
+                                     # new_curve << min_point # just add in the same point to the new curve
             else
               # the min point is new and was found before the end of the array.  Orphaning the other points
-              Rails.logger.info "Orphaning previous point in array.  Replacing #{@pareto[i_pareto+1].name} with #{min_point.name}"
+              Rails.logger.info "Orphaning previous point in array.  Replacing #{@pareto[i_pareto + 1].name} with #{min_point.name}"
               new_curve << min_point
               new_point_to_evaluate = true
               orphaning = true
@@ -197,7 +194,7 @@ class Analysis::SequentialSearch
           end
 
           if orphaning
-            Rails.logger.info "Breaking out of loop because of ophan request"
+            Rails.logger.info 'Breaking out of loop because of ophan request'
             break
           end
         end
@@ -215,9 +212,9 @@ class Analysis::SequentialSearch
       Rails.logger.info "Determining run list for iteration #{@iteration}"
       if @iteration == 0
         # run the baseline
-        Rails.logger.info "setting up to run just the starting point"
-        data_point_list << {variable_group: [], name: "Starting Point", variables: {}, iteration: @iteration, sample: 1}
-        #elsif @iteration == 1
+        Rails.logger.info 'setting up to run just the starting point'
+        data_point_list << { variable_group: [], name: 'Starting Point', variables: {}, iteration: @iteration, sample: 1 }
+        # elsif @iteration == 1
         #  # no need to look at anything, just return the array
         #  run_list = Analysis::SequentialSearch.mash_up_hash([], parameter_space)
         #  data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, 1)
@@ -233,7 +230,7 @@ class Analysis::SequentialSearch
           run_list = Analysis::SequentialSearch.mash_up_hash(full_variable_group_list, parameter_space)
           data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, @iteration)
         else
-          Rails.logger.info("Could not find last point on pareto front")
+          Rails.logger.info('Could not find last point on pareto front')
         end
       end
 
@@ -284,7 +281,7 @@ class Analysis::SequentialSearch
     selected_variables = Variable.variables(@analysis.id)
 
     if pivot_array.size > 1
-      Rails.logger.warn "Pivot arrays are not implemented in sequential search at the moment. Any pivot values will be ignored"
+      Rails.logger.warn 'Pivot arrays are not implemented in sequential search at the moment. Any pivot values will be ignored'
     end
 
     # Create an instance for R
@@ -295,7 +292,7 @@ class Analysis::SequentialSearch
 
     # the sequential search operates on measures so get variables / measures
     parameter_space = {}
-    measures = Measure.where({analysis_id: @analysis}).order_by(:name.asc) # order is not super important here because the analysis has has the order, right?
+    measures = Measure.where(analysis_id: @analysis).order_by(:name.asc) # order is not super important here because the analysis has has the order, right?
     measures.each do |measure|
       variables = measure.variables.where(perturbable: true)
 
@@ -306,7 +303,7 @@ class Analysis::SequentialSearch
         if variable['uncertainty_type'] =~ /discrete_uncertain/ # not sure what to do with bool_uncertain at the moment
           values, weights = variable.map_discrete_hash_to_array
         else
-          # if the variable is continuous then discretize it before running. Pass in as an array of 1 because it 
+          # if the variable is continuous then discretize it before running. Pass in as an array of 1 because it
           # expects all variables but we are pinning it to discretize the variables one-by-one.
           values, var_types = lhs.sample_all_variables([variable], @analysis.problem['algorithm']['number_of_samples'])
         end
@@ -321,13 +318,13 @@ class Analysis::SequentialSearch
       Rails.logger.info "measure values array hash is  #{measure_values}"
 
       measure_values.each do |mvs|
-        parameter_space[UUID.new.generate] = {measure_id: measure._id, variables: mvs}
+        parameter_space[UUID.new.generate] = { measure_id: measure._id, variables: mvs }
       end
     end
     Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
 
     # determine the first list of items to run
-    final_message = ""
+    final_message = ''
     @run_list = determine_run_list(parameter_space)
     Rails.logger.info "datapoint list is #{@run_list}"
     new_pareto_point = true
@@ -340,16 +337,16 @@ class Analysis::SequentialSearch
         dp['sample'] = run[:sample]
         if dp.save!
         else
-          raise "Could not save datapoint #{dp.errors}"
+          fail "Could not save datapoint #{dp.errors}"
         end
         Rails.logger.info "Added new datapoint #{dp.name}"
       end
       @analysis.save!
 
       Rails.logger.info("Kicking off simulations for iteration #{@iteration}")
-      @analysis.start(true, 'batch_run', {skip_init: true, run_data_point_filename: "run_openstudio_workflow.rb"})
+      @analysis.start(true, 'batch_run', skip_init: true, run_data_point_filename: 'run_openstudio_workflow.rb')
       Rails.logger.info("Finished simulations for iteration #{@iteration}... checking results")
-      new_pareto_point = determine_curve()
+      new_pareto_point = determine_curve
       Rails.logger.info("Determined pareto curve for #{@iteration} and new point flag is set to #{new_pareto_point}")
       Rails.logger.info("Finished simulations for iteration #{@iteration}... iterating")
 
@@ -376,8 +373,6 @@ class Analysis::SequentialSearch
 # Since this is a delayed job, if it crashes it will typically try multiple times.
 # Fix this to 1 retry for now.
   def max_attempts
-    return 1
+    1
   end
-
 end
-

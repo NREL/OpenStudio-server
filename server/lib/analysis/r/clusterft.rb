@@ -6,25 +6,25 @@ module Analysis::R
 
       # load the required libraries for cluster management
       @r.converse "print('Configuring R Cluster - Loading Libraries')"
-      @r.converse "library(snow)"
-      @r.converse "library(NRELsnowFT)"
-      @r.converse "library(RMongo)"
-      @r.converse "library(R.utils)"
-      
+      @r.converse 'library(snow)'
+      @r.converse 'library(NRELsnowFT)'
+      @r.converse 'library(RMongo)'
+      @r.converse 'library(R.utils)'
+
       # determine the database name based on the environment
-      if Rails.env == "development"
-        @db = "os_dev"
-      elsif Rails.env == "production"
-        @db = "os_prod"
-      elsif Rails.env == "test"
-        @db = "os_test"
+      if Rails.env == 'development'
+        @db = 'os_dev'
+      elsif Rails.env == 'production'
+        @db = 'os_prod'
+      elsif Rails.env == 'test'
+        @db = 'os_test'
       end
     end
 
     # configure the r session, returns true if the flag variable was readable (and true)
     def configure(master_ip)
       result = false
-      @r.command() do
+      @r.command do
         %Q{
             ip <- "#{master_ip}"
             results <- NULL
@@ -33,25 +33,25 @@ module Analysis::R
             if (file.exists('/mnt/openstudio/rtimeout')) {
               file.remove('/mnt/openstudio/rtimeout')
             }
-            #test the query of getting the run_flag  
-            print(paste("connecting to mongo database: #{@db}")) 
+            #test the query of getting the run_flag
+            print(paste("connecting to mongo database: #{@db}"))
             mongo <- mongoDbConnect("#{@db}", host=ip, port=27017)
             flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis_id}"}', '{run_flag:1}')
-    
+
             print(flag["run_flag"])
             if (flag["run_flag"] == "true"  ){
               print("flag is set to true!")
-            }        
+            }
             dbDisconnect(mongo)
           }
       end
 
       out = @r.converse "flag['run_flag'][,1]"
-      result = out == "true" ? true : false 
-      
-      # note that if result is false it may be because the Rserve session wasn't running right, or the analysis 
+      result = out == 'true' ? true : false
+
+      # note that if result is false it may be because the Rserve session wasn't running right, or the analysis
       # database record was not found
-      
+
       result
     end
 
@@ -80,7 +80,7 @@ module Analysis::R
               }, TimeoutException=function(ex) {
                 cat("#{@analysis_id} Timeout\n");
                 timeflag <<- FALSE;
-                file.create('rtimeout') 
+                file.create('rtimeout')
                 stop
             })
           endtime <- Sys.time()
@@ -88,15 +88,15 @@ module Analysis::R
           print(paste("R cluster startup time:",timetaken))
           }
       end
-      result = @r.converse("timeflag")
+      result = @r.converse('timeflag')
     end
 
     def stop
       result = false
-      @r.command() do
+      @r.command do
         %Q{
             print("Stopping cluster")
-            stopClusterFT(cl)          
+            stopClusterFT(cl)
             print("Cluster stopped")
           }
       end

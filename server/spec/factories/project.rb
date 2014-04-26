@@ -1,11 +1,11 @@
 FactoryGirl.define do
   factory :data_point do
-    name "Example Data Point"
+    name 'Example Data Point'
     analysis
   end
 
   factory :analysis do
-    name "Example Analysis"
+    name 'Example Analysis'
     project
 
     factory :analysis_with_data_points do
@@ -20,7 +20,7 @@ FactoryGirl.define do
   end
 
   factory :project do
-    name "Test Project"
+    name 'Test Project'
 
     factory :project_with_analyses do
       ignore do
