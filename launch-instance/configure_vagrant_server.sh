@@ -29,7 +29,6 @@ sudo service apache2 stop
 sudo service mongodb stop
 
 # remove mongo db & add it back
-# sudo rm -rf /mnt/mongodb/data
 sudo mkdir -p /mnt/mongodb/data
 sudo chown mongodb:nogroup /mnt/mongodb/data
 sudo rm -rf /var/lib/mongodb
