@@ -13,8 +13,8 @@ else
 fi
 
 # copy all the setup scripts to the appropriate home directory -- Not needed on vagrant
-#cp /data/launch-instance/setup* ~
-#chmod 775 ~/setup*
+#cp /data/launch-instance/setup* /home/ubuntu
+#chmod 775 /home/ubuntu/setup*
 #chown ubuntu:ubuntu /home/ubuntu/setup*
 
 # configure the application based worker data
