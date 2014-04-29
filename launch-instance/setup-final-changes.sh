@@ -14,6 +14,8 @@ sudo cat /dev/null > /var/log/auth.log
 sudo cat /dev/null > /var/log/lastlog
 sudo cat /dev/null > /var/log/kern.log
 sudo cat /dev/null > /var/log/boot.log
+sudo cat /dev/null > /var/log/mongodb/mongodb.log
+sudo cat /dev/null > /var/log/apache2/error.log
 sudo rm -f /data/launch-instance/*.pem
 sudo rm -f /data/launch-instance/*.log
 sudo rm -f /data/launch-instance/*.json
