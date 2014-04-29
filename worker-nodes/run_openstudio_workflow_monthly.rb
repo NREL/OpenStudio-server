@@ -151,10 +151,10 @@ begin
         end
 
         # process the measure -- TODO grab the relative directory instead of this last(2).first stuff
-        measure_path = wf['bcl_measure_directory'].split('/').last(2).first
-        measure_name = wf['bcl_measure_class_name_ADDME']
+        measure_path = wf['measure_definition_directory']
+        measure_name = wf['measure_definition_class_name']
 
-        require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, measure_name, 'measure'))}"
+        require "#{File.expand_path(File.join(File.dirname(__FILE__), '..', measure_path, 'measure'))}"
 
         measure = measure_name.constantize.new
         runner = OpenStudio::Ruleset::OSRunner.new
