@@ -5,6 +5,7 @@ class Project
   field :uuid, type: String
   field :_id, type: String, default: -> { uuid || UUID.generate }
   field :name, type: String
+  field :display_name, type: String
 
   # Relationships
   has_many :analyses
