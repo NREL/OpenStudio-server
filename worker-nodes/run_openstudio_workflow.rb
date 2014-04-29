@@ -296,7 +296,7 @@ begin
   # HARD CODE the running of the report measure --- eventually loop of the workflow and
   # run any post processing
   ros.log_message 'Running OpenStudio Post Processing'
-  measure_path = './packaged_measures'
+  measure_path = 'packaged_measures'
   measure_name = 'StandardReports'
 
   # when full workflow then do this
