@@ -50,11 +50,11 @@ rake db:mongoid:create_indexes
 # configure the application based worker data
 cd /data/launch-instance && sudo ./configure_vagrant_worker_data.sh
 
-# restart delayed jobs
-sudo service delayed_job start
-
 # restart rserve
 sudo service Rserve restart
+
+# restart delayed jobs
+sudo service delayed_job start
 
 # Null out the logs
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
