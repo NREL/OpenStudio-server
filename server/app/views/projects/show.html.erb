@@ -12,7 +12,7 @@
       </tr>
       <% @project.analyses.each do |analysis| %>
           <tr>
-            <td><%= link_to analysis.name, analysis_path(analysis) %></td>
+            <td><%= link_to analysis.display_name, analysis_path(analysis) %></td>
             <td><%= link_to analysis.status, analysis_path(analysis) %></td>
             <td><%= link_to 'HTML', analysis_path(analysis) %>
               | <%= link_to 'JSON', analysis_path(analysis, :format => :json) %></td>
