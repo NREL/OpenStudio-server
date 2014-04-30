@@ -198,12 +198,12 @@ begin
               if data_point_json[:data_point]
                 if data_point_json[:data_point]['set_variable_values']
                   if data_point_json[:data_point]['set_variable_values'][variable_uuid]
-                    ros.log_message "Setting variable #{variable_name} to #{data_point_json[:data_point]['set_variable_values'][variable_uuid]}"
+                    ros.log_message "Setting variable '#{variable_name}' to #{data_point_json[:data_point]['set_variable_values'][variable_uuid]}"
                     v = argument_map[variable_name]
                     fail 'Could not find argument map in measure' unless v
                     variable_value = data_point_json[:data_point]['set_variable_values'][variable_uuid]
                     value_set = v.setValue(variable_value)
-                    fail "Could not set variable #{variable_name} of value #{variable_value} on model" unless value_set
+                    fail "Could not set variable '#{variable_name}' of value #{variable_value} on model" unless value_set
                     argument_map[variable_name] = v.clone
                     variable_found = true
                   else
@@ -223,24 +223,22 @@ begin
           end
         end
 
-        if variable_found
-          if wf['measure_type'] == 'RubyMeasure'
-            measure.run(@model, runner, argument_map)
-          elsif wf['measure_type'] == 'EnergyPlusMeasure'
-            measure.run(@model_idf, runner, argument_map)
-          elsif wf['measure_type'] == 'ReportingMeasure'
-            report_measures << measure
-          end
-          result = runner.result
-
-          ros.log_message result.initialCondition.get.logMessage, true unless result.initialCondition.empty?
-          ros.log_message result.finalCondition.get.logMessage, true unless result.finalCondition.empty?
-
-          result.warnings.each { |w| ros.log_message w.logMessage, true }
-          result.errors.each { |w| ros.log_message w.logMessage, true }
-          result.info.each { |w| ros.log_message w.logMessage, true }
-          result.attributes.each { |att| @output_attributes << att }
+        if wf['measure_type'] == 'RubyMeasure'
+          measure.run(@model, runner, argument_map)
+        elsif wf['measure_type'] == 'EnergyPlusMeasure'
+          measure.run(@model_idf, runner, argument_map)
+        elsif wf['measure_type'] == 'ReportingMeasure'
+          report_measures << measure
         end
+        result = runner.result
+
+        ros.log_message result.initialCondition.get.logMessage, true unless result.initialCondition.empty?
+        ros.log_message result.finalCondition.get.logMessage, true unless result.finalCondition.empty?
+
+        result.warnings.each { |w| ros.log_message w.logMessage, true }
+        result.errors.each { |w| ros.log_message w.logMessage, true }
+        result.info.each { |w| ros.log_message w.logMessage, true }
+        result.attributes.each { |att| @output_attributes << att }
       end
     end
   end
