@@ -141,6 +141,9 @@ begin
           if @model_idf.nil?
             ros.log_message 'Translate object to EnergyPlus IDF in Prep for EnergyPlus Measure', true
             a = Time.now
+            # ensure objects exist
+            @model.getFacility
+            @model.getBuilding
             forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
             # puts "starting forward translator #{Time.now}"
             @model_idf = forward_translator.translateModel(@model)
@@ -257,6 +260,8 @@ begin
   if @model_idf.nil?
     ros.log_message 'Translate object to energyplus IDF', true
     a = Time.now
+    @model.getFacility
+    @model.getBuilding
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     # puts "starting forward translator #{Time.now}"
     @model_idf = forward_translator.translateModel(@model)
@@ -315,8 +320,13 @@ begin
   result = runner.result
 
   ros.log_message 'Finished OpenStudio Post Processing'
+  ros.log_message result.initialCondition.get.logMessage, true unless result.initialCondition.empty?
   ros.log_message result.finalCondition.get.logMessage, true unless result.finalCondition.empty?
+
+  result.warnings.each { |w| ros.log_message w.logMessage, true }
   result.errors.each { |w| ros.log_message w.logMessage, true }
+  result.info.each { |w| ros.log_message w.logMessage, true }
+
   report_json = JSON.parse(OpenStudio.toJSON(result.attributes), symbolize_names: true)
   ros.log_message "JSON file is #{report_json}"
   File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
