@@ -1,10 +1,23 @@
-
 <h1>Admin</h1>
 
-<%= link_to 'Backup Database', admin_backup_database_path %><br/><br/><br/>
+<div class="row-fluid">
+  <div class="span8">
+    <div class="button-container">
+      <%= link_to 'Backup Database', admin_backup_database_path, class: "btn btn-mini" %>
+    </div>
+    <%= form_tag 'admin/restore_database', :multipart => true do %>
+        <div class="button-container">
+          Upload Previous Database Dump (targz) <%= file_field_tag "file", class: "btn btn-mini" %>
+        </div>
 
-<%= form_tag 'admin/restore_database', :multipart => true do %>
-    <p>Upload Previous Database Dump (targz)</p> <%= file_field_tag "file" %><br/>
-    <%= submit_tag "Upload and Restore Database" %>
-<% end %>
+        <div class="button-container">
+          <%= submit_tag "Upload and Restore Database", class: "btn btn-mini" %>
+        </div>
+    <% end %>
+  </div>
+</div>
+
+
+
+
 

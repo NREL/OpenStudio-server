@@ -2,6 +2,7 @@ class PagesController < ApplicationController
   # static page
   def about
   end
+
   # main dashboard for the site
   def dashboard
     # data for dashboard header
@@ -25,7 +26,9 @@ class PagesController < ApplicationController
     logger.info("HEY!!  @failed_perc = #{@failed_perc}, @completed_perc = #{@completed_perc}, failed_runs = #{failed_runs}, total_runs = #{total_runs}, completed_cnt = #{completed_cnt}")
     # data for each analysis
     # can only aggregate over entire collection, so do that first then parse out results
-    aggregated_results = DataPoint.collection.aggregate('$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status' }, count: { '$sum' =>  1 } })
+    aggregated_results = DataPoint.collection.aggregate(
+        '$group' => {'_id' => {'analysis_id' => '$analysis_id', 'status' => '$status'}, count: {'$sum' => 1}})
+
 
     # TODO: this could probably be done more efficiently...
     @results = []
@@ -45,7 +48,7 @@ class PagesController < ApplicationController
 
       # for js
       cnt = 0
-      js_res = Array.new
+      js_res = []
       aggregated_results.each do |res|
         logger.info("RESULT: #{res.inspect}")
         if res['_id']['analysis_id'] == run.id

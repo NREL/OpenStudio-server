@@ -49,7 +49,6 @@ class Analysis
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
-
   validates_attachment_content_type :seed_zip, content_type: %w(application/zip)
 
   # Callbacks
@@ -248,7 +247,7 @@ class Analysis
     Hash[mappings.sort_by { |_, v| v }]
   end
 
-  # This returns a slighly different format compared to the method above.  This returs
+  # This returns a slighly different format compared to the method above.  This returns
   # all the result variables that are avaiable in the form:
   # {"air_handler_fan_efficiency_final"=>true, "air_handler_fan_efficiency_initial"=>true, ...
   def get_superset_of_result_variables
