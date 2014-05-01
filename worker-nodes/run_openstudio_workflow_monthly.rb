@@ -17,9 +17,9 @@ optparse = OptionParser.new do |opts|
     options[:uuid] = uuid
   end
 
-  options[:runType] = 'AWS'
-  opts.on('-r', '--runType RUNTYPE', String, 'String that indicates where Simulate Data Point is being run (Local|AWS).') do |runType|
-    options[:runType] = runType
+  options[:problem_formulation] = nil
+  opts.on('--problem', String, 'Optional problem formulation file which will override value in mongo') do |pr|
+    options[:problem_formulation] = pr
   end
 
   options[:logLevel] = -1
@@ -125,7 +125,6 @@ begin
         unless File.exist?(@weather_filename)
           fail "Could not find weather file for simulation #{@weather_filename}"
         end
-
       else
         fail 'No weather file path defined'
       end
@@ -142,6 +141,9 @@ begin
           if @model_idf.nil?
             ros.log_message 'Translate object to EnergyPlus IDF in Prep for EnergyPlus Measure', true
             a = Time.now
+            # ensure objects exist
+            @model.getFacility
+            @model.getBuilding
             forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
             # puts "starting forward translator #{Time.now}"
             @model_idf = forward_translator.translateModel(@model)
@@ -258,6 +260,8 @@ begin
   if @model_idf.nil?
     ros.log_message 'Translate object to energyplus IDF', true
     a = Time.now
+    @model.getFacility
+    @model.getBuilding
     forward_translator = OpenStudio::EnergyPlus::ForwardTranslator.new
     # puts "starting forward translator #{Time.now}"
     @model_idf = forward_translator.translateModel(@model)
@@ -284,7 +288,7 @@ begin
   end
 
   ros.log_message 'Waiting for simulation to finish', true
-  command = "ruby -W0 #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} \
+  command = "ruby #{run_directory}/run_energyplus.rb -a #{run_directory} -i #{idf_filename} -o #{osm_filename} \
               -w #{@weather_filename} -p #{post_process_filename}"
   # command += " -e #{run_args[:energyplus]}" unless run_args.nil?
   # command += " --idd-path #{run_args[:idd]}" unless run_args.nil?
@@ -322,11 +326,20 @@ begin
   result = runner.result
 
   ros.log_message 'Finished OpenStudio Post Processing'
+  ros.log_message result.initialCondition.get.logMessage, true unless result.initialCondition.empty?
   ros.log_message result.finalCondition.get.logMessage, true unless result.finalCondition.empty?
+
+  result.warnings.each { |w| ros.log_message w.logMessage, true }
   result.errors.each { |w| ros.log_message w.logMessage, true }
+  result.info.each { |w| ros.log_message w.logMessage, true }
+
   report_json = JSON.parse(OpenStudio.toJSON(result.attributes), symbolize_names: true)
   ros.log_message "JSON file is #{report_json}"
   File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
+
+  # report the attributes of each of the measures
+  ros.log_message "Measure output attributes are #{@output_attributes}"
+  File.open("#{run_directory}/measure_attributes.json", 'w') { |f| f << JSON.pretty_generate(@output_attributes) }
 
   # If profiling, then go ahead and get the results here.  Note that we are not profiling the
   # result of saving the json data and pushing the data back to mongo because the "communicate_results_json" method
