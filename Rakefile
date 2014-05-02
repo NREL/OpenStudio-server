@@ -43,7 +43,7 @@ task :release do
   # check if the current tag already existing
   ts = g.tags
   if ts.find { |t| t.name == OPENSTUDIO_SERVER_VERSION }
-    puts "\nVersion already tags. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}.\n".red
+    puts "\nVersion already tagged. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}.\n".red
     exit 0
   end
 
