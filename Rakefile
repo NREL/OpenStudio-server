@@ -5,6 +5,7 @@ require "rake"
 require "git"
 require "logger"
 require "rspec/core/rake_task"
+require 'colored'
 
 # To release new version, increment the value in the ./server/lib/version file
 require_relative "server/lib/version"
@@ -24,14 +25,16 @@ task :release do
 
   if g.status.changed.size > 0 || g.status.added.size > 0 || g.status.deleted.size > 0
     s = "\n Changed: #{g.status.changed.size}\n Added: #{g.status.added.size}\n Deleted: #{g.status.deleted.size}"
-    raise "There are uncommitted changes on the branch.  Please commit before proceeding. #{s}"
+    puts "#{s}\n There are uncommitted changes on the branch.  Please commit before proceeding.".red
+    exit 0
   end
 
   # check you file again what is on remote
   h = g.diff('master', 'origin/master').stats
 
   if h[:total][:files] > 0
-    raise "Local branch has not been pushed to origin.  Please push before proceeding"
+    puts "Local branch has not been pushed to origin.  Please push before proceeding".red
+    exit 0
   end
 
   # do a git pull to make sure that we are up-to-date with tags
@@ -40,7 +43,8 @@ task :release do
   # check if the current tag already existing
   ts = g.tags
   if ts.find { |t| t.name == OPENSTUDIO_SERVER_VERSION }
-    raise "Version already tags. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}"
+    puts "Version already tags. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}".red
+    exit 0
   end
 
   # add the new tag
@@ -56,7 +60,7 @@ task :release do
   g.push("origin", AMI_BUILD_BRANCH)
   g.checkout("master")
 
-  puts "Successfully create tag and pushed repo to server"
+  puts "Successfully create tag and pushed repo to server".green
 end
 
 RSpec::Core::RakeTask.new("spec") do |spec|
