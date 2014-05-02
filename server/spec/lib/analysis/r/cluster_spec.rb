@@ -3,7 +3,7 @@ require 'spec_helper'
 # not sure why i have to include this here
 require 'rserve/simpler'
 
-describe Analysis::R::Cluster do
+describe Analysis::R::Cluster, broken: true do
   before :all do
     ComputeNode.delete_all
     FactoryGirl.create(:compute_node)
