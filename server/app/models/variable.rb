@@ -206,8 +206,9 @@ class Variable
   end
 
   def remove_dependencies
-    preflight_images.each do |pfi|
-      pfi.destroy
-    end
+    # TODO: need to reset permissions before we can actually delete the files
+    #preflight_images.each do |pfi|
+    #  pfi.destroy
+    #end
   end
 end
