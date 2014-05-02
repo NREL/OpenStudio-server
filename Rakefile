@@ -25,7 +25,7 @@ task :release do
 
   if g.status.changed.size > 0 || g.status.added.size > 0 || g.status.deleted.size > 0
     s = "\n Changed: #{g.status.changed.size}\n Added: #{g.status.added.size}\n Deleted: #{g.status.deleted.size}"
-    puts "#{s}\n There are uncommitted changes on the branch.  Please commit before proceeding.".red
+    puts "#{s}\n There are uncommitted changes on the branch.  Please commit before proceeding.\n".red
     exit 0
   end
 
@@ -33,7 +33,7 @@ task :release do
   h = g.diff('master', 'origin/master').stats
 
   if h[:total][:files] > 0
-    puts "Local branch has not been pushed to origin.  Please push before proceeding".red
+    puts "\nLocal branch has not been pushed to origin.  Please push before proceeding.\n".red
     exit 0
   end
 
@@ -43,7 +43,7 @@ task :release do
   # check if the current tag already existing
   ts = g.tags
   if ts.find { |t| t.name == OPENSTUDIO_SERVER_VERSION }
-    puts "Version already tags. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}".red
+    puts "\nVersion already tags. Please increment your version.  Current version is #{OPENSTUDIO_SERVER_VERSION}.\n".red
     exit 0
   end
 
