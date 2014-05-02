@@ -60,7 +60,7 @@ task :release do
   g.push("origin", AMI_BUILD_BRANCH)
   g.checkout("master")
 
-  puts "Successfully create tag and pushed repo to server".green
+  puts "\nSuccessfully create tag and pushed repo to server\n".green
 end
 
 RSpec::Core::RakeTask.new("spec") do |spec|
