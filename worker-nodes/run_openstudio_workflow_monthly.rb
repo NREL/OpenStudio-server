@@ -416,7 +416,7 @@ rescue Exception => e
   ros.log_message log_message, true
 
   # need to tell the system that this failed
-  ros.communicate_failure
+  ros.communicate_failure run_directory
 ensure
   ros.log_message "#{__FILE__} Completed", true
 

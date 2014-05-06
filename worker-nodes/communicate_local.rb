@@ -50,7 +50,7 @@ module CommunicateLocal
     puts 'Run completed normally.'
   end
 
-  def self.communicate_failure(dp)
+  def self.communicate_failure(dp, os_directory)
     puts 'Run failed.'
   end
 
