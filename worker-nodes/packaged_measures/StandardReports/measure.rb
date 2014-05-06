@@ -1,7 +1,5 @@
 require 'erb'
 
-#require 'looger'
-#@logger = Logger.new("#{File.dirname(__FILE__)}/junk.log")
 #start the measure
 class StandardReports < OpenStudio::Ruleset::ReportingUserScript
 
@@ -17,13 +15,17 @@ class StandardReports < OpenStudio::Ruleset::ReportingUserScript
 
     return args
   end #end the arguments method
-  
-  def report_optional_value(runner, name, units, optional_value)
-    if not optional_value.empty?
-      runner.registerValue(name, optional_value.get, units)
+
+  #sql_query method
+  def sql_query(sql, report_name, query)
+    val = 10e9
+    result = sql.execAndReturnFirstDouble("SELECT Value FROM TabularDataWithStrings WHERE ReportName='#{report_name}' AND #{query}")
+    if not result.empty?
+      val = result.get
     end
+    return val
   end
-  
+
   #define what happens when the measure is run
   def run(runner, user_arguments)
     super(runner, user_arguments)
@@ -37,7 +39,7 @@ class StandardReports < OpenStudio::Ruleset::ReportingUserScript
     min_version_feature1 = OpenStudio::VersionString.new("1.2.3")
 
     # get the last model and sql file
-    #@logger.info "i am here--before last model"
+
     model = runner.lastOpenStudioModel
     if model.empty?
       runner.registerError("Cannot find last model.")
@@ -45,7 +47,6 @@ class StandardReports < OpenStudio::Ruleset::ReportingUserScript
     end
     model = model.get
 
-#@logger.info "i am here--before last eplus sql"
     sqlFile = runner.lastEnergyPlusSqlFile
     if sqlFile.empty?
       runner.registerError("Cannot find last sql file.")
@@ -53,8 +54,6 @@ class StandardReports < OpenStudio::Ruleset::ReportingUserScript
     end
     sqlFile = sqlFile.get
     model.setSqlFile(sqlFile)
-
-    #@logger.info "finished"
 
     # put data into variables, these are available in the local scope binding
     #building_name = model.getBuilding.name.get
@@ -131,21 +130,40 @@ class StandardReports < OpenStudio::Ruleset::ReportingUserScript
     end
     energy = energy[0..-3]
     energy << "\n};\n"
-    
     if (os_version >= min_version_feature1)
-      report_optional_value(runner, "hours_simulated", "hr", sqlFile.hoursSimulated)
-      report_optional_value(runner, "net_site_energy", "GJ", sqlFile.netSiteEnergy)
-      report_optional_value(runner, "net_source_energy", "GJ", sqlFile.netSourceEnergy)
-      report_optional_value(runner, "total_site_energy", "GJ", sqlFile.totalSiteEnergy)
-      report_optional_value(runner, "total_source_energy", "GJ", sqlFile.totalSourceEnergy)
-      report_optional_value(runner, "annual_total_utility_cost", "$", sqlFile.annualTotalUtilityCost)
+      runner.registerValue("site_energy_use_si",OpenStudio::convert(site_energy_use,"J","GJ").get,"GJ")
+      runner.registerValue("site_energy_use_ip",OpenStudio::convert(site_energy_use,"J","MBtu").get,"MBtu")
       
-      endUses = sqlFile.endUses
-      if not endUses.empty?
-        runner.registerAttribute(endUses.get.attribute)
-      end
+      # queries that don't have API methods yet 
+      total_building_area = sql_query(sqlFile, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Building Area' AND RowName='Total Building Area' AND ColumnName='Area'")
+      runner.registerValue("total_building_area",total_building_area,"m2")
+      
+      net_conditioned_building_area = sql_query(sqlFile, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Building Area' AND RowName='Net Conditioned Building Area' AND ColumnName='Area'")
+      runner.registerValue("net_conditioned_building_area",net_conditioned_building_area,"m2")
+      
+      unconditioned_building_area = sql_query(sqlFile, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Building Area' AND RowName='Unconditioned Building Area' AND ColumnName='Area'")
+      runner.registerValue("unconditioned_building_area",unconditioned_building_area,"m2")
+      
+      total_site_energy_eui = sql_query(sqlFile, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Site and Source Energy' AND RowName='Total Site Energy' AND ColumnName='Energy Per Conditioned Building Area'")
+      runner.registerValue("total_site_energy_eui",total_site_energy_eui,"MJ/m2")
+
+      total_source_energy_eui = sql_query(sqlFile, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Site and Source Energy' AND RowName='Total Source Energy' AND ColumnName='Energy Per Conditioned Building Area'")
+      runner.registerValue("total_source_energy_eui",total_source_energy_eui,"MJ/m2")
+      
+      time_setpoint_not_met_during_occupied_heating = sql_query(sqlFile, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Heating' AND ColumnName='Facility'")
+      runner.registerValue("time_setpoint_not_met_during_occupied_heating",time_setpoint_not_met_during_occupied_heating,"hr")
+
+      time_setpoint_not_met_during_occupied_cooling = sql_query(sqlFile, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Cooling' AND ColumnName='Facility'")
+      runner.registerValue("time_setpoint_not_met_during_occupied_cooling",time_setpoint_not_met_during_occupied_cooling,"hr")
+      
+      time_setpoint_not_met_during_occupied_hours = time_setpoint_not_met_during_occupied_heating + time_setpoint_not_met_during_occupied_cooling
+      runner.registerValue("time_setpoint_not_met_during_occupied_hours",time_setpoint_not_met_during_occupied_hours,"hr")
+  
+      total_life_cycle_cost = sql_query(sqlFile, 'Life-Cycle Cost Report', "TableName='Present Value by Category' AND RowName='Grand Total' AND ColumnName='Present Value'")
+      runner.registerValue("total_life_cycle_cost",total_life_cycle_cost,"$")
+  
     end
-    
+
     # echo out our values
     #runner.registerInfo("This building is named #{building_name}.")
 
