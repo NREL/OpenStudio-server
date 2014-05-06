@@ -69,8 +69,8 @@ class AnalysisChauffeur
     @communicate_module.communicate_complete(@communicate_object)
   end
 
-  def communicate_failure
-    @communicate_module.communicate_failure(@communicate_object)
+  def communicate_failure(os_directory)
+    @communicate_module.communicate_failure(@communicate_object, os_directory)
   end
 
   def reload
