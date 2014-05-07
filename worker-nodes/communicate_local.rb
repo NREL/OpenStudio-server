@@ -51,6 +51,7 @@ module CommunicateLocal
   end
 
   def self.communicate_failure(dp, os_directory)
+    # os_directory can be nil, but nothing happens here... move along
     puts 'Run failed.'
   end
 

@@ -118,9 +118,10 @@ module CommunicateMongo
     dp.save!
   end
 
+  # Zip up the results if analysis_dir is passed. Send the status to MongoDB
   def self.communicate_failure(dp, analysis_dir)
     # zip up the folder even on datapoint failures
-    if File.exist? analysis_dir
+    if analysis_dir && File.exist?(analysis_dir)
       zip_results(dp, analysis_dir)
     end
 

@@ -56,7 +56,7 @@ rescue Exception => e
   ros.log_message log_message, true
 
   # need to tell mongo this failed
-  ros.communicate_failure
+  ros.communicate_failure(nil)
 ensure
   # Must print out a dp uuid of some sort, default is NA
   puts dp ? dp.uuid : 'NA'
