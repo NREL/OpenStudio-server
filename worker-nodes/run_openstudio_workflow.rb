@@ -377,7 +377,7 @@ begin
           end
         else
           # objective_functions[variable['name']] = nil
-          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = 2147483647 # set to max int
+          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = Float::MAX 
           objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["objective_function_group_#{variable['objective_function_index'] + 1}"] = nil
