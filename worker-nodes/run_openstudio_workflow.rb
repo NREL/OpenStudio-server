@@ -238,10 +238,16 @@ begin
         result.warnings.each { |w| ros.log_message w.logMessage, true }
         result.errors.each { |w| ros.log_message w.logMessage, true }
         result.info.each { |w| ros.log_message w.logMessage, true }
-        result.attributes.each { |att| @output_attributes << att }
+        begin
+          result.attributes.each { |att| @output_attributes << JSON.parse(OpenStudio::toJSON(att)) }
+        rescue Exception => e
+          log_message = "TODO: #{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+          ros.log_message log_message, true
+        end
       end
     end
   end
+
 
   a = Time.now
   osm_filename = "#{run_directory}/osm_out.osm"
