@@ -188,7 +188,6 @@ begin
           end
         end
 
-        variable_found = false
         ros.log_message "iterate over variables for workflow item #{wf['name']}", true
         if wf['variables']
           wf['variables'].each do |wf_var|
@@ -207,7 +206,6 @@ begin
                     value_set = v.setValue(variable_value)
                     fail "Could not set variable '#{variable_name}' of value #{variable_value} on model" unless value_set
                     argument_map[variable_name] = v.clone
-                    variable_found = true
                   else
                     fail "[ERROR] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
                     ros.log_message("[WARNING] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
@@ -345,19 +343,12 @@ begin
     File.open("#{directory}/profile-tree.prof", 'w') { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
 
-  @report_measures.each do |report_measure|
-    # run the reporting measures
-
-  end
-
   # Initialize the objective function variable
   objective_functions = {}
   if File.exist?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), symbolize_names: true)
     ros.log_message "Result JSON is: #{result_json}"
-    ros.log_message "analysis_json[:analysis]['output_variables']\n"
-    ros.log_message "#{analysis_json[:analysis]['output_variables']}"
-    ros.log_message 'pulling out objective functions', true
+    ros.log_message "Analysis JSON Output Variables are: #{analysis_json[:analysis]['output_variables']}"
     # Save the objective functions to the object for sending back to the simulation executive
     analysis_json[:analysis]['output_variables'].each do |variable|
       # determine which ones are the objective functions (code smell: todo: use enumerator)
@@ -380,7 +371,7 @@ begin
           end
         else
           # objective_functions[variable['name']] = nil
-          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = 2147483647 # set to max int
           objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["objective_function_group_#{variable['objective_function_index'] + 1}"] = nil
