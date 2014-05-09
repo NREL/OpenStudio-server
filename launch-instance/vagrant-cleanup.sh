@@ -71,12 +71,12 @@ sudo apt-get autoremove --purge x11proto-core-dev -y
 sudo apt-get autoremove --purge x11proto-input-dev -y
 sudo apt-get autoremove --purge x11proto-kb-dev -y	
 
-sudo rm -rf /usr/local/lib/R-3.0.2.tar.gz
-sudo rm -rf /usr/local/lib/R-3.0.2/doc
-sudo rm -rf /usr/local/lib/R-3.0.2/tests
+sudo rm -rf /usr/local/lib/R-3.0.3.tar.gz
+sudo rm -rf /usr/local/lib/R-3.0.3/doc
+sudo rm -rf /usr/local/lib/R-3.0.3/tests
 sudo rm -rf /usr/lib/R/doc
 sudo rm -rf /tmp/*.tar.gz
-cd /usr/local/lib/R-3.0.2/src/gnuwin32/
+cd /usr/local/lib/R-3.0.3/src/gnuwin32/
 sudo make clean
 
 sudo rm -rf /usr/local/EnergyPlus-8-0-0/ExampleFiles
