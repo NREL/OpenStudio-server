@@ -1,7 +1,7 @@
 <measure>
   <name>Standard Reports</name>
   <uid>fc337100-8634-404e-8966-01243d292a79</uid>
-  <version_id>155b60ed-df4d-416f-95c4-b619f6972a39</version_id>
+  <version_id>4f1230e3-0954-43ab-a772-c345030ab14b</version_id>
   <description>Change me</description>
   <modeler_description>Change me</modeler_description>
   <provenances/>
@@ -22,12 +22,6 @@
   </attributes>
   <files>
     <file>
-      <filename>StandardReports_Test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8C62A700</checksum>
-    </file>
-    <file>
       <filename>ExampleModel.osm</filename>
       <filetype>osm</filetype>
       <usage_type>test</usage_type>
@@ -40,6 +34,12 @@
       <checksum>093FE760</checksum>
     </file>
     <file>
+      <filename>StandardReports_Test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6790E2F5</checksum>
+    </file>
+    <file>
       <version>
         <software_program>OpenStudio</software_program>
         <identifier>1.1.2</identifier>
@@ -47,7 +47,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>B6B97009</checksum>
+      <checksum>4263B498</checksum>
     </file>
   </files>
 </measure>

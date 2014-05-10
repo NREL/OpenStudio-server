@@ -118,7 +118,13 @@ module CommunicateMongo
     dp.save!
   end
 
-  def self.communicate_failure(dp)
+  # Zip up the results if analysis_dir is passed. Send the status to MongoDB
+  def self.communicate_failure(dp, analysis_dir)
+    # zip up the folder even on datapoint failures
+    if analysis_dir && File.exist?(analysis_dir)
+      zip_results(dp, analysis_dir)
+    end
+
     dp.run_end_time = Time.now
     dp.status = 'completed'
     dp.status_message = 'datapoint failure'
