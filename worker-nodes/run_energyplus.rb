@@ -7,8 +7,8 @@ require 'logger'
 options = {}
 OptionParser.new do |opts|
   opts.banner = 'Usage: run_energyplus [options]'
-  options[:energyplus] = '/usr/local/EnergyPlus-8-0-0/EnergyPlus'
-  options[:idd] = '/usr/local/EnergyPlus-8-0-0/Energy+.idd'
+  options[:energyplus] = '/usr/local/EnergyPlus-8-1-0/EnergyPlus'
+  options[:idd] = '/usr/local/EnergyPlus-8-1-0/Energy+.idd'
   options[:os_path] = '/usr/local/lib/ruby/site_ruby/2.0.0'
   options[:weather] = '../weather/USA_MD_Baltimore-Washington.Intl.AP.724060_TMY3.epw'
   options[:osm] = './tests/initial.osm'
