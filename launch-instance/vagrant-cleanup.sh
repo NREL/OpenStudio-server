@@ -79,9 +79,9 @@ sudo rm -rf /tmp/*.tar.gz
 cd /usr/local/lib/R-3.0.3/src/gnuwin32/
 sudo make clean
 
-sudo rm -rf /usr/local/EnergyPlus-8-0-0/ExampleFiles
-sudo rm -rf /usr/local/EnergyPlus-8-0-0/Documentation
-sudo rm -rf /usr/local/EnergyPlus-8-0-0/DataSets
+sudo rm -rf /usr/local/EnergyPlus-8-1-0/ExampleFiles
+sudo rm -rf /usr/local/EnergyPlus-8-1-0/Documentation
+sudo rm -rf /usr/local/EnergyPlus-8-1-0/DataSets
 sudo rm -rf /usr/local/lib/ruby/site_ruby/2.0.0/openstudio/sketchup_plugin
 sudo rm -rf /usr/local/lib/ruby/site_ruby/2.0.0/openstudio/examples
 sudo rm -rf /usr/local/share/openstudio/Ruby/openstudio/sketchup_plugin
@@ -125,4 +125,8 @@ sudo dd if=/dev/zero of=/bin/EMPTY bs=1M
 sudo rm /bin/EMPTY
 sudo dd if=/dev/zero of=/etc/EMPTY bs=1M
 sudo rm /etc/EMPTY
+sudo dd if=/dev/zero of=/mnt/EMPTY bs=1M
+sudo rm /mnt/EMPTY
+sudo dd if=/dev/zero of=/data/EMPTY bs=1M
+sudo rm /data/EMPTY
 #exit
