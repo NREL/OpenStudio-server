@@ -27,6 +27,9 @@ Vagrant.configure("2") do |config|
   # your network.
   # config.vm.network :public_network
 
+  #update guest addition to latest virtualbox (requires vagrant-vbguest plugin)
+  config.vbguest.auto_reboot = true
+
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
@@ -35,7 +38,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", type: "rsync", :mount_options => [ "dmode=777", "fmode=777" ], rsync__exclude: ".git/", :rsync__args => ["--verbose", "--archive", "--delete", "-z", "--chmod=a+rwx"]
   config.vm.synced_folder "../../launch-instance", "/data/launch-instance", type: "rsync", :mount_options => [ "dmode=777", "fmode=777" ], rsync__exclude: ".git/", :rsync__args => ["--verbose", "--archive", "--delete", "-z", "--chmod=a+rwx"]
   config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", type: "rsync", :mount_options => [ "dmode=777", "fmode=777" ], rsync__exclude: ".git/", :rsync__args => ["--verbose", "--archive", "--delete", "-z", "--chmod=a+rwx"]
-  config.vm.synced_folder "E:/data-worker", "/mnt/openstudio", type: "rsync", rsync__exclude: ".git/", :owner => "vagrant", :group => "www-data", :mount_options => [ "dmode=775", "fmode=775" ]
+  config.vm.synced_folder "J:/data-worker", "/mnt/openstudio", type: "rsync", rsync__exclude: ".git/", :owner => "vagrant", :group => "www-data", :mount_options => [ "dmode=775", "fmode=775" ]
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -46,7 +49,8 @@ Vagrant.configure("2") do |config|
     # vb.gui = true
 
     # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", 1024*7, "--cpus", 7]
+    vb.customize ["modifyvm", :id, "--memory", 1024*12*4, "--cpus", 12]
+#	vb.customize ["modifyvm", :id, "--memory", 1024*21*4, "--cpus", 21]
     #vb.customize ["modifyvm", :id, "--memory", 1024*2, "--cpus", 1*2]
 
     # Disable DNS proxy.
