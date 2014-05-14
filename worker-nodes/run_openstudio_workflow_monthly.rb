@@ -239,7 +239,8 @@ begin
         result.errors.each { |w| ros.log_message w.logMessage, true }
         result.info.each { |w| ros.log_message w.logMessage, true }
         begin
-          result.attributes.each { |att| @output_attributes << JSON.parse(OpenStudio::toJSON(att)) }
+          # TODO: associate this with the measure that was just run
+          @output_attributes << JSON.parse(OpenStudio::toJSON(result.attributes), symbolize_names: true)
         rescue Exception => e
           log_message = "TODO: #{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
           ros.log_message log_message, true
@@ -336,6 +337,7 @@ begin
   result.errors.each { |w| ros.log_message w.logMessage, true }
   result.info.each { |w| ros.log_message w.logMessage, true }
 
+  # TODO: associate this with the measure that was just run
   report_json = JSON.parse(OpenStudio.toJSON(result.attributes), symbolize_names: true)
   ros.log_message "JSON file is #{report_json}"
   File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
