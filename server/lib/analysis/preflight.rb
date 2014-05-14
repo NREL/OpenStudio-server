@@ -197,7 +197,7 @@ class Analysis::Preflight
     @analysis.end_time = Time.now
     @analysis.status = 'completed'
     @analysis.save!
-
+    @r.converse("print('finished preflight')")
     Rails.logger.info("Finished running #{self.class.name}")
   end
 

@@ -148,7 +148,7 @@ rescue Exception => e
   ros.log_message log_message, true
 
   # need to tell mongo this failed
-  ros.communicate_failure
+  ros.communicate_failure nil
 ensure
 
   # always print the objective function result or NA

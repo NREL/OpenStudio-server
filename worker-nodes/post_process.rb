@@ -13,7 +13,7 @@ def sql_query(sql, report_name, query)
     rescue Exception => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
-      val = 10e9
+      val = nil
     end
   end
   val
@@ -34,7 +34,7 @@ def add_element(hash, var_name, value, xpath = nil)
   else
     test = value.to_s
     value = test.match('\.').nil? ? Integer(test) : Float(test) rescue test.to_s
-    if value.is_a?(Fixnum) or value.is_a?(Float)
+    if value.is_a?(Fixnum) || value.is_a?(Float)
       store_val = value.to_f
     else
       store_val = value.to_s
@@ -49,9 +49,7 @@ end
 # add results from sql method
 def add_data(sql, query, hdr, area, val)
   row = []
-  if val.nil?
-    val = sql_query(sql, 'AnnualBuildingUtilityPerformanceSummary', query)
-  end
+  val = sql_query(sql, 'AnnualBuildingUtilityPerformanceSummary', query) if val.nil?
   row << hdr
   if area.nil?
     row << val
@@ -91,7 +89,7 @@ begin
   tbl_data << add_data(sql_file, "TableName='End Uses' AND RowName='Refrigeration' AND ColumnName='Electricity'", 'Refrigeration Electricity (MJ/m2)', bldg_area, nil)
   htg_hrs = sql_query(sql_file, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Heating' AND ColumnName='Facility'")
   clg_hrs = sql_query(sql_file, 'AnnualBuildingUtilityPerformanceSummary', "TableName='Comfort and Setpoint Not Met Summary' AND RowName='Time Setpoint Not Met During Occupied Cooling' AND ColumnName='Facility'")
-  tot_hrs = htg_hrs + clg_hrs
+  tot_hrs = clg_hrs && htg_hrs ? htg_hrs + clg_hrs : nil
   tbl_data << add_data(sql_file, nil, 'Heating Hours Unmet (hr)', nil, htg_hrs)
   tbl_data << add_data(sql_file, nil, 'Cooling Hours Unmet (hr)', nil, clg_hrs)
   tbl_data << add_data(sql_file, nil, 'Total Hours Unmet (hr)', nil, tot_hrs)
@@ -115,8 +113,8 @@ begin
     csv.transpose.each do |k, v|
       longname = k.gsub(/\(.*\)/, '').strip
       short_name = longname.downcase.gsub(' ', '_')
-      units = k.match(/\(.*\)/)[0].gsub('(', '').gsub(')', '').downcase
-      results[short_name.to_sym] = v.to_f
+      units = k.match(/\(.*\)/)[0].gsub('(', '').gsub(')', '')
+      results[short_name.to_sym] = v.nil? ? nil : v.to_f
       results["#{short_name}_units".to_sym] = units
       results["#{short_name}_display_name".to_sym] = longname
     end
@@ -125,7 +123,6 @@ begin
     # save out results
     File.open('eplustbl.json', 'w') { |f| f << JSON.pretty_generate(results) }
   end
-
 rescue Exception => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   puts log_message

@@ -798,8 +798,8 @@ class AnalysesController < ApplicationController
 
   def write_and_send_input_variables_rdata(analysis)
     variable_mappings = analysis.get_superset_of_input_variables
-    download_filename = "#{analysis.name}_input_variables.RData"
-    data_frame_name = "#{analysis.name.downcase.gsub(" ", "_")}_input_variables"
+    download_filename = "#{analysis.name}_metadata.RData"
+    data_frame_name = "metadata"
     Rails.logger.info("Data frame name will be #{data_frame_name}")
 
     # need to convert array of hash to hash of arrays
@@ -854,8 +854,8 @@ class AnalysesController < ApplicationController
     variable_mappings = analysis.get_superset_of_input_variables
     result_mappings = analysis.get_superset_of_result_variables
     data = get_plot_data(analysis, variable_mappings, result_mappings)
-    download_filename = "#{analysis.name}.RData"
-    data_frame_name = analysis.name.downcase.gsub(' ', '_')
+    download_filename = "#{analysis.name}_results.RData"
+    data_frame_name = "results"
     Rails.logger.info("Data frame name will be #{data_frame_name}")
 
     # need to convert array of hash to hash of arrays

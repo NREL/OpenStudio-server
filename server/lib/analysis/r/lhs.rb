@@ -25,14 +25,16 @@ module Analysis::R
       o
     end
 
-    def discrete_sample_from_probability(probabilities_array, var, save_histogram = true)
+    # Sample the data in a discrete manner. This requires that the user passes in an array of the
+    # samples to choose from which can contain the weights.
+    def discrete_sample_from_probability(probabilities_array, var)
       @r.converse "print('creating discrete distribution')"
       if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
         fail 'no hash values and weight passed'
       end
       values, weights = var.map_discrete_hash_to_array
 
-      dataframe = { 'data' => probabilities_array }.to_dataframe
+      dataframe = {'data' => probabilities_array}.to_dataframe
 
       if var.uncertainty_type == 'discrete_uncertain'
         @r.command(df: dataframe, values: values, weights: weights) do
@@ -53,24 +55,11 @@ module Analysis::R
         fail "discrete distribution type #{var.uncertainty_type} not known for R"
       end
 
-      # returns an array
-      @r.converse 'print(samples)'
-      save_file_name = nil
-      if save_histogram && !values[0].kind_of?(String)
-        # Determine where to save it
-        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
-        Rails.logger.info("R image file name is #{save_file_name}")
-        @r.command do
-          %Q{
-            print("#{save_file_name}")
-            png(filename="#{save_file_name}", width = 1024, height = 1024)
-            hist(samples, freq=F, breaks=20)
-            dev.off()
-          }
-        end
-      end
+      samples = @r.converse 'samples'
+      samples = [samples] unless samples.kind_of? Array # ensure it is an array
+      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
 
-      { r: @r.converse('samples'), image_path: save_file_name }
+      samples
     end
 
     # Take the values/probabilities from the LHS sample and transform them into
@@ -78,7 +67,7 @@ module Analysis::R
     # Note that the probabilities and the samples must be an array so there are
     # checks to make sure that it is.  If R only has one sample, then it will not
     # wrap it in an array.
-    def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max, save_histogram = true)
+    def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max)
       probabilities_array = [probability_array] unless probabilities_array.kind_of? Array # ensure array
 
       Rails.logger.info 'Creating sample from probability'
@@ -96,7 +85,7 @@ module Analysis::R
       end
 
       @r.converse "print('creating distribution')"
-      dataframe = { 'data' => probabilities_array }.to_dataframe
+      dataframe = {'data' => probabilities_array}.to_dataframe
 
       if distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
         @r.command(df: dataframe) do
@@ -129,27 +118,11 @@ module Analysis::R
         end
       end
 
-      # Should return an array. Always return an array, even if it is one value.
       samples = @r.converse 'samples'
-      samples = [samples] unless samples.kind_of? Array
-      save_file_name = nil
-      if save_histogram && !samples[0].kind_of?(String)
-        # Determine where to save it
-        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_plot', '.jpg'], nil)}"
-        Rails.logger.info("R image file name is #{save_file_name}")
-        @r.command do
-          %Q{
-          print("#{save_file_name}")
-          png(filename="#{save_file_name}", width = 1024, height = 1024)
-          hist(samples, freq=F, breaks=20)
-          dev.off()
-        }
-        end
-      end
-
+      samples = [samples] unless samples.kind_of? Array # ensure it is an array
       Rails.logger.info("R created the following samples #{@r.converse('samples')}")
 
-      { r: samples, image_path: save_file_name }
+      samples
     end
 
     def sample_all_variables(selected_variables, number_of_samples, grouped_by_measure = false)
@@ -171,15 +144,16 @@ module Analysis::R
       i_var = 0
       selected_variables.each do |var|
         Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
-        sfp = nil
+        variable_samples = nil
         var_names << var.name
         # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
         if var.uncertainty_type == 'discrete_uncertain'
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-          sfp = discrete_sample_from_probability(p[i_var], var, true)
+          variable_samples = discrete_sample_from_probability(p[i_var], var)
           var_types << 'discrete'
         else
-          sfp = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil, var.lower_bounds_value, var.upper_bounds_value, true)
+          variable_samples = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil,
+                                                      var.lower_bounds_value, var.upper_bounds_value)
           var_types << 'continuous'
         end
 
@@ -191,13 +165,14 @@ module Analysis::R
           min_max[:eps] << 0
         end
 
+        # always add the data to the grouped hash even if it isn't used
         grouped["#{var.measure.id}"] = {} unless grouped.key?(var.measure.id)
-        grouped["#{var.measure.id}"]["#{var.id}"] = sfp[:r]
-        samples["#{var.id}"] = sfp[:r]
-        if sfp[:image_path]
-          pfi = PreflightImage.add_from_disk(var.id, 'histogram', sfp[:image_path])
-          var.preflight_images << pfi unless var.preflight_images.include?(pfi)
-        end
+        grouped["#{var.measure.id}"]["#{var.id}"] = variable_samples
+
+        # save the samples to the
+        samples["#{var.id}"] = variable_samples
+
+        plot_samples(var, variable_samples)
 
         var.r_index = i_var + 1 # r_index is 1-based
         var.save!
@@ -205,11 +180,48 @@ module Analysis::R
         i_var += 1
       end
 
+      # return the samples grouped by the measure if requested (this is an hash of samples by measure id)
       if grouped_by_measure
         samples = grouped
+        Rails.logger.info "Grouped variables are #{grouped}"
       end
-      Rails.logger.info "Grouped variables are #{grouped}"
+
       [samples, var_types, min_max, var_names]
+    end
+
+    private
+
+    # Plot the sample and save it to the Preflight Image model
+    def plot_samples(variable, samples)
+      Rails.logger.info "Creating image for #{variable.name} with samples #{samples}"
+      save_file_name = nil
+      if samples && samples.count > 0
+        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.jpg'], nil)}"
+        Rails.logger.info("R image file name is #{save_file_name}")
+        if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
+          @r.command(d: {samples: samples}.to_dataframe) do
+            %Q{
+              png(filename="#{save_file_name}", width = 1024, height = 1024)
+              hist(d$samples, freq=F, breaks=20)
+              dev.off()
+          }
+          end
+        else # plot as a table
+          @r.command(d: {samples: samples}.to_dataframe) do
+            %Q{
+              png(filename="#{save_file_name}", width = 1024, height = 1024)
+              plot(table(d$samples), ylab='count')
+              dev.off()
+          }
+          end
+        end
+
+        if save_file_name
+          pfi = PreflightImage.add_from_disk(variable.id, 'histogram', save_file_name)
+          variable.preflight_images << pfi unless variable.preflight_images.include?(pfi)
+        end
+      end
     end
   end
 end
+
