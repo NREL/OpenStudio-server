@@ -188,7 +188,6 @@ begin
           end
         end
 
-        variable_found = false
         ros.log_message "iterate over variables for workflow item #{wf['name']}", true
         if wf['variables']
           wf['variables'].each do |wf_var|
@@ -207,7 +206,6 @@ begin
                     value_set = v.setValue(variable_value)
                     fail "Could not set variable '#{variable_name}' of value #{variable_value} on model" unless value_set
                     argument_map[variable_name] = v.clone
-                    variable_found = true
                   else
                     fail "[ERROR] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object" if CRASH_ON_NO_WORKFLOW_VARIABLE
                     ros.log_message("[WARNING] Value for variable '#{variable_name}:#{variable_uuid}' not set in datapoint object", true)
@@ -240,7 +238,13 @@ begin
         result.warnings.each { |w| ros.log_message w.logMessage, true }
         result.errors.each { |w| ros.log_message w.logMessage, true }
         result.info.each { |w| ros.log_message w.logMessage, true }
-        result.attributes.each { |att| @output_attributes << att }
+        begin
+          # TODO: associate this with the measure that was just run
+          @output_attributes << JSON.parse(OpenStudio::toJSON(result.attributes), symbolize_names: true)
+        rescue Exception => e
+          log_message = "TODO: #{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+          ros.log_message log_message, true
+        end
       end
     end
   end
@@ -327,6 +331,7 @@ begin
   result.errors.each { |w| ros.log_message w.logMessage, true }
   result.info.each { |w| ros.log_message w.logMessage, true }
 
+  # TODO: associate this with the measure that was just run
   report_json = JSON.parse(OpenStudio.toJSON(result.attributes), symbolize_names: true)
   ros.log_message "JSON file is #{report_json}"
   File.open("#{run_directory}/standard_report.json", 'w') { |f| f << JSON.pretty_generate(report_json) }
@@ -345,19 +350,12 @@ begin
     File.open("#{directory}/profile-tree.prof", 'w') { |f| RubyProf::CallTreePrinter.new(profile_results).print(f) }
   end
 
-  @report_measures.each do |report_measure|
-    # run the reporting measures
-
-  end
-
   # Initialize the objective function variable
   objective_functions = {}
   if File.exist?("#{run_directory}/run/eplustbl.json")
     result_json = JSON.parse(File.read("#{run_directory}/run/eplustbl.json"), symbolize_names: true)
     ros.log_message "Result JSON is: #{result_json}"
-    ros.log_message "analysis_json[:analysis]['output_variables']\n"
-    ros.log_message "#{analysis_json[:analysis]['output_variables']}"
-    ros.log_message 'pulling out objective functions', true
+    ros.log_message "Analysis JSON Output Variables are: #{analysis_json[:analysis]['output_variables']}"
     # Save the objective functions to the object for sending back to the simulation executive
     analysis_json[:analysis]['output_variables'].each do |variable|
       # determine which ones are the objective functions (code smell: todo: use enumerator)
@@ -380,7 +378,7 @@ begin
           end
         else
           # objective_functions[variable['name']] = nil
-          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = nil
+          objective_functions["objective_function_#{variable['objective_function_index'] + 1}"] = Float::MAX
           objective_functions["objective_function_target_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["scaling_factor_#{variable['objective_function_index'] + 1}"] = nil
           objective_functions["objective_function_group_#{variable['objective_function_index'] + 1}"] = nil
@@ -410,7 +408,7 @@ rescue Exception => e
   ros.log_message log_message, true
 
   # need to tell the system that this failed
-  ros.communicate_failure
+  ros.communicate_failure run_directory
 ensure
   ros.log_message "#{__FILE__} Completed", true
 
