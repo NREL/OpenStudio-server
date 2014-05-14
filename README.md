@@ -91,9 +91,8 @@ vagrant provision
 
 - Test the Rails application by pointing your local browser to [http://localhost:8080](http://localhost:8080)
 
-```
+
   **Windows**  
-```sh
   
   Windows users may want to install cwRsync and use the rsync method of mounting shared drives.
   This eliminates the performance hit in standard vagrant sharing, especially with drives on different indexes.
