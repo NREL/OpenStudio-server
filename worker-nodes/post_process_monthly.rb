@@ -85,6 +85,32 @@ def add_data3(sql, query, hdr, area, val)
   row
 end
 
+# add results from sql method
+def add_data4(sql, query, hdr, area, val)
+  row = []
+  
+  if val.nil?
+    val = 0
+    
+    ["INTERIORLIGHTS:ELECTRICITY", "EXTERIORLIGHTS:ELECTRICITY", "INTERIOREQUIPMENT:ELECTRICITY", "EXTERIOREQUIPMENT:ELECTRICITY", 
+     "FANS:ELECTRICITY", "PUMPS:ELECTRICITY", "HEATING:ELECTRICITY", "COOLING:ELECTRICITY", "HEATREJECTION:ELECTRICITY", 
+     "HUMIDIFIER:ELECTRICITY", "HEATRECOVERY:ELECTRICITY", "WATERSYSTEMS:ELECTRICITY", "COGENERATION:ELECTRICITY", "REFRIGERATION:ELECTRICITY"].each do |end_use|
+      
+      tmp_query = query + " AND ColumnName='#{end_use}'"
+      tmp_val = sql_query(sql, 'BUILDING ENERGY PERFORMANCE - ELECTRICITY', tmp_query)
+      val += tmp_val if not tmp_val.nil?
+    end
+  end
+ 
+  row << hdr
+  if area.nil?
+    row << val
+  else
+    row << (val * 1000) / area
+  end
+  row
+end
+
 begin
   # open sql file
   sql_file = OpenStudio::SqlFile.new(OpenStudio::Path.new('eplusout.sql'))
@@ -148,18 +174,18 @@ begin
   tbl_data << add_data3(sql_file, "RowName='November' AND ColumnName='HEATING:GAS'", 'Heating Gas Nov (J)', nil, nil)
   tbl_data << add_data3(sql_file, "RowName='December' AND ColumnName='HEATING:GAS'", 'Heating Gas Dec (J)', nil, nil)
 # InteriorEquipment:electricity
-  tbl_data << add_data2(sql_file, "RowName='January' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Jan (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='February' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Feb (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='March' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Mar (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='April' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Apr (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='May' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity May (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='June' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Jun (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='July' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Jul (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='August' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Aug (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='September' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Sep (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='October' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Oct (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='November' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Nov (J)', nil, nil)
-  tbl_data << add_data2(sql_file, "RowName='December' AND ColumnName='INTERIOREQUIPMENT:ELECTRICITY'", 'InteriorEquipment Electricity Dec (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='January'", 'Total Electricity Jan (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='February'", 'Total Electricity Feb (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='March'", 'Total Electricity Mar (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='April'", 'Total Electricity Apr (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='May'", 'Total Electricity May (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='June'", 'Total Electricity Jun (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='July'", 'Total Electricity Jul (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='August'", 'Total Electricity Aug (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='September'", 'Total Electricity Sep (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='October'", 'Total Electricity Oct (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='November'", 'Total Electricity Nov (J)', nil, nil)
+  tbl_data << add_data4(sql_file, "RowName='December'", 'Total Electricity Dec (J)', nil, nil)
   # close SQL file
   sql_file.close
   # transpose data
