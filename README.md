@@ -32,6 +32,12 @@ vagrant plugin install vagrant-omnibus
 vagrant plugin install vagrant-aws
 ```
 
+- Virtualbox 4.3+ users may want to install the vagrant-vbguest plugin to update the guest version 
+
+```sh
+vagrant plugin install vagrant-vbguest
+```
+
 - Start VirtualBox (Windows only)
 
 - **NREL ONLY** Set environment variables or bypass SSL proxy
@@ -84,6 +90,13 @@ vagrant provision
   Note, if provisioning fails continue to call the `vagrant provision` command
 
 - Test the Rails application by pointing your local browser to [http://localhost:8080](http://localhost:8080)
+
+
+  **Windows**  
+  
+  Windows users may want to install cwRsync and use the rsync method of mounting shared drives.
+  This eliminates the performance hit in standard vagrant sharing, especially with drives on different indexes.
+  Make sure there is only one rsync process found on the system (ex, remove the Rtools/rsync.exe)
 
 ## Deploying to Amazon EC2
 

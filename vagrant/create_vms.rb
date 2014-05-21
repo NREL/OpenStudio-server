@@ -66,6 +66,8 @@ end
 # Versioning (change these each build)
 require_relative "../server/lib/version"
 @os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
+@os_version = nil
+@os_version_sha = nil
 
 os_role_file = "./chef/roles/openstudio.rb" # Grab the openstudio version out of the vagrant rols
 if File.exists?(os_role_file)
@@ -82,6 +84,7 @@ end
 puts "OpenStudio Server Version is: #{@os_server_version}"
 puts "OpenStudio Version is: #{@os_version}"
 puts "OpenStudio SHA is: #{@os_version_sha}"
+fail "OpenStudio Version / SHA is empty" if @os_version_sha.nil? || @os_version.nil?
 
 test_amis_filename = "test_amis_openstudio.json"
 File.delete(test_amis_filename) if File.exists?(test_amis_filename)
