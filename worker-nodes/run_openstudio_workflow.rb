@@ -161,7 +161,14 @@ begin
         measure = measure_name.constantize.new
         runner = OpenStudio::Ruleset::OSRunner.new
 
-        arguments = measure.arguments(@model)
+        arguments = nil
+        if wf['measure_type'] == 'RubyMeasure'
+          arguments = measure.arguments(@model)
+        elsif wf['measure_type'] == 'EnergyPlusMeasure'
+          arguments = measure.arguments(@model_idf)
+        elsif wf['measure_type'] == 'ReportingMeasure'
+          arguments = measure.arguments()
+        end
 
         # Create argument map and initialize all the arguments
         argument_map = OpenStudio::Ruleset::OSArgumentMap.new
@@ -228,7 +235,7 @@ begin
         elsif wf['measure_type'] == 'EnergyPlusMeasure'
           measure.run(@model_idf, runner, argument_map)
         elsif wf['measure_type'] == 'ReportingMeasure'
-          report_measures << measure
+          @report_measures << measure
         end
         result = runner.result
 

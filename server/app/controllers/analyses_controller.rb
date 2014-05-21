@@ -809,7 +809,9 @@ class AnalysesController < ApplicationController
     out_hash['variable_display_name'] = []
     out_hash['value_type'] = []
     out_hash['units'] = []
-    out_hash['type_of_variable'] = []
+    out_hash['type_of_variable'] = [] 
+    out_hash['output_variable_group'] = []
+    out_hash['output_variable_target'] = []  
 
     variable_mappings.each do |k, v|
       variable = Variable.find(k)
@@ -826,6 +828,24 @@ class AnalysesController < ApplicationController
         out_hash['type_of_variable'] << 'static'
       else
         out_hash['type_of_variable'] << 'other'
+      end
+      out_hash['output_variable_group'] << nil
+      out_hash['output_variable_target'] << nil
+    end
+    
+    if analysis.output_variables
+      Rails.logger.info("output variables is #{analysis.output_variables}")
+      analysis.output_variables.each do |ov|
+        if ov['objective_function_target']
+          #out_hash['measure_name'] << nil
+          out_hash['variable_name'] << ov['name']
+          out_hash['variable_display_name'] << ov['display_name']
+          out_hash['units'] << ov['units']
+          out_hash['type_of_variable'] << 'objective_function'
+          out_hash['value_type'] << 'double'
+          out_hash['output_variable_group'] << ov['objective_function_group']
+          out_hash['output_variable_target'] << ov['objective_function_target']
+        end
       end
     end
 
@@ -848,6 +868,15 @@ class AnalysesController < ApplicationController
     else
       fail 'could not create R dataframe'
     end
+   
+    # Have R delete the file since it will have permissions to delete the file.
+    Rails.logger.info "Temp filename is #{tmp_filename}"
+    r_command = "file.remove('#{tmp_filename}')"
+    Rails.logger.info "R command is #{r_command}"
+    if File.exist? tmp_filename
+      r.converse(r_command) 
+    end  
+      
   end
 
   def write_and_send_rdata(analysis)
