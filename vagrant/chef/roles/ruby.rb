@@ -26,7 +26,7 @@ default_attributes(
             "2.0.0-p451" => [
                 {
                     :name => "bundler",
-                    :version => "1.5.3",
+                    :version => "1.6.2",
                 },
                 {
                     :name => "ruby-prof"
