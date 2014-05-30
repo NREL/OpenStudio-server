@@ -1,7 +1,3 @@
-<p>
-  <a href="#dp_fields">Jump to EnergyPlus Results</a>
-</p>
-
 <h2>Data Point Information</h2>
 <strong>Name:</strong> <%= @data_point.name %><br/>
 <strong>Analysis:</strong> <%= link_to @data_point.analysis.display_name, analysis_path(@data_point.analysis) %><br/>
@@ -30,7 +26,7 @@
 </table>
 
 
-<h2>High Level Results</h2>
+<h2>Results</h2>
 <% if @data_point.results %>
     <% @data_point.results.sort.each do |k, v| %>
         <h3> <%= "Measure: #{k}" %></h3>
@@ -71,14 +67,12 @@
     <% end %>
 <% end %>
 
-<a id="dp_fields"></a>
 <h2>EnergyPlus HTML</h2>
 <% if @html %>
     <%= @html.html_safe %>
 <% else %>
     <p>No HTML file found.</p>
 <% end %>
-
 
 <h2>Data Point Fields</h2>
 <table class="table table-striped">

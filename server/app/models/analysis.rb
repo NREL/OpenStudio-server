@@ -176,6 +176,7 @@ class Analysis
     [self.save!, errors]
   end
 
+  # Method that pulls out the variables from the uploaded problem/analysis JSON.
   def pull_out_os_variables
     pat_json = false
     # get the measures first
@@ -209,6 +210,13 @@ class Analysis
           var = Variable.create_from_os_json(id, variable)
         end
       end
+    end
+
+
+    # pull out the output variables
+    self.output_variables.each do |variable|
+      Rails.logger.info "Saving off output variables: #{variable}"
+      var = Variable.create_output_variable(id, variable)
     end
 
     self.save!

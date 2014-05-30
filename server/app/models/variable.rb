@@ -6,18 +6,23 @@ class Variable
   field :_id, type: String, default: -> { uuid || UUID.generate }
   field :r_index, type: Integer
   field :version_uuid, type: String # pointless at this time
-  field :name, type: String
+  field :name, type: String # machine name
+  field :metadata_id, type: String # link to dencity taxonomy
   field :display_name, type: String
   field :minimum # don't define this--it can be anything  -- and remove this eventually as os uses lower bounds
   field :maximum # don't define this--it can be anything
   field :mean # don't define this--it can be anything
   field :delta_x_value # don't define this--it can be anything
   field :uncertainty_type, type: String
+  field :units, type: String
   field :discrete_values_and_weights
-  field :data_type, type: String # not sure this is needed because mongo is typed
+  field :data_type, type: String
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
+  field :visualize, type: Boolean
+  field :export, type: Boolean
   field :perturbable, type: Boolean, default: false # if enabled, then it will be perturbed
+  field :output, type: Boolean, default: false # is this an output variable for reporting, etc
   field :pivot, type: Boolean, default: false
   field :pivot_samples # don't type for now
   field relation_to_output: String, default: 'standard' # or can be inverse
@@ -64,6 +69,35 @@ class Variable
     end
 
     # deal with type or any other "excluded" variables from the hash
+    var.save!
+
+    var
+  end
+
+  # Create an output variable from the Analysis JSON
+  def self.create_output_variable(analysis_id, json)
+    var = Variable.where(analysis_id: analysis_id, name: json['name'] ).first
+    if var
+      Rails.logger.warn "Variable already exists for '#{var.name}'"
+    else
+      Rails.logger.info "Adding a new variable named: '#{json['name']}'"
+      var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'] )
+    end
+
+    var.output = true
+    var.metadata_id = json['metadata_id'] if json['metadata_id']
+    var.display_name = json['display_name'] if json['display_name']
+    var.units = json['units'] if json['units']
+    var.visualize = json['visualize'] if json['visualize']
+    var.export = json['export'] if json['export']
+    var.data_type = json['variable_type'] if json['variable_type']
+    var.data_type = json['variable_type'] if json['variable_type']
+    var['objective_function'] = json['objective_function'] if json['objective_function']
+    var['objective_function_index'] = json['objective_function_index'] if json['objective_function_index']
+    var['objective_function_target'] = json['objective_function_target'] if json['objective_function_target']
+    var['scaling_factor'] = json['scaling_factor'] if json['scaling_factor']
+    var['objective_function_group'] = json['objective_function_group'] if json['objective_function_group']
+
     var.save!
 
     var
