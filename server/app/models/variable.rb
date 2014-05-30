@@ -144,38 +144,6 @@ class Variable
     pivot_array
   end
 
-  def self.statics(analysis_id)
-    Variable.where(analysis_id: analysis_id, static: true).order_by(:name.asc)
-  end
-
-  def self.static_array(analysis_id, grouped = false, array_around_grouped_value = true)
-    # get static variables.  These must be applied after the pivot vars and before the lhs
-    static_variables = Variable.statics(analysis_id)
-    grouped_hash = {}
-    static_array = []
-    static_variables.each do |var|
-      if var.static_value
-        if grouped
-          grouped_hash["#{var.measure.id}"] = {} unless grouped_hash.key?(var.measure.id)
-          if array_around_grouped_value
-            grouped_hash["#{var.measure.id}"]["#{var.id}"] = [var.static_value]
-          else
-            grouped_hash["#{var.measure.id}"]["#{var.id}"] = var.static_value
-          end
-        else
-          static_array << { "#{var.id}" => var.static_value }
-        end
-      else
-        fail "Asking to set a static value but none was passed for #{var.name}"
-      end
-    end
-    Rails.logger.info "static array is #{static_array}"
-    Rails.logger.info "grouped static hash is #{grouped_hash}"
-
-    static_array = grouped_hash if grouped
-    static_array
-  end
-
   def self.variables(analysis_id)
     Variable.where(analysis_id: analysis_id, perturbable: true).order_by(:name.asc)
   end

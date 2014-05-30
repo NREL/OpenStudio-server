@@ -103,15 +103,6 @@ describe Analysis::Core do
       r[7].should eq(c: false)
     end
 
-    # the test below is merging a measure array and 2 static
-    # variable that need to be in each of the combined hash
-    it 'should return a grouped hash array' do
-      h = { a: { x: [1, 2, 3], y: %w(4 5 6) }, b: { z: [10, 11, 12, 13] } }
-      s = { a: { s1: [true], s2: [1.5] }, b: { s3: ['s3'] } }
-      r = Analysis::Core.grouped_hash_of_array_to_array_of_hash(h, s)
 
-      expect(r.first).to eq(x: 1, y: '4', s1: true, s2: 1.5)
-      expect(r.last).to eq(z: 13, s3: 's3')
-    end
   end
 end

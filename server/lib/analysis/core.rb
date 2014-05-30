@@ -59,46 +59,6 @@ module Analysis::Core
 
   module_function :hash_of_array_to_array_of_hash_non_combined # export this function for use outside of class extension
 
-  # Grouped hash of hash of arrays with static array
-  def grouped_hash_of_array_to_array_of_hash(hash_array, static_array)
-    # This takes
-    # h = {a: {x: [1, 2, 3]}, b: {y: ["4", "5", "6"], z: [true, false, false]}
-    # s = {a: {w: [true]}}
-    # and makes
-    # h' = [{x: 1, w: true}, {y: "4", z: true} ]
-
-    # first go through and expand the length of s[measure_id] to the same length as the h[measure_id]
-    hash_array.each do |k, v|
-      if static_array.key?(k)
-        # get the length of the hash variable arrays -- these should always be equal
-        max = v.map { |ks, vs| vs.size }.max
-
-        # expand the static array to have the same lengths
-        static_array[k].each do |ks, vs|
-          # puts "expanding static array from #{static_array}"
-          static_array[k][ks] = vs * max
-          # puts "to static array of #{static_array}"
-        end
-      end
-    end
-
-    # puts "Static array is now #{static_array}"
-    merged = hash_array.deep_merge(static_array)
-
-    # puts "Merged array is now #{merged}"
-    # for each measure combine the results
-    merged.each do |k, v|
-      merged[k] = hash_of_array_to_array_of_hash(v)
-    end
-    # puts "New hash array is #{merged}"
-
-    # now merge this down to an array
-    merged = merged.map { |_, v| v }.flatten
-
-    merged
-  end
-  module_function :grouped_hash_of_array_to_array_of_hash # export this function for use outside of class extension
-
   # The module method will take continuous variables and discretize the values and save them into the
   # values hash (with weights if applicable) in order to be used with discrete algorithms
   def discretize_variables

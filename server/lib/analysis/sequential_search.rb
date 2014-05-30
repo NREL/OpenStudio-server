@@ -280,7 +280,6 @@ class Analysis::SequentialSearch
 
     # get static variables.  These must be applied after the pivot vars and before the lhs
     pivot_array = Variable.pivot_array(@analysis.id)
-    static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
 
     if pivot_array.size > 1
