@@ -87,6 +87,7 @@ module Analysis::R
           print(paste("RUBYLIB:",Sys.getenv("RUBYLIB")))
           print(paste("R_HOME:",Sys.getenv("R_HOME")))
           print(paste("R_ENVIRON:",Sys.getenv("R_ENVIRON")))
+          print("Cluster started")
         }
       end
       result = @r.converse('timeflag')
@@ -96,7 +97,7 @@ module Analysis::R
       result = false
       @r.command do
         %Q{
-            print("Stopping cluster")
+            print("Stopping cluster...")
             stopCluster(cl)
             print("Cluster stopped")
           }
