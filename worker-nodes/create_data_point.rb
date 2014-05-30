@@ -13,6 +13,7 @@ require 'optparse'
 require 'fileutils'
 require 'logger'
 require 'openstudio-workflow'
+require 'uuid'
 
 puts "Parsing Input: #{ARGV}"
 
@@ -23,27 +24,29 @@ optparse = OptionParser.new do |opts|
     options[:analysis_id] = analysis_id
   end
 
-  opts.on('-v', '--variables ARRAY', Array, 'Array of variables') do |a|
+  options[:variables] = []
+  opts.on('-v', '--variables 1,2,3', Array, 'Array of variable values') do |a|
     options[:variables] = a
   end
-
 end
 optparse.parse!
 
 puts "Parsed Input: #{optparse}"
+errored = false
+puts "Options are: #{options}"
 
 begin
   dp_uuid = UUID.new.generate
-  analysis_dir = "/mnt/openstudio/#{options[:analysis_id]}"
+  analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
 
-  options = {
+  workflow_options = {
       datapoint_id: dp_uuid,
       analysis_root_path: analysis_dir,
       adapter_options: {
           mongoid_path: '/mnt/openstudio/rails-models'
       }
   }
-  k = OpenStudio::Workflow.load 'Mongo', analysis_dir, options
+  k = OpenStudio::Workflow.load 'Mongo', analysis_dir, workflow_options
   k.logger.info "Creating new datapoint on worker"
 
   dp = DataPoint.find_or_create_by(uuid: dp_uuid)
@@ -53,24 +56,31 @@ begin
 
   sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
 
-  options[:variables].each_with_index do |value, index|
-    r_index_value = index + 1
-    k.logger.info "adding new variable value with r_index #{r_index_value} of value #{value}"
+  if options[:variables]
+    options[:variables].each_with_index do |value, index|
+      r_index_value = index + 1
+      k.logger.info "adding new variable value with r_index #{r_index_value} of value #{value}"
 
-    # todo check for nil variables
-    uuid = Variable.where(r_index: r_index_value).first.uuid
+      # todo check for nil variables
+      uuid = Variable.where(r_index: r_index_value).first.uuid
 
-    # need to check type of value and convert here
-    sample[uuid] = value.to_f
+      # need to check type of value and convert here
+      sample[uuid] = value.to_f
+    end
+  else
+    fail 'no variables in array'
   end
-  k.logger.infoe "new variable values are #{sample}"
+
+  k.logger.info "new variable values are #{sample}" if k
   dp.set_variable_values = sample
   dp.save!
 
 rescue Exception => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-  k.logger.info log_message
+  k.logger.info log_message if k
+
+  errored = true
 ensure
   # Must print out a dp uuid of some sort, default is NA
-  puts dp ? dp.uuid : 'NA'
+  puts dp && !errored ? dp.uuid : 'NA'
 end
