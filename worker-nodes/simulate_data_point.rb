@@ -122,7 +122,7 @@ begin
         analysis_root_path: analysis_dir,
         datapoint_id: options[:uuid],
         use_monthly_reports: true,
-        xml_library_file: "#{analysis_dir}/lib/openstudio_xml",
+        xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
         adapter_options: {
             mongoid_path: '/mnt/openstudio/rails-models'
         }

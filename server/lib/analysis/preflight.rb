@@ -8,17 +8,16 @@ class Analysis::Preflight
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      problem: {
-        random_seed: 1298,
-        algorithm: {
-          sample_method: 'individual_measures',
-          run_max: true,
-          run_min: true,
-          run_mode: true,
-          run_starting_point: false,
-          run_all_samples_for_pivots: true
+        skip_init: false,
+        run_data_point_filename: 'run_openstudio_workflow.rb',
+        problem: {
+            random_seed: 1298,
+            algorithm: {
+                sample_method: 'individual_variables',
+                run_max: true,
+                run_min: true,
+                run_mode: true,
+                run_all_samples_for_pivots: true
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -81,17 +80,58 @@ class Analysis::Preflight
     samples = []
 
     if @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
+      Rails.logger.info "Sampling each variable individually"
       selected_variables.each do |variable|
-        if variable.relation_to_output == 'inverse'
-          samples << { "#{variable.id}" => variable.maximum } if @analysis.problem['algorithm']['run_min']
-          samples << { "#{variable.id}" => variable.minimum } if @analysis.problem['algorithm']['run_max']
-        else # including the empty string case
-          samples << { "#{variable.id}" => variable.minimum } if @analysis.problem['algorithm']['run_min']
-          samples << { "#{variable.id}" => variable.maximum } if @analysis.problem['algorithm']['run_max']
-        end
-        samples << { "#{variable.id}" => variable.modes_value } if @analysis.problem['algorithm']['run_mode']
-      end
+        if @analysis.problem['algorithm']['run_min']
+          instance = {}
+          if variable.relation_to_output == 'inverse'
+            instance["#{variable.id}".to_sym] = variable.maximum
+          else
+            instance["#{variable.id}".to_sym] = variable.minimum
+          end
 
+          selected_variables.each do |variable2|
+            if variable != variable2
+              instance["#{variable2.id}".to_sym] = variable2.static_value
+            end
+          end
+
+          Rails.logger.info "Instance is #{instance}"
+          samples << instance
+        end
+
+        if @analysis.problem['algorithm']['run_max']
+          instance = {}
+          if variable.relation_to_output == 'inverse'
+            instance["#{variable.id}".to_sym] = variable.minimum
+          else
+            instance["#{variable.id}".to_sym] = variable.maximum
+          end
+
+          selected_variables.each do |variable2|
+            if variable != variable2
+              instance["#{variable2.id}".to_sym] = variable2.static_value
+            end
+          end
+
+          Rails.logger.info "Instance is #{instance}"
+          samples << instance
+        end
+
+        if @analysis.problem['algorithm']['run_mode']
+          instance = {}
+          instance["#{variable.id}".to_sym] = variable.modes_value
+
+          selected_variables.each do |variable2|
+            if variable != variable2
+              instance["#{variable2.id}".to_sym] = variable2.static_value
+            end
+          end
+
+          Rails.logger.info "Instance is #{instance}"
+          samples << instance
+        end
+      end
     elsif @analysis.problem['algorithm']['sample_method'] == 'all_variables'
       Rails.logger.info 'Sampling for all variables'
       min_sample = {} # {:name => 'Minimum'}
@@ -117,51 +157,46 @@ class Analysis::Preflight
       samples << mode_sample if @analysis.problem['algorithm']['run_mode']
 
     elsif @analysis.problem['algorithm']['sample_method'] == 'individual_measures'
-      # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is
-      # useful when you need each measure to be evaluated individually.  The variables are then linked.
-      grouped = { min: {}, max: {}, mode: {} }
-      Rails.logger.info 'Sampling individual measures'
-      min_sample = {} # {:name => 'Minimum'}
-      max_sample = {} # {:name => 'Maximim'}
-      mode_sample = {}
-      selected_variables.each do |variable|
-        grouped[:min]["#{variable.measure.id}"] = {} unless grouped[:min].key?(variable.measure.id)
-        grouped[:max]["#{variable.measure.id}"] = {} unless grouped[:max].key?(variable.measure.id)
-        grouped[:mode]["#{variable.measure.id}"] = {} unless grouped[:mode].key?(variable.measure.id)
-
-        if variable.relation_to_output == 'inverse'
-          grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
-          grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
-        else
-          grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
-          grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
-        end
-        grouped[:mode]["#{variable.measure.id}"]["#{variable.id}"] = variable.modes_value
-      end
-
-
-      # Hash will look like this now:
-      # {
-      # {:min=>{"m_a"=>{"v_1"=>0.2161572052401747}, "m_b"=>{"v_2"=>0.21428571428571425, "v_3"=>0.56}}}
-      # }
-      # So add the min,max,mode values
-      samples += grouped[:min].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_min']
-      samples += grouped[:max].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_max']
-      samples += grouped[:mode].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_mode']
-      Rails.logger.info "Final grouped hash is: #{samples}"
+      fail "this has been removed for now until it is needed. it is best to use individual variables"
+      # # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is
+      # # useful when you need each measure to be evaluated individually.  The variables are then linked.
+      # grouped = {min: {}, max: {}, mode: {}}
+      # Rails.logger.info 'Sampling individual measures'
+      # min_sample = {} # {:name => 'Minimum'}
+      # max_sample = {} # {:name => 'Maximim'}
+      # mode_sample = {}
+      # selected_variables.each do |variable|
+      #   grouped[:min]["#{variable.measure.id}"] = {} unless grouped[:min].key?(variable.measure.id)
+      #   grouped[:max]["#{variable.measure.id}"] = {} unless grouped[:max].key?(variable.measure.id)
+      #   grouped[:mode]["#{variable.measure.id}"] = {} unless grouped[:mode].key?(variable.measure.id)
+      #
+      #   if variable.relation_to_output == 'inverse'
+      #     grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
+      #     grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
+      #   else
+      #     grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
+      #     grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
+      #   end
+      #   grouped[:mode]["#{variable.measure.id}"]["#{variable.id}"] = variable.modes_value
+      # end
+      #
+      #
+      # # Hash will look like this now:
+      # # {
+      # # {:min=>{"m_a"=>{"v_1"=>0.2161572052401747}, "m_b"=>{"v_2"=>0.21428571428571425, "v_3"=>0.56}}}
+      # # }
+      # # So add the min,max,mode values
+      # samples += grouped[:min].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_min']
+      # samples += grouped[:max].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_max']
+      # samples += grouped[:mode].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_mode']
+      # Rails.logger.info "Final grouped hash is: #{samples}"
     else
       fail 'no sampling method defined (all_variables or individual_variables)'
     end
 
-    # add in the starting point if requested.  Note that the static variables are not added to the
-    # starting point.
-    # samples << {:name => "Starting Point"} if @analysis.problem['algorithm']['run_starting_point']
-
     if @analysis.problem['algorithm']['run_all_samples_for_pivots']
-      samples << {} if @analysis.problem['algorithm']['run_starting_point']
-
       # Always add in the pivot variables for now.  This allows the location to be set if it is a pivot
-      Rails.logger.info 'Fixing Pivot dimension'
+      Rails.logger.info "Fixing Pivot dimension #{pivot_array}"
       samples = add_pivots(samples, pivot_array)
       Rails.logger.info "Finished adding the pivots resulting in #{samples}"
     else
