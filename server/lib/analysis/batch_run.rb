@@ -91,9 +91,7 @@ class Analysis::BatchRun
       if cluster_started
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
           %Q{
-
             clusterEvalQ(cl,library(RMongo))
-
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
@@ -102,12 +100,12 @@ class Analysis::BatchRun
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
-              print("#{@analysis.use_shm}")
+              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              print(paste("Use dev/shm set to:","#{@analysis.use_shm}"))
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
               print(paste("Run command",y))
               z <- system(y,intern=TRUE)
@@ -121,12 +119,12 @@ class Analysis::BatchRun
               dps <- rbind(dps, c(NA))
             }
             if (nrow(dps) == 0) {
-              print("not sure what to do with no datapoint so adding an NA")
+              print("not sure what to do with no datapoint so adding two NAs")
               dps <- rbind(dps, c(NA))
               dps <- rbind(dps, c(NA))
             }
 
-            print(paste("number of datapoints is:",nrow(dps)))
+            print(paste("Number of datapoints:",nrow(dps)))
 
             results <- parLapply(cl, dps[,1], f)
           }
