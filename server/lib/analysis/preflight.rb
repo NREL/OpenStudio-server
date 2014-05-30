@@ -96,7 +96,6 @@ class Analysis::Preflight
             end
           end
 
-          Rails.logger.info "Instance is #{instance}"
           samples << instance
         end
 
@@ -114,7 +113,6 @@ class Analysis::Preflight
             end
           end
 
-          Rails.logger.info "Instance is #{instance}"
           samples << instance
         end
 
@@ -128,7 +126,6 @@ class Analysis::Preflight
             end
           end
 
-          Rails.logger.info "Instance is #{instance}"
           samples << instance
         end
       end
