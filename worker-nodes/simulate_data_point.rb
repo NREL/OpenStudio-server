@@ -77,21 +77,74 @@ begin
   logger.info "Analysis Root Directory is #{analysis_dir}"
   logger.info "Simulation Run Directory is #{directory}"
   logger.info "Simulation Storage Directory is #{store_directory}"
+  logger.info "Run datapoint type/file is #{options[:run_data_point_filename]}"
 
-  options = {
-      datapoint_id: options[:uuid],
-      analysis_root_path: analysis_dir,
-      use_monthly_reports: true,
+  # TODO: program the various paths based on the run_data_point_filename
+  # TODO: rename run_data_point_filename to run_workflow_method
 
-      adapter_options: {
-          mongoid_path: '/mnt/openstudio/rails-models'
-      }
-  }
+  workflow_options = nil
+  if options[:run_data_point_filename] == 'workflow_monthly' ||
+      options[:run_data_point_filename] == 'run_openstudio_workflow_monthly.rb'
+    workflow_options = {
+        datapoint_id: options[:uuid],
+        analysis_root_path: analysis_dir,
+        use_monthly_reports: true,
+
+        adapter_options: {
+            mongoid_path: '/mnt/openstudio/rails-models'
+        }
+    }
+
+  elsif options[:run_data_point_filename] == 'workflow' ||
+      options[:run_data_point_filename] == 'run_openstudio_workflow.rb'
+    workflow_options = {
+        datapoint_id: options[:uuid],
+        analysis_root_path: analysis_dir,
+        use_monthly_reports: false,
+
+        adapter_options: {
+            mongoid_path: '/mnt/openstudio/rails-models'
+        }
+    }
+  elsif options[:run_data_point_filename] == 'custom_xml' ||
+      options[:run_data_point_filename] == 'run_openstudio_xml.rb'
+
+    # Set up the custom workflow states and transitions
+    transitions = OpenStudio::Workflow::Run.default_transition
+    transitions[1][:to] = :xml
+    transitions.insert(2, {from: :xml, to: :openstudio})
+    states = OpenStudio::Workflow::Run.default_states
+    states.insert(2, {:state => :xml, :options => {:after_enter => :run_xml}})
+
+    workflow_options = {
+        transitions: transitions,
+        states: states,
+        analysis_root_path: analysis_dir,
+        datapoint_id: options[:uuid],
+        use_monthly_reports: true,
+        xml_library_file: "#{analysis_dir}/lib/openstudio_xml",
+        adapter_options: {
+            mongoid_path: '/mnt/openstudio/rails-models'
+        }
+    }
+  elsif options[:run_data_point_filename] == 'legacy_workflow' ||
+      options[:run_data_point_filename] == 'run_openstudio.rb'
+    workflow_options = {
+        datapoint_id: options[:uuid],
+        analysis_root_path: analysis_dir,
+        use_monthly_reports: false,
+
+        adapter_options: {
+            mongoid_path: '/mnt/openstudio/rails-models'
+        }
+    }
+  end
 
   logger.info 'Creating Workflow Manager instance'
-  k = OpenStudio::Workflow.load 'Mongo', directory, options
+  k = OpenStudio::Workflow.load 'Mongo', directory, workflow_options
   logger.info "Running workflow with #{options}"
   k.run
+
 
   # TODO: get the last results out --- result = result.split("\n").last if result
 
