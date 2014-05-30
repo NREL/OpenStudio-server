@@ -123,7 +123,6 @@ class Analysis::NsgaNrel
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
-    static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 

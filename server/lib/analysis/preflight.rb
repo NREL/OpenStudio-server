@@ -17,7 +17,7 @@ class Analysis::Preflight
           run_max: true,
           run_min: true,
           run_mode: true,
-          run_starting_point: true,
+          run_starting_point: false,
           run_all_samples_for_pivots: true
             }
         }
@@ -72,7 +72,7 @@ class Analysis::Preflight
     @r.converse("print('starting preflight')")
     samples = nil
     var_types = nil
-    static_array = nil
+
 
     Rails.logger.info 'Starting sampling'
 
@@ -92,9 +92,6 @@ class Analysis::Preflight
         samples << { "#{variable.id}" => variable.modes_value } if @analysis.problem['algorithm']['run_mode']
       end
 
-      # Add in the static array (which are set in each sample)
-      static_array = Variable.static_array(@analysis.id)
-      samples = add_static_variables(samples, static_array)
     elsif @analysis.problem['algorithm']['sample_method'] == 'all_variables'
       Rails.logger.info 'Sampling for all variables'
       min_sample = {} # {:name => 'Minimum'}
@@ -119,9 +116,6 @@ class Analysis::Preflight
       samples << max_sample if @analysis.problem['algorithm']['run_max']
       samples << mode_sample if @analysis.problem['algorithm']['run_mode']
 
-      # Add in the static array (which are set in each sample)
-      static_array = Variable.static_array(@analysis.id)
-      samples = add_static_variables(samples, static_array)
     elsif @analysis.problem['algorithm']['sample_method'] == 'individual_measures'
       # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is
       # useful when you need each measure to be evaluated individually.  The variables are then linked.
@@ -145,15 +139,6 @@ class Analysis::Preflight
         grouped[:mode]["#{variable.measure.id}"]["#{variable.id}"] = variable.modes_value
       end
 
-      # add in the static values for each measure group
-      static_grouped = Variable.static_array(@analysis.id, true, false)
-      # will return {"a"=>{"b"=>0.56}}
-      static_grouped.each do |k, v|
-        Rails.logger.info "static group is #{k}"
-        grouped[:min][k].merge!(v) if grouped[:min].key?(k)
-        grouped[:max][k].merge!(v) if grouped[:max].key?(k)
-        grouped[:mode][k].merge!(v) if grouped[:mode].key?(k)
-      end
 
       # Hash will look like this now:
       # {
