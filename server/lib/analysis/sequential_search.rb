@@ -268,6 +268,9 @@ class Analysis::SequentialSearch
     # verify that the objective_functions are unique
     @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
 
+    # save other run information in another object in the analysis
+    @analysis.run_options['sequential_search'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
 
