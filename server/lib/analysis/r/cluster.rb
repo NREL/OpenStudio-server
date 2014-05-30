@@ -27,20 +27,17 @@ module Analysis::R
         %Q{
             ip <- "#{master_ip}"
             results <- NULL
-            print(paste("master ip address is",ip))
-            print(paste("working directory is",getwd()))
+            print(paste("Master ip address is",ip))
+            print(paste("Current working directory is",getwd()))
             if (file.exists('/mnt/openstudio/rtimeout')) {
               file.remove('/mnt/openstudio/rtimeout')
             }
             #test the query of getting the run_flag
-            print(paste("connecting to mongo database: #{@db}"))
+            print(paste("Connecting to MongoDB: #{@db}"))
             mongo <- mongoDbConnect("#{@db}", host=ip, port=27017)
             flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis_id}"}', '{run_flag:1}')
 
-            print(flag["run_flag"])
-            if (flag["run_flag"] == "true"  ){
-              print("flag is set to true!")
-            }
+            print(paste("Run flag:",flag['run_flag']))
             dbDisconnect(mongo)
           }
       end
@@ -60,14 +57,14 @@ module Analysis::R
       result = false
       @r.command(ips: ip_addresses.to_dataframe) do
         %Q{
-          print(ips)
+          print("Starting cluster...")
+          print(paste("Worker IPs:", ips))
           if (nrow(ips) == 0) {
             stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
           }
           uniqueips <- unique(ips)
           numunique <- nrow(uniqueips) * 180
-          print("max timeout is:")
-          print(numunique)
+          print(paste("max timeout is:",numunique))
           timeflag <<- TRUE;
           res <- NULL;
           starttime <- Sys.time()
@@ -85,11 +82,11 @@ module Analysis::R
           timetaken <- endtime - starttime
           print(paste("R cluster startup time:",timetaken))
 
-          print(paste("Who am I is",system('whoami', intern = TRUE)))
-          print(paste("PATH is",Sys.getenv("PATH")))
-          print(paste("RUBYLIB is",Sys.getenv("RUBYLIB")))
-          print(paste("R_HOME is",Sys.getenv("R_HOME")))
-          print(paste("R_ENVIRON is",Sys.getenv("R_ENVIRON")))
+          print(paste("whoami:",system('whoami', intern = TRUE)))
+          print(paste("PATH:",Sys.getenv("PATH")))
+          print(paste("RUBYLIB:",Sys.getenv("RUBYLIB")))
+          print(paste("R_HOME:",Sys.getenv("R_HOME")))
+          print(paste("R_ENVIRON:",Sys.getenv("R_ENVIRON")))
         }
       end
       result = @r.converse('timeflag')
