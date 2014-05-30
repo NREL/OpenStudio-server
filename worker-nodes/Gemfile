@@ -14,3 +14,5 @@ gem 'delayed_job_mongoid'
 gem 'libxml-ruby'
 gem 'os'
 
+gem 'uuid'
+
