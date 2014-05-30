@@ -52,6 +52,8 @@ begin
   dp = DataPoint.find_or_create_by(uuid: dp_uuid)
   dp.name = "Autocreated on worker: #{dp_uuid}"
   dp.analysis_id = options[:analysis_id]
+
+  # TODO: set datapoint status
   dp.save!
 
   sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
