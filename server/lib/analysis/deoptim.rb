@@ -4,30 +4,30 @@ class Analysis::Deoptim
 
   def initialize(analysis_id, options = {})
     defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [
-        {
-          display_name: 'Total Site Energy (EUI)',
-          name: 'total_energy',
-          objective_function: true,
-          objective_function_index: 0,
-          index: 0
-        },
-        {
-          display_name: 'Total Life Cycle Cost',
-          name: 'total_life_cycle_cost',
-          objective_function: true,
-          objective_function_index: 1,
-          index: 1
-        }
+        skip_init: false,
+        run_data_point_filename: 'run_openstudio_workflow.rb',
+        create_data_point_filename: 'create_data_point.rb',
+        output_variables: [
+            {
+                display_name: 'Total Site Energy (EUI)',
+                name: 'total_energy',
+                objective_function: true,
+                objective_function_index: 0,
+                index: 0
+            },
+            {
+                display_name: 'Total Life Cycle Cost',
+                name: 'total_life_cycle_cost',
+                objective_function: true,
+                objective_function_index: 1,
+                index: 1
+            }
         ],
-      problem: {
-        algorithm: {
-          generations: 1,
-          objective_functions: %w(total_energy total_life_cycle_cost)
-        }
+        problem: {
+            algorithm: {
+                generations: 1,
+                objective_functions: %w(total_energy total_life_cycle_cost)
+            }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
@@ -52,6 +52,9 @@ class Analysis::Deoptim
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # save other run information in another object in the analysis
+    @analysis.run_options['deoptim'] =@options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }

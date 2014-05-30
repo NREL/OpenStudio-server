@@ -30,6 +30,9 @@ class Analysis::BatchRunft
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
+    # save other run information in another object in the analysis
+    @analysis.run_options['batch_runft'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
     @analysis.reload

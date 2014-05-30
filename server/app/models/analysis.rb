@@ -18,6 +18,7 @@ class Analysis
   field :start_time, type: DateTime
   field :end_time, type: DateTime
   field :results, type: Hash, default: nil
+  field :run_options, type: Hash, default: {}  # hash of each run options configurations (if desired)
   field :problem
   field :status_message, type: String # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
