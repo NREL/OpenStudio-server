@@ -20,6 +20,8 @@ class Variable
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
   field :visualize, type: Boolean
+  field :objective_function, type: Boolean
+  field :objective_function_index, type: Integer
   field :export, type: Boolean
   field :perturbable, type: Boolean, default: false # if enabled, then it will be perturbed
   field :output, type: Boolean, default: false # is this an output variable for reporting, etc
@@ -92,8 +94,8 @@ class Variable
     var.export = json['export'] if json['export']
     var.data_type = json['variable_type'] if json['variable_type']
     var.data_type = json['variable_type'] if json['variable_type']
-    var['objective_function'] = json['objective_function'] if json['objective_function']
-    var['objective_function_index'] = json['objective_function_index'] if json['objective_function_index']
+    var.objective_function = json['objective_function'] if json['objective_function']
+    var.objective_function_index = json['objective_function_index'] if json['objective_function_index']
     var['objective_function_target'] = json['objective_function_target'] if json['objective_function_target']
     var['scaling_factor'] = json['scaling_factor'] if json['scaling_factor']
     var['objective_function_group'] = json['objective_function_group'] if json['objective_function_group']

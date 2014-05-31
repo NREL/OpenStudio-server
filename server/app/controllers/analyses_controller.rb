@@ -82,25 +82,7 @@ class AnalysesController < ApplicationController
           @status_simulations = @na_sims
       end
 
-      @objective_functions = []
-
-      if @analysis.output_variables
-        @analysis.output_variables.each do |ov|
-          if ov['objective_function']
-            @objective_functions << ov
-          end
-        end
-      end
-
-      if @objective_functions.empty?
-        # todo: we need to standardize on the result of this
-        if @analysis['num_measure_groups']
-          @objective_functions << { 'display_name' => 'Total Site Energy (EUI)', 'name' => 'total_site_energy', 'units' => 'EUI' }
-        else
-          @objective_functions << { 'display_name' => 'Total Site Energy (EUI)', 'name' => 'total_energy', 'units' => 'EUI' }
-        end
-        @objective_functions << { 'display_name' => 'Total Life Cycle Cost', 'name' => 'total_life_cycle_cost', 'units' => 'USD' }
-      end
+      @objective_functions = @analysis.variables.where(:objective_function => true).order_by(:objective_function.asc, :sample.asc)
     end
 
     respond_to do |format|
@@ -407,7 +389,7 @@ class AnalysesController < ApplicationController
 
     dps.each do |dp|
       # the datapoint is considered complete if it has results set
-      if dp['results']
+      if dp.results
         dp_values = {}
         dp_values['data_point_uuid'] = data_point_path(dp.id)
 
@@ -421,6 +403,7 @@ class AnalysesController < ApplicationController
               end
             end
           end
+
           # output variables. Don't overwrite input variables from above
           results.each do |key, _|
             # TEMP: special case for "total_energy" (could also be called total_site_energy)
@@ -743,7 +726,7 @@ class AnalysesController < ApplicationController
 
     dps.each do |dp|
       # the datapoint is considered complete if it has results set
-      if dp['results']
+      if dp.results
         dp_values = {}
 
         dp_values['data_point_uuid'] = data_point_path(dp.id)
