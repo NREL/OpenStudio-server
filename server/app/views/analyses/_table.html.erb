@@ -1,7 +1,5 @@
 <div id='<%= "#{status || ''}simulations"%>'>
 
-
-
 <% if simulations.size == 0 %>
   <p style="padding-top:10px;">There are no simulations to display.</p>
 <% else %>
@@ -41,11 +39,15 @@
 
       <% if status == 'all' and @view_all == 0 %>
         <div class="button-container">
-          <%= link_to("View All", analysis_path(:id => @analysis, :view_all => 1, :status => status, :all_page => all_page, :completed_page => completed_page, :started_page => started_page, :queued_page => queued_page, :na_page => na_page), :class => "btn btn-mini") %></button>
+          <%= link_to("View All", analysis_path(:id => @analysis, :view_all => 1, :status => status,
+                                                :all_page => all_page, :completed_page => completed_page,
+                                                :started_page => started_page, :queued_page => queued_page,
+                                                :na_page => na_page), :class => "btn btn-mini") %></button>
         </div>
       <% elsif status == 'all' and @view_all == 1 %>
         <div class="button-container">
-          <%= link_to("Paginate", analysis_path(:id => @analysis.id, :status => status, :view_all => 0), :class => "btn btn-mini") %>
+          <%= link_to("Paginate", analysis_path(:id => @analysis.id, :status => status,
+                                                :view_all => 0), :class => "btn btn-mini") %>
         </div>
       <% end %>
 
@@ -72,7 +74,9 @@
               <td class="other-col"><%= dp.status %></td>
               <td class="other-col"><%= dp.status_message if dp.status_message %></td>
               <% @objective_functions.each do |ov| %>
-                  <td class="<%= class_var %>"><%= (dp.results && dp.results[ov['name']])? dp.results[ov['name']].round(2) : "" %>  </td>
+                  <!-- TODO: This is horrible. Can we use an ostruct? send the data from the contoller -->
+                  <td class="<%= class_var %>"><%= (dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]])?
+                                                           dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].round(2) : '' %>  </td>
               <% end %>
               <td class="other-col"> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
               <td class="other-col"> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
