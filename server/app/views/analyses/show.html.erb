@@ -47,7 +47,7 @@
 
     <% if @analysis.status == 'started' %> <div class="button-container"><%= link_to("Stop Analysis", stop_analysis_path(@analysis), :class => "btn btn-mini") %></div><% end %>
 
-    <h2 class="pad-top-30">Simulations (<%= @analysis.data_points.count if @analysis.data_points %>) </h2>
+    <h2 class="pad-top-30">Simulations (<%= "#{@analysis.data_points.where(:status => 'completed').count} / #{@analysis.data_points.count}" if @analysis.data_points %>) </h2>
 
     <ul class="nav nav-tabs">
       <li <% if @status == 'all' %>class="active"<% end %>> <a data-toggle="tab" href="#sectionAll">All</a></li>
