@@ -89,7 +89,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: { analysis: @analysis } }
+      format.json { render json: {analysis: @analysis} }
       format.js
     end
   end
@@ -247,7 +247,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status } } } }
+      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status} }} }
     end
   end
 
@@ -263,7 +263,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
+      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status, download_status: k.download_status} }} }
     end
   end
 
@@ -303,14 +303,14 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-        :problem,
+          :problem,
       ]
       include_fields = [
-        :variables,
-        :measures # => {:include => :variables}
+          :variables,
+          :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
+      format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
     end
   end
 
@@ -462,7 +462,7 @@ class AnalysesController < ApplicationController
     @plot_data = get_plot_data(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: { mappings: @mappings, plotvars: @plotvars, data: @plot_data } }
+      format.json { render json: {mappings: @mappings, plotvars: @plotvars, data: @plot_data} }
     end
   end
 
@@ -535,7 +535,7 @@ class AnalysesController < ApplicationController
       @plot_data, @datapoint = get_plot_data_bar(@analysis)
     end
     respond_to do |format|
-      format.json { render json: { datapoint: { id: @datapoint.id, name: @datapoint.name }, bardata: @plot_data } }
+      format.json { render json: {datapoint: {id: @datapoint.id, name: @datapoint.name}, bardata: @plot_data} }
     end
   end
 
@@ -552,7 +552,7 @@ class AnalysesController < ApplicationController
       @plot_data, @datapoint = get_plot_data_radar(@analysis)
     end
     respond_to do |format|
-      format.json { render json: { datapoint: { id: @datapoint.id, name: @datapoint.name }, radardata: @plot_data } }
+      format.json { render json: {datapoint: {id: @datapoint.id, name: @datapoint.name}, radardata: @plot_data} }
     end
   end
 
@@ -564,7 +564,7 @@ class AnalysesController < ApplicationController
     @plot_data = get_plot_data(@analysis, @mappings)
 
     respond_to do |format|
-      format.json { render json: { mappings: @mappings, plotvars: @plotvars, data: @plot_data } }
+      format.json { render json: {mappings: @mappings, plotvars: @plotvars, data: @plot_data} }
     end
   end
 
@@ -572,12 +572,11 @@ class AnalysesController < ApplicationController
   # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
   # Once this is functional, then remove the old "plot_data". Remove route too!
   def plot_data_v2
-
     analysis = Analysis.find(params[:id])
     variables, plot_data = get_plot_data_v2(analysis)
 
     respond_to do |format|
-      format.json { render json: { variables: variables, data: plot_data } }
+      format.json { render json: {variables: variables, data: plot_data} }
     end
   end
 
@@ -595,21 +594,21 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.json do
         fields = [
-          :name,
-          :data_points,
-          :analysis_type,
-          :status,
-          :start_time,
-          :end_time,
-          :seed_zip,
-          :results,
-          :run_start_time,
-          :run_end_time,
-          :openstudio_datapoint_file_name,
-          :output_variables
+            :name,
+            :data_points,
+            :analysis_type,
+            :status,
+            :start_time,
+            :end_time,
+            :seed_zip,
+            :results,
+            :run_start_time,
+            :run_end_time,
+            :openstudio_datapoint_file_name,
+            :output_variables
         ]
 
-        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
+        render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
         # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
@@ -624,20 +623,6 @@ class AnalysesController < ApplicationController
       end
       format.rdata do
         write_and_send_rdata(@analysis)
-      end
-    end
-  end
-
-  def download_variables
-    @analysis = Analysis.find(params[:id])
-
-    respond_to do |format|
-      format.csv do
-        redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
-        # write_and_send_csv(@analysis)
-      end
-      format.rdata do
-        write_and_send_input_variables_rdata(@analysis)
       end
     end
   end
@@ -793,10 +778,10 @@ class AnalysesController < ApplicationController
     var_fields = [:_id, :perturbable, :display_name, :name, :units]
     variables = Variable.variables(analysis).only(var_fields).as_json(:only => var_fields)
     variables += Variable.pivots(analysis).only(var_fields).as_json(:only => var_fields)
-    variables.sort_by!{ |v| v['name'] }
+    variables.sort_by! { |v| v['name'] }
 
     # Create a map from the _id to the variables machine name
-    variable_name_map = Hash[variables.map{|v| [v['_id'], v['name']]}]
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
 
     # initialize the plot fields that will need to be reported
     plot_fields = [:set_variable_values, :name]
@@ -804,7 +789,7 @@ class AnalysesController < ApplicationController
     visualizes = Variable.visualizes(analysis).only(var_fields).as_json(:only => var_fields)
 
     # flatten all the visualization variables to a queryable syntx
-    visualize_map = visualizes.map{|v| "results.#{v['name']}" }
+    visualize_map = visualizes.map { |v| "results.#{v['name']}" }
     plot_fields += [:_id, visualize_map]
     plot_fields.flatten!
 
@@ -818,10 +803,10 @@ class AnalysesController < ApplicationController
       # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
       # the datapoint actaully put it in the results
       #   First get the machine name for each variable using the variable_name_map
-      variable_values = Hash[pd['set_variable_values'].map{ |k,v| [variable_name_map[k], v] }]
+      variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
 
       #   Second sort the values (VERY IMPORTANT)
-      variable_values = Hash[variable_values.sort_by{ |k,_| k}]
+      variable_values = Hash[variable_values.sort_by { |k, _| k }]
 
       # merge the variable values into the results hash
       pd['results'].merge!(variable_values)
@@ -830,7 +815,7 @@ class AnalysesController < ApplicationController
       pd.delete('set_variable_values')
 
       # and then remove any other null field
-      pd.delete_if{ |k,v| v.nil? && plot_fields.exclude?(k)}
+      pd.delete_if { |k, v| v.nil? && plot_fields.exclude?(k) }
 
       # now flatten completely
       pd.merge!(pd.delete('results'))
@@ -857,8 +842,6 @@ class AnalysesController < ApplicationController
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_plot_data_v2(analysis)
 
-    logger.info data
-
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
       icnt = 0
@@ -873,93 +856,7 @@ class AnalysesController < ApplicationController
     send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
   end
 
-  def write_and_send_input_variables_rdata(analysis)
-    variable_mappings = analysis.get_superset_of_input_variables
-    download_filename = "#{analysis.name}_metadata.RData"
-    data_frame_name = "metadata"
-    Rails.logger.info("Data frame name will be #{data_frame_name}")
-
-    # need to convert array of hash to hash of arrays
-    out_hash = {}
-    out_hash['measure_name'] = []
-    out_hash['variable_name'] = []
-    out_hash['variable_display_name'] = []
-    out_hash['value_type'] = []
-    out_hash['units'] = []
-    out_hash['type_of_variable'] = [] 
-    out_hash['output_variable_group'] = []
-    out_hash['output_variable_target'] = []  
-
-    variable_mappings.each do |k, v|
-      variable = Variable.find(k)
-      out_hash['measure_name'] << variable.measure.name ? variable.measure.name : nil
-      out_hash['variable_name'] << variable.name ? variable.name : nil
-      out_hash['variable_display_name'] << variable['display_name'] ? variable['display_name'] : nil
-      out_hash['value_type'] << variable['value_type'] ? variable['value_type'] : nil
-      out_hash['units'] << variable['units'] ? variable['units'] : nil
-      if variable['variable']
-        out_hash['type_of_variable'] << 'variable'
-      elsif variable['pivot']
-        out_hash['type_of_variable'] << 'pivot'
-      elsif variable['static']
-        out_hash['type_of_variable'] << 'static'
-      else
-        out_hash['type_of_variable'] << 'other'
-      end
-      out_hash['output_variable_group'] << nil
-      out_hash['output_variable_target'] << nil
-    end
-    
-    if analysis.output_variables
-      Rails.logger.info("output variables is #{analysis.output_variables}")
-      analysis.output_variables.each do |ov|
-        if ov['objective_function_target']
-          #out_hash['measure_name'] << nil
-          out_hash['variable_name'] << ov['name']
-          out_hash['variable_display_name'] << ov['display_name']
-          out_hash['units'] << ov['units']
-          out_hash['type_of_variable'] << 'objective_function'
-          out_hash['value_type'] << 'double'
-          out_hash['output_variable_group'] << ov['objective_function_group']
-          out_hash['output_variable_target'] << ov['objective_function_target']
-        end
-      end
-    end
-
-    Rails.logger.info("outhash is #{out_hash}")
-
-    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
-    require 'rserve/simpler'
-    r = Rserve::Simpler.new
-    r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
-      %Q{
-            temp <- tempfile('rdata', tmpdir="/tmp")
-            save('#{data_frame_name}', file = temp)
-            Sys.chmod(temp, mode = "0777", use_umask = TRUE)
-         }
-    end
-    tmp_filename = r.converse('temp')
-
-    if File.exist?(tmp_filename)
-      send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
-    else
-      fail 'could not create R dataframe'
-    end
-   
-    # Have R delete the file since it will have permissions to delete the file.
-    Rails.logger.info "Temp filename is #{tmp_filename}"
-    r_command = "file.remove('#{tmp_filename}')"
-    Rails.logger.info "R command is #{r_command}"
-    if File.exist? tmp_filename
-      r.converse(r_command) 
-    end  
-      
-  end
-
   def write_and_send_rdata(analysis)
-
-    require 'csv'
-
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_plot_data_v2(analysis)
 

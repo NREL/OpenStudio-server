@@ -7,7 +7,7 @@ class Variable
   field :r_index, type: Integer
   field :version_uuid, type: String # pointless at this time
   field :name, type: String # machine name
-  field :metadata_id, type: String # link to dencity taxonomy
+  field :metadata_id, type: String, default: nil # link to dencity taxonomy
   field :display_name, type: String
   field :minimum # don't define this--it can be anything  -- and remove this eventually as os uses lower bounds
   field :maximum # don't define this--it can be anything
@@ -17,16 +17,18 @@ class Variable
   field :units, type: String
   field :discrete_values_and_weights
   field :data_type, type: String
+  field :value_type, type: String, default: nil  # merge this with the above?
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
   field :visualize, type: Boolean, default: false
   field :objective_function, type: Boolean, default: false
-  field :objective_function_index, type: Integer
+  field :objective_function_index, type: Integer, default: nil
+  field :objective_function_group, type: Integer, default: nil
   field :export, type: Boolean, default: false
   field :perturbable, type: Boolean, default: false # if enabled, then it will be perturbed
   field :output, type: Boolean, default: false # is this an output variable for reporting, etc
   field :pivot, type: Boolean, default: false
-  field :pivot_samples # don't type for now
+  # field :pivot_samples # don't type for now -- #NLL DELETE? 6/1/2014
   field relation_to_output: String, default: 'standard' # or can be inverse
   field :static_value # don't type this because it can take on anything (other than hashes and arrays)
 
@@ -190,6 +192,57 @@ class Variable
 
   def self.exports(analysis_id)
     Variable.where(analysis_id: analysis_id, export: true).order_by(:name.asc)
+  end
+
+  # Method to get all the variables out in a specific JSON format
+  def self.get_variable_data_v2(analysis)
+    # get all variables for analysis
+    save_fields = [
+        :measure_id, :name, :display_name, :metadata_id, :value_type, :units,
+        :perturbable, :pivot, :output, :visualize, :export,
+        :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
+    ]
+    variables = Variable.where(analysis_id: analysis).or({perturbable: true}, {pivot: true}, {output: true}).as_json(only: save_fields)
+
+    variables.each do |v|
+      if v['measure_id']
+        m = Measure.find(v['measure_id'])
+        v['measure_name'] = m.name
+        v['measure_display_name'] = m.display_name
+      elsif v['name'].include?('.')
+        tmp_name = v['name'].split('.')[0]
+        # Test if this is a measure, if so grab that information
+        m = Measure.where(name: tmp_name).first
+        if m
+          v['measure_id'] = m._id
+          v['measure_name'] = m.name
+          v['measure_display_name'] = m.display_name
+        else
+          v['measure_id'] = nil
+          v['measure_name'] = tmp_name
+          v['measure_display_name'] = nil
+        end
+      else
+        v['measure_id'] = nil
+        v['measure_name'] = nil
+        v['measure_display_name'] = nil
+      end
+
+      # variable = Variable.find(k)
+      if v['perturbable']
+        v['type_of_variable'] = 'variable'
+      elsif v['pivot']
+        v['type_of_variable'] = 'pivot'
+      elsif v['static']
+        v['type_of_variable'] = 'static'
+      elsif v['output']
+        v['type_of_variable'] = 'output'
+      else
+        v['type_of_variable'] = 'unknown'
+      end
+    end
+
+    variables
   end
 
   def map_discrete_hash_to_array

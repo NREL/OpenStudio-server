@@ -9,8 +9,9 @@ class VariablesController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: @variables }
+      format.json { render json: Variable.get_variable_data_v2(params[:analysis_id]) }
     end
+
   end
 
   # GET /variables/1
@@ -85,5 +86,84 @@ class VariablesController < ApplicationController
       format.html { redirect_to variables_url }
       format.json { head :no_content }
     end
+  end
+
+  def download_variables
+    analysis = Analysis.find(params[:analysis_id])
+
+    respond_to do |format|
+      format.csv do
+        write_and_send_input_variables_csv(analysis)
+        #redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
+        # write_and_send_csv(@analysis)
+      end
+      format.rdata do
+        write_and_send_input_variables_rdata(analysis)
+      end
+    end
+  end
+
+  protected
+
+  def write_and_send_input_variables_csv(analysis)
+    require 'csv'
+    variables = Variable.get_variable_data_v2(analysis)
+
+    filename = "#{analysis.name}_metadata.csv"
+    csv_string = CSV.generate do |csv|
+      icnt = 0
+      variables.each do |dp|
+        icnt += 1
+        # Write out the header if this is the first datapoint
+        csv << dp.keys if icnt == 1
+        csv << dp.values
+      end
+    end
+
+    send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
+  end
+
+  def write_and_send_input_variables_rdata(analysis)
+    variables = Variable.get_variable_data_v2(analysis)
+
+    # need to convert array of hash to hash of arrays
+    # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
+    out_hash = variables.each_with_object(Hash.new([])) do |h1, h|
+      h1.each { |k, v| h[k] = h[k] + [v] }
+    end
+
+    logger.info out_hash
+
+    download_filename = "#{analysis.name}_metadata.RData"
+    data_frame_name = "metadata"
+
+    Rails.logger.info("outhash is #{out_hash}")
+
+    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
+    require 'rserve/simpler'
+    r = Rserve::Simpler.new
+    r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
+      %Q{
+            temp <- tempfile('rdata', tmpdir="/tmp")
+            save('#{data_frame_name}', file = temp)
+            Sys.chmod(temp, mode = "0777", use_umask = TRUE)
+         }
+    end
+    tmp_filename = r.converse('temp')
+
+    if File.exist?(tmp_filename)
+      send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
+    else
+      fail 'could not create R dataframe'
+    end
+
+    # Have R delete the file since it will have permissions to delete the file.
+    Rails.logger.info "Temp filename is #{tmp_filename}"
+    r_command = "file.remove('#{tmp_filename}')"
+    Rails.logger.info "R command is #{r_command}"
+    if File.exist? tmp_filename
+      r.converse(r_command)
+    end
+
   end
 end
