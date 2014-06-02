@@ -19,10 +19,10 @@ class Variable
   field :data_type, type: String
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
-  field :visualize, type: Boolean
-  field :objective_function, type: Boolean
+  field :visualize, type: Boolean, default: false
+  field :objective_function, type: Boolean, default: false
   field :objective_function_index, type: Integer
-  field :export, type: Boolean
+  field :export, type: Boolean, default: false
   field :perturbable, type: Boolean, default: false # if enabled, then it will be perturbed
   field :output, type: Boolean, default: false # is this an output variable for reporting, etc
   field :pivot, type: Boolean, default: false
@@ -182,6 +182,14 @@ class Variable
 
   def self.variables(analysis_id)
     Variable.where(analysis_id: analysis_id, perturbable: true).order_by(:name.asc)
+  end
+
+  def self.visualizes(analysis_id)
+    Variable.where(analysis_id: analysis_id, visualize: true).order_by(:name.asc)
+  end
+
+  def self.exports(analysis_id)
+    Variable.where(analysis_id: analysis_id, export: true).order_by(:name.asc)
   end
 
   def map_discrete_hash_to_array
