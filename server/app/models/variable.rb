@@ -128,6 +128,11 @@ class Variable
         var.visualize = true
       end
 
+      if var['pivot']
+        var.export = true
+        var.visualize = true
+      end
+
       if k == 'argument'
         # this is main portion of the variable
         exclude_fields_2 = %w(uuid version_uuid)
