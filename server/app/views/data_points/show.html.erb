@@ -48,7 +48,7 @@
                     <% if k2 =~ /(_final|_initial)$/ %>
                         <% var = Variable.where(:analysis_id => @data_point.analysis_id, :name => k2.gsub(/(_final|_initial)/, "")).first %>
                         <td><%= var.display_name if var && var.display_name %></td>
-                        <td><%= k2 %></td>
+                        <td><%= "#{k}.#{k2}" %></td>
                         <td><%= v2 %></td>
                         <td><%= var.units if var && var.units %></td>
                     <% else %>
