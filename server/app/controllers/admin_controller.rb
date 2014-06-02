@@ -9,10 +9,12 @@ class AdminController < ApplicationController
 
   def restore_database
     uploaded_file = params[:file]
-
-    reload_database(uploaded_file)
-
-    redirect_to admin_index_path, notice: "Dropped and Reloaded Database with #{uploaded_file.original_filename}"
+    if uploaded_file
+      reload_database(uploaded_file)
+      redirect_to admin_index_path, notice: "Dropped and Reloaded Database with #{uploaded_file.original_filename}"
+    else
+      redirect_to admin_index_path, notice: "No file selected"
+    end
   end
 
   private
