@@ -1,4 +1,6 @@
 require 'will_paginate/array'
+require 'core_extensions'
+
 class AnalysesController < ApplicationController
   # GET /analyses
   # GET /analyses.json
@@ -313,6 +315,7 @@ class AnalysesController < ApplicationController
   end
 
   # TODO: this can be deprecated?
+  # TODO: Remove this and use a general plot_data method
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
 
@@ -322,6 +325,7 @@ class AnalysesController < ApplicationController
   end
 
   # other version with form to control what data to plot
+  # TODO: Remove this and use a general plot_data method
   def plot_parallelcoordinates2
     @analysis = Analysis.find(params[:id])
     # mappings + plotvars make the superset of chart variables
@@ -340,6 +344,7 @@ class AnalysesController < ApplicationController
   end
 
   # interactive XY plot: choose x and y variables
+  # TODO: Remove this and use a general plot_data method
   def plot_xy_interactive
     @analysis = Analysis.find(params[:id])
 
@@ -378,6 +383,7 @@ class AnalysesController < ApplicationController
 
   # The results is the same as the variables hash which defines which results to export.  If nil it will only
   # export the results that are in the output_variables hash
+  # TODO: Remove this and use a general plot_data method
   def get_plot_data2(analysis, variables, outputs, results = nil)
     plot_data = []
     if @analysis.analysis_type == 'sequential_search'
@@ -438,6 +444,7 @@ class AnalysesController < ApplicationController
     plot_data
   end
 
+  # TODO: Remove this and use a general plot_data method
   def plot_data_xy
     # TODO: either figure out how to ajaxify the json directly to reduce db calls
     # TODO: or remove data from the @plot_data variable (we are returning everything for now)
@@ -459,6 +466,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Remove this and use a general plot_data method
   def plot_scatter
     @analysis = Analysis.find(params[:id])
 
@@ -467,6 +475,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Remove this and use a general plot_data method
   def plot_xy
     @analysis = Analysis.find(params[:id])
 
@@ -475,6 +484,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Remove this and use a general plot_data method
   def plot_radar
     @analysis = Analysis.find(params[:id])
     if params[:datapoint_id]
@@ -493,6 +503,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Remove this and use a general plot_data method
   def plot_bar
     @analysis = Analysis.find(params[:id])
     if params[:datapoint_id]
@@ -511,6 +522,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Remove this and use a general plot_data method
   def plot_data_bar
     # TODO: this should always take a datapoint param
     @analysis = Analysis.find(params[:id])
@@ -527,6 +539,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Remove this and use a general plot_data method
   def plot_data_radar
     # TODO: this should always take a datapoint param
     @analysis = Analysis.find(params[:id])
@@ -546,13 +559,25 @@ class AnalysesController < ApplicationController
   def plot_data
     @analysis = Analysis.find(params[:id])
 
-    # Get the mappings of the variables that were used. Move this to the datapoint class
     @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
     @plot_data = get_plot_data(@analysis, @mappings)
 
     respond_to do |format|
       format.json { render json: { mappings: @mappings, plotvars: @plotvars, data: @plot_data } }
+    end
+  end
+
+  # This needs to be updated, but the plan of this method is to provide all the plot-data (or export data) in
+  # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
+  # Once this is functional, then remove the old "plot_data". Remove route too!
+  def plot_data_v2
+
+    analysis = Analysis.find(params[:id])
+    variables, plot_data = get_plot_data_v2(analysis)
+
+    respond_to do |format|
+      format.json { render json: { variables: variables, data: plot_data } }
     end
   end
 
@@ -619,6 +644,7 @@ class AnalysesController < ApplicationController
 
   protected
 
+  # TODO: Update this to pull from the Variables model with the field :visualize set to true *see plot_data_v2
   def get_plot_variables(analysis)
     plotvars = []
     ovs = @analysis.output_variables
@@ -758,13 +784,81 @@ class AnalysesController < ApplicationController
     plot_data
   end
 
+  def get_plot_data_v2(analysis)
+    # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
+    # up from the database only operator
+    variables = nil
+    plot_data = nil
+
+    var_fields = [:_id, :perturbable, :display_name, :name, :units]
+    variables = Variable.variables(analysis).only(var_fields).as_json(:only => var_fields)
+    variables += Variable.pivots(analysis).only(var_fields).as_json(:only => var_fields)
+    variables.sort_by!{ |v| v['name'] }
+
+    # Create a map from the _id to the variables machine name
+    variable_name_map = Hash[variables.map{|v| [v['_id'], v['name']]}]
+
+    # initialize the plot fields that will need to be reported
+    plot_fields = [:set_variable_values, :name]
+
+    visualizes = Variable.visualizes(analysis).only(var_fields).as_json(:only => var_fields)
+
+    # flatten all the visualization variables to a queryable syntx
+    visualize_map = visualizes.map{|v| "results.#{v['name']}" }
+    plot_fields += [:_id, visualize_map]
+    plot_fields.flatten!
+
+    # Can't call the as_json(:only) method on this probably because of the nested results hash
+    plot_data = analysis.data_points.all.order_by(:created_at.asc).only(plot_fields).as_json
+
+    # Flatten the results hash to the dot notation syntax
+    plot_data.each do |pd|
+      pd['results'] = hash_to_dot_notation(pd['results'])
+
+      # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
+      # the datapoint actaully put it in the results
+      #   First get the machine name for each variable using the variable_name_map
+      variable_values = Hash[pd['set_variable_values'].map{ |k,v| [variable_name_map[k], v] }]
+
+      #   Second sort the values (VERY IMPORTANT)
+      variable_values = Hash[variable_values.sort_by{ |k,_| k}]
+
+      # merge the variable values into the results hash
+      pd['results'].merge!(variable_values)
+
+      # now remove the set_variable_values section
+      pd.delete('set_variable_values')
+
+      # and then remove any other null field
+      pd.delete_if{ |k,v| v.nil? && plot_fields.exclude?(k)}
+
+      # now flatten completely
+      pd.merge!(pd.delete('results'))
+
+      # copy _id to data_point_uuid for backwards compatibility
+      pd['data_point_uuid'] = "/data_points/#{pd['_id']}"
+    end
+
+    # TODO: how to handle to sorting by iteration?
+    # if @analysis.analysis_type == 'sequential_search'
+    #   dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+    #   dps = dps.rotate(1) # put the starting point on top
+    # else
+    #   dps = @analysis.data_points.all
+    # end
+
+    [(variables + visualizes).uniq, plot_data]
+
+  end
+
   def write_and_send_csv(analysis)
     require 'csv'
 
-    variable_mappings = analysis.get_superset_of_input_variables
-    result_mappings = analysis.get_superset_of_result_variables
-    Rails.logger.info "RESULTS MAPPING was #{result_mappings}"
-    data = get_plot_data(analysis, variable_mappings, result_mappings)
+    # get variables from the variables object now instead of using the "superset_of_input_variables"
+    variables, data = get_plot_data_v2(analysis)
+
+    logger.info data
+
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
       icnt = 0
@@ -863,12 +957,11 @@ class AnalysesController < ApplicationController
   end
 
   def write_and_send_rdata(analysis)
-    variable_mappings = analysis.get_superset_of_input_variables
-    result_mappings = analysis.get_superset_of_result_variables
-    data = get_plot_data(analysis, variable_mappings, result_mappings)
-    download_filename = "#{analysis.name}_results.RData"
-    data_frame_name = "results"
-    Rails.logger.info("Data frame name will be #{data_frame_name}")
+
+    require 'csv'
+
+    # get variables from the variables object now instead of using the "superset_of_input_variables"
+    variables, data = get_plot_data_v2(analysis)
 
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
@@ -876,7 +969,9 @@ class AnalysesController < ApplicationController
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
 
-    Rails.logger.info("outhash is #{out_hash}")
+    download_filename = "#{analysis.name}_results.RData"
+    data_frame_name = "results"
+    Rails.logger.info("Data frame name will be #{data_frame_name}")
 
     # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
