@@ -9,10 +9,10 @@ class Variable
   field :name, type: String # machine name
   field :metadata_id, type: String, default: nil # link to dencity taxonomy
   field :display_name, type: String
-  field :minimum # don't define this--it can be anything  -- and remove this eventually as os uses lower bounds
-  field :maximum # don't define this--it can be anything
-  field :mean # don't define this--it can be anything
-  field :delta_x_value # don't define this--it can be anything
+  field :minimum
+  field :maximum
+  field :mean
+  field :delta_x_value
   field :uncertainty_type, type: String
   field :units, type: String
   field :discrete_values_and_weights
@@ -20,10 +20,10 @@ class Variable
   field :value_type, type: String, default: nil  # merge this with the above?
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
-  field :visualize, type: Boolean, default: false
   field :objective_function, type: Boolean, default: false
   field :objective_function_index, type: Integer, default: nil
   field :objective_function_group, type: Integer, default: nil
+  field :visualize, type: Boolean, default: false
   field :export, type: Boolean, default: false
   field :perturbable, type: Boolean, default: false # if enabled, then it will be perturbed
   field :output, type: Boolean, default: false # is this an output variable for reporting, etc
@@ -31,8 +31,6 @@ class Variable
   # field :pivot_samples # don't type for now -- #NLL DELETE? 6/1/2014
   field relation_to_output: String, default: 'standard' # or can be inverse
   field :static_value # don't type this because it can take on anything (other than hashes and arrays)
-
-  scope :enabled, where(perturbable: true)
 
   # Relationships
   belongs_to :analysis
@@ -107,8 +105,7 @@ class Variable
     var
   end
 
-  # This method is really not needed once we merge the concept of a argument
-  # and a variable
+  # Create the OS argument/variable
   def self.create_by_os_argument_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
     if var
@@ -124,6 +121,12 @@ class Variable
 
       # Map these temporary terms ??
       var.perturbable = v if k == 'variable'
+
+      # Set the visualize and export field if perturbable
+      if var.perturbable
+        var.export = true
+        var.visualize = true
+      end
 
       if k == 'argument'
         # this is main portion of the variable
