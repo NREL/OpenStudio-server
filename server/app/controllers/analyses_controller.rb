@@ -794,7 +794,7 @@ class AnalysesController < ApplicationController
     plot_fields.flatten!
 
     # Can't call the as_json(:only) method on this probably because of the nested results hash
-    plot_data = analysis.data_points.all.order_by(:created_at.asc).only(plot_fields).as_json
+    plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
 
     # Flatten the results hash to the dot notation syntax
     plot_data.each do |pd|
