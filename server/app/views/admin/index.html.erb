@@ -3,7 +3,10 @@
 <div class="row-fluid">
   <div class="span8">
     <div class="button-container">
-      <%= link_to 'Backup Database', admin_backup_database_path, class: "btn btn-mini" %>
+      <%= link_to 'Backup Database (For Sharing)', admin_backup_database_path(full_backup: false), class: "btn btn-mini" %>
+    </div>
+    <div class="button-container">
+      <%= link_to 'Backup Database (Full)', admin_backup_database_path(full_backup: true), class: "btn btn-mini" %>
     </div>
     <%= form_tag 'admin/restore_database', :multipart => true do %>
         <div class="button-container">
