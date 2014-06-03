@@ -635,7 +635,7 @@ class AnalysesController < ApplicationController
 
     time_stamp = Time.now.to_i
     save_file = "/tmp/#{analysis.name}_datapoints_#{time_stamp}.zip"
-    resp = `zip #{save_file} -j /mnt/openstudio/analysis_#{analysis.id}/data_point_*.zip`
+    resp = `zip #{save_file} -j --exclude='*reports.zip' /mnt/openstudio/analysis_#{analysis.id}/data_point_*.zip`
 
     if $?.exitstatus == 0
       data_point_zip_data = File.read(save_file)
