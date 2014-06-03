@@ -627,6 +627,25 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def download_all_data_points
+    analysis = Analysis.find(params[:id])
+
+    # use a system call to zip up all the results
+    # TODO: this may eventually timeout
+
+    time_stamp = Time.now.to_i
+    save_file = "/tmp/#{analysis.name}_datapoints_#{time_stamp}.zip"
+    resp = `zip #{save_file} -j /mnt/openstudio/analysis_#{analysis.id}/data_point_*.zip`
+
+    if $?.exitstatus == 0
+      data_point_zip_data = File.read(save_file)
+      send_data data_point_zip_data, filename: File.basename(save_file), type: 'application/zip; header=present', disposition: 'attachment'
+    else
+      redirect_to analysis_path(analysis), notice: "Error zipping up files"
+    end
+
+  end
+
   protected
 
   # TODO: Update this to pull from the Variables model with the field :visualize set to true *see plot_data_v2

@@ -25,6 +25,7 @@ OpenstudioServer::Application.routes.draw do
         get :plot_data_radar
         get :plot_data_xy
         get :download_data
+        get :download_all_data_points
 
         match 'plot_parallelcoordinates2' => 'analyses#plot_parallelcoordinates2', :via => [:get, :post]
         match 'plot_xy_interactive' => 'analyses#plot_xy_interactive', :via => [:get, :post]
