@@ -11,7 +11,7 @@ cp -rf /data/worker-nodes/* /mnt/openstudio/
 
 # install workflow dependencies
 cd /mnt/openstudio
-bundle
+bundle update
 
 # copy over the models needed for mongo
 cd /mnt/openstudio/rails-models && unzip -o rails-models.zip -d models
