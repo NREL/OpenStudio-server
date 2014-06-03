@@ -1,5 +1,5 @@
 # Non Sorting Genetic Algorithm
-class Analysis::NsgaNrel
+class Analysis::Constroptim
   include Analysis::R
 
   def initialize(analysis_id, options = {})
@@ -9,24 +9,23 @@ class Analysis::NsgaNrel
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-        random_seed: 1979,
+	       random_seed: 1979,
         algorithm: {
-          number_of_samples: 30,
+          number_of_samples: 3,
           sample_method: 'individual_variables',
           generations: 1,
-          toursize: 2,
-          cprob: 0.7,
-          xoverdistidx: 5,
-          mudistidx: 10,
-          mprob: 0.5,
+          mu: 1e-4,
+          pgtol: 1e-2,
+          factr: 4.5036e13,
+          maxit: 100,
           normtype: 'minkowski',
           ppower: 2,
-          objective_functions: []
+          objective_functions: [],
+          epsilongradient: 1e-4
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
     @analysis_id = analysis_id
   end
 
@@ -49,7 +48,7 @@ class Analysis::NsgaNrel
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['nsga_nrel'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis.run_options['optim'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -67,7 +66,7 @@ class Analysis::NsgaNrel
 
     # create an instance for R
     @r = Rserve::Simpler.new
-    Rails.logger.info 'Setting up R for NSGA2 Run'
+    Rails.logger.info 'Setting up R for Optim Run'
     @r.converse('setwd("/mnt/openstudio")')
     @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
 
@@ -90,8 +89,8 @@ class Analysis::NsgaNrel
     # that the run flag is true.
 
     # TODO preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
-      fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
+    if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
+      fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
@@ -106,17 +105,6 @@ class Analysis::NsgaNrel
     if @analysis.problem['algorithm']['ppower'] <= 0
       fail 'P Norm must be non-negative'
     end
-
-    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
-      fail 'Must have at least two objective functions defined'
-    end
-
-    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
-      fail 'Must have at least two output_variables'
-    end
-
-    ug = @analysis.output_variables.uniq { |v| v['objective_function_group'] }
-    Rails.logger.info "Number of objective function groups are #{ug.size}"
 
     if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
@@ -144,9 +132,9 @@ class Analysis::NsgaNrel
     cluster = nil
     process = nil
     begin
-      if samples.empty? || samples.size <= 1
+      if samples.empty? || samples.size < 1
         Rails.logger.info 'No variables were passed into the options, therefore exit'
-        fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+        fail "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
       end
 
       # Start up the cluster and perform the analysis
@@ -173,21 +161,27 @@ class Analysis::NsgaNrel
       cluster_started = cluster.start(worker_ips)
       Rails.logger.info ("Time flag was set to #{cluster_started}")
 
+      unless var_types.all? { |t| t.downcase == 'continuous' }
+        Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
+        fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+      end
+
       if cluster_started
-        # gen is the number of generations to calculate
+        # maxit is the max number of iterations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        Rails.logger.info("variable types are #{var_types}")
-        @r.command(vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'], xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'], mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
+        # epsilongradient is epsilon in numerical gradient calc
+
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
+        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
+        @r.command(vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol']) do
           %Q{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))
 
-            print(paste("objfun:",objfun))
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
-            print(paste("UniqueGroups:",uniquegroups))
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
 
@@ -197,13 +191,10 @@ class Analysis::NsgaNrel
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
-            clusterExport(cl,"uniquegroups")
 
-            for (i in 1:ncol(vars)){
-              vars[,i] <- sort(vars[,i])
-            }
             print(paste("vartypes:",vartypes))
-	          print(paste("varnames:",varnames))
+            print(paste("varnames:",varnames))
+
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
@@ -216,7 +207,7 @@ class Analysis::NsgaNrel
 
               ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}--run-shm",sep="")
               } else {
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
@@ -233,6 +224,7 @@ class Analysis::NsgaNrel
             #           call f(u) where u is UUID of data_point
             g <- function(x){
               ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
@@ -264,8 +256,6 @@ class Analysis::NsgaNrel
               objvalue <- NULL
               objtarget <- NULL
               sclfactor <- NULL
-              objgroup <- NULL
-              group_count <- 1
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "NULL"){
@@ -291,58 +281,81 @@ class Analysis::NsgaNrel
                 } else {
                   sclfactor[i] <- 1.0
                 }
-                objfungrouptemp <- paste("objective_function_group_",i,sep="")
-                if (json[objfungrouptemp] != "NULL"){
-                  objgroup[i] <- as.numeric(json[objfungrouptemp])
-                } else {
-                  objgroup[i] <- group_count
-                  group_count <- group_count + 1
-                }
               }
+              options(digits=8)
+              options(scipen=-2)
               print(paste("Objective function results are:",objvalue))
               print(paste("Objective function targets are:",objtarget))
               print(paste("Objective function scaling factors are:",sclfactor))
-
               objvalue <- objvalue / sclfactor
               objtarget <- objtarget / sclfactor
-
-              ug <- length(unique(objgroup))
-              if (ug != uniquegroups) {
-                 print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-              }
-
-              for (i in 1:ug){
-                obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
-              }
-
-              #for (i in 1:objDim){
-              #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
-              #}
+              obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
               print(paste("Objective function Norm:",obj))
               return(obj)
             }
 
             clusterExport(cl,"g")
 
-            if (nrow(vars) == 1) {
-              print("not sure what to do with only one datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-            }
-            if (nrow(vars) == 0) {
-              print("not sure what to do with no datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-              vars <- rbind(vars, c(NA))
-            }
+            #if (nrow(vars) == 1) {
+            #  print("not sure what to do with only one datapoint so adding an NA")
+            #  vars <- rbind(vars, c(NA))
+            #}
+            #if (nrow(vars) == 0) {
+            #  print("not sure what to do with no datapoint so adding an NA")
+            #  vars <- rbind(vars, c(NA))
+            #  vars <- rbind(vars, c(NA))
+            #}
 
-            print(nrow(vars))
-            print(ncol(vars))
-            if (ncol(vars) == 1) {
-              print("NSGA2 needs more than one variable")
-              stop
-            }
 
-            print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
+            varMin <- mins
+            varMax <- maxes
+            varMean <- (mins+maxes)/2.0
+            varDomain <- maxes - mins
+            varEps <- varDomain*epsilongradient
+            print(paste("varseps:",varseps))
+            print(paste("varEps:",varEps))
+            varEps <- ifelse(varseps!=0,varseps,varEps)
+            print(paste("merged varEps:",varEps))
+
+            print("setup gradient")
+            gn <- g
+            clusterExport(cl,"gn")
+            clusterExport(cl,"varEps")
+
+            vectorGradient <- function(x, ...) { # Now use the cluster
+	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+            }
+            print(paste("Lower Bounds set to:",varMin))
+            print(paste("Upper Bounds set to:",varMax))
+            print(paste("Initial iterate set to:",varMean))
+            print(paste("Length of variable domain:",varDomain))
+            print(paste("factr set to:",factr))
+            print(paste("pgtol set to:",pgtol))
+
+            options(digits=8)
+            options(scipen=-2)
+
+            results <- constroptim(theta=varMean, f=g, grad=vectorGradient, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
+
+	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+            Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
+            print(paste("Iterations:",Iteration))
+            print(Rlog[grep('L =',Rlog)])
+	    print(Rlog[grep('X0 =',Rlog)])
+            print(Rlog[grep('U =',Rlog)])
+            Xlog <- Rlog[grep('X =',Rlog)]
+            print("Iteration parameters:")
+            print(Xlog[-grep('Cauchy',Xlog)])
+            print(Rlog[grep('norm of step',Rlog)])
+            print(Rlog[grep('Objective function Norm',Rlog)])
+            print(results$message)
+            print(results$convergence)
+            print(results$counts)
+            print(results$par)
+            print(results$value)
+            flush.console()
+            #results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
+            #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
           }
 
