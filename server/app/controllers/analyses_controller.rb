@@ -239,15 +239,20 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     dps = nil
-    if params[:jobs].nil?
-      dps = @analysis.data_points
-    else
+    if params[:jobs]
       dps = @analysis.data_points.where(status: params[:jobs])
+    else
+      dps = @analysis.data_points
     end
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status} }} }
+      format.json { render json: {
+          analysis: {
+              status: @analysis.status,
+              analysis_type: @analysis.analysis_type
+          },
+          data_points: dps.map { |k| {_id: k.id, status: k.status} }} }
     end
   end
 
