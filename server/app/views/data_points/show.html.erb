@@ -28,43 +28,52 @@
 
 <h2>Results</h2>
 <% if @data_point.results %>
+  <div class="panel-group" id="accordion">
     <% @data_point.results.sort.each do |k, v| %>
-        <h3> <%= "Measure: #{k}" %></h3>
-        <table class="table table-striped">
-          <thead>
-          <tr>
-            <th>Display Name</th>
-            <th>Name</th>
-            <th>Value</th>
-            <th>Units</th>
-          <tr>
-          </thead>
-          <tbody>
-
-          <% if v.is_a? Hash %>
-              <% v.each do |k2, v2| %>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_<%= k %>">
+          <%= "Measure: #{k}" %>
+        </a></h4>
+        </div>
+        <div id="collapse_<%= k %>" class="panel-collapse collapse">
+          <div class="panel-body">
+            <table class="table table-striped">
+              <thead>
+              <tr>
+                <th>Display Name</th>
+                <th>Name</th>
+                <th>Value</th>
+                <th>Units</th>
+              <tr>
+              </thead>
+              <tbody>
+              <% if v.is_a? Hash %>
+                <% v.each do |k2, v2| %>
                   <% next if k2 =~ /(_display_name|_units)$/ %>
                   <tr>
                     <% if k2 =~ /(_final|_initial)$/ %>
-                        <% var = Variable.where(:analysis_id => @data_point.analysis_id, :name => k2.gsub(/(_final|_initial)/, "")).first %>
-                        <td><%= var.display_name if var && var.display_name %></td>
-                        <td><%= "#{k}.#{k2}" %></td>
-                        <td><%= v2 %></td>
-                        <td><%= var.units if var && var.units %></td>
+                      <% var = Variable.where(:analysis_id => @data_point.analysis_id, :name => k2.gsub(/(_final|_initial)/, "")).first %>
+                      <td><%= var.display_name if var && var.display_name %></td>
+                      <td><%= "#{k}.#{k2}" %></td>
+                      <td><%= v2 %></td>
+                      <td><%= var.units if var && var.units %></td>
                     <% else %>
-                        <td><%= @data_point.results["#{k2}_display_name"] if @data_point.results.has_key?("#{k2}_display_name") %></td>
-                        <td><%= k2 %></td>
-                        <td><%= v2 %></td>
-                        <td><%= @data_point.results["#{k2}_units"] if @data_point.results.has_key?("#{k2}_units") %></td>
+                      <td><%= @data_point.results["#{k2}_display_name"] if @data_point.results.has_key?("#{k2}_display_name") %></td>
+                      <td><%= k2 %></td>
+                      <td><%= v2 %></td>
+                      <td><%= @data_point.results["#{k2}_units"] if @data_point.results.has_key?("#{k2}_units") %></td>
                     <% end %>
                   </tr>
+                <% end %>
               <% end %>
-
-          <% end %>
-
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     <% end %>
+  </div>
 <% end %>
 
 <h2>EnergyPlus HTML</h2>
