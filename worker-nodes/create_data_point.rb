@@ -30,42 +30,51 @@ optparse = OptionParser.new do |opts|
 end
 optparse.parse!
 
-# Logger for the simulate datapoint
-logger = Logger.new("#{directory}/create_data_point_#{options[:uuid]}.log")
-logger.info "Parsed Input: #{optparse}"
+
 errored = false
-logger.info "Options are: #{options}"
+
 
 begin
   dp_uuid = UUID.new.generate
-  analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
+  analysis_root_path = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
+  run_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{dp_uuid}"
+# Logger for the simulate datapoint
+  logger = Logger.new("#{analysis_root_path}/create_data_point_#{dp_uuid}.log")
+  logger.info "Parsed Input: #{options}"
+  logger.info "Analysis id is #{options[:analysis_id]}"
 
   workflow_options = {
       datapoint_id: dp_uuid,
-      analysis_root_path: analysis_dir,
+      analysis_root_path: analysis_root_path,
       adapter_options: {
           mongoid_path: '/mnt/openstudio/rails-models'
       }
   }
+
   logger.info "Creating Mongo connector"
-  k = OpenStudio::Workflow.load 'Mongo', analysis_dir, workflow_options
-  k.logger.info "Creating new datapoint"
+  k = OpenStudio::Workflow.load 'Mongo', run_directory, workflow_options
   logger.info "Created Mongo connector"
 
+  k.logger.info "Creating new datapoint"
+  logger.info "Creating new datapoint"
   dp = DataPoint.find_or_create_by(uuid: dp_uuid)
   dp.name = "Autocreated on worker: #{dp_uuid}"
   dp.analysis_id = options[:analysis_id]
 
   # TODO: set datapoint status
-  logger.info "Saving new datapoint #{dp.inspect}"
-  dp.save!
+  logger.info "Saving new datapoint"
+  unless dp.save!
+    logger.error "Could not save the datapoint into the database with error #{dp.errors.full_messages}"
+  end
+  logger.info "Saved new datapoint"
 
   sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
 
   if options[:variables]
+    logger.info "Applying variables: #{options[:variables]}"
     options[:variables].each_with_index do |value, index|
       r_index_value = index + 1
-      k.logger.info "adding new variable value with r_index #{r_index_value} of value #{value}"
+      k.logger.info "Adding new variable value with r_index #{r_index_value} of value #{value}"
 
       # todo check for nil variables
       uuid = Variable.where(r_index: r_index_value).first.uuid
