@@ -30,9 +30,7 @@ optparse = OptionParser.new do |opts|
 end
 optparse.parse!
 
-
 errored = false
-
 
 begin
   dp_uuid = UUID.new.generate
