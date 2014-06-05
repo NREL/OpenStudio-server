@@ -319,10 +319,14 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # TODO: this can be deprecated?
-  # TODO: Remove this and use a general plot_data method
+  # Parallel Coords plot
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
+
+    # variables represent the variables we want graphed. Nil = all
+    @variables = params[:variables] ? params[:variables] : nil
+    var_fields = [:id,:display_name, :name, :units]
+    @visualizes = Variable.visualizes(@analysis).only(var_fields)
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
@@ -330,6 +334,7 @@ class AnalysesController < ApplicationController
   end
 
   # other version with form to control what data to plot
+  # TODO: this can be deprecated?
   # TODO: Remove this and use a general plot_data method
   def plot_parallelcoordinates2
     @analysis = Analysis.find(params[:id])
@@ -821,7 +826,7 @@ class AnalysesController < ApplicationController
       pd['results'] = hash_to_dot_notation(pd['results'])
 
       # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
-      # the datapoint actaully put it in the results
+      # the datapoint actually put it in the results
       #   First get the machine name for each variable using the variable_name_map
       variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
 
