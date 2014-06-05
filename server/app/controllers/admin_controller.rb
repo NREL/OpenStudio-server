@@ -17,6 +17,18 @@ class AdminController < ApplicationController
     end
   end
 
+  def clear_database
+    `mongo os_dev --eval "db.dropDatabase();"`
+    if $?.exitstatus == 0
+      success = true
+      redirect_to admin_index_path, notice: "Database deleted successfully."
+    else
+      logger.info 'Error deleting mongo database'
+      redirect_to admin_index_path, notice: "Error deleting database."
+    end
+
+  end
+
   private
 
   def reload_database(database_file)
