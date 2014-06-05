@@ -1,9 +1,13 @@
 <h2>Analysis Results &mdash;  <%= link_to @analysis.display_name, analysis_path(@analysis) %></h2>
 
-<div id="graph-div">
-  <script>
-      //size of chart
-      var m = [230, 20, 50, 20],
+  <%= javascript_tag do %>
+    selected_vars = <%=raw @variables.to_json %>;
+  <% end %>
+
+  <div id="graph-div">
+      <script>
+          //size of chart
+          var m = [230, 20, 50, 20],
               w = 1220 - m[1] - m[3],
               h = 1000 - m[0] - m[2];
 
@@ -243,7 +247,6 @@
             $('input:checkbox').prop('checked', false);
             toggle = true;
         }
-
         console.log($('input:checkbox'));
     });
 </script>

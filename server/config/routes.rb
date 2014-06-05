@@ -32,9 +32,10 @@ OpenstudioServer::Application.routes.draw do
       end
 
       resources :measures, only: [:show, :index], shallow: true
-      resources :variables, only: [:show, :index], shallow: true do
+      resources :variables, only: [:show, :index, :edit, :update], shallow: true do
         collection do
           get :download_variables
+          get :modify
         end
       end
       resources :data_points, shallow: true  do

@@ -60,7 +60,7 @@
         <div class="panel-body">
           <div class="list-group">
             <%= link_to "Measures (#{@analysis.measures.count})", analysis_measures_path(@analysis), class:'list-group-item' %>
-            <%= link_to "Variables (#{@analysis.variables.where(perturbable: true).count})", analysis_variables_path(@analysis), class:'list-group-item' %>
+            <%= link_to "Variables (#{@analysis.variables.where(perturbable: true).count} Perturbable)", analysis_variables_path(@analysis), class:'list-group-item' %>
 
             <%= link_to 'Parallel Coordinates Plot', plot_parallelcoordinates_analysis_path(@analysis), class: 'list-group-item' %>
             <%= link_to 'Scatter Plot', plot_scatter_analysis_path(@analysis), class: 'list-group-item' %>
