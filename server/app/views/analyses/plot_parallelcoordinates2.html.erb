@@ -40,7 +40,7 @@
         x.domain(dimensions = d3.keys(data[0]).filter(function (d) {
 
           // Don't show any of these items
-          if ((d === "_id") || (d === "data_point_uuid") || (d === "lighting_control") || (d === "climate_zone_id") || (d === "wwr_west_static")) return false;
+          if ((d === "shading_height_above_window.shading_height_above_window_final") || (d === "_id") || (d === "data_point_uuid") || (d === "lighting_control") || (d === "climate_zone_id") || (d === "wwr_west_static")) return false;
 
           if ((d === "wwr_facade") || (d === "location")) {
             y[d] = d3.scale.ordinal()
