@@ -60,7 +60,7 @@ result = nil
 
 begin
   directory = nil
-  fail "Data Point is NA... skipping" if options[:uuid]
+  fail "Data Point is NA... skipping" if options[:uuid] == 'NA'
   analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
   store_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{options[:uuid]}"
   FileUtils.mkdir_p(store_directory)
