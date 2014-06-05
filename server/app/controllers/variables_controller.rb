@@ -103,6 +103,12 @@ class VariablesController < ApplicationController
     end
   end
 
+
+  # Bulk modify form
+  def modify
+    @variables = Variable.where(analysis_id: params[:analysis_id]).order_by(name: 1)
+  end
+
   protected
 
   def write_and_send_input_variables_csv(analysis)
@@ -166,4 +172,6 @@ class VariablesController < ApplicationController
     end
 
   end
+
+
 end
