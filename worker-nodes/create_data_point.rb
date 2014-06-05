@@ -1,5 +1,4 @@
 # Command line based interface to execute the Workflow manager.
-
 require 'bundler'
 begin
   Bundler.setup
@@ -31,9 +30,11 @@ optparse = OptionParser.new do |opts|
 end
 optparse.parse!
 
-puts "Parsed Input: #{optparse}"
+# Logger for the simulate datapoint
+logger = Logger.new("#{directory}/create_data_point_#{options[:uuid]}.log")
+logger.info "Parsed Input: #{optparse}"
 errored = false
-puts "Options are: #{options}"
+logger.info "Options are: #{options}"
 
 begin
   dp_uuid = UUID.new.generate
@@ -46,14 +47,17 @@ begin
           mongoid_path: '/mnt/openstudio/rails-models'
       }
   }
+  logger.info "Creating Mongo connector"
   k = OpenStudio::Workflow.load 'Mongo', analysis_dir, workflow_options
-  k.logger.info "Creating new datapoint on worker"
+  k.logger.info "Creating new datapoint"
+  logger.info "Created Mongo connector"
 
   dp = DataPoint.find_or_create_by(uuid: dp_uuid)
   dp.name = "Autocreated on worker: #{dp_uuid}"
   dp.analysis_id = options[:analysis_id]
 
   # TODO: set datapoint status
+  logger.info "Saving new datapoint #{dp.inspect}"
   dp.save!
 
   sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
@@ -77,6 +81,7 @@ begin
   dp.set_variable_values = sample
   dp.save!
 
+  k.logger.info "Finished creating new datapoint"
 rescue Exception => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   k.logger.info log_message if k

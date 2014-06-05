@@ -256,7 +256,8 @@ class Analysis::NsgaNrel
 	        }, timeout=5);
 	        }, TimeoutException=function(ex) {
 	           cat(data_point_directory," No objectives.json: Timeout\n");
-                   return(1e19)
+               json <- toJSON(as.list(NULL))
+               return(json)
               })
               #json <- fromJSON(file=object_file)
               obj <- NULL
