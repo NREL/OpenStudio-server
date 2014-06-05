@@ -23,6 +23,7 @@ optparse = OptionParser.new do |opts|
     options[:analysis_id] = analysis_id
   end
 
+  options[:uuid] = 'NA'
   opts.on('-u', '--uuid UUID', String, 'UUID of the data point to run with no braces.') do |s|
     options[:uuid] = s
   end
@@ -59,6 +60,7 @@ result = nil
 
 begin
   directory = nil
+  fail "Data Point is NA... skipping" if options[:uuid]
   analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
   store_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{options[:uuid]}"
   FileUtils.mkdir_p(store_directory)
