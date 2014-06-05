@@ -52,9 +52,12 @@ OpenstudioServer::Application.routes.draw do
 
   match 'admin/backup_database' => 'admin#backup_database', :via => :get
   match 'admin/restore_database' => 'admin#restore_database', :via => :post
+  match 'admin/clear_database' => 'admin#clear_database', :via => :get
+
   resources :admin, only: [:index] do
     get :backup_database
     post :restore_database
+    get :clear_database
   end
 
   match '/about' => 'pages#about'
