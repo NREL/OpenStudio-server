@@ -231,10 +231,16 @@ class Analysis::Optim
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
-
+                
               # Call the simulate data point method
-              f(z[j])
-
+              if (as.character(z[j]) == "NA") { 
+		        cat("UUID is NA \n");
+                json <- toJSON(as.list(NULL))
+                return(json)		    
+			  } else {
+			    f(z[j])
+              }
+			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
