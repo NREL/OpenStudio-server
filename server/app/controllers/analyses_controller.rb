@@ -804,11 +804,9 @@ class AnalysesController < ApplicationController
     variables = nil
     plot_data = nil
 
-    var_fields = [:_id, :perturbable, :display_name, :name, :units, :value_type, :data_type]
-    # makes an array of hashes
-    variables = Variable.variables(analysis).only(var_fields).as_json(:only => var_fields)
-    variables += Variable.pivots(analysis).only(var_fields).as_json(:only => var_fields)
-    variables.sort_by! { |v| v['name'] }
+    var_fields = [:_id, :perturbable, :pivot, :visualize, :display_name, :name, :units, :value_type, :data_type]
+    variables = Variable.where(analysis_id: analysis).or(perturbable: true).
+        or(pivot: true).or(visualize: true).order_by(:name.asc).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
@@ -817,7 +815,6 @@ class AnalysesController < ApplicationController
     # flatten all the visualization variables to a queryable syntax
     visualizes = Variable.visualizes(analysis).only(var_fields).as_json(:only => var_fields)
     visualize_map = visualizes.map { |v| "results.#{v['name']}" }
-
     # initialize the plot fields that will need to be reported
     plot_fields = [:set_variable_values, :name, :_id] + visualize_map
 
@@ -860,8 +857,14 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-    [(variables + visualizes).uniq, plot_data]
+    variables.map!{|v| { :"#{v['name']}".to_sym => v }}
 
+    logger.info variables.class
+    #logger.info .reduce({}, :merge)
+
+    variables = variables.reduce({}, :merge)
+    #variables.reduce(|v| {}, :merge)
+    [variables, plot_data]
   end
 
   def write_and_send_csv(analysis)
