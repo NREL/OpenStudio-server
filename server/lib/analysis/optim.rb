@@ -364,6 +364,12 @@ class Analysis::Optim
             #results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+			
+			#write final params to json file
+			answer <- toJSON(results$par)
+			write(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/bestresult.json")
+			convergenceflag <- toJSON(results$convergence)
+			write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergenceflag.json")
           }
 
         end
