@@ -30,15 +30,16 @@ optparse = OptionParser.new do |opts|
 end
 optparse.parse!
 
-# Logger for the simulate datapoint
-logger = Logger.new("#{directory}/create_data_point_#{options[:uuid]}.log")
-logger.info "Parsed Input: #{optparse}"
+
 errored = false
-logger.info "Options are: #{options}"
+
 
 begin
   dp_uuid = UUID.new.generate
   analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
+# Logger for the simulate datapoint
+  logger = Logger.new("#{analysis_dir}/create_data_point_#{options[:uuid]}.log")
+  logger.info "Parsed Input: #{optparse}"
 
   workflow_options = {
       datapoint_id: dp_uuid,
