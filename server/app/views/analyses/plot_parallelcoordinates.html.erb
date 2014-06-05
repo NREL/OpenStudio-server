@@ -25,12 +25,12 @@
 
           d3.json("plot_data_v2.json", function (error, data) {
               // Extract the list of dimensions and create a scale for each.
-              var cnt = 0;
+              //var cnt = 0;
               x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
-                cnt = cnt + 1;
-               // if (cnt > 18) return false;
+                //cnt = cnt + 1;
+                //if (cnt > 18) return false;
                 // To ignore
-                  if ((d === "_id") || (d === "name") || (d === "data_point_uuid") || (d === "location.location_final")) return false;
+                  if ((d === "shading_height_above_window.shading_height_above_window_final") || (d === "_id") || (d === "name") || (d === "data_point_uuid") || (d === "location.location_final")) return false;
 
                   // handle String datatype
                   // handle Bool datatype
