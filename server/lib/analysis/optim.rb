@@ -233,13 +233,13 @@ class Analysis::Optim
               z
                 
               # Call the simulate data point method
-              if (as.character(z[j]) == "NA") { 
-		        cat("UUID is NA \n");
-                json <- toJSON(as.list(NULL))
-                return(json)		    
-			  } else {
-			    f(z[j])
-              }
+            if (as.character(z[j]) == "NA") { 
+		      cat("UUID is NA \n");
+              NAvalue <- .Machine$double.xmax
+              return(NAvalue)		    
+			} else {
+		      f(z[j])
+              
 			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
@@ -248,14 +248,14 @@ class Analysis::Optim
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	      tryCatch({
-	        res <- evalWithTimeout({
-	          json <- fromJSON(file=object_file)
-	        }, timeout=5);
-	        }, TimeoutException=function(ex) {
-	           cat(data_point_directory," No objectives.json: Timeout\n");
-               json <- toJSON(as.list(NULL))
-               return(json)
+	          tryCatch({
+	            res <- evalWithTimeout({
+	              json <- fromJSON(file=object_file)
+	            }, timeout=5);
+	           }, TimeoutException=function(ex) {
+	             cat(data_point_directory," No objectives.json: Timeout\n");
+                 json <- toJSON(as.list(NULL))
+                 return(json)
               })
               #json <- fromJSON(file=object_file)
               obj <- NULL
@@ -298,7 +298,8 @@ class Analysis::Optim
               obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
               print(paste("Objective function Norm:",obj))
               return(obj)
-            }
+              }
+			}
 
             clusterExport(cl,"g")
 
