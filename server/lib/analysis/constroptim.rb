@@ -1,5 +1,5 @@
 # Non Sorting Genetic Algorithm
-class Analysis::Optim
+class Analysis::Constroptim
   include Analysis::R
 
   def initialize(analysis_id, options = {})
@@ -14,7 +14,7 @@ class Analysis::Optim
           number_of_samples: 3,
           sample_method: 'individual_variables',
           generations: 1,
-          method: 'L-BFGS-B',
+          mu: 1e-4,
           pgtol: 1e-2,
           factr: 4.5036e13,
           maxit: 100,
@@ -231,16 +231,10 @@ class Analysis::Optim
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
-                
+
               # Call the simulate data point method
-              if (as.character(z[j]) == "NA") { 
-		        cat("UUID is NA \n");
-                json <- toJSON(as.list(NULL))
-                return(json)		    
-			  } else {
-			    f(z[j])
-              }
-			  
+              f(z[j])
+
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -341,7 +335,7 @@ class Analysis::Optim
             options(digits=8)
             options(scipen=-2)
 
-            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
+            results <- constroptim(theta=varMean, f=g, grad=vectorGradient, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
 	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1

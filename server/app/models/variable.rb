@@ -30,7 +30,7 @@ class Variable
   field :pivot, type: Boolean, default: false
   # field :pivot_samples # don't type for now -- #NLL DELETE? 6/1/2014
   field relation_to_output: String, default: 'standard' # or can be inverse
-  field :static_value # don't type this because it can take on anything (other than hashes and arrays)
+  field :static_value, default: nil # don't type this because it can take on anything (other than hashes and arrays)
 
   # Relationships
   belongs_to :analysis
@@ -207,7 +207,7 @@ class Variable
     # get all variables for analysis
     save_fields = [
         :measure_id, :name, :display_name, :metadata_id, :value_type, :units,
-        :perturbable, :pivot, :output, :visualize, :export,
+        :perturbable, :pivot, :output, :visualize, :export, :static_value,
         :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
     variables = Variable.where(analysis_id: analysis).or({perturbable: true}, {pivot: true}, {output: true}).as_json(only: save_fields)
