@@ -17,7 +17,7 @@ class Analysis
   field :analysis_type, type: String
   field :start_time, type: DateTime
   field :end_time, type: DateTime
-  field :results, type: Hash, default: nil
+  field :results, type: Hash, default: {} # this was nil, can we have this be an empty hash? Check Measure Group JSONS!
   field :run_options, type: Hash, default: {}  # hash of each run options configurations (if desired)
   field :problem
   field :status_message, type: String # the resulting message from the analysis
