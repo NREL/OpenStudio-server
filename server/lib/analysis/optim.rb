@@ -4,24 +4,24 @@ class Analysis::Optim
 
   def initialize(analysis_id, options = {})
     defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [],
-      problem: {
-	       random_seed: 1979,
-        algorithm: {
-          number_of_samples: 3,
-          sample_method: 'individual_variables',
-          generations: 1,
-          method: 'L-BFGS-B',
-          pgtol: 1e-2,
-          factr: 4.5036e13,
-          maxit: 100,
-          normtype: 'minkowski',
-          ppower: 2,
-          objective_functions: [],
-          epsilongradient: 1e-4
+        skip_init: false,
+        run_data_point_filename: 'run_openstudio_workflow.rb',
+        create_data_point_filename: 'create_data_point.rb',
+        output_variables: [],
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                number_of_samples: 3,
+                sample_method: 'individual_variables',
+                generations: 1,
+                method: 'L-BFGS-B',
+                pgtol: 1e-2,
+                factr: 4.5036e13,
+                maxit: 100,
+                normtype: 'minkowski',
+                ppower: 2,
+                objective_functions: [],
+                epsilongradient: 1e-4
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -49,7 +49,11 @@ class Analysis::Optim
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
+    Rails.logger.info "Analysis type is #{@options['analysis_type']}"
     @analysis.run_options['optim'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results['optim'] = {}
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -143,7 +147,7 @@ class Analysis::Optim
       if !cluster.configure(master_ip)
         fail 'could not configure R cluster'
       else
-	       Rails.logger.info 'Successfuly configured cluster'
+        Rails.logger.info 'Successfuly configured cluster'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
@@ -249,58 +253,58 @@ class Analysis::Optim
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	          tryCatch({
-	            res <- evalWithTimeout({
-	              json <- fromJSON(file=object_file)
-	            }, timeout=5);
-	           }, TimeoutException=function(ex) {
-	             cat(data_point_directory," No objectives.json: Timeout\n");
-                 json <- toJSON(as.list(NULL))
-                 return(json)
-              })
-              #json <- fromJSON(file=object_file)
-              obj <- NULL
-              objvalue <- NULL
-              objtarget <- NULL
-              sclfactor <- NULL
-              for (i in 1:objDim){
-                objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "NULL"){
-                  objvalue[i] <- as.numeric(json[objfuntemp])
-                } else {
-                  objvalue[i] <- 1.0e19
-                  cat(data_point_directory," Missing ", objfuntemp,"\n");
-                }
-                objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "NULL"){
-                  objtarget[i] <- as.numeric(json[objfuntargtemp])
-                } else {
-                  objtarget[i] <- 0.0
-                }
-                scalingfactor <- paste("scaling_factor_",i,sep="")
-                sclfactor[i] <- 1.0
-                if (json[scalingfactor] != "NULL"){
-                  sclfactor[i] <- as.numeric(json[scalingfactor])
-                  if (sclfactor[i] == 0.0) {
-                    print(paste(scalingfactor," is ZERO, overwriting\n"))
-                    sclfactor[i] = 1.0
+              tryCatch({
+                res <- evalWithTimeout({
+                  json <- fromJSON(file=object_file)
+                }, timeout=5);
+               }, TimeoutException=function(ex) {
+                 cat(data_point_directory," No objectives.json: Timeout\n");
+                   json <- toJSON(as.list(NULL))
+                   return(json)
+                })
+                #json <- fromJSON(file=object_file)
+                obj <- NULL
+                objvalue <- NULL
+                objtarget <- NULL
+                sclfactor <- NULL
+                for (i in 1:objDim){
+                  objfuntemp <- paste("objective_function_",i,sep="")
+                  if (json[objfuntemp] != "NULL"){
+                    objvalue[i] <- as.numeric(json[objfuntemp])
+                  } else {
+                    objvalue[i] <- 1.0e19
+                    cat(data_point_directory," Missing ", objfuntemp,"\n");
                   }
-                } else {
+                  objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                  if (json[objfuntargtemp] != "NULL"){
+                    objtarget[i] <- as.numeric(json[objfuntargtemp])
+                  } else {
+                    objtarget[i] <- 0.0
+                  }
+                  scalingfactor <- paste("scaling_factor_",i,sep="")
                   sclfactor[i] <- 1.0
+                  if (json[scalingfactor] != "NULL"){
+                    sclfactor[i] <- as.numeric(json[scalingfactor])
+                    if (sclfactor[i] == 0.0) {
+                      print(paste(scalingfactor," is ZERO, overwriting\n"))
+                      sclfactor[i] = 1.0
+                    }
+                  } else {
+                    sclfactor[i] <- 1.0
+                  }
                 }
+                options(digits=8)
+                options(scipen=-2)
+                print(paste("Objective function results are:",objvalue))
+                print(paste("Objective function targets are:",objtarget))
+                print(paste("Objective function scaling factors are:",sclfactor))
+                objvalue <- objvalue / sclfactor
+                objtarget <- objtarget / sclfactor
+                obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
+                print(paste("Objective function Norm:",obj))
+                return(obj)
               }
-              options(digits=8)
-              options(scipen=-2)
-              print(paste("Objective function results are:",objvalue))
-              print(paste("Objective function targets are:",objtarget))
-              print(paste("Objective function scaling factors are:",sclfactor))
-              objvalue <- objvalue / sclfactor
-              objtarget <- objtarget / sclfactor
-              obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
-              print(paste("Objective function Norm:",obj))
-              return(obj)
-              }
-			}
+			      }
 
             clusterExport(cl,"g")
 
@@ -315,23 +319,23 @@ class Analysis::Optim
             #}
 
 
-            varMin <- mins
-            varMax <- maxes
-            varMean <- (mins+maxes)/2.0
-            varDomain <- maxes - mins
-            varEps <- varDomain*epsilongradient
-            print(paste("varseps:",varseps))
-            print(paste("varEps:",varEps))
-            varEps <- ifelse(varseps!=0,varseps,varEps)
-            print(paste("merged varEps:",varEps))
+              varMin <- mins
+              varMax <- maxes
+              varMean <- (mins+maxes)/2.0
+              varDomain <- maxes - mins
+              varEps <- varDomain*epsilongradient
+              print(paste("varseps:",varseps))
+              print(paste("varEps:",varEps))
+              varEps <- ifelse(varseps!=0,varseps,varEps)
+              print(paste("merged varEps:",varEps))
 
-            print("setup gradient")
-            gn <- g
-            clusterExport(cl,"gn")
-            clusterExport(cl,"varEps")
+              print("setup gradient")
+              gn <- g
+              clusterExport(cl,"gn")
+              clusterExport(cl,"varEps")
 
-            vectorGradient <- function(x, ...) { # Now use the cluster
-	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+              vectorGradient <- function(x, ...) { # Now use the cluster
+              vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
@@ -345,11 +349,11 @@ class Analysis::Optim
 
             results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+	          Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
             print(paste("Iterations:",Iteration))
             print(Rlog[grep('L =',Rlog)])
-	    print(Rlog[grep('X0 =',Rlog)])
+	          print(Rlog[grep('X0 =',Rlog)])
             print(Rlog[grep('U =',Rlog)])
             Xlog <- Rlog[grep('X =',Rlog)]
             print("Iteration parameters:")
@@ -366,11 +370,11 @@ class Analysis::Optim
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
 			
-			#write final params to json file
-			answer <- paste("{",paste("\"",varnames,"\"",": ",results$par,sep="", collapse=","),"}",sep="")
-			write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/bestresult.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-			convergenceflag <- toJSON(results$convergence)
-			write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergenceflag.json")
+            #write final params to json file
+            answer <- paste("{",paste("\"",varnames,"\"",": ",results$par,sep="", collapse=","),"}",sep="")
+            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/bestresult.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+            convergenceflag <- toJSON(results$convergence)
+            write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergenceflag.json")
           }
 
         end
@@ -378,6 +382,16 @@ class Analysis::Optim
         fail 'could not start the cluster (most likely timed out)'
       end
 
+      # Post process the results and jam into the database
+      bestresult_json = "/mnt/openstudio/analysis_#{@analysis.id}/bestresult.json"
+      if File.exist? bestresult_json
+        begin
+          @analysis.results['optim']['bestresult'] = JSON.parse(File.read(bestresult_json))
+          @analysis.save!
+        rescue Exception => e
+          Rails.logger.error "Could not save post processed results for bestresult.json"
+        end
+      end
     rescue Exception => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
