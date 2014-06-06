@@ -1,28 +1,28 @@
 <h2>Variables</h2>
 
-<% form_tag %>
-<table class="table table-striped">
-  <thead>
-  <tr>
-    <th>Display Name</th>
-    <th>Machine Name</th>
-    <th>Units</th>
-    <th>Visualize</th>
-    <th>Export</th>
-    <th>Actions</th>
-  <tr>
-  </thead>
-  <tbody>
-    <% @variables.each do |var| %>
-      <tr>
-       <td><%= var.display_name %></td>
-       <td><%= var.name %></td>
-       <td><%= var.units %></td>
-       <td></td>
-       <td></td>
-       <td><%= link_to "Edit", edit_variable_path(var) %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<%= form_tag modify_analysis_variables_path, :method => :post do |f| %>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Display Name</th>
+      <th>Machine Name</th>
+      <th>Units</th>
+      <th>Visualize</th>
+      <th>Export</th>
+      <th>Actions</th>
+    <tr>
+    </thead>
+    <tbody>
+      <% @variables.each do |var| %>
+        <tr>
+         <td><%= var.display_name %></td>
+         <td><%= var.name %></td>
+         <td><%= var.units %></td>
+         <td></td>
+         <td></td>
+         <td><%= link_to "Edit", edit_variable_path(var) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 <% end %>

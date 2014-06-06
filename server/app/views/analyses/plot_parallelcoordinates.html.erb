@@ -1,7 +1,7 @@
 <h2>Analysis Results &mdash;  <%= link_to @analysis.display_name, analysis_path(@analysis) %></h2>
 
   <%= javascript_tag do %>
-    selected_vars = <%=raw @variables.to_json %>;
+    hide_vars = <%=raw @variables.to_json %>;
   <% end %>
 
   <div id="graph-div">
@@ -34,10 +34,12 @@
           // Extract the list of dimensions and create a scale for each.
           //var cnt = 0;
           x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
-              //cnt = cnt + 1;
-              //if (cnt > 18) return false;
-              // To ignore
+
+              // To ignore always
               if ((d === "shading_height_above_window.shading_height_above_window_final") || (d === "_id") || (d === "name") || (d === "data_point_uuid") || (d === "location.location_final")) return false;
+
+              // To filter out (from form)
+            if ($.inArray(d, hide_vars) == -1) return false;
 
               // handle String datatype
               // handle Bool datatype
@@ -209,18 +211,18 @@
           <div class="span4">
 
             <% @visualizes.each_with_index do |var, index| %>
-                <% if @visualizes.count/2.floor == index %>
+                <% if @visualizes.count/3.floor == index or @visualizes.count/3*2.floor == index %>
                     </div>
-                    <div class="span4">
-
+                    <div class="span3">
                 <% end %>
+
                 <p>
-                  <% if @variables.nil? or (!@variables.nil? and @variables.include?(var)) %>
+                  <% if @variables.nil? or (!@variables.nil? and @variables.include?(var.name)) %>
                       <% checked_str = true %>
                   <% else %>
                       <% checked_str = false %>
                   <% end %>
-                  <%= check_box_tag "variables[]", var.display_name, checked_str, :id => "variables_#{index}" %>
+                  <%= check_box_tag "variables[]", var.name, checked_str, :id => "variables_#{index}" %>
                   <%= label_tag("variables_#{index}", var.display_name) %>
                 </p>
             <% end %>

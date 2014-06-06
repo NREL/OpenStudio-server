@@ -326,7 +326,7 @@ class AnalysesController < ApplicationController
     # variables represent the variables we want graphed. Nil = all
     @variables = params[:variables] ? params[:variables] : nil
     var_fields = [:id,:display_name, :name, :units]
-    @visualizes = Variable.visualizes(@analysis).only(var_fields)
+    @visualizes = get_plot_variables_v2(@analysis)
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
@@ -865,6 +865,15 @@ class AnalysesController < ApplicationController
     variables = variables.reduce({}, :merge)
     #variables.reduce(|v| {}, :merge)
     [variables, plot_data]
+  end
+
+  # Get plot variables
+  # Used by plot_parallelcoordinates
+  def get_plot_variables_v2(analysis)
+
+    variables = Variable.where(analysis_id: analysis).or(perturbable: true).
+        or(pivot: true).or(visualize: true).order_by(:name.asc)
+
   end
 
   def write_and_send_csv(analysis)
