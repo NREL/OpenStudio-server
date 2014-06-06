@@ -27,7 +27,7 @@ OpenstudioServer::Application.routes.draw do
         get :download_data
         get :download_all_data_points
 
-        match 'plot_parallelcoordinates2' => 'analyses#plot_parallelcoordinates2', :via => [:get, :post]
+        match 'plot_parallelcoordinates' => 'analyses#plot_parallelcoordinates', :via => [:get, :post]
         match 'plot_xy_interactive' => 'analyses#plot_xy_interactive', :via => [:get, :post]
       end
 
@@ -35,9 +35,11 @@ OpenstudioServer::Application.routes.draw do
       resources :variables, only: [:show, :index, :edit, :update], shallow: true do
         collection do
           get :download_variables
-          get :modify
+          match 'modify' => 'variables#modify', :via => [:get, :post]
         end
+
       end
+
       resources :data_points, shallow: true  do
         member do
           get :show_full
