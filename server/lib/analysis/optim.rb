@@ -26,6 +26,7 @@ class Analysis::Optim
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
+    Rails.logger.info(@options)
     @analysis_id = analysis_id
   end
 
@@ -83,7 +84,7 @@ class Analysis::Optim
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting Batch Run')
+    Rails.logger.info('Starting Optim Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.

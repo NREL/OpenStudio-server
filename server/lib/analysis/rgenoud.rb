@@ -239,8 +239,14 @@ class Analysis::Rgenoud
               z
 
               # Call the simulate data point method
-              f(z[j])
-
+            if (as.character(z[j]) == "NA") { 
+		      cat("UUID is NA \n");
+              NAvalue <- .Machine$double.xmax
+              return(NAvalue)		    
+			} else {
+		      f(z[j])
+              
+			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -248,14 +254,14 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	      tryCatch({
-	        res <- evalWithTimeout({
-	          json <- fromJSON(file=object_file)
-	        }, timeout=5);
-	        }, TimeoutException=function(ex) {
-	           cat(data_point_directory," No objectives.json: Timeout\n");
-			   json <- toJSON(as.list(NULL))
-               return(json)
+	          tryCatch({
+	            res <- evalWithTimeout({
+	              json <- fromJSON(file=object_file)
+	            }, timeout=5);
+	           }, TimeoutException=function(ex) {
+	             cat(data_point_directory," No objectives.json: Timeout\n");
+                 json <- toJSON(as.list(NULL))
+                 return(json)
               })
               #json <- fromJSON(file=object_file)
               obj <- NULL
@@ -298,7 +304,8 @@ class Analysis::Rgenoud
               obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
               print(paste("Objective function Norm:",obj))
               return(obj)
-            }
+              }
+			}
 
             clusterExport(cl,"g")
 
@@ -346,6 +353,12 @@ class Analysis::Rgenoud
             print(paste("value:",results$value))
             flush.console()
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+			
+			#write final params to json file
+			answer <- toJSON(results$par)
+			write(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/bestresult.json")
+			convergenceflag <- toJSON(results$peakgeneration)
+			write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergenceflag.json")
           }
 
         end
