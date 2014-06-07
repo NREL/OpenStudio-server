@@ -1,0 +1,113 @@
+<%= form_for :variable do |f| %>
+  <% if @variable.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@variable.errors.count, "error") %> prohibited this variable from being saved:</h2>
+
+      <ul>
+        <% @variable.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <table class="edittable">
+    <tr>
+      <td><%= label_tag('name', 'Name') %></td>
+      <td><%= text_field_tag('name', @variable.name, disabled: true) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('display_name', 'Display Name') %></td>
+      <td><%= text_field_tag('display_name', @variable.display_name) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('metadata_id', 'Metadata ID') %></td>
+      <td><%= text_field_tag('metadata_name', @variable.metadata_id) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('minimum', 'Minimum') %></td>
+      <td><%= text_field_tag('minimum', @variable.minimum) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('maximum', 'Maximum') %></td>
+      <td><%= text_field_tag('maximum', @variable.maximum) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('mean', 'Mean') %></td>
+      <td><%= text_field_tag('mean', @variable.mean) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('delta_x_value', 'Delta X Value') %></td>
+      <td><%= text_field_tag('delta_x_value', @variable.delta_x_value) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('uncertainty_type', 'Uncertainty Type') %></td>
+      <td><%= text_field_tag('uncertainty_type', @variable.uncertainty_type) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('units', 'Units') %></td>
+      <td><%= text_field_tag('units', @variable.units) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('discrete_values_and_weights', 'Discrete Values and Weights') %></td>
+      <td><%= text_field_tag('discrete_values_and_weights', @variable.discrete_values_and_weights) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('data_type', 'Data Type') %></td>
+      <td><%= text_field_tag('data_type', @variable.data_type) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('variable_index', 'Variable Index') %></td>
+      <td><%= text_field_tag('variable_index', @variable.variable_index) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('argument_index', 'Argument Index') %></td>
+      <td><%= text_field_tag('argument_index', @variable.argument_index) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('objective_function', 'Objective Function') %></td>
+      <td><%= check_box_tag('objective_function', @variable.objective_function, @variable.objective_function) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('objective_function_index', 'Objective Function Index') %></td>
+      <td><%= text_field_tag('objective_function_index', @variable.objective_function_index) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('objective_function_group', 'Objective Function Group') %></td>
+      <td><%= text_field_tag('objective_function_group', @variable.objective_function_group) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('visualize', 'Visualize') %></td>
+      <td><%=check_box_tag('visualize', @variable.visualize, @variable.visualize) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('export', 'Export') %></td>
+      <td><%=check_box_tag('export', @variable.export, @variable.export) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('perturbable', 'Perturbable') %></td>
+      <td><%=check_box_tag('perturbable', @variable.perturbable, @variable.perturbable) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('output', 'Output') %></td>
+      <td><%=check_box_tag('output', @variable.output, @variable.output) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('pivot', 'Pivot') %></td>
+      <td><%=check_box_tag('pivot', @variable.pivot, @variable.pivot) %></td>
+    </tr>
+    <!--TODO: make this a select with standard/inverse as options? -->
+    <tr>
+      <td><%= label_tag('relation_to_output', 'Relation to Output') %></td>
+      <td><%= text_field_tag('relation_to_output', @variable.relation_to_output) %></td>
+    </tr>
+    <tr>
+      <td><%= label_tag('static_value', 'Static Value') %></td>
+      <td><%= text_field_tag('static_value', @variable.static_value) %></td>
+    </tr>
+
+  </table>
+
+  <div class="submit">
+    <%= f.submit %>
+  </div>
+<% end %>
