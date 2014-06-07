@@ -481,6 +481,26 @@ h2.header-large {
   border: 3px solid green;
 }
 
+.edittable th,
+.edittable td {
+  padding: 8px;
+  line-height: 25px;
+}
+
+.edittable {
+  input {
+    width: 350px;
+  }
+  textarea {
+    width: 350px;
+    height: 100px;
+  }
+  select {
+    width:  350px;
+  }
+}
+
+
 //updated panel stuff
 .panel {
   margin-bottom: 20px;
