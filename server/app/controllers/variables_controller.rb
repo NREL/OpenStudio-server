@@ -107,6 +107,23 @@ class VariablesController < ApplicationController
   # Bulk modify form
   def modify
     @variables = Variable.where(analysis_id: params[:analysis_id]).order_by(name: 1)
+
+    if request.post?
+      #TODO: sanitize params
+      @variables.each do |var|
+        if params[:visualize_ids].include? var.id
+          var.visualize = true
+        else
+          var.visualize = false
+        end
+        if params[:export_ids].include? var.id
+          var.export = true
+        else
+          var.export = false
+        end
+        var.save!
+      end
+    end
   end
 
   protected
