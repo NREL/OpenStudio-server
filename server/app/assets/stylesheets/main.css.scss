@@ -491,6 +491,14 @@ h2.header-large {
   input {
     width: 350px;
   }
+  input[type=checkbox]{
+    width: 30px;
+  }
+  .cb-label {
+    font-weight:normal;
+    width:320px;
+    margin:5px 0 0;
+  }
   textarea {
     width: 350px;
     height: 100px;
@@ -500,6 +508,11 @@ h2.header-large {
   }
 }
 
+.save-btn {
+  text-align:center;
+  padding: 20px 10px;
+
+}
 
 //updated panel stuff
 .panel {
