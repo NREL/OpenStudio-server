@@ -150,7 +150,7 @@ begin
   params = OpenStudio::Runmanager::JobParams.new
   params.append('cleanoutfiles', 'standard')
   workflow.add(params)
-  ep_hash = OpenStudio::EnergyPlus.find_energyplus(8, 0)
+  ep_hash = OpenStudio::EnergyPlus.find_energyplus(8, 1)
   fail "#{File.basename(__FILE__)} was unable to locate EnergyPlus." if ep_hash.nil?
   ep_path = OpenStudio::Path.new(ep_hash[:energyplus_exe].to_s).parent_path
   tools = OpenStudio::Runmanager::ConfigOptions.makeTools(ep_path,
