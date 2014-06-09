@@ -481,6 +481,42 @@ h2.header-large {
   border: 3px solid green;
 }
 
+.edittable th,
+.edittable td {
+  padding: 8px;
+  line-height: 25px;
+}
+
+.edittable {
+  input {
+    width: 350px;
+  }
+  input[type=checkbox]{
+    width: 30px;
+  }
+  .cb-label {
+    font-weight:normal;
+    width:320px;
+    margin:5px 0 0;
+  }
+  textarea {
+    width: 350px;
+    height: 100px;
+  }
+  select {
+    width:  350px;
+  }
+}
+
+.save-btn {
+  text-align:center;
+  padding: 20px 10px;
+}
+
+.edit-links {
+  padding-left: 20px;
+}
+
 //updated panel stuff
 .panel {
   margin-bottom: 20px;

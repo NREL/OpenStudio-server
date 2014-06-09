@@ -333,26 +333,6 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # other version with form to control what data to plot
-  # TODO: this can be deprecated?
-  # TODO: Remove this and use a general plot_data method
-  def plot_parallelcoordinates2
-    @analysis = Analysis.find(params[:id])
-    # mappings + plotvars make the superset of chart variables
-    @mappings = @analysis.get_superset_of_input_variables
-    @plotvars = get_plot_variables(@analysis)
-
-    # variables represent the variables we want graphed. Nil = all
-    @variables = params[:variables] ? params[:variables] : nil
-
-    # whatever is defined as variables here should be the only returned data
-    @plot_data = get_plot_data2(@analysis, @mappings, @plotvars, @variables)
-
-    respond_to do |format|
-      format.html # plot_parallelcoordinates.html.erb
-    end
-  end
-
   # interactive XY plot: choose x and y variables
   # TODO: Remove this and use a general plot_data method
   def plot_xy_interactive
@@ -389,69 +369,6 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.html # plot_xy.html.erb
     end
-  end
-
-  # The results is the same as the variables hash which defines which results to export.  If nil it will only
-  # export the results that are in the output_variables hash
-  # TODO: Remove this and use a general plot_data method
-  def get_plot_data2(analysis, variables, outputs, results = nil)
-    plot_data = []
-    if @analysis.analysis_type == 'sequential_search'
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
-    else
-      dps = @analysis.data_points.all
-    end
-
-    dps.each do |dp|
-      # the datapoint is considered complete if it has results set
-      if dp.results
-        dp_values = {}
-        dp_values['data_point_uuid'] = data_point_path(dp.id)
-
-        if results
-          # input variables: not in dp['results']
-          if dp.set_variable_values
-            variables.each do |k, v|
-              if results.include?(v)
-                logger.info("value: #{dp.set_variable_values[k]}")
-                dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
-              end
-            end
-          end
-
-          # output variables. Don't overwrite input variables from above
-          results.each do |key, _|
-            # TEMP: special case for "total_energy" (could also be called total_site_energy)
-            if key == 'total_energy' and !dp.results[key]
-              dp_values[key] = dp['results']['total_site_energy']
-            elsif !dp_values[key]
-              dp_values[key] = dp['results'][key] ? dp['results'][key] : nil
-            end
-          end
-
-        else
-          # go through variables and output variables
-          if dp.set_variable_values
-            variables.each do |k, v|
-              dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
-            end
-          end
-          outputs.each do |ov|
-            # TEMP: special case for "total_energy" (could be called total_site_energy)
-            if ov == 'total_energy' and !dp['results'][ov]
-              dp_values['total_energy'] = dp['results']['total_site_energy']
-            else
-              dp_values[ov] = dp['results'][ov] if dp['results'][ov]
-            end
-          end
-        end
-
-        plot_data << dp_values
-      end
-    end
-
-    plot_data
   end
 
   # TODO: Remove this and use a general plot_data method
@@ -513,40 +430,58 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # TODO: Remove this and use a general plot_data method
+  # Data for Bar chart of objective functions actual values vs target values
+  # "% error"-like, but negative when actual is less than target and positive when it is more than target
   def plot_bar
     @analysis = Analysis.find(params[:id])
-    if params[:datapoint_id]
-      @datapoint = DataPoint.find(params[:datapoint_id])
-    else
-
-      if @analysis.analysis_type == 'sequential_search'
-        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
+    @datapoint = DataPoint.find(params[:datapoint_id])
 
     respond_to do |format|
       format.html # plot_bar.html.erb
     end
   end
 
-  # TODO: Remove this and use a general plot_data method
+  #TODO: remove
   def plot_data_bar
-    # TODO: this should always take a datapoint param
     @analysis = Analysis.find(params[:id])
+    @datapoint = DataPoint.find(params[:datapoint_id])
 
-    if params[:datapoint_id]
-      # plot a specific datapoint
-      @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
-    else
-      # plot the latest datapoint
-      @plot_data, @datapoint = get_plot_data_bar(@analysis)
-    end
+    @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
+
     respond_to do |format|
       format.json { render json: {datapoint: {id: @datapoint.id, name: @datapoint.name}, bardata: @plot_data} }
     end
+  end
+
+  # Data for Bar chart of objective functions actual values vs target values
+  # "% error"-like, but negative when actual is less than target and positive when it is more than target
+  def get_plot_data_bar(analysis, datapoint_id = nil)
+    ovs = analysis.output_variables
+    plot_data_bar = []
+
+    if datapoint_id
+      dp = analysis.data_points.find(datapoint_id)
+    else
+      if analysis.analysis_type == 'sequential_search'
+        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+      else
+        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
+      end
+    end
+
+    if dp['results']
+      ovs.each do |ov|
+        if ov['objective_function']
+          dp_values = []
+          dp_values << ov['name']
+          dp_values << ((dp['results'][ov['name']] - ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
+          plot_data_bar << dp_values
+        end
+      end
+
+    end
+
+    [plot_data_bar, dp]
   end
 
   # TODO: Remove this and use a general plot_data method
@@ -677,38 +612,6 @@ class AnalysesController < ApplicationController
     plotvars
   end
 
-  # Data for Bar chart of objective functions actual values vs target values
-  # "% error"-like, but negative when actual is less than target and positive when it is more than target
-  # for now: only plots the latest datapoint
-  def get_plot_data_bar(analysis, datapoint_id = nil)
-    ovs = analysis.output_variables
-    plot_data_bar = []
-
-    if datapoint_id
-      dp = analysis.data_points.find(datapoint_id)
-    else
-      if analysis.analysis_type == 'sequential_search'
-        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
-
-    if dp['results']
-      ovs.each do |ov|
-        if ov['objective_function']
-          dp_values = []
-          dp_values << ov['name']
-          dp_values << ((dp['results'][ov['name']] - ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
-          plot_data_bar << dp_values
-        end
-      end
-
-    end
-
-    [plot_data_bar, dp]
-  end
-
   # get data for radar chart
   def get_plot_data_radar(analysis, datapoint_id = nil)
     # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
@@ -803,8 +706,13 @@ class AnalysesController < ApplicationController
     # up from the database only operator
     variables = nil
     plot_data = nil
+    single_dp = false
+    if params[:datapoint_id]
+      # plot a specific datapoint
+      single_dp = true
+    end
 
-    var_fields = [:_id, :perturbable, :pivot, :visualize, :display_name, :name, :units, :value_type, :data_type]
+    var_fields = [:_id, :perturbable, :pivot, :visualize, :export,:output, :objective_function,:objective_function_group, :objective_function_index, :objective_function_target, :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
     variables = Variable.where(analysis_id: analysis).or(perturbable: true).
         or(pivot: true).or(visualize: true).order_by(:name.asc).as_json(only: var_fields)
 

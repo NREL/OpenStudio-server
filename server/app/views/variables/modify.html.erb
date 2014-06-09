@@ -18,11 +18,22 @@
          <td><%= var.display_name %></td>
          <td><%= var.name %></td>
          <td><%= var.units %></td>
-         <td></td>
-         <td></td>
+         <% v_checked = false %>
+         <% if var.visualize %>
+           <% v_checked = true %>
+         <% end %>
+          <% e_checked = false %>
+          <% if var.export %>
+            <% e_checked = true %>
+          <% end %>
+         <td><%= check_box_tag 'visualize_ids[]', var.id, v_checked %></td>
+         <td><%= check_box_tag 'export_ids[]', var.id, e_checked %></td>
          <td><%= link_to "Edit", edit_variable_path(var) %></td>
         </tr>
       <% end %>
     </tbody>
   </table>
+  <div class="save-btn">
+    <%= submit_tag "Save Changes", class: "btn btn-primary" %>
+  </div>
 <% end %>
