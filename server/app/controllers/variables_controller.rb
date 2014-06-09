@@ -107,9 +107,56 @@ class VariablesController < ApplicationController
   # Bulk modify form
   def modify
     @variables = Variable.where(analysis_id: params[:analysis_id]).order_by(name: 1)
+
+    if request.post?
+      #TODO: sanitize params
+      @variables.each do |var|
+        if params[:visualize_ids].include? var.id
+          var.visualize = true
+        else
+          var.visualize = false
+        end
+        if params[:export_ids].include? var.id
+          var.export = true
+        else
+          var.export = false
+        end
+        var.save!
+      end
+    end
+  end
+
+  # GET metadata
+  # DenCity view
+  def metadata
+    @variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
+  end
+
+  def download_metadata
+    respond_to do |format|
+      format.csv do
+        write_and_send_metadata_csv
+      end
+    end
+
   end
 
   protected
+
+  def write_and_send_metadata_csv
+    require 'csv'
+    variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
+    filename =  "dencity_metadata.csv"
+    csv_string = CSV.generate do |csv|
+      csv << ['name', 'display_name', 'description', 'units', 'datatype', 'user_defined']
+      variables.each do |v|
+        csv << [v.metadata_id, v.display_name, '', v.units, v.data_type, false]
+      end
+    end
+
+    send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
+
+  end
 
   def write_and_send_input_variables_csv(analysis)
     require 'csv'
