@@ -712,7 +712,7 @@ class AnalysesController < ApplicationController
       single_dp = true
     end
 
-    var_fields = [:_id, :perturbable, :pivot, :visualize, :export,:output, :objective_function,:objective_function_group, :objective_function_index, :display_name, :name, :units, :value_type, :data_type]
+    var_fields = [:_id, :perturbable, :pivot, :visualize, :export,:output, :objective_function,:objective_function_group, :objective_function_index, :objective_function_target, :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
     variables = Variable.where(analysis_id: analysis).or(perturbable: true).
         or(pivot: true).or(visualize: true).order_by(:name.asc).as_json(only: var_fields)
 
