@@ -1,0 +1,26 @@
+<h2>DenCity Variable Metadata</h2>
+
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Metadata ID</th>
+    <th>Display Name</th>
+    <th>Datatype</th>
+    <th>Units</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @variables.each do |v| %>
+    <tr>
+      <td><%= v.metadata_id %></td>
+      <td><%= v.display_name %></td>
+      <td><%= v.data_type %></td>
+      <td><%= v.units %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<div class="save-btn">
+  <%= link_to "Download CSV", download_metadata_path(format: :csv), class: "btn btn-primary" %>
+</div>

@@ -35,6 +35,8 @@ OpenstudioServer::Application.routes.draw do
       resources :variables, only: [:show, :index, :edit, :update], shallow: true do
         collection do
           get :download_variables
+          get :metadata
+          get :download_metadata
           match 'modify' => 'variables#modify', :via => [:get, :post]
         end
 
@@ -65,6 +67,10 @@ OpenstudioServer::Application.routes.draw do
 
   match '/about' => 'pages#about'
   match '/analyses' => 'analyses#index'
+
+  #DenCity routes
+  match 'metadata' => 'variables#metadata', :via => :get
+  match 'download_metadata' => 'variables#download_metadata', :via => :get
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

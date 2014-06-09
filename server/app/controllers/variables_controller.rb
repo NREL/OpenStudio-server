@@ -126,7 +126,37 @@ class VariablesController < ApplicationController
     end
   end
 
+  # GET metadata
+  # DenCity view
+  def metadata
+    @variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
+  end
+
+  def download_metadata
+    respond_to do |format|
+      format.csv do
+        write_and_send_metadata_csv
+      end
+    end
+
+  end
+
   protected
+
+  def write_and_send_metadata_csv
+    require 'csv'
+    variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
+    filename =  "dencity_metadata.csv"
+    csv_string = CSV.generate do |csv|
+      csv << ['name', 'display_name', 'description', 'units', 'datatype', 'user_defined']
+      variables.each do |v|
+        csv << [v.metadata_id, v.display_name, '', v.units, v.data_type, false]
+      end
+    end
+
+    send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
+
+  end
 
   def write_and_send_input_variables_csv(analysis)
     require 'csv'
