@@ -210,7 +210,7 @@ class Variable
         :perturbable, :pivot, :output, :visualize, :export, :static_value,
         :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
-    variables = Variable.where(analysis_id: analysis).or({perturbable: true}, {pivot: true}, {output: true}).as_json(only: save_fields)
+    variables = Variable.where(analysis_id: analysis).or({perturbable: true}, {pivot: true}, {output: true}, {export: true}).as_json(only: save_fields)
 
     variables.each do |v|
       if v['measure_id']

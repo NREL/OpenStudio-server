@@ -325,7 +325,7 @@ class AnalysesController < ApplicationController
 
     # variables represent the variables we want graphed. Nil = all
     @variables = params[:variables] ? params[:variables] : nil
-    var_fields = [:id,:display_name, :name, :units]
+    var_fields = [:id, :display_name, :name, :units]
     @visualizes = get_plot_variables_v2(@analysis)
 
     respond_to do |format|
@@ -706,23 +706,28 @@ class AnalysesController < ApplicationController
     # up from the database only operator
     variables = nil
     plot_data = nil
-    single_dp = false
-    if params[:datapoint_id]
-      # plot a specific datapoint
-      single_dp = true
-    end
+    single_dp = params[:datapoint_id] ? true : false # plot a specific datapoint
+    export = params[:export] == 'true' ? true : false
+    logger.info "Export flag set to #{export}"
 
-    var_fields = [:_id, :perturbable, :pivot, :visualize, :export,:output, :objective_function,:objective_function_group, :objective_function_index, :objective_function_target, :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
+    var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
+                  :objective_function_group, :objective_function_index, :objective_function_target,
+                  :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
     variables = Variable.where(analysis_id: analysis).or(perturbable: true).
-        or(pivot: true).or(visualize: true).order_by(:name.asc).as_json(only: var_fields)
+        or(pivot: true).or(visualize: true).or(export: true).order_by(:name.asc).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
 
-
     # flatten all the visualization variables to a queryable syntax
-    visualizes = Variable.visualizes(analysis).only(var_fields).as_json(:only => var_fields)
-    visualize_map = visualizes.map { |v| "results.#{v['name']}" }
+    output_variables = nil
+    if export
+      output_variables = Variable.exports(analysis).only(var_fields).as_json(:only => var_fields)
+    else
+      output_variables = Variable.visualizes(analysis).only(var_fields).as_json(:only => var_fields)
+    end
+
+    visualize_map = output_variables.map { |v| "results.#{v['name']}" }
     # initialize the plot fields that will need to be reported
     plot_fields = [:set_variable_values, :name, :_id] + visualize_map
 
@@ -765,7 +770,7 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-    variables.map!{|v| { :"#{v['name']}".to_sym => v }}
+    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
 
     logger.info variables.class
     #logger.info .reduce({}, :merge)
