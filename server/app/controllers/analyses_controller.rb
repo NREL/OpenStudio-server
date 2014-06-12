@@ -6,7 +6,7 @@ class AnalysesController < ApplicationController
   # GET /analyses.json
   def index
     if params[:project_id].nil?
-      @analyses = Analysis.all
+      @analyses = Analysis.all.order_by(:start_time.asc)
       @project = nil
 
     else
@@ -471,10 +471,12 @@ class AnalysesController < ApplicationController
 
     if dp['results']
       ovs.each do |ov|
-        if ov['objective_function']
+        logger.info("HI: #{ov['name']}")
+        if ov['objective_function_target']
+          logger.info("HEY! #{dp['results'][ov['name']]}")
           dp_values = []
           dp_values << ov['name']
-          dp_values << ((dp['results'][ov['name']] - ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
+          dp_values << ((dp['results'][ov['name']].to_f - ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
           plot_data_bar << dp_values
         end
       end
@@ -489,13 +491,13 @@ class AnalysesController < ApplicationController
     # TODO: this should always take a datapoint param
     @analysis = Analysis.find(params[:id])
 
-    if params[:datapoint_id]
+    #if params[:datapoint_id]
       # plot a specific datapoint
-      @plot_data, @datapoint = get_plot_data_radar(@analysis, params[:datapoint_id])
-    else
-      # plot the latest datapoint
-      @plot_data, @datapoint = get_plot_data_radar(@analysis)
-    end
+    @plot_data, @datapoint = get_plot_data_radar(@analysis, params[:datapoint_id])
+    #else
+    #  # plot the latest datapoint
+    #  @plot_data, @datapoint = get_plot_data_radar(@analysis)
+    #end
     respond_to do |format|
       format.json { render json: {datapoint: {id: @datapoint.id, name: @datapoint.name}, radardata: @plot_data} }
     end
@@ -518,7 +520,19 @@ class AnalysesController < ApplicationController
   # Once this is functional, then remove the old "plot_data". Remove route too!
   def plot_data_v2
     analysis = Analysis.find(params[:id])
-    variables, plot_data = get_plot_data_v2(analysis)
+    datapoint_id = params[:datapoint_id] ? params[:datapoint_id]:nil
+
+    variables, plot_data = get_plot_data_v2(analysis, datapoint_id)
+
+    respond_to do |format|
+      format.json { render json: {variables: variables, data: plot_data} }
+    end
+  end
+
+  # New function for objective data only
+  def plot_obj_data
+    analysis = Analysis.find(params[:id])
+    variables, plot_data = get_obj_plot_data(analysis)
 
     respond_to do |format|
       format.json { render json: {variables: variables, data: plot_data} }
@@ -701,11 +715,80 @@ class AnalysesController < ApplicationController
     plot_data
   end
 
-  def get_plot_data_v2(analysis)
+  # Plot data with objective functions only
+  def get_obj_plot_data(analysis)
+    # only get variables that have objective_function = true
+    var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,:objective_function_group, :objective_function_index, :objective_function_target, :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
+
+    variables = Variable.where(analysis_id: analysis, objective_function: true).
+        order_by(:name.asc).as_json(only: var_fields)
+
+    # Create a map from the _id to the variables machine name
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
+    visualize_map = variables.map { |v| "results.#{v['name']}" }
+
+    logger.info("variable map: #{variable_name_map.inspect}")
+    logger.info("visualize map: #{visualize_map.inspect}")
+
+    # initialize the plot fields that will need to be reported
+    plot_fields = [:set_variable_values, :name, :_id] + visualize_map
+
+    if params[:datapoint_id]
+      # Can't call the as_json(:only) method on this probably because of the nested results hash
+      plot_data = analysis.data_points.where(id: params[:datapoint_id]).order_by(:created_at.asc).only(plot_fields).as_json
+    else
+      # Can't call the as_json(:only) method on this probably because of the nested results hash
+      plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
+    end
+
+    # Flatten the results hash to the dot notation syntax
+    plot_data.each do |pd|
+      logger.info("res: #{pd['results'].inspect}")
+      pd['results'] = hash_to_dot_notation(pd['results'])
+
+      # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
+      # the datapoint actually put it in the results
+      #   First get the machine name for each variable using the variable_name_map
+#      variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
+#      logger.info("set_variable_values: #{pd['set_variable_values'].inspect}")
+
+      #   Second sort the values (VERY IMPORTANT)
+ #     variable_values = Hash[variable_values.sort_by { |k, _| k }]
+
+      # merge the variable values into the results hash
+  #    pd['results'].merge!(variable_values)
+
+      # now remove the set_variable_values section
+      pd.delete('set_variable_values')
+
+      # and then remove any other null field
+      pd.delete_if { |k, v| v.nil? && plot_fields.exclude?(k) }
+
+      # now flatten completely
+      pd.merge!(pd.delete('results'))
+
+      # copy _id to data_point_uuid for backwards compatibility
+      pd['data_point_uuid'] = "/data_points/#{pd['_id']}"
+    end
+
+    variables.map!{|v| { :"#{v['name']}".to_sym => v }}
+
+    logger.info variables.class
+    #logger.info .reduce({}, :merge)
+
+    variables = variables.reduce({}, :merge)
+    #variables.reduce(|v| {}, :merge)
+    [variables, plot_data]
+
+  end
+
+  # Plot data across analysis
+  def get_plot_data_v2(analysis, datapoint_id=nil)
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
     variables = nil
     plot_data = nil
+    
     single_dp = params[:datapoint_id] ? true : false # plot a specific datapoint
     export = params[:export] == 'true' ? true : false
     logger.info "Export flag set to #{export}"
@@ -732,7 +815,11 @@ class AnalysesController < ApplicationController
     plot_fields = [:set_variable_values, :name, :_id] + visualize_map
 
     # Can't call the as_json(:only) method on this probably because of the nested results hash
-    plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
+    if datapoint_id
+      plot_data = analysis.data_points.where(status: 'completed', id: datapoint_id).order_by(:created_at.asc).only(plot_fields).as_json
+    else
+      plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
+    end
 
     # Flatten the results hash to the dot notation syntax
     plot_data.each do |pd|
@@ -740,6 +827,7 @@ class AnalysesController < ApplicationController
 
       # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
       # the datapoint actually put it in the results
+
       #   First get the machine name for each variable using the variable_name_map
       variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
 
@@ -760,6 +848,7 @@ class AnalysesController < ApplicationController
 
       # copy _id to data_point_uuid for backwards compatibility
       pd['data_point_uuid'] = "/data_points/#{pd['_id']}"
+
     end
 
     # TODO: how to handle to sorting by iteration?

@@ -1,9 +1,8 @@
 <!-- vars for javascript -->
 <%= javascript_tag do %>
-    statuses = <%= raw @js_results.to_json %>;
-    total_cnts = <%= raw @totals.to_json %>;
+    statuses = <%= raw @js_res.to_json %>;
+    total = <%= raw @total.to_json %>;
 <% end %>
-
 
 <div class="row-fluid gray-header">
   <div class="span3"><h2>Dashboard</h2></div>
@@ -21,55 +20,106 @@
   </div>
 </div>
 
-<% rowcnt = 0 %>
 <div class="row-fluid">
-  <!--new row -->
-  <% @results.each_with_index do |res, index| %>
-      <% if index % 3 == 0 %>
+  <div class="span12">
+    <div class="analysis-container">
+      <div class="analysis-content">
+        <% if @current %>
+        <div class="analysis-header">Current Analysis: <h3><%= link_to(@current.display_name, analysis_path(@current)) %></h3></div>
+
+        <div class="row-fluid pad-top-20">
+          <div class="span6">
+
+         <h4 style="text-align:left;">Progress Status</h4>
+          <div id="pie" class="pie"></div>
           </div>
-          <div class="row-fluid">
-      <% end %>
-      <div class="span4">
-        <div class="analysis-container">
-          <div class="analysis-content">
-            <div class="analysis-header"><%= link_to(res["display_name"], analysis_path(res["id"])) %></div>
-            <p>Project: <%= link_to(res["project_name"], project_path(res["project_id"])) %></p>
+          <div class="span6 pad-top-20">
 
-            <p>Date Started:
-              <% unless res["created_at"].nil? %><%= res["created_at"].strftime("%m/%d/%Y %H:%M:%S") %>
-              <% end %></p>
+            <p>Project: <%= link_to(@current.project.name, project_path(@current.project)) %></p>
+            <p>Start:
+              <% unless @current.start_time.nil? %><%= @current.start_time.strftime("%m/%d/%Y %H:%M:%S") %>
+              <% end %>
+            </p>
+            <p><% unless @current.end_time.nil? %>End: <%= @current.end_time.strftime("%m/%d/%Y %H:%M:%S") %><% end %></p>
+            <p><% unless @current.end_time.nil? || @current.start_time.nil? %>Duration:  <%= distance_of_time_in_words(@current.start_time, @current.end_time) %> <% end %></p>
+            <p>Status: <span class="label <% if @current.status == 'completed' %>label-success<% end %>"><%=@current.status %></span></p>
+            <p><span class="badge badge-info"><%= @current.data_points.count %></span> Datapoints</p>
+            <p><% if @current.status == 'completed' %><% fails =  @current.data_points.where(status_message: 'datapoint failure').count %><span class="badge <% if fails > 0 %>badge-warning<% end %>"></span> <% if fails == 0%>No <% end %>Failures<% end %></p>
 
-            <div id="pie<%= index %>" class="pie"></div>
-            <div class="row-fluid">
-              <div class="span2">
+            <div class="row-fluid pad-top-20">
+              <div class="span3 offset3">
                 <div class="button-container">
-                  <%= link_to 'View Analysis', analysis_path(res["id"]), class: "btn btn-mini" %>
+                  <%= link_to 'View Analysis', analysis_path(@current), class: "btn btn-mini" %>
                 </div>
               </div>
-              <div class="span2 offset5">
+              <div class="span3">
                 <div class="button-container">
-                  <%= link_to 'Delete Project', project_path(res["project_id"]), method: :delete,
+                  <%= link_to 'Delete Project', project_path(@current.project), method: :delete,
                               data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <% else %>
+          <p>There are no analyses to display</p>
+        <% end %>
       </div>
-  <% end %>
+    </div>
   </div>
+</div>
 
-  <%= @test %>
+
+
+<% @analyses.each_with_index do |res, index| %>
+  <% next if index == 0 %>
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="analysis-container">
+        <div class="analysis-content">
+          <div class="row-fluid">
+            <div class="span3">
+              <p><h3><%= link_to(res.display_name, analysis_path(res)) %></h3></p>
+
+            </div>
+            <div class="span3">
+              <p>Project: <%= link_to(res.project.name, project_path(res.project)) %></p>
+              <p>Start:<% unless res.start_time.nil? %><%= res.start_time.strftime("%m/%d/%Y %H:%M:%S") %><% end %></p>
+              <p>End: <% unless res.end_time.nil? %><%= res.end_time.strftime("%m/%d/%Y %H:%M:%S") %><% end %></p>
+              <p>Duration: <%= distance_of_time_in_words(res.start_time, res.end_time) unless res.start_time.nil? || res.end_time.nil? %></p>
+
+            </div>
+            <div class="span3">
+              <p>Status: <span class="label <% if res.status == 'completed' %>label-success<% end %>"><%=res.status %></span></p>
+              <p><span class="badge badge-info"><%= res.data_points.count %></span> Datapoints</p>
+              <p><% fails = res.data_points.where(status_message: 'datapoint failure').count %><span class="badge <% if fails > 0 %>badge-warning<% else %>badge-info<% end %>"></span><% if fails == 0 %> No <% end %>Failures</p>
+            </div>
+            <div class="span3">
+              <div class="button-container">
+                <%= link_to 'View Analysis', analysis_path(res), class: "btn btn-mini" %>
+              </div>
+              <div class="button-container">
+                <%= link_to 'Delete Project', project_path(res.project), method: :delete,
+                            data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
 
   <script type="text/javascript">
-      function make_pie_chart(data, cnt, index) {
+      function make_pie_chart(data, cnt) {
           var w = 230,                        //width
                   h = 230,                            //height
                   r = 110,                            //radius
                   radius = 115,                          //to center on svg
                   color = d3.scale.category20();     //builtin range of colors
 
-          var vis = d3.select("#pie" + j)
+          var vis = d3.select("#pie")
                   .append("svg:svg")              //create the SVG element inside the <body>
                   .data([data])                   //associate our data with the document
                   .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
@@ -107,7 +157,7 @@
           //    .attr("text-anchor", "middle")                          //center the text on it's origin
           //    .text(function(d, i) { return data[i].label; });        //get the label from our original data array
 
-          var legend = d3.select("#pie" + index).append("svg")
+          var legend = d3.select("#pie").append("svg")
                   .attr("class", "legend")
                   .attr("width", w)
                   .attr("height", 100)
@@ -131,7 +181,7 @@
                       return data[i].label + " (" + data[i].value + ")";
                   });
 
-          var total = d3.select("#pie" + index).append("svg")
+          var total = d3.select("#pie").append("svg")
                   .attr("width", w)
                   .attr("height", 20)
                   .attr("class", "total")
@@ -160,14 +210,10 @@
       }
 
       addLoadEvent(function () {
-          //go through data array and dispatch chart rendering
-          data = [];
+          //dispatch chart rendering
+          data = statuses;
+          cnt = total;
+          make_pie_chart(data, cnt);
 
-          for (j = 0; j < statuses.length; j++) {
-              data = statuses[j];
-              cnt = total_cnts[j];
-
-              make_pie_chart(data, cnt, j);
-          }
       });
   </script>
