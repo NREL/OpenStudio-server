@@ -3,6 +3,7 @@
 <table class="table table-striped">
   <thead>
   <tr>
+    <th>Display Name</th>
     <th>Name</th>
     <th>Measure Type</th>
     <th>Description</th>
@@ -13,6 +14,7 @@
   <tbody>
   <% @measures.each do |measure| %>
       <tr>
+        <td><%= link_to_if(measure.display_name, measure.display_name, measure_path(measure)) %></td>
         <td><%= link_to_if(measure.name, measure.name, measure_path(measure)) %></td>
         <td><%= measure.measure_type if measure.measure_type %></td>
         <td><%= measure.description %></td>

@@ -371,7 +371,7 @@ class Analysis::Optim
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
 			
             #write final params to json file
-            answer <- paste("{",paste("\"",varnames,"\"",": ",results$par,sep="", collapse=","),"}",sep="")
+            answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
             write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/bestresult.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
             convergenceflag <- toJSON(results$convergence)
             write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergenceflag.json")
