@@ -320,50 +320,41 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Parallel Coords plot
+  # Parallel Coordinates plot
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
 
     # variables represent the variables we want graphed. Nil = all
     @variables = params[:variables] ? params[:variables] : nil
     var_fields = [:id, :display_name, :name, :units]
-    @visualizes = get_plot_variables_v2(@analysis)
+    @visualizes = get_plot_variables(@analysis)
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
     end
   end
 
-  # interactive XY plot: choose x and y variables
-  # TODO: Remove this and use a general plot_data method
+  # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
     @analysis = Analysis.find(params[:id])
 
-    @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
+    logger.info "PLOTVARS: #{@plotvars}"
 
-    @allvars = []
-    @mappings.each do |key, val|
-      @allvars << val
-    end
-    @plotvars.each do |val|
-      @allvars << val
-    end
-
-    # variables represent the variables we want graphed. Nil = all
+    # variables represent the variables we want graphed. Nil == choose the first 2
     @variables = []
     if params[:variables].nil?
-      @variables << @plotvars[0] << @plotvars[1]
+      @variables << @plotvars[0].name << @plotvars[1].name
     else
       if params[:variables][:x]
         @variables << params[:variables][:x]
       else
-        @variables << @plotvars[0]
+        @variables << @plotvars[0].name
       end
       if params[:variables][:y]
         @variables << params[:variables][:y]
       else
-        @variables << @plotvars[0]
+        @variables << @plotvars[0].name
       end
     end
 
@@ -372,29 +363,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # TODO: Remove this and use a general plot_data method
-  def plot_data_xy
-    # TODO: either figure out how to ajaxify the json directly to reduce db calls
-    # TODO: or remove data from the @plot_data variable (we are returning everything for now)
-    @analysis = Analysis.find(params[:id])
-
-    # Get the mappings of the variables that were used. Move this to the datapoint class
-    @mappings = @analysis.get_superset_of_input_variables
-
-    # if no variables are specified, use first one(s) in the list
-    if params[:variables].nil?
-      @plotvars = get_plot_variables(@analysis)
-    else
-      @plotvars = params[:variables].split(',')
-    end
-    @plot_data = get_plot_data(@analysis, @mappings)
-
-    respond_to do |format|
-      format.json { render json: {mappings: @mappings, plotvars: @plotvars, data: @plot_data} }
-    end
-  end
-
-  # TODO: Remove this and use a general plot_data method
+  # Scatter plot
   def plot_scatter
     @analysis = Analysis.find(params[:id])
 
@@ -403,16 +372,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # TODO: Remove this and use a general plot_data method
-  def plot_xy
-    @analysis = Analysis.find(params[:id])
-
-    respond_to do |format|
-      format.html # plot_xy.html.erb
-    end
-  end
-
-  # TODO: Remove this and use a general plot_data method
+  # Radar plot (single datapoint, must have objective functions)
   def plot_radar
     @analysis = Analysis.find(params[:id])
     if params[:datapoint_id]
@@ -431,7 +391,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Data for Bar chart of objective functions actual values vs target values
+  # Bar chart (single datapoint, must have objective functions)
   # "% error"-like, but negative when actual is less than target and positive when it is more than target
   def plot_bar
     @analysis = Analysis.find(params[:id])
@@ -539,7 +499,7 @@ class AnalysesController < ApplicationController
   protected
 
   # TODO: Update this to pull from the Variables model with the field :visualize set to true *see plot_data_v2
-  def get_plot_variables(analysis)
+  def get_plot_variables_old(analysis)
     plotvars = []
     ovs = @analysis.output_variables
     ovs.each do |ov|
@@ -696,10 +656,9 @@ class AnalysesController < ApplicationController
 
   # Get plot variables
   # Used by plot_parallelcoordinates
-  def get_plot_variables_v2(analysis)
+  def get_plot_variables(analysis)
 
-    variables = Variable.where(analysis_id: analysis).or(perturbable: true).
-        or(pivot: true).or(visualize: true).order_by(:name.asc)
+    variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
 
   end
 
