@@ -3,28 +3,28 @@
 <table class="table table-striped">
   <thead>
   <tr>
-    <th>Name</th>
     <th>Project</th>
-    <th>Type</th>
+    <th>Name</th>
+    <th>Last Analysis Type</th>
     <th>Status</th>
     <th>Start Time (UTC)</th>
     <th>End Time (UTC)</th>
-    <th>Delta Time (s)</th>
+    <th>Duration </th>
     <th>View</th>
   <tr>
   </thead>
   <tbody>
   <% @analyses.each do |analysis| %>
     <tr>
-    <td><%= link_to(analysis.display_name, analysis_path(analysis)) %></td>
-    <td><%= link_to(analysis.project.name, project_path(analysis.project)) %></td>
-    <td><%= analysis.analysis_type %></td>
-    <td><%= analysis.status %></td>
-    <td><%= analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.start_time.nil? %></td>
-    <td><%= analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.end_time.nil? %></td>
-    <td><%= (analysis.end_time.to_f - analysis.start_time.to_f).round(2) unless analysis.end_time.nil? || analysis.start_time.nil? %></td>
-    <td><%= link_to 'JSON', analysis_path(analysis, :format => :json) %>
-      | <%= link_to_if(!analysis.seed_zip.nil?, "Zip File", analysis.seed_zip.url(:original, false)) %> </td>
+      <td><%= link_to(analysis.project.name, project_path(analysis.project)) %></td>
+      <td><%= link_to(analysis.display_name, analysis_path(analysis)) %></td>
+      <td><%= analysis.analysis_type %></td>
+      <td><%= analysis.status %></td>
+      <td><%= analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.start_time.nil? %></td>
+      <td><%= analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.end_time.nil? %></td>
+      <td><%#= (analysis.end_time.to_f - analysis.start_time.to_f).round(2) unless analysis.end_time.nil? || analysis.start_time.nil? %> <%= distance_of_time_in_words(analysis.start_time, analysis.end_time) unless analysis.start_time.nil? || analysis.end_time.nil? %></td>
+      <td><%= link_to 'JSON', analysis_path(analysis, :format => :json) %>
+        | <%= link_to_if(!analysis.seed_zip.nil?, "Zip File", analysis.seed_zip.url(:original, false)) %> </td>
     </tr>
    <% end %>
     </tbody>

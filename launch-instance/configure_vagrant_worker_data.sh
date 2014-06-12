@@ -7,17 +7,19 @@ sudo chown -R vagrant:www-data /mnt/openstudio
 sudo chmod -R 775 /mnt/openstudio
 
 # save application files into the right directory
-cp -rf /data/worker-nodes/* /mnt/openstudio/
+sudo cp -rf /data/worker-nodes/* /mnt/openstudio/
 
 # install workflow dependencies
 cd /mnt/openstudio
+sudo rm -f Gemfile.lock
 bundle update
+sudo bundle update
 
 # copy over the models needed for mongo
-cd /mnt/openstudio/rails-models && unzip -o rails-models.zip -d models
+cd /mnt/openstudio/rails-models && sudo unzip -o rails-models.zip -d models
 
 # rename the mongoid-vagrant template to mongoid.yml which is unpacked with unzip
-mv /mnt/openstudio/rails-models/mongoid-vagrant.yml /mnt/openstudio/rails-models/mongoid.yml
+sudo mv /mnt/openstudio/rails-models/mongoid-vagrant.yml /mnt/openstudio/rails-models/mongoid.yml
 
 # rerun the permissions after unzipping the files
 sudo chown -R vagrant:www-data /mnt/openstudio 

@@ -4,8 +4,9 @@
   <table class="table table-striped">
     <thead>
     <tr>
-      <th>Display Name</th>
       <th>Machine Name</th>
+      <th>Display Name</th>
+      <th>Measure Name</th>
       <th>Units</th>
       <th>Visualize</th>
       <th>Export</th>
@@ -15,8 +16,9 @@
     <tbody>
       <% @variables.each do |var| %>
         <tr>
-         <td><%= var.display_name %></td>
          <td><%= var.name %></td>
+         <td><%= var.display_name %></td>
+         <td><% if var.measure? %><%= var.measure.display_name %><% end %></td>
          <td><%= var.units %></td>
          <% v_checked = false %>
          <% if var.visualize %>
