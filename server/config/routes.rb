@@ -13,6 +13,7 @@ OpenstudioServer::Application.routes.draw do
         get :page_data
         get :plot_data
         get :plot_data_v2
+        get :plot_obj_data
         get :download_status
         get :debug_log
         get :new_view

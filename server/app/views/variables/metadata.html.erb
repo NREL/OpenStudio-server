@@ -1,4 +1,4 @@
-<h2>DenCity Variable Metadata</h2>
+<h2>DenCity Metadata</h2>
 
 <table class="table table-striped">
   <thead>
@@ -22,5 +22,6 @@
 </table>
 
 <div class="save-btn">
-  <%= link_to "Download CSV", download_metadata_path(format: :csv), class: "btn btn-primary" %>
+  <p>Note: Only SI Units can be used as DenCity metadata.</p>
+  <%= link_to "Download DenCity Metadata (csv)", download_metadata_path(format: :csv), class: "btn btn-primary" %>
 </div>
