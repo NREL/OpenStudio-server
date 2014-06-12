@@ -115,7 +115,8 @@ class Analysis::NsgaNrel
       fail 'Must have at least two output_variables'
     end
 
-    ug = @analysis.output_variables.uniq { |v| v['objective_function_group'] }
+    objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+    ug = objtrue.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
 
     if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
@@ -241,8 +242,14 @@ class Analysis::NsgaNrel
               z
 
               # Call the simulate data point method
-              f(z[j])
-
+            if (as.character(z[j]) == "NA") { 
+		      cat("UUID is NA \n");
+              NAvalue <- .Machine$double.xmax
+              return(NAvalue)		    
+			} else {
+		      f(z[j])
+              
+			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -309,6 +316,8 @@ class Analysis::NsgaNrel
               ug <- length(unique(objgroup))
               if (ug != uniquegroups) {
                  print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
+                 write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                 stop
               }
 
               for (i in 1:ug){
@@ -320,6 +329,7 @@ class Analysis::NsgaNrel
               #}
               print(paste("Objective function Norm:",obj))
               return(obj)
+              }
             }
 
             clusterExport(cl,"g")
@@ -344,6 +354,9 @@ class Analysis::NsgaNrel
             print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            #write final params to json file
+            answer <- results$parameters
+            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/parameters.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
           }
 
         end
