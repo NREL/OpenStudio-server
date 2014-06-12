@@ -47,7 +47,7 @@ bundle exec rake db:purge
 bundle exec rake db:mongoid:create_indexes
 
 # configure the application based worker data
-cd /data/launch-instance && sudo ./configure_vagrant_worker_data.sh
+cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 # restart rserve
 sudo service Rserve restart
