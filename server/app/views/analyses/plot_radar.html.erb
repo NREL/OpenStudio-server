@@ -25,7 +25,7 @@
       var data = [];
       var dp_values = {};
 
-      d3.json("plot_data_v2.json?datapoint_id=" + datapoint_id ,  function (rawdata) {
+      d3.json("analysis_data.json?visualize=true&datapoint_id=" + datapoint_id ,  function (rawdata) {
 
        //variables holds the axes names
         Object.keys(rawdata['variables']).forEach(function (d) {

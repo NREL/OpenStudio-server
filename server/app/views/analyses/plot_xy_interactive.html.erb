@@ -44,7 +44,7 @@
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.json(encodeURI("plot_data_v2.json"), function (error, data) {
+      d3.json(encodeURI("analysis_data.json?visualize=true"), function (error, data) {
 
         //get x and y variables
         Object.keys(data['variables']).forEach(function (name) {

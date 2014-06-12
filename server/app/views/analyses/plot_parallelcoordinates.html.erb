@@ -29,7 +29,7 @@
               .append("svg:g")
               .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
-      d3.json("plot_data_v2.json", function (error, data) {
+      d3.json("analysis_data.json?visualize=true", function (error, data) {
           // Extract the list of dimensions and create a scale for each.
           x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
 
