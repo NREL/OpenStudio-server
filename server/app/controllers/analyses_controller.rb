@@ -402,28 +402,20 @@ class AnalysesController < ApplicationController
     end
   end
 
-
-  #TODO: replace with plot_data_v2 when all other plots are converted
-  def plot_data
-    @analysis = Analysis.find(params[:id])
-
-    @mappings = @analysis.get_superset_of_input_variables
-    @plotvars = get_plot_variables(@analysis)
-    @plot_data = get_plot_data(@analysis, @mappings)
-
-    respond_to do |format|
-      format.json { render json: {mappings: @mappings, plotvars: @plotvars, data: @plot_data} }
-    end
-  end
-
   # This needs to be updated, but the plan of this method is to provide all the plot-data (or export data) in
   # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
   # Once this is functional, then remove the old "plot_data". Remove route too!
-  def plot_data_v2
+  def analysis_data
     analysis = Analysis.find(params[:id])
     datapoint_id = params[:datapoint_id] ? params[:datapoint_id]:nil
+    #other variables that can be specified
+    options = {}
+    options['visualize'] = params[:visualize] ? true:false
+    options['export'] = params[:export] ? true:false
+    options['pivot'] = params[:pivot] ? true:false
+    options['perturbable'] = params[:perturbable] ? true:false
 
-    variables, plot_data = get_plot_data_v2(analysis, datapoint_id)
+    variables, plot_data = get_analysis_data(analysis, datapoint_id, options)
 
     respond_to do |format|
       format.json { render json: {variables: variables, data: plot_data} }
@@ -498,77 +490,10 @@ class AnalysesController < ApplicationController
 
   protected
 
-  # TODO: Update this to pull from the Variables model with the field :visualize set to true *see plot_data_v2
-  def get_plot_variables_old(analysis)
-    plotvars = []
-    ovs = @analysis.output_variables
-    ovs.each do |ov|
-      if ov['objective_function']
-        plotvars << ov['name']
-      end
-    end
-
-    # add "total energy" if it's not already in the output variables
-    unless plotvars.include?('total_energy')
-      plotvars.insert(0, 'total_energy')
-    end
-
-    Rails.logger.info plotvars
-    plotvars
-  end
-
-  # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
-  # a useful JSON for plotting (and exporting to CSV/R-dataframe)
-  # The results is the same as the variables hash which defines which results to export.  If nil it will only
-  # export the results that in the output_variables hash
-  def get_plot_data(analysis, variables, results = nil)
-    plot_data = []
-    if @analysis.analysis_type == 'sequential_search'
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
-    else
-      dps = @analysis.data_points.all
-    end
-
-    # load in the output variables that are requested (including objective functions)
-    ovs = get_plot_variables(@analysis)
-
-    dps.each do |dp|
-      # the datapoint is considered complete if it has results set
-      if dp.results
-        dp_values = {}
-
-        dp_values['data_point_uuid'] = data_point_path(dp.id)
-
-        # lookup input value names (from set_variable_values)
-        # todo: push this work into the database
-        if dp.set_variable_values
-          variables.each do |k, v|
-            dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
-          end
-        end
-
-        if results
-          # this will eventually be two levels (which will need to be collapsable for column vectors)
-          results.each do |key, _|
-            dp_values[key] = dp.results[key] ? dp.results[key] : nil
-          end
-        else
-          # output all output variables in the array of hashes (regardless if it is an objective function or not)
-          ovs.each do |ov|
-            dp_values[ov] = dp['results'][ov] if dp['results'][ov]
-          end
-        end
-
-        plot_data << dp_values
-      end
-    end
-
-    plot_data
-  end
-
   # Plot data across analysis
-  def get_plot_data_v2(analysis, datapoint_id=nil)
+  # if a datapoint_id is specified, will return only that point
+  # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
+  def get_analysis_data(analysis, datapoint_id=nil, options=nil)
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
     variables = nil
@@ -581,8 +506,12 @@ class AnalysesController < ApplicationController
     var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
                   :objective_function_group, :objective_function_index, :objective_function_target,
                   :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
-    variables = Variable.where(analysis_id: analysis).or(perturbable: true).
-        or(pivot: true).or(visualize: true).or(export: true).order_by(:name.asc).as_json(only: var_fields)
+
+    # TODO: use options passed in
+    variables = Variable.where(analysis_id: analysis).or(visualize: true).order_by(:name.asc).as_json(only: var_fields)
+
+    #variables = Variable.where(analysis_id: analysis).or(perturbable: true).
+    #    or(pivot: true).or(visualize: true).or(export: true).order_by(:name.asc).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
