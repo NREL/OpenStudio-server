@@ -22,6 +22,3 @@ cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 #file flag the user_data has completed
 cat /dev/null > ~/user_data_done
-
-
-              
