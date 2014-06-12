@@ -129,7 +129,7 @@ class VariablesController < ApplicationController
   # GET metadata
   # DenCity view
   def metadata
-    @variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
+    @variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil).order_by(name: 1)
   end
 
   def download_metadata
