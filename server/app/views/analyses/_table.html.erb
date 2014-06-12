@@ -86,7 +86,7 @@
                   <% if !dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name) %>
                     | <%= link_to( "Zip File", download_data_point_path(dp)) %>
                   <% end %>
-                <% if dp.status == 'completed' %>
+                <% if dp.status == 'completed' && @has_obj_targets %>
                   | <%= link_to('Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>
                   | <%= link_to('Radar Plot', plot_radar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>
                 <% end %>
