@@ -1,5 +1,4 @@
 <h2>Analysis Results &mdash;  <%= link_to @analysis.display_name, analysis_path(@analysis) %></h2>
-
   <%= javascript_tag do %>
     hide_vars = <%=raw @variables.to_json %>;
   <% end %>
@@ -32,7 +31,6 @@
 
       d3.json("plot_data_v2.json", function (error, data) {
           // Extract the list of dimensions and create a scale for each.
-          //var cnt = 0;
           x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
 
               // To ignore always
