@@ -92,11 +92,25 @@
   <tr>
   </thead>
   <tbody>
+
   <% @table_data.each do |k, v| %>
-      <tr>
-        <td><%= k %></td>
-        <td><%= v %></td>
+
+    <% if k == 'results' || k == 'sdp_log_file' %>
+     <tr data-toggle="collapse" class="accordion-toggle" data-target="#collapse_<%= k %>">
+       <td><%= k %></td>
+       <td><button class= "btn"> Toggle View </button></td>
+     </tr>
+      <tr class="hidden-row">
+        <td>&nbsp;</td>
+        <td><div class="accordion-body collapse" id="collapse_<%= k %>"><%= v %></div></td>
       </tr>
+    <% else %>
+    <tr>
+      <td><%= k %></td>
+      <td><%= v %></td>
+    </tr>
+    <% end %>
+
   <% end %>
   </tbody>
 </table>
