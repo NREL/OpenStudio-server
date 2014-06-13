@@ -408,12 +408,14 @@ class AnalysesController < ApplicationController
   def analysis_data
     analysis = Analysis.find(params[:id])
     datapoint_id = params[:datapoint_id] ? params[:datapoint_id]:nil
-    #other variables that can be specified
+    # other variables that can be specified
     options = {}
-    options['visualize'] = params[:visualize] ? true:false
-    options['export'] = params[:export] ? true:false
-    options['pivot'] = params[:pivot] ? true:false
-    options['perturbable'] = params[:perturbable] ? true:false
+    options['visualize'] = params[:visualize] == 'true' ? true:false
+    options['export'] = params[:export] == 'true' ? true:false
+    options['pivot'] = params[:pivot] == 'true' ? true:false
+    options['perturbable'] = params[:perturbable] == 'true' ? true:false
+
+    logger.info("OPTIONS: #{options.to_json}")
 
     variables, plot_data = get_analysis_data(analysis, datapoint_id, options)
 
@@ -498,33 +500,27 @@ class AnalysesController < ApplicationController
     # up from the database only operator
     variables = nil
     plot_data = nil
-    
-    single_dp = params[:datapoint_id] ? true : false # plot a specific datapoint
-    export = params[:export] == 'true' ? true : false
-    logger.info "Export flag set to #{export}"
 
     var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
                   :objective_function_group, :objective_function_index, :objective_function_target,
                   :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
 
-    # TODO: use options passed in
-    variables = Variable.where(analysis_id: analysis).or(visualize: true).order_by(:name.asc).as_json(only: var_fields)
-
-    #variables = Variable.where(analysis_id: analysis).or(perturbable: true).
-    #    or(pivot: true).or(visualize: true).or(export: true).order_by(:name.asc).as_json(only: var_fields)
+    # dynamic query, only add 'or' for option fields that are true
+    or_qry = []
+    options.each do |k,v|
+      if v
+        # add to or
+        or_item = {}
+        or_item[k] = v
+        or_qry << or_item
+      end
+    end
+    variables = Variable.where(analysis_id: analysis).or(or_qry).order_by(:name.asc).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
 
-    # flatten all the visualization variables to a queryable syntax
-    output_variables = nil
-    if export
-      output_variables = Variable.exports(analysis).only(var_fields).as_json(:only => var_fields)
-    else
-      output_variables = Variable.visualizes(analysis).only(var_fields).as_json(:only => var_fields)
-    end
-
-    visualize_map = output_variables.map { |v| "results.#{v['name']}" }
+    visualize_map = variables.map { |v| "results.#{v['name']}" }
     # initialize the plot fields that will need to be reported
     plot_fields = [:set_variable_values, :name, :_id] + visualize_map
 
