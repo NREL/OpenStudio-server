@@ -28,6 +28,7 @@ class AnalysesController < ApplicationController
     per_page = 50
 
     @analysis = Analysis.find(params[:id])
+    @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0 ? true:false
 
     if @analysis
 
@@ -319,50 +320,41 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Parallel Coords plot
+  # Parallel Coordinates plot
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
 
     # variables represent the variables we want graphed. Nil = all
     @variables = params[:variables] ? params[:variables] : nil
     var_fields = [:id, :display_name, :name, :units]
-    @visualizes = get_plot_variables_v2(@analysis)
+    @visualizes = get_plot_variables(@analysis)
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
     end
   end
 
-  # interactive XY plot: choose x and y variables
-  # TODO: Remove this and use a general plot_data method
+  # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
     @analysis = Analysis.find(params[:id])
 
-    @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
+    logger.info "PLOTVARS: #{@plotvars}"
 
-    @allvars = []
-    @mappings.each do |key, val|
-      @allvars << val
-    end
-    @plotvars.each do |val|
-      @allvars << val
-    end
-
-    # variables represent the variables we want graphed. Nil = all
+    # variables represent the variables we want graphed. Nil == choose the first 2
     @variables = []
     if params[:variables].nil?
-      @variables << @plotvars[0] << @plotvars[1]
+      @variables << @plotvars[0].name << @plotvars[1].name
     else
       if params[:variables][:x]
         @variables << params[:variables][:x]
       else
-        @variables << @plotvars[0]
+        @variables << @plotvars[0].name
       end
       if params[:variables][:y]
         @variables << params[:variables][:y]
       else
-        @variables << @plotvars[0]
+        @variables << @plotvars[0].name
       end
     end
 
@@ -371,29 +363,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # TODO: Remove this and use a general plot_data method
-  def plot_data_xy
-    # TODO: either figure out how to ajaxify the json directly to reduce db calls
-    # TODO: or remove data from the @plot_data variable (we are returning everything for now)
-    @analysis = Analysis.find(params[:id])
-
-    # Get the mappings of the variables that were used. Move this to the datapoint class
-    @mappings = @analysis.get_superset_of_input_variables
-
-    # if no variables are specified, use first one(s) in the list
-    if params[:variables].nil?
-      @plotvars = get_plot_variables(@analysis)
-    else
-      @plotvars = params[:variables].split(',')
-    end
-    @plot_data = get_plot_data(@analysis, @mappings)
-
-    respond_to do |format|
-      format.json { render json: {mappings: @mappings, plotvars: @plotvars, data: @plot_data} }
-    end
-  end
-
-  # TODO: Remove this and use a general plot_data method
+  # Scatter plot
   def plot_scatter
     @analysis = Analysis.find(params[:id])
 
@@ -402,16 +372,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # TODO: Remove this and use a general plot_data method
-  def plot_xy
-    @analysis = Analysis.find(params[:id])
-
-    respond_to do |format|
-      format.html # plot_xy.html.erb
-    end
-  end
-
-  # TODO: Remove this and use a general plot_data method
+  # Radar plot (single datapoint, must have objective functions)
   def plot_radar
     @analysis = Analysis.find(params[:id])
     if params[:datapoint_id]
@@ -430,7 +391,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Data for Bar chart of objective functions actual values vs target values
+  # Bar chart (single datapoint, must have objective functions)
   # "% error"-like, but negative when actual is less than target and positive when it is more than target
   def plot_bar
     @analysis = Analysis.find(params[:id])
@@ -441,98 +402,20 @@ class AnalysesController < ApplicationController
     end
   end
 
-  #TODO: remove
-  def plot_data_bar
-    @analysis = Analysis.find(params[:id])
-    @datapoint = DataPoint.find(params[:datapoint_id])
-
-    @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
-
-    respond_to do |format|
-      format.json { render json: {datapoint: {id: @datapoint.id, name: @datapoint.name}, bardata: @plot_data} }
-    end
-  end
-
-  # Data for Bar chart of objective functions actual values vs target values
-  # "% error"-like, but negative when actual is less than target and positive when it is more than target
-  def get_plot_data_bar(analysis, datapoint_id = nil)
-    ovs = analysis.output_variables
-    plot_data_bar = []
-
-    if datapoint_id
-      dp = analysis.data_points.find(datapoint_id)
-    else
-      if analysis.analysis_type == 'sequential_search'
-        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
-
-    if dp['results']
-      ovs.each do |ov|
-        logger.info("HI: #{ov['name']}")
-        if ov['objective_function_target']
-          logger.info("HEY! #{dp['results'][ov['name']]}")
-          dp_values = []
-          dp_values << ov['name']
-          dp_values << ((dp['results'][ov['name']].to_f - ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
-          plot_data_bar << dp_values
-        end
-      end
-
-    end
-
-    [plot_data_bar, dp]
-  end
-
-  # TODO: Remove this and use a general plot_data method
-  def plot_data_radar
-    # TODO: this should always take a datapoint param
-    @analysis = Analysis.find(params[:id])
-
-    #if params[:datapoint_id]
-      # plot a specific datapoint
-    @plot_data, @datapoint = get_plot_data_radar(@analysis, params[:datapoint_id])
-    #else
-    #  # plot the latest datapoint
-    #  @plot_data, @datapoint = get_plot_data_radar(@analysis)
-    #end
-    respond_to do |format|
-      format.json { render json: {datapoint: {id: @datapoint.id, name: @datapoint.name}, radardata: @plot_data} }
-    end
-  end
-
-  def plot_data
-    @analysis = Analysis.find(params[:id])
-
-    @mappings = @analysis.get_superset_of_input_variables
-    @plotvars = get_plot_variables(@analysis)
-    @plot_data = get_plot_data(@analysis, @mappings)
-
-    respond_to do |format|
-      format.json { render json: {mappings: @mappings, plotvars: @plotvars, data: @plot_data} }
-    end
-  end
-
   # This needs to be updated, but the plan of this method is to provide all the plot-data (or export data) in
   # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
   # Once this is functional, then remove the old "plot_data". Remove route too!
-  def plot_data_v2
+  def analysis_data
     analysis = Analysis.find(params[:id])
     datapoint_id = params[:datapoint_id] ? params[:datapoint_id]:nil
+    #other variables that can be specified
+    options = {}
+    options['visualize'] = params[:visualize] ? true:false
+    options['export'] = params[:export] ? true:false
+    options['pivot'] = params[:pivot] ? true:false
+    options['perturbable'] = params[:perturbable] ? true:false
 
-    variables, plot_data = get_plot_data_v2(analysis, datapoint_id)
-
-    respond_to do |format|
-      format.json { render json: {variables: variables, data: plot_data} }
-    end
-  end
-
-  # New function for objective data only
-  def plot_obj_data
-    analysis = Analysis.find(params[:id])
-    variables, plot_data = get_obj_plot_data(analysis)
+    variables, plot_data = get_analysis_data(analysis, datapoint_id, options)
 
     respond_to do |format|
       format.json { render json: {variables: variables, data: plot_data} }
@@ -607,183 +490,10 @@ class AnalysesController < ApplicationController
 
   protected
 
-  # TODO: Update this to pull from the Variables model with the field :visualize set to true *see plot_data_v2
-  def get_plot_variables(analysis)
-    plotvars = []
-    ovs = @analysis.output_variables
-    ovs.each do |ov|
-      if ov['objective_function']
-        plotvars << ov['name']
-      end
-    end
-
-    # add "total energy" if it's not already in the output variables
-    unless plotvars.include?('total_energy')
-      plotvars.insert(0, 'total_energy')
-    end
-
-    Rails.logger.info plotvars
-    plotvars
-  end
-
-  # get data for radar chart
-  def get_plot_data_radar(analysis, datapoint_id = nil)
-    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
-    # and this is just an ugly mapping, sorry all.
-    # TODO: not sure why this is doubly nested array, but it's necessary for the radar plot code
-
-    ovs = analysis.output_variables
-    plot_data_radar = []
-
-    if datapoint_id
-      dp = analysis.data_points.find(datapoint_id)
-    else
-      if analysis.analysis_type == 'sequential_search'
-        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
-
-    if dp['results']
-      plot_data = []
-      ovs.each do |ov|
-        if ov['objective_function']
-          dp_values = {}
-          dp_values['axis'] = ov['name']
-          if ov['scaling_factor']
-            dp_values['value'] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
-          else
-            dp_values['value'] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
-          end
-          plot_data << dp_values
-        end
-      end
-    end
-    plot_data_radar << plot_data
-
-    [plot_data_radar, dp]
-  end
-
-  # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
-  # a useful JSON for plotting (and exporting to CSV/R-dataframe)
-  # The results is the same as the variables hash which defines which results to export.  If nil it will only
-  # export the results that in the output_variables hash
-  def get_plot_data(analysis, variables, results = nil)
-    plot_data = []
-    if @analysis.analysis_type == 'sequential_search'
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
-    else
-      dps = @analysis.data_points.all
-    end
-
-    # load in the output variables that are requested (including objective functions)
-    ovs = get_plot_variables(@analysis)
-
-    dps.each do |dp|
-      # the datapoint is considered complete if it has results set
-      if dp.results
-        dp_values = {}
-
-        dp_values['data_point_uuid'] = data_point_path(dp.id)
-
-        # lookup input value names (from set_variable_values)
-        # todo: push this work into the database
-        if dp.set_variable_values
-          variables.each do |k, v|
-            dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
-          end
-        end
-
-        if results
-          # this will eventually be two levels (which will need to be collapsable for column vectors)
-          results.each do |key, _|
-            dp_values[key] = dp.results[key] ? dp.results[key] : nil
-          end
-        else
-          # output all output variables in the array of hashes (regardless if it is an objective function or not)
-          ovs.each do |ov|
-            dp_values[ov] = dp['results'][ov] if dp['results'][ov]
-          end
-        end
-
-        plot_data << dp_values
-      end
-    end
-
-    plot_data
-  end
-
-  # Plot data with objective functions only
-  def get_obj_plot_data(analysis)
-    # only get variables that have objective_function = true
-    var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,:objective_function_group, :objective_function_index, :objective_function_target, :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
-
-    variables = Variable.where(analysis_id: analysis, objective_function: true).
-        order_by(:name.asc).as_json(only: var_fields)
-
-    # Create a map from the _id to the variables machine name
-    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
-    visualize_map = variables.map { |v| "results.#{v['name']}" }
-
-    logger.info("variable map: #{variable_name_map.inspect}")
-    logger.info("visualize map: #{visualize_map.inspect}")
-
-    # initialize the plot fields that will need to be reported
-    plot_fields = [:set_variable_values, :name, :_id] + visualize_map
-
-    if params[:datapoint_id]
-      # Can't call the as_json(:only) method on this probably because of the nested results hash
-      plot_data = analysis.data_points.where(id: params[:datapoint_id]).order_by(:created_at.asc).only(plot_fields).as_json
-    else
-      # Can't call the as_json(:only) method on this probably because of the nested results hash
-      plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
-    end
-
-    # Flatten the results hash to the dot notation syntax
-    plot_data.each do |pd|
-      logger.info("res: #{pd['results'].inspect}")
-      pd['results'] = hash_to_dot_notation(pd['results'])
-
-      # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
-      # the datapoint actually put it in the results
-      #   First get the machine name for each variable using the variable_name_map
-#      variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
-#      logger.info("set_variable_values: #{pd['set_variable_values'].inspect}")
-
-      #   Second sort the values (VERY IMPORTANT)
- #     variable_values = Hash[variable_values.sort_by { |k, _| k }]
-
-      # merge the variable values into the results hash
-  #    pd['results'].merge!(variable_values)
-
-      # now remove the set_variable_values section
-      pd.delete('set_variable_values')
-
-      # and then remove any other null field
-      pd.delete_if { |k, v| v.nil? && plot_fields.exclude?(k) }
-
-      # now flatten completely
-      pd.merge!(pd.delete('results'))
-
-      # copy _id to data_point_uuid for backwards compatibility
-      pd['data_point_uuid'] = "/data_points/#{pd['_id']}"
-    end
-
-    variables.map!{|v| { :"#{v['name']}".to_sym => v }}
-
-    logger.info variables.class
-    #logger.info .reduce({}, :merge)
-
-    variables = variables.reduce({}, :merge)
-    #variables.reduce(|v| {}, :merge)
-    [variables, plot_data]
-
-  end
-
   # Plot data across analysis
-  def get_plot_data_v2(analysis, datapoint_id=nil)
+  # if a datapoint_id is specified, will return only that point
+  # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
+  def get_analysis_data(analysis, datapoint_id=nil, options=nil)
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
     variables = nil
@@ -796,8 +506,12 @@ class AnalysesController < ApplicationController
     var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
                   :objective_function_group, :objective_function_index, :objective_function_target,
                   :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
-    variables = Variable.where(analysis_id: analysis).or(perturbable: true).
-        or(pivot: true).or(visualize: true).or(export: true).order_by(:name.asc).as_json(only: var_fields)
+
+    # TODO: use options passed in
+    variables = Variable.where(analysis_id: analysis).or(visualize: true).order_by(:name.asc).as_json(only: var_fields)
+
+    #variables = Variable.where(analysis_id: analysis).or(perturbable: true).
+    #    or(pivot: true).or(visualize: true).or(export: true).order_by(:name.asc).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
@@ -871,10 +585,9 @@ class AnalysesController < ApplicationController
 
   # Get plot variables
   # Used by plot_parallelcoordinates
-  def get_plot_variables_v2(analysis)
+  def get_plot_variables(analysis)
 
-    variables = Variable.where(analysis_id: analysis).or(perturbable: true).
-        or(pivot: true).or(visualize: true).order_by(:name.asc)
+    variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
 
   end
 

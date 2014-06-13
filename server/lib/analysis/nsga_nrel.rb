@@ -356,7 +356,7 @@ class Analysis::NsgaNrel
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
             #write final params to json file
             answer <- results$parameters
-            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/parameters.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+            write.table(answer, file="/mnt/openstudio/parameters_#{@analysis.id}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
           }
 
         end

@@ -11,20 +11,14 @@ OpenstudioServer::Application.routes.draw do
         get :stop
         get :status
         get :page_data
-        get :plot_data
-        get :plot_data_v2
-        get :plot_obj_data
+        get :analysis_data
         get :download_status
         get :debug_log
         get :new_view
         get :plot_parallelcoordinates
         get :plot_scatter
-        get :plot_xy
         get :plot_radar
         get :plot_bar
-        get :plot_data_bar
-        get :plot_data_radar
-        get :plot_data_xy
         get :download_data
         get :download_all_data_points
 
