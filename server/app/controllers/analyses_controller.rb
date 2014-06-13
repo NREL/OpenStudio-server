@@ -520,17 +520,7 @@ class AnalysesController < ApplicationController
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
 
-    # flatten all the visualization variables to a queryable syntax
-    output_variables = nil
-    # TODO: why this?
-    export = options.has_key? "export" && options['export'] ? true : false
-    if export
-      output_variables = Variable.exports(analysis).only(var_fields).as_json(:only => var_fields)
-    else
-      output_variables = Variable.visualizes(analysis).only(var_fields).as_json(:only => var_fields)
-    end
-
-    visualize_map = output_variables.map { |v| "results.#{v['name']}" }
+    visualize_map = variables.map { |v| "results.#{v['name']}" }
     # initialize the plot fields that will need to be reported
     plot_fields = [:set_variable_values, :name, :_id] + visualize_map
 
