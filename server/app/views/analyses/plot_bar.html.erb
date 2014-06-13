@@ -21,7 +21,7 @@
         var rawdata, dp_values;
         var bardata = [];
 
-        d3.json("plot_data_v2.json?datapoint_id=" + datapoint_id , function (rawdata) {
+        d3.json("analysis_data.json?visualize=true&datapoint_id=" + datapoint_id , function (rawdata) {
 
           Object.keys(rawdata['variables']).forEach(function (d) {
 
