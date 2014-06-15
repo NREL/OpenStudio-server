@@ -402,11 +402,10 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # This needs to be updated, but the plan of this method is to provide all the plot-data (or export data) in
+  # This function provides all data (plot or export data, depending on what is specified) in
   # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
-  # Once this is functional, then remove the old "plot_data". Remove route too!
   def analysis_data
-    analysis = Analysis.find(params[:id])
+    @analysis = Analysis.find(params[:id])
     datapoint_id = params[:datapoint_id] ? params[:datapoint_id]:nil
     # other variables that can be specified
     options = {}
@@ -415,12 +414,12 @@ class AnalysesController < ApplicationController
     options['pivot'] = params[:pivot] == 'true' ? true:false
     options['perturbable'] = params[:perturbable] == 'true' ? true:false
 
-    logger.info("OPTIONS: #{options.to_json}")
-
-    variables, plot_data = get_analysis_data(analysis, datapoint_id, options)
+    # get data
+    @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
 
     respond_to do |format|
-      format.json { render json: {variables: variables, data: plot_data} }
+      format.json { render json: {variables: @variables, data: @data} }
+      format.html #analysis_data.html.erb
     end
   end
 
@@ -492,7 +491,7 @@ class AnalysesController < ApplicationController
 
   protected
 
-  # Plot data across analysis
+  # Get data across analysis
   # if a datapoint_id is specified, will return only that point
   # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
   def get_analysis_data(analysis, datapoint_id=nil, options=nil)

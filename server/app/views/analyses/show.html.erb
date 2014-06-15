@@ -1,5 +1,3 @@
-
-
 <!-- <script type="text/javascript" charset="utf-8">
     <%#= render 'page_data.js' %>
 </script>
@@ -61,7 +59,7 @@
           <div class="list-group">
             <%= link_to "Measures (#{@analysis.measures.count})", analysis_measures_path(@analysis), class:'list-group-item' %>
             <%= link_to "Variables (#{@analysis.variables.where(perturbable: true).count} Perturbable)", analysis_variables_path(@analysis), class:'list-group-item' %>
-
+            <%= link_to "Analysis Data", analysis_data_analysis_path(@analysis), class: 'list-group-item' %>
             <%= link_to 'Parallel Coordinates Plot', plot_parallelcoordinates_analysis_path(@analysis), class: 'list-group-item' %>
             <%= link_to 'Scatter Plot', plot_scatter_analysis_path(@analysis), class: 'list-group-item' %>
             <%= link_to 'Interactive XY Plot', plot_xy_interactive_analysis_path(@analysis), class: 'list-group-item' %>
