@@ -25,4 +25,3 @@ sudo mv /mnt/openstudio/rails-models/mongoid-vagrant.yml /mnt/openstudio/rails-m
 sudo chown -R vagrant:www-data /mnt/openstudio 
 sudo find /mnt/openstudio -type d -print0 | xargs -0 chmod 775
 sudo find /mnt/openstudio -type f -print0 | xargs -0 chmod 664
-
