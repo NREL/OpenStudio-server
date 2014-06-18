@@ -74,7 +74,7 @@ if File.exists?(os_role_file)
   openstudio_role = File.read(os_role_file)
   json_string = openstudio_role.scan(/default_attributes\((.*)\)/m).first.join
   json_obj = eval("{ #{json_string} }")
-  @os_version = json_obj[:openstudio][:installer][:version]
+  @os_version = json_obj[:openstudio][:version]
   @os_version_sha = json_obj[:openstudio][:installer][:version_revision]
 
 else
@@ -213,7 +213,7 @@ def run_vagrant_provision(element)
   success = true
   $mutex.lock
   begin
-    Timeout::timeout(3600) {
+    Timeout::timeout(4500) {
       puts "#{element[:id]}: entering provisioning (which requires syncing folders)"
       command = "cd ./#{element[:name]} && vagrant provision"
       exit_code = system_call(command) do |message|
