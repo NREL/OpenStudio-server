@@ -213,7 +213,7 @@ def run_vagrant_provision(element)
   success = true
   $mutex.lock
   begin
-    Timeout::timeout(3600) {
+    Timeout::timeout(4500) {
       puts "#{element[:id]}: entering provisioning (which requires syncing folders)"
       command = "cd ./#{element[:name]} && vagrant provision"
       exit_code = system_call(command) do |message|
