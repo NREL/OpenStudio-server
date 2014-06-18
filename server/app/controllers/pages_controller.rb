@@ -7,7 +7,8 @@ class PagesController < ApplicationController
   def dashboard
     # data for dashboard header
     @projects = Project.all
-    @analyses = Analysis.all.order_by(:start_time.desc)
+    # sort works because the states are queued, started, completed, na. started is the last in the list...
+    @analyses = Analysis.all.order_by(:status.desc, :start_time.desc)
     failed_runs = DataPoint.where(status_message: 'datapoint failure').count
     total_runs = DataPoint.all.count
     completed_cnt = DataPoint.where(status: 'completed').count

@@ -8,11 +8,9 @@ class AnalysesController < ApplicationController
     if params[:project_id].nil?
       @analyses = Analysis.all.order_by(:start_time.asc)
       @project = nil
-
     else
       @project = Project.find(params[:project_id])
       @analyses = @project.analyses
-
     end
 
     respond_to do |format|
