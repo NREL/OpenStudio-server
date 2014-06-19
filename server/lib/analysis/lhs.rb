@@ -74,24 +74,23 @@ class Analysis::Lhs
         @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
       samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
       if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
-        # Do the work to mash up the samples, pivots, and static variables before creating the data points
+        # Do the work to mash up the samples and pivot variables before creating the data points
         Rails.logger.info "Samples are #{samples}"
         samples = hash_of_array_to_array_of_hash(samples)
         Rails.logger.info "Flipping samples around yields #{samples}"
       elsif @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
-        # Do the work to mash up the samples, pivots, and static variables before creating the data points
+        # Do the work to mash up the samples and pivot variables before creating the data points
         Rails.logger.info "Samples are #{samples}"
-        samples = hash_of_array_to_array_of_hash_non_combined(samples)
+        samples = hash_of_array_to_array_of_hash_non_combined(samples, selected_variables)
         Rails.logger.info "Non-combined samples yields #{samples}"
       end
-
     elsif @analysis.problem['algorithm']['sample_method'] == 'individual_measures'
       # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is
       # useful when you need each measure to be evaluated individually.  The variables are then linked.
       samples_grouped, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'], true)
       Rails.logger.info "Grouped samples are #{samples}"
     else
-      fail 'no sampling method defined (all_variables or individual_variables)'
+      fail 'no sampling method defined (all_variables, individual_variables, or individual_measures)'
     end
 
     Rails.logger.info 'Fixing Pivot dimension'
