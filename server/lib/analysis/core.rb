@@ -49,12 +49,22 @@ module Analysis::Core
   module_function :hash_of_array_to_array_of_hash # export this function for use outside of class extension
 
   # return the single dimension samples of the array.  This also runs a dedupe method.
-  def hash_of_array_to_array_of_hash_non_combined(hash_array)
+  def hash_of_array_to_array_of_hash_non_combined(hash_array, selected_variables)
     # This takes
     # h = {a: [1, 2, 3], b: ["4", "5", "6"], c: [true, false, false]}
     # and makes
     # [{a:1}, {a:2}, {a:3}, {b:"4"}, ... {c: true}, {c: false}]
-    result = hash_array.map { |k, v| v.map { |value| { :"#{k}" => value } } }.flatten.uniq
+    result = hash_array.map { |k, v| v.map { |value| {:"#{k}" => value} } }.flatten.uniq
+    # then sets the "static/default" from the other variables
+    selected_variables.each do |var|
+      result.each_with_index do |r, index|
+        unless r.has_key? var._id.to_sym
+          result[index][var._id.to_sym] = var.static_value
+        end
+      end
+    end
+
+    result
   end
 
   module_function :hash_of_array_to_array_of_hash_non_combined # export this function for use outside of class extension
