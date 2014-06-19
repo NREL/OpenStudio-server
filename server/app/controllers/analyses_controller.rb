@@ -26,7 +26,7 @@ class AnalysesController < ApplicationController
     per_page = 50
 
     @analysis = Analysis.find(params[:id])
-    @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0 ? true:false
+    @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0 ? true : false
 
     if @analysis
 
@@ -251,7 +251,7 @@ class AnalysesController < ApplicationController
               status: @analysis.status,
               analysis_type: @analysis.analysis_type
           },
-          data_points: dps.map { |k| {_id: k.id, status: k.status} }} }
+          data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }} }
     end
   end
 
@@ -404,13 +404,13 @@ class AnalysesController < ApplicationController
   # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
   def analysis_data
     @analysis = Analysis.find(params[:id])
-    datapoint_id = params[:datapoint_id] ? params[:datapoint_id]:nil
+    datapoint_id = params[:datapoint_id] ? params[:datapoint_id] : nil
     # other variables that can be specified
     options = {}
-    options['visualize'] = params[:visualize] == 'true' ? true:false
-    options['export'] = params[:export] == 'true' ? true:false
-    options['pivot'] = params[:pivot] == 'true' ? true:false
-    options['perturbable'] = params[:perturbable] == 'true' ? true:false
+    options['visualize'] = params[:visualize] == 'true' ? true : false
+    options['export'] = params[:export] == 'true' ? true : false
+    options['pivot'] = params[:pivot] == 'true' ? true : false
+    options['perturbable'] = params[:perturbable] == 'true' ? true : false
 
     # get data
     @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
@@ -489,10 +489,9 @@ class AnalysesController < ApplicationController
 
   protected
 
-  # Get data across analysis
-  # if a datapoint_id is specified, will return only that point
+  # Get data across analysis. If a datapoint_id is specified, will return only that point
   # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
-  def get_analysis_data(analysis, datapoint_id=nil, options=nil)
+  def get_analysis_data(analysis, datapoint_id = nil, options = nil)
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
     variables = nil
@@ -504,12 +503,14 @@ class AnalysesController < ApplicationController
 
     # dynamic query, only add 'or' for option fields that are true
     or_qry = []
-    options.each do |k,v|
-      if v
-        # add to or
-        or_item = {}
-        or_item[k] = v
-        or_qry << or_item
+    if options
+      options.each do |k, v|
+        if v
+          # add to or
+          or_item = {}
+          or_item[k] = v
+          or_qry << or_item
+        end
       end
     end
     variables = Variable.where(analysis_id: analysis).or(or_qry).order_by(:name.asc).as_json(only: var_fields)
@@ -528,6 +529,7 @@ class AnalysesController < ApplicationController
       plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
     end
 
+    logger.info plot_data
     # Flatten the results hash to the dot notation syntax
     plot_data.each do |pd|
       pd['results'] = hash_to_dot_notation(pd['results'])
@@ -588,7 +590,7 @@ class AnalysesController < ApplicationController
     require 'csv'
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_plot_data_v2(analysis)
+    variables, data = get_analysis_data(analysis, nil, {export: true})
 
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
@@ -606,7 +608,7 @@ class AnalysesController < ApplicationController
 
   def write_and_send_rdata(analysis)
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_plot_data_v2(analysis)
+    variables, data = get_analysis_data(analysis, nil, {export: true})
 
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}

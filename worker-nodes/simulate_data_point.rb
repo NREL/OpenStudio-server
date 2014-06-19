@@ -147,7 +147,6 @@ begin
   logger.info "Running workflow with #{options}"
   k.run
 
-
   # TODO: get the last results out --- result = result.split("\n").last if result
 
   # copy the files that are needed over to the run directory
