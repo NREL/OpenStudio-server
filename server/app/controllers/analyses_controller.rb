@@ -529,7 +529,6 @@ class AnalysesController < ApplicationController
       plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
     end
 
-    logger.info plot_data
     # Flatten the results hash to the dot notation syntax
     plot_data.each do |pd|
       pd['results'] = hash_to_dot_notation(pd['results'])
