@@ -125,7 +125,7 @@ module Analysis::R
       samples
     end
 
-    def sample_all_variables(selected_variables, number_of_samples, grouped_by_measure = false)
+    def sample_all_variables(selected_variables, number_of_samples)
       grouped = {}
       samples = {}
       var_types = []
@@ -165,10 +165,6 @@ module Analysis::R
           min_max[:eps] << 0
         end
 
-        # always add the data to the grouped hash even if it isn't used
-        grouped["#{var.measure.id}"] = {} unless grouped.key?(var.measure.id)
-        grouped["#{var.measure.id}"]["#{var.id}"] = variable_samples
-
         # save the samples to the
         samples["#{var.id}"] = variable_samples
 
@@ -178,12 +174,6 @@ module Analysis::R
         var.save!
 
         i_var += 1
-      end
-
-      # return the samples grouped by the measure if requested (this is an hash of samples by measure id)
-      if grouped_by_measure
-        samples = grouped
-        Rails.logger.info "Grouped variables are #{grouped}"
       end
 
       [samples, var_types, min_max, var_names]
