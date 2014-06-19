@@ -44,8 +44,15 @@
             <p><% unless @current.end_time.nil? || @current.start_time.nil? %>Duration:  <%= distance_of_time_in_words(@current.start_time, @current.end_time) %> <% end %></p>
             <p>Status: <span class="label <% if @current.status == 'completed' %>label-success<% end %>"><%=@current.status %></span></p>
             <p><span class="badge badge-info"><%= @current.data_points.count %></span> Datapoints</p>
-            <p><% if @current.status == 'completed' %><% fails =  @current.data_points.where(status_message: 'datapoint failure').count %><span class="badge <% if fails > 0 %>badge-warning<% end %>"></span> <% if fails == 0%>No <% end %>Failures<% end %></p>
-
+            <p>
+              <% if @current.status == 'completed' %>
+                  <% fails = @current.data_points.where(status_message: 'datapoint failure').count %>
+                  <span class="badge
+                  <% if fails > 0 %>badge-warning <% else %>badge-info<% end %>">
+                  <% if fails == 0 %>0<% else %> <%= fails %><% end %>
+                  </span> Failures
+              <% end %>
+            </p>
             <div class="row-fluid pad-top-20">
               <div class="span3 offset3">
                 <div class="button-container">
@@ -92,7 +99,14 @@
             <div class="span3">
               <p>Status: <span class="label <% if res.status == 'completed' %>label-success<% end %>"><%=res.status %></span></p>
               <p><span class="badge badge-info"><%= res.data_points.count %></span> Datapoints</p>
-              <p><% fails = res.data_points.where(status_message: 'datapoint failure').count %><span class="badge <% if fails > 0 %>badge-warning<% else %>badge-info<% end %>"></span><% if fails == 0 %> No <% end %>Failures</p>
+
+              <p>
+                <% fails = res.data_points.where(status_message: 'datapoint failure').count %>
+                <span class="badge
+                <% if fails > 0 %>badge-warning <% else %>badge-info<% end %>">
+                <% if fails == 0 %>0<% else %> <%= fails %><% end %>
+                </span> Failures
+              </p>
             </div>
             <div class="span3">
               <div class="button-container">
