@@ -5,10 +5,27 @@ def hash_to_dot_notation(object, prefix = nil)
       if prefix
         hash_to_dot_notation value, "#{prefix}.#{key}"
       else
-        hash_to_dot_notation value, "#{key}"
+        if value.empty?
+          # remove any empty result hashes
+          object.delete(key)
+        else
+          hash_to_dot_notation value, "#{key}"
+        end
       end
     end.reduce(&:merge)
   else
     {prefix => object}
+  end
+end
+
+
+class Hash
+  def compact(opts={})
+    inject({}) do |new_hash, (k,v)|
+      if !v.nil?
+        new_hash[k] = opts[:recurse] && v.class == Hash ? v.compact(opts) : v
+      end
+      new_hash
+    end
   end
 end
