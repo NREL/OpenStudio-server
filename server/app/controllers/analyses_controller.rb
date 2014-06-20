@@ -472,7 +472,7 @@ class AnalysesController < ApplicationController
     analysis = Analysis.find(params[:id])
 
     # use a system call to zip up all the results
-    # TODO: this may eventually timeout
+    # TODO: this may eventually timeout -- and probably should
 
     time_stamp = Time.now.to_i
     save_file = "/tmp/#{analysis.name}_datapoints_#{time_stamp}.zip"
@@ -484,7 +484,6 @@ class AnalysesController < ApplicationController
     else
       redirect_to analysis_path(analysis), notice: "Error zipping up files"
     end
-
   end
 
   protected
@@ -580,9 +579,7 @@ class AnalysesController < ApplicationController
   # Get plot variables
   # Used by plot_parallelcoordinates
   def get_plot_variables(analysis)
-
     variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
-
   end
 
   def write_and_send_csv(analysis)

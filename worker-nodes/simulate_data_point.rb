@@ -91,7 +91,6 @@ begin
         datapoint_id: options[:uuid],
         analysis_root_path: analysis_dir,
         use_monthly_reports: true,
-
         adapter_options: {
             mongoid_path: '/mnt/openstudio/rails-models'
         }
@@ -103,7 +102,6 @@ begin
         datapoint_id: options[:uuid],
         analysis_root_path: analysis_dir,
         use_monthly_reports: false,
-
         adapter_options: {
             mongoid_path: '/mnt/openstudio/rails-models'
         }
@@ -135,7 +133,6 @@ begin
         datapoint_id: options[:uuid],
         analysis_root_path: analysis_dir,
         use_monthly_reports: false,
-
         adapter_options: {
             mongoid_path: '/mnt/openstudio/rails-models'
         }
