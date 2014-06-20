@@ -117,6 +117,7 @@ class Analysis::Optim
     else
       @analysis.exit_on_guideline14 = false
     end
+    @analysis.save!
     Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
     if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
@@ -322,9 +323,10 @@ class Analysis::Optim
                 
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
 	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+	        print(paste("exit_on_guideline14: ",flag))
 		if (flag["exit_on_guideline14"] == "true" ){
 		  # read in the results from the objective function file
-		  guideline_file <- paste(data_point_directory,"run/CalibrationReports/guideline.json",sep="")
+		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
 		  tryCatch({
 		    res <- evalWithTimeout({
 		       json <- fromJSON(file=guideline_file)
@@ -336,7 +338,10 @@ class Analysis::Optim
                   })
                   guideline <- json[[1]]
                   for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
-                  if (isTrue(guideline)){
+                  print(paste("guideline: ",guideline))
+                  print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+                  print(paste("all(guideline): ",all(guideline)))
+                  if (all(guideline)){
                     #write final params to json file
                     varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
                     answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
@@ -429,16 +434,6 @@ class Analysis::Optim
         fail 'could not start the cluster (most likely timed out)'
       end
 
-      # Post process the results and jam into the database
-      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
-      if File.exist? best_result_json
-        begin
-          @analysis.results['optim']['best_result'] = JSON.parse(File.read(best_result_json))
-          @analysis.save!
-        rescue Exception => e
-          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
-        end
-      end
     rescue Exception => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
@@ -451,7 +446,16 @@ class Analysis::Optim
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
-
+      # Post process the results and jam into the database
+      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
+      if File.exist? best_result_json
+        begin
+          @analysis.results['optim']['best_result'] = JSON.parse(File.read(best_result_json))
+          @analysis.save!
+        rescue Exception => e
+          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
+        end
+      end
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
