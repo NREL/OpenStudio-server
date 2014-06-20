@@ -415,7 +415,7 @@ class Analysis::Optim
             flush.console()
             #results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
 			
             #write final params to json file
             answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
@@ -430,13 +430,13 @@ class Analysis::Optim
       end
 
       # Post process the results and jam into the database
-      bestresult_json = "/mnt/openstudio/analysis_#{@analysis.id}/bestresult.json"
-      if File.exist? bestresult_json
+      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
+      if File.exist? best_result_json
         begin
-          @analysis.results['optim']['bestresult'] = JSON.parse(File.read(bestresult_json))
+          @analysis.results['optim']['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
         rescue Exception => e
-          Rails.logger.error "Could not save post processed results for bestresult.json"
+          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
         end
       end
     rescue Exception => e
