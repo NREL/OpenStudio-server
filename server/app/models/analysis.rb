@@ -11,7 +11,8 @@ class Analysis
   field :name, type: String
   field :display_name, type: String
   field :description, type: String
-  field :run_flag, type: Boolean
+  field :run_flag, type: Boolean, default: false
+  field :exit_on_guideline14, type: Boolean, default: false
   field :delayed_job_ids, type: Array, default: []
   field :status, type: String
   field :analysis_type, type: String

@@ -20,6 +20,7 @@ class Analysis::Optim
                 maxit: 100,
                 normtype: 'minkowski',
                 ppower: 2,
+                exit_on_guideline14: 0,
                 objective_functions: [],
                 epsilongradient: 1e-4
             }
@@ -111,6 +112,13 @@ class Analysis::Optim
       fail 'P Norm must be non-negative'
     end
 
+    if @analysis.problem['algorithm']['exit_on_guideline14'] == 1
+      @analysis.exit_on_guideline14 = true
+    else
+      @analysis.exit_on_guideline14 = false
+    end
+    Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+
     if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
     end
@@ -199,8 +207,17 @@ class Analysis::Optim
 
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
-
-
+            
+            varfile <- function(x){
+              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
+               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              }
+            }
+            
+            clusterExport(cl,"varfile")
+            clusterExport(cl,"varnames")
+            clusterEvalQ(cl,varfile(varnames))
+            
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -302,6 +319,36 @@ class Analysis::Optim
                 objtarget <- objtarget / sclfactor
                 obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
                 print(paste("Objective function Norm:",obj))
+                
+                mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+		if (flag["exit_on_guideline14"] == "true" ){
+		  # read in the results from the objective function file
+		  guideline_file <- paste(data_point_directory,"run/CalibrationReports/guideline.json",sep="")
+		  tryCatch({
+		    res <- evalWithTimeout({
+		       json <- fromJSON(file=guideline_file)
+		       }, timeout=5);
+		    }, TimeoutException=function(ex) {
+		    cat(data_point_directory," No guideline.json file: Timeout\n");
+		    json <- toJSON(as.list(NULL))
+	            return(json)
+                  })
+                  guideline <- json[[1]]
+                  for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
+                  if (isTrue(guideline)){
+                    #write final params to json file
+                    varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
+                    answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
+                    write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                    convergenceflag <- toJSON("exit_on_guideline14")
+                    write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+                    dbDisconnect(mongo)
+                    stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+                  }	  
+		}
+                dbDisconnect(mongo)
+                           
                 return(obj)
               }
 			      }
@@ -372,9 +419,9 @@ class Analysis::Optim
 			
             #write final params to json file
             answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
-            write.table(answer, file="/mnt/openstudio/bestresult_#{@analysis.id}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
             convergenceflag <- toJSON(results$convergence)
-            write(convergenceflag, file="/mnt/openstudio/convergenceflag_#{@analysis.id}.json")
+            write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
           }
 
         end
