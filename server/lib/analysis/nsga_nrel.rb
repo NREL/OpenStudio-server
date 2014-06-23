@@ -21,6 +21,7 @@ class Analysis::NsgaNrel
           mprob: 0.5,
           normtype: 'minkowski',
           ppower: 2,
+          exit_on_guideline14: 0,
           objective_functions: []
             }
         }
@@ -49,7 +50,11 @@ class Analysis::NsgaNrel
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
+    Rails.logger.info "Analysis type is #{@options['analysis_type']}"
     @analysis.run_options['nsga_nrel'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results['optim'] = {}
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -84,7 +89,7 @@ class Analysis::NsgaNrel
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting Batch Run')
+    Rails.logger.info('Starting NSGA2 Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -118,7 +123,15 @@ class Analysis::NsgaNrel
     objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
     ug = objtrue.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
-
+    
+    if @analysis.problem['algorithm']['exit_on_guideline14'] == 1
+      @analysis.exit_on_guideline14 = true
+    else
+      @analysis.exit_on_guideline14 = false 
+    end
+    @analysis.save!  
+    Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+    
     if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
     end
@@ -204,8 +217,18 @@ class Analysis::NsgaNrel
               vars[,i] <- sort(vars[,i])
             }
             print(paste("vartypes:",vartypes))
-	          print(paste("varnames:",varnames))
-
+            print(paste("varnames:",varnames))
+            
+            varfile <- function(x){
+              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
+               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              }
+            }
+            
+            clusterExport(cl,"varfile")
+            clusterExport(cl,"varnames")
+            clusterEvalQ(cl,varfile(varnames))
+            
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -328,6 +351,40 @@ class Analysis::NsgaNrel
               #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
               #}
               print(paste("Objective function Norm:",obj))
+              
+                mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+	        print(paste("exit_on_guideline14: ",flag))
+		if (flag["exit_on_guideline14"] == "true" ){
+		  # read in the results from the objective function file
+		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+		  tryCatch({
+		    res <- evalWithTimeout({
+		       json <- fromJSON(file=guideline_file)
+		       }, timeout=5);
+		    }, TimeoutException=function(ex) {
+		    cat(data_point_directory," No guideline.json file: Timeout\n");
+		    json <- toJSON(as.list(NULL))
+	            return(json)
+                  })
+                  guideline <- json[[1]]
+                  for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
+                  print(paste("guideline: ",guideline))
+                  print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+                  print(paste("all(guideline): ",all(guideline)))
+                  if (all(guideline)){
+                    #write final params to json file
+                    varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
+                    answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
+                    write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                    convergenceflag <- toJSON("exit_on_guideline14")
+                    write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+                    dbDisconnect(mongo)
+                    stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+                  }	  
+		}
+                dbDisconnect(mongo)              
+              
               return(obj)
               }
             }
@@ -353,7 +410,7 @@ class Analysis::NsgaNrel
 
             print(paste("Number of generations set to:",gen))
             results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
             #write final params to json file
             answer <- results$parameters
             write.table(answer, file="/mnt/openstudio/parameters_#{@analysis.id}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
@@ -376,7 +433,16 @@ class Analysis::NsgaNrel
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
-
+      # Post process the results and jam into the database
+      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
+      if File.exist? best_result_json
+        begin
+          @analysis.results['optim']['best_result'] = JSON.parse(File.read(best_result_json))
+          @analysis.save!
+        rescue Exception => e
+          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
+        end
+      end
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
