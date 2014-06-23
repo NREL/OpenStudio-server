@@ -54,7 +54,7 @@ class Analysis::NsgaNrel
     @analysis.run_options['nsga_nrel'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
     # Clear out any former results on the analysis
     @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results['optim'] = {}
+    @analysis.results['nsga_nrel'] = {}
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
