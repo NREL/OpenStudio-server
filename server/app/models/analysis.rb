@@ -45,6 +45,7 @@ class Analysis
   index({ uuid: 1 }, unique: true)
   index({ id: 1 }, unique: true)
   index(name: 1)
+  index(created_at: 1)
   index(project_id: 1)
   index(uuid: 1, status: 1)
   index(uuid: 1, download_status: 1)
