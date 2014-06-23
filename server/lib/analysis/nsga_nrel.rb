@@ -269,8 +269,8 @@ class Analysis::NsgaNrel
 		      cat("UUID is NA \n");
               NAvalue <- .Machine$double.xmax
               return(NAvalue)		    
-			} else {
-		      f(z[j])
+			} else {	      
+		      try(f(z[j]), silent = TRUE)
               
 			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")

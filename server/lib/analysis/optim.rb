@@ -261,7 +261,7 @@ class Analysis::Optim
               NAvalue <- .Machine$double.xmax
               return(NAvalue)		    
 			} else {
-		      f(z[j])
+		      try(f(z[j]), silent = TRUE)
               
 			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
