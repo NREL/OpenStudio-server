@@ -26,9 +26,10 @@ class AnalysesController < ApplicationController
     per_page = 50
 
     @analysis = Analysis.find(params[:id])
-    @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0 ? true : false
 
     if @analysis
+
+      @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0 ? true : false
 
       # tab status
       @status = 'all'
