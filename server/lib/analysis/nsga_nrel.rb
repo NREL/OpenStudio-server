@@ -393,7 +393,6 @@ class Analysis::NsgaNrel
               return(obj)
               }
             }
-
             clusterExport(cl,"g")
 
             if (nrow(vars) == 1) {
@@ -423,7 +422,6 @@ class Analysis::NsgaNrel
 	    write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
 
           }
-
         end
       else
         fail 'could not start the cluster (most likely timed out)'
@@ -450,7 +448,11 @@ class Analysis::NsgaNrel
         rescue Exception => e
           Rails.logger.error "Could not save post processed results for bestresult.json into the database"
         end
+      else
+        # find the best point based on the simulations
+
       end
+
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
