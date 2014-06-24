@@ -10,7 +10,7 @@ default_attributes(
     :openstudio => {
         :version => "1.4.0",
         :installer => {
-            :version_revision => "60c2e9d96f",
+            :version_revision => "fb79c6ea72",
             :platform => "Linux-Ruby2.0"
         }
     }
