@@ -18,18 +18,37 @@ class AdminController < ApplicationController
   end
 
   def clear_database
+    success_1 = false
+    success_2 = false
+
+    logger.info "Working directory is #{Dir.pwd} and I am #{`whoami`}"
+
     `mongo os_dev --eval "db.dropDatabase();"`
     if $?.exitstatus == 0
-      success = true
-      redirect_to admin_index_path, notice: "Database deleted successfully."
-    else
-      logger.info 'Error deleting mongo database'
-      redirect_to admin_index_path, notice: "Error deleting database."
+      success_1 = true
     end
 
+    # call_rake 'routes' #'db:mongoid:create_indexes'
+    # if $?.exitstatus == 0
+    #   success_2 = true
+    # end
+
+    if success_1# && success_2
+      redirect_to admin_index_path, notice: "Database deleted successfully."
+    else
+      logger.info "Error deleting mongo database: #{success_1}, #{success_2}"
+      redirect_to admin_index_path, notice: "Error deleting database."
+    end
   end
 
   private
+
+  #  http://railscasts.com/episodes/127-rake-in-background
+  def call_rake(task, options = {})
+    options[:rails_env] ||= Rails.env
+    args = options.map { |n, v| "#{n.to_s.upcase}='#{v}'" }
+    system "rake #{task} #{args.join(' ')} --trace 2>&1 >> #{Rails.root}/log/rake.log"
+  end
 
   def reload_database(database_file)
     success = false
