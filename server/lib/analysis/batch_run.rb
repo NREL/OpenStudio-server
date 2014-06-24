@@ -154,14 +154,15 @@ class Analysis::BatchRun
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
 
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 
