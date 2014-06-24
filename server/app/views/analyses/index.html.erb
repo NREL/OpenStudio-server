@@ -22,7 +22,7 @@
       <td><%= analysis.status %></td>
       <td><%= analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.start_time.nil? %></td>
       <td><%= analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.end_time.nil? %></td>
-      <td><%#= (analysis.end_time.to_f - analysis.start_time.to_f).round(2) unless analysis.end_time.nil? || analysis.start_time.nil? %> <%= distance_of_time_in_words(analysis.start_time, analysis.end_time) unless analysis.start_time.nil? || analysis.end_time.nil? %></td>
+      <td><%= distance_of_time_in_words(analysis.start_time, analysis.end_time) unless analysis.start_time.nil? || analysis.end_time.nil? %></td>
       <td><%= link_to 'JSON', analysis_path(analysis, :format => :json) %>
         | <%= link_to_if(!analysis.seed_zip.nil?, "Zip File", analysis.seed_zip.url(:original, false)) %> </td>
     </tr>

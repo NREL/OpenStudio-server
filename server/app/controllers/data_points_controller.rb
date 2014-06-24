@@ -28,14 +28,23 @@ class DataPointsController < ApplicationController
 
           @data_point.set_variable_values ? @set_variable_values = @data_point.set_variable_values : @set_variable_values = []
 
-          html_filename = @data_point.openstudio_datapoint_file_name.to_s.gsub("#{@data_point.id}.zip", "#{@data_point.id}/reports/eplustbl.html")
-          logger.info "HTML file is #{html_filename}"
-          File.exist?(html_filename) ? @html = File.read(html_filename) : nil
+          if @data_point.openstudio_datapoint_file_name
+            local_analysis_dir = "#{File.dirname(@data_point.openstudio_datapoint_file_name.to_s)}/#{File.basename(@data_point.openstudio_datapoint_file_name.to_s, '.*')}"
+            @htmls = []
+            logger.debug "Local analysis dir is #{local_analysis_dir}"
+            Dir["#{local_analysis_dir}/reports/*.html"].each do |h|
+              new_h = {}
+              new_h[:filename] = h
+              new_h[:name] = File.basename(h, '.*')
+              new_h[:display_name] = new_h[:name].titleize
+              @htmls << new_h
+            end
+          end
         end
         format.json { render json: @data_point.output }
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
+        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
       end
     end
   end
@@ -153,5 +162,15 @@ class DataPointsController < ApplicationController
 
     data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
     send_data data_point_zip_data, filename: File.basename(@data_point.openstudio_datapoint_file_name), type: 'application/zip; header=present', disposition: 'attachment'
+  end
+
+  def view_report
+    html_file = params[:html_file]
+
+    if File.exist? html_file
+      @html = File.read html_file
+    else
+      @html = "Could not find file"
+    end
   end
 end

@@ -1,86 +1,132 @@
 <h2>Data Point Information</h2>
-<strong>Name:</strong> <%= @data_point.name %><br/>
-<strong>Analysis:</strong> <%= link_to @data_point.analysis.display_name, analysis_path(@data_point.analysis) %><br/>
-<%= link_to 'View Full JSON', show_full_data_point_path(@data_point, :format => :json) %><br/>
-<% if !@data_point.openstudio_datapoint_file_name.nil? && File.exist?(@data_point.openstudio_datapoint_file_name) %><%= link_to("Download Data Point", download_data_point_path(@data_point)) %><br/>
-<% end %>
-<% if @data_point.status == 'completed' %><%= link_to("View Bar Chart", plot_bar_analysis_path(:id => @data_point.analysis.id, :datapoint_id => @data_point.id)) %>
-<% end %>
+
+<div class="row-fluid">
+  <div class="span4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Analysis Information</h3>
+      </div>
+      <div class="panel-body">
+        <table class="table table-striped">
+          <tr>
+            <th>Data Point Name</th>
+            <td><%= @data_point.name %></td>
+          </tr>
+          <tr>
+            <th>Analysis</th>
+            <td><%= link_to @data_point.analysis.display_name, analysis_path(@data_point.analysis) %></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Data and Visualizations</h3>
+      </div>
+      <div class="panel-body">
+        <div class="list-group">
+          <% if @data_point.status == 'completed' %>
+              <%= link_to "View Bar Chart", plot_bar_analysis_path(:id => @data_point.analysis.id, :datapoint_id => @data_point.id), class: 'list-group-item' %>
+          <% end %>
+          <% if @data_point.openstudio_datapoint_file_name && File.exist?(@data_point.openstudio_datapoint_file_name) %>
+              <%= link_to("Download Data Point", download_data_point_path(@data_point), class: 'list-group-item') %>
+          <% end %>
+
+          <%= link_to 'View JSON', show_full_data_point_path(@data_point, :format => :json), class: 'list-group-item' %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="span4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Custom Reports</h3>
+      </div>
+      <div class="panel-body">
+        <div class="list-group">
+          <!-- create submit forms for each of the pages -->
+          <% @htmls.each do |h| %>
+              <%= link_to "View #{h[:display_name]}", view_report_data_point_path(@data_point, html_file: h[:filename]), class: 'list-group-item' %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <h2>Variable Values</h2>
-<table class="table table-striped">
-  <thead>
-  <tr>
-    <th>Field Name</th>
-    <th>Field Value</th>
-  <tr>
-  </thead>
-  <tbody>
-  <% @set_variable_values.each do |k, v| %>
+<% if @set_variable_values.empty? %>
+    <p>No variables found for this data point</p>
+<% else %>
+    <table class="table table-striped">
+      <thead>
       <tr>
-        <td><%= link_to(Variable.find(k).name, Variable.find(k)) if Variable.find(k) %></td>
-        <td><%= v %></td>
-      </tr>
-  <% end %>
-  </tbody>
-</table>
-
+        <th>Field Name</th>
+        <th>Field Value</th>
+      <tr>
+      </thead>
+      <tbody>
+      <% @set_variable_values.each do |k, v| %>
+          <tr>
+            <td><%= link_to(Variable.find(k).name, Variable.find(k)) if Variable.find(k) %></td>
+            <td><%= v %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% end %>
 
 <h2>Results</h2>
 <% if @data_point.results %>
-  <div class="panel-group" id="accordion">
-    <% @data_point.results.sort.each do |k, v| %>
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_<%= k %>">
-          <%= "Measure: #{k}" %>
-        </a></h4>
-        </div>
-        <div id="collapse_<%= k %>" class="panel-collapse collapse">
-          <div class="panel-body">
-            <table class="table table-striped">
-              <thead>
-              <tr>
-                <th>Display Name</th>
-                <th>Name</th>
-                <th>Value</th>
-                <th>Units</th>
-              <tr>
-              </thead>
-              <tbody>
-              <% if v.is_a? Hash %>
-                <% v.each do |k2, v2| %>
-                  <% next if k2 =~ /(_display_name|_units)$/ %>
+    <div class="panel-group" id="accordion">
+      <% @data_point.results.sort.each do |k, v| %>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4>
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_<%= k %>">
+                  <%= "Measure: #{k}" %>
+                </a></h4>
+            </div>
+            <div id="collapse_<%= k %>" class="panel-collapse collapse">
+              <div class="panel-body">
+                <table class="table table-striped">
+                  <thead>
                   <tr>
-                    <% if k2 =~ /(_final|_initial)$/ %>
-                      <% var = Variable.where(:analysis_id => @data_point.analysis_id, :name => k2.gsub(/(_final|_initial)/, "")).first %>
-                      <td><%= var.display_name if var && var.display_name %></td>
-                      <td><%= "#{k}.#{k2}" %></td>
-                      <td><%= v2 %></td>
-                      <td><%= var.units if var && var.units %></td>
-                    <% else %>
-                      <td><%= @data_point.results["#{k2}_display_name"] if @data_point.results.has_key?("#{k2}_display_name") %></td>
-                      <td><%= k2 %></td>
-                      <td><%= v2 %></td>
-                      <td><%= @data_point.results["#{k2}_units"] if @data_point.results.has_key?("#{k2}_units") %></td>
-                    <% end %>
-                  </tr>
-                <% end %>
-              <% end %>
-              </tbody>
-            </table>
+                    <th>Display Name</th>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th>Units</th>
+                  <tr>
+                  </thead>
+                  <tbody>
+                  <% if v.is_a? Hash %>
+                      <% v.each do |k2, v2| %>
+                          <% next if k2 =~ /(_display_name|_units)$/ %>
+                          <tr>
+                            <% if k2 =~ /(_final|_initial)$/ %>
+                                <% var = Variable.where(:analysis_id => @data_point.analysis_id, :name => k2.gsub(/(_final|_initial)/, "")).first %>
+                                <td><%= var.display_name if var && var.display_name %></td>
+                                <td><%= "#{k}.#{k2}" %></td>
+                                <td><%= v2 %></td>
+                                <td><%= var.units if var && var.units %></td>
+                            <% else %>
+                                <td><%= @data_point.results["#{k2}_display_name"] if @data_point.results.has_key?("#{k2}_display_name") %></td>
+                                <td><%= k2 %></td>
+                                <td><%= v2 %></td>
+                                <td><%= @data_point.results["#{k2}_units"] if @data_point.results.has_key?("#{k2}_units") %></td>
+                            <% end %>
+                          </tr>
+                      <% end %>
+                  <% end %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    <% end %>
-  </div>
-<% end %>
-
-<h2>EnergyPlus HTML</h2>
-<% if @html %>
-    <%= @html.html_safe %>
-<% else %>
-    <p>No HTML file found.</p>
+      <% end %>
+    </div>
 <% end %>
 
 <h2>Data Point Fields</h2>
@@ -95,21 +141,25 @@
 
   <% @table_data.each do |k, v| %>
 
-    <% if k == 'results' || k == 'sdp_log_file' %>
-     <tr data-toggle="collapse" class="accordion-toggle" data-target="#collapse_<%= k %>">
-       <td><%= k %></td>
-       <td><button class= "btn"> Toggle View </button></td>
-     </tr>
-      <tr class="hidden-row">
-        <td>&nbsp;</td>
-        <td><div class="accordion-body collapse" id="collapse_<%= k %>"><%= v %></div></td>
-      </tr>
-    <% else %>
-    <tr>
-      <td><%= k %></td>
-      <td><%= v %></td>
-    </tr>
-    <% end %>
+      <% if k == 'results' || k == 'sdp_log_file' %>
+          <tr data-toggle="collapse" class="accordion-toggle" data-target="#collapse_<%= k %>">
+            <td><%= k %></td>
+            <td>
+              <button class="btn"> Toggle View</button>
+            </td>
+          </tr>
+          <tr class="hidden-row">
+            <td>&nbsp;</td>
+            <td>
+              <div class="accordion-body collapse" id="collapse_<%= k %>"><%= v %></div>
+            </td>
+          </tr>
+      <% else %>
+          <tr>
+            <td><%= k %></td>
+            <td><%= v %></td>
+          </tr>
+      <% end %>
 
   <% end %>
   </tbody>
