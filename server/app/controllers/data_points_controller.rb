@@ -14,7 +14,7 @@ class DataPointsController < ApplicationController
   # GET /data_points/1.json
   def show
     @data_point = DataPoint.find(params[:id])
-
+    @htmls = []
     respond_to do |format|
       if @data_point
         format.html do
@@ -30,7 +30,6 @@ class DataPointsController < ApplicationController
 
           if @data_point.openstudio_datapoint_file_name
             local_analysis_dir = "#{File.dirname(@data_point.openstudio_datapoint_file_name.to_s)}/#{File.basename(@data_point.openstudio_datapoint_file_name.to_s, '.*')}"
-            @htmls = []
             logger.debug "Local analysis dir is #{local_analysis_dir}"
             Dir["#{local_analysis_dir}/reports/*.html"].each do |h|
               new_h = {}
