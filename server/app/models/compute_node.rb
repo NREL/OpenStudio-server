@@ -103,8 +103,8 @@ class ComputeNode
       if node.node_type == 'server'
         Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
         Rails.logger.info "#{remote_filename} exists... moving to new location"
-        FileUtils.mv(remote_filename, local_filename)
-        FileUtils.mv(remote_filename_reports, local_filename_reports)
+        FileUtils.mv(remote_filename, local_filename) if File.exist? remote_filename
+        FileUtils.mv(remote_filename_reports, local_filename_reports) if File.exist? remote_filename_reports
 
         remote_file_downloaded = true
         remote_file_exists = true
