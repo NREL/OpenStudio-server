@@ -59,7 +59,6 @@ begin
   dp.name = "Autocreated on worker: #{dp_uuid}"
   dp.analysis_id = options[:analysis_id]
 
-  # TODO: set datapoint status
   logger.info "Saving new datapoint"
   unless dp.save!
     logger.error "Could not save the datapoint into the database with error #{dp.errors.full_messages}"
@@ -74,11 +73,26 @@ begin
       r_index_value = index + 1
       k.logger.info "Adding new variable value with r_index #{r_index_value} of value #{value}"
 
-      # todo check for nil variables
-      uuid = Variable.where(r_index: r_index_value).first.uuid
+      # TODO: check for nil variables
+      var_db = Variable.where(analysis_id: dp.analysis_id, r_index: r_index_value).first
+      if var_db
+        uuid = var_db.uuid
 
-      # need to check type of value and convert here
-      sample[uuid] = value.to_f
+        case var_db.value_type.downcase
+          when 'double'
+            sample[uuid] = value.to_f
+          when 'string'
+            sample[uuid] = value.to_s
+          when 'integer', 'int'
+            sample[uuid] = value.to_i
+          when 'bool', 'boolean'
+            sample[uuid] = value.downcase == 'true' ? true : false
+          else
+            fail "Unknown DataType for variable #{var_db.name} of #{var_db.value_type}"
+        end
+      else
+        fail 'Could not find variable in database'
+      end
     end
   else
     fail 'no variables in array'
