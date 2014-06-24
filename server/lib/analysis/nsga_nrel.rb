@@ -382,7 +382,7 @@ class Analysis::NsgaNrel
                     varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
                     answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
                     write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                    convergenceflag <- toJSON("exit_on_guideline14")
+                    convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
                     write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
                     dbDisconnect(mongo)
                     stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
@@ -419,6 +419,9 @@ class Analysis::NsgaNrel
             #write final params to json file
             answer <- results$parameters
             write.table(answer, file="/mnt/openstudio/parameters_#{@analysis.id}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+            convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
+	    write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+
           }
 
         end
