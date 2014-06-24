@@ -160,7 +160,7 @@ class Analysis
 
       return [true]
     else
-      Rails.logger.info("Analysis is already queued with #{dj} and option was not passed to allow multiple analyses")
+      Rails.logger.info("Analysis is already queued with #{dj} or option was not passed to allow multiple analyses")
       return [false, 'An analysis is already queued']
     end
   end

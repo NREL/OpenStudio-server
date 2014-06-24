@@ -4,25 +4,25 @@ class Analysis::NsgaNrel
 
   def initialize(analysis_id, options = {})
     defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [],
-      problem: {
-        random_seed: 1979,
-        algorithm: {
-          number_of_samples: 30,
-          sample_method: 'individual_variables',
-          generations: 1,
-          toursize: 2,
-          cprob: 0.7,
-          xoverdistidx: 5,
-          mudistidx: 10,
-          mprob: 0.5,
-          normtype: 'minkowski',
-          ppower: 2,
-          exit_on_guideline14: 0,
-          objective_functions: []
+        skip_init: false,
+        run_data_point_filename: 'run_openstudio_workflow.rb',
+        create_data_point_filename: 'create_data_point.rb',
+        output_variables: [],
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                number_of_samples: 30,
+                sample_method: 'individual_variables',
+                generations: 1,
+                toursize: 2,
+                cprob: 0.7,
+                xoverdistidx: 5,
+                mudistidx: 10,
+                mprob: 0.5,
+                normtype: 'minkowski',
+                ppower: 2,
+                exit_on_guideline14: 0,
+                objective_functions: []
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -123,15 +123,15 @@ class Analysis::NsgaNrel
     objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
     ug = objtrue.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
-    
+
     if @analysis.problem['algorithm']['exit_on_guideline14'] == 1
       @analysis.exit_on_guideline14 = true
     else
-      @analysis.exit_on_guideline14 = false 
+      @analysis.exit_on_guideline14 = false
     end
-    @analysis.save!  
+    @analysis.save!
     Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
-    
+
     if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
     end
@@ -147,11 +147,12 @@ class Analysis::NsgaNrel
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-    Rails.logger.info "mins_maxes: #{mins_maxes}"
-    Rails.logger.info "var_names: #{var_names}"
-
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
+
+    Rails.logger.info "mins_maxes: #{mins_maxes}"
+    Rails.logger.info "var_names: #{var_names}"
+    Rails.logger.info("variable types are #{var_types}")
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster_started = false
@@ -168,7 +169,7 @@ class Analysis::NsgaNrel
       if !cluster.configure(master_ip)
         fail 'could not configure R cluster'
       else
-	       Rails.logger.info 'Successfuly configured cluster'
+        Rails.logger.info 'Successfuly configured cluster'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
@@ -191,8 +192,12 @@ class Analysis::NsgaNrel
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        Rails.logger.info("variable types are #{var_types}")
-        @r.command(vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'], xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'], mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
+        @r.command(vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
+                   toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
+                   xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'],
+                   mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
           %Q{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
@@ -447,14 +452,15 @@ class Analysis::NsgaNrel
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
 
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

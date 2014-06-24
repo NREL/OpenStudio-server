@@ -126,7 +126,6 @@ module Analysis::R
     end
 
     def sample_all_variables(selected_variables, number_of_samples)
-      grouped = {}
       samples = {}
       var_types = []
       var_names = []

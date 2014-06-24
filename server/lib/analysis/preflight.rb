@@ -213,12 +213,16 @@ class Analysis::Preflight
       Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
     end
 
-    # Do one last check if there are any data points that were not downloaded
-    @analysis.end_time = Time.now
-    @analysis.status = 'completed'
+    # Only set this data if the analysis was NOT called from another analysis
+    unless @options[:skip_init]
+      @analysis.end_time = Time.now
+      @analysis.status = 'completed'
+    end
+
     @analysis.save!
     @r.converse("print('finished preflight')")
-    Rails.logger.info("Finished running #{self.class.name}")
+
+    Rails.logger.info "Finished running analysis '#{self.class.name}'"
   end
 
   # Since this is a delayed job, if it crashes it will typically try multiple times.
