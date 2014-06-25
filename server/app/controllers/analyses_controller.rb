@@ -524,39 +524,41 @@ class AnalysesController < ApplicationController
 
     # Can't call the as_json(:only) method on this probably because of the nested results hash
     if datapoint_id
-      plot_data = analysis.data_points.where(status: 'completed', id: datapoint_id).order_by(:created_at.asc).only(plot_fields).as_json
+      plot_data = analysis.data_points.where(status: 'completed', status_message: 'completed normal', id: datapoint_id).order_by(:created_at.asc).only(plot_fields).as_json
     else
-      plot_data = analysis.data_points.where(status: 'completed').order_by(:created_at.asc).only(plot_fields).as_json
+      plot_data = analysis.data_points.where(status: 'completed', status_message: 'completed normal').order_by(:created_at.asc).only(plot_fields).as_json
     end
 
     # Flatten the results hash to the dot notation syntax
+    Rails.logger.info plot_data
     plot_data.each do |pd|
-      pd['results'] = hash_to_dot_notation(pd['results'])
+      unless pd['results'].empty?
+        pd['results'] = hash_to_dot_notation(pd['results'])
 
-      # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
-      # the datapoint actually put it in the results
+        # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
+        # the datapoint actually put it in the results
 
-      #   First get the machine name for each variable using the variable_name_map
-      variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
+        #   First get the machine name for each variable using the variable_name_map
+        variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
 
-      #   Second sort the values (VERY IMPORTANT)
-      variable_values = Hash[variable_values.sort_by { |k, _| k }]
+        #   Second sort the values (VERY IMPORTANT)
+        variable_values = Hash[variable_values.sort_by { |k, _| k }]
 
-      # merge the variable values into the results hash
-      pd['results'].merge!(variable_values)
+        # merge the variable values into the results hash
+        pd['results'].merge!(variable_values)
 
-      # now remove the set_variable_values section
-      pd.delete('set_variable_values')
+        # now remove the set_variable_values section
+        pd.delete('set_variable_values')
 
-      # and then remove any other null field
-      pd.delete_if { |k, v| v.nil? && plot_fields.exclude?(k) }
+        # and then remove any other null field
+        pd.delete_if { |k, v| v.nil? && plot_fields.exclude?(k) }
 
-      # now flatten completely
-      pd.merge!(pd.delete('results'))
+        # now flatten completely
+        pd.merge!(pd.delete('results')) if pd
 
-      # copy _id to data_point_uuid for backwards compatibility
-      pd['data_point_uuid'] = "/data_points/#{pd['_id']}"
-
+        # copy _id to data_point_uuid for backwards compatibility
+        pd['data_point_uuid'] = "/data_points/#{pd['_id']}"
+      end
     end
 
     # TODO: how to handle to sorting by iteration?
