@@ -276,18 +276,21 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-              json <- NULL
-              try(json <- fromJSON(file=object_file), silent=TRUE)
-              if (json == NULL) {
-	        cat(data_point_directory," No objectives.json: Timeout\n");
-	      }       
-              
+	          tryCatch({
+	            res <- evalWithTimeout({
+	              json <- fromJSON(file=object_file)
+	            }, timeout=5);
+	           }, TimeoutException=function(ex) {
+	             cat(data_point_directory," No objectives.json: Timeout\n");
+                 json <- toJSON(as.list(NULL))
+                 return(json)
+              })
               #json <- fromJSON(file=object_file)
               obj <- NULL
               objvalue <- NULL
               objtarget <- NULL
               sclfactor <- NULL
-            if (json != NULL) {  
+
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "NULL"){
@@ -323,7 +326,7 @@ class Analysis::Rgenoud
               objtarget <- objtarget / sclfactor
               obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
               print(paste("Objective function Norm:",obj))
-            } else { obj <- 1e32}  
+
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
 	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
 	        print(paste("exit_on_guideline14: ",flag))
