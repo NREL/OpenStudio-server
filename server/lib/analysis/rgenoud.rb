@@ -287,6 +287,7 @@ class Analysis::Rgenoud
               objvalue <- NULL
               objtarget <- NULL
               sclfactor <- NULL
+            if (json != NULL) {  
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "NULL"){
@@ -322,6 +323,7 @@ class Analysis::Rgenoud
               objtarget <- objtarget / sclfactor
               obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
               print(paste("Objective function Norm:",obj))
+            } else { obj <- 1e32}  
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
 	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
 	        print(paste("exit_on_guideline14: ",flag))
