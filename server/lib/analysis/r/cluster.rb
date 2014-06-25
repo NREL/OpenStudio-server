@@ -57,31 +57,7 @@ module Analysis::R
       result = false
       @r.command(ips: ip_addresses.to_dataframe) do
         %Q{
-        
-	 checkForRemoteErrors <- function(val){
-	      count <- 0
-	      firstmsg <- NULL
-	      for (v in val) {
-		  if (inherits(v, "try-error")) {
-		      count <- count + 1
-		      if (count == 1) 
-			  firstmsg <- v
-		  }
-	      }
-	      if (count == 1) 
-		  print(paste("one node produced an error: ", firstmsg))
-	      else if (count > 1) 
-		  print(paste(count, " nodes produced errors; first error: ", 
-			      firstmsg))
-	      val
-	 }
- 
-          unlockBinding("checkForRemoteErrors", as.environment("package:snow"))
-          assignInNamespace("checkForRemoteErrors",checkForRemoteErrors, ns="snow", envir=as.environment("package:snow"))
-          assign("checkForRemoteErrors", checkForRemoteErrors, as.environment("package:snow"))
-          lockBinding("checkForRemoteErrors", as.environment("package:snow"))        
-        
-        
+    
           print("Starting cluster...")
           print(paste("Worker IPs:", ips))
           if (nrow(ips) == 0) {
