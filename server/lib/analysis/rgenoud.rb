@@ -276,21 +276,17 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	          tryCatch({
-	            res <- evalWithTimeout({
-	              json <- fromJSON(file=object_file)
-	            }, timeout=5);
-	           }, TimeoutException=function(ex) {
-	             cat(data_point_directory," No objectives.json: Timeout\n");
-                 json <- toJSON(as.list(NULL))
-                 return(json)
-              })
-              #json <- fromJSON(file=object_file)
+	          json <- NULL
+            try(json <- fromJSON(file=object_file), silent=TRUE)
+
+            if (is.null(json)) {
+              obj <- .Machine$double.xmax 
+            } else {
               obj <- NULL
               objvalue <- NULL
               objtarget <- NULL
               sclfactor <- NULL
-
+              
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "NULL"){
@@ -330,6 +326,7 @@ class Analysis::Rgenoud
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
 	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
 	        print(paste("exit_on_guideline14: ",flag))
+          
 		if (flag["exit_on_guideline14"] == "true" ){
 		  # read in the results from the objective function file
 		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
@@ -359,6 +356,7 @@ class Analysis::Rgenoud
                   }	  
 		}
                 dbDisconnect(mongo)
+                }
               return(obj)
               }
 			}
