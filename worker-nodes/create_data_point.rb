@@ -68,7 +68,7 @@ begin
   sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
 
   if options[:variables]
-    logger.info "Applying variables: #{options[:variables]}"
+    k.logger.info "Applying variables: #{options[:variables]}"
     options[:variables].each_with_index do |value, index|
       r_index_value = index + 1
       k.logger.info "Adding new variable value with r_index #{r_index_value} of value #{value}"
