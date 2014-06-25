@@ -49,10 +49,20 @@ class DataPointsController < ApplicationController
   end
 
   def show_full
-    @data_point = DataPoint.find(params[:id])
+    @data_point = DataPoint.find(params[:id]).as_json
+
+    @data_point['set_variable_values_names'] = {}
+    @data_point['set_variable_values_display_names'] = {}
+    @data_point['set_variable_values'].each do |k, v|
+      var = Variable.find(k)
+      new_key = var ? var.name : k
+      new_display_key = var ? var.display_name : k
+      @data_point['set_variable_values_names'][new_key] = v
+      @data_point['set_variable_values_display_names'][new_display_key] = v
+    end
 
     respond_to do |format|
-      format.json { render json: @data_point.to_json }
+      format.json { render json: @data_point }
     end
   end
 
