@@ -16,9 +16,6 @@ default_attributes(
         :libraries => [
             {
 	        :name => 'snow',
-	        :package_path => "/data/R-packages",
-	        :version => '0.3-14',
-	        :update_method => 'always_update'
             },
             {
                 :name => "Rserve"
