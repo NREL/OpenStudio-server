@@ -224,24 +224,6 @@ class Analysis::Rgenoud
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
             
-            checkForRemoteErrors <- function(val){
-              count <- 0
-              firstmsg <- NULL
-              for (v in val) {
-                if (inherits(v, "try-error")) {
-                 count <- count + 1
-                 if (count == 1) 
-                   firstmsg <- v
-                }
-              }
-              if (count == 1) 
-                print(paste("one node produced an error: ", firstmsg))
-              else if (count > 1) 
-                print(paste(count, " nodes produced errors; first error: ", firstmsg))
-              val
-            }
-            clusterExport(cl,"checkForRemoteErrors")
-            
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
