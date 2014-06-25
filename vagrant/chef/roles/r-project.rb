@@ -15,7 +15,10 @@ default_attributes(
         },
         :libraries => [
             {
-                :name => "snow"
+	        :name => 'snow',
+	        :package_path => "/data/R-packages",
+	        :version => '0.3-14',
+	        :update_method => 'always_update'
             },
             {
                 :name => "Rserve"
@@ -73,9 +76,6 @@ default_attributes(
             },
             {
                 :name => "rgenoud"
-            },
-            {
-                :name => "snowFT"
             },
             {
                 :name => "doParallel"
