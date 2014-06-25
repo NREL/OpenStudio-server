@@ -276,15 +276,12 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	          tryCatch({
-	            res <- evalWithTimeout({
-	              json <- fromJSON(file=object_file)
-	            }, timeout=5);
-	           }, TimeoutException=function(ex) {
-	             cat(data_point_directory," No objectives.json: Timeout\n");
-                 json <- toJSON(as.list(NULL))
-                 return(json)
-              })
+              json <- NULL
+              try(json <- fromJSON(file=object_file), silent=TRUE)
+              if (json == NULL) {
+	        cat(data_point_directory," No objectives.json: Timeout\n");
+	      }       
+              
               #json <- fromJSON(file=object_file)
               obj <- NULL
               objvalue <- NULL
