@@ -41,7 +41,7 @@ class Analysis::SingleRun
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['singlerun'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis.run_options['single_run'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
 
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!

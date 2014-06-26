@@ -96,13 +96,18 @@ if @options[:provider] == :aws
   require 'aws-sdk'
 
   # read in the AWS config settings
-  config = YAML.load(File.read(File.join(File.expand_path("~"), "aws_config.yml")))
-  AWS.config(
-      :access_key_id => config['access_key_id'],
-      :secret_access_key => config['secret_access_key'],
-      :region => "us-east-1",
-      :ssl_verify_peer => false
-  )
+  filename = File.expand_path(File.join("~", ".aws", "config.yml"))
+  if File.exist? filename
+    puts "Using new location style format"
+    config = YAML.load(File.read(filename))
+    AWS.config(
+        :access_key_id => config['access_key_id'],
+        :secret_access_key => config['secret_access_key'],
+        :region => config['region'],
+        :ssl_verify_peer => false
+    )
+  end
+
   @aws = AWS::EC2.new
 end
 
