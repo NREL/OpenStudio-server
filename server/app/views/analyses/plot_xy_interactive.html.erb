@@ -44,17 +44,27 @@
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.json(encodeURI("plot_data_xy.json?variables=" + variables), function (error, data) {
+      d3.json(encodeURI("analysis_data.json?visualize=true"), function (error, data) {
 
-        x_variable = data['plotvars'][0]
-        x.domain(d3.extent(data['data'], function (d) {
-           return d[data['plotvars'][0]];
-        })).nice();
+        //get x and y variables
+        Object.keys(data['variables']).forEach(function (name) {
+          if (name == variables[0]){
+            x_variable = name;
+            x.domain(d3.extent(data['data'], function (d) {
+              return d[x_variable];
+            })).nice();
+          }
 
-        y_variable = data['plotvars'][1]
-          y.domain(d3.extent(data['data'], function (d) {
-           return d[data['plotvars'][1]];
-        })).nice();
+          if (name === variables[1])  {
+            y_variable = name;
+            y.domain(d3.extent(data['data'], function (d) {
+              return d[y_variable];
+            })).nice();
+
+          }
+        });
+
+        console.log('x-var: ' + x_variable + ' y-var: ' + y_variable)
 
         svg.append("g")
             .attr("class", "x axis")
@@ -116,11 +126,11 @@
           <div class="span5">
             <fieldset>
             <%= label_tag("variables[x]", "X axis:") %>
-            <%= select_tag "variables[x]", options_for_select(@allvars, @variables.first) %>
+            <%= select_tag "variables[x]", options_from_collection_for_select(@plotvars, :name, :name, @variables.first) %>
             </fieldset>
             <fieldset>
             <%= label_tag("variables[y]", "Y axis:") %>
-            <%= select_tag "variables[y]", options_for_select(@allvars, @variables.last) %>
+            <%= select_tag "variables[y]", options_from_collection_for_select(@plotvars, :name, :name, @variables.last) %>
             </fieldset>
             <p>
             <div class="submit-form"> <%= submit_tag "Update Chart" %>  </div>

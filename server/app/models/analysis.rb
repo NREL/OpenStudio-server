@@ -11,13 +11,15 @@ class Analysis
   field :name, type: String
   field :display_name, type: String
   field :description, type: String
-  field :run_flag, type: Boolean
+  field :run_flag, type: Boolean, default: false
+  field :exit_on_guideline14, type: Boolean, default: false
   field :delayed_job_ids, type: Array, default: []
   field :status, type: String
   field :analysis_type, type: String
   field :start_time, type: DateTime
   field :end_time, type: DateTime
-  field :results, type: Hash, default: nil
+  field :results, type: Hash, default: {} # this was nil, can we have this be an empty hash? Check Measure Group JSONS!
+  field :run_options, type: Hash, default: {}  # hash of each run options configurations (if desired)
   field :problem
   field :status_message, type: String # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
@@ -43,6 +45,7 @@ class Analysis
   index({ uuid: 1 }, unique: true)
   index({ id: 1 }, unique: true)
   index(name: 1)
+  index(created_at: 1)
   index(project_id: 1)
   index(uuid: 1, status: 1)
   index(uuid: 1, download_status: 1)
@@ -57,7 +60,7 @@ class Analysis
 
   # TODO: Move this into the compute node class and call this with delayed jobs if applicable
   def initialize_workers(options = {})
-    # delete the master and workers and reload them everysingle time an analysis is initialized
+    # delete the master and workers and reload them everysingle time an analysis is initialized -- why NICK?
     ComputeNode.delete_all
 
     Rails.logger.info 'initializing workers'
@@ -157,7 +160,7 @@ class Analysis
 
       return [true]
     else
-      Rails.logger.info("Analysis is already queued with #{dj} and option was not passed to allow multiple analyses")
+      Rails.logger.info("Analysis is already queued with #{dj} or option was not passed to allow multiple analyses")
       return [false, 'An analysis is already queued']
     end
   end
@@ -175,6 +178,7 @@ class Analysis
     [self.save!, errors]
   end
 
+  # Method that pulls out the variables from the uploaded problem/analysis JSON.
   def pull_out_os_variables
     pat_json = false
     # get the measures first
@@ -208,6 +212,13 @@ class Analysis
           var = Variable.create_from_os_json(id, variable)
         end
       end
+    end
+
+
+    # pull out the output variables
+    self.output_variables.each do |variable|
+      Rails.logger.info "Saving off output variables: #{variable}"
+      var = Variable.create_output_variable(id, variable)
     end
 
     self.save!

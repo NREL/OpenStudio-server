@@ -18,14 +18,32 @@
 
         var colorscale = d3.scale.category10();
 
-        var data;
+        var rawdata, dp_values;
+        var bardata = [];
 
-        d3.json("plot_data_bar.json?datapoint_id=" + datapoint_id , function (data2) {
-          console.log(data2)
-          data = data2['bardata'];
+        d3.json("analysis_data.json?visualize=true&datapoint_id=" + datapoint_id , function (rawdata) {
+
+          Object.keys(rawdata['variables']).forEach(function (d) {
+
+            dp_values = [];
+
+            // only get the ones with obj function target not null
+            if ((typeof rawdata['variables'][d]['objective_function_target'] !== 'undefined') && (rawdata['variables'][d]['objective_function_target'] !== null))
+            {
+
+              dp_values.push(rawdata['variables'][d]['name']);
+              dp_values.push(Math.round((rawdata['data'][0][d] - rawdata['variables'][d]['objective_function_target']) / rawdata['variables'][d]['objective_function_target'] * 1000)/10);
+
+              // add to data array
+              bardata.push(dp_values);
+            }
+
+          });
+
+          console.log(bardata)
 
           d3.select("#bar-div")
-            .datum(data)
+            .datum(bardata)
             .call(columnChart()
                 .width(w)
                 .height(h)

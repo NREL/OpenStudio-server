@@ -21,6 +21,7 @@ class Analysis::Rgenoud
           solutiontolerance: 0.01,
           normtype: 'minkowski',
           ppower: 2,
+          exit_on_guideline14: 0,
           objective_functions: [],
           pgtol: 1e-1,
           factr: 4.5036e14,
@@ -51,6 +52,13 @@ class Analysis::Rgenoud
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # save other run information in another object in the analysis
+    Rails.logger.info "Analysis type is #{@options['analysis_type']}"
+    @analysis.run_options['rgenoud'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results['rgenoud'] = {}
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -109,12 +117,19 @@ class Analysis::Rgenoud
       fail 'P Norm must be non-negative'
     end
 
+    if @analysis.problem['algorithm']['exit_on_guideline14'] == 1
+      @analysis.exit_on_guideline14 = true
+    else
+      @analysis.exit_on_guideline14 = false
+    end
+    @analysis.save!
+    Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+
     if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
-    static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
@@ -146,7 +161,7 @@ class Analysis::Rgenoud
       if !cluster.configure(master_ip)
         fail 'could not configure R cluster'
       else
-	       Rails.logger.info 'Successfuly configured cluster'
+        Rails.logger.info 'Successfuly configured cluster'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
@@ -198,8 +213,17 @@ class Analysis::Rgenoud
 
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
-
-
+            
+            varfile <- function(x){
+              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
+               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              }
+            }
+            
+            clusterExport(cl,"varfile")
+            clusterExport(cl,"varnames")
+            clusterEvalQ(cl,varfile(varnames))
+            
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -209,11 +233,11 @@ class Analysis::Rgenoud
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
+              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
@@ -227,7 +251,7 @@ class Analysis::Rgenoud
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
+              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
 
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
@@ -237,8 +261,14 @@ class Analysis::Rgenoud
               z
 
               # Call the simulate data point method
-              f(z[j])
-
+            if (as.character(z[j]) == "NA") { 
+		      cat("UUID is NA \n");
+              NAvalue <- .Machine$double.xmax
+              return(NAvalue)		    
+			} else {
+		      try(f(z[j]), silent = TRUE)
+              
+			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -246,19 +276,17 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	      tryCatch({
-	        res <- evalWithTimeout({
-	          json <- fromJSON(file=object_file)
-	        }, timeout=5);
-	        }, TimeoutException=function(ex) {
-	           cat(data_point_directory," No objectives.json: Timeout\n");
-                   return(1e19)
-              })
-              #json <- fromJSON(file=object_file)
+	          json <- NULL
+            try(json <- fromJSON(file=object_file), silent=TRUE)
+
+            if (is.null(json)) {
+              obj <- .Machine$double.xmax 
+            } else {
               obj <- NULL
               objvalue <- NULL
               objtarget <- NULL
               sclfactor <- NULL
+              
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "NULL"){
@@ -294,8 +322,41 @@ class Analysis::Rgenoud
               objtarget <- objtarget / sclfactor
               obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
               print(paste("Objective function Norm:",obj))
+
+                mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+	        print(paste("exit_on_guideline14: ",flag))
+          
+		if (flag["exit_on_guideline14"] == "true" ){
+		  # read in the results from the objective function file
+		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+		  json <- NULL
+		  try(json <- fromJSON(file=guideline_file), silent=TRUE)
+		  if (is.null(json)) {
+		    print(paste("no guideline file: ",guideline_file))
+		  } else {
+                    guideline <- json[[1]]
+                    for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
+                    print(paste("guideline: ",guideline))
+                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+                    print(paste("all(guideline): ",all(guideline)))
+                    if (all(guideline)){
+                      #write final params to json file
+                      varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
+                      answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
+                      write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                      convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+                      write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+                      dbDisconnect(mongo)
+                      stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+                    }
+                  }
+		}
+                dbDisconnect(mongo)
+                }
               return(obj)
-            }
+              }
+			}
 
             clusterExport(cl,"g")
 
@@ -342,7 +403,14 @@ class Analysis::Rgenoud
             print(paste("par:",results$par))
             print(paste("value:",results$value))
             flush.console()
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
+			
+			#write final params to json file
+            answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
+            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+            #convergenceflag <- toJSON(results$peakgeneration)
+            convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
+            write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
           }
 
         end
@@ -362,19 +430,29 @@ class Analysis::Rgenoud
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
-
+      # Post process the results and jam into the database
+      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
+      if File.exist? best_result_json
+        begin
+          @analysis.results['rgenoud']['best_result'] = JSON.parse(File.read(best_result_json))
+          @analysis.save!
+        rescue Exception => e
+          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
+        end
+      end
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
 
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

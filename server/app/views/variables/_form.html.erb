@@ -1,0 +1,116 @@
+<%= form_for @variable do |f| %>
+  <% if @variable.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@variable.errors.count, "error") %> prohibited this variable from being saved:</h2>
+
+      <ul>
+        <% @variable.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <table class="edittable">
+    <tr>
+      <td><%= f.label('name', 'Name') %></td>
+      <td><%= f.text_field(:name, disabled: true) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('display_name', 'Display Name') %></td>
+      <td><%= f.text_field(:display_name) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('metadata_id', 'Metadata ID') %></td>
+      <td><%= f.text_field(:metadata_id) %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><%= f.check_box(:objective_function) %><%= f.label('objective_function', 'Objective Function', class: 'cb-label') %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><%= f.check_box(:visualize) %><%= f.label('visualize', 'Visualize', class: 'cb-label') %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><%= f.check_box(:export) %><%= f.label('export', 'Export', class: 'cb-label') %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><%= f.check_box(:perturbable) %><%= f.label('perturbable', 'Perturbable', class: 'cb-label') %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><%= f.check_box(:output) %><%= f.label('output', 'Output', class: 'cb-label') %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><%= f.check_box(:pivot) %><%= f.label('pivot', 'Pivot', class: 'cb-label') %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('units', 'Units') %></td>
+      <td><%= f.text_field(:units) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('data_type', 'Data Type') %></td>
+      <td><%= f.text_field(:data_type) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('minimum', 'Minimum') %></td>
+      <td><%= f.text_field(:minimum) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('maximum', 'Maximum') %></td>
+      <td><%= f.text_field(:maximum) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('mean', 'Mean') %></td>
+      <td><%= f.text_field(:mean) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('delta_x_value', 'Delta X Value') %></td>
+      <td><%= f.text_field(:delta_x_value) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('uncertainty_type', 'Uncertainty Type') %></td>
+      <td><%= f.text_field(:uncertainty_type) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('discrete_values_and_weights', 'Discrete Values and Weights') %></td>
+      <td><%= f.text_field(:discrete_values_and_weights) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('variable_index', 'Variable Index') %></td>
+      <td><%= f.text_field(:variable_index) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('argument_index', 'Argument Index') %></td>
+      <td><%= f.text_field(:argument_index) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('objective_function_index', 'Objective Function Index') %></td>
+      <td><%= f.text_field(:objective_function_index) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('objective_function_group', 'Objective Function Group') %></td>
+      <td><%= f.text_field(:objective_function_group) %></td>
+    </tr>
+    <!--TODO: make this a select with standard/inverse as options? -->
+    <!--TODO: how could this not be defined if it has a default? -->
+    <% if @variable.attributes.has_key? 'relation_to_output' %>
+    <tr>
+      <td><%= f.label('relation_to_output', 'Relation to Output') %></td>
+      <td><%= f.text_field(:relation_to_output) %></td>
+    </tr>
+    <% end %>
+    <tr>
+      <td><%= f.label('static_value', 'Static Value') %></td>
+      <td><%= f.text_field(:static_value) %></td>
+    </tr>
+
+  </table>
+  <div class='save-btn'>
+    <%= submit_tag "Save", class: "btn btn-primary" %>
+  </div>
+
+<% end %>

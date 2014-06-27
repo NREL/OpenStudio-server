@@ -30,6 +30,9 @@ class Analysis::BatchRunft
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
+    # save other run information in another object in the analysis
+    @analysis.run_options['batch_runft'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
     @analysis.reload
@@ -101,12 +104,12 @@ class Analysis::BatchRunft
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "/usr/local/rbenv/shims/ruby"
+              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
               print("#{@analysis.use_shm}")
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
               z <- system(y,intern=TRUE)
               j <- length(z)
@@ -149,14 +152,15 @@ class Analysis::BatchRunft
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
 
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

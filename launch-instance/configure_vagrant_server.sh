@@ -43,11 +43,11 @@ sudo service apache2 start
 # Add in the database indexes after making the db directory
 sudo chmod 777 /var/www/rails/openstudio/public
 cd /var/www/rails/openstudio
-rake db:purge
-rake db:mongoid:create_indexes
+bundle exec rake db:purge
+bundle exec rake db:mongoid:create_indexes
 
 # configure the application based worker data
-cd /data/launch-instance && sudo ./configure_vagrant_worker_data.sh
+cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 # restart rserve
 sudo service Rserve restart
