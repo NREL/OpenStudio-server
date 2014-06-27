@@ -1,10 +1,10 @@
 class Analysis::BatchRun
   def initialize(analysis_id, options = {})
     defaults = {
-      skip_init: false,
-      data_points: [],
-      run_data_point_filename: 'run_openstudio.rb',
-      problem: {}
+        skip_init: false,
+        data_points: [],
+        run_data_point_filename: 'run_openstudio.rb',
+        problem: {}
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)
@@ -14,6 +14,7 @@ class Analysis::BatchRun
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
+  # TODO: Move the setup information to a base class
   def perform
     # add into delayed job
     require 'rserve/simpler'
@@ -30,6 +31,10 @@ class Analysis::BatchRun
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
+    # save other run information in another object in the analysis
+    @analysis.run_options['batch_run'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+
+    Rails.logger.info "Saving options in #{self.class}"
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
     @analysis.reload
@@ -89,11 +94,9 @@ class Analysis::BatchRun
 
       # todo: move os_dev to a variable based on environment
       if cluster_started
-        @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
+        @r.command(dps: {data_points: @options[:data_points]}.to_dataframe) do
           %Q{
-
             clusterEvalQ(cl,library(RMongo))
-
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
@@ -102,12 +105,12 @@ class Analysis::BatchRun
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
-              print("#{@analysis.use_shm}")
+              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              print(paste("Use dev/shm set to:","#{@analysis.use_shm}"))
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
               print(paste("Run command",y))
               z <- system(y,intern=TRUE)
@@ -121,12 +124,12 @@ class Analysis::BatchRun
               dps <- rbind(dps, c(NA))
             }
             if (nrow(dps) == 0) {
-              print("not sure what to do with no datapoint so adding an NA")
+              print("not sure what to do with no datapoint so adding two NAs")
               dps <- rbind(dps, c(NA))
               dps <- rbind(dps, c(NA))
             }
 
-            print(paste("number of datapoints is:",nrow(dps)))
+            print(paste("Number of datapoints:",nrow(dps)))
 
             results <- parLapply(cl, dps[,1], f)
           }
@@ -151,14 +154,15 @@ class Analysis::BatchRun
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
 
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

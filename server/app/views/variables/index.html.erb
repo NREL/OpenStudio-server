@@ -1,8 +1,10 @@
-<h1>List of Variables</h1>
+<h2>Variables &mdash;  <%= link_to @variables.first.analysis.display_name, analysis_path(@variables.first.analysis) %></h2>
 
 <% if @variables && @variables.first %>
-    <%= link_to 'Download Variables as R Data Frame', download_variables_analysis_path(@variables.first.analysis, format: :rdata) %> |
-    <%= link_to 'Download Variables as CSV', download_variables_analysis_path(@variables.first.analysis, format: :csv) %> 
+    <%= link_to 'Modify Variables', modify_analysis_variables_path(@variables.first.analysis) %>  |
+    <%= link_to 'Download Variables as R Data Frame', download_variables_analysis_variables_path(@variables.first.analysis, format: :rdata) %>  |
+    <%= link_to 'Download Variables as CSV', download_variables_analysis_variables_path(@variables.first.analysis, format: :csv) %>   |
+    <%= link_to 'JSON', analysis_variables_path(@variables.first.analysis, format: :json) %>
 <% end %>
 
 <h2>Pivot Variables</h2>
@@ -75,35 +77,25 @@
   </tbody>
 </table>
 
-<h2>Static Variables</h2>
+<h2>Output Variables</h2>
 <table class="table table-striped">
   <thead>
   <tr>
     <th>Display Name</th>
     <th>Machine Name</th>
-    <th>Number of Samples</th>
-    <th>Thumbnail</th>
+    <th>Taxonomy ID</th>
+    <th>Units</th>
+    <th>Objective Function Index</th>
   <tr>
   </thead>
   <tbody>
-  <% @statics.each do |v| %>
+  <% @outputs.each do |v| %>
       <tr>
         <td><%= link_to v.display_name, variable_path(v) %></td>
         <td><%= v.name %></td>
-        <% if v.discrete_values_and_weights %>
-            <td><%= v.discrete_values_and_weights.size %></td>
-        <% elsif v.uncertainty_type && v.analysis.problem && v.analysis.problem['algorithm'] && v.analysis.problem['algorithm']['number_of_samples'] %>
-            <td><%= v.analysis.problem['algorithm']['number_of_samples'] %></td>
-        <% else %>
-            <td></td>
-        <% end %>
-        <% if v.perturbable && v.preflight_images.first %>
-            <td>
-              <%= link_to image_tag(v.preflight_images.first.image.url(:thumb)), v.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900'] %>
-            </td>
-        <% else %>
-            <td>No image</td>
-        <% end %>
+        <td><%= v.metadata_id %></td>
+        <td><%= v.units %></td>
+        <td><%= v['objective_function_index'] %></td>
       </tr>
   <% end %>
   </tbody>

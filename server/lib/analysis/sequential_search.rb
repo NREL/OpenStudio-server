@@ -268,6 +268,9 @@ class Analysis::SequentialSearch
     # verify that the objective_functions are unique
     @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
 
+    # save other run information in another object in the analysis
+    @analysis.run_options['sequential_search'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
 
@@ -277,7 +280,6 @@ class Analysis::SequentialSearch
 
     # get static variables.  These must be applied after the pivot vars and before the lhs
     pivot_array = Variable.pivot_array(@analysis.id)
-    static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
 
     if pivot_array.size > 1
@@ -364,10 +366,15 @@ class Analysis::SequentialSearch
     Rails.logger.info("#{__FILE__} finished after iteration #{@iteration} with message '#{final_message}'")
     # Check the results of the run
 
-    # Do one last check if there are any data points that were not downloaded
-    @analysis.end_time = Time.now
-    @analysis.status = 'completed'
+    # Only set this data if the analysis was NOT called from another analysis
+    unless @options[:skip_init]
+      @analysis.end_time = Time.now
+      @analysis.status = 'completed'
+    end
+
     @analysis.save!
+
+    Rails.logger.info "Finished running analysis '#{self.class.name}'"
   end
 
 # Since this is a delayed job, if it crashes it will typically try multiple times.

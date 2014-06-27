@@ -1,0 +1,85 @@
+		 SNOW: Simple Network of Workstations
+
+The snow package provides support for simple parallel computing on a
+network of workstations using R.  A master R process calls makeCluster
+to start a cluster of worker processes; the master process then uses
+functions such as clusterCall and clusterApply to execute R code on
+the worker processes and collect and return the results on the master.
+This framework supports many forms of "embarrassingly parallel"
+computations.
+
+Snow can use one of four communications mechanisms: sockets, PVM, MPI,
+or NetWorkSpaces (NWS).  NWS support was provided by Steve Weston.
+PVM clusters use the rpvm package; MPI clusters use package Rmpi; NWS
+clusters use package nws.  If pvm is used, then pvm must be started,
+either using a pvm console (e.g the pvm text console or the graphical
+xpvm console, both available with pvm) or from R using functions
+provided by rpvm.  Similarly, LAM-MPI must be started, e.g.  using
+lamboot, for MPI clusters that use Rmpi and LAM-MPI.  If NWS is used,
+the NetWorkSpaces server must be running.  SOCK clusters are the
+easiest approach for using snow on a single multi-core computer as
+they require no additional software.
+
+
+			       CAUTION
+
+Be sure to call stopCluster before exiting R.  Otherwise stray
+processes may remain running and need to be shut down manually.
+
+
+			     INSTALLATION
+
+PVM clusters require PVM and the rpvm package.  MPI clusters require a
+suitable MPI implementation (e.g. LAM-MPI or Open MPI) and the Rmpi
+package.  NWS clusters require the NetWorkSpaces server (a Python
+application) on one network accessible machine, and the nws package on
+all hosts used for a cluster.  The rsprng and/or rlecuyer packages may
+also be useful to support parallel random number generation.  These
+supporting R packages and the snow package should be installed in the
+same library directory.  The snow package and supporting packages need
+to be available on all hosts that are to be used for a cluster.
+
+No further configuration should be needed for a homogeneous network of
+workstations with a common architecture, operating system, and common
+file system layout.  If some hosts have different file system layouts,
+then SOCK and NWS clusters can use host specifications for the workers
+that specify where to find the snow package and the Rscript program to
+use.  Alternatively, the file RunSnowWorker should be placed in a
+directory on the PATH of each host to be used for worker processes,
+and each such host should define the variable R_SNOW_LIB as the
+directory in which the snow package and supporting packages have been
+installed.  Thus if snow has been installed with
+
+	R CMD INSTALL snow -l $HOME/SNOW/R/lib
+
+then users with a csh shell would place something like
+
+	setenv R_SNOW_LIB $HOME/SNOW/R/lib
+
+in their .cshrc files.  Setting this variable to a nonempty value on
+the master as well ensures that the cluster startup mechanism assumes
+an inhomogeneous cluster by default.  Rscript should also be on the
+PATH of the hosts used to run worker processes. Alternatively, you can
+define the environment variable R_SNOW_RSCRIPT_CMD to the path for
+Rscript, or you can edit edit the RunSnowWorker scripts to use a fully
+qualified path to the R shell script.
+
+For SOCK and NWS clusters the option manual = TRUE forces a manual
+startup mode in which the master prints the command to be run manually
+to start a worker process. Together with setting the outfile option
+this can be useful for debugging cluster startup.
+
+To date, snow has been used successfully with master and workers
+running on combinations of several flavors of Unix-like operating
+systems, including Linux, HP-UX and Mac OS X using PVM, NWS, LAM-MPI,
+or sockets.  The socket version of snow has been run with a master on
+Linux or Windows Windows and workers on a combination of Windows,
+Linux, and Mac OS X; freeSSHd and Putty's plink were used for remote
+process startup on windows.  The MPI version has been run on a single
+multi-core Windows machine using DeinoMPI; reports on experiences with
+MPICH2 on windows would be welcome.
+
+
+			      REFERENCE
+
+http://www.stat.uiowa.edu/~luke/R/cluster/cluster.html.

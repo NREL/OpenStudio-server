@@ -6,25 +6,31 @@ class Variable
   field :_id, type: String, default: -> { uuid || UUID.generate }
   field :r_index, type: Integer
   field :version_uuid, type: String # pointless at this time
-  field :name, type: String
+  field :name, type: String # machine name
+  field :metadata_id, type: String, default: nil # link to dencity taxonomy
   field :display_name, type: String
-  field :minimum # don't define this--it can be anything  -- and remove this eventually as os uses lower bounds
-  field :maximum # don't define this--it can be anything
-  field :mean # don't define this--it can be anything
-  field :delta_x_value # don't define this--it can be anything
+  field :minimum
+  field :maximum
+  field :mean
+  field :delta_x_value
   field :uncertainty_type, type: String
+  field :units, type: String
   field :discrete_values_and_weights
-  field :data_type, type: String # not sure this is needed because mongo is typed
+  field :data_type, type: String
+  field :value_type, type: String, default: nil  # merge this with the above?
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
+  field :objective_function, type: Boolean, default: false
+  field :objective_function_index, type: Integer, default: nil
+  field :objective_function_group, type: Integer, default: nil
+  field :visualize, type: Boolean, default: false
+  field :export, type: Boolean, default: false
   field :perturbable, type: Boolean, default: false # if enabled, then it will be perturbed
+  field :output, type: Boolean, default: false # is this an output variable for reporting, etc
   field :pivot, type: Boolean, default: false
-  field :pivot_samples # don't type for now
-  field :static, type: Boolean, default: false
+  # field :pivot_samples # don't type for now -- #NLL DELETE? 6/1/2014
   field relation_to_output: String, default: 'standard' # or can be inverse
-  field :static_value # don't type this because it can take on anything (other than hashes and arrays)
-
-  scope :enabled, where(perturbable: true)
+  field :static_value, default: nil # don't type this because it can take on anything (other than hashes and arrays)
 
   # Relationships
   belongs_to :analysis
@@ -70,8 +76,36 @@ class Variable
     var
   end
 
-  # This method is really not needed once we merge the concept of a argument
-  # and a variable
+  # Create an output variable from the Analysis JSON
+  def self.create_output_variable(analysis_id, json)
+    var = Variable.where(analysis_id: analysis_id, name: json['name'] ).first
+    if var
+      Rails.logger.warn "Variable already exists for '#{var.name}'"
+    else
+      Rails.logger.info "Adding a new variable named: '#{json['name']}'"
+      var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'] )
+    end
+
+    var.output = true
+    var.metadata_id = json['metadata_id'] if json['metadata_id']
+    var.display_name = json['display_name'] if json['display_name']
+    var.units = json['units'] if json['units']
+    var.visualize = json['visualize'] if json['visualize']
+    var.export = json['export'] if json['export']
+    var.data_type = json['variable_type'] if json['variable_type']
+    var.data_type = json['variable_type'] if json['variable_type']
+    var.objective_function = json['objective_function'] if json['objective_function']
+    var.objective_function_index = json['objective_function_index'] if json['objective_function_index']
+    var['objective_function_target'] = json['objective_function_target'] if json['objective_function_target']
+    var['scaling_factor'] = json['scaling_factor'] if json['scaling_factor']
+    var['objective_function_group'] = json['objective_function_group'] if json['objective_function_group']
+
+    var.save!
+
+    var
+  end
+
+  # Create the OS argument/variable
   def self.create_by_os_argument_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
     if var
@@ -87,6 +121,17 @@ class Variable
 
       # Map these temporary terms ??
       var.perturbable = v if k == 'variable'
+
+      # Set the visualize and export field if perturbable
+      if var.perturbable
+        var.export = true
+        var.visualize = true
+      end
+
+      if var['pivot']
+        var.export = true
+        var.visualize = true
+      end
 
       if k == 'argument'
         # this is main portion of the variable
@@ -145,40 +190,67 @@ class Variable
     pivot_array
   end
 
-  def self.statics(analysis_id)
-    Variable.where(analysis_id: analysis_id, static: true).order_by(:name.asc)
-  end
-
-  def self.static_array(analysis_id, grouped = false, array_around_grouped_value = true)
-    # get static variables.  These must be applied after the pivot vars and before the lhs
-    static_variables = Variable.statics(analysis_id)
-    grouped_hash = {}
-    static_array = []
-    static_variables.each do |var|
-      if var.static_value
-        if grouped
-          grouped_hash["#{var.measure.id}"] = {} unless grouped_hash.key?(var.measure.id)
-          if array_around_grouped_value
-            grouped_hash["#{var.measure.id}"]["#{var.id}"] = [var.static_value]
-          else
-            grouped_hash["#{var.measure.id}"]["#{var.id}"] = var.static_value
-          end
-        else
-          static_array << { "#{var.id}" => var.static_value }
-        end
-      else
-        fail "Asking to set a static value but none was passed for #{var.name}"
-      end
-    end
-    Rails.logger.info "static array is #{static_array}"
-    Rails.logger.info "grouped static hash is #{grouped_hash}"
-
-    static_array = grouped_hash if grouped
-    static_array
-  end
-
   def self.variables(analysis_id)
     Variable.where(analysis_id: analysis_id, perturbable: true).order_by(:name.asc)
+  end
+
+  def self.visualizes(analysis_id)
+    Variable.where(analysis_id: analysis_id, visualize: true).order_by(:name.asc)
+  end
+
+  def self.exports(analysis_id)
+    Variable.where(analysis_id: analysis_id, export: true).order_by(:name.asc)
+  end
+
+  # Method to get all the variables out in a specific JSON format
+  def self.get_variable_data_v2(analysis)
+    # get all variables for analysis
+    save_fields = [
+        :measure_id, :name, :display_name, :metadata_id, :value_type, :units,
+        :perturbable, :pivot, :output, :visualize, :export, :static_value,
+        :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
+    ]
+    variables = Variable.where(analysis_id: analysis).or({perturbable: true}, {pivot: true}, {output: true}, {export: true}).as_json(only: save_fields)
+
+    variables.each do |v|
+      if v['measure_id']
+        m = Measure.find(v['measure_id'])
+        v['measure_name'] = m.name
+        v['measure_display_name'] = m.display_name
+      elsif v['name'].include?('.')
+        tmp_name = v['name'].split('.')[0]
+        # Test if this is a measure, if so grab that information
+        m = Measure.where(name: tmp_name).first
+        if m
+          v['measure_id'] = m._id
+          v['measure_name'] = m.name
+          v['measure_display_name'] = m.display_name
+        else
+          v['measure_id'] = nil
+          v['measure_name'] = tmp_name
+          v['measure_display_name'] = nil
+        end
+      else
+        v['measure_id'] = nil
+        v['measure_name'] = nil
+        v['measure_display_name'] = nil
+      end
+
+      # variable = Variable.find(k)
+      if v['perturbable']
+        v['type_of_variable'] = 'variable'
+      elsif v['pivot']
+        v['type_of_variable'] = 'pivot'
+      elsif v['static']
+        v['type_of_variable'] = 'static'
+      elsif v['output']
+        v['type_of_variable'] = 'output'
+      else
+        v['type_of_variable'] = 'unknown'
+      end
+    end
+
+    variables
   end
 
   def map_discrete_hash_to_array

@@ -5,7 +5,7 @@ class DataPoint
   field :uuid, type: String
   field :_id, type: String, default: -> { uuid || UUID.generate }
   field :name, type: String
-  field :variable_values # This has been hijacked from OS DataPoint. Use set_variable_values
+  field :variable_values # This has been hijacked by OS DataPoint. Use set_variable_values
   field :set_variable_values # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
   field :ip_address, type: String
   field :internal_ip_address, type: String
@@ -14,21 +14,21 @@ class DataPoint
   field :openstudio_datapoint_file_name, type: String # make this paperclip?
   field :status, type: String, default: 'na' # enum of queued, started, completed
   field :status_message, type: String # results of the simulation
-  field :output
-  field :results, type: Hash
+  field :output # what is this?
+  field :results, type: Hash, default: {}
   field :run_start_time, type: DateTime
   field :run_end_time, type: DateTime
   field :sdp_log_file, type: Array, default: []
 
   # Relationships
   belongs_to :analysis
-  has_many :variable_instances
 
   # Indexes
   index({ uuid: 1 }, unique: true)
   index({ id: 1 }, unique: true)
   index(name: 1)
   index(status: 1)
+  index(analysis_id: 1, created_at: 1)
   index(analysis_id: 1)
   index(uuid: 1, status: 1, download_status: 1)
   index(run_start_time: -1, name: 1)

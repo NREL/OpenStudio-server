@@ -4,28 +4,28 @@ class Analysis::RgenoudLexical
 
   def initialize(analysis_id, options = {})
     defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [],
-      problem: {
-	       random_seed: 1979,
-        algorithm: {
-          generations: 1,
-          waitgenerations: 3,
-          popsize: 30,
-          boundaryenforcement: 2,
-          bfgsburnin: 2,
-          printlevel: 2,
-          balance: false,
-          solutiontolerance: 0.01,
-          normtype: 'minkowski',
-          ppower: 2,
-          objective_functions: [],
-          pgtol: 1e-1,
-          factr: 4.5036e14,
-          maxit: 5,
-          epsilongradient: 1e-4
+        skip_init: false,
+        run_data_point_filename: 'run_openstudio_workflow.rb',
+        create_data_point_filename: 'create_data_point.rb',
+        output_variables: [],
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                generations: 1,
+                waitgenerations: 3,
+                popsize: 30,
+                boundaryenforcement: 2,
+                bfgsburnin: 2,
+                printlevel: 2,
+                balance: false,
+                solutiontolerance: 0.01,
+                normtype: 'minkowski',
+                ppower: 2,
+                objective_functions: [],
+                pgtol: 1e-1,
+                factr: 4.5036e14,
+                maxit: 5,
+                epsilongradient: 1e-4
             }
         }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -51,6 +51,9 @@ class Analysis::RgenoudLexical
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # save other run information in another object in the analysis
+    @analysis.run_options['rgenoud_lexical'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -116,7 +119,6 @@ class Analysis::RgenoudLexical
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
-    static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
@@ -148,7 +150,7 @@ class Analysis::RgenoudLexical
       if !cluster.configure(master_ip)
         fail 'could not configure R cluster'
       else
-	       Rails.logger.info 'Successfuly configured cluster'
+        Rails.logger.info 'Successfuly configured cluster'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
@@ -215,11 +217,11 @@ class Analysis::RgenoudLexical
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
+              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
@@ -233,7 +235,7 @@ class Analysis::RgenoudLexical
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "/usr/local/rbenv/shims/ruby -W0"
+              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
 
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
@@ -394,14 +396,15 @@ class Analysis::RgenoudLexical
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
 
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

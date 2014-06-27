@@ -18,10 +18,7 @@ fi
 #chown ubuntu:ubuntu /home/ubuntu/setup*
 
 # configure the application based worker data
-cd /data/launch-instance && sudo ./configure_vagrant_worker_data.sh
+cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 #file flag the user_data has completed
 cat /dev/null > ~/user_data_done
-
-
-              

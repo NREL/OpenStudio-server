@@ -15,7 +15,7 @@ default_attributes(
         },
         :libraries => [
             {
-                :name => "snow"
+	        :name => 'snow',
             },
             {
                 :name => "Rserve"
@@ -75,15 +75,12 @@ default_attributes(
                 :name => "rgenoud"
             },
             {
-                :name => "snowFT"
-            },
-            {
                 :name => "doParallel"
             },
             {
                 :name => 'NRELmoo',
                 :package_path => "/data/R-packages",
-                :version => '1.2.4',
+                :version => '1.2.5',
                 :update_method => 'always_update'
             },
             {

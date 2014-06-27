@@ -35,7 +35,9 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => use_nfs
   config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => use_nfs
   config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => use_nfs
-  #config.vm.synced_folder "E:/data-worker", "/mnt/openstudio", :nfs => use_nfs, :owner => "vagrant", :group => "www-data", :mount_options => [ "dmode=775", "fmode=775" ]
+  # config.vm.synced_folder "../../../OpenStudio-workflow", "/data/OpenStudio-workflow", :nfs => use_nfs
+  # config.vm.synced_folder "../../../OpenStudio-analysis-gem", "/data/OpenStudio-analysis-gem", :nfs => use_nfs
+  # config.vm.synced_folder "E:/data-worker", "/mnt/openstudio", :nfs => use_nfs, :owner => "vagrant", :group => "www-data", :mount_options => [ "dmode=775", "fmode=775" ]
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.

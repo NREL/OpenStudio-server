@@ -20,13 +20,33 @@
       var LegendOptions = ['Relative Error (%)'];
 
       //Data
-      var data;
+      var rawdata;
+      var chartdata = [];
+      var data = [];
+      var dp_values = {};
 
-      d3.json("plot_data_radar.json?datapoint_id=" + datapoint_id ,  function (data2) {
+      d3.json("analysis_data.json?visualize=true&datapoint_id=" + datapoint_id ,  function (rawdata) {
 
-               data = data2['radardata'];
-               console.log(data);
+       //variables holds the axes names
+        Object.keys(rawdata['variables']).forEach(function (d) {
 
+          dp_values = {};
+
+          // only get the ones with obj function target not null
+          if ((typeof rawdata['variables'][d]['objective_function_target'] !== 'undefined') && (rawdata['variables'][d]['objective_function_target'] !== null))
+          {
+
+            dp_values['axis'] = d;
+            dp_values['value'] = Math.abs(rawdata['data'][0][d] - rawdata['variables'][d]['objective_function_target']) / rawdata['variables'][d]['objective_function_target'];
+
+            // add to data array
+            data.push(dp_values);
+          }
+
+        });
+
+        // extra array needed for structure
+        chartdata.push(data);
 
       //Options for the Radar chart, other than default
       var mycfg = {
@@ -39,7 +59,8 @@
 
       //Call function to draw the Radar chart
       //Will expect that data is in %'s
-      RadarChart.draw("#radar-div", data, mycfg);
+
+      RadarChart.draw("#radar-div", chartdata, mycfg);
 
       ////////////////////////////////////////////
       /////////// Initiate legend ////////////////

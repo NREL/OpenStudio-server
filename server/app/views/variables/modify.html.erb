@@ -1,0 +1,41 @@
+<h2>Variables</h2>
+
+<%= form_tag modify_analysis_variables_path, :method => :post do |f| %>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Machine Name</th>
+      <th>Display Name</th>
+      <th>Measure Name</th>
+      <th>Units</th>
+      <th>Visualize</th>
+      <th>Export</th>
+      <th>Actions</th>
+    <tr>
+    </thead>
+    <tbody>
+      <% @variables.each do |var| %>
+        <tr>
+         <td><%= var.name %></td>
+         <td><%= var.display_name %></td>
+         <td><% if var.measure? %><%= var.measure.display_name %><% end %></td>
+         <td><%= var.units %></td>
+         <% v_checked = false %>
+         <% if var.visualize %>
+           <% v_checked = true %>
+         <% end %>
+          <% e_checked = false %>
+          <% if var.export %>
+            <% e_checked = true %>
+          <% end %>
+         <td><%= check_box_tag 'visualize_ids[]', var.id, v_checked %></td>
+         <td><%= check_box_tag 'export_ids[]', var.id, e_checked %></td>
+         <td><%= link_to "Edit", edit_variable_path(var) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <div class="save-btn">
+    <%= submit_tag "Save Changes", class: "btn btn-primary" %>
+  </div>
+<% end %>

@@ -1,0 +1,68 @@
+<h2>Analysis Data &mdash;  <%= link_to @analysis.display_name, analysis_path(@analysis) %></h2>
+
+<h3>Variables</h3>
+   <table class="table table-striped">
+     <thead>
+     <tr>
+       <th>Name</th>
+       <th>Datatype</th>
+       <th>Units</th>
+       <th>Export</th>
+       <th>Visualize</th>
+       <th>Pivot</th>
+       <th>Output</th>
+       <th>Perturbable</th>
+       <th>Objective Function</th>
+     <tr>
+     </thead>
+     <tbody>
+       <% @variables.each do |key, var| %>
+       <tr>
+         <td><%= var['display_name']%></td>
+         <td><%= var['data_type'] unless var['data_type'].nil? %><%= var['value_type'] unless var['value_type'].nil? %></td>
+         <td><%= var['units'] %></td>
+         <td><%= var['export'] if var['export'] %></td>
+         <td><%= var['visualize'] if var['visualize'] %></td>
+         <td><%= var['pivot'] if var['pivot'] %></td>
+         <td><%= var['output'] if var['output'] %></td>
+         <td><%= var['perturbable'] if var['perturbabe'] %></td>
+         <td>
+           <% if var['objective_function'] %>
+            group: <%= var['objective_function_group'] %> <br/>
+            index <%= var['objective_function_index'] %> <br/>
+            target: <%= var['objective_function_target'] %>
+           <% end %>
+         </td>
+       </tr>
+       <% end %>
+     </tbody>
+
+
+   </table>
+
+
+<h3>Data</h3>
+
+<div class="panel-group" id="accordion">
+  <% @data.each do |d| %>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapse_<%= d['_id'] %>">
+          <%= d['name'] %>
+        </a></h4>
+      </div>
+      <div id="collapse_<%= d['_id'] %>" class="panel-collapse collapse">
+        <div class="panel-body">
+          <table class="table table-striped">
+            <% d.each do |key, val| %>
+              <tr>
+                <th><%= key %></th>
+                <td><%= val %></td>
+              </tr>
+            <% end %>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
