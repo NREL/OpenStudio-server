@@ -340,7 +340,7 @@ def process(element, &block)
     end
 
     begin
-      Timeout::timeout(900) {
+      Timeout::timeout(1200) {
         # cleanup the box by calling the cleanup scripts
         puts "#{element[:id]}: configuring the machines"
         command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
@@ -358,7 +358,7 @@ def process(element, &block)
 
       # finish up AMI cleanup 
       begin
-        Timeout::timeout(900) {
+        Timeout::timeout(1200) {
           command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
           #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
           command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
@@ -442,11 +442,18 @@ end
 end
 $threads.each { |t| t.join }
 
+
+puts
+puts "============================= AMI Information======================================="
+puts
 @vms.each do |vm|
   puts vm
 end
-
-puts "================"
+puts
+puts "===================================================================="
+puts
+puts "===================================================================="
+puts
 end_time = Time.now
 good_build = @vms.all? { |vm| vm[:good_ami] && vm[:error_message] == "" }
 if good_build
@@ -454,7 +461,7 @@ if good_build
 
   if @options[:provider] == :aws
     puts
-    puts " === amis.json format ====="
+    puts "=========================== JSON ========================================="
     amis_hash = {}
     amis_hash[@os_version] = {}
     amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
@@ -467,8 +474,6 @@ if good_build
     outfile = File.join(File.dirname(__FILE__), test_amis_filename)
     # save it to a file for use in integration test
     File.open(outfile, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
-
-    # Todo: save some of these results to a database?
   end
 else
   puts "AMIs had errors"
