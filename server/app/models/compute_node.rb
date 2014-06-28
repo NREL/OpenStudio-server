@@ -5,6 +5,7 @@ class ComputeNode
   field :node_type, type: String
   field :ip_address, type: String
   field :hostname, type: String
+  field :local_hostname, type: String
   field :user, type: String
   field :password, type: String
   field :cores, type: Integer
@@ -130,7 +131,10 @@ class ComputeNode
           shell_result = `#{unzip_reports}`
         end
       end
+    else
+      Rails.logger.error "Could not compute_node record with IP address of #{ip_address}"
     end
+
 
     [remote_file_exists, remote_file_downloaded, local_filename]
   end
@@ -149,6 +153,12 @@ class ComputeNode
         node.ami_id = 'Vagrant'
         node.instance_id = 'Vagrant'
       else
+        # TODO: convert this all over to Facter!
+        #   ex: @datapoint.ami_id = m['ami-id'] ? m['ami-id'] : 'unknown'
+        #   ex: @datapoint.instance_id = m['instance-id'] ? m['instance-id'] : 'unknown'
+        #   ex: @datapoint.hostname = m['public-hostname'] ? m['public-hostname'] : 'unknown'
+        #   ex: @datapoint.local_hostname = m['local-hostname'] ? m['local-hostname'] : 'unknown'
+
         if node.node_type == 'server'
           node.ami_id = `curl -sL http://169.254.169.254/latest/meta-data/ami-id`
           node.instance_id = `curl -sL http://169.254.169.254/latest/meta-data/instance-id`
