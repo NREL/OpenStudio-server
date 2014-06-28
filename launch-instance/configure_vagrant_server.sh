@@ -42,9 +42,8 @@ sudo service apache2 start
 
 # Add in the database indexes after making the db directory
 sudo chmod 777 /var/www/rails/openstudio/public
-cd /var/www/rails/openstudio
-bundle exec rake db:purge
-bundle exec rake db:mongoid:create_indexes
+cd /var/www/rails/openstudio && bundle exec rake db:purge
+cd /var/www/rails/openstudio && bundle exec rake db:mongoid:create_indexes
 
 # configure the application based worker data
 cd /data/launch-instance && ./configure_vagrant_worker_data.sh

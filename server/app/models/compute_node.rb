@@ -34,15 +34,20 @@ class ComputeNode
   # if the file already exists, then it will overwrite the file
   # verify the behaviour of the zip extraction on top of an already existing analysis.
   def self.copy_data_to_workers(analysis)
-    # copy the datafiles over to the worker nodes
-    ComputeNode.where(valid: true).each do |node|
+
+    # copy the datafiles over to the worker nodes. Always include the server node because
+    # this creates the permissions of the analysis folder
+    ComputeNode.all.each do |node|
       Rails.logger.info("Configuring node '#{node.ip_address}'")
+
       # removed the entire section where I pivoted on type of server and now using SSH even to talk
       # to the server node to better manage the permissions
       Net::SSH.start(node.ip_address, node.user, password: node.password) do |session|
         if !analysis.use_shm
           upload_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+          # NL: sudo chgrp the folder so that it has the right permissions. Make sure in the future that the
+          # anlaysis user has sudo rights to chmod the files.
+          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |channel, stream, data|
             Rails.logger.info(data)
           end
           session.loop
@@ -66,7 +71,8 @@ class ComputeNode
           end
           session.loop
 
-          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+          # NL: sudo chgrp the folder so that it has the right permissions.
+          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |channel, stream, data|
             Rails.logger.info(data)
           end
           session.loop
@@ -82,6 +88,7 @@ class ComputeNode
     end
   end
 
+  # Download the results from either local or remote worker
   def self.download_results(ip_address, analysis_id, data_point_id)
     remote_file_downloaded = false
     remote_file_exists = false
@@ -97,8 +104,8 @@ class ComputeNode
       local_filename = "#{local_filepath}/data_point_#{data_point_id}.zip"
       local_filename_reports = "#{local_filepath}/data_point_#{data_point_id}_reports.zip"
 
-      # make sure that the local path exists
-      FileUtils.mkdir_p(local_filepath)
+      # make sure that the local path exists -- NL: this should always exist as the copy_data_to_workers creates the folder
+      # FileUtils.mkdir_p(local_filepath)
 
       if node.node_type == 'server'
         Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
@@ -128,6 +135,7 @@ class ComputeNode
     [remote_file_exists, remote_file_downloaded, local_filename]
   end
 
+  # Report back the system inforamtion of the node for debugging purposes
   def self.get_system_information
     # if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
 
@@ -194,7 +202,6 @@ class ComputeNode
           remote_file_downloaded = true
         end
 
-        # todo: test the deletion of the zip file
         if remote_file_downloaded
           session.exec!("cd #{remote_file_path} && rm -f #{remote_file}") do |channel, stream, data|
             Rails.logger.info 'deleting datapoint from remote worker'

@@ -67,12 +67,12 @@ class DataPoint
       # This is becoming more of a post process that is being triggered by the "downloading" of the
       # file.  If we aren't going to download the file, then the child process can have a flag that it
       # checks similar to the downloaded flag.
-      Rails.logger.info 'post-processing the JSON data that was pushed into the database by the worker'
+      Rails.logger.info 'Post-processing the JSON data that was pushed into the database by the worker'
       save_results_from_openstudio_json
 
       # look up the worker nodes ip address from database. Move this to ComputeNode class and pass in any potential
       # ip addresses that may have finished
-      Rails.logger.info "trying to download #{id}"
+      Rails.logger.info "Trying to download #{id}"
       remote_file_exists, remote_file_downloaded, local_filename = ComputeNode.download_results(ip_address, analysis.id, id)
 
       # now add the datapoint path to the database to get it via the server
