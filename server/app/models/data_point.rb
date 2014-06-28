@@ -7,8 +7,7 @@ class DataPoint
   field :name, type: String
   field :variable_values # This has been hijacked by OS DataPoint. Use set_variable_values
   field :set_variable_values # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
-  field :ip_address, type: String
-  field :internal_ip_address, type: String
+
   field :download_status, type: String, default: 'na'
   field :download_information, type: String
   field :openstudio_datapoint_file_name, type: String # make this paperclip?
@@ -19,6 +18,11 @@ class DataPoint
   field :run_start_time, type: DateTime
   field :run_end_time, type: DateTime
   field :sdp_log_file, type: Array, default: []
+
+  # Run location information
+  field :ip_address, type: String
+  field :internal_ip_address, type: String
+
 
   # Relationships
   belongs_to :analysis
