@@ -24,7 +24,7 @@ class ComputeNode
     worker_ips_hash[:worker_ips] = []
 
     ComputeNode.where(valid: true).each do |node|
-      (1..node.cores).each { |i| worker_ips_hash[:worker_ips] << node.ip_address }
+      (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << node.ip_address }
     end
     Rails.logger.info("worker ip hash: #{worker_ips_hash}")
 
@@ -47,39 +47,39 @@ class ComputeNode
           upload_dir = "/mnt/openstudio/analysis_#{analysis.id}"
           # NL: sudo chgrp the folder so that it has the right permissions. Make sure in the future that the
           # anlaysis user has sudo rights to chmod the files.
-          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |channel, stream, data|
+          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |_channel, _stream, data|
             Rails.logger.info(data)
           end
           session.loop
 
           session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}/")
 
-          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}") do |channel, stream, data|
+          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}") do |_channel, _stream, data|
             logger.info(data)
           end
           session.loop
         else
           upload_dir = "/run/shm/openstudio/analysis_#{analysis.id}"
           storage_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-          session.exec!("rm -rf #{upload_dir}") do |channel, stream, data|
+          session.exec!("rm -rf #{upload_dir}") do |_channel, _stream, data|
             Rails.logger.info(data)
           end
           session.loop
 
-          session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis_#{analysis.id}") do |channel, stream, data|
+          session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis_#{analysis.id}") do |_channel, _stream, data|
             Rails.logger.info(data)
           end
           session.loop
 
           # NL: sudo chgrp the folder so that it has the right permissions.
-          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |channel, stream, data|
+          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |_channel, _stream, data|
             Rails.logger.info(data)
           end
           session.loop
 
           session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}")
 
-          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |channel, stream, data|
+          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |_channel, _stream, data|
             logger.info(data)
           end
           session.loop
@@ -167,13 +167,13 @@ class ComputeNode
             # Rails.logger.info(self.inspect)
 
             logger.info 'Checking the configuration of the worker nodes'
-            session.exec!('curl -sL http://169.254.169.254/latest/meta-data/ami-id') do |channel, stream, data|
+            session.exec!('curl -sL http://169.254.169.254/latest/meta-data/ami-id') do |_channel, _stream, data|
               Rails.logger.info("Worker node reported back #{data}")
               node.ami_id = data
             end
             session.loop
 
-            session.exec!('curl -sL http://169.254.169.254/latest/meta-data/instance-id') do |channel, stream, data|
+            session.exec!('curl -sL http://169.254.169.254/latest/meta-data/instance-id') do |_channel, _stream, data|
               Rails.logger.info("Worker node reported back #{data}")
               node.instance_id = data
             end
@@ -193,7 +193,7 @@ class ComputeNode
     Rails.logger.info 'entering scp_download_file'
     Net::SSH.start(ip_address, user, password: password) do |session|
       Rails.logger.info 'Checking if the remote file exists'
-      session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |channel, stream, data|
+      session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |_channel, _stream, data|
         Rails.logger.info("check remote file data is #{data}")
         if data == 'true'
           remote_file_exists = true
@@ -212,7 +212,7 @@ class ComputeNode
         end
 
         if remote_file_downloaded
-          session.exec!("cd #{remote_file_path} && rm -f #{remote_file}") do |channel, stream, data|
+          session.exec!("cd #{remote_file_path} && rm -f #{remote_file}") do |_channel, _stream, data|
             Rails.logger.info 'deleting datapoint from remote worker'
             Rails.logger.info "#{data}"
             logger.info(data)
