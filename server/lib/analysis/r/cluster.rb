@@ -57,7 +57,7 @@ module Analysis::R
       result = false
       @r.command(ips: ip_addresses.to_dataframe) do
         %Q{
-    
+
           print("Starting cluster...")
           print(paste("Worker IPs:", ips))
           if (nrow(ips) == 0) {

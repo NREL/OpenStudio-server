@@ -144,28 +144,12 @@ Style/StringLiterals:
 Style/Tab:
   Enabled: false
 
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/TrailingBlankLines:
-  Enabled: false
-
 # Offense count: 1
 # Configuration parameters: EnforcedStyleForMultiline, SupportedStyles.
 Style/TrailingComma:
-  Enabled: false
-
-# Offense count: 36
-# Cop supports --auto-correct.
-Style/TrailingWhitespace:
   Enabled: false
 
 # Offense count: 5
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/VariableName:
   Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/WordArray:
-  MinSize: 6

@@ -208,17 +208,17 @@ class Analysis::Optim
 
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
-            
+
             varfile <- function(x){
               if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
-            
+
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
-            
+
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -254,16 +254,16 @@ class Analysis::Optim
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
-                
+
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") { 
+            if (as.character(z[j]) == "NA") {
 		      cat("UUID is NA \n");
               NAvalue <- .Machine$double.xmax
-              return(NAvalue)		    
+              return(NAvalue)
 			} else {
 		      try(f(z[j]), silent = TRUE)
-              
-			  
+
+
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -320,7 +320,7 @@ class Analysis::Optim
                 objtarget <- objtarget / sclfactor
                 obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
                 print(paste("Objective function Norm:",obj))
-                
+
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
 	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
 	        print(paste("exit_on_guideline14: ",flag))
@@ -350,10 +350,10 @@ class Analysis::Optim
                     write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
                     dbDisconnect(mongo)
                     stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
-                  }	  
+                  }
 		}
                 dbDisconnect(mongo)
-                           
+
                 return(obj)
               }
 			      }
@@ -421,7 +421,7 @@ class Analysis::Optim
             #results <- DEoptim(g,lower=varMin, upper=varMax,control=list(itermax=gen,NP=100,parallelType=2, storepopfrom=1, storepopfreq=1))
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
-			
+
             #write final params to json file
             answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
             write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
