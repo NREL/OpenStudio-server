@@ -6,4 +6,8 @@ AllCops:
     - 'testing/**/*'
     - 'vagrant/**/*'
 
+Rails/DefaultScope:
+  Include:
+    - 'server/**/*.rb'
+
 inherit_from: .rubocop_todo.yml

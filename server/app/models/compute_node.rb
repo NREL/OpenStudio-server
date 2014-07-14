@@ -35,7 +35,6 @@ class ComputeNode
   # if the file already exists, then it will overwrite the file
   # verify the behaviour of the zip extraction on top of an already existing analysis.
   def self.copy_data_to_workers(analysis)
-
     # copy the datafiles over to the worker nodes. Always include the server node because
     # this creates the permissions of the analysis folder
     ComputeNode.all.each do |node|

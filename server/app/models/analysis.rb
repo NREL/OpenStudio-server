@@ -287,7 +287,7 @@ class Analysis
     Hash[mappings.sort]
   end
 
-# copy back the results to the master node if they are finished
+  # copy back the results to the master node if they are finished
   def finalize_data_points
     any_downloaded = false
     data_points.and({ download_status: 'na' }, { status: 'completed' }).each do |dp|

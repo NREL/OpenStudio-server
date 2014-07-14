@@ -182,7 +182,7 @@ class Analysis::SequentialSearch
                 && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
                 @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
               Rails.logger.info 'Found the same objective function values in array, skipping'
-                                     # new_curve << min_point # just add in the same point to the new curve
+            # new_curve << min_point # just add in the same point to the new curve
             else
               # the min point is new and was found before the end of the array.  Orphaning the other points
               Rails.logger.info "Orphaning previous point in array.  Replacing #{@pareto[i_pareto + 1].name} with #{min_point.name}"
@@ -377,8 +377,8 @@ class Analysis::SequentialSearch
     Rails.logger.info "Finished running analysis '#{self.class.name}'"
   end
 
-# Since this is a delayed job, if it crashes it will typically try multiple times.
-# Fix this to 1 retry for now.
+  # Since this is a delayed job, if it crashes it will typically try multiple times.
+  # Fix this to 1 retry for now.
   def max_attempts
     1
   end
