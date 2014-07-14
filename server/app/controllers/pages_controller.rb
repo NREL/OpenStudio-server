@@ -49,6 +49,5 @@ class PagesController < ApplicationController
 
       @total = cnt
     end
-
   end
 end

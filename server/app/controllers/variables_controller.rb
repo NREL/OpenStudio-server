@@ -11,7 +11,6 @@ class VariablesController < ApplicationController
       format.html # index.html.erb
       format.json { render json: Variable.get_variable_data_v2(params[:analysis_id]) }
     end
-
   end
 
   # GET /variables/1
@@ -138,7 +137,6 @@ class VariablesController < ApplicationController
         write_and_send_metadata_csv
       end
     end
-
   end
 
   protected
@@ -155,7 +153,6 @@ class VariablesController < ApplicationController
     end
 
     send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
-
   end
 
   def write_and_send_input_variables_csv(analysis)
@@ -217,8 +214,5 @@ class VariablesController < ApplicationController
     if File.exist? tmp_filename
       r.converse(r_command)
     end
-
   end
-
-
 end

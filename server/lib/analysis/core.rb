@@ -58,7 +58,7 @@ module Analysis::Core
     # then sets the "static/default" from the other variables
     selected_variables.each do |var|
       result.each_with_index do |r, index|
-        unless r.has_key? var._id.to_sym
+        unless r.key? var._id.to_sym
           result[index][var._id.to_sym] = var.static_value
         end
       end
