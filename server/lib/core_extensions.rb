@@ -18,7 +18,6 @@ def hash_to_dot_notation(object, prefix = nil)
   end
 end
 
-
 class Hash
   def compact(opts={})
     reduce({}) do |new_hash, (k,v)|

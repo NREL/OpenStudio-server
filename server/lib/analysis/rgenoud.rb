@@ -27,8 +27,8 @@ class Analysis::Rgenoud
           factr: 4.5036e14,
           maxit: 5,
           epsilongradient: 1e-4
-            }
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)

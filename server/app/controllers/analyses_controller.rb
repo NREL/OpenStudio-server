@@ -250,8 +250,8 @@ class AnalysesController < ApplicationController
       format.json { 
         render json: {
           analysis: {
-              status: @analysis.status,
-              analysis_type: @analysis.analysis_type
+            status: @analysis.status,
+            analysis_type: @analysis.analysis_type
           },
           data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }} 
       }
@@ -310,11 +310,11 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-          :problem,
+        :problem,
       ]
       include_fields = [
-          :variables,
-          :measures # => {:include => :variables}
+        :variables,
+        :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
       format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
@@ -420,7 +420,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.json { render json: {variables: @variables, data: @data} }
-      format.html #analysis_data.html.erb
+      format.html # analysis_data.html.erb
     end
   end
 
@@ -438,18 +438,18 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.json do
         fields = [
-            :name,
-            :data_points,
-            :analysis_type,
-            :status,
-            :start_time,
-            :end_time,
-            :seed_zip,
-            :results,
-            :run_start_time,
-            :run_end_time,
-            :openstudio_datapoint_file_name,
-            :output_variables
+          :name,
+          :data_points,
+          :analysis_type,
+          :status,
+          :start_time,
+          :end_time,
+          :seed_zip,
+          :results,
+          :run_start_time,
+          :run_end_time,
+          :openstudio_datapoint_file_name,
+          :output_variables
         ]
 
         render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
@@ -574,10 +574,10 @@ class AnalysesController < ApplicationController
     variables.map! { |v| {:"#{v['name']}".to_sym => v} }
 
     logger.info variables.class
-    #logger.info .reduce({}, :merge)
+    # logger.info .reduce({}, :merge)
 
     variables = variables.reduce({}, :merge)
-    #variables.reduce(|v| {}, :merge)
+    # variables.reduce(|v| {}, :merge)
     [variables, plot_data]
   end
 

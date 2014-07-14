@@ -206,9 +206,9 @@ class Variable
   def self.get_variable_data_v2(analysis)
     # get all variables for analysis
     save_fields = [
-        :measure_id, :name, :display_name, :metadata_id, :value_type, :units,
-        :perturbable, :pivot, :output, :visualize, :export, :static_value,
-        :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
+      :measure_id, :name, :display_name, :metadata_id, :value_type, :units,
+      :perturbable, :pivot, :output, :visualize, :export, :static_value,
+      :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
     variables = Variable.where(analysis_id: analysis).or({perturbable: true}, {pivot: true}, {output: true}, {export: true}).as_json(only: save_fields)
 
@@ -279,8 +279,8 @@ class Variable
 
   def remove_dependencies
     # TODO: need to reset permissions before we can actually delete the files
-    #preflight_images.each do |pfi|
+    # preflight_images.each do |pfi|
     #  pfi.destroy
-    #end
+    # end
   end
 end

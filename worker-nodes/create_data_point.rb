@@ -42,11 +42,11 @@ begin
   logger.info "Analysis id is #{options[:analysis_id]}"
 
   workflow_options = {
-      datapoint_id: dp_uuid,
-      analysis_root_path: analysis_root_path,
-      adapter_options: {
-          mongoid_path: '/mnt/openstudio/rails-models'
-      }
+    datapoint_id: dp_uuid,
+    analysis_root_path: analysis_root_path,
+    adapter_options: {
+      mongoid_path: '/mnt/openstudio/rails-models'
+    }
   }
 
   logger.info "Creating Mongo connector"

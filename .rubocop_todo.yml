@@ -73,16 +73,6 @@ Style/Documentation:
 Style/EachWithObject:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-Style/EmptyLines:
-  Enabled: false
-
-# Offense count: 7
-# Cop supports --auto-correct.
-Style/EmptyLinesAroundBody:
-  Enabled: false
-
 # Offense count: 2
 # Configuration parameters: AllowedVariables.
 Style/GlobalVars:
@@ -104,25 +94,9 @@ Style/HashSyntax:
 Style/IfUnlessModifier:
   Enabled: false
 
-# Offense count: 7
-# Cop supports --auto-correct.
-Style/IndentArray:
-  Enabled: false
-
-# Offense count: 42
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/IndentHash:
-  Enabled: false
-
-# Offense count: 11
-# Cop supports --auto-correct.
-Style/LeadingCommentSpace:
-  Enabled: false
-
 # Offense count: 974
 Style/LineLength:
-  Max: 1029
+  Max: 1100
 
 # Offense count: 87
 # Configuration parameters: CountComments.

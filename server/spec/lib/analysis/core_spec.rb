@@ -104,6 +104,5 @@ describe Analysis::Core do
       r[7].should eq(c: false)
     end
 
-
   end
 end

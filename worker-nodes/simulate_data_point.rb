@@ -88,23 +88,23 @@ begin
   if options[:run_data_point_filename] == 'workflow_monthly' ||
       options[:run_data_point_filename] == 'run_openstudio_workflow_monthly.rb'
     workflow_options = {
-        datapoint_id: options[:uuid],
-        analysis_root_path: analysis_dir,
-        use_monthly_reports: true,
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      datapoint_id: options[:uuid],
+      analysis_root_path: analysis_dir,
+      use_monthly_reports: true,
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
 
   elsif options[:run_data_point_filename] == 'workflow' ||
       options[:run_data_point_filename] == 'run_openstudio_workflow.rb'
     workflow_options = {
-        datapoint_id: options[:uuid],
-        analysis_root_path: analysis_dir,
-        use_monthly_reports: false,
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      datapoint_id: options[:uuid],
+      analysis_root_path: analysis_dir,
+      use_monthly_reports: false,
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
   elsif options[:run_data_point_filename] == 'custom_xml' ||
       options[:run_data_point_filename] == 'run_openstudio_xml.rb'
@@ -117,25 +117,25 @@ begin
     states.insert(2, :state => :xml, :options => {:after_enter => :run_xml})
 
     workflow_options = {
-        transitions: transitions,
-        states: states,
-        analysis_root_path: analysis_dir,
-        datapoint_id: options[:uuid],
-        use_monthly_reports: true,
-        xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      transitions: transitions,
+      states: states,
+      analysis_root_path: analysis_dir,
+      datapoint_id: options[:uuid],
+      use_monthly_reports: true,
+      xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
   elsif options[:run_data_point_filename] == 'legacy_workflow' ||
       options[:run_data_point_filename] == 'run_openstudio.rb'
     workflow_options = {
-        datapoint_id: options[:uuid],
-        analysis_root_path: analysis_dir,
-        use_monthly_reports: false,
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      datapoint_id: options[:uuid],
+      analysis_root_path: analysis_dir,
+      use_monthly_reports: false,
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
   end
 

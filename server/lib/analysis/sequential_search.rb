@@ -21,15 +21,15 @@ class Analysis::SequentialSearch
           objective_function_index: 1,
           index: 1
         }
-        ],
+      ],
       problem: {
         random_seed: 1979,
         algorithm: {
           number_of_samples: 10, # to discretize any continuous variables
           max_iterations: 1000,
           objective_functions: %w(total_energy total_life_cycle_cost)
-            }
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)

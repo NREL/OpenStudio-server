@@ -134,7 +134,6 @@ class ComputeNode
       Rails.logger.error "Could not compute_node record with IP address of #{ip_address}"
     end
 
-
     [remote_file_exists, remote_file_downloaded, local_filename]
   end
 
