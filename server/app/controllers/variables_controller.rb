@@ -145,7 +145,7 @@ class VariablesController < ApplicationController
     variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
     filename =  "dencity_metadata.csv"
     csv_string = CSV.generate do |csv|
-      csv << ['name', 'display_name', 'description', 'units', 'datatype', 'user_defined']
+      csv << %w(name display_name description units datatype user_defined)
       variables.each do |v|
         csv << [v.metadata_id, v.display_name, '', v.units, v.data_type, false]
       end

@@ -223,17 +223,17 @@ class Analysis::NsgaNrel
             }
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
-            
+
             varfile <- function(x){
               if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
-            
+
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
-            
+
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -270,14 +270,14 @@ class Analysis::NsgaNrel
               z
 
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") { 
+            if (as.character(z[j]) == "NA") {
 		      cat("UUID is NA \n");
               NAvalue <- .Machine$double.xmax
-              return(NAvalue)		    
-			} else {	      
+              return(NAvalue)
+			} else {
 		      try(f(z[j]), silent = TRUE)
-              
-			  
+
+
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -356,7 +356,7 @@ class Analysis::NsgaNrel
               #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
               #}
               print(paste("Objective function Norm:",obj))
-              
+
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
 	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
 	        print(paste("exit_on_guideline14: ",flag))
@@ -386,10 +386,10 @@ class Analysis::NsgaNrel
                     write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
                     dbDisconnect(mongo)
                     stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
-                  }	  
+                  }
 		}
-                dbDisconnect(mongo)              
-              
+                dbDisconnect(mongo)
+
               return(obj)
               }
             }

@@ -213,17 +213,17 @@ class Analysis::Rgenoud
 
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
-            
+
             varfile <- function(x){
               if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
-            
+
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
-            
+
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -261,14 +261,14 @@ class Analysis::Rgenoud
               z
 
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") { 
+            if (as.character(z[j]) == "NA") {
 		      cat("UUID is NA \n");
               NAvalue <- .Machine$double.xmax
-              return(NAvalue)		    
+              return(NAvalue)
 			} else {
 		      try(f(z[j]), silent = TRUE)
-              
-			  
+
+
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -280,13 +280,13 @@ class Analysis::Rgenoud
             try(json <- fromJSON(file=object_file), silent=TRUE)
 
             if (is.null(json)) {
-              obj <- .Machine$double.xmax 
+              obj <- .Machine$double.xmax
             } else {
               obj <- NULL
               objvalue <- NULL
               objtarget <- NULL
               sclfactor <- NULL
-              
+
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "NULL"){
@@ -326,7 +326,7 @@ class Analysis::Rgenoud
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
 	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
 	        print(paste("exit_on_guideline14: ",flag))
-          
+
 		if (flag["exit_on_guideline14"] == "true" ){
 		  # read in the results from the objective function file
 		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
@@ -404,7 +404,7 @@ class Analysis::Rgenoud
             print(paste("value:",results$value))
             flush.console()
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
-			
+
 			#write final params to json file
             answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
             write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)

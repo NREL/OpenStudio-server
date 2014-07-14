@@ -213,4 +213,3 @@ module Analysis::R
     end
   end
 end
-
