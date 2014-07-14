@@ -94,7 +94,7 @@ describe Analysis::Core do
 
     it 'should return non-combined hashes' do
       h = { a: [1, 2, 3], b: %w(4 5 6), c: [true, false, false] }
-      vars = [OpenStruct.new(_id: 'c', static_value: 123 )]
+      vars = [OpenStruct.new(_id: 'c', static_value: 123)]
       r = Analysis::Core.hash_of_array_to_array_of_hash_non_combined(h, vars)
       puts "Non combined hash returned with #{r.inspect}"
       r.size.should eq(8)

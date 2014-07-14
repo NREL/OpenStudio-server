@@ -13,7 +13,7 @@ require_relative "server/lib/version"
 # todo: enable a second part of this that waits for testing of the amis before this is formally released
 # VERSION_APPEND = Openstudioserver::VERSION_EXT
 OPENSTUDIO_SERVER_VERSION = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
-AMI_BUILD_BRANCH="ami-build"
+AMI_BUILD_BRANCH = "ami-build"
 
 desc "build and release the server (via AMIs) using jenkins"
 task :release do

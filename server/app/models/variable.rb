@@ -78,12 +78,12 @@ class Variable
 
   # Create an output variable from the Analysis JSON
   def self.create_output_variable(analysis_id, json)
-    var = Variable.where(analysis_id: analysis_id, name: json['name'] ).first
+    var = Variable.where(analysis_id: analysis_id, name: json['name']).first
     if var
       Rails.logger.warn "Variable already exists for '#{var.name}'"
     else
       Rails.logger.info "Adding a new variable named: '#{json['name']}'"
-      var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'] )
+      var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'])
     end
 
     var.output = true

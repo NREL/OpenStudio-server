@@ -54,7 +54,7 @@ unless options[:directory]
 end
 
 puts "Checking UUID of #{options[:uuid]}"
-if (not options[:uuid]) || (options[:uuid] == 'NA')
+if (!options[:uuid]) || (options[:uuid] == 'NA')
   puts 'No UUID defined'
   if options[:uuid] == 'NA'
     puts 'Recevied an NA UUID which may be because you are only trying to run one datapoint'

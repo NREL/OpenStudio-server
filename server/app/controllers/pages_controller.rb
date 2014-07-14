@@ -30,7 +30,7 @@ class PagesController < ApplicationController
     unless @current.nil?
       # aggregate results of current analysis
       aggregated_results = DataPoint.collection.aggregate(
-          [{'$match' => {'analysis_id' => @current.id}},{'$group' => {'_id' => {'analysis_id' => '$analysis_id', 'status' => '$status'}, count: {'$sum' => 1}}}])
+          [{'$match' => {'analysis_id' => @current.id}}, {'$group' => {'_id' => {'analysis_id' => '$analysis_id', 'status' => '$status'}, count: {'$sum' => 1}}}])
     end
     # for js
     cnt = 0
