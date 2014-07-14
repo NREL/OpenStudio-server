@@ -590,7 +590,7 @@ class AnalysesController < ApplicationController
     require 'csv'
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_analysis_data(analysis, nil, {export: true})
+    variables, data = get_analysis_data(analysis, nil, export: true)
 
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
@@ -608,7 +608,7 @@ class AnalysesController < ApplicationController
 
   def write_and_send_rdata(analysis)
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_analysis_data(analysis, nil, {export: true})
+    variables, data = get_analysis_data(analysis, nil, export: true)
 
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}

@@ -37,17 +37,6 @@ Style/AccessorMethodName:
 Style/BlockNesting:
   Max: 4
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Style/Blocks:
-  Enabled: false
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/BracesAroundHashParameters:
-  Enabled: false
-
 # Offense count: 9
 # Configuration parameters: IndentWhenRelativeTo, SupportedStyles, IndentOneStep.
 Style/CaseIndentation:

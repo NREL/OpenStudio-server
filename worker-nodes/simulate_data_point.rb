@@ -112,9 +112,9 @@ begin
     # Set up the custom workflow states and transitions
     transitions = OpenStudio::Workflow::Run.default_transition
     transitions[1][:to] = :xml
-    transitions.insert(2, {from: :xml, to: :openstudio})
+    transitions.insert(2, from: :xml, to: :openstudio)
     states = OpenStudio::Workflow::Run.default_states
-    states.insert(2, {:state => :xml, :options => {:after_enter => :run_xml}})
+    states.insert(2, :state => :xml, :options => {:after_enter => :run_xml})
 
     workflow_options = {
         transitions: transitions,
