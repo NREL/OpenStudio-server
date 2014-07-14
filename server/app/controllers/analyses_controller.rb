@@ -252,7 +252,8 @@ class AnalysesController < ApplicationController
               status: @analysis.status,
               analysis_type: @analysis.analysis_type
           },
-          data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }} }
+          data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }} 
+      }
     end
   end
 
