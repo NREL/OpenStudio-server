@@ -103,30 +103,15 @@ Style/LineLength:
 Style/MethodLength:
   Max: 312
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/NegatedIf:
-  Enabled: false
-
 # Offense count: 18
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/Next:
   Enabled: false
 
 # Offense count: 1
-# Cop supports --auto-correct.
-Style/Not:
-  Enabled: false
-
-# Offense count: 1
 # Configuration parameters: CountKeywordArgs.
 Style/ParameterLists:
   Max: 6
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/RedundantSelf:
-  Enabled: false
 
 # Offense count: 1
 Style/SelfAssignment:
@@ -138,36 +123,10 @@ Style/SelfAssignment:
 Style/SignalException:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/SpaceAfterComma:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/SpaceAroundEqualsInParameterDefault:
-  Enabled: false
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/SpaceAroundOperators:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/SpaceBeforeComment:
-  Enabled: false
-
 # Offense count: 66
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SupportedStyles.
 Style/SpaceInsideHashLiteralBraces:
-  Enabled: false
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/SpaceInsideParens:
   Enabled: false
 
 # Offense count: 7

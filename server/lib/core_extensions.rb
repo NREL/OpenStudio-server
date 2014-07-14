@@ -19,9 +19,9 @@ def hash_to_dot_notation(object, prefix = nil)
 end
 
 class Hash
-  def compact(opts={})
-    reduce({}) do |new_hash, (k,v)|
-      if !v.nil?
+  def compact(opts = {})
+    reduce({}) do |new_hash, (k, v)|
+      unless v.nil?
         new_hash[k] = opts[:recurse] && v.class == Hash ? v.compact(opts) : v
       end
       new_hash

@@ -54,7 +54,7 @@ class Analysis::Deoptim
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['deoptim'] =@options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis.run_options['deoptim'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }

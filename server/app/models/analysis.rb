@@ -215,7 +215,7 @@ class Analysis
     end
 
     # pull out the output variables
-    self.output_variables.each do |variable|
+    output_variables.each do |variable|
       Rails.logger.info "Saving off output variables: #{variable}"
       var = Variable.create_output_variable(id, variable)
     end

@@ -33,7 +33,7 @@ class AdminController < ApplicationController
     #   success_2 = true
     # end
 
-    if success_1# && success_2
+    if success_1 # && success_2
       redirect_to admin_index_path, notice: "Database deleted successfully."
     else
       logger.info "Error deleting mongo database: #{success_1}, #{success_2}"
