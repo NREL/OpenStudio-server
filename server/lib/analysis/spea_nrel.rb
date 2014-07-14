@@ -146,10 +146,10 @@ class Analysis::SpeaNrel
       process.start
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info("Found the following good ips #{worker_ips}")
+      Rails.logger.info "Found the following good ips #{worker_ips}"
 
       cluster_started = cluster.start(worker_ips)
-      Rails.logger.info ("Time flag was set to #{cluster_started}")
+      Rails.logger.info "Time flag was set to #{cluster_started}"
 
       if cluster_started
         # gen is the number of generations to calculate

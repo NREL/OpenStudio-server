@@ -5,21 +5,17 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 1
 Lint/AmbiguousOperator:
-  Enabled: false
+  Enabled: true
 
-# Offense count: 1
 Lint/BlockAlignment:
-  Enabled: false
+  Enabled: true
 
-# Offense count: 9
 Lint/ParenthesesAsGroupedExpression:
-  Enabled: false
+  Enabled: true
 
-# Offense count: 1
 Lint/RequireParentheses:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 1
 Lint/UnreachableCode:
@@ -31,7 +27,7 @@ Lint/UselessAssignment:
 
 # Offense count: 3
 Style/AccessorMethodName:
-  Enabled: false
+  Enabled: true
 
 # Offense count: 4
 Style/BlockNesting:
