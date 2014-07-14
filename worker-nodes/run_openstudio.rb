@@ -108,9 +108,9 @@ begin
   # load problem formulation
   loadResult = OpenStudio::Analysis.loadJSON(analysis_json)
   if loadResult.analysisObject.empty?
-    loadResult.errors.each { |error|
+    loadResult.errors.each do |error|
       warn error.logMessage
-    }
+    end
     fail 'Unable to load analysis json.'
   end
 
@@ -128,9 +128,9 @@ begin
   # load data point to run
   loadResult = OpenStudio::Analysis.loadJSON(data_point_json)
   if loadResult.analysisObject.empty?
-    loadResult.errors.each { |error|
+    loadResult.errors.each do |error|
       warn error.logMessage
-    }
+    end
     fail 'Unable to load data point json.'
   end
   data_point = loadResult.analysisObject.get.to_DataPoint.get
