@@ -110,5 +110,9 @@ rescue => e
   errored = true
 ensure
   # Must print out a dp uuid of some sort, default is NA
-  puts (dp && !errored) ? dp.uuid : 'NA'
+  final_result = 'NA'
+  if dp && !errored
+    final_result = dp.uuid
+  end
+  final_result
 end

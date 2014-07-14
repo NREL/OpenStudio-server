@@ -138,7 +138,7 @@ class ComputeNode
   end
 
   # Report back the system inforamtion of the node for debugging purposes
-  def self.get_system_information
+  def self.system_information
     # if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
 
     # end

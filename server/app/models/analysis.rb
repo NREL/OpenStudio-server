@@ -105,7 +105,7 @@ class Analysis
     end
 
     # get server and worker characteristics
-    ComputeNode.get_system_information
+    ComputeNode.system_information
 
     # check if this fails
     ComputeNode.copy_data_to_workers(self)
@@ -229,7 +229,7 @@ class Analysis
   #   { "uuid": "variable_name", "uuid2": "variable_name_2"}
   # 2013-02-20: NL Moved to Analysis Model. Updated to use map/reduce.  This runs in 62.8ms on a smallish sized collection compared to 461ms on the
   # same collection
-  def get_superset_of_input_variables
+  def superset_of_input_variables
     mappings = {}
     start = Time.now
 
@@ -260,7 +260,8 @@ class Analysis
   # This returns a slighly different format compared to the method above.  This returns
   # all the result variables that are avaiable in the form:
   # {"air_handler_fan_efficiency_final"=>true, "air_handler_fan_efficiency_initial"=>true, ...
-  def get_superset_of_result_variables
+  # TODO: this can be deprecated (need to verify: 7/14/2014)
+  def superset_of_result_variables
     mappings = {}
     start = Time.now
 
