@@ -254,12 +254,12 @@ class Analysis::RgenoudLexical
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	      tryCatch({
-	        res <- evalWithTimeout({
-	          json <- fromJSON(file=object_file)
-	        }, timeout=5);
-	        }, TimeoutException=function(ex) {
-	           cat(data_point_directory," No objectives.json: Timeout\n");
+         tryCatch({
+           res <- evalWithTimeout({
+             json <- fromJSON(file=object_file)
+           }, timeout=5);
+           }, TimeoutException=function(ex) {
+              cat(data_point_directory," No objectives.json: Timeout\n");
                    return(1e19)
               })
               #json <- fromJSON(file=object_file)
@@ -329,13 +329,13 @@ class Analysis::RgenoudLexical
             clusterExport(cl,"g")
 
             varMin <- mins
-	    varMax <- maxes
-	    varMean <- (mins+maxes)/2.0
-	    varDomain <- maxes - mins
-	    varEps <- varDomain*epsilongradient
-	    print(paste("varseps:",varseps))
-	    print(paste("varEps:",varEps))
-	    varEps <- ifelse(varseps!=0,varseps,varEps)
+       varMax <- maxes
+       varMean <- (mins+maxes)/2.0
+       varDomain <- maxes - mins
+       varEps <- varDomain*epsilongradient
+       print(paste("varseps:",varseps))
+       print(paste("varEps:",varEps))
+       varEps <- ifelse(varseps!=0,varseps,varEps)
             print(paste("merged varEps:",varEps))
             varDom <- cbind(varMin,varMax)
             print(paste("varDom:",varDom))
@@ -346,7 +346,7 @@ class Analysis::RgenoudLexical
             clusterExport(cl,"varEps")
 
             vectorGradient <- function(x, ...) { # Now use the cluster
-	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+           vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
@@ -360,8 +360,8 @@ class Analysis::RgenoudLexical
             #results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
             results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, lexical=objDim, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
-	    Rlog[grep('vartypes:',Rlog)]
+       Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+       Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
             Rlog[grep('<=',Rlog)]
             print(paste("popsize:",results$pop.size))

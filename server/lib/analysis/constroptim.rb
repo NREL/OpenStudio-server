@@ -9,7 +9,7 @@ class Analysis::Constroptim
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-	       random_seed: 1979,
+          random_seed: 1979,
         algorithm: {
           number_of_samples: 3,
           sample_method: 'individual_variables',
@@ -142,7 +142,7 @@ class Analysis::Constroptim
       if !cluster.configure(master_ip)
         fail 'could not configure R cluster'
       else
-	       Rails.logger.info 'Successfuly configured cluster'
+          Rails.logger.info 'Successfuly configured cluster'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
@@ -242,12 +242,12 @@ class Analysis::Constroptim
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	      tryCatch({
-	        res <- evalWithTimeout({
-	          json <- fromJSON(file=object_file)
-	        }, timeout=5);
-	        }, TimeoutException=function(ex) {
-	           cat(data_point_directory," No objectives.json: Timeout\n");
+         tryCatch({
+           res <- evalWithTimeout({
+             json <- fromJSON(file=object_file)
+           }, timeout=5);
+           }, TimeoutException=function(ex) {
+              cat(data_point_directory," No objectives.json: Timeout\n");
                json <- toJSON(as.list(NULL))
                return(json)
               })
@@ -323,7 +323,7 @@ class Analysis::Constroptim
             clusterExport(cl,"varEps")
 
             vectorGradient <- function(x, ...) { # Now use the cluster
-	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+           vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
@@ -337,11 +337,11 @@ class Analysis::Constroptim
 
             results <- constroptim(theta=varMean, f=g, grad=vectorGradient, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+       Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
             print(paste("Iterations:",Iteration))
             print(Rlog[grep('L =',Rlog)])
-	    print(Rlog[grep('X0 =',Rlog)])
+       print(Rlog[grep('X0 =',Rlog)])
             print(Rlog[grep('U =',Rlog)])
             Xlog <- Rlog[grep('X =',Rlog)]
             print("Iteration parameters:")

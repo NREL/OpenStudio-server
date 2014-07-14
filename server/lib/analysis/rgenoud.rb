@@ -9,7 +9,7 @@ class Analysis::Rgenoud
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-	       random_seed: 1979,
+          random_seed: 1979,
         algorithm: {
           generations: 1,
           waitgenerations: 3,
@@ -262,11 +262,11 @@ class Analysis::Rgenoud
 
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
-		      cat("UUID is NA \n");
+            cat("UUID is NA \n");
               NAvalue <- .Machine$double.xmax
               return(NAvalue)
-			} else {
-		      try(f(z[j]), silent = TRUE)
+         } else {
+            try(f(z[j]), silent = TRUE)
 
 
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
@@ -276,7 +276,7 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	          json <- NULL
+             json <- NULL
             try(json <- fromJSON(file=object_file), silent=TRUE)
 
             if (is.null(json)) {
@@ -324,17 +324,17 @@ class Analysis::Rgenoud
               print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-	        print(paste("exit_on_guideline14: ",flag))
+           flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+           print(paste("exit_on_guideline14: ",flag))
 
-		if (flag["exit_on_guideline14"] == "true" ){
-		  # read in the results from the objective function file
-		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-		  json <- NULL
-		  try(json <- fromJSON(file=guideline_file), silent=TRUE)
-		  if (is.null(json)) {
-		    print(paste("no guideline file: ",guideline_file))
-		  } else {
+      if (flag["exit_on_guideline14"] == "true" ){
+        # read in the results from the objective function file
+        guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+        json <- NULL
+        try(json <- fromJSON(file=guideline_file), silent=TRUE)
+        if (is.null(json)) {
+          print(paste("no guideline file: ",guideline_file))
+        } else {
                     guideline <- json[[1]]
                     for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
                     print(paste("guideline: ",guideline))
@@ -351,23 +351,23 @@ class Analysis::Rgenoud
                       stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
                     }
                   }
-		}
+      }
                 dbDisconnect(mongo)
                 }
               return(obj)
               }
-			}
+         }
 
             clusterExport(cl,"g")
 
             varMin <- mins
-	    varMax <- maxes
-	    varMean <- (mins+maxes)/2.0
-	    varDomain <- maxes - mins
-	    varEps <- varDomain*epsilongradient
-	    print(paste("varseps:",varseps))
-	    print(paste("varEps:",varEps))
-	    varEps <- ifelse(varseps!=0,varseps,varEps)
+       varMax <- maxes
+       varMean <- (mins+maxes)/2.0
+       varDomain <- maxes - mins
+       varEps <- varDomain*epsilongradient
+       print(paste("varseps:",varseps))
+       print(paste("varEps:",varEps))
+       varEps <- ifelse(varseps!=0,varseps,varEps)
             print(paste("merged varEps:",varEps))
             varDom <- cbind(varMin,varMax)
             print(paste("varDom:",varDom))
@@ -378,7 +378,7 @@ class Analysis::Rgenoud
             clusterExport(cl,"varEps")
 
             vectorGradient <- function(x, ...) { # Now use the cluster
-	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+           vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
@@ -392,8 +392,8 @@ class Analysis::Rgenoud
             #results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
             results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
-	    Rlog[grep('vartypes:',Rlog)]
+       Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+       Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
             Rlog[grep('<=',Rlog)]
             print(paste("popsize:",results$pop.size))
@@ -405,7 +405,7 @@ class Analysis::Rgenoud
             flush.console()
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
 
-			#write final params to json file
+         #write final params to json file
             answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
             write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
             #convergenceflag <- toJSON(results$peakgeneration)

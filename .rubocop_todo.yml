@@ -54,7 +54,7 @@ Style/ClassVars:
 
 # Offense count: 27
 Style/CyclomaticComplexity:
-  Max: 33
+  Max: 48
 
 # Offense count: 42
 Style/Documentation:
@@ -104,11 +104,3 @@ Style/ParameterLists:
 Style/SpecialGlobalVars:
   Enabled: false
 
-# Offense count: 104
-Style/Tab:
-  Enabled: false
-
-# Offense count: 5
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/VariableName:
-  Enabled: false
