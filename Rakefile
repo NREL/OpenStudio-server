@@ -20,7 +20,7 @@ task :release do
   # verify that you are on master
   g = Git.open(File.dirname(__FILE__), log: Logger.new('release.log'))
 
-  raise 'Must release from master branch' if g.current_branch != 'master'
+  fail 'Must release from master branch' if g.current_branch != 'master'
 
   if g.status.changed.size > 0 || g.status.added.size > 0 || g.status.deleted.size > 0
     s = "\n Changed: #{g.status.changed.size}\n Added: #{g.status.added.size}\n Deleted: #{g.status.deleted.size}"
