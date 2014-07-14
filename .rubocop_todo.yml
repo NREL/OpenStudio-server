@@ -81,12 +81,12 @@ Style/IfUnlessModifier:
 
 # Offense count: 974
 Style/LineLength:
-  Max: 1100
+  Max: 1200
 
 # Offense count: 87
 # Configuration parameters: CountComments.
 Style/MethodLength:
-  Max: 312
+  Max: 350
 
 # Offense count: 18
 # Configuration parameters: EnforcedStyle, SupportedStyles.
@@ -98,10 +98,6 @@ Style/Next:
 Style/ParameterLists:
   Max: 6
 
-# Offense count: 1
-Style/SelfAssignment:
-  Enabled: false
-
 # DO NOT enable this because it appears $? is different than $CHILD_STATUS.
 # Offense count: 7
 # Cop supports --auto-correct.
@@ -110,11 +106,6 @@ Style/SpecialGlobalVars:
 
 # Offense count: 104
 Style/Tab:
-  Enabled: false
-
-# Offense count: 1
-# Configuration parameters: EnforcedStyleForMultiline, SupportedStyles.
-Style/TrailingComma:
   Enabled: false
 
 # Offense count: 5

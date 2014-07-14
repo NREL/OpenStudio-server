@@ -310,7 +310,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-        :problem,
+        :problem
       ]
       include_fields = [
         :variables,
