@@ -257,11 +257,11 @@ class Analysis::Optim
 
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
-		      cat("UUID is NA \n");
+            cat("UUID is NA \n");
               NAvalue <- .Machine$double.xmax
               return(NAvalue)
-			} else {
-		      try(f(z[j]), silent = TRUE)
+         } else {
+            try(f(z[j]), silent = TRUE)
 
 
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
@@ -322,19 +322,19 @@ class Analysis::Optim
                 print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-	        print(paste("exit_on_guideline14: ",flag))
-		if (flag["exit_on_guideline14"] == "true" ){
-		  # read in the results from the objective function file
-		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-		  tryCatch({
-		    res <- evalWithTimeout({
-		       json <- fromJSON(file=guideline_file)
-		       }, timeout=5);
-		    }, TimeoutException=function(ex) {
-		    cat(data_point_directory," No guideline.json file: Timeout\n");
-		    json <- toJSON(as.list(NULL))
-	            return(json)
+           flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+           print(paste("exit_on_guideline14: ",flag))
+      if (flag["exit_on_guideline14"] == "true" ){
+        # read in the results from the objective function file
+        guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+        tryCatch({
+          res <- evalWithTimeout({
+             json <- fromJSON(file=guideline_file)
+             }, timeout=5);
+          }, TimeoutException=function(ex) {
+          cat(data_point_directory," No guideline.json file: Timeout\n");
+          json <- toJSON(as.list(NULL))
+               return(json)
                   })
                   guideline <- json[[1]]
                   for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
@@ -351,12 +351,12 @@ class Analysis::Optim
                     dbDisconnect(mongo)
                     stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
                   }
-		}
+      }
                 dbDisconnect(mongo)
 
                 return(obj)
               }
-			      }
+               }
 
             clusterExport(cl,"g")
 
@@ -401,11 +401,11 @@ class Analysis::Optim
 
             results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-	          Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
             print(paste("Iterations:",Iteration))
             print(Rlog[grep('L =',Rlog)])
-	          print(Rlog[grep('X0 =',Rlog)])
+             print(Rlog[grep('X0 =',Rlog)])
             print(Rlog[grep('U =',Rlog)])
             Xlog <- Rlog[grep('X =',Rlog)]
             print("Iteration parameters:")

@@ -271,11 +271,11 @@ class Analysis::NsgaNrel
 
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
-		      cat("UUID is NA \n");
+            cat("UUID is NA \n");
               NAvalue <- .Machine$double.xmax
               return(NAvalue)
-			} else {
-		      try(f(z[j]), silent = TRUE)
+         } else {
+            try(f(z[j]), silent = TRUE)
 
 
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
@@ -285,12 +285,12 @@ class Analysis::NsgaNrel
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	      tryCatch({
-	        res <- evalWithTimeout({
-	          json <- fromJSON(file=object_file)
-	        }, timeout=5);
-	        }, TimeoutException=function(ex) {
-	           cat(data_point_directory," No objectives.json: Timeout\n");
+         tryCatch({
+           res <- evalWithTimeout({
+             json <- fromJSON(file=object_file)
+           }, timeout=5);
+           }, TimeoutException=function(ex) {
+              cat(data_point_directory," No objectives.json: Timeout\n");
                json <- toJSON(as.list(NULL))
                return(json)
               })
@@ -358,19 +358,19 @@ class Analysis::NsgaNrel
               print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-	        print(paste("exit_on_guideline14: ",flag))
-		if (flag["exit_on_guideline14"] == "true" ){
-		  # read in the results from the objective function file
-		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-		  tryCatch({
-		    res <- evalWithTimeout({
-		       json <- fromJSON(file=guideline_file)
-		       }, timeout=5);
-		    }, TimeoutException=function(ex) {
-		    cat(data_point_directory," No guideline.json file: Timeout\n");
-		    json <- toJSON(as.list(NULL))
-	            return(json)
+           flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+           print(paste("exit_on_guideline14: ",flag))
+      if (flag["exit_on_guideline14"] == "true" ){
+        # read in the results from the objective function file
+        guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+        tryCatch({
+          res <- evalWithTimeout({
+             json <- fromJSON(file=guideline_file)
+             }, timeout=5);
+          }, TimeoutException=function(ex) {
+          cat(data_point_directory," No guideline.json file: Timeout\n");
+          json <- toJSON(as.list(NULL))
+               return(json)
                   })
                   guideline <- json[[1]]
                   for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
@@ -387,7 +387,7 @@ class Analysis::NsgaNrel
                     dbDisconnect(mongo)
                     stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
                   }
-		}
+      }
                 dbDisconnect(mongo)
 
               return(obj)
@@ -419,7 +419,7 @@ class Analysis::NsgaNrel
             answer <- results$parameters
             write.table(answer, file="/mnt/openstudio/parameters_#{@analysis.id}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
             convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
-	    write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
 
           }
         end
