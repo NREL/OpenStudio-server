@@ -1,0 +1,9 @@
+AllCops:
+  Exclude:
+    - 'launch-instance/**/*'
+    - 'lib/**/*'
+    - 'prototyping/**/*'
+    - 'testing/**/*'
+    - 'vagrant/**/*'
+
+inherit_from: .rubocop_todo.yml
