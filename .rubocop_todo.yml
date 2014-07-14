@@ -111,12 +111,7 @@ Style/ParameterLists:
 Style/SelfAssignment:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/SignalException:
-  Enabled: false
-
+# DO NOT enable this because it appears $? is different than $CHILD_STATUS.
 # Offense count: 7
 # Cop supports --auto-correct.
 Style/SpecialGlobalVars:
