@@ -23,7 +23,6 @@ class DataPoint
   field :ip_address, type: String
   field :internal_ip_address, type: String
 
-
   # Relationships
   belongs_to :analysis
 

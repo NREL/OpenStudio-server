@@ -4,27 +4,27 @@ class Analysis::Optim
 
   def initialize(analysis_id, options = {})
     defaults = {
-        skip_init: false,
-        run_data_point_filename: 'run_openstudio_workflow.rb',
-        create_data_point_filename: 'create_data_point.rb',
-        output_variables: [],
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                number_of_samples: 3,
-                sample_method: 'individual_variables',
-                generations: 1,
-                method: 'L-BFGS-B',
-                pgtol: 1e-2,
-                factr: 4.5036e13,
-                maxit: 100,
-                normtype: 'minkowski',
-                ppower: 2,
-                exit_on_guideline14: 0,
-                objective_functions: [],
-                epsilongradient: 1e-4
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        random_seed: 1979,
+        algorithm: {
+          number_of_samples: 3,
+          sample_method: 'individual_variables',
+          generations: 1,
+          method: 'L-BFGS-B',
+          pgtol: 1e-2,
+          factr: 4.5036e13,
+          maxit: 100,
+          normtype: 'minkowski',
+          ppower: 2,
+          exit_on_guideline14: 0,
+          objective_functions: [],
+          epsilongradient: 1e-4
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)

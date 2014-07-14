@@ -64,7 +64,7 @@ OpenstudioServer::Application.routes.draw do
   match '/about' => 'pages#about'
   match '/analyses' => 'analyses#index'
 
-  #DenCity routes
+  # DenCity routes
   match 'metadata' => 'variables#metadata', :via => :get
   match 'download_metadata' => 'variables#download_metadata', :via => :get
 

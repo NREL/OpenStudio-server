@@ -93,7 +93,7 @@ class VariablesController < ApplicationController
     respond_to do |format|
       format.csv do
         write_and_send_input_variables_csv(analysis)
-        #redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
+        # redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
         # write_and_send_csv(@analysis)
       end
       format.rdata do
@@ -102,13 +102,12 @@ class VariablesController < ApplicationController
     end
   end
 
-
   # Bulk modify form
   def modify
     @variables = Variable.where(analysis_id: params[:analysis_id]).order_by(name: 1)
 
     if request.post?
-      #TODO: sanitize params
+      # TODO: sanitize params
       @variables.each do |var|
         if params[:visualize_ids].include? var.id
           var.visualize = true

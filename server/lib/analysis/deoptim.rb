@@ -4,31 +4,31 @@ class Analysis::Deoptim
 
   def initialize(analysis_id, options = {})
     defaults = {
-        skip_init: false,
-        run_data_point_filename: 'run_openstudio_workflow.rb',
-        create_data_point_filename: 'create_data_point.rb',
-        output_variables: [
-            {
-                display_name: 'Total Site Energy (EUI)',
-                name: 'total_energy',
-                objective_function: true,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: 'Total Life Cycle Cost',
-                name: 'total_life_cycle_cost',
-                objective_function: true,
-                objective_function_index: 1,
-                index: 1
-            }
-        ],
-        problem: {
-            algorithm: {
-                generations: 1,
-                objective_functions: %w(total_energy total_life_cycle_cost)
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [
+        {
+          display_name: 'Total Site Energy (EUI)',
+          name: 'total_energy',
+          objective_function: true,
+          objective_function_index: 0,
+          index: 0
+        },
+        {
+          display_name: 'Total Life Cycle Cost',
+          name: 'total_life_cycle_cost',
+          objective_function: true,
+          objective_function_index: 1,
+          index: 1
         }
+      ],
+      problem: {
+        algorithm: {
+          generations: 1,
+          objective_functions: %w(total_energy total_life_cycle_cost)
+        }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)

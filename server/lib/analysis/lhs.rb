@@ -15,8 +15,8 @@ class Analysis::Lhs
         algorithm: {
           number_of_samples: 100,
           sample_method: 'all_variables'
-            }
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
 

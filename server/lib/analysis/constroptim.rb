@@ -22,8 +22,8 @@ class Analysis::Constroptim
           ppower: 2,
           objective_functions: [],
           epsilongradient: 1e-4
-            }
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     @analysis_id = analysis_id

@@ -22,7 +22,7 @@ class Analysis::SpeaNrel
           objective_function_index: 1,
           index: 1
         }
-        ],
+      ],
       problem: {
         algorithm: {
           generations: 1,
@@ -33,7 +33,7 @@ class Analysis::SpeaNrel
           mprob: 0.5,
           objective_functions: %w(total_energy total_life_cycle_cost)
         }
-        }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)

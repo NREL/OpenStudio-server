@@ -4,30 +4,30 @@ class Analysis::RgenoudLexical
 
   def initialize(analysis_id, options = {})
     defaults = {
-        skip_init: false,
-        run_data_point_filename: 'run_openstudio_workflow.rb',
-        create_data_point_filename: 'create_data_point.rb',
-        output_variables: [],
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                generations: 1,
-                waitgenerations: 3,
-                popsize: 30,
-                boundaryenforcement: 2,
-                bfgsburnin: 2,
-                printlevel: 2,
-                balance: false,
-                solutiontolerance: 0.01,
-                normtype: 'minkowski',
-                ppower: 2,
-                objective_functions: [],
-                pgtol: 1e-1,
-                factr: 4.5036e14,
-                maxit: 5,
-                epsilongradient: 1e-4
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        random_seed: 1979,
+        algorithm: {
+          generations: 1,
+          waitgenerations: 3,
+          popsize: 30,
+          boundaryenforcement: 2,
+          bfgsburnin: 2,
+          printlevel: 2,
+          balance: false,
+          solutiontolerance: 0.01,
+          normtype: 'minkowski',
+          ppower: 2,
+          objective_functions: [],
+          pgtol: 1e-1,
+          factr: 4.5036e14,
+          maxit: 5,
+          epsilongradient: 1e-4
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
     Rails.logger.info(@options)
