@@ -137,7 +137,7 @@ class Analysis::BatchRun
       else
         fail 'could not start the cluster (most likely timed out)'
       end
-    rescue Exception => e
+    rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
       @analysis.status_message = log_message
