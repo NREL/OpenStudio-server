@@ -213,7 +213,7 @@ begin
 
   # now set the objective function value or values
   objective_function_result = 0
-rescue Exception => e
+rescue => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace}"
   ros.log_message log_message, true
 

@@ -103,7 +103,7 @@ begin
   dp.save!
 
   k.logger.info "Finished creating new datapoint"
-rescue Exception => e
+rescue => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   k.logger.info log_message if k
 

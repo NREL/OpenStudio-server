@@ -418,7 +418,7 @@ class Analysis::Rgenoud
         fail 'could not start the cluster (most likely timed out)'
       end
 
-    rescue Exception => e
+    rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
       @analysis.status_message = log_message
@@ -436,7 +436,7 @@ class Analysis::Rgenoud
         begin
           @analysis.results['rgenoud']['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
-        rescue Exception => e
+        rescue => e
           Rails.logger.error "Could not save post processed results for bestresult.json into the database"
         end
       end

@@ -21,11 +21,6 @@ Lint/ParenthesesAsGroupedExpression:
 Lint/RequireParentheses:
   Enabled: false
 
-# Offense count: 15
-# Cop supports --auto-correct.
-Lint/RescueException:
-  Enabled: false
-
 # Offense count: 1
 Lint/UnreachableCode:
   Enabled: false

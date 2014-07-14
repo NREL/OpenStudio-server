@@ -173,7 +173,7 @@ begin
   if result == 'NA'
     fail 'Simulation result was invalid'
   end
-rescue Exception => e
+rescue => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   puts log_message
   logger.info log_message if logger
