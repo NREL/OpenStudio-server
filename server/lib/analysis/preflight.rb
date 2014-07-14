@@ -79,7 +79,7 @@ class Analysis::Preflight
     samples = []
 
     if @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
-      Rails.logger.info "Sampling each variable individually"
+      Rails.logger.info 'Sampling each variable individually'
       selected_variables.each do |variable|
         if @analysis.problem['algorithm']['run_min']
           instance = {}
@@ -153,7 +153,7 @@ class Analysis::Preflight
       samples << mode_sample if @analysis.problem['algorithm']['run_mode']
 
     elsif @analysis.problem['algorithm']['sample_method'] == 'individual_measures'
-      fail "this has been removed for now until it is needed. it is best to use individual variables"
+      fail 'this has been removed for now until it is needed. it is best to use individual variables'
       # # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is
       # # useful when you need each measure to be evaluated individually.  The variables are then linked.
       # grouped = {min: {}, max: {}, mode: {}}

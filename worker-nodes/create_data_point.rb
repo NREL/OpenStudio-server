@@ -49,21 +49,21 @@ begin
     }
   }
 
-  logger.info "Creating Mongo connector"
+  logger.info 'Creating Mongo connector'
   k = OpenStudio::Workflow.load 'Mongo', run_directory, workflow_options
-  logger.info "Created Mongo connector"
+  logger.info 'Created Mongo connector'
 
-  k.logger.info "Creating new datapoint"
-  logger.info "Creating new datapoint"
+  k.logger.info 'Creating new datapoint'
+  logger.info 'Creating new datapoint'
   dp = DataPoint.find_or_create_by(uuid: dp_uuid)
   dp.name = "Autocreated on worker: #{dp_uuid}"
   dp.analysis_id = options[:analysis_id]
 
-  logger.info "Saving new datapoint"
+  logger.info 'Saving new datapoint'
   unless dp.save!
     logger.error "Could not save the datapoint into the database with error #{dp.errors.full_messages}"
   end
-  logger.info "Saved new datapoint"
+  logger.info 'Saved new datapoint'
 
   sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
 
@@ -102,7 +102,7 @@ begin
   dp.set_variable_values = sample
   dp.save!
 
-  k.logger.info "Finished creating new datapoint"
+  k.logger.info 'Finished creating new datapoint'
 rescue => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   k.logger.info log_message if k

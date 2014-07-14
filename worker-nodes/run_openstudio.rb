@@ -188,7 +188,7 @@ begin
     # check if there are any new folders that were creates
     temp_dirs = Dir[File.join(directory.to_s, '*/')].map { |d| d.split('/').pop }.sort
     if (temp_dirs + job_dirs).uniq != job_dirs
-      ros.log_message "#{(temp_dirs - job_dirs).join(",")}", true
+      ros.log_message "#{(temp_dirs - job_dirs).join(',')}", true
       job_dirs = temp_dirs
     end
   end
