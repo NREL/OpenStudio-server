@@ -9,7 +9,7 @@ class Analysis::Constroptim
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-          random_seed: 1979,
+        random_seed: 1979,
         algorithm: {
           number_of_samples: 3,
           sample_method: 'individual_variables',
@@ -142,7 +142,7 @@ class Analysis::Constroptim
       if !cluster.configure(master_ip)
         fail 'could not configure R cluster'
       else
-          Rails.logger.info 'Successfuly configured cluster'
+        Rails.logger.info 'Successfuly configured cluster'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
