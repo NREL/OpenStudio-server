@@ -64,7 +64,7 @@ task :release do
 end
 
 RSpec::Core::RakeTask.new("spec") do |spec|
-  pwd = Dir.pwd 
+  pwd = Dir.pwd
   #Dir.chdir("./server")
   #`bundle exec rspec`
 end
@@ -74,7 +74,7 @@ desc 'Run RuboCop on the lib directory'
 RuboCop::RakeTask.new(:rubocop) do |task|
   task.patterns = ['server/**/*.rb']
   # only show the files with failures
-  task.options = ['--no-color','--out=rubocop-results.xml']
+  task.options = ['--no-color', '--out=rubocop-results.xml']
   task.formatters = ['RuboCop::Formatter::CheckstyleFormatter']
   task.requires = ['rubocop/formatter/checkstyle_formatter']
   # don't abort rake on failure
