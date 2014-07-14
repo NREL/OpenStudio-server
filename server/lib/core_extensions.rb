@@ -14,7 +14,7 @@ def hash_to_dot_notation(object, prefix = nil)
       end
     end.reduce(&:merge)
   else
-    {prefix => object}
+    { prefix => object }
   end
 end
 

@@ -437,7 +437,7 @@ class Analysis::Rgenoud
           @analysis.results['rgenoud']['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
         rescue => e
-          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
+          Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
       # Do one last check if there are any data points that were not downloaded

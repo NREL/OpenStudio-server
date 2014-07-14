@@ -43,7 +43,7 @@ class DataPointsController < ApplicationController
         format.json { render json: @data_point.output }
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
+        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
       end
     end
   end
@@ -179,7 +179,7 @@ class DataPointsController < ApplicationController
     if File.exist? html_file
       @html = File.read html_file
     else
-      @html = "Could not find file"
+      @html = 'Could not find file'
     end
   end
 end

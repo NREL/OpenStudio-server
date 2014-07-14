@@ -84,12 +84,12 @@ class AnalysesController < ApplicationController
           @status_simulations = @na_sims
       end
 
-      @objective_functions = @analysis.variables.where(:objective_function => true).order_by(:objective_function.asc, :sample.asc)
+      @objective_functions = @analysis.variables.where(objective_function: true).order_by(:objective_function.asc, :sample.asc)
     end
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {analysis: @analysis} }
+      format.json { render json: { analysis: @analysis } }
       format.js
     end
   end
@@ -253,7 +253,7 @@ class AnalysesController < ApplicationController
             status: @analysis.status,
             analysis_type: @analysis.analysis_type
           },
-          data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }}
+          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message } } }
       }
     end
   end
@@ -270,7 +270,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status, download_status: k.download_status} }} }
+      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
     end
   end
 
@@ -317,7 +317,7 @@ class AnalysesController < ApplicationController
         :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
+      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
     end
   end
 
@@ -419,7 +419,7 @@ class AnalysesController < ApplicationController
     @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
 
     respond_to do |format|
-      format.json { render json: {variables: @variables, data: @data} }
+      format.json { render json: { variables: @variables, data: @data } }
       format.html # analysis_data.html.erb
     end
   end
@@ -452,7 +452,7 @@ class AnalysesController < ApplicationController
           :output_variables
         ]
 
-        render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
+        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
         # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
@@ -485,7 +485,7 @@ class AnalysesController < ApplicationController
       data_point_zip_data = File.read(save_file)
       send_data data_point_zip_data, filename: File.basename(save_file), type: 'application/zip; header=present', disposition: 'attachment'
     else
-      redirect_to analysis_path(analysis), notice: "Error zipping up files"
+      redirect_to analysis_path(analysis), notice: 'Error zipping up files'
     end
   end
 
@@ -571,7 +571,7 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
+    variables.map! { |v| { :"#{v['name']}".to_sym => v } }
 
     logger.info variables.class
     # logger.info .reduce({}, :merge)
@@ -618,7 +618,7 @@ class AnalysesController < ApplicationController
     end
 
     download_filename = "#{analysis.name}_results.RData"
-    data_frame_name = "results"
+    data_frame_name = 'results'
     Rails.logger.info("Data frame name will be #{data_frame_name}")
 
     # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...

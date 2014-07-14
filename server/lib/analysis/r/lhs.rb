@@ -34,7 +34,7 @@ module Analysis::R
       end
       values, weights = var.map_discrete_hash_to_array
 
-      dataframe = {'data' => probabilities_array}.to_dataframe
+      dataframe = { 'data' => probabilities_array }.to_dataframe
 
       if var.uncertainty_type == 'discrete_uncertain'
         @r.command(df: dataframe, values: values, weights: weights) do
@@ -85,7 +85,7 @@ module Analysis::R
       end
 
       @r.converse "print('creating distribution')"
-      dataframe = {'data' => probabilities_array}.to_dataframe
+      dataframe = { 'data' => probabilities_array }.to_dataframe
 
       if distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
         @r.command(df: dataframe) do
@@ -188,7 +188,7 @@ module Analysis::R
         save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.jpg'], nil)}"
         Rails.logger.info("R image file name is #{save_file_name}")
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
-          @r.command(d: {samples: samples}.to_dataframe) do
+          @r.command(d: { samples: samples }.to_dataframe) do
             %Q{
               png(filename="#{save_file_name}", width = 1024, height = 1024)
               hist(d$samples, freq=F, breaks=20)
@@ -196,7 +196,7 @@ module Analysis::R
           }
           end
         else # plot as a table
-          @r.command(d: {samples: samples}.to_dataframe) do
+          @r.command(d: { samples: samples }.to_dataframe) do
             %Q{
               png(filename="#{save_file_name}", width = 1024, height = 1024)
               plot(table(d$samples), ylab='count')

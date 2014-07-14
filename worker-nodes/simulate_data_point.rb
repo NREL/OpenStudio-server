@@ -60,7 +60,7 @@ result = nil
 
 begin
   directory = nil
-  fail "Data Point is NA... skipping" if options[:uuid] == 'NA'
+  fail 'Data Point is NA... skipping' if options[:uuid] == 'NA'
   analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
   store_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{options[:uuid]}"
   FileUtils.mkdir_p(store_directory)
@@ -114,7 +114,7 @@ begin
     transitions[1][:to] = :xml
     transitions.insert(2, from: :xml, to: :openstudio)
     states = OpenStudio::Workflow::Run.default_states
-    states.insert(2, :state => :xml, :options => {:after_enter => :run_xml})
+    states.insert(2, state: :xml, options: { after_enter: :run_xml })
 
     workflow_options = {
       transitions: transitions,

@@ -446,7 +446,7 @@ class Analysis::NsgaNrel
           @analysis.results['nsga_nrel']['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
         rescue => e
-          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
+          Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       else
         # find the best point based on the simulations

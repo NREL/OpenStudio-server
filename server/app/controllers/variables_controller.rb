@@ -127,7 +127,7 @@ class VariablesController < ApplicationController
   # GET metadata
   # DenCity view
   def metadata
-    @variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil).order_by(name: 1)
+    @variables = Variable.where(:metadata_id.ne => '', :metadata_id.ne => nil).order_by(name: 1)
   end
 
   def download_metadata
@@ -142,8 +142,8 @@ class VariablesController < ApplicationController
 
   def write_and_send_metadata_csv
     require 'csv'
-    variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
-    filename =  "dencity_metadata.csv"
+    variables = Variable.where(:metadata_id.ne => '', :metadata_id.ne => nil)
+    filename =  'dencity_metadata.csv'
     csv_string = CSV.generate do |csv|
       csv << %w(name display_name description units datatype user_defined)
       variables.each do |v|
@@ -184,7 +184,7 @@ class VariablesController < ApplicationController
     logger.info out_hash
 
     download_filename = "#{analysis.name}_metadata.RData"
-    data_frame_name = "metadata"
+    data_frame_name = 'metadata'
 
     Rails.logger.info("outhash is #{out_hash}")
 
