@@ -247,7 +247,8 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {
+      format.json { 
+        render json: {
           analysis: {
               status: @analysis.status,
               analysis_type: @analysis.analysis_type

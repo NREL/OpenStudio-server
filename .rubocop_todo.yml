@@ -56,30 +56,14 @@ Style/ClassLength:
 Style/ClassVars:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: PreferredMethods.
-Style/CollectionMethods:
-  Enabled: false
-
 # Offense count: 35
 # Configuration parameters: Keywords.
 Style/CommentAnnotation:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/CommentIndentation:
-  Enabled: false
-
 # Offense count: 27
 Style/CyclomaticComplexity:
   Max: 33
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/DeprecatedHashMethods:
-  Enabled: false
 
 # Offense count: 42
 Style/Documentation:

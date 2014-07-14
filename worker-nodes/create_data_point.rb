@@ -36,7 +36,7 @@ begin
   dp_uuid = UUID.new.generate
   analysis_root_path = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
   run_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{dp_uuid}"
-# Logger for the simulate datapoint
+  # Logger for the simulate datapoint
   logger = Logger.new("#{analysis_root_path}/create_data_point_#{dp_uuid}.log")
   logger.info "Parsed Input: #{options}"
   logger.info "Analysis id is #{options[:analysis_id]}"
