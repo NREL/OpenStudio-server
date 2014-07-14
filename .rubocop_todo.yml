@@ -25,11 +25,6 @@ Lint/RequireParentheses:
 Lint/UnreachableCode:
   Enabled: false
 
-# Offense count: 22
-# Cop supports --auto-correct.
-Lint/UnusedBlockArgument:
-  Enabled: false
-
 # Offense count: 51
 Lint/UselessAssignment:
   Enabled: false

@@ -63,7 +63,7 @@ task :release do
   puts "\nSuccessfully create tag and pushed repo to server\n".green
 end
 
-RSpec::Core::RakeTask.new("spec") do |spec|
+RSpec::Core::RakeTask.new("spec") do |_spec|
   pwd = Dir.pwd
   #Dir.chdir("./server")
   #`bundle exec rspec`
