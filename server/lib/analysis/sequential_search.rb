@@ -139,7 +139,7 @@ class Analysis::SequentialSearch
               temp_slope = nil
               if (x - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]]) == 0
                 # check if this has the same value, if so, then don't add#
-                # todo: this should really cause a derivative analysis to kick off that would
+                # TODO: this should really cause a derivative analysis to kick off that would
                 # then use this point as a potential path as well.
                 if y == pareto_point.results[@analysis.problem['algorithm']['objective_functions'][1]]
                   temp_slope = -Float::MAX
@@ -315,7 +315,7 @@ class Analysis::SequentialSearch
         measure_values["#{variable._id}"] = values.values.flatten
       end
       Rails.logger.info "measure values with variables are #{measure_values}"
-      # TODO, test the length of each measure value array
+      # TODO: test the length of each measure value array
       measure_values = measure_values.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
       Rails.logger.info "measure values array hash is  #{measure_values}"
 
@@ -361,7 +361,7 @@ class Analysis::SequentialSearch
       @iteration += 1
     end
 
-    # todo: finish of the pareto front so that it includes all the points to the end
+    # TODO: finish of the pareto front so that it includes all the points to the end
 
     Rails.logger.info("#{__FILE__} finished after iteration #{@iteration} with message '#{final_message}'")
     # Check the results of the run

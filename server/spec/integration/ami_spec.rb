@@ -8,7 +8,7 @@ describe 'AmiIntegration' do
   context 'most recent AMIs from Jenkins' do
     before(:all) do
 
-      # todo: should check if the jenkins server AMI list is available (i.e. inside nrel's firewall),
+      # TODO: should check if the jenkins server AMI list is available (i.e. inside nrel's firewall),
       # else
       aws_options = {
         ami_lookup_version: 2,
@@ -64,7 +64,7 @@ describe 'AmiIntegration' do
       end
       puts res
 
-      # todo: same test but use the Analysis Gem
+      # TODO: same test but use the Analysis Gem
 
     end
 

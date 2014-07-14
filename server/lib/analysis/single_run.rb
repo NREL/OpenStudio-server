@@ -69,7 +69,7 @@ class Analysis::SingleRun
     selected_variables.each do |var|
       Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
       variable_samples = nil
-      # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
+      # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
       if var.uncertainty_type == 'discrete_uncertain'
         Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
         variable_samples = var.static_value

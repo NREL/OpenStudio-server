@@ -52,7 +52,7 @@ class Analysis::Lhs
 
     Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
     Rails.logger.info "Setting up R for #{self.class.name}"
-    # todo: need to move this to the module class
+    # TODO: need to move this to the module class
     @r.converse('setwd("/mnt/openstudio")')
 
     # make this a core method

@@ -52,11 +52,6 @@ Style/ClassLength:
 Style/ClassVars:
   Enabled: false
 
-# Offense count: 35
-# Configuration parameters: Keywords.
-Style/CommentAnnotation:
-  Enabled: false
-
 # Offense count: 27
 Style/CyclomaticComplexity:
   Max: 33
