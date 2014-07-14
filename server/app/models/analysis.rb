@@ -291,9 +291,13 @@ class Analysis
   def finalize_data_points
     any_downloaded = false
     data_points.and({ download_status: 'na' }, { status: 'completed' }).each do |dp|
-      downloaded = dp.finalize_data_points
-      any_downloaded = any_downloaded || downloaded
+      # Don't break out of this loop if finalize_data_points == true because each data point
+      # needs to have the method called
+      if dp.finalize_data_points
+        any_downloaded = true
+      end
     end
+
     any_downloaded
   end
 
