@@ -13,12 +13,12 @@ class PagesController < ApplicationController
     total_runs = DataPoint.all.count
     completed_cnt = DataPoint.where(status: 'completed').count
 
-    if failed_runs != 0 and total_runs != 0
+    if failed_runs != 0 && total_runs != 0
       @failed_perc = (failed_runs.to_f / total_runs.to_f * 100).round(0)
     else
       @failed_perc = 0
     end
-    if completed_cnt != 0 and total_runs != 0
+    if completed_cnt != 0 && total_runs != 0
       @completed_perc = (completed_cnt.to_f / total_runs.to_f * 100).round(0)
     else
       @completed_perc = 0

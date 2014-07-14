@@ -33,11 +33,6 @@ Lint/UselessAssignment:
 Style/AccessorMethodName:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/AndOr:
-  Enabled: false
-
 # Offense count: 4
 Style/BlockNesting:
   Max: 4
@@ -66,7 +61,7 @@ Style/ClassAndModuleChildren:
 # Offense count: 18
 # Configuration parameters: CountComments.
 Style/ClassLength:
-  Max: 446
+  Max: 500
 
 # Offense count: 2
 Style/ClassVars:
