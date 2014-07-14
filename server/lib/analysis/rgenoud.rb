@@ -9,7 +9,7 @@ class Analysis::Rgenoud
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-          random_seed: 1979,
+        random_seed: 1979,
         algorithm: {
           generations: 1,
           waitgenerations: 3,
