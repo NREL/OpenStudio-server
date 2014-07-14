@@ -72,7 +72,6 @@ end
 require 'rubocop/rake_task'
 desc 'Run RuboCop on the lib directory'
 RuboCop::RakeTask.new(:rubocop) do |task|
-  task.patterns = ['server/**/*.rb']
   # only show the files with failures
   task.options = ['--no-color', '--out=rubocop-results.xml']
   task.formatters = ['RuboCop::Formatter::CheckstyleFormatter']
