@@ -621,7 +621,7 @@ class AnalysesController < ApplicationController
     data_frame_name = 'results'
     Rails.logger.info("Data frame name will be #{data_frame_name}")
 
-    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
+    # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
     r = Rserve::Simpler.new
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do

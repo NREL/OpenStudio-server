@@ -55,7 +55,7 @@ class Analysis::Preflight
 
     Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
     Rails.logger.info "Setting up R for #{self.class.name}"
-    # todo: need to move this to the module class
+    # TODO: need to move this to the module class
     @r.converse('setwd("/mnt/openstudio")')
 
     # make this a core method
@@ -197,7 +197,7 @@ class Analysis::Preflight
       Rails.logger.info "Finished adding the pivots resulting in #{samples}"
     else
       # only grab one of the pivots for now
-      # todo: run all baselines, but only sample for the "default pivot"
+      # TODO: run all baselines, but only sample for the "default pivot"
     end
 
     # Add the data points to the database

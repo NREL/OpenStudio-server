@@ -80,7 +80,7 @@ class Analysis::Rgenoud
     @r.converse('setwd("/mnt/openstudio")')
     @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
 
-    # todo: deal better with random seeds
+    # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
     # R libraries needed for this algorithm
     @r.converse 'library(rjson)'
@@ -99,7 +99,7 @@ class Analysis::Rgenoud
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    # TODO preflight check -- need to catch this in the analysis module
+    # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
       fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
     end
@@ -108,7 +108,7 @@ class Analysis::Rgenoud
       fail 'Must have number of samples to discretize the parameter space'
     end
 
-    # TODO add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
     # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
     #  raise "P Norm must be non-negative"
     # end

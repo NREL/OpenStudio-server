@@ -115,7 +115,7 @@ class Analysis
     defaults = { skip_init: false, use_server_as_worker: false }
     options = defaults.merge(options)
 
-    # TODO need to also check if the workers have been initialized, if so, then skip
+    # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
       self.start_time = Time.now # this is the time it was queued, not starts
       self.end_time = nil
@@ -243,12 +243,12 @@ class Analysis
       function(key, nothing) { return null; }
     }
 
-    # todo: do we want to filter this on only completed simulations--i don't think so anymore.
+    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     #   old query .where({download_status: 'completed', status: 'completed'})
     var_ids = data_points.map_reduce(map, reduce).out(inline: true)
     var_ids.each do |var|
       v = Variable.where(uuid: var['_id']).only(:name).first
-      # todo: can we delete the gsub'ing -- as i think the v.name is always the machine name now
+      # TODO: can we delete the gsub'ing -- as i think the v.name is always the machine name now
       mappings[var['_id']] = v.name.gsub(' ', '_') if v
     end
     Rails.logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
@@ -275,7 +275,7 @@ class Analysis
       function(key, nothing) { return null; }
     }
 
-    # todo: do we want to filter this on only completed simulations--i don't think so anymore.
+    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     #   old query .where({download_status: 'completed', status: 'completed'})
     var_ids = data_points.map_reduce(map, reduce).out(inline: true)
     var_ids.each do |var|

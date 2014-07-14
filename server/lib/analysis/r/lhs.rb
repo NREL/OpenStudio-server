@@ -145,7 +145,7 @@ module Analysis::R
         Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
         variable_samples = nil
         var_names << var.name
-        # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
+        # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
         if var.uncertainty_type == 'discrete_uncertain'
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           variable_samples = discrete_sample_from_probability(p[i_var], var)

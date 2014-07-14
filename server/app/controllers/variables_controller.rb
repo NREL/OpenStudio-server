@@ -188,7 +188,7 @@ class VariablesController < ApplicationController
 
     Rails.logger.info("outhash is #{out_hash}")
 
-    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
+    # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
     r = Rserve::Simpler.new
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do

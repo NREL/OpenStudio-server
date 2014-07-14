@@ -104,7 +104,7 @@ module Analysis::R
           }
       end
 
-      # todo: how to test if it successfully stopped the cluster
+      # TODO: how to test if it successfully stopped the cluster
       result = true
     end
   end

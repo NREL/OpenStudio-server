@@ -92,7 +92,7 @@ class Analysis::Deoptim
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    # TODO preflight check -- need to catch this in the analysis module
+    # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
       fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
