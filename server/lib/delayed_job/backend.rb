@@ -1,3 +1,4 @@
+#TODO Remove this class
 module DelayedJobView
   module Backend
     BACKEND_METHODS = [:all, :failed, :active, :queued, :destroy, :retry, :limited]
@@ -13,7 +14,7 @@ module DelayedJobView
       end
 
       BACKEND_METHODS << { to: :used_backend }
-      delegate *BACKEND_METHODS
+      # delegate *BACKEND_METHODS
     end
   end
 end

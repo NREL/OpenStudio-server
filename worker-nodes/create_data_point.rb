@@ -110,5 +110,5 @@ rescue Exception => e
   errored = true
 ensure
   # Must print out a dp uuid of some sort, default is NA
-  puts dp && !errored ? dp.uuid : 'NA'
+  puts (dp && !errored) ? dp.uuid : 'NA'
 end
