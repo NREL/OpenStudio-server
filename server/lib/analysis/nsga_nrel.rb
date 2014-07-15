@@ -183,10 +183,10 @@ class Analysis::NsgaNrel
       process.start
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info("Found the following good ips #{worker_ips}")
+      Rails.logger.info "Found the following good ips #{worker_ips}"
 
       cluster_started = cluster.start(worker_ips)
-      Rails.logger.info("Time flag was set to #{cluster_started}")
+      Rails.logger.info "Time flag was set to #{cluster_started}"
 
       if cluster_started
         # gen is the number of generations to calculate
@@ -270,14 +270,14 @@ class Analysis::NsgaNrel
               z
 
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") {
-            cat("UUID is NA \n");
-              NAvalue <- 1e19
-              return(NAvalue)
-         } else {
-            try(f(z[j]), silent = TRUE)
-
-
+            if (as.character(z[j]) == "NA") { 
+		      cat("UUID is NA \n");
+              NAvalue <- 1.0e19
+              return(NAvalue)		    
+			} else {
+		      try(f(z[j]), silent = TRUE)
+              
+			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -285,16 +285,12 @@ class Analysis::NsgaNrel
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-         tryCatch({
-           res <- evalWithTimeout({
-             json <- fromJSON(file=object_file)
-           }, timeout=5);
-           }, TimeoutException=function(ex) {
-              cat(data_point_directory," No objectives.json: Timeout\n");
-               json <- toJSON(as.list(NULL))
-               return(json)
-              })
-              #json <- fromJSON(file=object_file)
+             json <- NULL
+            try(json <- fromJSON(file=object_file), silent=TRUE)
+
+            if (is.null(json)) {
+              obj <- 1.0e19
+            } else {
               obj <- NULL
               objvalue <- NULL
               objtarget <- NULL
@@ -363,33 +359,30 @@ class Analysis::NsgaNrel
       if (flag["exit_on_guideline14"] == "true" ){
         # read in the results from the objective function file
         guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-        tryCatch({
-          res <- evalWithTimeout({
-             json <- fromJSON(file=guideline_file)
-             }, timeout=5);
-          }, TimeoutException=function(ex) {
-          cat(data_point_directory," No guideline.json file: Timeout\n");
-          json <- toJSON(as.list(NULL))
-               return(json)
-                  })
-                  guideline <- json[[1]]
-                  for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
-                  print(paste("guideline: ",guideline))
-                  print(paste("isTRUE(guideline): ",isTRUE(guideline)))
-                  print(paste("all(guideline): ",all(guideline)))
-                  if (all(guideline)){
-                    #write final params to json file
-                    varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
-                    answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
-                    write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                    convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
-                    write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
-                    dbDisconnect(mongo)
-                    stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+        json <- NULL
+        try(json <- fromJSON(file=guideline_file), silent=TRUE)
+        if (is.null(json)) {
+          print(paste("no guideline file: ",guideline_file))
+        } else {
+                    guideline <- json[[1]]
+                    for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
+                    print(paste("guideline: ",guideline))
+                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+                    print(paste("all(guideline): ",all(guideline)))
+                    if (all(guideline)){
+                      #write final params to json file
+                      varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
+                      answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
+                      write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                      convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+                      write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+                      dbDisconnect(mongo)
+                      stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+                    }
                   }
       }
                 dbDisconnect(mongo)
-
+                }
               return(obj)
               }
             }
