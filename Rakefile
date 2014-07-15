@@ -64,8 +64,6 @@ end
 
 RSpec::Core::RakeTask.new('spec') do |_spec|
   pwd = Dir.pwd
-  # Dir.chdir("./server")
-  # `bundle exec rspec`
 end
 
 require 'rubocop/rake_task'
