@@ -272,7 +272,7 @@ class Analysis::NsgaNrel
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
             cat("UUID is NA \n");
-              NAvalue <- .Machine$double.xmax
+              NAvalue <- 1e19
               return(NAvalue)
          } else {
             try(f(z[j]), silent = TRUE)
