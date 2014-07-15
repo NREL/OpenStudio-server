@@ -261,14 +261,14 @@ class Analysis::Rgenoud
               z
 
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") {
-            cat("UUID is NA \n");
-              NAvalue <- .Machine$double.xmax
-              return(NAvalue)
-         } else {
-            try(f(z[j]), silent = TRUE)
-
-
+            if (as.character(z[j]) == "NA") { 
+		      cat("UUID is NA \n");
+              NAvalue <- 1.0e19
+              return(NAvalue)		    
+			} else {
+		      try(f(z[j]), silent = TRUE)
+              
+			  
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -280,7 +280,7 @@ class Analysis::Rgenoud
             try(json <- fromJSON(file=object_file), silent=TRUE)
 
             if (is.null(json)) {
-              obj <- .Machine$double.xmax
+              obj <- 1.0e19
             } else {
               obj <- NULL
               objvalue <- NULL
