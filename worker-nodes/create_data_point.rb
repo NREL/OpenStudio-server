@@ -109,10 +109,11 @@ rescue => e
 
   errored = true
 ensure
-  # Must print out a dp uuid of some sort, default is NA
+  # Must print out a dp uuid or and NA
+  #   NA's are caught by the R algorithm as an error
   final_result = 'NA'
   if dp && !errored
     final_result = dp.uuid
   end
-  final_result
+  puts final_result
 end
