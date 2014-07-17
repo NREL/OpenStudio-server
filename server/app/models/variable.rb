@@ -87,13 +87,30 @@ class Variable
       var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'])
     end
 
+    # Example JSON from the spreadsheet tool
+    # {
+    #     display_name: "Total Site Energy Intensity",
+    #     display_name_short: "Site EUI",
+    #     metadata_id: "total_site_energy_intensity",
+    #     name: "standard_report_legacy.total_energy",
+    #     units: "MJ/m2",
+    #     visualize: false,
+    #     export: true,
+    #     variable_type: "Double",
+    #     objective_function: true,
+    #     objective_function_index: 0,
+    #     objective_function_target: null,
+    #     scaling_factor: null,
+    #     objective_function_group: 1
+    # },
     var.output = true
-    var.metadata_id = json['metadata_id'] if json['metadata_id']
     var.display_name = json['display_name'] if json['display_name']
+    # Until 12/30/2014 keep providing the display_name option
+    var.display_name_short = json['display_name_short'] ? json['display_name_short'] : json['display_name']
+    var.metadata_id = json['metadata_id'] if json['metadata_id']
     var.units = json['units'] if json['units']
     var.visualize = json['visualize'] if json['visualize']
     var.export = json['export'] if json['export']
-    var.data_type = json['variable_type'] if json['variable_type']
     var.data_type = json['variable_type'] if json['variable_type']
     var.objective_function = json['objective_function'] if json['objective_function']
     var.objective_function_index = json['objective_function_index'] if json['objective_function_index']
