@@ -112,6 +112,7 @@ class Variable
     var.visualize = json['visualize'] if json['visualize']
     var.export = json['export'] if json['export']
     var.data_type = json['variable_type'] if json['variable_type']
+    var.value_type = json['variable_type'] if json['variable_type']
     var.objective_function = json['objective_function'] if json['objective_function']
     var.objective_function_index = json['objective_function_index'] if json['objective_function_index']
     var['objective_function_target'] = json['objective_function_target'] if json['objective_function_target']
