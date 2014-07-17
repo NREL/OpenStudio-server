@@ -256,14 +256,14 @@ class Analysis::Optim
               z
 
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") { 
+            if (as.character(z[j]) == "NA") {
 		      cat("UUID is NA \n");
               NAvalue <- 1.0e19
-              return(NAvalue)		    
+              return(NAvalue)
 			} else {
 		      try(f(z[j]), silent = TRUE)
-              
-			  
+
+
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -448,7 +448,7 @@ class Analysis::Optim
         begin
           @analysis.results['optim']['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
-        rescue => e
+        rescue # => e
           Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end

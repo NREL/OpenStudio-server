@@ -70,7 +70,6 @@ class Analysis::Preflight
     # generate the probabilities for all variables as column vectors
     @r.converse("print('starting preflight')")
     samples = nil
-    var_types = nil
 
     Rails.logger.info 'Starting sampling'
 
