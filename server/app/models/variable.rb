@@ -8,7 +8,8 @@ class Variable
   field :version_uuid, type: String # pointless at this time
   field :name, type: String # machine name
   field :metadata_id, type: String, default: nil # link to dencity taxonomy
-  field :display_name, type: String
+  field :display_name, type: String, default: ''
+  field :display_name_short, type: String, default: ''
   field :minimum
   field :maximum
   field :mean
@@ -206,12 +207,13 @@ class Variable
   def self.get_variable_data_v2(analysis)
     # get all variables for analysis
     save_fields = [
-      :measure_id, :name, :display_name, :metadata_id, :value_type, :units,
+      :measure_id, :name, :display_name, :display_name_short, :metadata_id, :value_type, :units,
       :perturbable, :pivot, :output, :visualize, :export, :static_value,
       :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
     variables = Variable.where(analysis_id: analysis).or({ perturbable: true }, { pivot: true }, { output: true }, { export: true }).as_json(only: save_fields)
 
+    # Add in some measure information into each of the variables, if it is a variable
     variables.each do |v|
       if v['measure_id']
         m = Measure.find(v['measure_id'])
