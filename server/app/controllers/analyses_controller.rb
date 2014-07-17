@@ -501,7 +501,7 @@ class AnalysesController < ApplicationController
 
     var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
                   :objective_function_group, :objective_function_index, :objective_function_target,
-                  :scaling_factor, :display_name, :name, :units, :value_type, :data_type]
+                  :scaling_factor, :display_name, :display_name_short, :name, :units, :value_type, :data_type]
 
     # dynamic query, only add 'or' for option fields that are true
     or_qry = []
