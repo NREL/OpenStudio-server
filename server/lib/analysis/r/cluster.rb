@@ -22,7 +22,6 @@ module Analysis::R
 
     # configure the r session, returns true if the flag variable was readable (and true)
     def configure(master_ip)
-      result = false
       @r.command do
         %Q{
             ip <- "#{master_ip}"
@@ -54,7 +53,6 @@ module Analysis::R
     # start the cluster.  Returns true if the cluster was started, false
     # if the cluster timed out or failed. The IP addresses are passed as a hash of an arrays a["ip"] = ["ip1", "ip2", ...]
     def start(ip_addresses)
-      result = false
       @r.command(ips: ip_addresses.to_dataframe) do
         %Q{
 
@@ -91,7 +89,8 @@ module Analysis::R
           print("Cluster started")
         }
       end
-      result = @r.converse('timeflag')
+
+      @r.converse('timeflag')
     end
 
     def stop

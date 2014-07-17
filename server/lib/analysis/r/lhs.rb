@@ -38,25 +38,25 @@ module Analysis::R
 
       if var.uncertainty_type == 'discrete_uncertain'
         @r.command(df: dataframe, values: values, weights: weights) do
-          %Q{
+          "
             print(values)
             samples <- qdiscrete(df$data, weights, values)
-          }
+          "
         end
       elsif var.uncertainty_type == 'bool_uncertain'
         fail 'bool_uncertain needs some updating to map from bools'
         @r.command(df: dataframe, values: values, weights: weights) do
-          %Q{
+          "
             print(values)
             samples <- qdiscrete(df$data, weights, values)
-          }
+          "
         end
       else
         fail "discrete distribution type #{var.uncertainty_type} not known for R"
       end
 
       samples = @r.converse 'samples'
-      samples = [samples] unless samples.kind_of? Array # ensure it is an array
+      samples = [samples] unless samples.is_a? Array # ensure it is an array
       Rails.logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples
@@ -68,7 +68,7 @@ module Analysis::R
     # checks to make sure that it is.  If R only has one sample, then it will not
     # wrap it in an array.
     def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max)
-      probabilities_array = [probability_array] unless probabilities_array.kind_of? Array # ensure array
+      probabilities_array = [probability_array] unless probabilities_array.is_a? Array # ensure array
 
       Rails.logger.info 'Creating sample from probability'
       r_dist_name = ''
@@ -89,37 +89,37 @@ module Analysis::R
 
       if distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
         @r.command(df: dataframe) do
-          %Q{
+          "
             samples <- #{r_dist_name}(df$data, #{min}, #{max})
-          }
+          "
         end
       elsif distribution_type == 'lognormal'
         @r.command(df: dataframe) do
-          %Q{
+          "
             sigma <- sqrt(log(#{stddev}/(#{mean}^2)+1))
             mu <- log((#{mean}^2)/sqrt(#{stddev}+#{mean}^2))
             samples <- #{r_dist_name}(df$data, mu, sigma)
             samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
-          }
+          "
         end
       elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
         @r.command(df: dataframe) do
-          %Q{
+          "
           print(df)
           samples <- #{r_dist_name}(df$data, #{min}, #{max}, #{mean})
-        }
+        "
         end
       else
         @r.command(df: dataframe) do
-          %Q{
+          "
             samples <- #{r_dist_name}(df$data, #{mean}, #{stddev})
             samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
-          }
+          "
         end
       end
 
       samples = @r.converse 'samples'
-      samples = [samples] unless samples.kind_of? Array # ensure it is an array
+      samples = [samples] unless samples.is_a? Array # ensure it is an array
       Rails.logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples

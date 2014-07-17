@@ -233,15 +233,15 @@ class Analysis
     mappings = {}
     start = Time.now
 
-    map = %Q{
+    map = "
       function() {
         for (var key in this.set_variable_values) { emit(key, null); }
       }
-    }
+    "
 
-    reduce = %Q{
+    reduce = "
       function(key, nothing) { return null; }
-    }
+    "
 
     # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     #   old query .where({download_status: 'completed', status: 'completed'})
@@ -265,15 +265,15 @@ class Analysis
     mappings = {}
     start = Time.now
 
-    map = %Q{
+    map = "
       function() {
         for (var key in this.results) { emit(key, null); }
       }
-    }
+    "
 
-    reduce = %Q{
+    reduce = "
       function(key, nothing) { return null; }
-    }
+    "
 
     # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     #   old query .where({download_status: 'completed', status: 'completed'})
