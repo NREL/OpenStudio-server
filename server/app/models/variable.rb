@@ -226,7 +226,7 @@ class Variable
     # get all variables for analysis
     save_fields = [
       :measure_id, :name, :display_name, :display_name_short, :metadata_id, :value_type, :units,
-      :perturbable, :pivot, :output, :visualize, :export, :static_value,
+      :perturbable, :pivot, :output, :visualize, :export, :static_value, :minimum, :maximum,
       :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
     variables = Variable.where(analysis_id: analysis).or({ perturbable: true }, { pivot: true }, { output: true }, { export: true }).as_json(only: save_fields)
