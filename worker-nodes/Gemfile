@@ -14,5 +14,8 @@ gem 'delayed_job_mongoid'
 gem 'libxml-ruby'
 gem 'os'
 
+# Always allow ruby-prof in measures
+gem 'ruby-prof'
+
 gem 'uuid'
 
