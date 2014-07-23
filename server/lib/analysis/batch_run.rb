@@ -31,7 +31,7 @@ class Analysis::BatchRun
 
     # save other run information in another object in the analysis
     @analysis_job.start_time = Time.now
-    @analysis_job.status = 'running'
+    @analysis_job.status = 'started'
     @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
     @analysis_job.save!
 
