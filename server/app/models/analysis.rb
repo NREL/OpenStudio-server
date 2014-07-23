@@ -15,11 +15,17 @@ class Analysis
   field :exit_on_guideline14, type: Boolean, default: false
   field :delayed_job_ids, type: Array, default: []
   field :status, type: String
+
+  # Hash of the jobs to run for the analysis
+  field :jobs, type: Array, default: [] # very specific format
+  field :job_index, type: Integer, default: 0
+
   field :analysis_type, type: String
+  field :queued_time, type: DateTime
   field :start_time, type: DateTime
   field :end_time, type: DateTime
   field :results, type: Hash, default: {} # this was nil, can we have this be an empty hash? Check Measure Group JSONS!
-  field :run_options, type: Hash, default: {}  # hash of each run options configurations (if desired)
+  field :run_options, type: Hash, default: {} # hash of each run options configurations (if desired)
   field :problem
   field :status_message, type: String # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
@@ -115,28 +121,50 @@ class Analysis
     defaults = { skip_init: false, use_server_as_worker: false }
     options = defaults.merge(options)
 
+    Rails.logger.info "calling start on #{analysis_type} with options #{options}"
+
     # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
-      self.start_time = Time.now # this is the time it was queued, not starts
-      self.end_time = nil
-      Rails.logger.info('Initializing workers in database')
-      initialize_workers(options)
-
       Rails.logger.info("Queuing up analysis #{uuid}")
-      self.analysis_type = analysis_type
+      self.queued_time = Time.now
       self.status = 'queued'
       self.save!
+
+      Rails.logger.info('Initializing workers in database')
+      initialize_workers(options)
     end
 
     Rails.logger.info("Starting #{analysis_type}")
     if no_delay
+      reload
       Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
       abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, options)
+      # add new jobs
+      jobs << {
+        queued_time: Time.now,
+        start_time: nil,
+        end_time: nil,
+        status: 'queued',
+        analysis_type: analysis_type,
+        job_index: jobs.length
+      }
+      self.save!
       abr.perform
     else
+      reload
       Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
       job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, options), queue: 'analysis'
+      # TODO: remove the delayed_jobs_ids from the db
       delayed_job_ids << job.id
+      jobs << {
+        queued_time: Time.now,
+        start_time: nil,
+        end_time: nil,
+        status: 'queued',
+        analysis_type: analysis_type,
+        delayed_job_id: job.id,
+        job_index: jobs.length
+      }
       self.save!
     end
   end
@@ -160,7 +188,7 @@ class Analysis
 
       return [true]
     else
-      Rails.logger.info("Analysis is already queued with #{dj} or option was not passed to allow multiple analyses")
+      Rails.logger.info "Analysis is already queued with #{dj} or option was not passed to allow multiple analyses"
       return [false, 'An analysis is already queued']
     end
   end

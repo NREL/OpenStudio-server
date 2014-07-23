@@ -23,6 +23,8 @@ class Analysis::BatchRun
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
+    @analysis.start_time = Time.now
+    @analysis.analysis_type = 'batch_run'
     @analysis.status = 'started'
     @analysis.end_time = nil
     @analysis.run_flag = true
@@ -160,6 +162,7 @@ class Analysis::BatchRun
         @analysis.status = 'completed'
       end
 
+      @analysis.job_index += 1
       @analysis.save!
 
       Rails.logger.info "Finished running analysis '#{self.class.name}'"
