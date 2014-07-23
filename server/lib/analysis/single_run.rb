@@ -1,7 +1,7 @@
 class Analysis::SingleRun
   include Analysis::Core # pivots and static vars
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.
     #   Options under problem will be merged together and persisted into the database.  The order of
@@ -21,6 +21,7 @@ class Analysis::SingleRun
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -32,8 +33,7 @@ class Analysis::SingleRun
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
@@ -41,7 +41,15 @@ class Analysis::SingleRun
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['single_run'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'started'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
+
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results[self.class.to_s.underscore] = {}
 
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
@@ -98,10 +106,11 @@ class Analysis::SingleRun
 
     # Only set this data if the analysis was NOT called from another analysis
     unless @options[:skip_init]
-      @analysis.end_time = Time.now
-      @analysis.status = 'completed'
+      @analysis_job.end_time = Time.now
+      @analysis_job.status = 'completed'
+      @analysis_job.save!
+      @analysis.reload
     end
-
     @analysis.save!
 
     Rails.logger.info "Finished running analysis '#{self.class.name}'"

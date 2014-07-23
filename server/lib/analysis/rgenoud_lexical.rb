@@ -2,7 +2,7 @@
 class Analysis::RgenoudLexical
   include Analysis::R
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
@@ -30,8 +30,9 @@ class Analysis::RgenoudLexical
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
+
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -44,8 +45,7 @@ class Analysis::RgenoudLexical
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
@@ -53,7 +53,19 @@ class Analysis::RgenoudLexical
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['rgenoud_lexical'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'started'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
+
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results[self.class.to_s.underscore] = {}
+
+    # save all the changes into the database and reload the object (which is required)
+    @analysis.save!
+    @analysis.reload
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -65,9 +77,9 @@ class Analysis::RgenoudLexical
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
 
-    # save the data
+    # save the algorithm specific updates
     @analysis.save!
-    @analysis.reload # after saving the data (needed for some reason yet to be determined)
+    @analysis.reload
 
     # create an instance for R
     @r = Rserve::Simpler.new
@@ -398,10 +410,11 @@ class Analysis::RgenoudLexical
 
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
-        @analysis.end_time = Time.now
-        @analysis.status = 'completed'
+        @analysis_job.end_time = Time.now
+        @analysis_job.status = 'completed'
+        @analysis_job.save!
+        @analysis.reload
       end
-
       @analysis.save!
 
       Rails.logger.info "Finished running analysis '#{self.class.name}'"

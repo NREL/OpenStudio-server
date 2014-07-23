@@ -12,6 +12,7 @@ class Job
   field :index, type: Integer
   field :options, type: Hash # these are the passed in options
   field :run_options, type: Hash, default: {} # these are the options after merging with the default
+  field :results, type: Hash, default: {}
 
   belongs_to :analysis
 

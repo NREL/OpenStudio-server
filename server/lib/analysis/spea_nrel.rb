@@ -2,7 +2,7 @@
 class Analysis::SpeaNrel
   include Analysis::R
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
@@ -36,8 +36,9 @@ class Analysis::SpeaNrel
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
+
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes

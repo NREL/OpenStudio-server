@@ -46,9 +46,13 @@ class Analysis::Preflight
     # save other run information in another object in the analysis
     # save other run information in another object in the analysis
     @analysis_job.start_time = Time.now
-    @analysis_job.status = 'running'
+    @analysis_job.status = 'started'
     @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
     @analysis_job.save!
+
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results[self.class.to_s.underscore] = {}
 
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
