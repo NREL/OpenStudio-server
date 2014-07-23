@@ -6,6 +6,7 @@ gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :branch =>
 # Install other gems that are needed but not required by the workflow gem
 gem 'facter'
 gem 'ruby-prof'
+gem 'parallel'
 gem 'multi_json'
 gem 'oj'
 
