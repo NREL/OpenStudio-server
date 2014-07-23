@@ -13,19 +13,12 @@ class Analysis
   field :description, type: String
   field :run_flag, type: Boolean, default: false
   field :exit_on_guideline14, type: Boolean, default: false
-  field :delayed_job_ids, type: Array, default: []
-  field :status, type: String
 
   # Hash of the jobs to run for the analysis
-  field :jobs, type: Array, default: [] # very specific format
-  field :job_index, type: Integer, default: 0
-
-  field :analysis_type, type: String
-  field :queued_time, type: DateTime
-  field :start_time, type: DateTime
-  field :end_time, type: DateTime
+  #field :jobs, type: Array, default: [] # very specific format
+  # move the results into the jobs array
   field :results, type: Hash, default: {} # this was nil, can we have this be an empty hash? Check Measure Group JSONS!
-  field :run_options, type: Hash, default: {} # hash of each run options configurations (if desired)
+
   field :problem
   field :status_message, type: String # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
@@ -41,19 +34,19 @@ class Analysis
 
   # Relationships
   belongs_to :project
+
   has_many :data_points
   has_many :algorithms
   has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
   has_many :measures
-  # has_many :problems
+  has_many :jobs
 
   # Indexes
-  index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index({uuid: 1}, unique: true)
+  index({id: 1}, unique: true)
   index(name: 1)
   index(created_at: 1)
   index(project_id: 1)
-  index(uuid: 1, status: 1)
   index(uuid: 1, download_status: 1)
 
   # Validations
@@ -118,7 +111,7 @@ class Analysis
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = { skip_init: false, use_server_as_worker: false }
+    defaults = {skip_init: false, use_server_as_worker: false}
     options = defaults.merge(options)
 
     Rails.logger.info "calling start on #{analysis_type} with options #{options}"
@@ -126,8 +119,6 @@ class Analysis
     # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
       Rails.logger.info("Queuing up analysis #{uuid}")
-      self.queued_time = Time.now
-      self.status = 'queued'
       self.save!
 
       Rails.logger.info('Initializing workers in database')
@@ -136,54 +127,42 @@ class Analysis
 
     Rails.logger.info("Starting #{analysis_type}")
     if no_delay
-      reload
       Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
-      abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, options)
-      # add new jobs
-      jobs << {
-        queued_time: Time.now,
-        start_time: nil,
-        end_time: nil,
-        status: 'queued',
-        analysis_type: analysis_type,
-        job_index: jobs.length
-      }
+      aj = self.jobs.new_job(id, analysis_type, jobs.length, options)
       self.save!
+      self.reload
+      abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
-      reload
       Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, options), queue: 'analysis'
-      # TODO: remove the delayed_jobs_ids from the db
-      delayed_job_ids << job.id
-      jobs << {
-        queued_time: Time.now,
-        start_time: nil,
-        end_time: nil,
-        status: 'queued',
-        analysis_type: analysis_type,
-        delayed_job_id: job.id,
-        job_index: jobs.length
-      }
+      aj = self.jobs.new_job(id, analysis_type, jobs.length, options)
+      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analysis'
+      aj.delayed_job_id = job.id
+      aj.save!
+
       self.save!
+      self.reload
     end
   end
 
+  # Options take the form of?
+  # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    defaults = { allow_multiple_jobs: false }
+    defaults = {allow_multiple_jobs: false}
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
     Rails.logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
+    dj_ids = jobs.map { |v| v[:delayed_job_ids] }
+    Rails.logger.info "Delayed Job ids are #{dj_ids}"
     if options[:allow_multiple_jobs]
       # go ahead and submit the job no matter what
       start(no_delay, analysis_type, options)
 
       return [true]
-      # TODO: need to test for each of these cases!
-    elsif delayed_job_ids.empty? || !Delayed::Job.where(:_id.in => delayed_job_ids).exists? || status != 'queued' || status != 'started'
+    elsif delayed_job_ids.empty? || !Delayed::Job.where(:_id.in => delayed_job_ids).exists?
       start(no_delay, analysis_type, options)
 
       return [true]
@@ -195,12 +174,15 @@ class Analysis
 
   def stop_analysis
     logger.info('attempting to stop analysis')
-    # check if the project is running
-    if status == 'queued' || status == 'started'
-      self.run_flag = false
-      self.status = 'completed'
-      self.end_time = Time.now
-      # TODO: add a flag that this was killed
+
+    self.run_flag = false
+
+    jobs.each do |j|
+      unless j[:status] == 'completed'
+        j[:status] = 'completed'
+        j[:end_time] = Time.new
+        j[:status_message] = 'canceled by user'
+      end
     end
 
     [self.save!, errors]
@@ -318,7 +300,7 @@ class Analysis
   # copy back the results to the master node if they are finished
   def finalize_data_points
     any_downloaded = false
-    data_points.and({ download_status: 'na' }, { status: 'completed' }).each do |dp|
+    data_points.and({download_status: 'na'}, {status: 'completed'}).each do |dp|
       # Don't break out of this loop if finalize_data_points == true because each data point
       # needs to have the method called
       if dp.finalize_data_points
@@ -345,6 +327,49 @@ class Analysis
         data_points.where(status: status)
       end
     end
+  end
+
+  def jobs_status
+    jobs.order_by(:index.asc).map{ |j| {analysis_type: j.analysis_type, status: j.status}}
+  end
+
+  def status
+    j = jobs.last
+    if j && j.status
+      return j.status
+    else
+      return 'unknown'
+    end
+  end
+
+  def analysis_type
+    j = jobs.last
+    if j && j.analysis_type
+      return j.analysis_type
+    else
+      return 'unknown'
+    end
+  end
+
+  def start_time
+    j = jobs.first
+
+    return j.start_time if j
+
+    nil
+  end
+
+  def end_time
+    j = jobs.last
+    if j && j['end_time']
+      return j['end_time']
+    else
+      return nil
+    end
+  end
+
+  def delayed_job_ids
+    jobs.map { |v| v[:delayed_job_ids] }
   end
 
   protected
@@ -379,12 +404,17 @@ class Analysis
     end
 
     # delete any delayed jobs items
-    if delayed_job_ids
-      delayed_job_ids.each do |djid|
-        dj = Delayed::Job.find(djid)
-        dj.delete unless dj.nil?
-      end
+    delayed_job_ids.each do |djid|
+      next unless djid
+      dj = Delayed::Job.find(djid)
+      dj.delete unless dj.nil?
     end
+
+    jobs.each do |r|
+      logger.info("removing #{record.id}")
+      record.destroy
+    end
+
   end
 
   def verify_uuid

@@ -1,7 +1,7 @@
 class Analysis::Preflight
   include Analysis::Core # pivots and static vars
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.
     #   Options under problem will be merged together and persisted into the database.  The order of
@@ -24,6 +24,7 @@ class Analysis::Preflight
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -35,12 +36,7 @@ class Analysis::Preflight
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-
-    @analysis.jobs[@analysis.job_index][:start_time] = Time.now
-
-    @analysis.start_time = Time.now
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
@@ -48,8 +44,11 @@ class Analysis::Preflight
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    # TODO: save this in the jobs hash
-    @analysis.run_options['preflight'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'running'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
 
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
@@ -63,10 +62,6 @@ class Analysis::Preflight
       Rails.logger.info "Setting up R for #{self.class.name}"
       # TODO: need to move this to the module class
       @r.converse('setwd("/mnt/openstudio")')
-
-      # make this a core method
-      Rails.logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
-      @r.converse("set.seed(#{@analysis.problem['random_seed']})")
 
       pivot_array = Variable.pivot_array(@analysis.id)
 
@@ -159,38 +154,6 @@ class Analysis::Preflight
 
       elsif @analysis.problem['algorithm']['sample_method'] == 'individual_measures'
         fail 'this has been removed for now until it is needed. it is best to use individual variables'
-        # # Individual Measures analysis takes each variable and groups them together by the measure ID.  This is
-        # # useful when you need each measure to be evaluated individually.  The variables are then linked.
-        # grouped = {min: {}, max: {}, mode: {}}
-        # Rails.logger.info 'Sampling individual measures'
-        # min_sample = {} # {:name => 'Minimum'}
-        # max_sample = {} # {:name => 'Maximim'}
-        # mode_sample = {}
-        # selected_variables.each do |variable|
-        #   grouped[:min]["#{variable.measure.id}"] = {} unless grouped[:min].key?(variable.measure.id)
-        #   grouped[:max]["#{variable.measure.id}"] = {} unless grouped[:max].key?(variable.measure.id)
-        #   grouped[:mode]["#{variable.measure.id}"] = {} unless grouped[:mode].key?(variable.measure.id)
-        #
-        #   if variable.relation_to_output == 'inverse'
-        #     grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
-        #     grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
-        #   else
-        #     grouped[:min]["#{variable.measure.id}"]["#{variable.id}"] = variable.minimum
-        #     grouped[:max]["#{variable.measure.id}"]["#{variable.id}"] = variable.maximum
-        #   end
-        #   grouped[:mode]["#{variable.measure.id}"]["#{variable.id}"] = variable.modes_value
-        # end
-        #
-        #
-        # # Hash will look like this now:
-        # # {
-        # # {:min=>{"m_a"=>{"v_1"=>0.2161572052401747}, "m_b"=>{"v_2"=>0.21428571428571425, "v_3"=>0.56}}}
-        # # }
-        # # So add the min,max,mode values
-        # samples += grouped[:min].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_min']
-        # samples += grouped[:max].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_max']
-        # samples += grouped[:mode].map { |_, v| v }.flatten if @analysis.problem['algorithm']['run_mode']
-        # Rails.logger.info "Final grouped hash is: #{samples}"
       else
         fail 'no sampling method defined (all_variables or individual_variables)'
       end
@@ -221,16 +184,12 @@ class Analysis::Preflight
 
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
-        @analysis.jobs[@analysis.job_index][:end_time] = Time.now
-        @analysis.jobs[@analysis.job_index][:status] = 'completed'
-        @analysis.end_time = Time.now
-        @analysis.status = 'completed'
+        @analysis_job.end_time = Time.now
+        @analysis_job.status = 'completed'
+        @analysis_job.save!
+        @analysis.reload
       end
-
-      @analysis.job_index += 1
-
       @analysis.save!
-      @r.converse("print('finished preflight')")
 
       Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end

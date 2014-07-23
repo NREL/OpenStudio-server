@@ -1,5 +1,5 @@
 class Analysis::BatchRun
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
       data_points: [],
@@ -10,23 +10,19 @@ class Analysis::BatchRun
     Rails.logger.info(@options)
 
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
-  # TODO: Move the setup information to a base class
   def perform
-    # add into delayed job
     require 'rserve/simpler'
     require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.start_time = Time.now
-    @analysis.analysis_type = 'batch_run'
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
@@ -34,9 +30,11 @@ class Analysis::BatchRun
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['batch_run'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'running'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
 
-    Rails.logger.info "Saving options in #{self.class}"
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
     @analysis.reload
@@ -158,11 +156,11 @@ class Analysis::BatchRun
 
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
-        @analysis.end_time = Time.now
-        @analysis.status = 'completed'
+        @analysis_job.end_time = Time.now
+        @analysis_job.status = 'completed'
+        @analysis_job.save!
+        @analysis.reload
       end
-
-      @analysis.job_index += 1
       @analysis.save!
 
       Rails.logger.info "Finished running analysis '#{self.class.name}'"
