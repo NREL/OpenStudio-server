@@ -251,7 +251,8 @@ class AnalysesController < ApplicationController
         render json: {
           analysis: {
             status: @analysis.status,
-            analysis_type: @analysis.analysis_type
+            analysis_type: @analysis.analysis_type,
+            jobs: @analysis.jobs.order_by(:index.asc)
           },
           data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message } } }
       end

@@ -7,8 +7,10 @@ gem 'json'
 
 # database modules
 gem 'mongoid', '~> 3.1.6'
-gem 'paperclip', '~> 4.1.1' 
+#gem 'mongoid', '~> 4.0'
+gem 'paperclip', '~> 4.1.1'
 gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
+#gem 'mongoid-locker', '~> 0.3'
 
 # R
 gem 'rserve-simpler'
