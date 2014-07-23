@@ -54,6 +54,7 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
+    parallel (1.1.2)
     ruby-prof (0.15.1)
     systemu (2.6.4)
     tzinfo (0.3.40)
@@ -74,5 +75,6 @@ DEPENDENCIES
   openstudio-workflow!
   os
   paperclip (~> 4.1.1)
+  parallel
   ruby-prof
   uuid
