@@ -6,19 +6,16 @@ gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :branch =>
 # Install other gems that are needed but not required by the workflow gem
 gem 'facter'
 gem 'ruby-prof'
+gem 'multi_json'
+gem 'oj'
 
 gem 'mongoid', '~> 3.1.6'
 gem 'paperclip', '~> 4.1.1'
 gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
 gem 'delayed_job_mongoid'
-#gem 'mongoid-locker', '~> 0.2.1'
-
 
 gem 'libxml-ruby'
 gem 'os'
-
-# Always allow ruby-prof in measures
-gem 'ruby-prof'
 
 gem 'uuid'
 
