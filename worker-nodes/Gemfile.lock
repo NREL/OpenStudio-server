@@ -46,6 +46,7 @@ GEM
       paperclip (>= 2.3.6)
     moped (1.5.2)
     multi_json (1.10.1)
+    oj (2.9.9)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -53,6 +54,7 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
+    ruby-prof (0.15.1)
     systemu (2.6.4)
     tzinfo (0.3.40)
     uuid (2.3.7)
@@ -67,7 +69,10 @@ DEPENDENCIES
   libxml-ruby
   mongoid (~> 3.1.6)
   mongoid-paperclip
+  multi_json
+  oj
   openstudio-workflow!
   os
   paperclip (~> 4.1.1)
+  ruby-prof
   uuid
