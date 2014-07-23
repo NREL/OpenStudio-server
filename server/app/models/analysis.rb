@@ -176,14 +176,16 @@ class Analysis
     logger.info('attempting to stop analysis')
 
     self.run_flag = false
+    # The ensure block will clean up the jobs and save the statuses
 
-    jobs.each do |j|
-      unless j[:status] == 'completed'
-        j[:status] = 'completed'
-        j[:end_time] = Time.new
-        j[:status_message] = 'canceled by user'
-      end
-    end
+    # jobs.each do |j|
+    #   unless j.status == 'completed'
+    #     j.status = 'completed'
+    #     j.end_time = Time.new
+    #     j.status_message = 'canceled by user'
+    #     j.save
+    #   end
+    # end
 
     [self.save!, errors]
   end

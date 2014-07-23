@@ -51,8 +51,7 @@ class Analysis::SpeaNrel
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
@@ -60,7 +59,19 @@ class Analysis::SpeaNrel
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['spea_nrel'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'started'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
+
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
+
+    # save all the changes into the database and reload the object (which is required)
+    @analysis.save!
+    @analysis.reload
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -72,9 +83,9 @@ class Analysis::SpeaNrel
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
 
-    # save the data
+    # save the algorithm specific updates
     @analysis.save!
-    @analysis.reload # after saving the data (needed for some reason yet to be determined)
+    @analysis.reload
 
     # create an instance for R
     @r = Rserve::Simpler.new

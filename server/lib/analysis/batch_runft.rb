@@ -38,7 +38,7 @@ class Analysis::BatchRunft
 
     # Clear out any former results on the analysis
     @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results[self.class.to_s.underscore] = {}
+    @analysis.results[self.class.to_s.split('::').last.underscore ] = {}
 
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
