@@ -15,7 +15,7 @@ class Analysis
   field :exit_on_guideline14, type: Boolean, default: false
 
   # Hash of the jobs to run for the analysis
-  #field :jobs, type: Array, default: [] # very specific format
+  # field :jobs, type: Array, default: [] # very specific format
   # move the results into the jobs array
   field :results, type: Hash, default: {} # this was nil, can we have this be an empty hash? Check Measure Group JSONS!
 
@@ -42,8 +42,8 @@ class Analysis
   has_many :jobs
 
   # Indexes
-  index({uuid: 1}, unique: true)
-  index({id: 1}, unique: true)
+  index({ uuid: 1 }, unique: true)
+  index({ id: 1 }, unique: true)
   index(name: 1)
   index(created_at: 1)
   index(project_id: 1)
@@ -76,7 +76,7 @@ class Analysis
       if cols[0] == 'master' # TODO: eventually rename this from master to server. The database calls this server
         node = ComputeNode.find_or_create_by(node_type: 'server', ip_address: cols[1])
         node.hostname = cols[2]
-        node.cores = [cols[3].to_i - 1, 1].max
+        node.cores = cols[3]
         node.user = cols[4]
         node.password = cols[5].chomp
         if options[:use_server_as_worker] && cols[6].chomp == 'true'
@@ -111,7 +111,7 @@ class Analysis
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = {skip_init: false, use_server_as_worker: false}
+    defaults = { skip_init: false, use_server_as_worker: false }
     options = defaults.merge(options)
 
     Rails.logger.info "calling start on #{analysis_type} with options #{options}"
@@ -128,27 +128,27 @@ class Analysis
     Rails.logger.info("Starting #{analysis_type}")
     if no_delay
       Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
-      aj = self.jobs.new_job(id, analysis_type, jobs.length, options)
+      aj = jobs.new_job(id, analysis_type, jobs.length, options)
       self.save!
-      self.reload
+      reload
       abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
       Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
-      aj = self.jobs.new_job(id, analysis_type, jobs.length, options)
+      aj = jobs.new_job(id, analysis_type, jobs.length, options)
       job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analysis'
       aj.delayed_job_id = job.id
       aj.save!
 
       self.save!
-      self.reload
+      reload
     end
   end
 
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    defaults = {allow_multiple_jobs: false}
+    defaults = { allow_multiple_jobs: false }
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
@@ -302,7 +302,7 @@ class Analysis
   # copy back the results to the master node if they are finished
   def finalize_data_points
     any_downloaded = false
-    data_points.and({download_status: 'na'}, {status: 'completed'}).each do |dp|
+    data_points.and({ download_status: 'na' }, { status: 'completed' }).each do |dp|
       # Don't break out of this loop if finalize_data_points == true because each data point
       # needs to have the method called
       if dp.finalize_data_points
@@ -332,7 +332,7 @@ class Analysis
   end
 
   def jobs_status
-    jobs.order_by(:index.asc).map{ |j| {analysis_type: j.analysis_type, status: j.status}}
+    jobs.order_by(:index.asc).map { |j| { analysis_type: j.analysis_type, status: j.status } }
   end
 
   def status
@@ -412,11 +412,10 @@ class Analysis
       dj.delete unless dj.nil?
     end
 
-    jobs.each do |r|
+    jobs.each do |_r|
       logger.info("removing #{record.id}")
       record.destroy
     end
-
   end
 
   def verify_uuid
