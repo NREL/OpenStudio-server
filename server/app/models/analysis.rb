@@ -412,9 +412,9 @@ class Analysis
       dj.delete unless dj.nil?
     end
 
-    jobs.each do |_r|
-      logger.info("removing #{record.id}")
-      record.destroy
+    jobs.each do |r|
+      logger.info("removing #{r.id}")
+      r.destroy
     end
   end
 
