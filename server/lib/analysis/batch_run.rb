@@ -7,7 +7,6 @@ class Analysis::BatchRun
       problem: {}
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
 
     @analysis_id = analysis_id
     @analysis_job_id = analysis_job_id
