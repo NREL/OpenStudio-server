@@ -40,7 +40,6 @@ class Analysis::NsgaNrel
     require 'uuid'
     require 'childprocess'
 
-
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
     @analysis_job = Job.find(@analysis_job_id)
@@ -59,7 +58,7 @@ class Analysis::NsgaNrel
 
     # Clear out any former results on the analysis
     @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results[self.class.to_s.split('::').last.underscore ] = {}
+    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
 
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
@@ -445,7 +444,7 @@ class Analysis::NsgaNrel
       best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          @analysis.results[self.class.to_s.split('::').last.underscore ]['best_result'] = JSON.parse(File.read(best_result_json))
+          @analysis.results[self.class.to_s.split('::').last.underscore]['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
         rescue => e
           Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
