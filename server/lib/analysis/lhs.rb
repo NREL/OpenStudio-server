@@ -1,7 +1,7 @@
 class Analysis::Lhs
   include Analysis::Core # pivots and static vars
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.
     #   Options under problem will be merged together and persisted into the database.  The order of
