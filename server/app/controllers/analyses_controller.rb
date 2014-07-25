@@ -89,7 +89,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: { analysis: @analysis } }
+      format.json { render json: {analysis: @analysis} }
       format.js
     end
   end
@@ -249,12 +249,12 @@ class AnalysesController < ApplicationController
       #  format.html # new.html.erb
       format.json do
         render json: {
-          analysis: {
-            status: @analysis.status,
-            analysis_type: @analysis.analysis_type,
-            jobs: @analysis.jobs.order_by(:index.asc)
-          },
-          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message } } }
+            analysis: {
+                status: @analysis.status,
+                analysis_type: @analysis.analysis_type,
+                jobs: @analysis.jobs.order_by(:index.asc)
+            },
+            data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }}
       end
     end
   end
@@ -271,7 +271,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
+      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status, download_status: k.download_status} }} }
     end
   end
 
@@ -311,14 +311,14 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-        :problem
+          :problem
       ]
       include_fields = [
-        :variables,
-        :measures # => {:include => :variables}
+          :variables,
+          :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
+      format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
     end
   end
 
@@ -420,7 +420,7 @@ class AnalysesController < ApplicationController
     @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
 
     respond_to do |format|
-      format.json { render json: { variables: @variables, data: @data } }
+      format.json { render json: {variables: @variables, data: @data} }
       format.html # analysis_data.html.erb
     end
   end
@@ -439,21 +439,21 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.json do
         fields = [
-          :name,
-          :data_points,
-          :analysis_type,
-          :status,
-          :start_time,
-          :end_time,
-          :seed_zip,
-          :results,
-          :run_start_time,
-          :run_end_time,
-          :openstudio_datapoint_file_name,
-          :output_variables
+            :name,
+            :data_points,
+            :analysis_type,
+            :status,
+            :start_time,
+            :end_time,
+            :seed_zip,
+            :results,
+            :run_start_time,
+            :run_end_time,
+            :openstudio_datapoint_file_name,
+            :output_variables
         ]
 
-        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
+        render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
         # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
@@ -476,7 +476,7 @@ class AnalysesController < ApplicationController
 
   # Get data across analysis. If a datapoint_id is specified, will return only that point
   # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
-  def get_analysis_data(analysis, datapoint_id = nil, options = nil)
+  def get_analysis_data(analysis, datapoint_id = nil, options = {})
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
     variables = nil
@@ -488,14 +488,12 @@ class AnalysesController < ApplicationController
 
     # dynamic query, only add 'or' for option fields that are true
     or_qry = []
-    if options
-      options.each do |k, v|
-        if v
-          # add to or
-          or_item = {}
-          or_item[k] = v
-          or_qry << or_item
-        end
+    options.each do |k, v|
+      if v
+        # add to or
+        or_item = {}
+        or_item[k] = v
+        or_qry << or_item
       end
     end
     variables = Variable.where(analysis_id: analysis).or(or_qry).order_by(:name.asc).as_json(only: var_fields)
@@ -505,11 +503,11 @@ class AnalysesController < ApplicationController
 
     visualize_map = variables.map { |v| "results.#{v['name']}" }
     # initialize the plot fields that will need to be reported
-    plot_fields = [:set_variable_values, :name, :_id, :run_start_time, :run_end_time] + visualize_map
+    plot_fields = [:set_variable_values, :name, :_id, :run_start_time, :run_end_time, :status, :status_message] + visualize_map
 
     # Can't call the as_json(:only) method on this probably because of the nested results hash
     if datapoint_id
-      plot_data = analysis.data_points.where(status: 'completed', status_message: 'completed normal', id: datapoint_id).order_by(:created_at.asc).only(plot_fields).as_json
+      plot_data = analysis.data_points.where(status: 'completed', id: datapoint_id, status_message: 'completed normal').order_by(:created_at.asc).only(plot_fields).as_json
     else
       plot_data = analysis.data_points.where(status: 'completed', status_message: 'completed normal').order_by(:created_at.asc).only(plot_fields).as_json
     end
@@ -554,7 +552,7 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-    variables.map! { |v| { :"#{v['name']}".to_sym => v } }
+    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
 
     logger.info variables.class
     # logger.info .reduce({}, :merge)

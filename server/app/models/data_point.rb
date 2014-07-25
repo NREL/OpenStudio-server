@@ -12,11 +12,11 @@ class DataPoint
   field :download_information, type: String
   field :openstudio_datapoint_file_name, type: String # make this paperclip?
   field :status, type: String, default: 'na' # enum of queued, started, completed
-  field :status_message, type: String # results of the simulation
+  field :status_message, type: String, default: '' # results of the simulation
   field :output # what is this?
   field :results, type: Hash, default: {}
-  field :run_start_time, type: DateTime
-  field :run_end_time, type: DateTime
+  field :run_start_time, type: DateTime, default: nil
+  field :run_end_time, type: DateTime, default: nil
   field :sdp_log_file, type: Array, default: []
 
   # Run location information
