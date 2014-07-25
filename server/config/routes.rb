@@ -42,7 +42,9 @@ OpenstudioServer::Application.routes.draw do
           get :show_full
           get :view_report
           get :download
+          get :dencity
         end
+
         collection do
           post :batch_upload
         end
