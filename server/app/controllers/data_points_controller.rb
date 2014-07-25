@@ -192,10 +192,7 @@ class DataPointsController < ApplicationController
       # reformat the data slightly to get a concise view of the data
       dencity = {}
 
-
       # instructions for building the inputs
-
-
       measure_instances = []
       if @data_point.analysis['problem']
         if @data_point.analysis['problem']['workflow']
@@ -204,7 +201,6 @@ class DataPointsController < ApplicationController
             m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
             m_instance['id'] = wf['measure_definition_uuid']
             m_instance['version_id'] = wf['measure_definition_version_uuid']
-
 
             if wf['arguments']
               m_instance['arguments'] = {}
@@ -224,6 +220,7 @@ class DataPointsController < ApplicationController
         end
       end
 
+      dencity[:provenance_name] = @data_point.analysis.name
       dencity[:measure_instances] = measure_instances
       dencity[:structure] = @data_point[:results]['dencity_reports']
     end
