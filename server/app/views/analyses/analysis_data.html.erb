@@ -5,7 +5,8 @@
      <thead>
      <tr>
        <th>Name</th>
-       <th>Datatype</th>
+       <th>Data Type*</th>
+       <th>Data Type*</th>
        <th>Units</th>
        <th>Export</th>
        <th>Visualize</th>
@@ -19,7 +20,8 @@
        <% @variables.each do |key, var| %>
        <tr>
          <td><%= var['display_name']%></td>
-         <td><%= var['data_type'] unless var['data_type'].nil? %><%= var['value_type'] unless var['value_type'].nil? %></td>
+         <td><%= var['data_type'] unless var['data_type'].nil? %>
+         <td><%= var['value_type'] unless var['value_type'].nil? %>
          <td><%= var['units'] %></td>
          <td><%= var['export'] if var['export'] %></td>
          <td><%= var['visualize'] if var['visualize'] %></td>
@@ -40,7 +42,7 @@
 
    </table>
 
-
+<p>* If there are two data types, then the record has both a value type and data type field (which needs to be fixed)</p>
 <h3>Data</h3>
 
 <div class="panel-group" id="accordion">
