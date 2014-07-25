@@ -505,7 +505,7 @@ class AnalysesController < ApplicationController
 
     visualize_map = variables.map { |v| "results.#{v['name']}" }
     # initialize the plot fields that will need to be reported
-    plot_fields = [:set_variable_values, :name, :_id] + visualize_map
+    plot_fields = [:set_variable_values, :name, :_id, :run_start_time, :run_end_time] + visualize_map
 
     # Can't call the as_json(:only) method on this probably because of the nested results hash
     if datapoint_id
