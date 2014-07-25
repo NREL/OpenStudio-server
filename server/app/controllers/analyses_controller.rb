@@ -472,6 +472,84 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def dencity
+    @analysis = Analysis.find(params[:id])
+
+    if @analysis
+      # reformat the data slightly to get a concise view of the data
+      prov_fields = ['uuid', 'created_at', 'name', 'display_name', 'description']
+
+      a = @analysis.as_json
+      a.each do |k, v|
+        logger.info k
+      end
+      @provenance = a.select { |key, _| prov_fields.include? key }
+
+      @provenance['user_defined_id'] = @provenance.delete('uuid')
+      @provenance['user_created_date'] = @provenance.delete('created_at')
+      @provenance['analysis_types'] = @analysis.analysis_types
+
+      @measure_metadata = []
+      if @analysis['problem']
+        if @analysis['problem']['algorithm']
+          @provenance['analysis_information'] = @analysis['problem']['algorithm']
+        end
+
+        if @analysis['problem']['workflow']
+          @analysis['problem']['workflow'].each do |wf|
+            new_wfi = {}
+            new_wfi['id'] = wf['measure_definition_uuid']
+            new_wfi['version_id'] = wf['measure_definition_version_uuid']
+
+            # Eventually all of this could be pulled directly from BCL
+            new_wfi['name'] = wf['measure_definition_class_name']
+            new_wfi['display_name'] = wf['measure_definition_display_name']
+            new_wfi['type'] = wf['measure_type']
+            new_wfi['modeler_description'] = wf['modeler_description']
+            new_wfi['description'] = wf['description']
+
+            new_wfi['arguments'] = []
+            if wf['arguments']
+              wf['arguments'].each do |arg|
+                wfi_arg = {}
+                wfi_arg['display_name'] = arg['display_name']
+                wfi_arg['display_name_short'] = arg['display_name_short']
+                wfi_arg['name'] = arg['name']
+                wfi_arg['description'] = ''
+                wfi_arg['units'] = '' # should be haystack compatible unit strings
+
+                new_wfi['arguments'] << wfi_arg
+              end
+            end
+
+            if wf['variables']
+              wf['variables'].each do |arg|
+                wfi_arg = {}
+                wfi_arg['display_name'] = arg['display_name']
+                wfi_arg['display_name_short'] = arg['display_name_short']
+                wfi_arg['name'] = arg['name']
+                wfi_arg['description'] = ''
+                wfi_arg['units'] = '' # should be haystack compatible unit strings
+
+                new_wfi['arguments'] << wfi_arg
+              end
+            end
+
+            @measure_metadata << new_wfi
+          end
+        end
+      end
+
+
+      #@analysis
+    end
+
+    respond_to do |format|
+      #format.html # show.html.erb
+      format.json { render partial: "analyses/dencity", formats: [:json] }
+    end
+  end
+
   protected
 
   # Get data across analysis. If a datapoint_id is specified, will return only that point
@@ -620,4 +698,6 @@ class AnalysesController < ApplicationController
       fail 'could not create R dataframe'
     end
   end
+
+
 end
