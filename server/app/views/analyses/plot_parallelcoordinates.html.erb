@@ -42,7 +42,7 @@
               // handle String datatype
               // handle Bool datatype
               if ((data['variables'][d]['data_type'] === 'string') || (data['variables'][d]['data_type'] === 'bool') || (data['variables'][d]['data_type'] === 'String') || (data['variables'][d]['data_type'] === 'Bool')) {
-                  console.log("This is a string or bool: " + d + ", " + data['variables'][d]['data_type'])
+                  //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['data_type'])
                   y[d] = d3.scale.ordinal()
                           .domain(data['data'].map(function (p) {
                               return p[d];
@@ -50,7 +50,7 @@
                           .rangePoints([h, 0]);
               }
               else if ((data['variables'][d]['value_type'] === 'string') || (data['variables'][d]['value_type'] === 'bool') || (data['variables'][d]['value_type'] === 'String') || (data['variables'][d]['value_type'] === 'Bool')) {
-                  console.log("This is a string or bool: " + d + ", " + data['variables'][d]['value_type'])
+                  //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['value_type'])
                   y[d] = d3.scale.ordinal()
                           .domain(data['data'].map(function (p) {
                               return p[d];
@@ -136,13 +136,14 @@
                       else {
                           d3.select(this).call(axis.scale(y[d]));
                       }
-
                   })
                   .append("svg:text")
                   .attr("text-anchor", "start")
                   .attr("y", -9)
                   .attr("transform", "rotate(-45)")
-                  .text(String);
+                  .text(function (d){
+                      return data['variables'][d]['display_name_short'];
+                  });
 
           // Add and store a brush for each axis.
           g.append("svg:g")
@@ -171,7 +172,7 @@
               // check for undefined values
               if (d[p] == " " || d[p] == null) return [x(p), null];
 
-              console.log(d[p])
+              //console.log(d[p])
               return [position(p), y[p](d[p])];
           }));
       }
@@ -247,7 +248,6 @@
             $('input:checkbox').prop('checked', false);
             toggle = true;
         }
-        console.log($('input:checkbox'));
     });
 </script>
 
