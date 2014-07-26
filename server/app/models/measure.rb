@@ -71,7 +71,7 @@ class Measure
 
             # Create a variable definition (i.e. a variable) for each argument regardless
             # whether or not it is used
-            new_var = Variable.create_by_os_argument_json(analysis_id, arg)
+            new_var = Variable.create_and_assign_to_measure(analysis_id, measure.id, arg)
             # Rails.logger.info("New variable is #{new_var}")
             measure.variables << new_var unless measure.variables.include?(new_var)
 
@@ -95,8 +95,8 @@ class Measure
       if k == 'variables' && v
         # Rails.logger.info "How do i get the values here: #{v.inspect}"
         v.each do |json_var|
-          Rails.logger.info "JSON had a variable named '#{json_var[:name]}'"
-          new_var = Variable.create_by_os_argument_json(analysis_id, json_var)
+          Rails.logger.info "JSON had a variable named '#{json_var['display_name']}'"
+          new_var = Variable.create_and_assign_to_measure(analysis_id, measure.id, json_var)
 
           if new_var.save!
             measure.variables << new_var  unless measure.variables.include?(new_var)

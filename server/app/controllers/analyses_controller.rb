@@ -89,7 +89,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {analysis: @analysis} }
+      format.json { render json: { analysis: @analysis } }
       format.js
     end
   end
@@ -249,12 +249,12 @@ class AnalysesController < ApplicationController
       #  format.html # new.html.erb
       format.json do
         render json: {
-            analysis: {
-                status: @analysis.status,
-                analysis_type: @analysis.analysis_type,
-                jobs: @analysis.jobs.order_by(:index.asc)
-            },
-            data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }}
+          analysis: {
+            status: @analysis.status,
+            analysis_type: @analysis.analysis_type,
+            jobs: @analysis.jobs.order_by(:index.asc)
+          },
+          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message } } }
       end
     end
   end
@@ -271,7 +271,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status, download_status: k.download_status} }} }
+      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
     end
   end
 
@@ -311,14 +311,14 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-          :problem
+        :problem
       ]
       include_fields = [
-          :variables,
-          :measures # => {:include => :variables}
+        :variables,
+        :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
+      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
     end
   end
 
@@ -420,7 +420,7 @@ class AnalysesController < ApplicationController
     @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
 
     respond_to do |format|
-      format.json { render json: {variables: @variables, data: @data} }
+      format.json { render json: { variables: @variables, data: @data } }
       format.html # analysis_data.html.erb
     end
   end
@@ -439,21 +439,21 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.json do
         fields = [
-            :name,
-            :data_points,
-            :analysis_type,
-            :status,
-            :start_time,
-            :end_time,
-            :seed_zip,
-            :results,
-            :run_start_time,
-            :run_end_time,
-            :openstudio_datapoint_file_name,
-            :output_variables
+          :name,
+          :data_points,
+          :analysis_type,
+          :status,
+          :start_time,
+          :end_time,
+          :seed_zip,
+          :results,
+          :run_start_time,
+          :run_end_time,
+          :openstudio_datapoint_file_name,
+          :output_variables
         ]
 
-        render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
+        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
         # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
@@ -477,10 +477,10 @@ class AnalysesController < ApplicationController
 
     if @analysis
       # reformat the data slightly to get a concise view of the data
-      prov_fields = ['uuid', 'created_at', 'name', 'display_name', 'description']
+      prov_fields = %w(uuid created_at name display_name description)
 
       a = @analysis.as_json
-      a.each do |k, v|
+      a.each do |k, _v|
         logger.info k
       end
       @provenance = a.select { |key, _| prov_fields.include? key }
@@ -545,14 +545,11 @@ class AnalysesController < ApplicationController
           end
         end
       end
-
-
-      #@analysis
     end
 
     respond_to do |format|
-      #format.html # show.html.erb
-      format.json { render partial: "analyses/dencity", formats: [:json] }
+      # format.html # show.html.erb
+      format.json { render partial: 'analyses/dencity', formats: [:json] }
     end
   end
 
@@ -636,7 +633,7 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
+    variables.map! { |v| { :"#{v['name']}".to_sym => v } }
 
     logger.info variables.class
     # logger.info .reduce({}, :merge)
@@ -704,6 +701,4 @@ class AnalysesController < ApplicationController
       fail 'could not create R dataframe'
     end
   end
-
-
 end

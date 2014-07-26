@@ -18,7 +18,7 @@ class Variable
   field :units, type: String
   field :discrete_values_and_weights
   field :data_type, type: String
-  field :value_type, type: String, default: nil  # merge this with the above?
+  field :value_type, type: String, default: nil # merge this with the above?
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
   field :objective_function, type: Boolean, default: false
@@ -83,7 +83,7 @@ class Variable
     if var
       Rails.logger.warn "Variable already exists for '#{var.name}'"
     else
-      Rails.logger.info "Adding a new variable named: '#{json['name']}'"
+      Rails.logger.info "Adding a new output variable named: '#{json['name']}'"
       var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'])
     end
 
@@ -125,14 +125,18 @@ class Variable
   end
 
   # Create the OS argument/variable
-  def self.create_by_os_argument_json(analysis_id, os_json)
-    var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
+  def self.create_and_assign_to_measure(analysis_id, measure_id, os_json)
+    fail 'Measure ID was not defined' unless measure_id
+    Rails.logger.info "AAAGAGAGA #{measure_id} for #{os_json}"
+    var = Variable.where(analysis_id: analysis_id, measure_id: measure_id, uuid: os_json['uuid']).first
     if var
-      Rails.logger.warn("Variable already exists for '#{var.name}' : '#{var.uuid}'")
+      fail "Variable already exists for '#{var.name}' : '#{var.uuid}'"
     else
-      Rails.logger.info("Adding a new variable/argument named: '#{os_json['name']}' with UUID '#{os_json['uuid']}'")
-      var = Variable.find_or_create_by(analysis_id: analysis_id, uuid: os_json['uuid'])
+      Rails.logger.info("Adding a new variable/argument named: '#{os_json['display_name']}' with UUID '#{os_json['uuid']}'")
+      var = Variable.find_or_create_by(analysis_id: analysis_id, measure_id: measure_id, uuid: os_json['uuid'])
     end
+
+    var.measure_id = measure_id
 
     exclude_fields = %w(uuid type argument uncertainty_description)
     os_json.each do |k, v|
@@ -172,12 +176,17 @@ class Variable
             attribute['name'] ? att_name = attribute['name'] : att_name = nil
             next unless att_name
             attribute.each do |k2, v2|
-              exclude_fields_2 = %w(uuid version_uuid name)
+              exclude_fields_2 = %w(uuid version_uuid)
               var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
             end
           end
         end
       end
+    end
+
+    # override the variable name to be the measure uuid and the argument name
+    if os_json['variable'] || os_json['pivot']
+      var.name = "#{measure_id}.#{os_json['argument']['name']}"
     end
 
     var.save!

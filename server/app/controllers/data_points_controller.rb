@@ -43,7 +43,7 @@ class DataPointsController < ApplicationController
         format.json { render json: @data_point.output }
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
+        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
       end
     end
   end
@@ -183,7 +183,6 @@ class DataPointsController < ApplicationController
     end
   end
 
-
   def dencity
     @data_point = DataPoint.find(params[:id])
 
@@ -196,7 +195,7 @@ class DataPointsController < ApplicationController
       measure_instances = []
       if @data_point.analysis['problem']
         if @data_point.analysis['problem']['workflow']
-          @data_point.analysis['problem']['workflow'].each_with_index do |wf, index|
+          @data_point.analysis['problem']['workflow'].each_with_index do |wf, _index|
             m_instance = {}
             m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
             m_instance['id'] = wf['measure_definition_uuid']
@@ -206,7 +205,7 @@ class DataPointsController < ApplicationController
               m_instance['arguments'] = {}
               if wf['variables']
                 wf['variables'].each do |var|
-                  m_instance['arguments'][var['name']] = @data_point.set_variable_values[var['uuid']]
+                  m_instance['arguments'][var['argument']['name']] = @data_point.set_variable_values[var['uuid']]
                 end
               end
 
@@ -229,7 +228,7 @@ class DataPointsController < ApplicationController
       if dencity
         format.json { render json: dencity.to_json }
       else
-        format.json { render json: {error: 'Could not format data point into DEnCity view'}, status: :unprocessable_entity }
+        format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
       end
     end
   end
