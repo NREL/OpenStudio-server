@@ -29,9 +29,9 @@ OpenstudioServer::Application.routes.draw do
       resources :measures, only: [:show, :index], shallow: true
       resources :variables, only: [:show, :index, :edit, :update], shallow: true do
         collection do
+          get :download_metadata
           get :download_variables
           get :metadata
-          get :download_metadata
           match 'modify' => 'variables#modify', :via => [:get, :post]
         end
 
@@ -42,6 +42,7 @@ OpenstudioServer::Application.routes.draw do
           get :show_full
           get :view_report
           get :download
+          get :download_reports
           get :dencity
         end
 
