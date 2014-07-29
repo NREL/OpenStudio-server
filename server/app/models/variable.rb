@@ -188,10 +188,11 @@ class Variable
     if os_json['variable'] || os_json['pivot']
       # Creates a unique ID for this measure
       var.name = "#{measure.id}.#{os_json['argument']['name']}"
+
       # A not necessarily unique id, but close enough
       var.name_with_measure = "#{measure.name}.#{os_json['argument']['name']}"
     else
-      var.name_with_measure = var.name
+      var.name_with_measure = "#{measure.name}.#{var.name}"
     end
 
     var.save!
