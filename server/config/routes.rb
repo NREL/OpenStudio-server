@@ -20,6 +20,7 @@ OpenstudioServer::Application.routes.draw do
         get :plot_radar
         get :plot_bar
         get :download_data
+        get :dencity
 
         match 'plot_parallelcoordinates' => 'analyses#plot_parallelcoordinates', :via => [:get, :post]
         match 'plot_xy_interactive' => 'analyses#plot_xy_interactive', :via => [:get, :post]
@@ -28,9 +29,9 @@ OpenstudioServer::Application.routes.draw do
       resources :measures, only: [:show, :index], shallow: true
       resources :variables, only: [:show, :index, :edit, :update], shallow: true do
         collection do
+          get :download_metadata
           get :download_variables
           get :metadata
-          get :download_metadata
           match 'modify' => 'variables#modify', :via => [:get, :post]
         end
 
@@ -41,7 +42,10 @@ OpenstudioServer::Application.routes.draw do
           get :show_full
           get :view_report
           get :download
+          get :download_reports
+          get :dencity
         end
+
         collection do
           post :batch_upload
         end

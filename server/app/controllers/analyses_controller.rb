@@ -472,6 +472,87 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def dencity
+    @analysis = Analysis.find(params[:id])
+
+    if @analysis
+      # reformat the data slightly to get a concise view of the data
+      prov_fields = %w(uuid created_at name display_name description)
+
+      a = @analysis.as_json
+      a.each do |k, _v|
+        logger.info k
+      end
+      @provenance = a.select { |key, _| prov_fields.include? key }
+
+      @provenance['user_defined_id'] = @provenance.delete('uuid')
+      @provenance['user_created_date'] = @provenance.delete('created_at')
+      @provenance['analysis_types'] = @analysis.analysis_types
+
+      @measure_metadata = []
+      if @analysis['problem']
+        if @analysis['problem']['algorithm']
+          @provenance['analysis_information'] = @analysis['problem']['algorithm']
+        end
+
+        if @analysis['problem']['workflow']
+          @analysis['problem']['workflow'].each do |wf|
+            new_wfi = {}
+            new_wfi['id'] = wf['measure_definition_uuid']
+            new_wfi['version_id'] = wf['measure_definition_version_uuid']
+
+            # Eventually all of this could be pulled directly from BCL
+            new_wfi['name'] = wf['measure_definition_class_name']
+            new_wfi['display_name'] = wf['measure_definition_display_name']
+            new_wfi['type'] = wf['measure_type']
+            new_wfi['modeler_description'] = wf['modeler_description']
+            new_wfi['description'] = wf['description']
+
+            new_wfi['arguments'] = []
+            if wf['arguments']
+              wf['arguments'].each do |arg|
+                wfi_arg = {}
+                wfi_arg['display_name'] = arg['display_name']
+                wfi_arg['display_name_short'] = arg['display_name_short']
+                wfi_arg['name'] = arg['name']
+                wfi_arg['data_type'] = arg['value_type']
+                wfi_arg['default_value'] = nil
+                wfi_arg['description'] = ''
+                wfi_arg['display_units'] = '' # should be haystack compatible unit strings
+                wfi_arg['units'] = '' # should be haystack compatible unit strings
+
+                new_wfi['arguments'] << wfi_arg
+              end
+            end
+
+            if wf['variables']
+              wf['variables'].each do |arg|
+                wfi_var = {}
+                wfi_var['display_name'] = arg['argument']['display_name']
+                wfi_var['display_name_short'] = arg['argument']['display_name_short']
+                wfi_var['name'] = arg['argument']['name']
+                wfi_var['default_value'] = nil
+                wfi_var['data_type'] = arg['argument']['value_type']
+                wfi_var['description'] = ''
+                wfi_var['display_units'] = arg['units']
+                wfi_var['units'] = '' # should be haystack compatible unit strings
+
+                new_wfi['arguments'] << wfi_var
+              end
+            end
+
+            @measure_metadata << new_wfi
+          end
+        end
+      end
+    end
+
+    respond_to do |format|
+      # format.html # show.html.erb
+      format.json { render partial: 'analyses/dencity', formats: [:json] }
+    end
+  end
+
   protected
 
   # Get data across analysis. If a datapoint_id is specified, will return only that point
@@ -484,22 +565,18 @@ class AnalysesController < ApplicationController
 
     var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
                   :objective_function_group, :objective_function_index, :objective_function_target,
-                  :scaling_factor, :display_name, :display_name_short, :name, :units, :value_type, :data_type]
+                  :scaling_factor, :display_name, :display_name_short, :name, :name_with_measure, :units, :value_type, :data_type]
 
     # dynamic query, only add 'or' for option fields that are true
-    or_qry = []
+    or_qry = [{perturbable: true}, {pivot: true}, {output: true}]
     options.each do |k, v|
-      if v
-        # add to or
-        or_item = {}
-        or_item[k] = v
-        or_qry << or_item
-      end
+      or_qry << {:"#{k}" => v} if v
     end
-    variables = Variable.where(analysis_id: analysis).or(or_qry).order_by(:name.asc).as_json(only: var_fields)
+    variables = Variable.where(analysis_id: analysis, :name.nin => ["", nil]).or(or_qry).
+        order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
-    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name_with_measure']] }]
 
     visualize_map = variables.map { |v| "results.#{v['name']}" }
     # initialize the plot fields that will need to be reported
@@ -513,8 +590,13 @@ class AnalysesController < ApplicationController
     end
 
     # Flatten the results hash to the dot notation syntax
-    Rails.logger.info plot_data
     plot_data.each do |pd|
+
+      # Make sure that date times are converted to strings because Rserve/Simpler does not handle this for you.
+      # If you see a Matrix error then it is most likely because there is a DateTime in the RData Frame
+      pd['run_start_time'] = pd['run_start_time'].to_s if pd['run_start_time']
+      pd['run_end_time'] = pd['run_end_time'].to_s if pd['run_end_time']
+
       unless pd['results'].empty?
         pd['results'] = hash_to_dot_notation(pd['results'])
 
@@ -544,6 +626,7 @@ class AnalysesController < ApplicationController
       end
     end
 
+
     # TODO: how to handle to sorting by iteration?
     # if @analysis.analysis_type == 'sequential_search'
     #   dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
@@ -554,11 +637,13 @@ class AnalysesController < ApplicationController
 
     variables.map! { |v| {:"#{v['name']}".to_sym => v} }
 
-    logger.info variables.class
-    # logger.info .reduce({}, :merge)
-
     variables = variables.reduce({}, :merge)
     # variables.reduce(|v| {}, :merge)
+
+    #variables.each do |v|
+    #  Rails.logger.info v
+    #end
+
     [variables, plot_data]
   end
 
@@ -573,15 +658,22 @@ class AnalysesController < ApplicationController
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, nil, export: true)
+    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
 
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
-      icnt = 0
+      csv << static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }
       data.each do |dp|
-        icnt += 1
-        # Write out the header if this is the first datapoint
-        csv << dp.keys if icnt == 1
-        csv << dp.values
+        # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
+        arr = []
+        (static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }).each do |v|
+          if dp[v].nil?
+            arr << nil
+          else
+            arr << dp[v]
+          end
+        end
+        csv << arr
       end
     end
 
@@ -592,19 +684,35 @@ class AnalysesController < ApplicationController
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, nil, export: true)
 
+    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
+    names_of_vars = static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }
+
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
-    out_hash = data.each_with_object(Hash.new([])) do |h1, h|
-      h1.each { |k, v| h[k] = h[k] + [v] }
+    out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
+      names_of_vars.each do |v|
+        add_this_value = ex_hash[v].nil? ? nil : ex_hash[v]
+        h[v] = h[v] + [add_this_value]
+      end
     end
+
+    # If the data are guaranteed to exist in the same column structure for each data point AND the
+    # length of each column is the same (especially no nils), then you can use the method below
+    #out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
+      #ex_hash.each { |k, v| h[k] = h[k] + [v] }
+    #end
+
+    #out_hash.each_key do |k|
+    #  #Rails.logger.info "Length is #{out_hash[k].size}"
+    #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    #end
 
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
-    Rails.logger.info("Data frame name will be #{data_frame_name}")
 
-    # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
     r = Rserve::Simpler.new
+
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %Q{
             temp <- tempfile('rdata', tmpdir="/tmp")

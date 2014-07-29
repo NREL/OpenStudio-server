@@ -173,6 +173,14 @@ class DataPointsController < ApplicationController
     send_data data_point_zip_data, filename: File.basename(@data_point.openstudio_datapoint_file_name), type: 'application/zip; header=present', disposition: 'attachment'
   end
 
+  def download_reports
+    @data_point = DataPoint.find(params[:id])
+
+    remote_filename_reports = @data_point.openstudio_datapoint_file_name.gsub('.zip', '_reports.zip')
+    data_point_zip_data = File.read(remote_filename_reports)
+    send_data data_point_zip_data, filename: File.basename(remote_filename_reports), type: 'application/zip; header=present', disposition: 'attachment'
+  end
+
   def view_report
     html_file = params[:html_file]
 
@@ -180,6 +188,56 @@ class DataPointsController < ApplicationController
       @html = File.read html_file
     else
       @html = 'Could not find file'
+    end
+  end
+
+  def dencity
+    @data_point = DataPoint.find(params[:id])
+
+    dencity = nil
+    if @data_point
+      # reformat the data slightly to get a concise view of the data
+      dencity = {}
+
+      # instructions for building the inputs
+      measure_instances = []
+      if @data_point.analysis['problem']
+        if @data_point.analysis['problem']['workflow']
+          @data_point.analysis['problem']['workflow'].each_with_index do |wf, _index|
+            m_instance = {}
+            m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
+            m_instance['id'] = wf['measure_definition_uuid']
+            m_instance['version_id'] = wf['measure_definition_version_uuid']
+
+            if wf['arguments']
+              m_instance['arguments'] = {}
+              if wf['variables']
+                wf['variables'].each do |var|
+                  m_instance['arguments'][var['argument']['name']] = @data_point.set_variable_values[var['uuid']]
+                end
+              end
+
+              wf['arguments'].each do |arg|
+                m_instance['arguments'][arg['name']] = arg['value']
+              end
+            end
+
+            measure_instances << m_instance
+          end
+        end
+      end
+
+      dencity[:provenance_name] = @data_point.analysis.name
+      dencity[:measure_instances] = measure_instances
+      dencity[:structure] = @data_point[:results]['dencity_reports']
+    end
+
+    respond_to do |format|
+      if dencity
+        format.json { render json: dencity.to_json }
+      else
+        format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
+      end
     end
   end
 end
