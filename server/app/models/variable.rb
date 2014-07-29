@@ -7,6 +7,7 @@ class Variable
   field :r_index, type: Integer
   field :version_uuid, type: String # pointless at this time
   field :name, type: String # machine name
+  field :name_with_measure, type: String
   field :metadata_id, type: String, default: nil # link to dencity taxonomy
   field :display_name, type: String, default: ''
   field :display_name_short, type: String, default: ''
@@ -125,18 +126,17 @@ class Variable
   end
 
   # Create the OS argument/variable
-  def self.create_and_assign_to_measure(analysis_id, measure_id, os_json)
-    fail 'Measure ID was not defined' unless measure_id
-    Rails.logger.info "AAAGAGAGA #{measure_id} for #{os_json}"
-    var = Variable.where(analysis_id: analysis_id, measure_id: measure_id, uuid: os_json['uuid']).first
+  def self.create_and_assign_to_measure(analysis_id, measure, os_json)
+    fail 'Measure ID was not defined' unless measure && measure.id
+    var = Variable.where(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid']).first
     if var
       fail "Variable already exists for '#{var.name}' : '#{var.uuid}'"
     else
       Rails.logger.info("Adding a new variable/argument named: '#{os_json['display_name']}' with UUID '#{os_json['uuid']}'")
-      var = Variable.find_or_create_by(analysis_id: analysis_id, measure_id: measure_id, uuid: os_json['uuid'])
+      var = Variable.find_or_create_by(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid'])
     end
 
-    var.measure_id = measure_id
+    var.measure_id = measure.id
 
     exclude_fields = %w(uuid type argument uncertainty_description)
     os_json.each do |k, v|
@@ -186,7 +186,12 @@ class Variable
 
     # override the variable name to be the measure uuid and the argument name
     if os_json['variable'] || os_json['pivot']
-      var.name = "#{measure_id}.#{os_json['argument']['name']}"
+      # Creates a unique ID for this measure
+      var.name = "#{measure.id}.#{os_json['argument']['name']}"
+      # A not necessarily unique id, but close enough
+      var.name_with_measure = "#{measure.name}.#{os_json['argument']['name']}"
+    else
+      var.name_with_measure = var.name
     end
 
     var.save!
@@ -234,7 +239,7 @@ class Variable
   def self.get_variable_data_v2(analysis)
     # get all variables for analysis
     save_fields = [
-      :measure_id, :name, :display_name, :display_name_short, :metadata_id, :value_type, :units,
+      :measure_id, :name, :name_with_measure, :display_name, :display_name_short, :metadata_id, :value_type, :units,
       :perturbable, :pivot, :output, :visualize, :export, :static_value, :minimum, :maximum,
       :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
@@ -246,7 +251,7 @@ class Variable
         m = Measure.find(v['measure_id'])
         v['measure_name'] = m.name
         v['measure_display_name'] = m.display_name
-      elsif v['name'].include?('.')
+      elsif v['name'] && v['name'].include?('.')
         tmp_name = v['name'].split('.')[0]
         # Test if this is a measure, if so grab that information
         m = Measure.where(name: tmp_name).first

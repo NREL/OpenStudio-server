@@ -565,7 +565,7 @@ class AnalysesController < ApplicationController
 
     var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
                   :objective_function_group, :objective_function_index, :objective_function_target,
-                  :scaling_factor, :display_name, :display_name_short, :name, :units, :value_type, :data_type]
+                  :scaling_factor, :display_name, :display_name_short, :name, :name_with_measure, :units, :value_type, :data_type]
 
     # dynamic query, only add 'or' for option fields that are true
     or_qry = []
@@ -577,10 +577,10 @@ class AnalysesController < ApplicationController
         or_qry << or_item
       end
     end
-    variables = Variable.where(analysis_id: analysis).or(or_qry).order_by(:name.asc).as_json(only: var_fields)
+    variables = Variable.where(analysis_id: analysis, :name.nin => ["", nil]).or(or_qry).order_by(:name.asc).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
-    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name_with_measure']] }]
 
     visualize_map = variables.map { |v| "results.#{v['name']}" }
     # initialize the plot fields that will need to be reported
@@ -635,9 +635,6 @@ class AnalysesController < ApplicationController
 
     variables.map! { |v| { :"#{v['name']}".to_sym => v } }
 
-    logger.info variables.class
-    # logger.info .reduce({}, :merge)
-
     variables = variables.reduce({}, :merge)
     # variables.reduce(|v| {}, :merge)
     [variables, plot_data]
@@ -682,6 +679,9 @@ class AnalysesController < ApplicationController
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
     Rails.logger.info("Data frame name will be #{data_frame_name}")
+
+    Rails.logger.info data
+    Rails.logger.info out_hash
 
     # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
