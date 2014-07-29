@@ -568,16 +568,12 @@ class AnalysesController < ApplicationController
                   :scaling_factor, :display_name, :display_name_short, :name, :name_with_measure, :units, :value_type, :data_type]
 
     # dynamic query, only add 'or' for option fields that are true
-    or_qry = []
+    or_qry = [{perturbable: true}, {pivot: true}, {output: true}]
     options.each do |k, v|
-      if v
-        # add to or
-        or_item = {}
-        or_item[k] = v
-        or_qry << or_item
-      end
+      or_qry << {:"#{k}" => v} if v
     end
-    variables = Variable.where(analysis_id: analysis, :name.nin => ["", nil]).or(or_qry).order_by(:name.asc).as_json(only: var_fields)
+    variables = Variable.where(analysis_id: analysis, :name.nin => ["", nil]).or(or_qry).
+        order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name_with_measure']] }]
@@ -594,7 +590,6 @@ class AnalysesController < ApplicationController
     end
 
     # Flatten the results hash to the dot notation syntax
-    Rails.logger.info plot_data
     plot_data.each do |pd|
       unless pd['results'].empty?
         pd['results'] = hash_to_dot_notation(pd['results'])
@@ -627,6 +622,7 @@ class AnalysesController < ApplicationController
       end
     end
 
+
     # TODO: how to handle to sorting by iteration?
     # if @analysis.analysis_type == 'sequential_search'
     #   dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
@@ -639,6 +635,11 @@ class AnalysesController < ApplicationController
 
     variables = variables.reduce({}, :merge)
     # variables.reduce(|v| {}, :merge)
+
+    #variables.each do |v|
+    #  Rails.logger.info v
+    #end
+
     [variables, plot_data]
   end
 
@@ -653,15 +654,18 @@ class AnalysesController < ApplicationController
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, nil, export: true)
+    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
 
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
-      icnt = 0
+      csv << static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }
       data.each do |dp|
-        icnt += 1
-        # Write out the header if this is the first data point
-        csv << dp.keys if icnt == 1
-        csv << dp.values
+        # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
+        arr = []
+        (static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }).each do |v|
+          arr << dp[v] ? dp[v] : nil
+        end
+        csv << arr
       end
     end
 
