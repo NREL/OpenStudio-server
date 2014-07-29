@@ -591,10 +591,14 @@ class AnalysesController < ApplicationController
 
     # Flatten the results hash to the dot notation syntax
     plot_data.each do |pd|
+
+      # Make sure that date times are converted to strings because Rserve/Simpler does not handle this for you.
+      # If you see a Matrix error then it is most likely because there is a DateTime in the RData Frame
+      pd['run_start_time'] = pd['run_start_time'].to_s if pd['run_start_time']
+      pd['run_end_time'] = pd['run_end_time'].to_s if pd['run_end_time']
+
       unless pd['results'].empty?
         pd['results'] = hash_to_dot_notation(pd['results'])
-        pd['run_start_time'] = pd['run_start_time'].to_s if pd['run_start_time']
-        pd['run_end_time'] = pd['run_end_time'].to_s if pd['run_end_time']
 
         # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
         # the datapoint actually put it in the results
@@ -692,11 +696,14 @@ class AnalysesController < ApplicationController
       end
     end
 
+    # If the data are guaranteed to exist in the same column structure for each data point AND the
+    # length of each column is the same (especially no nils), then you can use the method below
     #out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
       #ex_hash.each { |k, v| h[k] = h[k] + [v] }
     #end
 
     #out_hash.each_key do |k|
+    #  #Rails.logger.info "Length is #{out_hash[k].size}"
     #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
     #end
 
