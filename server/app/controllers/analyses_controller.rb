@@ -663,7 +663,11 @@ class AnalysesController < ApplicationController
         # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
         arr = []
         (static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }).each do |v|
-          arr << dp[v] ? dp[v] : nil
+          if dp[v].nil?
+            arr << nil
+          else
+            arr << dp[v]
+          end
         end
         csv << arr
       end
@@ -676,19 +680,29 @@ class AnalysesController < ApplicationController
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, nil, export: true)
 
+    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
+    names_of_vars = static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }
+
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
-    out_hash = data.each_with_object(Hash.new([])) do |h1, h|
-      h1.each { |k, v| h[k] = h[k] + [v] }
+    out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
+      names_of_vars.each do |v|
+        add_this_value = ex_hash[v].nil? ? nil : ex_hash[v]
+        h[v] = h[v] + [add_this_value]
+      end
     end
-    out_hash.each_key do |k|
-      Rails.logger.info "#{k}  -   #{out_hash[k]}"
-    end
+
+    #out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
+      #ex_hash.each { |k, v| h[k] = h[k] + [v] }
+    #end
+
+    #out_hash.each_key do |k|
+    #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    #end
 
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
 
-    # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
     r = Rserve::Simpler.new
 
