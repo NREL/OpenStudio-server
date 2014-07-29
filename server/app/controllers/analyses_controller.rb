@@ -89,7 +89,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: { analysis: @analysis } }
+      format.json { render json: {analysis: @analysis} }
       format.js
     end
   end
@@ -249,12 +249,12 @@ class AnalysesController < ApplicationController
       #  format.html # new.html.erb
       format.json do
         render json: {
-          analysis: {
-            status: @analysis.status,
-            analysis_type: @analysis.analysis_type,
-            jobs: @analysis.jobs.order_by(:index.asc)
-          },
-          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message } } }
+            analysis: {
+                status: @analysis.status,
+                analysis_type: @analysis.analysis_type,
+                jobs: @analysis.jobs.order_by(:index.asc)
+            },
+            data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }}
       end
     end
   end
@@ -271,7 +271,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
+      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status, download_status: k.download_status} }} }
     end
   end
 
@@ -311,14 +311,14 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-        :problem
+          :problem
       ]
       include_fields = [
-        :variables,
-        :measures # => {:include => :variables}
+          :variables,
+          :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
+      format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
     end
   end
 
@@ -420,7 +420,7 @@ class AnalysesController < ApplicationController
     @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
 
     respond_to do |format|
-      format.json { render json: { variables: @variables, data: @data } }
+      format.json { render json: {variables: @variables, data: @data} }
       format.html # analysis_data.html.erb
     end
   end
@@ -439,21 +439,21 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.json do
         fields = [
-          :name,
-          :data_points,
-          :analysis_type,
-          :status,
-          :start_time,
-          :end_time,
-          :seed_zip,
-          :results,
-          :run_start_time,
-          :run_end_time,
-          :openstudio_datapoint_file_name,
-          :output_variables
+            :name,
+            :data_points,
+            :analysis_type,
+            :status,
+            :start_time,
+            :end_time,
+            :seed_zip,
+            :results,
+            :run_start_time,
+            :run_end_time,
+            :openstudio_datapoint_file_name,
+            :output_variables
         ]
 
-        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
+        render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
         # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
@@ -598,6 +598,8 @@ class AnalysesController < ApplicationController
     plot_data.each do |pd|
       unless pd['results'].empty?
         pd['results'] = hash_to_dot_notation(pd['results'])
+        pd['run_start_time'] = pd['run_start_time'].to_s if pd['run_start_time']
+        pd['run_end_time'] = pd['run_end_time'].to_s if pd['run_end_time']
 
         # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
         # the datapoint actually put it in the results
@@ -633,7 +635,7 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-    variables.map! { |v| { :"#{v['name']}".to_sym => v } }
+    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
 
     variables = variables.reduce({}, :merge)
     # variables.reduce(|v| {}, :merge)
@@ -657,7 +659,7 @@ class AnalysesController < ApplicationController
       icnt = 0
       data.each do |dp|
         icnt += 1
-        # Write out the header if this is the first datapoint
+        # Write out the header if this is the first data point
         csv << dp.keys if icnt == 1
         csv << dp.values
       end
@@ -675,17 +677,17 @@ class AnalysesController < ApplicationController
     out_hash = data.each_with_object(Hash.new([])) do |h1, h|
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
+    out_hash.each_key do |k|
+      Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    end
 
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
-    Rails.logger.info("Data frame name will be #{data_frame_name}")
-
-    Rails.logger.info data
-    Rails.logger.info out_hash
 
     # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
     r = Rserve::Simpler.new
+
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %Q{
             temp <- tempfile('rdata', tmpdir="/tmp")
