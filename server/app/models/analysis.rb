@@ -344,6 +344,10 @@ class Analysis
     end
   end
 
+  def analysis_types
+    jobs.order_by(:index.asc).map { |j| j.analysis_type }
+  end
+
   def analysis_type
     j = jobs.last
     if j && j.analysis_type

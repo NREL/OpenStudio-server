@@ -5,7 +5,7 @@ class VariablesController < ApplicationController
     @variables = Variable.where(analysis_id: params[:analysis_id], perturbable: true).order_by(name: 1)
     @outputs = Variable.where(analysis_id: params[:analysis_id], output: true).order_by(name: 1)
     @pivots = Variable.where(analysis_id: params[:analysis_id], pivot: true).order_by(name: 1)
-    @others = Variable.where(analysis_id: params[:analysis_id], pivot: false, perturbable: false, static: false).order_by(name: 1)
+    @others = Variable.where(analysis_id: params[:analysis_id], pivot: false, perturbable: false, output: false).order_by(name: 1)
 
     respond_to do |format|
       format.html # index.html.erb
