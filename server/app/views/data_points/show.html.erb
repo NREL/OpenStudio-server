@@ -73,7 +73,7 @@
       <tbody>
       <% @set_variable_values.each do |k, v| %>
           <tr>
-            <td><%= link_to(Variable.find(k).name, Variable.find(k)) if Variable.find(k) %></td>
+            <td><%= link_to(Variable.find(k).display_name, Variable.find(k)) if Variable.find(k) %></td>
             <td><%= v %></td>
           </tr>
       <% end %>
