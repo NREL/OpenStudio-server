@@ -47,6 +47,7 @@ class Variable
   index(analysis_id: 1)
   index(analysis_id: 1, uuid: 1)
   index(analysis_id: 1, perturbable: 1)
+  index(analysis_id: 1, name: 1)
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
