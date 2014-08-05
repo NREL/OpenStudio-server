@@ -227,7 +227,6 @@ class DataPointsController < ApplicationController
         end
       end
 
-      dencity[:provenance_name] = @data_point.analysis.name
       dencity[:measure_instances] = measure_instances
       dencity[:structure] = @data_point[:results]['dencity_reports']
     end
