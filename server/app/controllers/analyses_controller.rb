@@ -59,6 +59,7 @@ class AnalysesController < ApplicationController
         @all_sims = @all_sims_total.paginate(page: @all_page, per_page: per_page, total_entries: @all_sims_total.count)
       end
 
+      # TODO: this is going to be slow ecause it returns the entire datapoint for each of these queries
       @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
       @completed_sims = @completed_sims_total.paginate(page: @completed_page, per_page: per_page, total_entries: @completed_sims_total.count)
 
@@ -240,9 +241,9 @@ class AnalysesController < ApplicationController
 
     dps = nil
     if params[:jobs]
-      dps = @analysis.data_points.where(status: params[:jobs])
+      dps = @analysis.data_points.where(status: params[:jobs]).only(:status, :analysis_type, :jobs, :status_message)
     else
-      dps = @analysis.data_points
+      dps = @analysis.data_points.only(:status, :analysis_type, :jobs, :status_message)
     end
 
     respond_to do |format|
