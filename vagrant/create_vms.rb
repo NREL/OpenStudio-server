@@ -64,7 +64,7 @@ if @options[:list_amis]
 end
 
 # Versioning (change these each build)
-require_relative "../server/lib/version"
+require_relative "../server/lib/openstudio_server/version"
 @os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 @os_version = nil
 @os_version_sha = nil
