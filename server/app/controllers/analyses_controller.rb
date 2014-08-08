@@ -90,7 +90,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {analysis: @analysis} }
+      format.json { render json: { analysis: @analysis } }
       format.js
     end
   end
@@ -250,12 +250,12 @@ class AnalysesController < ApplicationController
       #  format.html # new.html.erb
       format.json do
         render json: {
-            analysis: {
-                status: @analysis.status,
-                analysis_type: @analysis.analysis_type,
-                jobs: @analysis.jobs.order_by(:index.asc)
-            },
-            data_points: dps.map { |k| {_id: k.id, status: k.status, final_message: k.status_message} }}
+          analysis: {
+            status: @analysis.status,
+            analysis_type: @analysis.analysis_type,
+            jobs: @analysis.jobs.order_by(:index.asc)
+          },
+          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message } } }
       end
     end
   end
@@ -272,7 +272,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: {analysis: {status: @analysis.status}, data_points: dps.map { |k| {_id: k.id, status: k.status, download_status: k.download_status} }} }
+      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
     end
   end
 
@@ -312,14 +312,14 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-          :problem
+        :problem
       ]
       include_fields = [
-          :variables,
-          :measures # => {:include => :variables}
+        :variables,
+        :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
+      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
     end
   end
 
@@ -420,9 +420,9 @@ class AnalysesController < ApplicationController
     # get data
     @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
 
-    logger.info "sending analysis data to view"
+    logger.info 'sending analysis data to view'
     respond_to do |format|
-      format.json { render json: {variables: @variables, data: @data} }
+      format.json { render json: { variables: @variables, data: @data } }
       format.html # analysis_data.html.erb
     end
   end
@@ -441,21 +441,21 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.json do
         fields = [
-            :name,
-            :data_points,
-            :analysis_type,
-            :status,
-            :start_time,
-            :end_time,
-            :seed_zip,
-            :results,
-            :run_start_time,
-            :run_end_time,
-            :openstudio_datapoint_file_name,
-            :output_variables
+          :name,
+          :data_points,
+          :analysis_type,
+          :status,
+          :start_time,
+          :end_time,
+          :seed_zip,
+          :results,
+          :run_start_time,
+          :run_end_time,
+          :openstudio_datapoint_file_name,
+          :output_variables
         ]
 
-        render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
+        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
         # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
@@ -563,8 +563,8 @@ class AnalysesController < ApplicationController
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
 
-    #require 'ruby-prof'
-    #RubyProf.start
+    # require 'ruby-prof'
+    # RubyProf.start
     start_time = Time.now
     variables = nil
     plot_data = nil
@@ -574,18 +574,18 @@ class AnalysesController < ApplicationController
                   :scaling_factor, :display_name, :display_name_short, :name, :name_with_measure, :units, :value_type, :data_type]
 
     # dynamic query, only add 'or' for option fields that are true
-    or_qry = [{perturbable: true}, {pivot: true}, {output: true}]
+    or_qry = [{ perturbable: true }, { pivot: true }, { output: true }]
     options.each do |k, v|
-      or_qry << {:"#{k}" => v} if v
+      or_qry << { :"#{k}" => v } if v
     end
-    variables = Variable.where(analysis_id: analysis, :name.nin => ["", nil]).or(or_qry).
+    variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry).
         order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
-    #logger.info "Variable name map is #{variable_name_map}"
+    # logger.info "Variable name map is #{variable_name_map}"
 
-    logger.info "looking for data points"
+    logger.info 'looking for data points'
 
     # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
     # below is to map the inputs/outputs to a flat hash.
@@ -597,14 +597,14 @@ class AnalysesController < ApplicationController
                       status: this.status, status_message: this.status_message
                     };
 
-         var mrMap = #{variables.map { |v| v['name'].split(".") }.to_json};
+         var mrMap = #{variables.map { |v| v['name'].split('.') }.to_json};
          for (var i in mrMap){
            if (this.results[mrMap[i][0]] && this.results[mrMap[i][0]][mrMap[i][1]]) {
              new_data[mrMap[i].join('.')] = this.results[mrMap[i][0]][mrMap[i][1]]
            }
          }
 
-         var variableMap = #{variable_name_map.reject{|k,v| v.nil?}.to_json};
+         var variableMap = #{variable_name_map.reject { |_k, v| v.nil? }.to_json};
          for (var p in this.set_variable_values) {
             new_data[variableMap[p]] = this.set_variable_values[p];
          }
@@ -634,7 +634,7 @@ class AnalysesController < ApplicationController
       plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id, status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
     else
       plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                    .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")#.finalize(finalize)
+                    .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}") # .finalize(finalize)
     end
     logger.info "finished fixing up data: #{Time.now - start_time}"
 
@@ -647,25 +647,25 @@ class AnalysesController < ApplicationController
     # end
 
     start_time = Time.now
-    logger.info "mapping variables"
-    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
+    logger.info 'mapping variables'
+    variables.map! { |v| { :"#{v['name']}".to_sym => v } }
 
     variables = variables.reduce({}, :merge)
     logger.info "finished mapping variables: #{Time.now - start_time}"
 
     start_time = Time.now
-    logger.info "Start as_json"
+    logger.info 'Start as_json'
     plot_data = plot_data.as_json
     logger.info "Finished as_json: #{Time.now - start_time}"
 
     start_time = Time.now
-    logger.info "Start collapse"
+    logger.info 'Start collapse'
     plot_data.each do |pd|
       pd.merge!(pd.delete('value'))
     end
     logger.info "finished merge: #{Time.now - start_time}"
 
-    #plot_data.merge(plot_data.delete('value'))
+    # plot_data.merge(plot_data.delete('value'))
 
     [variables, plot_data]
   end
@@ -681,16 +681,16 @@ class AnalysesController < ApplicationController
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, nil, export: true)
-    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
+    static_fields = %w(name _id run_start_time run_end_time status status_message)
 
     logger.info variables
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
-      csv << static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name'] }
+      csv << static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
       data.each do |dp|
         # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
         arr = []
-        (static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name'] }).each do |v|
+        (static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }).each do |v|
           if dp[v].nil?
             arr << nil
           else
@@ -708,13 +708,13 @@ class AnalysesController < ApplicationController
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, nil, export: true)
 
-    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
-    names_of_vars = static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name'] }
+    static_fields = %w(name _id run_start_time run_end_time status status_message)
+    names_of_vars = static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
 
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
     start_time = Time.now
-    logger.info "starting conversion of data to column vectors"
+    logger.info 'starting conversion of data to column vectors'
     out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
       names_of_vars.each do |v|
         add_this_value = ex_hash[v].nil? ? nil : ex_hash[v]
@@ -725,14 +725,14 @@ class AnalysesController < ApplicationController
 
     # If the data are guaranteed to exist in the same column structure for each data point AND the
     # length of each column is the same (especially no nils), then you can use the method below
-    #out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
-    #ex_hash.each { |k, v| h[k] = h[k] + [v] }
-    #end
+    # out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
+    # ex_hash.each { |k, v| h[k] = h[k] + [v] }
+    # end
 
-    #out_hash.each_key do |k|
+    # out_hash.each_key do |k|
     #  #Rails.logger.info "Length is #{out_hash[k].size}"
     #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
-    #end
+    # end
 
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
@@ -741,7 +741,7 @@ class AnalysesController < ApplicationController
     r = Rserve::Simpler.new
 
     start_time = Time.now
-    logger.info "starting creation of data frame"
+    logger.info 'starting creation of data frame'
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %Q{
             temp <- tempfile('rdata', tmpdir="/tmp")

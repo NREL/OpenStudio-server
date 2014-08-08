@@ -8,7 +8,7 @@ require 'rspec/core/rake_task'
 require 'colored'
 
 # To release new version, increment the value in the ./server/lib/version file
-require_relative 'server/lib/version'
+require_relative 'server/lib/openstudio_server/version'
 
 # TODO: enable a second part of this that waits for testing of the amis before this is formally released
 # VERSION_APPEND = Openstudioserver::VERSION_EXT

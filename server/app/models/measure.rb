@@ -18,8 +18,8 @@ class Measure
   has_many :variables
 
   # Indexes
-  index({uuid: 1}, unique: true)
-  index({id: 1}, unique: true)
+  index({ uuid: 1 }, unique: true)
+  index({ id: 1 }, unique: true)
   index(name: 1)
   index(analysis_id: 1)
   index(analysis_id: 1, uuid: 1)
