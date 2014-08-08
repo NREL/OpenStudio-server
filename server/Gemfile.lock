@@ -216,6 +216,7 @@ GEM
       rspec-expectations (~> 2.99.0)
       rspec-mocks (~> 2.99.0)
     ruby-ole (1.2.11.7)
+    ruby-prof (0.15.1)
     rubyzip (1.1.6)
     sass (3.2.10)
     sass-rails (3.2.6)
@@ -288,6 +289,7 @@ DEPENDENCIES
   rspec
   rspec-html-matchers
   rspec-rails (~> 2.0)
+  ruby-prof
   sass (= 3.2.10)
   sass-rails (~> 3.2.3)
   therubyracer

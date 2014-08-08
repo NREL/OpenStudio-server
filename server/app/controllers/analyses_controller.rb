@@ -420,6 +420,7 @@ class AnalysesController < ApplicationController
     # get data
     @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
 
+    logger.info "sending analysis data to view"
     respond_to do |format|
       format.json { render json: {variables: @variables, data: @data} }
       format.html # analysis_data.html.erb
@@ -561,6 +562,10 @@ class AnalysesController < ApplicationController
   def get_analysis_data(analysis, datapoint_id = nil, options = {})
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
+
+    #require 'ruby-prof'
+    #RubyProf.start
+    start_time = Time.now
     variables = nil
     plot_data = nil
 
@@ -578,55 +583,60 @@ class AnalysesController < ApplicationController
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name_with_measure']] }]
+    logger.info "Variable name map is #{variable_name_map}"
 
-    visualize_map = variables.map { |v| "results.#{v['name']}" }
-    # initialize the plot fields that will need to be reported
-    plot_fields = [:set_variable_values, :name, :_id, :run_start_time, :run_end_time, :status, :status_message] + visualize_map
+    logger.info "looking for data points"
 
-    # Can't call the as_json(:only) method on this probably because of the nested results hash
+    # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
+    # below is to map the inputs/outputs to a flat hash.
+    map = %Q{
+      function() {
+         key = this._id;
+         new_data = {
+                      name: this.name, run_start_time: this.run_start_time, run_end_time: this.run_end_time,
+                      status: this.status, status_message: this.status_message
+                    };
+
+         var mrMap = #{variables.map { |v| v['name'].split(".") }.to_json};
+         for (var i in mrMap){
+           if (this.results[mrMap[i][0]] && this.results[mrMap[i][0]][mrMap[i][1]]) {
+             new_data[mrMap[i].join('.')] = this.results[mrMap[i][0]][mrMap[i][1]]
+           }
+         }
+
+         var variableMap = #{variable_name_map.reject{|k,v| v.nil?}.to_json};
+         for (var p in this.set_variable_values) {
+            new_data[variableMap[p]] = this.set_variable_values[p];
+         }
+
+         new_data['data_point_uuid'] = "/data_points/" + this._id
+
+         emit(key, new_data);
+      }
+    }
+
+    reduce = %Q{
+      function(key, values) {
+        return values[0];
+      }
+    }
+
+    finalize = %Q{
+      function(key, value) {
+        value['_id'] = key;
+        db.datapoints_mr.insert(value);
+      }
+    }
+
+    # Eventaully use this where the timestamp is processed as part of the request to save time
+    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     if datapoint_id
-      plot_data = analysis.data_points.where(status: 'completed', id: datapoint_id, status_message: 'completed normal').order_by(:created_at.asc).only(plot_fields).as_json
+      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id, status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
     else
-      plot_data = analysis.data_points.where(status: 'completed', status_message: 'completed normal').order_by(:created_at.asc).only(plot_fields).as_json
+      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
+                    .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")#.finalize(finalize)
     end
-
-    # Flatten the results hash to the dot notation syntax
-    plot_data.each do |pd|
-
-      # Make sure that date times are converted to strings because Rserve/Simpler does not handle this for you.
-      # If you see a Matrix error then it is most likely because there is a DateTime in the RData Frame
-      pd['run_start_time'] = pd['run_start_time'].to_s if pd['run_start_time']
-      pd['run_end_time'] = pd['run_end_time'].to_s if pd['run_end_time']
-
-      unless pd['results'].empty?
-        pd['results'] = hash_to_dot_notation(pd['results'])
-
-        # For now, hack the set_variable_values values into the results! yes, this is a hack until we have
-        # the datapoint actually put it in the results
-
-        #   First get the machine name for each variable using the variable_name_map
-        variable_values = Hash[pd['set_variable_values'].map { |k, v| [variable_name_map[k], v] }]
-
-        #   Second sort the values (VERY IMPORTANT)
-        variable_values = Hash[variable_values.sort_by { |k, _| k }]
-
-        # merge the variable values into the results hash
-        pd['results'].merge!(variable_values)
-
-        # now remove the set_variable_values section
-        pd.delete('set_variable_values')
-
-        # and then remove any other null field
-        pd.delete_if { |k, v| v.nil? && plot_fields.exclude?(k) }
-
-        # now flatten completely
-        pd.merge!(pd.delete('results')) if pd
-
-        # copy _id to data_point_uuid for backwards compatibility
-        pd['data_point_uuid'] = "/data_points/#{pd['_id']}"
-      end
-    end
-
+    logger.info "finished fixing up data: #{Time.now - start_time}"
 
     # TODO: how to handle to sorting by iteration?
     # if @analysis.analysis_type == 'sequential_search'
@@ -636,14 +646,26 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
+    start_time = Time.now
+    logger.info "mapping variables"
+    variables.map! { |v| {:"#{v['_id']}".to_sym => v} }
 
     variables = variables.reduce({}, :merge)
-    # variables.reduce(|v| {}, :merge)
+    logger.info "finished mapping variables: #{Time.now - start_time}"
 
-    #variables.each do |v|
-    #  Rails.logger.info v
-    #end
+    start_time = Time.now
+    logger.info "Start as_json"
+    plot_data = plot_data.as_json
+    logger.info "Finished as_json: #{Time.now - start_time}"
+
+    start_time = Time.now
+    logger.info "Start collapse"
+    plot_data.each do |pd|
+      pd.merge!(pd.delete('value'))
+    end
+    logger.info "finished merge: #{Time.now - start_time}"
+
+    #plot_data.merge(plot_data.delete('value'))
 
     [variables, plot_data]
   end
@@ -661,6 +683,7 @@ class AnalysesController < ApplicationController
     variables, data = get_analysis_data(analysis, nil, export: true)
     static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
 
+    logger.info variables
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
       csv << static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }
@@ -700,7 +723,7 @@ class AnalysesController < ApplicationController
     # If the data are guaranteed to exist in the same column structure for each data point AND the
     # length of each column is the same (especially no nils), then you can use the method below
     #out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
-      #ex_hash.each { |k, v| h[k] = h[k] + [v] }
+    #ex_hash.each { |k, v| h[k] = h[k] + [v] }
     #end
 
     #out_hash.each_key do |k|

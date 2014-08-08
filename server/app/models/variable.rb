@@ -35,7 +35,7 @@ class Variable
   field :static_value, default: nil # don't type this because it can take on anything (other than hashes and arrays)
 
   # Relationships
-  belongs_to :analysis
+  belongs_to :analysis, index: true
   belongs_to :measure
   has_many :preflight_images
 
