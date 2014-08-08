@@ -713,12 +713,15 @@ class AnalysesController < ApplicationController
 
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
+    start_time = Time.now
+    logger.info "starting conversion of data to column vectors"
     out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
       names_of_vars.each do |v|
         add_this_value = ex_hash[v].nil? ? nil : ex_hash[v]
         h[v] = h[v] + [add_this_value]
       end
     end
+    logger.info "finished conversion: #{Time.now - start_time}"
 
     # If the data are guaranteed to exist in the same column structure for each data point AND the
     # length of each column is the same (especially no nils), then you can use the method below
@@ -737,6 +740,8 @@ class AnalysesController < ApplicationController
     require 'rserve/simpler'
     r = Rserve::Simpler.new
 
+    start_time = Time.now
+    logger.info "starting creation of data frame"
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %Q{
             temp <- tempfile('rdata', tmpdir="/tmp")
@@ -745,6 +750,7 @@ class AnalysesController < ApplicationController
          }
     end
     tmp_filename = r.converse('temp')
+    logger.info "finished data frame: #{Time.now - start_time}"
 
     if File.exist?(tmp_filename)
       send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
