@@ -583,7 +583,7 @@ class AnalysesController < ApplicationController
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
-    logger.info "Variable name map is #{variable_name_map}"
+    #logger.info "Variable name map is #{variable_name_map}"
 
     logger.info "looking for data points"
 
