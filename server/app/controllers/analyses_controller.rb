@@ -582,7 +582,7 @@ class AnalysesController < ApplicationController
         order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
-    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name_with_measure']] }]
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
     logger.info "Variable name map is #{variable_name_map}"
 
     logger.info "looking for data points"
@@ -648,7 +648,7 @@ class AnalysesController < ApplicationController
 
     start_time = Time.now
     logger.info "mapping variables"
-    variables.map! { |v| {:"#{v['_id']}".to_sym => v} }
+    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
 
     variables = variables.reduce({}, :merge)
     logger.info "finished mapping variables: #{Time.now - start_time}"
@@ -686,11 +686,11 @@ class AnalysesController < ApplicationController
     logger.info variables
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
-      csv << static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }
+      csv << static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name'] }
       data.each do |dp|
         # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
         arr = []
-        (static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }).each do |v|
+        (static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name'] }).each do |v|
           if dp[v].nil?
             arr << nil
           else
@@ -709,7 +709,7 @@ class AnalysesController < ApplicationController
     variables, data = get_analysis_data(analysis, nil, export: true)
 
     static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
-    names_of_vars = static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name_with_measure'] }
+    names_of_vars = static_fields + variables.map { |k, v| v['output'] ? v['name'] : v['name'] }
 
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
