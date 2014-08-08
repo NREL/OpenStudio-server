@@ -24,7 +24,7 @@ class DataPoint
   field :internal_ip_address, type: String
 
   # Relationships
-  belongs_to :analysis
+  belongs_to :analysis, index: true
 
   # Indexes
   index({ uuid: 1 }, unique: true)
@@ -32,12 +32,12 @@ class DataPoint
   index(name: 1)
   index(status: 1)
   index(analysis_id: 1, created_at: 1)
-  index(analysis_id: 1)
+  index(created_at: 1)
   index(uuid: 1, status: 1, download_status: 1)
   index(run_start_time: -1, name: 1)
   index(run_end_time: -1, name: 1)
   index(analysis_id: 1, iteration: 1, sample: 1)
-  index(analysis_id: 1, status: 1, status_message: 1)
+  index(analysis_id: 1, status: 1, status_message: 1, created_at: 1)
 
   # Callbacks
   after_create :verify_uuid

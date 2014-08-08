@@ -45,6 +45,7 @@ GEM
     mongoid-paperclip (0.0.9)
       paperclip (>= 2.3.6)
     moped (1.5.2)
+    msgpack (0.5.8)
     multi_json (1.10.1)
     oj (2.9.9)
     origin (1.1.0)
@@ -70,6 +71,7 @@ DEPENDENCIES
   libxml-ruby
   mongoid (~> 3.1.6)
   mongoid-paperclip
+  msgpack
   multi_json
   oj
   openstudio-workflow!
