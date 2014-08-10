@@ -190,36 +190,44 @@ class ComputeNode
     remote_file_exists = false
     remote_file_downloaded = false
     Rails.logger.info 'entering scp_download_file'
-    Net::SSH.start(ip_address, user, password: password) do |session|
-      Rails.logger.info 'Checking if the remote file exists'
-      session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |_channel, _stream, data|
-        Rails.logger.info("check remote file data is #{data}")
-        if data == 'true'
-          remote_file_exists = true
-        end
-      end
-      session.loop
 
-      Rails.logger.info "remote file exists flag is #{remote_file_exists} for #{remote_file}"
-      if remote_file_exists
-        Rails.logger.info "Trying to download #{remote_file} to #{local_file}"
-        if !session.scp.download!(remote_file, local_file)
-          remote_file_downloaded = false
-          Rails.logger.info 'ERROR trying to download datapoint from remote worker'
-        else
-          remote_file_downloaded = true
-        end
-
-        if remote_file_downloaded
-          session.exec!("cd #{remote_file_path} && rm -f #{remote_file}") do |_channel, _stream, data|
-            Rails.logger.info 'deleting datapoint from remote worker'
-            Rails.logger.info "#{data}"
-            logger.info(data)
+    # Timeout After 2 Minutes
+    begin
+      Timeout::timeout(120) {
+        Net::SSH.start(ip_address, user, password: password) do |session|
+          Rails.logger.info 'Checking if the remote file exists'
+          session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |_channel, _stream, data|
+            Rails.logger.info("check remote file data is #{data}")
+            if data == 'true'
+              remote_file_exists = true
+            end
           end
           session.loop
-        end
-      end
-    end # session
+
+          Rails.logger.info "remote file exists flag is #{remote_file_exists} for #{remote_file}"
+          if remote_file_exists
+            Rails.logger.info "Trying to download #{remote_file} to #{local_file}"
+            if !session.scp.download!(remote_file, local_file)
+              remote_file_downloaded = false
+              Rails.logger.info 'ERROR trying to download datapoint from remote worker'
+            else
+              remote_file_downloaded = true
+            end
+
+            if remote_file_downloaded
+              session.exec!("cd #{remote_file_path} && rm -f #{remote_file}") do |_channel, _stream, data|
+                Rails.logger.info 'deleting datapoint from remote worker'
+                Rails.logger.info "#{data}"
+                logger.info(data)
+              end
+              session.loop
+            end
+          end
+        end # session
+      }
+    rescue Timeout::Error
+      Rails.logger.error "TimeoutError trying to download data point from remote server #{ip_address}"
+    end
 
     # return both booleans
     Rails.logger.info 'leaving scp_download_file'

@@ -20,7 +20,7 @@ class Analysis
   field :results, type: Hash, default: {} # this was nil, can we have this be an empty hash? Check Measure Group JSONS!
 
   field :problem
-  field :status_message, type: String # the resulting message from the analysis
+  field :status_message, type: String, default: '' # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
   field :use_shm, type: Boolean, default: false # flag on whether or not to use SHM for analysis (impacts file uploading)

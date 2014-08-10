@@ -711,6 +711,7 @@ class AnalysesController < ApplicationController
     static_fields = %w(name _id run_start_time run_end_time status status_message)
     names_of_vars = static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
 
+    # TODO: this is reeeally slow and needs to be addressed # finished conversion: 1764.665880011 ~ 13k points
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
     start_time = Time.now

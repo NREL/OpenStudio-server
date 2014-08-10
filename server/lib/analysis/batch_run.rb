@@ -142,7 +142,7 @@ class Analysis::BatchRun
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      puts log_message
+      Rails.logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
     ensure
@@ -152,11 +152,19 @@ class Analysis::BatchRun
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
+    end
 
-      # Do one last check if there are any data points that were not downloaded
+    # Do one last check if there are any data points that were not downloaded
+    begin
+      # in large analyses it appears that this is timing out or just not running to completion.
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
-
+    rescue => e
+      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+      Rails.logger.error log_message
+      @analysis.status_message += log_message
+      @analysis.save!
+    ensure
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis_job.end_time = Time.now
