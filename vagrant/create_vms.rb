@@ -76,7 +76,6 @@ if File.exists?(os_role_file)
   json_obj = eval("{ #{json_string} }")
   @os_version = json_obj[:openstudio][:version]
   @os_version_sha = json_obj[:openstudio][:installer][:version_revision]
-
 else
   raise "Could not find OpenStudio.rb chef role in #{os_role_file}"
 end
@@ -159,26 +158,27 @@ def system_call(command, &block)
   exit_code
 end
 
+# Run vagrant up with the provisioner
 def run_vagrant_up(element)
   success = true
   $mutex.lock
   begin
     Timeout::timeout(2400) {
       puts "#{element[:id]}: starting process on #{element}"
-      command = "cd ./#{element[:name]} && VAGRANT_AWS_USER_UUID=#{@options[:user_uuid]} vagrant up --no-provision"
+      command = "cd ./#{element[:name]} && VAGRANT_AWS_USER_UUID=#{@options[:user_uuid]} vagrant up"
       if @options[:provider] == :aws
         command += " --provider=aws"
       end
       exit_code = system_call(command) do |message|
         puts "#{element[:id]}: #{message}"
-        if message =~ /Installing Chef.*\d*.\d*.\d*.*Omnibus package/i
-          puts "#{element[:id]}: chef is installing - you can go on now"
+        if message =~ /Installing Chef.*\d*.\d*.\d*.*Omnibus package.*/i
+          puts "#{element[:id]}: Chef is installing - you can go on now"
           $mutex.unlock
-        elsif message =~ /The machine is already created/i
+        elsif message =~ /.*is already running/i
           puts "#{element[:id]}: machines already running -- go to vagrant provision"
           $mutex.unlock
         elsif message =~ /.*ERROR:/
-          puts "#{element[:id]}Error found during provisioning"
+          puts "#{element[:id]}: Error found during provisioning"
         end
       end
       if exit_code != 0
@@ -192,9 +192,9 @@ def run_vagrant_up(element)
   rescue AllJobsInvalid
     # pass the exception through
     raise AllJobsInvalid
-  rescue TimeoutError
+  rescue Timeout::Error
     # DO NOT raise an error if timeout, just timeout
-    error = "#{element[:id]}: ERROR TimeoutError running vagrant up"
+    error = "#{element[:id]}: ERROR Timeout::Error running vagrant up"
     puts error
     element[:error_message] += error
     success = false
@@ -223,7 +223,7 @@ def run_vagrant_provision(element)
       command = "cd ./#{element[:name]} && vagrant provision"
       exit_code = system_call(command) do |message|
         puts "#{element[:id]}: #{message}"
-        if message =~ /Running chef-solo.../i
+        if message =~ /Running provisioner. chef_solo.../i
           puts "#{element[:id]}: chef running - you can go on now"
           $mutex.unlock
         elsif message =~ /The machine is already created/i
@@ -237,9 +237,9 @@ def run_vagrant_provision(element)
         success = false
       end
     }
-  rescue TimeoutError
+  rescue Timeout::Error
     # DO NOT raise an error if timeout, just timeout
-    error = "#{element[:id]}: ERROR TimeoutError running vagrant provision"
+    error = "#{element[:id]}: ERROR Timeout::Error running vagrant provision"
     puts error
     element[:error_message] += error
     success = false
@@ -289,7 +289,7 @@ def get_instance_id(element)
     error ="Error running get instance_id, #{e.message}"
     puts error
     element[:error_message] += error
-    raise TimeoutError, error
+    raise Timeout::Error, error
   end
   puts "#{element[:id]}: Finished getting element ID"
 end
@@ -332,7 +332,7 @@ def process(element, &block)
     end
     
     # run vagrant provision one more time to make sure that it completes (mainly to catch the passenger error)
-    run_vagrant_provision(element)
+    # run_vagrant_provision(element)
 
     # Append the instance id to the element
     if @options[:provider] == :aws
@@ -349,7 +349,7 @@ def process(element, &block)
         system_call(command) { |message| puts "#{element[:id]}: #{message}" }
       }
     rescue Exception => e
-      raise TimeoutError, "Error running initial cleanup, #{e.message}"
+      raise Timeout::Error, "Error running initial cleanup, #{e.message}"
     end
 
     if @options[:provider] == :aws
@@ -365,7 +365,7 @@ def process(element, &block)
           #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
         }
       rescue Exception => e
-        raise TimeoutError, "Error running final cleanup, #{e.message}"
+        raise Timeout::Error, "Error running final cleanup, #{e.message}"
       end
 
       begin
