@@ -185,8 +185,8 @@ def run_vagrant_up(element)
         # this can happen when AWS isn't available or insufficient capacity in AWS
         #InsufficientInstanceCapacity => Insufficient capacity.
         success = false
-        $mutex.unlock
-        raise AllJobsInvalid # call this after unlocking
+        # $mutex.unlock if $mutex.owned?
+        # raise AllJobsInvalid # call this after unlocking
       end
     }
   rescue AllJobsInvalid
@@ -203,7 +203,7 @@ def run_vagrant_up(element)
     element[:error_message] += error
   rescue Exception => e
     # DO NOT raise an excpetion if it crashed out 
-    puts "#{element[:id]}: ERROR in vagrant up with #{e.message}"
+    error = "#{element[:id]}: ERROR in vagrant up with #{e.message}"
     puts error
     element[:error_message] += error
     success = false
