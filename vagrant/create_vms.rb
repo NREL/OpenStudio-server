@@ -163,7 +163,7 @@ def run_vagrant_up(element)
   success = true
   $mutex.lock
   begin
-    Timeout::timeout(2400) {
+    Timeout::timeout(4500) {
       puts "#{element[:id]}: starting process on #{element}"
       command = "cd ./#{element[:name]} && VAGRANT_AWS_USER_UUID=#{@options[:user_uuid]} vagrant up"
       if @options[:provider] == :aws
