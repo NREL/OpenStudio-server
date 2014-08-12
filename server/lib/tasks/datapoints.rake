@@ -7,14 +7,15 @@ namespace :datapoints do
     analysis = Analysis.find(args.analysis_id)
     while still_downloading
       # Simple task to go through all the datapoints and download the results if they are complete
-      if !analysis.nil?
+      if analysis
         puts "checking datapoints on #{analysis.id}"
-        any_downloaded = analysis.finalize_data_points
-        if any_downloaded
-          puts "Downloaded at least one data point."
+        begin
+          any_downloaded = analysis.finalize_data_points
+        rescue => e
+          puts "Error during downloading of data points... will try to continue #{e.message}"
         end
       end
-      sleep(5)
+      sleep 5
     end
   end
 end

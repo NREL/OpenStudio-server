@@ -191,7 +191,8 @@ class ComputeNode
     remote_file_downloaded = false
     Rails.logger.info 'entering scp_download_file'
 
-    # Timeout After 2 Minutes
+    # Timeout After 2 Minutes / 120 seconds
+    retries = 0
     begin
       Timeout::timeout(120) {
         Net::SSH.start(ip_address, user, password: password) do |session|
@@ -227,6 +228,10 @@ class ComputeNode
       }
     rescue Timeout::Error
       Rails.logger.error "TimeoutError trying to download data point from remote server #{ip_address}"
+      retry if (retries += 1) <= 3
+    rescue => e
+      Rails.logger.error "Exception while trying to download data point from remote server #{e.message}"
+      retry if (retries += 1) <= 3
     end
 
     # return both booleans
