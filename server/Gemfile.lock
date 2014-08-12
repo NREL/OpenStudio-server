@@ -157,6 +157,7 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
+    parallel (1.2.0)
     polyglot (0.3.5)
     rack (1.4.5)
     rack-cache (1.2)
@@ -284,6 +285,7 @@ DEPENDENCIES
   openstudio-analysis
   openstudio-aws
   paperclip (~> 4.1.1)
+  parallel
   rails (= 3.2.17)
   rserve-simpler
   rspec
