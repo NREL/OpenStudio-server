@@ -303,7 +303,7 @@ class Analysis
   def finalize_data_points
     any_downloaded = false
     # download this in parallel because it is taken way too long when running ~100 simulations at a time
-    Parallel.each(data_points.and({ download_status: 'na' }, { status: 'completed' }), in_threads: 24) do |dp|
+    Parallel.each(data_points.and({ download_status: 'na' }, { status: 'completed' }), in_threads: 10) do |dp|
       # Don't break out of this loop if finalize_data_points == true because each data point
       # needs to have the method called
       if dp.finalize_data_points
