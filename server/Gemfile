@@ -26,7 +26,6 @@ gem 'net-sftp'
 gem 'libv8'
 gem 'execjs'
 gem 'therubyracer'
-gem 'backbone-on-rails'
 
 gem 'parallel'
 
