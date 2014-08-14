@@ -34,15 +34,6 @@ GEM
       jamespath
       multi_json (~> 1.0)
       multi_xml (~> 0.5)
-    backbone-on-rails (1.1.1.0)
-      actionmailer
-      actionpack
-      activemodel
-      activeresource
-      eco
-      ejs
-      jquery-rails
-      railties
     better_errors (1.1.0)
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
@@ -81,12 +72,6 @@ GEM
       delayed_job (>= 3.0, < 5)
       mongoid (>= 3.0, < 5)
     diff-lcs (1.2.5)
-    eco (1.0.0)
-      coffee-script
-      eco-source
-      execjs
-    eco-source (1.1.0.rc.1)
-    ejs (1.1.1)
     erubis (2.7.0)
     execjs (2.2.1)
     factory_girl (4.4.0)
@@ -257,7 +242,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  backbone-on-rails
   better_errors
   binding_of_caller
   bootstrap-sass (~> 2.3.2.2)
