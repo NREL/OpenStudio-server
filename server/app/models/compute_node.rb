@@ -88,54 +88,132 @@ class ComputeNode
     end
   end
 
-  # Download the results from either local or remote worker
-  def self.download_results(ip_address, analysis_id, data_point_id)
+  # New method to download files from the remote systems.  This method flips the download around and favors
+  # looking at which points are on the compute node and download the files that way instead of trying to find which
+  # compute node the data point was run.
+  def self.download_all_results(analysis_id)
+    # Get the analysis
+    analysis = Analysis.find(analysis_id)
+
+    # What is the maximum number of cores that we want this to run on?
+    Parallel.each(ComputeNode.all) do |cn|
+      Rails.logger.info "Checking for points on #{cn.ip_address}"
+
+      # find which data points are complete on the compute node
+      dps = analysis.data_points.and({ download_status: 'na' }, { status: 'completed' }, { ip_address: cn.ip_address})
+      dps.each do |dp|
+        Rails.logger.info "Trying to download #{dp.id}"
+        remote_file_exists, remote_file_downloaded, local_filename = cn.download_result(dp.analysis.id, dp.id)
+
+        # now add the datapoint path to the database to get it via the server
+        if remote_file_exists && remote_file_downloaded
+          dp.openstudio_datapoint_file_name = local_filename
+        elsif remote_file_exists
+          dp.openstudio_datapoint_file_name = nil
+          dp.download_information = 'failed to download the file'
+        else
+          dp.download_information = 'file did not exist on remote system or could not connect to remote system'
+        end
+
+        dp.download_status = 'completed'
+        dp.finalize_data_point
+        dp.save!
+      end
+    end
+  end
+
+  # Download/move the results
+  def download_result(analysis_id, data_point_id)
     remote_file_downloaded = false
     remote_file_exists = false
     local_filename = nil
 
-    node = ComputeNode.where(ip_address: ip_address).first
-    if node
-      remote_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
-      remote_filename = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}.zip"
-      remote_datapoint_path = "#{remote_filepath}/data_point_#{data_point_id}"
-      remote_filename_reports = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}_reports.zip"
-      local_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
-      local_filename = "#{local_filepath}/data_point_#{data_point_id}.zip"
-      local_filename_reports = "#{local_filepath}/data_point_#{data_point_id}_reports.zip"
+    remote_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
+    remote_filename = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}.zip"
+    remote_datapoint_path = "#{remote_filepath}/data_point_#{data_point_id}"
+    remote_filename_reports = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}_reports.zip"
+    local_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
+    local_filename = "#{local_filepath}/data_point_#{data_point_id}.zip"
+    local_filename_reports = "#{local_filepath}/data_point_#{data_point_id}_reports.zip"
 
-      # make sure that the local path exists -- NL: this should always exist as the copy_data_to_workers creates the folder
-      # FileUtils.mkdir_p(local_filepath)
+    # make sure that the local path exists -- NL: this should always exist as the copy_data_to_workers creates the folder
+    # FileUtils.mkdir_p(local_filepath)
 
-      if node.node_type == 'server'
-        Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
-        Rails.logger.info "#{remote_filename} exists... moving to new location"
-        FileUtils.mv(remote_filename, local_filename) if File.exist? remote_filename
-        FileUtils.mv(remote_filename_reports, local_filename_reports) if File.exist? remote_filename_reports
+    if node_type == 'server'
+      Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
+      Rails.logger.info "#{remote_filename} exists... moving to new location"
+      FileUtils.mv(remote_filename, local_filename) if File.exist? remote_filename
+      FileUtils.mv(remote_filename_reports, local_filename_reports) if File.exist? remote_filename_reports
 
-        remote_file_downloaded = true
-        remote_file_exists = true
-      else
-        Rails.logger.info "Zip file on worker node. scp over to server #{remote_filename} to #{local_filename}"
-        a, b = node.scp_download_file(remote_filename_reports, local_filename_reports, remote_datapoint_path)
-        remote_file_exists, remote_file_downloaded  = node.scp_download_file(remote_filename, local_filename, remote_datapoint_path)
-
-        # unzip the contents of the remote file if it existed
-        if a && b
-          Rails.logger.info 'Reports zip downloaded'
-          local_datapoint_path = "#{local_filepath}/data_point_#{data_point_id}"
-          FileUtils.mkdir_p(local_datapoint_path)
-          unzip_reports = "cd #{local_filepath} && unzip -o #{local_filename_reports} -d #{local_datapoint_path}"
-          Rails.logger.info "Extracting reports zip with command: #{unzip_reports}"
-          shell_result = `#{unzip_reports}`
-        end
-      end
+      remote_file_downloaded = true
+      remote_file_exists = true
     else
-      Rails.logger.error "Could not compute_node record with IP address of #{ip_address}"
+      Rails.logger.info "Zip file on worker node. scp over to server #{remote_filename} to #{local_filename}"
+      a, b = scp_download_file(remote_filename_reports, local_filename_reports, remote_datapoint_path)
+      remote_file_exists, remote_file_downloaded  = scp_download_file(remote_filename, local_filename, remote_datapoint_path)
+
+      # unzip the contents of the remote file if it existed
+      if a && b
+        Rails.logger.info 'Reports zip downloaded'
+        local_datapoint_path = "#{local_filepath}/data_point_#{data_point_id}"
+        FileUtils.mkdir_p(local_datapoint_path)
+        unzip_reports = "cd #{local_filepath} && unzip -o #{local_filename_reports} -d #{local_datapoint_path}"
+        Rails.logger.info "Extracting reports zip with command: #{unzip_reports}"
+        shell_result = `#{unzip_reports}`
+      end
     end
 
     [remote_file_exists, remote_file_downloaded, local_filename]
   end
+
+  # # Download the results from either local or remote worker
+  # def self.download_results(ip_address, analysis_id, data_point_id)
+  #   remote_file_downloaded = false
+  #   remote_file_exists = false
+  #   local_filename = nil
+  #
+  #   node = ComputeNode.where(ip_address: ip_address).first
+  #   if node
+  #     remote_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
+  #     remote_filename = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}.zip"
+  #     remote_datapoint_path = "#{remote_filepath}/data_point_#{data_point_id}"
+  #     remote_filename_reports = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}_reports.zip"
+  #     local_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
+  #     local_filename = "#{local_filepath}/data_point_#{data_point_id}.zip"
+  #     local_filename_reports = "#{local_filepath}/data_point_#{data_point_id}_reports.zip"
+  #
+  #     # make sure that the local path exists -- NL: this should always exist as the copy_data_to_workers creates the folder
+  #     # FileUtils.mkdir_p(local_filepath)
+  #
+  #     if node.node_type == 'server'
+  #       Rails.logger.info "looks like this is on the server node, just moving #{remote_filename} to #{local_filename}"
+  #       Rails.logger.info "#{remote_filename} exists... moving to new location"
+  #       FileUtils.mv(remote_filename, local_filename) if File.exist? remote_filename
+  #       FileUtils.mv(remote_filename_reports, local_filename_reports) if File.exist? remote_filename_reports
+  #
+  #       remote_file_downloaded = true
+  #       remote_file_exists = true
+  #     else
+  #       Rails.logger.info "Zip file on worker node. scp over to server #{remote_filename} to #{local_filename}"
+  #       a, b = node.scp_download_file(remote_filename_reports, local_filename_reports, remote_datapoint_path)
+  #       remote_file_exists, remote_file_downloaded  = node.scp_download_file(remote_filename, local_filename, remote_datapoint_path)
+  #
+  #       # unzip the contents of the remote file if it existed
+  #       if a && b
+  #         Rails.logger.info 'Reports zip downloaded'
+  #         local_datapoint_path = "#{local_filepath}/data_point_#{data_point_id}"
+  #         FileUtils.mkdir_p(local_datapoint_path)
+  #         unzip_reports = "cd #{local_filepath} && unzip -o #{local_filename_reports} -d #{local_datapoint_path}"
+  #         Rails.logger.info "Extracting reports zip with command: #{unzip_reports}"
+  #         shell_result = `#{unzip_reports}`
+  #       end
+  #     end
+  #   else
+  #     Rails.logger.error "Could not compute_node record with IP address of #{ip_address}"
+  #   end
+  #
+  #   [remote_file_exists, remote_file_downloaded, local_filename]
+  # end
 
   # Report back the system inforamtion of the node for debugging purposes
   def self.system_information

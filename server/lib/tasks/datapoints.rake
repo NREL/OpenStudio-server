@@ -10,9 +10,9 @@ namespace :datapoints do
       if analysis
         puts "checking datapoints on #{analysis.id}"
         begin
-          any_downloaded = analysis.finalize_data_points
+          analysis.finalize_data_points
         rescue => e
-          puts "Error during downloading of data points... will try to continue #{e.message}"
+          puts "Error during downloading of data points... will try to continue #{e.message}:#{e.backtrace.join("\n")}"
         end
       end
       sleep 5
