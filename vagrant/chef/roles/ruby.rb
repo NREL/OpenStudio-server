@@ -13,7 +13,7 @@ default_attributes(
         :upgrade => true,
         :rubies => [
             {
-                :name => '2.0.0-p451',
+                :name => '2.0.0-p481',
                 :environment => {
                     'RUBY_CONFIGURE_OPTS' => '--enable-shared', # needs to be set for openstudio linking
                     'CONFIGURE_OPTS' => '--disable-install-doc'
@@ -21,12 +21,12 @@ default_attributes(
             }
         ],
         :no_rdoc_ri => true,
-        :global => "2.0.0-p451",
+        :global => "2.0.0-p481",
         :gems => {
-            "2.0.0-p451" => [
+            "2.0.0-p481" => [
                 {
                     :name => "bundler",
-                    :version => "1.6.2",
+                    :version => "1.7.0",
                 },
                 {
                     :name => "ruby-prof"
