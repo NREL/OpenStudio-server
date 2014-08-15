@@ -4,6 +4,10 @@
 # Note that this threadpool will equal the number of vms in the array
 # there is no limit--so careful
 
+# To run make sure that the vagrant aws and awsinfo plugin are installed
+
+#    vagrant plugin install vagrant-aws
+#    vagrant plugin install vagrant-awsinfo
 # TODOs
 #   - write out to logger
 #   - use server-api gem to talk to AWS for API
@@ -127,16 +131,16 @@ if @options[:provider] == :vagrant
   #}
 elsif @options[:provider] == :aws
   @vms << {
-      id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
-  }
-  @vms << {
       id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
       ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
       id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
+  }
+  @vms << {
+      id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
+      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
   }
 end
 
@@ -267,7 +271,7 @@ def run_vagrant_reload(element)
       command = "cd ./#{element[:name]} && vagrant reload"
       system_call(command) { |message| puts "#{element[:id]}: #{message}" }
     }
-  rescue Exception => e
+  rescue => e
     error = "Error running vagrant reload, #{e.message}"
     puts error
     element[:error_message] += error
@@ -277,21 +281,24 @@ def run_vagrant_reload(element)
   $mutex.unlock
 end
 
+# Get the instance IDs using the AWS info plugin
 def get_instance_id(element)
-  # Get the instance ids by executing the Amazon API on the system. I don't thinks need to have mutexes?
+  $mutex.lock
   puts "#{element[:id]}: Get instance id"
   begin
     Timeout::timeout(60) {
-      command = "cd ./#{element[:name]} && vagrant ssh -c 'curl -sL http://169.254.169.254/latest/meta-data/instance-id'"
-      element[:instance_id] = `#{command}`
+      command = "cd ./#{element[:name]} && vagrant awsinfo"
+      r = JSON.parse `#{command}`
+      element[:instance_id] = r['instance_id']
     }
-  rescue Exception => e
+  rescue => e
     error ="Error running get instance_id, #{e.message}"
     puts error
     element[:error_message] += error
-    raise Timeout::Error, error
+    raise error
   end
-  puts "#{element[:id]}: Finished getting element ID"
+  puts "#{element[:id]}: Finished getting instance ID #{element[:instance_id]}"
+  $mutex.unlock
 end
 
 def create_ami(element)
@@ -349,7 +356,7 @@ def process(element, &block)
         system_call(command) { |message| puts "#{element[:id]}: #{message}" }
       }
     rescue Exception => e
-      raise Timeout::Error, "Error running initial cleanup, #{e.message}"
+      raise Timeout::Error, "Timeout::Error running initial cleanup, #{e.message}"
     end
 
     if @options[:provider] == :aws
@@ -365,7 +372,7 @@ def process(element, &block)
           #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
         }
       rescue Exception => e
-        raise Timeout::Error, "Error running final cleanup, #{e.message}"
+        raise Timeout::Error, "Timeout::Error running final cleanup, #{e.message}"
       end
 
       begin
