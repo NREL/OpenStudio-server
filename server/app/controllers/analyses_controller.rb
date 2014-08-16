@@ -241,9 +241,9 @@ class AnalysesController < ApplicationController
 
     dps = nil
     if params[:jobs]
-      dps = @analysis.data_points.where(status: params[:jobs]).only(:status, :analysis_type, :jobs, :status_message)
+      dps = @analysis.data_points.where(status: params[:jobs]).only(:status, :analysis_type, :jobs, :status_message, :download_status)
     else
-      dps = @analysis.data_points.only(:status, :analysis_type, :jobs, :status_message)
+      dps = @analysis.data_points.only(:status, :analysis_type, :jobs, :status_message, :download_status)
     end
 
     respond_to do |format|
@@ -255,7 +255,7 @@ class AnalysesController < ApplicationController
             analysis_type: @analysis.analysis_type,
             jobs: @analysis.jobs.order_by(:index.asc)
           },
-          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message } } }
+          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message, download_status: k.download_status } } }
       end
     end
   end
