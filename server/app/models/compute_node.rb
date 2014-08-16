@@ -96,12 +96,14 @@ class ComputeNode
     analysis = Analysis.find(analysis_id)
 
     # What is the maximum number of cores that we want this to run on?
-    Parallel.each(ComputeNode.all) do |cn|
+    cns = ComputeNode.all
+    Parallel.each(cns, in_threads: ComputeNode.count) do |cn|
       Rails.logger.info "Checking for points on #{cn.ip_address}"
 
       # find which data points are complete on the compute node
       dps = analysis.data_points.and({ download_status: 'na' }, { status: 'completed' }, { ip_address: cn.ip_address})
       dps.each do |dp|
+        st = Time.now
         Rails.logger.info "Trying to download #{dp.id}"
         remote_file_exists, remote_file_downloaded, local_filename = cn.download_result(dp.analysis.id, dp.id)
 
@@ -118,6 +120,7 @@ class ComputeNode
         dp.download_status = 'completed'
         dp.finalize_data_point
         dp.save!
+        Rails.logger.info "Saved downloaded file in #{(Time.now - st)}"
       end
     end
   end
@@ -267,7 +270,6 @@ class ComputeNode
   def scp_download_file(remote_file, local_file, remote_file_path)
     remote_file_exists = false
     remote_file_downloaded = false
-    Rails.logger.info 'entering scp_download_file'
 
     # Timeout After 2 Minutes / 120 seconds
     retries = 0
@@ -276,28 +278,25 @@ class ComputeNode
         Net::SSH.start(ip_address, user, password: password) do |session|
           Rails.logger.info 'Checking if the remote file exists'
           session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |_channel, _stream, data|
-            Rails.logger.info("check remote file data is #{data}")
-            if data == 'true'
-              remote_file_exists = true
-            end
+            #Rails.logger.info("Check remote file data is #{data}")
+            remote_file_exists = true if data == 'true'
           end
           session.loop
 
-          Rails.logger.info "remote file exists flag is #{remote_file_exists} for #{remote_file}"
+          Rails.logger.info "Remote file exists flag is '#{remote_file_exists}' for '#{remote_file}'"
           if remote_file_exists
-            Rails.logger.info "Trying to download #{remote_file} to #{local_file}"
+            Rails.logger.info "Downloading #{remote_file} to #{local_file}"
             if !session.scp.download!(remote_file, local_file)
               remote_file_downloaded = false
-              Rails.logger.info 'ERROR trying to download datapoint from remote worker'
+              Rails.logger.info 'ERROR trying to download data point from remote worker'
             else
               remote_file_downloaded = true
             end
 
             if remote_file_downloaded
               session.exec!("cd #{remote_file_path} && rm -f #{remote_file}") do |_channel, _stream, data|
-                Rails.logger.info 'deleting datapoint from remote worker'
+                Rails.logger.info 'Deleting data point from remote worker'
                 Rails.logger.info "#{data}"
-                logger.info(data)
               end
               session.loop
             end
@@ -313,7 +312,6 @@ class ComputeNode
     end
 
     # return both booleans
-    Rails.logger.info 'leaving scp_download_file'
     [remote_file_exists, remote_file_downloaded]
   end
 end

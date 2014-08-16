@@ -34,6 +34,7 @@ class DataPoint
   index(analysis_id: 1, created_at: 1)
   index(created_at: 1)
   index(uuid: 1, status: 1, download_status: 1)
+  index(analysis_id: 1, status: 1, download_status: 1, ip_address: 1)
   index(run_start_time: -1, name: 1)
   index(run_end_time: -1, name: 1)
   index(analysis_id: 1, iteration: 1, sample: 1)
@@ -42,10 +43,10 @@ class DataPoint
   # Callbacks
   after_create :verify_uuid
 
+  # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
+  # open structure define in the JSON. This is used for the measure group JSONs only. Deprecate as
+  # soon as measure groups are handles correctly.
   def save_results_from_openstudio_json
-    # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
-    # open structure define in the JSON
-
     if output && output['data_point'] && output['data_point']['output_attributes']
       self.results = {}
       output['data_point']['output_attributes'].each do |output_hash|
