@@ -4,6 +4,32 @@
 #
 # Recipe installs the base software needed for openstudio analysis (both server and worker)
 
+
+# General useful utilities
+include_recipe 'apt'
+include_recipe 'ntp'
+include_recipe 'cron'
+
+
+node.override['logrotate']['global']['rotate'] = 30
+node.override['logrotate']['global']['compress'] = true
+%w(monthly weekly yearly).each do |freq|
+  node.override['logrotate']['global'][freq] = false
+end
+node.override['logrotate']['global']['daily'] = true
+include_recipe 'logrotate::global'
+
+# logrotate_app 'tomcat-myapp' do
+#   cookbook  'logrotate'
+#   path      '/var/log/tomcat/myapp.log'
+#   options   ['missingok', 'delaycompress']
+#   frequency 'daily'
+#   rotate    30
+#   create    '644 root adm'
+# end
+
+
+
 include_recipe "rbenv::default"
 include_recipe "rbenv::ruby_build"
 

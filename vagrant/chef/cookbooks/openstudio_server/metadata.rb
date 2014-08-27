@@ -10,8 +10,14 @@ recipe "passenger_apache2", "Installs Passenger as an Apache module"
 recipe "passenger_apache2::mod_rails", "Enables Apache module configuration for passenger module"
 
 depends "apache2", ">= 1.0.4"
-depends "build-essential"
-depends "rbenv"
+
+depends 'apt'
+depends 'cron'
+depends 'ntp'
+depends 'logrotate'
+depends 'build-essential'
+depends 'rbenv'
+
 
 %w{ redhat centos scientific amazon oracle ubuntu debian arch }.each do |os|
   supports os
