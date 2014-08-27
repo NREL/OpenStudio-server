@@ -1,0 +1,11 @@
+source "https://supermarket.getchef.com"
+
+metadata
+
+cookbook 'apt', '~> 2.5.3'
+
+# Use the standard rbenv cookbook now. No longer use the forked NREL-cookbook
+# cookbook 'rbenv', github: 'NREL-cookbooks/rbenv'
+
+cookbook 'openstudio_server', path: "../chef/cookbooks/openstudio_server"
+        
