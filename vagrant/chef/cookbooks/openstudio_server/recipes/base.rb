@@ -9,6 +9,25 @@
 include_recipe 'apt'
 include_recipe 'ntp'
 include_recipe 'cron'
+include_recipe 'man'
+include_recipe 'vim'
+
+# A much nicer replacement for grep.
+include_recipe 'ack'
+
+# Zip/Unzip
+include_recipe 'zip'
+
+# Sudo - careful installing this as you can easily prevent yourself from using sudo
+node.default['authorization']['sudo']['users'] = ["vagrant", "ubuntu"]
+node.default['authorization']['sudo']['sudoers_defaults'] = [
+    'env_reset',
+    'secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"'
+]
+node.default['authorization']['sudo']['passwordless'] = true
+node.default['authorization']['sudo']['include_sudoers_d'] = true
+node.default['authorization']['sudo']['agent_forwarding'] = true
+include_recipe 'sudo'
 
 
 node.override['logrotate']['global']['rotate'] = 30
@@ -28,23 +47,27 @@ include_recipe 'logrotate::global'
 #   create    '644 root adm'
 # end
 
-
+# Other random packages that need to be installed
+%w( expect curl iotop imagemagick ).each do |pi|
+  package pi
+end
 
 include_recipe "rbenv::default"
 include_recipe "rbenv::ruby_build"
 
-# needs to be set for openstudio linking to ruby
+
+# Install rbenv and Ruby
+
+# Set env variables as they are needed for openstudio linking to ruby
 ENV['RUBY_CONFIGURE_OPTS'] = '--enable-shared'
 ENV['CONFIGURE_OPTS'] = '--disable-install-doc'
 
-# TODO: move this to an attribute
-version_of_ruby = "2.0.0-p481"
-rbenv_ruby version_of_ruby do
+rbenv_ruby node[:openstudio_server][:ruby_version] do
   global true
 end
 
 %w(bundler ruby-prof).each do |g|
   rbenv_gem g do
-    ruby_version version_of_ruby
+    ruby_version node[:openstudio_server][:ruby_version]
   end
 end
