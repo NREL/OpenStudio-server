@@ -12,7 +12,6 @@ run_list([
              #"recipe[sudo::secure_path]",
 
              # Apt
-             "recipe[apt]",
 
              # Default iptables setup on all servers.
              #"recipe[iptables]",
@@ -22,10 +21,6 @@ run_list([
              #"recipe[curl]",
 
              # Setup log rotation.
-             "recipe[logrotate]",
-
-             # Cron for scheduled tasks.
-             "recipe[cron]",
 
              # Cronic is a handy script to prevent e-mail from over verbose scripts in
              # cron.
