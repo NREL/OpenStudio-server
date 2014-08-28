@@ -228,7 +228,30 @@ class DataPointsController < ApplicationController
       end
 
       dencity[:measure_instances] = measure_instances
-      dencity[:structure] = @data_point[:results]['dencity_reports']
+
+      # Don't use this old method.  Instead get the dencity reporting variables from the metadata_id flag
+      # dencity[:structure] = @data_point[:results]['dencity_reports']
+
+      # Grab all the variables that have defined a measure ID and pull out the results
+      vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '').
+          order_by(:name.asc).as_json(only: [:name, :metadata_id])
+
+      dencity[:structure] = {}
+      vars.each do |v|
+        a, b = v['name'].split('.')
+        logger.info "#{v[:metadata_id]} had #{a} and #{b}"
+
+        if dencity[:structure][v['metadata_id']].present?
+          logger.error "DEnCity variable '#{v['metadata_id']} is already defined in output as #{a}:#{b}"
+        end
+
+        if @data_point[:results][a].present? && @data_point[:results][a][b].present?
+          dencity[:structure][v['metadata_id']] = @data_point[:results][a][b]
+        else
+          logger.warn 'could not find result'
+          dencity[:structure][v['metadata_id']] = nil
+        end
+      end
     end
 
     respond_to do |format|
