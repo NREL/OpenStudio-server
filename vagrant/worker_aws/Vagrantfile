@@ -9,8 +9,7 @@ Vagrant.configure("2") do |config|
   config.omnibus.chef_version = "11.12.8"
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "dummy"
-  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  config.vm.box = "dimroc/awsdummy"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -71,7 +70,6 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider :aws do |aws, override|
-    #http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
     begin
       override.vm.box = "dummy"
       override.vm.box_url = "http://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
@@ -94,7 +92,7 @@ Vagrant.configure("2") do |config|
       aws.region = "us-east-1"
       aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
 
-      aws.ami = "ami-995a06f0"  #16GB version
+      aws.ami = "ami-e84d8480" # Ubuntu 14.04
 
       override.ssh.username = "ubuntu"
 
