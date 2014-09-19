@@ -9,8 +9,7 @@ Vagrant.configure("2") do |config|
   config.omnibus.chef_version = "11.12.8"
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "dummy"
-  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  config.vm.box = "dimroc/awsdummy"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -35,7 +34,6 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => use_nfs
   config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => use_nfs
   config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => use_nfs
-
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -72,7 +70,6 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider :aws do |aws, override|
-    #http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
     begin
       override.vm.box = "dummy"
       override.vm.box_url = "http://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
@@ -93,11 +90,9 @@ Vagrant.configure("2") do |config|
 
       aws.security_groups = ["default"]
       aws.region = "us-east-1"
-      #cc2.8xlarge	$2.40 	32 cores
       aws.instance_type = "c3.xlarge" # c3.xlarge	$0.30 	4 cores
-      #aws.ami = "ami-55b1ff3c" #default version
-      #aws.ami = "ami-c14915a8" #16GB version
-      aws.ami = "ami-1313207a"  #updated ami-c14915a8 for grub upgrade
+
+      aws.ami = "ami-864d84ee"  # Ubuntu 14.04 HVM
 
       override.ssh.username = "ubuntu"
 
