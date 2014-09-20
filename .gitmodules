@@ -87,7 +87,7 @@
 	url = git@github.com:opscode-cookbooks/partial_search.git
 [submodule "vagrant/chef/cookbooks/mongodb"]
 	path = vagrant/chef/cookbooks/mongodb
-	url = git@github.com:NREL-cookbooks/mongodb.git
+	url = git@github.com:edelight/chef-mongodb.git
 [submodule "vagrant/chef/cookbooks/aws"]
 	path = vagrant/chef/cookbooks/aws
 	url = git@github.com:NREL-cookbooks/aws.git
