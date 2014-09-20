@@ -9,9 +9,8 @@ run_list([
 
 default_attributes(
     :mongodb => {
-        :install_method => "10gen",
-        :package_version => "2.4.9",
-        :dbpath => "/mnt/mongodb/data", # being deprecated. use line below
+        :package_version => "2.6.4",
+        :install_method => 'mongodb-org',
         :config => {
           :dbpath => "/mnt/mongodb/data"
         }
