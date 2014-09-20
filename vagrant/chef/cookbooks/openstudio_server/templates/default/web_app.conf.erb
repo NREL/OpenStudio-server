@@ -8,8 +8,7 @@ RailsEnv <%= @params[:rails_env] %>
 <Directory <%= @params[:docroot] %>>
   Options FollowSymLinks
   AllowOverride None
-  Order allow,deny
-  Allow from all
+  Require all granted
 </Directory>
 
 LogLevel info
