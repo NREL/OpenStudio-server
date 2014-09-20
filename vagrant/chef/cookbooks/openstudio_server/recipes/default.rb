@@ -72,6 +72,10 @@ bash "configure delayed_job daemon" do
   EOH
 end
 
+service "apache2" do
+  action :restart
+end
+
 service "delayed_job" do
   action :restart
 end
