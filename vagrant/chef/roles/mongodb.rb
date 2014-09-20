@@ -9,11 +9,17 @@ run_list([
 
 default_attributes(
     :mongodb => {
+        # These first 4 are per this pull request: https://github.com/edelight/chef-mongodb/pull/262
+        # They should be fixed soon, at which point the defaults will work again.
+        :dbconfig_file => '/etc/mongod.conf',
+        :sysconfig_file => '/var/lib/mongo',
+        :default_init_name => 'mongod',
+        :instance_name => 'mongod',
         :package_version => "2.6.4",
         :install_method => 'mongodb-org',
         :config => {
-          :dbpath => "/mnt/mongodb/data"
+          :dbpath => "/mnt/mongodb/data",
+          :logpath => '/var/log/mongo/mongod.log'
         }
     }
 )
-
