@@ -7,7 +7,7 @@ include_recipe "passenger_apache2"
 
 web_app "openstudio-server" do
   docroot "#{node[:openstudio_server][:server_path]}/public"
-  server_name "openstudio-server"
+  server_name "openstudio-server.#{node[:domain]}"
   rails_env "#{node[:openstudio_server][:rails_environment]}"
 end
 
