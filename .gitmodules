@@ -78,7 +78,7 @@
 	url = git@github.com:NREL-cookbooks/expect.git
 [submodule "vagrant/chef/cookbooks/java"]
 	path = vagrant/chef/cookbooks/java
-	url = git@github.com:NREL-cookbooks/java.git
+	url = git@github.com:agileorbit-cookbooks/java.git 
 [submodule "vagrant/chef/cookbooks/ssh_known_hosts"]
 	path = vagrant/chef/cookbooks/ssh_known_hosts
 	url = git@github.com:opscode-cookbooks/ssh_known_hosts.git
