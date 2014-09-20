@@ -7,7 +7,7 @@ run_list([
 
 default_attributes(
     :passenger => {
-        :version => "4.0.29",
+        :version => "4.0.50",
 
         # Run all passengers processes as the apache user.
         :user_switching => false,
