@@ -582,7 +582,7 @@ class AnalysesController < ApplicationController
         order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
-    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name']] }]
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.','|')] }]
     # logger.info "Variable name map is #{variable_name_map}"
 
     logger.info 'looking for data points'
@@ -597,13 +597,15 @@ class AnalysesController < ApplicationController
                       status: this.status, status_message: this.status_message
                     };
 
+         // Retrieve all the results and map the variables to a.b
          var mrMap = #{variables.map { |v| v['name'].split('.') }.to_json};
          for (var i in mrMap){
            if (this.results[mrMap[i][0]] && this.results[mrMap[i][0]][mrMap[i][1]]) {
-             new_data[mrMap[i].join('.')] = this.results[mrMap[i][0]][mrMap[i][1]]
+             new_data[mrMap[i].join('|')] = this.results[mrMap[i][0]][mrMap[i][1]]
            }
          }
 
+         // Set the variable names to a.b
          var variableMap = #{variable_name_map.reject { |_k, v| v.nil? }.to_json};
          for (var p in this.set_variable_values) {
             new_data[variableMap[p]] = this.set_variable_values[p];
@@ -631,10 +633,11 @@ class AnalysesController < ApplicationController
     # Eventaully use this where the timestamp is processed as part of the request to save time
     # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     if datapoint_id
-      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id, status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
+                                  status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
     else
       plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                    .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}") # .finalize(finalize)
+                    .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
     end
     logger.info "finished fixing up data: #{Time.now - start_time}"
 
@@ -645,6 +648,7 @@ class AnalysesController < ApplicationController
     # else
     #   dps = @analysis.data_points.all
     # end
+
 
     start_time = Time.now
     logger.info 'mapping variables'
@@ -660,8 +664,15 @@ class AnalysesController < ApplicationController
 
     start_time = Time.now
     logger.info 'Start collapse'
-    plot_data.each do |pd|
+    plot_data.each_with_index do |pd, i|
       pd.merge!(pd.delete('value'))
+
+      # Horrible hack right now until we decide how to handle variables with periods in the key
+      #   The root of this issue is that Mongo 2.6 now strictly checks for periods in the hash and will
+      #   throw an exception.  The map/reduce script above has to save the result of the map/reduce to the
+      #   database because it is too large.  So the results have to be stored with pipes (|) temporary, then
+      #   mapped back out.
+      plot_data[i] = Hash[pd.map {|k, v| [k.gsub('|', '.'), v] }]
     end
     logger.info "finished merge: #{Time.now - start_time}"
 
