@@ -104,7 +104,6 @@ override_attributes(
 
 run_list(
     [
-        "recipe[java]",
         "recipe[r::default]",
         "recipe[r::rserve]",
     ])
