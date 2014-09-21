@@ -2,10 +2,8 @@ name "ruby"
 description "The bare essentials for servers that are using ruby."
 
 run_list([
-             #"recipe[build-essential]",
              "recipe[ruby_build]",
              "recipe[rbenv::system]",
-         #"recipe[rbenv::vagrant]",
          ])
 
 default_attributes(
