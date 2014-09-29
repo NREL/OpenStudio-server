@@ -67,8 +67,13 @@ if @options[:list_amis]
   exit 0
 end
 
-# Versioning (change these each build)
-require_relative "../server/lib/openstudio_server/version"
+# Versioning (change these each build) - Support old version lookup for awhile
+if File.exist? "../server/lib/openstudio_server/version"
+  require_relative "../server/lib/openstudio_server/version"
+else
+  require_relative "../server/lib/version"
+end
+
 @os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 @os_version = nil
 @os_version_sha = nil
