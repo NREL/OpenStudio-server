@@ -297,7 +297,7 @@ def get_instance_id(element)
       element[:instance_id] = r['instance_id']
     }
   rescue => e
-    error ="Error running get instance_id, #{e.message}"
+    error ="Error running get instance_id, #{e.message}: #{e.backtrace.join('\n')}"
     puts error
     element[:error_message] += error
     raise error
