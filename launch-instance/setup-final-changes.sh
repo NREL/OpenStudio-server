@@ -1,6 +1,9 @@
 #!/bin/sh
 
+# Unlock password (again)
 sudo usermod -U ubuntu
+
+# Clean up files to remove history
 cat /dev/null > ~/.ssh/authorized_keys
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/mongo.log
@@ -24,5 +27,7 @@ sudo rm -f /data/worker-nodes/README.md
 sudo rm -f /data/worker-nodes/rails-models/mongoid-vagrant.yml
 sudo rm -rf /var/chef
 sudo cat /dev/null > ~/.bash_history && history -c
+
+# Clean up apt
 sudo apt-get clean
 
