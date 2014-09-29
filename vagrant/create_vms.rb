@@ -103,6 +103,16 @@ puts "Lauching #{__FILE__} with provider: #{@options[:provider]}"
 if @options[:provider] == :aws
   require 'aws-sdk'
 
+  # check to make sure the right vagrant plugins are installed
+  r = `vagrant plugin list | grep 'vagrant-aws (0.5.0)'`
+  raise "Could not find AWS plugin. Run 'vagrant plugin install vagrant-aws'" unless r
+
+  r = `vagrant plugin list | grep 'vagrant-awsinfo (0.0.8)'`
+  raise "Could not find AWS Info plugin. Run 'vagrant plugin install vagrant-awsinfo'" unless r
+
+  r = `vagrant plugin list | grep 'vagrant-berkshelf (2.0.1)'`
+  raise "Could not find Berkshelf plugin. Run 'vagrant plugin install vagrant-berkshelf'" unless r
+
   # read in the AWS config settings
   filename = File.expand_path(File.join("~", ".aws", "config.yml"))
   if File.exist? filename
