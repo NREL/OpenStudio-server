@@ -301,9 +301,12 @@ def get_instance_id(element)
   $mutex.lock
   puts "#{element[:id]}: Get instance id"
   begin
-    Timeout::timeout(60) {
+    Timeout::timeout(300) {
       command = "cd ./#{element[:name]} && vagrant awsinfo"
-      r = JSON.parse `#{command}`
+      # Make sure to grep for only the content return in the {}.  For some reason this command can output other
+      # stuff ahead of what is needed
+      cout = `#{command}`.scan(/\{.*\}/m).first
+      r = JSON.parse cout
       element[:instance_id] = r['instance_id']
     }
   rescue => e
