@@ -48,11 +48,11 @@ puts "options = #{@options.inspect}"
 
 if @options[:list_amis]
   puts "Listing available AMIs from AWS"
-  
+
   require 'openstudio-aws'
-  
+
   @aws = OpenStudio::Aws::Aws.new
-  
+
   json_version_1 = @aws.os_aws.create_new_ami_json(1)
   json_version_2 = @aws.os_aws.create_new_ami_json(2)
 
@@ -67,8 +67,13 @@ if @options[:list_amis]
   exit 0
 end
 
-# Versioning (change these each build)
-require_relative "../server/lib/openstudio_server/version"
+# Versioning (change these each build) - Support old version lookup for awhile
+if File.exist? "../server/lib/openstudio_server/version"
+  require_relative "../server/lib/openstudio_server/version"
+else
+  require_relative "../server/lib/version"
+end
+
 @os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 @os_version = nil
 @os_version_sha = nil
@@ -337,7 +342,7 @@ def process(element, &block)
         raise "ERROR reached maximum number of retries in vagrant provision"
       end
     end
-    
+
     # run vagrant provision one more time to make sure that it completes (mainly to catch the passenger error)
     # run_vagrant_provision(element)
 
