@@ -1,15 +1,23 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant.configure("2") do |config|
-  use_nfs = false
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  is_windows = (RUBY_PLATFORM =~ /mswin|mingw|cygwin/)
+  use_nfs = !is_windows
+  use_nfs = false if ENV["VAGRANT_DISABLE_NFS"] == "true"
 
   # Don't use 11.14.2 because of https://github.com/opscode/chef/issues/1739 (duplicate error)
   # config.omnibus.chef_version = :latest
   config.omnibus.chef_version = "11.12.8"
 
+  # Use berkshelf.  Make sure to install ChefDK if you are using Windows.
+  # config.berkshelf.enabled = true
+
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "dimroc/awsdummy"
+  config.vm.box = "ubuntu/trusty64"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -19,7 +27,8 @@ Vagrant.configure("2") do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network :private_network, ip: "192.168.33.11"
+  config.vm.network :private_network, ip: "192.168.33.12"
+  config.vm.hostname = "os-worker-aws-cluster"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -40,9 +49,6 @@ Vagrant.configure("2") do |config|
   # Example for VirtualBox:
   #
   config.vm.provider :virtualbox do |vb|
-    # Don't boot with headless mode
-    # vb.gui = true
-
     # Use VBoxManage to customize the VM. For example to change memory:
     vb.customize ["modifyvm", :id, "--memory", 2048, "--cpus", 2]
 
@@ -50,23 +56,6 @@ Vagrant.configure("2") do |config|
     # Causes slowness: https://github.com/rubygems/rubygems/issues/513
     vb.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
-  end
-
-  config.vm.hostname = "os-worker"
-
-  # View the documentation for the provider you're using for more
-  # information on available options.
-
-  # Enable provisioning with chef solo, specifying a cookbooks path, roles
-  # path, and data_bags path (all relative to this Vagrantfile), and adding
-  # some recipes and/or roles.
-  #
-  config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = "../chef/cookbooks"
-    chef.roles_path = "../chef/roles"
-    
-    #chef.add_role "base"
-    chef.add_role "openstudio-worker-aws"
   end
 
   config.vm.provider :aws do |aws, override|
@@ -85,19 +74,21 @@ Vagrant.configure("2") do |config|
         aws.keypair_name = aws_config.fetch("keypair_name")
         aws.region = aws_config.fetch("region")
         override.ssh.private_key_path = aws_config.fetch("private_key_path")
+        aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 16 }]
       else
         raise "Could not find '#{secret_file}' file with your secrets"
       end
-      
-      aws.security_groups = ["default"]
-      aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
 
-      aws.ami = "ami-e84d8480" # Ubuntu 14.04
+      aws.security_groups = ["default"]
+      aws.region = "us-east-1"
+      aws.instance_type = "c3.xlarge" # c3.xlarge	$0.30 	4 cores
+
+      aws.ami = "ami-864d84ee"  # Ubuntu 14.04 HVM
 
       override.ssh.username = "ubuntu"
 
       aws.tags = {
-          'Name' => 'Vagrant OpenStudio-worker',
+          'Name' => 'Vagrant OpenStudio-worker-cluster',
           'NodeType' => 'Worker',
           'UserUUID' => ENV["VAGRANT_AWS_USER_UUID"] || 'unknown_user_uuid'
       }
@@ -105,4 +96,13 @@ Vagrant.configure("2") do |config|
       warn "Unable to configure AWS provider."
     end
   end
+
+  config.vm.provision :chef_solo do |chef|
+    chef.cookbooks_path = "../chef/cookbooks"
+    chef.roles_path = "../chef/roles"
+
+    #chef.add_role "base"
+    chef.add_role "openstudio-worker"
+  end
+
 end
