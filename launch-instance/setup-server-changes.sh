@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# Allow password-based authentication
-sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
-echo StrictHostKeyChecking no > /home/ubuntu/.ssh/config
-sudo service ssh restart
-
 # Reset permissions on files - add sticky bit for public data
 sudo chown -R ubuntu.www-data /var/www/rails/openstudio
 sudo chown -R ubuntu.www-data /var/www/rails/public
@@ -20,6 +15,3 @@ rm -rf /mnt/openstudio
 sudo apt-get upgrade -y
 chmod +x /data/launch-instance/setup-cleanup-aws.sh
 sudo /data/launch-instance/setup-cleanup-aws.sh
-
-# Unlock the ubuntu password
-sudo passwd -u ubuntu
