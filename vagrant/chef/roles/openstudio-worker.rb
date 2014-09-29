@@ -6,6 +6,7 @@ run_list([
              "role[base]",
              "role[ruby]",
              "recipe[openstudio_server::mongoshell]",
+             "recipe[openstudio_server::users]",  # Run this before R and before openstudio bashprofile
              "role[r-project]",
              "role[openstudio]",
              "recipe[openstudio_server::bashprofile]",
