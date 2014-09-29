@@ -123,11 +123,11 @@ if @options[:provider] == :vagrant
   #}
 elsif @options[:provider] == :aws
   @vms << {
-      id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
+      id: 1, name: "server", postflight_script_1: "setup-server-changes.sh", error_message: "",
       ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
-      id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
+      id: 2, name: "worker", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
