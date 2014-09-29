@@ -4,6 +4,10 @@
 # Note that this threadpool will equal the number of vms in the array
 # there is no limit--so careful
 
+# To run make sure that the vagrant aws and awsinfo plugin are installed
+
+#    vagrant plugin install vagrant-aws
+#    vagrant plugin install vagrant-awsinfo
 # TODOs
 #   - write out to logger
 #   - use server-api gem to talk to AWS for API
@@ -44,11 +48,11 @@ puts "options = #{@options.inspect}"
 
 if @options[:list_amis]
   puts "Listing available AMIs from AWS"
-  
+
   require 'openstudio-aws'
-  
+
   @aws = OpenStudio::Aws::Aws.new
-  
+
   json_version_1 = @aws.os_aws.create_new_ami_json(1)
   json_version_2 = @aws.os_aws.create_new_ami_json(2)
 
@@ -64,7 +68,7 @@ if @options[:list_amis]
 end
 
 # Versioning (change these each build)
-require_relative "../server/lib/version"
+require_relative "../server/lib/openstudio_server/version"
 @os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 @os_version = nil
 @os_version_sha = nil
@@ -76,7 +80,6 @@ if File.exists?(os_role_file)
   json_obj = eval("{ #{json_string} }")
   @os_version = json_obj[:openstudio][:version]
   @os_version_sha = json_obj[:openstudio][:installer][:version_revision]
-
 else
   raise "Could not find OpenStudio.rb chef role in #{os_role_file}"
 end
@@ -96,13 +99,18 @@ if @options[:provider] == :aws
   require 'aws-sdk'
 
   # read in the AWS config settings
-  config = YAML.load(File.read(File.join(File.expand_path("~"), "aws_config.yml")))
-  AWS.config(
-      :access_key_id => config['access_key_id'],
-      :secret_access_key => config['secret_access_key'],
-      :region => "us-east-1",
-      :ssl_verify_peer => false
-  )
+  filename = File.expand_path(File.join("~", ".aws", "config.yml"))
+  if File.exist? filename
+    puts "Using new location style format"
+    config = YAML.load(File.read(filename))
+    AWS.config(
+        :access_key_id => config['access_key_id'],
+        :secret_access_key => config['secret_access_key'],
+        :region => config['region'],
+        :ssl_verify_peer => false
+    )
+  end
+
   @aws = AWS::EC2.new
 end
 
@@ -123,11 +131,11 @@ if @options[:provider] == :vagrant
   #}
 elsif @options[:provider] == :aws
   @vms << {
-      id: 1, name: "server", postflight_script_1: "setup-server-changes.sh", error_message: "",
+      id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
       ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
-      id: 2, name: "worker", postflight_script_1: "setup-worker-changes.sh", error_message: "",
+      id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
@@ -154,42 +162,43 @@ def system_call(command, &block)
   exit_code
 end
 
+# Run vagrant up with the provisioner
 def run_vagrant_up(element)
   success = true
   $mutex.lock
   begin
-    Timeout::timeout(2400) {
+    Timeout::timeout(4500) {
       puts "#{element[:id]}: starting process on #{element}"
-      command = "cd ./#{element[:name]} && VAGRANT_AWS_USER_UUID=#{@options[:user_uuid]} vagrant up --no-provision"
+      command = "cd ./#{element[:name]} && VAGRANT_AWS_USER_UUID=#{@options[:user_uuid]} vagrant up"
       if @options[:provider] == :aws
         command += " --provider=aws"
       end
       exit_code = system_call(command) do |message|
         puts "#{element[:id]}: #{message}"
-        if message =~ /Installing Chef.*\d*.\d*.\d*.*Omnibus package/i
-          puts "#{element[:id]}: chef is installing - you can go on now"
+        if message =~ /Installing Chef.*\d*.\d*.\d*.*Omnibus package.*/i
+          puts "#{element[:id]}: Chef is installing - you can go on now"
           $mutex.unlock
-        elsif message =~ /The machine is already created/i
+        elsif message =~ /.*is already running/i
           puts "#{element[:id]}: machines already running -- go to vagrant provision"
           $mutex.unlock
         elsif message =~ /.*ERROR:/
-          puts "#{element[:id]}Error found during provisioning"
+          puts "#{element[:id]}: Error found during provisioning"
         end
       end
       if exit_code != 0
         # this can happen when AWS isn't available or insufficient capacity in AWS
         #InsufficientInstanceCapacity => Insufficient capacity.
         success = false
-        $mutex.unlock
-        raise AllJobsInvalid # call this after unlocking
+        # $mutex.unlock if $mutex.owned?
+        # raise AllJobsInvalid # call this after unlocking
       end
     }
   rescue AllJobsInvalid
     # pass the exception through
     raise AllJobsInvalid
-  rescue TimeoutError
+  rescue Timeout::Error
     # DO NOT raise an error if timeout, just timeout
-    error = "#{element[:id]}: ERROR TimeoutError running vagrant up"
+    error = "#{element[:id]}: ERROR Timeout::Error running vagrant up"
     puts error
     element[:error_message] += error
     success = false
@@ -198,7 +207,7 @@ def run_vagrant_up(element)
     element[:error_message] += error
   rescue Exception => e
     # DO NOT raise an excpetion if it crashed out 
-    puts "#{element[:id]}: ERROR in vagrant up with #{e.message}"
+    error = "#{element[:id]}: ERROR in vagrant up with #{e.message}"
     puts error
     element[:error_message] += error
     success = false
@@ -218,7 +227,7 @@ def run_vagrant_provision(element)
       command = "cd ./#{element[:name]} && vagrant provision"
       exit_code = system_call(command) do |message|
         puts "#{element[:id]}: #{message}"
-        if message =~ /Running chef-solo.../i
+        if message =~ /Running provisioner. chef_solo.../i
           puts "#{element[:id]}: chef running - you can go on now"
           $mutex.unlock
         elsif message =~ /The machine is already created/i
@@ -232,9 +241,9 @@ def run_vagrant_provision(element)
         success = false
       end
     }
-  rescue TimeoutError
+  rescue Timeout::Error
     # DO NOT raise an error if timeout, just timeout
-    error = "#{element[:id]}: ERROR TimeoutError running vagrant provision"
+    error = "#{element[:id]}: ERROR Timeout::Error running vagrant provision"
     puts error
     element[:error_message] += error
     success = false
@@ -262,7 +271,7 @@ def run_vagrant_reload(element)
       command = "cd ./#{element[:name]} && vagrant reload"
       system_call(command) { |message| puts "#{element[:id]}: #{message}" }
     }
-  rescue Exception => e
+  rescue => e
     error = "Error running vagrant reload, #{e.message}"
     puts error
     element[:error_message] += error
@@ -272,21 +281,24 @@ def run_vagrant_reload(element)
   $mutex.unlock
 end
 
+# Get the instance IDs using the AWS info plugin
 def get_instance_id(element)
-  # Get the instance ids by executing the Amazon API on the system. I don't thinks need to have mutexes?
+  $mutex.lock
   puts "#{element[:id]}: Get instance id"
   begin
     Timeout::timeout(60) {
-      command = "cd ./#{element[:name]} && vagrant ssh -c 'curl -sL http://169.254.169.254/latest/meta-data/instance-id'"
-      element[:instance_id] = `#{command}`
+      command = "cd ./#{element[:name]} && vagrant awsinfo"
+      r = JSON.parse `#{command}`
+      element[:instance_id] = r['instance_id']
     }
-  rescue Exception => e
+  rescue => e
     error ="Error running get instance_id, #{e.message}"
     puts error
     element[:error_message] += error
-    raise TimeoutError, error
+    raise error
   end
-  puts "#{element[:id]}: Finished getting element ID"
+  puts "#{element[:id]}: Finished getting instance ID #{element[:instance_id]}"
+  $mutex.unlock
 end
 
 def create_ami(element)
@@ -325,9 +337,9 @@ def process(element, &block)
         raise "ERROR reached maximum number of retries in vagrant provision"
       end
     end
-    
+
     # run vagrant provision one more time to make sure that it completes (mainly to catch the passenger error)
-    run_vagrant_provision(element)
+    # run_vagrant_provision(element)
 
     # Append the instance id to the element
     if @options[:provider] == :aws
@@ -335,7 +347,7 @@ def process(element, &block)
     end
 
     begin
-      Timeout::timeout(900) {
+      Timeout::timeout(1200) {
         # cleanup the box by calling the cleanup scripts
         puts "#{element[:id]}: configuring the machines"
         command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
@@ -344,23 +356,23 @@ def process(element, &block)
         system_call(command) { |message| puts "#{element[:id]}: #{message}" }
       }
     rescue Exception => e
-      raise TimeoutError, "Error running initial cleanup, #{e.message}"
+      raise Timeout::Error, "Timeout::Error running initial cleanup, #{e.message}"
     end
 
     if @options[:provider] == :aws
       # Reboot the box if on Amazon because of kernel updates
-      #run_vagrant_reload(element) # todo: can i remove this?
+      #run_vagrant_reload(element) # TODO: can i remove this?
 
       # finish up AMI cleanup 
       begin
-        Timeout::timeout(900) {
+        Timeout::timeout(1200) {
           command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
           #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
           command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
           #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
         }
       rescue Exception => e
-        raise TimeoutError, "Error running final cleanup, #{e.message}"
+        raise Timeout::Error, "Timeout::Error running final cleanup, #{e.message}"
       end
 
       begin
@@ -437,11 +449,18 @@ end
 end
 $threads.each { |t| t.join }
 
+
+puts
+puts "============================= AMI Information======================================="
+puts
 @vms.each do |vm|
   puts vm
 end
-
-puts "================"
+puts
+puts "===================================================================="
+puts
+puts "===================================================================="
+puts
 end_time = Time.now
 good_build = @vms.all? { |vm| vm[:good_ami] && vm[:error_message] == "" }
 if good_build
@@ -449,7 +468,7 @@ if good_build
 
   if @options[:provider] == :aws
     puts
-    puts " === amis.json format ====="
+    puts "=========================== JSON ========================================="
     amis_hash = {}
     amis_hash[@os_version] = {}
     amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
@@ -462,8 +481,6 @@ if good_build
     outfile = File.join(File.dirname(__FILE__), test_amis_filename)
     # save it to a file for use in integration test
     File.open(outfile, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
-
-    # Todo: save some of these results to a database?
   end
 else
   puts "AMIs had errors"
