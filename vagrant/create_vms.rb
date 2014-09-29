@@ -136,15 +136,15 @@ if @options[:provider] == :vagrant
   #}
 elsif @options[:provider] == :aws
   @vms << {
-      id: 1, name: "server_aws", postflight_script_1: "setup-server-changes.sh", error_message: "",
+      id: 1, name: "server", postflight_script_1: "setup-server-changes.sh", error_message: "",
       ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
-      id: 2, name: "worker_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
+      id: 2, name: "worker", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
   }
   @vms << {
-      id: 3, name: "worker_cluster_aws", postflight_script_1: "setup-worker-changes.sh", error_message: "",
+      id: 3, name: "worker_cluster", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
   }
 end
@@ -478,7 +478,7 @@ if good_build
     amis_hash[@os_version] = {}
     amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
     amis_hash[@os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
-    amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster_aws" }.first[:ami_id]
+    amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash)
 
