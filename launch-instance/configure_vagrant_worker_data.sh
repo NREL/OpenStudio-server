@@ -9,7 +9,13 @@ sudo chmod -R 775 /mnt/openstudio
 # save application files into the right directory
 cp -rf /data/worker-nodes/* /mnt/openstudio/
 
-# copy over the models needed for mongo
+# This currently doesn't use the workflow gem
+
+
+
+
+
+# copy over the models needed for mongo - old location
 cd /mnt/openstudio/rails-models && unzip -o rails-models.zip
 
 # rename the mongoid-vagrant template to mongoid.yml which is unpacked with unzip
