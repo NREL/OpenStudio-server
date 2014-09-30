@@ -103,6 +103,16 @@ puts "Lauching #{__FILE__} with provider: #{@options[:provider]}"
 if @options[:provider] == :aws
   require 'aws-sdk'
 
+  # check to make sure the right vagrant plugins are installed
+  r = `vagrant plugin list | grep 'vagrant-aws (0.5.0)'`
+  raise "Could not find AWS plugin. Run 'vagrant plugin install vagrant-aws'" unless r
+
+  r = `vagrant plugin list | grep 'vagrant-awsinfo (0.0.8)'`
+  raise "Could not find AWS Info plugin. Run 'vagrant plugin install vagrant-awsinfo'" unless r
+
+  r = `vagrant plugin list | grep 'vagrant-berkshelf (2.0.1)'`
+  raise "Could not find Berkshelf plugin. Run 'vagrant plugin install vagrant-berkshelf'" unless r
+
   # read in the AWS config settings
   filename = File.expand_path(File.join("~", ".aws", "config.yml"))
   if File.exist? filename
@@ -291,13 +301,16 @@ def get_instance_id(element)
   $mutex.lock
   puts "#{element[:id]}: Get instance id"
   begin
-    Timeout::timeout(60) {
+    Timeout::timeout(300) {
       command = "cd ./#{element[:name]} && vagrant awsinfo"
-      r = JSON.parse `#{command}`
+      # Make sure to grep for only the content return in the {}.  For some reason this command can output other
+      # stuff ahead of what is needed
+      cout = `#{command}`.scan(/\{.*\}/m).first
+      r = JSON.parse cout
       element[:instance_id] = r['instance_id']
     }
   rescue => e
-    error ="Error running get instance_id, #{e.message}"
+    error ="Error running get instance_id, #{e.message}: #{e.backtrace.join('\n')}"
     puts error
     element[:error_message] += error
     raise error
@@ -454,7 +467,6 @@ end
 end
 $threads.each { |t| t.join }
 
-
 puts
 puts "============================= AMI Information======================================="
 puts
@@ -476,8 +488,8 @@ if good_build
     puts "=========================== JSON ========================================="
     amis_hash = {}
     amis_hash[@os_version] = {}
-    amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server_aws" }.first[:ami_id]
-    amis_hash[@os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker_aws" }.first[:ami_id]
+    amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server" }.first[:ami_id]
+    amis_hash[@os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker" }.first[:ami_id]
     amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash)
