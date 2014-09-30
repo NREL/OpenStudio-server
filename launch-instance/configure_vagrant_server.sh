@@ -27,6 +27,8 @@ chown vagrant:vagrant ~/setup*
 sudo service delayed_job stop
 sudo service apache2 stop
 sudo service mongodb stop
+# support the new mongodb version as well
+sudo service mongod stop
 
 # remove mongo db & add it back
 sudo mkdir -p /mnt/mongodb/data
@@ -35,6 +37,7 @@ sudo rm -rf /var/lib/mongodb
 
 # restart mongo
 sudo service mongodb start
+sudo service mongod start
 
 # restart the rails application
 sudo service apache2 stop
