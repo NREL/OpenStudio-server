@@ -43,6 +43,12 @@ OptionParser.new do |opts|
   opts.on("-l", "--list-amis", "Create AMI JSON lists") do |s|
     @options[:list_amis] = true
   end
+
+  @options[:skip_terminate] = false
+  opts.on("-x", "--skip-terminate", "Do not terminate the instances") do |s|
+    @options[:skip_terminate] = true
+  end
+
 end.parse!
 puts "options = #{@options.inspect}"
 
@@ -378,16 +384,14 @@ def process(element, &block)
     end
 
     if @options[:provider] == :aws
-      # Reboot the box if on Amazon because of kernel updates
-      #run_vagrant_reload(element) # TODO: can i remove this?
-
-      # finish up AMI cleanup 
+      # finish up AMI cleanup
       begin
         Timeout::timeout(1200) {
           command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
-          #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+          # This will remove the key from the instance.  Make sure that you run this last!
           command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
-          #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
         }
       rescue Exception => e
         raise Timeout::Error, "Timeout::Error running final cleanup, #{e.message}"
@@ -450,10 +454,14 @@ def process(element, &block)
   ensure
     # Be sure to alwys kill the instances if using AWS
     if @options[:provider] == :aws
-      puts "#{element[:id]}: terminating instance"
-      command = "cd ./#{element[:name]} && vagrant destroy -f"
-      system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-      puts "#{element[:id]}: instance terminated and  thread"
+      if @options[:skip_terminate]
+        puts "#{element[:id]}: skipping the termination of instance. Make sure to terminate manually"
+      else
+        puts "#{element[:id]}: terminating instance"
+        command = "cd ./#{element[:name]} && vagrant destroy -f"
+        system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+        puts "#{element[:id]}: instance terminated and  thread"
+      end
     end
   end
 end
