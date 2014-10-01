@@ -83,8 +83,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       aws.security_groups = ["default"]
       aws.region = "us-east-1"
-      #aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
-      aws.instance_type = "m3.medium" # $0.07 / hour, 1 core, slow network
+      aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
+      #aws.instance_type = "m3.medium" # $0.07 / hour, 1 core, slow network
 
       aws.ami = "ami-8caa1ce4" # Ubuntu 14.04
 
