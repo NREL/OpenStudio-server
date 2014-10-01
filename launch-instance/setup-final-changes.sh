@@ -36,4 +36,3 @@ sudo cat /dev/null > ~/.bash_history && history -c
 
 # Clean up apt
 sudo apt-get clean
-
