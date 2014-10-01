@@ -83,7 +83,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       aws.region = "us-east-1"
       aws.instance_type = "c3.xlarge" # c3.xlarge	$0.30 	4 cores
 
-      aws.ami = "ami-864d84ee"  # Ubuntu 14.04 HVM
+      aws.ami = "ami-9aaa1cf2"  # Ubuntu 14.04 HVM
 
       override.ssh.username = "ubuntu"
 
