@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Upgrade any remaining packages and call the cleanup scripts
 sudo apt-get update -y

@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+echo "Running setup-final-changes.sh"
 
 # Allow password-based authentication
 sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
@@ -32,8 +34,5 @@ sudo rm -f /data/launch-instance/*.yml
 sudo rm -f /data/worker-nodes/README.md
 sudo rm -f /data/worker-nodes/rails-models/mongoid-vagrant.yml
 sudo rm -rf /var/chef
-sudo cat /dev/null > ~/.bash_history && history -c
-
-# Clean up apt
-sudo apt-get clean
-
+sudo -- su ubuntu -c 'cat /dev/null > ~/.bash_history && history -c'
+sudo -- su -c 'cat /dev/null > ~/.bash_history && history -c'
