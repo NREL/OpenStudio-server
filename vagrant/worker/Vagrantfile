@@ -43,7 +43,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "../../worker-nodes", "/data/worker-nodes", :nfs => use_nfs
   config.vm.synced_folder "../../launch-instance", "/data/launch-instance", :nfs => use_nfs
   config.vm.synced_folder "../../lib/R-packages", "/data/R-packages", :nfs => use_nfs
-  #config.vm.synced_folder "E:/data-worker", "/mnt/openstudio", :nfs => use_nfs, :owner => "vagrant", :group => "www-data", :mount_options => [ "dmode=775", "fmode=775" ]
+  # config.vm.synced_folder "../../../OpenStudio-workflow", "/data/OpenStudio-workflow", :nfs => use_nfs
+  # config.vm.synced_folder "../../../OpenStudio-analysis-gem", "/data/OpenStudio-analysis-gem", :nfs => use_nfs
+  # config.vm.synced_folder "E:/data-worker", "/mnt/openstudio", :nfs => use_nfs, :owner => "vagrant", :group => "www-data", :mount_options => [ "dmode=775", "fmode=775" ]
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -82,8 +84,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       aws.security_groups = ["default"]
       aws.region = "us-east-1"
       aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
+      #aws.instance_type = "m3.medium" # $0.07 / hour, 1 core, slow network
 
-      aws.ami = "ami-e84d8480" # Ubuntu 14.04
+      aws.ami = "ami-8caa1ce4" # Ubuntu 14.04
 
       override.ssh.username = "ubuntu"
 
