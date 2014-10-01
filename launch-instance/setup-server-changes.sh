@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Reset permissions on files - add sticky bit for public data
 sudo chown -R ubuntu.www-data /var/www/rails/openstudio
