@@ -43,6 +43,12 @@ OptionParser.new do |opts|
   opts.on("-l", "--list-amis", "Create AMI JSON lists") do |s|
     @options[:list_amis] = true
   end
+
+  @options[:skip_terminate] = false
+  opts.on("-x", "--skip-terminate", "Do not terminate the instances") do |s|
+    @options[:skip_terminate] = true
+  end
+
 end.parse!
 puts "options = #{@options.inspect}"
 
@@ -450,10 +456,14 @@ def process(element, &block)
   ensure
     # Be sure to alwys kill the instances if using AWS
     if @options[:provider] == :aws
-      puts "#{element[:id]}: terminating instance"
-      command = "cd ./#{element[:name]} && vagrant destroy -f"
-      system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-      puts "#{element[:id]}: instance terminated and  thread"
+      if @options[:skip_terminate]
+        puts "#{element[:id]}: skipping the termination of instance. Make sure to terminate manually"
+      else
+        puts "#{element[:id]}: terminating instance"
+        command = "cd ./#{element[:name]} && vagrant destroy -f"
+        system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+        puts "#{element[:id]}: instance terminated and  thread"
+      end
     end
   end
 end
