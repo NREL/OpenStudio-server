@@ -388,9 +388,10 @@ def process(element, &block)
       begin
         Timeout::timeout(1200) {
           command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
-          #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+          # This will remove the key from the instance.  Make sure that you run this last!
           command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
-          #system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
         }
       rescue Exception => e
         raise Timeout::Error, "Timeout::Error running final cleanup, #{e.message}"
