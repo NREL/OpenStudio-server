@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 sudo apt-get autoremove --purge gir1.2-freedesktop -y
 sudo apt-get autoremove --purge gir1.2-glib-2.0 -y
@@ -33,8 +33,8 @@ sudo rm -rf /usr/lib/R/doc
 sudo rm -rf /tmp/*.tar.gz
 
 # This should be called from the chef script!
-cd /usr/local/lib/R-3.0.3/src/gnuwin32/
-sudo make clean
+# cd /usr/local/lib/R-3.0.3/src/gnuwin32/
+# sudo make clean
 
 # Remove OpenStudio and EnergyPlus unneeded files
 sudo rm -rf /usr/local/EnergyPlus-8-1-0/ExampleFiles/*
@@ -47,7 +47,7 @@ sudo rm -rf /usr/local/share/openstudio/Ruby/openstudio/examples
 sudo rm -rf /usr/local/share/openstudio/examples
 sudo rm -rf /usr/local/share/openstudio/OSApp
 
-# Clean again
+# Clean apt
 sudo apt-get autoclean
 sudo apt-get clean
 

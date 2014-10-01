@@ -384,10 +384,7 @@ def process(element, &block)
     end
 
     if @options[:provider] == :aws
-      # Reboot the box if on Amazon because of kernel updates
-      #run_vagrant_reload(element) # TODO: can i remove this?
-
-      # finish up AMI cleanup 
+      # finish up AMI cleanup
       begin
         Timeout::timeout(1200) {
           command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
