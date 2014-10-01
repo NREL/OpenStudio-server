@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Some good notes here about sharing instances:
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
+
 echo "Running setup-final-changes.sh"
 
 # Allow password-based authentication
