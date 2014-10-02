@@ -10,7 +10,7 @@ sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh
 echo StrictHostKeyChecking no > /home/ubuntu/.ssh/config
 sudo service ssh restart
 
-# Set a default password and unlock
+# Set a default password and unlock (but will lock again at initial boot)
 echo -e "ubuntu\nubuntu" | sudo passwd ubuntu
 sudo passwd -u ubuntu
 
