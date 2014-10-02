@@ -23,6 +23,7 @@ require 'timeout'
 require 'optparse'
 require 'github'
 require 'securerandom'
+require 'pp'
 
 @options = {}
 OptionParser.new do |opts|
@@ -158,10 +159,6 @@ elsif @options[:provider] == :aws
   @vms << {
       id: 2, name: "worker", postflight_script_1: "setup-worker-changes.sh", error_message: "",
       ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
-  }
-  @vms << {
-      id: 3, name: "worker_cluster", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-      ami_name: "OpenStudio-Cluster OS-#{@os_version} V#{@os_server_version}"
   }
 end
 
@@ -479,7 +476,7 @@ puts
 puts "============================= AMI Information======================================="
 puts
 @vms.each do |vm|
-  puts vm
+  pp vm
 end
 puts
 puts "===================================================================="
@@ -498,7 +495,8 @@ if good_build
     amis_hash[@os_version] = {}
     amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server" }.first[:ami_id]
     amis_hash[@os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker" }.first[:ami_id]
-    amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker_cluster" }.first[:ami_id]
+    # Map the worker to the cc2worker for now until we deprecate the cc2s
+    # amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker" }.first[:ami_id]
 
     puts JSON.pretty_generate(amis_hash)
 
