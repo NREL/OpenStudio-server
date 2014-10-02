@@ -6,7 +6,7 @@ puts ARGV
 Vagrant.configure("2") do |config|
   is_windows = (RUBY_PLATFORM =~ /mswin|mingw|cygwin/)
   use_nfs = !is_windows
-  use_nfs = false if ENV["VAGRANT_DISABLE_NFS"] == "true" 
+  use_nfs = false if ENV["VAGRANT_DISABLE_NFS"] == "true"
 
   # Don't use 11.14.2 because of https://github.com/opscode/chef/issues/1739 (duplicate error)  
   # config.omnibus.chef_version = :latest
@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
   # Bridged networks make the machine appear as another physical device on
   # your network.
   # config.vm.network :public_network
-  
+
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
@@ -82,7 +82,7 @@ Vagrant.configure("2") do |config|
       aws.region = "us-east-1"
       aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
 
-      aws.ami = "ami-8caa1ce4" # Ubuntu 14.04
+      aws.ami = "ami-9aaa1cf2"  # Ubuntu 14.04 HVM
 
       override.ssh.username = "ubuntu"
 
