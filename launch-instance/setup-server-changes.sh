@@ -6,9 +6,6 @@ sudo chown -R ubuntu.www-data /var/www/rails/public
 sudo chmod -R g+w /var/www/rails/openstudio/public
 sudo chmod +t /var/www/rails/openstudio/public
 sudo chmod -R g+w /var/www/rails/openstudio/tmp
-cd /var/www/rails/openstudio
-rake db:purge
-rake db:mongoid:create_indexes
 rm -rf /mnt/openstudio
 
 # Upgrade any remaining packages and call the cleanup scripts
