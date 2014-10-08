@@ -36,14 +36,14 @@ module Analysis::R
 
       dataframe = { 'data' => probabilities_array }.to_dataframe
 
-      if var.uncertainty_type == 'discrete_uncertain'
+      if  var.uncertainty_type == 'discrete' || var.uncertainty_type == 'discrete_uncertain'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
             print(values)
             samples <- qdiscrete(df$data, weights, values)
           "
         end
-      elsif var.uncertainty_type == 'bool_uncertain'
+      elsif var.uncertainty_type == 'bool' || var.uncertainty_type == 'boolean' || var.uncertainty_type == 'bool_uncertain'
         fail 'bool_uncertain needs some updating to map from bools'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
@@ -151,7 +151,7 @@ module Analysis::R
           variable_samples = discrete_sample_from_probability(p[i_var], var)
           var_types << 'discrete'
         else
-          variable_samples = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil,
+          variable_samples = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
                                                       var.lower_bounds_value, var.upper_bounds_value)
           var_types << 'continuous'
         end
