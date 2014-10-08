@@ -1,7 +1,8 @@
 #!/bin/bash
 
-sudo apt-get autoremove --purge gir1.2-freedesktop -y
-sudo apt-get autoremove --purge gir1.2-glib-2.0 -y
+# Do NOT remove gir1.2* as it is needed for cloud init
+# sudo apt-get autoremove --purge gir1.2-freedesktop -y
+# sudo apt-get autoremove --purge gir1.2-glib-2.0 -y
 
 # JDK 6 has been deprecated (NL - 2014-09-29)
 sudo apt-get autoremove --purge openjdk-6-jdk -y

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Some good notes here about sharing instances:
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
+
 echo "Running setup-final-changes.sh"
 
 # Allow password-based authentication
@@ -7,12 +10,15 @@ sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh
 echo StrictHostKeyChecking no > /home/ubuntu/.ssh/config
 sudo service ssh restart
 
-# Set a default password and unlock
+# Set a default password and unlock (but will lock again at initial boot)
 echo -e "ubuntu\nubuntu" | sudo passwd ubuntu
 sudo passwd -u ubuntu
 
+# Remove authorized keys
+sudo shred -u /home/ubuntu/.ssh/authorized_keys
+sudo shred -u /root/.ssh/authorized_keys
+
 # Clean up files to remove history
-cat /dev/null > ~/.ssh/authorized_keys
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/mongo.log
 sudo cat /dev/null > /var/www/rails/openstudio/log/development.log
@@ -27,12 +33,12 @@ sudo -- su -c 'cat /dev/null > /var/log/kern.log'
 sudo -- su -c 'cat /dev/null > /var/log/boot.log'
 sudo -- su -c 'cat /dev/null > /var/log/mongodb/mongodb.log'
 sudo -- su -c 'cat /dev/null > /var/log/apache2/error.log'
-sudo rm -f /data/launch-instance/*.pem
-sudo rm -f /data/launch-instance/*.log
-sudo rm -f /data/launch-instance/*.json
-sudo rm -f /data/launch-instance/*.yml
-sudo rm -f /data/worker-nodes/README.md
-sudo rm -f /data/worker-nodes/rails-models/mongoid-vagrant.yml
+sudo shred -u /data/launch-instance/*.pem
+sudo shred -u /data/launch-instance/*.log
+sudo shred -u /data/launch-instance/*.json
+sudo shred -u /data/launch-instance/*.yml
+sudo shred -u /data/worker-nodes/README.md
+sudo shred -u /data/worker-nodes/rails-models/mongoid-vagrant.yml
 sudo rm -rf /var/chef
-sudo -- su ubuntu -c 'cat /dev/null > ~/.bash_history && history -c'
-sudo -- su -c 'cat /dev/null > ~/.bash_history && history -c'
+sudo -- su ubuntu -c 'shred -u ~/.*history && history -c'
+sudo -- su -c 'shred -u ~/.*history && history -c'
