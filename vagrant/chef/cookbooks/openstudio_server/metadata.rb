@@ -24,7 +24,6 @@ depends 'build-essential'
 # Applications
 depends 'rbenv'
 
-
 %w{ redhat centos scientific amazon oracle ubuntu debian arch }.each do |os|
   supports os
 end

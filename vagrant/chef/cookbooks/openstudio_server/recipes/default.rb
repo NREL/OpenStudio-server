@@ -7,7 +7,7 @@ include_recipe "passenger_apache2"
 
 web_app "openstudio-server" do
   docroot "#{node[:openstudio_server][:server_path]}/public"
-  server_name "openstudio-server"
+  server_name "openstudio-server.#{node[:domain]}"
   rails_env "#{node[:openstudio_server][:rails_environment]}"
 end
 
@@ -70,6 +70,10 @@ bash "configure delayed_job daemon" do
     update-rc.d -f delayed_job remove
     update-rc.d delayed_job defaults 99
   EOH
+end
+
+service "apache2" do
+  action :restart
 end
 
 service "delayed_job" do

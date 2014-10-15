@@ -36,6 +36,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   ci_reporter (~> 1.9.0)

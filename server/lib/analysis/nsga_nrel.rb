@@ -237,7 +237,14 @@ class Analysis::NsgaNrel
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
-
+              
+            if (uniquegroups == 1) {
+                 print(paste("unique groups error:",uniquegroups))
+                 write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                 stop(options("show.error.messages"="unique groups"),"unique groups is 1")
+            }
+			
+			
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))

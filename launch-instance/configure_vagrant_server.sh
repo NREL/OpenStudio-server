@@ -26,7 +26,7 @@ chown vagrant:vagrant ~/setup*
 # stop the various services that use mongo
 sudo service delayed_job stop
 sudo service apache2 stop
-sudo service mongodb stop
+sudo service mongod stop
 
 # remove mongo db & add it back
 sudo mkdir -p /mnt/mongodb/data
@@ -34,7 +34,7 @@ sudo chown mongodb:nogroup /mnt/mongodb/data
 sudo rm -rf /var/lib/mongodb
 
 # restart mongo
-sudo service mongodb start
+sudo service mongod start
 
 # restart the rails application
 sudo service apache2 stop
