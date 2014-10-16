@@ -4,8 +4,14 @@ metadata
 
 cookbook 'apt', '~> 2.5.3'
 
-# Use the standard rbenv cookbook now. No longer use the forked NREL-cookbook
-# cookbook 'rbenv', github: 'NREL-cookbooks/rbenv'
-
+# This will pull in many of the dependencies
 cookbook 'openstudio_server', path: "../chef/cookbooks/openstudio_server"
-        
+cookbook 'mongodb'
+
+cookbook "openstudio", github: 'NREL-cookbooks/openstudio', protocol: 'ssh'
+cookbook "energyplus", github: 'NREL-cookbooks/energyplus', protocol: 'ssh'
+cookbook "ark", github: 'NREL-cookbooks/ark', protocol: 'ssh'
+cookbook "r", github: 'NREL-cookbooks/cookbook-r'
+cookbook "radiance", github: 'NREL-cookbooks/radiance'
+
+

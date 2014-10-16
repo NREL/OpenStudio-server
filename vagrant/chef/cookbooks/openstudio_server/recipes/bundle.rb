@@ -12,6 +12,3 @@ bash "bundle install" do
     bundle install
   EOH
 end
-
-# rehash rbenv
-rbenv_rehash "rehashing in case rails was installed"

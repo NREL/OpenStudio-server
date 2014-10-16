@@ -11,7 +11,6 @@ version           "2.0.0"
 #depends "apache2", ">= 1.0.4"
 
 depends 'apt'
-depends 'cron'
 depends 'ntp'
 depends 'man'
 depends 'ack'
@@ -20,9 +19,14 @@ depends 'zip'
 depends 'sudo'
 depends 'logrotate'
 depends 'build-essential'
+#depends 'openstudio'
 
 # Applications
 depends 'rbenv'
+depends 'mongodb'
+depends 'apache2'
+depends 'passenger_apache2'
+
 
 %w{ redhat centos scientific amazon oracle ubuntu debian arch }.each do |os|
   supports os
