@@ -71,3 +71,10 @@ end
     ruby_version node[:openstudio_server][:ruby][:version]
   end
 end
+
+# set the passenger node values to the location of rbenv - languages is not accessible
+#Chef::Log.info "Resetting passenger root path to #{languages['ruby']['gems_dir']}/gems/passenger-#{node['passenger']['version']}"
+#Chef::Log.info "Resetting passenger ruby bin path to #{languages['ruby']['ruby_bin']}"
+
+node.override['passenger']['root_path'] = "/opt/rbenv/versions/#{node[:openstudio_server][:ruby][:version]}/lib/ruby/gems/2.0.0/gems/passenger-#{node['passenger']['version']}"
+node.override['passenger']['ruby_bin'] = "/opt/rbenv/versions/#{node[:openstudio_server][:ruby][:version]}/bin/ruby"

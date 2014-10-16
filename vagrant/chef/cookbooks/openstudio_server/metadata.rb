@@ -6,10 +6,6 @@ description       "Installs and configures OpenStudio web application"
 long_description  IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version           "2.0.0"
 
-#recipe "passenger_apache2", "Installs Passenger as an Apache module"
-#recipe "passenger_apache2::mod_rails", "Enables Apache module configuration for passenger module"
-#depends "apache2", ">= 1.0.4"
-
 depends 'apt'
 depends 'ntp'
 depends 'man'
@@ -19,9 +15,9 @@ depends 'zip'
 depends 'sudo'
 depends 'logrotate'
 depends 'build-essential'
-#depends 'openstudio'
 
 # Applications
+depends 'openstudio'
 depends 'rbenv'
 depends 'mongodb'
 depends 'apache2'
