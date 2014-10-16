@@ -48,11 +48,6 @@ include_recipe 'logrotate::global'
 #   create    '644 root adm'
 # end
 
-# Other random packages that need to be installed
-%w( expect curl iotop imagemagick ).each do |pi|
-  package pi
-end
-
 include_recipe "rbenv"
 include_recipe "rbenv::ruby_build"
 
