@@ -1,26 +1,19 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-puts ARGV
-
 Vagrant.configure("2") do |config|
   is_windows = (RUBY_PLATFORM =~ /mswin|mingw|cygwin/)
   use_nfs = !is_windows
   use_nfs = false if ENV["VAGRANT_DISABLE_NFS"] == "true"
 
   # Don't use 11.14.2 because of https://github.com/opscode/chef/issues/1739 (duplicate error)  
-  # Latest is 11.16.2
   config.omnibus.chef_version = "latest"
-  #config.omnibus.chef_version = "11.12.8"
-
-  # Use berkshelf.  Make sure to install ChefDK if you are using Windows.
-  # config.berkshelf.enabled = true
-
-  # Use berkshelf.  Make sure to install ChefDK if you are using Windows.
-  config.berkshelf.enabled = true
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ubuntu/trusty64"
+
+  # Use berkshelf.  Make sure to install ChefDK if you are using Windows.
+  config.berkshelf.enabled = true
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -30,7 +23,6 @@ Vagrant.configure("2") do |config|
   config.vm.network :forwarded_port, guest: 22, host: 2200, id: "ssh"
   config.vm.network :forwarded_port, guest: 3000, host: 8082
   config.vm.network :forwarded_port, guest: 27017, host: 8888
-
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -59,43 +51,6 @@ Vagrant.configure("2") do |config|
     begin
       override.vm.box = "dummy"
       override.vm.box_url = "http://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
-<<<<<<< HEAD
-
-      # you will need to create a yaml file with these values to
-      # properly deploy to ec2
-      require 'yaml'
-      secret_file = File.join(Dir.home, '.aws', 'config.yml')
-      if File.exist? secret_file
-        aws_config = YAML::load_file(secret_file)
-        aws.access_key_id = aws_config.fetch("access_key_id")
-        aws.secret_access_key = aws_config.fetch("secret_access_key")
-        aws.keypair_name = aws_config.fetch("keypair_name")
-        aws.region = aws_config.fetch("region")
-        override.ssh.private_key_path = aws_config.fetch("private_key_path")
-      else
-        raise "Could not find '#{secret_file}' file with your secrets"
-      end
-
-      aws.security_groups = ["default"]
-      aws.instance_type = "m3.xlarge" # $0.45 / hour, 4 cores, moderate network
-      #aws.ami = "ami-d0f89fb9" #orig non-cluster AMI
-      aws.ami = "ami-995a06f0" #16GB version
-
-      override.ssh.username = "ubuntu"
-
-      aws.tags = {
-          'Name' => 'Vagrant OpenStudio-server',
-          'NodeType' => 'Server',
-          'UserUUID' => ENV["VAGRANT_AWS_USER_UUID"] || 'unknown_user_uuid'
-      }
-    rescue LoadError
-      warn "Unable to configure AWS provider."
-    end
-  end
-
-  # View the documentation for the provider you're using for more
-  # information on available options.
-=======
 
       # you will need to create a yaml file with these values to
       # properly deploy to ec2
@@ -138,6 +93,7 @@ Vagrant.configure("2") do |config|
     chef.log_level = :info
     chef.roles_path = "../chef/roles"
 
-    chef.add_recipe "openstudio_server::base"
+    chef.add_role "openstudio-server"
+    #chef.add_recipe "openstudio_server::base"
   end
 end

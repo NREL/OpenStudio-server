@@ -5,25 +5,20 @@ The preferred development approach for this application is to use Vagrant to pro
 
 ## Instructions
 
-- Install [Vagrant] and [VirtualBox]  
+- Install [Vagrant], [VirtualBox], and [ChefDK]
   *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use 4.2.18 instead.*
   
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
+[ChefDK]: https://downloads.getchef.com/chef-dk/ "ChefDK"
 
 - Check out the git repo: see the instruction on the Wiki.  
   **Make sure to checkout the repo with LF end-of-lines if on windows**
 
-- Initialize and update all Git submodules (see wiki):
-```sh
-$ git submodule init
-$ git submodule update
-```
-
-- Install the Vagrant omnibus plugin
+- Install a couple Vagrant plugin for bootstrapping Chef and Berkshelf (for downloading cookbooks)
 
 ```sh
-vagrant plugin install vagrant-omnibus
+vagrant plugin install vagrant-omnibus vagrant-berkshelf
 ```
 
 - Also install the Vagrant AWS plugin as the vagrant file will fail if not installed 
@@ -151,62 +146,17 @@ vagrant ssh
 ```
 
 ### Server Changes
-
-```sh
-cd /data/launch-instance
-chmod 777 setup-server-changes.sh
-sudo ./setup-server-changes.sh
-chmod 777 setup-final-changes.sh
-sudo ./setup-final-changes.sh
-exit
-cat /dev/null > ~/.bash_history && history -c
-sudo shutdown -r now
-```
-
-### Worker Changes
-
-```sh
-cd /data/launch-instance
-chmod 777 setup-worker-changes.sh
-sudo ./setup-worker-changes.sh
-chmod 777 setup-final-changes.sh
-sudo ./setup-final-changes.sh
-exit
-cat /dev/null > ~/.bash_history && history -c
-sudo shutdown -r now
-```
-
-### Server Changes
-- The script below does several items including
   + Enable password login (for setting up passwordless SSH)
   + Change owner of Rserved and restart Rserve 
   + Update all packages and reboot
   + Remove unneeded directories/files
 
 
-```sh
-sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
-echo StrictHostKeyChecking no > .ssh/config
-sudo service ssh restart
-cd /var/www/rails/openstudio
-rake db:purge
-rake db:mongoid:create_indexes
-rm -rf /mnt/openstudio
-sudo apt-get upgrade -y
-```
-
 ### Worker Changes
   + Enable password login (for setting up passwordless SSH)
   + Update all packages and reboot
   + Remove unneeded directories/files
 
-
-```sh
-sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
-echo StrictHostKeyChecking no > .ssh/config
-sudo service ssh restart
-sudo apt-get upgrade -y
-```
 
 ### Final Changes
 - Before creating the AMI do these last on both systems
@@ -214,36 +164,6 @@ sudo apt-get upgrade -y
   + Remove authorized keys (this will prevent you from logging in again, do this last)
   + Clear out the various logs
   + Remove unneeded files that are in the mounted folders
-
-```sh
-sudo usermod -U ubuntu
-cat /dev/null > ~/.ssh/authorized_keys
-cat /dev/null > ~/.bash_history && history -c
-sudo -i
-cat /dev/null > /var/www/rails/openstudio/log/download.log
-cat /dev/null > /var/www/rails/openstudio/log/mongo.log
-cat /dev/null > /var/www/rails/openstudio/log/development.log
-cat /dev/null > /var/www/rails/openstudio/log/production.log
-cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
-rm -f /var/www/rails/openstudio/log/test.log
-rm -rf /var/www/rails/openstudio/public/assets/*
-rm -rf /var/www/rails/openstudio/tmp/*
-cat /dev/null > /var/log/auth.log
-cat /dev/null > /var/log/lastlog
-cat /dev/null > /var/log/kern.log
-cat /dev/null > /var/log/boot.log
-rm -f /data/launch-instance/*.pem
-rm -f /data/launch-instance/*.log
-rm -f /data/launch-instance/*.json
-rm -f /data/launch-instance/*.yml
-rm -f /data/worker-nodes/README.md
-rm -f /data/worker-nodes/rails-models/mongoid-vagrant.yml
-rm -rf /var/chef
-cat /dev/null > ~/.bash_history && history -c
-apt-get clean
-
-sudo shutdown -r now
-```
 
 - login to AWS and take a snapshot of the image
   + Naming convention is `OpenStudio Worker Cluster OS <version of openstudio>`

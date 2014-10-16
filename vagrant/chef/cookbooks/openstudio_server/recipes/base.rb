@@ -4,19 +4,21 @@
 #
 # Recipe installs the base software needed for openstudio analysis (both server and worker)
 
+# Eventually remove the roles tab and use this for configuring the system.
+
 
 # General useful utilities
-include_recipe 'apt'
-include_recipe 'ntp'
-include_recipe 'cron'
-include_recipe 'man'
-include_recipe 'vim'
+# include_recipe 'apt'
+# include_recipe 'ntp'
+# include_recipe 'cron'
+# include_recipe 'man'
+# include_recipe 'vim'
 
 # A much nicer replacement for grep.
-include_recipe 'ack'
+# include_recipe 'ack'
 
 # Zip/Unzip
-include_recipe 'zip'
+# include_recipe 'zip'
 
 # Sudo - careful installing this as you can easily prevent yourself from using sudo
 node.default['authorization']['sudo']['users'] = ["vagrant", "ubuntu"]
@@ -28,7 +30,6 @@ node.default['authorization']['sudo']['passwordless'] = true
 node.default['authorization']['sudo']['include_sudoers_d'] = true
 node.default['authorization']['sudo']['agent_forwarding'] = true
 include_recipe 'sudo'
-
 
 node.override['logrotate']['global']['rotate'] = 30
 node.override['logrotate']['global']['compress'] = true
@@ -52,9 +53,8 @@ include_recipe 'logrotate::global'
   package pi
 end
 
-include_recipe "rbenv::default"
+include_recipe "rbenv"
 include_recipe "rbenv::ruby_build"
-
 
 # Install rbenv and Ruby
 
@@ -62,12 +62,12 @@ include_recipe "rbenv::ruby_build"
 ENV['RUBY_CONFIGURE_OPTS'] = '--enable-shared'
 ENV['CONFIGURE_OPTS'] = '--disable-install-doc'
 
-rbenv_ruby node[:openstudio_server][:ruby_version] do
+rbenv_ruby node[:openstudio_server][:ruby][:version] do
   global true
 end
 
 %w(bundler ruby-prof).each do |g|
   rbenv_gem g do
-    ruby_version node[:openstudio_server][:ruby_version]
+    ruby_version node[:openstudio_server][:ruby][:version]
   end
 end
