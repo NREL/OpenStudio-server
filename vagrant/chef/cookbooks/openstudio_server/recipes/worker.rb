@@ -10,5 +10,3 @@ execute 'bundle install' do
   cwd '/data/worker-nodes'
 end
 
-# rehash rbenv
-rbenv_rehash "rehashing in case rails was installed"

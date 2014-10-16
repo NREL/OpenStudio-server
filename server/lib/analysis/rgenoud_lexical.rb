@@ -166,7 +166,7 @@ class Analysis::RgenoudLexical
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build('/usr/local/rbenv/shims/bundle', 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       process.io.inherit!
@@ -229,7 +229,7 @@ class Analysis::RgenoudLexical
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
@@ -247,7 +247,7 @@ class Analysis::RgenoudLexical
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
 
               # convert the vector to comma separated values
               w = paste(x, collapse=",")

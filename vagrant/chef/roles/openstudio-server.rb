@@ -19,7 +19,7 @@ run_list([
 
 default_attributes(
     :openstudio_server => {
-        :ruby_path => "/usr/local/rbenv", # this is needed for the delayed_job service
+        :ruby_path => "/opt/rbenv/shims", # this is needed for the delayed_job and R runs service. Where is the ruby binary (in the shims)?
         :server_path => "/var/www/rails/openstudio",
         :rails_environment => "development"
     }

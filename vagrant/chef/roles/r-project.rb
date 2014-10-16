@@ -11,7 +11,7 @@ default_attributes(
         :make_opts => ["-j4"],
         :r_environment_site => {
             :rubylib => "/usr/local/lib/ruby/site_ruby/2.0.0",
-            :path_additions => ["/usr/local/radiance/bin", "/usr/local/rbenv/shims"]
+            :path_additions => ["/usr/local/radiance/bin", "/opt/rbenv/shims"]
         },
         :libraries => [
             {
@@ -104,4 +104,3 @@ run_list(
         "recipe[r::default]",
         "recipe[r::rserve]",
     ])
-
