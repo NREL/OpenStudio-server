@@ -13,7 +13,6 @@ The preferred development approach for this application is to use Vagrant to pro
 [ChefDK]: https://downloads.getchef.com/chef-dk/ "ChefDK"
 
 - Check out the git repo: see the instruction on the Wiki.  
-  **Make sure to checkout the repo with LF end-of-lines if on windows**
 
 - Install a couple Vagrant plugin for bootstrapping Chef and Berkshelf (for downloading cookbooks)
 
