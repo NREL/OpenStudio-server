@@ -4,16 +4,16 @@ description "Install and configure OpenStudio for use with Ruby on Rails"
 run_list([
              # Default iptables setup on all servers.
              "role[base]",
-             #"role[mongodb]",
-             #"recipe[openstudio_server::users]",  # Run this before R and before openstudio bashprofile
-             #"role[r-project]",
-             #"role[openstudio]",
-             #"role[radiance]",
+             "role[mongodb]",
+             "recipe[openstudio_server::users]",  # Run this before R and before openstudio bashprofile
+             "role[r-project]",
+             "role[openstudio]",
+             "role[radiance]",
              "role[web_base]",
-             #"recipe[openstudio_server::bashprofile]",
-             #"recipe[openstudio_server::bundle]", #install the bundle first to get rails for apache passenger
+             "recipe[openstudio_server::bashprofile]",
+             "recipe[openstudio_server::bundle]", #install the bundle first to get rails for apache passenger
              "role[passenger_apache]",
-             #"recipe[openstudio_server]",
+             "recipe[openstudio_server]",
          ])
 
 
