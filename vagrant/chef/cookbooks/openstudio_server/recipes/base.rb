@@ -22,9 +22,11 @@
 
 # Sudo - careful installing this as you can easily prevent yourself from using sudo
 node.default['authorization']['sudo']['users'] = ["vagrant", "ubuntu"]
+# set the sudoers files so that it has access to rbenv
+secure_path = "#{node[:rbenv][:root_path]}/shims:#{node[:rbenv][:root_path]}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 node.default['authorization']['sudo']['sudoers_defaults'] = [
     'env_reset',
-    'secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"'
+    "secure_path=\"#{secure_path}\""
 ]
 node.default['authorization']['sudo']['passwordless'] = true
 node.default['authorization']['sudo']['include_sudoers_d'] = true
@@ -61,11 +63,13 @@ rbenv_ruby node[:openstudio_server][:ruby][:version] do
   global true
 end
 
-%w(bundler ruby-prof).each do |g|
+# Add any gems that require compilation here otherwise the workflow gem won't be able to use them
+%w(bundler libxml-ruby ruby-prof).each do |g|
   rbenv_gem g do
     ruby_version node[:openstudio_server][:ruby][:version]
   end
 end
+
 
 # set the passenger node values to the location of rbenv - languages is not accessible
 #Chef::Log.info "Resetting passenger root path to #{languages['ruby']['gems_dir']}/gems/passenger-#{node['passenger']['version']}"
