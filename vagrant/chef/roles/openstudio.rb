@@ -8,6 +8,7 @@ run_list([
 
 default_attributes(
     :openstudio => {
+        :skip_ruby_install => true,
         :version => "1.5.1",
         :installer => {
             :version_revision => "297c509238",
