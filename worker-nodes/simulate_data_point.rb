@@ -38,7 +38,7 @@ optparse = OptionParser.new do |opts|
     options[:run_shm_dir] = s
   end
 
-  options[:run_data_point_filename] = 'run_openstudio.rb'
+  options[:run_data_point_filename] = 'workflow'
   opts.on('-x', '--execute-file NAME', String, 'Name of the file to copy and execute') do |s|
     options[:run_data_point_filename] = s
   end
@@ -127,9 +127,10 @@ begin
         mongoid_path: '/mnt/openstudio/rails-models'
       }
     }
-  elsif options[:run_data_point_filename] == 'legacy_workflow' ||
+  elsif options[:run_data_point_filename] == 'pat_workflow' ||
       options[:run_data_point_filename] == 'run_openstudio.rb'
     workflow_options = {
+      is_pat: true,
       datapoint_id: options[:uuid],
       analysis_root_path: analysis_dir,
       use_monthly_reports: false,
