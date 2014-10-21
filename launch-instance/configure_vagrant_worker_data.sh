@@ -12,8 +12,9 @@ sudo cp -rf /data/worker-nodes/* /mnt/openstudio/
 # install workflow dependencies
 cd /mnt/openstudio
 sudo rm -f Gemfile.lock
-bundle update
-sudo bundle update
+bundle
+# vagrant/ubuntu are now members of rbenv but it still doesn't work to not call sudo on bundle
+sudo bundle
 
 # copy over the models needed for mongo
 cd /mnt/openstudio/rails-models && sudo unzip -o rails-models.zip -d models
