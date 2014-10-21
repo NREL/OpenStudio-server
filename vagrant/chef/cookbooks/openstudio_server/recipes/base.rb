@@ -70,6 +70,13 @@ end
   end
 end
 
+# Add user to rbenv group
+Chef::Log.info "Adding user '#{node[:openstudio_server][:bash_profile_user]}' to '#{node[:rbenv][:group]}' group"
+group node[:rbenv][:group] do
+  action :modify
+  members node[:openstudio_server][:bash_profile_user]
+  append true
+end
 
 # set the passenger node values to the location of rbenv - languages is not accessible
 #Chef::Log.info "Resetting passenger root path to #{languages['ruby']['gems_dir']}/gems/passenger-#{node['passenger']['version']}"
