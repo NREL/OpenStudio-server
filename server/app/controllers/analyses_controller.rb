@@ -338,7 +338,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     @plotvars = get_plot_variables(@analysis)
-    logger.info "PLOTVARS: #{@plotvars}"
+    #logger.info "PLOTVARS: #{@plotvars}"
 
     # variables represent the variables we want graphed. Nil == choose the first 2
     @variables = []
@@ -357,10 +357,46 @@ class AnalysesController < ApplicationController
       end
     end
 
+    # calculate pareto or update chart?
+    if params[:commit] && params[:commit] == "Calculate Pareto"
+      logger.info "COMMIT VALUES IS: #{params[:commit]}"
+      calculate_pareto(@variables)
+    end
+
+
     respond_to do |format|
       format.html # plot_xy.html.erb
     end
   end
+
+  # Calculate Pareto
+  def calculate_pareto(variables)
+    
+    # get data: reuse existing function
+    vars, data = get_analysis_data(@analysis)
+    # sort by x,y
+    sorted_data = data.sort_by {|h| [ h[variables[0]],h[variables[1]] ]}
+
+    for i in 0..40
+      logger.info("#{variables[0]}: #{sorted_data[i][variables[0]]}, #{variables[1]}: #{sorted_data[i][variables[1]]}")
+    end
+
+    # calculate Y cumulative minimum
+    min_val = 1000000000
+    cum_min_arr = []
+    sorted_data.each do |d|
+      min_val = [min_val, d[variables[1]].to_f].min
+      cum_min_arr << min_val
+    end
+
+    # remove duplicates
+    no_dup_arr = cum_min_arr.uniq
+    logger.info("NO DUPLICATES: #{no_dup_arr.inspect}")
+
+    # pick final points??
+    
+  end
+
 
   # Scatter plot
   def plot_scatter
@@ -530,7 +566,7 @@ class AnalysesController < ApplicationController
     end
 
     # Flatten the results hash to the dot notation syntax
-    Rails.logger.info plot_data
+    #Rails.logger.info plot_data
     plot_data.each do |pd|
       unless pd['results'].empty?
         pd['results'] = hash_to_dot_notation(pd['results'])

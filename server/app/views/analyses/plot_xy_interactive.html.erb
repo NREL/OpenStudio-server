@@ -44,6 +44,8 @@
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+          var xVals = new Array();
+
       d3.json(encodeURI("analysis_data.json?visualize=true"), function (error, data) {
 
         //get x and y variables
@@ -51,6 +53,7 @@
           if (name == variables[0]){
             x_variable = name;
             x.domain(d3.extent(data['data'], function (d) {
+              xVals.push(d[x_variable]);
               return d[x_variable];
             })).nice();
           }
@@ -65,6 +68,7 @@
         });
 
         console.log('x-var: ' + x_variable + ' y-var: ' + y_variable)
+        console.log('xVals: ' + xVals)
 
         svg.append("g")
             .attr("class", "x axis")
@@ -133,7 +137,8 @@
             <%= select_tag "variables[y]", options_from_collection_for_select(@plotvars, :name, :name, @variables.last) %>
             </fieldset>
             <p>
-            <div class="submit-form"> <%= submit_tag "Update Chart" %>  </div>
+            <div class="submit-form"> <%= submit_tag "Update Chart" %>&nbsp; <%= submit_tag "Calculate Pareto" %> </div>
+        
             </p>
           </div>
         <% end %>
