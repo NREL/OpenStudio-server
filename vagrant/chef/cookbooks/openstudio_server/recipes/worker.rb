@@ -4,7 +4,9 @@
 #
 
 # execute bundle install in directory
-execute 'bundle install' do
-  cwd '/data/worker-nodes'
+bash "bundle install" do
+  code <<-EOH
+    cd /data/worker-nodes
+    bundle install
+  EOH
 end
-

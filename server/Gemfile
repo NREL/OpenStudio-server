@@ -67,9 +67,6 @@ gem 'childprocess'
 # http(s) requests
 gem 'faraday'
 
-# worker node gems (because server can run as worker)
-gem 'libxml-ruby'
-
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
