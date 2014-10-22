@@ -39,7 +39,7 @@ OpenstudioServer::Application.routes.draw do
 
       resources :data_points, shallow: true  do
         member do
-          get :show_full
+          get :show_full # 10/22 - Need to deprecate this, only historic analysis stuff uses this
           get :view_report
           get :download
           get :download_reports
