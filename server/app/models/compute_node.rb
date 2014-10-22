@@ -111,7 +111,7 @@ class ComputeNode
           Rails.logger.info "Trying to download #{dp.id}"
           remote_file_exists, remote_file_downloaded, local_filename = cn.download_result(session, dp.analysis.id, dp.id)
 
-          # now add the datapoint path to the database to get it via the server
+          # now add the data point path to the database to get it via the server
           if remote_file_exists && remote_file_downloaded
             dp.openstudio_datapoint_file_name = local_filename
           elsif remote_file_exists
