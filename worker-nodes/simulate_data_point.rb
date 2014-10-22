@@ -143,6 +143,9 @@ begin
   k = OpenStudio::Workflow.load 'Mongo', directory, workflow_options
   logger.info "Running workflow with #{options}"
   k.run
+  logger.info "Final run state is #{k.final_state}"
+
+
 
   # TODO: get the last results out --- result = result.split("\n").last if result
 
@@ -151,10 +154,10 @@ begin
     # only grab the zip/log files and put back in store_directory
     zip_file = "#{directory}/data_point_#{options[:uuid]}.zip"
     dest_zip_file = "#{store_directory}/data_point_#{options[:uuid]}.zip"
-    puts "Trying to move zip file from #{zip_file} to #{dest_zip_file}"
+    logger.info "Trying to move zip file from #{zip_file} to #{dest_zip_file}"
     if File.exist?(zip_file)
       FileUtils.rm_f(dest_zip_file) if File.exist?(dest_zip_file)
-      puts 'Moving zip file'
+      logger.info 'Moving zip file'
       FileUtils.move(zip_file, dest_zip_file)
     end
 
@@ -165,12 +168,13 @@ begin
       FileUtils.move(log_file, dest_log_file)
     end
 
-    puts "Removing directory from shm #{directory}"
+    logger.info "Removing directory from shm #{directory}"
     FileUtils.rm_rf(directory) if Dir.exist?(directory)
   end
 
   # check if the simulation failed after moving the files back to the right place
   if result == 'NA'
+    logger.info 'Simulation result was invalid'
     fail 'Simulation result was invalid'
   end
 rescue => e
