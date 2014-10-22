@@ -47,10 +47,12 @@ class DataPointsController < ApplicationController
           @data_point['set_variable_values_display_names'] = {}
           @data_point['set_variable_values'].each do |k, v|
             var = Variable.find(k)
-            new_key = var ? var.name : k
-            new_display_key = var ? var.display_name : k
-            @data_point['set_variable_values_names'][new_key] = v
-            @data_point['set_variable_values_display_names'][new_display_key] = v
+            if var
+              new_key = var ? var.name : k
+              new_display_key = var ? var.display_name : k
+              @data_point['set_variable_values_names'][new_key] = v
+              @data_point['set_variable_values_display_names'][new_display_key] = v
+            end
           end
 
           render json: @data_point
