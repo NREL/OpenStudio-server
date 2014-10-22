@@ -46,19 +46,20 @@ class DataPoint
   # open structure define in the JSON. This is used for the measure group JSONs only. Deprecate as
   # soon as measure groups are handled correctly.
   def save_results_from_openstudio_json
-    if output && output['data_point'] && output['data_point']['output_attributes']
-      self.results = {}
-      output['data_point']['output_attributes'].each do |output_hash|
-        logger.info(output_hash)
-        unless output_hash['value_type'] == 'AttributeVector'
-          output_hash.key?('display_name') ? hash_key = output_hash['display_name'].parameterize.underscore :
-              hash_key = output_hash['name'].parameterize.underscore
-          # logger.info("hash name will be: #{hash_key} with value: #{output_hash['value']}")
-          self['results'][hash_key.to_sym] = output_hash['value']
-        end
-      end
-      self.save!
-    end
+    # Do not do this because output no longer exists
+    # if output && output['data_point'] && output['data_point']['output_attributes']
+    #   self.results = {}
+    #   output['data_point']['output_attributes'].each do |output_hash|
+    #     logger.info(output_hash)
+    #     unless output_hash['value_type'] == 'AttributeVector'
+    #       output_hash.key?('display_name') ? hash_key = output_hash['display_name'].parameterize.underscore :
+    #           hash_key = output_hash['name'].parameterize.underscore
+    #       # logger.info("hash name will be: #{hash_key} with value: #{output_hash['value']}")
+    #       self['results'][hash_key.to_sym] = output_hash['value']
+    #     end
+    #   end
+    #   self.save!
+    # end
   end
 
   # Perform the final actions on the Data Point.
