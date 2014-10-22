@@ -4,7 +4,7 @@
 #
 
 # Other random packages that need to be installed
-%w( expect curl iotop imagemagick unzip ).each do |pi|
+%w( expect curl iotop imagemagick unzip zip ).each do |pi|
   package pi do
     action :upgrade
   end
