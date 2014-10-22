@@ -13,7 +13,6 @@ class DataPoint
   field :openstudio_datapoint_file_name, type: String # make this paperclip?
   field :status, type: String, default: 'na' # enum of queued, started, completed
   field :status_message, type: String, default: '' # results of the simulation
-  field :output # what is this?
   field :results, type: Hash, default: {}
   field :run_start_time, type: DateTime, default: nil
   field :run_end_time, type: DateTime, default: nil
@@ -43,9 +42,9 @@ class DataPoint
   # Callbacks
   after_create :verify_uuid
 
-  # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
+  # Parse the OpenStudio PAT JSON and save the results into a name:value hash instead of the
   # open structure define in the JSON. This is used for the measure group JSONs only. Deprecate as
-  # soon as measure groups are handles correctly.
+  # soon as measure groups are handled correctly.
   def save_results_from_openstudio_json
     if output && output['data_point'] && output['data_point']['output_attributes']
       self.results = {}
