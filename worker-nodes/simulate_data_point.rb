@@ -182,6 +182,7 @@ rescue => e
   puts log_message
   logger.info log_message if logger
 ensure
+  logger.info "Finished #{__FILE__}" if logger
   logger.close if logger
   # always print the objective function result or NA
   puts result
