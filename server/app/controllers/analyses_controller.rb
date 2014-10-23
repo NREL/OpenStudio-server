@@ -335,10 +335,13 @@ class AnalysesController < ApplicationController
 
   # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
+    
     @analysis = Analysis.find(params[:id])
-
     @plotvars = get_plot_variables(@analysis)
     #logger.info "PLOTVARS: #{@plotvars}"
+    @pareto = false
+    @pareto_datapoints = []
+    @debug = false
 
     # variables represent the variables we want graphed. Nil == choose the first 2
     @variables = []
@@ -358,9 +361,16 @@ class AnalysesController < ApplicationController
     end
 
     # calculate pareto or update chart?
-    if params[:commit] && params[:commit] == "Calculate Pareto"
-      logger.info "COMMIT VALUES IS: #{params[:commit]}"
-      calculate_pareto(@variables)
+    if params[:commit] && params[:commit] == "Calculate Pareto Front"
+      logger.info "PARETO! COMMIT VALUES IS: #{params[:commit]}"
+      # set variable for view
+      @pareto = true
+      # keep these pts in a variable, but mainly for quick debug
+      @pareto_pts = calculate_pareto(@variables)
+
+      # this is what you actually need for the chart and to save a pareto
+      @pareto_datapoints = @pareto_pts.map { |p| p['_id'] }
+      #logger.info("DATAPOINTS ARRAY: #{@pareto_datapoints}")
     end
 
 
@@ -377,9 +387,9 @@ class AnalysesController < ApplicationController
     # sort by x,y
     sorted_data = data.sort_by {|h| [ h[variables[0]],h[variables[1]] ]}
 
-    for i in 0..40
-      logger.info("#{variables[0]}: #{sorted_data[i][variables[0]]}, #{variables[1]}: #{sorted_data[i][variables[1]]}")
-    end
+    #for i in 0..40
+    #  logger.info("#{variables[0]}: #{sorted_data[i][variables[0]]}, #{variables[1]}: #{sorted_data[i][variables[1]]}")
+    #end
 
     # calculate Y cumulative minimum
     min_val = 1000000000
@@ -388,13 +398,27 @@ class AnalysesController < ApplicationController
       min_val = [min_val, d[variables[1]].to_f].min
       cum_min_arr << min_val
     end
+ 
+    # calculate indexes of the unique entries, not the unique entries themselves
+    no_dup_indexes = []
+    cum_min_arr.each_with_index do |n, i|
+      if i == 0
+        no_dup_indexes << i
+      else
+        if n != cum_min_arr[i-1]
+          no_dup_indexes << i
+        end
+      end
+    end
 
-    # remove duplicates
-    no_dup_arr = cum_min_arr.uniq
-    logger.info("NO DUPLICATES: #{no_dup_arr.inspect}")
+    logger.info("Unique Pareto Indexes: #{no_dup_indexes.inspect}")
 
-    # pick final points??
-    
+    # pick final points & return
+    pareto_points  = []
+    no_dup_indexes.each do |i|
+      pareto_points << sorted_data[i]
+    end
+    pareto_points
   end
 
 

@@ -8,7 +8,11 @@
 
   <%= javascript_tag do %>
     variables = <%=raw @variables.to_json %>;
+    pareto_points = <%= raw @pareto_datapoints.to_json %>;
   <% end %>
+
+  
+
 
   <div id="xy-div">
     <script>
@@ -17,21 +21,10 @@
           width = 900 - margin.left - margin.right + 1,
           height = 600 - margin.top - margin.bottom - 1;
 
-      var x = d3.scale.linear()
-          .range([0, width]);
 
-      var y = d3.scale.linear()
-          .range([height, 0]);
+      var color = d3.scale.category10();
 
-      var color = d3.scale.category20();
-
-      var xAxis = d3.svg.axis()
-          .scale(x)
-          .orient("bottom");
-
-      var yAxis = d3.svg.axis()
-          .scale(y)
-          .orient("left");
+      var series_select = 0;
 
       var tooltip = d3.select("#xy-div")
           .append("div")
@@ -44,77 +37,151 @@
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-          var xVals = new Array();
-
       d3.json(encodeURI("analysis_data.json?visualize=true"), function (error, data) {
 
-        //get x and y variables
-        Object.keys(data['variables']).forEach(function (name) {
-          if (name == variables[0]){
-            x_variable = name;
-            x.domain(d3.extent(data['data'], function (d) {
-              xVals.push(d[x_variable]);
-              return d[x_variable];
-            })).nice();
-          }
 
-          if (name === variables[1])  {
-            y_variable = name;
-            y.domain(d3.extent(data['data'], function (d) {
-              return d[y_variable];
-            })).nice();
+        // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
+        var seriesNames = new Array();
+        seriesNames.push('xy');
+        //pareto?
+        if (pareto_points.length > 0) seriesNames.push('pareto');
 
-          }
+        
+        // Map the data to an array of arrays of {x, y} tuples.
+        var series = new Array();
+
+        // Map the data to an array of arrays of {x, y} tuples.
+        var serie = data['data'].map(function(d) {
+          return {x: d[variables[0]], y: d[variables[1]], id: d['_id']};
         });
+        series.push(serie);
 
-        console.log('x-var: ' + x_variable + ' y-var: ' + y_variable)
-        console.log('xVals: ' + xVals)
+        //add pareto series
+        if (pareto_points.length > 0) {
+          serie = data['data'].map(function(d) {
+            if (pareto_points.indexOf(d['_id']) > -1){
+              return {x: d[variables[0]], y: d[variables[1]], id: d['_id']}; 
+            }
+          });
+          //clean array
+          serie = serie.filter(function(n){ return n != undefined });
+          series.push(serie);
+        }
 
+        var x = d3.scale.linear()
+            .range([0, width]);
+
+        var y = d3.scale.linear()
+            .range([height, 0]);
+
+                    // Compute the scales’ domains.
+        x.domain(d3.extent(d3.merge(series), function(d) { return d.x; })).nice();
+        y.domain(d3.extent(d3.merge(series), function(d) { return d.y; })).nice();
+
+
+        // Add the x-axis.
         svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
-            .call(xAxis)
-            .append("text")
-            .attr("class", "label")
-            .attr("x", width)
-            .attr("y", 40)
-            .style("text-anchor", "end")
-            .text(x_variable)
-            .style("font-size","14px");
-
+            .call(d3.svg.axis().scale(x).orient("bottom"));
+       
+        // Add the y-axis.
         svg.append("g")
             .attr("class", "y axis")
-            .call(yAxis)
-            .append("text")
-            .attr("class", "label")
-            .attr("transform", "rotate(-90)")
-            .attr("y", -40)
-            .style("text-anchor", "end")
-            .text(y_variable)
-            .style("font-size","14px");
+            .call(d3.svg.axis().scale(y).orient("left"));
 
-        svg.selectAll("circle")
-            .data(data['data'])
-            .enter().append("svg:circle")
+        // Add the points for all series!
+        svg.selectAll(".series")
+            .data(series)
+          .enter().append("g")
+            .attr("class", function(d,i) { 
+              //series_select = i;
+              return 'series_' + i ; 
+            })
+            //.style("fill", function(d, i) { return color(i); })
+            .style("fill", color(0))
+          .selectAll(".point")
+            .data(function(d) { return d; })
+          .enter().append("circle")
             .attr("class", "dot")
-            .attr("r", 6)
-            .attr("cx", function (d) {
-              return x(d[x_variable]);
-            })
-            .attr("cy", function (d) {
-              return y(d[y_variable]);
-            })
-            .style("fill",function (d) {
-              return color(d.iteration);
-            }).on("click", function (d) {
-
+            .attr("r", 4.5)
+            .attr("cx", function(d, i) { return x(d.x);  })
+            .attr("cy", function(d) { return y(d.y); })
+          
+            .on("click", function (d) {
               tooltip.transition().duration(200).style("opacity", .9);
               return tooltip.style("left", (d3.event.pageX - 190) + "px")
                   .style("top", (d3.event.pageY - 60) + "px")
-                  .html("X: " + d[x_variable].toFixed(2) +
-                      "</br>Y: " + d[y_variable].toFixed(2) +
-                      "</br><a href=" + d.data_point_uuid + ">View Data Point</a>");
-            });
+                  .html("X: " + d.x.toFixed(2) +
+                      "</br>Y: " + d.y.toFixed(2) +
+                      "</br><a href=/data_points/" + d.id + ">View Data Point</a>");
+            }); 
+
+         
+          if (pareto_points.length > 0) {
+            // Add super cool transitions on pareto points!
+            svg.selectAll('g.series_1 circle.dot')
+              .transition()
+              .duration(5)
+              .attr('r', 10)
+              .style("fill", color(1))
+              .style('opacity', 0.3);
+            
+            // draw legend
+            var legend = svg.selectAll(".legend")
+                .data(color.domain())
+              .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+            // draw legend colored rectangles
+            legend.append("rect")
+                .attr("x", width - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", color);
+
+            // draw legend text
+            legend.append("text")
+                .attr("x", width - 24)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(function(d, i) { 
+                  if (i == 0) return 'All'
+                  else return 'Pareto Front' 
+                })
+
+            //More transitions!
+            svg.selectAll('g.series_1 circle.dot')
+              .transition()
+              .delay(5)
+              .duration(2000)
+              .ease('linear')
+              .attr('r', 4.5)
+              .style('opacity', 1.0);     
+          
+            // hidden text
+           var text = svg.append('text')
+              .attr('x', 250)
+              .attr('y', 150)
+              .attr('dy', '.35em')
+              .attr('text-anchor', 'middle')
+              .text("Kat is AWESOME")
+              .style('font-size', 36)
+              .style('fill', 'mediumSeaGreen')
+              .style('font-family', 'monospace')
+              .style('opacity', 0) // hidden
+            ;
+
+
+            // plus fade in text
+            text.transition()
+                    .delay(3000)
+                    .duration(1000)
+                    .style('opacity', 1)
+            ;
+          }
 
         });
 
@@ -137,7 +204,7 @@
             <%= select_tag "variables[y]", options_from_collection_for_select(@plotvars, :name, :name, @variables.last) %>
             </fieldset>
             <p>
-            <div class="submit-form"> <%= submit_tag "Update Chart" %>&nbsp; <%= submit_tag "Calculate Pareto" %> </div>
+            <div class="submit-form"> <%= submit_tag "Update Chart" %>&nbsp; <%= submit_tag "Calculate Pareto Front" %> </div>
         
             </p>
           </div>
@@ -145,6 +212,16 @@
 
       </div>
     </div>
+  </div>
+
+  <div>
+    <% if @debug %>
+    <% if @pareto_pts %>
+      <% @pareto_pts.each do |p| %>
+        <%= p[@variables[0]] %>, <%= p[@variables[1]] %> | <%= p['_id'] %><br/>
+      <% end %>
+    <% end %>
+    <% end %>
   </div>
 
 
