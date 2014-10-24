@@ -93,7 +93,7 @@ class Analysis::SequentialSearch
     def determine_curve
       new_point_to_evaluate = false
       Rails.logger.info "Determine the Pareto Front for iteration #{@iteration}"
-      Rails.logger.info "Current pareto front is: #{@pareto.map { |p| p.name }}"
+      Rails.logger.info "Current pareto front is: #{@pareto.map(&:name)}"
       if @iteration == 0
         # just add the point to the pareto curve
         min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
@@ -202,7 +202,7 @@ class Analysis::SequentialSearch
 
         @pareto = new_curve
       end
-      Rails.logger.info "Final pareto front is: #{@pareto.map { |p| p.name }}"
+      Rails.logger.info "Final pareto front is: #{@pareto.map(&:name)}"
 
       new_point_to_evaluate
     end

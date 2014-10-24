@@ -169,7 +169,7 @@ class Analysis::SpeaNrel
         # popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
         @r.command(vars: samples.to_dataframe, vartypes: var_types, gen: @analysis.problem['algorithm']['generations'], tourSize: @analysis.problem['algorithm']['tourSize'], cprob: @analysis.problem['algorithm']['cprob'], cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'], mprob: @analysis.problem['algorithm']['mprob']) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
 
