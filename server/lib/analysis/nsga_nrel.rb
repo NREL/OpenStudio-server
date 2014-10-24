@@ -206,7 +206,7 @@ class Analysis::NsgaNrel
                    toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
                    xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'],
                    mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))
@@ -237,14 +237,14 @@ class Analysis::NsgaNrel
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
-              
+
             if (uniquegroups == 1) {
                  print(paste("unique groups error:",uniquegroups))
                  write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
                  stop(options("show.error.messages"="unique groups"),"unique groups is 1")
             }
-			
-			
+
+
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
@@ -286,11 +286,11 @@ class Analysis::NsgaNrel
 
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
-		      cat("UUID is NA \n");
+          cat("UUID is NA \n");
               NAvalue <- 1.0e19
               return(NAvalue)
-			} else {
-		      try(f(z[j]), silent = TRUE)
+      } else {
+          try(f(z[j]), silent = TRUE)
 
 
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")

@@ -98,7 +98,7 @@ class Analysis::BatchRun
       # TODO: move os_dev to a variable based on environment
       if cluster_started
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)

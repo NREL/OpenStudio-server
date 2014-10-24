@@ -59,7 +59,7 @@ class DataPointsController < ApplicationController
         end
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
+        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
       end
     end
   end
@@ -232,8 +232,8 @@ class DataPointsController < ApplicationController
       # dencity[:structure] = @data_point[:results]['dencity_reports']
 
       # Grab all the variables that have defined a measure ID and pull out the results
-      vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '').
-          order_by(:name.asc).as_json(only: [:name, :metadata_id])
+      vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '')
+          .order_by(:name.asc).as_json(only: [:name, :metadata_id])
 
       dencity[:structure] = {}
       vars.each do |v|
@@ -257,7 +257,7 @@ class DataPointsController < ApplicationController
       if dencity
         format.json { render json: dencity.to_json }
       else
-        format.json { render json: {error: 'Could not format data point into DEnCity view'}, status: :unprocessable_entity }
+        format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
       end
     end
   end

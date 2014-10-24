@@ -301,7 +301,7 @@ class Analysis
 
   # copy back the results to the master node if they are finished
   def finalize_data_points
-    ComputeNode.download_all_results(self.id)
+    ComputeNode.download_all_results(id)
   end
 
   # filter results on analysis show page (per status)
@@ -336,7 +336,7 @@ class Analysis
   end
 
   def analysis_types
-    jobs.order_by(:index.asc).map { |j| j.analysis_type }
+    jobs.order_by(:index.asc).map(&:analysis_type)
   end
 
   def analysis_type
