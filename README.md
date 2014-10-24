@@ -6,7 +6,7 @@ The preferred development approach for this application is to use Vagrant to pro
 ## Instructions
 
 - Install [Vagrant], [VirtualBox], and [ChefDK]
-  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use 4.2.18 instead.*
+  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use [4.2.x](https://www.virtualbox.org/wiki/Download_Old_Builds_4_2) instead.*
   
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
