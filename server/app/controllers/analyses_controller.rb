@@ -337,10 +337,13 @@ class AnalysesController < ApplicationController
   def plot_xy_interactive
     
     @analysis = Analysis.find(params[:id])
+    @saved_paretos = @analysis.paretos
+
     @plotvars = get_plot_variables(@analysis)
-    #logger.info "PLOTVARS: #{@plotvars}"
+    
     @pareto = false
-    @pareto_datapoints = []
+    @pareto_data_points = []
+    @pareto_saved = false
     @debug = false
 
     # variables represent the variables we want graphed. Nil == choose the first 2
@@ -360,19 +363,49 @@ class AnalysesController < ApplicationController
       end
     end
 
+    # load a pareto by id?
+    if params[:pareto]
+      pareto =  Pareto.find(params[:pareto])
+      @pareto_data_points = pareto.data_points
+      @variables = [pareto.x_var, pareto.y_var]
+    end
+
     # calculate pareto or update chart?
     if params[:commit] && params[:commit] == "Calculate Pareto Front"
       logger.info "PARETO! COMMIT VALUES IS: #{params[:commit]}"
       # set variable for view
       @pareto = true
       # keep these pts in a variable, but mainly for quick debug
-      @pareto_pts = calculate_pareto(@variables)
+      pareto_pts = calculate_pareto(@variables)
 
       # this is what you actually need for the chart and to save a pareto
-      @pareto_datapoints = @pareto_pts.map { |p| p['_id'] }
-      #logger.info("DATAPOINTS ARRAY: #{@pareto_datapoints}")
+      @pareto_data_points = pareto_pts.map { |p| p['_id'] }
+      # logger.info("DATAPOINTS ARRAY: #{@pareto_datapoints}")
     end
 
+    # save pareto front?
+    if params[:commit] && params[:commit] == "Save Pareto Front"
+      
+      @pareto = true
+      @pareto_data_points = params[:data_points]
+
+      # save
+      pareto = Pareto.new()
+      pareto.analysis = @analysis
+      pareto.x_var = params[:x_var]
+      pareto.y_var = params[:y_var]
+      pareto.name = params[:name]
+      pareto.data_points = params[:data_points]
+      if pareto.save!
+        @pareto_saved = true
+        flash[:notice] = "Pareto saved!"
+      else
+        flash[:notice] = "The pareto front could not be saved."
+      end
+    end
+
+
+    logger.info("PARAMS!! #{params}")
 
     respond_to do |format|
       format.html # plot_xy.html.erb
@@ -386,10 +419,6 @@ class AnalysesController < ApplicationController
     vars, data = get_analysis_data(@analysis)
     # sort by x,y
     sorted_data = data.sort_by {|h| [ h[variables[0]],h[variables[1]] ]}
-
-    #for i in 0..40
-    #  logger.info("#{variables[0]}: #{sorted_data[i][variables[0]]}, #{variables[1]}: #{sorted_data[i][variables[1]]}")
-    #end
 
     # calculate Y cumulative minimum
     min_val = 1000000000
@@ -411,7 +440,8 @@ class AnalysesController < ApplicationController
       end
     end
 
-    logger.info("Unique Pareto Indexes: #{no_dup_indexes.inspect}")
+    # DEBUG
+    # logger.info("Unique Pareto Indexes: #{no_dup_indexes.inspect}")
 
     # pick final points & return
     pareto_points  = []

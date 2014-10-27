@@ -1,0 +1,20 @@
+<h2>Paretos &mdash; <%= link_to @paretos.first.analysis.display_name, analysis_path(@paretos.first.analysis) %></h2>
+
+<table class="table table-striped">
+  <tr>
+    <th>Name</th>
+    <th>X</th>
+    <th>Y</th>
+    <th>Actions</th>
+  </tr>
+
+<% @paretos.each do |pareto| %>
+  <tr>
+    <td><%= link_to pareto.name, pareto %></td>
+    <td><%= pareto.x_var %></td>
+    <td><%= pareto.y_var %></td>
+    <td><%= link_to 'Edit', edit_pareto_path(pareto) %> | <%= link_to 'Destroy', pareto, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+

@@ -78,7 +78,9 @@ svg {
 
 #xy-div {
   padding:20px 10px;
-  width: 1200;
+  /*width: 1200;
+  height: 1000; */
+  width:100%;
   height: 1000;
 }
 
@@ -107,3 +109,8 @@ svg {
   stroke: #000;
 }
 
+.p-chart {
+  font-size: 110%;
+  padding: 10px;
+  margin:0;
+}

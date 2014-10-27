@@ -1,0 +1,44 @@
+<div class="row-fluid">
+  <div class="span8">
+    <h2>Pareto Information </h2>
+    <%= link_to "Edit", edit_pareto_path(@pareto), class: "btn btn-primary" %>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th>Field Name</th>
+        <th>Field Value</th>
+      <tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Name</td>
+          <td><%= @pareto.name %></td>
+        </tr>
+        <tr>
+          <th>X</td>
+          <td><%= @pareto.x_var %></td>
+        </tr>
+        <tr>
+          <th>Y</td>
+          <td><%= @pareto.y_var %></td>
+        </tr>
+      </tbody>
+    </table>
+    <h2>Data Points in this Pareto</h2>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th>Data Point Name</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @pareto.data_points.split(" ").each_with_index do |dp, index| %>
+          <tr>
+          	<td><%= index + 1 %></td>
+            <td><%= link_to dp, data_point_path(dp) %></td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<%= form_for(@pareto) do |f| %>
+  <% if @pareto.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@pareto.errors.count, "error") %> prohibited this pareto from being saved:</h2>
+
+      <ul>
+      <% @pareto.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <table class="edittable">
+    <tr>
+      <td><%= f.label('name', 'Name') %></td>
+      <td><%= f.text_field(:name) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('x_var', 'X') %></td>
+      <td><%= f.text_field(:x_var) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label('y_var', 'Y') %></td>
+      <td><%= f.text_field(:y_var) %></td>
+    </tr>
+  </table>
+  <div style="padding:20px 150px;">
+    <%= submit_tag "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>
