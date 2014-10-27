@@ -67,7 +67,7 @@
           </table>
           <div class="submit-form"> <%= submit_tag "Save Pareto Front", class: 'btn btn-primary' %></div>
         <% end %>
-        <% if @saved_paretos %>
+        <% if @saved_paretos.count > 0 %>
           <div class="well">
           <h4>Saved Pareto Fronts for this Analysis</h4>
           <table class="table table-striped">
