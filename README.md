@@ -6,15 +6,15 @@ The preferred development approach for this application is to use Vagrant to pro
 ## Instructions
 
 - Install [Vagrant], [VirtualBox], and [ChefDK]
-  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use 4.2.18 instead.*
-
+  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use [4.2.x](https://www.virtualbox.org/wiki/Download_Old_Builds_4_2) instead.*
+ 
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
 [ChefDK]: https://downloads.getchef.com/chef-dk/ "ChefDK"
 
-- Check out the git repo: see the instruction on the Wiki.  
+- Check out this git repo: see the instruction on the Wiki.  
 
-- Install a couple Vagrant plugin for bootstrapping Chef and Berkshelf (for downloading cookbooks)
+- Install the Vagrant plugins for bootstrapping Chef and Berkshelf
 
 ```sh
 vagrant plugin install vagrant-omnibus vagrant-berkshelf
