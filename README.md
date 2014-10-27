@@ -7,7 +7,7 @@ The preferred development approach for this application is to use Vagrant to pro
 
 - Install [Vagrant], [VirtualBox], and [ChefDK]
   *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use 4.2.18 instead.*
-  
+
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
 [ChefDK]: https://downloads.getchef.com/chef-dk/ "ChefDK"
@@ -20,13 +20,13 @@ The preferred development approach for this application is to use Vagrant to pro
 vagrant plugin install vagrant-omnibus vagrant-berkshelf
 ```
 
-- Also install the Vagrant AWS plugin as the vagrant file will fail if not installed 
+- Also install the Vagrant AWS plugin as the vagrant file will fail if not installed
 
 ```sh
 vagrant plugin install vagrant-aws
 ```
 
-- Virtualbox 4.3+ users may want to install the vagrant-vbguest plugin to update the guest version 
+- Virtualbox 4.3+ users may want to install the vagrant-vbguest plugin to update the guest version
 
 ```sh
 vagrant plugin install vagrant-vbguest
@@ -57,18 +57,18 @@ vagrant up
   Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
 
 - **NREL ONLY** Disable HTTPS
-If you are inside the NREL firewall then you will need to disable HTTPS on rubygems. 
+If you are inside the NREL firewall then you will need to disable HTTPS on rubygems.
 
   - Log into Vagrant VM  
-  
+
 ```sh
 vagrant ssh
 ```
-  
+
   (Or use [PuTTy](http://stackoverflow.com/questions/9885108/ssh-to-vagrant-box-in-windows) on Windows.)
 
 - Add http://rubygems.org to gem sources
-  
+
 ```sh
 sudo -i
 gem sources -r https://rubygems.org/
@@ -76,7 +76,7 @@ gem sources -a http://rubygems.org/
 ```
 
 - Exit the VM and then reprovision the VM
-  
+
 ```sh
 vagrant provision
 ```
@@ -87,7 +87,7 @@ vagrant provision
 
 
   **Windows**  
-  
+
   Windows users may want to install cwRsync and use the rsync method of mounting shared drives.
   This eliminates the performance hit in standard vagrant sharing, especially with drives on different indexes.
   Make sure there is only one rsync process found on the system (ex, remove the Rtools/rsync.exe)
@@ -96,7 +96,7 @@ vagrant provision
 
 ### Development/Test AMIs
 
-- Install the Vagrant AWS plug-in 
+- Install the Vagrant AWS plug-in
 
 ```sh
 vagrant plugin install vagrant-aws
@@ -129,9 +129,9 @@ ruby create_vms.rb --aws
 ### Official AMI Generation
 
 - Push all code to master
-- Update the Server version in ./server/lib/version.rb using semantic versioning.
+- Update the Server version in ./server/lib/openstudio_server/version.rb using semantic versioning.
 - Commit/push your code
-- Run the `rake release` in the root. 
+- Run the `rake release` in the root.
   This will tag the version in git, push the tags, then push the code to ami-build.  Jenkins will take over the generation of the AMIs.
 
 
@@ -146,7 +146,7 @@ vagrant ssh
 
 ### Server Changes
   + Enable password login (for setting up passwordless SSH)
-  + Change owner of Rserved and restart Rserve 
+  + Change owner of Rserved and restart Rserve
   + Update all packages and reboot
   + Remove unneeded directories/files
 
@@ -170,8 +170,6 @@ vagrant ssh
 
 - test the AMI using the script run_ec2
 - merge the branch into master
-- tag the release 
-  + Naming convention is to increment the minor release (e.g. V1.2.0).  Note that this number does not increment the same as openstudio because there may be intermediate patched. 
+- tag the release
+  + Naming convention is to increment the minor release (e.g. V1.2.0).  Note that this number does not increment the same as openstudio because there may be intermediate patched.
   + Add a note in the release to which versions of OpenStudio the release supports
-
-
