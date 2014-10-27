@@ -1,0 +1,2 @@
+module ParetosHelper
+end
