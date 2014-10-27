@@ -8,17 +8,17 @@ class PagesController < ApplicationController
     # data for dashboard header
     @projects = Project.all
     # sort works because the states are queued, started, completed, na. started is the last in the list...
-    @analyses = Analysis.all.order_by(:status.desc, :start_time.desc)
+    @analyses = Analysis.all.order_by(:updated_at.desc)
     failed_runs = DataPoint.where(status_message: 'datapoint failure').count
     total_runs = DataPoint.all.count
     completed_cnt = DataPoint.where(status: 'completed').count
 
-    if failed_runs != 0 and total_runs != 0
+    if failed_runs != 0 && total_runs != 0
       @failed_perc = (failed_runs.to_f / total_runs.to_f * 100).round(0)
     else
       @failed_perc = 0
     end
-    if completed_cnt != 0 and total_runs != 0
+    if completed_cnt != 0 && total_runs != 0
       @completed_perc = (completed_cnt.to_f / total_runs.to_f * 100).round(0)
     else
       @completed_perc = 0
@@ -30,7 +30,7 @@ class PagesController < ApplicationController
     unless @current.nil?
       # aggregate results of current analysis
       aggregated_results = DataPoint.collection.aggregate(
-          [{'$match' => {'analysis_id' => @current.id}},{'$group' => {'_id' => {'analysis_id' => '$analysis_id', 'status' => '$status'}, count: {'$sum' => 1}}}])
+          [{ '$match' => { 'analysis_id' => @current.id } }, { '$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status' }, count: { '$sum' => 1 } } }])
     end
     # for js
     cnt = 0
@@ -49,6 +49,5 @@ class PagesController < ApplicationController
 
       @total = cnt
     end
-
   end
 end

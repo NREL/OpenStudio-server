@@ -13,15 +13,14 @@ class Analysis
   field :description, type: String
   field :run_flag, type: Boolean, default: false
   field :exit_on_guideline14, type: Boolean, default: false
-  field :delayed_job_ids, type: Array, default: []
-  field :status, type: String
-  field :analysis_type, type: String
-  field :start_time, type: DateTime
-  field :end_time, type: DateTime
+
+  # Hash of the jobs to run for the analysis
+  # field :jobs, type: Array, default: [] # very specific format
+  # move the results into the jobs array
   field :results, type: Hash, default: {} # this was nil, can we have this be an empty hash? Check Measure Group JSONS!
-  field :run_options, type: Hash, default: {}  # hash of each run options configurations (if desired)
+
   field :problem
-  field :status_message, type: String # the resulting message from the analysis
+  field :status_message, type: String, default: '' # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
   field :use_shm, type: Boolean, default: false # flag on whether or not to use SHM for analysis (impacts file uploading)
@@ -35,12 +34,16 @@ class Analysis
 
   # Relationships
   belongs_to :project
+
   has_many :data_points
   has_many :algorithms
   has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
   has_many :measures
+
   has_many :paretos
   # has_many :problems
+
+  has_many :jobs
 
   # Indexes
   index({ uuid: 1 }, unique: true)
@@ -48,7 +51,6 @@ class Analysis
   index(name: 1)
   index(created_at: 1)
   index(project_id: 1)
-  index(uuid: 1, status: 1)
   index(uuid: 1, download_status: 1)
 
   # Validations
@@ -78,7 +80,7 @@ class Analysis
       if cols[0] == 'master' # TODO: eventually rename this from master to server. The database calls this server
         node = ComputeNode.find_or_create_by(node_type: 'server', ip_address: cols[1])
         node.hostname = cols[2]
-        node.cores = [cols[3].to_i - 1, 1].max
+        node.cores = cols[3]
         node.user = cols[4]
         node.password = cols[5].chomp
         if options[:use_server_as_worker] && cols[6].chomp == 'true'
@@ -106,7 +108,7 @@ class Analysis
     end
 
     # get server and worker characteristics
-    ComputeNode.get_system_information
+    ComputeNode.system_information
 
     # check if this fails
     ComputeNode.copy_data_to_workers(self)
@@ -116,32 +118,39 @@ class Analysis
     defaults = { skip_init: false, use_server_as_worker: false }
     options = defaults.merge(options)
 
-    # TODO need to also check if the workers have been initialized, if so, then skip
+    Rails.logger.info "calling start on #{analysis_type} with options #{options}"
+
+    # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
-      self.start_time = Time.now # this is the time it was queued, not starts
-      self.end_time = nil
+      Rails.logger.info("Queuing up analysis #{uuid}")
+      self.save!
+
       Rails.logger.info('Initializing workers in database')
       initialize_workers(options)
-
-      Rails.logger.info("Queuing up analysis #{uuid}")
-      self.analysis_type = analysis_type
-      self.status = 'queued'
-      self.save!
     end
 
     Rails.logger.info("Starting #{analysis_type}")
     if no_delay
       Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
-      abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, options)
+      aj = jobs.new_job(id, analysis_type, jobs.length, options)
+      self.save!
+      reload
+      abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
       Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, options), queue: 'analysis'
-      delayed_job_ids << job.id
+      aj = jobs.new_job(id, analysis_type, jobs.length, options)
+      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analysis'
+      aj.delayed_job_id = job.id
+      aj.save!
+
       self.save!
+      reload
     end
   end
 
+  # Options take the form of?
+  # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
     defaults = { allow_multiple_jobs: false }
     options = defaults.merge(options)
@@ -150,31 +159,37 @@ class Analysis
     # there is no reason why more than one analyses can be queued at the same time.
     Rails.logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
+    dj_ids = jobs.map { |v| v[:delayed_job_ids] }
+    Rails.logger.info "Delayed Job ids are #{dj_ids}"
     if options[:allow_multiple_jobs]
       # go ahead and submit the job no matter what
       start(no_delay, analysis_type, options)
 
       return [true]
-      # TODO: need to test for each of these cases!
-    elsif delayed_job_ids.empty? || !Delayed::Job.where(:_id.in => delayed_job_ids).exists? || status != 'queued' || status != 'started'
+    elsif delayed_job_ids.empty? || !Delayed::Job.where(:_id.in => delayed_job_ids).exists?
       start(no_delay, analysis_type, options)
 
       return [true]
     else
-      Rails.logger.info("Analysis is already queued with #{dj} or option was not passed to allow multiple analyses")
+      Rails.logger.info "Analysis is already queued with #{dj} or option was not passed to allow multiple analyses"
       return [false, 'An analysis is already queued']
     end
   end
 
   def stop_analysis
     logger.info('attempting to stop analysis')
-    # check if the project is running
-    if status == 'queued' || status == 'started'
-      self.run_flag = false
-      self.status = 'completed'
-      self.end_time = Time.now
-      # TODO: add a flag that this was killed
-    end
+
+    self.run_flag = false
+    # The ensure block will clean up the jobs and save the statuses
+
+    # jobs.each do |j|
+    #   unless j.status == 'completed'
+    #     j.status = 'completed'
+    #     j.end_time = Time.new
+    #     j.status_message = 'canceled by user'
+    #     j.save
+    #   end
+    # end
 
     [self.save!, errors]
   end
@@ -215,9 +230,8 @@ class Analysis
       end
     end
 
-
     # pull out the output variables
-    self.output_variables.each do |variable|
+    output_variables.each do |variable|
       Rails.logger.info "Saving off output variables: #{variable}"
       var = Variable.create_output_variable(id, variable)
     end
@@ -231,26 +245,26 @@ class Analysis
   #   { "uuid": "variable_name", "uuid2": "variable_name_2"}
   # 2013-02-20: NL Moved to Analysis Model. Updated to use map/reduce.  This runs in 62.8ms on a smallish sized collection compared to 461ms on the
   # same collection
-  def get_superset_of_input_variables
+  def superset_of_input_variables
     mappings = {}
     start = Time.now
 
-    map = %Q{
+    map = "
       function() {
         for (var key in this.set_variable_values) { emit(key, null); }
       }
-    }
+    "
 
-    reduce = %Q{
+    reduce = "
       function(key, nothing) { return null; }
-    }
+    "
 
-    # todo: do we want to filter this on only completed simulations--i don't think so anymore.
+    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     #   old query .where({download_status: 'completed', status: 'completed'})
     var_ids = data_points.map_reduce(map, reduce).out(inline: true)
     var_ids.each do |var|
       v = Variable.where(uuid: var['_id']).only(:name).first
-      # todo: can we delete the gsub'ing -- as i think the v.name is always the machine name now
+      # TODO: can we delete the gsub'ing -- as i think the v.name is always the machine name now
       mappings[var['_id']] = v.name.gsub(' ', '_') if v
     end
     Rails.logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
@@ -262,21 +276,22 @@ class Analysis
   # This returns a slighly different format compared to the method above.  This returns
   # all the result variables that are avaiable in the form:
   # {"air_handler_fan_efficiency_final"=>true, "air_handler_fan_efficiency_initial"=>true, ...
-  def get_superset_of_result_variables
+  # TODO: this can be deprecated (need to verify: 7/14/2014)
+  def superset_of_result_variables
     mappings = {}
     start = Time.now
 
-    map = %Q{
+    map = "
       function() {
         for (var key in this.results) { emit(key, null); }
       }
-    }
+    "
 
-    reduce = %Q{
+    reduce = "
       function(key, nothing) { return null; }
-    }
+    "
 
-    # todo: do we want to filter this on only completed simulations--i don't think so anymore.
+    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     #   old query .where({download_status: 'completed', status: 'completed'})
     var_ids = data_points.map_reduce(map, reduce).out(inline: true)
     var_ids.each do |var|
@@ -288,14 +303,9 @@ class Analysis
     Hash[mappings.sort]
   end
 
-# copy back the results to the master node if they are finished
+  # copy back the results to the master node if they are finished
   def finalize_data_points
-    any_downloaded = false
-    data_points.and({ download_status: 'na' }, { status: 'completed' }).each do |dp|
-      downloaded = dp.finalize_data_points
-      any_downloaded = any_downloaded || downloaded
-    end
-    any_downloaded
+    ComputeNode.download_all_results(self.id)
   end
 
   # filter results on analysis show page (per status)
@@ -314,6 +324,53 @@ class Analysis
         data_points.where(status: status)
       end
     end
+  end
+
+  def jobs_status
+    jobs.order_by(:index.asc).map { |j| { analysis_type: j.analysis_type, status: j.status } }
+  end
+
+  def status
+    j = jobs.last
+    if j && j.status
+      return j.status
+    else
+      return 'unknown'
+    end
+  end
+
+  def analysis_types
+    jobs.order_by(:index.asc).map { |j| j.analysis_type }
+  end
+
+  def analysis_type
+    j = jobs.last
+    if j && j.analysis_type
+      return j.analysis_type
+    else
+      return 'unknown'
+    end
+  end
+
+  def start_time
+    j = jobs.first
+
+    return j.start_time if j
+
+    nil
+  end
+
+  def end_time
+    j = jobs.last
+    if j && j['end_time']
+      return j['end_time']
+    else
+      return nil
+    end
+  end
+
+  def delayed_job_ids
+    jobs.map { |v| v[:delayed_job_ids] }
   end
 
   protected
@@ -348,11 +405,15 @@ class Analysis
     end
 
     # delete any delayed jobs items
-    if delayed_job_ids
-      delayed_job_ids.each do |djid|
-        dj = Delayed::Job.find(djid)
-        dj.delete unless dj.nil?
-      end
+    delayed_job_ids.each do |djid|
+      next unless djid
+      dj = Delayed::Job.find(djid)
+      dj.delete unless dj.nil?
+    end
+
+    jobs.each do |r|
+      logger.info("removing #{r.id}")
+      r.destroy
     end
   end
 

@@ -60,7 +60,7 @@ result = nil
 
 begin
   directory = nil
-  fail "Data Point is NA... skipping" if options[:uuid] == 'NA'
+  fail 'Data Point is NA... skipping' if options[:uuid] == 'NA'
   analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
   store_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{options[:uuid]}"
   FileUtils.mkdir_p(store_directory)
@@ -88,23 +88,23 @@ begin
   if options[:run_data_point_filename] == 'workflow_monthly' ||
       options[:run_data_point_filename] == 'run_openstudio_workflow_monthly.rb'
     workflow_options = {
-        datapoint_id: options[:uuid],
-        analysis_root_path: analysis_dir,
-        use_monthly_reports: true,
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      datapoint_id: options[:uuid],
+      analysis_root_path: analysis_dir,
+      use_monthly_reports: true,
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
 
   elsif options[:run_data_point_filename] == 'workflow' ||
       options[:run_data_point_filename] == 'run_openstudio_workflow.rb'
     workflow_options = {
-        datapoint_id: options[:uuid],
-        analysis_root_path: analysis_dir,
-        use_monthly_reports: false,
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      datapoint_id: options[:uuid],
+      analysis_root_path: analysis_dir,
+      use_monthly_reports: false,
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
   elsif options[:run_data_point_filename] == 'custom_xml' ||
       options[:run_data_point_filename] == 'run_openstudio_xml.rb'
@@ -112,30 +112,30 @@ begin
     # Set up the custom workflow states and transitions
     transitions = OpenStudio::Workflow::Run.default_transition
     transitions[1][:to] = :xml
-    transitions.insert(2, {from: :xml, to: :openstudio})
+    transitions.insert(2, from: :xml, to: :openstudio)
     states = OpenStudio::Workflow::Run.default_states
-    states.insert(2, {:state => :xml, :options => {:after_enter => :run_xml}})
+    states.insert(2, state: :xml, options: { after_enter: :run_xml })
 
     workflow_options = {
-        transitions: transitions,
-        states: states,
-        analysis_root_path: analysis_dir,
-        datapoint_id: options[:uuid],
-        use_monthly_reports: true,
-        xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      transitions: transitions,
+      states: states,
+      analysis_root_path: analysis_dir,
+      datapoint_id: options[:uuid],
+      use_monthly_reports: true,
+      xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
   elsif options[:run_data_point_filename] == 'legacy_workflow' ||
       options[:run_data_point_filename] == 'run_openstudio.rb'
     workflow_options = {
-        datapoint_id: options[:uuid],
-        analysis_root_path: analysis_dir,
-        use_monthly_reports: false,
-        adapter_options: {
-            mongoid_path: '/mnt/openstudio/rails-models'
-        }
+      datapoint_id: options[:uuid],
+      analysis_root_path: analysis_dir,
+      use_monthly_reports: false,
+      adapter_options: {
+        mongoid_path: '/mnt/openstudio/rails-models'
+      }
     }
   end
 
@@ -173,7 +173,7 @@ begin
   if result == 'NA'
     fail 'Simulation result was invalid'
   end
-rescue Exception => e
+rescue => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   puts log_message
   logger.info log_message if logger

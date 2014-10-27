@@ -7,8 +7,10 @@ gem 'json'
 
 # database modules
 gem 'mongoid', '~> 3.1.6'
-gem 'paperclip', '~> 4.1.1' 
+#gem 'mongoid', '~> 4.0'
+gem 'paperclip', '~> 4.1.1'
 gem 'mongoid-paperclip', :require => 'mongoid_paperclip'
+#gem 'mongoid-locker', '~> 0.3'
 
 # R
 gem 'rserve-simpler'
@@ -24,7 +26,8 @@ gem 'net-sftp'
 gem 'libv8'
 gem 'execjs'
 gem 'therubyracer'
-gem 'backbone-on-rails'
+
+gem 'parallel'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -71,6 +74,7 @@ group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
   gem 'meta_request'
+  gem 'ruby-prof'
   #gem 'ruby-debug' if RAILS_VERSION > "2.0.0"
 end
 

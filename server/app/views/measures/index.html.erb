@@ -20,12 +20,12 @@
         <td><%= measure.description %></td>
         <td>
           <% measure.variables.where(perturbable: false).order_by(name: 1).each do |var| %>
-              <%= link_to var.name, variable_path(var) %></br>
+              <%= link_to var.display_name, variable_path(var) %></br>
           <% end %>
         </td>
         <td>
           <% measure.variables.where(perturbable: true).order_by(name: 1).each do |var| %>
-              <%= link_to var.name, variable_path(var) %></br>
+              <%= link_to var.display_name, variable_path(var) %></br>
           <% end %>
         </td>
       </tr>

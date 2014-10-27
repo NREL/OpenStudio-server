@@ -54,11 +54,11 @@ module Analysis::Core
     # h = {a: [1, 2, 3], b: ["4", "5", "6"], c: [true, false, false]}
     # and makes
     # [{a:1}, {a:2}, {a:3}, {b:"4"}, ... {c: true}, {c: false}]
-    result = hash_array.map { |k, v| v.map { |value| {:"#{k}" => value} } }.flatten.uniq
+    result = hash_array.map { |k, v| v.map { |value| { :"#{k}" => value } } }.flatten.uniq
     # then sets the "static/default" from the other variables
     selected_variables.each do |var|
       result.each_with_index do |r, index|
-        unless r.has_key? var._id.to_sym
+        unless r.key? var._id.to_sym
           result[index][var._id.to_sym] = var.static_value
         end
       end

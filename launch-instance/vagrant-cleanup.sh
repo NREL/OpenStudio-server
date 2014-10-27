@@ -61,7 +61,7 @@ sudo apt-get autoremove --purge xserver-common -y
 sudo apt-get autoremove --purge xvfb -y
 
 sudo apt-get autoremove --purge libgnome2-0 -y
-sudo apt-get autoremove --purge libmail-sendmail-perl -y	
+sudo apt-get autoremove --purge libmail-sendmail-perl -y
 sudo apt-get autoremove --purge libmailtools-perl -y
 
 sudo apt-get autoremove --purge x11-common -y
@@ -69,7 +69,7 @@ sudo apt-get autoremove --purge x11-utils -y
 sudo apt-get autoremove --purge x11-xserver-utils -y
 sudo apt-get autoremove --purge x11proto-core-dev -y
 sudo apt-get autoremove --purge x11proto-input-dev -y
-sudo apt-get autoremove --purge x11proto-kb-dev -y	
+sudo apt-get autoremove --purge x11proto-kb-dev -y
 
 sudo rm -rf /usr/local/R-3.0.3.tar.gz
 sudo rm -rf /usr/local/R-3.0.3/doc

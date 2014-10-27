@@ -13,7 +13,7 @@ class AdminController < ApplicationController
       reload_database(uploaded_file)
       redirect_to admin_index_path, notice: "Dropped and Reloaded Database with #{uploaded_file.original_filename}"
     else
-      redirect_to admin_index_path, notice: "No file selected"
+      redirect_to admin_index_path, notice: 'No file selected'
     end
   end
 
@@ -33,11 +33,11 @@ class AdminController < ApplicationController
     #   success_2 = true
     # end
 
-    if success_1# && success_2
-      redirect_to admin_index_path, notice: "Database deleted successfully."
+    if success_1 # && success_2
+      redirect_to admin_index_path, notice: 'Database deleted successfully.'
     else
       logger.info "Error deleting mongo database: #{success_1}, #{success_2}"
-      redirect_to admin_index_path, notice: "Error deleting database."
+      redirect_to admin_index_path, notice: 'Error deleting database.'
     end
   end
 

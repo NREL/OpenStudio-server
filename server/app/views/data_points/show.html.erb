@@ -33,7 +33,10 @@
           <% if @data_point.openstudio_datapoint_file_name && File.exist?(@data_point.openstudio_datapoint_file_name) %>
               <%= link_to("Download Data Point", download_data_point_path(@data_point), class: 'list-group-item') %>
           <% end %>
-
+          <!--Assume that if the data point zip file exists, then the reports zip file also exists-->
+          <% if @data_point.openstudio_datapoint_file_name && File.exist?(@data_point.openstudio_datapoint_file_name) %>
+              <%= link_to("Download Data Point Reports", download_reports_data_point_path(@data_point), class: 'list-group-item') %>
+          <% end %>
           <%= link_to 'View JSON', show_full_data_point_path(@data_point, :format => :json), class: 'list-group-item' %>
         </div>
       </div>
@@ -70,7 +73,7 @@
       <tbody>
       <% @set_variable_values.each do |k, v| %>
           <tr>
-            <td><%= link_to(Variable.find(k).name, Variable.find(k)) if Variable.find(k) %></td>
+            <td><%= link_to(Variable.find(k).display_name, Variable.find(k)) if Variable.find(k) %></td>
             <td><%= v %></td>
           </tr>
       <% end %>

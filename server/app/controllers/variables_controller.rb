@@ -5,13 +5,12 @@ class VariablesController < ApplicationController
     @variables = Variable.where(analysis_id: params[:analysis_id], perturbable: true).order_by(name: 1)
     @outputs = Variable.where(analysis_id: params[:analysis_id], output: true).order_by(name: 1)
     @pivots = Variable.where(analysis_id: params[:analysis_id], pivot: true).order_by(name: 1)
-    @others = Variable.where(analysis_id: params[:analysis_id], pivot: false, perturbable: false, static: false).order_by(name: 1)
+    @others = Variable.where(analysis_id: params[:analysis_id], pivot: false, perturbable: false, output: false).order_by(name: 1)
 
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: Variable.get_variable_data_v2(params[:analysis_id]) }
     end
-
   end
 
   # GET /variables/1
@@ -94,7 +93,7 @@ class VariablesController < ApplicationController
     respond_to do |format|
       format.csv do
         write_and_send_input_variables_csv(analysis)
-        #redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
+        # redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
         # write_and_send_csv(@analysis)
       end
       format.rdata do
@@ -103,13 +102,12 @@ class VariablesController < ApplicationController
     end
   end
 
-
   # Bulk modify form
   def modify
     @variables = Variable.where(analysis_id: params[:analysis_id]).order_by(name: 1)
 
     if request.post?
-      #TODO: sanitize params
+      # TODO: sanitize params
       @variables.each do |var|
         if params[:visualize_ids].include? var.id
           var.visualize = true
@@ -129,7 +127,7 @@ class VariablesController < ApplicationController
   # GET metadata
   # DenCity view
   def metadata
-    @variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil).order_by(name: 1)
+    @variables = Variable.where(:metadata_id.ne => '', :metadata_id.ne => nil).order_by(name: 1)
   end
 
   def download_metadata
@@ -138,24 +136,22 @@ class VariablesController < ApplicationController
         write_and_send_metadata_csv
       end
     end
-
   end
 
   protected
 
   def write_and_send_metadata_csv
     require 'csv'
-    variables = Variable.where(:metadata_id.ne => "", :metadata_id.ne => nil)
-    filename =  "dencity_metadata.csv"
+    variables = Variable.where(:metadata_id.ne => '', :metadata_id.ne => nil)
+    filename =  'dencity_metadata.csv'
     csv_string = CSV.generate do |csv|
-      csv << ['name', 'display_name', 'description', 'units', 'datatype', 'user_defined']
+      csv << %w(name display_name description units datatype user_defined)
       variables.each do |v|
         csv << [v.metadata_id, v.display_name, '', v.units, v.data_type, false]
       end
     end
 
     send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
-
   end
 
   def write_and_send_input_variables_csv(analysis)
@@ -188,11 +184,11 @@ class VariablesController < ApplicationController
     logger.info out_hash
 
     download_filename = "#{analysis.name}_metadata.RData"
-    data_frame_name = "metadata"
+    data_frame_name = 'metadata'
 
     Rails.logger.info("outhash is #{out_hash}")
 
-    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
+    # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
     require 'rserve/simpler'
     r = Rserve::Simpler.new
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
@@ -217,8 +213,5 @@ class VariablesController < ApplicationController
     if File.exist? tmp_filename
       r.converse(r_command)
     end
-
   end
-
-
 end

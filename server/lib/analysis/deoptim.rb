@@ -2,37 +2,38 @@
 class Analysis::Deoptim
   include Analysis::R
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
-        skip_init: false,
-        run_data_point_filename: 'run_openstudio_workflow.rb',
-        create_data_point_filename: 'create_data_point.rb',
-        output_variables: [
-            {
-                display_name: 'Total Site Energy (EUI)',
-                name: 'total_energy',
-                objective_function: true,
-                objective_function_index: 0,
-                index: 0
-            },
-            {
-                display_name: 'Total Life Cycle Cost',
-                name: 'total_life_cycle_cost',
-                objective_function: true,
-                objective_function_index: 1,
-                index: 1
-            }
-        ],
-        problem: {
-            algorithm: {
-                generations: 1,
-                objective_functions: %w(total_energy total_life_cycle_cost)
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [
+        {
+          display_name: 'Total Site Energy (EUI)',
+          name: 'total_energy',
+          objective_function: true,
+          objective_function_index: 0,
+          index: 0
+        },
+        {
+          display_name: 'Total Life Cycle Cost',
+          name: 'total_life_cycle_cost',
+          objective_function: true,
+          objective_function_index: 1,
+          index: 1
         }
+      ],
+      problem: {
+        algorithm: {
+          generations: 1,
+          objective_functions: %w(total_energy total_life_cycle_cost)
+        }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
+
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -45,8 +46,7 @@ class Analysis::Deoptim
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
@@ -54,7 +54,19 @@ class Analysis::Deoptim
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    @analysis.run_options['deoptim'] =@options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'started'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
+
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
+
+    # save all the changes into the database and reload the object (which is required)
+    @analysis.save!
+    @analysis.reload
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -66,9 +78,9 @@ class Analysis::Deoptim
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
 
-    # save the data
+    # save the algorithm specific updates
     @analysis.save!
-    @analysis.reload # after saving the data (needed for some reason yet to be determined)
+    @analysis.reload
 
     # create an instance for R
     @r = Rserve::Simpler.new
@@ -92,7 +104,7 @@ class Analysis::Deoptim
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    # TODO preflight check -- need to catch this in the analysis module
+    # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
       fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
@@ -142,10 +154,10 @@ class Analysis::Deoptim
       process.start
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info("Found the following good ips #{worker_ips}")
+      Rails.logger.info "Found the following good ips #{worker_ips}"
 
       cluster_started = cluster.start(worker_ips)
-      Rails.logger.info ("Time flag was set to #{cluster_started}")
+      Rails.logger.info "Time flag was set to #{cluster_started}"
 
       if cluster_started
         # gen is the number of generations to calculate
@@ -256,7 +268,7 @@ class Analysis::Deoptim
         fail 'could not start the cluster (most likely timed out)'
       end
 
-    rescue Exception => e
+    rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
       @analysis.status_message = log_message
