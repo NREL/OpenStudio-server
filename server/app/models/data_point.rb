@@ -12,40 +12,41 @@ class DataPoint
   field :download_information, type: String
   field :openstudio_datapoint_file_name, type: String # make this paperclip?
   field :status, type: String, default: 'na' # enum of queued, started, completed
-  field :status_message, type: String # results of the simulation
+  field :status_message, type: String, default: '' # results of the simulation
   field :output # what is this?
   field :results, type: Hash, default: {}
-  field :run_start_time, type: DateTime
-  field :run_end_time, type: DateTime
+  field :run_start_time, type: DateTime, default: nil
+  field :run_end_time, type: DateTime, default: nil
   field :sdp_log_file, type: Array, default: []
 
   # Run location information
   field :ip_address, type: String
   field :internal_ip_address, type: String
 
-
   # Relationships
-  belongs_to :analysis
+  belongs_to :analysis, index: true
 
   # Indexes
-  index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index({uuid: 1}, unique: true)
+  index({id: 1}, unique: true)
   index(name: 1)
   index(status: 1)
   index(analysis_id: 1, created_at: 1)
-  index(analysis_id: 1)
+  index(created_at: 1)
   index(uuid: 1, status: 1, download_status: 1)
+  index(analysis_id: 1, status: 1, download_status: 1, ip_address: 1)
   index(run_start_time: -1, name: 1)
   index(run_end_time: -1, name: 1)
   index(analysis_id: 1, iteration: 1, sample: 1)
+  index(analysis_id: 1, status: 1, status_message: 1, created_at: 1)
 
   # Callbacks
   after_create :verify_uuid
 
+  # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
+  # open structure define in the JSON. This is used for the measure group JSONs only. Deprecate as
+  # soon as measure groups are handles correctly.
   def save_results_from_openstudio_json
-    # Parse the OpenStudio JSON and save the results into a name:value hash instead of the
-    # open structure define in the JSON
-
     if output && output['data_point'] && output['data_point']['output_attributes']
       self.results = {}
       output['data_point']['output_attributes'].each do |output_hash|
@@ -61,45 +62,10 @@ class DataPoint
     end
   end
 
-  def finalize_data_points
-    downloaded = false
-    if download_status == 'na' && status == 'completed'
-      # DO NOT DO THIS
-      # self.download_status = 'started'
-      # self.save!
-
-      # This is becoming more of a post process that is being triggered by the "downloading" of the
-      # file.  If we aren't going to download the file, then the child process can have a flag that it
-      # checks similar to the downloaded flag.
-      Rails.logger.info 'Post-processing the JSON data that was pushed into the database by the worker'
-      save_results_from_openstudio_json
-
-      # look up the worker nodes ip address from database. Move this to ComputeNode class and pass in any potential
-      # ip addresses that may have finished
-      Rails.logger.info "Trying to download #{id}"
-      remote_file_exists, remote_file_downloaded, local_filename = ComputeNode.download_results(ip_address, analysis.id, id)
-
-      # now add the datapoint path to the database to get it via the server
-      if remote_file_exists && remote_file_downloaded
-        self.openstudio_datapoint_file_name = local_filename
-        self.download_status = 'completed'
-        self.save!
-        downloaded = true
-      elsif remote_file_exists
-        self.openstudio_datapoint_file_name = nil
-        self.download_status = 'completed'
-        self.download_information = 'failed to download the file'
-        self.save!
-        downloaded = true
-      else
-        self.download_status = 'completed'
-        self.download_information = 'file did not exist on remote system or could not connect to remote system'
-        self.save!
-        downloaded = true
-      end
-    end
-
-    downloaded
+  # Perform the final actions on the Data Point.
+  def finalize_data_point
+    Rails.logger.info 'Post-processing the JSON data that was pushed into the database by the worker'
+    save_results_from_openstudio_json
   end
 
   protected

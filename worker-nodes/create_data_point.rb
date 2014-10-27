@@ -36,34 +36,34 @@ begin
   dp_uuid = UUID.new.generate
   analysis_root_path = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
   run_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{dp_uuid}"
-# Logger for the simulate datapoint
+  # Logger for the simulate datapoint
   logger = Logger.new("#{analysis_root_path}/create_data_point_#{dp_uuid}.log")
   logger.info "Parsed Input: #{options}"
   logger.info "Analysis id is #{options[:analysis_id]}"
 
   workflow_options = {
-      datapoint_id: dp_uuid,
-      analysis_root_path: analysis_root_path,
-      adapter_options: {
-          mongoid_path: '/mnt/openstudio/rails-models'
-      }
+    datapoint_id: dp_uuid,
+    analysis_root_path: analysis_root_path,
+    adapter_options: {
+      mongoid_path: '/mnt/openstudio/rails-models'
+    }
   }
 
-  logger.info "Creating Mongo connector"
+  logger.info 'Creating Mongo connector'
   k = OpenStudio::Workflow.load 'Mongo', run_directory, workflow_options
-  logger.info "Created Mongo connector"
+  logger.info 'Created Mongo connector'
 
-  k.logger.info "Creating new datapoint"
-  logger.info "Creating new datapoint"
+  k.logger.info 'Creating new datapoint'
+  logger.info 'Creating new datapoint'
   dp = DataPoint.find_or_create_by(uuid: dp_uuid)
   dp.name = "Autocreated on worker: #{dp_uuid}"
   dp.analysis_id = options[:analysis_id]
 
-  logger.info "Saving new datapoint"
+  logger.info 'Saving new datapoint'
   unless dp.save!
     logger.error "Could not save the datapoint into the database with error #{dp.errors.full_messages}"
   end
-  logger.info "Saved new datapoint"
+  logger.info 'Saved new datapoint'
 
   sample = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
 
@@ -102,13 +102,18 @@ begin
   dp.set_variable_values = sample
   dp.save!
 
-  k.logger.info "Finished creating new datapoint"
-rescue Exception => e
+  k.logger.info 'Finished creating new datapoint'
+rescue => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
   k.logger.info log_message if k
 
   errored = true
 ensure
-  # Must print out a dp uuid of some sort, default is NA
-  puts dp && !errored ? dp.uuid : 'NA'
+  # Must print out a dp uuid or and NA
+  #   NA's are caught by the R algorithm as an error
+  final_result = 'NA'
+  if dp && !errored
+    final_result = dp.uuid
+  end
+  puts final_result
 end

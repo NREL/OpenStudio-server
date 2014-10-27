@@ -4,8 +4,8 @@ class Project
 
   field :uuid, type: String
   field :_id, type: String, default: -> { uuid || UUID.generate }
-  field :name, type: String
-  field :display_name, type: String
+  field :name, type: String, default: ''
+  field :display_name, type: String, default: ''
 
   # Relationships
   has_many :analyses

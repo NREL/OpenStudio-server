@@ -2,14 +2,14 @@
 class Analysis::Rgenoud
   include Analysis::R
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-	       random_seed: 1979,
+        random_seed: 1979,
         algorithm: {
           generations: 1,
           waitgenerations: 3,
@@ -27,12 +27,13 @@ class Analysis::Rgenoud
           factr: 4.5036e14,
           maxit: 5,
           epsilongradient: 1e-4
-            }
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
+
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -45,8 +46,7 @@ class Analysis::Rgenoud
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
@@ -54,11 +54,19 @@ class Analysis::Rgenoud
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
 
     # save other run information in another object in the analysis
-    Rails.logger.info "Analysis type is #{@options['analysis_type']}"
-    @analysis.run_options['rgenoud'] = @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'started'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
+
     # Clear out any former results on the analysis
     @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results['rgenoud'] = {}
+    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
+
+    # save all the changes into the database and reload the object (which is required)
+    @analysis.save!
+    @analysis.reload
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -70,9 +78,9 @@ class Analysis::Rgenoud
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
 
-    # save the data
+    # save the algorithm specific updates
     @analysis.save!
-    @analysis.reload # after saving the data (needed for some reason yet to be determined)
+    @analysis.reload
 
     # create an instance for R
     @r = Rserve::Simpler.new
@@ -80,7 +88,7 @@ class Analysis::Rgenoud
     @r.converse('setwd("/mnt/openstudio")')
     @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
 
-    # todo: deal better with random seeds
+    # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
     # R libraries needed for this algorithm
     @r.converse 'library(rjson)'
@@ -99,7 +107,7 @@ class Analysis::Rgenoud
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    # TODO preflight check -- need to catch this in the analysis module
+    # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
       fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
     end
@@ -108,7 +116,7 @@ class Analysis::Rgenoud
       fail 'Must have number of samples to discretize the parameter space'
     end
 
-    # TODO add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
     # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
     #  raise "P Norm must be non-negative"
     # end
@@ -175,10 +183,10 @@ class Analysis::Rgenoud
       process.start
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info("Found the following good ips #{worker_ips}")
+      Rails.logger.info "Found the following good ips #{worker_ips}"
 
       cluster_started = cluster.start(worker_ips)
-      Rails.logger.info ("Time flag was set to #{cluster_started}")
+      Rails.logger.info "Time flag was set to #{cluster_started}"
 
       unless var_types.all? { |t| t.downcase == 'continuous' }
         Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
@@ -213,17 +221,17 @@ class Analysis::Rgenoud
 
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
-            
+
             varfile <- function(x){
               if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
-            
+
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
-            
+
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
               mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
@@ -261,14 +269,14 @@ class Analysis::Rgenoud
               z
 
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") { 
+            if (as.character(z[j]) == "NA") {
 		      cat("UUID is NA \n");
-              NAvalue <- .Machine$double.xmax
-              return(NAvalue)		    
+              NAvalue <- 1.0e19
+              return(NAvalue)
 			} else {
 		      try(f(z[j]), silent = TRUE)
-              
-			  
+
+
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -276,17 +284,17 @@ class Analysis::Rgenoud
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-	          json <- NULL
+             json <- NULL
             try(json <- fromJSON(file=object_file), silent=TRUE)
 
             if (is.null(json)) {
-              obj <- .Machine$double.xmax 
+              obj <- 1.0e19
             } else {
               obj <- NULL
               objvalue <- NULL
               objtarget <- NULL
               sclfactor <- NULL
-              
+
               for (i in 1:objDim){
                 objfuntemp <- paste("objective_function_",i,sep="")
                 if (json[objfuntemp] != "NULL"){
@@ -324,17 +332,17 @@ class Analysis::Rgenoud
               print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
-	        flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-	        print(paste("exit_on_guideline14: ",flag))
-          
-		if (flag["exit_on_guideline14"] == "true" ){
-		  # read in the results from the objective function file
-		  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-		  json <- NULL
-		  try(json <- fromJSON(file=guideline_file), silent=TRUE)
-		  if (is.null(json)) {
-		    print(paste("no guideline file: ",guideline_file))
-		  } else {
+           flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+           print(paste("exit_on_guideline14: ",flag))
+
+      if (flag["exit_on_guideline14"] == "true" ){
+        # read in the results from the objective function file
+        guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+        json <- NULL
+        try(json <- fromJSON(file=guideline_file), silent=TRUE)
+        if (is.null(json)) {
+          print(paste("no guideline file: ",guideline_file))
+        } else {
                     guideline <- json[[1]]
                     for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
                     print(paste("guideline: ",guideline))
@@ -351,23 +359,23 @@ class Analysis::Rgenoud
                       stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
                     }
                   }
-		}
+      }
                 dbDisconnect(mongo)
                 }
               return(obj)
               }
-			}
+         }
 
             clusterExport(cl,"g")
 
             varMin <- mins
-	    varMax <- maxes
-	    varMean <- (mins+maxes)/2.0
-	    varDomain <- maxes - mins
-	    varEps <- varDomain*epsilongradient
-	    print(paste("varseps:",varseps))
-	    print(paste("varEps:",varEps))
-	    varEps <- ifelse(varseps!=0,varseps,varEps)
+       varMax <- maxes
+       varMean <- (mins+maxes)/2.0
+       varDomain <- maxes - mins
+       varEps <- varDomain*epsilongradient
+       print(paste("varseps:",varseps))
+       print(paste("varEps:",varEps))
+       varEps <- ifelse(varseps!=0,varseps,varEps)
             print(paste("merged varEps:",varEps))
             varDom <- cbind(varMin,varMax)
             print(paste("varDom:",varDom))
@@ -378,7 +386,7 @@ class Analysis::Rgenoud
             clusterExport(cl,"varEps")
 
             vectorGradient <- function(x, ...) { # Now use the cluster
-	        vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+           vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
@@ -392,8 +400,8 @@ class Analysis::Rgenoud
             #results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
             results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-	    Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
-	    Rlog[grep('vartypes:',Rlog)]
+       Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+       Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
             Rlog[grep('<=',Rlog)]
             print(paste("popsize:",results$pop.size))
@@ -404,8 +412,8 @@ class Analysis::Rgenoud
             print(paste("value:",results$value))
             flush.console()
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
-			
-			#write final params to json file
+
+         #write final params to json file
             answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
             write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
             #convergenceflag <- toJSON(results$peakgeneration)
@@ -418,7 +426,7 @@ class Analysis::Rgenoud
         fail 'could not start the cluster (most likely timed out)'
       end
 
-    rescue Exception => e
+    rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
       @analysis.status_message = log_message
@@ -434,10 +442,10 @@ class Analysis::Rgenoud
       best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          @analysis.results['rgenoud']['best_result'] = JSON.parse(File.read(best_result_json))
+          @analysis.results[self.class.to_s.split('::').last.underscore]['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
-        rescue Exception => e
-          Rails.logger.error "Could not save post processed results for bestresult.json into the database"
+        rescue => e
+          Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
       # Do one last check if there are any data points that were not downloaded
@@ -446,10 +454,11 @@ class Analysis::Rgenoud
 
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
-        @analysis.end_time = Time.now
-        @analysis.status = 'completed'
+        @analysis_job.end_time = Time.now
+        @analysis_job.status = 'completed'
+        @analysis_job.save!
+        @analysis.reload
       end
-
       @analysis.save!
 
       Rails.logger.info "Finished running analysis '#{self.class.name}'"

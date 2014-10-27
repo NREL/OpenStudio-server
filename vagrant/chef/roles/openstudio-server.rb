@@ -6,6 +6,7 @@ run_list([
              "role[base]",
              "role[ruby]",
              "role[mongodb]",
+             "recipe[openstudio_server::users]",  # Run this before R and before openstudio bashprofile
              "role[r-project]",
              "role[openstudio]",
              "role[radiance]",
@@ -21,8 +22,7 @@ default_attributes(
     :openstudio_server => {
         :ruby_path => "/usr/local/rbenv", # this is needed for the delayed_job service
         :server_path => "/var/www/rails/openstudio",
-        :rails_environment => "development",
-        :bash_profile_user => "vagrant"
+        :rails_environment => "development"
     }
 )
 

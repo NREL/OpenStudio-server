@@ -2,6 +2,7 @@
 
 <div class="row-fluid">
   <h3 class="pad-bottom-20">Backup</h3>
+
   <div class="span3 pad-bottom-20">
     <%= link_to 'Backup Database (For Sharing)', admin_backup_database_path(full_backup: false), class: "btn btn-mini btn-primary" %>
   </div>
@@ -11,23 +12,29 @@
 </div>
 <div class='row-fluid'>
   <h3 class="pad-bottom-20">Restore</h3>
-  <div class="span3 pad-bottom-20">
 
+  <div class="span3 pad-bottom-20">
     <%= form_tag 'admin/restore_database', :multipart => true do %>
-
-      Upload Previous Database Dump (targz) <%= file_field_tag "file", class: "btn btn-mini" %>
-  </div>
-  <div class="span3 pad-bottom-20">
-      <div class="pad-top-20">
-        <%= submit_tag "Upload and Restore Database", class: "btn btn-mini btn-primary" %>
-      </div>
+        Upload Previous Database Dump (targz) <%= file_field_tag "file", class: "btn btn-mini" %>
+        </div>
+        <div class="span3 pad-bottom-20">
+          <div class="pad-top-20">
+            <%= submit_tag "Upload and Restore Database", class: "btn btn-mini btn-primary" %>
+          </div>
     <% end %>
+    </div>
+    </div>
+<div class='row-fluid'>
+  <h3 class="pad-bottom-20">Purge (This does not recreate indexes, use with caution)</h3>
+
+  <div class="span3 pad-bottom-20">
+    <%= link_to 'Clear Database', admin_clear_database_path, class: "btn btn-mini btn-primary" %>
   </div>
 </div>
 <div class='row-fluid'>
-  <h3 class="pad-bottom-20">Purge (This does not recreate indexes, use with caution)</h3>
+  <h3 class="pad-bottom-20">Server Information</h3>
   <div class="span3 pad-bottom-20">
-    <%= link_to 'Clear Database', admin_clear_database_path, class: "btn btn-mini btn-primary" %>
+    <p>Version of OpenStudio Server: <%="#{OpenstudioServer::VERSION}#{OpenstudioServer::VERSION_EXT}" %> </p>
   </div>
 </div>
 

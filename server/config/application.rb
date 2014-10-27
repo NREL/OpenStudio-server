@@ -27,6 +27,7 @@ module OpenstudioServer
       #{config.root}/lib/analysis
       #{config.root}/lib/analysis/r
       #{config.root}/lib/delayed_job
+      #{config.root}/lib/openstudio_server
     )
 
     # Only load the plugins named here, in the order given (default is alphabetical).

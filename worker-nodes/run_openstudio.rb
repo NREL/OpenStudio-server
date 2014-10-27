@@ -54,7 +54,7 @@ unless options[:directory]
 end
 
 puts "Checking UUID of #{options[:uuid]}"
-if (not options[:uuid]) || (options[:uuid] == 'NA')
+if (!options[:uuid]) || (options[:uuid] == 'NA')
   puts 'No UUID defined'
   if options[:uuid] == 'NA'
     puts 'Recevied an NA UUID which may be because you are only trying to run one datapoint'
@@ -108,9 +108,9 @@ begin
   # load problem formulation
   loadResult = OpenStudio::Analysis.loadJSON(analysis_json)
   if loadResult.analysisObject.empty?
-    loadResult.errors.each { |error|
+    loadResult.errors.each do |error|
       warn error.logMessage
-    }
+    end
     fail 'Unable to load analysis json.'
   end
 
@@ -128,9 +128,9 @@ begin
   # load data point to run
   loadResult = OpenStudio::Analysis.loadJSON(data_point_json)
   if loadResult.analysisObject.empty?
-    loadResult.errors.each { |error|
+    loadResult.errors.each do |error|
       warn error.logMessage
-    }
+    end
     fail 'Unable to load data point json.'
   end
   data_point = loadResult.analysisObject.get.to_DataPoint.get
@@ -188,7 +188,7 @@ begin
     # check if there are any new folders that were creates
     temp_dirs = Dir[File.join(directory.to_s, '*/')].map { |d| d.split('/').pop }.sort
     if (temp_dirs + job_dirs).uniq != job_dirs
-      ros.log_message "#{(temp_dirs - job_dirs).join(",")}", true
+      ros.log_message "#{(temp_dirs - job_dirs).join(',')}", true
       job_dirs = temp_dirs
     end
   end
@@ -213,7 +213,7 @@ begin
 
   # now set the objective function value or values
   objective_function_result = 0
-rescue Exception => e
+rescue => e
   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace}"
   ros.log_message log_message, true
 
