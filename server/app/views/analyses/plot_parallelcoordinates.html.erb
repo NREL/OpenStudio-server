@@ -10,20 +10,14 @@
     <div class="chart-text">
       <p>Unselect variables below to remove them from the chart</p>
 
-      <div class="update-button">
-        <button type="button" id="check_all" class="btn btn-primary">
-          Check / Uncheck All
-        </button>
-      </div>
-
       <div class="row-fluid">
        
-            <div class="span4">
+            <div class="span6">
 
               <% @visualizes.each_with_index do |var, index| %>
-                  <% if @visualizes.count/3.floor == index or @visualizes.count/3*2.floor == index %>
+                  <% if @visualizes.count/2.floor == index %>
                       </div>
-                      <div class="span3">
+                      <div class="span6">
                   <% end %>
 
                   <p>
@@ -38,7 +32,12 @@
               <% end %>
               <p>
               <% if @pareto %><%= hidden_field_tag("pareto", @pareto.id) %><% end %>
-              <div class="submit-form"> <%= submit_tag "Update Chart", class: 'btn btn-primary'  %>  </div>
+              <div class="submit-form-right">
+                <button type="button" id="check_all" class="btn btn-primary">
+                  Check / Uncheck All
+                </button>
+                <%= submit_tag "Update Chart", class: 'btn btn-primary'  %>  
+              </div>
               </p>
               </div>
 
@@ -49,10 +48,12 @@
 
   <div id="graph-div"></div>
    <% if @saved_paretos.count > 0 %>
-      <div class="pareto_toggles">
+      <div class="submit-form-right">
+
         <%= submit_tag 'All Data', class: 'btn btn-primary' %>
+
       <% @saved_paretos.each do |p| %>
-        <%= link_to p.name + ' Pareto Front', plot_parallelcoordinates_analysis_path(@analysis, pareto: p.id), class: 'btn btn-primary' %>
+        <%= link_to p.name + ' Pareto Front', plot_parallelcoordinates_analysis_path(@analysis, pareto: p.id, variables: @variables), class: 'btn btn-primary' %>
       <% end %>
       </div>
    <% end %>

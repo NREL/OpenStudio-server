@@ -421,12 +421,16 @@ h2.header-large {
   text-align:center;
   padding:20px 0px;
 }
+.submit-form-right {
+  text-align: right;
+  padding: 20px 100px;
+}
 .update-button {
   padding:20px 50px;
 }
 
 .chart-text {
-  padding:10px 0px;
+  padding:10px 0px 20px 10px;
   p {
     font-size:110%;
     font-weight:bold;
