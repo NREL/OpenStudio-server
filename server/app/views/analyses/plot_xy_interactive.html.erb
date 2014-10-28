@@ -78,7 +78,8 @@
             <% @saved_paretos.each do |p| %> 
               <tr>
                 <td><%= p.name %></td>
-                <td><%= link_to 'Plot', plot_xy_interactive_analysis_path(@analysis, pareto: p.id) %>
+                <td><%= link_to 'XY Plot', plot_xy_interactive_analysis_path(@analysis, pareto: p.id) %>
+                | <%= link_to 'Parallel Plot', plot_parallelcoordinates_analysis_path(@analysis, pareto: p.id) %>
                 | <%= link_to 'Edit', pareto_path(p.id) %></td>
               </tr>
             <% end %>
@@ -208,6 +209,10 @@
 
      
       if (pareto_points.length > 0) {
+        // make all points smaller
+        svg.selectAll('g.series_0 circle.dot')
+          .attr('r', 3);
+
         // Add super cool transitions on pareto points!
         svg.selectAll('g.series_1 circle.dot')
           .transition()
