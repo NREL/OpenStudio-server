@@ -325,12 +325,32 @@ class AnalysesController < ApplicationController
 
   # Parallel Coordinates plot
   def plot_parallelcoordinates
+    
     @analysis = Analysis.find(params[:id])
+    @saved_paretos = @analysis.paretos
 
-    # variables represent the variables we want graphed. Nil = all
-    @variables = params[:variables] ? params[:variables] : nil
-    var_fields = [:id, :display_name, :name, :units]
+    # variables for chart
+    @pareto_data_points = []
+    @pareto_name = ''
+    
+    # variables represent the variables we want graphed
     @visualizes = get_plot_variables(@analysis)
+    @variables = params[:variables] ? params[:variables] : @visualizes.collect {|k| k.name} 
+
+    # figure out actions
+    if params[:commit] && params[:commit] == 'All Data'
+      # don't do pareto
+
+    else
+      # check for pareto id
+      if params[:pareto]
+        @pareto = Pareto.find(params[:pareto])
+        @pareto_data_points = @pareto.data_points
+        @pareto_name = @pareto.name
+      end
+
+    end
+
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
@@ -367,7 +387,7 @@ class AnalysesController < ApplicationController
       end
     end
 
-    # load a pareto by id?
+    # load a pareto by id
     if params[:pareto]
       pareto =  Pareto.find(params[:pareto])
       @pareto_data_points = pareto.data_points
