@@ -52,9 +52,10 @@
 
         <%= submit_tag 'All Data', class: 'btn btn-primary' %>
 
-      <% @saved_paretos.each do |p| %>
-        <%= link_to p.name + ' Pareto Front', plot_parallelcoordinates_analysis_path(@analysis, pareto: p.id, variables: @variables), class: 'btn btn-primary' %>
-      <% end %>
+        <% @saved_paretos.each do |p| %>
+          <%= link_to p.name + ' Pareto Front', plot_parallelcoordinates_analysis_path(@analysis, pareto: p.id, variables: @variables), class: 'btn btn-primary' %>
+        <% end %>
+        <%= link_to 'Back to XY Plot', plot_xy_interactive_analysis_path(@analysis), class: 'btn btn-info' %>
       </div>
    <% end %>
 <% end %>
@@ -149,6 +150,14 @@
                 }
                 else {
                   return colors(0);
+                }
+              })
+              .attr('stroke-width', function(d) {
+                if (pareto_points.indexOf(d['_id']) > -1){
+                  return '2px';
+                }
+                else {
+                  return '0.5px';
                 }
               });
              
