@@ -92,6 +92,14 @@ vagrant provision
   This eliminates the performance hit in standard vagrant sharing, especially with drives on different indexes.
   Make sure there is only one rsync process found on the system (ex, remove the Rtools/rsync.exe)
 
+## Git SSH Issues
+
+If you experience issues accessing git:// protocols issues (typically because of a proxy denying access), then you can globally set the https:// protocol
+
+```
+git config --global url."https://".insteadOf git://
+```
+
 ## Deploying to Amazon EC2
 
 ### Development/Test AMIs
