@@ -18,6 +18,7 @@ default_attributes(
     # }
     # Use this for custom installations from any url
     :openstudio => {
+        :skip_ruby_install => true,
         :version => "1.5.1",
         :installer => {
             :origin => 'url',

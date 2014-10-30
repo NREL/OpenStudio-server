@@ -1,4 +1,7 @@
 OpenstudioServer::Application.routes.draw do
+  resources :paretos
+
+
   resources :projects, shallow: true do
     member do
       get :status
@@ -27,6 +30,7 @@ OpenstudioServer::Application.routes.draw do
       end
 
       resources :measures, only: [:show, :index], shallow: true
+      resources :paretos, only: [:show, :index, :edit, :update], shallow: true
       resources :variables, only: [:show, :index, :edit, :update], shallow: true do
         collection do
           get :download_metadata
@@ -36,7 +40,7 @@ OpenstudioServer::Application.routes.draw do
         end
 
       end
-
+      
       resources :data_points, shallow: true  do
         member do
           get :show_full # 10/22 - Need to deprecate this, only historic analysis stuff uses this

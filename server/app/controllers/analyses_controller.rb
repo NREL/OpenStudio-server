@@ -325,12 +325,32 @@ class AnalysesController < ApplicationController
 
   # Parallel Coordinates plot
   def plot_parallelcoordinates
+    
     @analysis = Analysis.find(params[:id])
+    @saved_paretos = @analysis.paretos
 
-    # variables represent the variables we want graphed. Nil = all
-    @variables = params[:variables] ? params[:variables] : nil
-    var_fields = [:id, :display_name, :name, :units]
+    # variables for chart
+    @pareto_data_points = []
+    @pareto_name = ''
+    
+    # variables represent the variables we want graphed
     @visualizes = get_plot_variables(@analysis)
+    @variables = params[:variables] ? params[:variables] : @visualizes.collect {|k| k.name} 
+
+    # figure out actions
+    if params[:commit] && params[:commit] == 'All Data'
+      # don't do pareto
+
+    else
+      # check for pareto id
+      if params[:pareto]
+        @pareto = Pareto.find(params[:pareto])
+        @pareto_data_points = @pareto.data_points
+        @pareto_name = @pareto.name
+      end
+
+    end
+
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
@@ -339,10 +359,16 @@ class AnalysesController < ApplicationController
 
   # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
+    
     @analysis = Analysis.find(params[:id])
+    @saved_paretos = @analysis.paretos
 
     @plotvars = get_plot_variables(@analysis)
-    logger.info "PLOTVARS: #{@plotvars}"
+    
+    @pareto = false
+    @pareto_data_points = []
+    @pareto_saved = false
+    @debug = false
 
     # variables represent the variables we want graphed. Nil == choose the first 2
     @variables = []
@@ -361,10 +387,94 @@ class AnalysesController < ApplicationController
       end
     end
 
+    # load a pareto by id
+    if params[:pareto]
+      pareto =  Pareto.find(params[:pareto])
+      @pareto_data_points = pareto.data_points
+      @variables = [pareto.x_var, pareto.y_var]
+    end
+
+    # calculate pareto or update chart?
+    if params[:commit] && params[:commit] == "Calculate Pareto Front"
+      logger.info "PARETO! COMMIT VALUES IS: #{params[:commit]}"
+      # set variable for view
+      @pareto = true
+      # keep these pts in a variable, but mainly for quick debug
+      pareto_pts = calculate_pareto(@variables)
+
+      # this is what you actually need for the chart and to save a pareto
+      @pareto_data_points = pareto_pts.map { |p| p['_id'] }
+      # logger.info("DATAPOINTS ARRAY: #{@pareto_datapoints}")
+    end
+
+    # save pareto front?
+    if params[:commit] && params[:commit] == "Save Pareto Front"
+      
+      @pareto = true
+      @pareto_data_points = params[:data_points]
+
+      # save
+      pareto = Pareto.new()
+      pareto.analysis = @analysis
+      pareto.x_var = params[:x_var]
+      pareto.y_var = params[:y_var]
+      pareto.name = params[:name]
+      pareto.data_points = params[:data_points]
+      if pareto.save!
+        @pareto_saved = true
+        flash[:notice] = "Pareto saved!"
+      else
+        flash[:notice] = "The pareto front could not be saved."
+      end
+    end
+
+
+    logger.info("PARAMS!! #{params}")
+
     respond_to do |format|
       format.html # plot_xy.html.erb
     end
   end
+
+  # Calculate Pareto
+  def calculate_pareto(variables)
+    
+    # get data: reuse existing function
+    vars, data = get_analysis_data(@analysis)
+    # sort by x,y
+    sorted_data = data.sort_by {|h| [ h[variables[0]],h[variables[1]] ]}
+
+    # calculate Y cumulative minimum
+    min_val = 1000000000
+    cum_min_arr = []
+    sorted_data.each do |d|
+      min_val = [min_val, d[variables[1]].to_f].min
+      cum_min_arr << min_val
+    end
+ 
+    # calculate indexes of the unique entries, not the unique entries themselves
+    no_dup_indexes = []
+    cum_min_arr.each_with_index do |n, i|
+      if i == 0
+        no_dup_indexes << i
+      else
+        if n != cum_min_arr[i-1]
+          no_dup_indexes << i
+        end
+      end
+    end
+
+    # DEBUG
+    # logger.info("Unique Pareto Indexes: #{no_dup_indexes.inspect}")
+
+    # pick final points & return
+    pareto_points  = []
+    no_dup_indexes.each do |i|
+      pareto_points << sorted_data[i]
+    end
+    pareto_points
+  end
+
 
   # Scatter plot
   def plot_scatter
