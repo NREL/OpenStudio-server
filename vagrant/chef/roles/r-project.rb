@@ -15,7 +15,7 @@ default_attributes(
         },
         :libraries => [
             {
-	        :name => 'snow',
+	            :name => 'snow',
             },
             {
                 :name => "Rserve"
@@ -76,6 +76,18 @@ default_attributes(
             },
             {
                 :name => "doParallel"
+            },
+			{
+                :name => "conf.design"
+            },
+			{
+                :name => "vcd"
+            },
+			{
+                :name => "combinat"
+            },
+			{
+                :name => "DoE.base"
             },
             {
                 :name => 'NRELmoo',
