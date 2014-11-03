@@ -103,7 +103,8 @@ class Analysis::Doe
         dp.save!
 
         Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
-		Rails.logger.info("Generated data point: #{dp}")
+		Rails.logger.info("UUID #{dp.uuid}")
+		Rails.logger.info("variable values: #{dp.set_variable_values}")
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
