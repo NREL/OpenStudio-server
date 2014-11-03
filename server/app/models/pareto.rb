@@ -3,7 +3,7 @@ class Pareto
   include Mongoid::Timestamps
 
   # Fields
-	field :_id, type: String, default: UUID.generate
+	field :_id, type: String, default: SecureRandom.uuid
 	field :name, type: String
 	field :x_var, type: String
 	field :y_var, type: String

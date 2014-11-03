@@ -16,7 +16,6 @@ class Analysis::BatchRun
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running

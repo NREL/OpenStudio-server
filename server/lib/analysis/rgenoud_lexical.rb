@@ -40,7 +40,6 @@ class Analysis::RgenoudLexical
   def perform
     # add into delayed job
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
