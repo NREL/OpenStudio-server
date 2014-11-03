@@ -6,7 +6,7 @@ class Analysis
   require 'delayed_job_mongoid'
 
   field :uuid, type: String
-  field :_id, type: String, default: -> { uuid || UUID.generate }
+  field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :version_uuid
   field :name, type: String
   field :display_name, type: String
@@ -305,7 +305,7 @@ class Analysis
 
   # copy back the results to the master node if they are finished
   def finalize_data_points
-    ComputeNode.download_all_results(self.id)
+    ComputeNode.download_all_results(id)
   end
 
   # filter results on analysis show page (per status)
@@ -340,7 +340,7 @@ class Analysis
   end
 
   def analysis_types
-    jobs.order_by(:index.asc).map { |j| j.analysis_type }
+    jobs.order_by(:index.asc).map(&:analysis_type)
   end
 
   def analysis_type

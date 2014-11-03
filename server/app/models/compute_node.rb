@@ -14,8 +14,8 @@ class ComputeNode
   field :valid, type: Boolean, default: false
 
   # Indexes
-  index({hostname: 1}, unique: true)
-  index({ip_address: 1}, unique: true)
+  index({ hostname: 1 }, unique: true)
+  index({ ip_address: 1 }, unique: true)
   index(node_type: 1)
 
   # Return all the valid IP addresses as a hash in prep for writing to a dataframe
@@ -101,7 +101,7 @@ class ComputeNode
       Rails.logger.info "Checking for points on #{cn.ip_address}"
 
       # find which data points are complete on the compute node
-      dps = analysis.data_points.and({download_status: 'na'}, {status: 'completed'}, {ip_address: cn.ip_address})
+      dps = analysis.data_points.and({ download_status: 'na' }, { status: 'completed' }, { ip_address: cn.ip_address })
 
       if dps.count > 0
         session = Net::SSH.start(cn.ip_address, cn.user, password: cn.password)
@@ -111,7 +111,7 @@ class ComputeNode
           Rails.logger.info "Trying to download #{dp.id}"
           remote_file_exists, remote_file_downloaded, local_filename = cn.download_result(session, dp.analysis.id, dp.id)
 
-          # now add the datapoint path to the database to get it via the server
+          # now add the data point path to the database to get it via the server
           if remote_file_exists && remote_file_downloaded
             dp.openstudio_datapoint_file_name = local_filename
           elsif remote_file_exists
@@ -174,7 +174,7 @@ class ComputeNode
     [remote_file_exists, remote_file_downloaded, local_filename]
   end
 
-   # Report back the system inforamtion of the node for debugging purposes
+  # Report back the system inforamtion of the node for debugging purposes
   def self.system_information
     # if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
 
@@ -230,10 +230,10 @@ class ComputeNode
     # Timeout After 2 Minutes / 120 seconds
     retries = 0
     begin
-      Timeout::timeout(120) {
+      Timeout.timeout(120) do
         Rails.logger.info 'Checking if the remote file exists'
         session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |_channel, _stream, data|
-          #Rails.logger.info("Check remote file data is #{data}")
+          # Rails.logger.info("Check remote file data is #{data}")
           remote_file_exists = true if data == 'true'
         end
         session.loop
@@ -255,7 +255,7 @@ class ComputeNode
             session.loop
           end
         end
-      }
+      end
     rescue Timeout::Error
       Rails.logger.error "TimeoutError trying to download data point from remote server #{ip_address}"
       retry if (retries += 1) <= 3

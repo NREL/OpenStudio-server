@@ -37,7 +37,7 @@
           <% if @data_point.openstudio_datapoint_file_name && File.exist?(@data_point.openstudio_datapoint_file_name) %>
               <%= link_to("Download Data Point Reports", download_reports_data_point_path(@data_point), class: 'list-group-item') %>
           <% end %>
-          <%= link_to 'View JSON', show_full_data_point_path(@data_point, :format => :json), class: 'list-group-item' %>
+          <%= link_to 'View JSON', data_point_path(@data_point, :format => :json), class: 'list-group-item' %>
         </div>
       </div>
     </div>

@@ -688,19 +688,18 @@ class AnalysesController < ApplicationController
     options.each do |k, v|
       or_qry << { :"#{k}" => v } if v
     end
-    variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry).
-        order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
+    variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry)
+        .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.', '|')] }]
+    #logger.info "Variable name map is #{variable_name_map}"
 
-    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.','|')] }]
-    # logger.info "Variable name map is #{variable_name_map}"
-
-    logger.info 'looking for data points'
+    #logger.info 'looking for data points'
 
     # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
     # below is to map the inputs/outputs to a flat hash.
-    map = %Q{
+    map = %{
       function() {
          key = this._id;
          new_data = {
@@ -711,7 +710,7 @@ class AnalysesController < ApplicationController
          // Retrieve all the results and map the variables to a.b
          var mrMap = #{variables.map { |v| v['name'].split('.') }.to_json};
          for (var i in mrMap){
-           if (this.results[mrMap[i][0]] && this.results[mrMap[i][0]][mrMap[i][1]]) {
+           if (typeof this.results[mrMap[i][0]] !== 'undefined' && typeof this.results[mrMap[i][0]][mrMap[i][1]] !== 'undefined') {
              new_data[mrMap[i].join('|')] = this.results[mrMap[i][0]][mrMap[i][1]]
            }
          }
@@ -728,13 +727,13 @@ class AnalysesController < ApplicationController
       }
     }
 
-    reduce = %Q{
+    reduce = %{
       function(key, values) {
         return values[0];
       }
     }
 
-    finalize = %Q{
+    finalize = %{
       function(key, value) {
         value['_id'] = key;
         db.datapoints_mr.insert(value);
@@ -760,7 +759,6 @@ class AnalysesController < ApplicationController
     #   dps = @analysis.data_points.all
     # end
 
-
     start_time = Time.now
     logger.info 'mapping variables'
     variables.map! { |v| { :"#{v['name']}".to_sym => v } }
@@ -783,7 +781,7 @@ class AnalysesController < ApplicationController
       #   throw an exception.  The map/reduce script above has to save the result of the map/reduce to the
       #   database because it is too large.  So the results have to be stored with pipes (|) temporary, then
       #   mapped back out.
-      plot_data[i] = Hash[pd.map {|k, v| [k.gsub('|', '.'), v] }]
+      plot_data[i] = Hash[pd.map { |k, v| [k.gsub('|', '.'), v] }]
     end
     logger.info "finished merge: #{Time.now - start_time}"
 
@@ -866,7 +864,7 @@ class AnalysesController < ApplicationController
     start_time = Time.now
     logger.info 'starting creation of data frame'
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
-      %Q{
+      %{
             temp <- tempfile('rdata', tmpdir="/tmp")
             save('#{data_frame_name}', file = temp)
             Sys.chmod(temp, mode = "0777", use_umask = TRUE)

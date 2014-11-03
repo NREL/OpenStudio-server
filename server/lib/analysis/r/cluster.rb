@@ -23,7 +23,7 @@ module Analysis::R
     # configure the r session, returns true if the flag variable was readable (and true)
     def configure(master_ip)
       @r.command do
-        %Q{
+        %{
             ip <- "#{master_ip}"
             results <- NULL
             print(paste("Master ip address is",ip))
@@ -54,7 +54,7 @@ module Analysis::R
     # if the cluster timed out or failed. The IP addresses are passed as a hash of an arrays a["ip"] = ["ip1", "ip2", ...]
     def start(ip_addresses)
       @r.command(ips: ip_addresses.to_dataframe) do
-        %Q{
+        %{
 
           print("Starting cluster...")
           print(paste("Worker IPs:", ips))
@@ -95,7 +95,7 @@ module Analysis::R
 
     def stop
       @r.command do
-        %Q{
+        %{
             print("Stopping cluster...")
             stopCluster(cl)
             print("Cluster stopped")

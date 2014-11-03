@@ -3,7 +3,7 @@ class Variable
   include Mongoid::Timestamps
 
   field :uuid, type: String
-  field :_id, type: String, default: -> { uuid || UUID.generate }
+  field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :r_index, type: Integer
   field :version_uuid, type: String # pointless at this time
   field :name, type: String # machine name

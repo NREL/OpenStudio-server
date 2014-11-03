@@ -12,7 +12,8 @@ require 'optparse'
 require 'fileutils'
 require 'logger'
 require 'openstudio-workflow'
-require 'uuid'
+require 'securerandom'
+
 
 puts "Parsing Input: #{ARGV}"
 
@@ -33,7 +34,7 @@ optparse.parse!
 errored = false
 
 begin
-  dp_uuid = UUID.new.generate
+  dp_uuid = SecureRandom.uuid
   analysis_root_path = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
   run_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{dp_uuid}"
   # Logger for the simulate datapoint

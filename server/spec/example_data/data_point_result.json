@@ -1535,7 +1535,7 @@
                     "version": "8.0.0"
                 },
                 {
-                    "local_bin_path": "/usr/local/rbenv/versions/2.0.0-p195/bin/ruby",
+                    "local_bin_path": "/opt/rbenv/shims/ruby",
                     "name": "ruby",
                     "out_file_filter": ".*",
                     "remote_archive": "",

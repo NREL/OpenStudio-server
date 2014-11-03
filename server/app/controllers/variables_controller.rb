@@ -192,7 +192,7 @@ class VariablesController < ApplicationController
     require 'rserve/simpler'
     r = Rserve::Simpler.new
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
-      %Q{
+      %{
             temp <- tempfile('rdata', tmpdir="/tmp")
             save('#{data_frame_name}', file = temp)
             Sys.chmod(temp, mode = "0777", use_umask = TRUE)

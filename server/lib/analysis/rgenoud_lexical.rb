@@ -40,7 +40,6 @@ class Analysis::RgenoudLexical
   def perform
     # add into delayed job
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
@@ -166,7 +165,7 @@ class Analysis::RgenoudLexical
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build('/usr/local/rbenv/shims/bundle', 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       process.io.inherit!
@@ -195,7 +194,7 @@ class Analysis::RgenoudLexical
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
         @r.command(vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'], BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'], boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'], printLevel: @analysis.problem['algorithm']['printlevel'], balance: @analysis.problem['algorithm']['balance'], solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'], waitGenerations: @analysis.problem['algorithm']['waitgenerations'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol'], uniquegroups: ug.size) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))
@@ -229,7 +228,7 @@ class Analysis::RgenoudLexical
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
@@ -247,7 +246,7 @@ class Analysis::RgenoudLexical
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
 
               # convert the vector to comma separated values
               w = paste(x, collapse=",")

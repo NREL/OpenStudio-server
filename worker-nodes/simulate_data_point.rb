@@ -38,9 +38,9 @@ optparse = OptionParser.new do |opts|
     options[:run_shm_dir] = s
   end
 
-  options[:run_data_point_filename] = 'run_openstudio.rb'
-  opts.on('-x', '--execute-file NAME', String, 'Name of the file to copy and execute') do |s|
-    options[:run_data_point_filename] = s
+  options[:run_workflow_method] = 'workflow'
+  opts.on('-x', '--execute-file NAME', String, 'Type of the workflow the run will execute') do |s|
+    options[:run_workflow_method] = s
   end
 
 end
@@ -79,14 +79,13 @@ begin
   logger.info "Analysis Root Directory is #{analysis_dir}"
   logger.info "Simulation Run Directory is #{directory}"
   logger.info "Simulation Storage Directory is #{store_directory}"
-  logger.info "Run datapoint type/file is #{options[:run_data_point_filename]}"
+  logger.info "Run datapoint type/file is #{options[:run_workflow_method]}"
 
-  # TODO: program the various paths based on the run_data_point_filename
-  # TODO: rename run_data_point_filename to run_workflow_method
+  # TODO: program the various paths based on the run_type
 
   workflow_options = nil
-  if options[:run_data_point_filename] == 'workflow_monthly' ||
-      options[:run_data_point_filename] == 'run_openstudio_workflow_monthly.rb'
+  if options[:run_workflow_method] == 'workflow_monthly' ||
+      options[:run_workflow_method] == 'run_openstudio_workflow_monthly.rb'
     workflow_options = {
       datapoint_id: options[:uuid],
       analysis_root_path: analysis_dir,
@@ -96,8 +95,8 @@ begin
       }
     }
 
-  elsif options[:run_data_point_filename] == 'workflow' ||
-      options[:run_data_point_filename] == 'run_openstudio_workflow.rb'
+  elsif options[:run_workflow_method] == 'workflow' ||
+      options[:run_workflow_method] == 'run_openstudio_workflow.rb'
     workflow_options = {
       datapoint_id: options[:uuid],
       analysis_root_path: analysis_dir,
@@ -106,8 +105,8 @@ begin
         mongoid_path: '/mnt/openstudio/rails-models'
       }
     }
-  elsif options[:run_data_point_filename] == 'custom_xml' ||
-      options[:run_data_point_filename] == 'run_openstudio_xml.rb'
+  elsif options[:run_workflow_method] == 'custom_xml' ||
+      options[:run_workflow_method] == 'run_openstudio_xml.rb'
 
     # Set up the custom workflow states and transitions
     transitions = OpenStudio::Workflow::Run.default_transition
@@ -127,9 +126,10 @@ begin
         mongoid_path: '/mnt/openstudio/rails-models'
       }
     }
-  elsif options[:run_data_point_filename] == 'legacy_workflow' ||
-      options[:run_data_point_filename] == 'run_openstudio.rb'
+  elsif options[:run_workflow_method] == 'pat_workflow' ||
+      options[:run_workflow_method] == 'run_openstudio.rb'
     workflow_options = {
+      is_pat: true,
       datapoint_id: options[:uuid],
       analysis_root_path: analysis_dir,
       use_monthly_reports: false,
@@ -143,6 +143,9 @@ begin
   k = OpenStudio::Workflow.load 'Mongo', directory, workflow_options
   logger.info "Running workflow with #{options}"
   k.run
+  logger.info "Final run state is #{k.final_state}"
+
+
 
   # TODO: get the last results out --- result = result.split("\n").last if result
 
@@ -151,10 +154,10 @@ begin
     # only grab the zip/log files and put back in store_directory
     zip_file = "#{directory}/data_point_#{options[:uuid]}.zip"
     dest_zip_file = "#{store_directory}/data_point_#{options[:uuid]}.zip"
-    puts "Trying to move zip file from #{zip_file} to #{dest_zip_file}"
+    logger.info "Trying to move zip file from #{zip_file} to #{dest_zip_file}"
     if File.exist?(zip_file)
       FileUtils.rm_f(dest_zip_file) if File.exist?(dest_zip_file)
-      puts 'Moving zip file'
+      logger.info 'Moving zip file'
       FileUtils.move(zip_file, dest_zip_file)
     end
 
@@ -165,12 +168,13 @@ begin
       FileUtils.move(log_file, dest_log_file)
     end
 
-    puts "Removing directory from shm #{directory}"
+    logger.info "Removing directory from shm #{directory}"
     FileUtils.rm_rf(directory) if Dir.exist?(directory)
   end
 
   # check if the simulation failed after moving the files back to the right place
   if result == 'NA'
+    logger.info 'Simulation result was invalid'
     fail 'Simulation result was invalid'
   end
 rescue => e
@@ -178,6 +182,7 @@ rescue => e
   puts log_message
   logger.info log_message if logger
 ensure
+  logger.info "Finished #{__FILE__}" if logger
   logger.close if logger
   # always print the objective function result or NA
   puts result

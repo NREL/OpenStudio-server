@@ -25,7 +25,7 @@ module Analysis::R
     def configure(master_ip)
       result = false
       @r.command do
-        %Q{
+        %{
             ip <- "#{master_ip}"
             results <- NULL
             print(paste("master ip address is",ip))
@@ -60,7 +60,7 @@ module Analysis::R
     def start(ip_addresses)
       result = false
       @r.command(ips: ip_addresses.to_dataframe) do
-        %Q{
+        %{
           print(ips)
           if (nrow(ips) == 0) {
             stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
@@ -94,7 +94,7 @@ module Analysis::R
     def stop
       result = false
       @r.command do
-        %Q{
+        %{
             print("Stopping cluster")
             stopClusterFT(cl)
             print("Cluster stopped")
