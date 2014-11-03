@@ -11,9 +11,7 @@
       <p>Unselect variables below to remove them from the chart</p>
 
       <div class="row-fluid">
-       
             <div class="span6">
-
               <% @visualizes.each_with_index do |var, index| %>
                   <% if @visualizes.count/2.floor == index %>
                       </div>
@@ -36,12 +34,10 @@
                 <button type="button" id="check_all" class="btn btn-primary">
                   Check / Uncheck All
                 </button>
-                <%= submit_tag "Update Chart", class: 'btn btn-primary'  %>  
+                <%= submit_tag "Update Chart", class: 'btn btn-primary'  %>
               </div>
               </p>
               </div>
-
-
       </div>
     </div>
   </div>
@@ -70,7 +66,7 @@
               y = {},
               dragging = {};
 
-      var colors = d3.scale.category10();        
+      var colors = d3.scale.category10();
 
       var line = d3.svg.line().defined(function (d) {
                   return d[1] != null;
@@ -88,18 +84,19 @@
               .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
       d3.json("analysis_data.json?visualize=true", function (error, data) {
+          //console.log(data);
           // Extract the list of dimensions and create a scale for each.
           x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
 
               // To ignore always
-              if ((d === "shading_height_above_window.shading_height_above_window_final") || (d === "_id") || (d === "name") || (d === "data_point_uuid") || (d === "location.location_final")) return false;
+              if ((d === "_id") || (d === "name") || (d === "data_point_uuid")) return false;
 
               // To filter out (from form)
               if ($.inArray(d, hide_vars) == -1) return false;
 
               // handle String datatype
               // handle Bool datatype
-              if ((data['variables'][d]['data_type'] === 'string') || (data['variables'][d]['data_type'] === 'bool') || (data['variables'][d]['data_type'] === 'String') || (data['variables'][d]['data_type'] === 'Bool')) {
+              if ((typeof['variables'][d] !== 'undefined') && ((data['variables'][d]['data_type'].toLowerCase() === 'string') || (data['variables'][d]['data_type'].toLowerCase() === 'bool'))) {
                   //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['data_type'])
                   y[d] = d3.scale.ordinal()
                           .domain(data['data'].map(function (p) {
@@ -107,7 +104,7 @@
                           }))
                           .rangePoints([h, 0]);
               }
-              else if ((data['variables'][d]['value_type'] === 'string') || (data['variables'][d]['value_type'] === 'bool') || (data['variables'][d]['value_type'] === 'String') || (data['variables'][d]['value_type'] === 'Bool')) {
+              else if ((typeof['variables'][d] !== 'undefined') && ((data['variables'][d]['value_type'].toLowerCase() === 'string') || (data['variables'][d]['value_type'].toLowerCase() === 'bool'))) {
                   //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['value_type'])
                   y[d] = d3.scale.ordinal()
                           .domain(data['data'].map(function (p) {
@@ -115,7 +112,6 @@
                           }))
                           .rangePoints([h, 0]);
               }
-
               else {
                   y[d] = d3.scale.linear()
                           .domain(d3.extent(data['data'], function (p) {
@@ -144,7 +140,7 @@
               .data(data['data'])
               .enter().append("svg:path")
               .attr("d", path)
-              .attr('stroke', function(d) { 
+              .attr('stroke', function(d) {
                 if (pareto_points.indexOf(d['_id']) > -1){
                   return colors(1);
                 }
@@ -160,7 +156,7 @@
                   return '0.5px';
                 }
               });
-             
+
           }
           else
           {
@@ -203,6 +199,7 @@
                               transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
                               transition(foreground)
                                       .attr("d", path);
+
                               background
                                       .attr("d", path)
                                       .transition()
@@ -215,10 +212,10 @@
           g.append("svg:g")
                   .attr("class", "axis")
                   .each(function (d) {
-                      if ((data['variables'][d]['data_type'] === 'string') || (data['variables'][d]['data_type'] === 'bool') || (data['variables'][d]['data_type'] === 'String') || (data['variables'][d]['data_type'] === 'Bool')) {
+                      if ((typeof['variables'][d] !== 'undefined') && ((data['variables'][d]['data_type'].toLowerCase() === 'string') || (data['variables'][d]['data_type'].toLowerCase() === 'bool'))) {
                           d3.select(this).call(axisCategorical.scale(y[d]));
                       }
-                      else if ((data['variables'][d]['value_type'] === 'string') || (data['variables'][d]['value_type'] === 'bool') || (data['variables'][d]['value_type'] === 'String') || (data['variables'][d]['value_type'] === 'Bool')) {
+                      else if ((typeof['variables'][d] !== 'undefined') && ((data['variables'][d]['value_type'].toLowerCase() === 'string') || (data['variables'][d]['value_type'].toLowerCase() === 'bool'))) {
                           d3.select(this).call(axisCategorical.scale(y[d]));
                       }
                       else {
@@ -242,11 +239,10 @@
                   .selectAll("rect")
                   .attr("x", -8)
                   .attr("width", 16);
-        
-        if (pareto_points.length > 0) {
 
+        if (pareto_points.length > 0) {
           var data_groups = ['All', pareto_name];
-          
+
           // draw legend (only when pareto front)
           var legend = svg.selectAll(".legend")
               .data(colors.domain())
@@ -268,7 +264,7 @@
               .attr("dy", ".35em")
               .style("text-anchor", "end")
               .text(function(d, i) {
-                console.log(data_groups[i]) 
+                console.log(data_groups[i])
                 return data_groups[i]
               });
         }
@@ -287,9 +283,10 @@
       function path(d) {
           return line(dimensions.map(function (p) {
               // check for undefined values
-              if (d[p] == " " || d[p] == null) return [x(p), null];
-
-              //console.log(d[p])
+              if (d[p] != 0 && (d[p] == " " || d[p] == null)) {
+                  return [x(p), null];
+              }
+              // console.log(d[p]);
               return [position(p), y[p](d[p])];
           }));
       }
@@ -308,10 +305,7 @@
               }) ? null : "none";
           });
       }
-
   </script>
-
-
 
 
 <script type='text/javascript'>
