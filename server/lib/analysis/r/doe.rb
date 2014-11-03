@@ -208,7 +208,7 @@ module Analysis::R
      @r.converse "print('creating full factorial')"
      @r.command(var_names: var_names) do
         %{
-          fac_design<- fac.design(factor.names=doe.orig)
+          fac_design<- fac.design(factor.names=doe.orig, randomize=FALSE)
         }
       end
       @r.converse 'print(fac_design)' 
