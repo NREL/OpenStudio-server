@@ -247,7 +247,6 @@ class Analysis::SequentialSearch
     end
 
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
@@ -330,7 +329,7 @@ class Analysis::SequentialSearch
       Rails.logger.info "measure values array hash is  #{measure_values}"
 
       measure_values.each do |mvs|
-        parameter_space[UUID.new.generate] = { measure_id: measure._id, variables: mvs }
+        parameter_space[SecureRandom.uuid] = { measure_id: measure._id, variables: mvs }
       end
     end
     Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
