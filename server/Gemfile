@@ -14,7 +14,6 @@ gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 
 # R
 gem 'rserve-simpler'
-gem 'uuid'
 
 # net-*
 gem 'net-http-persistent'
