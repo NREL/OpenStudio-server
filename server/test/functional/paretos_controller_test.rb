@@ -5,41 +5,41 @@ class ParetosControllerTest < ActionController::TestCase
     @pareto = paretos(:one)
   end
 
-  test "should get index" do
+  test 'should get index' do
     get :index
     assert_response :success
     assert_not_nil assigns(:paretos)
   end
 
-  test "should get new" do
+  test 'should get new' do
     get :new
     assert_response :success
   end
 
-  test "should create pareto" do
+  test 'should create pareto' do
     assert_difference('Pareto.count') do
-      post :create, pareto: {  }
+      post :create, pareto: {}
     end
 
     assert_redirected_to pareto_path(assigns(:pareto))
   end
 
-  test "should show pareto" do
+  test 'should show pareto' do
     get :show, id: @pareto
     assert_response :success
   end
 
-  test "should get edit" do
+  test 'should get edit' do
     get :edit, id: @pareto
     assert_response :success
   end
 
-  test "should update pareto" do
-    put :update, id: @pareto, pareto: {  }
+  test 'should update pareto' do
+    put :update, id: @pareto, pareto: {}
     assert_redirected_to pareto_path(assigns(:pareto))
   end
 
-  test "should destroy pareto" do
+  test 'should destroy pareto' do
     assert_difference('Pareto.count', -1) do
       delete :destroy, id: @pareto
     end

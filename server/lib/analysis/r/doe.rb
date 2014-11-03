@@ -4,8 +4,8 @@ module Analysis::R
       @r = r_session
 
       @r.converse 'library(DoE.base)'
-	  @r.converse 'library(plyr)'
-	  @r.converse 'library(lhs)'
+      @r.converse 'library(plyr)'
+      @r.converse 'library(lhs)'
     end
 
     # Take the number of variables and number of samples and generate the bins for
@@ -135,9 +135,9 @@ module Analysis::R
       min_max[:max] = []
       min_max[:eps] = []
 
-      #@r.converse 'doe.orig <- data.frame()'
-	  #@r.converse 'doe.orig <- list()'
-	  @r.converse "doe.orig <- vector(mode='list', length=#{selected_variables.count})"
+      # @r.converse 'doe.orig <- data.frame()'
+      # @r.converse 'doe.orig <- list()'
+      @r.converse "doe.orig <- vector(mode='list', length=#{selected_variables.count})"
 
       # get the probabilities
       Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
@@ -154,19 +154,19 @@ module Analysis::R
         # IF discrete, just get the original values of the variables.
         if var.uncertainty_type == 'discrete_uncertain'
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
-          #variable_samples = discrete_sample_from_probability(p[i_var], var)
+          # variable_samples = discrete_sample_from_probability(p[i_var], var)
           if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
             fail 'no hash values and weight passed'
           end
           values, weights = var.map_discrete_hash_to_array
-		  Rails.logger.info("values is #{values}")
-          variable_samples = values 
-		  Rails.logger.info("variable_samples is #{variable_samples}")
+          Rails.logger.info("values is #{values}")
+          variable_samples = values
+          Rails.logger.info("variable_samples is #{variable_samples}")
           var_types << 'discrete'
-        #IF continuous, then sample the variable to make it "discrete"
+        # IF continuous, then sample the variable to make it "discrete"
         else
           variable_samples = samples_from_probability2(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
-                                                      var.lower_bounds_value, var.upper_bounds_value)
+                                                       var.lower_bounds_value, var.upper_bounds_value)
           var_types << 'continuous'
         end
 
@@ -177,50 +177,49 @@ module Analysis::R
         else
           min_max[:eps] << 0
         end
-        
 
         var.r_index = i_var + 1 # r_index is 1-based
         var.save!
 
         i_var += 1
-        #@r.converse "doe.orig <- rbind.fill(doe.orig,as.data.frame(#{variable_samples}))"
-        #@r.converse "#{var.name} <- #{variable_samples}"
+        # @r.converse "doe.orig <- rbind.fill(doe.orig,as.data.frame(#{variable_samples}))"
+        # @r.converse "#{var.name} <- #{variable_samples}"
         @r.command(var_names: var.name, var_sample: variable_samples) do
           %{
- 		    #print(paste("doe.orig:",doe.orig))
-			#print(paste("legnth of doe.orig:",length(doe.orig)))
+         #print(paste("doe.orig:",doe.orig))
+      #print(paste("legnth of doe.orig:",length(doe.orig)))
             #print(paste("typeof(var_names):",typeof(var_names)))
             #num_var <- length(var_names)
-			#print(paste("num_var:",num_var))
-			print(paste("var_names:",var_names))
-			#print(paste("typeof(var_sample):",typeof(var_sample)))
+      #print(paste("num_var:",num_var))
+      print(paste("var_names:",var_names))
+      #print(paste("typeof(var_sample):",typeof(var_sample)))
             #print(paste("var_sample:",var_sample))
-			#num_var_sample <- length(var_sample)
-			#print(paste("num_var_sample:",num_var_sample))
-			doe.orig[[#{var.r_index}]] <- var_sample
-			print(paste("doe.orig:",doe.orig))
-			print(paste("r_index:",#{var.r_index}))
+      #num_var_sample <- length(var_sample)
+      #print(paste("num_var_sample:",num_var_sample))
+      doe.orig[[#{var.r_index}]] <- var_sample
+      print(paste("doe.orig:",doe.orig))
+      print(paste("r_index:",#{var.r_index}))
           }
         end
 
-       end
-      
-     @r.converse "print('creating full factorial')"
-     @r.command(var_names: var_names) do
+      end
+
+      @r.converse "print('creating full factorial')"
+      @r.command(var_names: var_names) do
         %{
           fac_design<- fac.design(factor.names=doe.orig, randomize=FALSE)
         }
       end
-      @r.converse 'print(fac_design)' 
-      samples_temp = @r.converse 'fac_design'      
+      @r.converse 'print(fac_design)'
+      samples_temp = @r.converse 'fac_design'
       Rails.logger.info("samples_temp is #{samples_temp}")
 
       selected_variables.each_with_index do |var, idx|
         samples["#{var.id}"] = samples_temp[idx]
       end
 
-	  Rails.logger.info("samples is #{samples}")
-      
+      Rails.logger.info("samples is #{samples}")
+
       [samples, var_types, min_max, var_names]
     end
   end
