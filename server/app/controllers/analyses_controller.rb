@@ -693,9 +693,9 @@ class AnalysesController < ApplicationController
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.', '|')] }]
-    # logger.info "Variable name map is #{variable_name_map}"
+    #logger.info "Variable name map is #{variable_name_map}"
 
-    logger.info 'looking for data points'
+    #logger.info 'looking for data points'
 
     # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
     # below is to map the inputs/outputs to a flat hash.
@@ -710,7 +710,7 @@ class AnalysesController < ApplicationController
          // Retrieve all the results and map the variables to a.b
          var mrMap = #{variables.map { |v| v['name'].split('.') }.to_json};
          for (var i in mrMap){
-           if (this.results[mrMap[i][0]] && this.results[mrMap[i][0]][mrMap[i][1]]) {
+           if (typeof this.results[mrMap[i][0]] !== 'undefined' && typeof this.results[mrMap[i][0]][mrMap[i][1]] !== 'undefined') {
              new_data[mrMap[i].join('|')] = this.results[mrMap[i][0]][mrMap[i][1]]
            }
          }
