@@ -1,6 +1,5 @@
 class Analysis::Doe
   include Analysis::Core # pivots and static vars
-
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.
@@ -28,7 +27,6 @@ class Analysis::Doe
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
@@ -104,6 +102,8 @@ class Analysis::Doe
         dp.save!
 
         Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+		Rails.logger.info("UUID #{dp.uuid}")
+		Rails.logger.info("variable values: #{dp.set_variable_values}")
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"

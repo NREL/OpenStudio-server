@@ -17,7 +17,6 @@ class Analysis::BatchRunft
   def perform
     # add into delayed job
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
@@ -82,7 +81,7 @@ class Analysis::BatchRunft
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build('/usr/local/rbenv/shims/bundle', 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       process.io.inherit!
@@ -100,7 +99,7 @@ class Analysis::BatchRunft
       # TODO: move os_dev to a variable based on environment
       if cluster_started
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
 
             f <- function(x){
@@ -111,7 +110,7 @@ class Analysis::BatchRunft
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               print("#{@analysis.use_shm}")
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")

@@ -1,6 +1,6 @@
 namespace :datapoints do
   desc 'download datapoints indefinitely'
-  task :download, [:analysis_id] => :environment do |t, args|
+  task :download, [:analysis_id] => :environment do |_t, args|
     puts "Analysis id is #{args.analysis_id}"
     # need to accept the UUID of the analysis ID
     still_downloading = true

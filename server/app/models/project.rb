@@ -3,7 +3,7 @@ class Project
   include Mongoid::Timestamps
 
   field :uuid, type: String
-  field :_id, type: String, default: -> { uuid || UUID.generate }
+  field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :name, type: String, default: ''
   field :display_name, type: String, default: ''
 

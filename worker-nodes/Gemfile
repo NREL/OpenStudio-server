@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :branch => 'develop'
+gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :branch => 'master'
 #gem 'openstudio-workflow', :path => '/data/OpenStudio-workflow'
 
 # Install other gems that are needed but not required by the workflow gem
@@ -21,5 +21,5 @@ gem 'delayed_job_mongoid'
 # Gems required for 3rd party libraries
 gem 'libxml-ruby'
 gem 'os'
-gem 'uuid'
+gem 'uuid' # convert this to SecureRandom internal ruby library
 

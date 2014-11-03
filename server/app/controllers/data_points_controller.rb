@@ -40,31 +40,30 @@ class DataPointsController < ApplicationController
             end
           end
         end
-        format.json { render json: @data_point.output }
+
+        format.json do
+          @data_point = @data_point.as_json
+          @data_point['set_variable_values_names'] = {}
+          @data_point['set_variable_values_display_names'] = {}
+          @data_point['set_variable_values'].each do |k, v|
+            var = Variable.find(k)
+            if var
+              new_key = var ? var.name : k
+              new_display_key = var ? var.display_name : k
+              @data_point['set_variable_values_names'][new_key] = v
+              @data_point['set_variable_values_display_names'][new_display_key] = v
+            end
+          end
+
+          render json: @data_point
+        end
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
         format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
       end
     end
   end
-
-  def show_full
-    @data_point = DataPoint.find(params[:id]).as_json
-
-    @data_point['set_variable_values_names'] = {}
-    @data_point['set_variable_values_display_names'] = {}
-    @data_point['set_variable_values'].each do |k, v|
-      var = Variable.find(k)
-      new_key = var ? var.name : k
-      new_display_key = var ? var.display_name : k
-      @data_point['set_variable_values_names'][new_key] = v
-      @data_point['set_variable_values_display_names'][new_display_key] = v
-    end
-
-    respond_to do |format|
-      format.json { render json: @data_point }
-    end
-  end
+  alias_method :show_full, :show
 
   # GET /data_points/new
   # GET /data_points/new.json
@@ -233,8 +232,8 @@ class DataPointsController < ApplicationController
       # dencity[:structure] = @data_point[:results]['dencity_reports']
 
       # Grab all the variables that have defined a measure ID and pull out the results
-      vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '').
-          order_by(:name.asc).as_json(only: [:name, :metadata_id])
+      vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '')
+          .order_by(:name.asc).as_json(only: [:name, :metadata_id])
 
       dencity[:structure] = {}
       vars.each do |v|

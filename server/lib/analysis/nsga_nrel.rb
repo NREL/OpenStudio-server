@@ -37,7 +37,6 @@ class Analysis::NsgaNrel
   def perform
     # add into delayed job
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
@@ -181,7 +180,7 @@ class Analysis::NsgaNrel
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build('/usr/local/rbenv/shims/bundle', 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       process.io.inherit!
@@ -206,7 +205,7 @@ class Analysis::NsgaNrel
                    toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
                    xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'],
                    mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))
@@ -237,14 +236,14 @@ class Analysis::NsgaNrel
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
-              
+
             if (uniquegroups == 1) {
                  print(paste("unique groups error:",uniquegroups))
                  write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
                  stop(options("show.error.messages"="unique groups"),"unique groups is 1")
             }
-			
-			
+
+
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
@@ -258,7 +257,7 @@ class Analysis::NsgaNrel
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
@@ -276,7 +275,7 @@ class Analysis::NsgaNrel
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && /usr/local/rbenv/shims/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
@@ -286,11 +285,11 @@ class Analysis::NsgaNrel
 
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
-		      cat("UUID is NA \n");
+          cat("UUID is NA \n");
               NAvalue <- 1.0e19
               return(NAvalue)
-			} else {
-		      try(f(z[j]), silent = TRUE)
+      } else {
+          try(f(z[j]), silent = TRUE)
 
 
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")

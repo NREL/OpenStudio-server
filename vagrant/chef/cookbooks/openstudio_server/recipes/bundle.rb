@@ -3,15 +3,10 @@
 # Recipe:: bundle
 #
 
-include_recipe "rbenv"
-
-# execute bundle install in directory
+# execute bundle install in the server directory to install all the rails dependencies
 bash "bundle install" do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}
     bundle install
   EOH
 end
-
-# rehash rbenv
-rbenv_rehash "rehashing in case rails was installed"

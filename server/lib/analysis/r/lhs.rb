@@ -189,7 +189,7 @@ module Analysis::R
         Rails.logger.info("R image file name is #{save_file_name}")
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
           @r.command(d: { samples: samples }.to_dataframe) do
-            %Q{
+            %{
               png(filename="#{save_file_name}", width = 1024, height = 1024)
               hist(d$samples, freq=F, breaks=20)
               dev.off()
@@ -197,7 +197,7 @@ module Analysis::R
           end
         else # plot as a table
           @r.command(d: { samples: samples }.to_dataframe) do
-            %Q{
+            %{
               png(filename="#{save_file_name}", width = 1024, height = 1024)
               plot(table(d$samples), ylab='count')
               dev.off()

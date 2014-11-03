@@ -1,24 +1,19 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure("2") do |config|
   is_windows = (RUBY_PLATFORM =~ /mswin|mingw|cygwin/)
   use_nfs = !is_windows
   use_nfs = false if ENV["VAGRANT_DISABLE_NFS"] == "true"
 
   # Don't use 11.14.2 because of https://github.com/opscode/chef/issues/1739 (duplicate error)
-  # Latest is 11.16.2
   config.omnibus.chef_version = "latest"
-  #config.omnibus.chef_version = "11.12.8"
-
-  # Use berkshelf.  Make sure to install ChefDK if you are using Windows.
-  # config.berkshelf.enabled = true
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ubuntu/trusty64"
+
+  # Use berkshelf.  Make sure to install ChefDK if you are using Windows.
+  config.berkshelf.enabled = true
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -68,9 +63,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # you will need to create a yaml file with these values to
       # properly deploy to ec2
-      require 'yaml'
       secret_file = File.join(Dir.home, '.aws', 'config.yml')
-      if File.exist? secret_file
+      if ENV['AWS_ACCESS_KEY'] && !File.exist?(secret_file)
+        fail "[ERROR] AWS secrets are set in your environment, but need more information in #{secret_file}"
+      elsif File.exist? secret_file
+        require 'yaml'
         aws_config = YAML::load_file(secret_file)
         aws.access_key_id = aws_config.fetch("access_key_id")
         aws.secret_access_key = aws_config.fetch("secret_access_key")
@@ -79,7 +76,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         override.ssh.private_key_path = aws_config.fetch("private_key_path")
         aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 16 }]
       else
-        raise "Could not find '#{secret_file}' file with your secrets"
+        warn "[WARNING] Could not find '#{secret_file}' file with access keys. Assuming no AWS provider, will continue..."
       end
 
       aws.security_groups = ["default"]

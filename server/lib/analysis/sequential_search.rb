@@ -93,7 +93,7 @@ class Analysis::SequentialSearch
     def determine_curve
       new_point_to_evaluate = false
       Rails.logger.info "Determine the Pareto Front for iteration #{@iteration}"
-      Rails.logger.info "Current pareto front is: #{@pareto.map { |p| p.name }}"
+      Rails.logger.info "Current pareto front is: #{@pareto.map(&:name)}"
       if @iteration == 0
         # just add the point to the pareto curve
         min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
@@ -202,7 +202,7 @@ class Analysis::SequentialSearch
 
         @pareto = new_curve
       end
-      Rails.logger.info "Final pareto front is: #{@pareto.map { |p| p.name }}"
+      Rails.logger.info "Final pareto front is: #{@pareto.map(&:name)}"
 
       new_point_to_evaluate
     end
@@ -247,7 +247,6 @@ class Analysis::SequentialSearch
     end
 
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
@@ -330,7 +329,7 @@ class Analysis::SequentialSearch
       Rails.logger.info "measure values array hash is  #{measure_values}"
 
       measure_values.each do |mvs|
-        parameter_space[UUID.new.generate] = { measure_id: measure._id, variables: mvs }
+        parameter_space[SecureRandom.uuid] = { measure_id: measure._id, variables: mvs }
       end
     end
     Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"

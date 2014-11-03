@@ -82,7 +82,7 @@
               <td class="other-col"> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
               <td class="other-col"><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
               <td><%= link_to 'HTML', data_point_path(dp) %>
-                | <%= link_to 'JSON', show_full_data_point_path(dp, :format => :json) %>
+                | <%= link_to 'JSON', data_point_path(dp, :format => :json) %>
                   <% if !dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name) %>
                     | <%= link_to( "Zip File", download_data_point_path(dp)) %>
                   <% end %>

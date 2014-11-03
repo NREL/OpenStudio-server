@@ -1,11 +1,7 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-<<<<<<< HEAD
-  revision: a965062aa1d777b8481a5ccbfb2ff3d6a78a9384
-=======
-  revision: 51e50f0a744a84ab11a40547c3eed524f36b56d7
->>>>>>> 28047a623a1543796eb286ee1bf23766c794ed46
-  branch: develop
+  revision: 06e190763f65f38fb19583d42393e635d614d3a7
+  branch: master
   specs:
     openstudio-workflow (0.0.2)
       aasm (~> 3.1.1)
@@ -17,13 +13,8 @@ GEM
   specs:
     CFPropertyList (2.2.8)
     aasm (3.1.1)
-<<<<<<< HEAD
-    activemodel (3.2.18)
-      activesupport (= 3.2.18)
-=======
     activemodel (3.2.19)
       activesupport (= 3.2.19)
->>>>>>> 28047a623a1543796eb286ee1bf23766c794ed46
       builder (~> 3.0.0)
     activesupport (3.2.19)
       i18n (~> 0.6, >= 0.6.4)
@@ -34,26 +25,18 @@ GEM
     cocaine (0.5.4)
       climate_control (>= 0.0.3, < 1.0)
     colored (1.2)
-<<<<<<< HEAD
-    delayed_job (4.0.1)
-=======
-    delayed_job (4.0.2)
->>>>>>> 28047a623a1543796eb286ee1bf23766c794ed46
+    delayed_job (4.0.4)
       activesupport (>= 3.0, < 4.2)
     delayed_job_mongoid (2.1.0)
       delayed_job (>= 3.0, < 5)
       mongoid (>= 3.0, < 5)
-    facter (2.1.0)
+    facter (2.2.0)
       CFPropertyList (~> 2.2.6)
-<<<<<<< HEAD
-    i18n (0.6.9)
-=======
     i18n (0.6.11)
->>>>>>> 28047a623a1543796eb286ee1bf23766c794ed46
     libxml-ruby (2.7.0)
     macaddr (1.7.1)
       systemu (~> 2.6.2)
-    mime-types (2.3)
+    mime-types (2.4.3)
     mongoid (3.1.6)
       activemodel (~> 3.2)
       moped (~> 1.4)
@@ -62,12 +45,9 @@ GEM
     mongoid-paperclip (0.0.9)
       paperclip (>= 2.3.6)
     moped (1.5.2)
-    msgpack (0.5.8)
+    msgpack (0.5.9)
     multi_json (1.10.1)
-<<<<<<< HEAD
-=======
-    oj (2.9.9)
->>>>>>> 28047a623a1543796eb286ee1bf23766c794ed46
+    oj (2.10.4)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -75,13 +55,10 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
-<<<<<<< HEAD
-=======
-    parallel (1.1.2)
-    ruby-prof (0.15.1)
->>>>>>> 28047a623a1543796eb286ee1bf23766c794ed46
+    parallel (1.3.3)
+    ruby-prof (0.15.2)
     systemu (2.6.4)
-    tzinfo (0.3.40)
+    tzinfo (0.3.42)
     uuid (2.3.7)
       macaddr (~> 1.0)
 
@@ -94,11 +71,6 @@ DEPENDENCIES
   libxml-ruby
   mongoid (~> 3.1.6)
   mongoid-paperclip
-<<<<<<< HEAD
-  openstudio-workflow!
-  os
-  paperclip (~> 4.1.1)
-=======
   msgpack
   multi_json
   oj
@@ -107,5 +79,4 @@ DEPENDENCIES
   paperclip (~> 4.1.1)
   parallel
   ruby-prof
->>>>>>> 28047a623a1543796eb286ee1bf23766c794ed46
   uuid
