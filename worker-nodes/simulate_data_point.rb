@@ -145,8 +145,6 @@ begin
   k.run
   logger.info "Final run state is #{k.final_state}"
 
-
-
   # TODO: get the last results out --- result = result.split("\n").last if result
 
   # copy the files that are needed over to the run directory

@@ -14,7 +14,6 @@ require 'logger'
 require 'openstudio-workflow'
 require 'securerandom'
 
-
 puts "Parsing Input: #{ARGV}"
 
 # parse arguments with optparse
