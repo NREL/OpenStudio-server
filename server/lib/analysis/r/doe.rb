@@ -135,7 +135,9 @@ module Analysis::R
       min_max[:max] = []
       min_max[:eps] = []
 
-      @r.converse 'doe.orig <- data.frame()'
+      #@r.converse 'doe.orig <- data.frame()'
+	  #@r.converse 'doe.orig <- list()'
+	  @r.converse "doe.orig <- vector(mode='list', length=#{selected_variables.count})"
 
       # get the probabilities
       Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
@@ -176,8 +178,7 @@ module Analysis::R
           min_max[:eps] << 0
         end
         
-        samples_temp["#{var.id}"] = variable_samples
-		Rails.logger.info("samples_temp is #{samples_temp}")
+
         var.r_index = i_var + 1 # r_index is 1-based
         var.save!
 
@@ -186,14 +187,19 @@ module Analysis::R
         #@r.converse "#{var.name} <- #{variable_samples}"
         @r.command(var_names: var.name, var_sample: variable_samples) do
           %{
-            print(paste("typeof(var_names):",typeof(var_names)))
-            num_var <- length(var_names)
-			print(paste("num_var:",num_var))
+ 		    #print(paste("doe.orig:",doe.orig))
+			#print(paste("legnth of doe.orig:",length(doe.orig)))
+            #print(paste("typeof(var_names):",typeof(var_names)))
+            #num_var <- length(var_names)
+			#print(paste("num_var:",num_var))
 			print(paste("var_names:",var_names))
-			print(paste("typeof(var_sample):",typeof(var_sample)))
-            print(paste("var_sample:",var_sample))
-			num_var_sample <- length(var_sample)
-			print(paste("num_var_sample:",num_var_sample))
+			#print(paste("typeof(var_sample):",typeof(var_sample)))
+            #print(paste("var_sample:",var_sample))
+			#num_var_sample <- length(var_sample)
+			#print(paste("num_var_sample:",num_var_sample))
+			doe.orig[[#{var.r_index}]] <- var_sample
+			print(paste("doe.orig:",doe.orig))
+			print(paste("r_index:",#{var.r_index}))
           }
         end
 
@@ -201,20 +207,19 @@ module Analysis::R
       
      @r.converse "print('creating full factorial')"
      @r.command(var_names: var_names) do
-        "
-          typeof(var_names)
-          num_var <- length(var_names)
-          var_names
-        "
+        %{
+          fac_design<- fac.design(factor.names=doe.orig)
+        }
+      end
+      @r.converse 'print(fac_design)' 
+      samples_temp = @r.converse 'fac_design'      
+      Rails.logger.info("samples_temp is #{samples_temp}")
+
+      selected_variables.each_with_index do |var, idx|
+        samples["#{var.id}"] = samples_temp[idx]
       end
 
-      #sample = @r.converse 'sample'
-      #selected_variables.each do |var| 
-      #  # save the samples to the
-      #  samples["#{var.id}"] = sample
-
-      #end
-      samples = samples_temp
+	  Rails.logger.info("samples is #{samples}")
       
       [samples, var_types, min_max, var_names]
     end
