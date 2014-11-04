@@ -1,5 +1,18 @@
 # Core functions for analysis
 module Analysis::Core
+  def database_name
+    if Rails.env == 'development'
+      return 'os_dev'
+    elsif Rails.env == 'production'
+      return 'os_prod'
+    elsif Rails.env == 'test'
+      return 'os_test'
+    end
+  end
+
+  module_function :database_name
+
+
   # Take the samples and add in the pivots.  Each pivot variable
   # will get a full set of samples
   # take p = [{p1: 1}, {p1: 2}]
@@ -76,5 +89,22 @@ module Analysis::Core
 
   # I put this here expecting to put the child download process here... need to move it eventually
   module BackgroundTasks
+    require 'childprocess'
+
+    # Start the child process to download results upon completion.
+    def start_child_processes(analysis_id)
+      p = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{analysis_id}]", "RAILS_ENV=#{Rails.env}")
+      # log_file = File.join(Rails.root,"log/download.log")
+      # Rails.logger.info("Log file is: #{log_file}")
+      p.io.inherit!
+      # process.io.stdout = process.io.stderr = File.open(log_file,'a+')
+      p.cwd = Rails.root # set the child's working directory where the bundler will execute
+      Rails.logger.info('Starting Child Process')
+      p.start
+
+      p
+    end
+
+    module_function :start_child_processes
   end
 end

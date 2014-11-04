@@ -1,4 +1,6 @@
 class Analysis::BatchRun
+  include Analysis::Core
+
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
@@ -15,9 +17,6 @@ class Analysis::BatchRun
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
-    require 'rserve/simpler'
-    require 'childprocess'
-
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
     @analysis_job = Job.find(@analysis_job_id)
@@ -78,29 +77,23 @@ class Analysis::BatchRun
         fail 'could not configure R cluster'
       end
 
-      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
-      # log_file = File.join(Rails.root,"log/download.log")
-      # Rails.logger.info("Log file is: #{log_file}")
-      process.io.inherit!
-      # process.io.stdout = process.io.stderr = File.open(log_file,'a+')
-      process.cwd = Rails.root # set the child's working directory where the bundler will execute
-      Rails.logger.info('Starting Child Process')
-      process.start
-
+      # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Found the following good ips #{worker_ips}"
+      Rails.logger.info "Worker node ips #{worker_ips}"
+      unless cluster.initialize_workers(worker_ips, @analysis.id)
+        fail 'could not run initialize worker scripts'
+      end
 
-      cluster_started = cluster.start(worker_ips)
-      Rails.logger.info "Time flag was set to #{cluster_started}"
+      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
+      process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
 
-      # TODO: move os_dev to a variable based on environment
-      if cluster_started
+      if cluster.start(worker_ips)
+        Rails.logger.info "Time flag was set to #{cluster_started}"
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
           %{
             clusterEvalQ(cl,library(RMongo))
             f <- function(x){
-              mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
