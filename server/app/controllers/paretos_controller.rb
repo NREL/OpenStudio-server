@@ -36,7 +36,7 @@ class ParetosController < ApplicationController
         format.html { redirect_to @pareto, notice: 'Pareto was successfully updated.' }
         format.json { head :no_content }
       else
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @pareto.errors, status: :unprocessable_entity }
       end
     end

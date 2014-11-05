@@ -76,13 +76,13 @@ class Analysis::Doe
       var_types = nil
       Rails.logger.info 'Starting sampling'
       doe = Analysis::R::Doe.new(@r)
-      if @analysis.problem['algorithm']['experiment_type'] == 'full_factorial' 
+      if @analysis.problem['algorithm']['experiment_type'] == 'full_factorial'
         samples, var_types = doe.full_factorial(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-          # Do the work to mash up the samples and pivot variables before creating the data points
-          Rails.logger.info "Samples are #{samples}"
-          samples = hash_of_array_to_array_of_hash(samples)
-          Rails.logger.info "Flipping samples around yields #{samples}"
+        # Do the work to mash up the samples and pivot variables before creating the data points
+        Rails.logger.info "Samples are #{samples}"
+        samples = hash_of_array_to_array_of_hash(samples)
+        Rails.logger.info "Flipping samples around yields #{samples}"
 
       else
         fail 'no experiment type defined (full_factorial)'
@@ -102,8 +102,8 @@ class Analysis::Doe
         dp.save!
 
         Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
-		Rails.logger.info("UUID #{dp.uuid}")
-		Rails.logger.info("variable values: #{dp.set_variable_values}")
+        Rails.logger.info("UUID #{dp.uuid}")
+        Rails.logger.info("variable values: #{dp.set_variable_values}")
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"

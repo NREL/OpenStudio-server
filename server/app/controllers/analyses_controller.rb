@@ -325,17 +325,16 @@ class AnalysesController < ApplicationController
 
   # Parallel Coordinates plot
   def plot_parallelcoordinates
-    
     @analysis = Analysis.find(params[:id])
     @saved_paretos = @analysis.paretos
 
     # variables for chart
     @pareto_data_points = []
     @pareto_name = ''
-    
+
     # variables represent the variables we want graphed
     @visualizes = get_plot_variables(@analysis)
-    @variables = params[:variables] ? params[:variables] : @visualizes.collect {|k| k.name} 
+    @variables = params[:variables] ? params[:variables] : @visualizes.map(&:name)
 
     # figure out actions
     if params[:commit] && params[:commit] == 'All Data'
@@ -351,7 +350,6 @@ class AnalysesController < ApplicationController
 
     end
 
-
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
     end
@@ -359,12 +357,11 @@ class AnalysesController < ApplicationController
 
   # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
-    
     @analysis = Analysis.find(params[:id])
     @saved_paretos = @analysis.paretos
 
     @plotvars = get_plot_variables(@analysis)
-    
+
     @pareto = false
     @pareto_data_points = []
     @pareto_saved = false
@@ -395,7 +392,7 @@ class AnalysesController < ApplicationController
     end
 
     # calculate pareto or update chart?
-    if params[:commit] && params[:commit] == "Calculate Pareto Front"
+    if params[:commit] && params[:commit] == 'Calculate Pareto Front'
       logger.info "PARETO! COMMIT VALUES IS: #{params[:commit]}"
       # set variable for view
       @pareto = true
@@ -408,13 +405,13 @@ class AnalysesController < ApplicationController
     end
 
     # save pareto front?
-    if params[:commit] && params[:commit] == "Save Pareto Front"
-      
+    if params[:commit] && params[:commit] == 'Save Pareto Front'
+
       @pareto = true
       @pareto_data_points = params[:data_points]
 
       # save
-      pareto = Pareto.new()
+      pareto = Pareto.new
       pareto.analysis = @analysis
       pareto.x_var = params[:x_var]
       pareto.y_var = params[:y_var]
@@ -422,12 +419,11 @@ class AnalysesController < ApplicationController
       pareto.data_points = params[:data_points]
       if pareto.save!
         @pareto_saved = true
-        flash[:notice] = "Pareto saved!"
+        flash[:notice] = 'Pareto saved!'
       else
-        flash[:notice] = "The pareto front could not be saved."
+        flash[:notice] = 'The pareto front could not be saved.'
       end
     end
-
 
     logger.info("PARAMS!! #{params}")
 
@@ -438,27 +434,26 @@ class AnalysesController < ApplicationController
 
   # Calculate Pareto
   def calculate_pareto(variables)
-    
     # get data: reuse existing function
     vars, data = get_analysis_data(@analysis)
     # sort by x,y
-    sorted_data = data.sort_by {|h| [ h[variables[0]],h[variables[1]] ]}
+    sorted_data = data.sort_by { |h| [h[variables[0]], h[variables[1]]] }
 
     # calculate Y cumulative minimum
-    min_val = 1000000000
+    min_val = 1_000_000_000
     cum_min_arr = []
     sorted_data.each do |d|
       min_val = [min_val, d[variables[1]].to_f].min
       cum_min_arr << min_val
     end
- 
+
     # calculate indexes of the unique entries, not the unique entries themselves
     no_dup_indexes = []
     cum_min_arr.each_with_index do |n, i|
       if i == 0
         no_dup_indexes << i
       else
-        if n != cum_min_arr[i-1]
+        if n != cum_min_arr[i - 1]
           no_dup_indexes << i
         end
       end
@@ -474,7 +469,6 @@ class AnalysesController < ApplicationController
     end
     pareto_points
   end
-
 
   # Scatter plot
   def plot_scatter
@@ -693,9 +687,9 @@ class AnalysesController < ApplicationController
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.', '|')] }]
-    #logger.info "Variable name map is #{variable_name_map}"
+    # logger.info "Variable name map is #{variable_name_map}"
 
-    #logger.info 'looking for data points'
+    # logger.info 'looking for data points'
 
     # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
     # below is to map the inputs/outputs to a flat hash.
