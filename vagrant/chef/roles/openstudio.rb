@@ -9,10 +9,10 @@ run_list([
 default_attributes(
     # Use this for the official release versions
     :openstudio => {
-        :version => "1.5.1",
+        :version => "1.5.2",
         :installer => {
             :origin => 'developer',
-            :version_revision => "297c509238",
+            :version_revision => "d6d0ccffe0",
             :platform => "Linux-Ruby2.0"
         }
     }
