@@ -89,9 +89,6 @@ default_attributes(
 			{
                 :name => "DoE.base"
             },
-			{
-                :name => "plyr"
-            },
             {
                 :name => 'NRELmoo',
                 :package_path => "/data/R-packages",
