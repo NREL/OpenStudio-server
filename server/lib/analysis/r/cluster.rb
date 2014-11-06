@@ -52,8 +52,6 @@ module Analysis::R
       result
     end
 
-
-
     # start the cluster.  Returns true if the cluster was started, false
     # if the cluster timed out or failed. The IP addresses are passed as a hash of an arrays a["ip"] = ["ip1", "ip2", ...]
     def start(ip_addresses)
@@ -96,8 +94,8 @@ module Analysis::R
       @r.converse('timeflag')
     end
 
-    # call the initialization script on each worker node. This will only be executed one time on each worker node (not IP)
-    def initialize_workers(ip_addresses, analysis_id)
+    # generic method to execute the worker init/finalize methods
+    def worker_init_finalize(ip_addresses, analysis_id, state)
       result = false
       uniq_ips = {}
       uniq_ips[:worker_ips] = ip_addresses[:worker_ips].uniq
@@ -110,7 +108,7 @@ module Analysis::R
             %{
               init <- function(x){
                 ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
-                y <- paste(ruby_command," /mnt/openstudio/worker_init.rb -a #{analysis_id}",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/worker_init_final.rb -a #{analysis_id} -s #{state}",sep="")
                 print(paste("Run command",y))
                 z <- system(y,intern=TRUE)
                 z
@@ -122,16 +120,15 @@ module Analysis::R
             }
           end
 
-          #<Array:35181820 [["Parsing Input: [\"-a\", \"c77365d0-45e5-0132-ccc9-14109fdf0b37\"]", ""], ["Parsing Input: [\"-a\", \"c77365d0-45e5-0132-ccc9-14109fdf0b37\"]", ""]]>
+          # <Array:35181820 [["Parsing Input: [\"-a\", \"c77365d0-45e5-0132-ccc9-14109fdf0b37\"]", ""], ["Parsing Input: [\"-a\", \"c77365d0-45e5-0132-ccc9-14109fdf0b37\"]", ""]]>
 
           # Verify the result that each cluster ran the scripts (looking for errors only)
           # Check the length and the last result (which should be true)
           c = @r.converse('r')
           # Rails.logger.info c.inspect
-          result = (c.size == uniq_ips[:worker_ips].size) && (c.map{ |i| i.last == 'true' }.all?)
-
+          result = (c.size == uniq_ips[:worker_ips].size) && (c.map { |i| i.last == 'true' }.all?)
         rescue => e
-          fail e
+          raise e
         ensure
           stop
         end
@@ -140,9 +137,14 @@ module Analysis::R
       result
     end
 
-    # call the finalization script on each worker node
-    def finalize_workers
+    # call the initialization script on each worker node. This will only be executed one time on each worker node (not IP)
+    def initialize_workers(ip_addresses, analysis_id)
+      worker_init_finalize(ip_addresses, analysis_id, 'initialize')
+    end
 
+    # call the finalization script on each worker node
+    def finalize_workers(ip_addresses, analysis_id)
+      worker_init_finalize(ip_addresses, analysis_id, 'finalize')
     end
 
     def stop

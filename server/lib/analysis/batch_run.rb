@@ -80,6 +80,8 @@ class Analysis::BatchRun
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
       Rails.logger.info "Worker node ips #{worker_ips}"
+
+      Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         fail 'could not run initialize worker scripts'
       end
@@ -127,12 +129,18 @@ class Analysis::BatchRun
             print(paste("Number of datapoints:",nrow(dps)))
 
             results <- parLapply(cl, dps[,1], f)
-	    # For verbose logging you can print the results using `print(results)`
+      # For verbose logging you can print the results using `print(results)`
           }
         end
       else
         fail 'could not start the cluster (most likely timed out)'
       end
+
+      Rails.logger.info 'Running finalize worker scripts'
+      unless cluster.finalize_workers(worker_ips, @analysis.id)
+        fail 'could not run finalize worker scripts'
+      end
+
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
