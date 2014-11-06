@@ -12,7 +12,6 @@ module Analysis::Core
 
   module_function :database_name
 
-
   # Take the samples and add in the pivots.  Each pivot variable
   # will get a full set of samples
   # take p = [{p1: 1}, {p1: 2}]
