@@ -5,34 +5,28 @@ The preferred development approach for this application is to use Vagrant to pro
 
 ## Instructions
 
-- Install [Vagrant] and [VirtualBox]  
-  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use 4.2.18 instead.*
-  
+- Install [Vagrant], [VirtualBox], and [ChefDK]
+  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use [4.2.x](https://www.virtualbox.org/wiki/Download_Old_Builds_4_2) instead.*
+ 
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
+[ChefDK]: https://downloads.getchef.com/chef-dk/ "ChefDK"
 
-- Check out the git repo: see the instruction on the Wiki.  
-  **Make sure to checkout the repo with LF end-of-lines if on windows**
+- Check out this git repo: see the instruction on the Wiki.  
 
-- Initialize and update all Git submodules (see wiki):
-```sh
-$ git submodule init
-$ git submodule update
-```
-
-- Install the Vagrant omnibus plugin
+- Install the Vagrant plugins for bootstrapping Chef and Berkshelf
 
 ```sh
-vagrant plugin install vagrant-omnibus
+vagrant plugin install vagrant-omnibus vagrant-berkshelf
 ```
 
-- Also install the Vagrant AWS plugin as the vagrant file will fail if not installed 
+- Also install the Vagrant AWS plugin as the vagrant file will fail if not installed
 
 ```sh
 vagrant plugin install vagrant-aws
 ```
 
-- Virtualbox 4.3+ users may want to install the vagrant-vbguest plugin to update the guest version 
+- Virtualbox 4.3+ users may want to install the vagrant-vbguest plugin to update the guest version
 
 ```sh
 vagrant plugin install vagrant-vbguest
@@ -63,18 +57,18 @@ vagrant up
   Note, if the Vagrant provision fails, run `vagrant provision` at command line again and see if it gets past the issue.
 
 - **NREL ONLY** Disable HTTPS
-If you are inside the NREL firewall then you will need to disable HTTPS on rubygems. 
+If you are inside the NREL firewall then you will need to disable HTTPS on rubygems.
 
   - Log into Vagrant VM  
-  
+
 ```sh
 vagrant ssh
 ```
-  
+
   (Or use [PuTTy](http://stackoverflow.com/questions/9885108/ssh-to-vagrant-box-in-windows) on Windows.)
 
 - Add http://rubygems.org to gem sources
-  
+
 ```sh
 sudo -i
 gem sources -r https://rubygems.org/
@@ -82,7 +76,7 @@ gem sources -a http://rubygems.org/
 ```
 
 - Exit the VM and then reprovision the VM
-  
+
 ```sh
 vagrant provision
 ```
@@ -93,16 +87,24 @@ vagrant provision
 
 
   **Windows**  
-  
+
   Windows users may want to install cwRsync and use the rsync method of mounting shared drives.
   This eliminates the performance hit in standard vagrant sharing, especially with drives on different indexes.
   Make sure there is only one rsync process found on the system (ex, remove the Rtools/rsync.exe)
+
+## Git SSH Issues
+
+If you experience issues accessing git:// protocols issues (typically because of a proxy denying access), then you can globally set the https:// protocol
+
+```
+git config --global url."https://".insteadOf git://
+```
 
 ## Deploying to Amazon EC2
 
 ### Development/Test AMIs
 
-- Install the Vagrant AWS plug-in 
+- Install the Vagrant AWS plug-in
 
 ```sh
 vagrant plugin install vagrant-aws
@@ -135,9 +137,9 @@ ruby create_vms.rb --aws
 ### Official AMI Generation
 
 - Push all code to master
-- Update the Server version in ./server/lib/version.rb using semantic versioning.
+- Update the Server version in ./server/lib/openstudio_server/version.rb using semantic versioning.
 - Commit/push your code
-- Run the `rake release` in the root. 
+- Run the `rake release` in the root.
   This will tag the version in git, push the tags, then push the code to ami-build.  Jenkins will take over the generation of the AMIs.
 
 
@@ -151,62 +153,17 @@ vagrant ssh
 ```
 
 ### Server Changes
-
-```sh
-cd /data/launch-instance
-chmod 777 setup-server-changes.sh
-sudo ./setup-server-changes.sh
-chmod 777 setup-final-changes.sh
-sudo ./setup-final-changes.sh
-exit
-cat /dev/null > ~/.bash_history && history -c
-sudo shutdown -r now
-```
-
-### Worker Changes
-
-```sh
-cd /data/launch-instance
-chmod 777 setup-worker-changes.sh
-sudo ./setup-worker-changes.sh
-chmod 777 setup-final-changes.sh
-sudo ./setup-final-changes.sh
-exit
-cat /dev/null > ~/.bash_history && history -c
-sudo shutdown -r now
-```
-
-### Server Changes
-- The script below does several items including
   + Enable password login (for setting up passwordless SSH)
-  + Change owner of Rserved and restart Rserve 
+  + Change owner of Rserved and restart Rserve
   + Update all packages and reboot
   + Remove unneeded directories/files
 
-
-```sh
-sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
-echo StrictHostKeyChecking no > .ssh/config
-sudo service ssh restart
-cd /var/www/rails/openstudio
-rake db:purge
-rake db:mongoid:create_indexes
-rm -rf /mnt/openstudio
-sudo apt-get upgrade -y
-```
 
 ### Worker Changes
   + Enable password login (for setting up passwordless SSH)
   + Update all packages and reboot
   + Remove unneeded directories/files
 
-
-```sh
-sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
-echo StrictHostKeyChecking no > .ssh/config
-sudo service ssh restart
-sudo apt-get upgrade -y
-```
 
 ### Final Changes
 - Before creating the AMI do these last on both systems
@@ -215,44 +172,12 @@ sudo apt-get upgrade -y
   + Clear out the various logs
   + Remove unneeded files that are in the mounted folders
 
-```sh
-sudo usermod -U ubuntu
-cat /dev/null > ~/.ssh/authorized_keys
-cat /dev/null > ~/.bash_history && history -c
-sudo -i
-cat /dev/null > /var/www/rails/openstudio/log/download.log
-cat /dev/null > /var/www/rails/openstudio/log/mongo.log
-cat /dev/null > /var/www/rails/openstudio/log/development.log
-cat /dev/null > /var/www/rails/openstudio/log/production.log
-cat /dev/null > /var/www/rails/openstudio/log/delayed_job.log
-rm -f /var/www/rails/openstudio/log/test.log
-rm -rf /var/www/rails/openstudio/public/assets/*
-rm -rf /var/www/rails/openstudio/tmp/*
-cat /dev/null > /var/log/auth.log
-cat /dev/null > /var/log/lastlog
-cat /dev/null > /var/log/kern.log
-cat /dev/null > /var/log/boot.log
-rm -f /data/launch-instance/*.pem
-rm -f /data/launch-instance/*.log
-rm -f /data/launch-instance/*.json
-rm -f /data/launch-instance/*.yml
-rm -f /data/worker-nodes/README.md
-rm -f /data/worker-nodes/rails-models/mongoid-vagrant.yml
-rm -rf /var/chef
-cat /dev/null > ~/.bash_history && history -c
-apt-get clean
-
-sudo shutdown -r now
-```
-
 - login to AWS and take a snapshot of the image
   + Naming convention is `OpenStudio Worker Cluster OS <version of openstudio>`
   + Increase the size of the root image to 10GB in both
 
 - test the AMI using the script run_ec2
 - merge the branch into master
-- tag the release 
-  + Naming convention is to increment the minor release (e.g. V1.2.0).  Note that this number does not increment the same as openstudio because there may be intermediate patched. 
+- tag the release
+  + Naming convention is to increment the minor release (e.g. V1.2.0).  Note that this number does not increment the same as openstudio because there may be intermediate patched.
   + Add a note in the release to which versions of OpenStudio the release supports
-
-

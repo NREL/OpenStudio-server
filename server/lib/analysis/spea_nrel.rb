@@ -2,7 +2,7 @@
 class Analysis::SpeaNrel
   include Analysis::R
 
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
@@ -22,7 +22,7 @@ class Analysis::SpeaNrel
           objective_function_index: 1,
           index: 1
         }
-        ],
+      ],
       problem: {
         algorithm: {
           generations: 1,
@@ -33,11 +33,12 @@ class Analysis::SpeaNrel
           mprob: 0.5,
           objective_functions: %w(total_energy total_life_cycle_cost)
         }
-        }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
+
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -45,18 +46,31 @@ class Analysis::SpeaNrel
   def perform
     # add into delayed job
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # save other run information in another object in the analysis
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'started'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
+
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
+
+    # save all the changes into the database and reload the object (which is required)
+    @analysis.save!
+    @analysis.reload
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
@@ -68,9 +82,9 @@ class Analysis::SpeaNrel
     # some algorithm specific data to be stored in the database
     @analysis['iteration'] = @iteration
 
-    # save the data
+    # save the algorithm specific updates
     @analysis.save!
-    @analysis.reload # after saving the data (needed for some reason yet to be determined)
+    @analysis.reload
 
     # create an instance for R
     @r = Rserve::Simpler.new
@@ -93,7 +107,7 @@ class Analysis::SpeaNrel
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
-    # TODO preflight check -- need to catch this in the analysis module
+    # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
       fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
@@ -103,7 +117,6 @@ class Analysis::SpeaNrel
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
-    static_array = Variable.static_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
@@ -134,7 +147,7 @@ class Analysis::SpeaNrel
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build('/usr/local/rbenv/shims/bundle', 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       process.io.inherit!
@@ -144,10 +157,10 @@ class Analysis::SpeaNrel
       process.start
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info("Found the following good ips #{worker_ips}")
+      Rails.logger.info "Found the following good ips #{worker_ips}"
 
       cluster_started = cluster.start(worker_ips)
-      Rails.logger.info ("Time flag was set to #{cluster_started}")
+      Rails.logger.info "Time flag was set to #{cluster_started}"
 
       if cluster_started
         # gen is the number of generations to calculate
@@ -155,7 +168,7 @@ class Analysis::SpeaNrel
         # popSize is the number of sample points in the variable (nrow(vars))
         Rails.logger.info("variable types are #{var_types}")
         @r.command(vars: samples.to_dataframe, vartypes: var_types, gen: @analysis.problem['algorithm']['generations'], tourSize: @analysis.problem['algorithm']['tourSize'], cprob: @analysis.problem['algorithm']['cprob'], cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'], mprob: @analysis.problem['algorithm']['mprob']) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
 
@@ -175,11 +188,11 @@ class Analysis::SpeaNrel
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "/usr/local/rbenv/shims/ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
               print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
@@ -193,7 +206,7 @@ class Analysis::SpeaNrel
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "/usr/local/rbenv/shims/ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
@@ -251,7 +264,7 @@ class Analysis::SpeaNrel
         fail 'could not start the cluster (most likely timed out)'
       end
 
-    rescue Exception => e
+    rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
       @analysis.status_message = log_message
@@ -268,14 +281,15 @@ class Analysis::SpeaNrel
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis.end_time = Time.now
         @analysis.status = 'completed'
       end
 
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

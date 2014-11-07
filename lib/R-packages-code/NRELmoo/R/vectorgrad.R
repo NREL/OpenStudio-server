@@ -38,6 +38,10 @@ vectorgrad <- function(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE, lb
           dp <- cbind(((1)*eps),(-(1)*eps))
         }
         Fout <- parCapply(cl, dp, function(x1) func(x + x1))
+		if (is.numeric(Fout) == FALSE) {
+		  if (debug == TRUE) print("Fout is not numeric")
+		  Fout <- as.numeric(Fout) 
+		}
         if (debug == TRUE) print(paste("Fout:",Fout))
         if (n > 1){
           if (debug == TRUE) print(paste("diag(dp):",diag(dp[,(1:n)])))

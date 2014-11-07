@@ -34,29 +34,29 @@ module Analysis::R
       end
       values, weights = var.map_discrete_hash_to_array
 
-      dataframe = {'data' => probabilities_array}.to_dataframe
+      dataframe = { 'data' => probabilities_array }.to_dataframe
 
-      if var.uncertainty_type == 'discrete_uncertain'
+      if  var.uncertainty_type == 'discrete' || var.uncertainty_type == 'discrete_uncertain'
         @r.command(df: dataframe, values: values, weights: weights) do
-          %Q{
+          "
             print(values)
             samples <- qdiscrete(df$data, weights, values)
-          }
+          "
         end
-      elsif var.uncertainty_type == 'bool_uncertain'
+      elsif var.uncertainty_type == 'bool' || var.uncertainty_type == 'boolean' || var.uncertainty_type == 'bool_uncertain'
         fail 'bool_uncertain needs some updating to map from bools'
         @r.command(df: dataframe, values: values, weights: weights) do
-          %Q{
+          "
             print(values)
             samples <- qdiscrete(df$data, weights, values)
-          }
+          "
         end
       else
         fail "discrete distribution type #{var.uncertainty_type} not known for R"
       end
 
       samples = @r.converse 'samples'
-      samples = [samples] unless samples.kind_of? Array # ensure it is an array
+      samples = [samples] unless samples.is_a? Array # ensure it is an array
       Rails.logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples
@@ -68,7 +68,7 @@ module Analysis::R
     # checks to make sure that it is.  If R only has one sample, then it will not
     # wrap it in an array.
     def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max)
-      probabilities_array = [probability_array] unless probabilities_array.kind_of? Array # ensure array
+      probabilities_array = [probability_array] unless probabilities_array.is_a? Array # ensure array
 
       Rails.logger.info 'Creating sample from probability'
       r_dist_name = ''
@@ -85,48 +85,47 @@ module Analysis::R
       end
 
       @r.converse "print('creating distribution')"
-      dataframe = {'data' => probabilities_array}.to_dataframe
+      dataframe = { 'data' => probabilities_array }.to_dataframe
 
       if distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
         @r.command(df: dataframe) do
-          %Q{
+          "
             samples <- #{r_dist_name}(df$data, #{min}, #{max})
-          }
+          "
         end
       elsif distribution_type == 'lognormal'
         @r.command(df: dataframe) do
-          %Q{
+          "
             sigma <- sqrt(log(#{stddev}/(#{mean}^2)+1))
             mu <- log((#{mean}^2)/sqrt(#{stddev}+#{mean}^2))
             samples <- #{r_dist_name}(df$data, mu, sigma)
             samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
-          }
+          "
         end
       elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
         @r.command(df: dataframe) do
-          %Q{
+          "
           print(df)
           samples <- #{r_dist_name}(df$data, #{min}, #{max}, #{mean})
-        }
+        "
         end
       else
         @r.command(df: dataframe) do
-          %Q{
+          "
             samples <- #{r_dist_name}(df$data, #{mean}, #{stddev})
             samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
-          }
+          "
         end
       end
 
       samples = @r.converse 'samples'
-      samples = [samples] unless samples.kind_of? Array # ensure it is an array
+      samples = [samples] unless samples.is_a? Array # ensure it is an array
       Rails.logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples
     end
 
-    def sample_all_variables(selected_variables, number_of_samples, grouped_by_measure = false)
-      grouped = {}
+    def sample_all_variables(selected_variables, number_of_samples)
       samples = {}
       var_types = []
       var_names = []
@@ -146,13 +145,13 @@ module Analysis::R
         Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
         variable_samples = nil
         var_names << var.name
-        # todo: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
+        # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
         if var.uncertainty_type == 'discrete_uncertain'
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           variable_samples = discrete_sample_from_probability(p[i_var], var)
           var_types << 'discrete'
         else
-          variable_samples = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, nil,
+          variable_samples = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
                                                       var.lower_bounds_value, var.upper_bounds_value)
           var_types << 'continuous'
         end
@@ -165,10 +164,6 @@ module Analysis::R
           min_max[:eps] << 0
         end
 
-        # always add the data to the grouped hash even if it isn't used
-        grouped["#{var.measure.id}"] = {} unless grouped.key?(var.measure.id)
-        grouped["#{var.measure.id}"]["#{var.id}"] = variable_samples
-
         # save the samples to the
         samples["#{var.id}"] = variable_samples
 
@@ -178,12 +173,6 @@ module Analysis::R
         var.save!
 
         i_var += 1
-      end
-
-      # return the samples grouped by the measure if requested (this is an hash of samples by measure id)
-      if grouped_by_measure
-        samples = grouped
-        Rails.logger.info "Grouped variables are #{grouped}"
       end
 
       [samples, var_types, min_max, var_names]
@@ -199,16 +188,16 @@ module Analysis::R
         save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.jpg'], nil)}"
         Rails.logger.info("R image file name is #{save_file_name}")
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
-          @r.command(d: {samples: samples}.to_dataframe) do
-            %Q{
+          @r.command(d: { samples: samples }.to_dataframe) do
+            %{
               png(filename="#{save_file_name}", width = 1024, height = 1024)
               hist(d$samples, freq=F, breaks=20)
               dev.off()
           }
           end
         else # plot as a table
-          @r.command(d: {samples: samples}.to_dataframe) do
-            %Q{
+          @r.command(d: { samples: samples }.to_dataframe) do
+            %{
               png(filename="#{save_file_name}", width = 1024, height = 1024)
               plot(table(d$samples), ylab='count')
               dev.off()
@@ -224,4 +213,3 @@ module Analysis::R
     end
   end
 end
-

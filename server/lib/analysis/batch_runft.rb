@@ -1,5 +1,5 @@
 class Analysis::BatchRunft
-  def initialize(analysis_id, options = {})
+  def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
       data_points: [],
@@ -7,9 +7,9 @@ class Analysis::BatchRunft
       problem: {}
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
-    Rails.logger.info(@options)
 
     @analysis_id = analysis_id
+    @analysis_job_id = analysis_job_id
   end
 
   # Perform is the main method that is run in the background.  At the moment if this method crashes
@@ -17,18 +17,27 @@ class Analysis::BatchRunft
   def perform
     # add into delayed job
     require 'rserve/simpler'
-    require 'uuid'
     require 'childprocess'
 
     # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis.status = 'started'
-    @analysis.end_time = nil
+    @analysis_job = Job.find(@analysis_job_id)
     @analysis.run_flag = true
 
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
     @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+
+    # save other run information in another object in the analysis
+    # save other run information in another object in the analysis
+    @analysis_job.start_time = Time.now
+    @analysis_job.status = 'started'
+    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    @analysis_job.save!
+
+    # Clear out any former results on the analysis
+    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
 
     # save all the changes into the database and reload the object (which is required)
     @analysis.save!
@@ -72,7 +81,7 @@ class Analysis::BatchRunft
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build('/usr/local/rbenv/shims/bundle', 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
+      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       process.io.inherit!
@@ -82,15 +91,15 @@ class Analysis::BatchRunft
       process.start
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info("Found the following good ips #{worker_ips}")
+      Rails.logger.info "Found the following good ips #{worker_ips}"
 
       cluster_started = cluster.start(worker_ips)
-      Rails.logger.info ("Time flag was set to #{cluster_started}")
+      Rails.logger.info "Time flag was set to #{cluster_started}"
 
-      # todo: move os_dev to a variable based on environment
+      # TODO: move os_dev to a variable based on environment
       if cluster_started
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
-          %Q{
+          %{
             clusterEvalQ(cl,library(RMongo))
 
             f <- function(x){
@@ -101,12 +110,12 @@ class Analysis::BatchRunft
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "/usr/local/rbenv/shims/ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               print("#{@analysis.use_shm}")
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} -r AWS",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               }
               z <- system(y,intern=TRUE)
               j <- length(z)
@@ -132,7 +141,7 @@ class Analysis::BatchRunft
       else
         fail 'could not start the cluster (most likely timed out)'
       end
-    rescue Exception => e
+    rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
       @analysis.status_message = log_message
@@ -149,14 +158,16 @@ class Analysis::BatchRunft
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
 
-      # Only set this data if the anlaysis was NOT called from another anlaysis
-
+      # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
-        @analysis.end_time = Time.now
-        @analysis.status = 'completed'
+        @analysis_job.end_time = Time.now
+        @analysis_job.status = 'completed'
+        @analysis_job.save!
+        @analysis.reload
       end
-
       @analysis.save!
+
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

@@ -3,20 +3,9 @@
 # Recipe:: packages
 #
 
-# install curl here, because there isn't a cookbook and i don't
-# want to make one right now.
-package "curl" do
-  action :upgrade
-end
-
-package "zip" do
-  action :upgrade
-end
-
-package "iotop" do
-  action :upgrade
-end
-
-package "imagemagick" do
-  action :upgrade
+# Other random packages that need to be installed
+%w( expect curl iotop imagemagick unzip zip ).each do |pi|
+  package pi do
+    action :upgrade
+  end
 end

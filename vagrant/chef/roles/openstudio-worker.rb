@@ -3,10 +3,9 @@ description "Install and configure OpenStudio for use with Ruby on Rails"
 
 run_list([
              # Default iptables setup on all servers.
+             "recipe[openstudio_server::users]",  # Run this before R and before openstudio bashprofile and base
              "role[base]",
-             "role[ruby]",
              "recipe[openstudio_server::mongoshell]",
-             "recipe[openstudio_server::users]",  # Run this before R and before openstudio bashprofile
              "role[r-project]",
              "role[openstudio]",
              "recipe[openstudio_server::bashprofile]",

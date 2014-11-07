@@ -1,6 +1,6 @@
 # generate n number of datapoints with the exact same list of variables
-require 'uuid'
 require 'erb'
+require 'securerandom'
 
 number_of_instances=64
 
@@ -17,8 +17,8 @@ end
 (1..number_of_instances).each do |instance|
   outfile = File.join(dir,"datapoint_#{instance}.json")
   @index = instance
-  @uuid = UUID.new.generate
-  @version_uuid = UUID.new.generate
+  @uuid = SecureRandom.uuid
+  @version_uuid = SecureRandom.uuid
   File.open(outfile, 'w') {|f| f << dp_tmp.result }
 end
 

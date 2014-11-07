@@ -3,7 +3,6 @@
 # Recipe:: bashprofile
 #
 
-
 ruby_block "update bash_profile" do
   block do
     bash_filename = nil

@@ -3,18 +3,52 @@ class AdminController < ApplicationController
   end
 
   def backup_database
-    write_and_send_data
+    logger.info params
+    write_and_send_data(params[:full_backup] == 'true')
   end
 
   def restore_database
     uploaded_file = params[:file]
+    if uploaded_file
+      reload_database(uploaded_file)
+      redirect_to admin_index_path, notice: "Dropped and Reloaded Database with #{uploaded_file.original_filename}"
+    else
+      redirect_to admin_index_path, notice: 'No file selected'
+    end
+  end
 
-    reload_database(uploaded_file)
+  def clear_database
+    success_1 = false
+    success_2 = false
 
-    redirect_to admin_index_path, notice: "Dropped and Reloaded Database with #{uploaded_file.original_filename}"
+    logger.info "Working directory is #{Dir.pwd} and I am #{`whoami`}"
+
+    `mongo os_dev --eval "db.dropDatabase();"`
+    if $?.exitstatus == 0
+      success_1 = true
+    end
+
+    # call_rake 'routes' #'db:mongoid:create_indexes'
+    # if $?.exitstatus == 0
+    #   success_2 = true
+    # end
+
+    if success_1 # && success_2
+      redirect_to admin_index_path, notice: 'Database deleted successfully.'
+    else
+      logger.info "Error deleting mongo database: #{success_1}, #{success_2}"
+      redirect_to admin_index_path, notice: 'Error deleting database.'
+    end
   end
 
   private
+
+  #  http://railscasts.com/episodes/127-rake-in-background
+  def call_rake(task, options = {})
+    options[:rails_env] ||= Rails.env
+    args = options.map { |n, v| "#{n.to_s.upcase}='#{v}'" }
+    system "rake #{task} #{args.join(' ')} --trace 2>&1 >> #{Rails.root}/log/rake.log"
+  end
 
   def reload_database(database_file)
     success = false
@@ -41,15 +75,23 @@ class AdminController < ApplicationController
     success
   end
 
-  def write_and_send_data(file_prefix = 'mongodump')
+  def write_and_send_data(full_backup = false, file_prefix = 'mongodump')
     success = false
 
     time_stamp = Time.now.to_i
     dump_dir = "/tmp/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    # mongodump  -u admin -p '' --port 30017 -d os_dev -o $BACKUP_DUMP
-    resp = `mongodump -db os_dev --out #{dump_dir}`
+    if full_backup
+      resp = `mongodump --db os_dev --out #{dump_dir}`
+    else
+      # mongodump  -u admin -p '' --port 30017 -d os_dev -o $BACKUP_DUMP
+      resp = `mongodump --db os_dev --collection projects --out #{dump_dir}`
+      resp = `mongodump --db os_dev --collection analyses --out #{dump_dir}`
+      resp = `mongodump --db os_dev --collection data_points --out #{dump_dir}`
+      resp = `mongodump --db os_dev --collection measures --out #{dump_dir}`
+      resp = `mongodump --db os_dev --collection variables --out #{dump_dir}`
+    end
 
     if $?.exitstatus == 0
       output_file = "/tmp/#{file_prefix}_#{time_stamp}.tar.gz"

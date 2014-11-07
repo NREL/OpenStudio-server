@@ -1,10 +1,22 @@
+GIT
+  remote: git://github.com/NREL/OpenStudio-workflow-gem.git
+  revision: 06e190763f65f38fb19583d42393e635d614d3a7
+  branch: master
+  specs:
+    openstudio-workflow (0.0.2)
+      aasm (~> 3.1.1)
+      colored (~> 1.2)
+      multi_json (~> 1.10.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
-    activemodel (3.2.18)
-      activesupport (= 3.2.18)
+    CFPropertyList (2.2.8)
+    aasm (3.1.1)
+    activemodel (3.2.19)
+      activesupport (= 3.2.19)
       builder (~> 3.0.0)
-    activesupport (3.2.18)
+    activesupport (3.2.19)
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
     builder (3.0.4)
@@ -12,16 +24,19 @@ GEM
       activesupport (>= 3.0)
     cocaine (0.5.4)
       climate_control (>= 0.0.3, < 1.0)
-    delayed_job (4.0.1)
+    colored (1.2)
+    delayed_job (4.0.4)
       activesupport (>= 3.0, < 4.2)
     delayed_job_mongoid (2.1.0)
       delayed_job (>= 3.0, < 5)
       mongoid (>= 3.0, < 5)
-    i18n (0.6.9)
+    facter (2.2.0)
+      CFPropertyList (~> 2.2.6)
+    i18n (0.6.11)
     libxml-ruby (2.7.0)
     macaddr (1.7.1)
       systemu (~> 2.6.2)
-    mime-types (2.3)
+    mime-types (2.4.3)
     mongoid (3.1.6)
       activemodel (~> 3.2)
       moped (~> 1.4)
@@ -30,11 +45,9 @@ GEM
     mongoid-paperclip (0.0.9)
       paperclip (>= 2.3.6)
     moped (1.5.2)
+    msgpack (0.5.9)
     multi_json (1.10.1)
-    net-http-persistent (2.9.4)
-    net-scp (1.2.1)
-      net-ssh (>= 2.6.5)
-    net-ssh (2.9.1)
+    oj (2.10.4)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -42,30 +55,28 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
-    rserve-client (0.3.1)
-    rserve-simpler (0.0.6)
-      rserve-client (~> 0.3.0)
-    ruby-prof (0.15.1)
+    parallel (1.3.3)
+    ruby-prof (0.15.2)
     systemu (2.6.4)
-    tzinfo (0.3.39)
+    tzinfo (0.3.42)
     uuid (2.3.7)
       macaddr (~> 1.0)
-    zip (2.0.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   delayed_job_mongoid
+  facter
   libxml-ruby
   mongoid (~> 3.1.6)
   mongoid-paperclip
-  net-http-persistent
-  net-scp
-  net-ssh
+  msgpack
+  multi_json
+  oj
+  openstudio-workflow!
   os
   paperclip (~> 4.1.1)
-  rserve-simpler
+  parallel
   ruby-prof
   uuid
-  zip

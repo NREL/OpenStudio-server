@@ -1,13 +1,9 @@
-name "buildingagent_web_base"
-description "A base role for buildingagent web servers."
+name "openstudio_server_web_base"
+description "A base role for openstudio web server"
 
 run_list([
-             "role[base]",
-             "role[ruby]",
-
              "recipe[apache2]",
              "recipe[apache2::mod_ssl]",
-             #"recipe[apache2::iptables]",
          ])
 
 override_attributes(
