@@ -74,12 +74,8 @@ if @options[:list_amis]
   exit 0
 end
 
-# Versioning (change these each build) - Support old version lookup for awhile
-if File.exist? "../server/lib/openstudio_server/version"
-  require_relative "../server/lib/openstudio_server/version"
-else
-  require_relative "../server/lib/version"
-end
+# Versioning (change these each build)
+require_relative "../server/lib/openstudio_server/version"
 
 @os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 @os_version = nil
@@ -512,4 +508,3 @@ ensure
   puts
   puts "Took #{Time.now - start_time}s to build."
 end
-

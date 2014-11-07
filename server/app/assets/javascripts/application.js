@@ -13,6 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require jquery.tablesorter
+//= require bootstrap
 //= require bootstrap_tooltip
 //= require bootstrap_tab
 //= require bootstrap_popover
@@ -20,21 +21,4 @@
 //= require mustache
 //= require d3.v3.min
 //= require radarchart
-
 //= require underscore
-//= require bootstrap
-//= require backbone
-//= require openstudio_server
-//= require_tree ../templates
-//= require_tree ./models
-//= require_tree ./collections
-//= require_tree ./views
-//= require_tree ./routers
-
-/*
-$(document).ready(function () {
-    $(".pagination").find("a").livequery(function () {
-        $(this).attr("data-remote", true);
-    });
-});
-*/

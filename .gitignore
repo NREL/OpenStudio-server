@@ -8,3 +8,4 @@ release.log
 *.swp
 /vagrant/test_amis.json
 rubocop-results.xml
+/worker-nodes/Gemfile.lock

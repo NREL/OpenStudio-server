@@ -26,8 +26,6 @@ chown vagrant:vagrant ~/setup*
 # stop the various services that use mongo
 sudo service delayed_job stop
 sudo service apache2 stop
-sudo service mongodb stop
-# support the new mongodb version as well
 sudo service mongod stop
 
 # remove mongo db & add it back
@@ -36,7 +34,6 @@ sudo chown mongodb:nogroup /mnt/mongodb/data
 sudo rm -rf /var/lib/mongodb
 
 # restart mongo
-sudo service mongodb start
 sudo service mongod start
 
 # restart the rails application
@@ -45,12 +42,11 @@ sudo service apache2 start
 
 # Add in the database indexes after making the db directory
 sudo chmod 777 /var/www/rails/openstudio/public
-cd /var/www/rails/openstudio
-rake db:purge
-rake db:mongoid:create_indexes
+cd /var/www/rails/openstudio && bundle exec rake db:purge
+cd /var/www/rails/openstudio && bundle exec rake db:mongoid:create_indexes
 
 # configure the application based worker data
-cd /data/launch-instance && sudo ./configure_vagrant_worker_data.sh
+cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 # restart rserve
 sudo service Rserve restart

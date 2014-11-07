@@ -5,7 +5,7 @@ describe Analysis::SequentialSearch do
     # need to populate the database with an analysis and datapoints
 
     # delete all the analyses
-    # parameter_space[UUID.new.generate] = {id: UUID.new.generate, measure_id: measure._id, variables: mvs}
+    # parameter_space[SecureRandom.uuid] = {id: SecureRandom.uuid, measure_id: measure._id, variables: mvs}
     @ps = {}
     @ps['1'] = { id: '1', measure_id: 'roof', variables: { 'r_value' => 5 } }
     @ps['2'] = { id: '2', measure_id: 'roof', variables: { 'r_value' => 70, 'cool' => true } }

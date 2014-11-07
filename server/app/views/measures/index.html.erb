@@ -1,8 +1,9 @@
-<h1>Listing Measures</h1>
+<h2>Measures &mdash;  <%= link_to @measures.first.analysis.display_name, analysis_path(@measures.first.analysis) %></h2>
 
 <table class="table table-striped">
   <thead>
   <tr>
+    <th>Display Name</th>
     <th>Name</th>
     <th>Measure Type</th>
     <th>Description</th>
@@ -13,17 +14,18 @@
   <tbody>
   <% @measures.each do |measure| %>
       <tr>
+        <td><%= link_to_if(measure.display_name, measure.display_name, measure_path(measure)) %></td>
         <td><%= link_to_if(measure.name, measure.name, measure_path(measure)) %></td>
         <td><%= measure.measure_type if measure.measure_type %></td>
         <td><%= measure.description %></td>
         <td>
           <% measure.variables.where(perturbable: false).order_by(name: 1).each do |var| %>
-              <%= link_to var.name, variable_path(var) %></br>
+              <%= link_to var.display_name, variable_path(var) %></br>
           <% end %>
         </td>
         <td>
           <% measure.variables.where(perturbable: true).order_by(name: 1).each do |var| %>
-              <%= link_to var.name, variable_path(var) %></br>
+              <%= link_to var.display_name, variable_path(var) %></br>
           <% end %>
         </td>
       </tr>

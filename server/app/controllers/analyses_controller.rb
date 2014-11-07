@@ -1,16 +1,16 @@
 require 'will_paginate/array'
+require 'core_extensions'
+
 class AnalysesController < ApplicationController
   # GET /analyses
   # GET /analyses.json
   def index
     if params[:project_id].nil?
-      @analyses = Analysis.all
+      @analyses = Analysis.all.order_by(:start_time.asc)
       @project = nil
-
     else
       @project = Project.find(params[:project_id])
       @analyses = @project.analyses
-
     end
 
     respond_to do |format|
@@ -28,6 +28,8 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     if @analysis
+
+      @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0 ? true : false
 
       # tab status
       @status = 'all'
@@ -57,6 +59,7 @@ class AnalysesController < ApplicationController
         @all_sims = @all_sims_total.paginate(page: @all_page, per_page: per_page, total_entries: @all_sims_total.count)
       end
 
+      # TODO: this is going to be slow ecause it returns the entire datapoint for each of these queries
       @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
       @completed_sims = @completed_sims_total.paginate(page: @completed_page, per_page: per_page, total_entries: @completed_sims_total.count)
 
@@ -82,25 +85,7 @@ class AnalysesController < ApplicationController
           @status_simulations = @na_sims
       end
 
-      @objective_functions = []
-
-      if @analysis.output_variables
-        @analysis.output_variables.each do |ov|
-          if ov['objective_function']
-            @objective_functions << ov
-          end
-        end
-      end
-
-      if @objective_functions.empty?
-        # todo: we need to standardize on the result of this
-        if @analysis['num_measure_groups']
-          @objective_functions << { 'display_name' => 'Total Site Energy (EUI)', 'name' => 'total_site_energy', 'units' => 'EUI' }
-        else
-          @objective_functions << { 'display_name' => 'Total Site Energy (EUI)', 'name' => 'total_energy', 'units' => 'EUI' }
-        end
-        @objective_functions << { 'display_name' => 'Total Life Cycle Cost', 'name' => 'total_life_cycle_cost', 'units' => 'USD' }
-      end
+      @objective_functions = @analysis.variables.where(objective_function: true).order_by(:objective_function.asc, :sample.asc)
     end
 
     respond_to do |format|
@@ -255,15 +240,23 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     dps = nil
-    if params[:jobs].nil?
-      dps = @analysis.data_points
+    if params[:jobs]
+      dps = @analysis.data_points.where(status: params[:jobs]).only(:status, :analysis_type, :jobs, :status_message, :download_status)
     else
-      dps = @analysis.data_points.where(status: params[:jobs])
+      dps = @analysis.data_points.only(:status, :analysis_type, :jobs, :status_message, :download_status)
     end
 
     respond_to do |format|
       #  format.html # new.html.erb
-      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status } } } }
+      format.json do
+        render json: {
+          analysis: {
+            status: @analysis.status,
+            analysis_type: @analysis.analysis_type,
+            jobs: @analysis.jobs.order_by(:index.asc)
+          },
+          data_points: dps.map { |k| { _id: k.id, status: k.status, final_message: k.status_message, download_status: k.download_status } } }
+      end
     end
   end
 
@@ -305,8 +298,8 @@ class AnalysesController < ApplicationController
     @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
 
     exclude_fields = [:_id, :user, :password]
-    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
     @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
 
     respond_to do |format|
       format.html # debug_log.html.erb
@@ -319,7 +312,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-        :problem,
+        :problem
       ]
       include_fields = [
         :variables,
@@ -330,152 +323,154 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # TODO: this can be deprecated?
+  # Parallel Coordinates plot
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
+    @saved_paretos = @analysis.paretos
+
+    # variables for chart
+    @pareto_data_points = []
+    @pareto_name = ''
+
+    # variables represent the variables we want graphed
+    @visualizes = get_plot_variables(@analysis)
+    @variables = params[:variables] ? params[:variables] : @visualizes.map(&:name)
+
+    # figure out actions
+    if params[:commit] && params[:commit] == 'All Data'
+      # don't do pareto
+
+    else
+      # check for pareto id
+      if params[:pareto]
+        @pareto = Pareto.find(params[:pareto])
+        @pareto_data_points = @pareto.data_points
+        @pareto_name = @pareto.name
+      end
+
+    end
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
     end
   end
 
-  # other version with form to control what data to plot
-  def plot_parallelcoordinates2
-    @analysis = Analysis.find(params[:id])
-    # mappings + plotvars make the superset of chart variables
-    @mappings = @analysis.get_superset_of_input_variables
-    @plotvars = get_plot_variables(@analysis)
-
-    # variables represent the variables we want graphed. Nil = all
-    @variables = params[:variables] ? params[:variables] : nil
-
-    # whatever is defined as variables here should be the only returned data
-    @plot_data = get_plot_data2(@analysis, @mappings, @plotvars, @variables)
-
-    respond_to do |format|
-      format.html # plot_parallelcoordinates.html.erb
-    end
-  end
-
-  # interactive XY plot: choose x and y variables
+  # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
     @analysis = Analysis.find(params[:id])
+    @saved_paretos = @analysis.paretos
 
-    @mappings = @analysis.get_superset_of_input_variables
     @plotvars = get_plot_variables(@analysis)
 
-    @allvars = []
-    @mappings.each do |key, val|
-      @allvars << val
-    end
-    @plotvars.each do |val|
-      @allvars << val
-    end
+    @pareto = false
+    @pareto_data_points = []
+    @pareto_saved = false
+    @debug = false
 
-    # variables represent the variables we want graphed. Nil = all
+    # variables represent the variables we want graphed. Nil == choose the first 2
     @variables = []
     if params[:variables].nil?
-      @variables << @plotvars[0] << @plotvars[1]
+      @variables << @plotvars[0].name << @plotvars[1].name
     else
       if params[:variables][:x]
         @variables << params[:variables][:x]
       else
-        @variables << @plotvars[0]
+        @variables << @plotvars[0].name
       end
       if params[:variables][:y]
         @variables << params[:variables][:y]
       else
-        @variables << @plotvars[0]
+        @variables << @plotvars[0].name
       end
     end
+
+    # load a pareto by id
+    if params[:pareto]
+      pareto =  Pareto.find(params[:pareto])
+      @pareto_data_points = pareto.data_points
+      @variables = [pareto.x_var, pareto.y_var]
+    end
+
+    # calculate pareto or update chart?
+    if params[:commit] && params[:commit] == 'Calculate Pareto Front'
+      logger.info "PARETO! COMMIT VALUES IS: #{params[:commit]}"
+      # set variable for view
+      @pareto = true
+      # keep these pts in a variable, but mainly for quick debug
+      pareto_pts = calculate_pareto(@variables)
+
+      # this is what you actually need for the chart and to save a pareto
+      @pareto_data_points = pareto_pts.map { |p| p['_id'] }
+      # logger.info("DATAPOINTS ARRAY: #{@pareto_datapoints}")
+    end
+
+    # save pareto front?
+    if params[:commit] && params[:commit] == 'Save Pareto Front'
+
+      @pareto = true
+      @pareto_data_points = params[:data_points]
+
+      # save
+      pareto = Pareto.new
+      pareto.analysis = @analysis
+      pareto.x_var = params[:x_var]
+      pareto.y_var = params[:y_var]
+      pareto.name = params[:name]
+      pareto.data_points = params[:data_points]
+      if pareto.save!
+        @pareto_saved = true
+        flash[:notice] = 'Pareto saved!'
+      else
+        flash[:notice] = 'The pareto front could not be saved.'
+      end
+    end
+
+    logger.info("PARAMS!! #{params}")
 
     respond_to do |format|
       format.html # plot_xy.html.erb
     end
   end
 
-  # The results is the same as the variables hash which defines which results to export.  If nil it will only
-  # export the results that are in the output_variables hash
-  def get_plot_data2(analysis, variables, outputs, results = nil)
-    plot_data = []
-    if @analysis.analysis_type == 'sequential_search'
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
-    else
-      dps = @analysis.data_points.all
+  # Calculate Pareto
+  def calculate_pareto(variables)
+    # get data: reuse existing function
+    vars, data = get_analysis_data(@analysis)
+    # sort by x,y
+    sorted_data = data.sort_by { |h| [h[variables[0]], h[variables[1]]] }
+
+    # calculate Y cumulative minimum
+    min_val = 1_000_000_000
+    cum_min_arr = []
+    sorted_data.each do |d|
+      min_val = [min_val, d[variables[1]].to_f].min
+      cum_min_arr << min_val
     end
 
-    dps.each do |dp|
-      # the datapoint is considered complete if it has results set
-      if dp['results']
-        dp_values = {}
-        dp_values['data_point_uuid'] = data_point_path(dp.id)
-
-        if results
-          # input variables: not in dp['results']
-          if dp.set_variable_values
-            variables.each do |k, v|
-              if results.include?(v)
-                logger.info("value: #{dp.set_variable_values[k]}")
-                dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
-              end
-            end
-          end
-          # output variables. Don't overwrite input variables from above
-          results.each do |key, _|
-            # TEMP: special case for "total_energy" (could also be called total_site_energy)
-            if key == 'total_energy' and !dp.results[key]
-              dp_values[key] = dp['results']['total_site_energy']
-            elsif !dp_values[key]
-              dp_values[key] = dp['results'][key] ? dp['results'][key] : nil
-            end
-          end
-
-        else
-          # go through variables and output variables
-          if dp.set_variable_values
-            variables.each do |k, v|
-              dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
-            end
-          end
-          outputs.each do |ov|
-            # TEMP: special case for "total_energy" (could be called total_site_energy)
-            if ov == 'total_energy' and !dp['results'][ov]
-              dp_values['total_energy'] = dp['results']['total_site_energy']
-            else
-              dp_values[ov] = dp['results'][ov] if dp['results'][ov]
-            end
-          end
+    # calculate indexes of the unique entries, not the unique entries themselves
+    no_dup_indexes = []
+    cum_min_arr.each_with_index do |n, i|
+      if i == 0
+        no_dup_indexes << i
+      else
+        if n != cum_min_arr[i - 1]
+          no_dup_indexes << i
         end
-
-        plot_data << dp_values
       end
     end
 
-    plot_data
+    # DEBUG
+    # logger.info("Unique Pareto Indexes: #{no_dup_indexes.inspect}")
+
+    # pick final points & return
+    pareto_points  = []
+    no_dup_indexes.each do |i|
+      pareto_points << sorted_data[i]
+    end
+    pareto_points
   end
 
-  def plot_data_xy
-    # TODO: either figure out how to ajaxify the json directly to reduce db calls
-    # TODO: or remove data from the @plot_data variable (we are returning everything for now)
-    @analysis = Analysis.find(params[:id])
-
-    # Get the mappings of the variables that were used. Move this to the datapoint class
-    @mappings = @analysis.get_superset_of_input_variables
-
-    # if no variables are specified, use first one(s) in the list
-    if params[:variables].nil?
-      @plotvars = get_plot_variables(@analysis)
-    else
-      @plotvars = params[:variables].split(',')
-    end
-    @plot_data = get_plot_data(@analysis, @mappings)
-
-    respond_to do |format|
-      format.json { render json: { mappings: @mappings, plotvars: @plotvars, data: @plot_data } }
-    end
-  end
-
+  # Scatter plot
   def plot_scatter
     @analysis = Analysis.find(params[:id])
 
@@ -484,14 +479,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  def plot_xy
-    @analysis = Analysis.find(params[:id])
-
-    respond_to do |format|
-      format.html # plot_xy.html.erb
-    end
-  end
-
+  # Radar plot (single datapoint, must have objective functions)
   def plot_radar
     @analysis = Analysis.find(params[:id])
     if params[:datapoint_id]
@@ -510,66 +498,36 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # Bar chart (single datapoint, must have objective functions)
+  # "% error"-like, but negative when actual is less than target and positive when it is more than target
   def plot_bar
     @analysis = Analysis.find(params[:id])
-    if params[:datapoint_id]
-      @datapoint = DataPoint.find(params[:datapoint_id])
-    else
-
-      if @analysis.analysis_type == 'sequential_search'
-        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
+    @datapoint = DataPoint.find(params[:datapoint_id])
 
     respond_to do |format|
       format.html # plot_bar.html.erb
     end
   end
 
-  def plot_data_bar
-    # TODO: this should always take a datapoint param
+  # This function provides all data (plot or export data, depending on what is specified) in
+  # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
+  def analysis_data
     @analysis = Analysis.find(params[:id])
+    datapoint_id = params[:datapoint_id] ? params[:datapoint_id] : nil
+    # other variables that can be specified
+    options = {}
+    options['visualize'] = params[:visualize] == 'true' ? true : false
+    options['export'] = params[:export] == 'true' ? true : false
+    options['pivot'] = params[:pivot] == 'true' ? true : false
+    options['perturbable'] = params[:perturbable] == 'true' ? true : false
 
-    if params[:datapoint_id]
-      # plot a specific datapoint
-      @plot_data, @datapoint = get_plot_data_bar(@analysis, params[:datapoint_id])
-    else
-      # plot the latest datapoint
-      @plot_data, @datapoint = get_plot_data_bar(@analysis)
-    end
+    # get data
+    @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
+
+    logger.info 'sending analysis data to view'
     respond_to do |format|
-      format.json { render json: { datapoint: { id: @datapoint.id, name: @datapoint.name }, bardata: @plot_data } }
-    end
-  end
-
-  def plot_data_radar
-    # TODO: this should always take a datapoint param
-    @analysis = Analysis.find(params[:id])
-
-    if params[:datapoint_id]
-      # plot a specific datapoint
-      @plot_data, @datapoint = get_plot_data_radar(@analysis, params[:datapoint_id])
-    else
-      # plot the latest datapoint
-      @plot_data, @datapoint = get_plot_data_radar(@analysis)
-    end
-    respond_to do |format|
-      format.json { render json: { datapoint: { id: @datapoint.id, name: @datapoint.name }, radardata: @plot_data } }
-    end
-  end
-
-  def plot_data
-    @analysis = Analysis.find(params[:id])
-
-    # Get the mappings of the variables that were used. Move this to the datapoint class
-    @mappings = @analysis.get_superset_of_input_variables
-    @plotvars = get_plot_variables(@analysis)
-    @plot_data = get_plot_data(@analysis, @mappings)
-
-    respond_to do |format|
-      format.json { render json: { mappings: @mappings, plotvars: @plotvars, data: @plot_data } }
+      format.json { render json: { variables: @variables, data: @data } }
+      format.html # analysis_data.html.erb
     end
   end
 
@@ -620,292 +578,294 @@ class AnalysesController < ApplicationController
     end
   end
 
-  def download_variables
+  def dencity
     @analysis = Analysis.find(params[:id])
 
+    if @analysis
+      # reformat the data slightly to get a concise view of the data
+      prov_fields = %w(uuid created_at name display_name description)
+
+      a = @analysis.as_json
+      a.each do |k, _v|
+        logger.info k
+      end
+      @provenance = a.select { |key, _| prov_fields.include? key }
+
+      @provenance['user_defined_id'] = @provenance.delete('uuid')
+      @provenance['user_created_date'] = @provenance.delete('created_at')
+      @provenance['analysis_types'] = @analysis.analysis_types
+
+      @measure_metadata = []
+      if @analysis['problem']
+        if @analysis['problem']['algorithm']
+          @provenance['analysis_information'] = @analysis['problem']['algorithm']
+        end
+
+        if @analysis['problem']['workflow']
+          @analysis['problem']['workflow'].each do |wf|
+            new_wfi = {}
+            new_wfi['id'] = wf['measure_definition_uuid']
+            new_wfi['version_id'] = wf['measure_definition_version_uuid']
+
+            # Eventually all of this could be pulled directly from BCL
+            new_wfi['name'] = wf['measure_definition_class_name']
+            new_wfi['display_name'] = wf['measure_definition_display_name']
+            new_wfi['type'] = wf['measure_type']
+            new_wfi['modeler_description'] = wf['modeler_description']
+            new_wfi['description'] = wf['description']
+
+            new_wfi['arguments'] = []
+            if wf['arguments']
+              wf['arguments'].each do |arg|
+                wfi_arg = {}
+                wfi_arg['display_name'] = arg['display_name']
+                wfi_arg['display_name_short'] = arg['display_name_short']
+                wfi_arg['name'] = arg['name']
+                wfi_arg['data_type'] = arg['value_type']
+                wfi_arg['default_value'] = nil
+                wfi_arg['description'] = ''
+                wfi_arg['display_units'] = '' # should be haystack compatible unit strings
+                wfi_arg['units'] = '' # should be haystack compatible unit strings
+
+                new_wfi['arguments'] << wfi_arg
+              end
+            end
+
+            if wf['variables']
+              wf['variables'].each do |arg|
+                wfi_var = {}
+                wfi_var['display_name'] = arg['argument']['display_name']
+                wfi_var['display_name_short'] = arg['argument']['display_name_short']
+                wfi_var['name'] = arg['argument']['name']
+                wfi_var['default_value'] = nil
+                wfi_var['data_type'] = arg['argument']['value_type']
+                wfi_var['description'] = ''
+                wfi_var['display_units'] = arg['units']
+                wfi_var['units'] = '' # should be haystack compatible unit strings
+
+                new_wfi['arguments'] << wfi_var
+              end
+            end
+
+            @measure_metadata << new_wfi
+          end
+        end
+      end
+    end
+
     respond_to do |format|
-      format.csv do
-        redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
-        # write_and_send_csv(@analysis)
-      end
-      format.rdata do
-        write_and_send_input_variables_rdata(@analysis)
-      end
+      # format.html # show.html.erb
+      format.json { render partial: 'analyses/dencity', formats: [:json] }
     end
   end
 
   protected
 
+  # Get data across analysis. If a datapoint_id is specified, will return only that point
+  # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
+  def get_analysis_data(analysis, datapoint_id = nil, options = {})
+    # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
+    # up from the database only operator
+
+    # require 'ruby-prof'
+    # RubyProf.start
+    start_time = Time.now
+    variables = nil
+    plot_data = nil
+
+    var_fields = [:_id, :perturbable, :pivot, :visualize, :export, :output, :objective_function,
+                  :objective_function_group, :objective_function_index, :objective_function_target,
+                  :scaling_factor, :display_name, :display_name_short, :name, :name_with_measure, :units, :value_type, :data_type]
+
+    # dynamic query, only add 'or' for option fields that are true
+    or_qry = [{ perturbable: true }, { pivot: true }, { output: true }]
+    options.each do |k, v|
+      or_qry << { :"#{k}" => v } if v
+    end
+    variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry)
+        .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name_with_measure.asc]).as_json(only: var_fields)
+
+    # Create a map from the _id to the variables machine name
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.', '|')] }]
+    # logger.info "Variable name map is #{variable_name_map}"
+
+    # logger.info 'looking for data points'
+
+    # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
+    # below is to map the inputs/outputs to a flat hash.
+    map = %{
+      function() {
+         key = this._id;
+         new_data = {
+                      name: this.name, run_start_time: this.run_start_time, run_end_time: this.run_end_time,
+                      status: this.status, status_message: this.status_message
+                    };
+
+         // Retrieve all the results and map the variables to a.b
+         var mrMap = #{variables.map { |v| v['name'].split('.') }.to_json};
+         for (var i in mrMap){
+           if (typeof this.results[mrMap[i][0]] !== 'undefined' && typeof this.results[mrMap[i][0]][mrMap[i][1]] !== 'undefined') {
+             new_data[mrMap[i].join('|')] = this.results[mrMap[i][0]][mrMap[i][1]]
+           }
+         }
+
+         // Set the variable names to a.b
+         var variableMap = #{variable_name_map.reject { |_k, v| v.nil? }.to_json};
+         for (var p in this.set_variable_values) {
+            new_data[variableMap[p]] = this.set_variable_values[p];
+         }
+
+         new_data['data_point_uuid'] = "/data_points/" + this._id
+
+         emit(key, new_data);
+      }
+    }
+
+    reduce = %{
+      function(key, values) {
+        return values[0];
+      }
+    }
+
+    finalize = %{
+      function(key, value) {
+        value['_id'] = key;
+        db.datapoints_mr.insert(value);
+      }
+    }
+
+    # Eventaully use this where the timestamp is processed as part of the request to save time
+    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
+    if datapoint_id
+      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
+                                  status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+    else
+      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
+                    .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+    end
+    logger.info "finished fixing up data: #{Time.now - start_time}"
+
+    # TODO: how to handle to sorting by iteration?
+    # if @analysis.analysis_type == 'sequential_search'
+    #   dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
+    #   dps = dps.rotate(1) # put the starting point on top
+    # else
+    #   dps = @analysis.data_points.all
+    # end
+
+    start_time = Time.now
+    logger.info 'mapping variables'
+    variables.map! { |v| { :"#{v['name']}".to_sym => v } }
+
+    variables = variables.reduce({}, :merge)
+    logger.info "finished mapping variables: #{Time.now - start_time}"
+
+    start_time = Time.now
+    logger.info 'Start as_json'
+    plot_data = plot_data.as_json
+    logger.info "Finished as_json: #{Time.now - start_time}"
+
+    start_time = Time.now
+    logger.info 'Start collapse'
+    plot_data.each_with_index do |pd, i|
+      pd.merge!(pd.delete('value'))
+
+      # Horrible hack right now until we decide how to handle variables with periods in the key
+      #   The root of this issue is that Mongo 2.6 now strictly checks for periods in the hash and will
+      #   throw an exception.  The map/reduce script above has to save the result of the map/reduce to the
+      #   database because it is too large.  So the results have to be stored with pipes (|) temporary, then
+      #   mapped back out.
+      plot_data[i] = Hash[pd.map { |k, v| [k.gsub('|', '.'), v] }]
+    end
+    logger.info "finished merge: #{Time.now - start_time}"
+
+    # plot_data.merge(plot_data.delete('value'))
+
+    [variables, plot_data]
+  end
+
+  # Get plot variables
+  # Used by plot_parallelcoordinates
   def get_plot_variables(analysis)
-    plotvars = []
-    ovs = @analysis.output_variables
-    ovs.each do |ov|
-      if ov['objective_function']
-        plotvars << ov['name']
-      end
-    end
-
-    # add "total energy" if it's not already in the output variables
-    unless plotvars.include?('total_energy')
-      plotvars.insert(0, 'total_energy')
-    end
-
-    Rails.logger.info plotvars
-    plotvars
-  end
-
-  # Data for Bar chart of objective functions actual values vs target values
-  # "% error"-like, but negative when actual is less than target and positive when it is more than target
-  # for now: only plots the latest datapoint
-  def get_plot_data_bar(analysis, datapoint_id = nil)
-    ovs = analysis.output_variables
-    plot_data_bar = []
-
-    if datapoint_id
-      dp = analysis.data_points.find(datapoint_id)
-    else
-      if analysis.analysis_type == 'sequential_search'
-        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
-
-    if dp['results']
-      ovs.each do |ov|
-        if ov['objective_function']
-          dp_values = []
-          dp_values << ov['name']
-          dp_values << ((dp['results'][ov['name']] - ov['objective_function_target']) / ov['objective_function_target'] * 100).round(1)
-          plot_data_bar << dp_values
-        end
-      end
-
-    end
-
-    [plot_data_bar, dp]
-  end
-
-  # get data for radar chart
-  def get_plot_data_radar(analysis, datapoint_id = nil)
-    # TODO: put the work on the database with projection queries (i.e. .only(:name, :age))
-    # and this is just an ugly mapping, sorry all.
-    # TODO: not sure why this is doubly nested array, but it's necessary for the radar plot code
-
-    ovs = analysis.output_variables
-    plot_data_radar = []
-
-    if datapoint_id
-      dp = analysis.data_points.find(datapoint_id)
-    else
-      if analysis.analysis_type == 'sequential_search'
-        dp = analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        dp = analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
-
-    if dp['results']
-      plot_data = []
-      ovs.each do |ov|
-        if ov['objective_function']
-          dp_values = {}
-          dp_values['axis'] = ov['name']
-          if ov['scaling_factor']
-            dp_values['value'] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
-          else
-            dp_values['value'] = (dp['results'][ov['name']].to_f - ov['objective_function_target'].to_f).abs / (ov['objective_function_target'].to_f)
-          end
-          plot_data << dp_values
-        end
-      end
-    end
-    plot_data_radar << plot_data
-
-    [plot_data_radar, dp]
-  end
-
-  # Simple method that takes in the analysis (to get the datapoints) and the variable map hash to construct
-  # a useful JSON for plotting (and exporting to CSV/R-dataframe)
-  # The results is the same as the variables hash which defines which results to export.  If nil it will only
-  # export the results that in the output_variables hash
-  def get_plot_data(analysis, variables, results = nil)
-    plot_data = []
-    if @analysis.analysis_type == 'sequential_search'
-      dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-      dps = dps.rotate(1) # put the starting point on top
-    else
-      dps = @analysis.data_points.all
-    end
-
-    # load in the output variables that are requested (including objective functions)
-    ovs = get_plot_variables(@analysis)
-
-    dps.each do |dp|
-      # the datapoint is considered complete if it has results set
-      if dp['results']
-        dp_values = {}
-
-        dp_values['data_point_uuid'] = data_point_path(dp.id)
-
-        # lookup input value names (from set_variable_values)
-        # todo: push this work into the database
-        if dp.set_variable_values
-          variables.each do |k, v|
-            dp_values[v] = dp.set_variable_values[k] ? dp.set_variable_values[k] : nil
-          end
-        end
-
-        if results
-          # this will eventually be two levels (which will need to be collapsable for column vectors)
-          results.each do |key, _|
-            dp_values[key] = dp.results[key] ? dp.results[key] : nil
-          end
-        else
-          # output all output variables in the array of hashes (regardless if it is an objective function or not)
-          ovs.each do |ov|
-            dp_values[ov] = dp['results'][ov] if dp['results'][ov]
-          end
-        end
-
-        plot_data << dp_values
-      end
-    end
-
-    plot_data
+    variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
   end
 
   def write_and_send_csv(analysis)
     require 'csv'
 
-    variable_mappings = analysis.get_superset_of_input_variables
-    result_mappings = analysis.get_superset_of_result_variables
-    Rails.logger.info "RESULTS MAPPING was #{result_mappings}"
-    data = get_plot_data(analysis, variable_mappings, result_mappings)
+    # get variables from the variables object now instead of using the "superset_of_input_variables"
+    variables, data = get_analysis_data(analysis, nil, export: true)
+    static_fields = %w(name _id run_start_time run_end_time status status_message)
+
+    logger.info variables
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
-      icnt = 0
+      csv << static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
       data.each do |dp|
-        icnt += 1
-        # Write out the header if this is the first datapoint
-        csv << dp.keys if icnt == 1
-        csv << dp.values
+        # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
+        arr = []
+        (static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }).each do |v|
+          if dp[v].nil?
+            arr << nil
+          else
+            arr << dp[v]
+          end
+        end
+        csv << arr
       end
     end
 
     send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
   end
 
-  def write_and_send_input_variables_rdata(analysis)
-    variable_mappings = analysis.get_superset_of_input_variables
-    download_filename = "#{analysis.name}_metadata.RData"
-    data_frame_name = "metadata"
-    Rails.logger.info("Data frame name will be #{data_frame_name}")
-
-    # need to convert array of hash to hash of arrays
-    out_hash = {}
-    out_hash['measure_name'] = []
-    out_hash['variable_name'] = []
-    out_hash['variable_display_name'] = []
-    out_hash['value_type'] = []
-    out_hash['units'] = []
-    out_hash['type_of_variable'] = [] 
-    out_hash['output_variable_group'] = []
-    out_hash['output_variable_target'] = []  
-
-    variable_mappings.each do |k, v|
-      variable = Variable.find(k)
-      out_hash['measure_name'] << variable.measure.name ? variable.measure.name : nil
-      out_hash['variable_name'] << variable.name ? variable.name : nil
-      out_hash['variable_display_name'] << variable['display_name'] ? variable['display_name'] : nil
-      out_hash['value_type'] << variable['value_type'] ? variable['value_type'] : nil
-      out_hash['units'] << variable['units'] ? variable['units'] : nil
-      if variable['variable']
-        out_hash['type_of_variable'] << 'variable'
-      elsif variable['pivot']
-        out_hash['type_of_variable'] << 'pivot'
-      elsif variable['static']
-        out_hash['type_of_variable'] << 'static'
-      else
-        out_hash['type_of_variable'] << 'other'
-      end
-      out_hash['output_variable_group'] << nil
-      out_hash['output_variable_target'] << nil
-    end
-    
-    if analysis.output_variables
-      Rails.logger.info("output variables is #{analysis.output_variables}")
-      analysis.output_variables.each do |ov|
-        if ov['objective_function_target']
-          #out_hash['measure_name'] << nil
-          out_hash['variable_name'] << ov['name']
-          out_hash['variable_display_name'] << ov['display_name']
-          out_hash['units'] << ov['units']
-          out_hash['type_of_variable'] << 'objective_function'
-          out_hash['value_type'] << 'double'
-          out_hash['output_variable_group'] << ov['objective_function_group']
-          out_hash['output_variable_target'] << ov['objective_function_target']
-        end
-      end
-    end
-
-    Rails.logger.info("outhash is #{out_hash}")
-
-    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
-    require 'rserve/simpler'
-    r = Rserve::Simpler.new
-    r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
-      %Q{
-            temp <- tempfile('rdata', tmpdir="/tmp")
-            save('#{data_frame_name}', file = temp)
-            Sys.chmod(temp, mode = "0777", use_umask = TRUE)
-         }
-    end
-    tmp_filename = r.converse('temp')
-
-    if File.exist?(tmp_filename)
-      send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
-    else
-      fail 'could not create R dataframe'
-    end
-   
-    # Have R delete the file since it will have permissions to delete the file.
-    Rails.logger.info "Temp filename is #{tmp_filename}"
-    r_command = "file.remove('#{tmp_filename}')"
-    Rails.logger.info "R command is #{r_command}"
-    if File.exist? tmp_filename
-      r.converse(r_command) 
-    end  
-      
-  end
-
   def write_and_send_rdata(analysis)
-    variable_mappings = analysis.get_superset_of_input_variables
-    result_mappings = analysis.get_superset_of_result_variables
-    data = get_plot_data(analysis, variable_mappings, result_mappings)
-    download_filename = "#{analysis.name}_results.RData"
-    data_frame_name = "results"
-    Rails.logger.info("Data frame name will be #{data_frame_name}")
+    # get variables from the variables object now instead of using the "superset_of_input_variables"
+    variables, data = get_analysis_data(analysis, nil, export: true)
 
+    static_fields = %w(name _id run_start_time run_end_time status status_message)
+    names_of_vars = static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
+
+    # TODO: this is reeeally slow and needs to be addressed # finished conversion: 1764.665880011 ~ 13k points
     # need to convert array of hash to hash of arrays
     # [{a: 1, b: 2}, {a: 3, b: 4}] to {a: [1,2], b: [3,4]}
-    out_hash = data.each_with_object(Hash.new([])) do |h1, h|
-      h1.each { |k, v| h[k] = h[k] + [v] }
+    start_time = Time.now
+    logger.info 'starting conversion of data to column vectors'
+    out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
+      names_of_vars.each do |v|
+        add_this_value = ex_hash[v].nil? ? nil : ex_hash[v]
+        h[v] = h[v] + [add_this_value]
+      end
     end
+    logger.info "finished conversion: #{Time.now - start_time}"
 
-    Rails.logger.info("outhash is #{out_hash}")
+    # If the data are guaranteed to exist in the same column structure for each data point AND the
+    # length of each column is the same (especially no nils), then you can use the method below
+    # out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
+    # ex_hash.each { |k, v| h[k] = h[k] + [v] }
+    # end
 
-    # Todo, move this to a helper method of some sort under /lib/anlaysis/r/...
+    # out_hash.each_key do |k|
+    #  #Rails.logger.info "Length is #{out_hash[k].size}"
+    #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    # end
+
+    download_filename = "#{analysis.name}_results.RData"
+    data_frame_name = 'results'
+
     require 'rserve/simpler'
     r = Rserve::Simpler.new
+
+    start_time = Time.now
+    logger.info 'starting creation of data frame'
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
-      %Q{
+      %{
             temp <- tempfile('rdata', tmpdir="/tmp")
             save('#{data_frame_name}', file = temp)
             Sys.chmod(temp, mode = "0777", use_umask = TRUE)
          }
     end
     tmp_filename = r.converse('temp')
+    logger.info "finished data frame: #{Time.now - start_time}"
 
     if File.exist?(tmp_filename)
       send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'

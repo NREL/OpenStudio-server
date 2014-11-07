@@ -1,0 +1,27 @@
+<h2>DenCity Metadata</h2>
+
+<table class="table table-striped">
+  <thead>
+  <tr>
+    <th>Metadata ID</th>
+    <th>Display Name</th>
+    <th>Datatype</th>
+    <th>Units</th>
+  <tr>
+  </thead>
+  <tbody>
+  <% @variables.each do |v| %>
+    <tr>
+      <td><%= v.metadata_id %></td>
+      <td><%= v.display_name %></td>
+      <td><%= v.data_type %></td>
+      <td><%= v.units %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<div class="save-btn">
+  <p>Note: Only SI Units can be used as DenCity metadata.</p>
+  <%= link_to "Download DenCity Metadata (csv)", download_metadata_path(format: :csv), class: "btn btn-primary" %>
+</div>

@@ -10,12 +10,12 @@ default_attributes(
         :prefix_bin => "/usr/local/bin",
         :make_opts => ["-j4"],
         :r_environment_site => {
-            :rubylib => "/usr/local/lib/ruby/site_ruby/2.0.0",
-            :path_additions => ["/usr/local/radiance/bin", "/usr/local/rbenv/shims"]
+            :rubylib => "/usr/local/lib/site_ruby/2.0.0",
+            :path_additions => ["/usr/local/radiance/bin", "/opt/rbenv/shims"]
         },
         :libraries => [
             {
-                :name => "snow"
+	            :name => 'snow',
             },
             {
                 :name => "Rserve"
@@ -75,15 +75,24 @@ default_attributes(
                 :name => "rgenoud"
             },
             {
-                :name => "snowFT"
-            },
-            {
                 :name => "doParallel"
+            },
+			{
+                :name => "conf.design"
+            },
+			{
+                :name => "vcd"
+            },
+			{
+                :name => "combinat"
+            },
+			{
+                :name => "DoE.base"
             },
             {
                 :name => 'NRELmoo',
                 :package_path => "/data/R-packages",
-                :version => '1.2.4',
+                :version => '1.2.5',
                 :update_method => 'always_update'
             },
             {
@@ -107,4 +116,3 @@ run_list(
         "recipe[r::default]",
         "recipe[r::rserve]",
     ])
-

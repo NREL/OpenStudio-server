@@ -1,0 +1,25 @@
+<h2>Paretos &mdash; <% if @paretos.count > 0 %><%= link_to @paretos.first.analysis.display_name, analysis_path(@paretos.first.analysis) %><% end %></h2>
+
+<% if @paretos.count > 0 %>
+  <table class="table table-striped">
+    <tr>
+      <th>Name</th>
+      <th>X</th>
+      <th>Y</th>
+      <th>Actions</th>
+    </tr>
+
+  <% @paretos.each do |pareto| %>
+    <tr>
+      <td><%= link_to pareto.name, pareto %></td>
+      <td><%= pareto.x_var %></td>
+      <td><%= pareto.y_var %></td>
+      <td><%= link_to 'Edit', edit_pareto_path(pareto) %> | <%= link_to 'Destroy', pareto, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    </tr>
+  <% end %>
+  </table>
+<% else %>
+
+  <p>There are no paretos saved for this analysis.</p>
+<% end %>
+

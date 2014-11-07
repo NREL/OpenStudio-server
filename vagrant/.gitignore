@@ -1,3 +1,4 @@
 Gemfile.lock
+Berksfile.lock
 .bundle
 /*.json
