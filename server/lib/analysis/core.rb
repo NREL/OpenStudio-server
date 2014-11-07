@@ -86,7 +86,38 @@ module Analysis::Core
   def discretize_variables
   end
 
-  # I put this here expecting to put the child download process here... need to move it eventually
+  # Initialize the analysis and report the data back to the database
+  #   analysis: mongoid object which contains the analysis
+  #   analysis_job_id: the Delayed Job ID that was given when the analysis was started
+  #   options: the options array that is passed into the analysis (merged with defaults)
+  def initialize_analysis_job(analysis, analysis_job_id, options)
+    analysis_job = Job.find(analysis_job_id)
+    analysis.run_flag = true
+
+    # add in the default problem/algorithm options into the analysis object
+    # anything at at the root level of the options are not designed to override the database object.
+    analysis.problem = options[:problem].deep_merge(analysis.problem)
+
+    # save other run information in another object in the analysis
+    analysis_job.start_time = Time.now
+    analysis_job.status = 'started'
+    analysis_job.run_options =  options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    analysis_job.save!
+
+    # Clear out any former results on the analysis
+    analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    analysis.results[self.class.to_s.split('::').last.underscore] = {}
+
+    # save all the changes into the database
+    analysis.save!
+
+    # return the analysis job db object
+    analysis_job
+  end
+
+  module_function :initialize_analysis_job
+
+  # Submodule to handle the background tasks
   module BackgroundTasks
     require 'childprocess'
 
