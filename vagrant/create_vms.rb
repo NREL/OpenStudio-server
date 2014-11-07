@@ -25,6 +25,9 @@ require 'github'
 require 'securerandom'
 require 'pp'
 
+# Add ChefDK to path -- assuming linux only right now
+ENV['PATH'] = "/opt/chefdk/bin:#{ENV['PATH']}"
+
 @options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: create_vms [options]"
