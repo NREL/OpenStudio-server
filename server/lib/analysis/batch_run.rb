@@ -17,27 +17,12 @@ class Analysis::BatchRun
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
-    # get the analysis and report that it is running
     @analysis = Analysis.find(@analysis_id)
-    @analysis_job = Job.find(@analysis_job_id)
-    @analysis.run_flag = true
 
-    # add in the default problem/algorithm options into the analysis object
-    # anything at at the root level of the options are not designed to override the database object.
-    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
+    # get the analysis and report that it is running
+    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
-    # save other run information in another object in the analysis
-    @analysis_job.start_time = Time.now
-    @analysis_job.status = 'started'
-    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
-    @analysis_job.save!
-
-    # Clear out any former results on the analysis
-    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
-
-    # save all the changes into the database and reload the object (which is required)
-    @analysis.save!
+    # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
@@ -55,9 +40,8 @@ class Analysis::BatchRun
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
-
     if @options[:data_points].empty?
-      Rails.logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
+      Rails.logger.info 'No data points were passed into the options, therefore checking which data points to run'
       @analysis.data_points.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid).each do |dp|
         Rails.logger.info "Adding in #{dp.uuid}"
         dp.status = 'queued'
@@ -94,6 +78,7 @@ class Analysis::BatchRun
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
           %{
             clusterEvalQ(cl,library(RMongo))
+
             f <- function(x){
               mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
@@ -129,7 +114,7 @@ class Analysis::BatchRun
             print(paste("Number of datapoints:",nrow(dps)))
 
             results <- parLapply(cl, dps[,1], f)
-      # For verbose logging you can print the results using `print(results)`
+            # For verbose logging you can print the results using `print(results)`
           }
         end
       else
@@ -140,7 +125,6 @@ class Analysis::BatchRun
       unless cluster.finalize_workers(worker_ips, @analysis.id)
         fail 'could not run finalize worker scripts'
       end
-
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
