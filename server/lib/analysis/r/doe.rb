@@ -4,7 +4,6 @@ module Analysis::R
       @r = r_session
 
       @r.converse 'library(DoE.base)'
-      @r.converse 'library(plyr)'
       @r.converse 'library(lhs)'
     end
 
