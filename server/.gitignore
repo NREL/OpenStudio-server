@@ -23,3 +23,5 @@
 /spec/reports
 /*.pem
 /*.json
+
+vendor/cache

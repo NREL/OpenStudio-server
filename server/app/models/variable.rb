@@ -6,8 +6,7 @@ class Variable
   field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :r_index, type: Integer
   field :version_uuid, type: String # pointless at this time
-  field :name, type: String # machine name
-  field :name_with_measure, type: String
+  field :name, type: String # machine name (with attached measure id)
   field :metadata_id, type: String, default: nil # link to dencity taxonomy
   field :display_name, type: String, default: ''
   field :display_name_short, type: String, default: ''
@@ -57,7 +56,7 @@ class Variable
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
-  # Create a new variable based on the OS Variable Metadata
+
   def self.create_from_os_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
     if var
@@ -65,7 +64,7 @@ class Variable
     else
       Rails.logger.info "create new variable for os_json['uuid']"
       var = Variable.find_or_create_by(analysis_id: analysis_id, uuid: os_json['uuid'])
-      Rails.lgger.info var.inspect
+      Rails.logger.info var.inspect
     end
 
     exclude_fields = %w(uuid type)
@@ -185,15 +184,17 @@ class Variable
       end
     end
 
-    # override the variable name to be the measure uuid and the argument name
+    # override the variable name to be the measure name and the argument name
+    # note that the measure.name should be unique
     if os_json['variable'] || os_json['pivot']
       # Creates a unique ID for this measure
-      var.name = "#{measure.id}.#{os_json['argument']['name']}"
-
-      # A not necessarily unique id, but close enough
-      var.name_with_measure = "#{measure.name}.#{os_json['argument']['name']}"
+      Rails.logger.info "Setting variable name to: '#{measure.name}.#{os_json['argument']['name']}'"
+      var.name = "#{measure.name}.#{os_json['argument']['name']}"
     else
-      var.name_with_measure = "#{measure.name}.#{var.name}"
+      # Just register a note when this is a static argument
+      Rails.logger.info "Static variable argument: '#{measure.name}.#{var.name}'"
+      #var.name = "#{measure.name}.#{var.name}"
+      #var.name_with_measure = "#{measure.name}.#{var.name}"
     end
 
     var.save!
@@ -241,7 +242,7 @@ class Variable
   def self.get_variable_data_v2(analysis)
     # get all variables for analysis
     save_fields = [
-      :measure_id, :name, :name_with_measure, :display_name, :display_name_short, :metadata_id, :value_type, :units,
+      :measure_id, :name, :display_name, :display_name_short, :metadata_id, :value_type, :units,
       :perturbable, :pivot, :output, :visualize, :export, :static_value, :minimum, :maximum,
       :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
