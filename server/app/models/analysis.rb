@@ -39,10 +39,7 @@ class Analysis
   has_many :algorithms
   has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
   has_many :measures
-
   has_many :paretos
-  # has_many :problems
-
   has_many :jobs
 
   # Indexes

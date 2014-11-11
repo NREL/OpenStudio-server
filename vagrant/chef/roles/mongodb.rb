@@ -1,5 +1,5 @@
 name "mongodb"
-description "Install and configure mogno"
+description "Install and configure mongo"
 
 run_list([
              # Default iptables setup on all servers.
