@@ -256,19 +256,6 @@
           .attr('r', 4.5)
           .style('opacity', 1.0);     
 
-        // hidden text
-        var text = svg.append('text')
-            .attr('x', 250)
-            .attr('y', 150)
-            .attr('dy', '.35em')
-            .attr('text-anchor', 'middle')
-            .text("Charts are Awesome!")
-            .style('font-size', 30)
-            .style('fill', 'mediumSeaGreen')
-            .style('font-family', 'monospace')
-            .style('opacity', 0) // hidden
-        ;
-
         // plus fade in text
         text.transition()
                 .delay(3000)
