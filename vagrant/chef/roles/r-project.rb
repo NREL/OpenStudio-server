@@ -69,7 +69,9 @@ default_attributes(
                 :name => "mco"
             },
             {
-                :name => "rjson"
+                :name => "rjson",
+				:package_path => "/data/R-packages",
+				:version => '0.2.14'
             },
             {
                 :name => "rgenoud"
