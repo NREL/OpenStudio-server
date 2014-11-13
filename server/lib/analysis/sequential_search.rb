@@ -1,5 +1,5 @@
 class Analysis::SequentialSearch
-  include Analysis::Core # pivots and static vars
+  include Analysis::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -246,45 +246,12 @@ class Analysis::SequentialSearch
       data_point_list
     end
 
-    require 'rserve/simpler'
-    require 'childprocess'
+    @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis = Analysis.find(@analysis_id)
-    @analysis_job = Job.find(@analysis_job_id)
-    @analysis.run_flag = true
+    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
-    # add in the default problem/algorithm options into the analysis object
-    # anything at at the root level of the options are not designed to override the database object.
-    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
-
-    # save other run information in another object in the analysis
-    # save other run information in another object in the analysis
-    @analysis_job.start_time = Time.now
-    @analysis_job.status = 'started'
-    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
-    @analysis_job.save!
-
-    # Clear out any former results on the analysis
-    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
-
-    # save all the changes into the database and reload the object (which is required)
-    @analysis.save!
-    @analysis.reload
-
-    # merge in the output variables and objective functions into the analysis object which are needed for problem execution
-    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
-    @analysis.output_variables.uniq!
-
-    # verify that the objective_functions are unique
-    @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
-
-    # some algorithm specific data to be stored in the database
-    @analysis['iteration'] = @iteration
-
-    # save the algorithm specific updates
-    @analysis.save!
+    # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # get static variables.  These must be applied after the pivot vars and before the lhs

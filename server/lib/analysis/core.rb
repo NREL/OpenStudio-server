@@ -108,6 +108,21 @@ module Analysis::Core
     analysis.results ||= {} # make sure that the analysis results is a hash and exists
     analysis.results[self.class.to_s.split('::').last.underscore] = {}
 
+    # merge in the output variables and objective functions into the analysis object which are needed for problem execution
+    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
+    @analysis.output_variables.uniq!
+
+    # verify that the objective_functions are unique
+    if @analysis.problem['algorithm'] &&  @analysis.problem['algorithm']['objective_functions']
+      @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
+    end
+
+
+    # some algorithm specific data to be stored in the database
+    # TODO: I have a feeling that this is not initalized in some cases -- so lazily initializing here
+    @iteration ||= -1
+    @analysis['iteration'] = @iteration
+
     # save all the changes into the database
     analysis.save!
 

@@ -74,6 +74,7 @@ class Analysis::BatchRunft
       process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
 
       if cluster.start(worker_ips)
+        cluster_started = true
         Rails.logger.info "Time flag was set to #{cluster_started}"
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
           %{
