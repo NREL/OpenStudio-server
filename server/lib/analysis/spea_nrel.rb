@@ -103,7 +103,6 @@ class Analysis::SpeaNrel
     Rails.logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
-    cluster_started = false
     cluster = nil
     process = nil
     begin
@@ -129,8 +128,7 @@ class Analysis::SpeaNrel
       Rails.logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        cluster_started = true
-        Rails.logger.info "Time flag was set to #{cluster_started}"
+        Rails.logger.info "Cluster Started flag is #{cluster.started}"
 
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
@@ -244,7 +242,7 @@ class Analysis::SpeaNrel
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster && cluster_started
+      cluster.stop if cluster
 
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')

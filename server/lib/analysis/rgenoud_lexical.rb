@@ -51,7 +51,6 @@ class Analysis::RgenoudLexical
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for genoud Run'
     @r.converse('setwd("/mnt/openstudio")')
-    @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
 
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
@@ -124,7 +123,6 @@ class Analysis::RgenoudLexical
     # Rails.logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
-    cluster_started = false
     cluster = nil
     process = nil
     begin
@@ -150,8 +148,7 @@ class Analysis::RgenoudLexical
       Rails.logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        cluster_started = true
-        Rails.logger.info "Time flag was set to #{cluster_started}"
+        Rails.logger.info "Cluster Started flag is #{cluster.started}"
         # maxit is the max number of iterations to calculate
         # varNo is the number of variables (ncol(vars))
         # popsize is the number of sample points in the variable (nrow(vars))
@@ -367,7 +364,7 @@ class Analysis::RgenoudLexical
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster && cluster_started
+      cluster.stop if cluster
 
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')

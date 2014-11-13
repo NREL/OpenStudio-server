@@ -49,10 +49,6 @@ class Analysis::NsgaNrel
     Rails.logger.info 'Setting up R for NSGA2 Run'
     @r.converse('setwd("/mnt/openstudio")')
 
-    # BRIAN CHECK THIS HERE!
-    # @r.converse('Sys.setenv(RUBYLIB="/usr/local/lib/ruby/site_ruby/2.0.0")')
-    # @r.converse("Sys.setenv(RUBYLIB='#{RUBY_BIN_DIR}')")
-
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
     # R libraries needed for this algorithm
@@ -137,7 +133,6 @@ class Analysis::NsgaNrel
     Rails.logger.info("variable types are #{var_types}")
 
     # Initialize some variables that are in the rescue/ensure blocks
-    cluster_started = false
     cluster = nil
     process = nil
     begin
@@ -163,8 +158,7 @@ class Analysis::NsgaNrel
       Rails.logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        cluster_started = true
-        Rails.logger.info "Time flag was set to #{cluster_started}"
+        Rails.logger.info "Cluster Started flag is #{cluster.started}"
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
@@ -415,7 +409,7 @@ class Analysis::NsgaNrel
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster && cluster_started
+      cluster.stop if cluster
 
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
