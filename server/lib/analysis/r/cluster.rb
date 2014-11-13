@@ -3,7 +3,7 @@ require 'rserve/simpler'
 module Analysis::R
   class Cluster
     attr_reader :started
-    
+
     def initialize(r_session, analysis_id)
       @r = r_session
       @analysis_id = analysis_id

@@ -101,7 +101,6 @@ class Analysis::Deoptim
     Rails.logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
-    cluster_started = false
     cluster = nil
     process = nil
     begin
@@ -124,8 +123,7 @@ class Analysis::Deoptim
       process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
 
       if cluster.start(worker_ips)
-        cluster_started = true
-        Rails.logger.info "Time flag was set to #{cluster_started}"
+        Rails.logger.info "Cluster Started flag is #{cluster.started}"
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
@@ -246,7 +244,7 @@ class Analysis::Deoptim
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster && cluster_started
+      cluster.stop if cluster
 
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
