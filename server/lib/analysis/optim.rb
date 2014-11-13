@@ -1,5 +1,6 @@
 # Non Sorting Genetic Algorithm
 class Analysis::Optim
+  include Analysis::Core
   include Analysis::R
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -35,46 +36,12 @@ class Analysis::Optim
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
-    # add into delayed job
-    require 'rserve/simpler'
-    require 'childprocess'
+    @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis = Analysis.find(@analysis_id)
-    @analysis_job = Job.find(@analysis_job_id)
-    @analysis.run_flag = true
+    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
-    # add in the default problem/algorithm options into the analysis object
-    # anything at at the root level of the options are not designed to override the database object.
-    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
-
-    # save other run information in another object in the analysis
-    # save other run information in another object in the analysis
-    @analysis_job.start_time = Time.now
-    @analysis_job.status = 'started'
-    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
-    @analysis_job.save!
-
-    # Clear out any former results on the analysis
-    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
-
-    # save all the changes into the database and reload the object (which is required)
-    @analysis.save!
-    @analysis.reload
-
-    # merge in the output variables and objective functions into the analysis object which are needed for problem execution
-    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
-    @analysis.output_variables.uniq!
-
-    # verify that the objective_functions are unique
-    @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
-
-    # some algorithm specific data to be stored in the database
-    @analysis['iteration'] = @iteration
-
-    # save the algorithm specific updates
-    @analysis.save!
+    # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
@@ -142,6 +109,16 @@ class Analysis::Optim
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
+    if samples.empty? || samples.size < 1
+      Rails.logger.info 'No variables were passed into the options, therefore exit'
+      fail "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
+    end
+
+    unless var_types.all? { |t| t.downcase == 'continuous' }
+      Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
+      fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+    end
+
     Rails.logger.info "mins_maxes: #{mins_maxes}"
     Rails.logger.info "var_names: #{var_names}"
 
@@ -153,41 +130,30 @@ class Analysis::Optim
     cluster = nil
     process = nil
     begin
-      if samples.empty? || samples.size < 1
-        Rails.logger.info 'No variables were passed into the options, therefore exit'
-        fail "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
-      end
-
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
-      if !cluster.configure(master_ip)
+      unless cluster.configure(master_ip)
         fail 'could not configure R cluster'
-      else
-        Rails.logger.info 'Successfuly configured cluster'
+      end
+
+      # Initialize each worker node
+      worker_ips = ComputeNode.worker_ips
+      Rails.logger.info "Worker node ips #{worker_ips}"
+
+      Rails.logger.info 'Running initialize worker scripts'
+      unless cluster.initialize_workers(worker_ips, @analysis.id)
+        fail 'could not run initialize worker scripts'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
-      # log_file = File.join(Rails.root,"log/download.log")
-      # Rails.logger.info("Log file is: #{log_file}")
-      process.io.inherit!
-      # process.io.stdout = process.io.stderr = File.open(log_file,'a+')
-      process.cwd = Rails.root # set the child's working directory where the bundler will execute
-      Rails.logger.info('Starting Child Process')
-      process.start
+      process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
 
       worker_ips = ComputeNode.worker_ips
       Rails.logger.info "Found the following good ips #{worker_ips}"
 
-      cluster_started = cluster.start(worker_ips)
-      Rails.logger.info "Time flag was set to #{cluster_started}"
-
-      unless var_types.all? { |t| t.downcase == 'continuous' }
-        Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
-        fail "Must have all continous variables to run algorithm.  Found #{var_types}"
-      end
-
-      if cluster_started
+      if cluster.start(worker_ips)
+        cluster_started = true
+        Rails.logger.info "Time flag was set to #{cluster_started}"
         # maxit is the max number of iterations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
@@ -228,7 +194,7 @@ class Analysis::Optim
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
@@ -325,7 +291,7 @@ class Analysis::Optim
               obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
               print(paste("Objective function Norm:",obj))
 
-                mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+                mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
            flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
            print(paste("exit_on_guideline14: ",flag))
 
@@ -435,6 +401,11 @@ class Analysis::Optim
         end
       else
         fail 'could not start the cluster (most likely timed out)'
+      end
+
+      Rails.logger.info 'Running finalize worker scripts'
+      unless cluster.finalize_workers(worker_ips, @analysis.id)
+        fail 'could not run finalize worker scripts'
       end
 
     rescue => e
