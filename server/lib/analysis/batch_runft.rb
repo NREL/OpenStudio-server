@@ -51,7 +51,6 @@ class Analysis::BatchRunft
     end
 
     # Initialize some variables that are in the rescue/ensure blocks
-    cluster_started = false
     cluster = nil
     process = nil
     begin
@@ -74,8 +73,7 @@ class Analysis::BatchRunft
       process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
 
       if cluster.start(worker_ips)
-        cluster_started = true
-        Rails.logger.info "Time flag was set to #{cluster_started}"
+        Rails.logger.info "Time flag was set to #{cluster.started}"
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
           %{
             clusterEvalQ(cl,library(RMongo))
@@ -133,7 +131,7 @@ class Analysis::BatchRunft
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster && cluster_started
+      cluster.stop if cluster
 
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')

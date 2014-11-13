@@ -2,9 +2,12 @@ require 'rserve/simpler'
 
 module Analysis::R
   class Cluster
+    attr_reader :started
+    
     def initialize(r_session, analysis_id)
       @r = r_session
       @analysis_id = analysis_id
+      @started = false
 
       # load the required libraries for cluster management
       @r.converse "print('Configuring R Cluster - Loading Libraries')"
@@ -91,7 +94,8 @@ module Analysis::R
         }
       end
 
-      @r.converse('timeflag')
+      @started = @r.converse('timeflag')
+      @started
     end
 
     # generic method to execute the worker init/finalize methods
@@ -148,15 +152,18 @@ module Analysis::R
     end
 
     def stop
-      @r.command do
-        %{
-            print("Stopping cluster...")
-            stopCluster(cl)
-            print("Cluster stopped")
-          }
+      if @started
+        @r.command do
+          %{
+              print("Stopping cluster...")
+              stopCluster(cl)
+              print("Cluster stopped")
+            }
+        end
       end
 
       # TODO: how to test if it successfully stopped the cluster
+      @started = false
       true
     end
   end
