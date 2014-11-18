@@ -232,11 +232,6 @@ class Analysis::Deoptim
         fail 'could not start the cluster (most likely timed out)'
       end
 
-      Rails.logger.info 'Running finalize worker scripts'
-      unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
-      end
-
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
@@ -250,6 +245,11 @@ class Analysis::Deoptim
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
 
+      Rails.logger.info 'Running finalize worker scripts'
+      unless cluster.finalize_workers(worker_ips, @analysis.id)
+        fail 'could not run finalize worker scripts'
+      end	  
+	  
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
