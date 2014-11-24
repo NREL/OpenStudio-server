@@ -2,11 +2,10 @@ GEM
   remote: http://rubygems.org/
   specs:
     CFPropertyList (2.2.8)
-    aasm (3.1.1)
-    activemodel (3.2.19)
-      activesupport (= 3.2.19)
+    activemodel (3.2.21)
+      activesupport (= 3.2.21)
       builder (~> 3.0.0)
-    activesupport (3.2.19)
+    activesupport (3.2.21)
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
     builder (3.0.4)
@@ -20,7 +19,7 @@ GEM
     delayed_job_mongoid (2.1.0)
       delayed_job (>= 3.0, < 5)
       mongoid (>= 3.0, < 5)
-    facter (2.2.0)
+    facter (2.0.2)
       CFPropertyList (~> 2.2.6)
     i18n (0.6.11)
     libxml-ruby (2.7.0)
@@ -37,11 +36,12 @@ GEM
     moped (1.5.2)
     msgpack (0.5.9)
     multi_json (1.10.1)
-    oj (2.10.4)
-    openstudio-workflow (0.0.2)
-      aasm (~> 3.1.1)
+    oj (2.11.1)
+    openstudio-workflow (0.0.3)
       colored (~> 1.2)
+      facter (~> 2.0.2)
       multi_json (~> 1.10.0)
+      zip (~> 2.0.2)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -55,6 +55,7 @@ GEM
     tzinfo (0.3.42)
     uuid (2.3.7)
       macaddr (~> 1.0)
+    zip (2.0.2)
 
 PLATFORMS
   ruby
@@ -68,7 +69,7 @@ DEPENDENCIES
   msgpack
   multi_json
   oj
-  openstudio-workflow (= 0.0.2)
+  openstudio-workflow (= 0.0.3)
   os
   paperclip (~> 4.1.1)
   parallel

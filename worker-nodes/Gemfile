@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 #gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'master'
-gem 'openstudio-workflow', '0.0.2'
+gem 'openstudio-workflow', '0.0.3'
 #gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop'
 #gem 'openstudio-workflow', :path => '/data/OpenStudio-workflow'
 
