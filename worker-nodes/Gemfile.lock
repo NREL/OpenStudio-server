@@ -1,3 +1,15 @@
+GIT
+  remote: git://github.com/NREL/OpenStudio-workflow-gem.git
+  revision: 2683ccc467ef041c7c613c7056dfd8bb5392e334
+  branch: develop
+  specs:
+    openstudio-workflow (0.0.3)
+      colored (~> 1.2)
+      facter (~> 2.0.2)
+      multi_json (~> 1.10.0)
+      rubyXL (~> 3.3.0)
+      zip (~> 2.0.2)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -26,6 +38,7 @@ GEM
     macaddr (1.7.1)
       systemu (~> 2.6.2)
     mime-types (2.4.3)
+    mini_portile (0.6.1)
     mongoid (3.1.6)
       activemodel (~> 3.2)
       moped (~> 1.4)
@@ -36,12 +49,9 @@ GEM
     moped (1.5.2)
     msgpack (0.5.9)
     multi_json (1.10.1)
+    nokogiri (1.6.5)
+      mini_portile (~> 0.6.0)
     oj (2.11.1)
-    openstudio-workflow (0.0.3)
-      colored (~> 1.2)
-      facter (~> 2.0.2)
-      multi_json (~> 1.10.0)
-      zip (~> 2.0.2)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -51,6 +61,10 @@ GEM
       mime-types
     parallel (1.3.3)
     ruby-prof (0.15.2)
+    rubyXL (3.3.0)
+      nokogiri (>= 1.4.4)
+      rubyzip (>= 1.1.6)
+    rubyzip (1.1.6)
     systemu (2.6.4)
     tzinfo (0.3.42)
     uuid (2.3.7)
@@ -62,14 +76,14 @@ PLATFORMS
 
 DEPENDENCIES
   delayed_job_mongoid
-  facter
+  facter (= 2.0.2)
   libxml-ruby
   mongoid (~> 3.1.6)
   mongoid-paperclip
   msgpack
   multi_json
   oj
-  openstudio-workflow (= 0.0.3)
+  openstudio-workflow!
   os
   paperclip (~> 4.1.1)
   parallel
