@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rake', '~> 10.2'
+gem 'rake', '~> 10.4'
 gem 'rubocop', require: false
 gem 'rubocop-checkstyle_formatter', require: false
 gem 'git', '~> 1.2.6'
