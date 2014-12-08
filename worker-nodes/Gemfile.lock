@@ -1,14 +1,14 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: 2683ccc467ef041c7c613c7056dfd8bb5392e334
+  revision: e2020baa856633916a283f2c4437c2e7486ab481
   branch: develop
   specs:
-    openstudio-workflow (0.0.3)
+    openstudio-workflow (0.0.4)
       colored (~> 1.2)
       facter (~> 2.0.2)
       multi_json (~> 1.10.0)
       rubyXL (~> 3.3.0)
-      zip (~> 2.0.2)
+      rubyzip (~> 1.1.6)
 
 GEM
   remote: http://rubygems.org/
@@ -61,7 +61,7 @@ GEM
       mime-types
     parallel (1.3.3)
     ruby-prof (0.15.2)
-    rubyXL (3.3.0)
+    rubyXL (3.3.1)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
     rubyzip (1.1.6)
@@ -69,7 +69,6 @@ GEM
     tzinfo (0.3.42)
     uuid (2.3.7)
       macaddr (~> 1.0)
-    zip (2.0.2)
 
 PLATFORMS
   ruby
