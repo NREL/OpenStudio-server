@@ -4,7 +4,10 @@
 #
 
 # Ohai is the right way, but I can't figure it out right now--so install facter
-chef_gem 'facter'
+# Lock the version per https://github.com/NREL/OpenStudio-server/issues/18
+chef_gem 'facter' do
+  version '2.3.0'
+end
 
 require 'facter'
 
