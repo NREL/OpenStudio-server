@@ -20,7 +20,7 @@ depends 'build-essential'
 depends 'openstudio'
 depends 'rbenv'
 depends 'mongodb'
-depends 'apache2', '~> 2.0.0'
+depends 'apache2', '~> 3.0.0'
 depends 'passenger_apache2'
 
 
