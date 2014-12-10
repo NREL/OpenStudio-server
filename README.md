@@ -9,7 +9,7 @@ The preferred development approach for this application is to use Vagrant to pro
  
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
-[ChefDK]: https://downloads.getchef.com/chef-dk/ "ChefDK"
+[ChefDK]: https://downloads.chef.io/chef-dk/ "ChefDK"
 
 - Check out this git repo: see the instruction on the Wiki.  
 
