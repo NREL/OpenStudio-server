@@ -18,7 +18,7 @@ class Variable
   field :units, type: String
   field :discrete_values_and_weights
   field :data_type, type: String
-  field :value_type, type: String, default: nil # merge this with the above?
+  field :value_type, type: String, default: nil # TODO: merge this with the above?
   field :variable_index, type: Integer # for measure groups
   field :argument_index, type: Integer
   field :objective_function, type: Boolean, default: false
