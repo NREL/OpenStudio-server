@@ -9,13 +9,12 @@ run_list([
 default_attributes(
     # Use this for the official release versions
     :openstudio => {
-        :version => "1.5.3",
+        :version => "1.5.5",
         :installer => {
-            :origin => 'developer',
-            :version_revision => "bad56a6316",
-            :platform => "Linux-Ruby2.0"
+            :version_revision => "f6ccda50f0"
         }
     }
+
     # Use this for custom installations from any url
     #:openstudio => {
     #    :skip_ruby_install => true,
