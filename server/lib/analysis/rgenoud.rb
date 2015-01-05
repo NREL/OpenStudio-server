@@ -123,7 +123,6 @@ class Analysis::Rgenoud
       fail "Must have all continous variables to run algorithm.  Found #{var_types}"
     end
 
-
     Rails.logger.info "mins_maxes: #{mins_maxes}"
     Rails.logger.info "var_names: #{var_names}"
 
@@ -401,12 +400,12 @@ class Analysis::Rgenoud
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
-	  
+
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
         fail 'could not run finalize worker scripts'
       end
-	  
+
       # Post process the results and jam into the database
       best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json

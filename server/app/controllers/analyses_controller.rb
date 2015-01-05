@@ -683,7 +683,7 @@ class AnalysesController < ApplicationController
       or_qry << { :"#{k}" => v } if v
     end
     variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry)
-        .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
+                .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.', '|')] }]
@@ -741,7 +741,7 @@ class AnalysesController < ApplicationController
                                   status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
     else
       plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                    .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                  .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
     end
     logger.info "finished fixing up data: #{Time.now - start_time}"
 

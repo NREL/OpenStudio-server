@@ -60,7 +60,7 @@ class Analysis::Lhs
       Rails.logger.info 'Starting sampling'
       lhs = Analysis::R::Lhs.new(@r)
       if @analysis.problem['algorithm']['sample_method'] == 'all_variables' ||
-          @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
+         @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
         samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
         if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
           # Do the work to mash up the samples and pivot variables before creating the data points

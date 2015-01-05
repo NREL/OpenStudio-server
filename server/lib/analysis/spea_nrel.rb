@@ -247,7 +247,7 @@ class Analysis::SpeaNrel
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
         fail 'could not run finalize worker scripts'
-      end	  
+      end
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points

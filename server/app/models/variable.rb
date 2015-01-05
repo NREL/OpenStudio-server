@@ -56,7 +56,6 @@ class Variable
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
-
   def self.create_from_os_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
     if var
@@ -193,8 +192,8 @@ class Variable
     else
       # Just register a note when this is a static argument
       Rails.logger.info "Static variable argument: '#{measure.name}.#{var.name}'"
-      #var.name = "#{measure.name}.#{var.name}"
-      #var.name_with_measure = "#{measure.name}.#{var.name}"
+      # var.name = "#{measure.name}.#{var.name}"
+      # var.name_with_measure = "#{measure.name}.#{var.name}"
     end
 
     var.save!
