@@ -233,7 +233,7 @@ class DataPointsController < ApplicationController
 
       # Grab all the variables that have defined a measure ID and pull out the results
       vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '')
-          .order_by(:name.asc).as_json(only: [:name, :metadata_id])
+             .order_by(:name.asc).as_json(only: [:name, :metadata_id])
 
       dencity[:structure] = {}
       vars.each do |v|

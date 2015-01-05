@@ -23,7 +23,7 @@ class Measure
   index(name: 1)
   index(analysis_id: 1)
   index(analysis_id: 1, uuid: 1)
-  index({analysis_id: 1, name: 1}, unique: true)
+  index({ analysis_id: 1, name: 1 }, unique: true)
 
   # Callbacks
   after_create :verify_uuid

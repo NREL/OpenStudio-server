@@ -133,8 +133,8 @@ class Analysis::BatchRun
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
     end
-    
-	Rails.logger.info 'Running finalize worker scripts'
+
+    Rails.logger.info 'Running finalize worker scripts'
     unless cluster.finalize_workers(worker_ips, @analysis.id)
       fail 'could not run finalize worker scripts'
     end
