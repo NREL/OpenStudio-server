@@ -1,5 +1,5 @@
 class Analysis::SingleRun
-  include Analysis::Core # pivots and static vars
+  include Analysis::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
@@ -27,31 +27,12 @@ class Analysis::SingleRun
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
-    require 'rserve/simpler'
-    require 'childprocess'
+    @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis = Analysis.find(@analysis_id)
-    @analysis_job = Job.find(@analysis_job_id)
-    @analysis.run_flag = true
+    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
-    # add in the default problem/algorithm options into the analysis object
-    # anything at at the root level of the options are not designed to override the database object.
-    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
-
-    # save other run information in another object in the analysis
-    # save other run information in another object in the analysis
-    @analysis_job.start_time = Time.now
-    @analysis_job.status = 'started'
-    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
-    @analysis_job.save!
-
-    # Clear out any former results on the analysis
-    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
-
-    # save all the changes into the database and reload the object (which is required)
-    @analysis.save!
+    # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"

@@ -1,11 +1,11 @@
-source "https://supermarket.getchef.com"
+source 'https://supermarket.chef.io'
 
 # This will pull in many of the dependencies
-cookbook 'openstudio_server', path: "../chef/cookbooks/openstudio_server"
+cookbook 'openstudio_server', path: '../chef/cookbooks/openstudio_server'
 
 # Tell where to get some of the dependencies
-cookbook "openstudio", github: 'NREL-cookbooks/openstudio', protocol: 'ssh'
-cookbook "energyplus", github: 'NREL-cookbooks/energyplus', protocol: 'ssh'
-cookbook "ark", github: 'NREL-cookbooks/ark', protocol: 'ssh'
-cookbook "r", github: 'NREL-cookbooks/cookbook-r'
-cookbook "radiance", github: 'NREL-cookbooks/radiance'
+cookbook 'openstudio', github: 'NREL-cookbooks/openstudio', protocol: 'ssh'
+cookbook 'energyplus', github: 'NREL-cookbooks/energyplus', protocol: 'ssh'
+cookbook 'ark', github: 'NREL-cookbooks/ark', protocol: 'ssh'
+cookbook 'r', github: 'NREL-cookbooks/cookbook-r'
+cookbook 'radiance', github: 'NREL-cookbooks/radiance'

@@ -1,5 +1,6 @@
 # Non Sorting Genetic Algorithm
 class Analysis::SpeaNrel
+  include Analysis::Core
   include Analysis::R
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -44,46 +45,12 @@ class Analysis::SpeaNrel
   # Perform is the main method that is run in the background.  At the moment if this method crashes
   # it will be logged as a failed delayed_job and will fail after max_attempts.
   def perform
-    # add into delayed job
-    require 'rserve/simpler'
-    require 'childprocess'
+    @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis = Analysis.find(@analysis_id)
-    @analysis_job = Job.find(@analysis_job_id)
-    @analysis.run_flag = true
+    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
-    # add in the default problem/algorithm options into the analysis object
-    # anything at at the root level of the options are not designed to override the database object.
-    @analysis.problem = @options[:problem].deep_merge(@analysis.problem)
-
-    # save other run information in another object in the analysis
-    # save other run information in another object in the analysis
-    @analysis_job.start_time = Time.now
-    @analysis_job.status = 'started'
-    @analysis_job.run_options =  @options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
-    @analysis_job.save!
-
-    # Clear out any former results on the analysis
-    @analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    @analysis.results[self.class.to_s.split('::').last.underscore] = {}
-
-    # save all the changes into the database and reload the object (which is required)
-    @analysis.save!
-    @analysis.reload
-
-    # merge in the output variables and objective functions into the analysis object which are needed for problem execution
-    @options[:output_variables].reverse.each { |v| @analysis.output_variables.unshift(v) unless @analysis.output_variables.include?(v) }
-    @analysis.output_variables.uniq!
-
-    # verify that the objective_functions are unique
-    @analysis.problem['algorithm']['objective_functions'].uniq! if @analysis.problem['algorithm']['objective_functions']
-
-    # some algorithm specific data to be stored in the database
-    @analysis['iteration'] = @iteration
-
-    # save the algorithm specific updates
-    @analysis.save!
+    # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
@@ -127,42 +94,42 @@ class Analysis::SpeaNrel
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['number_of_samples'])
 
+    if samples.empty? || samples.size <= 1
+      Rails.logger.info 'No variables were passed into the options, therefore exit'
+      fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+    end
+
     # Result of the parameter space will be column vectors of each variable
     Rails.logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
-    cluster_started = false
     cluster = nil
     process = nil
     begin
-      if samples.empty? || samples.size <= 1
-        Rails.logger.info 'No variables were passed into the options, therefore exit'
-        fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
-      end
-
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
         fail 'could not configure R cluster'
       end
 
+      # Initialize each worker node
+      worker_ips = ComputeNode.worker_ips
+      Rails.logger.info "Worker node ips #{worker_ips}"
+
+      Rails.logger.info 'Running initialize worker scripts'
+      unless cluster.initialize_workers(worker_ips, @analysis.id)
+        fail 'could not run initialize worker scripts'
+      end
+
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{@analysis.id}]", "RAILS_ENV=#{Rails.env}")
-      # log_file = File.join(Rails.root,"log/download.log")
-      # Rails.logger.info("Log file is: #{log_file}")
-      process.io.inherit!
-      # process.io.stdout = process.io.stderr = File.open(log_file,'a+')
-      process.cwd = Rails.root # set the child's working directory where the bundler will execute
-      Rails.logger.info('Starting Child Process')
-      process.start
+      process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
 
       worker_ips = ComputeNode.worker_ips
       Rails.logger.info "Found the following good ips #{worker_ips}"
 
-      cluster_started = cluster.start(worker_ips)
-      Rails.logger.info "Time flag was set to #{cluster_started}"
+      if cluster.start(worker_ips)
+        Rails.logger.info "Cluster Started flag is #{cluster.started}"
 
-      if cluster_started
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
@@ -181,14 +148,14 @@ class Analysis::SpeaNrel
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("os_dev", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
@@ -206,7 +173,7 @@ class Analysis::SpeaNrel
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_PATH}/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
@@ -271,12 +238,16 @@ class Analysis::SpeaNrel
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster && cluster_started
+      cluster.stop if cluster
 
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
 
+      Rails.logger.info 'Running finalize worker scripts'
+      unless cluster.finalize_workers(worker_ips, @analysis.id)
+        fail 'could not run finalize worker scripts'
+      end
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points

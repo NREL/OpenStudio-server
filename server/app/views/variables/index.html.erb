@@ -1,4 +1,4 @@
-<h2>Variables &mdash;  <%= link_to @variables.first.analysis.display_name, analysis_path(@variables.first.analysis) %></h2>
+<h2>Variables  <%#= link_to @variables.first.analysis, @variables.first.analysis.display_name, analysis_path(@variables.first.analysis) %></h2>
 
 <% if @variables && @variables.first %>
     <%= link_to 'Modify Variables', modify_analysis_variables_path(@variables.first.analysis) %>  |

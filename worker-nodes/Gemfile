@@ -1,10 +1,10 @@
 source 'http://rubygems.org'
 
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'master'
-# gem 'openstudio-workflow', :path => '/data/OpenStudio-workflow'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'EnergyPlus-8.2.0'
+# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'EnergyPlus-8.2.0'
 
 # Install other gems that are needed but not required by the workflow gem
-gem 'facter'
+gem 'facter', '2.0.2'
 gem 'ruby-prof'
 gem 'parallel'
 gem 'msgpack'

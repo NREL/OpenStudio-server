@@ -30,26 +30,26 @@ ENV['PATH'] = "/opt/chefdk/bin:#{ENV['PATH']}"
 
 @options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: create_vms [options]"
+  opts.banner = 'Usage: create_vms [options]'
   @options[:provider] = :vagrant
   @options[:version] = nil
 
-  opts.on("-p", "--provider [name_of_provider]", String, "Name of provider [vagrant of aws]") do |s|
+  opts.on('-p', '--provider [name_of_provider]', String, 'Name of provider [vagrant of aws]') do |s|
     @options[:provider] = s.to_sym
   end
 
   @options[:user_uuid] = SecureRandom.uuid
-  opts.on("-u", "--user-id [uuid]", String, "User UUID to know which AMI/Instances are yours") do |s|
+  opts.on('-u', '--user-id [uuid]', String, 'User UUID to know which AMI/Instances are yours') do |s|
     @options[:user_uuid] = s
   end
 
   @options[:list_amis] = false
-  opts.on("-l", "--list-amis", "Create AMI JSON lists") do |s|
+  opts.on('-l', '--list-amis', 'Create AMI JSON lists') do |_s|
     @options[:list_amis] = true
   end
 
   @options[:skip_terminate] = false
-  opts.on("-x", "--skip-terminate", "Do not terminate the instances") do |s|
+  opts.on('-x', '--skip-terminate', 'Do not terminate the instances') do |_s|
     @options[:skip_terminate] = true
   end
 
@@ -57,7 +57,7 @@ end.parse!
 puts "options = #{@options.inspect}"
 
 if @options[:list_amis]
-  puts "Listing available AMIs from AWS"
+  puts 'Listing available AMIs from AWS'
 
   require 'openstudio-aws'
 
@@ -66,42 +66,42 @@ if @options[:list_amis]
   json_version_1 = @aws.os_aws.create_new_ami_json(1)
   json_version_2 = @aws.os_aws.create_new_ami_json(2)
 
-  test_amis_filename = "amis_v1.json"
-  File.delete(test_amis_filename) if File.exists?(test_amis_filename)
+  test_amis_filename = 'amis_v1.json'
+  File.delete(test_amis_filename) if File.exist?(test_amis_filename)
   File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(json_version_1) }
 
-  test_amis_filename = "amis_v2.json"
-  File.delete(test_amis_filename) if File.exists?(test_amis_filename)
+  test_amis_filename = 'amis_v2.json'
+  File.delete(test_amis_filename) if File.exist?(test_amis_filename)
   File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(json_version_2) }
 
   exit 0
 end
 
 # Versioning (change these each build)
-require_relative "../server/lib/openstudio_server/version"
+require_relative '../server/lib/openstudio_server/version'
 
 @os_server_version = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 @os_version = nil
 @os_version_sha = nil
 
-os_role_file = "./chef/roles/openstudio.rb" # Grab the openstudio version out of the vagrant rols
-if File.exists?(os_role_file)
+os_role_file = './chef/roles/openstudio.rb' # Grab the openstudio version out of the vagrant rols
+if File.exist?(os_role_file)
   openstudio_role = File.read(os_role_file)
   json_string = openstudio_role.scan(/default_attributes\((.*)\)/m).first.join
   json_obj = eval("{ #{json_string} }")
   @os_version = json_obj[:openstudio][:version]
   @os_version_sha = json_obj[:openstudio][:installer][:version_revision]
 else
-  raise "Could not find OpenStudio.rb chef role in #{os_role_file}"
+  fail "Could not find OpenStudio.rb chef role in #{os_role_file}"
 end
 
 puts "OpenStudio Server Version is: #{@os_server_version}"
 puts "OpenStudio Version is: #{@os_version}"
 puts "OpenStudio SHA is: #{@os_version_sha}"
-fail "OpenStudio Version / SHA is empty" if @os_version_sha.nil? || @os_version.nil?
+fail 'OpenStudio Version / SHA is empty' if @os_version_sha.nil? || @os_version.nil?
 
-test_amis_filename = "test_amis_openstudio.json"
-File.delete(test_amis_filename) if File.exists?(test_amis_filename)
+test_amis_filename = 'test_amis_openstudio.json'
+File.delete(test_amis_filename) if File.exist?(test_amis_filename)
 
 start_time = Time.now
 puts "Lauching #{__FILE__} with provider: #{@options[:provider]}"
@@ -111,24 +111,24 @@ begin
 
     # check to make sure the right vagrant plugins are installed
     r = `vagrant plugin list | grep 'vagrant-aws (0.5.0)'`
-    raise "Could not find AWS plugin. Run 'vagrant plugin install vagrant-aws'" unless r
+    fail "Could not find AWS plugin. Run 'vagrant plugin install vagrant-aws'" unless r
 
     r = `vagrant plugin list | grep 'vagrant-awsinfo (0.0.8)'`
-    raise "Could not find AWS Info plugin. Run 'vagrant plugin install vagrant-awsinfo'" unless r
+    fail "Could not find AWS Info plugin. Run 'vagrant plugin install vagrant-awsinfo'" unless r
 
     r = `vagrant plugin list | grep 'vagrant-berkshelf (2.0.1)'`
-    raise "Could not find Berkshelf plugin. Run 'vagrant plugin install vagrant-berkshelf'" unless r
+    fail "Could not find Berkshelf plugin. Run 'vagrant plugin install vagrant-berkshelf'" unless r
 
     # read in the AWS config settings
-    filename = File.expand_path(File.join("~", ".aws", "config.yml"))
+    filename = File.expand_path(File.join('~', '.aws', 'config.yml'))
     if File.exist? filename
-      puts "Using new location style format"
+      puts 'Using new location style format'
       config = YAML.load(File.read(filename))
       AWS.config(
-          :access_key_id => config['access_key_id'],
-          :secret_access_key => config['secret_access_key'],
-          :region => config['region'],
-          :ssl_verify_peer => false
+          access_key_id: config['access_key_id'],
+          secret_access_key: config['secret_access_key'],
+          region: config['region'],
+          ssl_verify_peer: false
       )
     end
 
@@ -139,25 +139,25 @@ begin
   @vms = []
   if @options[:provider] == :vagrant
     @vms << {
-        id: 1, name: "server", postflight_script_1: "configure_vagrant_server.sh", error_message: "",
-        ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
+      id: 1, name: 'server', postflight_script_1: 'configure_vagrant_server.sh', error_message: '',
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
     }
     @vms << {
-        id: 2, name: "worker", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
-        ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
+      id: 2, name: 'worker', postflight_script_1: 'configure_vagrant_worker.sh', error_message: '',
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
     }
-    #@vms << {
+    # @vms << {
     #    id: 3, name: "worker_2", postflight_script_1: "configure_vagrant_worker.sh", error_message: "",
     #    ami_name: "OpenStudio-Cluster OS-#{os_version} V#{os_server_version}"
-    #}
+    # }
   elsif @options[:provider] == :aws
     @vms << {
-        id: 1, name: "server", postflight_script_1: "setup-server-changes.sh", error_message: "",
-        ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
+      id: 1, name: 'server', postflight_script_1: 'setup-server-changes.sh', error_message: '',
+      ami_name: "OpenStudio-Server OS-#{@os_version} V#{@os_server_version}"
     }
     @vms << {
-        id: 2, name: "worker", postflight_script_1: "setup-worker-changes.sh", error_message: "",
-        ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
+      id: 2, name: 'worker', postflight_script_1: 'setup-worker-changes.sh', error_message: '',
+      ami_name: "OpenStudio-Worker OS-#{@os_version} V#{@os_server_version}"
     }
   end
 
@@ -167,9 +167,9 @@ begin
   class AllJobsInvalid < StandardError
   end
 
-  def system_call(command, &block)
+  def system_call(command, &_block)
     IO.popen(command) do |io|
-      while (line = io.gets) do
+      while (line = io.gets)
         yield line
       end
     end
@@ -184,11 +184,11 @@ begin
     success = true
     $mutex.lock
     begin
-      Timeout::timeout(4500) {
+      Timeout.timeout(4500) do
         puts "#{element[:id]}: starting process on #{element}"
         command = "cd ./#{element[:name]} && VAGRANT_AWS_USER_UUID=#{@options[:user_uuid]} vagrant up"
         if @options[:provider] == :aws
-          command += " --provider=aws"
+          command += ' --provider=aws'
         end
         exit_code = system_call(command) do |message|
           puts "#{element[:id]}: #{message}"
@@ -204,12 +204,12 @@ begin
         end
         if exit_code != 0
           # this can happen when AWS isn't available or insufficient capacity in AWS
-          #InsufficientInstanceCapacity => Insufficient capacity.
+          # InsufficientInstanceCapacity => Insufficient capacity.
           success = false
           # $mutex.unlock if $mutex.owned?
           # raise AllJobsInvalid # call this after unlocking
         end
-      }
+      end
     rescue AllJobsInvalid
       # pass the exception through
       raise AllJobsInvalid
@@ -239,7 +239,7 @@ begin
     success = true
     $mutex.lock
     begin
-      Timeout::timeout(4500) {
+      Timeout.timeout(4500) do
         puts "#{element[:id]}: entering provisioning (which requires syncing folders)"
         command = "cd ./#{element[:name]} && vagrant provision"
         exit_code = system_call(command) do |message|
@@ -251,13 +251,13 @@ begin
             puts "#{element[:id]}: machines already running -- go to vagrant provision"
             $mutex.unlock
           elsif message =~ /.*ERROR:/
-            puts "Error found during provisioning"
+            puts 'Error found during provisioning'
           end
         end
         if exit_code != 0
           success = false
         end
-      }
+      end
     rescue Timeout::Error
       # DO NOT raise an error if timeout, just timeout
       error = "#{element[:id]}: ERROR Timeout::Error running vagrant provision"
@@ -283,11 +283,11 @@ begin
   def run_vagrant_reload(element)
     $mutex.lock
     begin
-      Timeout::timeout(1800) {
+      Timeout.timeout(1800) do
         puts "#{element[:id]}: restarting instance using vagrant reload"
         command = "cd ./#{element[:name]} && vagrant reload"
         system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-      }
+      end
     rescue => e
       error = "Error running vagrant reload, #{e.message}"
       puts error
@@ -303,16 +303,16 @@ begin
     $mutex.lock
     puts "#{element[:id]}: Get instance id"
     begin
-      Timeout::timeout(300) {
+      Timeout.timeout(300) do
         command = "cd ./#{element[:name]} && vagrant awsinfo"
         # Make sure to grep for only the content return in the {}.  For some reason this command can output other
         # stuff ahead of what is needed
         cout = `#{command}`.scan(/\{.*\}/m).first
         r = JSON.parse cout
         element[:instance_id] = r['instance_id']
-      }
+      end
     rescue => e
-      error ="Error running get instance_id, #{e.message}: #{e.backtrace.join('\n')}"
+      error = "Error running get instance_id, #{e.message}: #{e.backtrace.join('\n')}"
       puts error
       element[:error_message] += error
       raise error
@@ -328,7 +328,7 @@ begin
       puts "#{element[:id]}: creating AMI #{element[:ami_name]}"
       i = @aws.images.create(instance_id: element[:instance_id], name: element[:ami_name])
       puts "#{element[:id]}: waiting for AMI to become available"
-      while (i.state != :available) && (i.state != :failed) do
+      while (i.state != :available) && (i.state != :failed)
         puts "#{element[:id]}: ..."
         sleep 5
       end
@@ -338,126 +338,123 @@ begin
       i = nil
     end
 
-    return i
+    i
   end
 
-  def process(element, &block)
-    begin
-      # Only starts the machine and mounts the drives, but does not call provision
-      run_vagrant_up(element)
+  def process(element, &_block)
+    run_vagrant_up(element)
 
-      # Call this up to 3 times
-      retries = 0
-      while true
-        retries += 1
-        if retries <= 3
-          success = run_vagrant_provision(element)
-          break if success
-        else
-          raise "ERROR reached maximum number of retries in vagrant provision"
-        end
+    # Call this up to 3 times
+    retries = 0
+    loop do
+      retries += 1
+      if retries <= 3
+        success = run_vagrant_provision(element)
+        break if success
+      else
+        fail 'ERROR reached maximum number of retries in vagrant provision'
       end
+    end
 
-      # run vagrant provision one more time to make sure that it completes (mainly to catch the passenger error)
-      # run_vagrant_provision(element)
+    # run vagrant provision one more time to make sure that it completes (mainly to catch the passenger error)
+    # run_vagrant_provision(element)
 
-      # Append the instance id to the element
-      if @options[:provider] == :aws
-        get_instance_id(element)
+    # Append the instance id to the element
+    if @options[:provider] == :aws
+      get_instance_id(element)
+    end
+
+    begin
+      Timeout.timeout(1200) do
+        # cleanup the box by calling the cleanup scripts
+        puts "#{element[:id]}: configuring the machines"
+        command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
+        system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+        command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/#{element[:postflight_script_1]}'"
+        system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+      end
+    rescue Exception => e
+      raise Timeout::Error, "Timeout::Error running initial cleanup, #{e.message}"
+    end
+
+    if @options[:provider] == :aws
+      # finish up AMI cleanup
+      begin
+        Timeout.timeout(1200) do
+          command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
+          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+          # This will remove the key from the instance.  Make sure that you run this last!
+          command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
+          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+        end
+      rescue Exception => e
+        raise Timeout::Error, "Timeout::Error running final cleanup, #{e.message}"
       end
 
       begin
-        Timeout::timeout(1200) {
-          # cleanup the box by calling the cleanup scripts
-          puts "#{element[:id]}: configuring the machines"
-          command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
-          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-          command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/#{element[:postflight_script_1]}'"
-          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-        }
+        Timeout.timeout(1800) do
+          i = create_ami(element)
+          # check if the ami was create--if not change the ami_name and rerun
+          if i.nil? || i.state == :failed
+            puts "#{element[:id]}: AMI creation failed, retrying"
+            retries = 0
+            while retries < 3
+              retries += 1
+
+              element[:ami_name] += Time.now.strftime(' %Y%m%d-%H%M%S')
+              i = create_ami(element)
+              # update the name of the ami in case the old one is still around
+              break if i && i.state == :available
+            end
+          end
+
+          if i
+            if i.state == :available
+              puts "#{element[:id]}: making new AMI public"
+              i.public = true
+              element[:ami_id] = i.image_id
+              i.add_tag('autobuilt')
+              i.add_tag('created', value: true)
+              i.add_tag('tested', value: false)
+              i.add_tag('created_on', value: Time.now)
+              i.add_tag('openstudio_server_version', value: @os_server_version)
+              i.add_tag('openstudio_version', value: @os_version)
+              i.add_tag('openstudio_version_sha', value: @os_version_sha)
+              i.add_tag('user_uuid', value: @options[:user_uuid])
+              puts "#{element[:id]}: finished creating AMI"
+            end
+          else
+            element[:error_message] += 'AMI did not get created'
+          end
+        end
       rescue Exception => e
-        raise Timeout::Error, "Timeout::Error running initial cleanup, #{e.message}"
+        raise "Error creating AMI. #{e.message}, #{e.backtrace}"
       end
+    end
 
-      if @options[:provider] == :aws
-        # finish up AMI cleanup
-        begin
-          Timeout::timeout(1200) {
-            command = "cd ./#{element[:name]} && vagrant ssh -c 'chmod +x /data/launch-instance/*.sh'"
-            system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-            # This will remove the key from the instance.  Make sure that you run this last!
-            command = "cd ./#{element[:name]} && vagrant ssh -c '/data/launch-instance/setup-final-changes.sh'"
-            system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-          }
-        rescue Exception => e
-          raise Timeout::Error, "Timeout::Error running final cleanup, #{e.message}"
-        end
+    # Do some testing the machines in the future, otherwise, if it got here it is assumed good
+    element[:good_ami] = true
+  rescue AllJobsInvalid
+    element[:good_ami] = false
+    element[:error_message] += 'One of the images failed, killing all threads'
 
-        begin
-          Timeout::timeout(1800) {
-            i = create_ami(element)
-            # check if the ami was create--if not change the ami_name and rerun
-            if i.nil? || i.state == :failed
-              puts "#{element[:id]}: AMI creation failed, retrying"
-              retries = 0
-              while retries < 3
-                retries += 1
-
-                element[:ami_name] += Time.now.strftime(" %Y%m%d-%H%M%S")
-                i = create_ami(element)
-                # update the name of the ami in case the old one is still around
-                break if i && i.state == :available
-              end
-            end
-
-            if i
-              if i.state == :available
-                puts "#{element[:id]}: making new AMI public"
-                i.public = true
-                element[:ami_id] = i.image_id
-                i.add_tag("autobuilt")
-                i.add_tag("created", :value => true)
-                i.add_tag("tested", :value => false)
-                i.add_tag("created_on", :value => Time.now)
-                i.add_tag("openstudio_server_version", :value => @os_server_version)
-                i.add_tag("openstudio_version", :value => @os_version)
-                i.add_tag("openstudio_version_sha", :value => @os_version_sha)
-                i.add_tag("user_uuid", :value => @options[:user_uuid])
-                puts "#{element[:id]}: finished creating AMI"
-              end
-            else
-              element[:error_message] += "AMI did not get created"
-            end
-          }
-        rescue Exception => e
-          raise "Error creating AMI. #{e.message}, #{e.backtrace}"
-        end
-      end
-
-      # Do some testing the machines in the future, otherwise, if it got here it is assumed good
-      element[:good_ami] = true
-    rescue AllJobsInvalid
-      element[:good_ami] = false
-      element[:error_message] += "One of the images failed, killing all threads"
-
-      puts "Found error in one of the images therefore killing all threads"
-      $threads.each { |t| t.exit }
-    rescue Exception => e
-      puts e.message
-      # make it clear that the setup is invalid
-      element[:good_ami] = false
-      element[:error_message] += "Exception message, #{e.message}, #{e.backtrace}"
-    ensure
-      # Be sure to alwys kill the instances if using AWS
-      if @options[:provider] == :aws
-        if @options[:skip_terminate]
-          puts "#{element[:id]}: skipping the termination of instance. Make sure to terminate manually"
-        else
-          puts "#{element[:id]}: terminating instance"
-          command = "cd ./#{element[:name]} && vagrant destroy -f"
-          system_call(command) { |message| puts "#{element[:id]}: #{message}" }
-          puts "#{element[:id]}: instance terminated and  thread"
-        end
+    puts 'Found error in one of the images therefore killing all threads'
+    $threads.each(&:exit)
+  rescue Exception => e
+    puts e.message
+    # make it clear that the setup is invalid
+    element[:good_ami] = false
+    element[:error_message] += "Exception message, #{e.message}, #{e.backtrace}"
+  ensure
+    # Be sure to alwys kill the instances if using AWS
+    if @options[:provider] == :aws
+      if @options[:skip_terminate]
+        puts "#{element[:id]}: skipping the termination of instance. Make sure to terminate manually"
+      else
+        puts "#{element[:id]}: terminating instance"
+        command = "cd ./#{element[:name]} && vagrant destroy -f"
+        system_call(command) { |message| puts "#{element[:id]}: #{message}" }
+        puts "#{element[:id]}: instance terminated and  thread"
       end
     end
   end
@@ -469,42 +466,42 @@ begin
       end
     end
   end
-  $threads.each { |t| t.join }
+  $threads.each(&:join)
 
   puts
-  puts "============================= AMI Information======================================="
+  puts '============================= AMI Information======================================='
   puts
   @vms.each do |vm|
     pp vm
   end
   puts
-  puts "===================================================================="
+  puts '===================================================================='
   puts
-  puts "===================================================================="
+  puts '===================================================================='
   puts
-  good_build = @vms.all? { |vm| vm[:good_ami] && vm[:error_message] == "" }
+  good_build = @vms.all? { |vm| vm[:good_ami] && vm[:error_message] == '' }
   if good_build
-    puts "All machines appear to be good"
+    puts 'All machines appear to be good'
 
     if @options[:provider] == :aws
       puts
-      puts "=========================== JSON ========================================="
+      puts '=========================== JSON ========================================='
       amis_hash = {}
       amis_hash[@os_version] = {}
-      amis_hash[@os_version]["server"] = @vms.select { |vm| vm[:name] == "server" }.first[:ami_id]
-      amis_hash[@os_version]["worker"] = @vms.select { |vm| vm[:name] == "worker" }.first[:ami_id]
+      amis_hash[@os_version]['server'] = @vms.select { |vm| vm[:name] == 'server' }.first[:ami_id]
+      amis_hash[@os_version]['worker'] = @vms.select { |vm| vm[:name] == 'worker' }.first[:ami_id]
       # Map the worker to the cc2worker for now until we deprecate the cc2s
       # amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker" }.first[:ami_id]
 
       puts JSON.pretty_generate(amis_hash)
 
-      puts "Saving ami infomration to file"
+      puts 'Saving ami infomration to file'
       outfile = File.join(File.dirname(__FILE__), test_amis_filename)
       # save it to a file for use in integration test
       File.open(outfile, 'w') { |f| f << JSON.pretty_generate(amis_hash) }
     end
   else
-    puts "AMIs had errors"
+    puts 'AMIs had errors'
     exit 1
   end
 ensure
