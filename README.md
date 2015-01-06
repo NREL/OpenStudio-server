@@ -5,12 +5,11 @@ The preferred development approach for this application is to use Vagrant to pro
 
 ## Instructions
 
-- Install [Vagrant], [VirtualBox], and [ChefDK]
-  *Note: There is a [known issue](https://github.com/mitchellh/vagrant/issues/2392) with VirtualBox 4.3.x that prevents the VM from launching correctly; use [4.2.x](https://www.virtualbox.org/wiki/Download_Old_Builds_4_2) instead.*
+- Install [Vagrant] *1.6.1*, [VirtualBox] *4.3.8*, and [ChefDK]
  
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
-[ChefDK]: https://downloads.getchef.com/chef-dk/ "ChefDK"
+[ChefDK]: https://downloads.chef.io/chef-dk/ "ChefDK"
 
 - Check out this git repo: see the instruction on the Wiki.  
 

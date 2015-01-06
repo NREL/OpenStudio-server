@@ -23,27 +23,67 @@ class Measure
   index(name: 1)
   index(analysis_id: 1)
   index(analysis_id: 1, uuid: 1)
-
-  # Validations
-  # validates_format_of :uuid, :with => /[^0-]+/
-  # validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
+  index({ analysis_id: 1, name: 1 }, unique: true)
 
   # Callbacks
   after_create :verify_uuid
 
-  # parse openstudio's json to get out the variables
+  # Parse Analysis JSON to pull out the measures and variables
+  # Format of JSON is typically
+  # {
+  #     "measure_definition_class_name": "AddOverhangsByProjectionFactor",
+  #     "measure_definition_directory": "./measures/AddOverhangsByProjectionFactor",
+  #     "measure_definition_display_name": "AddOverhangsByProjectionFactor",
+  #     "measure_definition_uuid": "a15669c4-2d37-4177-913c-f62bd8159c7a",
+  #     "measure_definition_version_uuid": "1de14091-ccb5-4dfd-8476-a3e4873af54b",
+  #     "measure_type": "RubyMeasure",
+  #     "arguments": [
+  #       {
+  #         "display_name": "Cardinal Direction",
+  #         "display_name_short": "Cardinal Direction",
+  #         "name": "facade",
+  #         "value": "East",
+  #         "value_type": "choice"
+  #       }
+  #     ]
+  #     "display_name": "Overhangs PF East",
+  #     "name": "overhangs_pf_east",
+  #     "variables": [
+  #       {
+  #         "argument": {
+  #           "display_name": "East Projection Factor",
+  #           "display_name_short": "East PF",
+  #           "name": "projection_factor",
+  #           "value_type": "double"
+  #         },
+  #         "display_name": "East Projection Factor",
+  #         "display_name_short": "East PF",
+  #         "maximum": 1.0,
+  #         "minimum": 0.0,
+  #         "relation_to_output": "",
+  #         "static_value": 0.0,
+  #         "uncertainty_description": {}
+  #       }
+  #     ],
+  #     "workflow_index": 8,
+  #     "workflow_step_type": "Measure",
+  #     "uuid": "657880ff-8a11-4e8a-ac71-935f26f89e48",
+  #     "version_uuid": "8fddf44c-3335-4908-a824-042eec210984"
+  #   }
   def self.create_from_os_json(analysis_id, os_json, pat_json)
-    # The UUID is a misnomer because in measure groups the exact same measure
-    # is copied over multiple times.  The BCL UUID is the actual unique ID IMO.
-    measure = Measure.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
+    # The UUID is a misnomer because in measure groups the exact same measure is copied over multiple times. The
+    # Unique ID is the anlaysis id and the name combined.
+    # **Measure names must be unique and enforced by whatever software is writing the JSON**
+    measure = Measure.where(analysis_id: analysis_id, name: os_json['name']).first
     if measure
-      Rails.logger.info("Measure already exists for analysis #{analysis_id} of #{measure.name} : #{measure.uuid}")
+      # since the index is unique, this should fail before this point
+      fail "Measure already exists for analysis #{analysis_id} of #{measure.name}"
     else
-      measure = Measure.find_or_create_by(analysis_id: analysis_id, uuid: os_json['uuid'])
-      Rails.logger.info("Creating new measure for analysis #{analysis_id} with uuid '#{measure.uuid}'")
+      measure = Measure.find_or_create_by(analysis_id: analysis_id, name: os_json['name'])
+      Rails.logger.info("Creating new measure for analysis #{analysis_id} with name '#{measure.name}'")
     end
 
-    Rails.logger.info("adding/updating measure #{measure.uuid} for analysis #{analysis_id}")
+    Rails.logger.info("Adding/updating measure #{measure.name} for analysis #{analysis_id}")
     i_measure = 0
     os_json.each do |k, v|
       exclude_fields = %w(arguments variables)

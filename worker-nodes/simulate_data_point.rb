@@ -85,7 +85,7 @@ begin
 
   workflow_options = nil
   if options[:run_workflow_method] == 'workflow_monthly' ||
-      options[:run_workflow_method] == 'run_openstudio_workflow_monthly.rb'
+     options[:run_workflow_method] == 'run_openstudio_workflow_monthly.rb'
     workflow_options = {
       datapoint_id: options[:uuid],
       analysis_root_path: analysis_dir,
@@ -96,7 +96,7 @@ begin
     }
 
   elsif options[:run_workflow_method] == 'workflow' ||
-      options[:run_workflow_method] == 'run_openstudio_workflow.rb'
+        options[:run_workflow_method] == 'run_openstudio_workflow.rb'
     workflow_options = {
       datapoint_id: options[:uuid],
       analysis_root_path: analysis_dir,
@@ -106,7 +106,7 @@ begin
       }
     }
   elsif options[:run_workflow_method] == 'custom_xml' ||
-      options[:run_workflow_method] == 'run_openstudio_xml.rb'
+        options[:run_workflow_method] == 'run_openstudio_xml.rb'
 
     # Set up the custom workflow states and transitions
     transitions = OpenStudio::Workflow::Run.default_transition
@@ -127,7 +127,7 @@ begin
       }
     }
   elsif options[:run_workflow_method] == 'pat_workflow' ||
-      options[:run_workflow_method] == 'run_openstudio.rb'
+        options[:run_workflow_method] == 'run_openstudio.rb'
     workflow_options = {
       is_pat: true,
       datapoint_id: options[:uuid],

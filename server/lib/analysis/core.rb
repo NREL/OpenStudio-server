@@ -1,5 +1,21 @@
+# Include these gems/libraries for all the analyses
+require 'childprocess'
+require 'rserve/simpler'
+
 # Core functions for analysis
 module Analysis::Core
+  def database_name
+    if Rails.env == 'development'
+      return 'os_dev'
+    elsif Rails.env == 'production'
+      return 'os_prod'
+    elsif Rails.env == 'test'
+      return 'os_test'
+    end
+  end
+
+  module_function :database_name
+
   # Take the samples and add in the pivots.  Each pivot variable
   # will get a full set of samples
   # take p = [{p1: 1}, {p1: 2}]
@@ -74,7 +90,71 @@ module Analysis::Core
   def discretize_variables
   end
 
-  # I put this here expecting to put the child download process here... need to move it eventually
+  # Initialize the analysis and report the data back to the database
+  #   analysis: mongoid object which contains the analysis
+  #   analysis_job_id: the Delayed Job ID that was given when the analysis was started
+  #   options: the options array that is passed into the analysis (merged with defaults)
+  def initialize_analysis_job(analysis, analysis_job_id, options)
+    analysis_job = Job.find(analysis_job_id)
+    analysis.run_flag = true
+
+    # add in the default problem/algorithm options into the analysis object
+    # anything at at the root level of the options are not designed to override the database object.
+    analysis.problem = options[:problem].deep_merge(analysis.problem)
+
+    # save other run information in another object in the analysis
+    analysis_job.start_time = Time.now
+    analysis_job.status = 'started'
+    analysis_job.run_options =  options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    analysis_job.save!
+
+    # Clear out any former results on the analysis
+    analysis.results ||= {} # make sure that the analysis results is a hash and exists
+    analysis.results[self.class.to_s.split('::').last.underscore] = {}
+
+    # merge in the output variables and objective functions into the analysis object which are needed for problem execution
+    if options[:output_variables]
+      options[:output_variables].reverse.each { |v| analysis.output_variables.unshift(v) unless analysis.output_variables.include?(v) }
+      analysis.output_variables.uniq!
+    end
+
+    # verify that the objective_functions are unique
+    if analysis.problem['algorithm'] &&  analysis.problem['algorithm']['objective_functions']
+      analysis.problem['algorithm']['objective_functions'].uniq! if analysis.problem['algorithm']['objective_functions']
+    end
+
+    # some algorithm specific data to be stored in the database
+    # TODO: I have a feeling that this is not initalized in some cases -- so lazily initializing here
+    @iteration ||= -1
+    analysis['iteration'] = @iteration
+
+    # save all the changes into the database
+    analysis.save!
+
+    # return the analysis job db object
+    analysis_job
+  end
+
+  module_function :initialize_analysis_job
+
+  # Submodule to handle the background tasks
   module BackgroundTasks
+    require 'childprocess'
+
+    # Start the child process to download results upon completion.
+    def start_child_processes(analysis_id)
+      p = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download[#{analysis_id}]", "RAILS_ENV=#{Rails.env}")
+      # log_file = File.join(Rails.root,"log/download.log")
+      # Rails.logger.info("Log file is: #{log_file}")
+      p.io.inherit!
+      # process.io.stdout = process.io.stderr = File.open(log_file,'a+')
+      p.cwd = Rails.root # set the child's working directory where the bundler will execute
+      Rails.logger.info('Starting Child Process')
+      p.start
+
+      p
+    end
+
+    module_function :start_child_processes
   end
 end

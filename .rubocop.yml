@@ -4,7 +4,6 @@ AllCops:
     - 'lib/**/*'
     - 'prototyping/**/*'
     - 'testing/**/*'
-    - 'vagrant/**/*'
 
 Rails/DefaultScope:
   Include:
@@ -35,30 +34,30 @@ Lint/UselessAssignment:
 
 # ==================== Styles ====================
 # Offense count: 4
-Style/BlockNesting:
+Metrics/BlockNesting:
   Max: 4
 
 # Offense count: 18
 # Configuration parameters: CountComments.
-Style/ClassLength:
+Metrics/ClassLength:
   Max: 500
 
 # Offense count: 27
-Style/CyclomaticComplexity:
+Metrics/CyclomaticComplexity:
   Max: 48
 
 # Offense count: 974
-Style/LineLength:
+Metrics/LineLength:
   Max: 1200
 
 # Offense count: 87
 # Configuration parameters: CountComments.
-Style/MethodLength:
+Metrics/MethodLength:
   Max: 350
 
 # Offense count: 1
 # Configuration parameters: CountKeywordArgs.
-Style/ParameterLists:
+Metrics/ParameterLists:
   Max: 8
 
 # ==================== Disabled on Purpose ====================
