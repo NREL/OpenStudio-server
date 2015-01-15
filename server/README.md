@@ -1,38 +1,21 @@
 # OpenStudio Rails Application
 
-## Description
-This is a bare bones rails installation and there are some quirks due to NREL/vagrant/ruby 2.0 that have yet to be ironed out. Also, most of this will get simplified in the near future, this is just the basics to get up-and-running.
-
 ## Instructions
-- Login to the vagrant box and start the rails server.  You also need to start delayed job for handing the R calls
+- Login to the vagrant box and configure the worker and server
+
+* Server
+
+There is a helper script that configures the server for you, simply call `cs`.
 
 ```sh
-cd /var/www/rails/openstudio
-bundle install
+cs
 ```
+
+* Worker
+
+There is a helper script that configures the worker for you, simply call `cw`.
+
 
 ```sh
-vagrant ssh
-sudo -i
-cd /var/www/rails/openstudio/
-script/delayed_job start
-
+cw
 ```
-
-## Initializing the database
-```sh
-sudo -i
-cd /var/www/rails/openstudio
-rake db:seed
-```
-
-# WEBbrick
-- If you want to run the server through webbrick do the following
-
-```sh
-sudo -i
-cd /var/www/rails/openstudio/
-rails s
-```
-
-
