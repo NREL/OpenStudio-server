@@ -158,7 +158,7 @@ class Analysis::Optim
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol']) do
+        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol']) do
           %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
@@ -363,14 +363,31 @@ class Analysis::Optim
 
             options(digits=8)
             options(scipen=-2)
-
-            results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
-
-             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+            tryCatch({
+              results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
+            },
+            finally={
+              print(paste("ip workers:", ips))
+              print(paste("ip master:", master_ips))
+              ips2 <- ips[ips!=master_ips]
+              print(paste("non server ips:", ips2))
+              num_uniq_workers <- length(ips2)
+              whoami <- system('whoami', intern = TRUE)
+              for (i in 1:num_uniq_workers){
+                scp <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp command:",scp))
+                system(scp,intern=TRUE)
+                scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp2 command:",scp2))
+                system(scp2,intern=TRUE)
+              }               
+            })  
+            
+            Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
             print(paste("Iterations:",Iteration))
             print(Rlog[grep('L =',Rlog)])
-             print(Rlog[grep('X0 =',Rlog)])
+            print(Rlog[grep('X0 =',Rlog)])
             print(Rlog[grep('U =',Rlog)])
             Xlog <- Rlog[grep('X =',Rlog)]
             print("Iteration parameters:")
