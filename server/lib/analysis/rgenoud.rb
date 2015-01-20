@@ -163,7 +163,7 @@ class Analysis::Rgenoud
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'], BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'], boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'], printLevel: @analysis.problem['algorithm']['printlevel'], balance: @analysis.problem['algorithm']['balance'], solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'], waitGenerations: @analysis.problem['algorithm']['waitgenerations'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol']) do
+        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'], BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'], boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'], printLevel: @analysis.problem['algorithm']['printlevel'], balance: @analysis.problem['algorithm']['balance'], solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'], waitGenerations: @analysis.problem['algorithm']['waitgenerations'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol']) do
           %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
@@ -359,11 +359,35 @@ class Analysis::Rgenoud
             print(paste("BFGSburnin set to:",BFGSburnin))
 
             print(paste("Number of generations set to:",gen))
-            #results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
-            results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
 
-       Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
-       Rlog[grep('vartypes:',Rlog)]
+            tryCatch({
+              results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
+            },
+            finally={
+               #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
+               #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
+               #print(paste("scp command:",scp))
+               #print(paste("scp command:",scp2))
+               #system(scp,intern=TRUE)
+               #system(scp2,intern=TRUE)
+              print(paste("ip workers:", ips))
+              print(paste("ip master:", master_ips))
+              ips2 <- ips[ips!=master_ips]
+              print(paste("non server ips:", ips2))
+              num_uniq_workers <- length(ips2)
+              whoami <- system('whoami', intern = TRUE)
+              for (i in 1:num_uniq_workers){
+                scp <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp command:",scp))
+                system(scp,intern=TRUE)
+                scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp2 command:",scp2))
+                system(scp2,intern=TRUE)
+              }
+               
+            })
+            Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
+            Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
             Rlog[grep('<=',Rlog)]
             print(paste("popsize:",results$pop.size))
@@ -375,7 +399,7 @@ class Analysis::Rgenoud
             flush.console()
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
 
-         #write final params to json file
+            #write final params to json file
             answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
             write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
             #convergenceflag <- toJSON(results$peakgeneration)

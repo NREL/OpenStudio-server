@@ -162,7 +162,7 @@ class Analysis::NsgaNrel
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        @r.command(vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
+        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
                    objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
                    toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
@@ -383,13 +383,32 @@ class Analysis::NsgaNrel
             }
 
             print(paste("Number of generations set to:",gen))
-            results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
+            
+            tryCatch({
+              results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
+            },
+            finally={
+              print(paste("ip workers:", ips))
+              print(paste("ip master:", master_ips))
+              ips2 <- ips[ips!=master_ips]
+              print(paste("non server ips:", ips2))
+              num_uniq_workers <- length(ips2)
+              whoami <- system('whoami', intern = TRUE)
+              for (i in 1:num_uniq_workers){
+                scp <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp command:",scp))
+                system(scp,intern=TRUE)
+                scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp2 command:",scp2))
+                system(scp2,intern=TRUE)
+              }               
+            })  
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
             #write final params to json file
             answer <- results$parameters
             write.table(answer, file="/mnt/openstudio/parameters_#{@analysis.id}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
             convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
-       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+            write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
 
           }
         end
