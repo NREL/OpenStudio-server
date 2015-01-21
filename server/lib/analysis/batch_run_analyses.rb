@@ -136,7 +136,7 @@ class Analysis::BatchRunAnalyses
 
             print(paste("Number of data points:",nrow(dps)))
 
-            results <- parLapply(cl, c(1,nrow(dps)), f)
+            results <- parLapply(cl, seq(nrow(dps)), f)
             # For verbose logging you can print the results using `print(results)`
           }
         end
