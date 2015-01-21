@@ -15,7 +15,7 @@ namespace :datapoints do
           puts "Error during downloading of data points... will try to continue #{e.message}:#{e.backtrace.join("\n")}"
         end
       end
-      sleep 5
+      sleep 10
     end
   end
 end

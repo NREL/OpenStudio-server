@@ -46,7 +46,7 @@ class Analysis::BatchRunAnalyses
     dps.each do |dp|
        Rails.logger.info "Adding in #{dp.uuid}"
        # TODO: uncomment this in production
-       #dp.status = 'queued'
+       dp.status = 'queued'
        dp.save!
        dp_map[:analysis_id] << dp.analysis.id
        dp_map[:data_point_id] << dp.uuid
@@ -56,14 +56,6 @@ class Analysis::BatchRunAnalyses
     Rails.logger.info("Found #{dp_map[:data_point_id].size} across all analyses to run")
     Rails.logger.info("dp_map is #{dp_map}")
     analyses = dps.map{ |d| Analysis.find(d.analysis.id) }.uniq
-
-    # create the map needed for analysis and datapoints
-    # dps.each do |dp|
-    #   Rails.logger.info "UGH #{dps.inspect}"
-    #   analyses = dps.map{ |d| d.analysis.id }.uniq
-    #
-    #   Rails.logger.info "Initializing the analyses of the data points for #{analyses}"
-    # end
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
