@@ -203,7 +203,7 @@ class Analysis::NsgaNrel
             if (uniquegroups == 1) {
                  print(paste("unique groups error:",uniquegroups))
                  write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                 stop(options("show.error.messages"="unique groups"),"unique groups is 1")
+                 stop(options("show.error.messages"=TRUE),"unique groups is 1")
             }
 
 
@@ -216,7 +216,7 @@ class Analysis::NsgaNrel
               mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
-                stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
+                stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
 
@@ -318,7 +318,7 @@ class Analysis::NsgaNrel
               if (ug != uniquegroups) {
                  print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
                  write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                 stop
+                 stop(options("show.error.messages"=TRUE),"unique groups is not equal")
               }
 
               for (i in 1:ug){
@@ -354,7 +354,7 @@ class Analysis::NsgaNrel
                       convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
                       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
                       dbDisconnect(mongo)
-                      stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+                      stop(options("show.error.messages"=TRUE),"exit_on_guideline14")
                     }
                   }
       }
@@ -379,15 +379,14 @@ class Analysis::NsgaNrel
             print(ncol(vars))
             if (ncol(vars) == 1) {
               print("NSGA2 needs more than one variable")
-              stop
+              stop(options("show.error.messages"=TRUE),"NSGA2 needs more than one variable")
             }
 
             print(paste("Number of generations set to:",gen))
             
-            tryCatch({
+            try(
               results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
-            },
-            finally={
+            , silent = TRUE)
               print(paste("ip workers:", ips))
               print(paste("ip master:", master_ips))
               ips2 <- ips[ips!=master_ips]
@@ -402,7 +401,7 @@ class Analysis::NsgaNrel
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
               }               
-            })  
+             
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
             #write final params to json file
             answer <- results$parameters

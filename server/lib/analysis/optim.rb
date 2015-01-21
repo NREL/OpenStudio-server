@@ -194,7 +194,7 @@ class Analysis::Optim
               mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
-                stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
+                stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
 
@@ -313,7 +313,7 @@ class Analysis::Optim
                       convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
                       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
                       dbDisconnect(mongo)
-                      stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+                      stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
                     }
                   }
       }
@@ -363,10 +363,9 @@ class Analysis::Optim
 
             options(digits=8)
             options(scipen=-2)
-            tryCatch({
+            try(
               results <- optim(par=varMean, fn=g, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
-            },
-            finally={
+            , silent = TRUE)
               print(paste("ip workers:", ips))
               print(paste("ip master:", master_ips))
               ips2 <- ips[ips!=master_ips]
@@ -381,7 +380,7 @@ class Analysis::Optim
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
               }               
-            })  
+              
             
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
