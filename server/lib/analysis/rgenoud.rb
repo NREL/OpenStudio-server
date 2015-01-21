@@ -199,7 +199,7 @@ class Analysis::Rgenoud
               mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
-                stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
+                stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
 
@@ -318,7 +318,7 @@ class Analysis::Rgenoud
                       convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
                       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
                       dbDisconnect(mongo)
-                      stop(options("show.error.messages"="exit_on_guideline14"),"exit_on_guideline14")
+                      stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
                     }
                   }
       }
@@ -360,10 +360,9 @@ class Analysis::Rgenoud
 
             print(paste("Number of generations set to:",gen))
 
-            tryCatch({
+            try(
               results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
-            },
-            finally={
+            , silent = TRUE)            
                #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #print(paste("scp command:",scp))
@@ -385,7 +384,6 @@ class Analysis::Rgenoud
                 system(scp2,intern=TRUE)
               }
                
-            })
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
