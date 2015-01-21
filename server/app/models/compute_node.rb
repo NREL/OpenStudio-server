@@ -180,6 +180,7 @@ class ComputeNode
 
     # end
 
+    # TODO: move this to a worker init because this is hitting API limits on amazon
     Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
 
     # go through the worker node
