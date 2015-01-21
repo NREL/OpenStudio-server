@@ -419,7 +419,7 @@ class Analysis::NsgaNrel
       best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          @analysis.results[self.class.to_s.split('::').last.underscore]['best_result'] = JSON.parse(File.read(best_result_json))
+          @analysis.results[@options[:analysis_type]]['best_result'] = JSON.parse(File.read(best_result_json))
           @analysis.save!
         rescue => e
           Rails.logger.error 'Could not save post processed results for bestresult.json into the database'

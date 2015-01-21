@@ -110,7 +110,7 @@ module Analysis::Core
 
     # Clear out any former results on the analysis
     analysis.results ||= {} # make sure that the analysis results is a hash and exists
-    analysis.results[self.class.to_s.split('::').last.underscore] = {}
+    analysis.results[options[:analysis_type]] = {}
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     if options[:output_variables]
