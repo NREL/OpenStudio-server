@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Remove the snow.log
+sudo rm -f /tmp/snow.log
+
 # Force the generation of various directories that are in the EBS mnt
 sudo rm -rf /mnt/openstudio
 sudo mkdir -p /mnt/openstudio
