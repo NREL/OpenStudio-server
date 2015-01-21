@@ -99,8 +99,8 @@ class Analysis::BatchRunAnalyses
             print(dps)
             clusterEvalQ(cl,library(RMongo))
 
-            f <- function(analysis_id, datapoint_id){
-              print(paste("Analysis ID:", analysis_id, "Data Point ID:", datapoint_id))
+            f <- function(dp_index){
+              print(paste("Analysis ID:", dps$analysis_id[dp_index], "Data Point ID:", dps$data_point_id[dp_index]))
               mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
@@ -111,9 +111,9 @@ class Analysis::BatchRunAnalyses
               ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               print(paste("Use dev/shm set to:","#{@analysis.use_shm}"))
               if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",analysis_id," -u ",data_point_id," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",dps$analysis_id[dp_index]," -u ",dps$data_point_id[dp_index]," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",analysis_id," -u ",data_point_id," -x #{@options[:run_data_point_filename]}",sep="")
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",dps$analysis_id[dp_index]," -u ",dps$data_point_id[dp_index]," -x #{@options[:run_data_point_filename]}",sep="")
               }
               print(paste("Batch Run Analysis Command: ",y))
               z <- system(y,intern=TRUE)
@@ -123,18 +123,20 @@ class Analysis::BatchRunAnalyses
             clusterExport(cl,"f")
 
             if (nrow(dps) == 1) {
-              print("not sure what to do with only one datapoint so adding an NA")
+              print("not sure what to do with only one data point so adding an NA")
               dps <- rbind(dps, c(NA,NA))
             }
             if (nrow(dps) == 0) {
-              print("not sure what to do with no datapoint so adding two NAs")
+              print("not sure what to do with no data point so adding two NAs")
               dps <- rbind(dps, c(NA,NA))
               dps <- rbind(dps, c(NA,NA))
             }
 
+            clusterExport(cl,"dps")
+
             print(paste("Number of data points:",nrow(dps)))
 
-            results <- parLapply(cl, dps[,1], f, dps[,2])
+            results <- parLapply(cl, c(1,nrow(dps)), f)
             # For verbose logging you can print the results using `print(results)`
           }
         end
