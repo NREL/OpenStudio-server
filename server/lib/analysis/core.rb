@@ -100,7 +100,7 @@ module Analysis::Core
 
     # add in the default problem/algorithm options into the analysis object
     # anything at at the root level of the options are not designed to override the database object.
-    analysis.problem = options[:problem].deep_merge(analysis.problem)
+    analysis.problem = options[:problem].deep_merge(analysis.problem) if analysis.problem
 
     # save other run information in another object in the analysis
     analysis_job.start_time = Time.now
@@ -119,7 +119,7 @@ module Analysis::Core
     end
 
     # verify that the objective_functions are unique
-    if analysis.problem['algorithm'] &&  analysis.problem['algorithm']['objective_functions']
+    if analysis.problem && analysis.problem['algorithm'] &&  analysis.problem['algorithm']['objective_functions']
       analysis.problem['algorithm']['objective_functions'].uniq! if analysis.problem['algorithm']['objective_functions']
     end
 
