@@ -307,7 +307,7 @@ class Analysis
 
   # copy back the results to the master node if they are finished
   def finalize_data_points
-    ComputeNode.download_all_results(id)
+    ComputeNode.download_all_results
   end
 
   # filter results on analysis show page (per status)
