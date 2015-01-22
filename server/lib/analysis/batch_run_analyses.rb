@@ -5,10 +5,10 @@ class Analysis::BatchRunAnalyses
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
-        skip_init: false,
-        data_points: [],
-        run_data_point_filename: 'run_openstudio.rb',
-        problem: {}
+      skip_init: false,
+      data_points: [],
+      run_data_point_filename: 'run_openstudio.rb',
+      problem: {}
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
 
@@ -40,7 +40,7 @@ class Analysis::BatchRunAnalyses
     Rails.logger.info('Starting Batch Run Analysis')
 
     # Find all the data_points across all analyses
-    dp_map = {analysis_id: [], data_point_id: []}
+    dp_map = { analysis_id: [], data_point_id: [] }
     dps = DataPoint.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid, :analysis)
     dps.each do |dp|
       Rails.logger.info "Adding in #{dp.uuid}"
@@ -71,7 +71,7 @@ class Analysis::BatchRunAnalyses
       Rails.logger.info "Worker node ips #{worker_ips}"
 
       # copy the files to the worker nodes here
-      Rails.logger.info "Initializing the analyses of the data points for #{analyses.map { |a| a.id }}"
+      Rails.logger.info "Initializing the analyses of the data points for #{analyses.map(&:id)}"
       analyses.each do |analysis|
         Rails.logger.info 'Running initialize worker scripts'
         unless cluster.initialize_workers(worker_ips, analysis.id)
@@ -148,7 +148,6 @@ class Analysis::BatchRunAnalyses
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
       process.stop if process
     end
-
 
     analyses.each do |analysis|
       Rails.logger.info 'Running finalize worker scripts'

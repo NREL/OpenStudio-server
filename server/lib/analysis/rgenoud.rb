@@ -384,7 +384,7 @@ class Analysis::Rgenoud
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
               }
-               
+
             })
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Rlog[grep('vartypes:',Rlog)]

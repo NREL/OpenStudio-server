@@ -380,9 +380,9 @@ class Analysis::Optim
                 scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
-              }               
-            })  
-            
+              }
+            })
+
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
             print(paste("Iterations:",Iteration))

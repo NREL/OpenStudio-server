@@ -85,7 +85,7 @@ class Analysis::SingleRun
     dp.save!
 
     # This is here mainly for testing, but feel free to really use it.
-    @analysis.results[@options[:analysis_type]] = { last_message: 'completed successfully'}
+    @analysis.results[@options[:analysis_type]] = { last_message: 'completed successfully' }
     @analysis.save!
 
     # Only set this data if the analysis was NOT called from another analysis
