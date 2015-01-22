@@ -5,10 +5,10 @@ class Analysis::BatchRunAnalyses
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
-      skip_init: false,
-      data_points: [],
-      run_data_point_filename: 'run_openstudio.rb',
-      problem: {}
+        skip_init: false,
+        data_points: [],
+        run_data_point_filename: 'run_openstudio.rb',
+        problem: {}
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
 
@@ -37,29 +37,28 @@ class Analysis::BatchRunAnalyses
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting Batch Run')
+    Rails.logger.info('Starting Batch Run Analysis')
 
     # Find all the data_points across all analyses
-    dp_map = { analysis_id: [], data_point_id: [] }
+    dp_map = {analysis_id: [], data_point_id: []}
     dps = DataPoint.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid, :analysis)
     dps.each do |dp|
-       Rails.logger.info "Adding in #{dp.uuid}"
-       # TODO: uncomment this in production
-       dp.status = 'queued'
-       dp.save!
-       dp_map[:analysis_id] << dp.analysis.id
-       dp_map[:data_point_id] << dp.uuid
+      Rails.logger.info "Adding in #{dp.uuid}"
+      # TODO: uncomment this in production
+      dp.status = 'queued'
+      dp.save!
+
+      dp_map[:analysis_id] << dp.analysis.id
+      dp_map[:data_point_id] << dp.uuid
     end
 
-    # find all the analyses of the datapoints
+    # Gather all the analyses as objects of the datapoints
     Rails.logger.info("Found #{dp_map[:data_point_id].size} across all analyses to run")
-    Rails.logger.info("dp_map is #{dp_map}")
-    analyses = dps.map{ |d| Analysis.find(d.analysis.id) }.uniq
+    analyses = dp_map[:analysis_id].map { |id| Analysis.find(id) }.uniq
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
-    processes = []
+    process = nil
     begin
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
@@ -72,16 +71,16 @@ class Analysis::BatchRunAnalyses
       Rails.logger.info "Worker node ips #{worker_ips}"
 
       # copy the files to the worker nodes here
-      Rails.logger.info "Initializing the analyses of the data points for #{analyses.map{|a| a.id}}"
+      Rails.logger.info "Initializing the analyses of the data points for #{analyses.map { |a| a.id }}"
       analyses.each do |analysis|
         Rails.logger.info 'Running initialize worker scripts'
         unless cluster.initialize_workers(worker_ips, analysis.id)
-        fail 'could not run initialize worker scripts'
+          fail 'could not run initialize worker scripts'
         end
-
-        # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-        processes << Analysis::Core::BackgroundTasks.start_child_processes(analysis.id)
       end
+
+      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
+      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
@@ -124,7 +123,8 @@ class Analysis::BatchRunAnalyses
               dps <- rbind(dps, c(NA,NA))
             }
 
-            clusterExport(cl,"dps")
+            # Explort the datapoints dataframe so that the index into the array can be looked up on all the worker nodes
+            clusterExport(cl, "dps")
 
             print(paste("Number of data points:",nrow(dps)))
 
@@ -135,7 +135,6 @@ class Analysis::BatchRunAnalyses
       else
         fail 'could not start the cluster (most likely timed out)'
       end
-
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
@@ -147,7 +146,7 @@ class Analysis::BatchRunAnalyses
 
       # Kill the downloading of data files process
       Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
-      processes.each { |p| p.stop if p }
+      process.stop if process
     end
 
 
@@ -162,8 +161,16 @@ class Analysis::BatchRunAnalyses
     begin
       # in large analyses it appears that this is timing out or just not running to completion.
       analyses.each do |analysis|
-      Rails.logger.info('Trying to download any remaining files from worker nodes')
-      analysis.finalize_data_points
+        Rails.logger.info('Trying to download any remaining files from worker nodes')
+        analysis.finalize_data_points
+      end
+
+      # go through and mark any datapoints that are still queued as NA, this will reset the data points if the
+      # analysis bombs out
+      dps = DataPoint.where(:id.in => dp_map[:data_point_id]).and(status: 'queued')
+      dps.each do |dp|
+        dp.status = 'na'
+        dp.save!
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"

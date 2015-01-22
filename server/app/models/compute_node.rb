@@ -91,9 +91,9 @@ class ComputeNode
   # New method to download files from the remote systems.  This method flips the download around and favors
   # looking at which points are on the compute node and download the files that way instead of trying to find which
   # compute node the data point was run.
-  def self.download_all_results(analysis_id)
-    # Get the analysis
-    analysis = Analysis.find(analysis_id)
+  def self.download_all_results(analysis_id = nil)
+    # Get the analysis if it exists
+    analysis = analysis_id.nil? ? nil : Analysis.find(analysis_id)
 
     # What is the maximum number of cores that we want this to run on?
     cns = ComputeNode.all
@@ -101,7 +101,12 @@ class ComputeNode
       Rails.logger.info "Checking for points on #{cn.ip_address}"
 
       # find which data points are complete on the compute node
-      dps = analysis.data_points.and({ download_status: 'na' }, { status: 'completed' }, { ip_address: cn.ip_address })
+      dps = nil
+      if analysis
+        dps = analysis.data_points.and({ download_status: 'na' }, { status: 'completed' }, { ip_address: cn.ip_address })
+      else
+        dps = DataPoint.and({ download_status: 'na' }, { status: 'completed' }, { ip_address: cn.ip_address })
+      end
 
       if dps.count > 0
         session = Net::SSH.start(cn.ip_address, cn.user, password: cn.password)
