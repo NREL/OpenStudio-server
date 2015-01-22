@@ -143,8 +143,8 @@ module Analysis::Core
 
     # Start the child process to download results upon completion.
     def start_child_processes(analysis_id = nil)
-      Rails.logger.warn "No longer pass in analysis_id to start_child_process" if analysis_id
-      p = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', "datapoints:download", "RAILS_ENV=#{Rails.env}")
+      Rails.logger.warn 'No longer pass in analysis_id to start_child_process' if analysis_id
+      p = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', 'datapoints:download', "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       p.io.inherit!

@@ -43,8 +43,8 @@ class Analysis
   has_many :jobs
 
   # Indexes
-  index({uuid: 1}, unique: true)
-  index({id: 1}, unique: true)
+  index({ uuid: 1 }, unique: true)
+  index({ id: 1 }, unique: true)
   index(name: 1)
   index(created_at: 1)
   index(project_id: 1)
@@ -108,14 +108,14 @@ class Analysis
     ComputeNode.system_information
 
     # If the analysis has seed data, then send the data to the worker nodes
-    if !self.seed_zip.path.nil? && File.exist?(self.seed_zip.path)
+    if !seed_zip.path.nil? && File.exist?(seed_zip.path)
       # TODO: check if this fails
       ComputeNode.copy_data_to_workers(self)
     end
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = {skip_init: false, use_server_as_worker: false}
+    defaults = { skip_init: false, use_server_as_worker: false }
     options = defaults.merge(options)
 
     Rails.logger.info "calling start on #{analysis_type} with options #{options}"
@@ -152,7 +152,7 @@ class Analysis
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    defaults = {allow_multiple_jobs: false}
+    defaults = { allow_multiple_jobs: false }
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
@@ -329,7 +329,7 @@ class Analysis
   end
 
   def jobs_status
-    jobs.order_by(:index.asc).map { |j| {analysis_type: j.analysis_type, status: j.status} }
+    jobs.order_by(:index.asc).map { |j| { analysis_type: j.analysis_type, status: j.status } }
   end
 
   def status

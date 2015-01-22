@@ -383,7 +383,7 @@ class Analysis::NsgaNrel
             }
 
             print(paste("Number of generations set to:",gen))
-            
+
             tryCatch({
               results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
             },
@@ -401,8 +401,8 @@ class Analysis::NsgaNrel
                 scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
-              }               
-            })  
+              }
+            })
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
             #write final params to json file
             answer <- results$parameters
