@@ -313,7 +313,7 @@ class Analysis::Rgenoud
                     if (all(guideline)){
                       #write final params to json file
                       varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
-                      answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
+                      answer <- paste('{ "variables": [ {',paste('"',varnames,'"',': ',x,sep='', collapse=','),'} ] }',sep='')
                       write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
                       convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
                       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
