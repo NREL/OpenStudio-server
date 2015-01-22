@@ -164,7 +164,7 @@ class Analysis::BatchRunAnalyses
         analysis.finalize_data_points
       end
 
-      # go through and mark any datapoints that are still queued as NA, this will reset the data points if the
+      # go through and mark any data points that are still queued as NA, this will reset the data points if the
       # analysis bombs out
       dps = DataPoint.where(:id.in => dp_map[:data_point_id]).and(status: 'queued')
       dps.each do |dp|
