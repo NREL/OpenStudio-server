@@ -10,7 +10,7 @@ sudo chown -R vagrant:www-data /mnt/openstudio
 sudo chmod -R 775 /mnt/openstudio
 
 # save application files into the right directory
-sudo cp -rf /data/worker-nodes/* /mnt/openstudio/
+sudo rsync -a --chown vagrant:www-data /data/worker-nodes/ /mnt/openstudio/
 
 # install workflow dependencies
 cd /mnt/openstudio
