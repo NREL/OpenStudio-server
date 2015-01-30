@@ -7,7 +7,6 @@ require 'openstudio-aws'
 describe 'AmiIntegration' do
   context 'most recent AMIs from Jenkins' do
     before(:all) do
-
       # TODO: should check if the jenkins server AMI list is available (i.e. inside nrel's firewall),
       # else
       aws_options = {
@@ -65,7 +64,6 @@ describe 'AmiIntegration' do
       puts res
 
       # TODO: same test but use the Analysis Gem
-
     end
 
     it 'should be able to ping the server' do

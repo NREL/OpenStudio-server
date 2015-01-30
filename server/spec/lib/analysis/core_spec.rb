@@ -69,7 +69,6 @@ describe Analysis::Core do
       result.size.should eq(3)
       result.should eq(@samples)
     end
-
   end
 
   context 'hashing' do
@@ -103,6 +102,5 @@ describe Analysis::Core do
       r[6].should eq(c: true)
       r[7].should eq(c: false)
     end
-
   end
 end

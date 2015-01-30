@@ -362,7 +362,7 @@ class Analysis::Rgenoud
 
             try(
               results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
-            , silent = TRUE)            
+            , silent = TRUE)
                #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #print(paste("scp command:",scp))
@@ -383,7 +383,7 @@ class Analysis::Rgenoud
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
               }
-               
+
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
@@ -398,7 +398,6 @@ class Analysis::Rgenoud
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
 
             }
-
         end
       else
         fail 'could not start the cluster (most likely timed out)'

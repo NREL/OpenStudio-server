@@ -52,7 +52,6 @@ OptionParser.new do |opts|
   opts.on('-x', '--skip-terminate', 'Do not terminate the instances') do |_s|
     @options[:skip_terminate] = true
   end
-
 end.parse!
 puts "options = #{@options.inspect}"
 

@@ -103,9 +103,9 @@ class ComputeNode
       # find which data points are complete on the compute node
       dps = nil
       if analysis
-        dps = analysis.data_points.and({ download_status: 'na' }, { status: 'completed' }).or({ ip_address: cn.ip_address }, { internal_ip_address: cn.ip_address })
+        dps = analysis.data_points.and({ download_status: 'na' },  status: 'completed').or({ ip_address: cn.ip_address },  internal_ip_address: cn.ip_address)
       else
-        dps = DataPoint.and({ download_status: 'na' }, { status: 'completed' }).or({ ip_address: cn.ip_address }, { internal_ip_address: cn.ip_address })
+        dps = DataPoint.and({ download_status: 'na' },  status: 'completed').or({ ip_address: cn.ip_address },  internal_ip_address: cn.ip_address)
       end
 
       if dps.count > 0
