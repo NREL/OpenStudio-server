@@ -42,7 +42,9 @@ class DataPoint
   # Callbacks
   after_create :verify_uuid
 
-  STATUS_STATES = [:na, :queued, :started, :completed]
+  def self.status_states
+    [:na, :queued, :started, :completed]
+  end
 
   # Parse the OpenStudio PAT JSON and save the results into a name:value hash instead of the
   # open structure define in the JSON. This is used for the measure group JSONs only. Deprecate as

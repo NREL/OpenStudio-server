@@ -5,6 +5,8 @@ class Analysis
 
   require 'delayed_job_mongoid'
 
+
+
   field :uuid, type: String
   field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :version_uuid
@@ -58,7 +60,9 @@ class Analysis
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
-  ANALYSIS_STATES = [:na, :init, :queued, :started, :completed]
+  def self.status_states
+    [:na, :init, :queued, :started, :completed]
+  end
 
   # TODO: Move this into the compute node class and call this with delayed jobs if applicable
   def initialize_workers(options = {})

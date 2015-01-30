@@ -244,8 +244,8 @@ class AnalysesController < ApplicationController
     analysis_only_fields = [:status, :analysis_type, :jobs]
     data_point_only_fields = [:status, :analysis_type, :jobs, :status_message, :download_status]
 
-    job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.STATUS_STATES
-    # analysis_states = params[:state] ? [params[:state]] : Analyses.ANALYSIS_STATES
+    job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
+    # analysis_states = params[:state] ? [params[:state]] : Analyses.status_states
 
     if params[:version] == '2'
       logger.info 'Version 2 of analyses/status'
