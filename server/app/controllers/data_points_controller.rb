@@ -71,13 +71,21 @@ class DataPointsController < ApplicationController
     only_fields = [:status, :status_message, :download_status, :analysis_id]
     dps = params[:status] ? DataPoint.where(status: params[:jobs]).only(only_fields) : DataPoint.all.only(only_fields)
 
-    logger.info " HERE #{dps.size}"
-
     respond_to do |format|
       #  format.html # new.html.erb
       format.json do
         render json: {
-          data_points: dps.map { |k| { _id: k.id, analysis_id: k.analysis_id, status: k.status, final_message: k.status_message, download_status: k.download_status  } } }
+          data_points: dps.map do |dp|
+            {
+              _id: dp.id,
+              id: dp.id,
+              analysis_id: dp.analysis_id,
+              status: dp.status,
+              final_message: dp.status_message,
+              download_status: dp.download_status
+            }
+          end
+        }
       end
     end
   end
