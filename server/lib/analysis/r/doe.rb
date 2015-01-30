@@ -200,7 +200,6 @@ module Analysis::R
       print(paste("r_index:",#{var.r_index}))
           }
         end
-
       end
 
       @r.converse "print('creating full factorial')"

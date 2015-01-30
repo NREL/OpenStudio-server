@@ -58,6 +58,8 @@ class Analysis
   after_create :verify_uuid
   before_destroy :remove_dependencies
 
+  ANALYSIS_STATES = [:na, :init, :queued, :started, :completed]
+
   # TODO: Move this into the compute node class and call this with delayed jobs if applicable
   def initialize_workers(options = {})
     # delete the master and workers and reload them everysingle time an analysis is initialized -- why NICK?
@@ -203,7 +205,6 @@ class Analysis
     if self['problem'] && self['problem']['workflow']
       Rails.logger.info('found a problem and workflow')
       self['problem']['workflow'].each do |wf|
-
         # Currently the PAT format has measures and I plan on ignoring them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
         # individual measures

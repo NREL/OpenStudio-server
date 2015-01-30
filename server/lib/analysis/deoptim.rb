@@ -226,7 +226,6 @@ class Analysis::Deoptim
             #results <- sfLapply(vars[,1], f)
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
           }
-
         end
       else
         fail 'could not start the cluster (most likely timed out)'

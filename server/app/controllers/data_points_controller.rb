@@ -63,7 +63,24 @@ class DataPointsController < ApplicationController
       end
     end
   end
+
   alias_method :show_full, :show
+
+  def status
+    # The name :jobs is legacy based on how PAT queries the data points. Should we alias this to status?
+    only_fields = [:status, :status_message, :download_status, :analysis_id]
+    dps = params[:status] ? DataPoint.where(status: params[:jobs]).only(only_fields) : DataPoint.all.only(only_fields)
+
+    logger.info " HERE #{dps.size}"
+
+    respond_to do |format|
+      #  format.html # new.html.erb
+      format.json do
+        render json: {
+          data_points: dps.map { |k| { _id: k.id, analysis_id: k.analysis_id, status: k.status, final_message: k.status_message, download_status: k.download_status  } } }
+      end
+    end
+  end
 
   # GET /data_points/new
   # GET /data_points/new.json

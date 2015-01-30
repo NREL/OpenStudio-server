@@ -1,7 +1,6 @@
 require 'rspec'
 
 describe 'worker-init' do
-
   it 'should sort worker jobs correctly' do
     a = %w(00_Job0 01_Job1 11_Job11 20_Job20 02_Job2 21_Job21)
 

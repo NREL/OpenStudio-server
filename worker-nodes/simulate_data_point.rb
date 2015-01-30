@@ -42,7 +42,6 @@ optparse = OptionParser.new do |opts|
   opts.on('-x', '--execute-file NAME', String, 'Type of the workflow the run will execute') do |s|
     options[:run_workflow_method] = s
   end
-
 end
 optparse.parse!
 
