@@ -242,7 +242,7 @@ class AnalysesController < ApplicationController
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
     analysis_only_fields = [:status, :analysis_type, :jobs]
-    data_point_only_fields = [:status, :analysis_type, :jobs, :status_message, :download_status]
+    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :download_status]
 
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
     # analysis_states = params[:state] ? [params[:state]] : Analyses.status_states
@@ -274,6 +274,7 @@ class AnalysesController < ApplicationController
                                {
                                  _id: dp.id,
                                  id: dp.id,
+                                 analysis_id: dp.analysis_id,
                                  status: dp.status,
                                  final_message: dp.status_message,
                                  download_status: dp.download_status

@@ -5,8 +5,6 @@ class Analysis
 
   require 'delayed_job_mongoid'
 
-
-
   field :uuid, type: String
   field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :version_uuid
