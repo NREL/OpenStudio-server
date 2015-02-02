@@ -266,7 +266,11 @@ class Analysis::NsgaNrel
             try(json <- fromJSON(file=object_file), silent=TRUE)
 
             if (is.null(json)) {
-              obj <- 1.0e19
+              obj <- NULL
+              for (i in 1:objDim){
+                obj[i] <- 1.0e19
+              }
+              print(paste(data_point_directory,"/objectives.json is NULL"))
             } else {
               obj <- NULL
               objvalue <- NULL
