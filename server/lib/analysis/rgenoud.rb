@@ -362,7 +362,7 @@ class Analysis::Rgenoud
 
             try(
               results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
-            , silent = TRUE)
+            , silent = FALSE)
                #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #print(paste("scp command:",scp))
