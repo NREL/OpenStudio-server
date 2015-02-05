@@ -206,7 +206,6 @@ class Analysis::NsgaNrel
                  stop(options("show.error.messages"=TRUE),"unique groups is 1")
             }
 
-
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
@@ -248,13 +247,12 @@ class Analysis::NsgaNrel
 
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
-          cat("UUID is NA \n");
+              cat("UUID is NA \n");
               NAvalue <- 1.0e19
               return(NAvalue)
-      } else {
-          try(f(z[j]), silent = TRUE)
-
-
+            } else {
+              tryCatch({f(z[j])})
+              
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -262,89 +260,86 @@ class Analysis::NsgaNrel
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-             json <- NULL
-            try(json <- fromJSON(file=object_file), silent=TRUE)
+              json <- NULL
+              try(json <- fromJSON(file=object_file), silent=TRUE)
 
-            if (is.null(json)) {
-              obj <- NULL
-              for (i in 1:objDim){
-                obj[i] <- 1.0e19
-              }
-              print(paste(data_point_directory,"/objectives.json is NULL"))
-            } else {
-              obj <- NULL
-              objvalue <- NULL
-              objtarget <- NULL
-              sclfactor <- NULL
-              objgroup <- NULL
-              group_count <- 1
-              for (i in 1:objDim){
-                objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "NULL"){
-                  objvalue[i] <- as.numeric(json[objfuntemp])
-                } else {
-                  objvalue[i] <- 1.0e19
-                  cat(data_point_directory," Missing ", objfuntemp,"\n");
+              if (is.null(json)) {
+                obj <- NULL
+                for (i in 1:objDim){
+                  obj[i] <- 1.0e19
                 }
-                objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "NULL"){
-                  objtarget[i] <- as.numeric(json[objfuntargtemp])
-                } else {
-                  objtarget[i] <- 0.0
-                }
-                scalingfactor <- paste("scaling_factor_",i,sep="")
-                sclfactor[i] <- 1.0
-                if (json[scalingfactor] != "NULL"){
-                  sclfactor[i] <- as.numeric(json[scalingfactor])
-                  if (sclfactor[i] == 0.0) {
-                    print(paste(scalingfactor," is ZERO, overwriting\n"))
-                    sclfactor[i] = 1.0
+                print(paste(data_point_directory,"/objectives.json is NULL"))
+              } else {
+                obj <- NULL
+                objvalue <- NULL
+                objtarget <- NULL
+                sclfactor <- NULL
+                objgroup <- NULL
+                group_count <- 1
+                for (i in 1:objDim){
+                  objfuntemp <- paste("objective_function_",i,sep="")
+                  if (json[objfuntemp] != "NULL"){
+                    objvalue[i] <- as.numeric(json[objfuntemp])
+                  } else {
+                    objvalue[i] <- 1.0e19
+                    cat(data_point_directory," Missing ", objfuntemp,"\n");
                   }
-                } else {
+                  objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                  if (json[objfuntargtemp] != "NULL"){
+                    objtarget[i] <- as.numeric(json[objfuntargtemp])
+                  } else {
+                    objtarget[i] <- 0.0
+                  }
+                  scalingfactor <- paste("scaling_factor_",i,sep="")
                   sclfactor[i] <- 1.0
+                  if (json[scalingfactor] != "NULL"){
+                    sclfactor[i] <- as.numeric(json[scalingfactor])
+                    if (sclfactor[i] == 0.0) {
+                      print(paste(scalingfactor," is ZERO, overwriting\n"))
+                      sclfactor[i] = 1.0
+                    }
+                  } else {
+                    sclfactor[i] <- 1.0
+                  }
+                  objfungrouptemp <- paste("objective_function_group_",i,sep="")
+                  if (json[objfungrouptemp] != "NULL"){
+                    objgroup[i] <- as.numeric(json[objfungrouptemp])
+                  } else {
+                    objgroup[i] <- group_count
+                    group_count <- group_count + 1
+                  }
                 }
-                objfungrouptemp <- paste("objective_function_group_",i,sep="")
-                if (json[objfungrouptemp] != "NULL"){
-                  objgroup[i] <- as.numeric(json[objfungrouptemp])
-                } else {
-                  objgroup[i] <- group_count
-                  group_count <- group_count + 1
+                print(paste("Objective function results are:",objvalue))
+                print(paste("Objective function targets are:",objtarget))
+                print(paste("Objective function scaling factors are:",sclfactor))
+
+                objvalue <- objvalue / sclfactor
+                objtarget <- objtarget / sclfactor
+
+                ug <- length(unique(objgroup))
+                if (ug != uniquegroups) {
+                   print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
+                   write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                   stop(options("show.error.messages"=TRUE),"unique groups is not equal")
                 }
-              }
-              print(paste("Objective function results are:",objvalue))
-              print(paste("Objective function targets are:",objtarget))
-              print(paste("Objective function scaling factors are:",sclfactor))
 
-              objvalue <- objvalue / sclfactor
-              objtarget <- objtarget / sclfactor
+                for (i in 1:ug){
+                  obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
+                }
 
-              ug <- length(unique(objgroup))
-              if (ug != uniquegroups) {
-                 print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-                 write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                 stop(options("show.error.messages"=TRUE),"unique groups is not equal")
-              }
-
-              for (i in 1:ug){
-                obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
-              }
-
-              #for (i in 1:objDim){
-              #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
-              #}
-              print(paste("Objective function Norm:",obj))
+                print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
-           flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-           print(paste("exit_on_guideline14: ",flag))
-      if (flag["exit_on_guideline14"] == "true" ){
-        # read in the results from the objective function file
-        guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-        json <- NULL
-        try(json <- fromJSON(file=guideline_file), silent=TRUE)
-        if (is.null(json)) {
-          print(paste("no guideline file: ",guideline_file))
-        } else {
+                flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+                print(paste("exit_on_guideline14: ",flag))
+                if (flag["exit_on_guideline14"] == "true" ){
+                  # read in the results from the objective function file
+                  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+                  json <- NULL
+                  try(json <- fromJSON(file=guideline_file), silent=TRUE)
+                  if (is.null(json)) {
+                    print(paste("no guideline file: ",guideline_file))
+                  } else {
                     guideline <- json[[1]]
                     for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
                     print(paste("guideline: ",guideline))
@@ -361,11 +356,11 @@ class Analysis::NsgaNrel
                       stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
                     }
                   }
-      }
-                dbDisconnect(mongo)
                 }
-              return(obj)
+                dbDisconnect(mongo)
               }
+              return(obj)
+            }
             }
             clusterExport(cl,"g")
 
