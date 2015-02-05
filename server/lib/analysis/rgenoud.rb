@@ -231,113 +231,112 @@ class Analysis::Rgenoud
               z
 
               # Call the simulate data point method
-            if (as.character(z[j]) == "NA") {
-          cat("UUID is NA \n");
-              NAvalue <- 1.0e19
-              return(NAvalue)
-      } else {
-          try(f(z[j]), silent = TRUE)
+              if (as.character(z[j]) == "NA") {
+                cat("UUID is NA \n");
+                NAvalue <- 1.0e19
+                return(NAvalue)
+              } else {
+                tryCatch({f(z[j])})
 
+                data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+                # save off the variables file (can be used later if number of vars gets too long)
+                write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
 
-              # save off the variables file (can be used later if number of vars gets too long)
-              write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
+                # read in the results from the objective function file
+                object_file <- paste(data_point_directory,"/objectives.json",sep="")
+                json <- NULL
+                try(json <- fromJSON(file=object_file), silent=TRUE)
 
-              # read in the results from the objective function file
-              object_file <- paste(data_point_directory,"/objectives.json",sep="")
-             json <- NULL
-            try(json <- fromJSON(file=object_file), silent=TRUE)
-
-            if (is.null(json)) {
-              obj <- 1.0e19
-            } else {
-              obj <- NULL
-              objvalue <- NULL
-              objtarget <- NULL
-              sclfactor <- NULL
-
-              for (i in 1:objDim){
-                objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "NULL"){
-                  objvalue[i] <- as.numeric(json[objfuntemp])
+                if (is.null(json)) {
+                  obj <- 1.0e19
                 } else {
-                  objvalue[i] <- 1.0e19
-                  cat(data_point_directory," Missing ", objfuntemp,"\n");
-                }
-                objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "NULL"){
-                  objtarget[i] <- as.numeric(json[objfuntargtemp])
-                } else {
-                  objtarget[i] <- 0.0
-                }
-                scalingfactor <- paste("scaling_factor_",i,sep="")
-                sclfactor[i] <- 1.0
-                if (json[scalingfactor] != "NULL"){
-                  sclfactor[i] <- as.numeric(json[scalingfactor])
-                  if (sclfactor[i] == 0.0) {
-                    print(paste(scalingfactor," is ZERO, overwriting\n"))
-                    sclfactor[i] = 1.0
-                  }
-                } else {
-                  sclfactor[i] <- 1.0
-                }
-              }
-              options(digits=8)
-              options(scipen=-2)
-              print(paste("Objective function results are:",objvalue))
-              print(paste("Objective function targets are:",objtarget))
-              print(paste("Objective function scaling factors are:",sclfactor))
-              objvalue <- objvalue / sclfactor
-              objtarget <- objtarget / sclfactor
-              obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
-              print(paste("Objective function Norm:",obj))
+                  obj <- NULL
+                  objvalue <- NULL
+                  objtarget <- NULL
+                  sclfactor <- NULL
 
-                mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
-           flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-           print(paste("exit_on_guideline14: ",flag))
-
-      if (flag["exit_on_guideline14"] == "true" ){
-        # read in the results from the objective function file
-        guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-        json <- NULL
-        try(json <- fromJSON(file=guideline_file), silent=TRUE)
-        if (is.null(json)) {
-          print(paste("no guideline file: ",guideline_file))
-        } else {
-                    guideline <- json[[1]]
-                    for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
-                    print(paste("guideline: ",guideline))
-                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
-                    print(paste("all(guideline): ",all(guideline)))
-                    if (all(guideline)){
-                      #write final params to json file
-                      varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
-                      answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
-                      write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                      convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
-                      write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
-                      dbDisconnect(mongo)
-                      stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
+                  for (i in 1:objDim){
+                    objfuntemp <- paste("objective_function_",i,sep="")
+                    if (json[objfuntemp] != "NULL"){
+                      objvalue[i] <- as.numeric(json[objfuntemp])
+                    } else {
+                      objvalue[i] <- 1.0e19
+                      cat(data_point_directory," Missing ", objfuntemp,"\n");
+                    }
+                    objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                    if (json[objfuntargtemp] != "NULL"){
+                      objtarget[i] <- as.numeric(json[objfuntargtemp])
+                    } else {
+                      objtarget[i] <- 0.0
+                    }
+                    scalingfactor <- paste("scaling_factor_",i,sep="")
+                    sclfactor[i] <- 1.0
+                    if (json[scalingfactor] != "NULL"){
+                      sclfactor[i] <- as.numeric(json[scalingfactor])
+                      if (sclfactor[i] == 0.0) {
+                        print(paste(scalingfactor," is ZERO, overwriting\n"))
+                        sclfactor[i] = 1.0
+                      }
+                    } else {
+                      sclfactor[i] <- 1.0
                     }
                   }
-      }
-                dbDisconnect(mongo)
+                  options(digits=8)
+                  options(scipen=-2)
+                  print(paste("Objective function results are:",objvalue))
+                  print(paste("Objective function targets are:",objtarget))
+                  print(paste("Objective function scaling factors are:",sclfactor))
+                  objvalue <- objvalue / sclfactor
+                  objtarget <- objtarget / sclfactor
+                  obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
+                  print(paste("Objective function Norm:",obj))
+
+                  mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+                  flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+                  print(paste("exit_on_guideline14: ",flag))
+
+                  if (flag["exit_on_guideline14"] == "true" ){
+                  # read in the results from the objective function file
+                    guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+                    json <- NULL
+                    try(json <- fromJSON(file=guideline_file), silent=TRUE)
+                    if (is.null(json)) {
+                      print(paste("no guideline file: ",guideline_file))
+                    } else {
+                      guideline <- json[[1]]
+                      for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
+                      print(paste("guideline: ",guideline))
+                      print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+                      print(paste("all(guideline): ",all(guideline)))
+                      if (all(guideline)){
+                        #write final params to json file
+                        varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
+                        answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+                        write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                        convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+                        write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+                        dbDisconnect(mongo)
+                        stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
+                      }
+                    }
+                  }
+                  dbDisconnect(mongo)
                 }
-              return(obj)
+                return(obj)
               }
-         }
+            }
 
             clusterExport(cl,"g")
 
             varMin <- mins
-       varMax <- maxes
-       varMean <- (mins+maxes)/2.0
-       varDomain <- maxes - mins
-       varEps <- varDomain*epsilongradient
-       print(paste("varseps:",varseps))
-       print(paste("varEps:",varEps))
-       varEps <- ifelse(varseps!=0,varseps,varEps)
+            varMax <- maxes
+            varMean <- (mins+maxes)/2.0
+            varDomain <- maxes - mins
+            varEps <- varDomain*epsilongradient
+            print(paste("varseps:",varseps))
+            print(paste("varEps:",varEps))
+            varEps <- ifelse(varseps!=0,varseps,varEps)
             print(paste("merged varEps:",varEps))
             varDom <- cbind(varMin,varMax)
             print(paste("varDom:",varDom))
@@ -348,7 +347,7 @@ class Analysis::Rgenoud
             clusterExport(cl,"varEps")
 
             vectorGradient <- function(x, ...) { # Now use the cluster
-           vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+              vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
             }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
@@ -363,12 +362,7 @@ class Analysis::Rgenoud
             try(
               results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol))
             , silent = FALSE)
-               #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
-               #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
-               #print(paste("scp command:",scp))
-               #print(paste("scp command:",scp2))
-               #system(scp,intern=TRUE)
-               #system(scp2,intern=TRUE)
+            
               print(paste("ip workers:", ips))
               print(paste("ip master:", master_ips))
               ips2 <- ips[ips!=master_ips]
