@@ -371,7 +371,6 @@ class Analysis::Optim
               system(scp2,intern=TRUE)
             }
 
-
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Iteration <- length(Rlog[grep('Iteration',Rlog)]) - 1
             print(paste("Iterations:",Iteration))
