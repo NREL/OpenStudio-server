@@ -74,9 +74,7 @@ default_attributes(
           version: '0.2.14'
         },
         {
-          name: 'rgenoud',
-          package_path: '/data/R-packages',
-          version: '5.7-9',
+          name: 'rgenoud'
         },
         {
           name: 'doParallel'
