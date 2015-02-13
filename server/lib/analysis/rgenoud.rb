@@ -18,7 +18,7 @@ class Analysis::Rgenoud
           boundaryenforcement: 2,
           bfgsburnin: 2,
           printlevel: 2,
-          balance: false,
+          balance: 0,
           solutiontolerance: 0.01,
           normtype: 'minkowski',
           ppower: 2,
@@ -28,7 +28,7 @@ class Analysis::Rgenoud
           factr: 4.5036e14,
           maxit: 5,
           epsilongradient: 1e-4,
-          debugflag: false,
+          debugflag: 0,
           sleep: 10
         }
       }
@@ -364,7 +364,10 @@ class Analysis::Rgenoud
             print(paste("BFGSburnin set to:",BFGSburnin))
 
             print(paste("Number of generations set to:",gen))
-
+            if (debugFlag == 1) {debugFlag = TRUE} else {debugFlag = FALSE}
+            print(paste("debugFlag:", debugFlag))
+            if (balance == 1) {balance = TRUE} else {balance = FALSE}
+            print(paste("balance:", balance))
             try(
                  results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, balance=balance, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag)
                )            
