@@ -1,7 +1,7 @@
 Package: NRELmoo
 Type: Package
 Title: Parallel Elitist Non-dominated Sorting Genetic Algorithm based on R
-Version: 1.2.5
+Version: 1.2.6
 Date: 2013-11-21
 Author: Ching-Shih (Vince) Tsou <cstsou@mail.ntcb.edu.tw>
 Maintainer: Brian Ball <Brian.Ball@nrel.gov>
@@ -18,7 +18,7 @@ Description: This package provide functions for box-constrained
         Algorithm - SPEA-II. K-nearest neighbor density estimation, strength 
         value and raw Fitness, truncation operator are called in the main 
         program, spea2R, to complete the search.
-Depends: snow
+Depends: parallel
 License: LGPL-3
 Packaged: 2013-11-21 12:00:00 MT; Brian
 NeedsCompilation: no
