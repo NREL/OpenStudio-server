@@ -293,7 +293,7 @@ class Analysis::Rgenoud
               print(paste("Objective function scaling factors are:",sclfactor))
               objvalue <- objvalue / sclfactor
               objtarget <- objtarget / sclfactor
-              obj <- eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower))
+              obj <- force(eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower)))
               print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
@@ -327,7 +327,7 @@ class Analysis::Rgenoud
       }
                 dbDisconnect(mongo)
                 }
-              return(obj)
+              return(as.numeric(obj))
               }
          }
 
