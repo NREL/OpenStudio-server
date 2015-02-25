@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.17'
+gem 'rails', '3.2.21'
 
 # data modules
 gem 'json'
@@ -67,8 +67,8 @@ gem 'childprocess'
 gem 'faraday'
 
 group :development do
+  gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
-  gem 'binding_of_caller'
   gem 'meta_request'
   gem 'ruby-prof'
   # gem 'ruby-debug' if RAILS_VERSION > "2.0.0"

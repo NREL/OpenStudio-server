@@ -28,6 +28,5 @@ describe Project do
   end
 
   after :all do
-
   end
 end

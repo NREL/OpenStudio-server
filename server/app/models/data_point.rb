@@ -8,10 +8,10 @@ class DataPoint
   field :variable_values # This has been hijacked by OS DataPoint. Use set_variable_values
   field :set_variable_values, type: Hash, default: {} # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
 
-  field :download_status, type: String, default: 'na'
+  field :download_status, type: String, default: 'na' # The available states are [:]
   field :download_information, type: String
   field :openstudio_datapoint_file_name, type: String # make this paperclip?
-  field :status, type: String, default: 'na' # enum of queued, started, completed
+  field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation
   field :results, type: Hash, default: {}
   field :run_start_time, type: DateTime, default: nil
@@ -41,6 +41,10 @@ class DataPoint
 
   # Callbacks
   after_create :verify_uuid
+
+  def self.status_states
+    [:na, :queued, :started, :completed]
+  end
 
   # Parse the OpenStudio PAT JSON and save the results into a name:value hash instead of the
   # open structure define in the JSON. This is used for the measure group JSONs only. Deprecate as

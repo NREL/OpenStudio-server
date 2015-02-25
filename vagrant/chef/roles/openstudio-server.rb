@@ -13,7 +13,8 @@ run_list([
   'recipe[openstudio_server::bashprofile]',
   'recipe[openstudio_server::bundle]', # install the bundle first to get rails for apache passenger
   'role[passenger_apache]',
-  'recipe[openstudio_server]'
+  'recipe[openstudio_server]',
+  'recipe[openstudio_server::worker_data]'
 ])
 
 default_attributes(

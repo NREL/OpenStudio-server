@@ -245,7 +245,7 @@ class Variable
       :perturbable, :pivot, :output, :visualize, :export, :static_value, :minimum, :maximum,
       :objective_function, :objective_function_group, :objective_function_index, :objective_function_target
     ]
-    variables = Variable.where(analysis_id: analysis).or({ perturbable: true }, { pivot: true }, { output: true }, { export: true }).as_json(only: save_fields)
+    variables = Variable.where(analysis_id: analysis).or({ perturbable: true }, { pivot: true }, { output: true },  export: true).as_json(only: save_fields)
 
     # Add in some measure information into each of the variables, if it is a variable
     variables.each do |v|

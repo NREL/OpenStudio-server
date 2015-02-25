@@ -10,7 +10,7 @@ run_list([
   'role[openstudio]',
   'recipe[openstudio_server::bashprofile]',
   'role[radiance]',
-  'recipe[openstudio_server::worker]'
+  'recipe[openstudio_server::worker_data]'
 ])
 
 default_attributes(
