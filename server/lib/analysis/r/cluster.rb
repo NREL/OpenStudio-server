@@ -11,7 +11,7 @@ module Analysis::R
 
       # load the required libraries for cluster management
       @r.converse "print('Configuring R Cluster - Loading Libraries')"
-      @r.converse 'library(snow)'
+      @r.converse 'library(parallel)'
       @r.converse 'library(RMongo)'
       @r.converse 'library(R.utils)'
 
@@ -73,7 +73,7 @@ module Analysis::R
           starttime <- Sys.time()
           tryCatch({
              res <- evalWithTimeout({
-             cl <- makeSOCKcluster(ips[,1], outfile="/tmp/snow.log")
+             cl <- makePSOCKcluster(ips[,1], outfile="/tmp/snow.log")
               }, timeout=numunique);
               }, TimeoutException=function(ex) {
                 cat("#{@analysis_id} Timeout\n");
