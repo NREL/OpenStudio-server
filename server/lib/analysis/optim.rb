@@ -216,6 +216,7 @@ class Analysis::Optim
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
+              force(x)
               ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
 
               # convert the vector to comma separated values
@@ -284,7 +285,7 @@ class Analysis::Optim
                   print(paste("Objective function scaling factors are:",sclfactor))
                   objvalue <- objvalue / sclfactor
                   objtarget <- objtarget / sclfactor
-                  obj <- dist(rbind(objvalue,objtarget),method=normtype,p=ppower)
+                  obj <- force(eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower)))
                   print(paste("Objective function Norm:",obj))
 
                   mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
@@ -318,7 +319,7 @@ class Analysis::Optim
                   }
                   dbDisconnect(mongo)
                 }
-                return(obj)
+                return(as.numeric(obj))
               }
             }
 
