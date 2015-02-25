@@ -237,6 +237,7 @@ class Analysis::NsgaNrel
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
+              force(x)
               ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
@@ -324,7 +325,7 @@ class Analysis::NsgaNrel
                 }
 
                 for (i in 1:ug){
-                  obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
+                  obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
                 }
 
                 print(paste("Objective function Norm:",obj))
@@ -359,7 +360,7 @@ class Analysis::NsgaNrel
                 }
                 dbDisconnect(mongo)
               }
-              return(obj)
+              return(as.numeric(obj))
             }
             }
             clusterExport(cl,"g")
