@@ -206,7 +206,6 @@ class Analysis::NsgaNrel
                  stop(options("show.error.messages"=TRUE),"unique groups is 1")
             }
 
-
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
@@ -248,13 +247,12 @@ class Analysis::NsgaNrel
 
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
-          cat("UUID is NA \n");
+              cat("UUID is NA \n");
               NAvalue <- 1.0e19
               return(NAvalue)
-      } else {
-          try(f(z[j]), silent = TRUE)
-
-
+            } else {
+              tryCatch({f(z[j])})
+              
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
@@ -262,85 +260,86 @@ class Analysis::NsgaNrel
 
               # read in the results from the objective function file
               object_file <- paste(data_point_directory,"/objectives.json",sep="")
-             json <- NULL
-            try(json <- fromJSON(file=object_file), silent=TRUE)
+              json <- NULL
+              try(json <- fromJSON(file=object_file), silent=TRUE)
 
-            if (is.null(json)) {
-              obj <- 1.0e19
-            } else {
-              obj <- NULL
-              objvalue <- NULL
-              objtarget <- NULL
-              sclfactor <- NULL
-              objgroup <- NULL
-              group_count <- 1
-              for (i in 1:objDim){
-                objfuntemp <- paste("objective_function_",i,sep="")
-                if (json[objfuntemp] != "NULL"){
-                  objvalue[i] <- as.numeric(json[objfuntemp])
-                } else {
-                  objvalue[i] <- 1.0e19
-                  cat(data_point_directory," Missing ", objfuntemp,"\n");
+              if (is.null(json)) {
+                obj <- NULL
+                for (i in 1:objDim){
+                  obj[i] <- 1.0e19
                 }
-                objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                if (json[objfuntargtemp] != "NULL"){
-                  objtarget[i] <- as.numeric(json[objfuntargtemp])
-                } else {
-                  objtarget[i] <- 0.0
-                }
-                scalingfactor <- paste("scaling_factor_",i,sep="")
-                sclfactor[i] <- 1.0
-                if (json[scalingfactor] != "NULL"){
-                  sclfactor[i] <- as.numeric(json[scalingfactor])
-                  if (sclfactor[i] == 0.0) {
-                    print(paste(scalingfactor," is ZERO, overwriting\n"))
-                    sclfactor[i] = 1.0
+                print(paste(data_point_directory,"/objectives.json is NULL"))
+              } else {
+                obj <- NULL
+                objvalue <- NULL
+                objtarget <- NULL
+                sclfactor <- NULL
+                objgroup <- NULL
+                group_count <- 1
+                for (i in 1:objDim){
+                  objfuntemp <- paste("objective_function_",i,sep="")
+                  if (json[objfuntemp] != "NULL"){
+                    objvalue[i] <- as.numeric(json[objfuntemp])
+                  } else {
+                    objvalue[i] <- 1.0e19
+                    cat(data_point_directory," Missing ", objfuntemp,"\n");
                   }
-                } else {
+                  objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                  if (json[objfuntargtemp] != "NULL"){
+                    objtarget[i] <- as.numeric(json[objfuntargtemp])
+                  } else {
+                    objtarget[i] <- 0.0
+                  }
+                  scalingfactor <- paste("scaling_factor_",i,sep="")
                   sclfactor[i] <- 1.0
+                  if (json[scalingfactor] != "NULL"){
+                    sclfactor[i] <- as.numeric(json[scalingfactor])
+                    if (sclfactor[i] == 0.0) {
+                      print(paste(scalingfactor," is ZERO, overwriting\n"))
+                      sclfactor[i] = 1.0
+                    }
+                  } else {
+                    sclfactor[i] <- 1.0
+                  }
+                  objfungrouptemp <- paste("objective_function_group_",i,sep="")
+                  if (json[objfungrouptemp] != "NULL"){
+                    objgroup[i] <- as.numeric(json[objfungrouptemp])
+                  } else {
+                    objgroup[i] <- group_count
+                    group_count <- group_count + 1
+                  }
                 }
-                objfungrouptemp <- paste("objective_function_group_",i,sep="")
-                if (json[objfungrouptemp] != "NULL"){
-                  objgroup[i] <- as.numeric(json[objfungrouptemp])
-                } else {
-                  objgroup[i] <- group_count
-                  group_count <- group_count + 1
+                print(paste("Objective function results are:",objvalue))
+                print(paste("Objective function targets are:",objtarget))
+                print(paste("Objective function scaling factors are:",sclfactor))
+
+                objvalue <- objvalue / sclfactor
+                objtarget <- objtarget / sclfactor
+
+                ug <- length(unique(objgroup))
+                if (ug != uniquegroups) {
+                   print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
+                   write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                   stop(options("show.error.messages"=TRUE),"unique groups is not equal")
                 }
-              }
-              print(paste("Objective function results are:",objvalue))
-              print(paste("Objective function targets are:",objtarget))
-              print(paste("Objective function scaling factors are:",sclfactor))
 
-              objvalue <- objvalue / sclfactor
-              objtarget <- objtarget / sclfactor
+                for (i in 1:ug){
+                  obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
+                }
 
-              ug <- length(unique(objgroup))
-              if (ug != uniquegroups) {
-                 print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-                 write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                 stop(options("show.error.messages"=TRUE),"unique groups is not equal")
-              }
-
-              for (i in 1:ug){
-                obj[i] <- dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)
-              }
-
-              #for (i in 1:objDim){
-              #  obj[i] <- dist(rbind(objvalue[i],objtarget[i]),method=normtype,p=ppower)
-              #}
-              print(paste("Objective function Norm:",obj))
+                print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
-           flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-           print(paste("exit_on_guideline14: ",flag))
-      if (flag["exit_on_guideline14"] == "true" ){
-        # read in the results from the objective function file
-        guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-        json <- NULL
-        try(json <- fromJSON(file=guideline_file), silent=TRUE)
-        if (is.null(json)) {
-          print(paste("no guideline file: ",guideline_file))
-        } else {
+                flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+                print(paste("exit_on_guideline14: ",flag))
+                if (flag["exit_on_guideline14"] == "true" ){
+                  # read in the results from the objective function file
+                  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+                  json <- NULL
+                  try(json <- fromJSON(file=guideline_file), silent=TRUE)
+                  if (is.null(json)) {
+                    print(paste("no guideline file: ",guideline_file))
+                  } else {
                     guideline <- json[[1]]
                     for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
                     print(paste("guideline: ",guideline))
@@ -349,19 +348,19 @@ class Analysis::NsgaNrel
                     if (all(guideline)){
                       #write final params to json file
                       varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
-                      answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
+                      answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
                       write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
                       convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
                       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
                       dbDisconnect(mongo)
-                      stop(options("show.error.messages"=TRUE),"exit_on_guideline14")
+                      stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
                     }
                   }
-      }
-                dbDisconnect(mongo)
                 }
-              return(obj)
+                dbDisconnect(mongo)
               }
+              return(obj)
+            }
             }
             clusterExport(cl,"g")
 
@@ -383,10 +382,10 @@ class Analysis::NsgaNrel
             }
 
             print(paste("Number of generations set to:",gen))
-            
+
             try(
               results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
-            , silent = TRUE)
+            , silent = FALSE)
               print(paste("ip workers:", ips))
               print(paste("ip master:", master_ips))
               ips2 <- ips[ips!=master_ips]
@@ -400,14 +399,9 @@ class Analysis::NsgaNrel
                 scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
-              }               
-             
+              }
+
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
-            #write final params to json file
-            answer <- results$parameters
-            write.table(answer, file="/mnt/openstudio/parameters_#{@analysis.id}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-            convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
-            write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
 
           }
         end
@@ -437,8 +431,13 @@ class Analysis::NsgaNrel
       best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          @analysis.results[@options[:analysis_type]]['best_result'] = JSON.parse(File.read(best_result_json))
+          Rails.logger.info('read best result json')
+          temp2 = File.read(best_result_json)
+          temp = JSON.parse(temp2, symbolize_names: true)
+          Rails.logger.info("temp: #{temp}")
+          @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
+          Rails.logger.info("analysis: #{@analysis.results}")
         rescue => e
           Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end

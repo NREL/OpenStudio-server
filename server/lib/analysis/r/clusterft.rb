@@ -102,7 +102,7 @@ module Analysis::R
       end
 
       # TODO: how to test if it successfully stopped the cluster
-      result = true
+      true
     end
   end
 end

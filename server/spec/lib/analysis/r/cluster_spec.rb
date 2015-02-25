@@ -54,8 +54,6 @@ describe Analysis::R::Cluster, broken: true do
 
       cf = cluster_class.stop
       cf.should eq(true)
-
     end
-
   end
 end

@@ -30,4 +30,6 @@ OpenstudioServer::Application.configure do
 
   Mongoid.logger = Logger.new(File.join(Rails.root, 'log/mongo.log'))
   Moped.logger = Logger.new(File.join(Rails.root, 'log/mongo.log'))
+
+  # BetterErrors::Middleware.allow_ip! '10.0.0.0/16'
 end

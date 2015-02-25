@@ -347,7 +347,6 @@ class Analysis::RgenoudLexical
             flush.console()
             save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
           }
-
         end
       else
         fail 'could not start the cluster (most likely timed out)'
