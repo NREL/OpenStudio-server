@@ -12,7 +12,7 @@ spea2NREL(cl, fn, objDim, variables, vartype, archiveLimit = nrow(variables),
   midx = 20)
 }
 \arguments{
-  \item{cl}{snow cluster object}
+  \item{cl}{SOCK cluster object}
   \item{fn}{Objective functions to be minimized}
   \item{objDim}{number of objective functions}
   \item{variables}{matrix of variable values as column vectors. columns must have same length}
@@ -42,8 +42,8 @@ Ching-Shih (Vince) Tsou \email{cstsou@mail.ntcb.edu.tw}
 }
 \examples{
 ## find the non-dominated solutions of zdt1 test problem
-library(snow)
-cl <- makeSOCKcluster(rep("localhost",8))
+library(parallel)
+cl <- makePSOCKcluster(rep("localhost",8))
 vars <- cbind(seq(0,1,length.out=200),seq(0,1,length.out=200))
 vartype <- c("discrete","continuous")
 

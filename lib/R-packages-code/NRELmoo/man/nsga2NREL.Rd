@@ -11,7 +11,7 @@ nsga2NREL(cl, fn, objDim, variables, vartype, tourSize = 2, generations = 20,
   cprob = 0.7, XoverDistIdx = 5, mprob = 0.5, MuDistIdx = 10)
 }
 \arguments{
-  \item{cl}{snow cluster object}
+  \item{cl}{SOCK cluster object}
   \item{fn}{Objective functions to be minimized}
   \item{objDim}{Number of objective functions}
   \item{variables}{matrix of variable values as column vectors. columns must have same length}
@@ -39,8 +39,8 @@ Ching-Shih (Vince) Tsou \email{cstsou@mail.ntcb.edu.tw}
 }
 \examples{
 # find the non-dominated solutions of zdt1 test problem
-library(snow)
-cl <- makeSOCKcluster(rep("localhost",8))
+library(parallel)
+cl <- makePSOCKcluster(rep("localhost",8))
 vars <- cbind(seq(0,1,length.out=200),seq(0,1,length.out=200))
 vartype <- c("discrete","continuous")
 results <- nsga2NREL(cl,fn=ZDT1,2,vars,vartype,generations=40,mprob=0.8)
