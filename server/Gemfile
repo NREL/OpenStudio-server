@@ -56,7 +56,8 @@ group :test do
 end
 
 # web ui
-gem 'will_paginate'
+#gem 'will_paginate'
+gem 'kaminari'
 
 # job queuing
 gem 'delayed_job_mongoid'
