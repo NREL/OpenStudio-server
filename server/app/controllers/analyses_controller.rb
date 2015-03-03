@@ -1,4 +1,4 @@
-require 'will_paginate/array'
+
 require 'core_extensions'
 
 class AnalysesController < ApplicationController
@@ -39,39 +39,36 @@ class AnalysesController < ApplicationController
 
       # blanks should be saved as nil or it will crash
       @all_page = @status == 'all' ? params[:page] : params[:all_page]
-      @all_page = @all_page == '' ? nil : @all_page
+      @all_page = @all_page == '' ? 1 : @all_page
       @completed_page = @status == 'completed' ? params[:page] : params[:completed_page]
-      @completed_page = @completed_page == '' ? nil : @completed_page
+      @completed_page = @completed_page == '' ? 1 : @completed_page
       @started_page = @status == 'started' ? params[:page] : params[:started_page]
-      @started_page = @started_page == '' ? nil : @started_page
+      @started_page = @started_page == '' ? 1 : @started_page
       @queued_page = @status == 'queued' ? params[:page] : params[:queued_page]
-      @queued_page = @queued_page == '' ? nil : @queued_page
+      @queued_page = @queued_page == '' ? 1 : @queued_page
       @na_page = @status == 'na' ? params[:page] : params[:na_page]
-      @na_page = @na_page == '' ? nil : @na_page
+      @na_page = @na_page == '' ? 1 : @na_page
 
-      @all_sims_total = @analysis.search(params[:all_search], 'all')
+      
       # if "view_all" param is set, use @all_sims_total instead of @all_sims (for ALL tab only)
       @view_all = 0
       if params[:view_all] && params[:view_all] == '1'
-        @all_sims = @all_sims_total
         @view_all = 1
+        @all_sims = @analysis.search(params[:all_search], 'all', @all_page, @view_all)
       else
-        @all_sims = @all_sims_total.paginate(page: @all_page, per_page: per_page, total_entries: @all_sims_total.count)
+        @all_sims = @analysis.search(params[:all_search], 'all', @all_page, @view_all).page(1).per(50)
       end
 
-      # TODO: this is going to be slow ecause it returns the entire datapoint for each of these queries
-      @completed_sims_total = @analysis.search(params[:completed_search], 'completed')
-      @completed_sims = @completed_sims_total.paginate(page: @completed_page, per_page: per_page, total_entries: @completed_sims_total.count)
+      # TODO: this is going to be slow because it returns the entire datapoint for each of these queries
+      @completed_sims = @analysis.search(params[:completed_search], 'completed', @completed_page, @view_all).page(@completed_page).per(per_page)
 
-      @started_sims_total = @analysis.search(params[:started_search], 'started')
-      @started_sims = @started_sims_total.paginate(page: @started_page, per_page: per_page, total_entries: @started_sims_total.count)
+      @started_sims = @analysis.search(params[:started_search], 'started', @started_page, @view_all).page(@started_page).per(per_page)
 
-      @queued_sims_total = @analysis.search(params[:queued_search], 'queued')
-      @queued_sims = @queued_sims_total.paginate(page: @queued_page, per_page: per_page, total_entries: @queued_sims_total.count)
+      @queued_sims =  @analysis.search(params[:queued_search], 'queued', @queued_page, @view_all).page(@queued_page).per(per_page)
 
-      @na_sims_total = @analysis.search(params[:na_search], 'na')
-      @na_sims = @na_sims_total.paginate(page: @na_page, per_page: per_page, total_entries: @na_sims_total.count)
+      @na_sims = @analysis.search(params[:na_search], 'na', @na_page, @view_all).page(@na_page).per(per_page)
 
+      # Is this needed?
       case @status
         when 'all'
           @status_simulations = @all_sims
@@ -87,6 +84,8 @@ class AnalysesController < ApplicationController
 
       @objective_functions = @analysis.variables.where(objective_function: true).order_by(:objective_function.asc, :sample.asc)
     end
+
+    logger.info("All: #{@all_sims}, Completed: #{@completed_sims}, Started: #{@started_sims}, Queued: #{@queued_sims}, N/A: #{@na_sims}")
 
     respond_to do |format|
       format.html # show.html.erb
