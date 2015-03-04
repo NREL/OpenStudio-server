@@ -4,6 +4,7 @@ gem 'rails', '3.2.21'
 
 # data modules
 gem 'json'
+gem 'jbuilder'
 
 # database modules
 gem 'mongoid', '~> 3.1.6'

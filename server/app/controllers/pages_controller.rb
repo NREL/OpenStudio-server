@@ -3,6 +3,19 @@ class PagesController < ApplicationController
   def about
   end
 
+  # status page
+  def status
+  
+    @awake = Status.first
+    @server = ComputeNode.where(node_type: 'server').first
+    @workers = ComputeNode.where(node_type: 'worker')
+    
+    respond_to do |format|
+      format.html # status.html.erb
+      format.json # status.json.jbuilder
+    end
+ end
+
   # main dashboard for the site
   def dashboard
     # data for dashboard header

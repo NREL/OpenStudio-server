@@ -1,0 +1,44 @@
+<h2>Status</h2>
+
+<p><strong>Awake:</strong> <% if @awake.nil? %> Not set <% else %><%= @awake.awake.strftime('%Y-%m-%d %I:%M %p') %> <% end %></p>
+
+<p>Server:</p>
+<% unless @server.nil? %>
+<table class="table table-striped">
+	<tr>
+		<th>ID</th><th>IP</th><th>Hostname</th><th>Local Hostname</th><th>User</th><th>Password</th><th>Cores</th><th>AMI ID</th><th>Instance ID</th><th>Valid</th>
+	</tr>
+	<tr>
+		<td><%=@server.id %></td>
+		<td><%=@server.ip_address%></td>
+		<td><%=@server.hostname %></td>
+		<td><%=@server.local_hostname%></td>
+		<td><%=@server.user%></td>
+		<td><%=@server.password%></td>
+		<td><%=@server.cores%></td>
+		<td><%=@server.ami_id%></td>
+		<td><%=@server.instance_id%></td>
+		<td><%=@server.valid%></td>
+	</tr>
+</table> 
+<% end %>
+<p>Workers: </p>
+<table class="table table-striped">
+	<tr>
+		<th>ID</th><th>IP</th><th>Hostname</th><th>Local Hostname</th><th>User</th><th>Password</th><th>Cores</th><th>AMI ID</th><th>Instance ID</th><th>Valid</th>
+	</tr>
+	<% @workers.each do |worker| %>
+	<tr>
+		<td><%=worker.id%></td>
+		<td><%=worker.ip_address%></td>
+		<td><%=worker.hostname%></td>
+		<td><%=worker.local_hostname%></td>
+		<td><%=worker.user%></td>
+		<td><%=worker.password%></td>
+		<td><%=worker.cores%></td>
+		<td><%=worker.ami_id%></td>
+		<td><%=worker.instance_id%></td>
+		<td><%=worker.valid%></td>
+	</tr>
+	<% end %>
+</table> 

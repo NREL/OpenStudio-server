@@ -98,6 +98,9 @@ GEM
     hike (1.2.3)
     i18n (0.7.0)
     jamespath (0.5.1)
+    jbuilder (1.5.3)
+      activesupport (>= 3.0.0)
+      multi_json (>= 1.2.0)
     journey (1.0.4)
     jquery-rails (3.1.2)
       railties (>= 3.0, < 5.0)
@@ -274,6 +277,7 @@ DEPENDENCIES
   execjs
   factory_girl_rails
   faraday
+  jbuilder
   jquery-rails
   json
   kaminari
