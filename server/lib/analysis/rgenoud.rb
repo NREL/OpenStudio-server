@@ -316,7 +316,7 @@ class Analysis::Rgenoud
                     if (all(guideline)){
                       #write final params to json file
                       varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
-                      answer <- paste('{',paste('"',varnames,'"',': ',x,sep='', collapse=','),'}',sep='')
+                      answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
                       write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
                       convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
                       write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
@@ -370,6 +370,7 @@ class Analysis::Rgenoud
             print(paste("MM:", MM))
             if (balance == 1) {balance = TRUE} else {balance = FALSE}
             print(paste("balance:", balance))
+            results <- NULL
             try(
                  results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance)
                )            
@@ -406,13 +407,14 @@ class Analysis::Rgenoud
             print(paste("value:",results$value))
             flush.console()
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
-
-            #write final params to json file
-            answer <- paste('{',paste('"',varnames,'"',': ',results$par,sep='', collapse=','),'}',sep='')
-            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-            #convergenceflag <- toJSON(results$peakgeneration)
-            convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
-            write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+            if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/best_result.json") && !is.null(results$par)) {
+              #write final params to json file
+              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+              write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              #convergenceflag <- toJSON(results$peakgeneration)
+              convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
+              write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+            }
           }
 
         end
@@ -442,8 +444,13 @@ class Analysis::Rgenoud
       best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          @analysis.results[@options[:analysis_type]]['best_result'] = JSON.parse(File.read(best_result_json))
+          Rails.logger.info('read best result json')
+          temp2 = File.read(best_result_json)
+          temp = JSON.parse(temp2, symbolize_names: true)
+          Rails.logger.info("temp: #{temp}")
+          @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
+          Rails.logger.info("analysis: #{@analysis.results}")
         rescue => e
           Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
