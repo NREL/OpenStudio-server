@@ -383,7 +383,7 @@ class Analysis::NsgaNrel
             }
 
             print(paste("Number of generations set to:",gen))
-
+            results <- NULL
             try(
               results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
             , silent = FALSE)
