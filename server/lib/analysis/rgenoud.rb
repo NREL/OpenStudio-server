@@ -412,7 +412,7 @@ class Analysis::Rgenoud
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
             if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/best_result.json") && !is.null(results$par)) {
               #write final params to json file
-              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',results$par,sep='', collapse=','),'}',sep='')
               write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               #convergenceflag <- toJSON(results$peakgeneration)
               convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
