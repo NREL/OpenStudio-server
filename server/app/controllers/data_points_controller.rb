@@ -205,6 +205,7 @@ class DataPointsController < ApplicationController
     send_data data_point_zip_data, filename: File.basename(remote_filename_reports), type: 'application/zip; header=present', disposition: 'attachment'
   end
 
+  # TODO: this looks very unsafe. The idea that any file passed into this method can be rendered is not a good idea!
   def view_report
     html_file = params[:html_file]
 
