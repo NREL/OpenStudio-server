@@ -7,7 +7,7 @@ run_list([
 ])
 
 override_attributes(
-    apache: {
-      listen_ports: %w(80 443)
-    }
+  apache: {
+    listen_ports: %w(80 443)
+  }
 )

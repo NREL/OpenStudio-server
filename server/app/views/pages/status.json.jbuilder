@@ -1,7 +1,7 @@
 if  @awake.nil?
-	json.status 
+  json.status
 else
-	json.status @awake, :awake
+  json.status @awake, :awake
 end
 
 if @server.nil?
@@ -11,7 +11,7 @@ else
 end
 
 if @workers.empty?
-	json.workers
+  json.workers
 else
   json.workers @workers, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :password, :cores, :ami_id, :instance_id, :valid
 end

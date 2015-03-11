@@ -6,13 +6,13 @@ run_list([
 ])
 
 default_attributes(
-    # Use this for the official release versions
-    openstudio: {
-      version: '1.6.3',
-      installer: {
-        version_revision: 'c41ad82add'
-      }
+  # Use this for the official release versions
+  openstudio: {
+    version: '1.6.3',
+    installer: {
+      version_revision: 'c41ad82add'
     }
+  }
 
 # Use this for custom installations from any url
 #:openstudio => {
