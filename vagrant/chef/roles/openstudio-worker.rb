@@ -14,13 +14,13 @@ run_list([
 ])
 
 default_attributes(
-    openstudio_server: {
-      bash_profile_user: 'vagrant'
-    }
+  openstudio_server: {
+    bash_profile_user: 'vagrant'
+  }
 )
 
 override_attributes(
-    r: {
-      rserve_start_on_boot: false
-    }
+  r: {
+    rserve_start_on_boot: false
+  }
 )

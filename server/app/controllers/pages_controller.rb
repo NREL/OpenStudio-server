@@ -5,11 +5,10 @@ class PagesController < ApplicationController
 
   # status page
   def status
-  
     @awake = Status.first
     @server = ComputeNode.where(node_type: 'server').first
     @workers = ComputeNode.where(node_type: 'worker')
-    
+
     respond_to do |format|
       format.html # status.html.erb
       format.json # status.json.jbuilder
@@ -43,7 +42,7 @@ class PagesController < ApplicationController
     unless @current.nil?
       # aggregate results of current analysis
       aggregated_results = DataPoint.collection.aggregate(
-          [{ '$match' => { 'analysis_id' => @current.id } }, { '$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status' }, count: { '$sum' => 1 } } }])
+        [{ '$match' => { 'analysis_id' => @current.id } }, { '$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status' }, count: { '$sum' => 1 } } }])
     end
     # for js
     cnt = 0

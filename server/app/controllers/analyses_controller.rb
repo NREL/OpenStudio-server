@@ -49,7 +49,6 @@ class AnalysesController < ApplicationController
       @na_page = @status == 'na' ? params[:page] : params[:na_page]
       @na_page = @na_page == '' ? 1 : @na_page
 
-      
       # if "view_all" param is set, use @all_sims_total instead of @all_sims (for ALL tab only)
       @view_all = 0
       if params[:view_all] && params[:view_all] == '1'

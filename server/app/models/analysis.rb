@@ -47,7 +47,7 @@ class Analysis
   index({ id: 1 }, unique: true)
   index(name: 1)
   index(created_at: 1)
-  index(updated_at: -1) 
+  index(updated_at: -1)
   index(project_id: 1)
   index(uuid: 1, download_status: 1)
 
@@ -318,29 +318,29 @@ class Analysis
   def search(search, status, page_no = 1, view_all = 0)
     page_no = page_no.blank? ? 1 : page_no
     logger.info("search: #{search}, status: #{status}, page: #{page_no}, view_all: #{view_all}")
-    
+
     if search
       if status == 'all'
         if view_all
           dps = data_points.where(name: /#{search}/i).order_by(:created_at.asc)
         else
-          dps = data_points.where(name: /#{search}/i).order_by(:created_at.asc)#.page(page_no).per(50)
+          dps = data_points.where(name: /#{search}/i).order_by(:created_at.asc) # .page(page_no).per(50)
         end
       else
-        dps = data_points.where(name: /#{search}/i, status: status).order_by(:created_at.asc)#.page(page_no).per(50)
+        dps = data_points.where(name: /#{search}/i, status: status).order_by(:created_at.asc) # .page(page_no).per(50)
       end
     else
       if status == 'all'
         if view_all
           dps = data_points
         else
-          dps = data_points.order_by(:created_at.asc)#.page(page_no).per(50)
+          dps = data_points.order_by(:created_at.asc) # .page(page_no).per(50)
         end
       else
-        dps = data_points.where(status: status).order_by(:created_at.asc)#.page(page_no).per(50)
+        dps = data_points.where(status: status).order_by(:created_at.asc) # .page(page_no).per(50)
       end
     end
-    return dps
+    dps
   end
 
   def jobs_status
