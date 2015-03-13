@@ -9,6 +9,25 @@ class PagesController < ApplicationController
     @server = ComputeNode.where(node_type: 'server').first
     @workers = ComputeNode.where(node_type: 'worker')
 
+    @file_systems = []
+    filesystems = Sys::Filesystem.mounts
+    filesystems.each do |fs|
+      f = Sys::Filesystem.stat(fs.mount_point)
+      mb_percent = f.bytes_total == 0 ? 0 : ((f.bytes_used.to_f / f.bytes_total.to_f) * 100).round(2)
+
+      @file_systems << {
+          mount_point: fs.mount_point,
+          percent_used: mb_percent,
+          mb_used: f.bytes_used / 1E6,
+          mb_free: f.bytes_free / 1E6,
+          mb_total: f.bytes_total / 1E6
+      }
+    end
+    # find where the /mnt/ folder lives
+    @mnt_fs = nil
+    @mnt_fs = @file_systems.select{ |f| f[:mount_point] =~ /\/mnt/}
+    @mnt_fs = @file_systems.select{ |f| f[:mount_point] == '/'} if @mnt_fs.size == 0
+
     respond_to do |format|
       format.html # status.html.erb
       format.json # status.json.jbuilder
