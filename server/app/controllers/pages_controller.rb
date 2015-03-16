@@ -6,6 +6,7 @@ class PagesController < ApplicationController
   # status page
   def status
     @awake = Status.first
+    @awake_delta = @awake ? ((Time.now - @awake.awake)/60).round(2) : nil
     @server = ComputeNode.where(node_type: 'server').first
     @workers = ComputeNode.where(node_type: 'worker')
 
@@ -23,6 +24,8 @@ class PagesController < ApplicationController
           mb_total: f.bytes_total / 1E6
       }
     end
+
+    # this would probably be better as an openstruct
     # find where the /mnt/ folder lives
     @mnt_fs = nil
     @mnt_fs = @file_systems.select{ |f| f[:mount_point] =~ /\/mnt/}

@@ -2,7 +2,16 @@
 
 <h4>Awake:
   <% if @awake.nil? %> Not set
-      <% else %><%= @awake.awake.strftime('%Y-%m-%d %I:%M %p') %>
+      <% else %>
+      <%= @awake.awake.strftime('%Y-%m-%d %I:%M %p') %>
+  <% end %></h4>
+
+<h4>Awake (Delta):
+  <% if @awake_delta %>
+    <%= @awake_delta %> Minutes
+  <% else %>
+      Not Set
+
   <% end %></h4>
 
 <h4>File System:</h4>
