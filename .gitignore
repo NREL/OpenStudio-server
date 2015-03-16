@@ -10,3 +10,10 @@ release.log
 /vagrant/test_amis.json
 rubocop-results.xml
 /worker-nodes/Gemfile.lock
+
+# in some configs the server and worker data are persisted in this directory, never commit
+server-data
+worker-data
+
+# ignore files with ~ at end
+*~

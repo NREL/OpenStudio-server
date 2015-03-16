@@ -12,6 +12,7 @@
 
 # Ignore all logfiles and tempfiles.
 /log/*.log
+/log/*.json
 
 # Ignore subfolders in tmp
 /tmp/*

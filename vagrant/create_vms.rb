@@ -124,10 +124,10 @@ begin
       puts 'Using new location style format'
       config = YAML.load(File.read(filename))
       AWS.config(
-          access_key_id: config['access_key_id'],
-          secret_access_key: config['secret_access_key'],
-          region: config['region'],
-          ssl_verify_peer: false
+        access_key_id: config['access_key_id'],
+        secret_access_key: config['secret_access_key'],
+        region: config['region'],
+        ssl_verify_peer: false
       )
     end
 

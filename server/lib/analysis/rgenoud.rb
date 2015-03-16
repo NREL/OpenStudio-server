@@ -55,10 +55,10 @@ class Analysis::Rgenoud
     # create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for genoud Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse 'setwd("/mnt/openstudio")'
 
     # TODO: deal better with random seeds
-    @r.converse("set.seed(#{@analysis.problem['random_seed']})")
+    @r.converse "set.seed(#{@analysis.problem['random_seed']})"
     # R libraries needed for this algorithm
     @r.converse 'library(rjson)'
     @r.converse 'library(mco)'
@@ -75,68 +75,72 @@ class Analysis::Rgenoud
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
-
-    # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
-      fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
-    end
-
-    if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
-    end
-
-    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    #  raise "P Norm must be non-negative"
-    # end
-
-    if @analysis.problem['algorithm']['ppower'] <= 0
-      fail 'P Norm must be non-negative'
-    end
-
-    if @analysis.problem['algorithm']['exit_on_guideline14'] == 1
-      @analysis.exit_on_guideline14 = true
-    else
-      @analysis.exit_on_guideline14 = false
-    end
-    @analysis.save!
-    Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
-
-    if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
-      fail 'number of objective functions must equal'
-    end
-
-    pivot_array = Variable.pivot_array(@analysis.id)
-    selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
-
-    # discretize the variables using the LHS sampling method
-    @r.converse("print('starting lhs to discretize the variables')")
-    Rails.logger.info 'starting lhs to discretize the variables'
-
-    lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
-
-    if var_names.empty? || var_names.size < 1
-      Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
-    end
-
-    unless var_types.all? { |t| t.downcase == 'continuous' }
-      Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
-      fail "Must have all continous variables to run algorithm.  Found #{var_types}"
-    end
-
-    Rails.logger.info "mins_maxes: #{mins_maxes}"
-    Rails.logger.info "var_names: #{var_names}"
-
-    # Result of the parameter space will be column vectors of each variable
-    # Rails.logger.info "Samples are #{samples}"
-
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     process = nil
     begin
+      # TODO: preflight check -- need to catch this in the analysis module
+      if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
+        fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
+      end
+
+      if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
+        fail 'Must have number of samples to discretize the parameter space'
+      end
+
+      # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      #  raise "P Norm must be non-negative"
+      # end
+
+      if @analysis.problem['algorithm']['ppower'] <= 0
+        fail 'P Norm must be non-negative'
+      end
+
+      @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
+
+      @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
+
+      @analysis.save!
+      Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+
+      # check to make sure there are objective functions
+      if @analysis.output_variables.select { |v| v['objective_function'] == true }.size == 0
+        fail 'No objective functions defined'
+      end
+
+      # find the total number of objective functions
+      if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
+        fail 'Number of objective functions must equal between the output_variables and the problem definition'
+      end
+
+      pivot_array = Variable.pivot_array(@analysis.id)
+      selected_variables = Variable.variables(@analysis.id)
+      Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+
+      # discretize the variables using the LHS sampling method
+      @r.converse("print('starting lhs to discretize the variables')")
+      Rails.logger.info 'starting lhs to discretize the variables'
+
+      lhs = Analysis::R::Lhs.new(@r)
+      samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
+
+      if var_names.empty? || var_names.size < 1
+        Rails.logger.info 'No variables were passed into the options, therefore exit'
+        fail "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+      end
+
+      unless var_types.all? { |t| t.downcase == 'continuous' }
+        Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
+        fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+      end
+
+      Rails.logger.info "mins_maxes: #{mins_maxes}"
+      Rails.logger.info "var_names: #{var_names}"
+
+      # Result of the parameter space will be column vectors of each variable
+      # Rails.logger.info "Samples are #{samples}"
+
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
@@ -167,7 +171,20 @@ class Analysis::Rgenoud
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'], BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'], boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'], printLevel: @analysis.problem['algorithm']['printlevel'], BFGS: @analysis.problem['algorithm']['BFGS'], solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'], waitGenerations: @analysis.problem['algorithm']['waitgenerations'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol'], debugFlag: @analysis.problem['algorithm']['debugflag'], MM: @analysis.problem['algorithm']['MM'], balance: @analysis.problem['algorithm']['balance'], gradientcheck: @analysis.problem['algorithm']['gradientcheck']) do
+        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names,
+                   varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'],
+                   gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'],
+                   BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
+                   boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
+                   printLevel: @analysis.problem['algorithm']['printlevel'], BFGS: @analysis.problem['algorithm']['BFGS'],
+                   solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'],
+                   waitGenerations: @analysis.problem['algorithm']['waitgenerations'],
+                   maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'],
+                   factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol'],
+                   debugFlag: @analysis.problem['algorithm']['debugflag'], MM: @analysis.problem['algorithm']['MM'],
+                   balance: @analysis.problem['algorithm']['balance'], gradientcheck: @analysis.problem['algorithm']['gradientcheck']) do
           %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
@@ -376,7 +393,7 @@ class Analysis::Rgenoud
             results <- NULL
             try(
                  results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck)
-               )            
+               )
                #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #print(paste("scp command:",scp))
@@ -397,7 +414,7 @@ class Analysis::Rgenoud
                 print(paste("scp2 command:",scp2))
                 system(scp2,intern=TRUE)
               }
-               
+
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
             Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
@@ -419,7 +436,6 @@ class Analysis::Rgenoud
               write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
             }
           }
-
         end
       else
         fail 'could not start the cluster (most likely timed out)'
@@ -429,6 +445,10 @@ class Analysis::Rgenoud
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
       @analysis.status_message = log_message
+      @analysis.save!
+      @analysis_job.status = 'completed'
+      @analysis_job.save!
+      @analysis.reload
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
