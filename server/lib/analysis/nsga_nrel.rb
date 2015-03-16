@@ -253,7 +253,7 @@ class Analysis::NsgaNrel
               return(NAvalue)
             } else {
               tryCatch({f(z[j])})
-              
+
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
