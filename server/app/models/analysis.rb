@@ -60,7 +60,7 @@ class Analysis
   before_destroy :remove_dependencies
 
   def self.status_states
-    [:na, :init, :queued, :started, :completed]
+    ['na', 'init', 'queued', 'started', 'completed']
   end
 
   # TODO: Move this into the compute node class and call this with delayed jobs if applicable
