@@ -331,7 +331,7 @@ class Analysis::Rgenoud
                     print(paste("guideline: ",guideline))
                     print(paste("isTRUE(guideline): ",isTRUE(guideline)))
                     print(paste("all(guideline): ",all(guideline)))
-                    if (all(guideline)){
+                    if (length(which(guideline)) == objDim){
                       #write final params to json file
                       varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
                       answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
