@@ -124,6 +124,7 @@ access_key_id: key
 secret_access_key: access_key
 keypair_name: key_pair_name
 private_key_path: /Users/<user>/.ssh/amazon.pem
+region: us-east-1
 ```
 
 - Run the create_vms.rb script
