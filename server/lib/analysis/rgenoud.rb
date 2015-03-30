@@ -130,9 +130,10 @@ class Analysis::Rgenoud
         fail "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
       end
 
+      discrete_problem = 0
       unless var_types.all? { |t| t.downcase == 'continuous' }
-        Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
-        fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+        Rails.logger.info 'Setting run type to discrete'
+        discrete_problem = 1
       end
 
       Rails.logger.info "mins_maxes: #{mins_maxes}"
@@ -171,7 +172,7 @@ class Analysis::Rgenoud
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names,
+        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, discreteProblem: discrete_problem, varnames: var_names,
                    varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
@@ -202,7 +203,6 @@ class Analysis::Rgenoud
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
 
-            print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
 
             varfile <- function(x){
@@ -390,9 +390,11 @@ class Analysis::Rgenoud
             print(paste("balance:", balance))
             if (gradientcheck == 1) {gradientcheck = TRUE} else {gradientcheck = FALSE}
             print(paste("gradientcheck:", gradientcheck))
+            if (discreteProblem == 1) {discreteProblem = TRUE} else {discreteProblem = FALSE}
+            print(paste("discreteProblem:", discreteProblem))
             results <- NULL
             try(
-                 results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck)
+                 results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck, data.type.int=discreteProblem)
                )
                #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
@@ -416,7 +418,6 @@ class Analysis::Rgenoud
               }
 
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
-            Rlog[grep('vartypes:',Rlog)]
             Rlog[grep('varnames:',Rlog)]
             Rlog[grep('<=',Rlog)]
             print(paste("popsize:",results$pop.size))
