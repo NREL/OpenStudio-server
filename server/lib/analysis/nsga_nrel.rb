@@ -97,11 +97,7 @@ class Analysis::NsgaNrel
     ug = objtrue.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
 
-    if @analysis.problem['algorithm']['exit_on_guideline14'] == 1
-      @analysis.exit_on_guideline14 = true
-    else
-      @analysis.exit_on_guideline14 = false
-    end
+    @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
     @analysis.save!
     Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
@@ -251,8 +247,8 @@ class Analysis::NsgaNrel
               cat("UUID is NA \n");
               NAvalue <- 1.0e19
               return(NAvalue)
-            } else {
-              tryCatch({f(z[j])})
+      } else {
+          try(f(z[j]), silent = TRUE)
 
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
@@ -346,7 +342,7 @@ class Analysis::NsgaNrel
                     print(paste("guideline: ",guideline))
                     print(paste("isTRUE(guideline): ",isTRUE(guideline)))
                     print(paste("all(guideline): ",all(guideline)))
-                    if (all(guideline)){
+                    if (length(which(guideline)) == objDim){
                       #write final params to json file
                       varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
                       answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
@@ -403,7 +399,14 @@ class Analysis::NsgaNrel
               }
 
             save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
-
+            if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/best_result.json") && !is.null(results$par)) {
+              #write final params to json file
+              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',results$par,sep='', collapse=','),'}',sep='')
+              write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              #convergenceflag <- toJSON(results$peakgeneration)
+              convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
+              write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+            }
           }
         end
       else
@@ -414,6 +417,10 @@ class Analysis::NsgaNrel
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
       @analysis.status_message = log_message
+      @analysis.save!
+      @analysis_job.status = 'completed'
+      @analysis_job.save!
+      @analysis.reload
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
