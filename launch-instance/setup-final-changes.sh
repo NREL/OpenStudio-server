@@ -5,15 +5,6 @@
 
 echo "Running setup-final-changes.sh"
 
-# Allow password-based authentication
-sudo sed -i 's/PasswordAuthentication.no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
-echo StrictHostKeyChecking no > /home/ubuntu/.ssh/config
-sudo service ssh restart
-
-# Set a default password and unlock (but will lock again at initial boot)
-echo -e "ubuntu\nubuntu" | sudo passwd ubuntu
-sudo passwd -u ubuntu
-
 # Remove authorized keys
 sudo shred -u /home/ubuntu/.ssh/authorized_keys
 sudo shred -u /root/.ssh/authorized_keys
