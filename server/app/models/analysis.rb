@@ -110,13 +110,7 @@ class Analysis
     end
 
     # get server and worker characteristics
-    ComputeNode.system_information
-
-    # If the analysis has seed data, then send the data to the worker nodes
-    if !seed_zip.path.nil? && File.exist?(seed_zip.path)
-      # TODO: check if this fails
-      ComputeNode.copy_data_to_workers(self)
-    end
+    # ComputeNode.system_information
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})

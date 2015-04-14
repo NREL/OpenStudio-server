@@ -10,10 +10,10 @@ cd /data/launch-instance && ./setup-ssh-worker-nodes.sh ip_addresses
 
 # need to setup the hosts file and the local paths for writing results
 
-ENTRY="localhost localhost master"
+ENTRY="127.0.0.1 openstudio.server"
 FILE=/etc/hosts
 if grep -q "$ENTRY" $FILE; then
-  echo "entry already exists"
+  echo "Hosts 'openstudio.server' entry already exists"
 else
   sudo sh -c "echo $ENTRY >> /etc/hosts"
 fi
