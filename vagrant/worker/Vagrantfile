@@ -30,7 +30,6 @@ Vagrant.configure('2') do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../../", "/vagrant", :nfs => !is_windows
   config.vm.synced_folder '../../worker-nodes', '/data/worker-nodes', nfs: use_nfs
   config.vm.synced_folder '../../launch-instance', '/data/launch-instance', nfs: use_nfs
   config.vm.synced_folder '../../lib/R-packages', '/data/R-packages', nfs: use_nfs
@@ -48,7 +47,10 @@ Vagrant.configure('2') do |config|
     begin
       override.vm.box = 'dummy'
       override.vm.box_url = 'http://github.com/mitchellh/vagrant-aws/raw/master/dummy.box'
-      override.nfs.functional = false
+      # Version 1.6 of vagrant-aws plugin does not work with nfs (it should just rsync). Have to be explicit
+      override.vm.synced_folder '../../worker-nodes', '/data/worker-nodes', nfs: false
+      override.vm.synced_folder '../../launch-instance', '/data/launch-instance', nfs: false
+      override.vm.synced_folder '../../lib/R-packages', '/data/R-packages', nfs: false
 
       # you will need to create a yaml file with these values to
       # properly deploy to ec2
