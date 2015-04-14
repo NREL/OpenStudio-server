@@ -110,6 +110,8 @@ class Analysis
     end
 
     # get server and worker characteristics
+    # 4/14/15 Disable for now because there is not easy way to get this data back to the server without having
+    # to ssh into the box from the server user (nobody). Probably move this over to the worker initialization script.
     # ComputeNode.system_information
   end
 
