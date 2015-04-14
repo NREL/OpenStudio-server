@@ -122,7 +122,7 @@ class Analysis::SpeaNrel
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
+      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       worker_ips = ComputeNode.worker_ips
       Rails.logger.info "Found the following good ips #{worker_ips}"
