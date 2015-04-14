@@ -51,6 +51,7 @@ Vagrant.configure('2') do |config|
     begin
       override.vm.box = 'dummy'
       override.vm.box_url = 'http://github.com/mitchellh/vagrant-aws/raw/master/dummy.box'
+      override.nfs.functional = false
 
       # you will need to create a yaml file with these values to
       # properly deploy to ec2
