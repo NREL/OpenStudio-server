@@ -654,6 +654,14 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def download_analysis_zip
+    @analysis = Analysis.find(params[:id])
+    
+    if !@analysis.seed_zip.nil?
+      send_data File.open(@analysis.seed_zip.path).read, filename: 'analysis.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
+    end
+  end
+
   def dencity
     @analysis = Analysis.find(params[:id])
 
