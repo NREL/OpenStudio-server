@@ -7,6 +7,8 @@
 bash 'bundle_install' do
   code <<-EOH
     cd /data/worker-nodes
+    rm -f Gemfile.lock
     bundle install
+    sudo bundle install
   EOH
 end
