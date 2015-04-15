@@ -48,7 +48,9 @@ class ComputeNode
     # What is the maximum number of cores that we want this to run on?
     cns = ComputeNode.all
     Parallel.each(cns, in_threads: ComputeNode.count) do |cn|
-      Rails.logger.info "Checking for points on #{cn.ip_address}"
+      ip_address_override = node.node_type == 'server' ? 'localhost' : cn.ip_address
+
+      Rails.logger.info "Checking for points on #{ip_address_override}"
 
       # find which data points are complete on the compute node
       dps = nil
@@ -60,7 +62,7 @@ class ComputeNode
 
       if dps.count > 0
         # find the right key -- reminder that this works becaused delayed_job is root.
-        session = Net::SSH.start(cn.ip_address, cn.user, :keys => [ "/home/#{cn.user}/.ssh/id_rsa" ])
+        session = Net::SSH.start(ip_address_override, cn.user, :keys => [ "/home/#{cn.user}/.ssh/id_rsa" ])
 
         dps.each do |dp|
           st = Time.now
@@ -214,7 +216,7 @@ class ComputeNode
         end
       end
     rescue Timeout::Error
-      Rails.logger.error "TimeoutError trying to download data point from remote server #{ip_address}"
+      Rails.logger.error "TimeoutError trying to download data point from remote server"
       retry if (retries += 1) <= 3
     rescue => e
       Rails.logger.error "Exception while trying to download data point from remote server #{e.message}"
