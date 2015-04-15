@@ -24,7 +24,11 @@ class ComputeNode
     worker_ips_hash[:worker_ips] = []
 
     ComputeNode.where(valid: true).each do |node|
-      (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << node.ip_address }
+      if node.node_type == 'server'
+        (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << 'localhost' }
+      else
+        (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << node.ip_address }
+      end
     end
     Rails.logger.info("worker ip hash: #{worker_ips_hash}")
 
