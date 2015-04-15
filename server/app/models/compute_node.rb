@@ -48,7 +48,7 @@ class ComputeNode
     # What is the maximum number of cores that we want this to run on?
     cns = ComputeNode.all
     Parallel.each(cns, in_threads: ComputeNode.count) do |cn|
-      ip_address_override = node.node_type == 'server' ? 'localhost' : cn.ip_address
+      ip_address_override = cn.node_type == 'server' ? 'localhost' : cn.ip_address
 
       Rails.logger.info "Checking for points on #{ip_address_override}"
 
