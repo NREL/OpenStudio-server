@@ -478,6 +478,23 @@ class Analysis::Rgenoud
           Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
+
+      # Post process the results and jam into the database
+      converge_flag_json = "/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json"
+      if File.exist? converge_flag_json
+        begin
+          Rails.logger.info('read converge_flag.json')
+          temp2 = File.read(converge_flag_json)
+          temp = JSON.parse(temp2, symbolize_names: true)
+          Rails.logger.info("temp: #{temp}")
+          @analysis.results[@options[:analysis_type]]['convergence_flag'] = temp
+          @analysis.save!
+          Rails.logger.info("analysis: #{@analysis.results}")
+        rescue => e
+          Rails.logger.error 'Could not save post processed results for converge_flag.json into the database'
+        end
+      end
+
       # Do one last check if there are any data points that were not downloaded
       Rails.logger.info('Trying to download any remaining files from worker nodes')
       @analysis.finalize_data_points
