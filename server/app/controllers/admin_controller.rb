@@ -4,7 +4,7 @@ class AdminController < ApplicationController
 
   def backup_database
     logger.info params
-    write_and_send_data(params[:full_backup] == 'true')
+    write_and_send_data
   end
 
   def restore_database
@@ -75,23 +75,14 @@ class AdminController < ApplicationController
     success
   end
 
-  def write_and_send_data(full_backup = false, file_prefix = 'mongodump')
+  def write_and_send_data(file_prefix = 'mongodump')
     success = false
 
     time_stamp = Time.now.to_i
     dump_dir = "/tmp/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    if full_backup
-      resp = `mongodump --db os_dev --out #{dump_dir}`
-    else
-      # mongodump  -u admin -p '' --port 30017 -d os_dev -o $BACKUP_DUMP
-      resp = `mongodump --db os_dev --collection projects --out #{dump_dir}`
-      resp = `mongodump --db os_dev --collection analyses --out #{dump_dir}`
-      resp = `mongodump --db os_dev --collection data_points --out #{dump_dir}`
-      resp = `mongodump --db os_dev --collection measures --out #{dump_dir}`
-      resp = `mongodump --db os_dev --collection variables --out #{dump_dir}`
-    end
+    resp = `mongodump --db os_dev --out #{dump_dir}`
 
     if $?.exitstatus == 0
       output_file = "/tmp/#{file_prefix}_#{time_stamp}.tar.gz"

@@ -30,6 +30,7 @@ OpenstudioServer::Application.routes.draw do
         get :plot_radar
         get :plot_bar
         get :download_data
+        get :download_analysis_zip
         get :dencity
 
         match 'plot_parallelcoordinates' => 'analyses#plot_parallelcoordinates', :via => [:get, :post]
