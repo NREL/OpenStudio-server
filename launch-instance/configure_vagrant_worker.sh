@@ -4,10 +4,10 @@
 # File used to configure worker nodes on vagrant
 
 # Change Host File Entries
-ENTRY="192.168.33.10 os-server"
+ENTRY="192.168.33.10 openstudio.server"
 FILE=/etc/hosts
 if grep -q "$ENTRY" $FILE; then
-  echo "entry already exists"
+  echo "Hosts 'openstudio.server' entry already exists"
 else
   sudo sh -c "echo $ENTRY >> /etc/hosts"
 fi

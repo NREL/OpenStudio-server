@@ -24,73 +24,23 @@ class ComputeNode
     worker_ips_hash[:worker_ips] = []
 
     ComputeNode.where(valid: true).each do |node|
-      (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << node.ip_address }
+      if node.node_type == 'server'
+        (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << 'localhost' }
+      else
+        (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << node.ip_address }
+      end
     end
     Rails.logger.info("worker ip hash: #{worker_ips_hash}")
 
     worker_ips_hash
   end
 
-  # copy the zip file over the various workers and extract the file.
-  # if the file already exists, then it will overwrite the file
-  # verify the behaviour of the zip extraction on top of an already existing analysis.
-  def self.copy_data_to_workers(analysis)
-    # copy the datafiles over to the worker nodes. Always include the server node because
-    # this creates the permissions of the analysis folder
-    ComputeNode.all.each do |node|
-      Rails.logger.info("Configuring node '#{node.ip_address}'")
-
-      # removed the entire section where I pivoted on type of server and now using SSH even to talk
-      # to the server node to better manage the permissions
-      Net::SSH.start(node.ip_address, node.user, password: node.password) do |session|
-        if !analysis.use_shm
-          upload_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-          # NL: sudo chgrp the folder so that it has the right permissions. Make sure in the future that the
-          # anlaysis user has sudo rights to chmod the files.
-          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |_channel, _stream, data|
-            Rails.logger.info(data)
-          end
-          session.loop
-
-          session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}/")
-
-          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name}") do |_channel, _stream, data|
-            logger.info(data)
-          end
-          session.loop
-        else
-          upload_dir = "/run/shm/openstudio/analysis_#{analysis.id}"
-          storage_dir = "/mnt/openstudio/analysis_#{analysis.id}"
-          session.exec!("rm -rf #{upload_dir}") do |_channel, _stream, data|
-            Rails.logger.info(data)
-          end
-          session.loop
-
-          session.exec!("rm -f #{storage_dir}/*.log && rm -rf #{storage_dir}/analysis_#{analysis.id}") do |_channel, _stream, data|
-            Rails.logger.info(data)
-          end
-          session.loop
-
-          # NL: sudo chgrp the folder so that it has the right permissions.
-          session.exec!("mkdir -p #{upload_dir} && chmod -R 775 #{upload_dir} && sudo chgrp -R www-data #{upload_dir}") do |_channel, _stream, data|
-            Rails.logger.info(data)
-          end
-          session.loop
-
-          session.scp.upload!(analysis.seed_zip.path, "#{upload_dir}")
-
-          session.exec!("cd #{upload_dir} && unzip -o #{analysis.seed_zip_file_name} && chmod -R 775 #{upload_dir}") do |_channel, _stream, data|
-            logger.info(data)
-          end
-          session.loop
-        end
-      end
-    end
-  end
-
   # New method to download files from the remote systems.  This method flips the download around and favors
   # looking at which points are on the compute node and download the files that way instead of trying to find which
   # compute node the data point was run.
+  #
+  # This currently works because the user that runs the analysis is ROOT (via delayed jobs).
+  # Security-wise, make delayed_jobs run as an analysis user.
   def self.download_all_results(analysis_id = nil)
     # Get the analysis if it exists
     analysis = analysis_id.nil? ? nil : Analysis.find(analysis_id)
@@ -98,7 +48,9 @@ class ComputeNode
     # What is the maximum number of cores that we want this to run on?
     cns = ComputeNode.all
     Parallel.each(cns, in_threads: ComputeNode.count) do |cn|
-      Rails.logger.info "Checking for points on #{cn.ip_address}"
+      ip_address_override = cn.node_type == 'server' ? 'localhost' : cn.ip_address
+
+      Rails.logger.info "Checking for points on #{ip_address_override}"
 
       # find which data points are complete on the compute node
       dps = nil
@@ -109,7 +61,8 @@ class ComputeNode
       end
 
       if dps.count > 0
-        session = Net::SSH.start(cn.ip_address, cn.user, password: cn.password)
+        # find the right key -- reminder that this works becaused delayed_job is root.
+        session = Net::SSH.start(ip_address_override, cn.user, :keys => [ "/home/#{cn.user}/.ssh/id_rsa" ])
 
         dps.each do |dp|
           st = Time.now
@@ -181,52 +134,52 @@ class ComputeNode
 
   # Report back the system inforamtion of the node for debugging purposes
   def self.system_information
-    # if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
-
+    # # if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
+    #
+    # # end
+    #
+    # # TODO: move this to a worker init because this is hitting API limits on amazon
+    # Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
+    #
+    # # go through the worker node
+    # ComputeNode.all.each do |node|
+    #   if local_host
+    #     node.ami_id = 'Vagrant'
+    #     node.instance_id = 'Vagrant'
+    #   else
+    #     # TODO: convert this all over to Facter -- acutally remove this!
+    #     #   ex: @datapoint.ami_id = m['ami-id'] ? m['ami-id'] : 'unknown'
+    #     #   ex: @datapoint.instance_id = m['instance-id'] ? m['instance-id'] : 'unknown'
+    #     #   ex: @datapoint.hostname = m['public-hostname'] ? m['public-hostname'] : 'unknown'
+    #     #   ex: @datapoint.local_hostname = m['local-hostname'] ? m['local-hostname'] : 'unknown'
+    #
+    #     if node.node_type == 'server'
+    #       node.ami_id = `curl -sL http://169.254.169.254/latest/meta-data/ami-id`
+    #       node.instance_id = `curl -sL http://169.254.169.254/latest/meta-data/instance-id`
+    #     else
+    #       # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
+    #       Net::SSH.start(node.ip_address, node.user, password: node.password) do |session|
+    #         # Rails.logger.info(self.inspect)
+    #
+    #         logger.info 'Checking the configuration of the worker nodes'
+    #         session.exec!('curl -sL http://169.254.169.254/latest/meta-data/ami-id') do |_channel, _stream, data|
+    #           Rails.logger.info("Worker node reported back #{data}")
+    #           node.ami_id = data
+    #         end
+    #         session.loop
+    #
+    #         session.exec!('curl -sL http://169.254.169.254/latest/meta-data/instance-id') do |_channel, _stream, data|
+    #           Rails.logger.info("Worker node reported back #{data}")
+    #           node.instance_id = data
+    #         end
+    #         session.loop
+    #       end
+    #
+    #     end
+    #   end
+    #
+    #   node.save!
     # end
-
-    # TODO: move this to a worker init because this is hitting API limits on amazon
-    Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
-
-    # go through the worker node
-    ComputeNode.all.each do |node|
-      if local_host
-        node.ami_id = 'Vagrant'
-        node.instance_id = 'Vagrant'
-      else
-        # TODO: convert this all over to Facter!
-        #   ex: @datapoint.ami_id = m['ami-id'] ? m['ami-id'] : 'unknown'
-        #   ex: @datapoint.instance_id = m['instance-id'] ? m['instance-id'] : 'unknown'
-        #   ex: @datapoint.hostname = m['public-hostname'] ? m['public-hostname'] : 'unknown'
-        #   ex: @datapoint.local_hostname = m['local-hostname'] ? m['local-hostname'] : 'unknown'
-
-        if node.node_type == 'server'
-          node.ami_id = `curl -sL http://169.254.169.254/latest/meta-data/ami-id`
-          node.instance_id = `curl -sL http://169.254.169.254/latest/meta-data/instance-id`
-        else
-          # have to communicate with the box to get the instance information (ideally this gets pushed from who knew)
-          Net::SSH.start(node.ip_address, node.user, password: node.password) do |session|
-            # Rails.logger.info(self.inspect)
-
-            logger.info 'Checking the configuration of the worker nodes'
-            session.exec!('curl -sL http://169.254.169.254/latest/meta-data/ami-id') do |_channel, _stream, data|
-              Rails.logger.info("Worker node reported back #{data}")
-              node.ami_id = data
-            end
-            session.loop
-
-            session.exec!('curl -sL http://169.254.169.254/latest/meta-data/instance-id') do |_channel, _stream, data|
-              Rails.logger.info("Worker node reported back #{data}")
-              node.instance_id = data
-            end
-            session.loop
-          end
-
-        end
-      end
-
-      node.save!
-    end
   end
 
   def scp_download_file(session, remote_file, local_file, remote_file_path)
@@ -263,7 +216,7 @@ class ComputeNode
         end
       end
     rescue Timeout::Error
-      Rails.logger.error "TimeoutError trying to download data point from remote server #{ip_address}"
+      Rails.logger.error "TimeoutError trying to download data point from remote server"
       retry if (retries += 1) <= 3
     rescue => e
       Rails.logger.error "Exception while trying to download data point from remote server #{e.message}"

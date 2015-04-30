@@ -120,7 +120,7 @@ class Analysis::Deoptim
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes(@analysis.id)
+      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"

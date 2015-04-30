@@ -43,7 +43,6 @@ end
 
 # Set the result of the project for R to know that this finished
 result = false
-
 begin
   # Logger for the simulate datapoint
   analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
@@ -52,11 +51,16 @@ begin
 
   logger.info "Running #{__FILE__}"
 
-  # TODO, should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
+  # Download the zip file from the server
+  download_file = "#{analysis_dir}/analysis.zip"
+  download_url = "http://openstudio.server/analyses/#{options[:analysis_id]}/download_analysis_zip"
+  logger.info "Downloading analysis.zip from #{download_url} to #{download_file}"
+  `curl -o #{download_file} #{download_url}`
+  `cd #{analysis_dir} && unzip -o #{download_file}`
+
+  # Find any custom worker files -- should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
   files = Dir["#{analysis_dir}/lib/worker_#{options[:state]}/*.rb"].map { |n| File.basename(n) }.sort
-
-  logger.info "The following worker #{options[:state]} files were found #{files}"
-
+  logger.info "The following custom worker #{options[:state]} files were found #{files}"
   files.each do |f|
     f_fullpath = "#{analysis_dir}/lib/worker_#{options[:state]}/#{f}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
@@ -96,5 +100,5 @@ ensure
   logger.close if logger
 
   # always print out the state at the end
-  puts result
+  puts result  # as a string? (for R to parse correctly?)
 end

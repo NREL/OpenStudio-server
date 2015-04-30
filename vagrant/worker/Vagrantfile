@@ -26,27 +26,14 @@ Vagrant.configure('2') do |config|
   config.vm.network :private_network, ip: '192.168.33.11'
   config.vm.hostname = 'os-worker-1'
 
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network :public_network
-
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../../", "/vagrant", :nfs => !is_windows
   config.vm.synced_folder '../../worker-nodes', '/data/worker-nodes', nfs: use_nfs
   config.vm.synced_folder '../../launch-instance', '/data/launch-instance', nfs: use_nfs
   config.vm.synced_folder '../../lib/R-packages', '/data/R-packages', nfs: use_nfs
-  # config.vm.synced_folder "../../../OpenStudio-workflow", "/data/OpenStudio-workflow", :nfs => use_nfs
-  # config.vm.synced_folder "../../../OpenStudio-analysis-gem", "/data/OpenStudio-analysis-gem", :nfs => use_nfs
-  # config.vm.synced_folder "E:/data-worker", "/mnt/openstudio", :nfs => use_nfs, :owner => "vagrant", :group => "www-data", :mount_options => [ "dmode=775", "fmode=775" ]
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
   config.vm.provider :virtualbox do |vb|
     # Use VBoxManage to customize the VM. For example to change memory:
     vb.customize ['modifyvm', :id, '--memory', 1024 * 2, '--cpus', 1 * 2]
@@ -60,6 +47,10 @@ Vagrant.configure('2') do |config|
     begin
       override.vm.box = 'dummy'
       override.vm.box_url = 'http://github.com/mitchellh/vagrant-aws/raw/master/dummy.box'
+      # Version 1.6 of vagrant-aws plugin does not work with nfs (it should just rsync). Have to be explicit
+      override.vm.synced_folder '../../worker-nodes', '/data/worker-nodes', nfs: false
+      override.vm.synced_folder '../../launch-instance', '/data/launch-instance', nfs: false
+      override.vm.synced_folder '../../lib/R-packages', '/data/R-packages', nfs: false
 
       # you will need to create a yaml file with these values to
       # properly deploy to ec2
@@ -102,7 +93,6 @@ Vagrant.configure('2') do |config|
 
   config.vm.provision :chef_solo do |chef|
     chef.log_level = :info
-    chef.cookbooks_path = '../chef/cookbooks'
     chef.roles_path = '../chef/roles'
 
     chef.add_role 'openstudio-worker'

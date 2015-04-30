@@ -2,6 +2,8 @@ name 'base'
 description 'Base role for servers and worker nodes'
 
 run_list([
+  'recipe[apt]',
+
   # For checking out our repos.
   'recipe[git]',
 

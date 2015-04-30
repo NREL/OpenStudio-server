@@ -205,14 +205,21 @@ class DataPointsController < ApplicationController
     send_data data_point_zip_data, filename: File.basename(remote_filename_reports), type: 'application/zip; header=present', disposition: 'attachment'
   end
 
-  # TODO: this looks very unsafe. The idea that any file passed into this method can be rendered is not a good idea!
+  # Render an openstudio reporting measure's HTML report. This method has protection around which file to load.
+  # It expects the file to be in the reports directory of the data point. If the user try to navigate the file system
+  # the File.basename method will remove that.
   def view_report
-    html_file = params[:html_file]
+    # construct the path to the report based on the routs
+    @data_point = DataPoint.find(params[:id])
 
-    if File.exist? html_file
-      @html = File.read html_file
+    # remove any preceding .. because an attacker could try and traverse the file system
+    html_file = File.basename(params[:html_file])
+    file_str = "/mnt/openstudio/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{html_file}"
+
+    if File.exist? file_str
+      @html = File.read file_str
     else
-      @html = 'Could not find file'
+      @html = "Could not find file #{file_str}"
     end
   end
 
