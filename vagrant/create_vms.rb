@@ -43,38 +43,12 @@ OptionParser.new do |opts|
     @options[:user_uuid] = s
   end
 
-  @options[:list_amis] = false
-  opts.on('-l', '--list-amis', 'Create AMI JSON lists') do |_s|
-    @options[:list_amis] = true
-  end
-
   @options[:skip_terminate] = false
   opts.on('-x', '--skip-terminate', 'Do not terminate the instances') do |_s|
     @options[:skip_terminate] = true
   end
 end.parse!
 puts "options = #{@options.inspect}"
-
-if @options[:list_amis]
-  puts 'Listing available AMIs from AWS'
-
-  require 'openstudio-aws'
-
-  @aws = OpenStudio::Aws::Aws.new
-
-  json_version_1 = @aws.os_aws.create_new_ami_json(1)
-  json_version_2 = @aws.os_aws.create_new_ami_json(2)
-
-  test_amis_filename = 'amis_v1.json'
-  File.delete(test_amis_filename) if File.exist?(test_amis_filename)
-  File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(json_version_1) }
-
-  test_amis_filename = 'amis_v2.json'
-  File.delete(test_amis_filename) if File.exist?(test_amis_filename)
-  File.open(test_amis_filename, 'w') { |f| f << JSON.pretty_generate(json_version_2) }
-
-  exit 0
-end
 
 # Versioning (change these each build)
 require_relative '../server/lib/openstudio_server/version'
