@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'instance_info'
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'EnergyPlus-8.2.0'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'EnergyPlus-8.3.0'
 
 # Install other gems that are needed but not required by the workflow gem
 gem 'facter', '~> 2.3.0' # TODO: deprecate?
