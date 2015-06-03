@@ -14,7 +14,6 @@ default_attributes(
     sysconfig_file: '/var/lib/mongo',
     default_init_name: 'mongod',
     instance_name: 'mongod',
-    package_version: '2.6.4',
     install_method: 'mongodb-org',
     config: {
       dbpath: '/mnt/mongodb/data',
