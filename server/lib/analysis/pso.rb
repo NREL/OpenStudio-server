@@ -18,6 +18,13 @@ class Analysis::Pso
           abstol: 1e-2,
           reltol: 1e-2,
           method: 'spso2011',
+          xini: 'lhs',
+          vini: 'lhs2011',
+          boundary: 'default',
+          topology: 'random',
+          c1: 1.193147,
+          c2: 1.193147,
+          lambda: 1,
           normtype: 'minkowski',
           ppower: 2,
           exit_on_guideline14: 0,
@@ -78,6 +85,22 @@ class Analysis::Pso
       # end
       if not ['spso2007', 'spso2011', 'ipso', 'fips', 'wfips'].include?(@analysis.problem['algorithm']['method'])
         fail 'unknown method type'
+      end
+      
+      if not ['lhs', 'random'].include?(@analysis.problem['algorithm']['xini'])
+        fail 'unknown Xini type'
+      end
+      
+      if not ['zero', 'lhs2011', 'random2011', 'lhs2007', 'random2007', 'default'].include?(@analysis.problem['algorithm']['vini'])
+        fail 'unknown Vini type'
+      end
+      
+      if not ['invisible', 'damping', 'reflecting', 'absorbing2007', 'absorbing2007', 'default'].include?(@analysis.problem['algorithm']['boundary'])
+        fail 'unknown Boundary type'
+      end
+      
+      if not ['gbest', 'lbest', 'vonneumann','random'].include?(@analysis.problem['algorithm']['topology'])
+        fail 'unknown Topology type'
       end
 
       if @analysis.problem['algorithm']['ppower'] <= 0
@@ -165,6 +188,13 @@ class Analysis::Pso
                    abstol: @analysis.problem['algorithm']['abstol'],
                    reltol: @analysis.problem['algorithm']['reltol'],
                    maxit: @analysis.problem['algorithm']['maxit'],
+                   c1: @analysis.problem['algorithm']['c1'],
+                   c2: @analysis.problem['algorithm']['c2'],
+                   lambda: @analysis.problem['algorithm']['lambda'],
+                   xini: @analysis.problem['algorithm']['xini'],
+                   vini: @analysis.problem['algorithm']['vini'],
+                   boundary: @analysis.problem['algorithm']['boundary'],
+                   topology: @analysis.problem['algorithm']['topology'],
                    method: @analysis.problem['algorithm']['method']) do
           %{
             clusterEvalQ(cl,library(RMongo))
@@ -347,10 +377,20 @@ class Analysis::Pso
             print(paste("abstol:", abstol))
             print(paste("reltol:", reltol))
             print(paste("method:", method))
+            print(paste("xini:", xini))
+            if (vini == "default") {vini <- NULL}
+            print(paste("vini:", vini))
+            if (boundary == "default") {boundary <- NULL}
+            print(paste("boundary:", boundary))
+            if (topology == "vonneumann") {topology <- "vonNeumann"}
+            print(paste("topology:", topology))
+            print(paste("c1:", c1))
+            print(paste("c2:", c2))
+            print(paste("lambda:", lambda))
 
             results <- NULL
             try(
-                 results <- nrelPSO(cl=cl, fn=g, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol))
+                 results <- nrelPSO(cl=cl, fn=g, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda))
                )
                #scp <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/')
                #scp2 <- paste('scp vagrant@192.168.33.11:/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/')
