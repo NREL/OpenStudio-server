@@ -1,0 +1,20 @@
+importFrom("lhs", randomLHS)
+importFrom("parallel", makeCluster, makeForkCluster, detectCores, clusterCall, clusterExport, mclapply, parRapply, clusterApply, stopCluster)
+
+export(nrelPSO,
+       ackley,
+       griewank,
+       rastrigrin, # wrong name, only used for backward compatibility
+       rastrigin,
+       rosenbrock,
+       schafferF6,
+       schwefel,
+       sphere,
+       sackley,
+       sgriewank,
+       srastrigin,
+       srosenbrock,       
+       sschwefel1_2,
+       rLHS      
+      )
+      

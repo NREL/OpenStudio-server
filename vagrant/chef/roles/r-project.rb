@@ -102,6 +102,12 @@ default_attributes(
         package_path: '/data/R-packages',
         version: '1.3.32',
         update_method: 'always_update'
+      },
+      {
+        name: 'nrelPSO',
+        package_path: '/data/R-packages',
+        version: '0.3-4',
+        update_method: 'always_update'
       }
     ]
   }
