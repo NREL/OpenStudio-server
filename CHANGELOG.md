@@ -1,6 +1,10 @@
 OpenStudio Server
 ==================================
 
+Version 1.12.1
+--------------
+* OpenStudio 1.8.0
+
 Version 1.12.0
 --------------
 * Default to using EnergyPlus 8.3.
