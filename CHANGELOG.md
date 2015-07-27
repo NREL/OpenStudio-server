@@ -1,6 +1,10 @@
 OpenStudio Server
 ==================================
 
+Version 1.12.3
+--------------
+* OpenStudio 1.8.2
+
 Version 1.12.2
 --------------
 * OpenStudio 1.8.1
