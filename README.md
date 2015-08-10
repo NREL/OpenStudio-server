@@ -35,14 +35,14 @@ vagrant plugin install vagrant-vbguest
 
 - **NREL ONLY** Set environment variables or bypass SSL proxy
 Either login to the SSL Developer VPN or set the environment variables below.
-  **Windows**  
+-  **NREL Windows**  
 ```bat
 cd \path\to\Vagrantfile
 rem for each cmd window set the environment variable (or set globally (for NREL only)
 set OMNIBUS_INSTALL_URL=http://www.opscode.com/chef/install.sh
 
 ```
-  **Mac / Linux**  
+-  **NREL Mac / Linux**  
 ```sh
 cd /path/to/Vagrantfile
 # for each cmd window set the environment variable (or set globally (for NREL only)
