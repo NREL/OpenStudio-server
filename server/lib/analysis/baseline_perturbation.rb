@@ -43,7 +43,7 @@ class Analysis::BaselinePerturbation
       # TODO: need to move this to the module class
       @r.converse('setwd("/mnt/openstudio")')
 
-      #pivot_array = Variable.pivot_array(@analysis.id)
+      # pivot_array = Variable.pivot_array(@analysis.id)
 
       Rails.logger.info "#{Variable.variables(@analysis.id)}"
 
@@ -64,16 +64,16 @@ class Analysis::BaselinePerturbation
         Rails.logger.info "name: #{var.measure.name}; id: #{var.measure.id}"
       end
 
-      #Make baseline case
+      # Make baseline case
       instance = {}
       selected_variables.each do |variable|
         instance["#{variable.id}".to_sym] = variable.static_value
       end
       samples << instance
 
-      #Make perturbed cases
+      # Make perturbed cases
       if @analysis.problem['algorithm']['in_measure_combinations'].downcase == 'false'
-        Rails.logger.info "In False"
+        Rails.logger.info 'In False'
         selected_variables.each do |variable|
           if variable.map_discrete_hash_to_array.nil? || variable.discrete_values_and_weights.empty?
             fail 'no hash values and weight passed'
@@ -91,7 +91,7 @@ class Analysis::BaselinePerturbation
           end
         end
       elsif @analysis.problem['algorithm']['in_measure_combinations'].downcase == 'true'
-        Rails.logger.info "In True"
+        Rails.logger.info 'In True'
         measure_list = []
         selected_variables.each do |var|
           measure_list << var.measure.id unless measure_list.include? var.measure.id
@@ -108,10 +108,10 @@ class Analysis::BaselinePerturbation
               end
               meas_var_val["#{var.id}"] = values
               meas_var << var.id
-              meas_var_num << [0..(values.length-1)][0].to_a
+              meas_var_num << [0..(values.length - 1)][0].to_a
             end
           end
-          #Rails.logger.info "meas_var_num: #{meas_var_num}; meas_var_val: #{meas_var_val}; meas_var: #{meas_var}"
+          # Rails.logger.info "meas_var_num: #{meas_var_num}; meas_var_val: #{meas_var_val}; meas_var: #{meas_var}"
           combinations = meas_var_num.first.product(*meas_var_num[1..-1])
           combinations.each do |combination|
             instance = {}
@@ -119,9 +119,9 @@ class Analysis::BaselinePerturbation
               instance["#{meas_var[var_ind]}".to_sym] = meas_var_val[meas_var[var_ind]][value_ind]
             end
             selected_variables.each do |var|
-              instance["#{var.id}".to_sym] = var.static_value unless meas_var.include? var.id 
+              instance["#{var.id}".to_sym] = var.static_value unless meas_var.include? var.id
             end
-            #Rails.logger.info "instance: #{instance}"
+            # Rails.logger.info "instance: #{instance}"
             sleep 1
             samples << instance
           end

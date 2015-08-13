@@ -105,7 +105,7 @@ module Analysis::Core
     # save other run information in another object in the analysis
     analysis_job.start_time = Time.now
     analysis_job.status = 'started'
-    analysis_job.run_options =  options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
+    analysis_job.run_options = options.reject { |k, _| [:problem, :data_points, :output_variables].include?(k.to_sym) }
     analysis_job.save!
 
     # Clear out any former results on the analysis
@@ -114,12 +114,12 @@ module Analysis::Core
 
     # merge in the output variables and objective functions into the analysis object which are needed for problem execution
     if options[:output_variables]
-      options[:output_variables].reverse.each { |v| analysis.output_variables.unshift(v) unless analysis.output_variables.include?(v) }
+      options[:output_variables].reverse_each { |v| analysis.output_variables.unshift(v) unless analysis.output_variables.include?(v) }
       analysis.output_variables.uniq!
     end
 
     # verify that the objective_functions are unique
-    if analysis.problem && analysis.problem['algorithm'] &&  analysis.problem['algorithm']['objective_functions']
+    if analysis.problem && analysis.problem['algorithm'] && analysis.problem['algorithm']['objective_functions']
       analysis.problem['algorithm']['objective_functions'].uniq! if analysis.problem['algorithm']['objective_functions']
     end
 
