@@ -93,7 +93,7 @@ class Analysis::Optim
     @analysis.save!
     Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
-    if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
+    if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
     end
 
