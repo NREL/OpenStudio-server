@@ -108,6 +108,12 @@ default_attributes(
         package_path: '/data/R-packages',
         version: '0.3-4',
         update_method: 'always_update'
+      },
+      {
+        name: 'xts'
+      },
+      {
+        name: 'RSQLite'
       }
     ]
   }
