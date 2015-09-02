@@ -35,7 +35,7 @@ module Analysis::R
 
       dataframe = { 'data' => probabilities_array }.to_dataframe
 
-      if  var.uncertainty_type == 'discrete' || var.uncertainty_type == 'discrete_uncertain'
+      if var.uncertainty_type == 'discrete' || var.uncertainty_type == 'discrete_uncertain'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
             print(values)

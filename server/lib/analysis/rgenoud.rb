@@ -105,12 +105,12 @@ class Analysis::Rgenoud
       Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
       # check to make sure there are objective functions
-      if @analysis.output_variables.select { |v| v['objective_function'] == true }.size == 0
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } == 0
         fail 'No objective functions defined'
       end
 
       # find the total number of objective functions
-      if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
         fail 'Number of objective functions must equal between the output_variables and the problem definition'
       end
 

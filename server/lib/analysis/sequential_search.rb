@@ -163,7 +163,6 @@ class Analysis::SequentialSearch
                 min_point = dp
               elsif temp_slope == slope
                 # Rails.logger.info "Datapoint has same slope as previous point #{dp.name} with slope #{temp_slope}"
-              else
                 # Rails.logger.info "Slope was lower for #{dp.name} with slope #{temp_slope}"
               end
             end
@@ -179,8 +178,7 @@ class Analysis::SequentialSearch
               Rails.logger.info 'Pareto search found the same point or values'
               new_curve << min_point # just add in the same point to the new curve
             elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] ==
-                  @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][0]] \
-                && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
+                  @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][0]] \ && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
                    @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
               Rails.logger.info 'Found the same objective function values in array, skipping'
             # new_curve << min_point # just add in the same point to the new curve
@@ -236,7 +234,7 @@ class Analysis::SequentialSearch
       end
 
       # go through each of the run list results and delete any that have already run
-      data_point_list.reverse.each do |dp|
+      data_point_list.reverse_each do |dp|
         if @analysis.data_points.where(set_variable_values: dp[:variables]).exists?
           Rails.logger.info("Datapoint has already run for #{dp[:name]}")
           data_point_list.delete(dp)

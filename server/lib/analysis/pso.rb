@@ -83,23 +83,23 @@ class Analysis::Pso
       # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
-      if not ['spso2007', 'spso2011', 'ipso', 'fips', 'wfips'].include?(@analysis.problem['algorithm']['method'])
+      unless %w(spso2007 spso2011 ipso fips wfips).include?(@analysis.problem['algorithm']['method'])
         fail 'unknown method type'
       end
-      
-      if not ['lhs', 'random'].include?(@analysis.problem['algorithm']['xini'])
+
+      unless %w(lhs random).include?(@analysis.problem['algorithm']['xini'])
         fail 'unknown Xini type'
       end
-      
-      if not ['zero', 'lhs2011', 'random2011', 'lhs2007', 'random2007', 'default'].include?(@analysis.problem['algorithm']['vini'])
+
+      unless %w(zero lhs2011 random2011 lhs2007 random2007 default).include?(@analysis.problem['algorithm']['vini'])
         fail 'unknown Vini type'
       end
-      
-      if not ['invisible', 'damping', 'reflecting', 'absorbing2007', 'absorbing2007', 'default'].include?(@analysis.problem['algorithm']['boundary'])
+
+      unless %w(invisible damping reflecting absorbing2007 absorbing2007 default).include?(@analysis.problem['algorithm']['boundary'])
         fail 'unknown Boundary type'
       end
-      
-      if not ['gbest', 'lbest', 'vonneumann','random'].include?(@analysis.problem['algorithm']['topology'])
+
+      unless %w(gbest lbest vonneumann random).include?(@analysis.problem['algorithm']['topology'])
         fail 'unknown Topology type'
       end
 
@@ -115,12 +115,12 @@ class Analysis::Pso
       Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
       # check to make sure there are objective functions
-      if @analysis.output_variables.select { |v| v['objective_function'] == true }.size == 0
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } == 0
         fail 'No objective functions defined'
       end
 
       # find the total number of objective functions
-      if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
         fail 'Number of objective functions must equal between the output_variables and the problem definition'
       end
 
@@ -365,11 +365,11 @@ class Analysis::Pso
             varMin <- mins
             varMax <- maxes
             varMean <- (mins+maxes)/2.0
-           
+
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
             print(paste("Initial iterate set to:",varMean))
-            
+
             if (npart == 0) {npart <- NA}
             print(paste("Number of particles set to:",npart))
             print(paste("maxit:", maxit))
