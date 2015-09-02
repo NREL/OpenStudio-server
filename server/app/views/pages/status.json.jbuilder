@@ -2,8 +2,6 @@ if @awake
   json.status do
     json.awake @awake.awake
     json.awake_delta @awake_delta
-
-
   end
 else
   json.status
@@ -11,13 +9,12 @@ end
 
 json.analyses do
   json.count Analysis.count
-  json.na Analysis.all.only(:id).select{ |a| a.status == 'na'}.count
-  json.init Analysis.all.only(:id).select{ |a| a.status == 'init'}.count
-  json.queued Analysis.all.only(:id).select{ |a| a.status == 'queued'}.count
-  json.started Analysis.all.only(:id).select{ |a| a.status == 'started'}.count
-  json.completed Analysis.all.only(:id).select{ |a| a.status == 'completed'}.count
+  json.na Analysis.all.only(:id).count { |a| a.status == 'na' }
+  json.init Analysis.all.only(:id).count { |a| a.status == 'init' }
+  json.queued Analysis.all.only(:id).count { |a| a.status == 'queued' }
+  json.started Analysis.all.only(:id).count { |a| a.status == 'started' }
+  json.completed Analysis.all.only(:id).count { |a| a.status == 'completed' }
 end
-
 
 json.data_points do
   json.count DataPoint.count
@@ -50,7 +47,6 @@ if @workers.empty?
 else
   json.workers @workers, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :valid
 end
-
 
 if @file_systems.nil?
   json.file_systems

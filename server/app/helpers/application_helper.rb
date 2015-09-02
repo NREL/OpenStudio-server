@@ -26,6 +26,6 @@ module ApplicationHelper
   end
 
   def analyses_nav
-    @@analyses_for_menu ||= Analysis.all  # returns value if exists, or initializes it
+    @@analyses_for_menu ||= Analysis.all # returns value if exists, or initializes it
   end
 end

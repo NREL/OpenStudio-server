@@ -91,7 +91,7 @@ class Analysis::RgenoudLexical
 
     ug = @analysis.output_variables.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
-    if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
+    if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
     end
 

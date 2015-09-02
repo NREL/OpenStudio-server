@@ -14,7 +14,7 @@ class DataPointsController < ApplicationController
   # GET /data_points/1.json
   def show
     @data_point = DataPoint.find(params[:id])
-    @htmls = []
+    @files = []
     respond_to do |format|
       if @data_point
         format.html do
@@ -31,12 +31,16 @@ class DataPointsController < ApplicationController
           if @data_point.openstudio_datapoint_file_name
             local_analysis_dir = "#{File.dirname(@data_point.openstudio_datapoint_file_name.to_s)}/#{File.basename(@data_point.openstudio_datapoint_file_name.to_s, '.*')}"
             logger.debug "Local analysis dir is #{local_analysis_dir}"
-            Dir["#{local_analysis_dir}/reports/*.html"].each do |h|
+            Dir["#{local_analysis_dir}/reports/*"].each do |h|
               new_h = {}
               new_h[:filename] = h
               new_h[:name] = File.basename(h, '.*')
+              new_h[:extname] = File.extname(h).delete('.').upcase
               new_h[:display_name] = new_h[:name].titleize
-              @htmls << new_h
+
+              # only save the csvs and htmls/htms
+              next unless %w(HTML HTM CSV JSON).include? new_h[:extname]
+              @files << new_h
             end
           end
         end
@@ -213,13 +217,15 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     # remove any preceding .. because an attacker could try and traverse the file system
-    html_file = File.basename(params[:html_file])
-    file_str = "/mnt/openstudio/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{html_file}"
+    file = File.basename(params[:file])
+    file_str = "/mnt/openstudio/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{file}"
 
     if File.exist? file_str
-      @html = File.read file_str
+      render file: file_str, layout: false
     else
-      @html = "Could not find file #{file_str}"
+      respond_to do |format|
+        format.html { redirect_to @data_point, notice: "Could not find file #{file_str}" }
+      end
     end
   end
 

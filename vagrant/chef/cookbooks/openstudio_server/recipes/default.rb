@@ -33,7 +33,7 @@ bash 'fix delayed job permissions' do
   EOH
 end
 
-bash 'fix permissions on log files'  do
+bash 'fix permissions on log files' do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}/log
     find . -type d -print0 | xargs -0 chmod 777
@@ -41,7 +41,7 @@ bash 'fix permissions on log files'  do
   EOH
 end
 
-bash 'fix permissions on assets files'  do
+bash 'fix permissions on assets files' do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}/public
     find . -type d -print0 | xargs -0 chmod 777
@@ -49,7 +49,7 @@ bash 'fix permissions on assets files'  do
   EOH
 end
 
-bash 'fix permissions on tmp files'  do
+bash 'fix permissions on tmp files' do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}/tmp
     find . -type d -print0 | xargs -0 chmod 777
