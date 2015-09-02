@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: 1b3485b5064a93e2f24580dd3ec1df22d5480b12
+  revision: d7eb89b7114809e2d819a6cc37bfd10a0623f2ae
   branch: EnergyPlus-8.3.0
   specs:
     openstudio-workflow (0.1.1)
@@ -44,14 +44,14 @@ GEM
       moped (~> 1.4)
       origin (~> 1.0)
       tzinfo (~> 0.3.29)
-    mongoid-paperclip (0.0.9)
-      paperclip (>= 2.3.6)
+    mongoid-paperclip (0.0.10)
+      paperclip (>= 2.3.6, != 4.3.0)
     moped (1.5.3)
-    msgpack (0.6.0)
+    msgpack (0.6.2)
     multi_json (1.10.1)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
-    oj (2.12.9)
+    oj (2.12.12)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -59,9 +59,9 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
-    parallel (1.6.0)
+    parallel (1.6.1)
     ruby-prof (0.15.8)
-    rubyXL (3.3.8)
+    rubyXL (3.3.12)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
     rubyzip (1.1.7)
@@ -90,4 +90,4 @@ DEPENDENCIES
   uuid
 
 BUNDLED WITH
-   1.10.4
+   1.10.6
