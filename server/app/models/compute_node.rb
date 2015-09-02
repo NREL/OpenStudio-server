@@ -55,14 +55,14 @@ class ComputeNode
       # find which data points are complete on the compute node
       dps = nil
       if analysis
-        dps = analysis.data_points.and({ download_status: 'na' },  status: 'completed').or({ ip_address: cn.ip_address },  internal_ip_address: cn.ip_address)
+        dps = analysis.data_points.and({ download_status: 'na' }, status: 'completed').or({ ip_address: cn.ip_address }, internal_ip_address: cn.ip_address)
       else
-        dps = DataPoint.and({ download_status: 'na' },  status: 'completed').or({ ip_address: cn.ip_address },  internal_ip_address: cn.ip_address)
+        dps = DataPoint.and({ download_status: 'na' }, status: 'completed').or({ ip_address: cn.ip_address }, internal_ip_address: cn.ip_address)
       end
 
       if dps.count > 0
         # find the right key -- reminder that this works becaused delayed_job is root.
-        session = Net::SSH.start(ip_address_override, cn.user, :keys => [ "/home/#{cn.user}/.ssh/id_rsa" ])
+        session = Net::SSH.start(ip_address_override, cn.user, keys: ["/home/#{cn.user}/.ssh/id_rsa"])
 
         dps.each do |dp|
           st = Time.now
@@ -216,7 +216,7 @@ class ComputeNode
         end
       end
     rescue Timeout::Error
-      Rails.logger.error "TimeoutError trying to download data point from remote server"
+      Rails.logger.error 'TimeoutError trying to download data point from remote server'
       retry if (retries += 1) <= 3
     rescue => e
       Rails.logger.error "Exception while trying to download data point from remote server #{e.message}"
