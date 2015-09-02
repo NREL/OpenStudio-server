@@ -101,7 +101,7 @@ class Analysis::NsgaNrel
     @analysis.save!
     Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
-    if @analysis.output_variables.select { |v| v['objective_function'] == true }.size != @analysis.problem['algorithm']['objective_functions'].size
+    if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
       fail 'number of objective functions must equal'
     end
 
@@ -441,9 +441,6 @@ class Analysis::NsgaNrel
         rescue => e
           Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
-      else
-        # find the best point based on the simulations
-
       end
 
       # Do one last check if there are any data points that were not downloaded

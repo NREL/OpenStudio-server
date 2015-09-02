@@ -34,7 +34,7 @@ module Analysis::R
 
       dataframe = { 'data' => probabilities_array }.to_dataframe
 
-      if  var.uncertainty_type == 'discrete' || var.uncertainty_type == 'discrete_uncertain'
+      if var.uncertainty_type == 'discrete' || var.uncertainty_type == 'discrete_uncertain'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
             print(values)
@@ -214,7 +214,7 @@ module Analysis::R
       Rails.logger.info("samples_temp is #{samples_temp}")
 
       selected_variables.each_with_index do |var, idx|
-        samples["#{var.id}"] = samples_temp.column(idx).to_a.map{ |e| e.to_i}
+        samples["#{var.id}"] = samples_temp.column(idx).to_a.map(&:to_i)
       end
 
       Rails.logger.info("samples is #{samples}")

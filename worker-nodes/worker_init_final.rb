@@ -100,5 +100,5 @@ ensure
   logger.close if logger
 
   # always print out the state at the end
-  puts result  # as a string? (for R to parse correctly?)
+  puts result # as a string? (for R to parse correctly?)
 end

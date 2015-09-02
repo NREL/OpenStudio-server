@@ -6,7 +6,7 @@ run_list([
   'recipe[passenger_apache2::mod_rails]'
 ])
 
-# TODO check how many of these are now deprecated? https://github.com/opscode-cookbooks/passenger_apache2/blob/master/attributes/default.rb
+# TODO: check how many of these are now deprecated? https://github.com/opscode-cookbooks/passenger_apache2/blob/master/attributes/default.rb
 default_attributes(
   passenger: {
     version: '4.0.50',

@@ -60,7 +60,7 @@ class Analysis
   before_destroy :remove_dependencies
 
   def self.status_states
-    ['na', 'init', 'queued', 'started', 'completed']
+    %w(na init queued started completed)
   end
 
   # TODO: Move this into the compute node class and call this with delayed jobs if applicable
@@ -267,7 +267,7 @@ class Analysis
     var_ids.each do |var|
       v = Variable.where(uuid: var['_id']).only(:name).first
       # TODO: can we delete the gsub'ing -- as i think the v.name is always the machine name now
-      mappings[var['_id']] = v.name.gsub(' ', '_') if v
+      mappings[var['_id']] = v.name.tr(' ', '_') if v
     end
     Rails.logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
 

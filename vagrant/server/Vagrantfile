@@ -82,7 +82,7 @@ Vagrant.configure('2') do |config|
       aws.instance_type = 'm3.large' # $0.14 / hour, 2 cores, moderate network
       # aws.instance_type = "m3.xlarge" # $0.28 / hour, 4 cores, moderate network
 
-      aws.ami = 'ami-9eaa1cf6'  # Ubuntu 14.04 HVM EBS-SSD
+      aws.ami = 'ami-9eaa1cf6' # Ubuntu 14.04 HVM EBS-SSD
 
       override.ssh.username = 'ubuntu'
 

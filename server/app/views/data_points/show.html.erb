@@ -50,8 +50,8 @@
       <div class="panel-body">
         <div class="list-group">
           <!-- create submit forms for each of the pages -->
-          <% @htmls.each do |h| %>
-              <%= link_to "View #{h[:display_name]}", view_report_data_point_path(@data_point, html_file: File.basename(h[:filename])), class: 'list-group-item' %>
+          <% @files.each do |h| %>
+              <%= link_to "#{h[:display_name]} (#{h[:extname]})", view_report_data_point_path(@data_point, file: File.basename(h[:filename])), class: 'list-group-item' %>
           <% end %>
         </div>
       </div>
