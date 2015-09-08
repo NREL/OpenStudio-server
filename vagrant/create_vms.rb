@@ -461,8 +461,8 @@ begin
       puts '=========================== JSON ========================================='
       amis_hash = {}
       amis_hash[@os_version] = {}
-      amis_hash[@os_version]['server'] = @vms.select { |vm| vm[:name] == 'server' }.first[:ami_id]
-      amis_hash[@os_version]['worker'] = @vms.select { |vm| vm[:name] == 'worker' }.first[:ami_id]
+      amis_hash[@os_version]['server'] = @vms.find { |vm| vm[:name] == 'server' }[:ami_id]
+      amis_hash[@os_version]['worker'] = @vms.find { |vm| vm[:name] == 'worker' }[:ami_id]
       # Map the worker to the cc2worker for now until we deprecate the cc2s
       # amis_hash[@os_version]["cc2worker"] = @vms.select { |vm| vm[:name] == "worker" }.first[:ami_id]
 

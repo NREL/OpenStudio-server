@@ -108,6 +108,27 @@ default_attributes(
         package_path: '/data/R-packages',
         version: '0.3-4',
         update_method: 'always_update'
+      },
+      {
+        name: 'xts',
+        package_path: '/data/R-packages',
+        version: '0.9.874',
+        update_method: 'always_update'
+      },
+      {
+        name: 'RSQLite'
+      },
+      {
+        name: 'Rcpp'
+      },
+      {
+        name: 'plyr',
+        package_path: '/data/R-packages',
+        version: '1.8.1',
+        update_method: 'always_update'
+      },
+      {
+        name: 'ggplot2'
       }
     ]
   }

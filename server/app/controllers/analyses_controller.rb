@@ -658,7 +658,7 @@ class AnalysesController < ApplicationController
   def download_analysis_zip
     @analysis = Analysis.find(params[:id])
 
-    if !@analysis.seed_zip.nil?
+    unless @analysis.seed_zip.nil?
       send_data File.open(@analysis.seed_zip.path).read, filename: 'analysis.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
     end
   end
@@ -771,7 +771,7 @@ class AnalysesController < ApplicationController
                 .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
-    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].gsub('.', '|')] }]
+    variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].tr('.', '|')] }]
     # logger.info "Variable name map is #{variable_name_map}"
 
     # logger.info 'looking for data points'
@@ -860,7 +860,7 @@ class AnalysesController < ApplicationController
       #   throw an exception.  The map/reduce script above has to save the result of the map/reduce to the
       #   database because it is too large.  So the results have to be stored with pipes (|) temporary, then
       #   mapped back out.
-      plot_data[i] = Hash[pd.map { |k, v| [k.gsub('|', '.'), v] }]
+      plot_data[i] = Hash[pd.map { |k, v| [k.tr('|', '.'), v] }]
     end
     logger.info "finished merge: #{Time.now - start_time}"
 
