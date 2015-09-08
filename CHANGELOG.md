@@ -1,6 +1,12 @@
 OpenStudio Server
 ==================================
 
+Version 1.12.7
+--------------
+* Render JSON and HTML reports from data points.
+* Add new R libraries for worker nodes. Allow measures to run R scripts.
+* OpenStudio 1.8.5
+
 Version 1.12.6
 --------------
 * OpenStudio 1.8.5
