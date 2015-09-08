@@ -146,9 +146,6 @@ class Analysis::Preflight
         Rails.logger.info "Fixing Pivot dimension #{pivot_array}"
         samples = add_pivots(samples, pivot_array)
         Rails.logger.info "Finished adding the pivots resulting in #{samples}"
-      else
-        # only grab one of the pivots for now
-        # TODO: run all baselines, but only sample for the "default pivot"
       end
 
       # Add the data points to the database
