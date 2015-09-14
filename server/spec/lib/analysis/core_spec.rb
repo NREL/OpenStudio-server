@@ -60,7 +60,13 @@ describe Analysis::Core do
     end
     
     it 'should deal with more than two piviots' do
-      result = @dummy_class.product_hash([{a: 4, b: 5}, {p: 10, q: 20}, {n: 0, p: 1}])
+      result = @dummy_class.product_hash({a: [1,2], b:[3,4], c:[5,6]})
+      
+      result.size.should eq(8)
+    end
+    
+    it 'should deal with non-integers' do
+      result = @dummy_class.product_hash({a: [1.23,4.56], b:[true,false], c:['p','q']})
       
       result.size.should eq(8)
     end
