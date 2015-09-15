@@ -84,11 +84,3 @@ end
 Chef::Log.info 'Resetting the root_path and ruby_bin for Passenger'
 node.override['passenger']['root_path'] = "/opt/rbenv/versions/#{node[:openstudio_server][:ruby][:version]}/lib/ruby/gems/2.0.0/gems/passenger-#{node['passenger']['version']}"
 node.override['passenger']['ruby_bin'] = "/opt/rbenv/versions/#{node[:openstudio_server][:ruby][:version]}/bin/ruby"
-
-
-# set the locale to UTF-8
-bash 'set-local' do
-  code <<-EOH
-    locale-gen UTF-8
-  EOH
-end
