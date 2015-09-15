@@ -24,8 +24,8 @@ node.default['authorization']['sudo']['users'] = %w(vagrant ubuntu)
 # set the sudoers files so that it has access to rbenv
 secure_path = "#{node[:rbenv][:root_path]}/shims:#{node[:rbenv][:root_path]}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 node.default['authorization']['sudo']['sudoers_defaults'] = [
-  'env_reset',
-  "secure_path=\"#{secure_path}\""
+    'env_reset',
+    "secure_path=\"#{secure_path}\""
 ]
 node.default['authorization']['sudo']['passwordless'] = true
 node.default['authorization']['sudo']['include_sudoers_d'] = true
@@ -84,3 +84,11 @@ end
 Chef::Log.info 'Resetting the root_path and ruby_bin for Passenger'
 node.override['passenger']['root_path'] = "/opt/rbenv/versions/#{node[:openstudio_server][:ruby][:version]}/lib/ruby/gems/2.0.0/gems/passenger-#{node['passenger']['version']}"
 node.override['passenger']['ruby_bin'] = "/opt/rbenv/versions/#{node[:openstudio_server][:ruby][:version]}/bin/ruby"
+
+
+# set the locale to UTF-8
+bash 'set-local' do
+  code <<-EOH
+    locale-gen UTF-8
+  EOH
+end
