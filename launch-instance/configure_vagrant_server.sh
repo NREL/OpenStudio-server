@@ -24,7 +24,7 @@ chmod 775 ~/setup*
 chown vagrant:vagrant ~/setup*
 
 # stop the various services that use mongo
-sudo service delayed_job stop
+sudo supervisorctl stop delayed_job
 sudo service apache2 stop
 sudo service mongod stop
 
@@ -52,7 +52,7 @@ cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 sudo supervisorctl restart Rserve
 
 # restart delayed jobs
-sudo service delayed_job start
+sudo supervisorctl start delayed_job
 
 # Null out the logs
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log
