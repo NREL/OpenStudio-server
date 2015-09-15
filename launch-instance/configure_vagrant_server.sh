@@ -49,7 +49,7 @@ cd /var/www/rails/openstudio && bundle exec rake db:mongoid:create_indexes
 cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 # restart rserve
-sudo service Rserve restart
+sudo supervisorctl restart Rserve
 
 # restart delayed jobs
 sudo service delayed_job start
