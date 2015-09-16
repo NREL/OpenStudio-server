@@ -1,6 +1,10 @@
 OpenStudio Server
 ==================================
 
+Version 1.12.9
+--------------
+* OpenStudio 1.9.0
+
 Version 1.12.7
 --------------
 * Render JSON and HTML reports from data points.
