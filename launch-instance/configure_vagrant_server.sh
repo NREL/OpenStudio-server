@@ -28,6 +28,9 @@ sudo supervisorctl stop delayed_job
 sudo service apache2 stop
 sudo service mongod stop
 
+# make sure supervisor is running
+sudo service supervisor start
+
 # remove mongo db & add it back
 sudo mkdir -p /mnt/mongodb/data
 sudo chown mongodb:nogroup /mnt/mongodb/data
