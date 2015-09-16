@@ -20,7 +20,8 @@ default_attributes(
                 name: 'snow'
             },
             {
-                name: 'Rserve'
+                name: 'Rserve',
+                configure_flags: 'PKG_CPPFLAGS=-DNODAEMON'
             },
             {
                 name: 'lhs'
