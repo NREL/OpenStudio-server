@@ -59,14 +59,12 @@ bash 'fix permissions on tmp files' do
 end
 
 # supervisor tasks
-supervisor_service "delayed_job" do
+supervisor_service 'delayed_job' do
   command "#{node[:openstudio_server][:server_path]}/script/delayed_job run"
   directory "#{node[:openstudio_server][:server_path]}/script"
   environment(
-      {
-          RAILS_ENV: node[:openstudio_server][:rails_environment],
-          PATH: "#{node[:openstudio_server][:ruby_path]}:#{ENV['PATH']}"
-      }
+    RAILS_ENV: node[:openstudio_server][:rails_environment],
+    PATH: "#{node[:openstudio_server][:ruby_path]}:#{ENV['PATH']}"
   )
   stdout_logfile "#{node[:openstudio_server][:server_path]}/log/delayed_job.log"
   stderr_logfile "#{node[:openstudio_server][:server_path]}/log/delayed_job.log"

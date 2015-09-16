@@ -52,25 +52,24 @@ describe Analysis::Core do
       result.size.should eq(3)
       result.should eq(@samples)
     end
-    
+
     it 'should return no pivots when the pivot array is empty' do
       result = @dummy_class.product_hash([])
-      
+
       result.should eq([])
     end
-    
+
     it 'should deal with more than two piviots' do
-      result = @dummy_class.product_hash({a: [1,2], b:[3,4], c:[5,6]})
-      
+      result = @dummy_class.product_hash(a: [1, 2], b: [3, 4], c: [5, 6])
+
       result.size.should eq(8)
     end
-    
+
     it 'should deal with non-integers' do
-      result = @dummy_class.product_hash({a: [1.23,4.56], b:[true,false], c:['p','q']})
-      
+      result = @dummy_class.product_hash(a: [1.23, 4.56], b: [true, false], c: %w(p q))
+
       result.size.should eq(8)
     end
-    
   end
 
   context 'static variables' do
