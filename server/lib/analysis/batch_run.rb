@@ -112,7 +112,7 @@ class Analysis::BatchRun
 
             print(paste("Number of datapoints:",nrow(dps)))
 
-            results <- parLapplyLB(cl, dps[,1], f)
+            results <- clusterApplyLB(cl, dps[,1], f)
             # For verbose logging you can print the results using `print(results)`
           }
         end
