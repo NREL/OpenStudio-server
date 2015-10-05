@@ -2258,7 +2258,7 @@ NRELpso <- function(cl=cl,
          if (parallel=="none") {
            GoF <- apply(Xn, fn, MARGIN=1, ...)
          } else {
-           GoF <- parRapply(cl= cl, x=Xn, FUN=fn, ...)
+           GoF <- parRapplyLB(cl= cl, x=Xn, FUN=fn, ...)
          } # ELSE end
 	 
          Xt.fitness[iter, 1:npart] <- GoF
