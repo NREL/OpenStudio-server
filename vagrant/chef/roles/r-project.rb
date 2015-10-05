@@ -16,9 +16,6 @@ default_attributes(
       path_additions: ['/usr/local/radiance/bin', '/opt/rbenv/shims']
     },
     libraries: [
-      #{
-      #  name: 'snow'
-      #},
       {
         name: 'Rserve',
         configure_flags: 'PKG_CPPFLAGS=-DNODAEMON'
@@ -41,9 +38,6 @@ default_attributes(
       {
         name: 'RMongo'
       },
-      #{
-      #  name: 'snowfall'
-      #},
       {
         name: 'R.methodsS3'
       },
@@ -53,18 +47,6 @@ default_attributes(
       {
         name: 'R.utils'
       },
-      #{
-      #  name: 'iterators'
-      #},
-      #{
-      #  name: 'foreach'
-      #},
-      #{
-      #  name: 'doSNOW'
-      #},
-      #{
-      #  name: 'DEoptim'
-      #},
       {
         name: 'NMOF'
       },
@@ -72,16 +54,11 @@ default_attributes(
         name: 'mco'
       },
       {
-        name: 'rjson'#,
-      #  package_path: '/data/R-packages',
-      #  version: '0.2.14'
+        name: 'rjson'
       },
       {
         name: 'rgenoud'
       },
-      #{
-      #  name: 'doParallel'
-      #},
       {
         name: 'conf.design'
       },
@@ -97,15 +74,9 @@ default_attributes(
       {
         name: 'NRELmoo',
         package_path: '/data/R-packages',
-        version: '1.2.6',
+        version: '1.2.23',
         update_method: 'always_update'
       },
-      #{
-      #  name: 'NRELsnowFT',
-      #  package_path: '/data/R-packages',
-      #  version: '1.3.32',
-      #  update_method: 'always_update'
-      #},
       {
         name: 'nrelPSO',
         package_path: '/data/R-packages',
@@ -113,10 +84,7 @@ default_attributes(
         update_method: 'always_update'
       },
       {
-        name: 'xts'#,
-      #  package_path: '/data/R-packages',
-      #  version: '0.9.874',
-      #  update_method: 'always_update'
+        name: 'xts'
       },
       {
         name: 'RSQLite'
@@ -125,10 +93,7 @@ default_attributes(
         name: 'Rcpp'
       },
       {
-        name: 'plyr'#,
-        #package_path: '/data/R-packages',
-        #version: '1.8.1',
-        #update_method: 'always_update'
+        name: 'plyr'
       },
       {
         name: 'ggplot2'
