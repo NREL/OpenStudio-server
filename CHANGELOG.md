@@ -1,6 +1,10 @@
 OpenStudio Server
 ==================================
 
+Version 1.12.13
+--------------
+* OpenStudio 1.9.1
+
 Version 1.12.9
 --------------
 * OpenStudio 1.9.0
