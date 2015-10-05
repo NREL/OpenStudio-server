@@ -80,7 +80,7 @@ default_attributes(
       {
         name: 'nrelPSO',
         package_path: '/data/R-packages',
-        version: '0.3-4',
+        version: '0.3.13',
         update_method: 'always_update'
       },
       {
