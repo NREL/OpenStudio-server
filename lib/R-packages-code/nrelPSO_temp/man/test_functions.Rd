@@ -158,7 +158,7 @@ Mauricio Zambrano-Bigiarini, \email{mzb.devel@gmail.com}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{nrelPSO}}
+\code{\link{NRELpso}}
 }
 %%\examples{
 

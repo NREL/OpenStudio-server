@@ -54,7 +54,7 @@ Random.Bounded.Matrix <- function(npart, x.MinMax) {
 ################################################################################
 
 # 'n'      : number of strata used to divide each parameter range. 
-#            For nrelPSO: 'n=npart'
+#            For NRELpso: 'n=npart'
 # 'ranges' : Matrix of 'N' rows and 2 columns, (N is the number of parameters)
 #            the first column has the minimum values for each dimension, and
 #            the second column has the maximum values for each dimension
@@ -1495,7 +1495,7 @@ Random.Topology.Generation <- function(npart, K,
 #                     The frequency of report messages printed to the screen. Default
 #                     to every 10 iterations
 
-nrelPSO <- function(cl=cl,
+NRELpso <- function(cl=cl,
                     par, 
                     fn=fn,  
                     ...,
@@ -1957,9 +1957,9 @@ nrelPSO <- function(cl=cl,
       PSOparam.TextFile  <- file(PSOparam.fname , "w+")
       
       writeLines("================================================================================", PSOparam.TextFile)  
-      writeLines(c("nrelPSO version  :", sessionInfo()$otherPkgs$nrelPSO$Version), PSOparam.TextFile, sep="  ")
+      writeLines(c("NRELpso version  :", sessionInfo()$otherPkgs$NRELpso$Version), PSOparam.TextFile, sep="  ")
       writeLines("", PSOparam.TextFile) 
-      writeLines(c("nrelPSO Built    :", sessionInfo()$otherPkgs$nrelPSO$Built), PSOparam.TextFile, sep="  ")
+      writeLines(c("NRELpso Built    :", sessionInfo()$otherPkgs$NRELpso$Built), PSOparam.TextFile, sep="  ")
       writeLines("", PSOparam.TextFile) 
       writeLines(c("R version         :", sessionInfo()[[1]]$version.string), PSOparam.TextFile, sep="  ")
       writeLines("", PSOparam.TextFile) 
