@@ -78,7 +78,7 @@ default_attributes(
         update_method: 'always_update'
       },
       {
-        name: 'nrelPSO',
+        name: 'NRELpso',
         package_path: '/data/R-packages',
         version: '0.3.13',
         update_method: 'always_update'
