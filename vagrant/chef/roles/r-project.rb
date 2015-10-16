@@ -97,6 +97,9 @@ default_attributes(
       },
       {
         name: 'ggplot2'
+      },
+      {
+        name: 'sensitivity'
       }
     ]
   }
