@@ -20,5 +20,11 @@ fi
 # configure the application based worker data
 cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
+# make sure supervisor is running
+sudo service supervisor start
+
+# restart rserve
+sudo supervisorctl restart Rserve
+
 #file flag the user_data has completed
 cat /dev/null > ~/user_data_done

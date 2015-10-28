@@ -3,6 +3,8 @@ description 'install r'
 
 default_attributes(
   r: {
+    version: '3.2.2',
+    checksum: '9c9152e74134b68b0f3a1c7083764adc1cb56fd8336bec003fd0ca550cd2461d',
     install_repo: false,
     install_method: 'source',
     add_r_to_path: true,
@@ -15,10 +17,8 @@ default_attributes(
     },
     libraries: [
       {
-        name: 'snow'
-      },
-      {
-        name: 'Rserve'
+        name: 'Rserve',
+        configure_flags: 'PKG_CPPFLAGS=-DNODAEMON'
       },
       {
         name: 'lhs'
@@ -39,9 +39,6 @@ default_attributes(
         name: 'RMongo'
       },
       {
-        name: 'snowfall'
-      },
-      {
         name: 'R.methodsS3'
       },
       {
@@ -51,33 +48,16 @@ default_attributes(
         name: 'R.utils'
       },
       {
-        name: 'iterators'
-      },
-      {
-        name: 'foreach'
-      },
-      {
-        name: 'doSNOW'
-      },
-      {
-        name: 'DEoptim'
-      },
-      {
         name: 'NMOF'
       },
       {
         name: 'mco'
       },
       {
-        name: 'rjson',
-        package_path: '/data/R-packages',
-        version: '0.2.14'
+        name: 'rjson'
       },
       {
         name: 'rgenoud'
-      },
-      {
-        name: 'doParallel'
       },
       {
         name: 'conf.design'
@@ -94,26 +74,17 @@ default_attributes(
       {
         name: 'NRELmoo',
         package_path: '/data/R-packages',
-        version: '1.2.6',
+        version: '1.2.23',
         update_method: 'always_update'
       },
       {
-        name: 'NRELsnowFT',
+        name: 'NRELpso',
         package_path: '/data/R-packages',
-        version: '1.3.32',
+        version: '0.3.13',
         update_method: 'always_update'
       },
       {
-        name: 'nrelPSO',
-        package_path: '/data/R-packages',
-        version: '0.3-4',
-        update_method: 'always_update'
-      },
-      {
-        name: 'xts',
-        package_path: '/data/R-packages',
-        version: '0.9.874',
-        update_method: 'always_update'
+        name: 'xts'
       },
       {
         name: 'RSQLite'
@@ -122,13 +93,13 @@ default_attributes(
         name: 'Rcpp'
       },
       {
-        name: 'plyr',
-        package_path: '/data/R-packages',
-        version: '1.8.1',
-        update_method: 'always_update'
+        name: 'plyr'
       },
       {
         name: 'ggplot2'
+      },
+      {
+        name: 'sensitivity'
       }
     ]
   }

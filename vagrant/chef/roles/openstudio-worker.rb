@@ -21,6 +21,6 @@ default_attributes(
 
 override_attributes(
   r: {
-    rserve_start_on_boot: false
+    rserve_start_on_boot: true
   }
 )

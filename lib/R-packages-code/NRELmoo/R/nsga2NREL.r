@@ -23,10 +23,10 @@ function(cl, fn, objDim, variables, vartype,
                     tourSize=2, generations=20, cprob=0.7, XoverDistIdx=5, mprob=0.5, MuDistIdx=10) {
     cat("********** R based Nondominated Sorting Genetic Algorithm II *********")
     cat("\n")
-    cat("input checking")
+    cat("input checking\n")
     if (length(vartype)!= ncol(variables)) {print("vartype length not same as number of variable columns");stop}
     
-    cat("initializing the population")
+    cat("initializing the population\n")
     cat("\n")
     varNo = ncol(variables)
     popSize = nrow(variables)
@@ -41,13 +41,18 @@ function(cl, fn, objDim, variables, vartype,
     for (i in 1:varNo) {
       parent[,i] <- sample(variables[,i],nrow(variables))
     }
+    cat("parent:\n")
     print(parent)
+    cat("ncol parent:\n")
+    print(ncol(parent))
+    cat("nrow parent:\n")
+    print(nrow(parent))
     
     cat("check cluster\n")
     if (is.null(cl)) {print("cluster not initialized");stop}
 
     cat("start parallel pop\n")
-    parent <- cbind(parent, t(parApply(cl,parent,1,fn)));
+    parent <- cbind(parent, t(parApplyLB(cl,parent,1,fn)));
     cat("save params and objectives")
     parametersSave <- parent[,1:varNo]
     objectivesSave <- parent[,(varNo+1):(varNo+objDim)]
@@ -83,7 +88,7 @@ function(cl, fn, objDim, variables, vartype,
         cat("evaluate the objective fns of childAfterM")
         cat("\n")
         cat("start child parallel\n")
-        childAfterM <- cbind(childAfterM, t(parApply(cl,childAfterM,1,fn)));
+        childAfterM <- cbind(childAfterM, t(parApplyLB(cl,childAfterM,1,fn)));
         cat("save params and objectives")
         parametersSave <- cbind(parametersSave,childAfterM[,1:varNo])
         objectivesSave <- cbind(objectivesSave,childAfterM[,(varNo+1):(varNo+objDim)])
