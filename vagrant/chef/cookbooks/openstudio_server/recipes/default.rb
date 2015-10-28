@@ -4,6 +4,7 @@
 #
 
 include_recipe 'passenger_apache2'
+include_recipe 'supervisor'
 
 web_app 'openstudio-server' do
   docroot "#{node[:openstudio_server][:server_path]}/public"
@@ -57,25 +58,21 @@ bash 'fix permissions on tmp files' do
   EOH
 end
 
-template '/etc/init.d/delayed_job' do
-  source 'delayed_job.erb'
-  owner 'root'
-  mode '0755'
-end
-
-# go ahead and kick it off now because we aren't going to reboot
-bash 'configure delayed_job daemon' do
-  code <<-EOH
-    cd /etc/init.d/
-    update-rc.d -f delayed_job remove
-    update-rc.d delayed_job defaults 99
-  EOH
+# supervisor tasks
+supervisor_service 'delayed_job' do
+  command "#{node[:openstudio_server][:server_path]}/script/delayed_job run"
+  directory "#{node[:openstudio_server][:server_path]}/script"
+  environment(
+    RAILS_ENV: node[:openstudio_server][:rails_environment],
+    PATH: "#{node[:openstudio_server][:ruby_path]}:#{ENV['PATH']}"
+  )
+  stdout_logfile "#{node[:openstudio_server][:server_path]}/log/delayed_job.log"
+  stderr_logfile "#{node[:openstudio_server][:server_path]}/log/delayed_job.log"
+  action :enable
+  autostart true
+  user 'root'
 end
 
 service 'apache2' do
-  action :restart
-end
-
-service 'delayed_job' do
   action :restart
 end

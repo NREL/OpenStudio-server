@@ -23,8 +23,11 @@ cp /data/launch-instance/setup* ~
 chmod 775 ~/setup*
 chown vagrant:vagrant ~/setup*
 
+# make sure supervisor is running
+sudo service supervisor start
+
 # stop the various services that use mongo
-sudo service delayed_job stop
+sudo supervisorctl stop delayed_job
 sudo service apache2 stop
 sudo service mongod stop
 
@@ -49,10 +52,10 @@ cd /var/www/rails/openstudio && bundle exec rake db:mongoid:create_indexes
 cd /data/launch-instance && ./configure_vagrant_worker_data.sh
 
 # restart rserve
-sudo service Rserve restart
+sudo supervisorctl restart Rserve
 
 # restart delayed jobs
-sudo service delayed_job start
+sudo supervisorctl start delayed_job
 
 # Null out the logs
 sudo cat /dev/null > /var/www/rails/openstudio/log/download.log

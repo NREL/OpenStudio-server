@@ -65,14 +65,15 @@ module Analysis::Core
   module_function :hash_of_array_to_array_of_hash # export this function for use outside of class extension
 
   def product_hash(hash_array)
-  # This takes
+    # This takes
     # {a: [1,2,3], b:[4,5,6]}
     # and makes:
     # [{:a=>1, :b=>4}, {:a=>1, :b=>5}, {:a=>1, :b=>6}, {:a=>2, :b=>4}, {:a=>2, :b=>5}, {:a=>2, :b=>6}, {:a=>3, :b=>4}, {:a=>3, :b=>5}, {:a=>3, :b=>6}]
+    return [] if hash_array.empty?
     attrs   = hash_array.values
     keys    = hash_array.keys
     product = attrs[0].product(*attrs[1..-1])
-    result = product.map{ |p| Hash[keys.zip p] }
+    result = product.map { |p| Hash[keys.zip p] }
   end
 
   module_function :product_hash

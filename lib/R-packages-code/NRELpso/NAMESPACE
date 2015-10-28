@@ -1,7 +1,8 @@
 importFrom("lhs", randomLHS)
 importFrom("parallel", makeCluster, makeForkCluster, detectCores, clusterCall, clusterExport, mclapply, parRapply, clusterApply, stopCluster)
 
-export(nrelPSO,
+export(NRELpso,
+       parRapplyLB,
        ackley,
        griewank,
        rastrigrin, # wrong name, only used for backward compatibility

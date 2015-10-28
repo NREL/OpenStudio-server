@@ -1,5 +1,5 @@
 # Non Sorting Genetic Algorithm
-class Analysis::SpeaNrel
+class Analysis::Morris
   include Analysis::Core
   include Analysis::R
 
@@ -12,17 +12,12 @@ class Analysis::SpeaNrel
       problem: {
         random_seed: 1979,
         algorithm: {
-          number_of_samples: 30,
-          sample_method: 'individual_variables',
-          generations: 1,
-          toursize: 2,
-          cprob: 0.7,
-          cidx: 5,
-          midx: 10,
-          mprob: 0.5,
+          r: 1,
+          levels: 2,
+          grid_jump: 1,
+          type: "oat",
           normtype: 'minkowski',
           ppower: 2,
-          exit_on_guideline14: 0,
           objective_functions: []
         }
       }
@@ -46,15 +41,14 @@ class Analysis::SpeaNrel
 
     # create an instance for R
     @r = Rserve::Simpler.new
-    Rails.logger.info 'Setting up R for SPEA2 Run'
+    Rails.logger.info 'Setting up R for Morris Run'
     @r.converse('setwd("/mnt/openstudio")')
 
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
     # R libraries needed for this algorithm
     @r.converse 'library(rjson)'
-    @r.converse 'library(mco)'
-    @r.converse 'library(NRELmoo)'
+    @r.converse 'library(sensitivity)'
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -62,47 +56,18 @@ class Analysis::SpeaNrel
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting SPEA2 Run')
+    Rails.logger.info('Starting Morris Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
-      fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
+    if @analysis.problem['algorithm']['r'].nil? || @analysis.problem['algorithm']['r'] == 0
+      fail 'Value for r was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
-    end
-
-    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    #  raise "P Norm must be non-negative"
-    # end
-
-    if @analysis.problem['algorithm']['ppower'] <= 0
-      fail 'P Norm must be non-negative'
-    end
-
-    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
-      fail 'Must have at least two objective functions defined'
-    end
-
-    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
-      fail 'Must have at least two output_variables'
-    end
-
-    objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
-    ug = objtrue.uniq { |v| v['objective_function_group'] }
-    Rails.logger.info "Number of objective function groups are #{ug.size}"
-
-    @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
-    @analysis.save!
-    Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
-
-    if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-      fail 'number of objective functions must equal'
+    if @analysis.problem['algorithm']['levels'].nil? || @analysis.problem['algorithm']['levels'] == 0
+      fail 'Value for levels was not set or equal to zero (must be 1 or greater)'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
@@ -110,11 +75,11 @@ class Analysis::SpeaNrel
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
-    @r.converse("print('starting lhs to discretize the variables')")
+    @r.converse("print('starting lhs to get min/max')")
     Rails.logger.info 'starting lhs to discretize the variables'
 
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 2*selected_variables.count)
 
     if samples.empty? || samples.size <= 1
       Rails.logger.info 'No variables were passed into the options, therefore exit'
@@ -122,7 +87,7 @@ class Analysis::SpeaNrel
     end
 
     # Result of the parameter space will be column vectors of each variable
-    Rails.logger.info "Samples are #{samples}"
+    #Rails.logger.info "Samples are #{samples}"
 
     Rails.logger.info "mins_maxes: #{mins_maxes}"
     Rails.logger.info "var_names: #{var_names}"
@@ -155,35 +120,36 @@ class Analysis::SpeaNrel
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
-
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
         @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
+                   levels: @analysis.problem['algorithm']['levels'], r: @analysis.problem['algorithm']['r'],
+                   type: @analysis.problem['algorithm']['type'], grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
-                   toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
-                   cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'],
-                   mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
+                   objfun: @analysis.problem['algorithm']['objective_functions'],
+                   mins: mins_maxes[:min], maxes: mins_maxes[:max]) do
           %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))
 
-            print(paste("objfun:",objfun))
+            print(paste("levels:",levels))
+            print(paste("r:",r))
+            print(paste("grid_jump:",grid_jump))
+            print(paste("type:",type))
+            
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
-            print(paste("UniqueGroups:",uniquegroups))
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
 
             print(paste("min:",mins))
             print(paste("max:",maxes))
-
+            
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
-            clusterExport(cl,"uniquegroups")
 
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
@@ -195,12 +161,6 @@ class Analysis::SpeaNrel
               if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
                write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
-            }
-
-            if (uniquegroups == 1) {
-                 print(paste("unique groups error:",uniquegroups))
-                 write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                 stop(options("show.error.messages"=TRUE),"unique groups is 1")
             }
 
             clusterExport(cl,"varfile")
@@ -235,10 +195,13 @@ class Analysis::SpeaNrel
             #           call f(u) where u is UUID of data_point
             g <- function(x){
               force(x)
+              #print(paste("x:",x))
               ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
+              
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              #print(paste("g(y):",y))
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
@@ -248,8 +211,8 @@ class Analysis::SpeaNrel
               cat("UUID is NA \n");
               NAvalue <- 1.0e19
               return(NAvalue)
-      } else {
-          try(f(z[j]), silent = TRUE)
+            } else {
+              try(f(z[j]), silent = TRUE)
 
               data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
@@ -262,18 +225,13 @@ class Analysis::SpeaNrel
               try(json <- fromJSON(file=object_file), silent=TRUE)
 
               if (is.null(json)) {
-                obj <- NULL
-                for (i in 1:objDim){
-                  obj[i] <- 1.0e19
-                }
-                print(paste(data_point_directory,"/objectives.json is NULL"))
+                obj <- 1.0e19
               } else {
                 obj <- NULL
                 objvalue <- NULL
                 objtarget <- NULL
                 sclfactor <- NULL
-                objgroup <- NULL
-                group_count <- 1
+
                 for (i in 1:objDim){
                   objfuntemp <- paste("objective_function_",i,sep="")
                   if (json[objfuntemp] != "NULL"){
@@ -299,62 +257,19 @@ class Analysis::SpeaNrel
                   } else {
                     sclfactor[i] <- 1.0
                   }
-                  objfungrouptemp <- paste("objective_function_group_",i,sep="")
-                  if (json[objfungrouptemp] != "NULL"){
-                    objgroup[i] <- as.numeric(json[objfungrouptemp])
-                  } else {
-                    objgroup[i] <- group_count
-                    group_count <- group_count + 1
-                  }
-                }
+                } 
                 print(paste("Objective function results are:",objvalue))
                 print(paste("Objective function targets are:",objtarget))
                 print(paste("Objective function scaling factors are:",sclfactor))
 
                 objvalue <- objvalue / sclfactor
                 objtarget <- objtarget / sclfactor
-
-                ug <- length(unique(objgroup))
-                if (ug != uniquegroups) {
-                   print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-                   write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                   stop(options("show.error.messages"=TRUE),"unique groups is not equal")
-                }
-
-                for (i in 1:ug){
-                  obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
-                }
+                obj <- force(eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower)))
 
                 print(paste("Objective function Norm:",obj))
 
                 mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
                 flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-                print(paste("exit_on_guideline14: ",flag))
-                if (flag["exit_on_guideline14"] == "true" ){
-                  # read in the results from the objective function file
-                  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-                  json <- NULL
-                  try(json <- fromJSON(file=guideline_file), silent=TRUE)
-                  if (is.null(json)) {
-                    print(paste("no guideline file: ",guideline_file))
-                  } else {
-                    guideline <- json[[1]]
-                    for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
-                    print(paste("guideline: ",guideline))
-                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
-                    print(paste("all(guideline): ",all(guideline)))
-                    if (length(which(guideline)) == objDim){
-                      #write final params to json file
-                      varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
-                      answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
-                      write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                      convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
-                      write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
-                      dbDisconnect(mongo)
-                      stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
-                    }
-                  }
-                }
                 dbDisconnect(mongo)
               }
               return(as.numeric(obj))
@@ -362,44 +277,30 @@ class Analysis::SpeaNrel
             }
             clusterExport(cl,"g")
 
-            if (nrow(vars) == 1) {
-              print("not sure what to do with only one datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-            }
-            if (nrow(vars) == 0) {
-              print("not sure what to do with no datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-              vars <- rbind(vars, c(NA))
-            }
-
-            print(nrow(vars))
-            print(ncol(vars))
-            if (ncol(vars) == 1) {
-              print("SPEA2 needs more than one variable")
-              stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")
-            }
-
-            print(paste("Number of generations set to:",gen))
             results <- NULL
-            try(
-            results <- spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
-            , silent = FALSE)
-              print(paste("ip workers:", ips))
-              print(paste("ip master:", master_ips))
-              ips2 <- ips[ips!=master_ips]
-              print(paste("non server ips:", ips2))
-              num_uniq_workers <- length(ips2)
-              whoami <- system('whoami', intern = TRUE)
-              for (i in 1:num_uniq_workers){
-                scp <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
-                print(paste("scp command:",scp))
-                system(scp,intern=TRUE)
-                scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
-                print(paste("scp2 command:",scp2))
-                system(scp2,intern=TRUE)
-              }
+            m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes)
+            print(paste("m:", m))
+            print(paste("m$X:", m$X))
+            m1 <- as.list(data.frame(t(m$X)))
+            print(paste("m1:", m1))            
+            results <- clusterApplyLB(cl, m1, g)
+            print(mode(as.numeric(results)))
+            print(is.list(results))
+            print(paste("results:", as.numeric(results)))
+            tell(m,as.numeric(results))
+            print(m)
+            var_mu <- rep(0, ncol(vars))
+            var_mu_star <- var_mu
+            var_sigma <- var_mu
+            for (i in 1:ncol(vars)){
+              var_mu[i] <- mean(m$ee[,i])
+              var_mu_star[i] <- mean(abs(m$ee[,i]))
+              var_sigma[i] <- sd(m$ee[,i])
+            } 
+            answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/morris.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
 
-            save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
+            save(m, file="/mnt/openstudio/analysis_#{@analysis.id}/m.R")
           }
         end
       else
@@ -455,7 +356,6 @@ class Analysis::SpeaNrel
         @analysis_job.save!
         @analysis.reload
       end
-
       @analysis.save!
 
       Rails.logger.info "Finished running analysis '#{self.class.name}'"

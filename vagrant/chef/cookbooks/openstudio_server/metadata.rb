@@ -15,6 +15,7 @@ depends 'zip'
 depends 'sudo'
 depends 'logrotate'
 depends 'build-essential'
+depends 'supervisor'
 
 # Applications
 depends 'openstudio'

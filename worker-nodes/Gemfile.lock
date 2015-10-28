@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: d7eb89b7114809e2d819a6cc37bfd10a0623f2ae
+  revision: c333a084f16dbd3314346833689c36461cd10f18
   branch: EnergyPlus-8.3.0
   specs:
     openstudio-workflow (0.1.1)
@@ -26,32 +26,36 @@ GEM
     cocaine (0.5.7)
       climate_control (>= 0.0.3, < 1.0)
     colored (1.2)
-    delayed_job (4.0.6)
+    delayed_job (4.1.1)
       activesupport (>= 3.0, < 5.0)
-    delayed_job_mongoid (2.1.0)
+    delayed_job_mongoid (2.2.0)
       delayed_job (>= 3.0, < 5)
-      mongoid (>= 3.0, < 5)
+      mongoid (>= 3.0, < 6)
+      mongoid-compatibility
     facter (2.3.0)
       CFPropertyList (~> 2.2.6)
     i18n (0.7.0)
     libxml-ruby (2.8.0)
     macaddr (1.7.1)
       systemu (~> 2.6.2)
-    mime-types (2.6.1)
+    mime-types (2.6.2)
     mini_portile (0.6.2)
     mongoid (3.1.7)
       activemodel (~> 3.2)
       moped (~> 1.4)
       origin (~> 1.0)
       tzinfo (~> 0.3.29)
+    mongoid-compatibility (0.3.1)
+      activesupport
+      mongoid (>= 2.0)
     mongoid-paperclip (0.0.10)
       paperclip (>= 2.3.6, != 4.3.0)
     moped (1.5.3)
-    msgpack (0.6.2)
+    msgpack (0.7.0)
     multi_json (1.10.1)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
-    oj (2.12.12)
+    oj (2.13.0)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -60,13 +64,16 @@ GEM
       cocaine (~> 0.5.3)
       mime-types
     parallel (1.6.1)
+    rserve-client (0.3.1)
+    rserve-simpler (0.0.6)
+      rserve-client (~> 0.3.0)
     ruby-prof (0.15.8)
-    rubyXL (3.3.12)
+    rubyXL (3.3.14)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
     rubyzip (1.1.7)
     systemu (2.6.5)
-    tzinfo (0.3.44)
+    tzinfo (0.3.45)
     uuid (2.3.8)
       macaddr (~> 1.0)
 
@@ -86,6 +93,7 @@ DEPENDENCIES
   os
   paperclip (~> 4.1.1)
   parallel
+  rserve-simpler
   ruby-prof
   uuid
 
