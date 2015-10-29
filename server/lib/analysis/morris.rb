@@ -15,7 +15,7 @@ class Analysis::Morris
           r: 1,
           levels: 2,
           grid_jump: 1,
-          type: "oat",
+          type: 'oat',
           normtype: 'minkowski',
           ppower: 2,
           objective_functions: []
@@ -79,7 +79,7 @@ class Analysis::Morris
     Rails.logger.info 'starting lhs to discretize the variables'
 
     lhs = Analysis::R::Lhs.new(@r)
-    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 2*selected_variables.count)
+    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 2 * selected_variables.count)
 
     if samples.empty? || samples.size <= 1
       Rails.logger.info 'No variables were passed into the options, therefore exit'
@@ -87,7 +87,7 @@ class Analysis::Morris
     end
 
     # Result of the parameter space will be column vectors of each variable
-    #Rails.logger.info "Samples are #{samples}"
+    # Rails.logger.info "Samples are #{samples}"
 
     Rails.logger.info "mins_maxes: #{mins_maxes}"
     Rails.logger.info "var_names: #{var_names}"
@@ -138,7 +138,7 @@ class Analysis::Morris
             print(paste("r:",r))
             print(paste("grid_jump:",grid_jump))
             print(paste("type:",type))
-            
+
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
             print(paste("normtype:",normtype))
@@ -146,7 +146,7 @@ class Analysis::Morris
 
             print(paste("min:",mins))
             print(paste("max:",maxes))
-            
+
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
@@ -199,7 +199,7 @@ class Analysis::Morris
               ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
-              
+
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               #print(paste("g(y):",y))
               z <- system(y,intern=TRUE)
@@ -257,7 +257,7 @@ class Analysis::Morris
                   } else {
                     sclfactor[i] <- 1.0
                   }
-                } 
+                }
                 print(paste("Objective function results are:",objvalue))
                 print(paste("Objective function targets are:",objtarget))
                 print(paste("Objective function scaling factors are:",sclfactor))
@@ -282,7 +282,7 @@ class Analysis::Morris
             print(paste("m:", m))
             print(paste("m$X:", m$X))
             m1 <- as.list(data.frame(t(m$X)))
-            print(paste("m1:", m1))            
+            print(paste("m1:", m1))
             results <- clusterApplyLB(cl, m1, g)
             print(mode(as.numeric(results)))
             print(is.list(results))
@@ -296,7 +296,7 @@ class Analysis::Morris
               var_mu[i] <- mean(m$ee[,i])
               var_mu_star[i] <- mean(abs(m$ee[,i]))
               var_sigma[i] <- sd(m$ee[,i])
-            } 
+            }
             answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
             write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/morris.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
 
