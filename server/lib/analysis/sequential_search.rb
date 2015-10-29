@@ -179,7 +179,7 @@ class Analysis::SequentialSearch
               new_curve << min_point # just add in the same point to the new curve
             elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] ==
                   @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][0]] && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
-                   @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
+                                                                                                             @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
               Rails.logger.info 'Found the same objective function values in array, skipping'
             # new_curve << min_point # just add in the same point to the new curve
             else
