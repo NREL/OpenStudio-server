@@ -18,7 +18,7 @@ class Analysis::Sobol
           order: 1,
           nboot: 0,
           conf: 0.95,
-          type: "sobol",
+          type: 'sobol',
           normtype: 'minkowski',
           ppower: 2,
           objective_functions: []
@@ -72,7 +72,7 @@ class Analysis::Sobol
     if @analysis.problem['algorithm']['conf'].nil? || @analysis.problem['algorithm']['conf'] == 0
       fail 'Value for conf was not set or equal to zero (must be 1 or greater)'
     end
-    
+
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
       fail 'Must have number of samples to discretize the parameter space'
     end
@@ -152,7 +152,7 @@ class Analysis::Sobol
             print(paste("nboot:",nboot))
             print(paste("conf:",conf))
             print(paste("type:",type))
-            
+
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
             print(paste("normtype:",normtype))
@@ -160,7 +160,7 @@ class Analysis::Sobol
 
             print(paste("min:",mins))
             print(paste("max:",maxes))
-            
+
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
@@ -213,7 +213,7 @@ class Analysis::Sobol
               ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
-              
+
               y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               #print(paste("g(y):",y))
               z <- system(y,intern=TRUE)
@@ -271,7 +271,7 @@ class Analysis::Sobol
                   } else {
                     sclfactor[i] <- 1.0
                   }
-                } 
+                }
                 print(paste("Objective function results are:",objvalue))
                 print(paste("Objective function targets are:",objtarget))
                 print(paste("Objective function scaling factors are:",sclfactor))
@@ -308,7 +308,7 @@ class Analysis::Sobol
             print(paste("m:", m))
             print(paste("m$X:", m$X))
             m1 <- as.list(data.frame(t(m$X)))
-            print(paste("m1:", m1))            
+            print(paste("m1:", m1))
             results <- clusterApplyLB(cl, m1, g)
             print(mode(as.numeric(results)))
             print(is.list(results))
@@ -323,7 +323,7 @@ class Analysis::Sobol
               # var_mu[i] <- mean(m$ee[,i])
               # var_mu_star[i] <- mean(abs(m$ee[,i]))
               # var_sigma[i] <- sd(m$ee[,i])
-            # } 
+            # }
             # answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
             # write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/morris.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
 
