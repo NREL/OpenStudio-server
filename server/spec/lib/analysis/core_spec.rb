@@ -40,7 +40,7 @@ describe Analysis::Core do
   context 'pivot variables' do
     it 'pivot result should have double the length' do
       result = @dummy_class.add_pivots(@samples, @pivots)
-      puts "Pivot hash returned with #{result.inspect}"
+      # puts "Pivot hash returned with #{result.inspect}"
 
       result.size.should eq(6)
       result[0].should eq(p1: 'p1', a: 1, b: 2)
@@ -54,19 +54,19 @@ describe Analysis::Core do
     end
 
     it 'should return no pivots when the pivot array is empty' do
-      result = @dummy_class.product_hash([])
+      result = Analysis::Core.product_hash([])
 
       result.should eq([])
     end
 
     it 'should deal with more than two piviots' do
-      result = @dummy_class.product_hash(a: [1, 2], b: [3, 4], c: [5, 6])
+      result = Analysis::Core.product_hash(a: [1, 2], b: [3, 4], c: [5, 6])
 
       result.size.should eq(8)
     end
 
     it 'should deal with non-integers' do
-      result = @dummy_class.product_hash(a: [1.23, 4.56], b: [true, false], c: %w(p q))
+      result = Analysis::Core.product_hash(a: [1.23, 4.56], b: [true, false], c: %w(p q))
 
       result.size.should eq(8)
     end

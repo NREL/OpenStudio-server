@@ -24,6 +24,9 @@ depends 'mongodb'
 depends 'apache2', '~> 3.0.0'
 depends 'passenger_apache2'
 
+# need to use old version due to log_deprecation (https://github.com/chef-cookbooks/compat_resource/issues/7)
+depends 'compat_resource', '= 12.5.10'
+
 %w(redhat centos scientific amazon oracle ubuntu debian arch).each do |os|
   supports os
 end
