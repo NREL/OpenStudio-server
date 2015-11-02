@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: c333a084f16dbd3314346833689c36461cd10f18
+  revision: 6627867b7e363940cde0d3590d5854dae9b601f5
   branch: EnergyPlus-8.3.0
   specs:
     openstudio-workflow (0.1.1)
