@@ -7,6 +7,7 @@
 bash 'rails_bundle_install' do
   code <<-EOH
     cd #{node[:openstudio_server][:server_path]}
+    bundle update
     bundle install
   EOH
 end
