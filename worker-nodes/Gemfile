@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 # OpenStudio gem from github
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c98e91a'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: '6dde7d9'
 
 # Install other gems that are needed but not required by the workflow gem
 gem 'facter', '~> 2.3.0' # TODO: deprecate?
