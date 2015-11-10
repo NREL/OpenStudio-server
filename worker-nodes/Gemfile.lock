@@ -1,8 +1,9 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  branch: EnergyPlus-8.3.0
+  revision: fa2bb2f175cf44909bcb202661f504a650f5b7f2
+  branch: develop
   specs:
-    openstudio-workflow (0.1.1)
+    openstudio-workflow (0.2.0)
       colored (~> 1.2)
       facter (>= 2.0)
       multi_json (~> 1.10.0)
@@ -67,7 +68,7 @@ GEM
     rserve-simpler (0.0.6)
       rserve-client (~> 0.3.0)
     ruby-prof (0.15.8)
-    rubyXL (3.3.14)
+    rubyXL (3.3.15)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
     rubyzip (1.1.7)
