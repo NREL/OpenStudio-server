@@ -70,6 +70,9 @@ class Analysis::Morris
       fail 'Value for levels was not set or equal to zero (must be 1 or greater)'
     end
 
+    objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+    ug = objtrue.uniq { |v| v['objective_function_group'] }
+    Rails.logger.info "Number of objective function groups are #{ug.size}"
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
@@ -128,7 +131,7 @@ class Analysis::Morris
                    type: @analysis.problem['algorithm']['type'], grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
-                   mins: mins_maxes[:min], maxes: mins_maxes[:max]) do
+                   mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
           %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
@@ -141,6 +144,9 @@ class Analysis::Morris
 
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
+	    print(paste("UniqueGroups:",uniquegroups))
+	    print(paste("objfun:",objfun))
+	    
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
 
@@ -150,6 +156,7 @@ class Analysis::Morris
             clusterExport(cl,"objDim")
             clusterExport(cl,"normtype")
             clusterExport(cl,"ppower")
+            clusterExport(cl,"uniquegroups")
 
             for (i in 1:ncol(vars)){
               vars[,i] <- sort(vars[,i])
@@ -225,13 +232,18 @@ class Analysis::Morris
               try(json <- fromJSON(file=object_file), silent=TRUE)
 
               if (is.null(json)) {
-                obj <- 1.0e19
+                obj <- NULL
+                for (i in 1:objDim){
+                  obj[i] <- 1.0e19
+                }
+                print(paste(data_point_directory,"/objectives.json is NULL"))
               } else {
                 obj <- NULL
                 objvalue <- NULL
                 objtarget <- NULL
                 sclfactor <- NULL
-
+                objgroup <- NULL
+                group_count <- 1
                 for (i in 1:objDim){
                   objfuntemp <- paste("objective_function_",i,sep="")
                   if (json[objfuntemp] != "NULL"){
@@ -257,6 +269,13 @@ class Analysis::Morris
                   } else {
                     sclfactor[i] <- 1.0
                   }
+                  objfungrouptemp <- paste("objective_function_group_",i,sep="")
+                  if (json[objfungrouptemp] != "NULL"){
+                    objgroup[i] <- as.numeric(json[objfungrouptemp])
+                  } else {
+                    objgroup[i] <- group_count
+                    group_count <- group_count + 1
+                  }
                 }
                 print(paste("Objective function results are:",objvalue))
                 print(paste("Objective function targets are:",objtarget))
@@ -264,7 +283,17 @@ class Analysis::Morris
 
                 objvalue <- objvalue / sclfactor
                 objtarget <- objtarget / sclfactor
-                obj <- force(eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower)))
+
+                ug <- length(unique(objgroup))
+                if (ug != uniquegroups) {
+                   print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
+                   write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                   stop(options("show.error.messages"=TRUE),"unique groups is not equal")
+                }
+
+                for (i in 1:ug){
+                  obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
+                }
 
                 print(paste("Objective function Norm:",obj))
 
@@ -279,28 +308,51 @@ class Analysis::Morris
 
             results <- NULL
             m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes)
-            print(paste("m:", m))
-            print(paste("m$X:", m$X))
+            #print(paste("m:", m))
+            #print(paste("m$X:", m$X))
             m1 <- as.list(data.frame(t(m$X)))
-            print(paste("m1:", m1))
+            #print(paste("m1:", m1))
             results <- clusterApplyLB(cl, m1, g)
-            print(mode(as.numeric(results)))
+            print(paste("str(results):", str(results)))
+            print(paste("length(results):", length(results)))
+            #print(paste("mode(as.numeric(results))",mode(as.numeric(results))))
+            print(paste("mode(as.data.frame(results))",mode(as.data.frame(results))))
             print(is.list(results))
-            print(paste("results:", as.numeric(results)))
-            tell(m,as.numeric(results))
-            print(m)
+            #print(paste("as.numeric(results):", as.numeric(results)))
+            print(paste("as.data.frame(results):", as.data.frame(results)))
+            #print(paste("ncol(as.numeric(results)):", ncol(as.numeric(results))))
+            #print(paste("nrow(as.numeric(results)):", nrow(as.numeric(results))))
+            print(paste("ncol(as.data.frame(results)):", ncol(as.data.frame(results))))
+            print(paste("nrow(as.data.frame(results)):", nrow(as.data.frame(results))))
+           result <- as.data.frame(results)
+           print(paste("result:", result))
+           print(paste("unlist(result):", unlist(result)))
+           print(paste("ncol(result):", ncol(result)))
+           print(paste("nrow(result):", nrow(result)))
+           print(is.list(result))
+           for (j in 1:nrow(result)){
+           print(paste("unlist(result[j,])",unlist(result[j,])))
+           }
+           # for (j in 1:nrow(result)){
+           # print(paste("as.numeric(unlist(result[j]))",as.numeric(unlist(result[j]))))
+           # }
+           for (j in 1:nrow(result)){  
+            n <- m
+            tell(n,as.numeric(unlist(result[j,])))
+            print(n)
             var_mu <- rep(0, ncol(vars))
             var_mu_star <- var_mu
             var_sigma <- var_mu
             for (i in 1:ncol(vars)){
-              var_mu[i] <- mean(m$ee[,i])
-              var_mu_star[i] <- mean(abs(m$ee[,i]))
-              var_sigma[i] <- sd(m$ee[,i])
+              var_mu[i] <- mean(n$ee[,i])
+              var_mu_star[i] <- mean(abs(n$ee[,i]))
+              var_sigma[i] <- sd(n$ee[,i])
             }
             answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
-            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/morris.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/morris_#{j}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
 
-            save(m, file="/mnt/openstudio/analysis_#{@analysis.id}/m.R")
+            save(m, file="/mnt/openstudio/analysis_#{@analysis.id}/m_#{j}.R")
+           } 
           }
         end
       else
