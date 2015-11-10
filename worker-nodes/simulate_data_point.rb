@@ -82,30 +82,16 @@ begin
 
   # TODO: program the various paths based on the run_type
 
-  workflow_options = nil
-  if options[:run_workflow_method] == 'workflow_monthly' ||
-     options[:run_workflow_method] == 'run_openstudio_workflow_monthly.rb'
-    workflow_options = {
-      datapoint_id: options[:uuid],
-      analysis_root_path: analysis_dir,
-      use_monthly_reports: true,
-      adapter_options: {
-        mongoid_path: '/mnt/openstudio/rails-models'
-      }
+  # Set the default workflow options
+  workflow_options = {
+    datapoint_id: options[:uuid],
+    analysis_root_path: analysis_dir,
+    adapter_options: {
+      mongoid_path: '/mnt/openstudio/rails-models'
     }
-
-  elsif options[:run_workflow_method] == 'workflow' ||
-        options[:run_workflow_method] == 'run_openstudio_workflow.rb'
-    workflow_options = {
-      datapoint_id: options[:uuid],
-      analysis_root_path: analysis_dir,
-      use_monthly_reports: false,
-      adapter_options: {
-        mongoid_path: '/mnt/openstudio/rails-models'
-      }
-    }
-  elsif options[:run_workflow_method] == 'custom_xml' ||
-        options[:run_workflow_method] == 'run_openstudio_xml.rb'
+  }
+  if options[:run_workflow_method] == 'custom_xml' ||
+     options[:run_workflow_method] == 'run_openstudio_xml.rb'
 
     # Set up the custom workflow states and transitions
     transitions = OpenStudio::Workflow::Run.default_transition
@@ -119,7 +105,6 @@ begin
       states: states,
       analysis_root_path: analysis_dir,
       datapoint_id: options[:uuid],
-      use_monthly_reports: true,
       xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
       adapter_options: {
         mongoid_path: '/mnt/openstudio/rails-models'
@@ -131,7 +116,6 @@ begin
       is_pat: true,
       datapoint_id: options[:uuid],
       analysis_root_path: analysis_dir,
-      use_monthly_reports: false,
       adapter_options: {
         mongoid_path: '/mnt/openstudio/rails-models'
       }
