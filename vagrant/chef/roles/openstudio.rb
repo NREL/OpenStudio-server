@@ -6,23 +6,22 @@ run_list([
 ])
 
 default_attributes(
-  # Use this for the official release versions
-  openstudio: {
-    version: '1.9.4',
-    installer: {
-      version_revision: '89da90eab8'
-    }
-  }
+#   Use this for the official release versions
+#   openstudio: {
+#     version: '1.9.4',
+#     installer: {
+#       version_revision: '89da90eab8'
+#     }
+#   }
 
 # Use this for custom installations from any url
-#:openstudio => {
-#    :skip_ruby_install => true,
-#    :version => "1.5.1",
-#    :installer => {
-#        :origin => 'url',
-#        :version_revision => "5d1f0768a2",
-#        :download_url => 'https://github.com/NREL/OpenStudio/releases/download/v1.5.1-workflow5',
-#        :download_filename => "OpenStudio-1.5.1.5d1f0768a2-Linux.deb"
-#    }
-# }
+  openstudio: {
+    skip_ruby_install: true,
+    version: "1.9.4",
+    installer: {
+      origin: 'url',
+      download_url: 'https://openstudio-builds.s3.amazonaws.com/1.9.4',
+      download_filename: "OpenStudio-1.9.4.89da90eab8-Linux.deb"
+    }
+  }
 )
