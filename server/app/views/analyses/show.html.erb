@@ -149,14 +149,67 @@
     </div>
 
     <script>
-        $(document).ready(function () {
-            $("#datapointtable_all").tablesorter();
-            $("#datapointtable_completed").tablesorter();
-            $("#datapointtable_started").tablesorter();
-            $("#datapointtable_queued").tablesorter();
-            $("#datapointtable_na").tablesorter();
-        });
+      $(document).ready(function () {
+          $("#datapointtable_all").tablesorter();
+          $("#datapointtable_completed").tablesorter();
+          $("#datapointtable_started").tablesorter();
+          $("#datapointtable_queued").tablesorter();
+          $("#datapointtable_na").tablesorter();
+      });
 
     </script>
+
+     <script>
+      $(document).ready(function(){
+        var statuses = ['all', 'completed', 'started', 'queued', 'na'];
+        statuses.forEach(function(status){
+          var name = ".obj-function-col-" +status;
+
+          $(name).each(function(i){
+            var cur = $(this);
+            cur.hide();
+          });
+
+        });
+       
+      });
+      // this only works in all tabs if I define separate buttons and call them individually
+      $( "#toggle-button-all" ).click(function() {
+        $( ".obj-function-col-all" ).each(function(i){
+          var cur = $(this);
+          cur.toggle();
+        });
+      });
+
+      $( "#toggle-button-completed" ).click(function() {
+        $( ".obj-function-col-completed" ).each(function(i){
+          var cur = $(this);
+          cur.toggle();
+        });
+      });
+
+      $( "#toggle-button-started" ).click(function() {
+        $( ".obj-function-col-started" ).each(function(i){
+          var cur = $(this);
+          cur.toggle();
+        });
+      });
+
+      $( "#toggle-button-queued" ).click(function() {
+        $( ".obj-function-col-queued" ).each(function(i){
+          var cur = $(this);
+          cur.toggle();
+        });
+      });
+
+      $( "#toggle-button-na" ).click(function() {
+        $( ".obj-function-col-na" ).each(function(i){
+          var cur = $(this);
+          cur.toggle();
+        });
+      });
+
+  </script>
+
 
 <% end %>

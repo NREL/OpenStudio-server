@@ -1,3 +1,7 @@
+<%= javascript_tag do %>
+  jv_status = '<%= j status %>';
+<% end %>
+
 <div id='<%= "#{status || ''}simulations"%>'>
 
 <% if simulations.size == 0 %>
@@ -29,8 +33,8 @@
       <% class_var = "" %>
       <% if @objective_functions.count > 3 %>
         <div class="button-container">
-          <button class="btn btn-mini" id="toggle-button">Toggle Obj Functions</button>
-          <% class_var = "obj-function-col"%>
+          <button class="btn btn-mini" id='<%= "toggle-button-#{status || ''}"%>'>Toggle Obj Functions</button>
+          <% class_var = "obj-function-col-" + status %>
         </div>
       <% end %>
 
@@ -113,23 +117,4 @@
 </div>
 
 
-<script>
-  $(document).ready(function(){
 
-    $(".obj-function-col").each(function(i){
-      var cur = $(this);
-      cur.hide();
-    });
-
-  });
-
-  $( "#toggle-button" ).click(function() {
-    $( ".obj-function-col" ).each(function(i){
-      var cur = $(this);
-      cur.toggle();
-    });
-
-  });
-
-
-</script>
