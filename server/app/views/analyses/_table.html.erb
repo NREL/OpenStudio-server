@@ -76,7 +76,7 @@
               <% @objective_functions.each do |ov| %>
                   <!-- TODO: This is horrible. Can we use an ostruct? send the data from the contoller -->
                   <td class="<%= class_var %>"><%= (dp.results[ov['name'].split(".")[0]] && dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]])?
-                      dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].round(2) : '' %>  </td>
+                      dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]] : '' %>  </td>
               <% end %>
               <td class="other-col"> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
               <td class="other-col"> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
