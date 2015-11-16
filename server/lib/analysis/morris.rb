@@ -73,9 +73,21 @@ class Analysis::Morris
     objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
     ug = objtrue.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
+    obj_names = []
+    ug.each do |var|
+      obj_names << var['display_name_short']
+    end
+    Rails.logger.info "Objective function names #{obj_names}"
+    
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+
+    var_display_names = []
+    selected_variables.each do |var|
+      var_display_names << var.display_name_short
+    end
+    Rails.logger.info "Variable display names #{var_display_names}"
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to get min/max')")
@@ -131,6 +143,7 @@ class Analysis::Morris
                    type: @analysis.problem['algorithm']['type'], grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
+                   vardisplaynames: var_display_names, objnames: obj_names,
                    mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
           %{
             clusterEvalQ(cl,library(RMongo))
@@ -163,6 +176,8 @@ class Analysis::Morris
             }
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
+            print(paste("vardisplaynames:",vardisplaynames))
+            print(paste("objnames:",objnames))
 
             varfile <- function(x){
               if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
@@ -308,57 +323,40 @@ class Analysis::Morris
 
             results <- NULL
             m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes)
-            #print(paste("m:", m))
-            #print(paste("m$X:", m$X))
-            m1 <- as.list(data.frame(t(m$X)))
-            #print(paste("m1:", m1))
-            results <- clusterApplyLB(cl, m1, g)
-            print(paste("str(results):", str(results)))
-            print(paste("length(results):", length(results)))
-            #print(paste("mode(as.numeric(results))",mode(as.numeric(results))))
-            print(paste("mode(as.data.frame(results))",mode(as.data.frame(results))))
-            print(is.list(results))
-            #print(paste("as.numeric(results):", as.numeric(results)))
-            print(paste("as.data.frame(results):", as.data.frame(results)))
-            #print(paste("ncol(as.numeric(results)):", ncol(as.numeric(results))))
-            #print(paste("nrow(as.numeric(results)):", nrow(as.numeric(results))))
-            print(paste("ncol(as.data.frame(results)):", ncol(as.data.frame(results))))
-            print(paste("nrow(as.data.frame(results)):", nrow(as.data.frame(results))))
-           result <- as.data.frame(results)
-           print(paste("result:", result))
-           print(paste("unlist(result):", unlist(result)))
-           print(paste("ncol(result):", ncol(result)))
-           print(paste("nrow(result):", nrow(result)))
-           print(is.list(result))
-           for (j in 1:nrow(result)){
-           print(paste("unlist(result[j,])",unlist(result[j,])))
-           }
-           # for (j in 1:nrow(result)){
-           # print(paste("as.numeric(unlist(result[j]))",as.numeric(unlist(result[j]))))
-           # }
-           for (j in 1:nrow(result)){  
-            n <- m
-            tell(n,as.numeric(unlist(result[j,])))
-            print(n)
-            var_mu <- rep(0, ncol(vars))
-            var_mu_star <- var_mu
-            var_sigma <- var_mu
-            for (i in 1:ncol(vars)){
-              var_mu[i] <- mean(n$ee[,i])
-              var_mu_star[i] <- mean(abs(n$ee[,i]))
-              var_sigma[i] <- sd(n$ee[,i])
-            }
-            answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
-            write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/morris_#{j}.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
 
-            save(m, file="/mnt/openstudio/analysis_#{@analysis.id}/m_#{j}.R")
-           } 
+            m1 <- as.list(data.frame(t(m$X)))
+
+            results <- clusterApplyLB(cl, m1, g)
+            result <- as.data.frame(results)
+            print(paste("length(objnames):",length(objnames)))
+            print(paste("nrow(result):",nrow(result)))
+            file_names_jsons <- c("")
+            file_names_R <- c("")
+            for (j in 1:nrow(result)){  
+              n <- m
+              tell(n,as.numeric(unlist(result[j,])))
+              print(n)
+              var_mu <- rep(0, ncol(vars))
+              var_mu_star <- var_mu
+              var_sigma <- var_mu
+              for (i in 1:ncol(vars)){
+                var_mu[i] <- mean(n$ee[,i])
+                var_mu_star[i] <- mean(abs(n$ee[,i]))
+                var_sigma[i] <- sd(n$ee[,i])
+              }
+              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+              file_names_jsons[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
+              write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
+              file_names_R[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".R",sep="")
+              save(m, file=file_names_R[j])
+            }
+            file_zip <- c(file_names_jsons,file_names_R)
+            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/morris_results_#{@analysis.id}.zip",files=file_zip)            
           }
         end
       else
         fail 'could not start the cluster (most likely timed out)'
       end
-
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
