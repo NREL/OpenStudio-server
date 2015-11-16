@@ -10,7 +10,7 @@ default_attributes(
   openstudio: {
     version: '1.9.4',
     installer: {
-      version_revision: '89da90eab8'
+      version_revision: '19fda7de0b'
     }
   }
 

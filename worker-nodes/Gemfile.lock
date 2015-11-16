@@ -1,6 +1,5 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: c8d258dfe53f636452a2c4bef379410c179d28dd
   branch: develop
   specs:
     openstudio-workflow (0.2.0)
