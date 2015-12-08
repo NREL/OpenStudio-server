@@ -351,7 +351,10 @@ class Analysis::Morris
               save(m, file=file_names_R[j])
             }
             file_zip <- c(file_names_jsons,file_names_R)
-            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/morris_results_#{@analysis.id}.zip",files=file_zip)            
+            if(!dir.exists("/mnt/openstudio/analysis_#{@analysis.id}/downloads")){
+              dir.create("/mnt/openstudio/analysis_#{@analysis.id}/downloads")
+            }
+            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")            
           }
         end
       else
