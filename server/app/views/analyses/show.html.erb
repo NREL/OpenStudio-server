@@ -79,6 +79,9 @@
               <%= link_to 'CSV (Results)', download_data_analysis_path(@analysis, format: :csv, export: true), class: 'list-group-item' %>
               <%= link_to 'R Data Frame (Metadata)', download_variables_analysis_variables_path(@analysis, format: :rdata), class: 'list-group-item' %>
               <%= link_to 'R Data Frame (Results)', download_data_analysis_path(@analysis, format: :rdata, export: true), class: 'list-group-item' %>
+              <%if @algorithm_results %>
+                <%= link_to "Algorithm Results Zip", download_algorithm_results_zip_analysis_path(@analysis), class: 'list-group-item' %>
+              <% end %>
             </div>
           </div>
         </div>
