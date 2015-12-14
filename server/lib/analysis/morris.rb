@@ -361,7 +361,7 @@ class Analysis::Morris
               answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
               file_names_jsons[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
               write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
-              file_names_R[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".R",sep="")
+              file_names_R[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
               save(n, file=file_names_R[j])
               file_names_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
               png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200)
