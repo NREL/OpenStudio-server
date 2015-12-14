@@ -185,9 +185,18 @@ class Analysis::Morris
               }
             }
 
+            vardisplayfile <- function(x){
+              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json")){
+               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              }
+            }
+
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
+            clusterExport(cl,"vardisplayfile")
+            clusterExport(cl,"vardisplaynames")
+            clusterEvalQ(cl,vardisplayfile(vardisplaynames))
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
@@ -322,7 +331,7 @@ class Analysis::Morris
             clusterExport(cl,"g")
 
             results <- NULL
-            m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes)
+            m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes, scale=TRUE)
 
             m1 <- as.list(data.frame(t(m$X)))
 
@@ -330,9 +339,14 @@ class Analysis::Morris
             result <- as.data.frame(results)
             print(paste("length(objnames):",length(objnames)))
             print(paste("nrow(result):",nrow(result)))
+            print(paste("ncol(result):",ncol(result)))
             file_names_jsons <- c("")
             file_names_R <- c("")
+            file_names_png <- c("")
+            file_names_box_png <- c("")
             for (j in 1:nrow(result)){  
+              print(paste("result[j,]:",unlist(result[j,])))
+              print(paste("result[,j]:",unlist(result[,j])))
               n <- m
               tell(n,as.numeric(unlist(result[j,])))
               print(n)
@@ -348,9 +362,17 @@ class Analysis::Morris
               file_names_jsons[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
               write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
               file_names_R[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".R",sep="")
-              save(m, file=file_names_R[j])
+              save(n, file=file_names_R[j])
+              file_names_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
+              png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+              plot(n)
+              dev.off()
+              file_names_box_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
+              png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+              barplot(height=var_mu_star, names.arg=vardisplaynames, ylab="mu.star", main="Mu Star of Elementary Effects")
+              dev.off()
             }
-            file_zip <- c(file_names_jsons,file_names_R)
+            file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,"/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json")
             if(!dir.exists("/mnt/openstudio/analysis_#{@analysis.id}/downloads")){
               dir.create("/mnt/openstudio/analysis_#{@analysis.id}/downloads")
             }
