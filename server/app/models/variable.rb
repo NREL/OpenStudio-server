@@ -30,7 +30,7 @@ class Variable
   field :output, type: Boolean, default: false # is this an output variable for reporting, etc
   field :pivot, type: Boolean, default: false
   # field :pivot_samples # don't type for now -- #NLL DELETE? 6/1/2014
-  field relation_to_output: String, default: 'standard' # or can be inverse
+  field :relation_to_output, type: String, default: 'standard' # or can be inverse
   field :static_value, default: nil # don't type this because it can take on anything (other than hashes and arrays)
 
   # Relationships
