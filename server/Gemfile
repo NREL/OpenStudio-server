@@ -24,9 +24,9 @@ gem 'net-ssh'
 gem 'net-sftp'
 
 # javascript
-gem 'libv8'
+gem 'libv8', :platforms => :ruby
 gem 'execjs'
-gem 'therubyracer'
+gem 'therubyracer', :platforms => :ruby
 
 # other useful gems
 gem 'parallel'
