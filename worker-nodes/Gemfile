@@ -21,6 +21,6 @@ gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 gem 'delayed_job_mongoid'
 
 # Gems required for 3rd party libraries
-gem 'libxml-ruby'
+gem 'libxml-ruby', :platforms => :ruby
 gem 'os'
 gem 'uuid' # convert this to SecureRandom internal ruby library
