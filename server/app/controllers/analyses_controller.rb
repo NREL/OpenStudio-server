@@ -3,7 +3,7 @@ require 'core_extensions'
 require 'zip'
 
 class AnalysesController < ApplicationController
-  before_filter :set_algorithm_results_path, :only => [:show, :download_algorithm_results_zip]
+  before_filter :set_algorithm_results_path, only: [:show, :download_algorithm_results_zip]
 
   def set_algorithm_results_path
     @analysis = Analysis.find(params[:id])
@@ -99,7 +99,6 @@ class AnalysesController < ApplicationController
     if Dir.exist?(@algorithm_results_path) && !Dir.glob(@algorithm_results_path + '*').empty?
       @algorithm_results = true
     end
-
 
     respond_to do |format|
       format.html # show.html.erb
@@ -679,7 +678,6 @@ class AnalysesController < ApplicationController
   end
 
   def download_algorithm_results_zip
-     
     @analysis = Analysis.find(params[:id])
 
     zipfile_name = "algorithm_results_#{@analysis.id}.zip"
@@ -688,12 +686,12 @@ class AnalysesController < ApplicationController
     if Dir.exist?(@algorithm_results_path)
       paths = Dir.glob(@algorithm_results_path + '*')
       begin
-        #Initialize the temp file as a zip file
+        # Initialize the temp file as a zip file
         Zip::OutputStream.open(temp_file) { |zos| }
-       
-        #Add files to the zip file as usual
+
+        # Add files to the zip file as usual
         Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
-          #Put files in here
+          # Put files in here
           paths.each do |fi|
             logger.info(fi)
             # Two arguments:
@@ -702,14 +700,14 @@ class AnalysesController < ApplicationController
             zip.add(File.basename(fi), fi)
           end
         end
-       
-        #Read the binary data from the file
+
+        # Read the binary data from the file
         zip_data = File.read(temp_file.path)
-       
-        #Send the data to the browser as an attachment
-        send_data(zip_data, :type => 'application/zip', :filename => zipfile_name, disposition: 'attachment')
+
+        # Send the data to the browser as an attachment
+        send_data(zip_data, type: 'application/zip', filename: zipfile_name, disposition: 'attachment')
       ensure
-        #Close and delete the temp file
+        # Close and delete the temp file
         temp_file.close
         temp_file.unlink
       end

@@ -78,7 +78,7 @@ class Analysis::Morris
       obj_names << var['display_name_short']
     end
     Rails.logger.info "Objective function names #{obj_names}"
-    
+
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
@@ -157,9 +157,9 @@ class Analysis::Morris
 
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
-	    print(paste("UniqueGroups:",uniquegroups))
-	    print(paste("objfun:",objfun))
-	    
+      print(paste("UniqueGroups:",uniquegroups))
+      print(paste("objfun:",objfun))
+
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
 
@@ -344,7 +344,7 @@ class Analysis::Morris
             file_names_R <- c("")
             file_names_png <- c("")
             file_names_box_png <- c("")
-            for (j in 1:nrow(result)){  
+            for (j in 1:nrow(result)){
               print(paste("result[j,]:",unlist(result[j,])))
               print(paste("result[,j]:",unlist(result[,j])))
               n <- m
@@ -376,7 +376,7 @@ class Analysis::Morris
             if(!dir.exists("/mnt/openstudio/analysis_#{@analysis.id}/downloads")){
               dir.create("/mnt/openstudio/analysis_#{@analysis.id}/downloads")
             }
-            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")            
+            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")
           }
         end
       else
