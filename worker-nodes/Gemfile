@@ -6,6 +6,7 @@ gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'deve
 gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
 
 # Install other gems that are needed but not required by the workflow gem
+gem 'dencity'
 gem 'facter', '~> 2.3.0' # TODO: deprecate?
 gem 'ruby-prof'
 gem 'parallel'
