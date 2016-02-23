@@ -1,0 +1,17 @@
+# Docker Compose creates multiple containers on a single machine.
+# run `docker-compose up` to create and run/link the containers
+db:
+  image: mongo
+#  volumes:
+#      - $HOME/openstudio_server/mongo:/data/db
+  ports:
+      - "27017:27017"
+web:
+  build: .
+  dockerfile: /docker/server/Dockerfile
+  environment:
+    - RAILS_ENV=docker
+  links:
+    - db
+  ports:
+    - "8080:80"

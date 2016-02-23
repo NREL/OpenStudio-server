@@ -1,0 +1,6 @@
+.idea
+.git
+vagrant
+/server/Gemfile.lock
+/server/log
+/server/vendor
