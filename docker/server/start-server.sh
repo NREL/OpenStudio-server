@@ -2,7 +2,7 @@
 
 cd /srv && bundle exec rake db:mongoid:drop
 cd /srv && bundle exec rake db:mongoid:create_indexes
-cd /srv && bundle exec rake vagrant:setup
+cd /srv && bundle exec rake setup:docker
 service supervisord start
 # Wait for supervisor to start?
 

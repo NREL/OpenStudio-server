@@ -15,7 +15,7 @@ RUN apt-get update \
 		bzip2 \
 		ca-certificates \
 		curl \
-		default-jre \
+		default-jdk \
 		imagemagick \
 		gdebi-core \
 		git \
@@ -209,15 +209,6 @@ RUN curl --silent --show-error --retry 5 https://raw.githubusercontent.com/Super
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
-#### Setup the worker on the server node
-ADD /worker-nodes /mnt/openstudio
-RUN cd /mnt/openstudio \
-    && bundle install \
-    && cd /mnt/openstudio/rails-models \
-    && unzip -o rails-models.zip -d models \
-    && mv /mnt/openstudio/rails-models/mongoid-vagrant.yml /mnt/openstudio/rails-models/mongoid.yml \
-    && find /mnt/openstudio -type d -print0 | xargs -0 chmod 775 \
-    && find /mnt/openstudio -type f -print0 | xargs -0 chmod 664
 
 # Run this separate to cache the download
 ENV OPENSTUDIO_VERSION 1.10.4
@@ -264,14 +255,22 @@ RUN mkdir /srv/log
 ENV RAILS_ENV docker
 RUN rake assets:precompile
 
-# Where to save the assets, here for now I guess
-RUN mkdir -p /mnt/openstudio/server/$RAILS_ENV
-RUN mkdir -p /srv/public/assets/analyses && chmod 777 /srv/public/assets/analyses
-
 # Bundle app source
 ADD /server /srv
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN bundle install --without development test
+
+# Where to save the assets, here for now I guess
+RUN mkdir -p /mnt/openstudio/server/$RAILS_ENV
+RUN mkdir -p /srv/public/assets/analyses && chmod 777 /srv/public/assets/analyses
+
+#### Setup the worker on the server node
+ADD /worker-nodes /mnt/openstudio
+RUN cd /mnt/openstudio \
+    && bundle install \
+    && cd /mnt/openstudio/rails-models \
+    && find /mnt/openstudio -type d -print0 | xargs -0 chmod 775 \
+    && find /mnt/openstudio -type f -print0 | xargs -0 chmod 664
 
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
@@ -280,8 +279,11 @@ RUN ln -sf /dev/stdout /srv/log/docker.log
 RUN chmod 0666 /srv/log/*
 
 
+
+
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/start-server
+
 
 
 CMD ["/usr/local/bin/start-server"]
