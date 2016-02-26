@@ -69,7 +69,7 @@ begin
 
     logger.info "Extracting analysis.zip"
     OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-    OpenStudio::Workflow.extract_archive('rails-models/rails-models.zip', 'rails-models')
+    OpenStudio::Workflow.extract_archive('rails-models/rails-models.zip', 'rails-models/models')
 
     # Copy the mongoid file if mongoid.yml does not exist
     unless File.exist? 'rails-models/mongoid.yml'

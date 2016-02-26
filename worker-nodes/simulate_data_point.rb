@@ -56,9 +56,9 @@ begin
   # Logger for the simulate datapoint
   logger = Logger.new("#{directory}/#{options[:uuid]}.log")
 
-  logger.info "Analysis Root Directory is #{analysis_dir}"
-  logger.info "Simulation Run Directory is #{directory}"
-  logger.info "Run datapoint type/file is #{options[:run_workflow_method]}"
+  logger.info "Analysis root directory is #{analysis_dir}"
+  logger.info "Simulation run directory is #{directory}"
+  logger.info "Run data point type/file is #{options[:run_workflow_method]}"
 
   # TODO: program the various paths based on the run_type
 
