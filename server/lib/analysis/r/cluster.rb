@@ -112,7 +112,7 @@ module Analysis::R
             %{
               init <- function(x){
                 ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-                y <- paste(ruby_command," /mnt/openstudio/worker_init_final.rb -a #{analysis_id} -s #{state}",sep="")
+                y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/worker_init_final.rb -a #{analysis_id} -s #{state}",sep="")
                 print(paste("Run command",y))
                 z <- system(y,intern=TRUE)
                 z

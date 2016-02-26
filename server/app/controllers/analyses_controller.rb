@@ -1,4 +1,3 @@
-
 require 'core_extensions'
 require 'zip'
 
@@ -7,7 +6,7 @@ class AnalysesController < ApplicationController
 
   def set_algorithm_results_path
     @analysis = Analysis.find(params[:id])
-    @algorithm_results_path = "/mnt/openstudio/analysis_#{@analysis.id}/downloads/"
+    @algorithm_results_path = @analysis ? "/mnt/openstudio/analysis_#{@analysis.id}/downloads/" : ''
   end
 
   # GET /analyses
@@ -385,7 +384,11 @@ class AnalysesController < ApplicationController
   def debug_log
     @analysis = Analysis.find(params[:id])
 
-    @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
+    @rserve_log = nil
+    rserve_file = File.join(Rails.root, 'log', 'Rserve.log')
+    if File.exist? rserve_file
+      @rserve_log = File.read(rserve_file)
+    end
 
     exclude_fields = [:_id, :user, :password]
     @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)

@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.22'
+gem 'rake', '~> 10.5'
+gem 'rails', '~> 3.2'
 
 # data modules
 gem 'json'
@@ -9,10 +10,8 @@ gem 'rubyzip'
 
 # database modules
 gem 'mongoid', '~> 3.1.6'
-# gem 'mongoid', '~> 4.0'
 gem 'paperclip', '~> 4.1.1'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
-# gem 'mongoid-locker', '~> 0.3'
 
 # R
 gem 'rserve-simpler'
@@ -32,6 +31,19 @@ gem 'therubyracer', :platforms => :ruby
 gem 'parallel'
 gem 'sys-filesystem'
 
+# web ui
+# gem 'will_paginate'
+gem 'jquery-rails'
+gem 'kaminari'
+
+# job queuing
+gem 'delayed_job_mongoid'
+gem 'daemons'
+gem 'childprocess'
+
+# http(s) requests
+gem 'faraday'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
@@ -43,9 +55,13 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-gem 'jquery-rails'
+group :development, :test do
+  gem 'sextant' # navigate to /rails/routes to see routes
+  gem 'better_errors'
+  gem 'meta_request'
+  gem 'ruby-prof'
+  # gem 'ruby-debug' if RAILS_VERSION > "2.0.0"
 
-group :test do
   gem 'rspec'
   gem 'rspec-rails', '~> 2.0'
   gem 'mongoid-rspec'
@@ -59,25 +75,3 @@ group :test do
   gem 'openstudio-analysis'
 end
 
-# web ui
-# gem 'will_paginate'
-gem 'kaminari'
-
-# job queuing
-gem 'delayed_job_mongoid'
-gem 'daemons'
-gem 'childprocess'
-
-# http(s) requests
-gem 'faraday'
-
-group :development do
-  gem 'sextant' # navigate to /rails/routes to see routes
-  gem 'better_errors'
-  gem 'meta_request'
-  gem 'ruby-prof'
-  # gem 'ruby-debug' if RAILS_VERSION > "2.0.0"
-end
-
-# Deploy with Capistrano
-gem 'capistrano'

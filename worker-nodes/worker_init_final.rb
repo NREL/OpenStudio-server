@@ -14,6 +14,8 @@ end
 require 'optparse'
 require 'fileutils'
 require 'logger'
+require 'openstudio-workflow'
+require 'open-uri'
 
 puts "Parsing Input: #{ARGV}"
 
@@ -45,18 +47,35 @@ end
 result = false
 begin
   # Logger for the simulate datapoint
-  analysis_dir = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
+  analysis_dir = "analysis_#{options[:analysis_id]}"
   FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
   logger = Logger.new("#{analysis_dir}/worker_#{options[:state]}.log")
 
   logger.info "Running #{__FILE__}"
 
-  # Download the zip file from the server
-  download_file = "#{analysis_dir}/analysis.zip"
-  download_url = "http://openstudio.server/analyses/#{options[:analysis_id]}/download_analysis_zip"
-  logger.info "Downloading analysis.zip from #{download_url} to #{download_file}"
-  `curl -o #{download_file} #{download_url}`
-  `cd #{analysis_dir} && unzip -o #{download_file}`
+  if options[:state] == 'initialize'
+
+    # Download the zip file from the server
+    download_file = "#{analysis_dir}/analysis.zip"
+    download_host = "localhost:3000"
+    download_url = "http://#{download_host}/analyses/#{options[:analysis_id]}/download_analysis_zip"
+
+    File.open(download_file, "wb") do |saved_file|
+      # the following "open" is provided by open-uri
+      open(download_url, "rb") do |read_file|
+        saved_file.write(read_file.read)
+      end
+    end
+
+    logger.info "Extracting analysis.zip"
+    OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+    OpenStudio::Workflow.extract_archive('rails-models/rails-models.zip', 'rails-models')
+
+    # Copy the mongoid file if mongoid.yml does not exist
+    unless File.exist? 'rails-models/mongoid.yml'
+      FileUtils.copy 'rails-models/mongoid-vagrant.yml', 'rails-models/mongoid.yml'
+    end
+  end
 
   # Find any custom worker files -- should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
   files = Dir["#{analysis_dir}/lib/worker_#{options[:state]}/*.rb"].map { |n| File.basename(n) }.sort

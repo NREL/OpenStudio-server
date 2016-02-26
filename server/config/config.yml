@@ -4,6 +4,7 @@ defaults: &defaults
 development:
   <<: *defaults
   ruby_bin_dir: /Users/nlong/.rbenv/shims
+  sim_root_path: ':rails_root/../worker-nodes'
 
 docker:
   <<: *defaults

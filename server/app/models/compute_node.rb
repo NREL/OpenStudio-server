@@ -5,6 +5,7 @@ class ComputeNode
   field :node_type, type: String
   field :ip_address, type: String
   field :hostname, type: String
+  field :port, type: Integer
   field :local_hostname, type: String
   field :user, type: String
   field :password, type: String
@@ -14,8 +15,8 @@ class ComputeNode
   field :valid, type: Boolean, default: false
 
   # Indexes
-  index({ hostname: 1 }, unique: true)
-  index({ ip_address: 1 }, unique: true)
+  index({ hostname: 1 })
+  index({ ip_address: 1 })
   index(node_type: 1)
 
   # Return all the valid IP addresses as a hash in prep for writing to a dataframe
@@ -26,7 +27,7 @@ class ComputeNode
     ComputeNode.where(valid: true).each do |node|
       if node.node_type == 'server'
         (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << 'localhost' }
-      else
+      elsif node.node_type == 'worker'
         (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << node.ip_address }
       end
     end

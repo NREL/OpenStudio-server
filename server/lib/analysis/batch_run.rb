@@ -28,7 +28,7 @@ class Analysis::BatchRun
     # create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for Batch Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse "setwd('#{APP_CONFIG['sim_root_path']}')"
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -70,7 +70,7 @@ class Analysis::BatchRun
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes
+      # process = Analysis::Core::BackgroundTasks.start_child_processes
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
@@ -86,13 +86,8 @@ class Analysis::BatchRun
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              print(paste("Use dev/shm set to:","#{@analysis.use_shm}"))
-              if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
-              } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
-              }
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               print(paste("Run command",y))
               z <- system(y,intern=TRUE)
               j <- length(z)

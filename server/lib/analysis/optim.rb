@@ -199,11 +199,7 @@ class Analysis::Optim
               dbDisconnect(mongo)
 
               ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}--run-shm",sep="")
-              } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
-              }
+              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               #print(paste("R returned system call with:",z))

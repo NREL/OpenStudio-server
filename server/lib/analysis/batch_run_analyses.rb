@@ -100,12 +100,7 @@ class Analysis::BatchRunAnalyses
               dbDisconnect(mongo)
 
               ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              print(paste("Use dev/shm set to:","#{@analysis.use_shm}"))
-              if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",dps$analysis_id[dp_index]," -u ",dps$data_point_id[dp_index]," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
-              } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",dps$analysis_id[dp_index]," -u ",dps$data_point_id[dp_index]," -x #{@options[:run_data_point_filename]}",sep="")
-              }
+              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",dps$analysis_id[dp_index]," -u ",dps$data_point_id[dp_index]," -x #{@options[:run_data_point_filename]}",sep="")
               print(paste("Batch Run Analysis Command: ",y))
               z <- system(y,intern=TRUE)
               j <- length(z)

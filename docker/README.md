@@ -8,7 +8,7 @@
 The command below will create a 100GB volume for development. This is a very large volume and can be adjusted. Make sure to create a volume greater than 30GB.
 
 ```
-docker-machine create --virtualbox-disk-size 100000 -d virtualbox dev
+docker-machine create --virtualbox-disk-size 100000 --virtualbox-cpu-count 4 --virtualbox-memory 4096 -d virtualbox dev
 ```
 
 ## Start Docker-Machine Image

@@ -23,7 +23,6 @@ class Analysis
   field :status_message, type: String, default: '' # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
-  field :use_shm, type: Boolean, default: false # flag on whether or not to use SHM for analysis (impacts file uploading)
 
   # Temp location for these vas
   field :samples, type: Integer
@@ -128,8 +127,9 @@ class Analysis
       Rails.logger.info("Queuing up analysis #{uuid}")
       self.save!
 
+      # TODO: Remove the idea of initialing workers here. The cluster needs to be defined before running this method
       Rails.logger.info('Initializing workers in database')
-      initialize_workers(options)
+      # initialize_workers(options)
     end
 
     Rails.logger.info("Starting #{analysis_type}")
