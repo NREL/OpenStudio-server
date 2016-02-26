@@ -155,7 +155,7 @@ module Analysis::Core
 
     # Start the child process to download results upon completion.
     def start_child_processes
-      p = ChildProcess.build("#{RUBY_BIN_DIR}/bundle", 'exec', 'rake', 'datapoints:download', "RAILS_ENV=#{Rails.env}")
+      p = ChildProcess.build("#{APP_CONFIG['ruby_bin_dir']}/bundle", 'exec', 'rake', 'datapoints:download', "RAILS_ENV=#{Rails.env}")
       # log_file = File.join(Rails.root,"log/download.log")
       # Rails.logger.info("Log file is: #{log_file}")
       p.io.inherit!

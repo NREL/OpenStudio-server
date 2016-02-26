@@ -1,12 +1,12 @@
 namespace :vagrant do
-  desc 'setup the compute nodes in the database'
+  desc 'setup the default compute nodes in the database'
   task setup: :environment do
     ComputeNode.delete_all
 
-    node = ComputeNode.find_or_create_by(node_type: 'master', ip_address: '192.168.33.10')
-    node.save!
-    node = ComputeNode.find_or_create_by(node_type: 'worker', ip_address: '192.168.33.11')
-    node.cores = 4
-    node.save!
+    ComputeNode.create!(node_type: 'server',  hostname: 'localhost', ip_address: '127.0.0.1', valid: true, cores: 1)
+    ComputeNode.create!(node_type: 'mongodb', hostname: 'localhost', ip_address: '127.0.0.1', valid: true, cores: 2)
+
+    # ComputeNode.create!(node_type: 'server',  hostname: 'os-server', ip_address: '192.168.33.10', valid: true, cores: 1)
+    # ComputeNode.create!(node_type: 'worker', hostname: 'os-worker', ip_address: '192.168.33.11', valid: true, cores: 4)
   end
 end

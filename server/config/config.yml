@@ -1,0 +1,16 @@
+defaults: &defaults
+  sim_root_path: /mnt/openstudio
+
+development:
+  <<: *defaults
+  ruby_bin_dir: /Users/nlong/.rbenv/shims
+
+docker:
+  <<: *defaults
+  ruby_bin_dir: /usr/local/ruby
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

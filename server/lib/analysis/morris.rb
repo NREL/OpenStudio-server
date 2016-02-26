@@ -207,7 +207,7 @@ class Analysis::Morris
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
               if ("#{@analysis.use_shm}" == "true"){
                 y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
               } else {
@@ -227,7 +227,7 @@ class Analysis::Morris
             g <- function(x){
               force(x)
               #print(paste("x:",x))
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
 
@@ -364,11 +364,11 @@ class Analysis::Morris
               file_names_R[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
               save(n, file=file_names_R[j])
               file_names_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
-              png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+              png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
               plot(n)
               dev.off()
               file_names_box_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
-              png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+              png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
               barplot(height=var_mu_star, names.arg=vardisplaynames, ylab="mu.star", main="Mu Star of Elementary Effects")
               dev.off()
             }

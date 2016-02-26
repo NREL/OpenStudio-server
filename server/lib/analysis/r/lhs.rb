@@ -190,7 +190,7 @@ module Analysis::R
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
           @r.command(d: { samples: samples }.to_dataframe) do
             %{
-              png(filename="#{save_file_name}", width = 1024, height = 1024)
+              png(filename="#{save_file_name}", width = 1024, height = 1024, type="cairo")
               hist(d$samples, freq=F, breaks=20)
               dev.off()
           }
@@ -198,7 +198,7 @@ module Analysis::R
         else # plot as a table
           @r.command(d: { samples: samples }.to_dataframe) do
             %{
-              png(filename="#{save_file_name}", width = 1024, height = 1024)
+              png(filename="#{save_file_name}", width = 1024, height = 1024, type="cairo")
               plot(table(d$samples), ylab='count')
               dev.off()
           }
