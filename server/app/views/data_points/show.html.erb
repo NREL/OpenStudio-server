@@ -56,6 +56,27 @@
         </div>
       </div>
     </div>
+    <% unless @data_point.result_files.size == 0 %>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Download Result Files</h3>
+      </div>
+      <div class="panel-body">
+        <table class="table table-striped">
+          <tr>
+            <th>File Type</th>
+            <th>File Name</th>
+          </tr>
+          <% @data_point.result_files.each do |h| %>
+            <tr>
+              <td><%= h.type %></td>
+              <td><%= link_to h.display_name, h.attachment.url(:original, false) %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+    </div>
+    <% end %>
   </div>
 </div>
 

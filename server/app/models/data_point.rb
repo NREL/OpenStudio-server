@@ -24,6 +24,7 @@ class DataPoint
 
   # Relationships
   belongs_to :analysis, index: true
+  embeds_many :result_files
 
   # Indexes
   index({ uuid: 1 }, unique: true)

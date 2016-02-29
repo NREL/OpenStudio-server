@@ -194,6 +194,55 @@ class DataPointsController < ApplicationController
     end
   end
 
+  # upload results file
+  # POST /data_points/1/upload_file.json
+  # TODO: API-only for now. Make this an HTML form? 
+  def upload_file
+    # expected params: datapoint_id, file: {display_name, type, data}
+    if params[:datapoint_id]
+      datapoint_id = params[:datapoint_id]
+      logger.info('attaching results file to datapoint')
+      error = false
+      error_messages = []
+
+      @data_point = DataPoint.find(datapoint_id)
+      logger.info("Datapoint ID: #{@data_point.id.to_s}")
+
+      if params[:file]
+        @rf = ResultFile.new()
+        @rf.display_name = params[:file][:display_name]
+        @rf.type = params[:file][:type]
+
+        data = StringIO.new(Base64.decode64(params[:file][:attachment]))
+        data.class.class_eval { attr_accessor :original_filename, :content_type }
+        data.original_filename = params[:file][:filename]
+        data.content_type = 'zip'
+        params[:file][:attachment] = data
+
+        @rf.attachment = params[:file][:attachment]
+        @data_point.result_files << @rf
+        unless @data_point.save!
+          error = true
+          error_messages << 'Result File could not be saved: ' + @data_point.errors
+        end
+      else 
+        error = true
+        error_messages << 'Missing file parameter'  
+      end
+    else
+      error = true
+      error_messages << 'Missing datapoint parameter'
+    end
+
+    respond_to do |format|
+      if error
+        format.json { render json: { error: error_messages, result_file: @rf }, status: :unprocessable_entity }
+      else
+        format.json { render 'result_file', status: :created, location: data_point_url(@data_point) }
+      end
+    end
+  end
+
   def download
     @data_point = DataPoint.find(params[:id])
 

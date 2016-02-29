@@ -56,6 +56,7 @@ OpenstudioServer::Application.routes.draw do
           get :download
           get :download_reports
           get :dencity
+          post :upload_file
         end
 
         collection do
