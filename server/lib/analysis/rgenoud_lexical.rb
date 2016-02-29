@@ -50,7 +50,7 @@ class Analysis::RgenoudLexical
     # create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for genoud Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
@@ -191,8 +191,8 @@ class Analysis::RgenoudLexical
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               #print(paste("R returned system call with:",z))
@@ -205,11 +205,11 @@ class Analysis::RgenoudLexical
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
 
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
@@ -217,7 +217,7 @@ class Analysis::RgenoudLexical
               # Call the simulate data point method
               f(z[j])
 
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -341,7 +341,7 @@ class Analysis::RgenoudLexical
             print(paste("par:",results$par))
             print(paste("value:",results$value))
             flush.console()
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            save(results, file="#{APP_CONFIG['sim_root_path']}/results_#{@analysis.id}.R")
           }
         end
       else

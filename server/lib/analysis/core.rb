@@ -5,13 +5,7 @@ require 'rserve/simpler'
 # Core functions for analysis
 module Analysis::Core
   def database_name
-    if Rails.env == 'development'
-      return 'os_dev'
-    elsif Rails.env == 'production'
-      return 'os_prod'
-    elsif Rails.env == 'test'
-      return 'os_test'
-    end
+    Mongoid.default_session.options[:database]
   end
 
   module_function :database_name

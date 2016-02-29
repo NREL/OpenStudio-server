@@ -6,7 +6,7 @@ class AnalysesController < ApplicationController
 
   def set_algorithm_results_path
     @analysis = Analysis.find(params[:id])
-    @algorithm_results_path = @analysis ? "/mnt/openstudio/analysis_#{@analysis.id}/downloads/" : ''
+    @algorithm_results_path = @analysis ? "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads/" : ''
   end
 
   # GET /analyses

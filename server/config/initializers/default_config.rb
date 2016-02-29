@@ -4,4 +4,4 @@ APP_CONFIG = YAML.load_file(File.join(Rails.root,'/config/config.yml'))[Rails.en
 
 # Go through and interpret some of the variables
 APP_CONFIG['sim_root_path'] = File.expand_path(APP_CONFIG['sim_root_path'].gsub(':rails_root', Rails.root.to_s))
-
+APP_CONFIG['ruby_bin_dir'] = APP_CONFIG['ruby_bin_dir'].gsub(':ruby_bin_dir', RbConfig::CONFIG['bindir'])

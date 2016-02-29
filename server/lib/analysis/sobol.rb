@@ -45,7 +45,7 @@ class Analysis::Sobol
     # create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for Sobol Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
@@ -172,8 +172,8 @@ class Analysis::Sobol
             print(paste("varnames:",varnames))
 
             varfile <- function(x){
-              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
-               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json")){
+               write.table(x, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
 
@@ -190,8 +190,8 @@ class Analysis::Sobol
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               #print(paste("R returned system call with:",z))
@@ -206,11 +206,11 @@ class Analysis::Sobol
             g <- function(x){
               force(x)
               #print(paste("x:",x))
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
 
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               #print(paste("g(y):",y))
               z <- system(y,intern=TRUE)
               j <- length(z)
@@ -224,7 +224,7 @@ class Analysis::Sobol
             } else {
               try(f(z[j]), silent = TRUE)
 
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -321,9 +321,9 @@ class Analysis::Sobol
               # var_sigma[i] <- sd(m$ee[,i])
             # }
             # answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
-            # write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/morris.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+            # write.table(answer, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
 
-            save(m, file="/mnt/openstudio/analysis_#{@analysis.id}/m.R")
+            save(m, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/m.R")
           }
         end
       else
@@ -353,7 +353,7 @@ class Analysis::Sobol
       end
 
       # Post process the results and jam into the database
-      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
+      best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
           Rails.logger.info('read best result json')

@@ -35,7 +35,7 @@ class Analysis::BatchDatapoints
       Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       Rails.logger.info "Setting up R for #{self.class.name}"
       # TODO: need to move this to the module class
-      @r.converse('setwd("/mnt/openstudio")')
+      @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       selected_variables = Variable.variables(@analysis.id)
       Rails.logger.info "Found #{selected_variables.count} non-default variables in the batch datapoint set."

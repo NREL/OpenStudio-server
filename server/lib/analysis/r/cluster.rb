@@ -15,30 +15,26 @@ module Analysis::R
       @r.converse 'library(RMongo)'
       @r.converse 'library(R.utils)'
 
-      # determine the database name based on the environment
-      if Rails.env == 'development'
-        @db = 'os_dev'
-      elsif Rails.env == 'production'
-        @db = 'os_prod'
-      elsif Rails.env == 'test'
-        @db = 'os_test'
-      end
+      # set the name of the current database
+      @db_name = Analysis::Core.database_name
+      @db_ip, @db_port = Mongoid.sessions[:default][:hosts].first.split(':')
+      Rails.logger.info "Mongo IP and Port is #{@db_ip} and #{@db_port}"
     end
 
     # configure the r session, returns true if the flag variable was readable (and true)
     def configure(master_ip)
       @r.command do
         %{
-            ip <- "#{master_ip}"
+            ip <- "#{@db_ip}"
             results <- NULL
             print(paste("Master ip address is",ip))
             print(paste("Current working directory is",getwd()))
-            if (file.exists('/mnt/openstudio/rtimeout')) {
-              file.remove('/mnt/openstudio/rtimeout')
+            if (file.exists('#{APP_CONFIG['sim_root_path']}/rtimeout')) {
+              file.remove('#{APP_CONFIG['sim_root_path']}/rtimeout')
             }
             #test the query of getting the run_flag
-            print(paste("Connecting to MongoDB: #{@db}"))
-            mongo <- mongoDbConnect("#{@db}", host=ip, port=27017)
+            print(paste("Connecting to MongoDB: #{@db_name}"))
+            mongo <- mongoDbConnect("#{@db_name}", host=ip, port=27017)
             flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis_id}"}', '{run_flag:1}')
 
             print(paste("Run flag:",flag['run_flag']))

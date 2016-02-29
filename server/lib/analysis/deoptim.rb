@@ -51,7 +51,7 @@ class Analysis::Deoptim
     # create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for Batch Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: fix statically setting the random seed
     @r.converse('set.seed(1979)')
@@ -149,8 +149,8 @@ class Analysis::Deoptim
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               print(paste("R returned system call with:",z))
@@ -163,10 +163,10 @@ class Analysis::Deoptim
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
@@ -174,7 +174,7 @@ class Analysis::Deoptim
               # Call the simulate data point method
               f(z[j])
 
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -220,7 +220,7 @@ class Analysis::Deoptim
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            save(results, file="#{APP_CONFIG['sim_root_path']}/results_#{@analysis.id}.R")
           }
         end
       else

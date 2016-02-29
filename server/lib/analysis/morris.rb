@@ -42,7 +42,7 @@ class Analysis::Morris
     # create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for Morris Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
@@ -180,14 +180,14 @@ class Analysis::Morris
             print(paste("objnames:",objnames))
 
             varfile <- function(x){
-              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
-               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json")){
+               write.table(x, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
 
             vardisplayfile <- function(x){
-              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json")){
-               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json")){
+               write.table(x, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
 
@@ -207,8 +207,8 @@ class Analysis::Morris
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               #print(paste("R returned system call with:",z))
@@ -223,11 +223,11 @@ class Analysis::Morris
             g <- function(x){
               force(x)
               #print(paste("x:",x))
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
 
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               #print(paste("g(y):",y))
               z <- system(y,intern=TRUE)
               j <- length(z)
@@ -241,7 +241,7 @@ class Analysis::Morris
             } else {
               try(f(z[j]), silent = TRUE)
 
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -307,7 +307,7 @@ class Analysis::Morris
                 ug <- length(unique(objgroup))
                 if (ug != uniquegroups) {
                    print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-                   write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                   write.table("unique groups", file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
                    stop(options("show.error.messages"=TRUE),"unique groups is not equal")
                 }
 
@@ -355,24 +355,24 @@ class Analysis::Morris
                 var_sigma[i] <- sd(n$ee[,i])
               }
               answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
-              file_names_jsons[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
+              file_names_jsons[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
               write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
-              file_names_R[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
+              file_names_R[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
               save(n, file=file_names_R[j])
-              file_names_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
+              file_names_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
               png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
               plot(n)
               dev.off()
-              file_names_box_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
+              file_names_box_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
               png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
               barplot(height=var_mu_star, names.arg=vardisplaynames, ylab="mu.star", main="Mu Star of Elementary Effects")
               dev.off()
             }
-            file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,"/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json")
-            if(!dir.exists("/mnt/openstudio/analysis_#{@analysis.id}/downloads")){
-              dir.create("/mnt/openstudio/analysis_#{@analysis.id}/downloads")
+            file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,"#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json")
+            if(!dir.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads")){
+              dir.create("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads")
             }
-            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")
+            zip(zipfile="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")
           }
         end
       else
@@ -401,7 +401,7 @@ class Analysis::Morris
       end
 
       # Post process the results and jam into the database
-      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
+      best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
           Rails.logger.info('read best result json')

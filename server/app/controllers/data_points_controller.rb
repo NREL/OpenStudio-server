@@ -218,7 +218,7 @@ class DataPointsController < ApplicationController
 
     # remove any preceding .. because an attacker could try and traverse the file system
     file = File.basename(params[:file])
-    file_str = "/mnt/openstudio/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{file}"
+    file_str = "#{APP_CONFIG['sim_root_path']}/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{file}"
 
     if File.exist? file_str
       render file: file_str, layout: false

@@ -12,7 +12,7 @@ rubocop-results.xml
 /worker-nodes/Gemfile.lock
 /worker-nodes/analysis_*
 /worker-nodes/rails-models/models
-/worker-nodes/mongoid.yml
+/worker-nodes/rails-models/mongoid.yml
 
 # in some configs the server and worker data are persisted in this directory, never commit
 server-data

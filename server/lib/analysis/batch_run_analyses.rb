@@ -30,7 +30,7 @@ class Analysis::BatchRunAnalyses
     # create an instance for R
     @r = Rserve::Simpler.new
     Rails.logger.info 'Setting up R for Batch Run Analysis'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -99,8 +99,8 @@ class Analysis::BatchRunAnalyses
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a ",dps$analysis_id[dp_index]," -u ",dps$data_point_id[dp_index]," -x #{@options[:run_data_point_filename]}",sep="")
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a ",dps$analysis_id[dp_index]," -u ",dps$data_point_id[dp_index]," -x #{@options[:run_data_point_filename]}",sep="")
               print(paste("Batch Run Analysis Command: ",y))
               z <- system(y,intern=TRUE)
               j <- length(z)

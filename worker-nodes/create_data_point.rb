@@ -34,8 +34,8 @@ errored = false
 
 begin
   dp_uuid = SecureRandom.uuid
-  analysis_root_path = "/mnt/openstudio/analysis_#{options[:analysis_id]}"
-  run_directory = "/mnt/openstudio/analysis_#{options[:analysis_id]}/data_point_#{dp_uuid}"
+  analysis_root_path = "analysis_#{options[:analysis_id]}"
+  run_directory = "analysis_#{options[:analysis_id]}/data_point_#{dp_uuid}"
   # Logger for the simulate datapoint
   logger = Logger.new("#{analysis_root_path}/create_data_point_#{dp_uuid}.log")
   logger.info "Parsed Input: #{options}"
@@ -45,7 +45,7 @@ begin
     datapoint_id: dp_uuid,
     analysis_root_path: analysis_root_path,
     adapter_options: {
-      mongoid_path: '/mnt/openstudio/rails-models'
+      mongoid_path: File.expand_path('rails-models')
     }
   }
 

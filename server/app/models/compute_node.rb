@@ -95,11 +95,11 @@ class ComputeNode
     remote_file_exists = false
     local_filename = nil
 
-    remote_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
+    remote_filepath = "#{APP_CONFIG['sim_root_path']}/analysis_#{analysis_id}"
     remote_filename = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}.zip"
     remote_datapoint_path = "#{remote_filepath}/data_point_#{data_point_id}"
     remote_filename_reports = "#{remote_filepath}/data_point_#{data_point_id}/data_point_#{data_point_id}_reports.zip"
-    local_filepath = "/mnt/openstudio/analysis_#{analysis_id}"
+    local_filepath = "#{APP_CONFIG['sim_root_path']}/analysis_#{analysis_id}"
     local_filename = "#{local_filepath}/data_point_#{data_point_id}.zip"
     local_filename_reports = "#{local_filepath}/data_point_#{data_point_id}_reports.zip"
 

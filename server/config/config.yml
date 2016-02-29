@@ -1,9 +1,10 @@
 defaults: &defaults
   sim_root_path: /mnt/openstudio
+  ruby_bin_dir: ':ruby_bin_dir'
 
 development:
   <<: *defaults
-  ruby_bin_dir: /Users/nlong/.rbenv/shims
+  ruby_bin_dir: ':ruby_bin_dir'
   sim_root_path: ':rails_root/../worker-nodes'
 
 docker:
