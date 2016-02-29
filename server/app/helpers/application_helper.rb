@@ -10,6 +10,8 @@ module ApplicationHelper
       active if page == 'Admin'
     elsif path == '/about'
       active if page == 'About'
+    elsif path == '/nodes'
+      active if page == 'Nodes'
     elsif path.include? '/analyses'
       active2 if page == 'Analyses'
     end

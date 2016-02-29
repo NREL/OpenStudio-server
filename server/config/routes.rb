@@ -79,6 +79,7 @@ OpenstudioServer::Application.routes.draw do
   match '/about' => 'pages#about'
   match '/analyses' => 'analyses#index'
   match '/status' => 'pages#status'
+  match '/nodes' => 'pages#nodes'
 
   # DEnCity routes
   match 'metadata' => 'variables#metadata', :via => :get

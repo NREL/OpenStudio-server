@@ -4,25 +4,20 @@
     <ul class="nav navbar-nav">
       <li<%= active_nav('Home') %>><%= link_to 'Home', root_path %></li>
       <li<%= active_nav('Projects') %>><%= link_to 'Projects', projects_path %></li>
-
-         <li  class="dropdown <%= active_nav('Analyses') %>">
+      <li  class="dropdown <%= active_nav('Analyses') %>">
 
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Analyses <b class="caret"></b></a>
 
         <ul class="dropdown-menu">
-
           <% analyses_nav.each do |item| %>
-
             <li <%= active_subnav(item.id)%>><%= link_to item.name, analysis_path(item.id) %></li>
           <% end %>
           <% if analyses_nav.count > 1 %>
             <li <%= active_subnav('all') %>><%= link_to "Show All", analyses_path %></li>
           <% end %>
         </ul>
-
       </li>
-
-
+      <li<%= active_nav('Nodes') %>><%= link_to 'Nodes', nodes_path %></li>
       <li<%= active_nav('Admin') %>><%= link_to 'Admin', admin_index_path %></li>
       <li<%= active_nav('About') %>><%= link_to 'About', about_path %></li>
 

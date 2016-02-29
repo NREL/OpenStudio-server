@@ -35,7 +35,12 @@ class PagesController < ApplicationController
       format.html # status.html.erb
       format.json # status.json.jbuilder
     end
- end
+  end
+
+  # display table of compute node info
+  def nodes
+    @nodes = ComputeNode.all
+  end
 
   # main dashboard for the site
   def dashboard
