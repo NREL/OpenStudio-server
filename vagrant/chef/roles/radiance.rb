@@ -3,7 +3,7 @@ description 'Installs and configure radiance'
 
 default_attributes(
   radiance: {
-    version: 'fix-headless'
+    version: '5.0.a.8'
   }
 )
 
