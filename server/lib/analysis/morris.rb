@@ -78,7 +78,7 @@ class Analysis::Morris
       obj_names << var['display_name_short']
     end
     Rails.logger.info "Objective function names #{obj_names}"
-    
+
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
@@ -157,9 +157,9 @@ class Analysis::Morris
 
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
-	    print(paste("UniqueGroups:",uniquegroups))
-	    print(paste("objfun:",objfun))
-	    
+      print(paste("UniqueGroups:",uniquegroups))
+      print(paste("objfun:",objfun))
+
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
 
@@ -344,7 +344,8 @@ class Analysis::Morris
             file_names_R <- c("")
             file_names_png <- c("")
             file_names_box_png <- c("")
-            for (j in 1:nrow(result)){  
+            file_names_bar_png <- c("")
+            for (j in 1:nrow(result)){
               print(paste("result[j,]:",unlist(result[j,])))
               print(paste("result[,j]:",unlist(result[,j])))
               n <- m
@@ -366,17 +367,31 @@ class Analysis::Morris
               file_names_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
               png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200)
               plot(n)
+              #axis(1, las=2)
+              #axis(2, las=1)
               dev.off()
+              file_names_bar_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
+              png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+              op <- par(mar = c(14,4,4,2) + 0.1)
+              mp <- barplot(height=var_mu_star, ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
+              axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
+              #axis(2, las=1)
+              dev.off()
+              par(op)
               file_names_box_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
               png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200)
-              barplot(height=var_mu_star, names.arg=vardisplaynames, ylab="mu.star", main="Mu Star of Elementary Effects")
+              op <- par(mar = c(14,4,4,2) + 0.1)
+              #mp <- boxplot(n$ee, las=2, names=vardisplaynames)
+              boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9)
+              #axis(1, labels=vardisplaynames, las=2)
               dev.off()
+              par(op)
             }
-            file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,"/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json")
+            file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,file_names_bar_png,"/mnt/openstudio/analysis_#{@analysis.id}/vardisplaynames.json")
             if(!dir.exists("/mnt/openstudio/analysis_#{@analysis.id}/downloads")){
               dir.create("/mnt/openstudio/analysis_#{@analysis.id}/downloads")
             }
-            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")            
+            zip(zipfile="/mnt/openstudio/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")
           }
         end
       else
