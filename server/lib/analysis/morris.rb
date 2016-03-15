@@ -18,6 +18,7 @@ class Analysis::Morris
           type: 'oat',
           normtype: 'minkowski',
           ppower: 2,
+          debug: 0,
           objective_functions: []
         }
       }
@@ -60,7 +61,7 @@ class Analysis::Morris
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
-
+    
     # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['r'].nil? || @analysis.problem['algorithm']['r'] == 0
       fail 'Value for r was not set or equal to zero (must be 1 or greater)'
@@ -142,7 +143,7 @@ class Analysis::Morris
                    levels: @analysis.problem['algorithm']['levels'], r: @analysis.problem['algorithm']['r'],
                    type: @analysis.problem['algorithm']['type'], grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'], debugF: @analysis.problem['algorithm']['debug'],
                    vardisplaynames: var_display_names, objnames: obj_names,
                    mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
           %{
@@ -154,6 +155,7 @@ class Analysis::Morris
             print(paste("r:",r))
             print(paste("grid_jump:",grid_jump))
             print(paste("type:",type))
+            print(paste("debugF:",debugF))
 
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
@@ -240,7 +242,11 @@ class Analysis::Morris
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
               cat("UUID is NA \n");
-              NAvalue <- 1.0e19
+              if (debugF == 1) {
+                NAvalue <- 1.0e19
+              } else {
+                NAvalue <- 0.0
+              }
               return(NAvalue)
             } else {
               try(f(z[j]), silent = TRUE)
@@ -258,7 +264,11 @@ class Analysis::Morris
               if (is.null(json)) {
                 obj <- NULL
                 for (i in 1:objDim){
-                  obj[i] <- 1.0e19
+                  if (debugF == 1) {
+                    obj[i] <- 1.0e19
+                  } else {
+                    obj[i] <- 0.0
+                  }                  
                 }
                 print(paste(data_point_directory,"/objectives.json is NULL"))
               } else {
@@ -273,7 +283,11 @@ class Analysis::Morris
                   if (json[objfuntemp] != "NULL"){
                     objvalue[i] <- as.numeric(json[objfuntemp])
                   } else {
-                    objvalue[i] <- 1.0e19
+                    if (debugF == 1) {
+                      obj[i] <- 1.0e19
+                    } else {
+                      obj[i] <- 0.0
+                    } 
                     cat(data_point_directory," Missing ", objfuntemp,"\n");
                   }
                   objfuntargtemp <- paste("objective_function_target_",i,sep="")
