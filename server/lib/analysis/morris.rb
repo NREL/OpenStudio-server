@@ -193,6 +193,7 @@ class Analysis::Morris
               }
             }
 
+            clusterExport(cl,"debugF")
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
