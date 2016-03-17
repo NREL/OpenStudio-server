@@ -86,7 +86,8 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
 
 # Install passenger (this also installs nginx)
-RUN gem install passenger -v 5.0.25
+ENV PASSENGER_VERSION 5.0.25
+RUN gem install passenger -v $PASSENGER_VERSION
 RUN passenger-install-nginx-module
 
 #### Build R and install R packages.
