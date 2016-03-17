@@ -29,10 +29,5 @@ docker-compose up
 
 **Note that you may need to build the containers a couple times for everything to converge**
 
-## Create User
-```
-docker-compose run web ./manage.py create_default_user
-```
-
 #### You're done!!! ####
 Get the Docker IP address (`docker-machine ip dev`) and point your browser at [http://`ip-address`:8000](http://`ip-address`:8000)
