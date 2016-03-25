@@ -76,38 +76,36 @@ class Analysis
       ip_file = '/data/launch-instance/ip_addresses' # somehow check if this is a vagrant box -- RAILS ENV?
     end
 
-    if File.exist? ip_file
-      ips = File.read(ip_file).split("\n")
-      ips.each do |ip|
-        cols = ip.split('|')
-        if cols[0] == 'master' # TODO: eventually rename this from master to server. The database calls this server
-          node = ComputeNode.find_or_create_by(node_type: 'server', ip_address: cols[1])
-          node.hostname = cols[2]
-          node.cores = cols[3]
-          node.user = cols[4]
-          node.password = cols[5].chomp
-          if options[:use_server_as_worker] && cols[6].chomp == 'true'
-            node.valid = true
-          else
-            node.valid = false
-          end
-          node.save!
-
-          logger.info("Server node #{node.inspect}")
-        elsif cols[0] == 'worker'
-          node = ComputeNode.find_or_create_by(node_type: 'worker', ip_address: cols[1])
-          node.hostname = cols[2]
-          node.cores = cols[3]
-          node.user = cols[4]
-          node.password = cols[5].chomp
+    ips = File.read(ip_file).split("\n")
+    ips.each do |ip|
+      cols = ip.split('|')
+      if cols[0] == 'master' # TODO: eventually rename this from master to server. The database calls this server
+        node = ComputeNode.find_or_create_by(node_type: 'server', ip_address: cols[1])
+        node.hostname = cols[2]
+        node.cores = cols[3]
+        node.user = cols[4]
+        node.password = cols[5].chomp
+        if options[:use_server_as_worker] && cols[6].chomp == 'true'
+          node.valid = true
+        else
           node.valid = false
-          if cols[6] && cols[6].chomp == 'true'
-            node.valid = true
-          end
-          node.save!
-
-          logger.info("Worker node #{node.inspect}")
         end
+        node.save!
+
+        logger.info("Server node #{node.inspect}")
+      elsif cols[0] == 'worker'
+        node = ComputeNode.find_or_create_by(node_type: 'worker', ip_address: cols[1])
+        node.hostname = cols[2]
+        node.cores = cols[3]
+        node.user = cols[4]
+        node.password = cols[5].chomp
+        node.valid = false
+        if cols[6] && cols[6].chomp == 'true'
+          node.valid = true
+        end
+        node.save!
+
+        logger.info("Worker node #{node.inspect}")
       end
     end
 
