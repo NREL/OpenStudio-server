@@ -1,6 +1,26 @@
 OpenStudio Server
 ==================================
 
+Version 1.15.7
+--------------
+* OpenStudio 1.10.6
+
+Version 1.15.5
+--------------
+* OpenStudio 1.10.5
+
+Version 1.15.4
+--------------
+* OpenStudio 1.10.4
+
+Version 1.15.3
+--------------
+* OpenStudio 1.10.3
+
+Version 1.15.2
+--------------
+* OpenStudio 1.10.2
+
 Version 1.15.0
 --------------
 * OpenStudio 1.10.0

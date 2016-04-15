@@ -18,6 +18,7 @@ class Analysis::Morris
           type: 'oat',
           normtype: 'minkowski',
           ppower: 2,
+          debug: 0,
           objective_functions: []
         }
       }
@@ -60,7 +61,7 @@ class Analysis::Morris
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
-
+    
     # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['r'].nil? || @analysis.problem['algorithm']['r'] == 0
       fail 'Value for r was not set or equal to zero (must be 1 or greater)'
@@ -142,7 +143,7 @@ class Analysis::Morris
                    levels: @analysis.problem['algorithm']['levels'], r: @analysis.problem['algorithm']['r'],
                    type: @analysis.problem['algorithm']['type'], grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'], debugF: @analysis.problem['algorithm']['debug'],
                    vardisplaynames: var_display_names, objnames: obj_names,
                    mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
           %{
@@ -154,6 +155,7 @@ class Analysis::Morris
             print(paste("r:",r))
             print(paste("grid_jump:",grid_jump))
             print(paste("type:",type))
+            print(paste("debugF:",debugF))
 
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
@@ -191,6 +193,7 @@ class Analysis::Morris
               }
             }
 
+            clusterExport(cl,"debugF")
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
@@ -236,7 +239,11 @@ class Analysis::Morris
               # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
               cat("UUID is NA \n");
-              NAvalue <- 1.0e19
+              if (debugF == 1) {
+                NAvalue <- 1.0e19
+              } else {
+                NAvalue <- 0.0
+              }
               return(NAvalue)
             } else {
               try(f(z[j]), silent = TRUE)
@@ -254,7 +261,11 @@ class Analysis::Morris
               if (is.null(json)) {
                 obj <- NULL
                 for (i in 1:objDim){
-                  obj[i] <- 1.0e19
+                  if (debugF == 1) {
+                    obj[i] <- 1.0e19
+                  } else {
+                    obj[i] <- 0.0
+                  }                  
                 }
                 print(paste(data_point_directory,"/objectives.json is NULL"))
               } else {
@@ -269,7 +280,11 @@ class Analysis::Morris
                   if (json[objfuntemp] != "NULL"){
                     objvalue[i] <- as.numeric(json[objfuntemp])
                   } else {
-                    objvalue[i] <- 1.0e19
+                    if (debugF == 1) {
+                      obj[i] <- 1.0e19
+                    } else {
+                      obj[i] <- 0.0
+                    } 
                     cat(data_point_directory," Missing ", objfuntemp,"\n");
                   }
                   objfuntargtemp <- paste("objective_function_target_",i,sep="")
@@ -340,6 +355,9 @@ class Analysis::Morris
             file_names_R <- c("")
             file_names_png <- c("")
             file_names_box_png <- c("")
+            file_names_box_sorted_png <- c("")
+            file_names_bar_png <- c("")
+            file_names_bar_sorted_png <- c("")
             for (j in 1:nrow(result)){
               print(paste("result[j,]:",unlist(result[j,])))
               print(paste("result[,j]:",unlist(result[,j])))
@@ -362,11 +380,33 @@ class Analysis::Morris
               file_names_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
               png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
               plot(n)
+              #axis(1, las=2)
+              #axis(2, las=1)
               dev.off()
+            #if (all(is.finite(var_mu_star))) {  
+              file_names_bar_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
+              png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+              op <- par(mar = c(14,4,4,2) + 0.1)
+              mp <- barplot(height=var_mu_star, ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
+              axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
+              #axis(2, las=1)
+              dev.off()
+              #sorted
+              file_names_bar_sorted_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
+              png(file_names_bar_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+              op <- par(mar = c(14,4,4,2) + 0.1)
+              mp <- barplot(height=sort(var_mu_star), ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
+              axis(1, at=mp, labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)
+              #axis(2, las=1)
+              dev.off()
+
+              par(op)
               file_names_box_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
               png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-              barplot(height=var_mu_star, names.arg=vardisplaynames, ylab="mu.star", main="Mu Star of Elementary Effects")
-              dev.off()
+              op <- par(mar = c(14,4,4,2) + 0.1)
+              #mp <- boxplot(n$ee, las=2, names=vardisplaynames)
+              boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9)
+              #axis(1, labels=vardisplaynames, las=2)
             }
             file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,"#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json")
             if(!dir.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads")){

@@ -288,8 +288,8 @@ DEPENDENCIES
   openstudio-aws
   paperclip (~> 4.1.1)
   parallel
-  rails (~> 3.2)
-  rake (~> 10.5)
+  rails (= 3.2.22)
+  rake (< 11.0)
   rserve-simpler
   rspec
   rspec-html-matchers
