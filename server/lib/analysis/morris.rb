@@ -407,7 +407,7 @@ class Analysis::Morris
               #mp <- boxplot(n$ee, las=2, names=vardisplaynames)
               boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9)
               #axis(1, labels=vardisplaynames, las=2)
-            }
+            #}
             file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,"#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json")
             if(!dir.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads")){
               dir.create("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads")
