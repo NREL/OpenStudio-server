@@ -13,6 +13,7 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /log/*.json
+/log/.Rhistory
 
 # Ignore subfolders in tmp
 /tmp/*

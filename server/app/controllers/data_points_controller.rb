@@ -14,7 +14,6 @@ class DataPointsController < ApplicationController
   # GET /data_points/1.json
   def show
     @data_point = DataPoint.find(params[:id])
-    @files = []
     respond_to do |format|
       if @data_point
         format.html do
@@ -27,22 +26,6 @@ class DataPointsController < ApplicationController
           end
 
           @data_point.set_variable_values ? @set_variable_values = @data_point.set_variable_values : @set_variable_values = []
-
-          if @data_point.openstudio_datapoint_file_name
-            local_analysis_dir = "#{File.dirname(@data_point.openstudio_datapoint_file_name.to_s)}/#{File.basename(@data_point.openstudio_datapoint_file_name.to_s, '.*')}"
-            logger.debug "Local analysis dir is #{local_analysis_dir}"
-            Dir["#{local_analysis_dir}/reports/*"].each do |h|
-              new_h = {}
-              new_h[:filename] = h
-              new_h[:name] = File.basename(h, '.*')
-              new_h[:extname] = File.extname(h).delete('.').upcase
-              new_h[:display_name] = new_h[:name].titleize
-
-              # only save the csvs and htmls/htms
-              next unless %w(HTML HTM CSV JSON).include? new_h[:extname]
-              @files << new_h
-            end
-          end
         end
 
         format.json do
@@ -63,7 +46,7 @@ class DataPointsController < ApplicationController
         end
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
+        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
       end
     end
   end
@@ -79,16 +62,16 @@ class DataPointsController < ApplicationController
       #  format.html # new.html.erb
       format.json do
         render json: {
-          data_points: dps.map do |dp|
-            {
-              _id: dp.id,
-              id: dp.id,
-              analysis_id: dp.analysis_id,
-              status: dp.status,
-              final_message: dp.status_message,
-              download_status: dp.download_status
-            }
-          end
+            data_points: dps.map do |dp|
+              {
+                  _id: dp.id,
+                  id: dp.id,
+                  analysis_id: dp.analysis_id,
+                  status: dp.status,
+                  final_message: dp.status_message,
+                  download_status: dp.download_status
+              }
+            end
         }
       end
     end
@@ -194,89 +177,93 @@ class DataPointsController < ApplicationController
     end
   end
 
+  # Delete all the result files from the data point
+  # API only method
+  # DELETE /data_points/1/result_files
+  def result_files
+    dp = DataPoint.find(params[:id])
+    dp.result_files.destroy
+    dp.save
+
+    # Check if we want to delete anything else here (e.g. the results hash?)
+
+    respond_to do |format|
+      format.json { head :no_content }
+    end
+  end
+
   # upload results file
   # POST /data_points/1/upload_file.json
-  # TODO: API-only for now. Make this an HTML form? 
   def upload_file
-    # expected params: datapoint_id, file: {display_name, type, data}
-    if params[:datapoint_id]
-      datapoint_id = params[:datapoint_id]
-      logger.info('attaching results file to datapoint')
-      error = false
-      error_messages = []
+    # expected params: datapoint_id, file: {display_name, type, data, attachment}
+    error = false
+    error_messages = []
+    datapoint_id = params[:id]
+    logger.info('attaching results file to datapoint')
 
-      @data_point = DataPoint.find(datapoint_id)
-      logger.info("Datapoint ID: #{@data_point.id.to_s}")
+    @data_point = DataPoint.find(datapoint_id)
+    logger.info("Datapoint ID: #{@data_point.id.to_s}")
 
-      if params[:file]
-        @rf = ResultFile.new()
-        @rf.display_name = params[:file][:display_name]
-        @rf.type = params[:file][:type]
+    if params[:file] && params[:file][:attachment]
+      @rf = ResultFile.new(
+          display_name: params[:file][:display_name],
+          type: params[:file][:type]
+      )
+      @rf.attachment = params[:file][:attachment]
 
-        data = StringIO.new(Base64.decode64(params[:file][:attachment]))
-        data.class.class_eval { attr_accessor :original_filename, :content_type }
-        data.original_filename = params[:file][:filename]
-        data.content_type = 'zip'
-        params[:file][:attachment] = data
-
-        @rf.attachment = params[:file][:attachment]
-        @data_point.result_files << @rf
-        unless @data_point.save!
-          error = true
-          error_messages << 'Result File could not be saved: ' + @data_point.errors
-        end
-      else 
+      @data_point.result_files << @rf
+      unless @data_point.save!
         error = true
-        error_messages << 'Missing file parameter'  
+        error_messages << 'Result File could not be saved: ' + @data_point.errors
       end
     else
       error = true
-      error_messages << 'Missing datapoint parameter'
+      error_messages << 'Missing attachment parameter'
     end
 
     respond_to do |format|
       if error
-        format.json { render json: { error: error_messages, result_file: @rf }, status: :unprocessable_entity }
+        format.json { render json: {error: error_messages, result_file: params[:file]}, status: :unprocessable_entity }
       else
         format.json { render 'result_file', status: :created, location: data_point_url(@data_point) }
       end
     end
   end
 
-  def download
-    @data_point = DataPoint.find(params[:id])
-
-    data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
-    send_data data_point_zip_data, filename: File.basename(@data_point.openstudio_datapoint_file_name), type: 'application/zip; header=present', disposition: 'attachment'
-  end
-
-  def download_reports
-    @data_point = DataPoint.find(params[:id])
-
-    remote_filename_reports = @data_point.openstudio_datapoint_file_name.gsub('.zip', '_reports.zip')
-    data_point_zip_data = File.read(remote_filename_reports)
-    send_data data_point_zip_data, filename: File.basename(remote_filename_reports), type: 'application/zip; header=present', disposition: 'attachment'
-  end
-
-  # Render an openstudio reporting measure's HTML report. This method has protection around which file to load.
-  # It expects the file to be in the reports directory of the data point. If the user try to navigate the file system
-  # the File.basename method will remove that.
-  def view_report
-    # construct the path to the report based on the routs
-    @data_point = DataPoint.find(params[:id])
-
-    # remove any preceding .. because an attacker could try and traverse the file system
-    file = File.basename(params[:file])
-    file_str = "#{APP_CONFIG['sim_root_path']}/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{file}"
-
-    if File.exist? file_str
-      render file: file_str, layout: false
-    else
-      respond_to do |format|
-        format.html { redirect_to @data_point, notice: "Could not find file #{file_str}" }
-      end
-    end
-  end
+  # def download
+  #   @data_point = DataPoint.find(params[:id])
+  #
+  #   data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
+  #   send_data data_point_zip_data, filename: File.basename(@data_point.openstudio_datapoint_file_name), type: 'application/zip; header=present', disposition: 'attachment'
+  # end
+  #
+  # def download_reports
+  #   @data_point = DataPoint.find(params[:id])
+  #
+  #   remote_filename_reports = @data_point.openstudio_datapoint_file_name.gsub('.zip', '_reports.zip')
+  #   data_point_zip_data = File.read(remote_filename_reports)
+  #   send_data data_point_zip_data, filename: File.basename(remote_filename_reports), type: 'application/zip; header=present', disposition: 'attachment'
+  # end
+  #
+  # # Render an openstudio reporting measure's HTML report. This method has protection around which file to load.
+  # # It expects the file to be in the reports directory of the data point. If the user try to navigate the file system
+  # # the File.basename method will remove that.
+  # def view_report
+  #   # construct the path to the report based on the routs
+  #   @data_point = DataPoint.find(params[:id])
+  #
+  #   # remove any preceding .. because an attacker could try and traverse the file system
+  #   file = File.basename(params[:file])
+  #   file_str = "#{APP_CONFIG['sim_root_path']}/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{file}"
+  #
+  #   if File.exist? file_str
+  #     render file: file_str, layout: false
+  #   else
+  #     respond_to do |format|
+  #       format.html { redirect_to @data_point, notice: "Could not find file #{file_str}" }
+  #     end
+  #   end
+  # end
 
   def dencity
     @data_point = DataPoint.find(params[:id])
@@ -321,7 +308,7 @@ class DataPointsController < ApplicationController
 
       # Grab all the variables that have defined a measure ID and pull out the results
       vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '')
-             .order_by(:name.asc).as_json(only: [:name, :metadata_id])
+                 .order_by(:name.asc).as_json(only: [:name, :metadata_id])
 
       dencity[:structure] = {}
       vars.each do |v|
@@ -345,7 +332,7 @@ class DataPointsController < ApplicationController
       if dencity
         format.json { render json: dencity.to_json }
       else
-        format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
+        format.json { render json: {error: 'Could not format data point into DEnCity view'}, status: :unprocessable_entity }
       end
     end
   end

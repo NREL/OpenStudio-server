@@ -22,6 +22,10 @@ puts "Parsing Input: #{ARGV}"
 # parse arguments with optparse
 options = {}
 optparse = OptionParser.new do |opts|
+  opts.on('-h', '--host host:port', String, 'Server host and port (e.g. localhost:3000)') do |host|
+    options[:host] = host
+  end
+
   opts.on('-a', '--analysis_id UUID', String, 'UUID of the analysis.') do |analysis_id|
     options[:analysis_id] = analysis_id
   end
@@ -31,6 +35,12 @@ optparse = OptionParser.new do |opts|
   end
 end
 optparse.parse!
+
+unless options[:host]
+  puts "Must provide host"
+  puts optparse
+  exit
+end
 
 unless options[:analysis_id]
   # required argument is missing
@@ -57,8 +67,7 @@ begin
 
     # Download the zip file from the server
     download_file = "#{analysis_dir}/analysis.zip"
-    download_host = "localhost:3000"
-    download_url = "http://#{download_host}/analyses/#{options[:analysis_id]}/download_analysis_zip"
+    download_url = "http://#{options[:host]}/analyses/#{options[:analysis_id]}/download_analysis_zip"
 
     File.open(download_file, "wb") do |saved_file|
       # the following "open" is provided by open-uri

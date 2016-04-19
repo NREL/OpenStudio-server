@@ -307,11 +307,6 @@ class Analysis
     Hash[mappings.sort]
   end
 
-  # copy back the results to the master node if they are finished
-  def finalize_data_points
-    ComputeNode.download_all_results
-  end
-
   # filter results on analysis show page (per status)
   def search(search, status, page_no = 1, view_all = 0)
     page_no = page_no.blank? ? 1 : page_no

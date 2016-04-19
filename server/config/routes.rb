@@ -51,12 +51,15 @@ OpenstudioServer::Application.routes.draw do
 
       resources :data_points, shallow: true do
         member do
-          get :show_full # 10/22/14 - Need to deprecate this, only historic analysis stuff uses this
+          get :show_full # TODO: 10/22/14 - Need to deprecate this, only historic analysis stuff uses this
           get :view_report
           get :download
           get :download_reports
           get :dencity
+
+          # TODO: Review the end points
           post :upload_file
+          delete :result_files
         end
 
         collection do

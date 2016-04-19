@@ -92,10 +92,10 @@
               <td class="other-col"> <%= dp.run_start_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_start_time.nil? %> </td>
               <td class="other-col"> <%= dp.run_end_time.strftime("%m-%d-%Y %H:%M:%S") unless dp.run_end_time.nil? %> </td>
               <td class="other-col"><%= ((dp.run_end_time.to_f - dp.run_start_time.to_f)).round(2) unless dp.run_end_time.nil? || dp.run_start_time.nil? %></td>
-              <td><%= link_to 'HTML', data_point_path(dp) %>
+              <td><%= link_to 'View', data_point_path(dp) %>
                 | <%= link_to 'JSON', data_point_path(dp, :format => :json) %>
-                  <% if !dp.openstudio_datapoint_file_name.nil? && File.exist?(dp.openstudio_datapoint_file_name) %>
-                    | <%= link_to( "Zip File", download_data_point_path(dp)) %>
+                  <% dp.result_files.where(type: 'Data Point').each do |h| %>
+                    | <%= link_to 'Zip File', h.attachment.url(:original, false) %>
                   <% end %>
                 <% if dp.status == 'completed' && @has_obj_targets %>
                   | <%= link_to('Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>

@@ -38,8 +38,12 @@ GEM
       delayed_job (>= 3.0, < 5)
       mongoid (>= 3.0, < 6)
       mongoid-compatibility
+    domain_name (0.5.25)
+      unf (>= 0.0.5, < 1.0.0)
     facter (2.3.0)
       CFPropertyList (~> 2.2.6)
+    http-cookie (1.0.2)
+      domain_name (~> 0.5)
     i18n (0.7.0)
     libxml-ruby (2.8.0)
     macaddr (1.7.1)
@@ -59,6 +63,7 @@ GEM
     moped (1.5.3)
     msgpack (0.7.0)
     multi_json (1.10.1)
+    netrc (0.11.0)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
     oj (2.13.0)
@@ -70,6 +75,10 @@ GEM
       cocaine (~> 0.5.3)
       mime-types
     parallel (1.6.1)
+    rest-client (1.8.0)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 3.0)
+      netrc (~> 0.7)
     rserve-client (0.3.1)
     rserve-simpler (0.0.6)
       rserve-client (~> 0.3.0)
@@ -80,6 +89,9 @@ GEM
     rubyzip (1.1.7)
     systemu (2.6.5)
     tzinfo (0.3.45)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.1)
     uuid (2.3.8)
       macaddr (~> 1.0)
 
@@ -100,6 +112,7 @@ DEPENDENCIES
   os
   paperclip (~> 4.1.1)
   parallel
+  rest-client
   rserve-simpler
   ruby-prof
   uuid

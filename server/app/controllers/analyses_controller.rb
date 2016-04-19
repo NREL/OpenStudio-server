@@ -627,14 +627,6 @@ class AnalysesController < ApplicationController
   def page_data
     @analysis = Analysis.find(params[:id])
 
-    # once we know that for all the buildings.
-    # @time_zone = "America/Denver"
-    # @data.each do |d|
-    #  time, tz_abbr = Util::Date.fake_zone_in_utc(d[:time].to_i / 1000, @time_zone)
-    #  d[:fake_tz_time] = time.to_i * 1000
-    #  d[:tz_abbr] = tz_abbr
-    # end
-
     respond_to do |format|
       format.json do
         fields = [
@@ -648,7 +640,6 @@ class AnalysesController < ApplicationController
           :results,
           :run_start_time,
           :run_end_time,
-          :openstudio_datapoint_file_name,
           :output_variables
         ]
 

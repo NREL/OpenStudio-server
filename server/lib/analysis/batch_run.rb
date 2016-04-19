@@ -30,35 +30,32 @@ class Analysis::BatchRun
     Rails.logger.info 'Setting up R for Batch Run'
     @r.converse "setwd('#{APP_CONFIG['sim_root_path']}')"
 
-    # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
-    # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
-
-    # get the master ip address
-    master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting Batch Run')
-
-    # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
-    # that the run flag is true.
-    if @options[:data_points].empty?
-      Rails.logger.info 'No data points were passed into the options, therefore checking which data points to run'
-      @analysis.data_points.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid).each do |dp|
-        Rails.logger.info "Adding in #{dp.uuid}"
-        dp.status = 'queued'
-        dp.save!
-        @options[:data_points] << dp.uuid
-      end
-    end
-
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     process = nil
     begin
+      # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
+      # that the run flag is true.
+      if @options[:data_points].empty?
+        Rails.logger.info 'No data points were passed into the options, therefore checking which data points to run'
+        @analysis.data_points.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid).each do |dp|
+          Rails.logger.info "Adding in #{dp.uuid}"
+          dp.status = 'queued'
+          dp.save!
+          @options[:data_points] << dp.uuid
+        end
+      end
+
+      # Get the server ip address -- this can fail easily if no ComputeNode exists
+      # TODO: Move this to the Cluster Init routine
+      # TODO: rename master to server_ip
+      master_ip = ComputeNode.where(node_type: 'server').first.ip_address
+      Rails.logger.info("Master ip: #{master_ip}")
+      Rails.logger.info('Starting Batch Run')
+
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
-      unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
-      end
+      fail 'could not configure R cluster' unless cluster.configure(master_ip)
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
@@ -70,10 +67,11 @@ class Analysis::BatchRun
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      # process = Analysis::Core::BackgroundTasks.start_child_processes
+      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        # TODO: remove hard coded ip/port
         @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
           %{
             clusterEvalQ(cl,library(RMongo))
@@ -87,7 +85,7 @@ class Analysis::BatchRun
               dbDisconnect(mongo)
 
               ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -h localhost:3000 -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               print(paste("Run command",y))
               z <- system(y,intern=TRUE)
               j <- length(z)

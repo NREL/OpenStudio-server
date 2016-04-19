@@ -13,6 +13,7 @@ gem 'msgpack'
 gem 'multi_json'
 gem 'oj'
 gem 'rserve-simpler'
+gem 'rest-client'
 
 # Gems required for Rails mongoid adapter
 gem 'mongoid', '~> 3.1.6'

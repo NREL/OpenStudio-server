@@ -10,7 +10,7 @@ class DataPoint
 
   field :download_status, type: String, default: 'na' # The available states are [:]
   field :download_information, type: String
-  field :openstudio_datapoint_file_name, type: String # make this paperclip?
+  # field :openstudio_datapoint_file_name, type: String # make this paperclip? # TODO: Delete this item
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation
   field :results, type: Hash, default: {}

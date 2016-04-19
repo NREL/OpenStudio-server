@@ -38,7 +38,6 @@ gem 'kaminari'
 # job queuing
 gem 'delayed_job_mongoid'
 gem 'daemons'
-gem 'childprocess'
 
 # http(s) requests
 gem 'faraday'

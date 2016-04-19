@@ -142,25 +142,4 @@ module Analysis::Core
   end
 
   module_function :initialize_analysis_job
-
-  # Submodule to handle the background tasks
-  module BackgroundTasks
-    require 'childprocess'
-
-    # Start the child process to download results upon completion.
-    def start_child_processes
-      p = ChildProcess.build("#{APP_CONFIG['ruby_bin_dir']}/bundle", 'exec', 'rake', 'datapoints:download', "RAILS_ENV=#{Rails.env}")
-      # log_file = File.join(Rails.root,"log/download.log")
-      # Rails.logger.info("Log file is: #{log_file}")
-      p.io.inherit!
-      # process.io.stdout = process.io.stderr = File.open(log_file,'a+')
-      p.cwd = Rails.root # set the child's working directory where the bundler will execute
-      Rails.logger.info('Starting Child Process')
-      p.start
-
-      p
-    end
-
-    module_function :start_child_processes
-  end
 end
