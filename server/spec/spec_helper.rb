@@ -26,4 +26,8 @@ RSpec.configure do |config|
   config.order = 'random'
 
   config.filter_run_excluding broken: true
+
+  config.expect_with :rspec do |c|
+    c.syntax = [:should, :expect]
+  end
 end

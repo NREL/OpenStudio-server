@@ -1,7 +1,6 @@
 source 'http://rubygems.org'
 
 gem 'rails', '3.2.22'
-gem 'rake', '~> 11.1'
 
 # data modules
 gem 'json'
@@ -63,7 +62,7 @@ group :development, :test do
   # gem 'ruby-debug' if RAILS_VERSION > "2.0.0"
 
   gem 'rspec'
-  gem 'rspec-rails', '~> 2.0'
+  gem 'rspec-rails'
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
