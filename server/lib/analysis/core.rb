@@ -1,5 +1,4 @@
 # Include these gems/libraries for all the analyses
-require 'childprocess'
 require 'rserve/simpler'
 
 # Core functions for analysis
