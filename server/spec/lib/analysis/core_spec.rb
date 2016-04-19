@@ -99,7 +99,7 @@ describe Analysis::Core do
 
     it 'should not work when array length is different' do
       h = { a: [1, 2, 3], b: [4, 5, 6, 7, 8, 9] }
-      expect { Analysis::Core.hash_of_array_to_array_of_hash(h) }.to raise_error
+      expect { Analysis::Core.hash_of_array_to_array_of_hash(h) }.to raise_error(IndexError)
     end
 
     it 'should work with any type of data' do
