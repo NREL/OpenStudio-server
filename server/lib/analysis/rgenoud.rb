@@ -77,7 +77,6 @@ class Analysis::Rgenoud
     # that the run flag is true.
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
-    process = nil
     begin
       # TODO: preflight check -- need to catch this in the analysis module
       if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
@@ -155,9 +154,6 @@ class Analysis::Rgenoud
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         fail 'could not run initialize worker scripts'
       end
-
-      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       worker_ips = ComputeNode.worker_ips
       Rails.logger.info "Found the following good ips #{worker_ips}"
@@ -447,10 +443,6 @@ class Analysis::Rgenoud
     ensure
       # ensure that the cluster is stopped
       cluster.stop if cluster
-
-      # Kill the downloading of data files process
-      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
-      process.stop if process
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)

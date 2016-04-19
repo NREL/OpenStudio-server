@@ -414,6 +414,7 @@ class Analysis::Morris
             }
             zip(zipfile="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")
           }
+        }
         end
       else
         fail 'could not start the cluster (most likely timed out)'
@@ -430,10 +431,6 @@ class Analysis::Morris
     ensure
       # ensure that the cluster is stopped
       cluster.stop if cluster
-
-      # Kill the downloading of data files process
-      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
-      process.stop if process
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)

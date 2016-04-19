@@ -102,7 +102,6 @@ class Analysis::Deoptim
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
-    process = nil
     begin
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
@@ -118,9 +117,6 @@ class Analysis::Deoptim
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         fail 'could not run initialize worker scripts'
       end
-
-      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
@@ -235,10 +231,6 @@ class Analysis::Deoptim
     ensure
       # ensure that the cluster is stopped
       cluster.stop if cluster
-
-      # Kill the downloading of data files process
-      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
-      process.stop if process
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
