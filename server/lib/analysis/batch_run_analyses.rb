@@ -145,12 +145,6 @@ class Analysis::BatchRunAnalyses
 
     # Do one last check if there are any data points that were not downloaded
     begin
-      # in large analyses it appears that this is timing out or just not running to completion.
-      analyses.each do |analysis|
-        Rails.logger.info('Trying to download any remaining files from worker nodes')
-        analysis.finalize_data_points
-      end
-
       # go through and mark any data points that are still queued as NA, this will reset the data points if the
       # analysis bombs out
       dps = DataPoint.where(:id.in => dp_map[:data_point_id]).and(status: 'queued')

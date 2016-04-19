@@ -431,10 +431,6 @@ class Analysis::NsgaNrel
         end
       end
 
-      # Do one last check if there are any data points that were not downloaded
-      Rails.logger.info('Trying to download any remaining files from worker nodes')
-      @analysis.finalize_data_points
-
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis_job.end_time = Time.now
