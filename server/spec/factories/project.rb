@@ -9,7 +9,7 @@ FactoryGirl.define do
     project
 
     factory :analysis_with_data_points do
-      ignore do
+      transient do
         data_point_count 1
       end
 
@@ -23,7 +23,7 @@ FactoryGirl.define do
     name 'Test Project'
 
     factory :project_with_analyses do
-      ignore do
+      transient do
         analyses_count 1
       end
 
