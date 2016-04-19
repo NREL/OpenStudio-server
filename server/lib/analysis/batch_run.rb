@@ -32,7 +32,6 @@ class Analysis::BatchRun
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
-    process = nil
     begin
       # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
       # that the run flag is true.
@@ -65,9 +64,6 @@ class Analysis::BatchRun
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         fail 'could not run initialize worker scripts'
       end
-
-      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
@@ -120,22 +116,15 @@ class Analysis::BatchRun
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
+      Rails.logger.info('Ensuring the cluster is stopped')
       cluster.stop if cluster
-
-      # Kill the downloading of data files process
-      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
-      process.stop if process
     end
 
-    Rails.logger.info 'Running finalize worker scripts'
-    unless cluster.finalize_workers(worker_ips, @analysis.id)
-      fail 'could not run finalize worker scripts'
-    end
-    # Do one last check if there are any data points that were not downloaded
     begin
-      # in large analyses it appears that this is timing out or just not running to completion.
-      Rails.logger.info('Trying to download any remaining files from worker nodes')
-      @analysis.finalize_data_points
+      Rails.logger.info 'Running finalize worker scripts'
+      unless cluster.finalize_workers(worker_ips, @analysis.id)
+        fail 'could not run finalize worker scripts'
+      end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
