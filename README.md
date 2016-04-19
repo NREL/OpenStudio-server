@@ -5,6 +5,8 @@ The preferred development approach for this application is to use Vagrant to pro
 
 ## Instructions
 
+### Vagrant
+
 - Install [Vagrant] *1.6.1*, [VirtualBox] *4.3.8*, and [ChefDK]
  
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
@@ -132,6 +134,25 @@ region: us-east-1
 ```
 cd vagrant
 ruby create_vms.rb --aws
+```
+
+### Local Development
+
+* Install OpenStudio, R, MongoDB
+
+
+```
+cd server
+rake db:mongoid:drop && rake db:mongoid:create_indexes && rake setup:development
+rails s
+server/script/delayed_job run
+mongod
+```
+
+```
+R
+library(Rserve)
+Rserve()
 ```
 
 ### Official AMI Generation

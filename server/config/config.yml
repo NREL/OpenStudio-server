@@ -16,3 +16,6 @@ test:
 
 production:
   <<: *defaults
+
+local:
+  <<: *defaults

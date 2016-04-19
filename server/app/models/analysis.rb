@@ -65,6 +65,7 @@ class Analysis
   # TODO: Move this into the compute node class and call this with delayed jobs if applicable
   def initialize_workers(options = {})
     # delete the master and workers and reload them everysingle time an analysis is initialized -- why NICK?
+    # Todo: do not delete all the compute nodes
     ComputeNode.delete_all
 
     Rails.logger.info 'initializing workers'
