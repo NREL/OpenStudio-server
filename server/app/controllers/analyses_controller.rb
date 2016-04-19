@@ -987,6 +987,7 @@ class AnalysesController < ApplicationController
 
     start_time = Time.now
     logger.info 'starting creation of data frame'
+    # TODO: check these permissions and make them less open
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %{
             temp <- tempfile('rdata', tmpdir="/tmp")
