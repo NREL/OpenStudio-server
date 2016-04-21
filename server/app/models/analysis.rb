@@ -101,28 +101,16 @@ class Analysis
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    defaults = { allow_multiple_jobs: false }
+    defaults = { }
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
     Rails.logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
-    dj_ids = jobs.map { |v| v[:delayed_job_ids] }
-    Rails.logger.info "Delayed Job ids are #{dj_ids}"
-    if options[:allow_multiple_jobs]
-      # go ahead and submit the job no matter what
-      start(no_delay, analysis_type, options)
+    start(no_delay, analysis_type, options)
 
-      return [true]
-    elsif delayed_job_ids.empty? || !Delayed::Job.where(:_id.in => delayed_job_ids).exists?
-      start(no_delay, analysis_type, options)
-
-      return [true]
-    else
-      Rails.logger.info "Analysis is already queued with #{dj} or option was not passed to allow multiple analyses"
-      return [false, 'An analysis is already queued']
-    end
+    return [true]
   end
 
   def stop_analysis
