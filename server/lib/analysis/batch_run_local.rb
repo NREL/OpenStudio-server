@@ -42,7 +42,6 @@ class Analysis::BatchRunLocal
 
       # Get the server ip address -- this can fail easily if no ComputeNode exists
       # TODO: Move this to the Cluster Init routine
-      # TODO: rename master to server_ip
       server_ip = ComputeNode.where(node_type: 'server').first.ip_address
       Rails.logger.info("Server ip: #{server_ip}")
       Rails.logger.info('Starting Batch Run')
@@ -52,15 +51,22 @@ class Analysis::BatchRunLocal
       Rails.logger.info "Worker node ips #{worker_ips}"
 
       Rails.logger.info 'Running initialize worker scripts'
-      unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+      # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
+      `cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s initialize`
+
+      # unless cluster.initialize_workers(worker_ips, @analysis.id)
+      #   fail 'could not run initialize worker scripts'
+      # end
+
+      Rails.logger.info @options[:data_points]
+      @options[:data_points].each do |dp|
+        ruby_command = "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+        # TODO: remove hard coded ip/port
+        run_command = "#{ruby_command}/simulate_data_point.rb -h localhost:3000 -a #{@analysis.id} -u #{dp.id} -x #{@options[:run_data_point_filename]}"
+        `#{run_command}`
       end
 
-      # TODO: remove hard coded ip/port
-      # @r.command(dps: { data_points: @options[:data_points] }.to_dataframe) do
-      #       ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-      #       y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -h localhost:3000 -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
-      # end
+
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message
@@ -70,9 +76,7 @@ class Analysis::BatchRunLocal
 
     begin
       Rails.logger.info 'Running finalize worker scripts'
-      unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
-      end
+      `cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s finalize`
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       Rails.logger.error log_message

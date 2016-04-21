@@ -57,7 +57,7 @@ class Analysis::RepeatRun
       Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
       variable_samples = nil
       # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
-      if var.uncertainty_type == 'discrete_uncertain'
+      if var.uncertainty_type == 'discrete'
         variable_samples = var.static_value
         var_types << 'discrete'
       else

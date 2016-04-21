@@ -62,63 +62,8 @@ class Analysis
     %w(na init queued started completed)
   end
 
-  # TODO: Move this into the compute node class and call this with delayed jobs if applicable
-  def initialize_workers(options = {})
-    # delete the master and workers and reload them everysingle time an analysis is initialized -- why NICK?
-    # Todo: do not delete all the compute nodes
-    ComputeNode.delete_all
-
-    Rails.logger.info 'initializing workers'
-
-    # load in the master and worker information if it doesn't already exist
-    ip_file = '/home/ubuntu/ip_addresses'
-    unless File.exist?(ip_file)
-      ip_file = '/data/launch-instance/ip_addresses' # somehow check if this is a vagrant box -- RAILS ENV?
-    end
-
-    if File.exist? ip_file
-      ips = File.read(ip_file).split("\n")
-      ips.each do |ip|
-        cols = ip.split('|')
-        if cols[0] == 'master' # TODO: eventually rename this from master to server. The database calls this server
-          node = ComputeNode.find_or_create_by(node_type: 'server', ip_address: cols[1])
-          node.hostname = cols[2]
-          node.cores = cols[3]
-          node.user = cols[4]
-          node.password = cols[5].chomp
-          if options[:use_server_as_worker] && cols[6].chomp == 'true'
-            node.valid = true
-          else
-            node.valid = false
-          end
-          node.save!
-
-          logger.info("Server node #{node.inspect}")
-        elsif cols[0] == 'worker'
-          node = ComputeNode.find_or_create_by(node_type: 'worker', ip_address: cols[1])
-          node.hostname = cols[2]
-          node.cores = cols[3]
-          node.user = cols[4]
-          node.password = cols[5].chomp
-          node.valid = false
-          if cols[6] && cols[6].chomp == 'true'
-            node.valid = true
-          end
-          node.save!
-
-          logger.info("Worker node #{node.inspect}")
-        end
-      end
-    end
-
-    # get server and worker characteristics
-    # 4/14/15 Disable for now because there is not easy way to get this data back to the server without having
-    # to ssh into the box from the server user (nobody). Probably move this over to the worker initialization script.
-    # ComputeNode.system_information
-  end
-
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = { skip_init: false, use_server_as_worker: false }
+    defaults = { skip_init: false }
     options = defaults.merge(options)
 
     Rails.logger.info "calling start on #{analysis_type} with options #{options}"
@@ -244,11 +189,14 @@ class Analysis
     self.save!
   end
 
-  # Method goes through all the data_points in an analysis and finds all the input variables (set_variable_values)
-  # It uses map/reduce putting the load on the database to do the unique check.
-  # Result is a hash of ids and variable names in the form of:
+  # Method goes through all the data_points in an analysis and finds all the
+  # input variables (set_variable_values). It uses map/reduce putting the load
+  # on the database to do the unique check. Result is a hash of ids and variable
+  # names in the form of:
   #   { "uuid": "variable_name", "uuid2": "variable_name_2"}
-  # 2013-02-20: NL Moved to Analysis Model. Updated to use map/reduce.  This runs in 62.8ms on a smallish sized collection compared to 461ms on the
+  #
+  # 2013-02-20: NL Moved to Analysis Model. Updated to use map/reduce.  This
+  # runs in 62.8ms on a smallish sized collection compared to 461ms on the
   # same collection
   def superset_of_input_variables
     mappings = {}
@@ -276,36 +224,6 @@ class Analysis
 
     # sort before sending back
     Hash[mappings.sort_by { |_, v| v }]
-  end
-
-  # This returns a slighly different format compared to the method above.  This returns
-  # all the result variables that are avaiable in the form:
-  # {"air_handler_fan_efficiency_final"=>true, "air_handler_fan_efficiency_initial"=>true, ...
-  # TODO: this can be deprecated (need to verify: 7/14/2014)
-  def superset_of_result_variables
-    mappings = {}
-    start = Time.now
-
-    map = "
-      function() {
-        for (var key in this.results) { emit(key, null); }
-      }
-    "
-
-    reduce = "
-      function(key, nothing) { return null; }
-    "
-
-    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
-    #   old query .where({download_status: 'completed', status: 'completed'})
-    var_ids = data_points.map_reduce(map, reduce).out(inline: true)
-    var_ids.each do |var|
-      mappings[var['_id']] = true
-    end
-    Rails.logger.info "Result mappings created in #{Time.now - start}" # with the values of: #{mappings}"
-
-    # sort before sending back
-    Hash[mappings.sort]
   end
 
   # filter results on analysis show page (per status)
@@ -337,10 +255,12 @@ class Analysis
     dps
   end
 
+  # Return the list of job statuses
   def jobs_status
     jobs.order_by(:index.asc).map { |j| { analysis_type: j.analysis_type, status: j.status } }
   end
 
+  # Return the last job's status for the analysis
   def status
     j = jobs.last
     if j && j.status
@@ -386,6 +306,7 @@ class Analysis
 
   protected
 
+  # TODO: Make these :dependent_destroys
   def remove_dependencies
     logger.info("Found #{data_points.size} records")
     data_points.each do |record|

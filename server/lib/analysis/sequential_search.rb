@@ -276,7 +276,7 @@ class Analysis::SequentialSearch
       measure_values = {}
       variables.each do |variable|
         values = nil
-        if variable['uncertainty_type'] =~ /discrete_uncertain/ # not sure what to do with bool_uncertain at the moment
+        if variable['uncertainty_type'] =~ /discrete/ # not sure what to do with booleans at the moment
           values, weights = variable.map_discrete_hash_to_array
         else
           # if the variable is continuous then discretize it before running. Pass in as an array of 1 because it

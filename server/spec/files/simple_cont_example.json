@@ -163,7 +163,7 @@
                     "value": null
                   }
                 ],
-                "type": "triangle_uncertain"
+                "type": "triangle"
               },
               "uuid": "d157d709-b83e-42bd-bd30-1bc3a7979672",
               "variable_type": "RubyContinuousVariable",

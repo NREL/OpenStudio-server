@@ -86,6 +86,61 @@ class ComputeNode
     # end
   end
 
+  # This method is currenlty not used, but was previously for reading in the
+  # configuration information from a file. This can be removed entirely
+  # once the API for loading nodes into the app is finished.
+  def load_from_file
+    # delete the master and workers and reload them every
+    # single time an analysis is initialized
+    # Todo: do not delete all the compute nodes
+    ComputeNode.delete_all
+
+    Rails.logger.info 'initializing workers'
+
+    # load in the master and worker information if it doesn't already exist
+    ip_file = '/home/ubuntu/ip_addresses'
+    unless File.exist?(ip_file)
+      ip_file = '/data/launch-instance/ip_addresses' # somehow check if this is a vagrant box -- RAILS ENV?
+    end
+
+    if File.exist? ip_file
+      ips = File.read(ip_file).split("\n")
+      ips.each do |ip|
+        cols = ip.split('|')
+        # TODO: rename this from master to server. The database calls this server
+        if cols[0] == 'master'
+          node = ComputeNode.find_or_create_by(node_type: 'server', ip_address: cols[1])
+          node.hostname = cols[2]
+          node.cores = cols[3]
+          node.user = cols[4]
+          node.password = cols[5].chomp
+          node.valid = cols[6].chomp == 'true'
+          node.save!
+
+          logger.info("Server node #{node.inspect}")
+        elsif cols[0] == 'worker'
+          node = ComputeNode.find_or_create_by(node_type: 'worker', ip_address: cols[1])
+          node.hostname = cols[2]
+          node.cores = cols[3]
+          node.user = cols[4]
+          node.password = cols[5].chomp
+          node.valid = false
+          if cols[6] && cols[6].chomp == 'true'
+            node.valid = true
+          end
+          node.save!
+
+          logger.info("Worker node #{node.inspect}")
+        end
+      end
+    end
+
+    # get server and worker characteristics
+    # 4/14/15 Disable for now because there is not easy way to get this data back to the server without having
+    # to ssh into the box from the server user (nobody). Probably move this over to the worker initialization script.
+    # ComputeNode.system_information
+  end
+
   def scp_download_file(session, remote_file, local_file, remote_file_path)
     remote_file_exists = false
     remote_file_downloaded = false

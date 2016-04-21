@@ -36,15 +36,15 @@ module Analysis::R
 
       dataframe = { 'data' => probabilities_array }.to_dataframe
 
-      if var.uncertainty_type == 'discrete' || var.uncertainty_type == 'discrete_uncertain'
+      if var.uncertainty_type == 'discrete'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
             print(values)
             samples <- qdiscrete(df$data, weights, values)
           "
         end
-      elsif var.uncertainty_type == 'bool' || var.uncertainty_type == 'boolean' || var.uncertainty_type == 'bool_uncertain'
-        fail 'bool_uncertain needs some updating to map from bools'
+      elsif var.uncertainty_type == 'bool' || var.uncertainty_type == 'boolean'
+        fail 'bool distribution needs some updating to map from bools'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
             print(values)
@@ -72,13 +72,13 @@ module Analysis::R
 
       Rails.logger.info 'Creating sample from probability'
       r_dist_name = ''
-      if distribution_type == 'normal' || distribution_type == 'normal_uncertain'
+      if distribution_type == 'normal'
         r_dist_name = 'qnorm'
       elsif distribution_type == 'lognormal'
         r_dist_name = 'qlnorm'
-      elsif distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
+      elsif distribution_type == 'uniform'
         r_dist_name = 'qunif'
-      elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
+      elsif distribution_type == 'triangle'
         r_dist_name = 'qtriangle'
       else
         fail "distribution type #{distribution_type} not known for R"
@@ -87,7 +87,7 @@ module Analysis::R
       @r.converse "print('creating distribution')"
       dataframe = { 'data' => probabilities_array }.to_dataframe
 
-      if distribution_type == 'uniform' || distribution_type == 'uniform_uncertain'
+      if distribution_type == 'uniform'
         @r.command(df: dataframe) do
           "
             samples <- #{r_dist_name}(df$data, #{min}, #{max})
@@ -102,7 +102,7 @@ module Analysis::R
             samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
           "
         end
-      elsif distribution_type == 'triangle' || distribution_type == 'triangle_uncertain'
+      elsif distribution_type == 'triangle'
         @r.command(df: dataframe) do
           "
           print(df)
@@ -146,7 +146,7 @@ module Analysis::R
         variable_samples = nil
         var_names << var.name
         # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
-        if var.uncertainty_type == 'discrete_uncertain'
+        if var.uncertainty_type == 'discrete'
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           variable_samples = discrete_sample_from_probability(p[i_var], var)
           var_types << 'discrete'
