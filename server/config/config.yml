@@ -19,3 +19,4 @@ production:
 
 local:
   <<: *defaults
+  sim_root_path: ':rails_root/../worker-nodes'
