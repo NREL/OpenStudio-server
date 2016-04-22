@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: 1c32407ad6cfbfb4197c9900dfdab9b0daa3ab92
+  revision: ca6ec003761500b905122867d6a19ef7d76d1c97
   branch: develop
   specs:
     openstudio-workflow (0.2.0)
@@ -12,24 +12,24 @@ GIT
 
 GIT
   remote: git://github.com/NREL/openstudio-standards.git
-  revision: 68e7c6d8b12f77d34541f7091c1d92bfb606b638
+  revision: a7c9999d003f1ce669264ec333c68091349a408a
   specs:
-    openstudio-standards (0.1.0)
+    openstudio-standards (0.1.2)
 
 GEM
   remote: http://rubygems.org/
   specs:
     CFPropertyList (2.2.8)
-    activemodel (3.2.22)
-      activesupport (= 3.2.22)
+    activemodel (3.2.22.2)
+      activesupport (= 3.2.22.2)
       builder (~> 3.0.0)
-    activesupport (3.2.22)
+    activesupport (3.2.22.2)
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
     builder (3.0.4)
     climate_control (0.0.3)
       activesupport (>= 3.0)
-    cocaine (0.5.7)
+    cocaine (0.5.8)
       climate_control (>= 0.0.3, < 1.0)
     colored (1.2)
     delayed_job (4.1.1)
@@ -38,7 +38,7 @@ GEM
       delayed_job (>= 3.0, < 5)
       mongoid (>= 3.0, < 6)
       mongoid-compatibility
-    domain_name (0.5.25)
+    domain_name (0.5.20160310)
       unf (>= 0.0.5, < 1.0.0)
     facter (2.3.0)
       CFPropertyList (~> 2.2.6)
@@ -48,7 +48,7 @@ GEM
     libxml-ruby (2.8.0)
     macaddr (1.7.1)
       systemu (~> 2.6.2)
-    mime-types (2.6.2)
+    mime-types (2.99.1)
     mini_portile2 (2.0.0)
     mongoid (3.1.7)
       activemodel (~> 3.2)
@@ -61,12 +61,12 @@ GEM
     mongoid-paperclip (0.0.10)
       paperclip (>= 2.3.6, != 4.3.0)
     moped (1.5.3)
-    msgpack (0.7.0)
+    msgpack (0.7.5)
     multi_json (1.10.1)
     netrc (0.11.0)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
-    oj (2.13.0)
+    oj (2.15.0)
     origin (1.1.0)
     os (0.9.6)
     paperclip (4.1.1)
@@ -74,7 +74,7 @@ GEM
       activesupport (>= 3.0.0)
       cocaine (~> 0.5.3)
       mime-types
-    parallel (1.6.1)
+    parallel (1.8.0)
     rest-client (1.8.0)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 3.0)
@@ -82,16 +82,16 @@ GEM
     rserve-client (0.3.1)
     rserve-simpler (0.0.6)
       rserve-client (~> 0.3.0)
-    ruby-prof (0.15.8)
-    rubyXL (3.3.16)
+    ruby-prof (0.15.9)
+    rubyXL (3.3.17)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
     rubyzip (1.1.7)
     systemu (2.6.5)
-    tzinfo (0.3.45)
+    tzinfo (0.3.49)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.1)
+    unf_ext (0.0.7.2)
     uuid (2.3.8)
       macaddr (~> 1.0)
 
