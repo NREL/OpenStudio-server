@@ -1,4 +1,4 @@
-OpenstudioServer::Application.routes.draw do
+Rails.application.routes.draw do
   resources :paretos
 
   resources :data_points, only: [:index] do
