@@ -126,9 +126,10 @@ class AnalysesController < ApplicationController
   # POST /analyses.json
   def create
     project_id = params[:project_id]
-    params[:analysis].merge!(project_id: project_id)
+    params = analysis_params
+    params[:project_id] = project_id
 
-    @analysis = Analysis.new(params[:analysis])
+    @analysis = Analysis.new(params)
 
     # Need to pull out the variables that are in this analysis so that we can stitch the problem
     # back together when it goes to run
@@ -1003,5 +1004,11 @@ class AnalysesController < ApplicationController
     else
       fail 'could not create R dataframe'
     end
+  end
+
+  private
+  
+  def analysis_params
+    params.require(:analysis).permit!
   end
 end

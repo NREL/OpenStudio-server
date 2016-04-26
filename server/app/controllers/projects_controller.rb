@@ -45,7 +45,7 @@ class ProjectsController < ApplicationController
   # POST /projects
   # POST /projects.json
   def create
-    @project = Project.new(params[:project])
+    @project = Project.new(project_params)
 
     respond_to do |format|
       if @project.save
@@ -101,5 +101,11 @@ class ProjectsController < ApplicationController
       #  format.html # new.html.erb
       format.json { render json: { analyses: q } }
     end
+  end
+
+  private
+
+  def project_params
+    params.require(:project).permit!
   end
 end

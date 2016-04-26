@@ -13,7 +13,11 @@ class Variable
   field :minimum
   field :maximum
   field :mean
+  field :modes_value
   field :delta_x_value
+  field :stddev_value
+  field :lower_bounds_value
+  field :upper_bounds_value
   field :uncertainty_type, type: String
   field :units, type: String
   field :discrete_values_and_weights
