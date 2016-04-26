@@ -148,7 +148,7 @@ GEM
       mongoid (~> 5.0)
       rake
       rspec (~> 3.3)
-    multi_json (1.11.2)
+    multi_json (1.11.3)
     multipart-post (2.0.0)
     net-http-persistent (2.9.4)
     net-scp (1.2.1)

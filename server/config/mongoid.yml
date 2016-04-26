@@ -41,9 +41,9 @@ test:
 local:
     sessions:
       default:
-        database: ENV['os_server_database_name']
+        database: <%= ENV['OS_SERVER_DATABASE_NAME'] %>
         hosts:
-          - localhost:ENV['os_server_mongo_port']
+          - localhost:<%= ENV['OS_SERVER_MONGO_PORT'] %>
         options:
     options:
       allow_dynamic_fields: true

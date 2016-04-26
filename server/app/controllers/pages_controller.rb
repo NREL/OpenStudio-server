@@ -27,6 +27,7 @@ class PagesController < ApplicationController
 
     # this would probably be better as an openstruct
     # find where the /mnt/ folder lives
+    # TODO: make this cross-platform
     @mnt_fs = nil
     @mnt_fs = @file_systems.select { |f| f[:mount_point] =~ /\/mnt/ }
     @mnt_fs = @file_systems.select { |f| f[:mount_point] == '/' } if @mnt_fs.size == 0
