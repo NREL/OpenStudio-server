@@ -85,8 +85,6 @@ Rails.application.routes.draw do
   match '/about', to: 'pages#about', via: :get
   match '/status', to: 'pages#status', via: :get
 
-  # match '/nodes' => 'pages#nodes'
-
   # DEnCity routes
   # match 'metadata' => 'variables#metadata', :via => :get
   # match 'download_metadata' => 'variables#download_metadata', :via => :get
