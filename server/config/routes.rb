@@ -49,10 +49,6 @@ Rails.application.routes.draw do
           get :download_variables
           get :metadata
 
-          # # DEnCity routes
-          # match 'metadata' => 'variables#metadata', :via => :get
-          # match 'download_metadata' => 'variables#download_metadata', :via => :get
-
           get :modify
           post :modify
         end
