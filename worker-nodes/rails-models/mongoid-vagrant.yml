@@ -1,40 +1,50 @@
 development:
-  sessions:
+  clients:
     default:
       database: os_dev
       hosts:
         - localhost:27017
       options:
   options:
-    allow_dynamic_fields: true
     raise_not_found_error: false
+    log_level: :info
 docker:
-  sessions:
+  clients:
     default:
       database: os_docker
       hosts:
         - db:27017
       options:
   options:
-    allow_dynamic_fields: true
     raise_not_found_error: false
+    log_level: :info
 production:
-  sessions:
+  clients:
     default:
-      database: os_dev
+      database: os_production
       hosts:
         - localhost:27017
       options:
   options:
-    allow_dynamic_fields: true
     raise_not_found_error: false
+    log_level: :info
+local:
+  clients:
+    default:
+      database: <%= ENV['OS_SERVER_DATABASE_NAME'] %>
+      hosts:
+        - localhost:<%= ENV['OS_SERVER_MONGO_PORT'] %>
+      options:
+  options:
+    raise_not_found_error: false
+    log_level: :info
 test:
-  sessions:
+  clients:
     default:
       database: os_test
       hosts:
         - localhost:27017
       options:
-        consistency: :strong
-        max_retries: 1
-        retry_interval: 0
+        read:
+          mode: :primary
+        max_pool_size: 1

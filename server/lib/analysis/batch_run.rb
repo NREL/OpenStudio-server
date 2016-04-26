@@ -37,7 +37,7 @@ class Analysis::BatchRun
       # that the run flag is true.
       if @options[:data_points].empty?
         Rails.logger.info 'No data points were passed into the options, therefore checking which data points to run'
-        @analysis.data_points.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid).each do |dp|
+        @analysis.data_points.where(status: 'na', download_status: 'na').each do |dp|
           Rails.logger.info "Adding in #{dp.uuid}"
           dp.status = 'queued'
           dp.save!
