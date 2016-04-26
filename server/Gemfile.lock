@@ -324,6 +324,7 @@ DEPENDENCIES
   sass
   sass-rails
   sextant
+  sprockets-rails
   sys-filesystem
   therubyracer
   uglifier

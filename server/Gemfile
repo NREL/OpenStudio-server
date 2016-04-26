@@ -26,6 +26,7 @@ gem 'libv8', :platforms => :ruby
 gem 'execjs'
 gem 'therubyracer', :platforms => :ruby
 
+
 # other useful gems
 gem 'parallel'
 gem 'sys-filesystem'
@@ -44,13 +45,12 @@ gem 'faraday'
 
 # Gems used only for assets and not required
 # in production environments by default.
-group :assets do
-  gem 'sass'
-  gem 'sass-rails'
-  gem 'coffee-rails'
-  gem 'bootstrap-sass'
-  gem 'uglifier'
-end
+gem 'sass'
+gem 'coffee-rails'
+gem 'bootstrap-sass'
+gem 'sass-rails'
+gem 'uglifier'
+gem 'sprockets-rails'
 
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
