@@ -4,6 +4,6 @@ FactoryGirl.define do
     ip_address 'localhost'
     hostname 'os-server'
     cores '2'
-    valid true
+    enabled true
   end
 end
