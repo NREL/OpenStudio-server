@@ -81,7 +81,7 @@ class Analysis::BatchRun
               dbDisconnect(mongo)
 
               ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -h localhost:3000 -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               print(paste("Run command",y))
               z <- system(y,intern=TRUE)
               j <- length(z)

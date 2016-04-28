@@ -52,9 +52,7 @@ class Analysis::BatchRunLocal
       logger.info "Worker node ips #{worker_ips}"
 
       logger.info 'Running initialize worker scripts'
-      # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
-      # TODO: remove hard coded ip/port
-      run_command = "#{sys_call_ruby} worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s initialize"
+      run_command = "#{sys_call_ruby} worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s initialize"
       logger.info "Running the command: #{run_command}"
       `#{run_command}`
       exit_code = $?.exitstatus
@@ -62,8 +60,7 @@ class Analysis::BatchRunLocal
       raise "Could not make system call to run '#{run_command}}'" unless exit_code == 0
 
       @options[:data_points].each do |dp|
-        # TODO: remove hard coded ip/port
-        run_command = "#{sys_call_ruby} simulate_data_point.rb -h localhost:3000 -a #{@analysis_id} -u #{dp} -x #{@options[:run_data_point_filename]}"
+        run_command = "#{sys_call_ruby} simulate_data_point.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -u #{dp} -x #{@options[:run_data_point_filename]}"
         logger.info "Running the command: #{run_command}"
         `#{run_command}`
         exit_code = $?.exitstatus
@@ -79,7 +76,7 @@ class Analysis::BatchRunLocal
 
     begin
       logger.info 'Running finalize worker scripts'
-      run_command = "cd #{sys_call_ruby} worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s finalize"
+      run_command = "cd #{sys_call_ruby} worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s finalize"
       `#{run_command}`
       exit_code = $?.exitstatus
       logger.info "System call of #{run_command} exited with #{exit_code}"
