@@ -54,7 +54,7 @@ GEM
     arel (6.0.3)
     autoprefixer-rails (6.3.6)
       execjs
-    aws-sdk-core (2.2.36)
+    aws-sdk-core (2.2.37)
       jmespath (~> 1.0)
     bcl (0.5.6)
       archive-tar-minitar
@@ -75,7 +75,7 @@ GEM
     bootstrap-sass (3.3.6)
       autoprefixer-rails (>= 5.2.1)
       sass (>= 3.3.4)
-    bson (4.1.0)
+    bson (4.1.1)
     builder (3.2.2)
     callsite (0.0.11)
     ci_reporter (2.0.0)
@@ -138,7 +138,7 @@ GEM
     kaminari (0.16.3)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
-    libv8 (3.16.14.13)
+    libv8 (3.16.14.15)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     macaddr (1.7.1)
