@@ -1,11 +1,14 @@
 defaults: &defaults
   sim_root_path: /mnt/openstudio
   ruby_bin_dir: ':ruby_bin_dir'
+  os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
+  rails_log_path: ':rails_root/log'
 
 development:
   <<: *defaults
   ruby_bin_dir: ':ruby_bin_dir'
   sim_root_path: ':rails_root/../worker-nodes'
+  os_server_host_url: 'localhost:3000'
 
 docker:
   <<: *defaults
@@ -20,3 +23,4 @@ production:
 local:
   <<: *defaults
   sim_root_path: ':rails_root/../worker-nodes'
+  rails_log_path: <%= ENV['OS_SERVER_LOG_PATH'] %>
