@@ -12,9 +12,28 @@ GIT
       rubyzip (~> 1.0)
       semantic (~> 1.4)
 
+GIT
+  remote: git://github.com/NREL/OpenStudio-workflow-gem.git
+  revision: ca6ec003761500b905122867d6a19ef7d76d1c97
+  branch: develop
+  specs:
+    openstudio-workflow (0.2.0)
+      colored (~> 1.2)
+      facter (>= 2.0)
+      multi_json (~> 1.10.0)
+      rubyXL (~> 3.3.0)
+      rubyzip (~> 1.1.7)
+
+GIT
+  remote: git://github.com/NREL/openstudio-standards.git
+  revision: 4f9a99102b9e4aa5f857e4264488189e7411f3bc
+  specs:
+    openstudio-standards (0.1.3)
+
 GEM
   remote: http://rubygems.org/
   specs:
+    CFPropertyList (2.2.8)
     actionmailer (4.2.0)
       actionpack (= 4.2.0)
       actionview (= 4.2.0)
@@ -54,7 +73,7 @@ GEM
     arel (6.0.3)
     autoprefixer-rails (6.3.6)
       execjs
-    aws-sdk-core (2.2.37)
+    aws-sdk-core (2.3.0)
       jmespath (~> 1.0)
     bcl (0.5.6)
       archive-tar-minitar
@@ -92,6 +111,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.10.0)
+    colored (1.2)
     concurrent-ruby (1.0.1)
     daemons (1.2.3)
     delayed_job (4.1.1)
@@ -109,6 +129,8 @@ GEM
     diff-lcs (1.2.5)
     erubis (2.7.0)
     execjs (2.6.0)
+    facter (2.4.6)
+      CFPropertyList (~> 2.2.6)
     factory_girl (4.7.0)
       activesupport (>= 3.0.0)
     factory_girl_rails (4.7.0)
@@ -139,6 +161,7 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     libv8 (3.16.14.15)
+    libxml-ruby (2.8.0)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     macaddr (1.7.1)
@@ -171,7 +194,8 @@ GEM
       mongoid (~> 5.0)
       rake
       rspec (~> 3.3)
-    multi_json (1.11.3)
+    msgpack (0.7.5)
+    multi_json (1.10.1)
     multipart-post (2.0.0)
     net-http-persistent (2.9.4)
     net-scp (1.2.1)
@@ -181,12 +205,14 @@ GEM
     net-ssh (3.1.1)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
+    oj (2.15.0)
     openstudio-aws (0.4.1)
       aws-sdk-core (~> 2.0)
       net-scp (~> 1.1)
       semantic (~> 1.4)
       sshkey (~> 1.7)
     origin (2.2.0)
+    os (0.9.6)
     paperclip (4.3.6)
       activemodel (>= 3.2.0)
       activesupport (>= 3.2.0)
@@ -226,6 +252,8 @@ GEM
       thor (>= 0.18.1, < 2.0)
     rake (11.1.2)
     ref (2.0.0)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
     roo (1.13.2)
       nokogiri
       rubyzip
@@ -262,7 +290,7 @@ GEM
     rubyXL (3.3.17)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
-    rubyzip (1.2.0)
+    rubyzip (1.1.7)
     sass (3.4.22)
     sass-rails (5.0.4)
       railties (>= 4.0.0, < 5.0)
@@ -319,19 +347,27 @@ DEPENDENCIES
   json
   kaminari
   libv8
+  libxml-ruby
   meta_request
   mongoid (~> 5.1)
   mongoid-paperclip
   mongoid-rspec
+  msgpack
+  multi_json
   net-http-persistent
   net-scp
   net-sftp
   net-ssh
+  oj
   openstudio-analysis!
   openstudio-aws
+  openstudio-standards!
+  openstudio-workflow!
+  os
   paperclip (~> 4.3)
   parallel
   rails (= 4.2)
+  rest-client
   rserve-simpler
   rspec
   rspec-html-matchers

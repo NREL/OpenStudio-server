@@ -11,12 +11,7 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 
-begin
-
-rescue LoadError => e
-  # raise 'please install openstudio-workflow first' unless e.message =~ /openstudio-workflow/
-  # exit 1
-end
+require 'openstudio-workflow'
 require 'optparse'
 require 'fileutils'
 require 'logger'
@@ -87,18 +82,6 @@ begin
       end
     end
 
-    logger.info ENV.inspect
-    logger.info `which ruby`
-    logger.info `which bundle`
-    logger.info `ruby --version`
-    logger.info `bundle --version`
-    logger.info "Extracting analysis.zip"
-    begin
-      require 'openstudio-workflow'
-    rescue LoadError => e
-      raise 'please install openstudio-workflow first'
-      # exit 1
-    end
     OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
     OpenStudio::Workflow.extract_archive('rails-models/rails-models.zip', 'rails-models/models')
 

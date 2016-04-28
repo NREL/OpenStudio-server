@@ -12,12 +12,7 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 
-begin
-  require 'openstudio-workflow'
-rescue LoadError => e
-  raise 'please install openstudio-workflow first!' unless e.message =~ /openstudio-workflow/
-  exit 1
-end
+require 'openstudio-workflow'
 require 'optparse'
 require 'fileutils'
 require 'logger'

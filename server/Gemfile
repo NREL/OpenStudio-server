@@ -41,7 +41,7 @@ gem 'delayed_job_mongoid'
 gem 'daemons'
 
 # http(s) requests
-gem 'faraday'
+gem 'faraday' # TODO: can this be deprecated
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -51,6 +51,17 @@ gem 'bootstrap-sass'
 gem 'sass-rails'
 gem 'uglifier'
 gem 'sprockets-rails'
+
+# For workers - and other dependencies for measures
+# Note that these gems must also be in the /worker-nodes/Gemfile
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop'
+gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
+gem 'msgpack'
+gem 'multi_json'
+gem 'oj'
+gem 'rest-client'
+gem 'libxml-ruby', :platforms => :ruby
+gem 'os'
 
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes

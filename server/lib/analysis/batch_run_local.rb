@@ -46,7 +46,6 @@ class Analysis::BatchRunLocal
       server_ip = ComputeNode.where(node_type: 'server').first.ip_address
       logger.info "Server ip: #{server_ip}"
       logger.info 'Starting Batch Run Local'
-      logger.info ENV.inspect
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
@@ -117,7 +116,7 @@ class Analysis::BatchRunLocal
 
   # Return the Ruby system call string for ease
   def sys_call_ruby
-    # "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-    "cd #{APP_CONFIG['sim_root_path']} && ruby"
+    "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/ruby"
+    # "cd #{APP_CONFIG['sim_root_path']} && ruby"
   end
 end
