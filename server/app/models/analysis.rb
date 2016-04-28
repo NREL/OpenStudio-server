@@ -2,6 +2,7 @@ class Analysis
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::Paperclip
+  include Mongoid::Attributes::Dynamic
 
   require 'delayed_job_mongoid'
 

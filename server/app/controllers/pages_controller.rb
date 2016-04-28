@@ -38,10 +38,6 @@ class PagesController < ApplicationController
     end
   end
 
-  # display table of compute node info
-  def nodes
-    @nodes = ComputeNode.all
-  end
 
   # main dashboard for the site
   def dashboard

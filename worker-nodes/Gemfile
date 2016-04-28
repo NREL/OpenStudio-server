@@ -2,22 +2,23 @@ source 'http://rubygems.org'
 
 # OpenStudio gem from github
 gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop'
-
 gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
 
 # Install other gems that are needed but not required by the workflow gem
-gem 'facter', '~> 2.3.0' # TODO: deprecate?
+gem 'facter', '~> 2.3.0' # TODO: deprecate this now!
 gem 'ruby-prof'
 gem 'parallel'
 gem 'msgpack'
 gem 'multi_json'
 gem 'oj'
-gem 'rserve-simpler'
 gem 'rest-client'
 
+# R
+gem 'rserve-simpler'
+
 # Gems required for Rails mongoid adapter
-gem 'mongoid', '~> 3.1.6'
-gem 'paperclip', '~> 4.1.1'
+gem 'mongoid', '~> 5.1'
+gem 'paperclip', '~> 4.3'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 gem 'delayed_job_mongoid'
 

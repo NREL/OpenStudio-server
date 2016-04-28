@@ -4,7 +4,7 @@ require 'rserve/simpler'
 # Core functions for analysis
 module Analysis::Core
   def database_name
-    Mongoid.default_session.options[:database]
+    Mongoid.default_client.database.name
   end
 
   module_function :database_name

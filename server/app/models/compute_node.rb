@@ -12,19 +12,19 @@ class ComputeNode
   field :cores, type: Integer
   field :ami_id, type: String
   field :instance_id, type: String
-  field :valid, type: Boolean, default: false
+  field :enabled, type: Boolean, default: false
 
   # Indexes
   index({ hostname: 1 })
   index({ ip_address: 1 })
   index(node_type: 1)
 
-  # Return all the valid IP addresses as a hash in prep for writing to a dataframe
+  # Return all the enabled IP addresses as a hash in prep for writing to a dataframe
   def self.worker_ips
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
 
-    ComputeNode.where(valid: true).each do |node|
+    ComputeNode.where(enabled: true).each do |node|
       if node.node_type == 'server'
         (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << 'localhost' }
       elsif node.node_type == 'worker'
@@ -114,7 +114,7 @@ class ComputeNode
           node.cores = cols[3]
           node.user = cols[4]
           node.password = cols[5].chomp
-          node.valid = cols[6].chomp == 'true'
+          node.enabled = cols[6].chomp == 'true'
           node.save!
 
           logger.info("Server node #{node.inspect}")
@@ -124,9 +124,9 @@ class ComputeNode
           node.cores = cols[3]
           node.user = cols[4]
           node.password = cols[5].chomp
-          node.valid = false
+          node.enabled = false
           if cols[6] && cols[6].chomp == 'true'
-            node.valid = true
+            node.enabled = true
           end
           node.save!
 

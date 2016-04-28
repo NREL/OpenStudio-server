@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.22'
+gem 'rails', '4.2'
 
 # data modules
 gem 'json'
@@ -8,8 +8,8 @@ gem 'jbuilder'
 gem 'rubyzip'
 
 # database modules
-gem 'mongoid', '~> 3.1.6'
-gem 'paperclip', '~> 4.1.1'
+gem 'mongoid', '~> 5.1'
+gem 'paperclip', '~> 4.3'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 
 # R
@@ -26,6 +26,7 @@ gem 'libv8', :platforms => :ruby
 gem 'execjs'
 gem 'therubyracer', :platforms => :ruby
 
+
 # other useful gems
 gem 'parallel'
 gem 'sys-filesystem'
@@ -40,36 +41,44 @@ gem 'delayed_job_mongoid'
 gem 'daemons'
 
 # http(s) requests
-gem 'faraday'
+gem 'faraday' # TODO: can this be deprecated
 
 # Gems used only for assets and not required
 # in production environments by default.
-group :assets do
-  # sass versions above 3.2.10 giving 'text file busy' error on vagrant windows
-  gem 'sass', '3.2.10'
-  gem 'sass-rails', '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
-  gem 'bootstrap-sass', '~> 2.3.2.2'
-  gem 'uglifier', '>= 1.0.3'
-end
+gem 'sass'
+gem 'coffee-rails'
+gem 'bootstrap-sass'
+gem 'sass-rails'
+gem 'uglifier'
+gem 'sprockets-rails'
+
+# For workers - and other dependencies for measures
+# Note that these gems must also be in the /worker-nodes/Gemfile
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop'
+gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
+gem 'msgpack'
+gem 'multi_json'
+gem 'oj'
+gem 'rest-client'
+gem 'libxml-ruby', :platforms => :ruby
+gem 'os'
 
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
   gem 'meta_request'
   gem 'ruby-prof'
-  # gem 'ruby-debug' if RAILS_VERSION > "2.0.0"
 
   gem 'rspec'
   gem 'rspec-rails'
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
-  gem 'ci_reporter', '~> 1.9.0'
+  gem 'ci_reporter'
 
   # these two openstudio gems are needed for starting up the cluster
   # and running the analysis in the integration tests
   gem 'openstudio-aws'
-  gem 'openstudio-analysis'
+  gem 'openstudio-analysis', github: 'NREL/OpenStudio-analysis-gem', branch: 'develop'
 end
 

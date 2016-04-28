@@ -39,13 +39,13 @@ end
 if @server.nil?
   json.server
 else
-  json.server @server, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :valid
+  json.server @server, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :enabled
 end
 
 if @workers.empty?
   json.workers
 else
-  json.workers @workers, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :valid
+  json.workers @workers, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :enabled
 end
 
 if @file_systems.nil?

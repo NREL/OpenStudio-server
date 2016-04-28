@@ -18,8 +18,9 @@ class Analysis::BatchRunLocal
     @analysis_job_id = analysis_job_id
   end
 
-  # Perform is the main method that is run in the background.  At the moment if this method crashes
-  # it will be logged as a failed delayed_job and will fail after max_attempts.
+  # Perform is the main method that is run in the background.  At the moment if
+  # this method crashes it will be logged as a failed delayed_job and will fail
+  # after max_attempts.
   def perform
     @analysis = Analysis.find(@analysis_id)
 
@@ -31,9 +32,9 @@ class Analysis::BatchRunLocal
 
     begin
       if @options[:data_points].empty?
-        Rails.logger.info 'No data points were passed into the options, therefore checking which data points to run'
-        @analysis.data_points.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid).each do |dp|
-          Rails.logger.info "Adding in #{dp.uuid}"
+        Delayed::Worker.logger.info 'No data points were passed into the options, therefore checking which data points to run'
+        @analysis.data_points.where(status: 'na', download_status: 'na').each do |dp|
+          Delayed::Worker.logger.info "Adding in #{dp.uuid}"
           dp.status = 'queued'
           dp.save!
           @options[:data_points] << dp.uuid
@@ -43,40 +44,49 @@ class Analysis::BatchRunLocal
       # Get the server ip address -- this can fail easily if no ComputeNode exists
       # TODO: Move this to the Cluster Init routine
       server_ip = ComputeNode.where(node_type: 'server').first.ip_address
-      Rails.logger.info("Server ip: #{server_ip}")
-      Rails.logger.info('Starting Batch Run')
+      logger.info "Server ip: #{server_ip}"
+      logger.info 'Starting Batch Run Local'
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
-      Rails.logger.info 'Running initialize worker scripts'
+      logger.info 'Running initialize worker scripts'
       # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
-      ruby_command = "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-      run_command = "#{ruby_command} worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s initialize"
-      Rails.logger.info run_command
+      # TODO: remove hard coded ip/port
+      run_command = "#{sys_call_ruby} worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s initialize"
+      logger.info "Running the command: #{run_command}"
       `#{run_command}`
+      exit_code = $?.exitstatus
+      logger.info "System call of #{run_command} exited with #{exit_code}"
+      raise "Could not make system call to run '#{run_command}}'" unless exit_code == 0
 
-      Rails.logger.info @options[:data_points]
       @options[:data_points].each do |dp|
         # TODO: remove hard coded ip/port
-        run_command = "#{ruby_command} simulate_data_point.rb -h localhost:3000 -a #{@analysis_id} -u #{dp} -x #{@options[:run_data_point_filename]}"
-        Rails.logger.info run_command
+        run_command = "#{sys_call_ruby} simulate_data_point.rb -h localhost:3000 -a #{@analysis_id} -u #{dp} -x #{@options[:run_data_point_filename]}"
+        logger.info "Running the command: #{run_command}"
         `#{run_command}`
+        exit_code = $?.exitstatus
+        logger.info "System call of #{run_command} exited with #{exit_code}"
+        raise "Could not make system call to run '#{run_command}}'" unless exit_code == 0
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
     end
 
     begin
-      Rails.logger.info 'Running finalize worker scripts'
-      `cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s finalize`
+      logger.info 'Running finalize worker scripts'
+      run_command = "cd #{sys_call_ruby} worker_init_final.rb -h localhost:3000 -a #{@analysis_id} -s finalize"
+      `#{run_command}`
+      exit_code = $?.exitstatus
+      logger.info "System call of #{run_command} exited with #{exit_code}"
+      logger.info "Could not make system call to run '#{run_command}}'" unless exit_code == 0
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message += log_message
       @analysis.save!
     ensure
@@ -89,7 +99,7 @@ class Analysis::BatchRunLocal
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 
@@ -97,5 +107,16 @@ class Analysis::BatchRunLocal
   # Fix this to 1 retry for now.
   def max_attempts
     1
+  end
+
+  # Return the logger for the delayed job
+  def logger
+    Delayed::Worker.logger
+  end
+
+  # Return the Ruby system call string for ease
+  def sys_call_ruby
+    "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/ruby"
+    # "cd #{APP_CONFIG['sim_root_path']} && ruby"
   end
 end
