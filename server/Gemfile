@@ -68,6 +68,6 @@ group :development, :test do
   # these two openstudio gems are needed for starting up the cluster
   # and running the analysis in the integration tests
   gem 'openstudio-aws'
-  gem 'openstudio-analysis'
+  gem 'openstudio-analysis', github: 'NREL/OpenStudio-analysis-gem', branch: 'develop'
 end
 
