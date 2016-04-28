@@ -70,7 +70,7 @@ class AnalysesController < ApplicationController
 
       @started_sims = @analysis.search(params[:started_search], 'started', @started_page, @view_all).page(@started_page).per(per_page)
 
-      @queued_sims =  @analysis.search(params[:queued_search], 'queued', @queued_page, @view_all).page(@queued_page).per(per_page)
+      @queued_sims = @analysis.search(params[:queued_search], 'queued', @queued_page, @view_all).page(@queued_page).per(per_page)
 
       @na_sims = @analysis.search(params[:na_search], 'na', @na_page, @view_all).page(@na_page).per(per_page)
 
@@ -196,7 +196,7 @@ class AnalysesController < ApplicationController
   def action
     @analysis = Analysis.find(params[:id])
     logger.info("action #{params.inspect}")
-    params[:analysis_type].nil? ? @analysis_type = 'batch_run' : @analysis_type = params[:analysis_type]
+    @analysis_type = params[:analysis_type].nil? ? 'batch_run' : params[:analysis_type]
 
     logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
     options = params.symbolize_keys # read the defaults from the HTTP request
@@ -205,7 +205,7 @@ class AnalysesController < ApplicationController
     logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
 
     if params[:analysis_action] == 'start'
-      params[:without_delay].to_s == 'true' ? no_delay = true : no_delay = false
+      no_delay = params[:without_delay].to_s == 'true' ? true : false
       res = @analysis.run_analysis(no_delay, @analysis_type, options)
       result = {}
       if res[0]
@@ -259,92 +259,48 @@ class AnalysesController < ApplicationController
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
     # analysis_states = params[:state] ? [params[:state]] : Analyses.status_states
 
-    if params[:version] == '2'
-      logger.info 'Version 2 of analyses/status'
-      @analyses = params[:id] ? Analysis.where(id: params[:id]).only(analysis_only_fields) : Analysis.all.only(analysis_only_fields)
+    logger.info 'Version 2 of analyses/status'
+    @analyses = params[:id] ? Analysis.where(id: params[:id]).only(analysis_only_fields) : Analysis.all.only(analysis_only_fields)
 
-      logger.info "there are #{@analyses.size} analyses"
+    logger.info "there are #{@analyses.size} analyses"
 
-      respond_to do |format|
-        format.json do
-          render json: {
-            analyses: @analyses.map do |a|
-              {
-                _id: a.id,
-                id: a.id,
-                status: a.status,
-                analysis_type: a.analysis_type,
-                jobs: a.jobs.order_by(:index.asc).map do |j|
-                        {
-                          index: j.index,
-                          analysis_type: j.analysis_type,
-                          status: j.status,
-                          status_message: j.status_message
-                        }
-                      end,
-                data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
-                               {
-                                 _id: dp.id,
-                                 id: dp.id,
-                                 analysis_id: dp.analysis_id,
-                                 status: dp.status,
-                                 final_message: dp.status_message,
-                                 download_status: dp.download_status
-                               }
-                             end
-              }
-            end
-
+    respond_to do |format|
+      format.json do
+        data = @analyses.map do |a|
+          {
+            _id: a.id,
+            id: a.id,
+            status: a.status,
+            analysis_type: a.analysis_type,
+            jobs: a.jobs.order_by(:index.asc).map do |j|
+                    {
+                      index: j.index,
+                      analysis_type: j.analysis_type,
+                      status: j.status,
+                      status_message: j.status_message
+                    }
+                  end,
+            data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
+                           {
+                             _id: dp.id,
+                             id: dp.id,
+                             analysis_id: dp.analysis_id,
+                             status: dp.status,
+                             final_message: dp.status_message,
+                             download_status: dp.download_status
+                           }
+                         end
           }
         end
-      end
 
-    else
-      @analysis = Analysis.where(id: params[:id])
-
-      if @analysis.size > 1
-        respond_to do |format|
-          format.json do
-            render json: { error: 'Error trying to get status of more than one Analysis. Try version 2 of /analyses/status.json?version=2' }, status: :unprocessable_entity
-          end
-        end
-      elsif @analysis.size == 0
-        respond_to do |format|
-          format.json do
-            render json: {}
-          end
-        end
-      else
-        @analysis = @analysis.first
-        dps = nil
-        if params[:jobs]
-          dps = @analysis.data_points.where(status: params[:jobs]).only(data_point_only_fields)
+        if data.size == 1
+          render json: {
+            analysis: data.first
+          }
         else
-          dps = @analysis.data_points.only(data_point_only_fields)
-        end
-
-        respond_to do |format|
-          #  format.html # new.html.erb
-          format.json do
-            render json: {
-              analysis: {
-                _id: @analysis.id,
-                id: @analysis.id,
-                status: @analysis.status,
-                analysis_type: @analysis.analysis_type,
-                jobs: @analysis.jobs.order_by(:index.asc)
-              },
-              data_points: dps.map do |dp|
-                             {
-                               _id: dp.id,
-                               id: dp.id,
-                               status: dp.status,
-                               final_message: dp.status_message,
-                               download_status: dp.download_status
-                             }
-                           end
-            }
-          end
+          render json: {
+            analyses: data
+          }
         end
       end
     end
@@ -354,11 +310,11 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     dps = nil
-    if params[:downloads].nil?
-      dps = @analysis.data_points.where(download_status: 'completed')
-    else
-      dps = @analysis.data_points.where(download_status: params[:downloads])
-    end
+    dps = if params[:downloads].nil?
+            @analysis.data_points.where(download_status: 'completed')
+          else
+            @analysis.data_points.where(download_status: params[:downloads])
+          end
 
     respond_to do |format|
       #  format.html # new.html.erb
@@ -466,16 +422,16 @@ class AnalysesController < ApplicationController
     if params[:variables].nil?
       @variables << @plotvars[0].name << @plotvars[1].name
     else
-      if params[:variables][:x]
-        @variables << params[:variables][:x]
-      else
-        @variables << @plotvars[0].name
-      end
-      if params[:variables][:y]
-        @variables << params[:variables][:y]
-      else
-        @variables << @plotvars[0].name
-      end
+      @variables << if params[:variables][:x]
+                      params[:variables][:x]
+                    else
+                      @plotvars[0].name
+                    end
+      @variables << if params[:variables][:y]
+                      params[:variables][:y]
+                    else
+                      @plotvars[0].name
+                    end
     end
 
     # load a pareto by id
@@ -576,16 +532,16 @@ class AnalysesController < ApplicationController
   # Radar plot (single datapoint, must have objective functions)
   def plot_radar
     @analysis = Analysis.find(params[:id])
-    if params[:datapoint_id]
-      @datapoint = DataPoint.find(params[:datapoint_id])
-    else
+    @datapoint = if params[:datapoint_id]
+                   DataPoint.find(params[:datapoint_id])
+                 else
 
-      if @analysis.analysis_type == 'sequential_search'
-        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
+                   @datapoint = if @analysis.analysis_type == 'sequential_search'
+                                  @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+                                else
+                                  @analysis.data_points.all.order_by(:run_end_time.desc).first
+                                end
+                 end
 
     respond_to do |format|
       format.html # plot_radar.html.erb
@@ -814,7 +770,7 @@ class AnalysesController < ApplicationController
       or_qry << { :"#{k}" => v } if v
     end
     variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry)
-                .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
+                        .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].tr('.', '|')] }]
@@ -867,13 +823,13 @@ class AnalysesController < ApplicationController
 
     # Eventaully use this where the timestamp is processed as part of the request to save time
     # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
-    if datapoint_id
-      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
+    plot_data = if datapoint_id
+                  DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
                                   status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
-    else
-      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                  .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
-    end
+                else
+                  DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
+                           .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                end
     logger.info "finished fixing up data: #{Time.now - start_time}"
 
     # TODO: how to handle to sorting by iteration?
@@ -936,11 +892,11 @@ class AnalysesController < ApplicationController
         # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
         arr = []
         (static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }).each do |v|
-          if dp[v].nil?
-            arr << nil
-          else
-            arr << dp[v]
-          end
+          arr << if dp[v].nil?
+                   nil
+                 else
+                   dp[v]
+                 end
         end
         csv << arr
       end
@@ -1002,12 +958,12 @@ class AnalysesController < ApplicationController
     if File.exist?(tmp_filename)
       send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
     else
-      fail 'could not create R dataframe'
+      raise 'could not create R dataframe'
     end
   end
 
   private
-  
+
   def analysis_params
     params.require(:analysis).permit!
   end

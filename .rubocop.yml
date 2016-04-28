@@ -4,8 +4,6 @@ AllCops:
     - 'lib/**/*'
     - 'prototyping/**/*'
     - 'testing/**/*'
-
-Rails/DefaultScope:
   Include:
     - 'server/**/*.rb'
 

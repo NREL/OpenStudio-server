@@ -41,6 +41,10 @@ Rails.application.routes.draw do
         post :plot_xy_interactive
       end
 
+      collection do
+        get :status
+      end
+
       resources :measures, only: [:show, :index], shallow: true
       resources :paretos, only: [:show, :index, :edit, :update], shallow: true
       resources :variables, only: [:show, :index, :edit, :update], shallow: true do
