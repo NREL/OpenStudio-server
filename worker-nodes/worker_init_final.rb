@@ -11,10 +11,15 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 
+begin
+
+rescue LoadError => e
+  # raise 'please install openstudio-workflow first' unless e.message =~ /openstudio-workflow/
+  # exit 1
+end
 require 'optparse'
 require 'fileutils'
 require 'logger'
-require 'openstudio-workflow'
 require 'open-uri'
 
 puts "Parsing Input: #{ARGV}"
@@ -39,18 +44,20 @@ optparse.parse!
 unless options[:host]
   puts "Must provide host"
   puts optparse
-  exit
+  exit 1
 end
 
 unless options[:analysis_id]
   # required argument is missing
+  puts "Must provide analysis_id"
   puts optparse
-  exit
+  exit 1
 end
 
 unless options[:state]
   puts "State is required (either 'initialize' or 'finalize')"
-  exit
+  puts optparse
+  exit 1
 end
 
 # Set the result of the project for R to know that this finished
@@ -61,13 +68,17 @@ begin
   FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
   logger = Logger.new("#{analysis_dir}/worker_#{options[:state]}.log")
 
+  logger.info "Parsed Input: #{options}"
   logger.info "Running #{__FILE__}"
 
   if options[:state] == 'initialize'
+    logger.info "Running initialize block"
 
     # Download the zip file from the server
     download_file = "#{analysis_dir}/analysis.zip"
     download_url = "http://#{options[:host]}/analyses/#{options[:analysis_id]}/download_analysis_zip"
+
+    logger.info "Downloading analysis zip from #{download_url}"
 
     File.open(download_file, "wb") do |saved_file|
       # the following "open" is provided by open-uri
@@ -76,7 +87,18 @@ begin
       end
     end
 
+    logger.info ENV.inspect
+    logger.info `which ruby`
+    logger.info `which bundle`
+    logger.info `ruby --version`
+    logger.info `bundle --version`
     logger.info "Extracting analysis.zip"
+    begin
+      require 'openstudio-workflow'
+    rescue LoadError => e
+      raise 'please install openstudio-workflow first'
+      # exit 1
+    end
     OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
     OpenStudio::Workflow.extract_archive('rails-models/rails-models.zip', 'rails-models/models')
 

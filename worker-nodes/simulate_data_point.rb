@@ -12,10 +12,15 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 
+begin
+  require 'openstudio-workflow'
+rescue LoadError => e
+  raise 'please install openstudio-workflow first!' unless e.message =~ /openstudio-workflow/
+  exit 1
+end
 require 'optparse'
 require 'fileutils'
 require 'logger'
-require 'openstudio-workflow'
 require 'rest-client'
 
 puts "Parsing Input: #{ARGV}"
@@ -165,6 +170,7 @@ rescue => e
 ensure
   logger.info "Finished #{__FILE__}" if logger
   logger.close if logger
-  # always print the objective function result or NA
-  puts result
+
+  # always print out the state at the end
+  puts result # as a string? (for R to parse correctly?)
 end

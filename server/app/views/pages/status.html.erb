@@ -59,7 +59,7 @@
         <td><%= @server.cores %></td>
         <td><%= @server.ami_id %></td>
         <td><%= @server.instance_id %></td>
-        <td><%= @server.valid %></td>
+        <td><%= @server.enabled %></td>
       </tr>
     </table>
 <% end %>
@@ -88,7 +88,7 @@
             <td><%= worker.cores %></td>
             <td><%= worker.ami_id %></td>
             <td><%= worker.instance_id %></td>
-            <td><%= worker.valid %></td>
+            <td><%= worker.enabled %></td>
           </tr>
       <% end %>
     </table>
