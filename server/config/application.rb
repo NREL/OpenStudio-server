@@ -1,9 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
-# require 'rails/all'
 require 'action_controller/railtie'
 require 'action_mailer/railtie'
-# require "active_resource/railtie"
 require 'sprockets/railtie'
 
 # Require the gems listed in Gemfile, including any gems
@@ -27,6 +25,9 @@ module OpenstudioServer
 
     # Enable escaping HTML in JSON.
     config.active_support.escape_html_entities_in_json = true
+
+    # Set the queue adapter
+    config.active_job.queue_adapter = :delayed_job
 
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = 'utf-8'

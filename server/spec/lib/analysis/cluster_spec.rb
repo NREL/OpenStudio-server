@@ -34,8 +34,6 @@ describe Analysis::R::Cluster do
 
       cf = cluster_class.configure(master_ip)
       cf.should eq(true)
-      #      if !cluster.configure(master_ip)
-      #        raise "could not configure R cluster"
     end
 
     it 'should start snow cluster' do

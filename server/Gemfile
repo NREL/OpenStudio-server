@@ -69,7 +69,6 @@ group :development, :test do
   gem 'meta_request'
   gem 'ruby-prof'
 
-  gem 'rspec'
   gem 'rspec-rails'
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
