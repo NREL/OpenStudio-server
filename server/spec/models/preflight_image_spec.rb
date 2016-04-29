@@ -1,4 +1,6 @@
-describe PreflightImage do
+require 'rails_helper'
+
+RSpec.describe PreflightImage, type: :model do
   before :all do
     # delete all the analyses
     Project.delete_all

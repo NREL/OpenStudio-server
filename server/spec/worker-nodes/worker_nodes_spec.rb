@@ -1,4 +1,4 @@
-require 'rspec'
+require 'spec_helper'
 
 describe 'worker-init' do
   it 'should sort worker jobs correctly' do

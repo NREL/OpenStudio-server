@@ -1,9 +1,6 @@
-require 'spec_helper'
+require 'rails_helper'
 
-# not sure why i have to include this here
-require 'rserve/simpler'
-
-describe Analysis::R::Cluster do
+RSpec.describe Analysis::R::Cluster, type: :model do
   before :all do
     ComputeNode.delete_all
     FactoryGirl.create(:compute_node)

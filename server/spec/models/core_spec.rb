@@ -1,6 +1,6 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Analysis::Core do
+RSpec.describe Analysis::Core, type: :model do
   class DummyClass
   end
 

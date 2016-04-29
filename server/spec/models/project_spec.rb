@@ -1,6 +1,6 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Project do
+RSpec.describe Project, type: :model do
   before :all do
     # delete all the analyses
     Project.delete_all
