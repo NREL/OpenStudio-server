@@ -51,7 +51,3 @@ run_options = {
     analysis_type: ANALYSIS_TYPE
 }
 api.run_analysis(analysis_id, run_options)
-
-#api.kill_analysis(analysis_id)
-
-# TODO: Wait for finished so can use outputs in test statements.

@@ -73,7 +73,6 @@ begin
       r_index_value = index + 1
       k.logger.info "Adding new variable value with r_index #{r_index_value} of value #{value}"
 
-      # TODO: check for nil variables
       var_db = Variable.where(analysis_id: dp.analysis_id, r_index: r_index_value).first
       if var_db
         uuid = var_db.uuid
