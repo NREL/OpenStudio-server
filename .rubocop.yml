@@ -7,6 +7,9 @@ AllCops:
   Include:
     - 'server/**/*.rb'
 
+Rails:
+  Enabled: true
+
 # ==================== Linters ====================
 Lint/AmbiguousOperator:
   Enabled: true
@@ -20,11 +23,9 @@ Lint/ParenthesesAsGroupedExpression:
 Lint/RequireParentheses:
   Enabled: true
 
-# Offense count: 1
 Lint/UnreachableCode:
   Enabled: false
 
-# Offense count: 51
 Lint/UselessAssignment:
   Enabled: true
 
@@ -99,7 +100,7 @@ Style/GuardClause:
 Style/IfUnlessModifier:
   Enabled: false
 
-# Do NOT enable.  For some reason this is catchy any next which I feel are okay.
+# Do NOT enable.  For some reason this is catching any next which I feel are okay.
 # Offense count: 18
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/Next:
@@ -111,3 +112,14 @@ Style/Next:
 Style/SpecialGlobalVars:
   Enabled: false
 
+# a = if true
+#       1
+#     else
+#       2
+#     end
+Style/ConditionalAssignment:
+  Enabled: false
+
+Style/MultilineMethodCallIndentation:
+  EnforcedStyle: aligned
+  Enabled: true
