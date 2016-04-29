@@ -43,6 +43,9 @@ RSpec.configure do |config|
   config.filter_run_excluding broken: true
   config.order = :random
 
+  # Allow both should and expect syntax in the tests
+  config.expect_with(:rspec) { |c| c.syntax = [:should, :expect] }
+
 # The settings below are suggested to provide a good initial experience
 # with RSpec, but feel free to customize to your heart's content.
 =begin
