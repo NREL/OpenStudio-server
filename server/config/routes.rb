@@ -9,7 +9,7 @@ Rails.application.routes.draw do
     get :status, on: :collection
   end
 
-  resources :compute_nodes, only: [:index]
+  resources :compute_nodes
 
   resources :projects, shallow: true do
     member do
