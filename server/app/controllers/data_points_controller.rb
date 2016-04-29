@@ -46,12 +46,12 @@ class DataPointsController < ApplicationController
         end
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
+        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
       end
     end
   end
 
-  alias_method :show_full, :show
+  alias show_full show
 
   def status
     # The name :jobs is legacy based on how PAT queries the data points. Should we alias this to status?
@@ -62,16 +62,16 @@ class DataPointsController < ApplicationController
       #  format.html # new.html.erb
       format.json do
         render json: {
-            data_points: dps.map do |dp|
-              {
-                  _id: dp.id,
-                  id: dp.id,
-                  analysis_id: dp.analysis_id,
-                  status: dp.status,
-                  final_message: dp.status_message,
-                  download_status: dp.download_status
-              }
-            end
+          data_points: dps.map do |dp|
+            {
+              _id: dp.id,
+              id: dp.id,
+              analysis_id: dp.analysis_id,
+              status: dp.status,
+              final_message: dp.status_message,
+              download_status: dp.download_status
+            }
+          end
         }
       end
     end
@@ -202,12 +202,12 @@ class DataPointsController < ApplicationController
     logger.info('attaching results file to datapoint')
 
     @data_point = DataPoint.find(datapoint_id)
-    logger.info("Datapoint ID: #{@data_point.id.to_s}")
+    logger.info("Datapoint ID: #{@data_point.id}")
 
     if params[:file] && params[:file][:attachment]
       @rf = ResultFile.new(
-          display_name: params[:file][:display_name],
-          type: params[:file][:type]
+        display_name: params[:file][:display_name],
+        type: params[:file][:type]
       )
       @rf.attachment = params[:file][:attachment]
 
@@ -223,7 +223,7 @@ class DataPointsController < ApplicationController
 
     respond_to do |format|
       if error
-        format.json { render json: {error: error_messages, result_file: params[:file]}, status: :unprocessable_entity }
+        format.json { render json: { error: error_messages, result_file: params[:file] }, status: :unprocessable_entity }
       else
         format.json { render 'result_file', status: :created, location: data_point_url(@data_point) }
       end
@@ -308,7 +308,7 @@ class DataPointsController < ApplicationController
 
       # Grab all the variables that have defined a measure ID and pull out the results
       vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '')
-                 .order_by(:name.asc).as_json(only: [:name, :metadata_id])
+                        .order_by(:name.asc).as_json(only: [:name, :metadata_id])
 
       dencity[:structure] = {}
       vars.each do |v|
@@ -332,7 +332,7 @@ class DataPointsController < ApplicationController
       if dencity
         format.json { render json: dencity.to_json }
       else
-        format.json { render json: {error: 'Could not format data point into DEnCity view'}, status: :unprocessable_entity }
+        format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
       end
     end
   end

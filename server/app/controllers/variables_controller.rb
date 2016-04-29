@@ -203,7 +203,7 @@ class VariablesController < ApplicationController
     if File.exist?(tmp_filename)
       send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
     else
-      fail 'could not create R dataframe'
+      raise 'could not create R dataframe'
     end
 
     # Have R delete the file since it will have permissions to delete the file.

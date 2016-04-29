@@ -62,7 +62,7 @@ class Analysis::BatchRunAnalyses
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
@@ -74,7 +74,7 @@ class Analysis::BatchRunAnalyses
       analyses.each do |analysis|
         Rails.logger.info 'Running initialize worker scripts'
         unless cluster.initialize_workers(worker_ips, analysis.id)
-          fail 'could not run initialize worker scripts'
+          raise 'could not run initialize worker scripts'
         end
       end
 
@@ -124,7 +124,7 @@ class Analysis::BatchRunAnalyses
           }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
@@ -139,7 +139,7 @@ class Analysis::BatchRunAnalyses
     analyses.each do |analysis|
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
     end
 

@@ -68,7 +68,7 @@ class Analysis::Doe
         Rails.logger.info "Flipping samples around yields #{samples}"
 
       else
-        fail 'no experiment type defined (full_factorial)'
+        raise 'no experiment type defined (full_factorial)'
       end
 
       Rails.logger.info 'Fixing Pivot dimension'

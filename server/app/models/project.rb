@@ -43,6 +43,6 @@ class Project
 
   def verify_uuid
     self.uuid = id if uuid.nil?
-    self.save!
+    save!
   end
 end

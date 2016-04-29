@@ -68,7 +68,7 @@ class Analysis::Diag
         Rails.logger.info "Flipping samples around yields #{samples}"
 
       else
-        fail 'no experiment type defined (diagonal)'
+        raise 'no experiment type defined (diagonal)'
       end
 
       Rails.logger.info 'Fixing Pivot dimension'

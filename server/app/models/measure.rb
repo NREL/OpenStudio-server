@@ -77,7 +77,7 @@ class Measure
     measure = Measure.where(analysis_id: analysis_id, name: os_json['name']).first
     if measure
       # since the index is unique, this should fail before this point
-      fail "Measure already exists for analysis #{analysis_id} of #{measure.name}"
+      raise "Measure already exists for analysis #{analysis_id} of #{measure.name}"
     else
       measure = Measure.find_or_create_by(analysis_id: analysis_id, name: os_json['name'])
       Rails.logger.info("Creating new measure for analysis #{analysis_id} with name '#{measure.name}'")
@@ -147,6 +147,6 @@ class Measure
 
   def verify_uuid
     self.uuid = id if uuid.nil?
-    self.save!
+    save!
   end
 end

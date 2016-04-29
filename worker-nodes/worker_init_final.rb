@@ -37,14 +37,14 @@ end
 optparse.parse!
 
 unless options[:host]
-  puts "Must provide host"
+  puts 'Must provide host'
   puts optparse
   exit 1
 end
 
 unless options[:analysis_id]
   # required argument is missing
-  puts "Must provide analysis_id"
+  puts 'Must provide analysis_id'
   puts optparse
   exit 1
 end
@@ -67,7 +67,7 @@ begin
   logger.info "Running #{__FILE__}"
 
   if options[:state] == 'initialize'
-    logger.info "Running initialize block"
+    logger.info 'Running initialize block'
 
     # Download the zip file from the server
     download_file = "#{analysis_dir}/analysis.zip"
@@ -75,9 +75,9 @@ begin
 
     logger.info "Downloading analysis zip from #{download_url}"
 
-    File.open(download_file, "wb") do |saved_file|
+    File.open(download_file, 'wb') do |saved_file|
       # the following "open" is provided by open-uri
-      open(download_url, "rb") do |read_file|
+      open(download_url, 'rb') do |read_file|
         saved_file.write(read_file.read)
       end
     end

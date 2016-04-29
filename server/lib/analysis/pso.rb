@@ -75,7 +75,7 @@ class Analysis::Pso
     begin
       # TODO: preflight check -- need to catch this in the analysis module
       if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
-        fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
+        raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
       end
 
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
@@ -83,27 +83,27 @@ class Analysis::Pso
       #  raise "P Norm must be non-negative"
       # end
       unless %w(spso2007 spso2011 ipso fips wfips).include?(@analysis.problem['algorithm']['method'])
-        fail 'unknown method type'
+        raise 'unknown method type'
       end
 
       unless %w(lhs random).include?(@analysis.problem['algorithm']['xini'])
-        fail 'unknown Xini type'
+        raise 'unknown Xini type'
       end
 
       unless %w(zero lhs2011 random2011 lhs2007 random2007 default).include?(@analysis.problem['algorithm']['vini'])
-        fail 'unknown Vini type'
+        raise 'unknown Vini type'
       end
 
       unless %w(invisible damping reflecting absorbing2007 absorbing2007 default).include?(@analysis.problem['algorithm']['boundary'])
-        fail 'unknown Boundary type'
+        raise 'unknown Boundary type'
       end
 
       unless %w(gbest lbest vonneumann random).include?(@analysis.problem['algorithm']['topology'])
-        fail 'unknown Topology type'
+        raise 'unknown Topology type'
       end
 
       if @analysis.problem['algorithm']['ppower'] <= 0
-        fail 'P Norm must be non-negative'
+        raise 'P Norm must be non-negative'
       end
 
       @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
@@ -115,12 +115,12 @@ class Analysis::Pso
 
       # check to make sure there are objective functions
       if @analysis.output_variables.count { |v| v['objective_function'] == true } == 0
-        fail 'No objective functions defined'
+        raise 'No objective functions defined'
       end
 
       # find the total number of objective functions
       if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-        fail 'Number of objective functions must equal between the output_variables and the problem definition'
+        raise 'Number of objective functions must equal between the output_variables and the problem definition'
       end
 
       pivot_array = Variable.pivot_array(@analysis.id)
@@ -134,14 +134,14 @@ class Analysis::Pso
       lhs = Analysis::R::Lhs.new(@r)
       samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
 
-      if var_names.empty? || var_names.size < 1
+      if var_names.empty? || var_names.empty?
         Rails.logger.info 'No variables were passed into the options, therefore exit'
-        fail "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+        raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
       end
 
-      unless var_types.all? { |t| t.downcase == 'continuous' }
+      unless var_types.all? { |t| t.casecmp('continuous').zero? }
         Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
-        fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+        raise "Must have all continous variables to run algorithm.  Found #{var_types}"
       end
 
       Rails.logger.info "mins_maxes: #{mins_maxes}"
@@ -153,7 +153,7 @@ class Analysis::Pso
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
@@ -162,7 +162,7 @@ class Analysis::Pso
 
       Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
@@ -429,7 +429,7 @@ class Analysis::Pso
           }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
 
     rescue => e
@@ -447,7 +447,7 @@ class Analysis::Pso
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
 
       # Post process the results and jam into the database

@@ -16,7 +16,7 @@ module Analysis::Core
   # make s' = [{p1: 1, a: 1, b: 4}, {p1: 2, a: 1, b: 4}, {p1: 1, a: 2, b: 5},  {p1: 2, a: 2, b: 5}]
   def add_pivots(samples, pivots)
     new_samples = []
-    if pivots.size > 0
+    unless pivots.empty?
       pivots.each do |pivot|
         samples.each do |sample|
           new_samples << pivot.merge(sample)
@@ -34,7 +34,7 @@ module Analysis::Core
   # results is [{a:1, b:2, c:3}, {a:1, b:2, d:4}]
   def add_static_variables(samples, statics)
     # Need to test the performance of this
-    if statics.size > 0
+    unless statics.empty?
       samples.each do |sample|
         statics.each do |st|
           sample.merge!(st)

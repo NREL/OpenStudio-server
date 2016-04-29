@@ -72,7 +72,7 @@ class AdminController < ApplicationController
       send_data File.open(output_file).read, filename: File.basename(output_file), type: 'application/targz; header=present', disposition: 'attachment'
       success = true
     else
-      fail 'could not create dump'
+      raise 'could not create dump'
     end
 
     success

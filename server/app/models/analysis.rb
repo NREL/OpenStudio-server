@@ -72,7 +72,7 @@ class Analysis
     # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
       Rails.logger.info("Queuing up analysis #{uuid}")
-      self.save!
+      save!
 
       # TODO: Remove the idea of initialing workers here. The cluster needs to be defined before running this method
       Rails.logger.info('Initializing workers in database')
@@ -83,7 +83,7 @@ class Analysis
     if no_delay
       Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      self.save!
+      save!
       reload
       abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
@@ -94,7 +94,7 @@ class Analysis
       aj.delayed_job_id = job.id
       aj.save!
 
-      self.save!
+      save!
       reload
     end
   end
@@ -102,7 +102,7 @@ class Analysis
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    defaults = { }
+    defaults = {}
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
@@ -111,7 +111,7 @@ class Analysis
 
     start(no_delay, analysis_type, options)
 
-    return [true]
+    [true]
   end
 
   def stop_analysis
@@ -129,7 +129,7 @@ class Analysis
     #   end
     # end
 
-    [self.save!, errors]
+    [save!, errors]
   end
 
   # Method that pulls out the variables from the uploaded problem/analysis JSON.
@@ -175,7 +175,7 @@ class Analysis
       end
     end
 
-    self.save!
+    save!
   end
 
   # Method goes through all the data_points in an analysis and finds all the
@@ -340,6 +340,6 @@ class Analysis
 
   def verify_uuid
     self.uuid = id if uuid.nil?
-    self.save!
+    save!
   end
 end

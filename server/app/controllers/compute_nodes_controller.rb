@@ -1,5 +1,4 @@
 class ComputeNodesController < ApplicationController
-
   # GET /compute_nodes
   # GET /compute_nodes.json
   def index

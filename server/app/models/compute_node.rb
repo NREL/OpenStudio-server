@@ -15,8 +15,8 @@ class ComputeNode
   field :enabled, type: Boolean, default: false
 
   # Indexes
-  index({ hostname: 1 })
-  index({ ip_address: 1 })
+  index(hostname: 1)
+  index(ip_address: 1)
   index(node_type: 1)
 
   # Return all the enabled IP addresses as a hash in prep for writing to a dataframe

@@ -45,14 +45,14 @@ optparse.parse!
 
 puts 'Checking Arguments'
 unless options[:host]
-  puts "Must provide host"
+  puts 'Must provide host'
   puts optparse
   exit
 end
 
 unless options[:uuid]
   # required argument is missing
-  puts "Must provide datapoint uuid"
+  puts 'Must provide datapoint uuid'
   puts optparse
   exit
 end
@@ -61,7 +61,7 @@ end
 result = nil
 
 begin
-  fail 'Data Point is NA... skipping' if options[:uuid] == 'NA'
+  raise 'Data Point is NA... skipping' if options[:uuid] == 'NA'
   analysis_dir = File.expand_path("analysis_#{options[:analysis_id]}")
   directory = File.expand_path("analysis_#{options[:analysis_id]}/data_point_#{options[:uuid]}")
   FileUtils.mkdir_p(directory)
@@ -79,41 +79,41 @@ begin
 
   # Set the default workflow options
   workflow_options = {
-      datapoint_id: options[:uuid],
-      analysis_root_path: analysis_dir,
-      adapter_options: {
-          mongoid_path: File.expand_path('rails-models')
-      }
+    datapoint_id: options[:uuid],
+    analysis_root_path: analysis_dir,
+    adapter_options: {
+      mongoid_path: File.expand_path('rails-models')
+    }
   }
   if options[:run_workflow_method] == 'custom_xml' ||
-      options[:run_workflow_method] == 'run_openstudio_xml.rb'
+     options[:run_workflow_method] == 'run_openstudio_xml.rb'
 
     # Set up the custom workflow states and transitions
     transitions = OpenStudio::Workflow::Run.default_transition
     transitions[1][:to] = :xml
     transitions.insert(2, from: :xml, to: :openstudio)
     states = OpenStudio::Workflow::Run.default_states
-    states.insert(2, state: :xml, options: {after_enter: :run_xml})
+    states.insert(2, state: :xml, options: { after_enter: :run_xml })
 
     workflow_options = {
-        transitions: transitions,
-        states: states,
-        analysis_root_path: analysis_dir,
-        datapoint_id: options[:uuid],
-        xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
-        adapter_options: {
-            mongoid_path: File.expand_path('rails-models')
-        }
+      transitions: transitions,
+      states: states,
+      analysis_root_path: analysis_dir,
+      datapoint_id: options[:uuid],
+      xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
+      adapter_options: {
+        mongoid_path: File.expand_path('rails-models')
+      }
     }
   elsif options[:run_workflow_method] == 'pat_workflow' ||
-      options[:run_workflow_method] == 'run_openstudio.rb'
+        options[:run_workflow_method] == 'run_openstudio.rb'
     workflow_options = {
-        is_pat: true,
-        datapoint_id: options[:uuid],
-        analysis_root_path: analysis_dir,
-        adapter_options: {
-            mongoid_path: File.expand_path('rails-models')
-        }
+      is_pat: true,
+      datapoint_id: options[:uuid],
+      analysis_root_path: analysis_dir,
+      adapter_options: {
+        mongoid_path: File.expand_path('rails-models')
+      }
     }
   end
 
@@ -129,33 +129,33 @@ begin
   # check if the simulation failed after moving the files back to the right place
   if result == 'NA'
     logger.info 'Simulation result was invalid'
-    fail 'Simulation result was invalid'
+    raise 'Simulation result was invalid'
   end
 
   # Post the data back to the server
   # TODO: check for timeouts and retry
   Dir["#{directory}/reports/*.{html,json,csv}"].each do |report|
     RestClient.post(
-        "http://#{options[:host]}/data_points/#{options[:uuid]}/upload_file",
-        file: {
-            display_name: File.basename(report, '.*'),
-            type: 'Report',
-            attachment: File.new(report, 'rb')
-        }
+      "http://#{options[:host]}/data_points/#{options[:uuid]}/upload_file",
+      file: {
+        display_name: File.basename(report, '.*'),
+        type: 'Report',
+        attachment: File.new(report, 'rb')
+      }
     )
   end
 
   # Post the results too
   # TODO: Do not save the _reports file anymore in the workflow gem
   results_zip = "#{directory}/data_point_#{options[:uuid]}.zip"
-  if File.exists? results_zip
+  if File.exist? results_zip
     RestClient.post(
-        "http://#{options[:host]}/data_points/#{options[:uuid]}/upload_file",
-        file: {
-            display_name: 'Zip File',
-            type: 'Data Point',
-            attachment: File.new(results_zip, 'rb')
-        }
+      "http://#{options[:host]}/data_points/#{options[:uuid]}/upload_file",
+      file: {
+        display_name: 'Zip File',
+        type: 'Data Point',
+        attachment: File.new(results_zip, 'rb')
+      }
     )
   end
 rescue => e

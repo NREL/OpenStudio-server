@@ -73,11 +73,11 @@ class Analysis::RgenoudLexical
 
     # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
-      fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
+      raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
+      raise 'Must have number of samples to discretize the parameter space'
     end
 
     # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
@@ -86,13 +86,13 @@ class Analysis::RgenoudLexical
     # end
 
     if @analysis.problem['algorithm']['ppower'] <= 0
-      fail 'P Norm must be non-negative'
+      raise 'P Norm must be non-negative'
     end
 
     ug = @analysis.output_variables.uniq { |v| v['objective_function_group'] }
     Rails.logger.info "Number of objective function groups are #{ug.size}"
     if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-      fail 'number of objective functions must equal'
+      raise 'number of objective functions must equal'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
@@ -106,14 +106,14 @@ class Analysis::RgenoudLexical
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
 
-    if var_names.empty? || var_names.size < 1
+    if var_names.empty? || var_names.empty?
       Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+      raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
     end
 
-    unless var_types.all? { |t| t.downcase == 'continuous' }
+    unless var_types.all? { |t| t.casecmp('continuous').zero? }
       Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
-      fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+      raise "Must have all continous variables to run algorithm.  Found #{var_types}"
     end
 
     Rails.logger.info "mins_maxes: #{mins_maxes}"
@@ -128,7 +128,7 @@ class Analysis::RgenoudLexical
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
@@ -137,7 +137,7 @@ class Analysis::RgenoudLexical
 
       Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
@@ -341,12 +341,12 @@ class Analysis::RgenoudLexical
           }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"

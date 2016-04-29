@@ -23,7 +23,7 @@ module Analysis::R
     end
 
     # configure the r session, returns true if the flag variable was readable (and true)
-    def configure(master_ip)
+    def configure(_master_ip)
       @r.command do
         %{
             ip <- "#{@db_ip}"
@@ -128,7 +128,7 @@ module Analysis::R
           # Check the length and the last result (which should be true)
           c = @r.converse('r')
           # Rails.logger.info c.inspect
-          result = (c.size == uniq_ips[:worker_ips].size) && (c.map { |i| i.last == 'true' }.all?)
+          result = (c.size == uniq_ips[:worker_ips].size) && c.map { |i| i.last == 'true' }.all?
         rescue => e
           raise e
         ensure

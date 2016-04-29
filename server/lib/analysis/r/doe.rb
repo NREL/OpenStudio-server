@@ -29,7 +29,7 @@ module Analysis::R
     def discrete_sample_from_probability2(probabilities_array, var)
       @r.converse "print('creating discrete distribution')"
       if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
-        fail 'no hash values and weight passed'
+        raise 'no hash values and weight passed'
       end
       values, weights = var.map_discrete_hash_to_array
 
@@ -43,7 +43,7 @@ module Analysis::R
           "
         end
       elsif var.uncertainty_type == 'bool' || var.uncertainty_type == 'boolean'
-        fail 'bool distribution needs some updating to map from bools'
+        raise 'bool distribution needs some updating to map from bools'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
             print(values)
@@ -51,7 +51,7 @@ module Analysis::R
           "
         end
       else
-        fail "discrete distribution type #{var.uncertainty_type} not known for R"
+        raise "discrete distribution type #{var.uncertainty_type} not known for R"
       end
 
       samples = @r.converse 'samples'
@@ -80,7 +80,7 @@ module Analysis::R
       elsif distribution_type == 'triangle'
         r_dist_name = 'qtriangle'
       else
-        fail "distribution type #{distribution_type} not known for R"
+        raise "distribution type #{distribution_type} not known for R"
       end
 
       @r.converse "print('creating distribution')"
@@ -155,7 +155,7 @@ module Analysis::R
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           # variable_samples = discrete_sample_from_probability(p[i_var], var)
           if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
-            fail 'no hash values and weight passed'
+            raise 'no hash values and weight passed'
           end
           values, weights = var.map_discrete_hash_to_array
           Rails.logger.info("values is #{values}")
@@ -213,7 +213,7 @@ module Analysis::R
       Rails.logger.info("samples_temp is #{samples_temp}")
 
       selected_variables.each_with_index do |var, idx|
-        samples["#{var.id}"] = samples_temp[idx]
+        samples[var.id.to_s] = samples_temp[idx]
       end
 
       Rails.logger.info("samples is #{samples}")

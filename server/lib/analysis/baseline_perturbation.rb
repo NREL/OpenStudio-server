@@ -45,7 +45,7 @@ class Analysis::BaselinePerturbation
 
       # pivot_array = Variable.pivot_array(@analysis.id)
 
-      Rails.logger.info "#{Variable.variables(@analysis.id)}"
+      Rails.logger.info Variable.variables(@analysis.id).to_s
 
       selected_variables = Variable.variables(@analysis.id)
       Rails.logger.info "Found #{selected_variables.count} variables to perturb"
@@ -67,30 +67,30 @@ class Analysis::BaselinePerturbation
       # Make baseline case
       instance = {}
       selected_variables.each do |variable|
-        instance["#{variable.id}".to_sym] = variable.static_value
+        instance[variable.id.to_s.to_sym] = variable.static_value
       end
       samples << instance
 
       # Make perturbed cases
-      if @analysis.problem['algorithm']['in_measure_combinations'].downcase == 'false'
+      if @analysis.problem['algorithm']['in_measure_combinations'].casecmp('false').zero?
         Rails.logger.info 'In False'
         selected_variables.each do |variable|
           if variable.map_discrete_hash_to_array.nil? || variable.discrete_values_and_weights.empty?
-            fail 'no hash values and weight passed'
+            raise 'no hash values and weight passed'
           end
           values, weights = variable.map_discrete_hash_to_array
           values.each do |val|
             instance = {}
-            instance["#{variable.id}".to_sym] = val
+            instance[variable.id.to_s.to_sym] = val
             selected_variables.each do |variable2|
               if variable != variable2
-                instance["#{variable2.id}".to_sym] = variable2.static_value
+                instance[variable2.id.to_s.to_sym] = variable2.static_value
               end
             end
             samples << instance
           end
         end
-      elsif @analysis.problem['algorithm']['in_measure_combinations'].downcase == 'true'
+      elsif @analysis.problem['algorithm']['in_measure_combinations'].casecmp('true').zero?
         Rails.logger.info 'In True'
         measure_list = []
         selected_variables.each do |var|
@@ -103,10 +103,10 @@ class Analysis::BaselinePerturbation
           selected_variables.each do |var|
             if var.measure.id == meas
               values, weights = var.map_discrete_hash_to_array
-              if @analysis.problem['algorithm']['include_baseline_in_combinations'].downcase == 'true'
+              if @analysis.problem['algorithm']['include_baseline_in_combinations'].casecmp('true').zero?
                 values << var.static_value
               end
-              meas_var_val["#{var.id}"] = values
+              meas_var_val[var.id.to_s] = values
               meas_var << var.id
               meas_var_num << [0..(values.length - 1)][0].to_a
             end
@@ -116,10 +116,10 @@ class Analysis::BaselinePerturbation
           combinations.each do |combination|
             instance = {}
             combination.each_with_index do |value_ind, var_ind|
-              instance["#{meas_var[var_ind]}".to_sym] = meas_var_val[meas_var[var_ind]][value_ind]
+              instance[(meas_var[var_ind]).to_s.to_sym] = meas_var_val[meas_var[var_ind]][value_ind]
             end
             selected_variables.each do |var|
-              instance["#{var.id}".to_sym] = var.static_value unless meas_var.include? var.id
+              instance[var.id.to_s.to_sym] = var.static_value unless meas_var.include? var.id
             end
             # Rails.logger.info "instance: #{instance}"
             sleep 1
@@ -127,7 +127,7 @@ class Analysis::BaselinePerturbation
           end
         end
       else
-        fail "Algorithm variable 'in_measure_combinations' was not set to valid values 'true' or 'false', instead '#{@analysis.problem['algorithm']['in_measure_combinations'].downcase}'"
+        raise "Algorithm variable 'in_measure_combinations' was not set to valid values 'true' or 'false', instead '#{@analysis.problem['algorithm']['in_measure_combinations'].downcase}'"
       end
       # Add the data points to the database
       isample = 0

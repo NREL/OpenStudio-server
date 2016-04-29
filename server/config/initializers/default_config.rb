@@ -1,6 +1,6 @@
 # Load in the APP_CONFIG
 # Read in default config settings unique to this application.
-path = File.join(Rails.root,'/config/config.yml')
+path = File.join(Rails.root, '/config/config.yml')
 APP_CONFIG = YAML.load(ERB.new(File.new(path).read).result)[Rails.env]
 
 # Go through and interpret some of the variables
