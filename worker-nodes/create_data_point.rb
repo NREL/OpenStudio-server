@@ -45,7 +45,8 @@ begin
     datapoint_id: dp_uuid,
     analysis_root_path: analysis_root_path,
     adapter_options: {
-      mongoid_path: File.expand_path('rails-models')
+      mongoid_path: File.expand_path('rails-models'),
+      rails_env: Rails.env
     }
   }
 
