@@ -46,7 +46,7 @@ begin
     analysis_root_path: analysis_root_path,
     adapter_options: {
       mongoid_path: File.expand_path('rails-models'),
-      rails_env: Rails.env
+      rails_env: ENV['RAILS_ENV'] || 'development'
     }
   }
 

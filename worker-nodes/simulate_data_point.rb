@@ -83,7 +83,7 @@ begin
     analysis_root_path: analysis_dir,
     adapter_options: {
       mongoid_path: File.expand_path('rails-models'),
-      rails_env: Rails.env
+      rails_env: ENV['RAILS_ENV'] || 'development'
     }
   }
   if options[:run_workflow_method] == 'custom_xml' ||
@@ -104,7 +104,7 @@ begin
       xml_library_file: "#{analysis_dir}/lib/openstudio_xml/main.rb",
       adapter_options: {
         mongoid_path: File.expand_path('rails-models'),
-        rails_env: Rails.env
+        rails_env: ENV['RAILS_ENV'] || 'development'
       }
     }
   elsif options[:run_workflow_method] == 'pat_workflow' ||
@@ -115,7 +115,7 @@ begin
       analysis_root_path: analysis_dir,
       adapter_options: {
         mongoid_path: File.expand_path('rails-models'),
-        rails_env: Rails.env
+        rails_env: ENV['RAILS_ENV'] || 'development'
       }
     }
   end
