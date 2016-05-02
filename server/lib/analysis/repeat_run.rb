@@ -66,11 +66,11 @@ class Analysis::RepeatRun
       end
 
       # always add the data to the grouped hash even if it isn't used
-      grouped["#{var.measure.id}"] = {} unless grouped.key?(var.measure.id)
-      grouped["#{var.measure.id}"]["#{var.id}"] = variable_samples
+      grouped[var.measure.id.to_s] = {} unless grouped.key?(var.measure.id)
+      grouped[var.measure.id.to_s][var.id.to_s] = variable_samples
 
       # save the samples to the
-      samples["#{var.id}"] = variable_samples
+      samples[var.id.to_s] = variable_samples
 
       var.r_index = i_var + 1 # r_index is 1-based
       var.save!

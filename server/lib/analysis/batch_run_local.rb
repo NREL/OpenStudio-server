@@ -76,7 +76,7 @@ class Analysis::BatchRunLocal
 
     begin
       logger.info 'Running finalize worker scripts'
-      run_command = "cd #{sys_call_ruby} worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s finalize"
+      run_command = "#{sys_call_ruby} worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s finalize"
       `#{run_command}`
       exit_code = $?.exitstatus
       logger.info "System call of #{run_command} exited with #{exit_code}"

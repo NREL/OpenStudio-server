@@ -49,22 +49,22 @@ class Analysis::BatchDatapoints
 
       selected_variables.each do |var|
         if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
-          fail "no hash values and weight passed in variable #{var.name}"
+          raise "no hash values and weight passed in variable #{var.name}"
         end
         values, weights = var.map_discrete_hash_to_array
-        fail "'nil' value(s) found in variable #{var.id}. nil values not yet supported." if values.count(&:nil?) != 0
+        raise "'nil' value(s) found in variable #{var.id}. nil values not yet supported." if values.count(&:nil?) != 0
         values_length = values_length << values.length
-        values_set["#{var.id}".to_sym] = values
+        values_set[var.id.to_s.to_sym] = values
       end
 
-      fail 'Length of discrete_values passed in variables was not equal across variables.' if values_length.uniq.length != 1
+      raise 'Length of discrete_values passed in variables was not equal across variables.' if values_length.uniq.length != 1
 
       # Create Datapoint Samples
       samples = []
       for i in 0..(values_length[0] - 1)
         instance = {}
         selected_variables.each do |var|
-          instance["#{var.id}".to_sym] = values_set["#{var.id}".to_sym][i]
+          instance[var.id.to_s.to_sym] = values_set[var.id.to_s.to_sym][i]
         end
         samples << instance
       end

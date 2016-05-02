@@ -64,7 +64,7 @@ class Analysis::SequentialSearch
     parameter_space.each do |ps_id, ps_sample|
       group_list = []
       # add on variables
-      if selected.size == 0
+      if selected.empty?
         result_ids << [ps_id]
       else
         selected.each do |sel_id, sel_sample|
@@ -97,7 +97,7 @@ class Analysis::SequentialSearch
       if @iteration == 0
         # just add the point to the pareto curve
         min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
-        if min_point.size == 0
+        if min_point.empty?
           Rails.logger.info 'could not find the starting point'
         elsif min_point.size > 1
           Rails.logger.info 'found more than one datapoint for the initial iteration'
@@ -286,7 +286,7 @@ class Analysis::SequentialSearch
 
         # Return the values as an array which requires returning the values portion of the hash then flatten to remove
         # the outer array.
-        measure_values["#{variable._id}"] = values.values.flatten
+        measure_values[variable._id.to_s] = values.values.flatten
       end
       Rails.logger.info "measure values with variables are #{measure_values}"
       # TODO: test the length of each measure value array
@@ -304,7 +304,7 @@ class Analysis::SequentialSearch
     @run_list = determine_run_list(parameter_space)
     Rails.logger.info "datapoint list is #{@run_list}"
     new_pareto_point = true
-    while (!@run_list.empty?) || (new_pareto_point)
+    while !@run_list.empty? || new_pareto_point
       @run_list.each do |run|
         dp = @analysis.data_points.new(name: run[:name])
         dp['variable_group_list'] = run[:variable_group]
@@ -313,7 +313,7 @@ class Analysis::SequentialSearch
         dp['sample'] = run[:sample]
         if dp.save!
         else
-          fail "Could not save datapoint #{dp.errors}"
+          raise "Could not save datapoint #{dp.errors}"
         end
         Rails.logger.info "Added new datapoint #{dp.name}"
       end

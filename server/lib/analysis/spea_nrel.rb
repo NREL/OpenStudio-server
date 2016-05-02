@@ -69,11 +69,11 @@ class Analysis::SpeaNrel
 
     # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
-      fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
+      raise 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
+      raise 'Must have number of samples to discretize the parameter space'
     end
 
     # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
@@ -82,15 +82,15 @@ class Analysis::SpeaNrel
     # end
 
     if @analysis.problem['algorithm']['ppower'] <= 0
-      fail 'P Norm must be non-negative'
+      raise 'P Norm must be non-negative'
     end
 
     if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
-      fail 'Must have at least two objective functions defined'
+      raise 'Must have at least two objective functions defined'
     end
 
     if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
-      fail 'Must have at least two output_variables'
+      raise 'Must have at least two output_variables'
     end
 
     objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
@@ -102,7 +102,7 @@ class Analysis::SpeaNrel
     Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
     if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-      fail 'number of objective functions must equal'
+      raise 'number of objective functions must equal'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
@@ -118,7 +118,7 @@ class Analysis::SpeaNrel
 
     if samples.empty? || samples.size <= 1
       Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
@@ -134,7 +134,7 @@ class Analysis::SpeaNrel
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
@@ -143,7 +143,7 @@ class Analysis::SpeaNrel
 
       Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
@@ -395,7 +395,7 @@ class Analysis::SpeaNrel
           }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
 
     rescue => e
@@ -413,7 +413,7 @@ class Analysis::SpeaNrel
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
 
       # Post process the results and jam into the database

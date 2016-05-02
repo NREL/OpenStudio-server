@@ -67,14 +67,14 @@ class Analysis::Preflight
           if @analysis.problem['algorithm']['run_min']
             instance = {}
             if variable.relation_to_output == 'inverse'
-              instance["#{variable.id}".to_sym] = variable.maximum
+              instance[variable.id.to_s.to_sym] = variable.maximum
             else
-              instance["#{variable.id}".to_sym] = variable.minimum
+              instance[variable.id.to_s.to_sym] = variable.minimum
             end
 
             selected_variables.each do |variable2|
               if variable != variable2
-                instance["#{variable2.id}".to_sym] = variable2.static_value
+                instance[variable2.id.to_s.to_sym] = variable2.static_value
               end
             end
 
@@ -84,14 +84,14 @@ class Analysis::Preflight
           if @analysis.problem['algorithm']['run_max']
             instance = {}
             if variable.relation_to_output == 'inverse'
-              instance["#{variable.id}".to_sym] = variable.minimum
+              instance[variable.id.to_s.to_sym] = variable.minimum
             else
-              instance["#{variable.id}".to_sym] = variable.maximum
+              instance[variable.id.to_s.to_sym] = variable.maximum
             end
 
             selected_variables.each do |variable2|
               if variable != variable2
-                instance["#{variable2.id}".to_sym] = variable2.static_value
+                instance[variable2.id.to_s.to_sym] = variable2.static_value
               end
             end
 
@@ -100,11 +100,11 @@ class Analysis::Preflight
 
           if @analysis.problem['algorithm']['run_mode']
             instance = {}
-            instance["#{variable.id}".to_sym] = variable.modes_value
+            instance[variable.id.to_s.to_sym] = variable.modes_value
 
             selected_variables.each do |variable2|
               if variable != variable2
-                instance["#{variable2.id}".to_sym] = variable2.static_value
+                instance[variable2.id.to_s.to_sym] = variable2.static_value
               end
             end
 
@@ -118,13 +118,13 @@ class Analysis::Preflight
         mode_sample = {}
         selected_variables.each do |variable|
           if variable.relation_to_output == 'inverse'
-            min_sample["#{variable.id}"] = variable.maximum
-            max_sample["#{variable.id}"] = variable.minimum
+            min_sample[variable.id.to_s] = variable.maximum
+            max_sample[variable.id.to_s] = variable.minimum
           else
-            min_sample["#{variable.id}"] = variable.minimum
-            max_sample["#{variable.id}"] = variable.maximum
+            min_sample[variable.id.to_s] = variable.minimum
+            max_sample[variable.id.to_s] = variable.maximum
           end
-          mode_sample["#{variable.id}"] = variable.modes_value
+          mode_sample[variable.id.to_s] = variable.modes_value
         end
 
         Rails.logger.info "Minimum sample is: #{min_sample}"
@@ -136,9 +136,9 @@ class Analysis::Preflight
         samples << mode_sample if @analysis.problem['algorithm']['run_mode']
 
       elsif @analysis.problem['algorithm']['sample_method'] == 'individual_measures'
-        fail 'this has been removed for now until it is needed. it is best to use individual variables'
+        raise 'this has been removed for now until it is needed. it is best to use individual variables'
       else
-        fail 'no sampling method defined (all_variables or individual_variables)'
+        raise 'no sampling method defined (all_variables or individual_variables)'
       end
 
       if @analysis.problem['algorithm']['run_all_samples_for_pivots']

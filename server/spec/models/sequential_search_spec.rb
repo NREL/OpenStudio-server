@@ -1,6 +1,6 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Analysis::SequentialSearch do
+RSpec.describe Analysis::SequentialSearch, type: :model do
   before :all do
     # need to populate the database with an analysis and datapoints
 

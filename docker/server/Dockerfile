@@ -164,7 +164,6 @@ RUN cd /usr/src/R \
 
 RUN echo "remote enable" > /etc/Rserv.conf
 
-# TODO: Don't call this in multiple lines
 RUN R -e "install.packages(c('lhs','e1071','triangle','rJava','RUnit','RMongo'), repos='http://cran.fhcrc.org/')"
 RUN R -e "install.packages(c('R.methodsS3','R.oo','R.utils','NMOF','mco'), repos='http://cran.fhcrc.org/')"
 RUN R -e "install.packages(c('rgenoud','conf.design','vcd','combinat','DoE.base','xts','rjson'), repos='http://cran.fhcrc.org/')"

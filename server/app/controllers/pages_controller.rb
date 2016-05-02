@@ -30,14 +30,13 @@ class PagesController < ApplicationController
     # TODO: make this cross-platform
     @mnt_fs = nil
     @mnt_fs = @file_systems.select { |f| f[:mount_point] =~ /\/mnt/ }
-    @mnt_fs = @file_systems.select { |f| f[:mount_point] == '/' } if @mnt_fs.size == 0
+    @mnt_fs = @file_systems.select { |f| f[:mount_point] == '/' } if @mnt_fs.empty?
 
     respond_to do |format|
       format.html # status.html.erb
       format.json # status.json.jbuilder
     end
   end
-
 
   # main dashboard for the site
   def dashboard

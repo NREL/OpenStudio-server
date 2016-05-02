@@ -1,4 +1,6 @@
-describe DataPoint do
+require 'rails_helper'
+
+RSpec.describe DataPoint, type: :model do
   before :each do
     Project.delete_all
     Analysis.delete_all

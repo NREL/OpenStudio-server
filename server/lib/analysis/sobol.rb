@@ -66,15 +66,15 @@ class Analysis::Sobol
 
     # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['order'].nil? || @analysis.problem['algorithm']['order'] == 0
-      fail 'Value for order was not set or equal to zero (must be 1 or greater)'
+      raise 'Value for order was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['conf'].nil? || @analysis.problem['algorithm']['conf'] == 0
-      fail 'Value for conf was not set or equal to zero (must be 1 or greater)'
+      raise 'Value for conf was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
+      raise 'Must have number of samples to discretize the parameter space'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
@@ -95,7 +95,7 @@ class Analysis::Sobol
 
     if samples.empty? || samples.size <= 1
       Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
@@ -113,7 +113,7 @@ class Analysis::Sobol
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
@@ -122,7 +122,7 @@ class Analysis::Sobol
 
       Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
@@ -323,7 +323,7 @@ class Analysis::Sobol
           }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
 
     rescue => e
@@ -341,7 +341,7 @@ class Analysis::Sobol
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
 
       # Post process the results and jam into the database

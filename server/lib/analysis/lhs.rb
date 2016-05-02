@@ -74,7 +74,7 @@ class Analysis::Lhs
           Rails.logger.info "Non-combined samples yields #{samples}"
         end
       else
-        fail 'no sampling method defined (all_variables or individual_variables)'
+        raise 'no sampling method defined (all_variables or individual_variables)'
       end
 
       Rails.logger.info 'Fixing Pivot dimension'

@@ -15,8 +15,8 @@ class ComputeNode
   field :enabled, type: Boolean, default: false
 
   # Indexes
-  index({ hostname: 1 })
-  index({ ip_address: 1 })
+  index(hostname: 1)
+  index(ip_address: 1)
   index(node_type: 1)
 
   # Return all the enabled IP addresses as a hash in prep for writing to a dataframe
@@ -37,12 +37,12 @@ class ComputeNode
   end
 
   # Report back the system inforamtion of the node for debugging purposes
+  # TODO: Send system information to server, move this to a worker init because this is hitting API limits on amazon
   def self.system_information
     # # if Rails.env == "development"  #eventually set this up to be the flag to switch between varying environments
     #
     # # end
     #
-    # # TODO: move this to a worker init because this is hitting API limits on amazon
     # Socket.gethostname =~ /os-.*/ ? local_host = true : local_host = false
     #
     # # go through the worker node
@@ -51,7 +51,6 @@ class ComputeNode
     #     node.ami_id = 'Vagrant'
     #     node.instance_id = 'Vagrant'
     #   else
-    #     # TODO: convert this all over to Facter -- acutally remove this!
     #     #   ex: @datapoint.ami_id = m['ami-id'] ? m['ami-id'] : 'unknown'
     #     #   ex: @datapoint.instance_id = m['instance-id'] ? m['instance-id'] : 'unknown'
     #     #   ex: @datapoint.hostname = m['public-hostname'] ? m['public-hostname'] : 'unknown'
@@ -86,7 +85,7 @@ class ComputeNode
     # end
   end
 
-  # This method is currenlty not used, but was previously for reading in the
+  # This method is currently not used, but was previously for reading in the
   # configuration information from a file. This can be removed entirely
   # once the API for loading nodes into the app is finished.
   def load_from_file

@@ -73,7 +73,6 @@ begin
       r_index_value = index + 1
       k.logger.info "Adding new variable value with r_index #{r_index_value} of value #{value}"
 
-      # TODO: check for nil variables
       var_db = Variable.where(analysis_id: dp.analysis_id, r_index: r_index_value).first
       if var_db
         uuid = var_db.uuid
@@ -86,16 +85,16 @@ begin
           when 'integer', 'int'
             sample[uuid] = value.to_i
           when 'bool', 'boolean'
-            sample[uuid] = value.downcase == 'true' ? true : false
+            sample[uuid] = value.casecmp('true').zero? ? true : false
           else
-            fail "Unknown DataType for variable #{var_db.name} of #{var_db.value_type}"
+            raise "Unknown DataType for variable #{var_db.name} of #{var_db.value_type}"
         end
       else
-        fail 'Could not find variable in database'
+        raise 'Could not find variable in database'
       end
     end
   else
-    fail 'no variables in array'
+    raise 'no variables in array'
   end
 
   k.logger.info "new variable values are #{sample}" if k

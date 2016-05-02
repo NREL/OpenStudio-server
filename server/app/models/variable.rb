@@ -130,10 +130,10 @@ class Variable
 
   # Create the OS argument/variable
   def self.create_and_assign_to_measure(analysis_id, measure, os_json)
-    fail 'Measure ID was not defined' unless measure && measure.id
+    raise 'Measure ID was not defined' unless measure && measure.id
     var = Variable.where(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid']).first
     if var
-      fail "Variable already exists for '#{var.name}' : '#{var.uuid}'"
+      raise "Variable already exists for '#{var.name}' : '#{var.uuid}'"
     else
       Rails.logger.info("Adding a new variable/argument named: '#{os_json['display_name']}' with UUID '#{os_json['uuid']}'")
       var = Variable.find_or_create_by(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid'])
@@ -315,7 +315,7 @@ class Variable
 
   def verify_uuid
     self.uuid = id if uuid.nil?
-    self.save!
+    save!
   end
 
   def remove_dependencies

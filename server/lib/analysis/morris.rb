@@ -61,14 +61,14 @@ class Analysis::Morris
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
-    
+
     # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['r'].nil? || @analysis.problem['algorithm']['r'] == 0
-      fail 'Value for r was not set or equal to zero (must be 1 or greater)'
+      raise 'Value for r was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['levels'].nil? || @analysis.problem['algorithm']['levels'] == 0
-      fail 'Value for levels was not set or equal to zero (must be 1 or greater)'
+      raise 'Value for levels was not set or equal to zero (must be 1 or greater)'
     end
 
     objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
@@ -99,7 +99,7 @@ class Analysis::Morris
 
     if samples.empty? || samples.size <= 1
       Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
@@ -116,7 +116,7 @@ class Analysis::Morris
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
@@ -125,7 +125,7 @@ class Analysis::Morris
 
       Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
@@ -265,7 +265,7 @@ class Analysis::Morris
                     obj[i] <- 1.0e19
                   } else {
                     obj[i] <- 0.0
-                  }                  
+                  }
                 }
                 print(paste(data_point_directory,"/objectives.json is NULL"))
               } else {
@@ -284,7 +284,7 @@ class Analysis::Morris
                       obj[i] <- 1.0e19
                     } else {
                       obj[i] <- 0.0
-                    } 
+                    }
                     cat(data_point_directory," Missing ", objfuntemp,"\n");
                   }
                   objfuntargtemp <- paste("objective_function_target_",i,sep="")
@@ -383,7 +383,7 @@ class Analysis::Morris
               #axis(1, las=2)
               #axis(2, las=1)
               dev.off()
-            #if (all(is.finite(var_mu_star))) {  
+            #if (all(is.finite(var_mu_star))) {
               file_names_bar_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
               png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200)
               op <- par(mar = c(14,4,4,2) + 0.1)
@@ -417,7 +417,7 @@ class Analysis::Morris
         }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
@@ -434,7 +434,7 @@ class Analysis::Morris
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
 
       # Post process the results and jam into the database

@@ -69,11 +69,11 @@ class Analysis::Optim
 
     # TODO: preflight check -- need to catch this in the analysis module
     if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
-      fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
+      raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
     end
 
     if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
+      raise 'Must have number of samples to discretize the parameter space'
     end
 
     # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
@@ -82,7 +82,7 @@ class Analysis::Optim
     # end
 
     if @analysis.problem['algorithm']['ppower'] <= 0
-      fail 'P Norm must be non-negative'
+      raise 'P Norm must be non-negative'
     end
 
     if @analysis.problem['algorithm']['exit_on_guideline14'] == 1
@@ -94,7 +94,7 @@ class Analysis::Optim
     Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
     if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-      fail 'number of objective functions must equal'
+      raise 'number of objective functions must equal'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
@@ -108,14 +108,14 @@ class Analysis::Optim
     lhs = Analysis::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-    if samples.empty? || samples.size < 1
+    if samples.empty? || samples.empty?
       Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
+      raise "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
     end
 
-    unless var_types.all? { |t| t.downcase == 'continuous' }
+    unless var_types.all? { |t| t.casecmp('continuous').zero? }
       Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
-      fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+      raise "Must have all continous variables to run algorithm.  Found #{var_types}"
     end
 
     Rails.logger.info "mins_maxes: #{mins_maxes}"
@@ -130,7 +130,7 @@ class Analysis::Optim
       # Start up the cluster and perform the analysis
       cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
@@ -139,7 +139,7 @@ class Analysis::Optim
 
       Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
@@ -386,7 +386,7 @@ class Analysis::Optim
             }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
 
     rescue => e
@@ -400,7 +400,7 @@ class Analysis::Optim
 
       Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
 
       # Post process the results and jam into the database

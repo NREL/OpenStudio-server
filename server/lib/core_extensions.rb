@@ -9,7 +9,7 @@ def hash_to_dot_notation(object, prefix = nil)
           # remove any empty result hashes
           object.delete(key)
         else
-          hash_to_dot_notation value, "#{key}"
+          hash_to_dot_notation value, key.to_s
         end
       end
     end.reduce(&:merge)

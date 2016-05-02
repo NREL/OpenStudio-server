@@ -1,6 +1,6 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe Analysis::Lhs do
+RSpec.describe Analysis::Lhs, type: :model do
   before :each do
     # need to populate the database with an analysis and datapoints
 
