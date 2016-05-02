@@ -27,3 +27,5 @@
 /*.json
 
 vendor/cache
+.sass-cache
+
