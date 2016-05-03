@@ -14,7 +14,7 @@ GIT
 
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: ca6ec003761500b905122867d6a19ef7d76d1c97
+  revision: 969f930b9b6b29680c10ef564389d1cf8cea66b7
   branch: develop
   specs:
     openstudio-workflow (0.2.0)
@@ -112,7 +112,7 @@ GEM
       execjs
     coffee-script-source (1.10.0)
     colored (1.2)
-    concurrent-ruby (1.0.1)
+    concurrent-ruby (1.0.2)
     daemons (1.2.3)
     delayed_job (4.1.1)
       activesupport (>= 3.0, < 5.0)
@@ -123,7 +123,6 @@ GEM
     dencity (0.1.0)
       faraday
       faraday_middleware
-      hashie
       multi_json
       parallel
     diff-lcs (1.2.5)
@@ -146,7 +145,6 @@ GEM
     git-version-bump (0.15.1)
     globalid (0.3.6)
       activesupport (>= 4.1.0)
-    hashie (3.4.4)
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     i18n (0.7.0)
@@ -227,7 +225,6 @@ GEM
     rack-contrib (1.4.0)
       git-version-bump (~> 0.15)
       rack (~> 1.4)
-    rack-cors (0.4.0)
     rack-test (0.6.3)
       rack (>= 1.0)
     rails (4.2.0)
@@ -375,7 +372,6 @@ DEPENDENCIES
   os
   paperclip (~> 4.3)
   parallel
-  rack-cors
   rails (= 4.2)
   rest-client
   rserve-simpler

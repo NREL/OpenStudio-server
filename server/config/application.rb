@@ -50,14 +50,7 @@ module OpenstudioServer
     # Do not swallow errors in after_commit/after_rollback callbacks.
     # config.active_record.raise_in_transactional_callbacks = true
 
-    #config.middleware.insert_before 0, 'Rack::Cors' do
-    #  allow do
-    #    origins '*'-FROM http://localhost:8080
-    #    resource '*', headers: :any, methods: [:get, :post, :options]
-    #  end
-    #end
-
-   # remove x-frame-options header
-   config.action_dispatch.default_headers.delete('X-Frame-Options')
+    # remove x-frame-options header
+    config.action_dispatch.default_headers.delete('X-Frame-Options')
   end
 end

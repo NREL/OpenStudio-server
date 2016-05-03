@@ -1,7 +1,6 @@
 source 'http://rubygems.org'
 
 gem 'rails', '4.2'
-gem 'rack-cors', :require => 'rack/cors'
 
 # data modules
 gem 'json'
