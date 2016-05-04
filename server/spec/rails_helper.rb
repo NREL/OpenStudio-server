@@ -5,6 +5,16 @@ require File.expand_path('../../config/environment', __FILE__)
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'spec_helper'
 require 'rspec/rails'
+
+require 'capybara/rspec'
+require 'capybara/rails'
+
+Capybara.app_host = 'http://localhost:3000'
+Capybara.server_host = 'localhost'
+Capybara.server_port = '3000'
+Capybara.always_include_port = true
+Capybara.javascript_driver = :selenium
+
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -20,7 +30,7 @@ require 'rspec/rails'
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
 # require only the support files necessary.
 #
-# Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   # RSpec Rails can automatically mix in different behaviours to your tests
@@ -42,4 +52,12 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+
+  # NL Added 5/4/2016
+  # Allow features to have access to Requests
+  config.include RSpec::Rails::RequestExampleGroup, type: :feature
+
+  # project json helper for requests and features
+  config.include Requests::JsonHelpers, type: :request
+  config.include Requests::JsonHelpers, type: :feature
 end

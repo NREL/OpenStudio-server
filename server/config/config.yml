@@ -16,6 +16,8 @@ docker:
 
 test:
   <<: *defaults
+  os_server_host_url: 'localhost:3000'
+  sim_root_path: ':rails_root/../worker-nodes'
 
 production:
   <<: *defaults
