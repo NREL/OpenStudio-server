@@ -13,9 +13,9 @@ GIT
 
 GIT
   remote: git://github.com/NREL/openstudio-standards.git
-  revision: 75a17f5b54fc0b6dda3f6d06cc14d812f0c3450e
+  revision: 4f9a99102b9e4aa5f857e4264488189e7411f3bc
   specs:
-    openstudio-standards (0.1.1)
+    openstudio-standards (0.1.3)
 
 GEM
   remote: http://rubygems.org/
@@ -82,7 +82,7 @@ GEM
       rubyzip (>= 1.1.6)
     rubyzip (1.1.7)
     systemu (2.6.5)
-    tzinfo (0.3.48)
+    tzinfo (0.3.49)
     uuid (2.3.8)
       macaddr (~> 1.0)
 
