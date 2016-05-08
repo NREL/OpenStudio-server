@@ -118,7 +118,7 @@ class Analysis
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = { skip_init: false, use_server_as_worker: false }
+    defaults = { skip_init: false, use_server_as_worker: true }
     options = defaults.merge(options)
 
     Rails.logger.info "calling start on #{analysis_type} with options #{options}"
@@ -155,7 +155,7 @@ class Analysis
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    defaults = { allow_multiple_jobs: false }
+    defaults = { allow_multiple_jobs: true }
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
