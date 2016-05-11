@@ -2,45 +2,72 @@
 <%= javascript_tag do %>
     hide_vars = <%= raw @variables.to_json %>;
     pareto_points = <%= raw @pareto_data_points.to_json %>;
-    pareto_name = "<%=j @pareto_name %>";
+    pareto_names = <%= raw @pareto_names.to_json %>;
+    include_all_data = <%= raw @include_all.to_json %>;
 <% end %>
 
 <%= form_tag("/analyses/#{@analysis.id}/plot_parallelcoordinates") do %>
     <div id="chart-form">
       <div class="chart-text">
-        <p>Unselect variables below to remove them from the chart</p>
+        <h3 class="inline">Variables</h3> | <p class="inline"> Select the variables to include in the chart</p>
+        
+        <div class="pad-top-10 pad-bottom-10">
+          <button type="button" id="check_all" class="btn btn-primary">
+            Check / Uncheck All
+          </button>
+        </div>
 
         <div class="row-fluid">
           <div class="span6">
             <% @visualizes.each_with_index do |var, index| %>
-                <% if @visualizes.count/2.floor == index %>
-                    </div>
-                    <div class="span6">
+              <% if @visualizes.count/2.floor == index %>
+                  </div>
+                  <div class="span6">
+              <% end %>
+              <p>
+                <% if @variables.nil? or (!@variables.nil? and @variables.include?(var.name)) %>
+                    <% checked_str = true %>
+                <% else %>
+                    <% checked_str = false %>
                 <% end %>
-
-                <p>
-                  <% if @variables.nil? or (!@variables.nil? and @variables.include?(var.name)) %>
-                      <% checked_str = true %>
-                  <% else %>
-                      <% checked_str = false %>
-                  <% end %>
-                  <%= check_box_tag "variables[]", var.name, checked_str, :id => "variables_#{index}" %>
-                  <%= label_tag("variables_#{index}", var.display_name) %>
-                </p>
+                <%= check_box_tag "variables[]", var.name, checked_str, :id => "variables_#{index}" %>
+                <%= label_tag("variables_#{index}", var.display_name) %>
+              </p>
+            <% end %>
+              <%# if @pareto %><%#= hidden_field_tag("pareto", @pareto.id) %>
+              <%# end %>
+          </div>
+        </div>
+        <div class="pad-bottom-10">
+          <h3 class="inline">Data Series</h3> | <p class="inline"> Select the data series to include in the chart</p>
+        </div>
+        <div class="row-fluid">
+          <div class="span6">
+            <% if !@include_all.nil?  and @include_all %>
+              <% checked_str = true %>
+            <% else %>
+              <% checked_str = false %>
             <% end %>
             <p>
-              <% if @pareto %><%= hidden_field_tag("pareto", @pareto.id) %>
-              <% end %>
-
-            <div class="submit-form-right">
-              <button type="button" id="check_all" class="btn btn-primary">
-                Check / Uncheck All
-              </button>
-              <%= submit_tag "Update Chart", class: 'btn btn-primary' %>
-            </div>
+              <%= check_box_tag "all_data", true, checked_str, :id => "all_data" %>
+              <%= label_tag("all_data", "All Data") %>
             </p>
-            </div>
-            </div>
+            <% @saved_paretos.each do |p| %>
+              <% if !@pareto_names.empty? and @pareto_names.include?(p.name) %>
+                  <% checked_str = true %>
+              <% else %>
+                  <% checked_str = false %>
+              <% end %>
+              <p>
+                <%= check_box_tag "paretos[]", p.id, checked_str, :id => "paretos_#{p.id}" %>
+                <%= label_tag("paretos_#{p.id}", "Pareto Front #{p.name}") %>
+              </p>
+            <% end %>
+          </div>
+        </div>
+        <div class="submit-form-right">
+          <%= submit_tag "Update Chart", class: 'btn btn-primary' %>
+        </div>
       </div>
     </div>
 
@@ -48,296 +75,24 @@
     <% if @saved_paretos.count > 0 %>
         <div class="submit-form-right">
 
-          <%= submit_tag 'All Data', class: 'btn btn-primary' %>
+          <%#= submit_tag 'All Data', class: 'btn btn-primary' %>
 
-          <% @saved_paretos.each do |p| %>
-              <%= link_to p.name + ' Pareto Front', plot_parallelcoordinates_analysis_path(@analysis, pareto: p.id, variables: @variables), class: 'btn btn-primary' %>
-          <% end %>
+          <%# @saved_paretos.each do |p| %>
+              <%#= link_to p.name + ' Pareto Front', plot_parallelcoordinates_analysis_path(@analysis, pareto: p.id, variables: @variables), class: 'btn btn-primary' %>
+          <%# end %>
           <%= link_to 'Back to XY Plot', plot_xy_interactive_analysis_path(@analysis), class: 'btn btn-info' %>
         </div>
     <% end %>
 <% end %>
-<!--
-<script>
-    //size of chart
-    var m = [230, 20, 50, 20],
-            w = 1220 - m[1] - m[3],
-            h = 1000 - m[0] - m[2];
 
-    var x = d3.scale.ordinal().rangePoints([0, w], 1),
-            y = {},
-            dragging = {};
+<div id='partial-div'>
 
-    var colors = d3.scale.category10();
-
-    var line = d3.svg.line().defined(function (d) {
-                return d[1] != null;
-            }),
-            axis = d3.svg.axis().orient("left"),
-            axis = d3.svg.axis().ticks(5).tickFormat(d3.format(".2e")).orient("left"),
-            axisCategorical = d3.svg.axis().orient("left"),
-            background,
-            foreground;
-
-    var svg = d3.select("#graph-div").append("svg:svg")
-            .attr("width", w + m[1] + m[3])
-            .attr("height", h + m[0] + m[2])
-            .append("svg:g")
-            .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
-
-    d3.json("analysis_data.json?visualize=true", function (error, data) {
-        //console.log(data);
-        // Extract the list of dimensions and create a scale for each.
-        x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
-
-            // To ignore always
-            if ((d === "_id") || (d === "name") || (d === "data_point_uuid")) return false;
-
-            // To filter out (from form)
-            if ($.inArray(d, hide_vars) == -1) return false;
-
-            // handle String datatype
-            // handle Bool datatype
-            //console.log(data['variables'][d]);
-            if ((typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['data_type']) &&
-                    (
-                        (data['variables'][d]['data_type'].toLowerCase() === 'string') ||
-                        (data['variables'][d]['data_type'].toLowerCase() === 'bool') ||
-                        (data['variables'][d]['data_type'].toLowerCase() === 'choice'))
-                    ) {
-                //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['data_type']);
-                y[d] = d3.scale.ordinal()
-                        .domain(data['data'].map(function (p) {
-                            return p[d];
-                        }))
-                        .rangePoints([h, 0]);
-            }
-            else if ((typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['value_type']) &&
-                    (
-                        (data['variables'][d]['value_type'].toLowerCase() === 'string') ||
-                        (data['variables'][d]['value_type'].toLowerCase() === 'bool') ||
-                        (data['variables'][d]['value_type'].toLowerCase() === 'choice'))
-                    ) {
-                //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['value_type']);
-                y[d] = d3.scale.ordinal()
-                        .domain(data['data'].map(function (p) {
-                            return p[d];
-                        }))
-                        .rangePoints([h, 0]);
-            }
-            else {
-                console.log("ugh i'm here");
-                y[d] = d3.scale.linear()
-                        .domain(d3.extent(data['data'], function (p) {
-                            return p[d];
-                        }))
-                        .range([h, 0]);
-            }
-
-            return true;
-        }));
-
-        // Add grey background lines for context.
-        background = svg.append("svg:g")
-                .attr("class", "background")
-                .selectAll("path")
-                .data(data['data'])
-                .enter().append("svg:path")
-                .attr("d", path);
-
-        // Add blue/orange foreground lines for focus.
-        if (pareto_points.length > 0) {
-
-            foreground = svg.append("svg:g")
-                    .attr("class", "foreground")
-                    .selectAll("path")
-                    .data(data['data'])
-                    .enter().append("svg:path")
-                    .attr("d", path)
-                    .attr('stroke', function (d) {
-                        if (pareto_points.indexOf(d['_id']) > -1) {
-                            return colors(1);
-                        }
-                        else {
-                            return colors(0);
-                        }
-                    })
-                    .attr('stroke-width', function (d) {
-                        if (pareto_points.indexOf(d['_id']) > -1) {
-                            return '2px';
-                        }
-                        else {
-                            return '0.5px';
-                        }
-                    });
-
-        }
-        else {
-            foreground = svg.append("svg:g")
-                    .attr("class", "foreground")
-                    .selectAll("path")
-                    .data(data['data'])
-                    .enter().append("svg:path")
-                    .attr("d", path)
-                    .attr('stroke', colors(0));
-        }
-
-        // Add a group element for each dimension.
-        var g = svg.selectAll(".dimension")
-                .data(dimensions)
-                .enter().append("svg:g")
-                .attr("class", "dimension")
-                .attr("transform", function (d) {
-                    return "translate(" + x(d) + ")";
-                })
-                .call(d3.behavior.drag()
-                        .on("dragstart", function (d) {
-                            dragging[d] = this.__origin__ = x(d);
-                            background.attr("visibility", "hidden");
-                        })
-                        .on("drag", function (d) {
-                            dragging[d] = Math.min(w, Math.max(0, this.__origin__ += d3.event.dx));
-                            foreground.attr("d", path);
-                            dimensions.sort(function (a, b) {
-                                return position(a) - position(b);
-                            });
-                            x.domain(dimensions);
-                            g.attr("transform", function (d) {
-                                return "translate(" + position(d) + ")";
-                            })
-                        })
-                        .on("dragend", function (d) {
-                            delete this.__origin__;
-                            delete dragging[d];
-                            transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
-                            transition(foreground)
-                                    .attr("d", path);
-
-                            background
-                                    .attr("d", path)
-                                    .transition()
-                                    .delay(500)
-                                    .duration(0)
-                                    .attr("visibility", null);
-                        }));
-
-        // Add an axis and title.
-        g.append("svg:g")
-                .attr("class", "axis")
-                .each(function (d) {
-                    if ((typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['data_type']) &&
-                            (
-                                    (data['variables'][d]['data_type'].toLowerCase() === 'string') ||
-                                    (data['variables'][d]['data_type'].toLowerCase() === 'bool') ||
-                                    (data['variables'][d]['data_type'].toLowerCase() === 'choice'))
-                            ) {
-                        //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['data_type']);
-                        d3.select(this).call(axisCategorical.scale(y[d]));
-                    }
-                    else if ((typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['value_type']) &&
-                            (
-                                    (data['variables'][d]['value_type'].toLowerCase() === 'string') ||
-                                    (data['variables'][d]['value_type'].toLowerCase() === 'bool') ||
-                                    (data['variables'][d]['value_type'].toLowerCase() === 'choice'))
-                            ) {
-                        //console.log("This is a string or bool: " + d + ", " + data['variables'][d]['value_type']);
-                        d3.select(this).call(axisCategorical.scale(y[d]));
-                    }
-                    else {
-                        d3.select(this).call(axisCategorical.scale(y[d]));
-                        d3.select(this).call(axis.scale(y[d]));
-                    }
-                })
-                .append("svg:text")
-                .attr("text-anchor", "start")
-                .attr("y", -9)
-                .attr("transform", "rotate(-45)")
-                .text(function (d) {
-                    return data['variables'][d]['display_name_short'];
-                });
-
-        // Add and store a brush for each axis.
-        g.append("svg:g")
-                .attr("class", "brush")
-                .each(function (d) {
-                    d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brush", brush));
-                })
-                .selectAll("rect")
-                .attr("x", -8)
-                .attr("width", 16);
-
-        if (pareto_points.length > 0) {
-            var data_groups = ['All', pareto_name];
-
-            // draw legend (only when pareto front)
-            var legend = svg.selectAll(".legend")
-                    .data(colors.domain())
-                    .enter().append("g")
-                    .attr("class", "legend")
-                    .attr("transform", function (data_groups, i) {
-                        return "translate(20," + i * 20 + ")";
-                    });
-
-            // draw legend colored rectangles
-            legend.append("rect")
-                    .attr("x", w - 18)
-                    .attr("width", 18)
-                    .attr("height", 18)
-                    .style("fill", colors);
-
-            // draw legend text
-            legend.append("text")
-                    .attr("x", w - 24)
-                    .attr("y", 9)
-                    .attr("dy", ".35em")
-                    .style("text-anchor", "end")
-                    .text(function (d, i) {
-                        console.log(data_groups[i])
-                        return data_groups[i]
-                    });
-        }
-
-    });
-    function position(d) {
-        var v = dragging[d];
-        return v == null ? x(d) : v;
-    }
-
-    function transition(g) {
-        return g.transition().duration(500);
-    }
-
-    // Returns the path for a given data point.
-    function path(d) {
-        return line(dimensions.map(function (p) {
-            // check for undefined values
-            if (d[p] != 0 && (d[p] == " " || d[p] == null)) {
-                return [x(p), null];
-            }
-            // console.log(d[p]);
-            return [position(p), y[p](d[p])];
-        }));
-    }
-
-    // Handles a brush event, toggling the display of foreground lines.
-    function brush() {
-        var actives = dimensions.filter(function (p) {
-                    return !y[p].brush.empty();
-                }),
-                extents = actives.map(function (p) {
-                    return y[p].brush.extent();
-                });
-        foreground.style("display", function (d) {
-            return actives.every(function (p, i) {
-                return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-            }) ? null : "none";
-        });
-    }
-</script>
--->
+</div>
 
 <script>
     //size of chart
+    var selected_datapoints = [];
+
     var m = [230, 20, 50, 20],
             w = 1220 - m[1] - m[3],
             h = 1000 - m[0] - m[2];
@@ -365,10 +120,31 @@
 
     var categoricals = [];
 
+    console.log("pareto names: ", pareto_names);
+    console.log("include all data: ", include_all_data);
+
     d3.json("analysis_data.json?visualize=true", function (error, data) {
-        //console.log(data);
+        //console.log(data['data']);
+      var variables = data['variables']; 
+      data = data['data'];
+      if (Object.keys(pareto_points).length > 0 && !include_all_data) {
+        // make new dataset (exclude points not in the paretos)
+        var new_data = [];
+        console.log('length:', data.length);
+        for (var i=0; i < data.length; i++) {
+          for(var key in pareto_points) {
+            if (pareto_points[key].indexOf(data[i]['_id']) > -1) {
+              new_data.push(data[i]);
+              break;
+            }
+          }
+        }
+        data = new_data;
+      } 
+      console.log('data: ', data);
+
         // Extract the list of dimensions and create a scale for each.
-        x.domain(dimensions = d3.keys(data['data'][0]).filter(function (d) {
+        x.domain(dimensions = d3.keys(data[0]).filter(function (d) {
 
             // To ignore always
             if ((d === "_id") || (d === "name") || (d === "data_point_uuid")) return false;
@@ -378,22 +154,22 @@
 
             // handle String, Bool, Choice datatypes
             if (
-                (typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['data_type']) &&
+                (typeof(variables[d] !== 'undefined')) && (variables[d]['data_type']) &&
                     (
-                        (data['variables'][d]['data_type'].toLowerCase() === 'string') ||
-                        (data['variables'][d]['data_type'].toLowerCase() === 'bool') ||
-                        (data['variables'][d]['data_type'].toLowerCase() === 'choice')
+                        (variables[d]['data_type'].toLowerCase() === 'string') ||
+                        (variables[d]['data_type'].toLowerCase() === 'bool') ||
+                        (variables[d]['data_type'].toLowerCase() === 'choice')
                     ) 
-                ||(typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['value_type']) &&
+                ||(typeof(variables[d] !== 'undefined')) && (variables[d]['value_type']) &&
                     (
-                        (data['variables'][d]['value_type'].toLowerCase() === 'string') ||
-                        (data['variables'][d]['value_type'].toLowerCase() === 'bool') ||
-                        (data['variables'][d]['value_type'].toLowerCase() === 'choice')
+                        (variables[d]['value_type'].toLowerCase() === 'string') ||
+                        (variables[d]['value_type'].toLowerCase() === 'bool') ||
+                        (variables[d]['value_type'].toLowerCase() === 'choice')
                     )
                ) {
                 console.log("Categorical: ", d);
                 y[d] = d3.scale.ordinal()
-                        .domain(data['data'].map(function (p) {
+                        .domain(data.map(function (p) {
                             return p[d];
                         }))
                         .rangePoints([h, 0]);
@@ -401,51 +177,66 @@
             }
             else {
                 y[d] = d3.scale.linear()
-                        .domain(d3.extent(data['data'], function (p) {
+                        .domain(d3.extent(data, function (p) {
                             return p[d];
                         }))
                         .range([h, 0]);
-                console.log("Numeric: ", d);
+                //console.log("Numeric: ", d);
                     
             }
 
             return true;
         }));
 
-        console.log("Categoricals: ", categoricals);
+        //console.log("Categoricals: ", categoricals);
 
         // Add grey background lines for context.
         background = svg.append("svg:g")
                 .attr("class", "background")
                 .selectAll("path")
-                .data(data['data'])
+                .data(data)
                 .enter().append("svg:path")
                 .attr("d", path);
-
+          
+        
         // Add blue/orange foreground lines for focus.
-        if (pareto_points.length > 0) {
-
+        if (Object.keys(pareto_points).length > 0) {
+            
             foreground = svg.append("svg:g")
                     .attr("class", "foreground")
                     .selectAll("path")
-                    .data(data['data'])
+                    .data(data)
                     .enter().append("svg:path")
                     .attr("d", path)
                     .attr('stroke', function (d) {
-                        if (pareto_points.indexOf(d['_id']) > -1) {
-                            return colors(1);
+                        var found = 0;
+                        // depends on whether to include All?
+                        if (include_all_data)
+                          var index = 0;
+                        else
+                          var index = -1;
+                        for(var i in pareto_points) {
+                          index += 1;
+                          if (pareto_points[i].indexOf(d['_id']) > -1) {
+                            found = 1;
+                            return colors(index);
+                          }
                         }
-                        else {
-                            return colors(0);
-                        }
+                        if (!found && include_all_data) {
+                          return colors(0);
+                        } 
                     })
                     .attr('stroke-width', function (d) {
-                        if (pareto_points.indexOf(d['_id']) > -1) {
-                            return '2px';
+                      var found = 0;
+                      for(var i in pareto_points) {
+                        if (pareto_points[i].indexOf(d['_id']) > -1) {
+                          found = 1;
+                          return '2px';
                         }
-                        else {
-                            return '0.5px';
-                        }
+                      }
+                      if (!found && include_all_data) {
+                        return '0.5px';
+                      } 
                     });
 
         }
@@ -453,7 +244,7 @@
             foreground = svg.append("svg:g")
                     .attr("class", "foreground")
                     .selectAll("path")
-                    .data(data['data'])
+                    .data(data)
                     .enter().append("svg:path")
                     .attr("d", path)
                     .attr('stroke', colors(0));
@@ -503,17 +294,17 @@
                 .attr("class", "axis")
                 .each(function (d) {
                     if (
-                        (typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['data_type']) &&
+                        (typeof(variables[d] !== 'undefined')) && (variables[d]['data_type']) &&
                             (
-                                (data['variables'][d]['data_type'].toLowerCase() === 'string') ||
-                                (data['variables'][d]['data_type'].toLowerCase() === 'bool') ||
-                                (data['variables'][d]['data_type'].toLowerCase() === 'choice')
+                                (variables[d]['data_type'].toLowerCase() === 'string') ||
+                                (variables[d]['data_type'].toLowerCase() === 'bool') ||
+                                (variables[d]['data_type'].toLowerCase() === 'choice')
                             ) 
-                        ||(typeof(data['variables'][d] !== 'undefined')) && (data['variables'][d]['value_type']) &&
+                        ||(typeof(variables[d] !== 'undefined')) && (variables[d]['value_type']) &&
                             (
-                                (data['variables'][d]['value_type'].toLowerCase() === 'string') ||
-                                (data['variables'][d]['value_type'].toLowerCase() === 'bool') ||
-                                (data['variables'][d]['value_type'].toLowerCase() === 'choice')
+                                (variables[d]['value_type'].toLowerCase() === 'string') ||
+                                (variables[d]['value_type'].toLowerCase() === 'bool') ||
+                                (variables[d]['value_type'].toLowerCase() === 'choice')
                             )
                        ) 
                     {
@@ -530,7 +321,7 @@
                 .attr("y", -9)
                 .attr("transform", "rotate(-45)")
                 .text(function (d) {
-                    return data['variables'][d]['display_name_short'];
+                    return variables[d]['display_name_short'];
                 });
 
         // Add and store a brush for each axis.
@@ -544,8 +335,15 @@
                 .attr("width", 16);
 
 
-        if (pareto_points.length > 0) {
-            var data_groups = ['All', pareto_name];
+        if (Object.keys(pareto_points).length > 0) {
+
+            var data_groups = [];
+            if (include_all_data){
+              data_groups.push('All');
+            }
+            for (var i=0; i < pareto_names.length; i++) {
+              data_groups.push(pareto_names[i]);
+            }
 
             // draw legend (only when pareto front)
             var legend = svg.selectAll(".legend")
@@ -570,10 +368,89 @@
                     .attr("dy", ".35em")
                     .style("text-anchor", "end")
                     .text(function (d, i) {
-                        console.log(data_groups[i])
                         return data_groups[i]
                     });
         }
+
+      // Handles a brush event, toggling the display of foreground lines.
+      function brush() {
+        var actives = dimensions.filter(function (p) {
+                    return !y[p].brush.empty();
+                }),
+                extents = actives.map(function (p) {
+                    return y[p].brush.extent();
+                });
+
+        foreground.style("display", function (d) {
+            return actives.every(function (p, i) {
+                // Categorical
+                if (contains(categoricals, p))
+                {
+                    console.log("Categorical ", p);
+                    return extents[i][0] <= y[p](d[p]) && y[p](d[p]) <= extents[i][1];
+                }
+                // Numeric
+                else 
+                {
+                    return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+                }
+            }) ? null : "none";
+        });
+
+        // Get lines within extents
+        var selected = [];
+        console.log('actives: ', actives);
+        console.log('extents: ', extents);
+        data.map(function(d) {
+          actives.every(function(p, i) {
+
+            if (extents[i][0] <= d[p] && d[p] <= extents[i][1]) {
+              //console.log('within extent! ', d, '    ' ,p);
+              selected.push(d); 
+            }
+             
+          });
+        });
+        selected_datapoints = [];
+        selected.map(function (dp) {
+          selected_datapoints.push(dp['_id']);
+        });
+        console.log("selected: ", selected);
+        console.log('selected DPs: ', selected_datapoints);
+
+        // this does not work...can't send selected_datapoints to it
+        //$("#partial-div").html("<%= j render(partial: 'selected') %>");
+        var col1, col2;
+        $.each(selected_datapoints, function(index, value) {
+          if (Math.floor(selected_datapoints.length/2) <= index) {
+            if (col1 === undefined) {
+              col1 = $('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+
+            } else {
+              col1.append('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+            }
+          } else {
+            if (col2 == undefined) {
+              col2 = $('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+            } else {
+              col2.append('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+            }
+          }
+        });
+
+        $("#partial-div").empty().append('<h3>Selected Datapoints</h3>');
+        html = $('<div class="row">')
+              .append($('<div class="span6">')
+              .append($(col1)))
+              .append($('<div class="span6">')
+              .append($(col2)));
+
+        $("#partial-div").append(html);
+        
+        $("#partial-div").append('<div class="pad-top-20"><a href="download_selected?dps=' + selected_datapoints +
+          '" , class="btn btn-info">Download Selected Datapoints</a></div>');
+      }
+
 
     });
 
@@ -612,30 +489,7 @@
       return false;
     }
 
-    // Handles a brush event, toggling the display of foreground lines.
-    function brush() {
-        var actives = dimensions.filter(function (p) {
-                    return !y[p].brush.empty();
-                }),
-                extents = actives.map(function (p) {
-                    return y[p].brush.extent();
-                });
-        foreground.style("display", function (d) {
-            return actives.every(function (p, i) {
-                // Categorical
-                if (contains(categoricals, p))
-                {
-                    console.log("Categorical ", p);
-                    return extents[i][0] <= y[p](d[p]) && y[p](d[p]) <= extents[i][1];
-                }
-                // Numeric
-                else 
-                {
-                    return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-                }
-            }) ? null : "none";
-        });
-    }
+
 
 
 </script>
@@ -646,12 +500,21 @@
 
     $('#check_all').on("click", function () {
         if (toggle == true) {
-            $('input:checkbox').prop('checked', true);
-            toggle = false;
+          $("input:checkbox").each(function() {
+            var $this = $(this);
+            if($this.attr("id").indexOf('variable') > -1)
+              $this.prop('checked', true);
+          });
+          toggle = false;
         }
         else {
-            $('input:checkbox').prop('checked', false);
-            toggle = true;
+           
+          $("input:checkbox").each(function() {
+            var $this = $(this);
+            if($this.attr("id").indexOf('variable') > -1)
+              $this.prop('checked', false);
+          });
+          toggle = true;
         }
     });
 </script>

@@ -35,11 +35,11 @@ class Analysis
   # Relationships
   belongs_to :project
 
-  has_many :data_points
+  has_many :data_points, dependent: :destroy
   has_many :algorithms
   has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
-  has_many :measures
-  has_many :paretos
+  has_many :measures, dependent: :destroy
+  has_many :paretos, dependent: :destroy
   has_many :jobs
 
   # Indexes

@@ -15,4 +15,8 @@ class Pareto
   # Indexes
   index({ id: 1 }, unique: true)
   index(analysis_id: 1)
+
+  # Validation
+  validates_uniqueness_of :name, scope:  :anlysis_id
+  
 end

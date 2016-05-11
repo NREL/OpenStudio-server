@@ -417,28 +417,48 @@ class AnalysesController < ApplicationController
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
     @saved_paretos = @analysis.paretos
+    @include_all = false
 
     # variables for chart
-    @pareto_data_points = []
-    @pareto_name = ''
+    @pareto_data_points = {}
+    @pareto_names = []
+    @paretos = []
 
     # variables represent the variables we want graphed
     @visualizes = get_plot_variables(@analysis)
     @variables = params[:variables] ? params[:variables] : @visualizes.map(&:name)
+    # pareto_series represent the paretos to include in the chart
+    @pareto_series = params[:paretos] ? params[:paretos] : []
+    logger.info("HEY!! paretos param: #{params[:paretos]}")
+
+    @pareto_series.each do |p|
+      temp_pareto = Pareto.find(p)
+      @paretos << temp_pareto
+      @pareto_data_points[p] = temp_pareto.data_points
+      @pareto_names << temp_pareto.name
+    end 
+
+    # include all data?
+    logger.info("all_data param: #{params[:all_data]}")
+    if (!params[:all_data].nil? && params[:all_data]) == 'true' || @pareto_series.size == 0
+      @include_all = true
+    end
+
+
 
     # figure out actions
-    if params[:commit] && params[:commit] == 'All Data'
+    #if params[:commit] && params[:commit] == 'All Data'
       # don't do pareto
 
-    else
+    #else
       # check for pareto id
-      if params[:pareto]
-        @pareto = Pareto.find(params[:pareto])
-        @pareto_data_points = @pareto.data_points
-        @pareto_name = @pareto.name
-      end
+      #if params[:pareto]
+        #@pareto = Pareto.find(params[:pareto])
+        #@pareto_data_points = @pareto.data_points
+        #@pareto_name = @pareto.name
+      #end
 
-    end
+    #end
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
@@ -501,17 +521,17 @@ class AnalysesController < ApplicationController
       @pareto_data_points = params[:data_points]
 
       # save
-      pareto = Pareto.new
-      pareto.analysis = @analysis
-      pareto.x_var = params[:x_var]
-      pareto.y_var = params[:y_var]
-      pareto.name = params[:name]
-      pareto.data_points = params[:data_points]
-      if pareto.save!
+      @new_pareto = Pareto.new
+      @new_pareto.analysis = @analysis
+      @new_pareto.x_var = params[:x_var]
+      @new_pareto.y_var = params[:y_var]
+      @new_pareto.name = params[:name]
+      @new_pareto.data_points = params[:data_points]
+      if @new_pareto.save
         @pareto_saved = true
         flash[:notice] = 'Pareto saved!'
       else
-        flash[:notice] = 'The pareto front could not be saved.'
+        flash[:error] = "The pareto front could not be saved: #{@new_pareto.errors.full_messages}"
       end
     end
 
