@@ -1,0 +1,11 @@
+{
+  "analysis_id": "6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79",
+  "name": "Test Data Point",
+  "set_variable_values": {
+    "543c32a8-1a75-4ce2-94a7-56ae7684f201": "*Entire Building*",
+    "17f5caef-0fa3-4e07-8b62-cec15f3d3df4": 20,
+    "565ed9e5-b44a-4a3d-9b56-d25a53144c75": 5,
+    "c0a02054-12e8-40a0-8459-e08c767ae5a7": 1,
+    "c1206e78-2b42-411d-ab71-40677772e4ee": 1
+  }
+}

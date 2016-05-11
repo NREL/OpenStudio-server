@@ -42,7 +42,7 @@ class DataPointsController < ApplicationController
             end
           end
 
-          render json: @data_point
+          render json: { data_point: @data_point }
         end
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
@@ -99,7 +99,7 @@ class DataPointsController < ApplicationController
     analysis_id = params[:analysis_id]
     params[:data_point][:analysis_id] = analysis_id
 
-    @data_point = DataPoint.new(params[:data_point])
+    @data_point = DataPoint.new(data_point_params)
 
     respond_to do |format|
       if @data_point.save!
@@ -154,7 +154,7 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     respond_to do |format|
-      if @data_point.update_attributes(params[:data_point])
+      if @data_point.update(data_point_params)
         format.html { redirect_to @data_point, notice: 'Data point was successfully updated.' }
         format.json { head :no_content }
       else
@@ -335,5 +335,11 @@ class DataPointsController < ApplicationController
         format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
       end
     end
+  end
+
+  private
+
+  def data_point_params
+    params.require(:data_point).permit!
   end
 end

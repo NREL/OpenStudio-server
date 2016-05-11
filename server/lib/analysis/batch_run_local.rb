@@ -32,71 +32,21 @@ class Analysis::BatchRunLocal
 
     begin
       if @options[:data_points].empty?
-        Delayed::Worker.logger.info 'No data points were passed into the options, therefore checking which data points to run'
-        @analysis.data_points.where(status: 'na', download_status: 'na').each do |dp|
-          Delayed::Worker.logger.info "Adding in #{dp.uuid}"
-          dp.status = 'queued'
-          dp.save!
-          @options[:data_points] << dp.uuid
+        logger.info 'No data points were passed into the options, therefore checking which data points to run'
+
+        # queue up the simulations
+
+        @analysis.data_points.where(status: 'na').each do |dp|
+          logger.info "Adding #{dp.uuid} to simulations queue"
+          a = RunSimulateDataPoint.new(dp.id)
+          a.delay(queue: 'simulations').perform
         end
-      end
-
-      # Get the server ip address -- this can fail easily if no ComputeNode exists
-      # TODO: Move this to the Cluster Init routine
-      server_ip = ComputeNode.where(node_type: 'server').first.ip_address
-      logger.info "Server ip: #{server_ip}"
-      logger.info 'Starting Batch Run Local'
-
-      # Initialize each worker node
-      worker_ips = ComputeNode.worker_ips
-      logger.info "Worker node ips #{worker_ips}"
-
-      logger.info 'Running initialize worker scripts'
-      run_command = "#{sys_call_ruby} worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s initialize"
-      logger.info "Running the command: #{run_command}"
-      `#{run_command}`
-      exit_code = $?.exitstatus
-      logger.info "System call of #{run_command} exited with #{exit_code}"
-      raise "Could not make system call to run '#{run_command}}'" unless exit_code == 0
-
-      @options[:data_points].each do |dp|
-        run_command = "#{sys_call_ruby} simulate_data_point.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -u #{dp} -x #{@options[:run_data_point_filename]}"
-        logger.info "Running the command: #{run_command}"
-        `#{run_command}`
-        exit_code = $?.exitstatus
-        logger.info "System call of #{run_command} exited with #{exit_code}"
-        raise "Could not make system call to run '#{run_command}}'" unless exit_code == 0
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
-    end
-
-    begin
-      logger.info 'Running finalize worker scripts'
-      run_command = "#{sys_call_ruby} worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s finalize"
-      `#{run_command}`
-      exit_code = $?.exitstatus
-      logger.info "System call of #{run_command} exited with #{exit_code}"
-      logger.info "Could not make system call to run '#{run_command}}'" unless exit_code == 0
-    rescue => e
-      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      logger.error log_message
-      @analysis.status_message += log_message
-      @analysis.save!
-    ensure
-      # Only set this data if the analysis was NOT called from another analysis
-      unless @options[:skip_init]
-        @analysis_job.end_time = Time.now
-        @analysis_job.status = 'completed'
-        @analysis_job.save!
-        @analysis.reload
-      end
-      @analysis.save!
-
-      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 
@@ -114,6 +64,5 @@ class Analysis::BatchRunLocal
   # Return the Ruby system call string for ease
   def sys_call_ruby
     "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/ruby"
-    # "cd #{APP_CONFIG['sim_root_path']} && ruby"
   end
 end

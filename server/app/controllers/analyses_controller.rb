@@ -198,7 +198,6 @@ class AnalysesController < ApplicationController
     logger.info("action #{params.inspect}")
     @analysis_type = params[:analysis_type].nil? ? 'batch_run' : params[:analysis_type]
 
-    logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
     options = params.symbolize_keys # read the defaults from the HTTP request
     options[:run_data_point_filename] = params[:run_data_point_filename] if params[:run_data_point_filename]
 
@@ -357,6 +356,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Check if we can delete this!
   def new_view
     @analysis = Analysis.find(params[:id])
 
@@ -373,7 +373,7 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Parallel Coordinates plot
+  # TODO: rename this def with underscore
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
     @saved_paretos = @analysis.paretos

@@ -90,7 +90,7 @@ class Analysis
     else
       Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analysis'
+      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
       aj.delayed_job_id = job.id
       aj.save!
 

@@ -8,9 +8,11 @@ class DataPoint
   field :variable_values # This has been hijacked by OS DataPoint. Use set_variable_values
   field :set_variable_values, type: Hash, default: {} # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
 
-  field :download_status, type: String, default: 'na' # The available states are [:]
+  # TODO: delete download information and download status since these are pushed to the server now
+  field :download_status, type: String, default: 'na'
   field :download_information, type: String
   # field :openstudio_datapoint_file_name, type: String # make this paperclip? # TODO: Delete this item
+
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation
   field :results, type: Hash, default: {}

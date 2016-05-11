@@ -2,6 +2,9 @@ FactoryGirl.define do
   factory :data_point do
     name 'Example Data Point'
     analysis
+
+    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_data_point_1.json"))
+    initialize_with { new(json) }
   end
 
   factory :analysis do

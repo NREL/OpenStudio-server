@@ -1,15 +1,38 @@
 {
   "analysis": {
+    "uuid": "f89d2860-16e2-11e6-b6ba-3e1d05defe78",
     "display_name": "Example Csv",
     "name": "example_csv",
     "output_variables": [
-
     ],
     "problem": {
       "analysis_type": null,
       "algorithm": {
         "objective_functions": [
-
+          {
+            "display_name": "Total Natural Gas",
+            "name": "standard_report_legacy.total_natural_gas",
+            "units": "MJ/m2",
+            "visualize": true
+          },
+          {
+            "display_name": "Total Electricity",
+            "name": "standard_report_legacy.total_energy",
+            "units": "MJ/m2",
+            "visualize": true
+          },
+          {
+            "display_name": "Total Site Energy",
+            "name": "standard_report_legacy.total_electricity",
+            "units": "MJ/m2",
+            "visualize": true
+          },
+          {
+            "display_name": "Total Source Energy",
+            "name": "standard_report_legacy.total_source_energy",
+            "units": "MJ/m2",
+            "visualize": true
+          }
         ]
       },
       "workflow": [

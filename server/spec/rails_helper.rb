@@ -9,11 +9,11 @@ require 'rspec/rails'
 require 'capybara/rspec'
 require 'capybara/rails'
 
-Capybara.app_host = 'http://localhost:3000'
-Capybara.server_host = 'localhost'
-Capybara.server_port = '3000'
-Capybara.always_include_port = true
-Capybara.javascript_driver = :selenium
+# Capybara.app_host = 'http://localhost:3000'
+# Capybara.server_host = 'localhost'
+# Capybara.server_port = '3000'
+# Capybara.always_include_port = true
+# Capybara.javascript_driver = :selenium
 
 # Add additional requires below this line. Rails is not loaded until this point!
 

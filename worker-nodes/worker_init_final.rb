@@ -95,32 +95,7 @@ begin
   files = Dir["#{analysis_dir}/lib/worker_#{options[:state]}/*.rb"].map { |n| File.basename(n) }.sort
   logger.info "The following custom worker #{options[:state]} files were found #{files}"
   files.each do |f|
-    f_fullpath = "#{analysis_dir}/lib/worker_#{options[:state]}/#{f}"
-    f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
-    logger.info "Running #{options[:state]} script #{f_fullpath}"
-
-    # Each worker script has a very specific format and should be loaded and run as a class
-    require f_fullpath
-
-    # Remove the digits that specify the order and then create the class name
-    klass_name = File.basename(f, '.*').gsub(/^\d*_/, '').split('_').map(&:capitalize).join
-
-    # instantiate a class
-    klass = Object.const_get(klass_name).new
-
-    # check if there is an argument json that accompanies the class
-    args = nil
-    logger.info "Looking for argument file #{f_argspath}"
-    if File.exist?(f_argspath)
-      logger.info "argument file exists #{f_argspath}"
-      args = eval(File.read(f_argspath))
-      logger.info "arguments are #{args}"
-    end
-
-    r = klass.run(*args)
-    logger.info "Script returned with #{r}"
-
-    klass.finalize if klass.respond_to? :finalize
+    run_file(analysis_dir, options[:state], f, logger)
   end
 
   result = true
@@ -134,4 +109,35 @@ ensure
 
   # always print out the state at the end
   puts result # as a string? (for R to parse correctly?)
+end
+
+
+# Run the initialize/finalize script
+def run_file(analysis_dir, state, file, logger)
+  f_fullpath = "#{analysis_dir}/lib/worker_#{state}/#{file}"
+  f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
+  logger.info "Running #{state} script #{f_fullpath}"
+
+  # Each worker script has a very specific format and should be loaded and run as a class
+  require f_fullpath
+
+  # Remove the digits that specify the order and then create the class name
+  klass_name = File.basename(f, '.*').gsub(/^\d*_/, '').split('_').map(&:capitalize).join
+
+  # instantiate a class
+  klass = Object.const_get(klass_name).new
+
+  # check if there is an argument json that accompanies the class
+  args = nil
+  logger.info "Looking for argument file #{f_argspath}"
+  if File.exist?(f_argspath)
+    logger.info "argument file exists #{f_argspath}"
+    args = eval(File.read(f_argspath))
+    logger.info "arguments are #{args}"
+  end
+
+  r = klass.run(*args)
+  logger.info "Script returned with #{r}"
+
+  klass.finalize if klass.respond_to? :finalize
 end
