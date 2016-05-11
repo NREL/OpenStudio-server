@@ -22,10 +22,21 @@ Make sure that you have installed the following Vagrant plug-ins.
 * vagrant plugin install vagrant-aws
 * vagrant plugin install vagrant-awsinfo
 
-To create the EC2 instances, provision the application, then create the AMIs simply run the following:
+In addition, an AWS account needs to be specified to create the EC2 instances in. To specify this account, in your home directory create a .aws folder, and in the folder write a config.yml file following the form below with your AWS account information.
+```
+access_key_id: accessKeyForAwsUser
+secret_access_key: secretAccessKeyForAwsUser
+keypair_name: your-keypair-name
+region: us-east-1
+private_key_path: /Absolute/path/to/aws/.ssh/key.pem
+```
+
+Next, go to the [version.rb](https://github.com/NREL/OpenStudio-server/blob/develop/server/lib/openstudio_server/version.rb) file in the /server/lib/openstudio-server directory of this repo and update the VERSION_EXT constant for your one-off build. One off builds using the create_vms.rb script should not change the VERSION constant, as that is updated through the master branch and new AMIs released using the rake release command.
+
+Finally, to automatically create the EC2 instances, provision the application, then create the AMIs simply run the following, substituting in the username to register with the AMI:
 
 ```
-ruby create_vms.rb
+bundle exec ruby create_vms.rb -p aws -u your_user_name
 ```
 
 ## Server Configuration
