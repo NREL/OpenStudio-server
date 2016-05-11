@@ -28,4 +28,5 @@
 
 vendor/cache
 .sass-cache
-
+spec/files/tmp/*
+faraday.log
