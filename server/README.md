@@ -1,21 +1,17 @@
 # OpenStudio Rails Application
 
-## Instructions
-- Login to the vagrant box and configure the worker and server
+## Starting Worker Pools
 
-* Server
+The server is required to have a running delayed job instances watching
+the `analyses` queue. 
 
-There is a helper script that configures the server for you, simply call `cs`.
-
-```sh
-cs
+```
+bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,background start
 ```
 
-* Worker
+Depending on the resources available on the machine, the worker nodes
+can be spun up with the following command. 
 
-There is a helper script that configures the worker for you, simply call `cw`.
-
-
-```sh
-cw
+```
+bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulations start
 ```

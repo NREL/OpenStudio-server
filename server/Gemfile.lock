@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-analysis-gem.git
-  revision: 0024c290575c33628b3bb6b4e8f7ddb69497fff8
+  revision: b5be92cbd99fb8cb218025388c6894cd2bb674dd
   branch: develop
   specs:
     openstudio-analysis (0.5.0)
@@ -14,7 +14,7 @@ GIT
 
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: b545c11907ba24212c708fb05067923d147dd58b
+  revision: 822834f2ca0bcadc47d09bc456f758671c6ed71e
   branch: intermediate-pat2.0
   specs:
     openstudio-workflow (0.2.0)
