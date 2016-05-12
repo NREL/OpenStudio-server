@@ -159,8 +159,8 @@ class Analysis::Morris
 
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
-      print(paste("UniqueGroups:",uniquegroups))
-      print(paste("objfun:",objfun))
+            print(paste("UniqueGroups:",uniquegroups))
+            print(paste("objfun:",objfun))
 
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
