@@ -54,7 +54,9 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     pp j
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
-    # expect(j[:data].size).to be > 0
+
+    puts "App host is: #{host}"
+    # sleep 1000
 
     # TODO: Check results -- may need different analysis type with annual data
   end

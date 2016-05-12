@@ -14,7 +14,7 @@ class DataPoint
   # field :openstudio_datapoint_file_name, type: String # make this paperclip? # TODO: Delete this item
 
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
-  field :status_message, type: String, default: '' # results of the simulation
+  field :status_message, type: String, default: '' # results of the simulation [:completed normal, :error]
   field :results, type: Hash, default: {}
   field :run_start_time, type: DateTime, default: nil
   field :run_end_time, type: DateTime, default: nil

@@ -101,10 +101,13 @@ class RunSimulateDataPoint
           }
       )
     end
+
+    @data_point.update( status_message: 'completed normal')
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     puts log_message
     sim_logger.info log_message if sim_logger
+    @data_point.update( status_message: 'error')
   ensure
     sim_logger.info "Finished #{__FILE__}" if sim_logger
     sim_logger.close if sim_logger
