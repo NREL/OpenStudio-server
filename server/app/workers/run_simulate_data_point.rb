@@ -13,11 +13,13 @@ class RunSimulateDataPoint
     # For now just track the status here. Ideally we would use delayed jobs
     # or a plugin for delayed jobs to track the status of the job.
     # Also, should we use the API to set these or relay on mongoid.
-    @data_point.update( { run_start_time: Time.now, status: 'queued'} )
+    @data_point.update( { run_queue_time: Time.now, status: 'queued'} )
     @data_point.save!
   end
 
   def perform
+    @data_point.update( { run_start_time: Time.now, status: 'started'} )
+
     # Create the analysis directory
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
     FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
