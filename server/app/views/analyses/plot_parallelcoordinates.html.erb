@@ -419,7 +419,6 @@
         console.log('selected DPs: ', selected_datapoints);
 
         // this does not work...can't send selected_datapoints to it
-        //$("#partial-div").html("<%= j render(partial: 'selected') %>");
         var col1, col2;
         $.each(selected_datapoints, function(index, value) {
           if (Math.floor(selected_datapoints.length/2) <= index) {
