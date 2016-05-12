@@ -35,10 +35,10 @@ class RunSimulateDataPoint
     download_analysis_zip(sim_logger)
 
     # delete any existing data files from the server in case this is a 'rerun'
-    RestClient.delete "http://#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
+    RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
 
     # Download the data point to run and save to disk
-    url = "http://#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
+    url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
     sim_logger.info "Downloading data point from #{url}"
     r = RestClient.get url
     raise "Analysis JSON could not be downloaded" unless r.code == 200
@@ -79,7 +79,7 @@ class RunSimulateDataPoint
     # TODO: check for timeouts and retry
     Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each do |report|
       RestClient.post(
-          "http://#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file",
+          "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file",
           file: {
               display_name: File.basename(report, '.*'),
               type: 'Report',
@@ -93,7 +93,7 @@ class RunSimulateDataPoint
     results_zip = "#{simulation_dir}/data_point.zip"
     if File.exist? results_zip
       RestClient.post(
-          "http://#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file",
+          "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file",
           file: {
               display_name: 'Zip File',
               type: 'Data Point',
@@ -143,7 +143,7 @@ class RunSimulateDataPoint
       write_lock(write_lock_file) do |_|
         # create write lock
         download_file = "#{analysis_dir}/analysis.zip"
-        download_url = "http://#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
+        download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
         sim_logger.info "Downloading analysis zip from #{download_url}"
 
         File.open(download_file, 'wb') do |saved_file|
@@ -157,7 +157,7 @@ class RunSimulateDataPoint
         OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
 
         # Download only one copy of the anlaysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
-        a = RestClient.get "http://#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
+        a = RestClient.get "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
         raise "Analysis JSON could not be downloaded" unless a.code == 200
         # Parse to JSON to save it again with nice formatting
         File.open("#{analysis_dir}/analysis.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
@@ -181,7 +181,7 @@ class RunSimulateDataPoint
             }
         }
 
-        url = "http://#{APP_CONFIG['os_server_host_url']}/compute_nodes"
+        url = "#{APP_CONFIG['os_server_host_url']}/compute_nodes"
         RestClient.post(url, data)
       end
 

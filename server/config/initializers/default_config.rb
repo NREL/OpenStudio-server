@@ -9,7 +9,7 @@ APP_CONFIG['ruby_bin_dir'] = APP_CONFIG['ruby_bin_dir'].gsub(':ruby_bin_dir', Rb
 APP_CONFIG['rails_log_path'] = File.expand_path(APP_CONFIG['rails_log_path'].gsub(':rails_root', Rails.root.to_s))
 
 # Set the default URL
-Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host_url']
+Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host_url'].delete("http://")
 
 # Set the log path
 FileUtils.mkdir_p APP_CONFIG['rails_log_path'] unless Dir.exist? APP_CONFIG['rails_log_path']

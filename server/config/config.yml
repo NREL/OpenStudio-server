@@ -8,7 +8,7 @@ development:
   <<: *defaults
   ruby_bin_dir: ':ruby_bin_dir'
   sim_root_path: ':rails_root/../worker-nodes'
-  os_server_host_url: 'localhost:3000'
+  os_server_host_url: 'http://localhost:3000'
 
 docker:
   <<: *defaults
@@ -16,7 +16,7 @@ docker:
 
 test:
   <<: *defaults
-  os_server_host_url: 'localhost:3000'
+  os_server_host_url: 'http://localhost:3000'
   sim_root_path: ':rails_root/../worker-nodes'
 
 production:
