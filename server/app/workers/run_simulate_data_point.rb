@@ -14,6 +14,7 @@ class RunSimulateDataPoint
     # or a plugin for delayed jobs to track the status of the job.
     # Also, should we use the API to set these or relay on mongoid.
     @data_point.update( { run_start_time: Time.now, status: 'queued'} )
+    @data_point.save!
   end
 
   def perform
@@ -89,7 +90,7 @@ class RunSimulateDataPoint
 
     # Post the zip file of results
     # TODO: Do not save the _reports file anymore in the workflow gem
-    results_zip = "#{simulation_dir}/data_point_#{@options[:uuid]}.zip"
+    results_zip = "#{simulation_dir}/data_point.zip"
     if File.exist? results_zip
       RestClient.post(
           "http://#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file",
