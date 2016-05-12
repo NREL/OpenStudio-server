@@ -13,12 +13,12 @@ class RunSimulateDataPoint
     # For now just track the status here. Ideally we would use delayed jobs
     # or a plugin for delayed jobs to track the status of the job.
     # Also, should we use the API to set these or relay on mongoid.
-    @data_point.update( { run_queue_time: Time.now, status: 'queued'} )
+    @data_point.update({run_queue_time: Time.now, status: 'queued'})
     @data_point.save!
   end
 
   def perform
-    @data_point.update( { run_start_time: Time.now, status: 'started'} )
+    @data_point.update({run_start_time: Time.now, status: 'started'})
 
     # Create the analysis directory
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
@@ -50,15 +50,41 @@ class RunSimulateDataPoint
     # copy over the test file to the run directory
     FileUtils.cp "#{analysis_dir}/analysis.json", "#{simulation_dir}/analysis.json"
 
-    workflow_options = {
-        problem_filename: "analysis.json",
-        datapoint_filename: "data_point.json",
-        analysis_root_path: analysis_dir,
+    osw_path = "#{simulation_dir}/data_point.osw"
+    osw_options = {
+        file_paths: [
+            "../weather",
+            "../seed"
+        ],
+        measure_paths: ["../measures"]
     }
+    t = OpenStudio::Analysis::Translator::Workflow.new(
+        "#{simulation_dir}/analysis.json",
+        osw_options
+    )
+    t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
+    if t_result
+      File.open(osw_path, 'w') { |f| f << JSON.pretty_generate(t_result) }
+    else
+      fail "Could not translate OSA, OSD into OSW"
+    end
+
     sim_logger.info 'Creating Workflow Manager instance'
     sim_logger.info "Directory is #{simulation_dir}"
-    sim_logger.info "Workflow options are #{workflow_options}"
-    k = OpenStudio::Workflow.load 'Local', simulation_dir, workflow_options
+    adapter_options = {
+        workflow_filename: File.basename(osw_path),
+        datapoint_filename: "#{simulation_dir}/data_point.json",
+        analysis_filename: "#{analysis_dir}/analysis.json"
+    }
+    input_adapter = OpenStudio::Workflow.load_input_adapter 'local', adapter_options
+    adapter_options[:output_directory] = input_adapter.run_directory File.dirname(osw_path)
+    output_adapter = OpenStudio::Workflow.load_output_adapter 'local', adapter_options
+    run_options = {debug: true, cleanup: false}
+
+    k = OpenStudio::Workflow::Run.new input_adapter,
+                                      output_adapter,
+                                      File.dirname(osw_path),
+                                      run_options
     sim_logger.info "Running workflow"
     k.run
     sim_logger.info "Final run state is #{k.final_state}"
@@ -104,17 +130,17 @@ class RunSimulateDataPoint
       )
     end
 
-    @data_point.update( status_message: 'completed normal')
+    @data_point.update(status_message: 'completed normal')
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     puts log_message
     sim_logger.info log_message if sim_logger
-    @data_point.update( status_message: 'error')
+    @data_point.update(status_message: 'error')
   ensure
     sim_logger.info "Finished #{__FILE__}" if sim_logger
     sim_logger.close if sim_logger
 
-    @data_point.update( { run_end_time: Time.now, status: 'completed'} )
+    @data_point.update({run_end_time: Time.now, status: 'completed'})
 
     true
   end

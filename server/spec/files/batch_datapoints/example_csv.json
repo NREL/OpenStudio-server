@@ -4,35 +4,39 @@
     "display_name": "Example Csv",
     "name": "example_csv",
     "output_variables": [
+      {
+        "display_name": "Total Natural Gas",
+        "name": "standard_report_legacy.total_natural_gas",
+        "units": "MJ/m2",
+        "visualize": true,
+        "objective_function": true
+      },
+      {
+        "display_name": "Total Electricity",
+        "name": "standard_report_legacy.total_energy",
+        "units": "MJ/m2",
+        "visualize": true
+      },
+      {
+        "display_name": "Total Site Energy",
+        "name": "standard_report_legacy.total_electricity",
+        "units": "MJ/m2",
+        "visualize": true,
+        "objective_function": true
+      },
+      {
+        "display_name": "Total Source Energy",
+        "name": "standard_report_legacy.total_source_energy",
+        "units": "MJ/m2",
+        "visualize": true
+      }
     ],
     "problem": {
       "analysis_type": null,
       "algorithm": {
         "objective_functions": [
-          {
-            "display_name": "Total Natural Gas",
-            "name": "standard_report_legacy.total_natural_gas",
-            "units": "MJ/m2",
-            "visualize": true
-          },
-          {
-            "display_name": "Total Electricity",
-            "name": "standard_report_legacy.total_energy",
-            "units": "MJ/m2",
-            "visualize": true
-          },
-          {
-            "display_name": "Total Site Energy",
-            "name": "standard_report_legacy.total_electricity",
-            "units": "MJ/m2",
-            "visualize": true
-          },
-          {
-            "display_name": "Total Source Energy",
-            "name": "standard_report_legacy.total_source_energy",
-            "units": "MJ/m2",
-            "visualize": true
-          }
+          "standard_report_legacy.total_natural_gas",
+          "standard_report_legacy.total_electricity"
         ]
       },
       "workflow": [
