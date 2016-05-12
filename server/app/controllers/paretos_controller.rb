@@ -15,6 +15,9 @@ class ParetosController < ApplicationController
   def show
     @pareto = Pareto.find(params[:id])
 
+    @analysis = @pareto.analysis
+    @dps = @pareto.data_points.split(" ").join(",")
+
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @pareto }

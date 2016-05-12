@@ -40,5 +40,7 @@
       <% end %>
       </tbody>
     </table>
+
+    <%= link_to 'Download R Dataframe for these Datapoints', download_selected_datapoints_analysis_path(@analysis, dps: @dps), class: 'btn btn-info' %>
   </div>
 </div>

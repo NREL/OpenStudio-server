@@ -429,7 +429,6 @@ class AnalysesController < ApplicationController
     @variables = params[:variables] ? params[:variables] : @visualizes.map(&:name)
     # pareto_series represent the paretos to include in the chart
     @pareto_series = params[:paretos] ? params[:paretos] : []
-    logger.info("HEY!! paretos param: #{params[:paretos]}")
 
     @pareto_series.each do |p|
       temp_pareto = Pareto.find(p)
@@ -503,7 +502,6 @@ class AnalysesController < ApplicationController
 
     # calculate pareto or update chart?
     if params[:commit] && params[:commit] == 'Calculate Pareto Front'
-      logger.info "PARETO! COMMIT VALUES IS: #{params[:commit]}"
       # set variable for view
       @pareto = true
       # keep these pts in a variable, but mainly for quick debug
@@ -516,7 +514,6 @@ class AnalysesController < ApplicationController
 
     # save pareto front?
     if params[:commit] && params[:commit] == 'Save Pareto Front'
-      logger.info("in SAVE PARETO FRONT")
 
       @pareto = true
       @pareto_data_points = params[:data_points]
@@ -580,14 +577,14 @@ class AnalysesController < ApplicationController
     pareto_points
   end
 
-  def download_selected
+  def download_selected_datapoints
     @analysis = Analysis.find(params[:id])
-
+    logger.info("DPS: #{params[:dps]}")
     if params[:dps]
-      # get datapoints
-      @datapoint_ids = params[:dps]
+      # get datapoints (make array)
+      @datapoint_ids = params[:dps].split(',')
     end
-    
+    # TODO: what do you actually want returned here?
     write_and_send_rdata(@analysis, @datapoint_ids)
 
   end
@@ -911,11 +908,18 @@ class AnalysesController < ApplicationController
         datapoint_ids = [datapoint_ids];
       end
 
+      logger.info("datapoint IDS: #{datapoint_ids}")
+      plot_data_temp = DataPoint.where(analysis_id: analysis, status: 'completed',
+                                  status_message: 'completed normal').in(id: datapoint_ids);
+      logger.info("PLOT DATA TEMP SIZE: #{plot_data_temp.count}")
+
       plot_data = DataPoint.where(analysis_id: analysis, status: 'completed',
-                                  status_message: 'completed normal').in(id: datapoint_ids).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                                  status_message: 'completed normal', :id.in => datapoint_ids ).map_reduce(map, reduce).out(replace: "datapoints_mr_#{analysis.id}")
+      logger.info("PLOT DATA SIZE: #{plot_data.count}")
+
     else
       plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                  .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                  .order_by(:created_at.asc).map_reduce(map, reduce).out(replace: "datapoints_mr_#{analysis.id}")
     end
     logger.info "finished fixing up data: #{Time.now - start_time}"
 
@@ -964,11 +968,11 @@ class AnalysesController < ApplicationController
     variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
   end
 
-  def write_and_send_csv(analysis)
+  def write_and_send_csv(analysis, datapoint_ids=nil)
     require 'csv'
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_analysis_data(analysis, nil, export: true)
+    variables, data = get_analysis_data(analysis, datapoint_ids, export: true)
     static_fields = %w(name _id run_start_time run_end_time status status_message)
 
     logger.info variables

@@ -33,6 +33,7 @@ OpenstudioServer::Application.routes.draw do
         get :download_analysis_zip
         get :download_algorithm_results_zip
         get :dencity
+        get :download_selected_datapoints
 
         match 'plot_parallelcoordinates' => 'analyses#plot_parallelcoordinates', :via => [:get, :post]
         match 'plot_xy_interactive' => 'analyses#plot_xy_interactive', :via => [:get, :post]

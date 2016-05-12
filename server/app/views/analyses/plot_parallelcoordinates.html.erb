@@ -423,16 +423,16 @@
         $.each(selected_datapoints, function(index, value) {
           if (Math.floor(selected_datapoints.length/2) <= index) {
             if (col1 === undefined) {
-              col1 = $('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+              col1 = $('<div class="pad-5"><a href="/data_points/' + value + '">' +value+ '</a></div>');
 
             } else {
-              col1.append('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+              col1.append('<div class="pad-5"><a href="/data_points/' + value + '">' +value+ '</a></div>');
             }
           } else {
             if (col2 == undefined) {
-              col2 = $('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+              col2 = $('<div class="pad-5"><a href="/data_points/' + value + '">' +value+ '</a></div>');
             } else {
-              col2.append('<div class="pad-5"><a href="/data_points/' + value + '">' + value + '</a></div>');
+              col2.append('<div class="pad-5"><a href="/data_points/' + value + '">' +value+ '</a></div>');
             }
           }
         });
@@ -446,7 +446,7 @@
 
         $("#partial-div").append(html);
         
-        $("#partial-div").append('<div class="pad-top-20"><a href="download_selected?dps=' + selected_datapoints +
+        $("#partial-div").append('<div class="pad-top-20"><a href="download_selected_datapoints?dps=' + selected_datapoints +
           '" , class="btn btn-info">Download Selected Datapoints</a></div>');
       }
 
