@@ -16,6 +16,7 @@ class DataPoint
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation [:completed normal, :error]
   field :results, type: Hash, default: {}
+  field :run_queue_time, type: DateTime, default: nil
   field :run_start_time, type: DateTime, default: nil
   field :run_end_time, type: DateTime, default: nil
   field :sdp_log_file, type: Array, default: []
