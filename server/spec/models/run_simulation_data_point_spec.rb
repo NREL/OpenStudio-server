@@ -50,8 +50,6 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
 
     # Verify that the results exist
     j = api.get_analysis_results(analysis_id)
-    require 'pp'
-    pp j
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
 

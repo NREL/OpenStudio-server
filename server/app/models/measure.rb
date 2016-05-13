@@ -15,7 +15,7 @@ class Measure
 
   # Relationships
   belongs_to :analysis
-  has_many :variables
+  has_many :variables, dependent: :destroy
 
   # Indexes
   index({ uuid: 1 }, unique: true)

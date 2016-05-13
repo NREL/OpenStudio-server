@@ -40,7 +40,7 @@ class Variable
   # Relationships
   belongs_to :analysis, index: true
   belongs_to :measure
-  has_many :preflight_images
+  has_many :preflight_images, dependent: :destroy
 
   # Indexes
   index({ uuid: 1 }, unique: true)
@@ -58,7 +58,6 @@ class Variable
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :remove_dependencies
 
   def self.create_from_os_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
@@ -316,12 +315,5 @@ class Variable
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!
-  end
-
-  def remove_dependencies
-    # TODO: need to reset permissions before we can actually delete the files
-    # preflight_images.each do |pfi|
-    #  pfi.destroy
-    # end
   end
 end

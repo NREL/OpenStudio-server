@@ -26,7 +26,12 @@
               </tr>
               <tr>
                 <th>Status</th>
-                <td><%= @analysis.status %></td>
+                <td><%= @analysis.status %>
+                  <% if @analysis.status == 'started' %>
+                    | <%= link_to("Stop Analysis", stop_analysis_path(@analysis)) %>
+                      <% end %>
+                </td>
+
               </tr>
               <tr>
                 <th>Start Time</th>
@@ -88,9 +93,7 @@
       </div>
     </div>
 
-    <% if @analysis.status == 'started' %>
-        <div class="button-container"><%= link_to("Stop Analysis", stop_analysis_path(@analysis), :class => "btn btn-mini") %></div>
-    <% end %>
+
 
     <h2 class="pad-top-30">Simulations
       (<%= "#{@analysis.data_points.where(:status => 'completed').count} / #{@analysis.data_points.count}" if @analysis.data_points %>

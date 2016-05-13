@@ -35,16 +35,16 @@ class Analysis
   # Relationships
   belongs_to :project
 
-  has_many :data_points
-  has_many :algorithms
-  has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
-  has_many :measures
-  has_many :paretos
-  has_many :jobs
+  has_many :data_points, dependent: :destroy
+  has_many :algorithms, dependent: :destroy
+  has_many :variables, dependent: :destroy
+  has_many :measures, dependent: :destroy
+  has_many :paretos, dependent: :destroy
+  has_many :jobs, dependent: :destroy
 
   # Indexes
-  index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index({uuid: 1}, unique: true)
+  index({id: 1}, unique: true)
   index(name: 1)
   index(created_at: 1)
   index(updated_at: -1)
@@ -57,14 +57,14 @@ class Analysis
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :remove_dependencies
+  before_destroy :queue_delete_files
 
   def self.status_states
     %w(na init queued started completed)
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = { skip_init: false }
+    defaults = {skip_init: false}
     options = defaults.merge(options)
 
     Rails.logger.info "calling start on #{analysis_type} with options #{options}"
@@ -246,7 +246,7 @@ class Analysis
 
   # Return the list of job statuses
   def jobs_status
-    jobs.order_by(:index.asc).map { |j| { analysis_type: j.analysis_type, status: j.status } }
+    jobs.order_by(:index.asc).map { |j| {analysis_type: j.analysis_type, status: j.status} }
   end
 
   # Return the last job's status for the analysis
@@ -295,47 +295,12 @@ class Analysis
 
   protected
 
-  # TODO: Make these :dependent_destroys
-  def remove_dependencies
-    logger.info("Found #{data_points.size} records")
-    data_points.each do |record|
-      logger.info("removing #{record.id}")
-      record.destroy
-    end
+  # Queue up the task to delete all the files
+  def queue_delete_files
+    analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{self.id}"
 
-    logger.info("Found #{algorithms.size} records")
-    algorithms.each do |record|
-      logger.info("removing #{record.id}")
-      record.destroy
-    end
-
-    logger.info("Found #{measures.size} records")
-    if measures
-      measures.each do |record|
-        logger.info("removing #{record.id}")
-        record.destroy
-      end
-    end
-
-    logger.info("Found #{variables.size} records")
-    if variables
-      variables.each do |record|
-        logger.info("removing #{record.id}")
-        record.destroy
-      end
-    end
-
-    # delete any delayed jobs items
-    delayed_job_ids.each do |djid|
-      next unless djid
-      dj = Delayed::Job.find(djid)
-      dj.delete unless dj.nil?
-    end
-
-    jobs.each do |r|
-      logger.info("removing #{r.id}")
-      r.destroy
-    end
+    logger.error "Will not delete analysis directory because it does not conform to pattern" unless analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
   end
 
   def verify_uuid

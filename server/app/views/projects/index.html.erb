@@ -10,7 +10,11 @@
   <tr>
     <td><%= link_to project.name, project_path(project) %></td>
     <td><%= link_to 'HTML', project_path(project) %> | <%= link_to 'JSON', project_path(project, :format => :json) %></td>
-    <td><%= link_to 'Destroy', project, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <% if project.analyses.first.status == 'started' %>
+      <td><%= link_to 'Stop', stop_analysis_path(project.analyses.first), data: { confirm: 'Are you sure?' } %></td>
+    <% else %>
+      <td><%= link_to 'Delete', project, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <% end %>
   </tr>
 <% end %>
 </table>
