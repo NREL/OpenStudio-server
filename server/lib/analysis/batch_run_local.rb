@@ -41,13 +41,15 @@ class Analysis::BatchRunLocal
       @analysis.data_points.where(status: 'na').each do |dp|
         logger.info "Adding #{dp.uuid} to simulations queue"
         a = RunSimulateDataPoint.new(dp.id)
-        ids << a.delay(queue: 'simulations').perform
+        ids << a.delay(queue: 'simulations').perform.id
         logger.info ids
       end
     end
 
-    # Watch the delayed jobs
+    # Watch the delayed jobs to see when all the data points are completed.
+    # I would really prefer making a chord or callback for this.
     while ids.size > 0
+      # logger.debug "The ids array is #{ids}"
       ids.each do |id|
         ids.delete(id) if Delayed::Job.find(id).nil?
       end
