@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-analysis-gem.git
-  revision: b5be92cbd99fb8cb218025388c6894cd2bb674dd
+  revision: 039876a150444179ec8ae59e6696b3cef824a479
   branch: develop
   specs:
     openstudio-analysis (0.5.0)
@@ -339,7 +339,7 @@ GEM
       ref
     thor (0.19.1)
     thread_safe (0.3.5)
-    tilt (2.0.2)
+    tilt (2.0.3)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uglifier (3.0.0)
