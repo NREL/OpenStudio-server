@@ -1,7 +1,8 @@
 source 'http://rubygems.org'
 
 # OpenStudio gem from github
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop', ref: 'ca6ec00376'
+
 gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
 
 # Install other gems that are needed but not required by the workflow gem
