@@ -14,6 +14,7 @@ can be spun up with the following command.
 
 ```
 bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulations start
+bin/delayed_job -i worker_2 stop && bin/delayed_job -i worker_2 --queue=simulations start
 ```
 
 
@@ -21,3 +22,6 @@ bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulati
 ```
 bin/delayed_job stop && bin/delayed_job --queue=analyses,background,simulations start
 ```
+
+
+## Remote Delayed Job

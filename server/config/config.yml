@@ -25,4 +25,5 @@ production:
 local:
   <<: *defaults
   sim_root_path: ':rails_root/../worker-nodes'
+  os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
   rails_log_path: <%= ENV['OS_SERVER_LOG_PATH'] %>
