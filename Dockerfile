@@ -153,9 +153,11 @@ RUN cd /mnt/openstudio \
     && find /mnt/openstudio -type f -print0 | xargs -0 chmod 664
 
 # forward request and error logs to docker log collector
+
+# TODO: How to get logs out of this, mount shared volume?
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
-RUN ln -sf /dev/stdout /srv/log/docker.log
+#RUN ln -sf /dev/stdout /srv/log/docker.log
 RUN chmod 0666 /srv/log/*
 
 
