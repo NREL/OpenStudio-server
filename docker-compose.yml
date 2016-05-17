@@ -2,17 +2,26 @@
 # run `docker-compose up` to create and run/link the containers
 db:
   image: mongo
-#  volumes:
-#      - $HOME/openstudio_server/mongo:/data/db
   ports:
       - "27017:27017"
 web:
   build: .
-  dockerfile: /docker/server/Dockerfile
   environment:
     - RAILS_ENV=docker
   links:
     - db
+    - rserve
   ports:
     - "8080:80"
     - "9090:9090"
+rserve:
+  build: ./docker/R
+  ports:
+    - "6311:6311"
+worker:
+  command: bin/delayed_job -i worker --queue=simulations run
+  build: .
+  environment:
+    - RAILS_ENV=docker
+  links:
+    - db

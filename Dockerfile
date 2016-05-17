@@ -90,121 +90,6 @@ ENV PASSENGER_VERSION 5.0.25
 RUN gem install passenger -v $PASSENGER_VERSION
 RUN passenger-install-nginx-module
 
-#### Build R and install R packages.
-ENV R_VERSION 3.2.3
-ENV R_MAJOR_VERSION 3
-ENV R_SHA b93b7d878138279234160f007cb9b7f81b8a72c012a15566e9ec5395cfd9b6c1
-RUN curl -fSL -o R.tar.gz "http://cran.fhcrc.org/src/base/R-$R_MAJOR_VERSION/R-$R_VERSION.tar.gz" \
-    && echo "$R_SHA R.tar.gz" | sha256sum -c - \
-    && mkdir /usr/src/R \
-    && tar -xzf R.tar.gz -C /usr/src/R --strip-components=1 \
-	&& rm R.tar.gz \
-	&& cd /usr/src/R
-
-# Install a bunch of dependencies for building R
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        debhelper \
-        fonts-cabin \
-        fonts-comfortaa \
-        fonts-droid \
-        fonts-font-awesome \
-        fonts-freefont-otf \
-        fonts-freefont-ttf \
-        fonts-gfs-artemisia \
-        fonts-gfs-complutum \
-        fonts-gfs-didot \
-        fonts-gfs-neohellenic \
-        fonts-gfs-olga \
-        fonts-gfs-solomos \
-        fonts-inconsolata \
-        fonts-junicode \
-        fonts-lato \
-        fonts-linuxlibertine \
-        fonts-lobster \
-        fonts-lobstertwo \
-        fonts-oflb-asana-math \
-        fonts-sil-gentium \
-        fonts-sil-gentium-basic \
-        fonts-stix \
-        gfortran \
-        gir1.2-freedesktop \
-        gir1.2-pango-1.0 \
-        libblas3 \
-        libcairo-script-interpreter2 \
-        libcairo2-dev \
-        libgs9 \
-        libintl-perl \
-        libjbig-dev \
-        libjpeg-dev \
-        libkpathsea6 \
-        liblapack-dev \
-        liblzma-dev \
-        libpoppler44 \
-        libtcl8.5 \
-        libtiff5-dev \
-        libtk8.5 \
-        libxml-libxml-perl \
-        libxss1 \
-        libxt-dev \
-        mpack \
-        tcl8.5 \
-        tcl8.5-dev \
-        tk8.5 \
-        tk8.5-dev \
-        ttf-adf-accanthis \
-        ttf-adf-gillius \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN cd /usr/src/R \
-    && sed -i 's/NCONNECTIONS 128/NCONNECTIONS 2560/' src/main/connections.c \
-    && ./configure --enable-R-shlib \
-    && make -j$(nproc) \
-    && make install
-
-RUN echo "remote enable" > /etc/Rserv.conf
-
-RUN R -e "install.packages(c('lhs','e1071','triangle','rJava','RUnit','RMongo'), repos='http://cran.fhcrc.org/')"
-RUN R -e "install.packages(c('R.methodsS3','R.oo','R.utils','NMOF','mco'), repos='http://cran.fhcrc.org/')"
-RUN R -e "install.packages(c('rgenoud','conf.design','vcd','combinat','DoE.base','xts','rjson'), repos='http://cran.fhcrc.org/')"
-RUN R -e "install.packages(c('RSQLite','Rcpp','plyr','ggplot2','sensitivity'), repos='http://cran.fhcrc.org/')"
-RUN R -e "install.packages('Rserve', configure.args=c('PKG_CPPFLAGS=-DNODAEMON'), repos='http://cran.fhcrc.org/')"
-
-# Add in the additional R packages
-ADD /lib/ /usr/src/R/ext-lib
-RUN R CMD INSTALL /usr/src/R/ext-lib/R-packages/NRELmoo*.tar.gz /usr/src/R/ext-lib/R-packages/NRELpso*.tar.gz
-
-# Install required libaries
-RUN curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python \
-    && rm -f get-pip.py \
-    && pip install supervisor \
-    && mkdir -p /etc/supervisor.d \
-    && mkdir -p /etc/supervisor
-
-ADD /docker/server/supervisord.conf /etc/supervisor/supervisord.conf
-ADD /docker/server/supervisord.conf /etc/supervisord.conf
-ADD /docker/server/Rserve.supervisor.conf /etc/supervisor.d/Rserve.conf
-
-RUN ln -s /usr/local/bin/supervisord /usr/bin/supervisord \
-    && ln -s /usr/local/bin/supervisorctl /usr/bin/supervisorctl \
-    && mkdir -p /var/log/supervisor/
-
-RUN curl --silent --show-error --retry 5 https://raw.githubusercontent.com/Supervisor/initscripts/master/ubuntu > \
-        /etc/init.d/supervisord \
-    && chmod +x /etc/init.d/supervisord \
-    && update-rc.d supervisord defaults
-
-#RUN cd /usr/src/R \
-#   && make install
-#	&& { echo '#define ENABLE_PATH_CHECK 0'; echo; cat file.c; } > file.c.new && mv file.c.new file.c \
-#	&& autoconf \
-#	&& ./configure --disable-install-doc \
-#	&& make -j"$(nproc)" \
-#	&& make install \
-#	&& apt-get purge -y --auto-remove $buildDeps \
-#	&& gem update --system $RUBYGEMS_VERSION \
-#	&& rm -r /usr/src/ruby
-
 # Configure the nginx server
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
@@ -235,9 +120,6 @@ RUN apt-get update \
 ENV RUBYLIB /usr/local/lib/site_ruby/2.0.0
 ENV OPENSTUDIO_SERVER 'true'
 
-#### Delayed Job
-ADD /docker/server/delayed_job.supervisor.conf /etc/supervisor.d/delayed_job.conf
-
 #### OpenStudio Server Code
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 WORKDIR /srv
@@ -267,8 +149,6 @@ RUN mkdir -p /srv/public/assets/analyses && chmod 777 /srv/public/assets/analyse
 #### Setup the worker on the server node
 ADD /worker-nodes /mnt/openstudio
 RUN cd /mnt/openstudio \
-    && bundle install \
-    && cd /mnt/openstudio/rails-models \
     && find /mnt/openstudio -type d -print0 | xargs -0 chmod 775 \
     && find /mnt/openstudio -type f -print0 | xargs -0 chmod 664
 

@@ -12,6 +12,7 @@ development:
 
 docker:
   <<: *defaults
+  os_server_host_url: 'http://localhost:3000'
   ruby_bin_dir: /usr/local/ruby
 
 test:
