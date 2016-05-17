@@ -19,9 +19,11 @@ rserve:
   ports:
     - "6311:6311"
 worker:
-  command: bin/delayed_job -i worker --queue=simulations run
   build: .
   environment:
     - RAILS_ENV=docker
   links:
+    - web
     - db
+    - rserve
+  command: bin/delayed_job -i worker --queue=simulations run

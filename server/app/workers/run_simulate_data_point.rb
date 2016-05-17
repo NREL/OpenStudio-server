@@ -18,6 +18,11 @@ class RunSimulateDataPoint
   end
 
   def perform
+    if @data_point.nil?
+      status_message = "Could not find data point"
+      return
+    end
+
     @data_point.update( { run_start_time: Time.now, status: 'started'} )
 
     # Create the analysis directory
@@ -114,7 +119,7 @@ class RunSimulateDataPoint
     sim_logger.info "Finished #{__FILE__}" if sim_logger
     sim_logger.close if sim_logger
 
-    @data_point.update( { run_end_time: Time.now, status: 'completed'} )
+    @data_point.update( { run_end_time: Time.now, status: 'completed'} ) if @data_point
 
     true
   end
@@ -161,7 +166,7 @@ class RunSimulateDataPoint
         # Extract the zip
         OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
 
-        # Download only one copy of the anlaysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
+        # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
         a = RestClient.get "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
         raise "Analysis JSON could not be downloaded" unless a.code == 200
         # Parse to JSON to save it again with nice formatting

@@ -160,7 +160,6 @@ RUN ln -sf /dev/stderr /var/log/nginx/error.log
 #RUN ln -sf /dev/stdout /srv/log/docker.log
 RUN chmod 0666 /srv/log/*
 
-
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/start-server
 
