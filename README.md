@@ -134,11 +134,33 @@ cd vagrant
 ruby create_vms.rb --aws
 ```
 
-### Official AMI Generation
+### Releasing New AMIs
 
-- Push all code to master
-- Update the Server version in ./server/lib/openstudio_server/version.rb using semantic versioning.
-- Commit/push your code
-- Run the `rake release` in the root. This will tag the version in git, push the tags, then push the code to ami-build.  Jenkins will take over the generation of the AMIs and push the new AMIs IDs to developer.nrel.gov.
-- For OpenStudio PAT, Alex Swinder has to copy over the AMI ID from this file: http://developer.nrel.gov/downloads/buildings/openstudio/api/amis_v2.json to this file: http://developer.nrel.gov/downloads/buildings/openstudio/rsrc/amis.json
+## Releasing a New Version
 
+- Create a pull request from your feature branch to develop
+- Ensure the tests are passing (to be added) for the pull request
+- Merge the pull request into develop
+- Ensure the version id, found in the server [version.rb](./server/lib/openstudio_server/version.rb) file, is incremented to be one ahead of the master verion, using standard semantic versioning
+- Create a pull request to master and assign it to @bball, @nllong, @rhorsey, or @evanweaver
+- One of the above will review the pull request, and either re-assign it for further update, or merge it to master
+- When it is merged to master, the merger will release a new build using the `rake release` script
+- Check the [available OSServer AMI json](http://s3.amazonaws.com//openstudio-resources/server/api/v2/amis.json) regularly to see when the build becomes available
+
+## Releasing a One Off Version
+
+- Create a new branch off of a commit of develop or master which corresponds to the desired base state of your server
+- Update the server code as needed
+- After making all changes, it is recomended that you create a pull request back to develop, applying the DO NOT MERGE tag, to allow the continuous integration tests to run against your changes
+- After ensuring all test are sucessfull, close the pull request.
+- Add a suffix to the version id by setting a flag in the [version.rb](./server/lib/openstudio_server/version.rb) file
+- NOTE: THIS STEP WILL BE CHANGED SHORTLY: Follow the instructions found [here](./vagrant) to run the [create_vms.rb](./vagrant/create_vms.rb) script. This will build the AMIs and register them with Amazon EC2.
+- Check the [available OSServer AMI json](http://s3.amazonaws.com//openstudio-resources/server/api/v2/amis.json) regularly to see when the build becomes available
+
+## Other Notes
+
+For OpenStudio PAT, Alex Swinder has to copy over the AMI ID from this file: http://developer.nrel.gov/downloads/buildings/openstudio/api/amis_v2.json to this file: http://developer.nrel.gov/downloads/buildings/openstudio/rsrc/amis.json
+
+### Questions?
+
+Please contact @rhorsey, @bball, or @nllong with any question regarding this project. Thanks for you interest!
