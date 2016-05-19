@@ -101,42 +101,7 @@ git config --global url."https://".insteadOf git://
 
 ## Deploying to Amazon EC2
 
-### Development/Test AMIs
-
-- Install the Vagrant AWS plug-in
-
-```sh
-vagrant plugin install vagrant-aws
-```
-
-- **NREL ONLY** Login to the SSL Developer VPN
-
-- Install Vagrant Omnibus plug-in to automatically install chef on the destination system
-
-```sh
-vagrant plugin install vagrant-omnibus
-```
-
-- Create an `.aws_secrets` file in your home directory and include the following
-
-```sh
-access_key_id: key
-secret_access_key: access_key
-keypair_name: key_pair_name
-private_key_path: /Users/<user>/.ssh/amazon.pem
-region: us-east-1
-```
-
-- Run the create_vms.rb script
-
-```
-cd vagrant
-ruby create_vms.rb --aws
-```
-
-### Releasing New AMIs
-
-## Releasing a New Version
+### Releasing a New Version
 
 - Create a pull request from your feature branch to develop
 - Ensure the tests are passing (to be added) for the pull request
@@ -147,7 +112,7 @@ ruby create_vms.rb --aws
 - When it is merged to master, the merger will release a new build using the `rake release` script
 - Check the [available OSServer AMI json](http://s3.amazonaws.com//openstudio-resources/server/api/v2/amis.json) regularly to see when the build becomes available
 
-## Releasing a One Off Version
+### Releasing a One Off Version
 
 - Create a new branch off of a commit of develop or master which corresponds to the desired base state of your server
 - Update the server code as needed
@@ -157,10 +122,10 @@ ruby create_vms.rb --aws
 - NOTE: THIS STEP WILL BE CHANGED SHORTLY: Follow the instructions found [here](./vagrant) to run the [create_vms.rb](./vagrant/create_vms.rb) script. This will build the AMIs and register them with Amazon EC2.
 - Check the [available OSServer AMI json](http://s3.amazonaws.com//openstudio-resources/server/api/v2/amis.json) regularly to see when the build becomes available
 
-## Other Notes
+### Other Notes
 
 For OpenStudio PAT, Alex Swinder has to copy over the AMI ID from this file: http://developer.nrel.gov/downloads/buildings/openstudio/api/amis_v2.json to this file: http://developer.nrel.gov/downloads/buildings/openstudio/rsrc/amis.json
 
-### Questions?
+## Questions?
 
 Please contact @rhorsey, @bball, or @nllong with any question regarding this project. Thanks for you interest!
