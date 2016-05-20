@@ -10,7 +10,7 @@ default_attributes(
     add_r_to_path: true,
     add_ld_path: true,
     prefix_bin: '/usr/local/bin',
-    make_opts: ['-j4'],
+    make_opts: ['-j4', '--disable-byte-compiled-packages'],
     r_environment_site: {
       rubylib: '/usr/local/lib/site_ruby/2.0.0',
       path_additions: ['/usr/local/radiance/bin', '/opt/rbenv/shims']
