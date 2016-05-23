@@ -4,8 +4,6 @@ db:
   image: mongo
   ports:
     - "27017:27017"
-  volumes:
-    - $PWD/server/log:/srv/log
 web:
   build: .
   environment:
@@ -16,14 +14,10 @@ web:
   ports:
     - "8080:80"
     - "9090:9090"
-  volumes:
-    - $PWD/server/log:/srv/log
 rserve:
   build: ./docker/R
   ports:
     - "6311:6311"
-  volumes:
-    - $PWD/server/log:/srv/log
 worker:
   build: .
   environment:
@@ -32,6 +26,4 @@ worker:
     - web
     - db
     - rserve
-  volumes:
-    - $PWD/server/log:/srv/log
   command: bin/delayed_job -i worker --queue=simulations run
