@@ -145,6 +145,7 @@ RUN bundle install --without development test
 # Where to save the assets, here for now I guess
 RUN mkdir -p /mnt/openstudio/server/$RAILS_ENV
 RUN mkdir -p /srv/public/assets/analyses && chmod 777 /srv/public/assets/analyses
+RUN mkdir -p /srv/public/assets/data_points && chmod 777 /srv/public/assets/data_points
 
 #### Setup the worker on the server node
 ADD /worker-nodes /mnt/openstudio
