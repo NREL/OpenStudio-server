@@ -12,7 +12,7 @@ class RunSimulateDataPoint
 
     # For now just track the status here. Ideally we would use delayed jobs
     # or a plugin for delayed jobs to track the status of the job.
-    # Also, should we use the API to set these or relay on mongoid.
+    # Also, should we use the API to set these or relay on mongoid?
     @data_point.update( { run_queue_time: Time.now, status: 'queued'} )
     @data_point.save!
   end
@@ -39,7 +39,7 @@ class RunSimulateDataPoint
     sim_logger.info "Simulation directory is #{simulation_dir}"
     sim_logger.info "Run data point type/file is #{@options[:run_workflow_method]}"
 
-    download_analysis_zip(sim_logger)
+    initialize_worker(sim_logger)
 
     # delete any existing data files from the server in case this is a 'rerun'
     RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
@@ -127,7 +127,7 @@ class RunSimulateDataPoint
   # Method to download and unzip the analysis data. This has some logic
   # in order to handle multiple instances trying to download the file at the
   # same time.
-  def download_analysis_zip(sim_logger)
+  def initialize_worker(sim_logger)
     sim_logger.info "Starting download analysis zip for datapoint #{@data_point.id}"
 
     # If the request is local, then just copy the data over. But how do we
@@ -202,6 +202,11 @@ class RunSimulateDataPoint
 
     sim_logger.info "Finished worker initialization"
     true
+  end
+
+  # Finalize the worker node by running the scripts
+  def finalize_worker(sim_logger)
+
   end
 
   # Simple method to write a lock file in order for competing threads to
