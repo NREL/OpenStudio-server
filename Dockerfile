@@ -157,8 +157,7 @@ RUN cd /mnt/openstudio \
 # TODO: How to get logs out of this, mount shared volume?
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
-#RUN ln -sf /dev/stdout /srv/log/docker.log
-#RUN chmod 0666 /srv/log/*
+RUN chmod 666 /srv/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/start-server
