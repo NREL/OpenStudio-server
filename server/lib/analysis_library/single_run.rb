@@ -1,5 +1,5 @@
-class Analysis::SingleRun
-  include Analysis::Core
+class AnalysisLibrary::SingleRun
+  include AnalysisLibrary::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
@@ -30,7 +30,7 @@ class Analysis::SingleRun
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload

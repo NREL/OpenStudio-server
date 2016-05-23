@@ -1,7 +1,7 @@
 # Non Sorting Genetic Algorithm
-class Analysis::Optim
-  include Analysis::Core
-  include Analysis::R
+class AnalysisLibrary::Optim
+  include AnalysisLibrary::Core
+  include AnalysisLibrary::R
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -39,13 +39,14 @@ class Analysis::Optim
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = Rserve::Simpler.new
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
     Rails.logger.info 'Setting up R for Optim Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
@@ -105,7 +106,7 @@ class Analysis::Optim
     @r.converse("print('starting lhs to discretize the variables')")
     Rails.logger.info 'starting lhs to discretize the variables'
 
-    lhs = Analysis::R::Lhs.new(@r)
+    lhs = AnalysisLibrary::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
     if samples.empty? || samples.empty?
@@ -128,7 +129,7 @@ class Analysis::Optim
     cluster = nil
     begin
       # Start up the cluster and perform the analysis
-      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
         raise 'could not configure R cluster'
       end
@@ -187,7 +188,7 @@ class Analysis::Optim
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
@@ -280,7 +281,7 @@ class Analysis::Optim
                   obj <- force(eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower)))
                   print(paste("Objective function Norm:",obj))
 
-                  mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+                  mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
                   flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
                   print(paste("exit_on_guideline14: ",flag))
 

@@ -1,7 +1,7 @@
 # Non Sorting Genetic Algorithm
-class Analysis::Morris
-  include Analysis::Core
-  include Analysis::R
+class AnalysisLibrary::Morris
+  include AnalysisLibrary::Core
+  include AnalysisLibrary::R
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -35,13 +35,14 @@ class Analysis::Morris
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = Rserve::Simpler.new
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
     Rails.logger.info 'Setting up R for Morris Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
@@ -94,7 +95,7 @@ class Analysis::Morris
     @r.converse("print('starting lhs to get min/max')")
     Rails.logger.info 'starting lhs to discretize the variables'
 
-    lhs = Analysis::R::Lhs.new(@r)
+    lhs = AnalysisLibrary::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 2 * selected_variables.count)
 
     if samples.empty? || samples.size <= 1
@@ -114,7 +115,7 @@ class Analysis::Morris
     process = nil
     begin
       # Start up the cluster and perform the analysis
-      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
         raise 'could not configure R cluster'
       end
@@ -129,7 +130,7 @@ class Analysis::Morris
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes
+      process = AnalysisLibrary::Core::BackgroundTasks.start_child_processes
 
       worker_ips = ComputeNode.worker_ips
       Rails.logger.info "Found the following good ips #{worker_ips}"
@@ -203,7 +204,7 @@ class Analysis::Morris
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
@@ -332,7 +333,7 @@ class Analysis::Morris
 
                 print(paste("Objective function Norm:",obj))
 
-                mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+                mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
                 flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
                 dbDisconnect(mongo)
               }

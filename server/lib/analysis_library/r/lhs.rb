@@ -1,4 +1,4 @@
-module Analysis::R
+module AnalysisLibrary::R
   class Lhs
     def initialize(r_session)
       @r = r_session

@@ -1,7 +1,7 @@
 # Non Sorting Genetic Algorithm
-class Analysis::Pso
-  include Analysis::Core
-  include Analysis::R
+class AnalysisLibrary::Rgenoud
+  include AnalysisLibrary::Core
+  include AnalysisLibrary::R
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -12,23 +12,26 @@ class Analysis::Pso
       problem: {
         random_seed: 1979,
         algorithm: {
-          npart: 0,
-          maxfn: 100,
-          maxit: 20,
-          abstol: 1e-2,
-          reltol: 1e-2,
-          method: 'spso2011',
-          xini: 'lhs',
-          vini: 'lhs2011',
-          boundary: 'default',
-          topology: 'random',
-          c1: 1.193147,
-          c2: 1.193147,
-          lambda: 1,
+          generations: 1,
+          waitgenerations: 3,
+          popsize: 30,
+          boundaryenforcement: 2,
+          bfgsburnin: 2,
+          printlevel: 2,
+          BFGS: 1,
+          solutiontolerance: 0.01,
           normtype: 'minkowski',
           ppower: 2,
           exit_on_guideline14: 0,
-          objective_functions: []
+          gradientcheck: 1,
+          objective_functions: [],
+          pgtol: 1e-1,
+          factr: 4.5036e14,
+          maxit: 5,
+          epsilongradient: 1e-4,
+          debugflag: 0,
+          MM: 1,
+          balance: 0
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -44,21 +47,24 @@ class Analysis::Pso
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = Rserve::Simpler.new
-    Rails.logger.info 'Setting up R for PSO Run'
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
+    Rails.logger.info 'Setting up R for genoud Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
     @r.converse "set.seed(#{@analysis.problem['random_seed']})"
     # R libraries needed for this algorithm
     @r.converse 'library(rjson)'
-    @r.converse 'library(NRELpso)'
+    @r.converse 'library(mco)'
+    @r.converse 'library(NRELmoo)'
+    @r.converse 'library(rgenoud)'
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -66,7 +72,7 @@ class Analysis::Pso
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting PSO Run')
+    Rails.logger.info('Starting genoud Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -78,29 +84,14 @@ class Analysis::Pso
         raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
       end
 
+      if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
+        raise 'Must have number of samples to discretize the parameter space'
+      end
+
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
       # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
-      unless %w(spso2007 spso2011 ipso fips wfips).include?(@analysis.problem['algorithm']['method'])
-        raise 'unknown method type'
-      end
-
-      unless %w(lhs random).include?(@analysis.problem['algorithm']['xini'])
-        raise 'unknown Xini type'
-      end
-
-      unless %w(zero lhs2011 random2011 lhs2007 random2007 default).include?(@analysis.problem['algorithm']['vini'])
-        raise 'unknown Vini type'
-      end
-
-      unless %w(invisible damping reflecting absorbing2007 absorbing2007 default).include?(@analysis.problem['algorithm']['boundary'])
-        raise 'unknown Boundary type'
-      end
-
-      unless %w(gbest lbest vonneumann random).include?(@analysis.problem['algorithm']['topology'])
-        raise 'unknown Topology type'
-      end
 
       if @analysis.problem['algorithm']['ppower'] <= 0
         raise 'P Norm must be non-negative'
@@ -131,7 +122,7 @@ class Analysis::Pso
       @r.converse("print('starting lhs to discretize the variables')")
       Rails.logger.info 'starting lhs to discretize the variables'
 
-      lhs = Analysis::R::Lhs.new(@r)
+      lhs = AnalysisLibrary::R::Lhs.new(@r)
       samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
 
       if var_names.empty? || var_names.empty?
@@ -151,7 +142,7 @@ class Analysis::Pso
       # Rails.logger.info "Samples are #{samples}"
 
       # Start up the cluster and perform the analysis
-      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
         raise 'could not configure R cluster'
       end
@@ -171,27 +162,26 @@ class Analysis::Pso
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
         # maxit is the max number of iterations to calculate
+        # varNo is the number of variables (ncol(vars))
+        # popsize is the number of sample points in the variable (nrow(vars))
+        # epsilongradient is epsilon in numerical gradient calc
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
-        @analysis.problem['algorithm']['abstol'] = @analysis.problem['algorithm']['abstol'].to_f
-        @analysis.problem['algorithm']['reltol'] = @analysis.problem['algorithm']['reltol'].to_f
+        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
         @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names,
                    varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
-                   npart: @analysis.problem['algorithm']['npart'],
-                   maxfn: @analysis.problem['algorithm']['maxfn'],
-                   abstol: @analysis.problem['algorithm']['abstol'],
-                   reltol: @analysis.problem['algorithm']['reltol'],
-                   maxit: @analysis.problem['algorithm']['maxit'],
-                   c1: @analysis.problem['algorithm']['c1'],
-                   c2: @analysis.problem['algorithm']['c2'],
-                   lambda: @analysis.problem['algorithm']['lambda'],
-                   xini: @analysis.problem['algorithm']['xini'],
-                   vini: @analysis.problem['algorithm']['vini'],
-                   boundary: @analysis.problem['algorithm']['boundary'],
-                   topology: @analysis.problem['algorithm']['topology'],
-                   method: @analysis.problem['algorithm']['method']) do
+                   gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'],
+                   BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
+                   boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
+                   printLevel: @analysis.problem['algorithm']['printlevel'], BFGS: @analysis.problem['algorithm']['BFGS'],
+                   solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'],
+                   waitGenerations: @analysis.problem['algorithm']['waitgenerations'],
+                   maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'],
+                   factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol'],
+                   debugFlag: @analysis.problem['algorithm']['debugflag'], MM: @analysis.problem['algorithm']['MM'],
+                   balance: @analysis.problem['algorithm']['balance'], gradientcheck: @analysis.problem['algorithm']['gradientcheck']) do
           %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
@@ -224,7 +214,7 @@ class Analysis::Pso
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
@@ -317,7 +307,7 @@ class Analysis::Pso
               obj <- force(eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower)))
               print(paste("Objective function Norm:",obj))
 
-                mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+                mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
            flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
            print(paste("exit_on_guideline14: ",flag))
 
@@ -355,34 +345,47 @@ class Analysis::Pso
             clusterExport(cl,"g")
 
             varMin <- mins
-            varMax <- maxes
-            varMean <- (mins+maxes)/2.0
+       varMax <- maxes
+       varMean <- (mins+maxes)/2.0
+       varDomain <- maxes - mins
+       varEps <- varDomain*epsilongradient
+       print(paste("varseps:",varseps))
+       print(paste("varEps:",varEps))
+       varEps <- ifelse(varseps!=0,varseps,varEps)
+            print(paste("merged varEps:",varEps))
+            varDom <- cbind(varMin,varMax)
+            print(paste("varDom:",varDom))
 
+            print("setup gradient")
+            gn <- g
+            clusterExport(cl,"gn")
+            clusterExport(cl,"varEps")
+
+            vectorGradient <- function(x, ...) { # Now use the cluster
+           vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+            }
             print(paste("Lower Bounds set to:",varMin))
             print(paste("Upper Bounds set to:",varMax))
             print(paste("Initial iterate set to:",varMean))
+            print(paste("Length of variable domain:",varDomain))
+            print(paste("factr set to:",factr))
+            print(paste("pgtol set to:",pgtol))
+            print(paste("BFGSburnin set to:",BFGSburnin))
 
-            if (npart == 0) {npart <- NA}
-            print(paste("Number of particles set to:",npart))
-            print(paste("maxit:", maxit))
-            print(paste("maxfn:", maxfn))
-            print(paste("abstol:", abstol))
-            print(paste("reltol:", reltol))
-            print(paste("method:", method))
-            print(paste("xini:", xini))
-            if (vini == "default") {vini <- NULL}
-            print(paste("vini:", vini))
-            if (boundary == "default") {boundary <- NULL}
-            print(paste("boundary:", boundary))
-            if (topology == "vonneumann") {topology <- "vonNeumann"}
-            print(paste("topology:", topology))
-            print(paste("c1:", c1))
-            print(paste("c2:", c2))
-            print(paste("lambda:", lambda))
-
+            print(paste("Number of generations set to:",gen))
+            if (debugFlag == 1) {debugFlag = TRUE} else {debugFlag = FALSE}
+            print(paste("debugFlag:", debugFlag))
+            if (BFGS == 1) {BFGS = TRUE} else {BFGS = FALSE}
+            print(paste("BFGS:", BFGS))
+            if (MM == 1) {MM = TRUE} else {MM = FALSE}
+            print(paste("MM:", MM))
+            if (balance == 1) {balance = TRUE} else {balance = FALSE}
+            print(paste("balance:", balance))
+            if (gradientcheck == 1) {gradientcheck = TRUE} else {gradientcheck = FALSE}
+            print(paste("gradientcheck:", gradientcheck))
             results <- NULL
             try(
-                 results <- NRELpso(cl=cl, fn=g, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda))
+                 results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck)
                )
                #print(paste("scp command:",scp))
                #print(paste("scp command:",scp2))
@@ -404,19 +407,16 @@ class Analysis::Pso
               }
 
             Rlog <- readLines('/var/www/rails/openstudio/log/Rserve.log')
-            # Rlog[grep('vartypes:',Rlog)]
-            # Rlog[grep('varnames:',Rlog)]
-            # Rlog[grep('<=',Rlog)]
-            # print(paste("popsize:",results$pop.size))
-            # print(paste("peakgeneration:",results$peakgeneration))
-            # print(paste("generations:",results$generations))
-            # print(paste("gradients:",results$gradients))
-             print(paste("par:",results$par))
-             print(paste("value:",results$value))
-             print(paste("counts:",results$counts))
-             print(paste("convergence:",results$convergence))
-             print(paste("message:",results$message))
-             flush.console()
+            Rlog[grep('vartypes:',Rlog)]
+            Rlog[grep('varnames:',Rlog)]
+            Rlog[grep('<=',Rlog)]
+            print(paste("popsize:",results$pop.size))
+            print(paste("peakgeneration:",results$peakgeneration))
+            print(paste("generations:",results$generations))
+            print(paste("gradients:",results$gradients))
+            print(paste("par:",results$par))
+            print(paste("value:",results$value))
+            flush.console()
             save(results, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/results.R")
             if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json") && !is.null(results$par)) {
               #write final params to json file

@@ -3,6 +3,8 @@ defaults: &defaults
   ruby_bin_dir: ':ruby_bin_dir'
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
   rails_log_path: ':rails_root/log'
+  rserve_hostname: 'localhost'
+  rserve_port: 6311
 
 development:
   <<: *defaults
@@ -14,6 +16,7 @@ docker:
   <<: *defaults
   os_server_host_url: 'http://web:80'
   ruby_bin_dir: /usr/local/ruby
+  rserve_hostname: 'rserve'
 
 test:
   <<: *defaults

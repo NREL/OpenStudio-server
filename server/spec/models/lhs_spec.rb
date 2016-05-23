@@ -1,13 +1,13 @@
 require 'rails_helper'
 
-RSpec.describe Analysis::Lhs, type: :model do
+RSpec.describe AnalysisLibrary::Lhs, type: :model do
   before :each do
     # need to populate the database with an analysis and datapoints
 
     # delete all the analyses
 
     analysis_id = 'abcd'
-    @lhs = Analysis::Lhs.new(analysis_id, {})
+    @lhs = AnalysisLibrary::Lhs.new(analysis_id, {})
 
     @pivots = [{ p1: 'p1' }, { p1: 'p2' }]
     @samples = [{ a: 1, b: 2 }, { a: 3, b: 4 }, { e: 5 }]

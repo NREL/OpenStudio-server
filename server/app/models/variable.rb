@@ -222,8 +222,8 @@ class Variable
     end
 
     # if there are multiple pivots, then smash the hash of arrays to form a array of hashes
-    pivot_array = Analysis::Core.product_hash(pivot_hash)
-    # pivot_array = Analysis::Core.hash_of_array_to_array_of_hash(pivot_hash)
+    pivot_array = AnalysisLibrary::Core.product_hash(pivot_hash)
+    # pivot_array = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(pivot_hash)
     Rails.logger.info "pivot array is #{pivot_array}"
 
     pivot_array

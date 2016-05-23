@@ -1,5 +1,5 @@
-class Analysis::Doe
-  include Analysis::Core # pivots and static vars
+class AnalysisLibrary::Doe
+  include AnalysisLibrary::Core # pivots and static vars
 
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
@@ -30,13 +30,14 @@ class Analysis::Doe
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # Create an instance for R
-    @r = Rserve::Simpler.new
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
 
     begin
       Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
@@ -58,7 +59,7 @@ class Analysis::Doe
       samples = nil
       var_types = nil
       Rails.logger.info 'Starting sampling'
-      doe = Analysis::R::Doe.new(@r)
+      doe = AnalysisLibrary::R::Doe.new(@r)
       if @analysis.problem['algorithm']['experiment_type'] == 'full_factorial'
         samples, var_types = doe.full_factorial(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 

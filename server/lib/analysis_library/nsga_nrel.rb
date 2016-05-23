@@ -1,7 +1,7 @@
 # Non Sorting Genetic Algorithm
-class Analysis::SpeaNrel
-  include Analysis::Core
-  include Analysis::R
+class AnalysisLibrary::NsgaNrel
+  include AnalysisLibrary::Core
+  include AnalysisLibrary::R
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -17,8 +17,8 @@ class Analysis::SpeaNrel
           generations: 1,
           toursize: 2,
           cprob: 0.7,
-          cidx: 5,
-          midx: 10,
+          xoverdistidx: 5,
+          mudistidx: 10,
           mprob: 0.5,
           normtype: 'minkowski',
           ppower: 2,
@@ -39,14 +39,15 @@ class Analysis::SpeaNrel
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = Rserve::Simpler.new
-    Rails.logger.info 'Setting up R for SPEA2 Run'
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
+    Rails.logger.info 'Setting up R for NSGA2 Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
@@ -62,7 +63,7 @@ class Analysis::SpeaNrel
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
     Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting SPEA2 Run')
+    Rails.logger.info('Starting NSGA2 Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -113,7 +114,7 @@ class Analysis::SpeaNrel
     @r.converse("print('starting lhs to discretize the variables')")
     Rails.logger.info 'starting lhs to discretize the variables'
 
-    lhs = Analysis::R::Lhs.new(@r)
+    lhs = AnalysisLibrary::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
     if samples.empty? || samples.size <= 1
@@ -132,7 +133,7 @@ class Analysis::SpeaNrel
     cluster = nil
     begin
       # Start up the cluster and perform the analysis
-      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
         raise 'could not configure R cluster'
       end
@@ -151,7 +152,6 @@ class Analysis::SpeaNrel
 
       if cluster.start(worker_ips)
         Rails.logger.info "Cluster Started flag is #{cluster.started}"
-
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
@@ -159,7 +159,7 @@ class Analysis::SpeaNrel
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
                    objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
                    toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
-                   cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'],
+                   xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'],
                    mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
           %{
             clusterEvalQ(cl,library(RMongo))
@@ -205,7 +205,7 @@ class Analysis::SpeaNrel
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
@@ -319,7 +319,7 @@ class Analysis::SpeaNrel
 
                 print(paste("Objective function Norm:",obj))
 
-                mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+                mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
                 flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
                 print(paste("exit_on_guideline14: ",flag))
                 if (flag["exit_on_guideline14"] == "true" ){
@@ -367,14 +367,14 @@ class Analysis::SpeaNrel
             print(nrow(vars))
             print(ncol(vars))
             if (ncol(vars) == 1) {
-              print("SPEA2 needs more than one variable")
-              stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")
+              print("NSGA2 needs more than one variable")
+              stop(options("show.error.messages"=TRUE),"NSGA2 needs more than one variable")
             }
 
             print(paste("Number of generations set to:",gen))
             results <- NULL
             try(
-            results <- spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
+              results <- nsga2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
             , silent = FALSE)
               print(paste("ip workers:", ips))
               print(paste("ip master:", master_ips))
@@ -439,7 +439,6 @@ class Analysis::SpeaNrel
         @analysis_job.save!
         @analysis.reload
       end
-
       @analysis.save!
 
       Rails.logger.info "Finished running analysis '#{self.class.name}'"

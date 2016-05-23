@@ -2,8 +2,8 @@
 # Right now this is attached to an analysis--need to verify if this is
 # what we need to do.
 
-class Analysis::BatchRunLocal
-  include Analysis::Core
+class AnalysisLibrary::BatchRunLocal
+  include AnalysisLibrary::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -22,12 +22,10 @@ class Analysis::BatchRunLocal
   # this method crashes it will be logged as a failed delayed_job and will fail
   # after max_attempts.
   def perform
-
-
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload

@@ -1,5 +1,5 @@
-class Analysis::SequentialSearch
-  include Analysis::Core
+class AnalysisLibrary::SequentialSearch
+  include AnalysisLibrary::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -215,8 +215,8 @@ class Analysis::SequentialSearch
         data_point_list << { variable_group: [], name: 'Starting Point', variables: {}, iteration: @iteration, sample: 1 }
         # elsif @iteration == 1
         #  # no need to look at anything, just return the array
-        #  run_list = Analysis::SequentialSearch.mash_up_hash([], parameter_space)
-        #  data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, 1)
+        #  run_list = AnalysisLibrary::SequentialSearch.mash_up_hash([], parameter_space)
+        #  data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(parameter_space, run_list, 1)
       else
         last_dp = @pareto.last
         if last_dp
@@ -226,8 +226,8 @@ class Analysis::SequentialSearch
           full_variable_group_list = parameter_space.select { |k, v| v if variable_group_list.include?(k) }
 
           # Fix the previous variable groups in the next run
-          run_list = Analysis::SequentialSearch.mash_up_hash(full_variable_group_list, parameter_space)
-          data_point_list = Analysis::SequentialSearch.create_data_point_list(parameter_space, run_list, @iteration)
+          run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(full_variable_group_list, parameter_space)
+          data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(parameter_space, run_list, @iteration)
         else
           Rails.logger.info('Could not find last point on pareto front')
         end
@@ -247,7 +247,7 @@ class Analysis::SequentialSearch
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
@@ -261,10 +261,11 @@ class Analysis::SequentialSearch
     end
 
     # Create an instance for R
-    @r = Rserve::Simpler.new
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
 
     # setup an LHS instance for sampling the continuous variables
-    lhs = Analysis::R::Lhs.new(@r)
+    lhs = AnalysisLibrary::R::Lhs.new(@r)
 
     # the sequential search operates on measures so get variables / measures
     parameter_space = {}

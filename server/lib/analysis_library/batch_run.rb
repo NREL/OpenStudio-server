@@ -1,5 +1,5 @@
-class Analysis::BatchRun
-  include Analysis::Core
+class AnalysisLibrary::BatchRun
+  include AnalysisLibrary::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -20,13 +20,14 @@ class Analysis::BatchRun
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = Rserve::Simpler.new
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
     Rails.logger.info 'Setting up R for Batch Run'
     @r.converse "setwd('#{APP_CONFIG['sim_root_path']}')"
 
@@ -53,7 +54,7 @@ class Analysis::BatchRun
       Rails.logger.info('Starting Batch Run')
 
       # Start up the cluster and perform the analysis
-      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       raise 'could not configure R cluster' unless cluster.configure(master_ip)
 
       # Initialize each worker node
@@ -73,7 +74,7 @@ class Analysis::BatchRun
             clusterEvalQ(cl,library(RMongo))
 
             f <- function(x){
-              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")

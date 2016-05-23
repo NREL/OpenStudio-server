@@ -9,7 +9,8 @@ module Analysis
         FileUtils.mkdir_p(dir)
         filename = File.basename(savepath)
 
-        r = Rserve::Simpler.new
+        r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                    APP_CONFIG['rserve_port'])
         r.command "setwd('#{File.expand_path(dir)}')"
 
         save_string = "save('#{dataframe_name}', file = '#{dir}/#{filename}')"
@@ -17,8 +18,8 @@ module Analysis
       end
 
       def self.generate_summaries(dataframe)
-        r = Rserve::Simpler.new
-
+        r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                    APP_CONFIG['rserve_port'])
         result = r.converse('summary(df)', df: dataframe)
         result = result.each_slice(6).to_a
 

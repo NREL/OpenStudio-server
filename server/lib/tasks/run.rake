@@ -7,14 +7,9 @@ namespace :run do
   end
 
   desc 'test Rserve connection'
-  task :test_rserve do
-    require 'rserve/simpler'
-
-    # Figure out how to default all of the calls to Rserve:Simpler
-
-    # options = { hostname: '192.168.99.100', port_number: 6311 }
-    options = { hostname: 'rserve', port_number: 6311 }
-    r = Rserve::Simpler.new(options)
+  task test_rserve: :environment do
+    r = AnalysisLibrary::Core.initialize_rserve('rserve')
+    # r = AnalysisLibrary::Core.initialize_rserve
 
     puts r
     puts r.converse('2*1000000000')

@@ -39,7 +39,7 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     # Set the os server url for use by the run simulation
     APP_CONFIG['os_server_host_url'] = "http://#{host}"
 
-    # Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analysis'
+    # Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analysis'
     a = RunSimulateDataPoint.new(dp.id)
     a.delay(queue: 'simulations').perform
     expect(Delayed::Job.count).to eq(1)

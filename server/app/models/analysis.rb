@@ -85,12 +85,12 @@ class Analysis
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
       save!
       reload
-      abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
+      abr = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
       Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
+      job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
       aj.delayed_job_id = job.id
       aj.save!
 

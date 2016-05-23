@@ -1,6 +1,6 @@
 require 'rserve/simpler'
 
-module Analysis::R
+module AnalysisLibrary::R
   class Cluster
     attr_reader :started
 
@@ -16,7 +16,7 @@ module Analysis::R
       @r.converse 'library(R.utils)'
 
       # set the name of the current database
-      @db_name = Analysis::Core.database_name
+      @db_name = AnalysisLibrary::Core.database_name
       @db_ip = Mongoid.default_client.cluster.servers.first.address.host
       @db_port = Mongoid.default_client.cluster.servers.first.address.port
       Rails.logger.info "Mongo IP and Port is #{@db_ip} and #{@db_port}"

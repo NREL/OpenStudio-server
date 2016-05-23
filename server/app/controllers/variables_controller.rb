@@ -188,9 +188,8 @@ class VariablesController < ApplicationController
 
     Rails.logger.info("outhash is #{out_hash}")
 
-    # TODO: move this to a helper method of some sort under /lib/anlaysis/r/...
-    require 'rserve/simpler'
-    r = Rserve::Simpler.new
+    r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                APP_CONFIG['rserve_port'])
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %{
             temp <- tempfile('rdata', tmpdir="/tmp")

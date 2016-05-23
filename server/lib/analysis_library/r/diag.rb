@@ -1,15 +1,14 @@
-module Analysis::R
-  class Doe
+module AnalysisLibrary::R
+  class Diag
     def initialize(r_session)
       @r = r_session
 
-      @r.converse 'library(DoE.base)'
       @r.converse 'library(lhs)'
     end
 
     # Take the number of variables and number of samples and generate the bins for
     # a LHS sample
-    def lhs_probability2(num_variables, sample_size)
+    def lhs_probability3(num_variables, sample_size)
       Rails.logger.info "Start generating of LHS #{Time.now}"
       a = @r.converse "a <- randomLHS(#{sample_size}, #{num_variables})"
 
@@ -26,7 +25,7 @@ module Analysis::R
 
     # Sample the data in a discrete manner. This requires that the user passes in an array of the
     # samples to choose from which can contain the weights.
-    def discrete_sample_from_probability2(probabilities_array, var)
+    def discrete_sample_from_probability3(probabilities_array, var)
       @r.converse "print('creating discrete distribution')"
       if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
         raise 'no hash values and weight passed'
@@ -43,7 +42,7 @@ module Analysis::R
           "
         end
       elsif var.uncertainty_type == 'bool' || var.uncertainty_type == 'boolean'
-        raise 'bool distribution needs some updating to map from bools'
+        raise 'boolean needs some updating to map from bools'
         @r.command(df: dataframe, values: values, weights: weights) do
           "
             print(values)
@@ -66,7 +65,7 @@ module Analysis::R
     # Note that the probabilities and the samples must be an array so there are
     # checks to make sure that it is.  If R only has one sample, then it will not
     # wrap it in an array.
-    def samples_from_probability2(probabilities_array, distribution_type, mean, stddev, min, max)
+    def samples_from_probability3(probabilities_array, distribution_type, mean, stddev, min, max)
       probabilities_array = [probability_array] unless probabilities_array.is_a? Array # ensure array
 
       Rails.logger.info 'Creating sample from probability'
@@ -124,7 +123,7 @@ module Analysis::R
       samples
     end
 
-    def full_factorial(selected_variables, number_of_samples)
+    def diagonal(selected_variables, number_of_samples)
       samples = {}
       samples_temp = {}
       var_types = []
@@ -140,7 +139,7 @@ module Analysis::R
 
       # get the probabilities
       Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
-      p = lhs_probability2(selected_variables.count, number_of_samples)
+      p = lhs_probability3(selected_variables.count, number_of_samples)
       Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
 
       # TODO: performance smell... optimize this using Parallel
@@ -164,7 +163,7 @@ module Analysis::R
           var_types << 'discrete'
         # IF continuous, then sample the variable to make it "discrete"
         else
-          variable_samples = samples_from_probability2(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
+          variable_samples = samples_from_probability3(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
                                                        var.lower_bounds_value, var.upper_bounds_value)
           var_types << 'continuous'
         end
@@ -202,10 +201,12 @@ module Analysis::R
         end
       end
 
-      @r.converse "print('creating full factorial')"
+      @r.converse "print('creating diagonal')"
       @r.command(var_names: var_names) do
         %{
-          fac_design<- fac.design(factor.names=doe.orig, randomize=FALSE)
+           n <- length(var_names)
+           print(paste("n:",n))
+           fac_design<- rbind(rep(0,n),diag(1,n,n))
         }
       end
       @r.converse 'print(fac_design)'
@@ -213,7 +214,7 @@ module Analysis::R
       Rails.logger.info("samples_temp is #{samples_temp}")
 
       selected_variables.each_with_index do |var, idx|
-        samples[var.id.to_s] = samples_temp[idx]
+        samples[var.id.to_s] = samples_temp.column(idx).to_a.map(&:to_i)
       end
 
       Rails.logger.info("samples is #{samples}")
