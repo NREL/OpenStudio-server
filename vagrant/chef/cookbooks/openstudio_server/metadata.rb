@@ -36,7 +36,7 @@
 name 'openstudio_server'
 maintainer 'NREL'
 maintainer_email 'nicholas.long@nrel.gov'
-license 'LGPL'
+license 'BSD'
 description 'Installs and configures OpenStudio web application'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version '2.0.0'

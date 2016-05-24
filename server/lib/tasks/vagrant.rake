@@ -33,14 +33,15 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-# Allow the jobs to run for up to 1 week.  If this is ever hit, then we have other problems.
-# Delayed::Worker.destroy_failed_jobs = false
-# Delayed::Worker.sleep_delay = 60
-# Delayed::Worker.max_attempts = 3
+namespace :vagrant do
+  desc 'setup the compute nodes in the database'
+  task setup: :environment do
+    ComputeNode.delete_all
 
-Delayed::Worker.max_run_time = 168.hours
-# Delayed::Worker.read_ahead = 10
-# Delayed::Worker.default_queue_name = 'default'
-# Delayed::Worker.delay_jobs = !Rails.env.test?
-Delayed::Worker.raise_signal_exceptions = :term
-Delayed::Worker.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'delayed_job.log'))
+    node = ComputeNode.find_or_create_by(node_type: 'master', ip_address: '192.168.33.10')
+    node.save!
+    node = ComputeNode.find_or_create_by(node_type: 'worker', ip_address: '192.168.33.11')
+    node.cores = 4
+    node.save!
+  end
+end

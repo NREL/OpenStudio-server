@@ -33,14 +33,62 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-# Allow the jobs to run for up to 1 week.  If this is ever hit, then we have other problems.
-# Delayed::Worker.destroy_failed_jobs = false
-# Delayed::Worker.sleep_delay = 60
-# Delayed::Worker.max_attempts = 3
+require 'spec_helper'
 
-Delayed::Worker.max_run_time = 168.hours
-# Delayed::Worker.read_ahead = 10
-# Delayed::Worker.default_queue_name = 'default'
-# Delayed::Worker.delay_jobs = !Rails.env.test?
-Delayed::Worker.raise_signal_exceptions = :term
-Delayed::Worker.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'delayed_job.log'))
+# not sure why i have to include this here
+require 'rserve/simpler'
+
+describe Analysis::R::Cluster, broken: true do
+  before :all do
+    ComputeNode.delete_all
+    FactoryGirl.create(:compute_node)
+
+    # get an analysis (which should be loaded from factory girl)
+    @analysis = Analysis.first
+    @analysis.run_flag = true
+    @analysis.save!
+
+    # create an instance for R
+    @r = Rserve::Simpler.new
+  end
+
+  context 'create local cluster' do
+    it 'should create an R session' do
+      @r.should_not be_nil
+    end
+
+    it 'should configure the cluster with an analysis run_flag' do
+      @analysis.id.should_not be_nil
+
+      cluster_class = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster_class.should_not be_nil
+
+      # get the master cluster IP address
+      master_ip = ComputeNode.where(node_type: 'server').first.ip_address
+      master_ip.should eq('localhost')
+
+      cf = cluster_class.configure(master_ip)
+      cf.should eq(true)
+      #      if !cluster.configure(master_ip)
+      #        raise "could not configure R cluster"
+    end
+
+    it 'should start snow cluster' do
+      cluster_class = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster_class.should_not be_nil
+
+      # get the master cluster IP address
+      master_ip = ComputeNode.where(node_type: 'server').first.ip_address
+      master_ip.should eq('localhost')
+
+      ip_addresses = ComputeNode.worker_ips
+      ip_addresses[:worker_ips].size.should eq(2)
+
+      cf = cluster_class.start(ip_addresses)
+      cf.should eq(true)
+
+      cf = cluster_class.stop
+      cf.should eq(true)
+    end
+  end
+end

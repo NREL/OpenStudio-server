@@ -80,4 +80,3 @@ group :development, :test do
   gem 'openstudio-aws'
   gem 'openstudio-analysis', github: 'NREL/OpenStudio-analysis-gem', branch: 'develop'
 end
-

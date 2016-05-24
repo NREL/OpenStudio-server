@@ -33,14 +33,6 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-# Allow the jobs to run for up to 1 week.  If this is ever hit, then we have other problems.
-# Delayed::Worker.destroy_failed_jobs = false
-# Delayed::Worker.sleep_delay = 60
-# Delayed::Worker.max_attempts = 3
+# Set the ruby path so that child processes and R know where to call it.
 
-Delayed::Worker.max_run_time = 168.hours
-# Delayed::Worker.read_ahead = 10
-# Delayed::Worker.default_queue_name = 'default'
-# Delayed::Worker.delay_jobs = !Rails.env.test?
-Delayed::Worker.raise_signal_exceptions = :term
-Delayed::Worker.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'delayed_job.log'))
+RUBY_BIN_DIR = '/opt/rbenv/shims'
