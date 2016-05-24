@@ -21,6 +21,11 @@ This directory contains a `create_vms.rb` file which can be used to automaticall
 Make sure that you have installed the following Vagrant plug-ins.
 * vagrant plugin install vagrant-aws
 * vagrant plugin install vagrant-awsinfo
+To do so, run the following commands in a shell
+```sh
+vagrant plugin install vagrant-aws
+vagrant plugin install vagrant-omnibus
+```
 
 In addition, an AWS account needs to be specified to create the EC2 instances in. To specify this account, in your home directory create a .aws folder, and in the folder write a config.yml file following the form below with your AWS account information.
 ```
@@ -41,7 +46,7 @@ bundle exec ruby create_vms.rb -p aws -u your_user_name
 
 ## Server Configuration
 
-- Log into 192.168.33.10 either via `vagrant ssh` or putty.
+- Log into your server shell either via `vagrant ssh` or putty.
 
 ```sh
 cs
@@ -65,7 +70,7 @@ cs
 
 ## Worker Configuration
 
-- Log into 192.168.33.11 either via `vagrant ssh` or putty.
+- Log into your worker shell either via `vagrant ssh` or putty.
 
 ```sh
 cw
