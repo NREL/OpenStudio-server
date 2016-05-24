@@ -2,6 +2,8 @@
 
 ruby_regex = /^#\*{79}.*#\*{79}$/m
 erb_regex = /^<%.*#\*{79}.*#\*{79}.%>$/m
+js_regex = /^\/\* @preserve.*Copyright.*license.{2}\*\//m
+
 ruby_header_text = <<EOT
 #*******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
@@ -80,7 +82,16 @@ erb_header_text = <<EOT
 EOT
 erb_header_text.strip!
 
+js_header_text = <<EOT
+/* @preserve
+ * OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be found at openstudio.net/license.
+*/
+EOT
+js_header_text.strip!
+
 paths = [
+  { glob: "lib/openstudio-server/**/*.rb", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/app/**/*.rb", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/config/environments/*.rb", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/config/initializers/delayed_job_config.rb", license: ruby_header_text, regex: ruby_regex},
@@ -94,8 +105,9 @@ paths = [
   { glob: "worker-nodes/*.rb", license: ruby_header_text, regex: ruby_regex},
   # erb
   { glob: "server/app/views/**/*.html.erb", license: erb_header_text, regex: erb_regex},
+  # js
+  { glob: "server/app/views/**/*.js.erb", license: js_header_text, regex: js_regex},
 ]
-
 
 paths.each do |path|
   Dir[path[:glob]].each do |file|
