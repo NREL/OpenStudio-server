@@ -61,8 +61,11 @@
               </div>
               <div class="span3">
                 <div class="button-container">
-                  <%= link_to 'Delete Project', project_path(@current.project), method: :delete,
-                              data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %>
+                  <% if @current.status == 'started' %>
+                      <td><%= link_to 'Stop Analysis', stop_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                  <% else %>
+                      <td><%= link_to 'Delete Project', project_path(@current.project), method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %></td>
+                  <% end %>
                 </div>
               </div>
             </div>
@@ -113,10 +116,12 @@
                 <%= link_to 'View Analysis', analysis_path(res), class: "btn btn-mini" %>
               </div>
               <div class="button-container">
-                <%= link_to 'Delete Project', project_path(res.project), method: :delete,
-                            data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %>
+                <% if res.status == 'started' %>
+                    <td><%= link_to 'Stop Analysis', stop_analysis_path(res.project), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                <% else %>
+                    <td><%= link_to 'Delete Project', project_path(res.project), method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %></td>
+                <% end %>
               </div>
-
             </div>
           </div>
         </div>

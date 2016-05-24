@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Analysis::SequentialSearch, type: :model do
+RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
   before :all do
     # need to populate the database with an analysis and datapoints
 
@@ -28,7 +28,7 @@ RSpec.describe Analysis::SequentialSearch, type: :model do
 
     vgls.size.should eq(0)
 
-    run_list = Analysis::SequentialSearch.mash_up_hash(vgls, @ps)
+    run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(vgls, @ps)
 
     puts "Run list was returned with #{run_list.inspect}"
     puts "run list of size of #{run_list.size} is #{run_list}"
@@ -36,7 +36,7 @@ RSpec.describe Analysis::SequentialSearch, type: :model do
     run_list.should eq([['1'], ['2'], ['3'], ['4'], ['5'], ['6'], ['7']])
 
     # now create the run list data
-    data_point_list = Analysis::SequentialSearch.create_data_point_list(@ps, run_list, 1)
+    data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)
     data_point_list.size.should eq(7)
     data_point_list.first[:variables].should_not be_nil
     data_point_list.first[:name].should_not be_nil
@@ -50,7 +50,7 @@ RSpec.describe Analysis::SequentialSearch, type: :model do
 
     vgls.size.should_not eq(0)
 
-    run_list = Analysis::SequentialSearch.mash_up_hash(vgls, @ps)
+    run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(vgls, @ps)
 
     puts "Run list was returned with #{run_list.inspect}"
     puts "run list of size of #{run_list.size} is #{run_list}"
@@ -58,7 +58,7 @@ RSpec.describe Analysis::SequentialSearch, type: :model do
     run_list.should eq([['1'], ['2'], %w(1 3), %w(1 4), %w(1 5), %w(1 6), %w(1 7)])
 
     # now create the run list data
-    data_point_list = Analysis::SequentialSearch.create_data_point_list(@ps, run_list, 1)
+    data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)
     data_point_list.size.should eq(7)
     data_point_list.first[:variables].should_not be_nil
     data_point_list.first[:name].should_not be_nil
@@ -70,14 +70,14 @@ RSpec.describe Analysis::SequentialSearch, type: :model do
     # get the full ps information
     vgls = @ps.select { |k, v| v if vgl_ids.include?(k) }
 
-    run_list = Analysis::SequentialSearch.mash_up_hash(vgls, @ps)
+    run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(vgls, @ps)
 
     puts "run list of size of #{run_list.size} is #{run_list.uniq}"
     run_list.size.should eq(6) # only six for now because we aren't pulling out the values
     run_list.should eq([%w(1 3), %w(2 3), %w(1 4), %w(1 5), %w(1 6), %w(1 3 7)])
 
     # now create the run list data
-    data_point_list = Analysis::SequentialSearch.create_data_point_list(@ps, run_list, 1)
+    data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)
     data_point_list.size.should eq(6)
     data_point_list.first[:variables].should_not be_nil
     data_point_list.first[:variables].size.should eq(2)

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Analysis::R::Cluster, type: :model do
+RSpec.describe AnalysisLibrary::R::Cluster, type: :model do
   before :all do
     ComputeNode.delete_all
     FactoryGirl.create(:compute_node)
@@ -11,7 +11,8 @@ RSpec.describe Analysis::R::Cluster, type: :model do
     @analysis.save!
 
     # create an instance for R
-    @r = Rserve::Simpler.new
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
   end
 
   context 'create local cluster' do
@@ -22,7 +23,7 @@ RSpec.describe Analysis::R::Cluster, type: :model do
     it 'should configure the cluster with an analysis run_flag' do
       @analysis.id.should_not be_nil
 
-      cluster_class = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       cluster_class.should_not be_nil
 
       # get the master cluster IP address
@@ -34,7 +35,7 @@ RSpec.describe Analysis::R::Cluster, type: :model do
     end
 
     it 'should start snow cluster' do
-      cluster_class = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       cluster_class.should_not be_nil
 
       # get the master cluster IP address

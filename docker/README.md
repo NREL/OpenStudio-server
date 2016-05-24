@@ -24,6 +24,7 @@ docker-compose build
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully, then start the containers
 
 ``` 
+docker volume create --name=osdata
 docker-compose up
 ```
 

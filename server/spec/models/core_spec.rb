@@ -1,12 +1,12 @@
 require 'rails_helper'
 
-RSpec.describe Analysis::Core, type: :model do
+RSpec.describe AnalysisLibrary::Core, type: :model do
   class DummyClass
   end
 
   before :each do
     @dummy_class = DummyClass.new
-    @dummy_class.extend(Analysis::Core)
+    @dummy_class.extend(AnalysisLibrary::Core)
 
     # need to populate the database with an analysis and datapoints
 
@@ -54,19 +54,19 @@ RSpec.describe Analysis::Core, type: :model do
     end
 
     it 'should return no pivots when the pivot array is empty' do
-      result = Analysis::Core.product_hash([])
+      result = AnalysisLibrary::Core.product_hash([])
 
       result.should eq([])
     end
 
     it 'should deal with more than two piviots' do
-      result = Analysis::Core.product_hash(a: [1, 2], b: [3, 4], c: [5, 6])
+      result = AnalysisLibrary::Core.product_hash(a: [1, 2], b: [3, 4], c: [5, 6])
 
       result.size.should eq(8)
     end
 
     it 'should deal with non-integers' do
-      result = Analysis::Core.product_hash(a: [1.23, 4.56], b: [true, false], c: %w(p q))
+      result = AnalysisLibrary::Core.product_hash(a: [1.23, 4.56], b: [true, false], c: %w(p q))
 
       result.size.should eq(8)
     end
@@ -92,19 +92,19 @@ RSpec.describe Analysis::Core, type: :model do
   context 'hashing' do
     it 'should return array of hashes' do
       h = { a: [1, 2, 3], b: [4, 5, 6] }
-      r = Analysis::Core.hash_of_array_to_array_of_hash(h)
+      r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(h)
       r.size.should eq(h[:a].size)
       r[0].should eq(a: 1, b: 4)
     end
 
     it 'should not work when array length is different' do
       h = { a: [1, 2, 3], b: [4, 5, 6, 7, 8, 9] }
-      expect { Analysis::Core.hash_of_array_to_array_of_hash(h) }.to raise_error(IndexError)
+      expect { AnalysisLibrary::Core.hash_of_array_to_array_of_hash(h) }.to raise_error(IndexError)
     end
 
     it 'should work with any type of data' do
       h = { a: [1, 2, 3], b: %w(4 5 6), c: [true, false, false] }
-      r = Analysis::Core.hash_of_array_to_array_of_hash(h)
+      r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(h)
       r.size.should eq(h[:a].size)
       r[0].should eq(a: 1, b: '4', c: true)
     end
@@ -112,7 +112,7 @@ RSpec.describe Analysis::Core, type: :model do
     it 'should return non-combined hashes' do
       h = { a: [1, 2, 3], b: %w(4 5 6), c: [true, false, false] }
       vars = [OpenStruct.new(_id: 'c', static_value: 123)]
-      r = Analysis::Core.hash_of_array_to_array_of_hash_non_combined(h, vars)
+      r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash_non_combined(h, vars)
       puts "Non combined hash returned with #{r.inspect}"
       r.size.should eq(8)
       r[0].should eq(a: 1, c: 123)

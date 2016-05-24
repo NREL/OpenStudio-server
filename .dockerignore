@@ -2,6 +2,6 @@
 .git
 vagrant
 /server/Gemfile.lock
-/server/log
 /server/vendor
-/worker-nodes/analysis*
+/server/public/assets
+/worker-nodes/analysis_*

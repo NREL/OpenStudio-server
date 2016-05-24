@@ -932,15 +932,15 @@ class AnalysesController < ApplicationController
     # end
 
     # out_hash.each_key do |k|
-    #  #Rails.logger.info "Length is #{out_hash[k].size}"
-    #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    #  #logger.info "Length is #{out_hash[k].size}"
+    #  logger.info "#{k}  -   #{out_hash[k]}"
     # end
 
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
 
-    require 'rserve/simpler'
-    r = Rserve::Simpler.new
+    r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
 
     start_time = Time.now
     logger.info 'starting creation of data frame'
