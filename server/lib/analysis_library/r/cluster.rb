@@ -1,5 +1,3 @@
-require 'rserve/simpler'
-
 module AnalysisLibrary::R
   class Cluster
     attr_reader :started
@@ -23,7 +21,7 @@ module AnalysisLibrary::R
     end
 
     # configure the r session, returns true if the flag variable was readable (and true)
-    def configure(_master_ip)
+    def configure
       @r.command do
         %{
             ip <- "#{@db_ip}"

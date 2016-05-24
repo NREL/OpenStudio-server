@@ -44,7 +44,7 @@ class AnalysisLibrary::BatchRunAnalyses
     dp_map = { analysis_id: [], data_point_id: [] }
     dps = DataPoint.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid, :analysis)
     dps.each do |dp|
-      Rails.logger.info "Adding in #{dp.uuid}"
+      logger.info "Adding in #{dp.uuid}"
       # TODO: uncomment this in production
       dp.status = 'queued'
       dp.save!

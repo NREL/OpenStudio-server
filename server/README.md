@@ -25,3 +25,6 @@ bin/delayed_job stop && bin/delayed_job --queue=analyses,background,simulations 
 
 
 ## Remote Delayed Job
+
+
+bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,background start && bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulations start

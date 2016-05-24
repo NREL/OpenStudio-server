@@ -1,7 +1,6 @@
 # Non Sorting Genetic Algorithm
 class AnalysisLibrary::NsgaNrel
-  include AnalysisLibrary::Core
-  include AnalysisLibrary::R
+  include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -47,7 +46,7 @@ class AnalysisLibrary::NsgaNrel
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    Rails.logger.info 'Setting up R for NSGA2 Run'
+    logger.info 'Setting up R for NSGA2 Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
@@ -62,8 +61,8 @@ class AnalysisLibrary::NsgaNrel
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting NSGA2 Run')
+    logger.info("Master ip: #{master_ip}")
+    logger.info('Starting NSGA2 Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -96,11 +95,11 @@ class AnalysisLibrary::NsgaNrel
 
     objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
     ug = objtrue.uniq { |v| v['objective_function_group'] }
-    Rails.logger.info "Number of objective function groups are #{ug.size}"
+    logger.info "Number of objective function groups are #{ug.size}"
 
     @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
     @analysis.save!
-    Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+    logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
     if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
       raise 'number of objective functions must equal'
@@ -108,50 +107,50 @@ class AnalysisLibrary::NsgaNrel
 
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+    logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
-    Rails.logger.info 'starting lhs to discretize the variables'
+    logger.info 'starting lhs to discretize the variables'
 
     lhs = AnalysisLibrary::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
     if samples.empty? || samples.size <= 1
-      Rails.logger.info 'No variables were passed into the options, therefore exit'
+      logger.info 'No variables were passed into the options, therefore exit'
       raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
-    Rails.logger.info "Samples are #{samples}"
+    logger.info "Samples are #{samples}"
 
-    Rails.logger.info "mins_maxes: #{mins_maxes}"
-    Rails.logger.info "var_names: #{var_names}"
-    Rails.logger.info("variable types are #{var_types}")
+    logger.info "mins_maxes: #{mins_maxes}"
+    logger.info "var_names: #{var_names}"
+    logger.info("variable types are #{var_types}")
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
-      unless cluster.configure(master_ip)
+      unless cluster.configure
         raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
-      Rails.logger.info 'Running initialize worker scripts'
+      logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Found the following good ips #{worker_ips}"
+      logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        logger.info "Cluster Started flag is #{cluster.started}"
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
@@ -400,7 +399,7 @@ class AnalysisLibrary::NsgaNrel
 
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
       @analysis_job.status = 'completed'
@@ -411,7 +410,7 @@ class AnalysisLibrary::NsgaNrel
       # ensure that the cluster is stopped
       cluster.stop if cluster
 
-      Rails.logger.info 'Running finalize worker scripts'
+      logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
         raise 'could not run finalize worker scripts'
       end
@@ -420,15 +419,15 @@ class AnalysisLibrary::NsgaNrel
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          Rails.logger.info('read best result json')
+          logger.info('read best result json')
           temp2 = File.read(best_result_json)
           temp = JSON.parse(temp2, symbolize_names: true)
-          Rails.logger.info("temp: #{temp}")
+          logger.info("temp: #{temp}")
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
-          Rails.logger.info("analysis: #{@analysis.results}")
+          logger.info("analysis: #{@analysis.results}")
         rescue => e
-          Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
+          logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
 
@@ -441,13 +440,7 @@ class AnalysisLibrary::NsgaNrel
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
-  end
-
-  # Since this is a delayed job, if it crashes it will typically try multiple times.
-  # Fix this to 1 retry for now.
-  def max_attempts
-    1
   end
 end

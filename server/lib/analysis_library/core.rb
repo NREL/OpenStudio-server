@@ -1,6 +1,3 @@
-# Include these gems/libraries for all the analyses
-require 'rserve/simpler'
-
 # Core functions for analysis
 module AnalysisLibrary
   module Core

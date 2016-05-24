@@ -10,6 +10,7 @@ defaults: &defaults
 development:
   <<: *defaults
   ruby_bin_dir: ':ruby_bin_dir'
+  server_asset_path: ':rails_root/public/assets/server'
   sim_root_path: ':rails_root/../worker-nodes'
   os_server_host_url: 'http://localhost:3000'
 

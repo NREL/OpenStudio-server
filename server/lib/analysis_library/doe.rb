@@ -1,5 +1,5 @@
-class AnalysisLibrary::Doe
-  include AnalysisLibrary::Core # pivots and static vars
+class AnalysisLibrary::Doe < AnalysisLibrary::Base
+  include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of

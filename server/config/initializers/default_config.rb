@@ -7,6 +7,7 @@ APP_CONFIG = YAML.load(ERB.new(File.new(path).read).result)[Rails.env]
 APP_CONFIG['sim_root_path'] = File.expand_path(APP_CONFIG['sim_root_path'].gsub(':rails_root', Rails.root.to_s))
 APP_CONFIG['ruby_bin_dir'] = APP_CONFIG['ruby_bin_dir'].gsub(':ruby_bin_dir', RbConfig::CONFIG['bindir'])
 APP_CONFIG['rails_log_path'] = File.expand_path(APP_CONFIG['rails_log_path'].gsub(':rails_root', Rails.root.to_s))
+APP_CONFIG['server_asset_path'] = File.expand_path(APP_CONFIG['server_asset_path'].gsub(':rails_root', Rails.root.to_s))
 
 # Set the default URL
 Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host_url'].delete("http://")
