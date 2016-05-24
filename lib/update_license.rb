@@ -97,7 +97,7 @@ paths = [
   { glob: "server/config/initializers/delayed_job_config.rb", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/config/initializers/ruby_path.rb", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/lib/Rscripts/*.R", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/lib/analysis/**/*.rb", license: ruby_header_text, regex: ruby_regex},
+  { glob: "server/lib/analysis_library/**/*.rb", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/lib/openstudio_server/**/*.rb", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/lib/tasks/**/*.rake", license: ruby_header_text, regex: ruby_regex},
   { glob: "server/spec/**/*.rb", license: ruby_header_text, regex: ruby_regex},
