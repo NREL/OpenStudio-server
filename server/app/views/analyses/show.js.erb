@@ -1,3 +1,8 @@
+/* @preserve
+ * OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be found at openstudio.net/license.
+*/
+
 $("#<%= @status %>simulations").html('
 <%= escape_javascript render(:partial => "analyses/table", :locals => { users: @status_simulations, status: @status, :all_page => @all_page, :completed_page => @completed_page, :running_page => @running_page, :queued_page => @queued_page, :na_page => @na_page, :page => params[:page] }) %>
 ');
