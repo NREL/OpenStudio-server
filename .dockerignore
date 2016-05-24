@@ -3,6 +3,5 @@
 vagrant
 /server/Gemfile.lock
 /server/vendor
-/server/public/assets/analyses/*
-/server/public/assets/data_points/*
-/worker-nodes/analysis*
+/server/public/assets
+/worker-nodes/analysis_*

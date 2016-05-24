@@ -1,33 +1,39 @@
 # Docker Compose creates multiple containers on a single machine.
 # run `docker-compose up` to create and run/link the containers
-db:
-  image: mongo
-  ports:
-    - "27017:27017"
-web:
-  build: .
-  environment:
-    - RAILS_ENV=docker
-  links:
-    - db
-    - rserve
-  ports:
-    - "8080:80"
-    - "9090:9090"
-  volumes_from:
-    - osdata
-rserve:
-  build: ./docker/R
-  ports:
-    - "6311:6311"
-  volumes_from:
-    - osdata
-worker:
-  build: .
-  environment:
-    - RAILS_ENV=docker
-  links:
-    - web
-    - db
-    - rserve
-  command: bin/delayed_job -i worker --queue=simulations run
+version: '2'
+services:
+  db:
+    image: mongo
+    ports:
+      - "27017:27017"
+  web:
+    build: .
+    environment:
+      - RAILS_ENV=docker
+    links:
+      - db
+      - rserve
+    ports:
+      - "8080:80"
+      - "9090:9090"
+    volumes:
+      - osdata:/mnt/openstudio
+  rserve:
+    build: ./docker/R
+    ports:
+      - "6311:6311"
+    volumes:
+      - osdata:/mnt/openstudio
+  worker:
+    build: .
+    environment:
+      - RAILS_ENV=docker
+    links:
+      - web
+      - db
+      - rserve
+    command: bin/delayed_job -i worker --queue=simulations run
+volumes:
+  osdata:
+    external: true
+
