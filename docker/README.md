@@ -25,7 +25,6 @@ docker-compose build
 
 ``` 
 docker run -v /mnt/openstudio --name osdata busybox true
-docker run -v /mnt/openstud --name osdata-temp busybox true
 docker-compose up
 ```
 
