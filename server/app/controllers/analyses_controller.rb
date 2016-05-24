@@ -1,5 +1,3 @@
-
-require 'core_extensions'
 require 'zip'
 
 class AnalysesController < ApplicationController
