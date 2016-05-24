@@ -76,8 +76,4 @@ group :development do
   gem 'better_errors'
   gem 'meta_request'
   gem 'ruby-prof'
-  # gem 'ruby-debug' if RAILS_VERSION > "2.0.0"
 end
-
-# Deploy with Capistrano
-gem 'capistrano'
