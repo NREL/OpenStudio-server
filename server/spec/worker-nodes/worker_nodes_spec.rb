@@ -1,4 +1,3 @@
-<%
 #*******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
@@ -33,55 +32,17 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
-%>
 
-<div class="row-fluid">
-  <div class="span8">
-    <h2>Variable Information </h2>
-    <%= link_to "Edit", edit_variable_path(@variable), class: "btn btn-primary" %>
-    <table class="table table-striped">
-      <thead>
-      <tr>
-        <th>Field Name</th>
-        <th>Field Value</th>
-      <tr>
-      </thead>
-      <tbody>
-      <% @variable.as_document.each do |k, v| %>
-          <tr>
-            <td><%= k %></td>
-            <td><%= v %></td>
-          </tr>
-      <% end %>
-      </tbody>
-    </table>
+require 'rspec'
 
-    <h2>Data Points with this Variable</h2>
-    <table class="table table-striped">
-      <thead>
-      <tr>
-        <th>Data Point Name</th>
-        <th>Variable Value</th>
-      </tr>
-      </thead>
-      <tbody>
-      <% @dps.each do |dp| %>
-          <tr>
-            <td><%= link_to dp.name, dp %></td>
-            <td><%= dp.set_variable_values[@variable.id] %></td>
-          </tr>
-      <% end %>
-      </tbody>
-    </table>
+describe 'worker-init' do
+  it 'should sort worker jobs correctly' do
+    a = %w(00_Job0 01_Job1 11_Job11 20_Job20 02_Job2 21_Job21)
 
-  </div>
-  <div class="span4">
-    <%= link_to(image_tag(@variable.preflight_images.first.image.url(:small)), @variable.preflight_images.first.image.url(:original), :popup => ['original_image', 'height=700,width=900']) unless @variable.preflight_images.first.nil? %>
-  </div>
-</div>
+    a.sort!
 
-
-
-  
-
-
+    expect(a.first).to eq '00_Job0'
+    expect(a.last).to eq '21_Job21'
+    expect(a[3]).to eq '11_Job11'
+  end
+end
