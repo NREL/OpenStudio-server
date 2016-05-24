@@ -80,34 +80,34 @@ class Measure
       raise "Measure already exists for analysis #{analysis_id} of #{measure.name}"
     else
       measure = Measure.find_or_create_by(analysis_id: analysis_id, name: os_json['name'])
-      Rails.logger.info("Creating new measure for analysis #{analysis_id} with name '#{measure.name}'")
+      logger.info("Creating new measure for analysis #{analysis_id} with name '#{measure.name}'")
     end
 
-    Rails.logger.info("Adding/updating measure #{measure.name} for analysis #{analysis_id}")
+    logger.info("Adding/updating measure #{measure.name} for analysis #{analysis_id}")
     i_measure = 0
     os_json.each do |k, v|
       exclude_fields = %w(arguments variables)
 
       # check for null measures
-      # Rails.logger.info("trying to add #{k} : #{v}")
+      # logger.info("trying to add #{k} : #{v}")
       measure[k] = v unless exclude_fields.include? k
 
-      # Rails.logger.info(k)
+      # logger.info(k)
       if k['measure_type'] && v == 'NullMeasure'
         # this is a null measure--but has no name
-        Rails.logger.info('Null measure found')
+        logger.info('Null measure found')
         measure.name = 'NullMeasure'
       end
     end
 
     # Pull out the arugments that are in the measure
     if os_json['arguments']
-      # Rails.logger.info("#{k.inspect} #{v.inspect}")
+      # logger.info("#{k.inspect} #{v.inspect}")
       os_json['arguments'].each do |arg|
         # Create a variable definition (i.e. a variable) for each argument regardless
         # whether or not it is used
         new_var = Variable.create_and_assign_to_measure(analysis_id, measure, arg)
-        # Rails.logger.info("New variable is #{new_var}")
+        # logger.info("New variable is #{new_var}")
         measure.variables << new_var unless measure.variables.include?(new_var)
 
         if pat_json
@@ -115,11 +115,11 @@ class Measure
           # measure groups which really isn't needed for LHS nor optimization.
           if arg['value'] && arg['argument_index']
             # let the system know that the variable was selected for "manipulation"
-            # Rails.logger.info("letting the system know that it can use this variable #{new_var.inspect}")
+            # logger.info("letting the system know that it can use this variable #{new_var.inspect}")
             # new_var.perturbable = true
             # new_var.save!
 
-            # Rails.logger.info("adding #{arg['value']}")
+            # logger.info("adding #{arg['value']}")
             measure.values << [arg['argument_index'], arg['value']]
           end
         end
@@ -128,7 +128,7 @@ class Measure
 
     if os_json['variables']
       os_json['variables'].each do |json_var|
-        Rails.logger.info "JSON had a variable named '#{json_var['display_name']}'"
+        logger.info "JSON had a variable named '#{json_var['display_name']}'"
         new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
 
         if new_var.save!

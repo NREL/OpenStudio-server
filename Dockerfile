@@ -142,16 +142,9 @@ ADD /server /srv
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN bundle install --without development test
 
-# Where to save the assets, here for now I guess
-RUN mkdir -p /mnt/openstudio/server/$RAILS_ENV
+# Where to save the assets
 RUN mkdir -p /srv/public/assets/analyses && chmod 777 /srv/public/assets/analyses
 RUN mkdir -p /srv/public/assets/data_points && chmod 777 /srv/public/assets/data_points
-
-#### Setup the worker on the server node
-ADD /worker-nodes /mnt/openstudio
-RUN cd /mnt/openstudio \
-    && find /mnt/openstudio -type d -print0 | xargs -0 chmod 775 \
-    && find /mnt/openstudio -type f -print0 | xargs -0 chmod 664
 
 # forward request and error logs to docker log collector
 

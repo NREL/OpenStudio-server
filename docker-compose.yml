@@ -14,10 +14,14 @@ web:
   ports:
     - "8080:80"
     - "9090:9090"
+  volumes_from:
+    - osdata
 rserve:
   build: ./docker/R
   ports:
     - "6311:6311"
+  volumes_from:
+    - osdata
 worker:
   build: .
   environment:

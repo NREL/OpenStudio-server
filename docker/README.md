@@ -24,6 +24,8 @@ docker-compose build
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully, then start the containers
 
 ``` 
+docker run -v /mnt/openstudio --name osdata busybox true
+docker run -v /mnt/openstud --name osdata-temp busybox true
 docker-compose up
 ```
 

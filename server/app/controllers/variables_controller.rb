@@ -186,7 +186,7 @@ class VariablesController < ApplicationController
     download_filename = "#{analysis.name}_metadata.RData"
     data_frame_name = 'metadata'
 
-    Rails.logger.info("outhash is #{out_hash}")
+    logger.info("outhash is #{out_hash}")
 
     r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                 APP_CONFIG['rserve_port'])
@@ -206,9 +206,9 @@ class VariablesController < ApplicationController
     end
 
     # Have R delete the file since it will have permissions to delete the file.
-    Rails.logger.info "Temp filename is #{tmp_filename}"
+    logger.info "Temp filename is #{tmp_filename}"
     r_command = "file.remove('#{tmp_filename}')"
-    Rails.logger.info "R command is #{r_command}"
+    logger.info "R command is #{r_command}"
     if File.exist? tmp_filename
       r.converse(r_command)
     end

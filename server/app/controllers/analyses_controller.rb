@@ -932,8 +932,8 @@ class AnalysesController < ApplicationController
     # end
 
     # out_hash.each_key do |k|
-    #  #Rails.logger.info "Length is #{out_hash[k].size}"
-    #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    #  #logger.info "Length is #{out_hash[k].size}"
+    #  logger.info "#{k}  -   #{out_hash[k]}"
     # end
 
     download_filename = "#{analysis.name}_results.RData"

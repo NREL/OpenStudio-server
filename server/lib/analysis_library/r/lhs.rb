@@ -185,7 +185,7 @@ module AnalysisLibrary::R
       Rails.logger.info "Creating image for #{variable.name} with samples #{samples}"
       save_file_name = nil
       if samples && samples.count > 0
-        save_file_name = "/tmp/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.jpg'], nil)}"
+        save_file_name = "/#{APP_CONFIG['server_asset_path']}/R/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.jpg'], nil)}"
         Rails.logger.info("R image file name is #{save_file_name}")
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
           @r.command(d: { samples: samples }.to_dataframe) do

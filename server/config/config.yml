@@ -1,5 +1,6 @@
 defaults: &defaults
   sim_root_path: /mnt/openstudio
+  server_asset_path: /mnt/openstudio/server
   ruby_bin_dir: ':ruby_bin_dir'
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
   rails_log_path: ':rails_root/log'

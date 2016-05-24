@@ -40,47 +40,51 @@ class AnalysisLibrary::Lhs
                                                  APP_CONFIG['rserve_port'])
 
     begin
-      Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
-      Rails.logger.info "Setting up R for #{self.class.name}"
+      logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
+      logger.info "Setting up R for #{self.class.name}"
       # TODO: need to move this to the module class
+      a = @r.converse("system('whoami')")
+      logger.info a
+      a = @r.converse("system('cat /etc/hostname')")
+      logger.info a
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       # make this a core method
-      Rails.logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
+      logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
       @r.converse("set.seed(#{@analysis.problem['random_seed']})")
 
       pivot_array = Variable.pivot_array(@analysis.id)
 
       selected_variables = Variable.variables(@analysis.id)
-      Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+      logger.info "Found #{selected_variables.count} variables to perturb"
 
       # generate the probabilities for all variables as column vectors
       @r.converse("print('starting lhs')")
       samples = nil
       var_types = nil
-      Rails.logger.info 'Starting sampling'
+      logger.info 'Starting sampling'
       lhs = AnalysisLibrary::R::Lhs.new(@r)
       if @analysis.problem['algorithm']['sample_method'] == 'all_variables' ||
          @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
         samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
         if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
           # Do the work to mash up the samples and pivot variables before creating the data points
-          Rails.logger.info "Samples are #{samples}"
+          logger.info "Samples are #{samples}"
           samples = hash_of_array_to_array_of_hash(samples)
-          Rails.logger.info "Flipping samples around yields #{samples}"
+          logger.info "Flipping samples around yields #{samples}"
         elsif @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
           # Do the work to mash up the samples and pivot variables before creating the data points
-          Rails.logger.info "Samples are #{samples}"
+          logger.info "Samples are #{samples}"
           samples = hash_of_array_to_array_of_hash_non_combined(samples, selected_variables)
-          Rails.logger.info "Non-combined samples yields #{samples}"
+          logger.info "Non-combined samples yields #{samples}"
         end
       else
         raise 'no sampling method defined (all_variables or individual_variables)'
       end
 
-      Rails.logger.info 'Fixing Pivot dimension'
+      logger.info 'Fixing Pivot dimension'
       samples = add_pivots(samples, pivot_array)
-      Rails.logger.info "Finished adding the pivots resulting in #{samples}"
+      logger.info "Finished adding the pivots resulting in #{samples}"
 
       # Add the data points to the database
       isample = 0
@@ -91,7 +95,7 @@ class AnalysisLibrary::Lhs
         dp.set_variable_values = sample
         dp.save!
 
-        Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+        logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
@@ -108,7 +112,7 @@ class AnalysisLibrary::Lhs
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 
@@ -116,5 +120,10 @@ class AnalysisLibrary::Lhs
   # Fix this to 1 retry for now.
   def max_attempts
     1
+  end
+
+  # Return the logger for the delayed job
+  def logger
+    Delayed::Worker.logger
   end
 end

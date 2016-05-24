@@ -72,7 +72,7 @@ class DataPoint
 
   # Perform the final actions on the Data Point.
   def finalize_data_point
-    Rails.logger.info 'Post-processing the JSON data that was pushed into the database by the worker'
+    logger.info 'Post-processing the JSON data that was pushed into the database by the worker'
     save_results_from_openstudio_json
   end
 

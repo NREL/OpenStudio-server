@@ -385,7 +385,7 @@ class AnalysisLibrary::Morris
               #axis(2, las=1)
               dev.off()
             #if (all(is.finite(var_mu_star))) {
-              file_names_bar_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
+              file_names_bar_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
               png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200)
               op <- par(mar = c(14,4,4,2) + 0.1)
               mp <- barplot(height=var_mu_star, ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
@@ -393,7 +393,7 @@ class AnalysisLibrary::Morris
               #axis(2, las=1)
               dev.off()
               #sorted
-              file_names_bar_sorted_png[j] <- paste("/mnt/openstudio/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
+              file_names_bar_sorted_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
               png(file_names_bar_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200)
               op <- par(mar = c(14,4,4,2) + 0.1)
               mp <- barplot(height=sort(var_mu_star), ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")

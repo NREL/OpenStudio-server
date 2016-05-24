@@ -67,28 +67,28 @@ class Analysis
     defaults = {skip_init: false}
     options = defaults.merge(options)
 
-    Rails.logger.info "calling start on #{analysis_type} with options #{options}"
+    logger.info "calling start on #{analysis_type} with options #{options}"
 
     # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
-      Rails.logger.info("Queuing up analysis #{uuid}")
+      logger.info("Queuing up analysis #{uuid}")
       save!
 
       # TODO: Remove the idea of initialing workers here. The cluster needs to be defined before running this method
-      Rails.logger.info('Initializing workers in database')
+      logger.info('Initializing workers in database')
       # initialize_workers(options)
     end
 
-    Rails.logger.info("Starting #{analysis_type}")
+    logger.info("Starting #{analysis_type}")
     if no_delay
-      Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
+      logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
       save!
       reload
       abr = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
-      Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
+      logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
       job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
       aj.delayed_job_id = job.id
@@ -107,7 +107,7 @@ class Analysis
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
-    Rails.logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
+    logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
     start(no_delay, analysis_type, options)
 
@@ -136,10 +136,10 @@ class Analysis
   def pull_out_os_variables
     pat_json = false
     # get the measures first
-    Rails.logger.info('pulling out openstudio measures')
+    logger.info('pulling out openstudio measures')
     # note the measures first
     if self['problem'] && self['problem']['workflow']
-      Rails.logger.info('found a problem and workflow')
+      logger.info('found a problem and workflow')
       self['problem']['workflow'].each do |wf|
         # Currently the PAT format has measures and I plan on ignoring them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
@@ -159,7 +159,7 @@ class Analysis
     end
 
     if pat_json
-      Rails.logger.error('Appears to be a PAT JSON formatted file, pulling variables out of metadata for now')
+      logger.error('Appears to be a PAT JSON formatted file, pulling variables out of metadata for now')
       if os_metadata && os_metadata['variables']
         os_metadata['variables'].each do |variable|
           var = Variable.create_from_os_json(id, variable)
@@ -170,7 +170,7 @@ class Analysis
     # pull out the output variables
     if output_variables
       output_variables.each do |variable|
-        Rails.logger.info "Saving off output variables: #{variable}"
+        logger.info "Saving off output variables: #{variable}"
         var = Variable.create_output_variable(id, variable)
       end
     end
@@ -209,7 +209,7 @@ class Analysis
       # TODO: can we delete the gsub'ing -- as i think the v.name is always the machine name now
       mappings[var['_id']] = v.name.tr(' ', '_') if v
     end
-    Rails.logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
+    logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
 
     # sort before sending back
     Hash[mappings.sort_by { |_, v| v }]
