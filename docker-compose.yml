@@ -24,6 +24,20 @@ services:
       - "6311:6311"
     volumes:
       - osdata:/mnt/openstudio
+  web-background:
+    build: .
+    environment:
+      - RAILS_ENV=docker
+    links:
+      - db
+      - rserve
+    ports:
+      - "8080:80"
+      - "9090:9090"
+    volumes:
+      - osdata:/mnt/openstudio
+    command:
+      - bin/delayed_job -i server --queues=analyses,background run
   worker:
     build: .
     environment:

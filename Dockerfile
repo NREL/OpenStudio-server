@@ -131,6 +131,7 @@ RUN bundle install --without development test
 ADD /server/Rakefile /srv/Rakefile
 ADD /server/config/ /srv/config/
 ADD /server/app/assets/ /srv/app/assets/
+ADD /server/lib /srv/lib
 
 # Now call precompile
 RUN mkdir /srv/log
