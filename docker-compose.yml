@@ -31,9 +31,6 @@ services:
     links:
       - db
       - rserve
-    ports:
-      - "8080:80"
-      - "9090:9090"
     volumes:
       - osdata:/mnt/openstudio
     command:
