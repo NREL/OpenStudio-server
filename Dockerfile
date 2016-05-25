@@ -149,8 +149,8 @@ RUN mkdir -p /srv/public/assets/data_points && chmod 777 /srv/public/assets/data
 # forward request and error logs to docker log collector
 
 # TODO: How to get logs out of this, mount shared volume?
-RUN ln -sf /dev/stdout /var/log/nginx/access.log
-RUN ln -sf /dev/stderr /var/log/nginx/error.log
+#RUN ln -sf /dev/stdout /var/log/nginx/access.log
+#RUN ln -sf /dev/stderr /var/log/nginx/error.log
 RUN chmod 666 /srv/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
