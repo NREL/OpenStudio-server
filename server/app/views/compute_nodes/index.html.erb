@@ -39,29 +39,33 @@
 <div class="pad-top-20">
   <table class="table table-striped">
     <tr>
-      <th>Node Type</th>
-      <th>IP</th>
       <th>Hostname</th>
+      <th>Name</th>
+      <th>Queues</th>
+      <th>IP</th>
       <th>Port</th>
       <th>Local Hostname</th>
       <th>User</th>
       <th>Cores</th>
       <th>AMI ID</th>
       <th>Instance ID</th>
-      <th>Enabled?</th>
+      <th>PID</th>
+      <th>Last Heartbeat</th>
     </tr>
     <% @nodes.each do |n| %>
         <tr>
-          <td><%= n.node_type %></td>
-          <td><%= n.ip_address %></td>
           <td><%= n.hostname %></td>
+          <td><%= n.name %></td>
+          <td><%= n.queues.join(", ") if n.queues %></td>
+          <td><%= n.ip_address %></td>
           <td><%= n.port %></td>
           <td><%= n.local_hostname %></td>
           <td><%= n.user %></td>
           <td><%= n.cores %></td>
           <td><%= n.ami_id %></td>
           <td><%= n.instance_id %></td>
-          <td><%= n.enabled %></td>
+          <td><%= n.pid %></td>
+          <td><%= time_ago_in_words(n.last_heartbeat_at) %></td>
         </tr>
     <% end %>
   </table>

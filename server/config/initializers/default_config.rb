@@ -16,4 +16,5 @@ Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host
 FileUtils.mkdir_p APP_CONFIG['server_asset_path'] unless Dir.exist? APP_CONFIG['server_asset_path']
 FileUtils.mkdir_p "#{APP_CONFIG['server_asset_path']}/R" unless Dir.exist? "#{APP_CONFIG['server_asset_path']}/R"
 FileUtils.mkdir_p APP_CONFIG['rails_log_path'] unless Dir.exist? APP_CONFIG['rails_log_path']
-Rails.logger = Logger.new "#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"
+
+Rails.logger = ActiveSupport::TaggedLogging.new(Logger.new("#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"))

@@ -207,21 +207,6 @@ class RunSimulateDataPoint
         files.each do |f|
           run_file(analysis_dir, 'initialize', f, sim_logger)
         end
-
-        # TODO: Get real data from the instance
-        # Register this node with the server
-        data = {
-          compute_node: {
-            node_type: 'worker',
-            hostname: 'localhost',
-            ip_address: '127.0.0.1',
-            enabled: true,
-            cores: 1
-          }
-        }
-
-        url = "#{APP_CONFIG['os_server_host_url']}/compute_nodes"
-        RestClient.post(url, data)
       end
 
       # Now tell all other waiting threads that it is okay to continue

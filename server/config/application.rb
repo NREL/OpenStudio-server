@@ -15,13 +15,7 @@ module OpenstudioServer
     # -- all .rb files in that directory are automatically loaded.
 
     # Custom directories with classes and modules you want to be autoloadable.
-    config.autoload_paths += %W(
-      #{config.root}/lib
-      #{config.root}/lib/analysis
-      #{config.root}/lib/analysis/r
-      #{config.root}/lib/delayed_job
-      #{config.root}/lib/openstudio_server
-    )
+    config.autoload_paths << Rails.root.join('lib')
 
     # Enable escaping HTML in JSON.
     config.active_support.escape_html_entities_in_json = true

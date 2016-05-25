@@ -37,22 +37,27 @@ class ComputeNode
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :node_type, type: String
+  field :name, type: String
+  field :queues, type: Array
+  field :node_type, type: String # TODO: remove this. node_type is in the queues, or make a method
   field :ip_address, type: String
   field :hostname, type: String
-  field :port, type: Integer
+  field :port, type: Integer # TODO: remove this
   field :local_hostname, type: String
-  field :user, type: String
-  field :password, type: String
+  field :pid, type: Integer # PID of running delayed job instance
+  field :user, type: String # TODO: remove this
+  field :password, type: String # TODO: remove this
   field :cores, type: Integer
   field :ami_id, type: String
   field :instance_id, type: String
-  field :enabled, type: Boolean, default: false
+  field :enabled, type: Boolean, default: false # TODO: Remove this
+  field :last_heartbeat_at, type: DateTime, default: Time.now.utc
 
   # Indexes
   index(hostname: 1)
   index(ip_address: 1)
   index(node_type: 1)
+  index({name: 1, hostname: 1}, unique: true)
 
   # Return all the enabled IP addresses as a hash in prep for writing to a dataframe
   def self.worker_ips
@@ -70,6 +75,22 @@ class ComputeNode
 
     worker_ips_hash
   end
+
+  # TODO: verify method
+  def update_heartbeat
+    update(:last_heartbeat_at, Time.now.utc)
+  end
+
+  # TODO: verify method
+  def self.dead_workers(timeout_seconds)
+    where('last_heartbeat_at < ?', Time.now.utc - timeout_seconds.seconds)
+  end
+
+  # TODO: verify method
+  def self.active_names
+    select(:name)
+  end
+
 
   # Report back the system inforamtion of the node for debugging purposes
   # TODO: Send system information to server, move this to a worker init because this is hitting API limits on amazon
