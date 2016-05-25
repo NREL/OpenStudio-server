@@ -37,13 +37,6 @@ module Delayed
         # Just recreate the worker model to avoid the race condition where
         # it gets deleted before we can update its last heartbeat
 
-        # puts "worker stuff is #{worker.inspect}"
-        # puts ComputeNode.first.inspect
-        # puts worker.name
-        # puts worker.name_prefix
-        # puts worker.queues.class
-
-        # TODO: parse out the name, host, pid
         # delayed_job.worker_1 host:nlong-23980s.nrel.gov pid:89396
         name, hostname, pid = worker.name.split(' ')
         hostname.gsub!('host:', '') rescue nil
