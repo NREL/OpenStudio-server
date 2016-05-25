@@ -14,7 +14,6 @@ module Delayed
           @heartbeat.stop if @heartbeat
         end
       end
-
     end
   end
 end

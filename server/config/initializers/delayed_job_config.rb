@@ -47,4 +47,4 @@ Delayed::Worker.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'del
 
 # require 'delayed/plugins/heartbeat'
 Delayed::Worker.plugins << Delayed::Heartbeat::Plugin
-Delayed::Worker.plugins << Delayed::TaggedLogging::Plugin
+# Delayed::Worker.plugins << Delayed::TaggedLogging::Plugin
