@@ -33,8 +33,7 @@ services:
       - rserve
     volumes:
       - osdata:/mnt/openstudio
-    command:
-      - bin/delayed_job -i server --queues=analyses,background run
+    command: bin/delayed_job -i server --queues=analyses,background run
   worker:
     build: .
     environment:

@@ -18,3 +18,5 @@ FileUtils.mkdir_p "#{APP_CONFIG['server_asset_path']}/R" unless Dir.exist? "#{AP
 FileUtils.mkdir_p APP_CONFIG['rails_log_path'] unless Dir.exist? APP_CONFIG['rails_log_path']
 
 Rails.logger = ActiveSupport::TaggedLogging.new(Logger.new("#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"))
+
+Mongoid.logger.level = Logger::INFO
