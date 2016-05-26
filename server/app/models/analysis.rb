@@ -286,9 +286,9 @@ class Analysis
 
   # Return the last job's status for the analysis
   def status
-    j = jobs.last
-    if j && j.status
-      return j.status
+    j = jobs_status
+    if j
+      return j.last[:status] rescue 'unknown'
     else
       return 'unknown'
     end
