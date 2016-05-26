@@ -55,5 +55,9 @@ module AnalysisLibrary
     def sys_call_ruby
       "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/ruby"
     end
+
+    def analysis_dir(id)
+      "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
+    end
   end
 end

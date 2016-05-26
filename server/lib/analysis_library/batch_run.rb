@@ -76,7 +76,6 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     # Watch the delayed jobs to see when all the data points are completed.
     # I would really prefer making a chord or callback for this.
     while ids.size > 0
-      # logger.debug "The ids array is #{ids}"
       ids.each do |id|
         ids.delete(id) if Delayed::Job.find(id).nil?
       end

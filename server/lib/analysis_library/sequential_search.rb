@@ -33,6 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
+# TODO: Fix this for new queue
+
 class AnalysisLibrary::SequentialSearch
   include AnalysisLibrary::Core
 

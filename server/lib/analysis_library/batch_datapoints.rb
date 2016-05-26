@@ -33,9 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-class AnalysisLibrary::BatchDatapoints
-  include AnalysisLibrary::Core
-
+class AnalysisLibrary::BatchDatapoints  < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.

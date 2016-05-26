@@ -33,11 +33,11 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
+# TODO: Fix this for new queue
+
 # This class allows you to submit a large number of analysis that have simulations ready to run. Ideally use this
 # for differing workflows and single_runs. This is not an ideal implementation and should be an actual queue
-class AnalysisLibrary::BatchRunAnalyses
-  include AnalysisLibrary::Core
-
+class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,

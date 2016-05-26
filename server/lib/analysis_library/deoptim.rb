@@ -33,10 +33,11 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
+# TODO: Fix this for new queue
+
 # Non Sorting Genetic Algorithm
-class AnalysisLibrary::Deoptim
-  include AnalysisLibrary::Core
-  include AnalysisLibrary::R
+class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
+  include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {

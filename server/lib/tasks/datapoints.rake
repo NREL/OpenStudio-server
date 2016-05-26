@@ -33,10 +33,35 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
+require 'optparse'
+
 namespace :datapoints do
   desc 'test uploading a result_file'
   task test_file_upload: :environment do
     # This test has been removed.
     puts "Look at the simulate_data_point.rb to see how we are uploading files"
   end
+
+  # rake datapoints:create_datapoint -- -afa5dcadc-ed5b-4209-b907-777e9e2573c8 -v5,3,alsdfjk
+  desc 'create new datapoint'
+  task :create_datapoint => :environment do
+    puts ARGV.inspect
+
+    options = {}
+    o = OptionParser.new do |opts|
+      opts.banner = "Usage: rake create_datapoint -- '-a <analysis_id -v <[variables]>'"
+      opts.on('-a', '--analysis_id ID', String) { |a| options[:analysis_id] = a }
+      opts.on('-v', '--variables ID', Array) { |a| options[:variables] = a }
+    end
+    args = o.order!(ARGV) {}
+    o.parse!(args)
+    puts options.inspect
+
+    a = RunCreateDatapoint.new(options[:analysis_id], options[:variables])
+    uuid = a.perform
+
+    puts uuid
+  end
 end
+
+

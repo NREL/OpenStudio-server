@@ -33,6 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
+# TODO: Fix this for new queue
+
 class AnalysisLibrary::Diag
   include AnalysisLibrary::Core # pivots and static vars
 

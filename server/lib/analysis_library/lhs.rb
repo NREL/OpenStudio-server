@@ -77,11 +77,6 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     begin
       logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       logger.info "Setting up R for #{self.class.name}"
-      # TODO: need to move this to the module class
-      a = @r.converse("system('whoami')")
-      logger.info a
-      a = @r.converse("system('cat /etc/hostname')")
-      logger.info a
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       # make this a core method

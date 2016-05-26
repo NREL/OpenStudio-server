@@ -52,17 +52,17 @@ module Delayed
       end
 
       def run_heartbeat_loop
-        while true
-          break if sleep_interruptibly(heartbeat_interval)
-          @worker_model.update_heartbeat
-        end
+        # while true
+        #   break if sleep_interruptibly(heartbeat_interval)
+        #   @worker_model.update_heartbeat
+        # end
       rescue Exception => e
         Rails.logger.error("Worker heartbeat error: #{e.message}: #{e.backtrace.join('\n')}")
         raise e
       ensure
         Rails.logger.info('Shutting down worker heartbeat thread')
-        @stop_reader.close
-        @worker_model.delete
+        # @stop_reader.close
+        # @worker_model.delete
         # Delayed::Backend::ActiveRecord::Job.clear_active_connections!
       end
 

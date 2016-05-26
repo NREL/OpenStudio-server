@@ -33,7 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-# Non Sorting Genetic Algorithm
+# TODO: Fix this for new queue
+
 class AnalysisLibrary::Morris
   include AnalysisLibrary::Core
   include AnalysisLibrary::R
