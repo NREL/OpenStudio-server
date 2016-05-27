@@ -43,9 +43,9 @@ run_list([
 default_attributes(
   # Use this for the official release versions
   openstudio: {
-    version: '1.11.3',
+    version: '1.11.4',
     installer: {
-      version_revision: '3bdae23c47'
+      version_revision: '9e88fc5505'
     }
   }
 
