@@ -64,16 +64,16 @@ class AnalysisLibrary::BatchDatapoints  < AnalysisLibrary::Base
 
     # Create an instance for R
     begin
-      Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
-      Rails.logger.info "Setting up R for #{self.class.name}"
+      logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
+      logger.info "Setting up R for #{self.class.name}"
 
       selected_variables = Variable.variables(@analysis.id)
-      Rails.logger.info "Found #{selected_variables.count} non-default variables in the batch datapoint set."
+      logger.info "Found #{selected_variables.count} non-default variables in the batch datapoint set."
 
       # generate the probabilities for all variables as column vectors
       samples = nil
 
-      Rails.logger.info 'Starting batch datapoint extraction.'
+      logger.info 'Starting batch datapoint extraction.'
 
       # Iterate through each variable based on the method and add to the samples array in the form of
       # [{a: 1, b: true, c: 's'}, {a: 2, b: false, c: 'n'}]
@@ -111,7 +111,7 @@ class AnalysisLibrary::BatchDatapoints  < AnalysisLibrary::Base
         dp.set_variable_values = sample
         dp.save!
 
-        Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+        logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
       end
 
     ensure
@@ -125,7 +125,7 @@ class AnalysisLibrary::BatchDatapoints  < AnalysisLibrary::Base
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

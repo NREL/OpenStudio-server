@@ -44,7 +44,7 @@ module AnalysisLibrary::R
     # Take the number of variables and number of samples and generate the bins for
     # a LHS sample
     def lhs_probability3(num_variables, sample_size)
-      Rails.logger.info "Start generating of LHS #{Time.now}"
+      logger.info "Start generating of LHS #{Time.now}"
       a = @r.converse "a <- randomLHS(#{sample_size}, #{num_variables})"
 
       # returns a matrix so convert over to an ordered hash so that we can send back to R when needed
@@ -54,7 +54,7 @@ module AnalysisLibrary::R
       end
 
       # return as an ordered hash
-      Rails.logger.info "Finished generating of LHS #{Time.now}"
+      logger.info "Finished generating of LHS #{Time.now}"
       o
     end
 
@@ -90,7 +90,7 @@ module AnalysisLibrary::R
 
       samples = @r.converse 'samples'
       samples = [samples] unless samples.is_a? Array # ensure it is an array
-      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+      logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples
     end
@@ -103,7 +103,7 @@ module AnalysisLibrary::R
     def samples_from_probability3(probabilities_array, distribution_type, mean, stddev, min, max)
       probabilities_array = [probability_array] unless probabilities_array.is_a? Array # ensure array
 
-      Rails.logger.info 'Creating sample from probability'
+      logger.info 'Creating sample from probability'
       r_dist_name = ''
       if distribution_type == 'normal'
         r_dist_name = 'qnorm'
@@ -153,7 +153,7 @@ module AnalysisLibrary::R
 
       samples = @r.converse 'samples'
       samples = [samples] unless samples.is_a? Array # ensure it is an array
-      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+      logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples
     end
@@ -173,28 +173,28 @@ module AnalysisLibrary::R
       @r.converse "doe.orig <- vector(mode='list', length=#{selected_variables.count})"
 
       # get the probabilities
-      Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
+      logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
       p = lhs_probability3(selected_variables.count, number_of_samples)
-      Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
+      logger.info "Probabilities #{p.class} with #{p.inspect}"
 
       # TODO: performance smell... optimize this using Parallel
       i_var = 0
       selected_variables.each do |var|
-        Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
+        logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
         variable_samples = nil
         var_names << var.name
         # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
         # IF discrete, just get the original values of the variables.
         if var.uncertainty_type == 'discrete'
-          Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
+          logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           # variable_samples = discrete_sample_from_probability(p[i_var], var)
           if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
             raise 'no hash values and weight passed'
           end
           values, weights = var.map_discrete_hash_to_array
-          Rails.logger.info("values is #{values}")
+          logger.info("values is #{values}")
           variable_samples = values
-          Rails.logger.info("variable_samples is #{variable_samples}")
+          logger.info("variable_samples is #{variable_samples}")
           var_types << 'discrete'
         # IF continuous, then sample the variable to make it "discrete"
         else
@@ -246,13 +246,13 @@ module AnalysisLibrary::R
       end
       @r.converse 'print(fac_design)'
       samples_temp = @r.converse 'fac_design'
-      Rails.logger.info("samples_temp is #{samples_temp}")
+      logger.info("samples_temp is #{samples_temp}")
 
       selected_variables.each_with_index do |var, idx|
         samples[var.id.to_s] = samples_temp.column(idx).to_a.map(&:to_i)
       end
 
-      Rails.logger.info("samples is #{samples}")
+      logger.info("samples is #{samples}")
 
       [samples, var_types, min_max, var_names]
     end

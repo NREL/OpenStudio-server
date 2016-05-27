@@ -65,7 +65,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    Rails.logger.info 'Setting up R for Batch Run Analysis'
+    logger.info 'Setting up R for Batch Run Analysis'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
@@ -73,14 +73,12 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info('Starting Batch Run Analysis')
+    logger.info('Starting Batch Run Analysis')
 
     # Find all the data_points across all analyses
     dp_map = { analysis_id: [], data_point_id: [] }
     dps = DataPoint.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid, :analysis)
     dps.each do |dp|
-      logger.info "Adding in #{dp.uuid}"
-      # TODO: uncomment this in production
       dp.status = 'queued'
       dp.save!
 
@@ -89,7 +87,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
     end
 
     # Gather all the analyses as objects of the datapoints
-    Rails.logger.info("Found #{dp_map[:data_point_id].size} across all analyses to run")
+    logger.info("Found #{dp_map[:data_point_id].size} across all analyses to run")
     analyses = dp_map[:analysis_id].map { |id| Analysis.find(id) }.uniq
 
     # Initialize some variables that are in the rescue/ensure blocks
@@ -103,19 +101,19 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
       # copy the files to the worker nodes here
-      Rails.logger.info "Initializing the analyses of the data points for #{analyses.map(&:id)}"
+      logger.info "Initializing the analyses of the data points for #{analyses.map(&:id)}"
       analyses.each do |analysis|
-        Rails.logger.info 'Running initialize worker scripts'
+        logger.info 'Running initialize worker scripts'
         unless cluster.initialize_workers(worker_ips, analysis.id)
           raise 'could not run initialize worker scripts'
         end
       end
 
       if cluster.start(worker_ips)
-        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        logger.info "Cluster Started flag is #{cluster.started}"
         @r.command(dps: dp_map.to_dataframe) do
           %{
             print("Starting main portion of Batch Run Analysis")
@@ -164,7 +162,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
     ensure
@@ -173,7 +171,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
     end
 
     analyses.each do |analysis|
-      Rails.logger.info 'Running finalize worker scripts'
+      logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, analysis.id)
         raise 'could not run finalize worker scripts'
       end
@@ -190,7 +188,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message += log_message
       @analysis.save!
     ensure
@@ -203,7 +201,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

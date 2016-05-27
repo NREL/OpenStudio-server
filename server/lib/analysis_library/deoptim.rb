@@ -87,7 +87,7 @@ class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    Rails.logger.info 'Setting up R for Batch Run'
+    logger.info 'Setting up R for Batch Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: fix statically setting the random seed
@@ -103,8 +103,8 @@ class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting Batch Run')
+    logger.info("Master ip: #{master_ip}")
+    logger.info('Starting Batch Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -120,22 +120,22 @@ class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
 
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+    logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
-    Rails.logger.info 'starting lhs to discretize the variables'
+    logger.info 'starting lhs to discretize the variables'
 
     lhs = AnalysisLibrary::R::Lhs.new(@r)
     samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['number_of_samples'])
 
     if samples.empty? || samples.size <= 1
-      Rails.logger.info 'No variables were passed into the options, therefore exit'
+      logger.info 'No variables were passed into the options, therefore exit'
       raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
-    Rails.logger.info "Samples are #{samples}"
+    logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
@@ -148,19 +148,19 @@ class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
-      Rails.logger.info 'Running initialize worker scripts'
+      logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         raise 'could not run initialize worker scripts'
       end
 
       if cluster.start(worker_ips)
-        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        logger.info "Cluster Started flag is #{cluster.started}"
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        Rails.logger.info("variable types are #{var_types}")
+        logger.info("variable types are #{var_types}")
         @r.command(vars: samples.to_dataframe, vartypes: var_types, gen: @analysis.problem['algorithm']['generations']) do
           %{
             clusterEvalQ(cl,library(RMongo))
@@ -269,7 +269,7 @@ class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
       # ensure that the cluster is stopped
       cluster.stop if cluster
 
-      Rails.logger.info 'Running finalize worker scripts'
+      logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
         raise 'could not run finalize worker scripts'
       end
@@ -282,7 +282,7 @@ class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
 
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

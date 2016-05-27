@@ -79,28 +79,28 @@ class AnalysisLibrary::Preflight
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
     begin
-      Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
-      Rails.logger.info "Setting up R for #{self.class.name}"
+      logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
+      logger.info "Setting up R for #{self.class.name}"
       # TODO: need to move this to the module class
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       pivot_array = Variable.pivot_array(@analysis.id)
 
       selected_variables = Variable.variables(@analysis.id)
-      Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+      logger.info "Found #{selected_variables.count} variables to perturb"
 
       # generate the probabilities for all variables as column vectors
       @r.converse("print('starting preflight')")
       samples = nil
 
-      Rails.logger.info 'Starting sampling'
+      logger.info 'Starting sampling'
 
       # Iterate through each variable based on the method and add to the samples array in the form of
       # [{a: 1, b: true, c: 's'}, {a: 2, b: false, c: 'n'}]
       samples = []
 
       if @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
-        Rails.logger.info 'Sampling each variable individually'
+        logger.info 'Sampling each variable individually'
         selected_variables.each do |variable|
           if @analysis.problem['algorithm']['run_min']
             instance = {}
@@ -150,7 +150,7 @@ class AnalysisLibrary::Preflight
           end
         end
       elsif @analysis.problem['algorithm']['sample_method'] == 'all_variables'
-        Rails.logger.info 'Sampling for all variables'
+        logger.info 'Sampling for all variables'
         min_sample = {} # {:name => 'Minimum'}
         max_sample = {} # {:name => 'Maximim'}
         mode_sample = {}
@@ -165,9 +165,9 @@ class AnalysisLibrary::Preflight
           mode_sample[variable.id.to_s] = variable.modes_value
         end
 
-        Rails.logger.info "Minimum sample is: #{min_sample}"
-        Rails.logger.info "Maximum sample is: #{max_sample}"
-        Rails.logger.info "Mode sample is: #{mode_sample}"
+        logger.info "Minimum sample is: #{min_sample}"
+        logger.info "Maximum sample is: #{max_sample}"
+        logger.info "Mode sample is: #{mode_sample}"
 
         samples << min_sample if @analysis.problem['algorithm']['run_min']
         samples << max_sample if @analysis.problem['algorithm']['run_max']
@@ -181,9 +181,9 @@ class AnalysisLibrary::Preflight
 
       if @analysis.problem['algorithm']['run_all_samples_for_pivots']
         # Always add in the pivot variables for now.  This allows the location to be set if it is a pivot
-        Rails.logger.info "Fixing Pivot dimension #{pivot_array}"
+        logger.info "Fixing Pivot dimension #{pivot_array}"
         samples = add_pivots(samples, pivot_array)
-        Rails.logger.info "Finished adding the pivots resulting in #{samples}"
+        logger.info "Finished adding the pivots resulting in #{samples}"
       end
 
       # Add the data points to the database
@@ -195,7 +195,7 @@ class AnalysisLibrary::Preflight
         dp.set_variable_values = sample
         dp.save!
 
-        Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+        logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
       end
 
     ensure
@@ -209,7 +209,7 @@ class AnalysisLibrary::Preflight
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

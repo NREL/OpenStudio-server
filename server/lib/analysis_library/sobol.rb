@@ -81,7 +81,7 @@ class AnalysisLibrary::Sobol
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    Rails.logger.info 'Setting up R for Sobol Run'
+    logger.info 'Setting up R for Sobol Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
@@ -95,8 +95,8 @@ class AnalysisLibrary::Sobol
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting Sobol Run')
+    logger.info("Master ip: #{master_ip}")
+    logger.info('Starting Sobol Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -116,33 +116,33 @@ class AnalysisLibrary::Sobol
 
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+    logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to get min/max')")
-    Rails.logger.info 'starting lhs to discretize the variables'
+    logger.info 'starting lhs to discretize the variables'
 
     lhs = AnalysisLibrary::R::Lhs.new(@r)
-    Rails.logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
+    logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
     @r.converse("set.seed(#{@analysis.problem['algorithm']['random_seed']})")
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-    Rails.logger.info "Setting R base random seed to #{@analysis.problem['random_seed2']}"
+    logger.info "Setting R base random seed to #{@analysis.problem['random_seed2']}"
     @r.converse("set.seed(#{@analysis.problem['algorithm']['random_seed2']})")
     samples2, var_types2, mins_maxes2, var_names2 = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
     if samples.empty? || samples.size <= 1
-      Rails.logger.info 'No variables were passed into the options, therefore exit'
+      logger.info 'No variables were passed into the options, therefore exit'
       raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
-    Rails.logger.info "Samples are #{samples}"
-    Rails.logger.info "Samples2 are #{samples2}"
+    logger.info "Samples are #{samples}"
+    logger.info "Samples2 are #{samples2}"
 
-    Rails.logger.info "mins_maxes: #{mins_maxes}"
-    Rails.logger.info "var_names: #{var_names}"
-    Rails.logger.info "var_names2: #{var_names2}"
-    Rails.logger.info("variable types are #{var_types}")
+    logger.info "mins_maxes: #{mins_maxes}"
+    logger.info "var_names: #{var_names}"
+    logger.info "var_names2: #{var_names2}"
+    logger.info("variable types are #{var_types}")
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
@@ -155,18 +155,18 @@ class AnalysisLibrary::Sobol
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
-      Rails.logger.info 'Running initialize worker scripts'
+      logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Found the following good ips #{worker_ips}"
+      logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        logger.info "Cluster Started flag is #{cluster.started}"
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
@@ -365,7 +365,7 @@ class AnalysisLibrary::Sobol
 
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
       @analysis_job.status = 'completed'
@@ -376,7 +376,7 @@ class AnalysisLibrary::Sobol
       # ensure that the cluster is stopped
       cluster.stop if cluster
 
-      Rails.logger.info 'Running finalize worker scripts'
+      logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
         raise 'could not run finalize worker scripts'
       end
@@ -385,15 +385,15 @@ class AnalysisLibrary::Sobol
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          Rails.logger.info('read best result json')
+          logger.info('read best result json')
           temp2 = File.read(best_result_json)
           temp = JSON.parse(temp2, symbolize_names: true)
-          Rails.logger.info("temp: #{temp}")
+          logger.info("temp: #{temp}")
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
-          Rails.logger.info("analysis: #{@analysis.results}")
+          logger.info("analysis: #{@analysis.results}")
         rescue => e
-          Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
+          logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
 
@@ -406,7 +406,7 @@ class AnalysisLibrary::Sobol
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

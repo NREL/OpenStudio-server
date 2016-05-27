@@ -88,7 +88,7 @@ class AnalysisLibrary::Pso
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    Rails.logger.info 'Setting up R for PSO Run'
+    logger.info 'Setting up R for PSO Run'
     @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
@@ -102,8 +102,8 @@ class AnalysisLibrary::Pso
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting PSO Run')
+    logger.info("Master ip: #{master_ip}")
+    logger.info('Starting PSO Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
@@ -148,7 +148,7 @@ class AnalysisLibrary::Pso
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
 
       @analysis.save!
-      Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+      logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
       # check to make sure there are objective functions
       if @analysis.output_variables.count { |v| v['objective_function'] == true } == 0
@@ -162,30 +162,30 @@ class AnalysisLibrary::Pso
 
       pivot_array = Variable.pivot_array(@analysis.id)
       selected_variables = Variable.variables(@analysis.id)
-      Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+      logger.info "Found #{selected_variables.count} variables to perturb"
 
       # discretize the variables using the LHS sampling method
       @r.converse("print('starting lhs to discretize the variables')")
-      Rails.logger.info 'starting lhs to discretize the variables'
+      logger.info 'starting lhs to discretize the variables'
 
       lhs = AnalysisLibrary::R::Lhs.new(@r)
       samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
 
       if var_names.empty? || var_names.empty?
-        Rails.logger.info 'No variables were passed into the options, therefore exit'
+        logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
       end
 
       unless var_types.all? { |t| t.casecmp('continuous').zero? }
-        Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
+        logger.info 'Must have all continous variables to run algorithm, therefore exit'
         raise "Must have all continous variables to run algorithm.  Found #{var_types}"
       end
 
-      Rails.logger.info "mins_maxes: #{mins_maxes}"
-      Rails.logger.info "var_names: #{var_names}"
+      logger.info "mins_maxes: #{mins_maxes}"
+      logger.info "var_names: #{var_names}"
 
       # Result of the parameter space will be column vectors of each variable
-      # Rails.logger.info "Samples are #{samples}"
+      # logger.info "Samples are #{samples}"
 
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
@@ -195,18 +195,18 @@ class AnalysisLibrary::Pso
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
-      Rails.logger.info 'Running initialize worker scripts'
+      logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
         raise 'could not run initialize worker scripts'
       end
 
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Found the following good ips #{worker_ips}"
+      logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        logger.info "Cluster Started flag is #{cluster.started}"
         # maxit is the max number of iterations to calculate
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
@@ -471,7 +471,7 @@ class AnalysisLibrary::Pso
 
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
       @analysis_job.status = 'completed'
@@ -482,7 +482,7 @@ class AnalysisLibrary::Pso
       # ensure that the cluster is stopped
       cluster.stop if cluster
 
-      Rails.logger.info 'Running finalize worker scripts'
+      logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
         raise 'could not run finalize worker scripts'
       end
@@ -491,15 +491,15 @@ class AnalysisLibrary::Pso
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          Rails.logger.info('read best result json')
+          logger.info('read best result json')
           temp2 = File.read(best_result_json)
           temp = JSON.parse(temp2, symbolize_names: true)
-          Rails.logger.info("temp: #{temp}")
+          logger.info("temp: #{temp}")
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
-          Rails.logger.info("analysis: #{@analysis.results}")
+          logger.info("analysis: #{@analysis.results}")
         rescue => e
-          Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
+          logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
 
@@ -507,15 +507,15 @@ class AnalysisLibrary::Pso
       converge_flag_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/convergence_flag.json"
       if File.exist? converge_flag_json
         begin
-          Rails.logger.info('read converge_flag.json')
+          logger.info('read converge_flag.json')
           temp2 = File.read(converge_flag_json)
           temp = JSON.parse(temp2, symbolize_names: true)
-          Rails.logger.info("temp: #{temp}")
+          logger.info("temp: #{temp}")
           @analysis.results[@options[:analysis_type]]['convergence_flag'] = temp
           @analysis.save!
-          Rails.logger.info("analysis: #{@analysis.results}")
+          logger.info("analysis: #{@analysis.results}")
         rescue => e
-          Rails.logger.error 'Could not save post processed results for converge_flag.json into the database'
+          logger.error 'Could not save post processed results for converge_flag.json into the database'
         end
       end
 
@@ -528,7 +528,7 @@ class AnalysisLibrary::Pso
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

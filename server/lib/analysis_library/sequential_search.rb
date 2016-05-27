@@ -106,16 +106,16 @@ class AnalysisLibrary::SequentialSearch
       else
         selected.each do |sel_id, sel_sample|
           if sel_sample[:measure_id] == ps_sample[:measure_id]
-            Rails.logger.info "replacing in #{ps_id}"
+            logger.info "replacing in #{ps_id}"
             group_list << ps_id
           else
-            Rails.logger.info "adding in #{ps_id} including #{sel_id}"
+            logger.info "adding in #{ps_id} including #{sel_id}"
             group_list << ps_id << sel_id
           end
-          Rails.logger.info group_list.inspect
+          logger.info group_list.inspect
         end
         new_run = group_list.sort.uniq
-        Rails.logger.info "Determined a new ran combination of #{new_run}"
+        logger.info "Determined a new ran combination of #{new_run}"
         result_ids << new_run
 
         # go back a step on the assigned variable?
@@ -129,30 +129,30 @@ class AnalysisLibrary::SequentialSearch
   def perform
     def determine_curve
       new_point_to_evaluate = false
-      Rails.logger.info "Determine the Pareto Front for iteration #{@iteration}"
-      Rails.logger.info "Current pareto front is: #{@pareto.map(&:name)}"
+      logger.info "Determine the Pareto Front for iteration #{@iteration}"
+      logger.info "Current pareto front is: #{@pareto.map(&:name)}"
       if @iteration == 0
         # just add the point to the pareto curve
         min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
         if min_point.empty?
-          Rails.logger.info 'could not find the starting point'
+          logger.info 'could not find the starting point'
         elsif min_point.size > 1
-          Rails.logger.info 'found more than one datapoint for the initial iteration'
+          logger.info 'found more than one datapoint for the initial iteration'
         else
           min_point = min_point.first
         end
-        Rails.logger.info "Adding point to pareto front named '#{min_point.name}'"
+        logger.info "Adding point to pareto front named '#{min_point.name}'"
         @pareto << min_point
         new_point_to_evaluate = true
       else
-        Rails.logger.info 'Iterating over pareto front'
+        logger.info 'Iterating over pareto front'
         i_pareto = -1
         orphaning = false
         new_curve = []
         @pareto.each do |pareto_point|
           i_pareto += 1
           new_point_to_evaluate = false
-          Rails.logger.info "Pareto curve index #{i_pareto} of size #{@pareto.size}"
+          logger.info "Pareto curve index #{i_pareto} of size #{@pareto.size}"
 
           # Skip the starting point when evaluating the curve
           if i_pareto == 0
@@ -193,14 +193,14 @@ class AnalysisLibrary::SequentialSearch
                 end
               end
 
-              Rails.logger.info "Name: '#{dp.name}' Slope: '#{temp_slope}'"
+              logger.info "Name: '#{dp.name}' Slope: '#{temp_slope}'"
               if temp_slope > slope
-                Rails.logger.info "Better point found for datapoint #{dp.name} with slope #{temp_slope}"
+                logger.info "Better point found for datapoint #{dp.name} with slope #{temp_slope}"
                 slope = temp_slope
                 min_point = dp
               elsif temp_slope == slope
-                # Rails.logger.info "Datapoint has same slope as previous point #{dp.name} with slope #{temp_slope}"
-                # Rails.logger.info "Slope was lower for #{dp.name} with slope #{temp_slope}"
+                # logger.info "Datapoint has same slope as previous point #{dp.name} with slope #{temp_slope}"
+                # logger.info "Slope was lower for #{dp.name} with slope #{temp_slope}"
               end
             end
           end
@@ -208,20 +208,20 @@ class AnalysisLibrary::SequentialSearch
           # check if the result was the same point, or had the same values
           if min_point
             if i_pareto == (@pareto.size - 1)
-              Rails.logger.info "At the end of the pareto array but found a new point, adding #{min_point.name}"
+              logger.info "At the end of the pareto array but found a new point, adding #{min_point.name}"
               new_curve << min_point
               new_point_to_evaluate = true
             elsif min_point == @pareto[i_pareto + 1]
-              Rails.logger.info 'Pareto search found the same point or values'
+              logger.info 'Pareto search found the same point or values'
               new_curve << min_point # just add in the same point to the new curve
             elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] ==
                   @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][0]] && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
                                                                                                              @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
-              Rails.logger.info 'Found the same objective function values in array, skipping'
+              logger.info 'Found the same objective function values in array, skipping'
             # new_curve << min_point # just add in the same point to the new curve
             else
               # the min point is new and was found before the end of the array.  Orphaning the other points
-              Rails.logger.info "Orphaning previous point in array.  Replacing #{@pareto[i_pareto + 1].name} with #{min_point.name}"
+              logger.info "Orphaning previous point in array.  Replacing #{@pareto[i_pareto + 1].name} with #{min_point.name}"
               new_curve << min_point
               new_point_to_evaluate = true
               orphaning = true
@@ -230,14 +230,14 @@ class AnalysisLibrary::SequentialSearch
           end
 
           if orphaning
-            Rails.logger.info 'Breaking out of loop because of ophan request'
+            logger.info 'Breaking out of loop because of ophan request'
             break
           end
         end
 
         @pareto = new_curve
       end
-      Rails.logger.info "Final pareto front is: #{@pareto.map(&:name)}"
+      logger.info "Final pareto front is: #{@pareto.map(&:name)}"
 
       new_point_to_evaluate
     end
@@ -245,10 +245,10 @@ class AnalysisLibrary::SequentialSearch
     # need to reduce this to a call without the database
     def determine_run_list(parameter_space)
       data_point_list = []
-      Rails.logger.info "Determining run list for iteration #{@iteration}"
+      logger.info "Determining run list for iteration #{@iteration}"
       if @iteration == 0
         # run the baseline
-        Rails.logger.info 'setting up to run just the starting point'
+        logger.info 'setting up to run just the starting point'
         data_point_list << { variable_group: [], name: 'Starting Point', variables: {}, iteration: @iteration, sample: 1 }
         # elsif @iteration == 1
         #  # no need to look at anything, just return the array
@@ -259,21 +259,21 @@ class AnalysisLibrary::SequentialSearch
         if last_dp
           variable_group_list = last_dp['variable_group_list']
           # get the full ps information
-          Rails.logger.info("Last pareto front point was #{last_dp.name} with parameter space index #{variable_group_list}")
+          logger.info("Last pareto front point was #{last_dp.name} with parameter space index #{variable_group_list}")
           full_variable_group_list = parameter_space.select { |k, v| v if variable_group_list.include?(k) }
 
           # Fix the previous variable groups in the next run
           run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(full_variable_group_list, parameter_space)
           data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(parameter_space, run_list, @iteration)
         else
-          Rails.logger.info('Could not find last point on pareto front')
+          logger.info('Could not find last point on pareto front')
         end
       end
 
       # go through each of the run list results and delete any that have already run
       data_point_list.reverse_each do |dp|
         if @analysis.data_points.where(set_variable_values: dp[:variables]).exists?
-          Rails.logger.info("Datapoint has already run for #{dp[:name]}")
+          logger.info("Datapoint has already run for #{dp[:name]}")
           data_point_list.delete(dp)
         end
       end
@@ -294,7 +294,7 @@ class AnalysisLibrary::SequentialSearch
     selected_variables = Variable.variables(@analysis.id)
 
     if pivot_array.size > 1
-      Rails.logger.warn 'Pivot arrays are not implemented in sequential search at the moment. Any pivot values will be ignored'
+      logger.warn 'Pivot arrays are not implemented in sequential search at the moment. Any pivot values will be ignored'
     end
 
     # Create an instance for R
@@ -326,21 +326,21 @@ class AnalysisLibrary::SequentialSearch
         # the outer array.
         measure_values[variable._id.to_s] = values.values.flatten
       end
-      Rails.logger.info "measure values with variables are #{measure_values}"
+      logger.info "measure values with variables are #{measure_values}"
       # TODO: test the length of each measure value array
       measure_values = measure_values.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
-      Rails.logger.info "measure values array hash is  #{measure_values}"
+      logger.info "measure values array hash is  #{measure_values}"
 
       measure_values.each do |mvs|
         parameter_space[SecureRandom.uuid] = { measure_id: measure._id, variables: mvs }
       end
     end
-    Rails.logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
+    logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"
 
     # determine the first list of items to run
     final_message = ''
     @run_list = determine_run_list(parameter_space)
-    Rails.logger.info "datapoint list is #{@run_list}"
+    logger.info "datapoint list is #{@run_list}"
     new_pareto_point = true
     while !@run_list.empty? || new_pareto_point
       @run_list.each do |run|
@@ -353,16 +353,16 @@ class AnalysisLibrary::SequentialSearch
         else
           raise "Could not save datapoint #{dp.errors}"
         end
-        Rails.logger.info "Added new datapoint #{dp.name}"
+        logger.info "Added new datapoint #{dp.name}"
       end
       @analysis.save!
 
-      Rails.logger.info("Kicking off simulations for iteration #{@iteration}")
+      logger.info("Kicking off simulations for iteration #{@iteration}")
       @analysis.start(true, 'batch_run', skip_init: true, run_data_point_filename: 'run_openstudio_workflow.rb')
-      Rails.logger.info("Finished simulations for iteration #{@iteration}... checking results")
+      logger.info("Finished simulations for iteration #{@iteration}... checking results")
       new_pareto_point = determine_curve
-      Rails.logger.info("Determined pareto curve for #{@iteration} and new point flag is set to #{new_pareto_point}")
-      Rails.logger.info("Finished simulations for iteration #{@iteration}... iterating")
+      logger.info("Determined pareto curve for #{@iteration} and new point flag is set to #{new_pareto_point}")
+      logger.info("Finished simulations for iteration #{@iteration}... iterating")
 
       if @iteration >= @options[:problem][:algorithm][:max_iterations]
         final_message = "Reached max iterations of #{@analysis.problem['algorithm']['max_iterations']}"
@@ -375,7 +375,7 @@ class AnalysisLibrary::SequentialSearch
 
     # TODO: finish of the pareto front so that it includes all the points to the end
 
-    Rails.logger.info("#{__FILE__} finished after iteration #{@iteration} with message '#{final_message}'")
+    logger.info("#{__FILE__} finished after iteration #{@iteration} with message '#{final_message}'")
     # Check the results of the run
 
     # Only set this data if the analysis was NOT called from another analysis
@@ -387,7 +387,7 @@ class AnalysisLibrary::SequentialSearch
     end
     @analysis.save!
 
-    Rails.logger.info "Finished running analysis '#{self.class.name}'"
+    logger.info "Finished running analysis '#{self.class.name}'"
   end
 
   # Since this is a delayed job, if it crashes it will typically try multiple times.

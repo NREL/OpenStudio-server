@@ -46,7 +46,7 @@ module AnalysisLibrary::R
     # Take the number of variables and number of samples and generate the bins for
     # a LHS sample
     def lhs_probability(num_variables, sample_size)
-      Rails.logger.info "Start generating of LHS #{Time.now}"
+      logger.info "Start generating of LHS #{Time.now}"
       a = @r.converse "a <- randomLHS(#{sample_size}, #{num_variables})"
 
       # returns a matrix so convert over to an ordered hash so that we can send back to R when needed
@@ -56,7 +56,7 @@ module AnalysisLibrary::R
       end
 
       # return as an ordered hash
-      Rails.logger.info "Finished generating of LHS #{Time.now}"
+      logger.info "Finished generating of LHS #{Time.now}"
       o
     end
 
@@ -92,7 +92,7 @@ module AnalysisLibrary::R
 
       samples = @r.converse 'samples'
       samples = [samples] unless samples.is_a? Array # ensure it is an array
-      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+      logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples
     end
@@ -105,7 +105,7 @@ module AnalysisLibrary::R
     def samples_from_probability(probabilities_array, distribution_type, mean, stddev, min, max)
       probabilities_array = [probability_array] unless probabilities_array.is_a? Array # ensure array
 
-      Rails.logger.info 'Creating sample from probability'
+      logger.info 'Creating sample from probability'
       r_dist_name = ''
       if distribution_type == 'normal'
         r_dist_name = 'qnorm'
@@ -155,7 +155,7 @@ module AnalysisLibrary::R
 
       samples = @r.converse 'samples'
       samples = [samples] unless samples.is_a? Array # ensure it is an array
-      Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+      logger.info("R created the following samples #{@r.converse('samples')}")
 
       samples
     end
@@ -170,18 +170,18 @@ module AnalysisLibrary::R
       min_max[:eps] = []
 
       # get the probabilities
-      Rails.logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
+      logger.info "Sampling #{selected_variables.count} variables with #{number_of_samples} samples"
       p = lhs_probability(selected_variables.count, number_of_samples)
-      Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
+      logger.info "Probabilities #{p.class} with #{p.inspect}"
 
       i_var = 0
       selected_variables.each do |var|
-        Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
+        logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
         variable_samples = nil
         var_names << var.name
         # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
         if var.uncertainty_type == 'discrete'
-          Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
+          logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           variable_samples = discrete_sample_from_probability(p[i_var], var)
           var_types << 'discrete'
         else
@@ -216,11 +216,11 @@ module AnalysisLibrary::R
 
     # Plot the sample and save it to the Preflight Image model
     def plot_samples(variable, samples)
-      Rails.logger.info "Creating image for #{variable.name} with samples #{samples}"
+      logger.info "Creating image for #{variable.name} with samples #{samples}"
       save_file_name = nil
       if samples && samples.count > 0
         save_file_name = "/#{APP_CONFIG['server_asset_path']}/R/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.jpg'], nil)}"
-        Rails.logger.info("R image file name is #{save_file_name}")
+        logger.info("R image file name is #{save_file_name}")
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
           @r.command(d: { samples: samples }.to_dataframe) do
             %{

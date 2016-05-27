@@ -72,30 +72,30 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                 APP_CONFIG['rserve_port'])
     begin
-      Rails.logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
-      Rails.logger.info "Setting up R for #{self.class.name}"
+      logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
+      logger.info "Setting up R for #{self.class.name}"
       # TODO: need to move this to the module class
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       # pivot_array = Variable.pivot_array(@analysis.id)
 
-      Rails.logger.info Variable.variables(@analysis.id).to_s
+      logger.info Variable.variables(@analysis.id).to_s
 
       selected_variables = Variable.variables(@analysis.id)
-      Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+      logger.info "Found #{selected_variables.count} variables to perturb"
 
       # generate the probabilities for all variables as column vectors
       @r.converse("print('starting single perturbation')")
       samples = nil
 
-      Rails.logger.info 'Starting sampling'
+      logger.info 'Starting sampling'
 
       # Iterate through each variable based on the method and add to the samples array in the form of
       # [{a: 1, b: true, c: 's'}, {a: 2, b: false, c: 'n'}]
       samples = []
 
       selected_variables.each do |var|
-        Rails.logger.info "name: #{var.measure.name}; id: #{var.measure.id}"
+        logger.info "name: #{var.measure.name}; id: #{var.measure.id}"
       end
 
       # Make baseline case
@@ -107,7 +107,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
 
       # Make perturbed cases
       if @analysis.problem['algorithm']['in_measure_combinations'].casecmp('false').zero?
-        Rails.logger.info 'In False'
+        logger.info 'In False'
         selected_variables.each do |variable|
           if variable.map_discrete_hash_to_array.nil? || variable.discrete_values_and_weights.empty?
             raise 'no hash values and weight passed'
@@ -125,7 +125,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
           end
         end
       elsif @analysis.problem['algorithm']['in_measure_combinations'].casecmp('true').zero?
-        Rails.logger.info 'In True'
+        logger.info 'In True'
         measure_list = []
         selected_variables.each do |var|
           measure_list << var.measure.id unless measure_list.include? var.measure.id
@@ -145,7 +145,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
               meas_var_num << [0..(values.length - 1)][0].to_a
             end
           end
-          # Rails.logger.info "meas_var_num: #{meas_var_num}; meas_var_val: #{meas_var_val}; meas_var: #{meas_var}"
+          # logger.info "meas_var_num: #{meas_var_num}; meas_var_val: #{meas_var_val}; meas_var: #{meas_var}"
           combinations = meas_var_num.first.product(*meas_var_num[1..-1])
           combinations.each do |combination|
             instance = {}
@@ -155,7 +155,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
             selected_variables.each do |var|
               instance[var.id.to_s.to_sym] = var.static_value unless meas_var.include? var.id
             end
-            # Rails.logger.info "instance: #{instance}"
+            # logger.info "instance: #{instance}"
             sleep 1
             samples << instance
           end
@@ -172,12 +172,12 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
         dp.set_variable_values = sample
         dp.save!
 
-        Rails.logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+        logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
       end
 
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.info log_message
+      logger.info log_message
       @analysis.status_message = log_message
       @analysis.save!
     ensure
@@ -189,7 +189,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
         @analysis.reload
       end
       @analysis.save!
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 
