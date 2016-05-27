@@ -170,7 +170,8 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       end
 
       worker_ips = {}
-      worker_ips[:worker_ips] = ['localhost'] * 8
+      # TODO: Remove this hard coded value
+      worker_ips[:worker_ips] = ['localhost'] * 32
 
       logger.info "Found the following good ips #{worker_ips}"
 

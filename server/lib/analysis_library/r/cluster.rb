@@ -52,7 +52,6 @@ module AnalysisLibrary::R
       @db_name = AnalysisLibrary::Core.database_name
       @db_ip = Mongoid.default_client.cluster.servers.first.address.host
       @db_port = Mongoid.default_client.cluster.servers.first.address.port
-      Rails.logger.info "Mongo IP and Port is #{@db_ip} and #{@db_port}"
     end
 
     # configure the r session, returns true if the flag variable was readable (and true)
@@ -160,7 +159,6 @@ module AnalysisLibrary::R
           # Verify the result that each cluster ran the scripts (looking for errors only)
           # Check the length and the last result (which should be true)
           c = @r.converse('r')
-          # Rails.logger.info c.inspect
           result = (c.size == uniq_ips[:worker_ips].size) && c.map { |i| i.last == 'true' }.all?
         rescue => e
           raise e
