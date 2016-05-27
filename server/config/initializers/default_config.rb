@@ -5,6 +5,8 @@ APP_CONFIG = YAML.load(ERB.new(File.new(path).read).result)[Rails.env]
 
 # Go through and interpret some of the variables
 APP_CONFIG['sim_root_path'] = File.expand_path(APP_CONFIG['sim_root_path'].gsub(':rails_root', Rails.root.to_s))
+APP_CONFIG['r_worker_scripts_path'] = File.expand_path(APP_CONFIG['r_worker_scripts_path'].gsub(':rails_root', Rails.root.to_s))
+APP_CONFIG['r_scripts_path'] = File.expand_path(APP_CONFIG['r_scripts_path'].gsub(':rails_root', Rails.root.to_s))
 APP_CONFIG['ruby_bin_dir'] = APP_CONFIG['ruby_bin_dir'].gsub(':ruby_bin_dir', RbConfig::CONFIG['bindir'])
 APP_CONFIG['rails_log_path'] = File.expand_path(APP_CONFIG['rails_log_path'].gsub(':rails_root', Rails.root.to_s))
 APP_CONFIG['server_asset_path'] = File.expand_path(APP_CONFIG['server_asset_path'].gsub(':rails_root', Rails.root.to_s))

@@ -2,13 +2,6 @@ clusterEvalQ(cl,library(RMongo))
 clusterEvalQ(cl,library(rjson))
 clusterEvalQ(cl,library(R.utils))
 
-# run_datapoint is loaded from the run_datapoint.R file
-#source(paste(script_root_path,'run_datapoint.R',sep='/'))
-#clusterExport(cl,"run_datapoint")
-# create_and_run_datapoints is loaded from the create_and_run_datapoints.R script
-#source(paste(script_root_path,'create_and_run_datapoints.R',sep='/'))
-#clusterExport(cl,"create_and_run_datapoints")
-
 print(system('whoami', intern = TRUE))
 print(system('which ruby', intern = TRUE))
 print(paste("objfun:",objfun))
@@ -37,6 +30,7 @@ print(paste("varnames:",varnames))
 analysis_dir = paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
 print(paste("Analysis directory is ",analysis_dir,sep=''))
 ruby_command = paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
+rake_command = paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
 
 
 varfile = function(x){
@@ -55,14 +49,29 @@ if (uniquegroups == 1) {
 
 # Export some variables for the worker nodes
 clusterExport(cl,"ruby_command")
-clusterExport(cl,"rails_sim_root_path")
-clusterExport(cl,"rails_create_dp_filename")
-clusterExport(cl,"rails_analysis_id")
-clusterExport(cl,"rails_root_path")
+clusterExport(cl,"rake_command")
 clusterExport(cl,"analysis_dir")
 clusterExport(cl,"varfile")
 clusterExport(cl,"varnames")
+
+# globals
+clusterExport(cl,"rails_analysis_id")
+clusterExport(cl,"rails_sim_root_path")
+clusterExport(cl,"rails_ruby_bin_dir")
+clusterExport(cl,"rails_mongodb_name")
+clusterExport(cl,"rails_mongodb_ip")
+clusterExport(cl,"rails_run_filename")
+clusterExport(cl,"rails_create_dp_filename")
+clusterExport(cl,"rails_root_path")
+clusterExport(cl,"rails_host")
+clusterExport(cl,"r_worker_scripts_path")
+clusterExport(cl,"r_scripts_path")
 clusterEvalQ(cl,varfile(varnames))
+
+# Source and export functions
+source(paste(r_scripts_path,'create_and_run_datapoints.R',sep='/'))
+clusterExport(cl,"create_and_run_datapoints")
+
 
 if (nrow(vars) == 1) {
     print("not sure what to do with only one datapoint so adding an NA")
@@ -81,12 +90,7 @@ if (ncol(vars) == 1) {
     stop(options("show.error.messages"=TRUE),"NSGA2 needs more than one variable")
 }
 
-source(paste(script_root_path,'create_and_run_datapoints.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoints")
-
 print(paste("Number of generations set to:",gen))
-results = NULL
-
 print(uniquegroups)
 print(vars[])
 print(vartypes)
@@ -97,7 +101,7 @@ print(xoverdistidx)
 print(mudistidx)
 print(mprob)
 
-
+results = NULL
 results = nsga2NREL(cl=cl, fn=create_and_run_datapoints, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
 
 #try(results = nsga2NREL(cl=cl, fn=create_and_run_datapoints, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
@@ -109,7 +113,8 @@ ips2 <- ips[ips!=master_ips]
 print(paste("non server ips:", ips2))
 num_uniq_workers <- length(ips2)
 whoami <- system('whoami', intern = TRUE)
-# TODO: how to get best result back in docker space?
+
+# TODO: how to get best result back in docker space? API?
 #for (i in 1:num_uniq_workers) {
 #    scp = paste('scp ',whoami,'@',ips2[i],':',analysis_dir,'/best_result.json ',analysis_dir,'/',sep="")
 #print(paste("scp command:",scp))

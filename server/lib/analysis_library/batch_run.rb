@@ -83,7 +83,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       sleep 5
     end
 
-      # Finalize the node
+    # TODO: Finalize the worker node
 
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"

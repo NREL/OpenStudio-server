@@ -111,7 +111,13 @@ RUN Rscript install_packages.R
 ADD /lib/ /usr/src/R/ext-lib
 RUN R CMD INSTALL /usr/src/R/ext-lib/R-packages/NRELmoo*.tar.gz /usr/src/R/ext-lib/R-packages/NRELpso*.tar.gz
 
+# Install Ruby Gems
+ADD /api_create_datapoint.rb /srv/lib/api_create_datapoint.rb
+ADD /Gemfile /srv/lib/Gemfile
+RUN gem install bundler
+RUN cd /srv/lib && bundle install
 
+#ADD /lib/scripts /srv/lib/analysis_library/scripts
 ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
 CMD Rscript start.R

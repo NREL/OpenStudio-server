@@ -3,115 +3,116 @@
 #           create a UUID for that data_point and put in database
 #           call f(u) where u is UUID of data_point
 # Several of the variables are in the sessions. The list below should abstracted out:
-#   rails_rails_analysis_id
+#   rails_host
+#   rails_analysis_id
 #   ruby_command
-#   rails_sim_root_path
-#   rails_create_dp_filename
-#   rails_root_path
+#   r_worker_scripts_path
+# x: array of variables
 create_and_run_datapoints = function(x){
-    print(system('whoami', intern = TRUE))
-    print(system('which ruby', intern = TRUE))
-    print(system('which rake', intern = TRUE))
-    print(system('env', intern = TRUE))
+    # TODO: Replace this with an API call to the server
+    #    mongo = mongoDbConnect(rails_mongodb, host=rails_mongodb_ip, port=27017)
+    #    mongo_query_id = paste('{_id:"',rails_analysis_id,'"}',sep='')
+    #    flag = dbGetQueryForKeys(mongo, "analyses", mongo_query_id, '{run_flag:1}')
+    #    if (flag["run_flag"] == "false" ){
+    #        stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
+    #    }
+    #    dbDisconnect(mongo)
 
-    force(x)
     # convert the vector to comma separated values
+    force(x) # What does this do?
     w = paste(x, collapse=",")
-    # rake datapoints:create_datapoint -- -afa5dcadc-ed5b-4209-b907-777e9e2573c8 -v5,3,alsdfjk
-    y = paste('cd ',rails_root_path,' && bundle exec rake datapoints:create_datapoint -- -a',rails_analysis_id,' -v',w,sep='')
-#   y = paste(ruby_command,rails_sim_root_path,'/',rails_create_dp_filename,' -a ',rails_analysis_id,' -v ',w,sep='')
-    print(y)
-    z = system(y,intern=TRUE)
-    print("Running in create_and_run_datapoints")
-#    j = length(z)
-#    z
-    return(928734982374)
+    y = paste('ruby ',r_worker_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
 
-#    # Run the datapoint and check the results
-#    if (as.character(z[j]) == "NA") {
-#        cat("UUID is NA \n");
-#        NAvalue = 1.0e19
-#        return(NAvalue)
-#    } else {
-#        try(run_datapoint(z[j]), silent = TRUE)
-#
-#        data_point_directory = paste(analysis_dir,'/data_point_',z[j],sep='')
-#
-#        # save off the variables file (can be used later if number of vars gets too long)
-#        write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
-#
-#        # read in the results from the objective function file
-#        object_file <- paste(data_point_directory,"/objectives.json",sep="")
-#        json <- NULL
-#        try(json <- fromJSON(file=object_file), silent=TRUE)
-#
-#        if (is.null(json)) {
-#            obj <- NULL
-#            for (i in 1:objDim){
-#                obj[i] <- 1.0e19
-#            }
-#            print(paste(data_point_directory,"/objectives.json is NULL"))
-#        } else {
-#            obj <- NULL
-#            objvalue <- NULL
-#            objtarget <- NULL
-#            sclfactor <- NULL
-#            objgroup <- NULL
-#            group_count <- 1
-#            for (i in 1:objDim){
-#                objfuntemp <- paste("objective_function_",i,sep="")
-#                if (json[objfuntemp] != "NULL"){
-#                    objvalue[i] <- as.numeric(json[objfuntemp])
-#                } else {
-#                    objvalue[i] <- 1.0e19
-#                    cat(data_point_directory," Missing ", objfuntemp,"\n");
-#                }
-#                objfuntargtemp <- paste("objective_function_target_",i,sep="")
-#                if (json[objfuntargtemp] != "NULL"){
-#                    objtarget[i] <- as.numeric(json[objfuntargtemp])
-#                } else {
-#                    objtarget[i] <- 0.0
-#                }
-#                scalingfactor <- paste("scaling_factor_",i,sep="")
-#                sclfactor[i] <- 1.0
-#                if (json[scalingfactor] != "NULL"){
-#                    sclfactor[i] <- as.numeric(json[scalingfactor])
-#                    if (sclfactor[i] == 0.0) {
-#                        print(paste(scalingfactor," is ZERO, overwriting\n"))
-#                        sclfactor[i] = 1.0
-#                    }
-#                } else {
-#                    sclfactor[i] <- 1.0
-#                }
-#                objfungrouptemp <- paste("objective_function_group_",i,sep="")
-#                if (json[objfungrouptemp] != "NULL"){
-#                    objgroup[i] <- as.numeric(json[objfungrouptemp])
-#                } else {
-#                    objgroup[i] <- group_count
-#                    group_count <- group_count + 1
-#                }
-#            }
-#            print(paste("Objective function results are:",objvalue))
-#            print(paste("Objective function targets are:",objtarget))
-#            print(paste("Objective function scaling factors are:",sclfactor))
-#
-#            objvalue <- objvalue / sclfactor
-#            objtarget <- objtarget / sclfactor
-#
-#            ug <- length(unique(objgroup))
-#            if (ug != uniquegroups) {
-#                print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-#                uniq_filename = paste(analysis_dir,'/uniquegroups.err',sep='')
-#                write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-#                stop(options("show.error.messages"=TRUE),"unique groups is not equal")
-#            }
-#
-#            for (i in 1:ug){
-#                obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
-#            }
-#
-#            print(paste("Objective function Norm:",obj))
-#
+    # Call the system command to submit the simulation to the API / queue
+    print(paste('run command', y))
+    z = system(y,intern=TRUE)
+    # z will be a json file
+
+    z = z[length(z)]
+    print(z)
+
+    datapoint_directory = paste(rails_analysis_id,'/data_point_',z,sep='')
+    print(datapoint_directory)
+
+    # TODO: What to do with this?
+    # data_point_directory = paste(analysis_dir,'/data_point_',z[j],sep='')
+    #
+    ## save off the variables file (can be used later if number of vars gets too long)
+    # write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
+
+    json = try(fromJSON(z), silent=TRUE)
+    if (!json$status) {
+        NAvalue = 1.0e19
+        return(NAvalue)
+    } else {
+        if (is.null(json)) {
+            obj = NULL
+            for (i in 1:objDim) {
+                obj[i] <- 1.0e19
+            }
+            print(paste(datapoint_directory,"/objectives.json is NULL"))
+        } else {
+            obj <- NULL
+            objvalue <- NULL
+            objtarget <- NULL
+            sclfactor <- NULL
+            objgroup <- NULL
+            group_count <- 1
+            for (i in 1:objDim){
+                objfuntemp <- paste("objective_function_",i,sep="")
+                if (json$results[objfuntemp] != "NULL"){
+                    objvalue[i] <- as.numeric(json$results[objfuntemp])
+                } else {
+                    objvalue[i] <- 1.0e19
+                    cat(data_point_directory," Missing ", objfuntemp,"\n");
+                }
+                objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                if (json$results[objfuntargtemp] != "NULL"){
+                    objtarget[i] <- as.numeric(json$results[objfuntargtemp])
+                } else {
+                    objtarget[i] <- 0.0
+                }
+                scalingfactor <- paste("scaling_factor_",i,sep="")
+                sclfactor[i] <- 1.0
+                if (json$results[scalingfactor] != "NULL"){
+                    sclfactor[i] <- as.numeric(json$results[scalingfactor])
+                    if (sclfactor[i] == 0.0) {
+                        print(paste(scalingfactor," is ZERO, overwriting\n"))
+                        sclfactor[i] = 1.0
+                    }
+                } else {
+                    sclfactor[i] <- 1.0
+                }
+                objfungrouptemp <- paste("objective_function_group_",i,sep="")
+                if (json$results[objfungrouptemp] != "NULL"){
+                    objgroup[i] <- as.numeric(json$results[objfungrouptemp])
+                } else {
+                    objgroup[i] <- group_count
+                    group_count <- group_count + 1
+                }
+            }
+
+            print(paste("Objective function results are:",objvalue))
+            print(paste("Objective function targets are:",objtarget))
+            print(paste("Objective function scaling factors are:",sclfactor))
+
+            objvalue <- objvalue / sclfactor
+            objtarget <- objtarget / sclfactor
+
+            ug <- length(unique(objgroup))
+            if (ug != uniquegroups) {
+                print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
+                uniq_filename = paste(analysis_dir,'/uniquegroups.err',sep='')
+                write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+                stop(options("show.error.messages"=TRUE),"unique groups is not equal")
+            }
+
+            for (i in 1:ug){
+                obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
+            }
+
+            print(paste("Objective function Norm:",obj))
+
 #            mongo = mongoDbConnect(rails_mongodb, host=rails_mongodb_ip, port=27017)
 #            mongo_query_id = paste('{_id:"',rails_analysis_id,'"}',sep='')
 #            flag = dbGetQueryForKeys(mongo, "analyses", mongo_query_id, '{exit_on_guideline14:1}')
@@ -147,7 +148,13 @@ create_and_run_datapoints = function(x){
 #                }
 #            }
 #            dbDisconnect(mongo)
-#        }
-#        return(as.numeric(obj))
-#    }
+
+        }
+
+    }
+
+    return(as.numeric(obj))
 }
+
+
+

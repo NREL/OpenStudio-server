@@ -60,13 +60,15 @@ Rails.application.routes.draw do
 
       resources :data_points, shallow: true do
         member do
-          get :show_full # TODO: 10/22/14 - Need to deprecate this, only historic analysis stuff uses this
           get :view_report
-          get :download
-          get :download_reports
+          # get :download_reports # TODO: Remove this
           get :dencity
 
+          # Download reports
+          post :download_report
+
           # TODO: Review the end points
+          put :run
           post :upload_file
           delete :result_files
         end

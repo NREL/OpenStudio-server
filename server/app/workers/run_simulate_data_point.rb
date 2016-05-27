@@ -127,6 +127,15 @@ class RunSimulateDataPoint
                                    attachment: File.new(report, 'rb') })
     end
 
+    report_file = "#{simulation_dir}/objectives.json"
+    if File.exist? report_file
+      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
+      sim_logger.info "Saving report #{report_file} to #{url}"
+      RestClient.post(url, file: { display_name: File.basename(report_file, '.*'),
+                                   type: 'Report',
+                                   attachment: File.new(report_file, 'rb') })
+    end
+
     # Post the zip file of results
     # TODO: Do not save the _reports file anymore in the workflow gem
     results_zip = "#{simulation_dir}/data_point.zip"

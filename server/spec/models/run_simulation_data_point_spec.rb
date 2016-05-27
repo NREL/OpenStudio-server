@@ -50,12 +50,73 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     #  FactoryGirl.create(:project_with_analyses).analyses
   end
 
+  it 'should create the datapoint', js: true do
+    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+    puts "App host is: #{host}"
+
+    # TODO: Make this a helper of some sort
+    options = {hostname: "http://#{host}"}
+    api = OpenStudio::Analysis::ServerApi.new(options)
+    project_id = api.new_project
+    expect(project_id).not_to be nil
+    analysis_options = {
+        formulation_file: 'spec/files/batch_datapoints/example_csv.json',
+        upload_file: 'spec/files/batch_datapoints/example_csv.zip',
+    }
+    analysis_id = api.new_analysis(project_id, analysis_options)
+
+    expect(analysis_id).not_to be nil
+
+    a = RestClient.get "http://#{host}/analyses/#{analysis_id}"
+
+    # expect(...something...)
+
+    # Go set the r_index of the variables because the algorithm normally
+    # sets the index
+    selected_variables = Variable.variables(analysis_id)
+    selected_variables.each_with_index do |v, index|
+      v.r_index = index + 1
+      v.save
+    end
+
+    expect(selected_variables.size).to eq 5
+    data_point_data = {
+        data_point: {
+            name: "API Test Data Point",
+            ordered_variable_values: [1, 1, 5, 20, "*Entire Building*"]
+        }
+    }
+
+    require 'pp'
+    a = RestClient.post "http://#{host}/analyses/#{analysis_id}/data_points.json", data_point_data
+    a = JSON.parse(a, symbolize_names: true)
+    pp a
+    expect(a[:set_variable_values].size).to eq 5
+    expect(a[:set_variable_values].values[0]).to eq 1.0
+    expect(a[:set_variable_values].values[1]).to eq 1.0
+    expect(a[:set_variable_values].values[2]).to eq 5
+    expect(a[:set_variable_values].values[3]).to eq 20
+    expect(a[:set_variable_values].values[4]).to eq "*Entire Building*"
+
+    expect(a[:_id]).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+
+    a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+    a = JSON.parse(a, symbolize_names: true)
+    pp a
+    expect(a[:analysis][:data_points].size).to eq 1
+
+    # test using the script
+    script = File.expand_path('../docker/R/api_create_datapoint.rb', Rails.root)
+    puts script
+  end
+
+
   it 'should run the data point', js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     puts "App host is: #{host}"
 
     # TODO: Make this a helper of some sort
-    options = { hostname: "http://#{host}" }
+    options = {hostname: "http://#{host}"}
     api = OpenStudio::Analysis::ServerApi.new(options)
     project_id = api.new_project
     expect(project_id).not_to be nil
@@ -129,7 +190,7 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
           sleep 3
         end
       end
-      File.open(receipt_file, 'w') { |f| f << Time.now}
+      File.open(receipt_file, 'w') { |f| f << Time.now }
 
     end
 

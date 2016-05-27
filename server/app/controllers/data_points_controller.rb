@@ -77,16 +77,17 @@ class DataPointsController < ApplicationController
             end
           end
 
-          render json: { data_point: @data_point }
+          # look up the objective functions and report
+          # @data_point['objective_function_results'] = {}
+
+          render json: {data_point: @data_point}
         end
       else
         format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
+        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
       end
     end
   end
-
-  alias show_full show
 
   def status
     # The name :jobs is legacy based on how PAT queries the data points. Should we alias this to status?
@@ -97,16 +98,16 @@ class DataPointsController < ApplicationController
       #  format.html # new.html.erb
       format.json do
         render json: {
-          data_points: dps.map do |dp|
-            {
-              _id: dp.id,
-              id: dp.id,
-              analysis_id: dp.analysis_id,
-              status: dp.status,
-              final_message: dp.status_message,
-              download_status: dp.download_status
-            }
-          end
+            data_points: dps.map do |dp|
+              {
+                  _id: dp.id,
+                  id: dp.id,
+                  analysis_id: dp.analysis_id,
+                  status: dp.status,
+                  final_message: dp.status_message,
+                  download_status: dp.download_status
+              }
+            end
         }
       end
     end
@@ -131,18 +132,79 @@ class DataPointsController < ApplicationController
   # POST /data_points
   # POST /data_points.json
   def create
+    error_message = nil
     analysis_id = params[:analysis_id]
     params[:data_point][:analysis_id] = analysis_id
 
-    @data_point = DataPoint.new(data_point_params)
+    dp_params = data_point_params
+
+    # If the create method receives a list of ordered variable values, then
+    # look up the variables by the r_index, and assign the set_variable_values
+    if dp_params[:ordered_variable_values]
+      logger.info "Mapping ordered variables to actual variables"
+
+      # grab the selected variables
+      selected_variables = Variable.variables(analysis_id)
+
+      selected_variables.each do |v|
+        logger.info v.inspect
+      end
+
+      variable_values = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
+      # make sure the length of the selected variables and the variables array
+      # are equal
+      if selected_variables.size == dp_params[:ordered_variable_values].size
+        dp_params[:ordered_variable_values].each_with_index do |value, index|
+          logger.info "Adding new variable value for #{selected_variables[index].name} of value #{value}"
+          if selected_variables[index]
+            uuid = selected_variables[index].uuid
+
+            # Type cast the values as they are probably strings
+            case selected_variables[index].value_type.downcase
+              when 'double'
+                variable_values[uuid] = value.to_f
+              when 'string'
+                variable_values[uuid] = value.to_s
+              when 'integer', 'int'
+                variable_values[uuid] = value.to_i
+              when 'bool', 'boolean'
+                variable_values[uuid] = value.casecmp('true').zero? ? true : false
+              else
+                raise "Unknown DataType for variable #{selected_variables[index].name} of #{selected_variables[index].value_type}"
+            end
+          else
+            raise 'Could not find variable in database'
+          end
+        end
+
+        dp_params.delete(:ordered_variable_values)
+        dp_params[:set_variable_values] = variable_values
+      else
+        error_message = "Variable array and analysis variable size differ"
+        logger.error error_message
+
+        dp_params.delete(:ordered_variable_values)
+        dp_params[:set_variable_values] = {}
+      end
+    end
+
+    if error_message.nil?
+      logger.info "Creating datapoint with params: #{dp_params}"
+      @data_point = DataPoint.new(data_point_params)
+    end
 
     respond_to do |format|
-      if @data_point.save!
+      if error_message.nil? && @data_point.save!
         format.html { redirect_to @data_point, notice: 'Data point was successfully created.' }
         format.json { render json: @data_point, status: :created, location: @data_point }
       else
         format.html { render action: 'new' }
-        format.json { render json: @data_point.errors, status: :unprocessable_entity }
+        format.json {
+          render json: {
+              message: error_message,
+              data_point_errors: @data_point.nil? ? '' : @data_point.errors
+          }, status: :unprocessable_entity
+        }
       end
     end
   end
@@ -177,6 +239,29 @@ class DataPointsController < ApplicationController
       logger.info("error flag was set to #{error}")
       if !error
         format.json { render json: "Created #{saved_dps} datapoints from #{uploaded_dps} uploaded.", status: :created, location: @data_point }
+      else
+        format.json { render json: error_message, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # PUT /data_points/1.json
+  def run
+    error = false
+    error_message = nil
+    @data_point = DataPoint.find(params[:id])
+
+    # only run simulations that are in the na state
+    if @data_point.status = 'na'
+      a = RunSimulateDataPoint.new(@data_point.id)
+      @data_point.job_id = a.delay(queue: 'simulations').perform.id
+      @data_point.save!
+    end
+
+    respond_to do |format|
+      logger.info("error flag was set to #{error}")
+      if !error
+        format.json { render json: @data_point }
       else
         format.json { render json: error_message, status: :unprocessable_entity }
       end
@@ -234,19 +319,18 @@ class DataPointsController < ApplicationController
     error = false
     error_messages = []
     datapoint_id = params[:id]
-    logger.info('attaching results file to datapoint')
+    logger.info('Attaching results file to datapoint')
 
     @data_point = DataPoint.find(datapoint_id)
-    logger.info("Datapoint ID: #{@data_point.id}")
-
     if params[:file] && params[:file][:attachment]
       @rf = ResultFile.new(
-        display_name: params[:file][:display_name],
-        type: params[:file][:type]
+          display_name: params[:file][:display_name],
+          type: params[:file][:type]
       )
       @rf.attachment = params[:file][:attachment]
 
       @data_point.result_files << @rf
+
       unless @data_point.save!
         error = true
         error_messages << 'Result File could not be saved: ' + @data_point.errors
@@ -258,9 +342,28 @@ class DataPointsController < ApplicationController
 
     respond_to do |format|
       if error
-        format.json { render json: { error: error_messages, result_file: params[:file] }, status: :unprocessable_entity }
+        format.json { render json: {error: error_messages, result_file: params[:file]}, status: :unprocessable_entity }
       else
         format.json { render 'result_file', status: :created, location: data_point_url(@data_point) }
+      end
+    end
+  end
+
+  # download a datapoint report of filename
+  def download_report
+    @data_point = DataPoint.find(params[:id])
+
+    h = nil
+    dp_params = data_point_params
+    if dp_params[:filename]
+      h = @data_point.result_files.where(display_name: dp_params[:filename]).first
+    end
+
+    if h && h.attachment && File.exist?(h.attachment.path)
+      send_data File.read(h.attachment.path)
+    else
+      respond_to do |format|
+        format.json { render json: { status: 'error', error_message: 'could not find report'}, status: :unprocessable_entity }
       end
     end
   end
@@ -343,7 +446,7 @@ class DataPointsController < ApplicationController
 
       # Grab all the variables that have defined a measure ID and pull out the results
       vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '')
-                        .order_by(:name.asc).as_json(only: [:name, :metadata_id])
+                 .order_by(:name.asc).as_json(only: [:name, :metadata_id])
 
       dencity[:structure] = {}
       vars.each do |v|
@@ -367,7 +470,7 @@ class DataPointsController < ApplicationController
       if dencity
         format.json { render json: dencity.to_json }
       else
-        format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
+        format.json { render json: {error: 'Could not format data point into DEnCity view'}, status: :unprocessable_entity }
       end
     end
   end

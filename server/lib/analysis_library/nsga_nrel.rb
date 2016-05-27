@@ -202,8 +202,10 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
             rails_run_filename = "#{@options[:run_data_point_filename]}"
             rails_create_dp_filename = "#{@options[:create_data_point_filename]}"
             rails_root_path = "#{Rails.root}"
-            script_root_path = "#{Rails.root.join('lib/analysis_library/scripts')}"
-            source('#{Rails.root.join('lib/analysis_library/scripts/nsga.R')}')
+            rails_host = "#{APP_CONFIG['os_server_host_url']}"
+            r_worker_scripts_path = "#{APP_CONFIG['r_worker_scripts_path']}"
+            r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
+            source(paste(r_scripts_path,'/nsga.R',sep=''))
           }
         end
       else

@@ -174,7 +174,6 @@ module AnalysisLibrary::R
       p = lhs_probability(selected_variables.count, number_of_samples)
       Rails.logger.info "Probabilities #{p.class} with #{p.inspect}"
 
-      # TODO: performance smell... optimize this using Parallel
       i_var = 0
       selected_variables.each do |var|
         Rails.logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
