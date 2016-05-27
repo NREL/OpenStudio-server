@@ -69,8 +69,8 @@ clusterExport(cl,"r_scripts_path")
 clusterEvalQ(cl,varfile(varnames))
 
 # Source and export functions
-source(paste(r_scripts_path,'create_and_run_datapoints.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoints")
+source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
+clusterExport(cl,"create_and_run_datapoint")
 
 
 if (nrow(vars) == 1) {
@@ -102,7 +102,7 @@ print(mudistidx)
 print(mprob)
 
 results = NULL
-results = nsga2NREL(cl=cl, fn=create_and_run_datapoints, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
+results = nsga2NREL(cl=cl, fn=create_and_run_datapoint, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
 
 #try(results = nsga2NREL(cl=cl, fn=create_and_run_datapoints, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
 #, silent = FALSE)

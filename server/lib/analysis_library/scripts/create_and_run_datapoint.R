@@ -8,7 +8,7 @@
 #   ruby_command
 #   r_worker_scripts_path
 # x: array of variables
-create_and_run_datapoints = function(x){
+create_and_run_datapoint = function(x){
     # TODO: Replace this with an API call to the server
     #    mongo = mongoDbConnect(rails_mongodb, host=rails_mongodb_ip, port=27017)
     #    mongo_query_id = paste('{_id:"',rails_analysis_id,'"}',sep='')
