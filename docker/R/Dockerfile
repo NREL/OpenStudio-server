@@ -32,6 +32,7 @@ RUN apt-get update \
         libyaml-dev \
         procps \
         ruby \
+        ruby-dev \
         tar \
         unzip \
         wget \
@@ -108,16 +109,13 @@ RUN curl -fSL -o R.tar.gz "http://cran.fhcrc.org/src/base/R-$R_MAJOR_VERSION/R-$
 ADD /install_packages.R install_packages.R
 RUN Rscript install_packages.R
 # Install custom packages
-ADD /lib/ /usr/src/R/ext-lib
-RUN R CMD INSTALL /usr/src/R/ext-lib/R-packages/NRELmoo*.tar.gz /usr/src/R/ext-lib/R-packages/NRELpso*.tar.gz
+ADD /lib/ /srv/R/lib
+RUN R CMD INSTALL /srv/R/lib/R-packages/NRELmoo*.tar.gz /srv/R/lib/R-packages/NRELpso*.tar.gz
 
 # Install Ruby Gems
-ADD /api_create_datapoint.rb /srv/lib/api_create_datapoint.rb
-ADD /Gemfile /srv/lib/Gemfile
 RUN gem install bundler
-RUN cd /srv/lib && bundle install
+RUN cd /srv/R/lib && bundle install
 
-#ADD /lib/scripts /srv/lib/analysis_library/scripts
 ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
 CMD Rscript start.R

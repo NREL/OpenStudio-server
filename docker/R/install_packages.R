@@ -2,9 +2,9 @@
 install.packages('lhs', repos='http://cran.r-project.org')
 install.packages('e1071', repos='http://cran.r-project.org')
 install.packages('triangle', repos='http://cran.r-project.org')
-install.packages('rJava', repos='http://cran.r-project.org')
+install.packages('rJava', repos='http://cran.r-project.org') # TODO: remove this and dependent libraries
 install.packages('RUnit', repos='http://cran.r-project.org')
-install.packages('RMongo', repos='http://cran.r-project.org')
+install.packages('RMongo', repos='http://cran.r-project.org') # TODO: remove this and dependent libraries
 install.packages('R.methodsS3', repos='http://cran.r-project.org')
 install.packages('R.oo', repos='http://cran.r-project.org')
 install.packages('R.utils', repos='http://cran.r-project.org')

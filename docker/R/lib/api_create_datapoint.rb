@@ -2,7 +2,7 @@
 # for a response
 
 require 'optparse'
-require 'restclient'
+require 'rest-client'
 
 options = {submit_simulation: false, sleep_time: 5}
 o = OptionParser.new do |opts|
