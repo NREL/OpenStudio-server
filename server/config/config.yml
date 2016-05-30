@@ -6,8 +6,7 @@ defaults: &defaults
   rails_log_path: ':rails_root/log'
   rserve_hostname: 'localhost'
   rserve_port: 6311
-  r_worker_scripts_path: ':rails_root/../docker/R'
-  r_scripts_path: ':rails_root/lib/analysis_library/scripts'
+  r_scripts_path: ':rails_root/../docker/R'
 
 development:
   <<: *defaults
@@ -21,7 +20,7 @@ docker:
   os_server_host_url: 'http://web:80'
   ruby_bin_dir: /usr/local/ruby
   rserve_hostname: 'rserve'
-  r_worker_scripts_path: /srv/R
+  r_scripts_path: /srv/R/lib
 
 test:
   <<: *defaults

@@ -286,7 +286,7 @@ class AnalysesController < ApplicationController
   # @param :jobs [String] Constraint on the data point completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
-    analysis_only_fields = [:status, :analysis_type, :jobs]
+    analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline14]
     data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :download_status]
 
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
@@ -305,6 +305,8 @@ class AnalysesController < ApplicationController
             id: a.id,
             status: a.status,
             analysis_type: a.analysis_type,
+            run_flag: a.run_flag,
+            exit_on_guideline14: a.exit_on_guideline14,
             jobs: a.jobs.order_by(:index.asc).map do |j|
                     {
                       index: j.index,

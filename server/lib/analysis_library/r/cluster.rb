@@ -85,7 +85,8 @@ module AnalysisLibrary::R
     end
 
     # start the cluster.  Returns true if the cluster was started, false
-    # if the cluster timed out or failed. The IP addresses are passed as a hash of an arrays a["ip"] = ["ip1", "ip2", ...]
+    # if the cluster timed out or failed. The IP addresses are passed as a hash
+    # of an arrays ip_addresses["ip"] = ["ip1", "ip2", ...]
     def start(ip_addresses)
       @r.command(ips: ip_addresses.to_dataframe) do
         %{

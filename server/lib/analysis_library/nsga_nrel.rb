@@ -204,11 +204,13 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
             rails_create_dp_filename = "#{@options[:create_data_point_filename]}"
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
-            r_worker_scripts_path = "#{APP_CONFIG['r_worker_scripts_path']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
+            exit_guideline_14 = "#{@analysis.exit_on_guideline14}"
             source(paste(r_scripts_path,'/nsga.R',sep=''))
           }
         end
+
+        # TODO: find any results of the algorithm and save to the analysis
       else
         raise 'could not start the cluster (most likely timed out)'
       end

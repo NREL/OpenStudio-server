@@ -255,5 +255,9 @@ module AnalysisLibrary::R
 
       [samples, var_types, min_max, var_names]
     end
+
+    def logger
+      Rails.logger
+    end
   end
 end
