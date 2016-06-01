@@ -4,4 +4,4 @@ vagrant
 /server/Gemfile.lock
 /server/public/assets
 /server/tmp
-/worker-nodes/analysis_*
+/worker-nodes

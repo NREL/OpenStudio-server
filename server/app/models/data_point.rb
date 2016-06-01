@@ -80,6 +80,9 @@ class DataPoint
 
   # Callbacks
   after_create :verify_uuid
+  before_destroy :destroy_delayed_job
+
+  # Before destroy make sure the delayed job ID is also destroyed
 
   def self.status_states
     [:na, :queued, :started, :completed]
@@ -93,11 +96,12 @@ class DataPoint
 
   # Submit the simulation to run in the background task queue
   def submit_simulation
-    puts self.id
     job = RunSimulateDataPoint.new(self.id)
-    id = job.delay(queue: 'simulations').perform.id
+    self.job_id = job.delay(queue: 'simulations').perform.id
 
-    id
+    self.save!
+
+    self.job_id
   end
 
   protected
@@ -105,5 +109,10 @@ class DataPoint
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!
+  end
+
+  def destroy_delayed_job
+    dj = Delayed::Job.where(id: job_id).first
+    dj.destroy if dj
   end
 end

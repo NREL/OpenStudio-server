@@ -152,15 +152,17 @@ class Analysis
     self.run_flag = false
     # The ensure block will clean up the jobs and save the statuses
 
-    # TODO: how to set the status message correctly
-    # jobs.each do |j|
-    #   unless j.status == 'completed'
-    #     j.status = 'completed'
-    #     j.end_time = Time.new
-    #     j.status_message = 'canceled by user'
-    #     j.save
-    #   end
-    # end
+    jobs.each do |j|
+      unless j.status == 'completed'
+        j.status = 'completed'
+        j.end_time = Time.new
+        j.status_message = 'Canceled by user'
+        j.save!
+      end
+    end
+
+    # Remove all the queued delayed jobs for this analysis
+    data_points.where(status: 'queued').each { |dp| dp.destroy }
 
     [save!, errors]
   end
@@ -279,7 +281,7 @@ class Analysis
 
   # Return the list of job statuses
   def jobs_status
-    jobs.order_by(:index.asc).map { |j| {analysis_type: j.analysis_type, status: j.status} }
+    jobs.order_by(:index.asc).map { |j| {analysis_type: j.analysis_type, status: j.status, status_message: j.status_message} }
   end
 
   # Return the last job's status for the analysis
@@ -287,6 +289,16 @@ class Analysis
     j = jobs_status
     if j
       return j.last[:status] rescue 'unknown'
+    else
+      return 'unknown'
+    end
+  end
+
+  # Return the last job's status message
+  def job_status_message
+    j = jobs_status
+    if j
+      return j.last[:status_message] rescue 'unknown'
     else
       return 'unknown'
     end

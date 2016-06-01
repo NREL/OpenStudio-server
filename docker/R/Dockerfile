@@ -105,14 +105,19 @@ RUN curl -fSL -o R.tar.gz "http://cran.fhcrc.org/src/base/R-$R_MAJOR_VERSION/R-$
     && make -j$(nproc) \
     && make install
 
+
 # Add in the additional R packages
 ADD /install_packages.R install_packages.R
 RUN Rscript install_packages.R
+
 # Install custom packages
-ADD /lib/ /srv/R/lib
+ADD /lib/R-packages /srv/R/lib/R-packages
 RUN R CMD INSTALL /srv/R/lib/R-packages/NRELmoo*.tar.gz /srv/R/lib/R-packages/NRELpso*.tar.gz
 
-# Install Ruby Gems
+# Add the remaining files
+ADD /lib /srv/R/lib
+
+# Install Gems
 RUN gem install bundler
 RUN cd /srv/R/lib && bundle install
 

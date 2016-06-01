@@ -70,6 +70,10 @@
                 </td>
               </tr>
               <tr>
+                <th>Status Message</th>
+                <td><%= @analysis.job_status_message %>
+              </tr>
+              <tr>
                 <th>Start Time</th>
                 <td><%= @analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") + " UTC" unless @analysis.start_time.nil? %></td>
               </tr>

@@ -45,14 +45,14 @@ if (uniquegroups == 1) {
     stop(options("show.error.messages"=TRUE),"unique groups is 1")
 }
 
-# Export some local variables for the worker nodes
+# Export local variables for worker nodes
 clusterExport(cl,"ruby_command")
 clusterExport(cl,"rake_command")
 clusterExport(cl,"analysis_dir")
 clusterExport(cl,"varfile")
 clusterExport(cl,"varnames")
 
-# globals
+# Export some global variables for worker nodes
 clusterExport(cl,"rails_analysis_id")
 clusterExport(cl,"rails_sim_root_path")
 clusterExport(cl,"rails_ruby_bin_dir")
@@ -63,13 +63,13 @@ clusterExport(cl,"rails_create_dp_filename")
 clusterExport(cl,"rails_root_path")
 clusterExport(cl,"rails_host")
 clusterExport(cl,"r_scripts_path")
-clusterExport(cl,"exit_guideline_14")
+clusterExport(cl,"rails_exit_guideline_14")
 clusterEvalQ(cl,varfile(varnames))
 
-# Source and export functions
+# Export functions for worker nodes
 source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint")
-
+clusterExport(cl,"check_run_flag")
 
 if (nrow(vars) == 1) {
     print("not sure what to do with only one datapoint so adding an NA")

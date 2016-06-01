@@ -10,19 +10,9 @@
 # x: array of variables
 create_and_run_datapoint = function(x){
     # TODO: Replace this with an API call to the server
-    y = paste('ruby ',r_scripts_path,'/api_get_status.rb -h ',rails_host,' -a ',rails_analysis_id,sep='')
-    print(paste('run command', y))
-    z = system(y,intern=TRUE)
-    json = try(fromJSON(z), silent=TRUE)
-
-    print(json)
-    #    mongo = mongoDbConnect(rails_mongodb, host=rails_mongodb_ip, port=27017)
-    #    mongo_query_id = paste('{_id:"',rails_analysis_id,'"}',sep='')
-    #    flag = dbGetQueryForKeys(mongo, "analyses", mongo_query_id, '{run_flag:1}')
-    #    if (flag["run_flag"] == "false" ){
-    #        stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
-    #    }
-    #    dbDisconnect(mongo)
+    if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id)==FALSE){
+        stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
+    }
 
     # convert the vector to comma separated values
     force(x) # What does this do?
@@ -54,47 +44,47 @@ create_and_run_datapoint = function(x){
         if (is.null(json)) {
             obj = NULL
             for (i in 1:objDim) {
-                obj[i] <- 1.0e19
+                obj[i] = 1.0e19
             }
             print(paste(datapoint_directory,"/objectives.json is NULL"))
         } else {
-            obj <- NULL
-            objvalue <- NULL
-            objtarget <- NULL
-            sclfactor <- NULL
-            objgroup <- NULL
-            group_count <- 1
+            obj = NULL
+            objvalue = NULL
+            objtarget = NULL
+            sclfactor = NULL
+            objgroup = NULL
+            group_count = 1
             for (i in 1:objDim){
-                objfuntemp <- paste("objective_function_",i,sep="")
+                objfuntemp = paste("objective_function_",i,sep="")
                 if (json$results[objfuntemp] != "NULL"){
-                    objvalue[i] <- as.numeric(json$results[objfuntemp])
+                    objvalue[i] = as.numeric(json$results[objfuntemp])
                 } else {
-                    objvalue[i] <- 1.0e19
+                    objvalue[i] = 1.0e19
                     cat(data_point_directory," Missing ", objfuntemp,"\n");
                 }
-                objfuntargtemp <- paste("objective_function_target_",i,sep="")
+                objfuntargtemp = paste("objective_function_target_",i,sep="")
                 if (json$results[objfuntargtemp] != "NULL"){
-                    objtarget[i] <- as.numeric(json$results[objfuntargtemp])
+                    objtarget[i] = as.numeric(json$results[objfuntargtemp])
                 } else {
-                    objtarget[i] <- 0.0
+                    objtarget[i] = 0.0
                 }
-                scalingfactor <- paste("scaling_factor_",i,sep="")
-                sclfactor[i] <- 1.0
+                scalingfactor = paste("scaling_factor_",i,sep="")
+                sclfactor[i] = 1.0
                 if (json$results[scalingfactor] != "NULL"){
-                    sclfactor[i] <- as.numeric(json$results[scalingfactor])
+                    sclfactor[i] = as.numeric(json$results[scalingfactor])
                     if (sclfactor[i] == 0.0) {
                         print(paste(scalingfactor," is ZERO, overwriting\n"))
                         sclfactor[i] = 1.0
                     }
                 } else {
-                    sclfactor[i] <- 1.0
+                    sclfactor[i] = 1.0
                 }
-                objfungrouptemp <- paste("objective_function_group_",i,sep="")
+                objfungrouptemp = paste("objective_function_group_",i,sep="")
                 if (json$results[objfungrouptemp] != "NULL"){
-                    objgroup[i] <- as.numeric(json$results[objfungrouptemp])
+                    objgroup[i] = as.numeric(json$results[objfungrouptemp])
                 } else {
-                    objgroup[i] <- group_count
-                    group_count <- group_count + 1
+                    objgroup[i] = group_count
+                    group_count = group_count + 1
                 }
             }
 
@@ -102,10 +92,10 @@ create_and_run_datapoint = function(x){
             print(paste("Objective function targets are:",objtarget))
             print(paste("Objective function scaling factors are:",sclfactor))
 
-            objvalue <- objvalue / sclfactor
-            objtarget <- objtarget / sclfactor
+            objvalue = objvalue / sclfactor
+            objtarget = objtarget / sclfactor
 
-            ug <- length(unique(objgroup))
+            ug = length(unique(objgroup))
             if (ug != uniquegroups) {
                 print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
                 uniq_filename = paste(analysis_dir,'/uniquegroups.err',sep='')
@@ -114,51 +104,44 @@ create_and_run_datapoint = function(x){
             }
 
             for (i in 1:ug){
-                obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
+                obj[i] = force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
             }
 
             print(paste("Objective function Norm:",obj))
 
+            # Check if exit on guideline 14 is enabled
+            if (rails_exit_guideline_14){
 
+                # read in the results from the objective function file
+                guideline_file = paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+                json = NULL
+                try(json = fromJSON(file=guideline_file), silent=TRUE)
+                if (is.null(json)) {
+                    print(paste("no guideline file: ",guideline_file))
+                } else {
+                    guideline = json[[1]]
+                    for (i in 2:length(json)) guideline = cbind(guideline,json[[i]])
+                    print(paste("guideline: ",guideline))
+                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+                    print(paste("all(guideline): ",all(guideline)))
+                    if (length(which(guideline)) == objDim){
+                        #write final params to json file
+                        write_filename = paste(analysis_dir,'/varnames.json',sep='')
+                        varnames = scan(file=write_filename, what=character())
 
-#            mongo = mongoDbConnect(rails_mongodb, host=rails_mongodb_ip, port=27017)
-#            mongo_query_id = paste('{_id:"',rails_analysis_id,'"}',sep='')
-#            flag = dbGetQueryForKeys(mongo, "analyses", mongo_query_id, '{exit_on_guideline14:1}')
-#            print(paste("exit_on_guideline14: ",flag))
-#            if (flag["exit_on_guideline14"] == "true" ){
-#                # read in the results from the objective function file
-#                guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-#                json <- NULL
-#                try(json <- fromJSON(file=guideline_file), silent=TRUE)
-#                if (is.null(json)) {
-#                    print(paste("no guideline file: ",guideline_file))
-#                } else {
-#                    guideline <- json[[1]]
-#                    for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
-#                    print(paste("guideline: ",guideline))
-#                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
-#                    print(paste("all(guideline): ",all(guideline)))
-#                    if (length(which(guideline)) == objDim){
-#                        #write final params to json file
-#                        write_filename = paste(analysis_dir,'/varnames.json',sep='')
-#                        varnames = scan(file=write_filename, what=character())
-#
-#                        answer = paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
-#                        write_filename = paste(analysis_dir,'/best_result.json',sep='')
-#                        write.table(answer, file=write_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-#
-#                        convergenceflag = paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
-#                        write_filename = paste(analysis_dir,'/convergence_flag.json',sep='')
-#                        write(convergenceflag, file=write_filename)
-#                        dbDisconnect(mongo)
-#                        stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
-#                    }
-#                }
-#            }
-#            dbDisconnect(mongo)
+                        answer = paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+                        write_filename = paste(analysis_dir,'/best_result.json',sep='')
+                        write.table(answer, file=write_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
 
+                        convergenceflag = paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+                        write_filename = paste(analysis_dir,'/convergence_flag.json',sep='')
+                        write(convergenceflag, file=write_filename)
+                        dbDisconnect(mongo)
+                        stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
+                    }
+                }
+            }
         }
-
     }
 
     return(as.numeric(obj))
