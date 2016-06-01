@@ -54,7 +54,7 @@ end
 WITHOUT_DELAY=false
 ANALYSIS_TYPE="batch_run"
 STOP_AFTER_N=nil # set to nil if you want them all
-# each may contain up to 50 data points
+# each may contain up to 50 datapoints
 
 # Project data
 formulation_file = "./" + project_name + "/analysis.json"

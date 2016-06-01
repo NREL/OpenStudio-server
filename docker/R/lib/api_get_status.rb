@@ -25,7 +25,7 @@ result[:status] = false
 begin
   a = RestClient.get "#{options[:host]}/analyses/#{options[:analysis_id]}/status.json"
   # TODO: retries?
-  fail 'Could not create data point' unless a.code == 200
+  fail 'Could not create datapoint' unless a.code == 200
 
   a = JSON.parse(a, symbolize_names: true)
   result[:status] = true

@@ -73,7 +73,7 @@ if not copy_to_dir.nil?
   project_dir = copy_to_dir
 end
 
-# de-select some data points
+# de-select some datapoints
 if not n.nil?
   data_points = project.analysis.dataPoints
   for i in n..(data_points.size - 1)
@@ -121,7 +121,7 @@ server.projectUUIDs.each do |projectUUID|
   puts "  Success = #{success}"
 end
 
-# run the project. sets the run type of each data point to CloudDetailed if true
+# run the project. sets the run type of each datapoint to CloudDetailed if true
 if getDetailedResults
   project.analysis.dataPointsToQueue.each { |data_point|
     data_point.setRunType("CloudDetailed".to_DataPointRunType)

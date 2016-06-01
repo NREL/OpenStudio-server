@@ -62,7 +62,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
 
     ids = []
     if @options[:data_points].empty?
-      logger.info 'No data points were passed into the options, therefore checking which data points to run'
+      logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
 
       # queue up the simulations
       @analysis.data_points.where(status: 'na').each do |dp|
@@ -74,7 +74,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       end
     end
 
-    # Watch the delayed jobs to see when all the data points are completed.
+    # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
     while ids.size > 0
       ids.each do |id|

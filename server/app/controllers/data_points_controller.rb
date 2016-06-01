@@ -83,14 +83,14 @@ class DataPointsController < ApplicationController
           render json: {data_point: @data_point}
         end
       else
-        format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: {error: 'No Data Point'}, status: :unprocessable_entity }
+        format.html { redirect_to projects_path, notice: 'Could not find datapoint' }
+        format.json { render json: {error: 'No Datapoint'}, status: :unprocessable_entity }
       end
     end
   end
 
   def status
-    # The name :jobs is legacy based on how PAT queries the data points. Should we alias this to status?
+    # The name :jobs is legacy based on how PAT queries the datapoints. Should we alias this to status?
     only_fields = [:status, :status_message, :download_status, :analysis_id]
     dps = params[:status] ? DataPoint.where(status: params[:jobs]).only(only_fields) : DataPoint.all.only(only_fields)
 
@@ -194,7 +194,7 @@ class DataPointsController < ApplicationController
 
     respond_to do |format|
       if error_message.nil? && @data_point.save!
-        format.html { redirect_to @data_point, notice: 'Data point was successfully created.' }
+        format.html { redirect_to @data_point, notice: 'Datapoint was successfully created.' }
         format.json { render json: @data_point, status: :created, location: @data_point }
       else
         format.html { render action: 'new' }
@@ -273,7 +273,7 @@ class DataPointsController < ApplicationController
 
     respond_to do |format|
       if @data_point.update(data_point_params)
-        format.html { redirect_to @data_point, notice: 'Data point was successfully updated.' }
+        format.html { redirect_to @data_point, notice: 'Datapoint was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -295,7 +295,7 @@ class DataPointsController < ApplicationController
     end
   end
 
-  # Delete all the result files from the data point
+  # Delete all the result files from the datapoint
   # API only method
   # DELETE /data_points/1/result_files
   def result_files
@@ -382,7 +382,7 @@ class DataPointsController < ApplicationController
   # end
   #
   # # Render an openstudio reporting measure's HTML report. This method has protection around which file to load.
-  # # It expects the file to be in the reports directory of the data point. If the user try to navigate the file system
+  # # It expects the file to be in the reports directory of the datapoint. If the user try to navigate the file system
   # # the File.basename method will remove that.
   # def view_report
   #   # construct the path to the report based on the routs
@@ -468,7 +468,7 @@ class DataPointsController < ApplicationController
       if dencity
         format.json { render json: dencity.to_json }
       else
-        format.json { render json: {error: 'Could not format data point into DEnCity view'}, status: :unprocessable_entity }
+        format.json { render json: {error: 'Could not format datapoint into DEnCity view'}, status: :unprocessable_entity }
       end
     end
   end

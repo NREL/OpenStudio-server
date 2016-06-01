@@ -54,7 +54,7 @@ class RunSimulateDataPoint
 
   def perform
     if @data_point.nil?
-      status_message = 'Could not find data point'
+      status_message = 'Could not find datapoint'
       return
     end
 
@@ -72,16 +72,16 @@ class RunSimulateDataPoint
     sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     sim_logger.info "Analysis directory is #{analysis_dir}"
     sim_logger.info "Simulation directory is #{simulation_dir}"
-    sim_logger.info "Run data point type/file is #{@options[:run_workflow_method]}"
+    sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
     initialize_worker(sim_logger)
 
     # delete any existing data files from the server in case this is a 'rerun'
     RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
 
-    # Download the data point to run and save to disk
+    # Download the datapoint to run and save to disk
     url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
-    sim_logger.info "Downloading data point from #{url}"
+    sim_logger.info "Downloading datapoint from #{url}"
     r = RestClient.get url
     raise 'Analysis JSON could not be downloaded' unless r.code == 200
     # Parse to JSON to save it again with nice formatting
@@ -112,7 +112,7 @@ class RunSimulateDataPoint
       # push the results to the server
       @data_point.update(results: results)
 
-      # TODO: Need to create a chord to run at the end of all the data points to finalize the analysis
+      # TODO: Need to create a chord to run at the end of all the datapoints to finalize the analysis
     else
       raise "Could not find results #{results_file}"
     end

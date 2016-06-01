@@ -104,7 +104,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
       logger.info "Worker node ips #{worker_ips}"
 
       # copy the files to the worker nodes here
-      logger.info "Initializing the analyses of the data points for #{analyses.map(&:id)}"
+      logger.info "Initializing the analyses of the datapoints for #{analyses.map(&:id)}"
       analyses.each do |analysis|
         logger.info 'Running initialize worker scripts'
         unless cluster.initialize_workers(worker_ips, analysis.id)
@@ -121,7 +121,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
             clusterEvalQ(cl,library(RMongo))
 
             f <- function(dp_index){
-              print(paste("Analysis ID:", dps$analysis_id[dp_index], "Data Point ID:", dps$data_point_id[dp_index]))
+              print(paste("Analysis ID:", dps$analysis_id[dp_index], "Datapoint ID:", dps$data_point_id[dp_index]))
               mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
@@ -139,11 +139,11 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
             clusterExport(cl,"f")
 
             if (nrow(dps) == 1) {
-              print("not sure what to do with only one data point so adding an NA")
+              print("not sure what to do with only one datapoint so adding an NA")
               dps <- rbind(dps, c(NA,NA))
             }
             if (nrow(dps) == 0) {
-              print("not sure what to do with no data point so adding two NAs")
+              print("not sure what to do with no datapoint so adding two NAs")
               dps <- rbind(dps, c(NA,NA))
               dps <- rbind(dps, c(NA,NA))
             }
@@ -151,7 +151,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
             # Explort the datapoints dataframe so that the index into the array can be looked up on all the worker nodes
             clusterExport(cl, "dps")
 
-            print(paste("Number of data points:",nrow(dps)))
+            print(paste("Number of datapoints:",nrow(dps)))
 
             results <- clusterApplyLB(cl, seq(nrow(dps)), f)
             # For verbose logging you can print the results using `print(results)`
@@ -177,9 +177,9 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
       end
     end
 
-    # Do one last check if there are any data points that were not downloaded
+    # Do one last check if there are any datapoints that were not downloaded
     begin
-      # go through and mark any data points that are still queued as NA, this will reset the data points if the
+      # go through and mark any datapoints that are still queued as NA, this will reset the datapoints if the
       # analysis bombs out
       dps = DataPoint.where(:id.in => dp_map[:data_point_id]).and(status: 'queued')
       dps.each do |dp|

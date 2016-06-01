@@ -125,7 +125,7 @@ class AnalysisLibrary::RepeatRun < AnalysisLibrary::Base
       dp.set_variable_values = samples
       dp.save!
 
-      logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+      logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
     end
 
     # Only set this data if the analysis was NOT called from another analysis

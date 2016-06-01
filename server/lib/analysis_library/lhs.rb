@@ -98,12 +98,12 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
           @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
         samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
         if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
-          # Do the work to mash up the samples and pivot variables before creating the data points
+          # Do the work to mash up the samples and pivot variables before creating the datapoints
           logger.info "Samples are #{samples}"
           samples = hash_of_array_to_array_of_hash(samples)
           logger.info "Flipping samples around yields #{samples}"
         elsif @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
-          # Do the work to mash up the samples and pivot variables before creating the data points
+          # Do the work to mash up the samples and pivot variables before creating the datapoints
           logger.info "Samples are #{samples}"
           samples = hash_of_array_to_array_of_hash_non_combined(samples, selected_variables)
           logger.info "Non-combined samples yields #{samples}"
@@ -116,7 +116,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       samples = add_pivots(samples, pivot_array)
       logger.info "Finished adding the pivots resulting in #{samples}"
 
-      # Add the data points to the database
+      # Add the datapoints to the database
       isample = 0
       samples.uniq.each do |sample| # do this in parallel
         isample += 1
@@ -125,7 +125,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
         dp.set_variable_values = sample
         dp.save!
 
-        logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+        logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"

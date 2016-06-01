@@ -86,7 +86,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
       run_list.each do |ps_id|
         variables = variables.merge(parameter_space[ps_id][:variables])
       end
-      name_moniker = 'Data Point' if name_moniker == ''
+      name_moniker = 'Datapoint' if name_moniker == ''
       name = "#{name_moniker} [iteration #{iteration} sample #{i_sample}]"
       result << { variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample }
     end

@@ -88,7 +88,7 @@ class DataPoint
     [:na, :queued, :started, :completed]
   end
 
-  # Perform the final actions on the Data Point.
+  # Perform the final actions on the datapoint.
   def finalize_data_point
     logger.info 'Post-processing the JSON data that was pushed into the database by the worker'
     save_results_from_openstudio_json

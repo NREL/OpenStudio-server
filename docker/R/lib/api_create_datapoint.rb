@@ -39,7 +39,7 @@ begin
   }
 
   a = RestClient.post "#{options[:host]}/analyses/#{options[:analysis_id]}/data_points.json", data_point_data
-  fail 'Could not create data point' unless a.code == 201
+  fail 'Could not create datapoint' unless a.code == 201
 
   a = JSON.parse(a, symbolize_names: true)
   datapoint_id = a[:_id]

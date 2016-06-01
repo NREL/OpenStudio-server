@@ -232,7 +232,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
             clusterExport(cl,"f")
 
             #g(x) such that x is vector of variable values,
-            #           create a data_point from the vector of variable values x and return the new data point UUID
+            #           create a datapoint from the vector of variable values x and return the new datapoint UUID
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
@@ -248,7 +248,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
               j <- length(z)
               z
 
-              # Call the simulate data point method
+              # Call the simulate datapoint method
             if (as.character(z[j]) == "NA") {
               cat("UUID is NA \n");
               NAvalue <- 1.0e19

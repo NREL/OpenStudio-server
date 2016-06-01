@@ -98,7 +98,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
       if @analysis.problem['algorithm']['experiment_type'] == 'diagonal'
         samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-        # Do the work to mash up the samples and pivot variables before creating the data points
+        # Do the work to mash up the samples and pivot variables before creating the datapoints
         logger.info "Samples are #{samples}"
         samples = hash_of_array_to_array_of_hash(samples)
         logger.info "Flipping samples around yields #{samples}"
@@ -111,7 +111,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
       samples = add_pivots(samples, pivot_array)
       logger.info "Finished adding the pivots resulting in #{samples}"
 
-      # Add the data points to the database
+      # Add the datapoints to the database
       isample = 0
       samples.uniq.each do |sample| # do this in parallel
         isample += 1
@@ -120,7 +120,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
         dp.set_variable_values = sample
         dp.save!
 
-        logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+        logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
         logger.info("UUID #{dp.uuid}")
         logger.info("variable values: #{dp.set_variable_values}")
       end

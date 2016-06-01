@@ -10,7 +10,6 @@ require 'colored'
 # To release new version, increment the value in the ./server/lib/openstudio_server/version.rb file
 require_relative 'server/lib/openstudio_server/version'
 
-# TODO: enable a second part of this that waits for testing of the amis before this is formally released
 # VERSION_APPEND = Openstudioserver::VERSION_EXT
 OPENSTUDIO_SERVER_VERSION = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
 AMI_BUILD_BRANCH = 'ami-build'

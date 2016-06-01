@@ -79,7 +79,7 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     expect(selected_variables.size).to eq 5
     data_point_data = {
         data_point: {
-            name: "API Test Data Point",
+            name: "API Test Datapoint",
             ordered_variable_values: [1, 1, 5, 20, "*Entire Building*"]
         }
     }
@@ -139,8 +139,6 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     j = api.get_analysis_results(analysis_id)
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
-
-    # sleep 1000
 
     # TODO: Check results -- may need different analysis type with annual data
   end

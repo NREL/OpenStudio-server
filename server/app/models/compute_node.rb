@@ -218,11 +218,11 @@ class ComputeNode
             remote_file_downloaded = true
           else
             remote_file_downloaded = false
-            logger.info 'ERROR trying to download data point from remote worker'
+            logger.info 'ERROR trying to download datapoint from remote worker'
           end
 
           if remote_file_downloaded
-            logger.info 'Deleting data point from remote worker'
+            logger.info 'Deleting datapoint from remote worker'
             session.exec!("cd #{remote_file_path} && rm -f #{remote_file}") do |_channel, _stream, _data|
             end
             session.loop
@@ -230,10 +230,10 @@ class ComputeNode
         end
       end
     rescue Timeout::Error
-      logger.error 'TimeoutError trying to download data point from remote server'
+      logger.error 'TimeoutError trying to download datapoint from remote server'
       retry if (retries += 1) <= 3
     rescue => e
-      logger.error "Exception while trying to download data point from remote server #{e.message}"
+      logger.error "Exception while trying to download datapoint from remote server #{e.message}"
       retry if (retries += 1) <= 3
     end
 

@@ -141,7 +141,7 @@ server.projectUUIDs.each do |projectUUID|
 end
 
 
-# run the project. sets the run type of each data point to CloudDetailed if true
+# run the project. sets the run type of each datapoint to CloudDetailed if true
 if getDetailedResults
   project.analysis.dataPointsToQueue.each { |data_point|
     data_point.setRunType("CloudDetailed".to_DataPointRunType)

@@ -233,7 +233,7 @@ class AnalysisLibrary::RgenoudLexical < AnalysisLibrary::Base
             clusterExport(cl,"f")
 
             #g(x) such that x is vector of variable values,
-            #           create a data_point from the vector of variable values x and return the new data point UUID
+            #           create a datapoint from the vector of variable values x and return the new datapoint UUID
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
@@ -246,7 +246,7 @@ class AnalysisLibrary::RgenoudLexical < AnalysisLibrary::Base
               j <- length(z)
               z
 
-              # Call the simulate data point method
+              # Call the simulate datapoint method
               f(z[j])
 
               data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")

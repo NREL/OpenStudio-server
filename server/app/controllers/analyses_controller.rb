@@ -283,7 +283,7 @@ class AnalysesController < ApplicationController
 
   # version this in order to allow for analyses/status.json to return all the analyses with the status
   # @param :id [String] The ID of the specific analysis to get the status
-  # @param :jobs [String] Constraint on the data point completion (e.g. started, queued, completed)
+  # @param :jobs [String] Constraint on the datapoint completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
     analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline14]
@@ -812,7 +812,7 @@ class AnalysesController < ApplicationController
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].tr('.', '|')] }]
     # logger.info "Variable name map is #{variable_name_map}"
 
-    # logger.info 'looking for data points'
+    # logger.info 'looking for datapoints'
 
     # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
     # below is to map the inputs/outputs to a flat hash.
@@ -961,7 +961,7 @@ class AnalysesController < ApplicationController
     end
     logger.info "finished conversion: #{Time.now - start_time}"
 
-    # If the data are guaranteed to exist in the same column structure for each data point AND the
+    # If the data are guaranteed to exist in the same column structure for each datapoint AND the
     # length of each column is the same (especially no nils), then you can use the method below
     # out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
     # ex_hash.each { |k, v| h[k] = h[k] + [v] }

@@ -163,7 +163,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
       else
         raise "Algorithm variable 'in_measure_combinations' was not set to valid values 'true' or 'false', instead '#{@analysis.problem['algorithm']['in_measure_combinations'].downcase}'"
       end
-      # Add the data points to the database
+      # Add the datapoints to the database
       isample = 0
       samples.uniq.each do |sample| # do this in parallel
         isample += 1
@@ -172,7 +172,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
         dp.set_variable_values = sample
         dp.save!
 
-        logger.info("Generated data point #{dp.name} for analysis #{@analysis.name}")
+        logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
 
     rescue => e
