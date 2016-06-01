@@ -148,7 +148,7 @@ class ComputeNode
     # delete the master and workers and reload them every
     # single time an analysis is initialized
     # Todo: do not delete all the compute nodes
-    ComputeNode.delete_all
+    ComputeNode.destroy_all
 
     logger.info 'initializing workers'
 

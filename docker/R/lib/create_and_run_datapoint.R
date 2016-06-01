@@ -10,6 +10,12 @@
 # x: array of variables
 create_and_run_datapoint = function(x){
     # TODO: Replace this with an API call to the server
+    y = paste('ruby ',r_scripts_path,'/api_get_status.rb -h ',rails_host,' -a ',rails_analysis_id,sep='')
+    print(paste('run command', y))
+    z = system(y,intern=TRUE)
+    json = try(fromJSON(z), silent=TRUE)
+
+    print(json)
     #    mongo = mongoDbConnect(rails_mongodb, host=rails_mongodb_ip, port=27017)
     #    mongo_query_id = paste('{_id:"',rails_analysis_id,'"}',sep='')
     #    flag = dbGetQueryForKeys(mongo, "analyses", mongo_query_id, '{run_flag:1}')
@@ -112,6 +118,8 @@ create_and_run_datapoint = function(x){
             }
 
             print(paste("Objective function Norm:",obj))
+
+
 
 #            mongo = mongoDbConnect(rails_mongodb, host=rails_mongodb_ip, port=27017)
 #            mongo_query_id = paste('{_id:"',rails_analysis_id,'"}',sep='')

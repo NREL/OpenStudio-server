@@ -35,7 +35,7 @@
 
 # TODO: Fix this for new queue
 
-class AnalysisLibrary::RepeatRun
+class AnalysisLibrary::RepeatRun < AnalysisLibrary::Base
   include AnalysisLibrary::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})

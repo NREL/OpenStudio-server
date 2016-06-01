@@ -69,8 +69,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
         logger.info "Adding #{dp.uuid} to simulations queue"
 
         # TODO: move this method to the datapoint model
-        a = RunSimulateDataPoint.new(dp.id)
-        ids << a.delay(queue: 'simulations').perform.id
+        ids << dp.submit_simulation
         logger.info ids
       end
     end

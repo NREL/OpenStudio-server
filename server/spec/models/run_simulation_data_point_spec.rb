@@ -36,15 +36,11 @@
 require 'rails_helper'
 
 RSpec.describe RunSimulateDataPoint, :type => :feature do
-  before :all do
+  before :each do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    Project.delete_all
-    Analysis.delete_all
-    DataPoint.delete_all
-    Measure.delete_all
-    Variable.delete_all
-    Delayed::Job.delete_all
-
+    Project.destroy_all
+    Delayed::Job.destroy_all
+    
     # I am no longer using this factory for this purpose. It doesn't
     # link up everything, so just post the test using the Analysis Gem.
     #  FactoryGirl.create(:project_with_analyses).analyses
@@ -65,10 +61,11 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     }
     analysis_id = api.new_analysis(project_id, analysis_options)
 
+    puts analysis_id
     expect(analysis_id).not_to be nil
 
-    a = RestClient.get "http://#{host}/analyses/#{analysis_id}"
-
+    a = RestClient.get "http://#{host}/analyses/#{analysis_id}.json"
+    
     # expect(...something...)
 
     # Go set the r_index of the variables because the algorithm normally
@@ -87,10 +84,8 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
         }
     }
 
-    require 'pp'
     a = RestClient.post "http://#{host}/analyses/#{analysis_id}/data_points.json", data_point_data
     a = JSON.parse(a, symbolize_names: true)
-    pp a
     expect(a[:set_variable_values].size).to eq 5
     expect(a[:set_variable_values].values[0]).to eq 1.0
     expect(a[:set_variable_values].values[1]).to eq 1.0
@@ -110,10 +105,10 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     puts script
   end
 
-
-  it 'should run the data point', js: true do
+  it 'should run a datapoint', js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-    puts "App host is: #{host}"
+    # Set the os server url for use by the run simulation
+    APP_CONFIG['os_server_host_url'] = "http://#{host}"
 
     # TODO: Make this a helper of some sort
     options = {hostname: "http://#{host}"}
@@ -126,18 +121,14 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     }
     analysis_id = api.new_analysis(project_id, analysis_options)
     dp_file = 'spec/files/batch_datapoints/example_data_point_1.json'
-    api.upload_datapoint(analysis_id, {datapoint_file: dp_file})
-
+    dp_json = api.upload_datapoint(analysis_id, {datapoint_file: dp_file})
     expect(Delayed::Job.count).to eq(0)
 
-    dp = DataPoint.first
-
-    # Set the os server url for use by the run simulation
-    APP_CONFIG['os_server_host_url'] = "http://#{host}"
-
-    # Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analysis'
-    a = RunSimulateDataPoint.new(dp.id)
-    a.delay(queue: 'simulations').perform
+    dp = DataPoint.find(dp_json[:_id])
+    job_id = dp.submit_simulation
+    expect(job_id).to match /.{24}/
+    expect(dp.id).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
+    expect(dp.analysis.id).to eq analysis_id
     expect(Delayed::Job.count).to eq(1)
 
     # Start the work
@@ -149,7 +140,6 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
 
-    puts "App host is: #{host}"
     # sleep 1000
 
     # TODO: Check results -- may need different analysis type with annual data
@@ -209,8 +199,8 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     expect(a[3]).to eq '11_Job11'
   end
 
-  after :all do
-    Delayed::Job.delete_all
+  after :each do
+    Delayed::Job.destroy_all
   end
 
 end

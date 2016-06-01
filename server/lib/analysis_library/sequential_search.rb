@@ -35,9 +35,7 @@
 
 # TODO: Fix this for new queue
 
-class AnalysisLibrary::SequentialSearch
-  include AnalysisLibrary::Core
-
+class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
       skip_init: false,
@@ -106,16 +104,16 @@ class AnalysisLibrary::SequentialSearch
       else
         selected.each do |sel_id, sel_sample|
           if sel_sample[:measure_id] == ps_sample[:measure_id]
-            logger.info "replacing in #{ps_id}"
+            # logger.info "replacing in #{ps_id}"
             group_list << ps_id
           else
-            logger.info "adding in #{ps_id} including #{sel_id}"
+            # logger.info "adding in #{ps_id} including #{sel_id}"
             group_list << ps_id << sel_id
           end
-          logger.info group_list.inspect
+          # logger.info group_list.inspect
         end
         new_run = group_list.sort.uniq
-        logger.info "Determined a new ran combination of #{new_run}"
+        # logger.info "Determined a new ran combination of #{new_run}"
         result_ids << new_run
 
         # go back a step on the assigned variable?
@@ -129,8 +127,8 @@ class AnalysisLibrary::SequentialSearch
   def perform
     def determine_curve
       new_point_to_evaluate = false
-      logger.info "Determine the Pareto Front for iteration #{@iteration}"
-      logger.info "Current pareto front is: #{@pareto.map(&:name)}"
+      # logger.info "Determine the Pareto Front for iteration #{@iteration}"
+      # logger.info "Current pareto front is: #{@pareto.map(&:name)}"
       if @iteration == 0
         # just add the point to the pareto curve
         min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)

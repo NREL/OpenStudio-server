@@ -133,10 +133,9 @@ class DataPointsController < ApplicationController
   # POST /data_points.json
   def create
     error_message = nil
-    analysis_id = params[:analysis_id]
-    params[:data_point][:analysis_id] = analysis_id
 
     dp_params = data_point_params
+    dp_params[:analysis_id] = params[:analysis_id]
 
     # If the create method receives a list of ordered variable values, then
     # look up the variables by the r_index, and assign the set_variable_values
@@ -144,7 +143,7 @@ class DataPointsController < ApplicationController
       logger.info "Mapping ordered variables to actual variables"
 
       # grab the selected variables
-      selected_variables = Variable.variables(analysis_id)
+      selected_variables = Variable.variables(dp_params[:analysis_id])
 
       selected_variables.each do |v|
         logger.info v.inspect
@@ -190,7 +189,7 @@ class DataPointsController < ApplicationController
 
     if error_message.nil?
       logger.info "Creating datapoint with params: #{dp_params}"
-      @data_point = DataPoint.new(data_point_params)
+      @data_point = DataPoint.new(dp_params)
     end
 
     respond_to do |format|
@@ -253,8 +252,7 @@ class DataPointsController < ApplicationController
 
     # only run simulations that are in the na state
     if @data_point.status = 'na'
-      a = RunSimulateDataPoint.new(@data_point.id)
-      @data_point.job_id = a.delay(queue: 'simulations').perform.id
+      @data_point.job_id = @data_point.submit_simulation
       @data_point.save!
     end
 

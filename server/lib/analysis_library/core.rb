@@ -178,7 +178,8 @@ module AnalysisLibrary
           hostname: hostname,
           port_number: port
       }
-      Rserve::Simpler.new(rserve_options)
+      require 'rserve/simpler'
+      ::Rserve::Simpler.new(rserve_options)
     end
     module_function :initialize_rserve
 

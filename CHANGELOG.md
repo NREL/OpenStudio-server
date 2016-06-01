@@ -67,7 +67,7 @@ Version 1.12.9
 
 Version 1.12.7
 --------------
-* Render JSON and HTML reports from data points.
+* Render JSON and HTML reports from datapoints.
 * Add new R libraries for worker nodes. Allow measures to run R scripts.
 * OpenStudio 1.8.5
 

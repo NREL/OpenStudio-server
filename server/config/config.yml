@@ -6,7 +6,7 @@ defaults: &defaults
   rails_log_path: ':rails_root/log'
   rserve_hostname: 'localhost'
   rserve_port: 6311
-  r_scripts_path: ':rails_root/../docker/R'
+  r_scripts_path: ':rails_root/../docker/R/lib'
 
 development:
   <<: *defaults

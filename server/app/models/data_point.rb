@@ -91,6 +91,15 @@ class DataPoint
     save_results_from_openstudio_json
   end
 
+  # Submit the simulation to run in the background task queue
+  def submit_simulation
+    puts self.id
+    job = RunSimulateDataPoint.new(self.id)
+    id = job.delay(queue: 'simulations').perform.id
+
+    id
+  end
+
   protected
 
   def verify_uuid

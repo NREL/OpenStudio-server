@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-analysis-gem.git
-  revision: 039876a150444179ec8ae59e6696b3cef824a479
+  revision: 45f15dd87f3b12c807ec9f8dff828898c98c9267
   branch: develop
   specs:
     openstudio-analysis (0.5.0)
@@ -72,7 +72,7 @@ GEM
     addressable (2.4.0)
     archive-tar-minitar (0.5.2)
     arel (6.0.3)
-    autoprefixer-rails (6.3.6.1)
+    autoprefixer-rails (6.3.6.2)
       execjs
     aws-sdk-core (2.2.26)
       jmespath (~> 1.0)
@@ -160,7 +160,7 @@ GEM
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     i18n (0.7.0)
-    jbuilder (2.4.1)
+    jbuilder (2.5.0)
       activesupport (>= 3.0.0, < 5.1)
       multi_json (~> 1.2)
     jmespath (1.2.4)
@@ -171,7 +171,7 @@ GEM
       thor (>= 0.14, < 2.0)
     json (1.8.3)
     json_pure (1.8.3)
-    kaminari (0.16.3)
+    kaminari (0.17.0)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     libv8 (3.16.14.15)
@@ -218,7 +218,7 @@ GEM
     netrc (0.11.0)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
-    oj (2.15.0)
+    oj (2.15.1)
     openstudio-aws (0.4.2)
       aws-sdk-core (= 2.2.26)
       net-scp (~> 1.1)

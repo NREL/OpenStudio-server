@@ -38,9 +38,7 @@ require 'rails_helper'
 RSpec.describe Analysis, type: :model do
   before :all do
     # delete all the analyses
-    Project.delete_all
-    Analysis.delete_all
-    DataPoint.delete_all
+    Project.destroy_all
     FactoryGirl.create(:project_with_analyses).analyses
 
     @project = Project.first

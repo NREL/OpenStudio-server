@@ -47,41 +47,34 @@ module AnalysisLibrary::R
       @r.converse 'library(parallel)'
       @r.converse 'library(RMongo)'
       @r.converse 'library(R.utils)'
+      @r.converse 'library(rjson)'
 
       # set the name of the current database
-      @db_name = AnalysisLibrary::Core.database_name
-      @db_ip = Mongoid.default_client.cluster.servers.first.address.host
-      @db_port = Mongoid.default_client.cluster.servers.first.address.port
+      # @db_name = AnalysisLibrary::Core.database_name
+
+      # @db_ip = Mongoid.default_client.cluster.servers.first.address.host
+      # @db_port = Mongoid.default_client.cluster.servers.first.address.port
     end
 
     # configure the r session, returns true if the flag variable was readable (and true)
     def configure
       @r.command do
         %{
-            ip <- "#{@db_ip}"
-            results <- NULL
-            print(paste("Master ip address is",ip))
             print(paste("Current working directory is",getwd()))
             if (file.exists('#{APP_CONFIG['sim_root_path']}/rtimeout')) {
               file.remove('#{APP_CONFIG['sim_root_path']}/rtimeout')
             }
-            #test the query of getting the run_flag
-            print(paste("Connecting to MongoDB: #{@db_name}"))
-            mongo <- mongoDbConnect("#{@db_name}", host=ip, port=27017)
-            flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis_id}"}', '{run_flag:1}')
 
-            print(paste("Run flag:",flag['run_flag']))
-            dbDisconnect(mongo)
+            source(paste('#{APP_CONFIG['r_scripts_path']}','/functions.R',sep=''))
+
+            flag = FALSE
+            flag = check_run_flag('#{APP_CONFIG['r_scripts_path']}', '#{APP_CONFIG['os_server_host_url']}', '#{@analysis_id}')
           }
       end
 
-      out = @r.converse "flag['run_flag'][,1]"
-      result = out == 'true' ? true : false
-
       # note that if result is false it may be because the Rserve session wasn't running right, or the analysis
       # database record was not found
-
-      result
+      @r.converse "flag"
     end
 
     # start the cluster.  Returns true if the cluster was started, false

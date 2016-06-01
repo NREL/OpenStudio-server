@@ -35,9 +35,9 @@
 
 require 'rails_helper'
 
-RSpec.describe AnalysisLibrary::R::Cluster, type: :model do
+RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
   before :all do
-    ComputeNode.delete_all
+    ComputeNode.destroy_all
     FactoryGirl.create(:compute_node)
 
     # get an analysis (which should be loaded from factory girl)
@@ -55,7 +55,7 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :model do
       @r.should_not be_nil
     end
 
-    it 'should configure the cluster with an analysis run_flag' do
+    it 'should configure the cluster with an analysis run_flag', js: true do
       @analysis.id.should_not be_nil
 
       cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
@@ -65,7 +65,9 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :model do
       master_ip = ComputeNode.where(node_type: 'server').first.ip_address
       master_ip.should eq('localhost')
 
-      cf = cluster_class.configure(master_ip)
+      APP_CONFIG['os_server_host_url'] = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+
+      cf = cluster_class.configure
       cf.should eq(true)
     end
 

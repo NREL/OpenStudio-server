@@ -35,9 +35,7 @@
 
 # TODO: Fix this for new queue
 
-class AnalysisLibrary::SingleRun
-  include AnalysisLibrary::Core
-
+class AnalysisLibrary::SingleRun < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.

@@ -77,6 +77,8 @@ class Analysis
   has_many :paretos, dependent: :destroy
   has_many :jobs, dependent: :destroy
 
+  embeds_many :result_files
+
   # Indexes
   index({uuid: 1}, unique: true)
   index({id: 1}, unique: true)
@@ -102,16 +104,11 @@ class Analysis
     defaults = {skip_init: false}
     options = defaults.merge(options)
 
-    logger.info "calling start on #{analysis_type} with options #{options}"
+    logger.info "Calling start on #{analysis_type} with options #{options}"
 
-    # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
       logger.info("Queuing up analysis #{uuid}")
       save!
-
-      # TODO: Remove the idea of initialing workers here. The cluster needs to be defined before running this method
-      logger.info('Initializing workers in database')
-      # initialize_workers(options)
     end
 
     logger.info("Starting #{analysis_type}")
@@ -155,6 +152,7 @@ class Analysis
     self.run_flag = false
     # The ensure block will clean up the jobs and save the statuses
 
+    # TODO: how to set the status message correctly
     # jobs.each do |j|
     #   unless j.status == 'completed'
     #     j.status = 'completed'
@@ -330,7 +328,7 @@ class Analysis
 
   protected
 
-  # Queue up the task to delete all the files
+  # Queue up the task to delete all the files in the background
   def queue_delete_files
     analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{self.id}"
 

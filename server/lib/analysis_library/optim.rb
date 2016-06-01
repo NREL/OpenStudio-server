@@ -35,9 +35,8 @@
 
 # TODO: Fix this for new queue
 
-class AnalysisLibrary::Optim
-  include AnalysisLibrary::Core
-  include AnalysisLibrary::R
+class AnalysisLibrary::Optim < AnalysisLibrary::Base
+  include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
