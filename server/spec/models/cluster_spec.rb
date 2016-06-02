@@ -38,6 +38,8 @@ require 'rails_helper'
 RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
   before :all do
     ComputeNode.destroy_all
+    Project.destroy_all
+    FactoryGirl.create(:project_with_analyses).analyses
     FactoryGirl.create(:compute_node)
 
     # get an analysis (which should be loaded from factory girl)
