@@ -35,31 +35,52 @@
 
 require 'rails_helper'
 
-describe "Pages Exist", :type => :feature do
-  it "HomePage" do
-    visit '/'
-
-    expect(page).to have_content 'OpenStudio Cloud Management Console'
+describe "RunSingle" do
+  before :all do
+    Delayed::Job.destroy_all
   end
 
-  it "Home and Status Page" do
-    get '/'
-    expect(response).to be_success
-    expect(response.body).to have_content 'OpenStudio Cloud Management Console'
-
-    get '/status.json'
-    expect(response).to be_success
-    expect(json['status']['awake']).not_to be_nil
-  end
-
-  it "Accesses the API over host using selenium", js: true do
-
-    visit '/'
+  it "Runs the analysis", js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-
+    puts "http://#{host}"
+    APP_CONFIG['os_server_host_url'] = "http://#{host}"
     expect(host).to match /\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:\d{2,5}/
-    a = RestClient.get "http://#{host}"
 
-    expect(a.body).to have_content 'OpenStudio Cloud Management Console'
+    h = JSON.parse(File.read('spec/files/test_model/test_model.json'), symbolize_names: true)
+
+    workdir = 'spec/files/test_model/tmp_run_single'
+    FileUtils.mkdir_p workdir unless Dir.exist? workdir
+
+    formulation = OpenStudio::Analysis.load(h)
+    formulation.analysis_type = 'single_run'
+    formulation.save "#{workdir}/test_model.json"
+
+    expect(Delayed::Job.count).to eq(0)
+    options = {hostname: "http://#{host}"}
+    api = OpenStudio::Analysis::ServerApi.new(options)
+    analysis_id = api.run("#{workdir}/test_model.json",
+                          'spec/files/test_model/test_model.zip',
+                          formulation.analysis_type)
+
+    expect(Delayed::Job.count).to eq(2)
+    # Run the first job then use threads to emulate the multiple queues
+    threads = []
+    expect(Delayed::Worker.new.run(Delayed::Job.first)).to eq true
+    threads << Thread.new(1) { # analysis queue
+      expect(Delayed::Worker.new.run(Delayed::Job.first)).to eq true
+    }
+    threads << Thread.new(2) { # worker/simulations queue
+      loop do
+        j = Delayed::Job.where(queue: 'simulations').first
+        if j
+          expect(Delayed::Worker.new.run(j)).to eq true
+          break
+        end
+        sleep 1
+      end
+    }
+    threads.each {|t| t.join}
+
+    expect(Delayed::Job.count).to eq(0)
   end
 end

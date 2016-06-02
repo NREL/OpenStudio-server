@@ -35,31 +35,58 @@
 
 require 'rails_helper'
 
-describe "Pages Exist", :type => :feature do
-  it "HomePage" do
-    visit '/'
-
-    expect(page).to have_content 'OpenStudio Cloud Management Console'
+describe "RunNSGA" do
+  before :all do
+    Delayed::Job.destroy_all
   end
 
-  it "Home and Status Page" do
-    get '/'
-    expect(response).to be_success
-    expect(response.body).to have_content 'OpenStudio Cloud Management Console'
-
-    get '/status.json'
-    expect(response).to be_success
-    expect(json['status']['awake']).not_to be_nil
-  end
-
-  it "Accesses the API over host using selenium", js: true do
-
-    visit '/'
+  it "Runs the analysis", js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-
+    puts "http://#{host}"
+    APP_CONFIG['os_server_host_url'] = "http://#{host}"
     expect(host).to match /\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:\d{2,5}/
-    a = RestClient.get "http://#{host}"
 
-    expect(a.body).to have_content 'OpenStudio Cloud Management Console'
+    h = JSON.parse(File.read('spec/files/test_model/test_model.json'), symbolize_names: true)
+
+    workdir = 'spec/files/test_model/tmp_nsga'
+    FileUtils.mkdir_p workdir unless Dir.exist? workdir
+
+    formulation = OpenStudio::Analysis.load(h)
+    formulation.analysis_type = 'nsga_nrel'
+    formulation.algorithm.set_attribute('generations', 1)
+    formulation.algorithm.set_attribute('exit_on_guideline14', 1)
+
+    formulation.save "#{workdir}/test_model.json"
+
+    expect(Delayed::Job.count).to eq(0)
+    options = {hostname: "http://#{host}"}
+    api = OpenStudio::Analysis::ServerApi.new(options)
+    analysis_id = api.run("#{workdir}/test_model.json",
+                          'spec/files/test_model/test_model.zip',
+                          formulation.analysis_type)
+
+    expect(Delayed::Job.count).to eq(1)
+    # Use threads to emulate the multiple queues
+    threads = []
+    threads << Thread.new(1) { # analysis queue
+      expect(Delayed::Worker.new.run(Delayed::Job.first)).to eq true
+    }
+    threads << Thread.new(2) { # worker/simulations queue
+      loop do
+        j = Delayed::Job.where(queue: 'simulations').first
+        if j
+          expect(Delayed::Worker.new.run(j)).to eq true
+          # tell the analysis to stop after one simulation. This does
+          # not do an extensive test of the algorithm, just ensures that
+          # a single simulation is able to be created and run.
+          api.kill_analysis(analysis_id)
+          break
+        end
+        sleep 1
+      end
+    }
+    threads.each {|t| t.join}
+
+    expect(Delayed::Job.count).to eq(0)
   end
 end

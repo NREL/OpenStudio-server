@@ -29,4 +29,5 @@
 vendor/cache
 .sass-cache
 spec/files/tmp/*
+spec/files/test_model/tmp*
 faraday.log
