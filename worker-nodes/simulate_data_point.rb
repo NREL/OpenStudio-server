@@ -200,6 +200,8 @@ rescue => e
 ensure
   logger.info "Finished #{__FILE__}" if logger
   logger.close if logger
+  # always clean up the garbage
+  GC.start
   # always print the objective function result or NA
   puts result
 end
