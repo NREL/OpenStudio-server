@@ -137,7 +137,6 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
     # Result of the parameter space will be column vectors of each variable
     logger.info "Samples are #{samples}"
     logger.info "Samples2 are #{samples2}"
-
     logger.info "mins_maxes: #{mins_maxes}"
     logger.info "var_names: #{var_names}"
     logger.info "var_names2: #{var_names2}"

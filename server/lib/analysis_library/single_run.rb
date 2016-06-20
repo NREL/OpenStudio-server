@@ -33,8 +33,6 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-# TODO: Fix this for new queue
-
 class AnalysisLibrary::SingleRun < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of

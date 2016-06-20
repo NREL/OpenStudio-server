@@ -82,8 +82,8 @@ if (nrow(vars) == 0) {
 print(nrow(vars))
 print(ncol(vars))
 if (ncol(vars) == 1) {
-    print("NSGA2 needs more than one variable")
-    stop(options("show.error.messages"=TRUE),"NSGA2 needs more than one variable")
+    print("SPEA2 needs more than one variable")
+    stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")
 }
 
 print(paste("Number of generations set to:",gen))
@@ -98,16 +98,20 @@ print(mudistidx)
 print(mprob)
 
 results = NULL
-try(results = nsga2NREL(cl=cl, fn=create_and_run_datapoint, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob), silent=FALSE)
-# results = nsga2NREL(cl=cl, fn=create_and_run_datapoint, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
+try(results = spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
+# results = spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
 
-
-# TODO: how to get best result back in docker space? API? What is the server?
-#for (i in 1:num_uniq_workers) {
-#    scp = paste('scp ',whoami,'@',ips2[i],':',analysis_dir,'/best_result.json ',analysis_dir,'/',sep="")
+#print(paste("ip workers:", ips))
+#print(paste("ip master:", master_ips))
+#ips2 <- ips[ips!=master_ips]
+#print(paste("non server ips:", ips2))
+#num_uniq_workers <- length(ips2)
+#whoami <- system('whoami', intern = TRUE)
+#for (i in 1:num_uniq_workers){
+#    scp <- paste('scp ',whoami,'@',ips2[i],':#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json #{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/', sep="")
 #print(paste("scp command:",scp))
 #system(scp,intern=TRUE)
-#scp2 <- paste('scp ',whoami,'@',ips2[i],':',analysis_dir,'/convergence_flag.json ',analysis_dir,'/', sep="")
+#scp2 <- paste('scp ',whoami,'@',ips2[i],':#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/convergence_flag.json #{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/', sep="")
 #print(paste("scp2 command:",scp2))
 #system(scp2,intern=TRUE)
 #}

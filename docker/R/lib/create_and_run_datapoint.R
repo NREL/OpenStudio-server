@@ -1,15 +1,14 @@
-#g(x) such that x is vector of variable values,
-#           create a data_point from the vector of variable values x and return the new datapoint UUID
-#           create a UUID for that data_point and put in database
-#           call f(u) where u is UUID of data_point
+# create_and_run_datapoint(x) such that x is vector of variable values,
+#           create a datapoint from the vector of variable values x and run
+#           the new datapoint
+# x: vector of variable values
+#
 # Several of the variables are in the sessions. The list below should abstracted out:
 #   rails_host
 #   rails_analysis_id
 #   ruby_command
 #   r_scripts_path
-# x: array of variables
 create_and_run_datapoint = function(x){
-    # TODO: Replace this with an API call to the server
     if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id)==FALSE){
         stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
     }
@@ -22,8 +21,17 @@ create_and_run_datapoint = function(x){
     # Call the system command to submit the simulation to the API / queue
     print(paste('run command', y))
     z = system(y,intern=TRUE)
-    # z will be a json file
 
+    # The last line of the system command will be a json string
+    # {
+    #   "status": false
+    #   "results": {
+    #     "objective_function_1": 24.125,
+    #     "objective_function_group_1": 1.0,
+    #     "objective_function_2": 266.425,
+    #     "objective_function_group_2": 2.0
+    #   }
+    # }
     z = z[length(z)]
     print(z)
 

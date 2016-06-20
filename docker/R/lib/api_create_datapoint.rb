@@ -69,6 +69,14 @@ begin
               # that were uploaded when the datapoint completed
               a = RestClient.post "#{options[:host]}/data_points/#{datapoint_id}/download_report.json", {data_point: {filename: 'objectives'}}
               a = JSON.parse(a, symbolize_names: true)
+              # JSON will be form of:
+              # {
+              #     "objective_function_1": 24.125,
+              #     "objective_function_group_1": 1.0,
+              #     "objective_function_2": 266.425,
+              #     "objective_function_group_2": 2.0
+              # }
+
               if a[:status] == 'error'
                 fail "No objective functions returned"
               end
@@ -86,6 +94,7 @@ begin
   end
 
 rescue => e
+  result[:status] = false
   puts "#{__FILE__} Error: #{e.message}:#{e.backtrace.join("\n")}"
 ensure
   puts result.to_json

@@ -14,7 +14,6 @@ RUN apt-get update \
         bzip2 \
         ca-certificates \
         curl \
-        default-jdk \
         imagemagick \
         gdebi-core \
         git \

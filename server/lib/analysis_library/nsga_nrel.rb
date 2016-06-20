@@ -45,6 +45,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
         run_data_point_filename: 'run_openstudio_workflow.rb',
         create_data_point_filename: 'create_data_point.rb',
         output_variables: [],
+        max_queued_jobs: 32,
         problem: {
             random_seed: 1979,
             algorithm: {
@@ -157,11 +158,9 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
 
       # Result of the parameter space will be column vectors of each variable
       logger.info "Samples are #{samples}"
-
       logger.info "mins_maxes: #{mins_maxes}"
       logger.info "var_names: #{var_names}"
       logger.info("variable types are #{var_types}")
-
 
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
@@ -170,10 +169,9 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       end
 
       worker_ips = {}
-      # TODO: Remove this hard coded value
-      worker_ips[:worker_ips] = ['localhost'] * 32
+      worker_ips[:worker_ips] = ['localhost'] * @options[:max_queued_jobs]
 
-      logger.info "Found the following good ips #{worker_ips}"
+      logger.info "Starting R queue to hold #{@options[:max_queued_jobs]} jobs"
 
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"

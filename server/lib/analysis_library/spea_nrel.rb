@@ -33,34 +33,33 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-# TODO: Fix this for new queue
-
 class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [],
-      problem: {
-        random_seed: 1979,
-        algorithm: {
-          number_of_samples: 30,
-          sample_method: 'individual_variables',
-          generations: 1,
-          toursize: 2,
-          cprob: 0.7,
-          cidx: 5,
-          midx: 10,
-          mprob: 0.5,
-          normtype: 'minkowski',
-          ppower: 2,
-          exit_on_guideline14: 0,
-          objective_functions: []
+        skip_init: false,
+        run_data_point_filename: 'run_openstudio_workflow.rb',
+        create_data_point_filename: 'create_data_point.rb',
+        output_variables: [],
+        max_queued_jobs: 32,
+        problem: {
+            random_seed: 1979,
+            algorithm: {
+                number_of_samples: 30,
+                sample_method: 'individual_variables',
+                generations: 1,
+                toursize: 2,
+                cprob: 0.7,
+                cidx: 5,
+                midx: 10,
+                mprob: 0.5,
+                normtype: 'minkowski',
+                ppower: 2,
+                exit_on_guideline14: 0,
+                objective_functions: []
+            }
         }
-      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
 
@@ -169,21 +168,14 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
     begin
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
-      unless cluster.configure(master_ip)
+      unless cluster.configure
         raise 'could not configure R cluster'
       end
 
-      # Initialize each worker node
-      worker_ips = ComputeNode.worker_ips
-      logger.info "Worker node ips #{worker_ips}"
+      worker_ips = {}
+      worker_ips[:worker_ips] = ['localhost'] * @options[:max_queued_jobs]
 
-      logger.info 'Running initialize worker scripts'
-      unless cluster.initialize_workers(worker_ips, @analysis.id)
-        raise 'could not run initialize worker scripts'
-      end
-
-      worker_ips = ComputeNode.worker_ips
-      logger.info "Found the following good ips #{worker_ips}"
+      logger.info "Starting R queue to hold #{@options[:max_queued_jobs]} jobs"
 
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
@@ -198,237 +190,19 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
                    cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'],
                    mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
           %{
-            clusterEvalQ(cl,library(RMongo))
-            clusterEvalQ(cl,library(rjson))
-            clusterEvalQ(cl,library(R.utils))
-
-            print(paste("objfun:",objfun))
-            objDim <- length(objfun)
-            print(paste("objDim:",objDim))
-            print(paste("UniqueGroups:",uniquegroups))
-            print(paste("normtype:",normtype))
-            print(paste("ppower:",ppower))
-
-            print(paste("min:",mins))
-            print(paste("max:",maxes))
-
-            clusterExport(cl,"objDim")
-            clusterExport(cl,"normtype")
-            clusterExport(cl,"ppower")
-            clusterExport(cl,"uniquegroups")
-
-            for (i in 1:ncol(vars)){
-              vars[,i] <- sort(vars[,i])
-            }
-            print(paste("vartypes:",vartypes))
-            print(paste("varnames:",varnames))
-
-            varfile <- function(x){
-              if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json")){
-               write.table(x, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-              }
-            }
-
-            if (uniquegroups == 1) {
-                 print(paste("unique groups error:",uniquegroups))
-                 write.table("unique groups", file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                 stop(options("show.error.messages"=TRUE),"unique groups is 1")
-            }
-
-            clusterExport(cl,"varfile")
-            clusterExport(cl,"varnames")
-            clusterEvalQ(cl,varfile(varnames))
-
-            #f(x) takes a UUID (x) and runs the datapoint
-            f <- function(x){
-              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
-              flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
-              if (flag["run_flag"] == "false" ){
-                stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
-              }
-              dbDisconnect(mongo)
-
-              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
-              #print(paste("R is calling system command as:",y))
-              z <- system(y,intern=TRUE)
-              #print(paste("R returned system call with:",z))
-              return(z)
-            }
-            clusterExport(cl,"f")
-
-            #g(x) such that x is vector of variable values,
-            #           create a datapoint from the vector of variable values x and return the new datapoint UUID
-            #           create a UUID for that data_point and put in database
-            #           call f(u) where u is UUID of data_point
-            g <- function(x){
-              force(x)
-              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              # convert the vector to comma separated values
-              w = paste(x, collapse=",")
-              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
-              z <- system(y,intern=TRUE)
-              j <- length(z)
-              z
-
-              # Call the simulate datapoint method
-            if (as.character(z[j]) == "NA") {
-              cat("UUID is NA \n");
-              NAvalue <- 1.0e19
-              return(NAvalue)
-      } else {
-          try(f(z[j]), silent = TRUE)
-
-              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
-
-              # save off the variables file (can be used later if number of vars gets too long)
-              write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
-
-              # read in the results from the objective function file
-              object_file <- paste(data_point_directory,"/objectives.json",sep="")
-              json <- NULL
-              try(json <- fromJSON(file=object_file), silent=TRUE)
-
-              if (is.null(json)) {
-                obj <- NULL
-                for (i in 1:objDim){
-                  obj[i] <- 1.0e19
-                }
-                print(paste(data_point_directory,"/objectives.json is NULL"))
-              } else {
-                obj <- NULL
-                objvalue <- NULL
-                objtarget <- NULL
-                sclfactor <- NULL
-                objgroup <- NULL
-                group_count <- 1
-                for (i in 1:objDim){
-                  objfuntemp <- paste("objective_function_",i,sep="")
-                  if (json[objfuntemp] != "NULL"){
-                    objvalue[i] <- as.numeric(json[objfuntemp])
-                  } else {
-                    objvalue[i] <- 1.0e19
-                    cat(data_point_directory," Missing ", objfuntemp,"\n");
-                  }
-                  objfuntargtemp <- paste("objective_function_target_",i,sep="")
-                  if (json[objfuntargtemp] != "NULL"){
-                    objtarget[i] <- as.numeric(json[objfuntargtemp])
-                  } else {
-                    objtarget[i] <- 0.0
-                  }
-                  scalingfactor <- paste("scaling_factor_",i,sep="")
-                  sclfactor[i] <- 1.0
-                  if (json[scalingfactor] != "NULL"){
-                    sclfactor[i] <- as.numeric(json[scalingfactor])
-                    if (sclfactor[i] == 0.0) {
-                      print(paste(scalingfactor," is ZERO, overwriting\n"))
-                      sclfactor[i] = 1.0
-                    }
-                  } else {
-                    sclfactor[i] <- 1.0
-                  }
-                  objfungrouptemp <- paste("objective_function_group_",i,sep="")
-                  if (json[objfungrouptemp] != "NULL"){
-                    objgroup[i] <- as.numeric(json[objfungrouptemp])
-                  } else {
-                    objgroup[i] <- group_count
-                    group_count <- group_count + 1
-                  }
-                }
-                print(paste("Objective function results are:",objvalue))
-                print(paste("Objective function targets are:",objtarget))
-                print(paste("Objective function scaling factors are:",sclfactor))
-
-                objvalue <- objvalue / sclfactor
-                objtarget <- objtarget / sclfactor
-
-                ug <- length(unique(objgroup))
-                if (ug != uniquegroups) {
-                   print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-                   write.table("unique groups", file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                   stop(options("show.error.messages"=TRUE),"unique groups is not equal")
-                }
-
-                for (i in 1:ug){
-                  obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
-                }
-
-                print(paste("Objective function Norm:",obj))
-
-                mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
-                flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
-                print(paste("exit_on_guideline14: ",flag))
-                if (flag["exit_on_guideline14"] == "true" ){
-                  # read in the results from the objective function file
-                  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
-                  json <- NULL
-                  try(json <- fromJSON(file=guideline_file), silent=TRUE)
-                  if (is.null(json)) {
-                    print(paste("no guideline file: ",guideline_file))
-                  } else {
-                    guideline <- json[[1]]
-                    for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
-                    print(paste("guideline: ",guideline))
-                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
-                    print(paste("all(guideline): ",all(guideline)))
-                    if (length(which(guideline)) == objDim){
-                      #write final params to json file
-                      varnames <- scan(file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json" , what=character())
-                      answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
-                      write.table(answer, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-                      convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
-                      write(convergenceflag, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/convergence_flag.json")
-                      dbDisconnect(mongo)
-                      stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
-                    }
-                  }
-                }
-                dbDisconnect(mongo)
-              }
-              return(as.numeric(obj))
-            }
-            }
-            clusterExport(cl,"g")
-
-            if (nrow(vars) == 1) {
-              print("not sure what to do with only one datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-            }
-            if (nrow(vars) == 0) {
-              print("not sure what to do with no datapoint so adding an NA")
-              vars <- rbind(vars, c(NA))
-              vars <- rbind(vars, c(NA))
-            }
-
-            print(nrow(vars))
-            print(ncol(vars))
-            if (ncol(vars) == 1) {
-              print("SPEA2 needs more than one variable")
-              stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")
-            }
-
-            print(paste("Number of generations set to:",gen))
-            results <- NULL
-            try(
-            results <- spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
-            , silent = FALSE)
-              print(paste("ip workers:", ips))
-              print(paste("ip master:", master_ips))
-              ips2 <- ips[ips!=master_ips]
-              print(paste("non server ips:", ips2))
-              num_uniq_workers <- length(ips2)
-              whoami <- system('whoami', intern = TRUE)
-              for (i in 1:num_uniq_workers){
-                scp <- paste('scp ',whoami,'@',ips2[i],':#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json #{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/', sep="")
-                print(paste("scp command:",scp))
-                system(scp,intern=TRUE)
-                scp2 <- paste('scp ',whoami,'@',ips2[i],':#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/convergence_flag.json #{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/', sep="")
-                print(paste("scp2 command:",scp2))
-                system(scp2,intern=TRUE)
-              }
-
-            save(results, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/results.R")
-          }
+              rails_analysis_id = "#{@analysis.id}"
+              rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
+              rails_ruby_bin_dir = "#{APP_CONFIG['ruby_bin_dir']}"
+              rails_mongodb_name = "#{AnalysisLibrary::Core.database_name}"
+              rails_mongodb_ip = "#{master_ip}"
+              rails_run_filename = "#{@options[:run_data_point_filename]}"
+              rails_create_dp_filename = "#{@options[:create_data_point_filename]}"
+              rails_root_path = "#{Rails.root}"
+              rails_host = "#{APP_CONFIG['os_server_host_url']}"
+              r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
+              rails_exit_guideline_14 = "#{@analysis.exit_on_guideline14}"
+              source(paste(r_scripts_path,'/spea.R',sep=''))
+           }
         end
       else
         raise 'could not start the cluster (most likely timed out)'
