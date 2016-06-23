@@ -1,0 +1,604 @@
+#!/usr/bin/env ruby
+
+######################################################################
+#  Copyright (c) 2008-2016, Alliance for Sustainable Energy.  
+#  All rights reserved.
+#  
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#  
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#  
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+######################################################################
+
+
+Signal.trap('INT') { abort }
+require 'logger'
+$logger = ::Logger.new(STDOUT)
+$logger.level = ::Logger::WARN
+
+# This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
+#
+# @param [String] message Message to output
+# @param [Hash] opts Options hash
+#
+def safe_puts(message=nil, opts=nil)
+  message ||= ''
+  opts = {
+      io: $stdout,
+      printer: :puts
+  }.merge(opts || {})
+
+  begin
+    opts[:io].send(opts[:printer], message)
+  rescue Errno::EPIPE
+    # This is what makes this a `safe` puts
+    return
+  end
+end
+
+# This is a convenience method that properly handles duping the originally argv array so that it is not destroyed. This
+# method will also automatically detect "-h" and "--help" and print help. And if any invalid options are  detected, the
+# help will be printed, as well
+#
+# @param [Object, nil] opts An instance of OptionParse to parse against, defaults to a new OptionParse instance
+# @param [Array, nil] argv The argv input to be parsed, defaults to $argv
+# @return[Array, nil] If this method returns `nil`, then you should assume that help was printed and parsing failed
+#
+def parse_options(opts=nil, argv=nil)
+  # Creating a shallow copy of the arguments so the OptionParser
+  # doesn't destroy the originals.
+  argv ||= $argv.dup
+
+  # Default opts to a blank optionparser if none is given
+  opts ||= ::OptionParser.new
+
+  # Add the help option, which must be on every command.
+  opts.on_tail('-h', '--help', 'Print this help') do
+    safe_puts(opts.help)
+    return nil
+  end
+
+  opts.parse!(argv)
+  return argv
+rescue ::OptionParser::InvalidOption, ::OptionParser::MissingArgument
+  raise "Error: Invalid CLI option, #{opts.help.chomp}"
+end
+
+# This method will split the argv given into three parts: the flags to this command, the subcommand, and the flags to
+# the subcommand. For example:
+#     -v status -h -v
+# The above would yield 3 parts:
+#     ["-v"]
+#     "status"
+#     ["-h", "-v"]
+# These parts are useful because the first is a list of arguments given to the current command, the second is a
+# subcommand, and the third are the commands given to the subcommand
+#
+# @param [Array] argv The input to be split
+# @return [Array] The split command as [main arguments, sub command, sub command arguments]
+#
+def split_main_and_subcommand(argv)
+  # Initialize return variables
+  main_args   = nil
+  sub_command = nil
+  sub_args    = []
+
+  # We split the arguments into two: One set containing any flags before a word, and then the rest. The rest are what
+  # get actually sent on to the subcommand
+  argv.each_index do |i|
+    unless argv[i].start_with?('-')
+      # We found the beginning of the sub command. Split the
+      # args up.
+      main_args   = argv[0, i]
+      sub_command = argv[i]
+      sub_args    = argv[i + 1, argv.length - i + 1]
+
+      # Break so we don't find the next non flag and shift our main args
+      break
+    end
+  end
+
+  # Handle the case that argv was empty or didn't contain any subcommand
+  main_args = argv.dup if main_args.nil?
+
+  [main_args, sub_command, sub_args]
+end
+
+# This CLI class processes the input args and invokes the proper command class
+class CLI
+
+  # This constant maps subcommands to classes in this CLI and stores meta-data on them
+  COMMAND_LIST = {
+      start_local: [ Proc.new { ::StartLocal }, {primary: true, working: true}],
+      start_remote: [ Proc.new { ::StartRemote }, {primary: true, working: true}],
+      stop_local: [ Proc.new { ::StopLocal }, {primary: true, working: true}],
+      stop_remote: [Proc.new { ::StopRemote }, {primary: true, working: true}],
+      run_analysis: [Proc.new { ::RunAnalysis }, {primary: true, working: true}]
+  }
+
+  # This method instantiates the global variables $main_args, $sub_command, and $sub_args
+  #
+  # @param [Array] argv The arguments passed through the CLI
+  # @return [Object] An instance of the CLI class with initialized globals
+  #
+  def initialize(argv)
+    $main_args, $sub_command, $sub_args = split_main_and_subcommand(argv)
+
+    $logger.info("CLI Parsed Inputs: #{$main_args.inspect} #{$sub_command.inspect} #{$sub_args.inspect}")
+  end
+
+  # Checks to see if it should print the main help, and if not parses the subcommand into a class and executes it
+  def execute
+    $logger.debug "Main arguments are #{$main_args}"
+    $logger.debug "Sub-command is #{$sub_command}"
+    $logger.debug "Sub-arguments are #{$sub_args}"
+    if $main_args.include?('-h') || $main_args.include?('--help')
+      # Help is next in short-circuiting everything. Print
+      # the help and exit.
+      help
+      return 0
+    end
+
+    # If we reached this far then we must have a subcommand. If not,
+    # then we also just print the help and exit.
+    command_plugin = nil
+    if $sub_command
+      command_plugin = COMMAND_LIST[$sub_command.to_sym]
+    end
+
+    if !command_plugin || !$sub_command
+      help
+      return 1
+    end
+
+    command_class = command_plugin[0].call
+    $logger.debug("Invoking command class: #{command_class} #{$sub_args.inspect}")
+
+    # Initialize and execute the command class, returning the exit status.
+    result = 0
+    begin
+      result = command_class.new.execute($sub_args)
+    rescue Interrupt
+      $logger.error '?'
+      result = 1
+    end
+
+    result = 0 unless result.is_a?(Fixnum)
+    result
+  end
+
+  # Prints out the help text for the CLI
+  #
+  # @param [Boolean] list_all If set to true, the help prints all commands, however it otherwise only prints those
+  #   marked as primary in #COMMAND_LIST
+  # @return [void]
+  # @see #COMMAND_LIST #::ListCommands
+  #
+  def help(list_all=false)
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta [options] <command> [<args>]'
+      o.separator ''
+      o.on('-h', '--help', 'Print this help.')
+      o.on('--verbose', 'Print the full log to STDOUT')
+      o.separator ''
+      o.separator 'Common commands:'
+
+      # Add the available subcommands as separators in order to print them
+      # out as well.
+      commands = {}
+      longest = 0
+      COMMAND_LIST.each do |key, data|
+        # Skip non-primary commands. These only show up in extended
+        # help output.
+        next unless data[1][:primary] unless list_all
+
+        key           = key.to_s
+        klass         = data[0].call
+        commands[key] = klass.synopsis
+        longest       = key.length if key.length > longest
+      end
+
+      commands.keys.sort.each do |key|
+        o.separator "     #{key.ljust(longest+2)} #{commands[key]}"
+      end
+
+      o.separator ''
+      o.separator 'For help on any individual command run `openstudio_meta COMMAND -h`'
+    end
+
+    safe_puts opts.help
+  end
+end
+
+# Class to initialize a local server
+class StartLocal
+
+  require_relative 'resources/local.rb'
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Starts local processes for the OS Server'
+  end
+
+  # Executes the command line calls through threads, and sends their pids to file for shutdown
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    options = {debug: false, force_directories: false}
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR MONGO_DIR SERVER_DIR'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('--debug', 'Whatever makes debugging easy') do |f|
+        options[:debug] = f
+      end
+
+      o.on('--force-directories', 'Force creation of directories') do |f|
+        options[:force_directories] = true
+      end
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    project_dir = argv.shift
+    mongo_dir = argv.shift
+    server_dir = argv.shift
+    unless argv == []
+      $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
+      return 1
+    end
+    $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
+
+    # Check the directories exist
+    [project_dir, mongo_dir, server_dir].each do |dir|
+      unless ::File.exist? dir
+        if options[:force_directories] 
+          FileUtils.mkdir_p dir
+        else          
+          $logger.error "Unable to find directory '#{dir}'"
+          return 1
+        end
+      end
+    end
+  
+    # Also force the creation of the log dir in the project_dir
+    if options[:force_directories]       
+      FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
+    end
+
+    # Assemble the commands and spin off the threads
+    start_local_server project_dir, mongo_dir, server_dir, options[:debug]
+
+    0
+  end
+end
+
+# Class to stop the local server
+class StopLocal
+
+  require_relative 'resources/local.rb'
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Stops local processes for the OS Server'
+  end
+
+  # Stops the local server associated with a PAT 2.0 project directory
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    options = {debug: false}
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta stop_local [options] PROJECT_DIR'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('--debug', 'Whatever makes debugging easy') do |f|
+        options[:debug] = f
+      end
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    project_dir = argv.shift
+    unless argv == []
+      $logger.error 'Extra arguments passed to the stop_local command. Please refer to the help documentation.'
+      return 1
+    end
+    $logger.debug("StopLocal command: #{argv.inspect} #{options.inspect}")
+
+    # Retrieve the pids
+    local_state_file = ::File.absolute_path(File.join(project_dir,'local_configuration.json'))
+    unless ::File.exist? local_state_file
+      $logger.error "Unable to find the local configuation json at #{local_state_file}"
+      return 1
+    end
+    local_server_config = ::JSON.parse(File.read(local_state_file), {symbolize_names: true})
+    rails_pid = local_server_config[:rails_pid]
+    dj_pid = local_server_config[:dj_pid]
+    mongod_pid = local_server_config[:mongod_pid]
+
+    # Stop the pids, with lots of error catches
+    stop_local_server rails_pid, dj_pid, mongod_pid
+    
+    0
+  end
+end
+
+# Class to boot an OS Server AMI instance on AWS or return the URL of a known remote server, i.e. nrel24a
+class StartRemote
+
+  require_relative 'resources/remote.rb'
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Starts a remote OS Server'
+  end
+
+  # Boots an OS Server on AWS and returns it's URL, or returns the URL of a known server
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    options = {
+      debug: false,
+      aws_yml: '',
+      server_options_json: '',
+      project_dir: ''
+    }
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta start_remote [options] target'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('--debug', 'Whatever makes debugging easy') do |f|
+        options[:debug] = f
+      end
+      o.on('-a', '--aws_credentials FILE', 'YAML FILE containing AWS credentials') do |a|
+        options[:aws_yml] = a
+      end
+      o.on('-s', '--server_config FILE', 'JSON FILE containing the AWS server instance configuration') do |s|
+        options[:server_options_json] = s
+      end
+      o.on('-p', '--project DIRECTORY', 'DIRECTORY containing the project to save the AWS connection to') do |p|
+        options[:project_dir] = p
+      end
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    return 1 unless argv
+    $logger.debug("StartRemote command: #{argv.inspect} #{options.inspect}")
+    target = argv.shift.to_s.downcase
+    unless argv == []
+      $logger.error 'Extra arguments passed to the start_remote command. Please refer to the help documentation.'
+      return 1
+    end
+
+    # If target is AWS, ensure that needed directories and files exist and set the ENV for AWS
+    if target == 'aws'
+      unless ::File.exist? options[:aws_yml]
+        $logger.error "Unable to find AWS credentials file #{options[:aws_yml]}"
+        fail 1
+      end
+      unless ::File.exists? options[:server_options_json]
+        $logger.error "Unable to find server configuration file #{options[:server_options_json]}"
+        fail 1
+      end
+      unless ::File.exists? options[:project_dir]
+        $logger.error "Unable to find project directory #{options[:project_dir]}"
+        fail 1
+      end
+      parse_aws_yml(options[:aws_yml])
+    end
+
+    # Get OpenStudioServerApi object and ensure the instance is running
+    server_options = target == 'aws' ? ::JSON.parse(File.read(options[:server_options_json]), {symbolize_names: true}) : {}
+    server_dns = find_or_create_target(target, server_options, options[:project_dir])
+    $logger.info "Server DNS: #{server_dns}"
+
+    server_dns
+
+  end
+end
+
+# Class to stop a remote AWS instance
+class StopRemote
+
+  require_relative 'resources/remote.rb'
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Stops a remote OS Server on AWS'
+  end
+
+  # Terminates an AWS instance
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    options = {
+        debug: false,
+    }
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta stop_remote [options] aws_conn_json aws_yml'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('--debug', 'Whatever makes debugging easy') do |f|
+        options[:debug] = f
+      end
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    return 1 unless argv
+    $logger.debug("StopRemote command: #{argv.inspect} #{options.inspect}")
+    aws_conn_json = argv.shift.to_s
+    unless ::File.exist? aws_conn_json
+      $logger.error "Unable to find AWS connection file at #{aws_conn_json}"
+      fail 1
+    end
+    aws_yml = argv.shift.to_s
+    unless ::File.exist? aws_yml
+      $logger.error "Unable to find AWS credentials file at #{aws_yml}"
+      fail 1
+    end
+    unless argv == []
+      $logger.error 'Extra arguments passed to the stop_remote command. Please refer to the help documentation.'
+      return 1
+    end
+
+    # Set the env variables for AWS, load the instance controller, and terminate the instances.
+    parse_aws_yml(aws_yml)
+    aws_init_options = {credentials: {access_key_id: ::ENV['AWS_ACCESS_KEY'], secret_access_key: ::ENV['AWS_SECRET_KEY'],
+                        region: ::ENV['AWS_DEFAULT_REGION']}}
+    aws = OpenStudio::Aws::Aws.new(aws_init_options)
+    aws.load_instance_info_from_file(aws_conn_json)
+    aws.terminate
+
+    0
+
+  end
+end
+
+# Class to submit an analysis to a OS Server instance, defined by URL
+class RunAnalysis
+
+  require_relative 'resources/remote.rb'
+  BATCH_RUN_METHODS = %w(lhs preflight single_run repeat_run doe diag baseline_perturbation batch_datapoints)
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Runs an analysis on an OS Server instance'
+  end
+
+  # Submits an analysis to a URL
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    options = {
+      debug: false,
+      dencity: false,
+      analysis_type: %w(batch_datapoints batch_run_local)
+    }
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta run_analysis [options] project server_dns'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('-a', '--analysis TYPE', 'Analysis type to run') { |a| options[:analysis_type] = a }
+      o.on('-d', '--push_to_dencity', 'Push the analysis to DEnCity') { |_| options[:dencity] = true }
+      o.on('--debug', 'Whatever makes debugging easy') { |_| options[:debug] = true }
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    return 1 unless argv
+    $logger.debug("RunAnalysis command: #{argv.inspect} #{options.inspect}")
+    project_path = argv.shift.to_s
+    server_dns = argv.shift.to_s
+    unless argv == []
+      $logger.error 'Extra arguments passed to the run_analysis command. Please refer to the help documentation.'
+      return 1
+    end
+    ::ENV['OS_SERVER_HOSTNAME'] = server_dns
+
+    # Create temporary folder for server inputs
+    ::Dir.mkdir '.temp' unless ::File.exist?('.temp')
+    temp_filepath = '.temp/analysis'
+
+    # Process project file and retrieve cluster options
+    if ::File.extname(project_path).downcase == '.xlsx'
+      analysis_type = process_excel_project(project_path, temp_filepath)
+    elsif ::File.extname(project_path).downcase == '.csv'
+      analysis_type = process_csv_project(project_path, temp_filepath)
+    elsif ::File.extname(project_path).downcase == '.json'
+      temp_filepath = File.dirname(project_path)+'/'+File.basename(project_path).gsub('.json','')
+      analysis_type = options[:analysis_type]
+    else
+      $logger.error "Did not recognize project file extension #{::File.extname(project_path)}"
+      return 1
+    end
+
+    # Get OpenStudioServerApi object and ensure the instance is running
+    server_api = OpenStudio::Analysis::ServerApi.new(hostname: server_dns)
+    unless server_api.machine_status
+      $logger.error "ERROR: Server at #{server_api.hostname} is not responding"
+      return 1
+    end
+
+    formulation_file = temp_filepath+'.json'
+    analysis_zip_file = temp_filepath+'.zip'
+    batch_run_method = server_dns.include?('localhost') ? 'batch_run_local' : 'batch_run'
+    run_options = {
+        push_to_dencity: options[:dencity],
+        batch_run_method: batch_run_method
+    }
+
+    server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
+
+    0
+  end
+end
+
+# Set the logger level to DEBUG if the arguments include --verbose
+$argv = ARGV.dup
+if $argv.include? '--verbose'
+  $logger.level = ::Logger::DEBUG
+  $argv.delete '--verbose'
+  $logger.debug 'Set Logger log level to DEBUG'
+end
+$logger.debug "Input ARGV is #{$argv}"
+
+# Require the files. Given no bundler context until incorporation into commands classes this is pretty fragile
+$logger.debug 'Executing requires'
+$logger.debug 'Requiring optsparse'
+require 'optparse'
+$logger.debug 'Requiring zip'
+require 'zip'
+$logger.debug 'Requiring socket'
+require 'socket'
+$logger.debug 'Requiring timeout'
+require 'timeout'
+$logger.debug 'Requiring json'
+require 'json'
+$logger.debug 'Requiring yaml'
+require 'yaml'
+$logger.debug 'Requiring os-aws gem'
+require 'openstudio-aws'
+$logger.debug 'Requiring os-analysis gem'
+require 'openstudio-analysis'
+$logger.debug 'Required all gems successfully'
+
+# Execute the CLI interface, and exit with the proper error code
+$logger.info "Executing argv: #{$argv}"
+::CLI.new($argv).execute

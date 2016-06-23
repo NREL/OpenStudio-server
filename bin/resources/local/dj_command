@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+
+######################################################################
+#  Copyright (c) 2008-2016, Alliance for Sustainable Energy.
+#  All rights reserved.
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+######################################################################
+
+::Signal.trap('INT') { abort }
+
+require 'optparse'
+
+options = {debug: false}
+::OptionParser.new do |opts|
+  opts.banner = 'Usage: dj_daemon [options]'
+
+  opts.on('-i', '--invocation DIRECTORY', 'Directory to invoke delayed_jobs from') { |i| options[:invocation] = i }
+  opts.on('-l', '--log PATH', 'Directory to write the dj log to') { |l| options[:log_path] = l }
+  opts.on('-d', '--database PORT', 'Port for the mongod instance') { |d| options[:mongod_port] = d }
+  opts.on('-r', '--rails PORT', 'Port that rails runs on') { |r| options[:rails_port] = r }
+  opts.on('-s', '--server DIR', 'Directory to persist the delayed_jobs.pid files to') { |s| options[:server_dir] = s }
+  opts.on('--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+
+end.parse!
+
+::Dir.chdir(File.absolute_path(options[:invocation]))
+::ENV['OS_SERVER_MONGO_PORT'] = options[:mongod_port]
+::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
+::ENV['OS_SERVER_LOG_PATH'] = options[:log_path]
+::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:rails_port]
+::ENV['RAILS_ENV'] = 'local'
+
+# Call Run to keep the task in the foreground which will be threaded
+sys_call = "bundle exec ruby ./bin/delayed_job run --log-dir=#{options[:log_path]} --pid-dir=#{options[:server_dir]}"
+puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
+
+puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
+
+exec sys_call
