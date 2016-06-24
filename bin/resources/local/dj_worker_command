@@ -25,26 +25,30 @@ require 'optparse'
 
 options = {debug: false}
 ::OptionParser.new do |opts|
-  opts.banner = 'Usage: mongo_daemon [options]'
+  opts.banner = 'Usage: dj_daemon [options]'
 
-  opts.on('-p', '--port NUMBER', 'Port to start rails on') { |p| options[:port] = p }
-  opts.on('-r', '--project DIRECTORY', 'PAT project DIRECTORY') { |r| options[:project] = r }
-  opts.on('-l', '--log path', 'Directory to write the rails log to') { |l| options[:logfile] = l }
-  opts.on('-d', '--database PORT', 'Port for the mongod instance') { |d| options[:dbport] = d }
+  opts.on('-l', '--log PATH', 'Directory to write the dj log to') { |l| options[:log_path] = l }
+  opts.on('-p', '--project DIRECTORY', 'PAT project DIRECTORY') { |r| options[:project] = r }
+  opts.on('-d', '--database PORT', 'Port for the mongod instance') { |d| options[:mongod_port] = d }
+  opts.on('-r', '--rails PORT', 'Port that rails runs on') { |r| options[:rails_port] = r }
+  opts.on('-w', '--worker NUMBER', 'Number or workers to use') {|w| options[:worker_number] = w}
   opts.on('--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
 
 end.parse!
 
-local_pid_file = File.join(options[:project], 'server.pid')
-::Dir.chdir(File.absolute_path(File.join(Dir.pwd, './../../../server')))
-::ENV['OS_SERVER_MONGO_PORT'] = options[:dbport]
+::Dir.chdir(File.absolute_path(File.join(Dir.pwd, './../../../server/')))
+::ENV['OS_SERVER_MONGO_PORT'] = options[:mongod_port]
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
-::ENV['OS_SERVER_LOG_PATH'] = options[:logfile]
-::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:port]
+::ENV['OS_SERVER_LOG_PATH'] = options[:log_path]
+::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:rails_port]
 ::ENV['RAILS_ENV'] = 'local'
-sys_call = "bundle exec rails s -p #{options[:port]} -P #{local_pid_file}"
+
+# Call Run to keep the task in the foreground which will be threaded
+sys_call = "bundle exec ruby bin/delayed_job -i worker_#{options[:worker_number]} stop && bin/delayed_job -i"
+    "worker_#{options[:worker_number]} --queue=simulations start --log-dir=#{File.absolute_path(options[:log_path])} " +
+    "--pid-dir=#{File.absolute_path(options[:project])}"
+puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
-puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 
 exec sys_call

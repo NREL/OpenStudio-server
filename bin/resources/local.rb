@@ -97,17 +97,6 @@ def kill_rails_thread(rails_thread)
   $logger.error 'Killed the rails process'
 end
 
-# Kill the delayed_jobs thread in start_local
-#
-def kill_dj_thread(dj_thread)
-  begin
-    ::Process.kill('SIGKILL', dj_thread.value)
-  rescue
-    $logger.error 'Attempted to kill the delayed_jobs process. The success of the attempt is unclear'
-  end
-  $logger.error 'Killed the delayed_jobs proccess'
-end
-
 # Kill the mongod thread in start_local
 #
 def kill_mongod_thread(mongod_thread)
@@ -124,15 +113,16 @@ end
 #
 # @param project_directory [String] directory of the project attempting to boot the local server
 # @param mongo_directory [String] directory of the mongo install, (only matters for Windows)
-# @param server_directory [String] directory of the server codebase installed with PAT 2.0
+# @param worker_number [Integer] how many worker instances to spin up, counting from one
 # @return [String] URL of the started local server
 #
-def start_local_server(project_directory, mongo_directory, server_directory, debug)
+def start_local_server(project_directory, mongo_directory, worker_number, debug)
   cluster_name = 'local'
   mongod_command_path = ::File.absolute_path(::File.join(__FILE__,'../local/mongo_command'))
   mongod_log_path = ::File.absolute_path(::File.join(project_directory, 'logs'))
   mongo_db_directory = ::File.absolute_path(::File.join(project_directory, 'data/db'))
-  dj_command_path = ::File.absolute_path(::File.join(__FILE__,'../local/dj_command'))
+  dj_server_command_path = ::File.absolute_path(::File.join(__FILE__,'../local/dj_server_command'))
+  dj_worker_command_path = ::File.absolute_path(::File.join(__FILE__,'../local/dj_worker_command'))
   rails_command_path = ::File.absolute_path(::File.join(__FILE__,'../local/rails_command'))
   rails_log_path = ::File.absolute_path(::File.join(project_directory, 'logs'))
 
@@ -153,19 +143,28 @@ def start_local_server(project_directory, mongo_directory, server_directory, deb
 
   if is_windows?
     mongod_command = "ruby \"#{mongod_command_path}\" -i \"#{mongo_directory}\" -p #{mongod_port} -l \"#{mongod_log_path}\" -d \"#{mongo_db_directory}\""
-    rails_command = "ruby \"#{rails_command_path}\" -p #{rails_port} -i \"#{server_directory}\" -d #{mongod_port} -l \"#{rails_log_path}\" -r \"#{project_directory}\""
-    dj_command = "ruby \"#{dj_command_path}\" -r \"#{rails_port}\" -i \"#{server_directory}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -s \"#{project_directory}\""
+    rails_command = "ruby \"#{rails_command_path}\" -p #{rails_port} -d #{mongod_port} -l \"#{rails_log_path}\" -r \"#{project_directory}\""
+    dj_server_command = "ruby \"#{dj_server_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\""
+    dj_worker_commands = []
+    (1..worker_number).to_a.each do |i|
+      dj_worker_commands << "ruby \"#{dj_worker_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\" -w #{i}"
+    end
   else
     mongod_command = "ruby #{mongod_command_path} -i #{mongo_directory} -p #{mongod_port} -l #{mongod_log_path} -d #{mongo_db_directory}"
-    rails_command = "ruby #{rails_command_path} -p #{rails_port} -i #{server_directory} -d #{mongod_port} -l #{rails_log_path} -r #{project_directory}"
-    dj_command = "ruby #{dj_command_path} -r #{rails_port} -i #{server_directory} -l #{rails_log_path} -d #{mongod_port} -s #{project_directory}"
+    rails_command = "ruby #{rails_command_path} -p #{rails_port} -d #{mongod_port} -l #{rails_log_path} -r #{project_directory}"
+    dj_server_command = "ruby #{dj_server_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory}"
+    dj_worker_commands = []
+    (1..worker_number).to_a.each do |i|
+      dj_worker_commands = "ruby #{dj_worker_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory} -w #{i}"
+    end
   end
 
   if debug
     mongod_command += ' --debug'
     rails_command += ' --debug'
-    dj_command += ' --debug'
-    [mongod_command, rails_command, dj_command].each { |cmd| $logger.debug "Command for local CLI: #{cmd}" }
+    dj_server_command += ' --debug'
+    [mongod_command, rails_command, dj_server_command].each { |cmd| $logger.debug "Command for local CLI: #{cmd}" }
+    dj_worker_commands.each { |cmd| cmd += ' --debug'; $logger.debug "Command for local CLI: #{cmd}" }
   end
 
   mongod_thread = ::Thread.new{ spawn(mongod_command) }
@@ -207,17 +206,21 @@ def start_local_server(project_directory, mongo_directory, server_directory, deb
   $logger.error 'Unable to access rails PID. Please investigate' unless rails_pid
   $logger.debug "RAILS STARTED WITH PID #{rails_pid}"
 
-  dj_thread = ::Thread.new{ spawn(dj_command) }
+  dj_threads = []
+  dj_threads << ::Thread.new{ spawn(dj_server_command) }
+  dj_worker_commands.each { |cmd| dj_threads << ::Thread.new{ spawn(cmd) }}
 
-  # TODO: can we remove this sleep
+  # TODO: can we remove this sleep?
   sleep 10
 
-  dj_pid = dj_thread.value
-  $logger.debug "DELAYED JOB MAY HAVE BEEN STARTED WITH PID #{dj_pid}"
+  dj_pids = []
+  dj_threads.each {|thread| dj_pids << thread.value}
+
+  $logger.debug "DELAYED JOB MAY HAVE BEEN STARTED WITH PIDs #{dj_pids}"
 
   $logger.debug 'Instantiated all threads'
 
-  hash_to_write = {server_url: "http://localhost:#{rails_port}", mongod_pid: mongod_pid, dj_pid: dj_pid, rails_pid: rails_pid}
+  hash_to_write = {server_url: "http://localhost:#{rails_port}", mongod_pid: mongod_pid, dj_pids: dj_pids, rails_pid: rails_pid}
   ::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(hash_to_write) }
   ::File.open(receipt_file, 'wb') { |_| }
 
@@ -229,11 +232,11 @@ end
 # Stop the local server
 #
 # @param rails_pid [Integer] the process id belonging to the rails instance
-# @param dj_pid [Integer] the process id belonging to the delayed job instance
+# @param dj_pids [Array] the array of process ids belonging to the delayed job instances
 # @param mongod_pid [Integer] the process id belonging to the mongo instance
 # @return [Void]
 #
-def stop_local_server(rails_pid, dj_pid, mongod_pid)
+def stop_local_server(rails_pid, dj_pids, mongod_pid)
   begin
     ::Timeout::timeout (5) {
       ::Process.kill('SIGINT', rails_pid)
@@ -258,27 +261,29 @@ def stop_local_server(rails_pid, dj_pid, mongod_pid)
     end
   end
 
-  begin
-    ::Timeout::timeout (5) {
-      ::Process.kill('SIGINT', dj_pid)
-      ::Process.wait(dj_pid)
-    }
-  rescue Errno::ECHILD
-  rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}"
-  rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying SIGKILL"
+  dj_pids.each do |dj_pid|
     begin
       ::Timeout::timeout (5) {
-        ::Process.kill('SIGKILL', dj_pid)
+        ::Process.kill('SIGINT', dj_pid)
         ::Process.wait(dj_pid)
       }
     rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}. SIGINT appears to have completed successfully"
-    rescue ::Timeout::Error
-      $logger.error "Unable to kill the dj PID #{dj_pid} with SIGKILL"
-      fail 1
+      $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}"
+    rescue ::Timeout::Error, Errno::EINVAL
+      $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying SIGKILL"
+      begin
+        ::Timeout::timeout (5) {
+          ::Process.kill('SIGKILL', dj_pid)
+          ::Process.wait(dj_pid)
+        }
+      rescue Errno::ECHILD
+      rescue Errno::ESRCH
+        $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}. SIGINT appears to have completed successfully"
+      rescue ::Timeout::Error
+        $logger.error "Unable to kill the dj PID #{dj_pid} with SIGKILL"
+        fail 1
+      end
     end
   end
 

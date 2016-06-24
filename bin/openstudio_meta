@@ -235,10 +235,10 @@ class StartLocal
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = {debug: false, force_directories: false}
+    options = {debug: false, force_directories: false, workers: 1}
 
     opts = ::OptionParser.new do |o|
-      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR MONGO_DIR SERVER_DIR'
+      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR MONGO_DIR'
       o.separator ''
       o.separator 'Options:'
       o.separator ''
@@ -247,8 +247,12 @@ class StartLocal
         options[:debug] = f
       end
 
-      o.on('--force-directories', 'Force creation of directories') do |f|
+      o.on('--force-directories', 'Force creation of directories') do |_|
         options[:force_directories] = true
+      end
+
+      o.on('--worker-number', 'Number of workers to use') do |w|
+        options[:workers] = w
       end
     end
 
@@ -256,7 +260,6 @@ class StartLocal
     argv = parse_options(opts, sub_argv)
     project_dir = argv.shift
     mongo_dir = argv.shift
-    server_dir = argv.shift
     unless argv == []
       $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
       return 1
@@ -264,7 +267,7 @@ class StartLocal
     $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
 
     # Check the directories exist
-    [project_dir, mongo_dir, server_dir].each do |dir|
+    [project_dir, mongo_dir].each do |dir|
       unless ::File.exist? dir
         if options[:force_directories] 
           FileUtils.mkdir_p dir
@@ -281,7 +284,7 @@ class StartLocal
     end
 
     # Assemble the commands and spin off the threads
-    start_local_server project_dir, mongo_dir, server_dir, options[:debug]
+    start_local_server project_dir, mongo_dir, options[:workers], options[:debug]
 
     0
   end
