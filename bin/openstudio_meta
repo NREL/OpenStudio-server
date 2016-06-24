@@ -24,6 +24,7 @@ Signal.trap('INT') { abort }
 require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
+ENV['GEM_PATH'] = File.absolute_path(File.join(Dir.pwd, './../vendor/cache/'))
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
 #
