@@ -24,7 +24,7 @@ Signal.trap('INT') { abort }
 require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
-ENV['GEM_PATH'] = File.absolute_path(File.join(Dir.pwd, './../vendor/cache/'))
+ENV['GEM_PATH'] = File.absolute_path(File.join(Dir.pwd, './../server/vendor'))
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
 #
@@ -65,7 +65,7 @@ def parse_options(opts=nil, argv=nil)
   # Add the help option, which must be on every command.
   opts.on_tail('-h', '--help', 'Print this help') do
     safe_puts(opts.help)
-    return nil
+    exit(0)
   end
 
   opts.parse!(argv)
@@ -119,6 +119,7 @@ class CLI
 
   # This constant maps subcommands to classes in this CLI and stores meta-data on them
   COMMAND_LIST = {
+      install_gems: [ Proc.new { ::InstallGems }, {primary: true, working:true}],
       start_local: [ Proc.new { ::StartLocal }, {primary: true, working: true}],
       start_remote: [ Proc.new { ::StartRemote }, {primary: true, working: true}],
       stop_local: [ Proc.new { ::StopLocal }, {primary: true, working: true}],
@@ -217,6 +218,50 @@ class CLI
     end
 
     safe_puts opts.help
+  end
+end
+
+# Class to initialize packaged gems in ./../server/vendor/cache
+class InstallGems
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Installs the required packaged Gems'
+  end
+
+  # Executes the required gem install command from the correct folder
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    options = {debug: false}
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta install_gems [options]'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('--debug', 'Whatever makes debugging easy') do |f|
+        options[:debug] = f
+      end
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    unless argv == []
+      $logger.error 'Extra arguments passed to the install_gems command. Please refer to the help documentation.'
+      return 1
+    end
+    $logger.debug("InstallGems command: #{argv.inspect} #{options.inspect}")
+
+    # Execute the required bundler command
+    ::Dir.chdir File.absolute_path(File.join(Dir.pwd, './../server/'))
+    path_to_bundler = File.absolute_path('./../server/vendor/cache/bundler-1.12.5.gem')
+    sys_call = "gem install #{path_to_bundler} && bundle install --local --no-document ri rdoc"
+    puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
+    exec sys_call
   end
 end
 
@@ -337,11 +382,11 @@ class StopLocal
     end
     local_server_config = ::JSON.parse(File.read(local_state_file), {symbolize_names: true})
     rails_pid = local_server_config[:rails_pid]
-    dj_pid = local_server_config[:dj_pid]
+    dj_pids = local_server_config[:dj_pids]
     mongod_pid = local_server_config[:mongod_pid]
 
     # Stop the pids, with lots of error catches
-    stop_local_server rails_pid, dj_pid, mongod_pid
+    stop_local_server rails_pid, dj_pids, mongod_pid
     
     0
   end
@@ -363,6 +408,11 @@ class StartRemote
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
+    $logger.debug 'Requiring gems for StartRemote'
+    $logger.debug 'Requiring os-aws gem'
+    require 'openstudio-aws'
+    $logger.debug 'Successfully required all gems for StartRemote'
+
     options = {
       debug: false,
       aws_yml: '',
@@ -443,6 +493,10 @@ class StopRemote
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
+    $logger.debug 'Requiring gems for StopRemote'
+    $logger.debug 'Requiring os-aws gem'
+    require 'openstudio-aws'
+    $logger.debug 'Successfully required all gems for StopRemote'
     options = {
         debug: false,
     }
@@ -460,7 +514,7 @@ class StopRemote
 
     # Parse the options
     argv = parse_options(opts, sub_argv)
-    return 1 unless argv
+    fail 1 unless argv
     $logger.debug("StopRemote command: #{argv.inspect} #{options.inspect}")
     aws_conn_json = argv.shift.to_s
     unless ::File.exist? aws_conn_json
@@ -474,7 +528,7 @@ class StopRemote
     end
     unless argv == []
       $logger.error 'Extra arguments passed to the stop_remote command. Please refer to the help documentation.'
-      return 1
+      fail 1
     end
 
     # Set the env variables for AWS, load the instance controller, and terminate the instances.
@@ -507,6 +561,14 @@ class RunAnalysis
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
+    $logger.debug 'Requiring gems for RunAnalysis'
+    $logger.debug 'Requiring zip gem'
+    require 'zip'
+    $logger.debug 'Requiring os-analysis gem'
+    require 'openstudio-analysis'
+    $logger.debug 'Requiring os-aws gem'
+    require 'openstudio-aws'
+    $logger.debug 'Successfully required all gems for RunAnalysis'
     options = {
       debug: false,
       dencity: false,
@@ -580,6 +642,7 @@ if $argv.include? '--verbose'
   $logger.level = ::Logger::DEBUG
   $argv.delete '--verbose'
   $logger.debug 'Set Logger log level to DEBUG'
+  $logger.debug "Environment is: #{::ENV.inspect}"
 end
 $logger.debug "Input ARGV is #{$argv}"
 
@@ -587,21 +650,11 @@ $logger.debug "Input ARGV is #{$argv}"
 $logger.debug 'Executing requires'
 $logger.debug 'Requiring optsparse'
 require 'optparse'
-$logger.debug 'Requiring zip'
-require 'zip'
-$logger.debug 'Requiring socket'
-require 'socket'
 $logger.debug 'Requiring timeout'
 require 'timeout'
 $logger.debug 'Requiring json'
 require 'json'
-$logger.debug 'Requiring yaml'
-require 'yaml'
-$logger.debug 'Requiring os-aws gem'
-require 'openstudio-aws'
-$logger.debug 'Requiring os-analysis gem'
-require 'openstudio-analysis'
-$logger.debug 'Required all gems successfully'
+$logger.debug 'Required initial gems successfully'
 
 # Execute the CLI interface, and exit with the proper error code
 $logger.info "Executing argv: #{$argv}"
