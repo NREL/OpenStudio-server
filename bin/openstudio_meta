@@ -259,7 +259,7 @@ class InstallGems
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(Dir.pwd, './../server/'))
     path_to_bundler = File.absolute_path('./../server/vendor/cache/bundler-1.12.5.gem')
-    sys_call = "gem install #{path_to_bundler} && bundle install --local --no-document ri rdoc"
+    sys_call = "gem install #{path_to_bundler} && bundle install --local"
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     exec sys_call
   end
