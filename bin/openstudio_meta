@@ -24,7 +24,8 @@ Signal.trap('INT') { abort }
 require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
-ENV['GEM_PATH'] = File.absolute_path(File.join(Dir.pwd, './../server/vendor'))
+ENV['GEM_PATH'] = File.absolute_path(File.join(Dir.pwd, './../gems/'))
+ENV['GEM_HOME'] = File.absolute_path(File.join(Dir.pwd, './../gems/'))
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
 #
@@ -258,8 +259,9 @@ class InstallGems
 
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(Dir.pwd, './../server/'))
-    path_to_bundler = File.absolute_path('./../server/vendor/cache/bundler-1.12.5.gem')
-    sys_call = "gem install #{path_to_bundler} && bundle install --local"
+    bundler_bin = File.absolute_path('./../gems/bin/bundle')
+    sys_call = "gem install bundler -v 1.12.5 && #{bundler_bin} install --without development test"
+    puts "Enviroment variables: #{::ENV.inspect}"
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     exec sys_call
   end
