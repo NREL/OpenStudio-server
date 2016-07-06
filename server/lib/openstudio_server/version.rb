@@ -35,5 +35,5 @@
 
 module OpenstudioServer
   VERSION = '1.19.0'
-  VERSION_EXT = '-OS.1.12.0.ef50b89958' # with preceding - or +
+  VERSION_EXT = '-rc0' # with preceding - or +
 end
