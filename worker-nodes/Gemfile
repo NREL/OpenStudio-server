@@ -2,7 +2,6 @@ source 'http://rubygems.org'
 
 # OpenStudio gem from github
 gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop', ref: '5029467'
-
 gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
 
 # Install other gems that are needed but not required by the workflow gem
@@ -21,6 +20,7 @@ gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 gem 'delayed_job_mongoid'
 
 # Gems required for 3rd party libraries
-gem 'libxml-ruby', :platforms => :ruby
+# Don't use libxml-ruby 2.9. It causes a segfault on the node! Not sure why. Don't really care at the moment.
+gem 'libxml-ruby', '2.8.0', :platforms => :ruby
 gem 'os'
 gem 'uuid' # convert this to SecureRandom internal ruby library
