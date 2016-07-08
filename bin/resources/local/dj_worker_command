@@ -36,7 +36,8 @@ options = {debug: false}
 
 end.parse!
 
-::Dir.chdir(File.absolute_path(File.join(Dir.pwd, './../../../server/')))
+bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))
+::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server/')))
 ::ENV['OS_SERVER_MONGO_PORT'] = options[:mongod_port]
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
 ::ENV['OS_SERVER_LOG_PATH'] = options[:log_path]
@@ -44,7 +45,7 @@ end.parse!
 ::ENV['RAILS_ENV'] = 'local'
 
 # Call Run to keep the task in the foreground which will be threaded
-sys_call = "bundle exec ruby bin/delayed_job -i worker_#{options[:worker_number]} stop && bin/delayed_job -i"
+sys_call = "#{bundle_path} exec ruby bin/delayed_job -i worker_#{options[:worker_number]} stop && bin/delayed_job -i"
     "worker_#{options[:worker_number]} --queue=simulations start --log-dir=#{File.absolute_path(options[:log_path])} " +
     "--pid-dir=#{File.absolute_path(options[:project])}"
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]

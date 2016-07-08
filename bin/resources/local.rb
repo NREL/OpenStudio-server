@@ -24,6 +24,7 @@ unless $logger
   $logger.level = ::Logger::WARN
   $logger.warn 'Logger not passed in from invoking script for local.rb'
 end
+require 'socket'
 
 # Determines if OS is Windows
 #
@@ -126,7 +127,6 @@ def start_local_server(project_directory, mongo_directory, worker_number, debug)
   rails_command_path = ::File.absolute_path(::File.join(__FILE__,'../local/rails_command'))
   rails_log_path = ::File.absolute_path(::File.join(project_directory, 'logs'))
 
-
   mongod_port = find_available_port 27017, 100
   $logger.debug "Mongo port will be #{mongod_port}"
   $logger.error 'Unable to find port for mongo' unless mongod_port
@@ -141,21 +141,24 @@ def start_local_server(project_directory, mongo_directory, worker_number, debug)
   ::File.delete state_file if ::File.exists? state_file
   ::File.delete receipt_file if ::File.exists? receipt_file
 
+  i = 1
   if is_windows?
     mongod_command = "ruby \"#{mongod_command_path}\" -i \"#{mongo_directory}\" -p #{mongod_port} -l \"#{mongod_log_path}\" -d \"#{mongo_db_directory}\""
     rails_command = "ruby \"#{rails_command_path}\" -p #{rails_port} -d #{mongod_port} -l \"#{rails_log_path}\" -r \"#{project_directory}\""
     dj_server_command = "ruby \"#{dj_server_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\""
     dj_worker_commands = []
-    (1..worker_number).to_a.each do |i|
-      dj_worker_commands << "ruby \"#{dj_worker_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\" -w #{i}"
+    until i > worker_number
+        dj_worker_commands << "ruby \"#{dj_worker_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\" -w #{i}"
+        i += 1
     end
   else
     mongod_command = "ruby #{mongod_command_path} -i #{mongo_directory} -p #{mongod_port} -l #{mongod_log_path} -d #{mongo_db_directory}"
     rails_command = "ruby #{rails_command_path} -p #{rails_port} -d #{mongod_port} -l #{rails_log_path} -r #{project_directory}"
     dj_server_command = "ruby #{dj_server_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory}"
     dj_worker_commands = []
-    (1..worker_number).to_a.each do |i|
-      dj_worker_commands = "ruby #{dj_worker_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory} -w #{i}"
+    until i > worker_number
+      dj_worker_commands << "ruby #{dj_worker_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory} -w #{i}"
+      i += 1
     end
   end
 

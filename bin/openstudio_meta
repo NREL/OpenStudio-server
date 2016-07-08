@@ -261,7 +261,7 @@ class InstallGems
     ::Dir.chdir File.absolute_path(File.join(Dir.pwd, './../server/'))
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
     sys_call = "gem install bundler -v 1.12.5 && #{bundler_bin} install --without development test"
-    puts "Enviroment variables: #{::ENV.inspect}"
+    puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     exec sys_call
   end

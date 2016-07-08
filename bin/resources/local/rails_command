@@ -36,13 +36,14 @@ options = {debug: false}
 end.parse!
 
 local_pid_file = File.join(options[:project], 'server.pid')
-::Dir.chdir(File.absolute_path(File.join(Dir.pwd, './../../../server')))
+bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))
+::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server')))
 ::ENV['OS_SERVER_MONGO_PORT'] = options[:dbport]
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
 ::ENV['OS_SERVER_LOG_PATH'] = options[:logfile]
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:port]
 ::ENV['RAILS_ENV'] = 'local'
-sys_call = "bundle exec rails s -p #{options[:port]} -P #{local_pid_file}"
+sys_call = "#{bundle_path} exec rails s -p #{options[:port]} -P #{local_pid_file}"
 
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
