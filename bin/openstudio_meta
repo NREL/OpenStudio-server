@@ -286,7 +286,7 @@ class StartLocal
     options = {debug: false, force_directories: false, workers: 1}
 
     opts = ::OptionParser.new do |o|
-      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR MONGO_DIR'
+      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR MONGO_DIR RUBY_EXE'
       o.separator ''
       o.separator 'Options:'
       o.separator ''
@@ -308,6 +308,7 @@ class StartLocal
     argv = parse_options(opts, sub_argv)
     project_dir = argv.shift
     mongo_dir = argv.shift
+	ruby_path = argv.shift
     unless argv == []
       $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
       return 1
@@ -325,6 +326,9 @@ class StartLocal
         end
       end
     end
+	
+	# Check that ruby_path exists
+	fail "Unable to find ruby executable at `#{ruby_path}`" unless File.exists? ruby_path
   
     # Also force the creation of the log dir in the project_dir
     if options[:force_directories]       
@@ -332,7 +336,7 @@ class StartLocal
     end
 
     # Assemble the commands and spin off the threads
-    start_local_server project_dir, mongo_dir, options[:workers], options[:debug]
+    start_local_server project_dir, mongo_dir, ruby_path, options[:workers], options[:debug]
 
     0
   end

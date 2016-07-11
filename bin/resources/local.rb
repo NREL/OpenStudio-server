@@ -117,7 +117,7 @@ end
 # @param worker_number [Integer] how many worker instances to spin up, counting from one
 # @return [String] URL of the started local server
 #
-def start_local_server(project_directory, mongo_directory, worker_number, debug)
+def start_local_server(project_directory, mongo_directory, ruby_path, worker_number, debug)
   cluster_name = 'local'
   mongod_command_path = ::File.absolute_path(::File.join(__FILE__,'../local/mongo_command'))
   mongod_log_path = ::File.absolute_path(::File.join(project_directory, 'logs'))
@@ -143,21 +143,21 @@ def start_local_server(project_directory, mongo_directory, worker_number, debug)
 
   i = 1
   if is_windows?
-    mongod_command = "ruby \"#{mongod_command_path}\" -i \"#{mongo_directory}\" -p #{mongod_port} -l \"#{mongod_log_path}\" -d \"#{mongo_db_directory}\""
-    rails_command = "ruby \"#{rails_command_path}\" -p #{rails_port} -d #{mongod_port} -l \"#{rails_log_path}\" -r \"#{project_directory}\""
-    dj_server_command = "ruby \"#{dj_server_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\""
+    mongod_command = "\"#{ruby_path}\" \"#{mongod_command_path}\" -i \"#{mongo_directory}\" -p #{mongod_port} -l \"#{mongod_log_path}\" -d \"#{mongo_db_directory}\" -w"
+    rails_command = "\"#{ruby_path}\" \"#{rails_command_path}\" -p #{rails_port} -d #{mongod_port} -l \"#{rails_log_path}\" -r \"#{project_directory}\""
+    dj_server_command = "\"#{ruby_path}\" \"#{dj_server_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\""
     dj_worker_commands = []
     until i > worker_number
-        dj_worker_commands << "ruby \"#{dj_worker_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\" -w #{i}"
+        dj_worker_commands << "\"#{ruby_path}\" \"#{dj_worker_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\" -w #{i}"
         i += 1
     end
   else
-    mongod_command = "ruby #{mongod_command_path} -i #{mongo_directory} -p #{mongod_port} -l #{mongod_log_path} -d #{mongo_db_directory}"
-    rails_command = "ruby #{rails_command_path} -p #{rails_port} -d #{mongod_port} -l #{rails_log_path} -r #{project_directory}"
-    dj_server_command = "ruby #{dj_server_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory}"
+    mongod_command = "\"#{ruby_path}\" #{mongod_command_path} -i #{mongo_directory} -p #{mongod_port} -l #{mongod_log_path} -d #{mongo_db_directory}"
+    rails_command = "\"#{ruby_path}\" #{rails_command_path} -p #{rails_port} -d #{mongod_port} -l #{rails_log_path} -r #{project_directory}"
+    dj_server_command = "\"#{ruby_path}\" #{dj_server_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory}"
     dj_worker_commands = []
     until i > worker_number
-      dj_worker_commands << "ruby #{dj_worker_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory} -w #{i}"
+      dj_worker_commands << "\"#{ruby_path}\" #{dj_worker_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory} -w #{i}"
       i += 1
     end
   end

@@ -31,13 +31,17 @@ options = {debug: false}
   opts.on('-l', '--log path', 'Directory to write the mongo log to') { |l| options[:log_path] = l }
   opts.on('-i', '--invocation DIRECTORY', 'Directory to invoke mongo from') { |i| options[:invocation] = i }
   opts.on('-d', '--database DIRECTORY', 'Directory for the mongod instance database') { |d| options[:dbpath] = d }
+  opts.on('-w', '--windows', 'Flag to indicate running on Windows') { |w| options[:windows] = true }
   opts.on('--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
 
 end.parse!
 
 ::Dir.chdir(File.absolute_path(options[:invocation]))
-sys_call = "mongod --port #{options[:port]} --logpath #{options[:log_path]}/mongo.log --dbpath #{options[:dbpath]}"
-
+if options[:windows]
+  sys_call = "mongod.exe --port #{options[:port]} --logpath \"#{options[:log_path]}/mongo.log\" --dbpath \"#{options[:dbpath]}\""
+else
+  sys_call = "mongod --port #{options[:port]} --logpath #{options[:log_path]}/mongo.log --dbpath #{options[:dbpath]}"
+end
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
 exec sys_call
