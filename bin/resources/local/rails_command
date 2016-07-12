@@ -22,31 +22,60 @@
 ::Signal.trap('INT') { abort }
 
 require 'optparse'
+require 'pathname'
 
-options = {debug: false}
-::OptionParser.new do |opts|
-  opts.banner = 'Usage: mongo_daemon [options]'
+# Set up options parsing
+argv = ARGV.dup
+options = {
+    debug: false,
+    windows: false,
+    port: 8080
+}
+opts = ::OptionParser.new do |o|
+  o.banner = 'Usage: rails_command [options] LOG_DIR, PROJECT_DIR, DB_PORT'
+  o.separator 'LOG_DIR: Absolute path of the directory to write the Delayed Jobs log to'
+  o.separator 'PROJECT_DIR: Absolute path to the PAT project DIRECTORY'
+  o.separator 'DB_PORT: Port used by the mongod instance'
+  o.on('-p', '--port NUMBER', 'Port to start rails on') { |p| options[:port] = p }
+  o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+end
 
-  opts.on('-p', '--port NUMBER', 'Port to start rails on') { |p| options[:port] = p }
-  opts.on('-r', '--project DIRECTORY', 'PAT project DIRECTORY') { |r| options[:project] = r }
-  opts.on('-l', '--log path', 'Directory to write the rails log to') { |l| options[:logfile] = l }
-  opts.on('-d', '--database PORT', 'Port for the mongod instance') { |d| options[:dbport] = d }
-  opts.on('--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+# Parse arguments and verify them
+opts.parse!(argv)
+log_dir = argv.shift
+project_dir = argv.shift
+db_port = argv.shift
+inputs_empty = log_dir.nil? | project_dir.nil? | db_port.nil?
+fail 'LOG_DIR, PROJECT_DIR, and DB_PORT are all required for execution' if inputs_empty
+error_msg = ''
+error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
+error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
+fail error_msg unless error_msg.empty?
+error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exists? log_dir
+error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless
+  Dir.exists? project_dir
+fail error_msg unless error_msg.empty?
 
-end.parse!
-
-local_pid_file = File.join(options[:project], 'server.pid')
+# Create the system call to use
+local_pid_file = File.join(project_dir, 'server.pid')
 bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))
+bundle_path += '.bat' if options[:windows]
 rails_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rails'))
+rails_path += '.bat' if options[:windows]
 ::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server')))
-::ENV['OS_SERVER_MONGO_PORT'] = options[:dbport]
+::ENV['OS_SERVER_MONGO_PORT'] = db_port
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
-::ENV['OS_SERVER_LOG_PATH'] = options[:logfile]
+::ENV['OS_SERVER_LOG_PATH'] = log_dir
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:port]
 ::ENV['RAILS_ENV'] = 'local'
-sys_call = "\"#{bundle_path}\" exec \"#{rails_path}\" s -p #{options[:port]} -P #{local_pid_file}"
-
+if options[:windows]
+  sys_call = "\"#{bundle_path}\" exec \"#{rails_path}\" s -p #{options[:port]} -P #{local_pid_file}"
+else
+  sys_call = "#{bundle_path} exec #{rails_path} s -p #{options[:port]} -P #{local_pid_file}"
+end
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 
+# Execute the system call
 exec sys_call

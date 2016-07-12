@@ -90,7 +90,7 @@ end
 #
 def kill_rails_thread(rails_thread)
   begin
-    ::Process.kill('SIGKILL', rails_thread.value)
+    ::Process.kill('KILL', rails_thread.value)
   rescue
     $logger.error 'Attempted to kill rails process. The success of the attempt is unclear'
     return
@@ -102,7 +102,7 @@ end
 #
 def kill_mongod_thread(mongod_thread)
   begin
-    ::Process.kill('SIGKILL', mongod_thread.value)
+    ::Process.kill('KILL', mongod_thread.value)
   rescue
     $logger.error 'Attempted to kill mongod process. The success of the attempt is unclear'
     fail 1
@@ -143,21 +143,29 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   i = 1
   if is_windows?
-    mongod_command = "\"#{ruby_path}\" \"#{mongod_command_path}\" -i \"#{mongo_directory}\" -p #{mongod_port} -l \"#{mongod_log_path}\" -d \"#{mongo_db_directory}\" -w"
-    rails_command = "\"#{ruby_path}\" \"#{rails_command_path}\" -p #{rails_port} -d #{mongod_port} -l \"#{rails_log_path}\" -r \"#{project_directory}\""
-    dj_server_command = "\"#{ruby_path}\" \"#{dj_server_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\""
+    mongod_command = "\"#{ruby_path}\" \"#{mongod_command_path}\" -w -p #{mongod_port} \"#{mongod_log_path}\" "\
+      "\"#{mongo_directory}\" \"#{mongo_db_directory}\""
+    rails_command = "\"#{ruby_path}\" \"#{rails_command_path}\" -w -p #{rails_port} \"#{rails_log_path}\" "\
+      "\"#{project_directory}\" #{mongod_port}"
+    dj_server_command = "\"#{ruby_path}\" \"#{dj_server_command_path}\" -w \"#{ruby_path}\" \"#{rails_log_path}\" "\
+      "\"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\""
     dj_worker_commands = []
     until i > worker_number
-        dj_worker_commands << "\"#{ruby_path}\" \"#{dj_worker_command_path}\" -r \"#{rails_port}\" -l \"#{rails_log_path}\" -d \"#{mongod_port}\" -p \"#{project_directory}\" -w #{i}"
+        dj_worker_commands << "\"#{ruby_path}\" \"#{dj_worker_command_path}\" -w \"#{ruby_path}\" "\
+          "\"#{rails_log_path}\" \"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\" #{i}"
         i += 1
     end
   else
-    mongod_command = "\"#{ruby_path}\" #{mongod_command_path} -i #{mongo_directory} -p #{mongod_port} -l #{mongod_log_path} -d #{mongo_db_directory}"
-    rails_command = "\"#{ruby_path}\" #{rails_command_path} -p #{rails_port} -d #{mongod_port} -l #{rails_log_path} -r #{project_directory}"
-    dj_server_command = "\"#{ruby_path}\" #{dj_server_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory}"
+    mongod_command = "#{ruby_path} #{mongod_command_path} -p #{mongod_port} #{mongod_log_path} #{mongo_directory} "\
+      "#{mongo_db_directory}"
+    rails_command = "#{ruby_path} #{rails_command_path} -p #{rails_port} #{rails_log_path} #{project_directory} "\
+      "#{mongod_port}"
+    dj_server_command = "#{ruby_path} #{dj_server_command_path} #{ruby_path} #{rails_log_path} #{project_directory} "\
+      "#{mongod_port} #{rails_port}"
     dj_worker_commands = []
     until i > worker_number
-      dj_worker_commands << "\"#{ruby_path}\" #{dj_worker_command_path} -r #{rails_port} -l #{rails_log_path} -d #{mongod_port} -p #{project_directory} -w #{i}"
+      dj_worker_commands << "#{ruby_path} #{dj_worker_command_path} #{ruby_path} #{rails_log_path} "\
+        "#{project_directory} #{mongod_port} #{rails_port} #{i}"
       i += 1
     end
   end
@@ -211,10 +219,11 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   dj_threads = []
   dj_threads << ::Thread.new{ spawn(dj_server_command) }
+  sleep 15 # TODO: replace this sleep with a check on if the dj_thread is initialized
   dj_worker_commands.each { |cmd| dj_threads << ::Thread.new{ spawn(cmd) }}
 
-  # TODO: can we remove this sleep?
-  sleep 10
+  # TODO: replace this sleep with a check on if the dj_thread is initialized
+  sleep 15
 
   dj_pids = []
   dj_threads.each {|thread| dj_pids << thread.value}
@@ -249,17 +258,17 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
   rescue Errno::ESRCH
     $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}"
   rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying SIGKILL"
+    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
     begin
       ::Timeout::timeout (5) {
-        ::Process.kill('SIGKILL', rails_pid)
+        ::Process.kill('KILL', rails_pid)
         ::Process.wait(rails_pid)
       }
     rescue Errno::ECHILD
     rescue Errno::ESRCH
       $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
-      $logger.error "Unable to kill the rails PID #{rails_pid} with SIGKILL"
+      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
       fail 1
     end
   end
@@ -274,17 +283,17 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
     rescue Errno::ESRCH
       $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}"
     rescue ::Timeout::Error, Errno::EINVAL
-      $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying SIGKILL"
+      $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying KILL"
       begin
         ::Timeout::timeout (5) {
-          ::Process.kill('SIGKILL', dj_pid)
+          ::Process.kill('KILL', dj_pid)
           ::Process.wait(dj_pid)
         }
       rescue Errno::ECHILD
       rescue Errno::ESRCH
         $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}. SIGINT appears to have completed successfully"
       rescue ::Timeout::Error
-        $logger.error "Unable to kill the dj PID #{dj_pid} with SIGKILL"
+        $logger.error "Unable to kill the dj PID #{dj_pid} with KILL"
         fail 1
       end
     end
@@ -299,18 +308,20 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
   rescue Errno::ESRCH
     $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}"
   rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the mongo PID #{mongod_pid} with SIGINT. Trying SIGKILL."
+    $logger.warn "Unable to kill the mongo PID #{mongod_pid} with SIGINT. Trying KILL."
     begin
       ::Timeout::timeout (5) {
-        ::Process.kill('SIGKILL', mongod_pid)
+        ::Process.kill('KILL', mongod_pid)
         ::Process.wait(mongod_pid)
       }
     rescue Errno::ECHILD
     rescue Errno::ESRCH
       $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
-      $logger.error "Unable to kill the mongo PID #{mongod_pid} with SIGKILL"
+      $logger.error "Unable to kill the mongo PID #{mongod_pid} with KILL"
       fail 1
     end
   end
+
+  sleep 1 # Keep the return from beating the stdout text
 end

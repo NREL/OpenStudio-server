@@ -22,34 +22,59 @@
 ::Signal.trap('INT') { abort }
 
 require 'optparse'
+require 'pathname'
 
-options = {debug: false}
-::OptionParser.new do |opts|
-  opts.banner = 'Usage: dj_daemon [options] RUBY_EXE'
+# Set up options parsing
+argv = ARGV.dup
+options = {
+    debug: false,
+    windows: false
+}
+opts = ::OptionParser.new do |o|
+  o.banner = 'Usage: dj_server_command [options] RUBY_EXE LOG_DIR PROJECT_DIR DB_PORT RAILS_PORT'
+  o.separator ''
+  o.separator 'RUBY_EXE: Absolute path to the ruby executable to use'
+  o.separator 'LOG_DIR: Absolute path of the directory to write the Delayed Jobs log to'
+  o.separator 'PROJECT_DIR: Absolute path to the PAT project DIRECTORY'
+  o.separator 'DB_PORT: Port used by the mongod instance'
+  o.separator 'RAILS_PORT: Port that rails runs on'
+  o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+end
 
-  opts.on('-l', '--log PATH', 'Directory to write the dj log to') { |l| options[:log_path] = l }
-  opts.on('-p', '--project DIRECTORY', 'PAT project DIRECTORY') { |r| options[:project] = r }
-  opts.on('-d', '--database PORT', 'Port for the mongod instance') { |d| options[:mongod_port] = d }
-  opts.on('-r', '--rails PORT', 'Port that rails runs on') { |r| options[:rails_port] = r }
-  opts.on('--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+# Parse arguments and verify them
+opts.parse!(argv)
+ruby_exe = argv.shift
+log_dir = argv.shift
+project_dir = argv.shift
+db_port = argv.shift
+rails_port = argv.shift
+inputs_empty = ruby_exe.nil? | log_dir.nil? | project_dir.nil? | db_port.nil? | rails_port.nil?
+fail 'RUBY_EXE, LOG_DIR, PROJECT_DIR, DB_PORT, and RAILS_PORT are all required for execution' if inputs_empty
+error_msg = ''
+error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, is not absolute. " unless Pathname.new(ruby_exe).absolute?
+error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
+error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
+fail error_msg unless error_msg.empty?
+error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, does not exist on the file system. " unless File.exists? ruby_exe
+error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exists? log_dir
+error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless
+  Dir.exists? project_dir
+fail error_msg unless error_msg.empty?
 
-end.parse!
-
+# Create the system call to use
 bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))
-ruby_path = argv.shift
-fail "Unable to find ruby executable at `#{ruby_path}`" unless File.exists? ruby_path
+bundle_path += '.bat' if options[:windows]
 ::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server/')))
-::ENV['OS_SERVER_MONGO_PORT'] = options[:mongod_port]
+::ENV['OS_SERVER_MONGO_PORT'] = db_port
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
-::ENV['OS_SERVER_LOG_PATH'] = options[:log_path]
-::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:rails_port]
+::ENV['OS_SERVER_LOG_PATH'] = log_dir
+::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + rails_port
 ::ENV['RAILS_ENV'] = 'local'
-
-# Call Run to keep the task in the foreground which will be threaded
-sys_call = "#{bundle_path} exec #{ruby_path} -i server stop && bin/delayed_job -i server --queue=analyses,background start" +
-    "--log-dir=#{File.absolute_path(options[:log_path])} --pid-dir=#{File.absolute_path(options[:project])}"
+sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i server stop && bin/delayed_job -i server "\
+  "--queue=analyses,background start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
-
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
+# Execute the system call
 exec sys_call

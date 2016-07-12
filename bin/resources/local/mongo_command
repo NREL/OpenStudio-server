@@ -22,26 +22,54 @@
 ::Signal.trap('INT') { abort }
 
 require 'optparse'
+require 'pathname'
 
-options = {debug: false}
-::OptionParser.new do |opts|
-  opts.banner = 'Usage: mongo_daemon [options]'
+# Set up options parsing
+argv = ARGV.dup
+options = {
+  debug: false,
+  port: 27017,
+  windows: false
+}
+opts = ::OptionParser.new do |o|
+  o.banner = 'Usage: mongo_command [options] LOG_DIR INVOCATION_DIR DB_DIR'
+  o.separator ''
+  o.separator 'LOG_DIR: Absolute path of directory to write the mongod log to'
+  o.separator 'INVOCATION_DIR: Absolute path of directory to invoke mongod from'
+  o.separator 'DB_DIR: Absolute path of directory for the mongod instance database'
+  o.separator ''
+  o.on('-p', '--port NUMBER', 'Port to start mongod on, defaults to 27017') { |p| options[:port] = p }
+  o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+end
 
-  opts.on('-p', '--port NUMBER', 'Port to start mongo on') { |p| options[:port] = p }
-  opts.on('-l', '--log path', 'Directory to write the mongo log to') { |l| options[:log_path] = l }
-  opts.on('-i', '--invocation DIRECTORY', 'Directory to invoke mongo from') { |i| options[:invocation] = i }
-  opts.on('-d', '--database DIRECTORY', 'Directory for the mongod instance database') { |d| options[:dbpath] = d }
-  opts.on('-w', '--windows', 'Flag to indicate running on Windows') { |w| options[:windows] = true }
-  opts.on('--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+# Parse arguments and verify them
+opts.parse!(argv)
+log_dir = argv.shift
+invocation_dir = argv.shift
+db_dir = argv.shift
+inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil?
+fail 'LOG_DIR, INVOCATION_DIR, and DB_DIR are all required for execution' if inputs_empty
+error_msg = ''
+error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
+error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute. " unless
+  Pathname.new(invocation_dir).absolute?
+error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathname.new(db_dir).absolute?
+fail error_msg unless error_msg.empty?
+error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exists? log_dir
+error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless
+  Dir.exists? invocation_dir
+error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exists? db_dir
+fail error_msg unless error_msg.empty?
 
-end.parse!
-
-::Dir.chdir(File.absolute_path(options[:invocation]))
+# Create the system call to use
+::Dir.chdir(File.absolute_path(invocation_dir))
 if options[:windows]
-  sys_call = "mongod.exe --port #{options[:port]} --logpath \"#{options[:log_path]}/mongo.log\" --dbpath \"#{options[:dbpath]}\""
+  sys_call = "mongod.exe --port #{options[:port]} --logpath \"#{log_dir}/mongo.log\" --dbpath \"#{db_dir}\""
 else
-  sys_call = "mongod --port #{options[:port]} --logpath #{options[:log_path]}/mongo.log --dbpath #{options[:dbpath]}"
+  sys_call = "mongod --port #{options[:port]} --logpath #{log_dir}/mongo.log --dbpath #{db_dir}"
 end
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
+# Execute the system call
 exec sys_call

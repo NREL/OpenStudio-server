@@ -308,7 +308,7 @@ class StartLocal
     argv = parse_options(opts, sub_argv)
     project_dir = argv.shift
     mongo_dir = argv.shift
-	ruby_path = argv.shift
+	  ruby_path = argv.shift
     unless argv == []
       $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
       return 1
@@ -327,8 +327,8 @@ class StartLocal
       end
     end
 	
-	# Check that ruby_path exists
-	fail "Unable to find ruby executable at `#{ruby_path}`" unless File.exists? ruby_path
+	  # Check that ruby_path exists
+	  fail "Unable to find ruby executable at `#{ruby_path}`" unless File.exists? ruby_path
   
     # Also force the creation of the log dir in the project_dir
     if options[:force_directories]       
