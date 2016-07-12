@@ -67,15 +67,20 @@ fail error_msg unless error_msg.empty?
 
 # Create the system call to use
 bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))
-bundle_path += '.bat' if options[:windows]
 ::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server/')))
 ::ENV['OS_SERVER_MONGO_PORT'] = db_port
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
 ::ENV['OS_SERVER_LOG_PATH'] = log_dir
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + rails_port
 ::ENV['RAILS_ENV'] = 'local'
-sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i worker_#{worker_number} stop && bin/delayed_job -i"\
-  "worker_#{worker_number} --queue=simulations start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
+if options[:windows]
+  sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i worker_#{worker_number} stop "\
+    "&& bin/delayed_job -i worker_#{worker_number} --queue=simulations start --log-dir=\"#{log_dir}\" "\
+    "--pid-dir=\"#{project_dir}\""
+else
+  sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i worker_#{worker_number} stop && bin/delayed_job -i "\
+    "worker_#{worker_number} --queue=simulations start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
+end
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 

@@ -32,7 +32,9 @@ options = {
     port: 8080
 }
 opts = ::OptionParser.new do |o|
-  o.banner = 'Usage: rails_command [options] LOG_DIR, PROJECT_DIR, DB_PORT'
+  o.banner = 'Usage: rails_command [options] RUBY_EXE LOG_DIR, PROJECT_DIR, DB_PORT'
+  o.separator ''
+  o.separator 'RUBY_EXE: Absolute path to the ruby executable to use'
   o.separator 'LOG_DIR: Absolute path of the directory to write the Delayed Jobs log to'
   o.separator 'PROJECT_DIR: Absolute path to the PAT project DIRECTORY'
   o.separator 'DB_PORT: Port used by the mongod instance'
@@ -43,15 +45,18 @@ end
 
 # Parse arguments and verify them
 opts.parse!(argv)
+ruby_exe = argv.shift
 log_dir = argv.shift
 project_dir = argv.shift
 db_port = argv.shift
 inputs_empty = log_dir.nil? | project_dir.nil? | db_port.nil?
-fail 'LOG_DIR, PROJECT_DIR, and DB_PORT are all required for execution' if inputs_empty
+fail 'RUBY_EXE, LOG_DIR, PROJECT_DIR, and DB_PORT are all required for execution' if inputs_empty
 error_msg = ''
+error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, is not absolute. " unless Pathname.new(ruby_exe).absolute?
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
 fail error_msg unless error_msg.empty?
+error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, does not exist on the file system. " unless File.exists? ruby_exe
 error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exists? log_dir
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless
   Dir.exists? project_dir
@@ -60,9 +65,7 @@ fail error_msg unless error_msg.empty?
 # Create the system call to use
 local_pid_file = File.join(project_dir, 'server.pid')
 bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))
-bundle_path += '.bat' if options[:windows]
 rails_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rails'))
-rails_path += '.bat' if options[:windows]
 ::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server')))
 ::ENV['OS_SERVER_MONGO_PORT'] = db_port
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
@@ -70,7 +73,8 @@ rails_path += '.bat' if options[:windows]
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:port]
 ::ENV['RAILS_ENV'] = 'local'
 if options[:windows]
-  sys_call = "\"#{bundle_path}\" exec \"#{rails_path}\" s -p #{options[:port]} -P #{local_pid_file}"
+  sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rails_path}\" s -p #{options[:port]} -P "\
+    "#{local_pid_file}"
 else
   sys_call = "#{bundle_path} exec #{rails_path} s -p #{options[:port]} -P #{local_pid_file}"
 end

@@ -145,8 +145,8 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   if is_windows?
     mongod_command = "\"#{ruby_path}\" \"#{mongod_command_path}\" -w -p #{mongod_port} \"#{mongod_log_path}\" "\
       "\"#{mongo_directory}\" \"#{mongo_db_directory}\""
-    rails_command = "\"#{ruby_path}\" \"#{rails_command_path}\" -w -p #{rails_port} \"#{rails_log_path}\" "\
-      "\"#{project_directory}\" #{mongod_port}"
+    rails_command = "\"#{ruby_path}\" \"#{rails_command_path}\" -w -p #{rails_port} \"#{ruby_path}\" "\
+      "\"#{rails_log_path}\" \"#{project_directory}\" #{mongod_port}"
     dj_server_command = "\"#{ruby_path}\" \"#{dj_server_command_path}\" -w \"#{ruby_path}\" \"#{rails_log_path}\" "\
       "\"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\""
     dj_worker_commands = []
@@ -158,8 +158,8 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   else
     mongod_command = "#{ruby_path} #{mongod_command_path} -p #{mongod_port} #{mongod_log_path} #{mongo_directory} "\
       "#{mongo_db_directory}"
-    rails_command = "#{ruby_path} #{rails_command_path} -p #{rails_port} #{rails_log_path} #{project_directory} "\
-      "#{mongod_port}"
+    rails_command = "#{ruby_path} #{rails_command_path} -p #{rails_port} #{ruby_path} #{rails_log_path} "\
+      "#{project_directory} #{mongod_port}"
     dj_server_command = "#{ruby_path} #{dj_server_command_path} #{ruby_path} #{rails_log_path} #{project_directory} "\
       "#{mongod_port} #{rails_port}"
     dj_worker_commands = []
