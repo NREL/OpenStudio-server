@@ -37,13 +37,14 @@ gem 'sys-filesystem'
 # gem 'will_paginate'
 gem 'jquery-rails'
 gem 'kaminari'
+gem 'kaminari-mongoid'
 
 # job queuing
 gem 'delayed_job_mongoid'
 gem 'daemons'
 
 # http(s) requests
-gem 'faraday' # TODO: can this be deprecated
+gem 'faraday' # TODO: can this be deprecated?
 
 # Gems used only for assets and not required
 # in production environments by default.

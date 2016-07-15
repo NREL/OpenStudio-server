@@ -137,6 +137,8 @@ GEM
     kaminari (0.17.0)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
+    kaminari-mongoid (0.1.2)
+      kaminari
     libv8 (3.16.14.15)
     libxml-ruby (2.9.0)
     loofah (2.0.3)
@@ -355,6 +357,7 @@ DEPENDENCIES
   jquery-rails
   json
   kaminari
+  kaminari-mongoid
   libv8
   libxml-ruby
   meta_request
