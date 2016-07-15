@@ -126,7 +126,7 @@ git config --global url."https://".insteadOf git://
 
 ### Official AMI Generation
 
-`rake release`
+For OpenStudio PAT, Alex Swindler has to copy over the AMI ID from this file: http://developer.nrel.gov/downloads/buildings/openstudio/api/amis_v2.json to this file: http://developer.nrel.gov/downloads/buildings/openstudio/rsrc/amis.json
 
 ## Questions?
 
