@@ -1,11 +1,13 @@
 source 'http://rubygems.org'
 
+eval_gemfile File.join(File.dirname(__FILE__), "../bin/Gemfile")
+
 gem 'rails', '4.2'
 
 # data modules
 gem 'json'
 gem 'jbuilder'
-gem 'rubyzip'
+gem 'rubyzip', '~> 1.2.0'
 
 # database modules
 gem 'mongoid', '~> 5.1'
@@ -52,8 +54,8 @@ gem 'uglifier'
 gem 'sprockets-rails'
 
 # For workers - and other dependencies for measures
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'intermediate-pat2.0'
-gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
+gem 'openstudio-workflow', '1.0.0.pat1'
+gem 'openstudio-standards', '0.1.4'
 gem 'msgpack'
 gem 'multi_json'
 gem 'oj'
@@ -77,6 +79,6 @@ group :development, :test do
 
   # these two openstudio gems are needed for starting up the cluster
   # and running the analysis in the integration tests
-  gem 'openstudio-aws'
-  gem 'openstudio-analysis', github: 'NREL/OpenStudio-analysis-gem', branch: 'develop'
+  gem 'openstudio-aws', '~> 0.4'
+  gem 'openstudio-analysis', '1.0.0.pat1'
 end
