@@ -110,15 +110,15 @@ ADD /install_packages.R install_packages.R
 RUN Rscript install_packages.R
 
 # Install custom packages
-ADD /lib/R-packages /srv/R/lib/R-packages
-RUN R CMD INSTALL /srv/R/lib/R-packages/NRELmoo*.tar.gz /srv/R/lib/R-packages/NRELpso*.tar.gz
+ADD /lib/R-packages /opt/openstudio/R/lib/R-packages
+RUN R CMD INSTALL /opt/openstudio/R/lib/R-packages/NRELmoo*.tar.gz /opt/openstudio/R/lib/R-packages/NRELpso*.tar.gz
 
 # Add the remaining files
-ADD /lib /srv/R/lib
+ADD /lib /opt/openstudio/R/lib
 
 # Install Gems
 RUN gem install bundler
-RUN cd /srv/R/lib && bundle install
+RUN cd /opt/openstudio/R/lib && bundle install
 
 ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
