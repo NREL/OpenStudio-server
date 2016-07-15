@@ -1,7 +1,7 @@
 GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: 3b1f27f8fe704bf688fbeee00dce92ebbdd7635b
-  branch: osw
+  revision: bf161d9f3ee6f3af3ca6a13c60ab46299a25b4cc
+  branch: osw-working
   specs:
     openstudio-workflow (1.0.0.alpha.0)
 
@@ -194,7 +194,7 @@ GEM
     nokogiri (1.6.5)
       mini_portile (~> 0.6.0)
     oj (2.17.1)
-    openstudio-analysis (1.0.0.pat1)
+    openstudio-analysis (1.0.0.pat2)
       bcl (~> 0.5.5)
       dencity (~> 0.1.0)
       faraday (~> 0.8)
@@ -373,7 +373,7 @@ DEPENDENCIES
   net-ssh
   nokogiri (= 1.6.5)
   oj
-  openstudio-analysis (= 1.0.0.pat1)
+  openstudio-analysis (= 1.0.0.pat2)
   openstudio-aws (~> 0.4)
   openstudio-standards (= 0.1.4)
   openstudio-workflow!

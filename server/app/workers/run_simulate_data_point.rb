@@ -123,17 +123,14 @@ class RunSimulateDataPoint
     output_adapter = OpenStudio::Workflow.load_output_adapter 'local', adapter_options
     run_options = {debug: true, cleanup: false}
 
-    k = OpenStudio::Workflow::Run.new input_adapter,
-                                      output_adapter,
-                                      File.dirname(osw_path),
-                                      run_options
+    k = OpenStudio::Workflow::Run.new input_adapter, output_adapter, File.dirname(osw_path), run_options
     sim_logger.info "Running workflow"
     k.run
-    sim_logger.info "Final run state is #{k.final_state}"
+    sim_logger.info "Final run state is #{k.current_state}"
 
     # Save the results to the database - i was PUTing these to the server,
     # but the values were not be typed correctly within RestClient.
-    results_file = "#{simulation_dir}/data_point_out.json"
+    results_file = "#{simulation_dir}/run/measure_attributes.json"
     if File.exist? results_file
       results = JSON.parse(File.read(results_file), symbolize_names: true)
 

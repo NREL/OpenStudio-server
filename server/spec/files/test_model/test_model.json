@@ -348,8 +348,8 @@
           "measure_definition_display_name": "Reduce Lighting Loads by Percentage",
           "measure_definition_name": "reduce_lighting_loads_by_percentage",
           "measure_definition_name_xml": null,
-          "measure_definition_uuid": "729d4454-58ee-420c-bb99-8414872d775d",
-          "measure_definition_version_uuid": "bed1e32f-27ac-4ea6-abce-5db848072444",
+          "measure_definition_uuid": "9b244409-3cc5-4017-8a4e-0e4cf07a25c2",
+          "measure_definition_version_uuid": "b5822350-defe-43ba-8bef-0b7fb001d4fc",
           "arguments": [
             {
               "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
@@ -434,8 +434,8 @@
               "maximum": 70.0,
               "relation_to_output": null,
               "static_value": 0.0,
-              "uuid": "5914e4a2-f083-495e-932d-9d9b3259a059",
-              "version_uuid": "781eed68-70a4-4007-89c8-5a99ce094745",
+              "uuid": "e94b3f96-6256-47aa-9554-888bd42a81fa",
+              "version_uuid": "50b59580-eafa-456a-ba8a-21ce85768709",
               "variable": true,
               "uncertainty_description": {
                 "type": "triangle",
@@ -477,8 +477,8 @@
           "measure_definition_display_name": "Set R-value of Insulation for Roofs to a Specific Value",
           "measure_definition_name": "set_r_value_of_insulation_for_roofs_to_a_specific_value",
           "measure_definition_name_xml": null,
-          "measure_definition_uuid": "5be462da-d194-483e-977e-3c7d724b84ca",
-          "measure_definition_version_uuid": "bf3562fa-bd4c-4d33-83bb-b837a8b4d2cc",
+          "measure_definition_uuid": "c8ed5932-41c2-4c09-bc7c-29c78c9bdc04",
+          "measure_definition_version_uuid": "7477ebff-6b15-4b03-b0fa-0e5629fae711",
           "arguments": [
             {
               "display_name": "Roof R-Value",
@@ -528,8 +528,8 @@
           "measure_definition_display_name": "Window to Wall Ratio South",
           "measure_definition_name": "window_to_wall_ratio_south",
           "measure_definition_name_xml": null,
-          "measure_definition_uuid": "5370c472-6f38-4f2e-b281-0e8418a2d4c5",
-          "measure_definition_version_uuid": "31c9fd40-2fa5-4566-9aa9-397f7721130f",
+          "measure_definition_uuid": "d5d6ef1d-ee3d-4578-ba68-66c5a8aa9ef7",
+          "measure_definition_version_uuid": "7bdcdac5-b8b0-46f6-8375-33ec6800c626",
           "arguments": [
             {
               "display_name": "South WWR",
@@ -571,8 +571,8 @@
           "measure_definition_display_name": "Adjust Thermostat Setpoints by Degrees",
           "measure_definition_name": "adjust_thermostat_setpoints_by_degrees",
           "measure_definition_name_xml": null,
-          "measure_definition_uuid": "46c24c59-1ccd-4e67-b9a1-958e6ef20232",
-          "measure_definition_version_uuid": "9697735a-d19e-4b86-b1d8-dac973ba7b98",
+          "measure_definition_uuid": "71cb2e38-9baf-453b-8a39-bdb308cdeeeb",
+          "measure_definition_version_uuid": "44cc1d78-30f5-4557-8bde-9fa489c50843",
           "arguments": [
             {
               "display_name": "Alter Design Day Thermostats?",
@@ -601,8 +601,8 @@
               "maximum": 2.0,
               "relation_to_output": null,
               "static_value": 1.0,
-              "uuid": "fcc2fea6-5244-4661-97c8-2c4ff60d9247",
-              "version_uuid": "3907cee8-c0db-4284-91a1-a7502e9f1a11",
+              "uuid": "de14aaf1-7732-490e-9965-719f288a9b56",
+              "version_uuid": "65486a55-7999-4fd7-b6d3-82a4d22ac764",
               "variable": true,
               "uncertainty_description": {
                 "type": "uniform",
@@ -648,8 +648,8 @@
               "maximum": 2.0,
               "relation_to_output": null,
               "static_value": -1.0,
-              "uuid": "21d61008-a39b-4582-95e4-2091c0d67eac",
-              "version_uuid": "f7d79254-02b9-45ee-b581-8a9a11b29a3b",
+              "uuid": "2ba3c3cf-07bb-447e-845c-b445527069b9",
+              "version_uuid": "b7941969-4d70-4c7b-b27b-da5dcd007747",
               "variable": true,
               "uncertainty_description": {
                 "type": "uniform",
@@ -680,41 +680,6 @@
             }
           ],
           "workflow_index": 3
-        },
-        {
-          "name": "xcel_eda_tariff_selection_and_model_setup",
-          "display_name": "Xcel EDA Tariff Selection and Model Setup",
-          "measure_type": "EnergyPlusMeasure",
-          "measure_definition_class_name": "XcelEDATariffSelectionandModelSetup",
-          "measure_definition_directory": "./measures/XcelEDATariffSelectionandModelSetup",
-          "measure_definition_directory_local": "/Users/nlong/working/OpenStudio-analysis-spreadsheet/measures/XcelEDATariffSelectionandModelSetup",
-          "measure_definition_display_name": "Xcel EDA Tariff Selection and Model Setup",
-          "measure_definition_name": "xcel_eda_tariff_selection_and_model_setup",
-          "measure_definition_name_xml": null,
-          "measure_definition_uuid": "af92fd4f-ad4d-4a5f-a0bf-ba4485dbf32d",
-          "measure_definition_version_uuid": "57567636-9912-4237-8248-b6ff0b32c59d",
-          "arguments": [
-            {
-              "display_name": "Select an Electricity Tariff.",
-              "display_name_short": "Select an Electricity Tariff.",
-              "name": "elec_tar",
-              "value_type": "string",
-              "default_value": "Secondary General",
-              "value": "Secondary General"
-            },
-            {
-              "display_name": "Select a Gas Tariff.",
-              "display_name_short": "Select a Gas Tariff.",
-              "name": "gas_tar",
-              "value_type": "string",
-              "default_value": "Large CG",
-              "value": "Large CG"
-            }
-          ],
-          "variables": [
-
-          ],
-          "workflow_index": 4
         }
       ]
     },

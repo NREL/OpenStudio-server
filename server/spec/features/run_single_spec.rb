@@ -79,7 +79,7 @@ describe "RunSingle" do
         sleep 1
       end
     }
-    threads.each {|t| t.join}
+    threads.each {|t| t.join  }
 
     expect(Delayed::Job.count).to eq(0)
   end
