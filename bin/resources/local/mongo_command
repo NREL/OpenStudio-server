@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+######################################################################
+#  Copyright (c) 2008-2016, Alliance for Sustainable Energy.
+#  All rights reserved.
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+######################################################################
+
+::Signal.trap('INT') { abort }
+
+require 'optparse'
+require 'pathname'
+
+# Set up options parsing
+argv = ARGV.dup
+options = {
+  debug: false,
+  port: 27017,
+  windows: false
+}
+opts = ::OptionParser.new do |o|
+  o.banner = 'Usage: mongo_command [options] LOG_DIR INVOCATION_DIR DB_DIR'
+  o.separator ''
+  o.separator 'LOG_DIR: Absolute path of directory to write the mongod log to'
+  o.separator 'INVOCATION_DIR: Absolute path of directory to invoke mongod from'
+  o.separator 'DB_DIR: Absolute path of directory for the mongod instance database'
+  o.separator ''
+  o.on('-p', '--port NUMBER', 'Port to start mongod on, defaults to 27017') { |p| options[:port] = p }
+  o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+end
+
+# Parse arguments and verify them
+opts.parse!(argv)
+log_dir = argv.shift
+invocation_dir = argv.shift
+db_dir = argv.shift
+inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil?
+fail 'LOG_DIR, INVOCATION_DIR, and DB_DIR are all required for execution' if inputs_empty
+error_msg = ''
+error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
+error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute. " unless
+  Pathname.new(invocation_dir).absolute?
+error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathname.new(db_dir).absolute?
+fail error_msg unless error_msg.empty?
+error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exists? log_dir
+error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless
+  Dir.exists? invocation_dir
+error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exists? db_dir
+fail error_msg unless error_msg.empty?
+
+# Create the system call to use
+::Dir.chdir(File.absolute_path(invocation_dir))
+if options[:windows]
+  sys_call = "mongod.exe --port #{options[:port]} --logpath \"#{log_dir}/mongo.log\" --dbpath \"#{db_dir}\""
+else
+  sys_call = "mongod --port #{options[:port]} --logpath #{log_dir}/mongo.log --dbpath #{db_dir}"
+end
+puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
+
+# Execute the system call
+exec sys_call

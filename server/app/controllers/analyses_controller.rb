@@ -1,4 +1,38 @@
-require 'core_extensions'
+#*******************************************************************************
+# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# (1) Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# (2) Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# (3) Neither the name of the copyright holder nor the names of any contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission from the respective party.
+#
+# (4) Other than as required in clauses (1) and (2), distributions in any form
+# of modifications or other derivative works may not use the "OpenStudio"
+# trademark, "OS", "os", or any other confusingly similar designation without
+# specific prior written permission from Alliance for Sustainable Energy, LLC.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES
+# GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#*******************************************************************************
+
 require 'zip'
 
 class AnalysesController < ApplicationController
@@ -249,10 +283,10 @@ class AnalysesController < ApplicationController
 
   # version this in order to allow for analyses/status.json to return all the analyses with the status
   # @param :id [String] The ID of the specific analysis to get the status
-  # @param :jobs [String] Constraint on the data point completion (e.g. started, queued, completed)
+  # @param :jobs [String] Constraint on the datapoint completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
-    analysis_only_fields = [:status, :analysis_type, :jobs]
+    analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline14]
     data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :download_status]
 
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
@@ -271,6 +305,8 @@ class AnalysesController < ApplicationController
             id: a.id,
             status: a.status,
             analysis_type: a.analysis_type,
+            run_flag: a.run_flag,
+            exit_on_guideline14: a.exit_on_guideline14,
             jobs: a.jobs.order_by(:index.asc).map do |j|
                     {
                       index: j.index,
@@ -776,7 +812,7 @@ class AnalysesController < ApplicationController
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].tr('.', '|')] }]
     # logger.info "Variable name map is #{variable_name_map}"
 
-    # logger.info 'looking for data points'
+    # logger.info 'looking for datapoints'
 
     # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
     # below is to map the inputs/outputs to a flat hash.
@@ -925,22 +961,22 @@ class AnalysesController < ApplicationController
     end
     logger.info "finished conversion: #{Time.now - start_time}"
 
-    # If the data are guaranteed to exist in the same column structure for each data point AND the
+    # If the data are guaranteed to exist in the same column structure for each datapoint AND the
     # length of each column is the same (especially no nils), then you can use the method below
     # out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
     # ex_hash.each { |k, v| h[k] = h[k] + [v] }
     # end
 
     # out_hash.each_key do |k|
-    #  #Rails.logger.info "Length is #{out_hash[k].size}"
-    #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    #  #logger.info "Length is #{out_hash[k].size}"
+    #  logger.info "#{k}  -   #{out_hash[k]}"
     # end
 
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
 
-    require 'rserve/simpler'
-    r = Rserve::Simpler.new
+    r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
 
     start_time = Time.now
     logger.info 'starting creation of data frame'

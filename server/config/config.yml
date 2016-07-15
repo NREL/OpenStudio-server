@@ -1,18 +1,26 @@
 defaults: &defaults
   sim_root_path: /mnt/openstudio
+  server_asset_path: /mnt/openstudio/server
   ruby_bin_dir: ':ruby_bin_dir'
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
   rails_log_path: ':rails_root/log'
+  rserve_hostname: 'localhost'
+  rserve_port: 6311
+  r_scripts_path: ':rails_root/../docker/R/lib'
 
 development:
   <<: *defaults
   ruby_bin_dir: ':ruby_bin_dir'
+  server_asset_path: ':rails_root/public/assets/server'
   sim_root_path: ':rails_root/../worker-nodes'
   os_server_host_url: 'http://localhost:3000'
 
 docker:
   <<: *defaults
+  os_server_host_url: 'http://web:80'
   ruby_bin_dir: /usr/local/ruby
+  rserve_hostname: 'rserve'
+  r_scripts_path: /opt/openstudio/R/lib
 
 test:
   <<: *defaults
@@ -25,4 +33,6 @@ production:
 local:
   <<: *defaults
   sim_root_path: ':rails_root/../worker-nodes'
+  server_asset_path: ':rails_root/public/assets/server'
+  os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
   rails_log_path: <%= ENV['OS_SERVER_LOG_PATH'] %>

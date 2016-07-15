@@ -1,3 +1,38 @@
+#*******************************************************************************
+# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# (1) Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# (2) Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# (3) Neither the name of the copyright holder nor the names of any contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission from the respective party.
+#
+# (4) Other than as required in clauses (1) and (2), distributions in any form
+# of modifications or other derivative works may not use the "OpenStudio"
+# trademark, "OS", "os", or any other confusingly similar designation without
+# specific prior written permission from Alliance for Sustainable Energy, LLC.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES
+# GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#*******************************************************************************
+
 class Analysis
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -35,16 +70,18 @@ class Analysis
   # Relationships
   belongs_to :project
 
-  has_many :data_points
-  has_many :algorithms
-  has_many :variables # right now only having this a one-to-many (ideally this can go both ways)
-  has_many :measures
-  has_many :paretos
-  has_many :jobs
+  has_many :data_points, dependent: :destroy
+  has_many :algorithms, dependent: :destroy
+  has_many :variables, dependent: :destroy
+  has_many :measures, dependent: :destroy
+  has_many :paretos, dependent: :destroy
+  has_many :jobs, dependent: :destroy
+
+  embeds_many :result_files
 
   # Indexes
-  index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index({uuid: 1}, unique: true)
+  index({id: 1}, unique: true)
   index(name: 1)
   index(created_at: 1)
   index(updated_at: -1)
@@ -57,40 +94,35 @@ class Analysis
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :remove_dependencies
+  before_destroy :queue_delete_files
 
   def self.status_states
     %w(na init queued started completed)
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = { skip_init: false }
+    defaults = {skip_init: false}
     options = defaults.merge(options)
 
-    Rails.logger.info "calling start on #{analysis_type} with options #{options}"
+    logger.info "Calling start on #{analysis_type} with options #{options}"
 
-    # TODO: need to also check if the workers have been initialized, if so, then skip
     unless options[:skip_init]
-      Rails.logger.info("Queuing up analysis #{uuid}")
+      logger.info("Queuing up analysis #{uuid}")
       save!
-
-      # TODO: Remove the idea of initialing workers here. The cluster needs to be defined before running this method
-      Rails.logger.info('Initializing workers in database')
-      # initialize_workers(options)
     end
 
-    Rails.logger.info("Starting #{analysis_type}")
+    logger.info("Starting #{analysis_type}")
     if no_delay
-      Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
+      logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
       save!
       reload
-      abr = "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
+      abr = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
-      Rails.logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
+      logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      job = Delayed::Job.enqueue "Analysis::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
+      job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
       aj.delayed_job_id = job.id
       aj.save!
 
@@ -107,7 +139,7 @@ class Analysis
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
-    Rails.logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
+    logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
     start(no_delay, analysis_type, options)
 
@@ -120,14 +152,17 @@ class Analysis
     self.run_flag = false
     # The ensure block will clean up the jobs and save the statuses
 
-    # jobs.each do |j|
-    #   unless j.status == 'completed'
-    #     j.status = 'completed'
-    #     j.end_time = Time.new
-    #     j.status_message = 'canceled by user'
-    #     j.save
-    #   end
-    # end
+    jobs.each do |j|
+      unless j.status == 'completed'
+        j.status = 'completed'
+        j.end_time = Time.new
+        j.status_message = 'Canceled by user'
+        j.save!
+      end
+    end
+
+    # Remove all the queued delayed jobs for this analysis
+    data_points.where(status: 'queued').each { |dp| dp.destroy }
 
     [save!, errors]
   end
@@ -136,10 +171,10 @@ class Analysis
   def pull_out_os_variables
     pat_json = false
     # get the measures first
-    Rails.logger.info('pulling out openstudio measures')
+    logger.info('pulling out openstudio measures')
     # note the measures first
     if self['problem'] && self['problem']['workflow']
-      Rails.logger.info('found a problem and workflow')
+      logger.info('found a problem and workflow')
       self['problem']['workflow'].each do |wf|
         # Currently the PAT format has measures and I plan on ignoring them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
@@ -159,7 +194,7 @@ class Analysis
     end
 
     if pat_json
-      Rails.logger.error('Appears to be a PAT JSON formatted file, pulling variables out of metadata for now')
+      logger.error('Appears to be a PAT JSON formatted file, pulling variables out of metadata for now')
       if os_metadata && os_metadata['variables']
         os_metadata['variables'].each do |variable|
           var = Variable.create_from_os_json(id, variable)
@@ -170,7 +205,7 @@ class Analysis
     # pull out the output variables
     if output_variables
       output_variables.each do |variable|
-        Rails.logger.info "Saving off output variables: #{variable}"
+        logger.info "Saving off output variables: #{variable}"
         var = Variable.create_output_variable(id, variable)
       end
     end
@@ -209,7 +244,7 @@ class Analysis
       # TODO: can we delete the gsub'ing -- as i think the v.name is always the machine name now
       mappings[var['_id']] = v.name.tr(' ', '_') if v
     end
-    Rails.logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
+    logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
 
     # sort before sending back
     Hash[mappings.sort_by { |_, v| v }]
@@ -246,14 +281,24 @@ class Analysis
 
   # Return the list of job statuses
   def jobs_status
-    jobs.order_by(:index.asc).map { |j| { analysis_type: j.analysis_type, status: j.status } }
+    jobs.order_by(:index.asc).map { |j| {analysis_type: j.analysis_type, status: j.status, status_message: j.status_message} }
   end
 
   # Return the last job's status for the analysis
   def status
-    j = jobs.last
-    if j && j.status
-      return j.status
+    j = jobs_status
+    if j
+      return j.last[:status] rescue 'unknown'
+    else
+      return 'unknown'
+    end
+  end
+
+  # Return the last job's status message
+  def job_status_message
+    j = jobs_status
+    if j
+      return j.last[:status_message] rescue 'unknown'
     else
       return 'unknown'
     end
@@ -295,47 +340,12 @@ class Analysis
 
   protected
 
-  # TODO: Make these :dependent_destroys
-  def remove_dependencies
-    logger.info("Found #{data_points.size} records")
-    data_points.each do |record|
-      logger.info("removing #{record.id}")
-      record.destroy
-    end
+  # Queue up the task to delete all the files in the background
+  def queue_delete_files
+    analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{self.id}"
 
-    logger.info("Found #{algorithms.size} records")
-    algorithms.each do |record|
-      logger.info("removing #{record.id}")
-      record.destroy
-    end
-
-    logger.info("Found #{measures.size} records")
-    if measures
-      measures.each do |record|
-        logger.info("removing #{record.id}")
-        record.destroy
-      end
-    end
-
-    logger.info("Found #{variables.size} records")
-    if variables
-      variables.each do |record|
-        logger.info("removing #{record.id}")
-        record.destroy
-      end
-    end
-
-    # delete any delayed jobs items
-    delayed_job_ids.each do |djid|
-      next unless djid
-      dj = Delayed::Job.find(djid)
-      dj.delete unless dj.nil?
-    end
-
-    jobs.each do |r|
-      logger.info("removing #{r.id}")
-      r.destroy
-    end
+    logger.error "Will not delete analysis directory because it does not conform to pattern" unless analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
   end
 
   def verify_uuid

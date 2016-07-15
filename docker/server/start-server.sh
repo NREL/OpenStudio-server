@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-cd /srv && bundle exec rake db:mongoid:drop
-cd /srv && bundle exec rake db:mongoid:create_indexes
-cd /srv && bundle exec rake setup:docker
-service supervisord start
-# Wait for supervisor to start?
+# Always create new indexes in case the models have changed
+cd /opt/openstudio/server && bundle exec rake db:mongoid:create_indexes
 
 /opt/nginx/sbin/nginx

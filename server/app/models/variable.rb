@@ -1,3 +1,38 @@
+#*******************************************************************************
+# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# (1) Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# (2) Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# (3) Neither the name of the copyright holder nor the names of any contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission from the respective party.
+#
+# (4) Other than as required in clauses (1) and (2), distributions in any form
+# of modifications or other derivative works may not use the "OpenStudio"
+# trademark, "OS", "os", or any other confusingly similar designation without
+# specific prior written permission from Alliance for Sustainable Energy, LLC.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES
+# GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#*******************************************************************************
+
 class Variable
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -40,7 +75,7 @@ class Variable
   # Relationships
   belongs_to :analysis, index: true
   belongs_to :measure
-  has_many :preflight_images
+  has_many :preflight_images, dependent: :destroy
 
   # Indexes
   index({ uuid: 1 }, unique: true)
@@ -58,16 +93,15 @@ class Variable
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :remove_dependencies
 
   def self.create_from_os_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
     if var
-      Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
+      logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
     else
-      Rails.logger.info "create new variable for os_json['uuid']"
+      logger.info "create new variable for os_json['uuid']"
       var = Variable.find_or_create_by(analysis_id: analysis_id, uuid: os_json['uuid'])
-      Rails.logger.info var.inspect
+      logger.info var.inspect
     end
 
     exclude_fields = %w(uuid type)
@@ -85,9 +119,9 @@ class Variable
   def self.create_output_variable(analysis_id, json)
     var = Variable.where(analysis_id: analysis_id, name: json['name']).first
     if var
-      Rails.logger.warn "Variable already exists for '#{var.name}'"
+      logger.warn "Variable already exists for '#{var.name}'"
     else
-      Rails.logger.info "Adding a new output variable named: '#{json['name']}'"
+      logger.info "Adding a new output variable named: '#{json['name']}'"
       var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'])
     end
 
@@ -135,7 +169,7 @@ class Variable
     if var
       raise "Variable already exists for '#{var.name}' : '#{var.uuid}'"
     else
-      Rails.logger.info("Adding a new variable/argument named: '#{os_json['display_name']}' with UUID '#{os_json['uuid']}'")
+      logger.info("Adding a new variable/argument named: '#{os_json['display_name']}' with UUID '#{os_json['uuid']}'")
       var = Variable.find_or_create_by(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid'])
     end
 
@@ -191,11 +225,11 @@ class Variable
     # note that the measure.name should be unique
     if os_json['variable'] || os_json['pivot']
       # Creates a unique ID for this measure
-      Rails.logger.info "Setting variable name to: '#{measure.name}.#{os_json['argument']['name']}'"
+      logger.info "Setting variable name to: '#{measure.name}.#{os_json['argument']['name']}'"
       var.name = "#{measure.name}.#{os_json['argument']['name']}"
     else
       # Just register a note when this is a static argument
-      Rails.logger.info "Static variable argument: '#{measure.name}.#{var.name}'"
+      logger.info "Static variable argument: '#{measure.name}.#{var.name}'"
       # var.name = "#{measure.name}.#{var.name}"
       # var.name_with_measure = "#{measure.name}.#{var.name}"
     end
@@ -215,17 +249,17 @@ class Variable
 
     pivot_hash = {}
     pivot_variables.each do |var|
-      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
-      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
+      logger.info "Adding variable '#{var.name}' to pivot list"
+      logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
       values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
-      Rails.logger.info "pivot variable values are #{values}"
+      logger.info "pivot variable values are #{values}"
       pivot_hash[var.uuid] = values
     end
 
     # if there are multiple pivots, then smash the hash of arrays to form a array of hashes
-    pivot_array = Analysis::Core.product_hash(pivot_hash)
-    # pivot_array = Analysis::Core.hash_of_array_to_array_of_hash(pivot_hash)
-    Rails.logger.info "pivot array is #{pivot_array}"
+    pivot_array = AnalysisLibrary::Core.product_hash(pivot_hash)
+    # pivot_array = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(pivot_hash)
+    logger.info "pivot array is #{pivot_array}"
 
     pivot_array
   end
@@ -295,10 +329,10 @@ class Variable
   end
 
   def map_discrete_hash_to_array
-    Rails.logger.info "Discrete values and weights are #{discrete_values_and_weights}"
-    Rails.logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
+    logger.info "Discrete values and weights are #{discrete_values_and_weights}"
+    logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
     ave_weight = (1.0 / discrete_values_and_weights.size)
-    Rails.logger.info "average weight is #{ave_weight}"
+    logger.info "average weight is #{ave_weight}"
     discrete_values_and_weights.each_index do |i|
       unless discrete_values_and_weights[i].key? 'weight'
         discrete_values_and_weights[i]['weight'] = ave_weight
@@ -316,12 +350,5 @@ class Variable
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!
-  end
-
-  def remove_dependencies
-    # TODO: need to reset permissions before we can actually delete the files
-    # preflight_images.each do |pfi|
-    #  pfi.destroy
-    # end
   end
 end

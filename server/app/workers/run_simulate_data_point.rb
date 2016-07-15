@@ -1,3 +1,38 @@
+#*******************************************************************************
+# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# (1) Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# (2) Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# (3) Neither the name of the copyright holder nor the names of any contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission from the respective party.
+#
+# (4) Other than as required in clauses (1) and (2), distributions in any form
+# of modifications or other derivative works may not use the "OpenStudio"
+# trademark, "OS", "os", or any other confusingly similar designation without
+# specific prior written permission from Alliance for Sustainable Energy, LLC.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES
+# GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#*******************************************************************************
+
 # Command line based interface to execute the Workflow manager.
 
 # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
@@ -5,20 +40,26 @@
 
 class RunSimulateDataPoint
   def initialize(data_point_id, options = {})
-    defaults = {run_workflow_method: 'workflow'}.with_indifferent_access
+    defaults = { run_workflow_method: 'workflow' }.with_indifferent_access
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
 
     # For now just track the status here. Ideally we would use delayed jobs
     # or a plugin for delayed jobs to track the status of the job.
-    # Also, should we use the API to set these or relay on mongoid.
-    @data_point.update({run_queue_time: Time.now, status: 'queued'})
+    
+    # Also, should we use the API to set these or relay on mongoid?
+    @data_point.update(run_queue_time: Time.now, status: 'queued')
     @data_point.save!
   end
 
   def perform
-    @data_point.update({run_start_time: Time.now, status: 'started'})
+    if @data_point.nil?
+      status_message = 'Could not find datapoint'
+      return
+    end
+
+    @data_point.update(run_start_time: Time.now, status: 'started')
 
     # Create the analysis directory
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
@@ -32,18 +73,18 @@ class RunSimulateDataPoint
     sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     sim_logger.info "Analysis directory is #{analysis_dir}"
     sim_logger.info "Simulation directory is #{simulation_dir}"
-    sim_logger.info "Run data point type/file is #{@options[:run_workflow_method]}"
+    sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
-    download_analysis_zip(sim_logger)
+    initialize_worker(sim_logger)
 
     # delete any existing data files from the server in case this is a 'rerun'
     RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
 
-    # Download the data point to run and save to disk
+    # Download the datapoint to run and save to disk
     url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
-    sim_logger.info "Downloading data point from #{url}"
+    sim_logger.info "Downloading datapoint from #{url}"
     r = RestClient.get url
-    raise "Analysis JSON could not be downloaded" unless r.code == 200
+    raise 'Analysis JSON could not be downloaded' unless r.code == 200
     # Parse to JSON to save it again with nice formatting
     File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
 
@@ -71,6 +112,7 @@ class RunSimulateDataPoint
 
     sim_logger.info 'Creating Workflow Manager instance'
     sim_logger.info "Directory is #{simulation_dir}"
+
     adapter_options = {
         workflow_filename: File.basename(osw_path),
         datapoint_filename: "#{simulation_dir}/data_point.json",
@@ -98,36 +140,39 @@ class RunSimulateDataPoint
       # push the results to the server
       @data_point.update(results: results)
 
-      # TODO: Need to create a chord to run at the end of all the data points to finalize the analysis
+      # TODO: Need to create a chord to run at the end of all the datapoints to finalize the analysis
     else
-      fail "Could not find results #{results_file}"
+      raise "Could not find results #{results_file}"
     end
 
     # Post the reports back to the server
     # TODO: check for timeouts and retry
     Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each do |report|
-      RestClient.post(
-          "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file",
-          file: {
-              display_name: File.basename(report, '.*'),
-              type: 'Report',
-              attachment: File.new(report, 'rb')
-          }
-      )
+      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
+      sim_logger.info "Saving report #{report} to #{url}"
+      RestClient.post(url, file: { display_name: File.basename(report, '.*'),
+                                   type: 'Report',
+                                   attachment: File.new(report, 'rb') })
+    end
+
+    report_file = "#{simulation_dir}/objectives.json"
+    if File.exist? report_file
+      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
+      sim_logger.info "Saving report #{report_file} to #{url}"
+      RestClient.post(url, file: { display_name: File.basename(report_file, '.*'),
+                                   type: 'Report',
+                                   attachment: File.new(report_file, 'rb') })
     end
 
     # Post the zip file of results
     # TODO: Do not save the _reports file anymore in the workflow gem
     results_zip = "#{simulation_dir}/data_point.zip"
     if File.exist? results_zip
-      RestClient.post(
-          "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file",
-          file: {
-              display_name: 'Zip File',
-              type: 'Data Point',
-              attachment: File.new(results_zip, 'rb')
-          }
-      )
+      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
+      sim_logger.info "Saving zip #{results_zip} to #{url}"
+      RestClient.post(url, file: { display_name: 'Zip File',
+                                   type: 'Data Point',
+                                   attachment: File.new(results_zip, 'rb') })
     end
 
     @data_point.update(status_message: 'completed normal')
@@ -140,7 +185,7 @@ class RunSimulateDataPoint
     sim_logger.info "Finished #{__FILE__}" if sim_logger
     sim_logger.close if sim_logger
 
-    @data_point.update({run_end_time: Time.now, status: 'completed'})
+    @data_point.update(run_end_time: Time.now, status: 'completed') if @data_point
 
     true
   end
@@ -148,7 +193,7 @@ class RunSimulateDataPoint
   # Method to download and unzip the analysis data. This has some logic
   # in order to handle multiple instances trying to download the file at the
   # same time.
-  def download_analysis_zip(sim_logger)
+  def initialize_worker(sim_logger)
     sim_logger.info "Starting download analysis zip for datapoint #{@data_point.id}"
 
     # If the request is local, then just copy the data over. But how do we
@@ -163,7 +208,7 @@ class RunSimulateDataPoint
     # only call this block if there is no write_lock nor receipt in the dir
     if File.exist? write_lock_file
       # wait until receipt file appears then return
-      while true
+      loop do
         break if File.exist? receipt_file
         sleep 1
       end
@@ -187,9 +232,9 @@ class RunSimulateDataPoint
         # Extract the zip
         OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
 
-        # Download only one copy of the anlaysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
+        # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
         a = RestClient.get "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
-        raise "Analysis JSON could not be downloaded" unless a.code == 200
+        raise 'Analysis JSON could not be downloaded' unless a.code == 200
         # Parse to JSON to save it again with nice formatting
         File.open("#{analysis_dir}/analysis.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
 
@@ -199,21 +244,6 @@ class RunSimulateDataPoint
         files.each do |f|
           run_file(analysis_dir, 'initialize', f, sim_logger)
         end
-
-        # TODO: Get real data from the instance
-        # Register this node with the server
-        data = {
-            compute_node: {
-                node_type: 'worker',
-                hostname: 'localhost',
-                ip_address: '127.0.0.1',
-                enabled: true,
-                cores: 1
-            }
-        }
-
-        url = "#{APP_CONFIG['os_server_host_url']}/compute_nodes"
-        RestClient.post(url, data)
       end
 
       # Now tell all other waiting threads that it is okay to continue
@@ -221,8 +251,12 @@ class RunSimulateDataPoint
       File.open(receipt_file, 'w') { |f| f << Time.now }
     end
 
-    sim_logger.info "Finished worker initialization"
+    sim_logger.info 'Finished worker initialization'
     true
+  end
+
+  # Finalize the worker node by running the scripts
+  def finalize_worker(sim_logger)
   end
 
   # Simple method to write a lock file in order for competing threads to
@@ -244,7 +278,6 @@ class RunSimulateDataPoint
   def analysis_dir
     "#{APP_CONFIG['sim_root_path']}/analysis_#{@data_point.analysis.id}"
   end
-
 
   def simulation_dir
     "#{analysis_dir}/data_point_#{@data_point.id}"

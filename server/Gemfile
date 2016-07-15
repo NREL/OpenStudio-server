@@ -1,11 +1,14 @@
 source 'http://rubygems.org'
 
+
+eval_gemfile File.expand_path(File.join(File.dirname(__FILE__), "../bin/Gemfile"))
+
 gem 'rails', '4.2'
 
 # data modules
 gem 'json'
 gem 'jbuilder'
-gem 'rubyzip'
+gem 'rubyzip', '~> 1.2.0'
 
 # database modules
 gem 'mongoid', '~> 5.1'
@@ -34,13 +37,14 @@ gem 'sys-filesystem'
 # gem 'will_paginate'
 gem 'jquery-rails'
 gem 'kaminari'
+gem 'kaminari-mongoid'
 
 # job queuing
 gem 'delayed_job_mongoid'
 gem 'daemons'
 
 # http(s) requests
-gem 'faraday' # TODO: can this be deprecated
+gem 'faraday' # TODO: can this be deprecated?
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -52,9 +56,10 @@ gem 'uglifier'
 gem 'sprockets-rails'
 
 # For workers - and other dependencies for measures
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw-server'
-gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
-gem 'msgpack'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
+gem 'openstudio-standards', '0.1.4'
+gem 'msgpack', '~> 1.0'
+
 gem 'multi_json'
 gem 'oj'
 gem 'rest-client'
@@ -77,7 +82,6 @@ group :development, :test do
 
   # these two openstudio gems are needed for starting up the cluster
   # and running the analysis in the integration tests
-  gem 'openstudio-aws'
-  gem 'openstudio-analysis', github: 'NREL/OpenStudio-analysis-gem', branch: 'develop'
+  gem 'openstudio-aws', '~> 0.4'
+  gem 'openstudio-analysis', '1.0.0.pat1'
 end
-

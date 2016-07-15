@@ -1,29 +1,9 @@
 GIT
-  remote: git://github.com/NREL/OpenStudio-analysis-gem.git
-  revision: 039876a150444179ec8ae59e6696b3cef824a479
-  branch: develop
-  specs:
-    openstudio-analysis (0.5.0)
-      bcl (~> 0.5.5)
-      dencity (~> 0.1.0)
-      faraday (~> 0.8)
-      nokogiri (~> 1.6)
-      roo (~> 1.12)
-      rubyzip (~> 1.0)
-      semantic (~> 1.4)
-
-GIT
   remote: git://github.com/NREL/OpenStudio-workflow-gem.git
-  revision: 20c54dab8943f29f3a6abc5c8001a228f1c346f3
-  branch: osw-server
+  revision: 3b1f27f8fe704bf688fbeee00dce92ebbdd7635b
+  branch: osw
   specs:
     openstudio-workflow (1.0.0.alpha.0)
-
-GIT
-  remote: git://github.com/NREL/openstudio-standards.git
-  revision: 4f9a99102b9e4aa5f857e4264488189e7411f3bc
-  specs:
-    openstudio-standards (0.1.3)
 
 GEM
   remote: http://rubygems.org/
@@ -66,7 +46,7 @@ GEM
     addressable (2.4.0)
     archive-tar-minitar (0.5.2)
     arel (6.0.3)
-    autoprefixer-rails (6.3.6)
+    autoprefixer-rails (6.3.7)
       execjs
     aws-sdk-core (2.2.26)
       jmespath (~> 1.0)
@@ -108,17 +88,17 @@ GEM
     cocaine (0.5.8)
       climate_control (>= 0.0.3, < 1.0)
     coderay (1.1.1)
-    coffee-rails (4.1.1)
+    coffee-rails (4.2.1)
       coffee-script (>= 2.2.0)
-      railties (>= 4.0.0, < 5.1.x)
+      railties (>= 4.0.0, < 5.2.x)
     coffee-script (2.4.1)
       coffee-script-source
       execjs
     coffee-script-source (1.10.0)
     concurrent-ruby (1.0.2)
     daemons (1.2.3)
-    delayed_job (4.1.1)
-      activesupport (>= 3.0, < 5.0)
+    delayed_job (4.1.2)
+      activesupport (>= 3.0, < 5.1)
     delayed_job_mongoid (2.2.0)
       delayed_job (>= 3.0, < 5)
       mongoid (>= 3.0, < 6)
@@ -130,10 +110,10 @@ GEM
       multi_json
       parallel
     diff-lcs (1.2.5)
-    domain_name (0.5.20160310)
+    domain_name (0.5.20160615)
       unf (>= 0.0.5, < 1.0.0)
     erubis (2.7.0)
-    execjs (2.6.0)
+    execjs (2.7.0)
     factory_girl (4.7.0)
       activesupport (>= 3.0.0)
     factory_girl_rails (4.7.0)
@@ -143,7 +123,7 @@ GEM
       multipart-post (>= 1.2, < 3)
     faraday_middleware (0.10.0)
       faraday (>= 0.7.4, < 0.10)
-    ffi (1.9.10)
+    ffi (1.9.14)
     git-version-bump (0.15.1)
     globalid (0.3.6)
       activesupport (>= 4.1.0)
@@ -151,22 +131,22 @@ GEM
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     i18n (0.7.0)
-    jbuilder (2.4.1)
+    jbuilder (2.5.0)
       activesupport (>= 3.0.0, < 5.1)
       multi_json (~> 1.2)
-    jmespath (1.2.4)
-      json_pure (>= 1.8.1)
+    jmespath (1.3.0)
     jquery-rails (4.1.1)
       rails-dom-testing (>= 1, < 3)
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (1.8.3)
-    json_pure (1.8.3)
-    kaminari (0.16.3)
+    kaminari (0.17.0)
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
+    kaminari-mongoid (0.1.2)
+      kaminari
     libv8 (3.16.14.15)
-    libxml-ruby (2.8.0)
+    libxml-ruby (2.9.0)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     macaddr (1.7.1)
@@ -177,18 +157,22 @@ GEM
       callsite (~> 0.0, >= 0.0.11)
       rack-contrib (~> 1.1)
       railties (>= 3.0.0, < 5.1.0)
-    mime-types (2.99.1)
+    method_source (0.8.2)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
     mimemagic (0.3.0)
-    mini_portile2 (2.0.0)
-    minitest (5.8.4)
-    mongo (2.2.5)
+    mini_portile (0.6.2)
+    minitest (5.9.0)
+    mongo (2.2.6)
       bson (~> 4.0)
+      pry
     mongoid (5.1.3)
       activemodel (~> 4.0)
       mongo (~> 2.1)
       origin (~> 2.2)
       tzinfo (>= 0.3.37)
-    mongoid-compatibility (0.3.1)
+    mongoid-compatibility (0.4.0)
       activesupport
       mongoid (>= 2.0)
     mongoid-paperclip (0.0.10)
@@ -197,8 +181,8 @@ GEM
       mongoid (~> 5.0)
       rake
       rspec (~> 3.3)
-    msgpack (0.7.6)
-    multi_json (1.12.0)
+    msgpack (1.0.0)
+    multi_json (1.12.1)
     multipart-post (2.0.0)
     net-http-persistent (2.9.4)
     net-scp (1.2.1)
@@ -207,24 +191,37 @@ GEM
       net-ssh (>= 2.6.5)
     net-ssh (3.0.2)
     netrc (0.11.0)
-    nokogiri (1.6.7.2)
-      mini_portile2 (~> 2.0.0.rc2)
-    oj (2.15.0)
+    nokogiri (1.6.5)
+      mini_portile (~> 0.6.0)
+    oj (2.17.1)
+    openstudio-analysis (1.0.0.pat1)
+      bcl (~> 0.5.5)
+      dencity (~> 0.1.0)
+      faraday (~> 0.8)
+      nokogiri (~> 1.6)
+      roo (~> 2.3)
+      rubyzip (~> 1.2)
+      semantic (~> 1.4)
     openstudio-aws (0.4.2)
       aws-sdk-core (= 2.2.26)
       net-scp (~> 1.1)
       net-ssh (= 3.0.2)
       semantic (~> 1.4)
       sshkey (~> 1.7)
+    openstudio-standards (0.1.4)
     origin (2.2.0)
     os (0.9.6)
-    paperclip (4.3.6)
+    paperclip (4.3.7)
       activemodel (>= 3.2.0)
       activesupport (>= 3.2.0)
       cocaine (~> 0.5.5)
       mime-types
       mimemagic (= 0.3.0)
-    parallel (1.8.0)
+    parallel (1.9.0)
+    pry (0.10.4)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
     rack (1.6.4)
     rack-contrib (1.4.0)
       git-version-bump (~> 0.15)
@@ -255,74 +252,71 @@ GEM
       activesupport (= 4.2.0)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
-    rake (11.1.2)
+    rake (11.2.2)
     ref (2.0.0)
-    rest-client (1.8.0)
+    rest-client (2.0.0)
       http-cookie (>= 1.0.2, < 2.0)
-      mime-types (>= 1.16, < 3.0)
-      netrc (~> 0.7)
-    roo (1.13.2)
-      nokogiri
-      rubyzip
-      spreadsheet (> 0.6.4)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
+    roo (2.4.0)
+      nokogiri (~> 1)
+      rubyzip (~> 1.1, < 2.0.0)
     rserve-client (0.3.1)
     rserve-simpler (0.0.6)
       rserve-client (~> 0.3.0)
-    rspec (3.4.0)
-      rspec-core (~> 3.4.0)
-      rspec-expectations (~> 3.4.0)
-      rspec-mocks (~> 3.4.0)
-    rspec-core (3.4.4)
-      rspec-support (~> 3.4.0)
-    rspec-expectations (3.4.0)
+    rspec (3.5.0)
+      rspec-core (~> 3.5.0)
+      rspec-expectations (~> 3.5.0)
+      rspec-mocks (~> 3.5.0)
+    rspec-core (3.5.1)
+      rspec-support (~> 3.5.0)
+    rspec-expectations (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.4.0)
-    rspec-html-matchers (0.7.2)
+      rspec-support (~> 3.5.0)
+    rspec-html-matchers (0.8.0)
       nokogiri (~> 1)
       rspec (>= 3.0.0.a, < 4)
-    rspec-mocks (3.4.1)
+    rspec-mocks (3.5.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.4.0)
-    rspec-rails (3.4.2)
-      actionpack (>= 3.0, < 4.3)
-      activesupport (>= 3.0, < 4.3)
-      railties (>= 3.0, < 4.3)
-      rspec-core (~> 3.4.0)
-      rspec-expectations (~> 3.4.0)
-      rspec-mocks (~> 3.4.0)
-      rspec-support (~> 3.4.0)
-    rspec-support (3.4.1)
-    ruby-ole (1.2.12)
+      rspec-support (~> 3.5.0)
+    rspec-rails (3.5.1)
+      actionpack (>= 3.0)
+      activesupport (>= 3.0)
+      railties (>= 3.0)
+      rspec-core (~> 3.5.0)
+      rspec-expectations (~> 3.5.0)
+      rspec-mocks (~> 3.5.0)
+      rspec-support (~> 3.5.0)
+    rspec-support (3.5.0)
     ruby-prof (0.15.9)
-    rubyXL (3.3.18)
+    rubyXL (3.3.21)
       nokogiri (>= 1.4.4)
       rubyzip (>= 1.1.6)
     rubyzip (1.2.0)
     sass (3.4.22)
-    sass-rails (5.0.4)
-      railties (>= 4.0.0, < 5.0)
+    sass-rails (5.0.5)
+      railties (>= 4.0.0, < 6)
       sass (~> 3.1)
       sprockets (>= 2.8, < 4.0)
       sprockets-rails (>= 2.0, < 4.0)
       tilt (>= 1.1, < 3)
-    selenium-webdriver (2.53.0)
+    selenium-webdriver (2.53.4)
       childprocess (~> 0.5)
       rubyzip (~> 1.0)
       websocket (~> 1.0)
     semantic (1.4.1)
     sextant (0.2.4)
       rails (>= 3.2)
-    spreadsheet (1.1.2)
-      ruby-ole (>= 1.0)
-    sprockets (3.6.0)
+    slop (3.6.0)
+    sprockets (3.6.3)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
-    sprockets-rails (3.0.4)
+    sprockets-rails (3.1.1)
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     sshkey (1.8.0)
-    sys-filesystem (1.1.5)
+    sys-filesystem (1.1.6)
       ffi
     systemu (2.6.5)
     therubyracer (0.12.2)
@@ -330,7 +324,7 @@ GEM
       ref
     thor (0.19.1)
     thread_safe (0.3.5)
-    tilt (2.0.3)
+    tilt (2.0.5)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uglifier (3.0.0)
@@ -364,33 +358,36 @@ DEPENDENCIES
   jquery-rails
   json
   kaminari
+  kaminari-mongoid
   libv8
   libxml-ruby
   meta_request
   mongoid (~> 5.1)
   mongoid-paperclip
   mongoid-rspec
-  msgpack
+  msgpack (~> 1.0)
   multi_json
   net-http-persistent
   net-scp
   net-sftp
   net-ssh
+  nokogiri (= 1.6.5)
   oj
-  openstudio-analysis!
-  openstudio-aws
-  openstudio-standards!
+  openstudio-analysis (= 1.0.0.pat1)
+  openstudio-aws (~> 0.4)
+  openstudio-standards (= 0.1.4)
   openstudio-workflow!
   os
   paperclip (~> 4.3)
   parallel
   rails (= 4.2)
+  rake (~> 11.2)
   rest-client
   rserve-simpler
   rspec-html-matchers
   rspec-rails
   ruby-prof
-  rubyzip
+  rubyzip (~> 1.2.0)
   sass
   sass-rails
   selenium-webdriver
@@ -401,4 +398,4 @@ DEPENDENCIES
   uglifier
 
 BUNDLED WITH
-   1.10.6
+   1.12.5

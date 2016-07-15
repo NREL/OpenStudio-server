@@ -51,7 +51,7 @@
           "measure_definition_name": "reduce_space_infiltration_by_percentage",
           "measure_definition_name_xml": null,
           "measure_definition_uuid": "d8161857-8b77-4e1a-a76c-ae5deab7c1e0",
-          "measure_definition_version_uuid": "37681b68-3cc3-4799-bf51-ae603fd9b66e",
+          "measure_definition_version_uuid": "83e21dbf-635c-4c10-b016-cc4228d6d75b",
           "arguments": [
             {
               "display_name": "Increase in Material and Installation Costs for Building per Affected Floor Area",
@@ -96,8 +96,8 @@
               "maximum": "*Entire Building*",
               "relation_to_output": null,
               "static_value": "*Entire Building*",
-              "uuid": "543c32a8-1a75-4ce2-94a7-56ae7684f201",
-              "version_uuid": "10edf4b9-01dd-4932-99d5-b003007e9c9b",
+              "uuid": "8f505810-8c66-4b8c-83fd-d8271ef3055a",
+              "version_uuid": "aa8af2b8-672e-44c1-aaf9-b4d0f09e87f7",
               "variable": true,
               "uncertainty_description": {
                 "type": "discrete",
@@ -164,8 +164,8 @@
               "maximum": 20,
               "relation_to_output": null,
               "static_value": 20,
-              "uuid": "17f5caef-0fa3-4e07-8b62-cec15f3d3df4",
-              "version_uuid": "345bccc3-aad8-4d2f-a8da-4b8767388638",
+              "uuid": "03cb98b7-26d0-4ebc-9268-857ff4056887",
+              "version_uuid": "81bc1cc1-40cf-4141-b9c1-3d9c37a3ebf4",
               "variable": true,
               "uncertainty_description": {
                 "type": "discrete",
@@ -229,7 +229,7 @@
           "measure_definition_name": "reduce_lighting_loads_by_percentage",
           "measure_definition_name_xml": null,
           "measure_definition_uuid": "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-          "measure_definition_version_uuid": "5f7379ac-ef47-4415-a5a0-4ae44a65c463",
+          "measure_definition_version_uuid": "71cee08c-87d1-46f3-9961-c6025dedd010",
           "arguments": [
             {
               "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model",
@@ -314,8 +314,8 @@
               "maximum": 50,
               "relation_to_output": null,
               "static_value": 5,
-              "uuid": "565ed9e5-b44a-4a3d-9b56-d25a53144c75",
-              "version_uuid": "c39a79ac-5e2b-4255-ad7a-a511b4d2013f",
+              "uuid": "db84e097-490b-4b6b-bcd3-051c3b38b5f8",
+              "version_uuid": "2bc99bbc-6995-4c10-b0ce-5a53d38a6b21",
               "variable": true,
               "uncertainty_description": {
                 "type": "discrete",
@@ -408,8 +408,8 @@
               "maximum": 2,
               "relation_to_output": null,
               "static_value": 1,
-              "uuid": "c0a02054-12e8-40a0-8459-e08c767ae5a7",
-              "version_uuid": "161afe93-819d-4ddb-991e-5e7b6944e0c6",
+              "uuid": "5348fbe5-c549-4484-8f00-e2c4bded9c05",
+              "version_uuid": "e9a5ccae-012c-48fc-bf3c-b137e04a29be",
               "variable": true,
               "uncertainty_description": {
                 "type": "discrete",
@@ -476,8 +476,8 @@
               "maximum": 2,
               "relation_to_output": null,
               "static_value": 1,
-              "uuid": "c1206e78-2b42-411d-ab71-40677772e4ee",
-              "version_uuid": "3a6cd289-9e67-4698-a287-35388006cbc8",
+              "uuid": "b1062366-debc-4e66-8228-aa6e5f93cbd9",
+              "version_uuid": "c501e1f2-d6c3-4455-a1ef-f45794c135b4",
               "variable": true,
               "uncertainty_description": {
                 "type": "discrete",
