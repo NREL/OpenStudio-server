@@ -23,6 +23,13 @@ bin/delayed_job -i worker_2 stop && bin/delayed_job -i worker_2 --queue=simulati
 bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,background start && bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulations start
 ```
 
+For development in the foreground
+
+```
+bin/delayed_job -i server --queue=analyses,background run
+bin/delayed_job -i worker_1 --queue=simulations run
+```
+
 ## Install Nokogiri (with Brew System Libraries)
 
 ```
