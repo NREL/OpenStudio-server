@@ -61,10 +61,6 @@ task :release do
   puts "\nSuccessfully create tag and pushed repo to server\n".green
 end
 
-RSpec::Core::RakeTask.new('spec') do |_spec|
-  pwd = Dir.pwd
-end
-
 require 'rubocop/rake_task'
 desc 'Run RuboCop on the lib directory'
 RuboCop::RakeTask.new(:rubocop) do |task|

@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rake', '~> 10.4.2'
+gem 'rake', '~> 11.2'
 gem 'openstudio-aws', '~> 0.4'
 gem 'openstudio-analysis', '1.0.0.pat1'
 gem 'nokogiri', '1.6.5'

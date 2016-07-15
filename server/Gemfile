@@ -57,7 +57,7 @@ gem 'sprockets-rails'
 # For workers - and other dependencies for measures
 gem 'openstudio-workflow', '1.0.0.pat1'
 gem 'openstudio-standards', '0.1.4'
-gem 'msgpack'
+gem 'msgpack', '~> 1.0'
 gem 'multi_json'
 gem 'oj'
 gem 'rest-client'
