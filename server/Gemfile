@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 
-eval_gemfile File.join(File.dirname(__FILE__), "../bin/Gemfile")
+
+eval_gemfile File.expand_path(File.join(File.dirname(__FILE__), "../bin/Gemfile"))
 
 gem 'rails', '4.2'
 

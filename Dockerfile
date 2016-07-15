@@ -122,37 +122,38 @@ ENV OPENSTUDIO_SERVER 'true'
 
 #### OpenStudio Server Code
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
-WORKDIR /srv
-ADD /server/Gemfile /srv/Gemfile
+ADD /bin /opt/openstudio/bin
+ADD /server/Gemfile /opt/openstudio/server/Gemfile
+WORKDIR /opt/openstudio/server
 RUN bundle install --without development test
 
 # Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
 # have to be recompiled everytime
-ADD /server/Rakefile /srv/Rakefile
-ADD /server/config/ /srv/config/
-ADD /server/app/assets/ /srv/app/assets/
-ADD /server/lib /srv/lib
+ADD /server/Rakefile /opt/openstudio/server/Rakefile
+ADD /server/config/ /opt/openstudio/server/config/
+ADD /server/app/assets/ /opt/openstudio/server/app/assets/
+ADD /server/lib /opt/openstudio/server/lib
 
 # Now call precompile
-RUN mkdir /srv/log
+RUN mkdir /opt/openstudio/server/log
 ENV RAILS_ENV docker
 RUN rake assets:precompile
 
 # Bundle app source
-ADD /server /srv
+ADD /server /opt/openstudio/server
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN bundle install --without development test
 
 # Where to save the assets
-RUN mkdir -p /srv/public/assets/analyses && chmod 777 /srv/public/assets/analyses
-RUN mkdir -p /srv/public/assets/data_points && chmod 777 /srv/public/assets/data_points
+RUN mkdir -p /opt/openstudio/server/public/assets/analyses && chmod 777 /opt/openstudio/server/public/assets/analyses
+RUN mkdir -p /opt/openstudio/server/public/assets/data_points && chmod 777 /opt/openstudio/server/public/assets/data_points
 
 # forward request and error logs to docker log collector
 
 # TODO: How to get logs out of this, mount shared volume?
 #RUN ln -sf /dev/stdout /var/log/nginx/access.log
 #RUN ln -sf /dev/stderr /var/log/nginx/error.log
-RUN chmod 666 /srv/log/*.log
+RUN chmod 666 /opt/openstudio/server/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/start-server
