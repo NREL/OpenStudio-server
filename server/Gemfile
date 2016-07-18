@@ -67,6 +67,10 @@ gem 'rest-client'
 gem 'libxml-ruby', :platforms => :ruby
 gem 'os'
 
+if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/
+  gem "tzinfo-data"
+end
+
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
