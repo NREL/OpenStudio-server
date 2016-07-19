@@ -5,6 +5,7 @@
 
 FROM ubuntu:14.04
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
+ARG rails_env=docker
 
 # Install required libaries
 RUN apt-get update \
@@ -51,7 +52,7 @@ RUN mkdir -p /usr/local/etc \
 ENV RUBY_MAJOR 2.0
 ENV RUBY_VERSION 2.0.0-p648
 ENV RUBY_DOWNLOAD_SHA256 8690bd6b4949c333b3919755c4e48885dbfed6fd055fe9ef89930bde0d2376f8
-ENV RUBYGEMS_VERSION 2.5.2
+ENV RUBYGEMS_VERSION 2.6.6
 
 # some of ruby's build scripts are written in ruby
 # we purge this later to make sure our final image uses what we just built
@@ -87,6 +88,9 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION 5.0.25
+# Install Rack. Silly workaround for not having ruby 2.2.2. Rack 1.6.4 is the
+# latest for Ruby <= 2.0
+RUN gem install rack -v=1.6.4
 RUN gem install passenger -v $PASSENGER_VERSION
 RUN passenger-install-nginx-module
 
@@ -136,13 +140,13 @@ ADD /server/lib /opt/openstudio/server/lib
 
 # Now call precompile
 RUN mkdir /opt/openstudio/server/log
-ENV RAILS_ENV docker
+ENV RAILS_ENV $rails_env
 RUN rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
-RUN bundle install --without development test
+RUN bundle install
 
 # Where to save the assets
 RUN mkdir -p /opt/openstudio/server/public/assets/analyses && chmod 777 /opt/openstudio/server/public/assets/analyses
@@ -156,7 +160,9 @@ RUN mkdir -p /opt/openstudio/server/public/assets/data_points && chmod 777 /opt/
 RUN chmod 666 /opt/openstudio/server/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
+ADD /docker/server/start-server.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
+RUN chmod +x /usr/local/bin/run-server-tests
 
 CMD ["/usr/local/bin/start-server"]
 

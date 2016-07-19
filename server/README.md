@@ -37,6 +37,13 @@ gem install nokogiri -- --use-system-libraries --with-xml2-include=/usr/include/
 gem install libxml-ruby -- --with-xml2-include=/usr/include/libxml2 --with-xml2-lib=/usr/lib/
 ```
 
+# Testing using Docker-compose
+
+```
+docker volume create --name=osdata-test
+docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+```
+
 # TODOs
 
 * Rename Data Points to Datapoints

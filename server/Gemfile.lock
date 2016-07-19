@@ -96,6 +96,12 @@ GEM
       execjs
     coffee-script-source (1.10.0)
     concurrent-ruby (1.0.2)
+    coveralls (0.8.14)
+      json (>= 1.8, < 3)
+      simplecov (~> 0.12.0)
+      term-ansicolor (~> 1.3)
+      thor (~> 0.19.1)
+      tins (~> 1.6.0)
     daemons (1.2.3)
     delayed_job (4.1.2)
       activesupport (>= 3.0, < 5.1)
@@ -110,6 +116,7 @@ GEM
       multi_json
       parallel
     diff-lcs (1.2.5)
+    docile (1.1.5)
     domain_name (0.5.20160615)
       unf (>= 0.0.5, < 1.0.0)
     erubis (2.7.0)
@@ -134,7 +141,7 @@ GEM
     jbuilder (2.5.0)
       activesupport (>= 3.0.0, < 5.1)
       multi_json (~> 1.2)
-    jmespath (1.3.0)
+    jmespath (1.3.1)
     jquery-rails (4.1.1)
       rails-dom-testing (>= 1, < 3)
       railties (>= 4.2.0)
@@ -307,6 +314,11 @@ GEM
     semantic (1.4.1)
     sextant (0.2.4)
       rails (>= 3.2)
+    simplecov (0.12.0)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
     slop (3.6.0)
     sprockets (3.6.3)
       concurrent-ruby (~> 1.0)
@@ -319,14 +331,19 @@ GEM
     sys-filesystem (1.1.6)
       ffi
     systemu (2.6.5)
+    term-ansicolor (1.3.2)
+      tins (~> 1.0)
     therubyracer (0.12.2)
       libv8 (~> 3.16.14.0)
       ref
     thor (0.19.1)
     thread_safe (0.3.5)
     tilt (2.0.5)
+    tins (1.6.0)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
+    tzinfo-data (1.2016.6)
+      tzinfo (>= 1.0.0)
     uglifier (3.0.0)
       execjs (>= 0.3.0, < 3)
     unf (0.1.4)
@@ -349,6 +366,7 @@ DEPENDENCIES
   capybara
   ci_reporter
   coffee-rails
+  coveralls
   daemons
   delayed_job_mongoid
   execjs
@@ -384,9 +402,10 @@ DEPENDENCIES
   rake (~> 11.2)
   rest-client
   rserve-simpler
+  rspec (~> 3.4)
   rspec-html-matchers
   rspec-rails
-  ruby-prof
+  ruby-prof (~> 0.15)
   rubyzip (~> 1.2.0)
   sass
   sass-rails
@@ -395,6 +414,7 @@ DEPENDENCIES
   sprockets-rails
   sys-filesystem
   therubyracer
+  tzinfo-data
   uglifier
 
 BUNDLED WITH

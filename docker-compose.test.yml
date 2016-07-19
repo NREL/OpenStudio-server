@@ -1,0 +1,28 @@
+# Docker Compose creates multiple containers on a single machine.
+# run `docker-compose up` to create and run/link the containers
+version: '2'
+services:
+  web:
+    build:
+      args:
+        rails_env: docker-test
+    volumes:
+      - osdata-test:/mnt/openstudio
+    command: /usr/local/bin/run-server-tests
+  web-background:
+    build:
+      args:
+        rails_env: docker-test
+    volumes:
+      - osdata-test:/mnt/openstudio
+  worker:
+    build:
+      args:
+        rails_env: docker-test
+  rserve:
+    volumes:
+      - osdata-test:/mnt/openstudio
+volumes:
+  osdata-test:
+    external: true
+

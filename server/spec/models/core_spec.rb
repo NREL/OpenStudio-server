@@ -67,9 +67,9 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
   end
 
   it 'should have the right sizes' do
-    @pivots.size.should eq(2)
-    @samples.size.should eq(3)
-    @statics.size.should eq(2)
+    expect(@pivots.size).to eq(2)
+    expect(@samples.size).to eq(3)
+    expect(@statics.size).to eq(2)
   end
 
   context 'pivot variables' do
@@ -77,33 +77,33 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
       result = @dummy_class.add_pivots(@samples, @pivots)
       # puts "Pivot hash returned with #{result.inspect}"
 
-      result.size.should eq(6)
-      result[0].should eq(p1: 'p1', a: 1, b: 2)
+      expect(result.size).to eq(6)
+      expect(result[0]).to eq(p1: 'p1', a: 1, b: 2)
     end
 
     it 'should return the same back when pivots is empty' do
       result = @dummy_class.add_pivots(@samples, [])
 
-      result.size.should eq(3)
-      result.should eq(@samples)
+      expect(result.size).to eq(3)
+      expect(result).to eq(@samples)
     end
 
     it 'should return no pivots when the pivot array is empty' do
       result = AnalysisLibrary::Core.product_hash([])
 
-      result.should eq([])
+      expect(result).to eq []
     end
 
     it 'should deal with more than two piviots' do
       result = AnalysisLibrary::Core.product_hash(a: [1, 2], b: [3, 4], c: [5, 6])
 
-      result.size.should eq(8)
+      expect(result.size).to eq(8)
     end
 
     it 'should deal with non-integers' do
       result = AnalysisLibrary::Core.product_hash(a: [1.23, 4.56], b: [true, false], c: %w(p q))
 
-      result.size.should eq(8)
+      expect(result.size).to eq 8
     end
   end
 
@@ -112,15 +112,15 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
       result = @dummy_class.add_static_variables(@samples, @statics)
       puts "Static hash returned with #{result.inspect}"
 
-      result.size.should eq(3)
-      result[0].should eq(a: 1, b: 2, s1: 'a', s2: true)
+      expect(result.size).to eq 3
+      expect(result[0]).to eq(a: 1, b: 2, s1: 'a', s2: true)
     end
 
     it 'should return back the same objects if statics are empty' do
       result = @dummy_class.add_pivots(@samples, [])
 
-      result.size.should eq(3)
-      result.should eq(@samples)
+      expect(result.size).to eq 3
+      expect(result).to eq(@samples)
     end
   end
 
@@ -128,8 +128,8 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
     it 'should return array of hashes' do
       h = { a: [1, 2, 3], b: [4, 5, 6] }
       r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(h)
-      r.size.should eq(h[:a].size)
-      r[0].should eq(a: 1, b: 4)
+      expect(r.size).to eq h[:a].size
+      expect(r[0]).to eq(a: 1, b: 4)
     end
 
     it 'should not work when array length is different' do
@@ -140,8 +140,8 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
     it 'should work with any type of data' do
       h = { a: [1, 2, 3], b: %w(4 5 6), c: [true, false, false] }
       r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(h)
-      r.size.should eq(h[:a].size)
-      r[0].should eq(a: 1, b: '4', c: true)
+      expect(r.size).to eq h[:a].size
+      expect(r[0]).to eq(a: 1, b: '4', c: true)
     end
 
     it 'should return non-combined hashes' do
@@ -149,11 +149,11 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
       vars = [OpenStruct.new(_id: 'c', static_value: 123)]
       r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash_non_combined(h, vars)
       puts "Non combined hash returned with #{r.inspect}"
-      r.size.should eq(8)
-      r[0].should eq(a: 1, c: 123)
-      r[5].should eq(b: '6', c: 123)
-      r[6].should eq(c: true)
-      r[7].should eq(c: false)
+      expect(r.size).to eq 8
+      expect(r[0]).to eq(a: 1, c: 123)
+      expect(r[5]).to eq(b: '6', c: 123)
+      expect(r[6]).to eq(c: true)
+      expect(r[7]).to eq(c: false)
     end
   end
 end

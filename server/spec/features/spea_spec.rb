@@ -35,7 +35,7 @@
 
 require 'rails_helper'
 
-describe "Run SPEA" do
+RSpec.describe "Run SPEA" do
   before :all do
     Delayed::Job.destroy_all
   end

@@ -46,11 +46,11 @@ RSpec.describe DataPoint, type: :model do
   end
 
   it 'should have an analysis' do
-    @project.analyses.should_not be_nil
+    expect(@project.analyses).not_to be_nil
   end
 
   it 'should have uuid and id the same' do
-    @data_point.id.should eq(@data_point.uuid)
+    expect(@data_point.id).to eq @data_point.uuid
   end
 
   after :each do

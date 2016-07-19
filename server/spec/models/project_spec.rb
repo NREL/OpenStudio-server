@@ -45,7 +45,8 @@ RSpec.describe Project, type: :model do
   end
 
   it 'should have a project' do
-    Project.all.size.should eq(1), 'does not have just one project (either 0 or > 2)'
+    # 'does not have just one project (either 0 or > 2)'
+    expect(Project.all.size).to eq 1 
   end
 
   it 'should be a project class' do
@@ -53,11 +54,11 @@ RSpec.describe Project, type: :model do
   end
 
   it 'should have uuid and id the same' do
-    @project.id.should eq(@project.uuid)
+    expect(@project.id).to eq @project.uuid
   end
 
   it 'should have 1 analysis' do
-    @project.analyses.count.should eq(1)
+    expect(@project.analyses.size).to eq 1
   end
 
   after :all do

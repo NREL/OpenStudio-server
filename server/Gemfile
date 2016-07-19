@@ -68,18 +68,21 @@ gem 'libxml-ruby', :platforms => :ruby
 gem 'os'
 
 if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/
-  gem "tzinfo-data"
+  gem 'tzinfo-data'
 end
 
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
   gem 'meta_request'
-  gem 'ruby-prof'
 
+  gem 'coveralls', require: false
+  gem 'ruby-prof', '~> 0.15'
   gem 'capybara'
   gem 'selenium-webdriver'
+  gem 'rspec', '~> 3.4'
   gem 'rspec-rails'
+
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'

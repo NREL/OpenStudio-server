@@ -33,62 +33,48 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #*******************************************************************************
 
-require 'rails_helper'
+Rails.application.configure do
+  # Settings specified here will take precedence over those in config/application.rb.
 
-RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
-  before :all do
-    ComputeNode.destroy_all
-    Project.destroy_all
-    FactoryGirl.create(:project_with_analyses).analyses
-    FactoryGirl.create(:compute_node)
+  # The test environment is used exclusively to run your application's
+  # test suite. You never need to work with it otherwise. Remember that
+  # your test database is "scratch space" for the test suite and is wiped
+  # and recreated between test runs. Don't rely on the data there!
+  config.cache_classes = true
 
-    # get an analysis (which should be loaded from factory girl)
-    @analysis = Analysis.first
-    @analysis.run_flag = true
-    @analysis.save!
+  # Do not eager load code on boot. This avoids loading your whole application
+  # just for the purpose of running a single test. If you are using a tool that
+  # preloads Rails for running tests, you may have to set it to true.
+  config.eager_load = false
 
-    # create an instance for R
-    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
-                                                 APP_CONFIG['rserve_port'])
-  end
+  # Configure static file server for tests with Cache-Control for performance.
+  config.serve_static_files   = true
+  config.static_cache_control = 'public, max-age=3600'
 
-  context 'create local cluster' do
-    it 'should create an R session' do
-      expect(@r).not_to be_nil
-    end
+  # Show full error reports and disable caching.
+  config.consider_all_requests_local       = true
+  config.action_controller.perform_caching = false
 
-    it 'should configure the cluster with an analysis run_flag', js: true do
-      expect(@analysis.id).not_to be_nil
+  # Raise exceptions instead of rendering exception templates.
+  config.action_dispatch.show_exceptions = false
 
-      cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
-      expect(cluster_class).not_to be_nil
+  # Disable request forgery protection in test environment.
+  config.action_controller.allow_forgery_protection = false
 
-      # get the master cluster IP address
-      master_ip = 'localhost'
-      expect(master_ip).to eq('localhost')
+  # Tell Action Mailer not to deliver emails to the real world.
+  # The :test delivery method accumulates sent emails in the
+  # ActionMailer::Base.deliveries array.
+  config.action_mailer.delivery_method = :test
 
-      APP_CONFIG['os_server_host_url'] = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+  # Randomize the order test cases are executed.
+  config.active_support.test_order = :random
 
-      cf = cluster_class.configure
-      expect(cf).to eq true
-    end
+  # Print deprecation notices to the stderr.
+  config.active_support.deprecation = :stderr
 
-    it 'should start snow cluster' do
-      cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
-      expect(cluster_class).not_to be_nil
+  # Raises error for missing translations
+  # config.action_view.raise_on_missing_translations = true
 
-      # get the master cluster IP address
-      master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-      expect(master_ip).to eq('localhost')
-
-      ip_addresses = ComputeNode.worker_ips
-      expect(ip_addresses[:worker_ips].size).to eq(2)
-
-      cf = cluster_class.start(ip_addresses)
-      expect(cf).to eq true
-
-      cf = cluster_class.stop
-      expect(cf).to eq true
-    end
-  end
+  # Use a different logger for distributed setups.
+  # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
 end
