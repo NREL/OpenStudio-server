@@ -41,6 +41,7 @@ gem install libxml-ruby -- --with-xml2-include=/usr/include/libxml2 --with-xml2-
 
 ```
 docker volume create --name=osdata-test
+docker-compose -f docker-compose.yml -f docker-compose.test.yml build
 docker-compose -f docker-compose.yml -f docker-compose.test.yml up
 ```
 
