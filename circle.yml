@@ -10,7 +10,10 @@ dependencies:
 
 test:
   pre:
-    - docker volume create --name=osdata-test
+    - docker volume create --name=osdata
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+    - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d rserve
+    - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d web-background
+    - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d db
   override:
-    - docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+    - docker-compose -f docker-compose.yml -f docker-compose.test.yml run web

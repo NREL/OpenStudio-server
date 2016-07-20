@@ -10,7 +10,7 @@ services:
     environment:
      - COVERALLS_REPO_TOKEN
     volumes:
-      - osdata-test:/mnt/openstudio
+      - osdata:/mnt/openstudio
     command: /usr/local/bin/run-server-tests
   web-background:
     build:
@@ -18,7 +18,7 @@ services:
         rails_env: docker-test
         bundle_args: ''
     volumes:
-      - osdata-test:/mnt/openstudio
+      - osdata:/mnt/openstudio
   worker:
     build:
       args:
@@ -26,7 +26,7 @@ services:
         bundle_args: ''
   rserve:
     volumes:
-      - osdata-test:/mnt/openstudio
+      - osdata:/mnt/openstudio
 volumes:
   osdata-test:
     external: true
