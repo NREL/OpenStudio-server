@@ -1,0 +1,13 @@
+machine:
+  ruby:
+    version:
+      2.0.0-p647
+  services:
+    - docker
+
+dependencies:
+  override:
+
+test:
+  override:
+    - ./docker/server/docker-run.sh

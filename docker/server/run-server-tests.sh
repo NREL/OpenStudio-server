@@ -1,19 +1,5 @@
 #!/usr/bin/env bash
 
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-echo "here"
-
 # Arbitrary sleep to wait for other containers to start if this was the first
 sleep 30
 

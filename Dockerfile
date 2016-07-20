@@ -6,6 +6,7 @@
 FROM ubuntu:14.04
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 ARG rails_env=docker
+ARG bundle_args="--without development test"
 
 # Install required libaries
 RUN apt-get update \
@@ -129,7 +130,7 @@ ENV OPENSTUDIO_SERVER 'true'
 ADD /bin /opt/openstudio/bin
 ADD /server/Gemfile /opt/openstudio/server/Gemfile
 WORKDIR /opt/openstudio/server
-RUN bundle install --without development test
+RUN bundle install $bundle_args
 
 # Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
 # have to be recompiled everytime

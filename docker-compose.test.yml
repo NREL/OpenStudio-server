@@ -6,6 +6,9 @@ services:
     build:
       args:
         rails_env: docker-test
+        bundle_args:
+    environment:
+     - COVERALLS_REPO_TOKEN
     volumes:
       - osdata-test:/mnt/openstudio
     command: /usr/local/bin/run-server-tests
@@ -13,12 +16,14 @@ services:
     build:
       args:
         rails_env: docker-test
+        bundle_args:
     volumes:
       - osdata-test:/mnt/openstudio
   worker:
     build:
       args:
         rails_env: docker-test
+        bundle_args:
   rserve:
     volumes:
       - osdata-test:/mnt/openstudio
