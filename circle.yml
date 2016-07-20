@@ -1,9 +1,9 @@
 machine:
-  ruby:
-    version:
-      2.0.0-p647
-  services:
-    - docker
+  pre:
+    - |
+      sudo curl -L -o /usr/bin/docker 'http://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.0-circleci'
+      sudo chmod 0755 /usr/bin/docker
+      sudo start docker
 
 dependencies:
   pre:
@@ -11,6 +11,7 @@ dependencies:
 
 test:
   pre:
+    - docker volume create --name=osdata-test
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml build
   override:
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml up
