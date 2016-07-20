@@ -59,7 +59,7 @@ require 'coveralls'
 Coveralls.wear!
 
 
-dir = File.join(File.expand_path("../reports/coverage"), File.dirname(__FILE__))
+dir = File.expand_path("../../reports/coverage", File.dirname(__FILE__))
 SimpleCov.coverage_dir(dir)
 SimpleCov.formatter = Coveralls::SimpleCov::Formatter
 SimpleCov.start do

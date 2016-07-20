@@ -83,6 +83,9 @@ group :development, :test do
   gem 'rspec', '~> 3.4'
   gem 'rspec-rails'
 
+  gem 'rubocop', require: false
+  gem 'rubocop-checkstyle_formatter', require: false
+
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
