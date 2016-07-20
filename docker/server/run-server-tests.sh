@@ -12,4 +12,3 @@ done
 
 # Always create new indexes in case the models have changed
 cd /opt/openstudio/server && bundle exec rspec ./spec/models/run_simulation_data_point_spec.rb:49
-#    /opt/openstudio/server# bundle exec rspec
