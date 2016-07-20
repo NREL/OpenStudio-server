@@ -161,7 +161,7 @@ RUN mkdir -p /opt/openstudio/server/public/assets/data_points && chmod 777 /opt/
 RUN chmod 666 /opt/openstudio/server/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
-ADD /docker/server/start-server.sh /usr/local/bin/run-server-tests
+ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
 
