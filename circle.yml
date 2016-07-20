@@ -15,5 +15,9 @@ test:
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d rserve
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d web-background
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d db
+    - mkdir -p reports/rspec
   override:
-    - docker-compose -f docker-compose.yml -f docker-compose.test.yml run web
+    - docker-compose -f docker-compose.yml -f docker-compose.test.yml run web > reports/rspec/rpec_results.html
+  post:
+    - rsync -av reports/ $CIRCLE_ARTIFACTS/reports/
+

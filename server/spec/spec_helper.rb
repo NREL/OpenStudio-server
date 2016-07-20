@@ -56,7 +56,11 @@ require 'ci/reporter/core'
 # Always create spec reports
 require 'simplecov'
 require 'coveralls'
+Coveralls.wear!
 
+
+dir = File.join(File.expand_path("../reports/coverage"), File.dirname(__FILE__))
+SimpleCov.coverage_dir(dir)
 SimpleCov.formatter = Coveralls::SimpleCov::Formatter
 SimpleCov.start do
   add_filter 'spec/files'
