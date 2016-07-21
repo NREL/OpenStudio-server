@@ -10,7 +10,7 @@ services:
     environment:
      - COVERALLS_REPO_TOKEN
     volumes:
-      - ./reports:/opt/openstudio/server/reports
+      - ./reports:/opt/openstudio/reports
       - osdata:/mnt/openstudio
     command: /usr/local/bin/run-server-tests
   web-background:
