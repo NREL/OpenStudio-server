@@ -16,6 +16,8 @@ test:
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d web-background
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d db
     - mkdir -p reports/rspec
+    - export CI=true
+    - export CIRCLECI=true
   override:
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run web > reports/rspec/rpec_results.html
   post:
