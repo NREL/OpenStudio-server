@@ -125,6 +125,17 @@ RUN apt-get update \
 ENV RUBYLIB /usr/local/lib/site_ruby/2.0.0
 ENV OPENSTUDIO_SERVER 'true'
 
+# Install vfb and firefox requirement if docker-test env
+RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
+        echo "Running in testing environment" && \
+        echo "deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main" | tee -a /etc/apt/sources.list > /dev/null && \
+        apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29 && \
+        apt-get update && apt-get install -y xvfb firefox && \
+        rm -rf /var/lib/apt/lists/*; \
+    else \
+        echo "Not Running in testing environment"; \
+    fi
+
 #### OpenStudio Server Code
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 ADD /bin /opt/openstudio/bin
@@ -164,18 +175,6 @@ ADD /docker/server/start-server.sh /usr/local/bin/start-server
 ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
-
-
-# Install vfb and firefox requirement if docker-test env
-RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
-        echo "Running in testing environment" && \
-        echo "deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main" | tee -a /etc/apt/sources.list > /dev/null && \
-        apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29 && \
-        apt-get update && apt-get install -y xvfb firefox && \
-        rm -rf /var/lib/apt/lists/*; \
-    else \
-        echo "Not Running in testing environment"; \
-    fi
 
 CMD ["/usr/local/bin/start-server"]
 
