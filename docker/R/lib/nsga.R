@@ -1,4 +1,3 @@
-clusterEvalQ(cl,library(RMongo))
 clusterEvalQ(cl,library(rjson))
 clusterEvalQ(cl,library(R.utils))
 

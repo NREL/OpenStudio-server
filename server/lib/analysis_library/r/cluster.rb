@@ -45,7 +45,6 @@ module AnalysisLibrary::R
       # load the required libraries for cluster management
       @r.converse "print('Configuring R Cluster - Loading Libraries')"
       @r.converse 'library(parallel)'
-      @r.converse 'library(RMongo)'
       @r.converse 'library(R.utils)'
       @r.converse 'library(rjson)'
 

@@ -218,6 +218,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
                    debugFlag: @analysis.problem['algorithm']['debugflag'], MM: @analysis.problem['algorithm']['MM'],
                    balance: @analysis.problem['algorithm']['balance'], gradientcheck: @analysis.problem['algorithm']['gradientcheck']) do
           %{
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))

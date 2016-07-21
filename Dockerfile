@@ -171,7 +171,7 @@ RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
         echo "Running in testing environment" && \
         echo "deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main" | tee -a /etc/apt/sources.list > /dev/null && \
         apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29 && \
-        apt-get update && apt-get install -y xvfb firefox-mozilla-build && \
+        apt-get update && apt-get install -y xvfb firefox && \
         rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Not Running in testing environment"; \

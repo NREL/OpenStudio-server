@@ -118,6 +118,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
           %{
             print("Starting main portion of Batch Run Analysis")
             print(dps)
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
 
             f <- function(dp_index){

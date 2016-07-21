@@ -229,6 +229,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
                    topology: @analysis.problem['algorithm']['topology'],
                    method: @analysis.problem['algorithm']['method']) do
           %{
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))

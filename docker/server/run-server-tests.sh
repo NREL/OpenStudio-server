@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Configure XVFB
-export DISPLAY=:99.0
-sh -e /etc/init.d/xvfb start
+Xvfb :10 -ac &
+export DISPLAY=:10
 
 # Arbitrary sleep to wait for other containers and xvfb to start if this was the first
 for i in {1..10}
