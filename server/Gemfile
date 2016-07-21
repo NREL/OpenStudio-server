@@ -5,9 +5,10 @@ eval_gemfile File.join(File.dirname(__FILE__), "../bin/Gemfile")
 gem 'rails', '4.2'
 
 # data modules
-gem 'json'
+gem 'json', '1.7.7'
 gem 'jbuilder'
 gem 'rubyzip', '~> 1.2.0'
+gem 'tzinfo-data'
 
 # database modules
 gem 'mongoid', '~> 5.1'
