@@ -62,10 +62,11 @@ class PagesController < ApplicationController
 
     # this would probably be better as an openstruct
     # find where the /mnt/ folder lives
-    # TODO: make this cross-platform
-    @mnt_fs = nil
-    @mnt_fs = @file_systems.select { |f| f[:mount_point] =~ /\/mnt/ }
-    @mnt_fs = @file_systems.select { |f| f[:mount_point] == '/' } if @mnt_fs.empty?
+    # TODO: make this cross-platform. NL -- can we just remove this. Seems like
+	# we want to check how much storage is available in the worker-node directory
+    # @mnt_fs = nil
+    # @mnt_fs = @file_systems.select { |f| f[:mount_point] =~ /\/mnt/ }
+    # @mnt_fs = @file_systems.select { |f| f[:mount_point] == '/' } if @mnt_fs.empty?
 
     respond_to do |format|
       format.html # status.html.erb
