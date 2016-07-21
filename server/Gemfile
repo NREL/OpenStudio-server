@@ -81,6 +81,7 @@ group :development, :test do
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'rspec', '~> 3.4'
+  gem 'rspec-retry'
   gem 'rspec-rails'
 
   gem 'rubocop', require: false

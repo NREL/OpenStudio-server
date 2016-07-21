@@ -60,6 +60,7 @@ require 'simplecov'
 require 'coveralls'
 Coveralls.wear!
 
+require 'rspec/retry'
 
 dir = File.expand_path("../../reports/coverage", File.dirname(__FILE__))
 SimpleCov.coverage_dir(dir)
@@ -141,4 +142,13 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   config.order = :random
   Kernel.srand config.seed
+
+  # To handle the timeout of the first selenium test (by retrying)
+  # show retry status in spec process
+  config.verbose_retry = true
+  # Try twice (retry once)
+  config.default_retry_count = 2
+  # Only retry when Selenium raises Net::ReadTimeout
+  config.exceptions_to_retry = [Net::ReadTimeout]
+
 end
