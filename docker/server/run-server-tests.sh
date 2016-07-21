@@ -11,6 +11,6 @@ done
 
 
 # Always create new indexes in case the models have changed
-cd /opt/openstudio/server && bundle exec rspec ./spec/models/run_simulation_data_point_spec.rb:49 --format html
+cd /opt/openstudio/server && bundle exec rspec --format html
 cd /opt/openstudio/server && bundle exec rake rubocop:run
 
