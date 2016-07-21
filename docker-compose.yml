@@ -4,8 +4,6 @@ version: '2'
 services:
   db:
     image: mongo
-    ports:
-      - "27017:27017"
   web:
     build:
       context: .
@@ -42,8 +40,6 @@ services:
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
     build: ./docker/R
-    ports:
-      - "6311:6311"
     volumes:
       - osdata:/mnt/openstudio
 volumes:
