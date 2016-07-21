@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-# Arbitrary sleep to wait for other containers to start if this was the first
-sleep 5
+# Configure XVFB
+export DISPLAY=:99.0
+sh -e /etc/init.d/xvfb start
 
-for i in {1..5}
+# Arbitrary sleep to wait for other containers and xvfb to start if this was the first
+for i in {1..10}
 do
   echo "Waiting so other processes can start"
   sleep 1s

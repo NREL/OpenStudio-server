@@ -51,6 +51,8 @@
 # users commonly want.
 #
 
+require 'factory_girl_rails'
+
 require 'ci/reporter/core'
 
 # Always create spec reports
