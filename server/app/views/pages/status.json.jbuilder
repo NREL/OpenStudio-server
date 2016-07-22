@@ -24,17 +24,6 @@ json.data_points do
   json.completed DataPoint.where(download_status: :completed).count
 end
 
-if @mnt_fs
-  json.data_file_system do
-    json.mount_point @mnt_fs.first[:mount_point]
-    json.percent_used @mnt_fs.first[:percent_used]
-    json.mb_free @mnt_fs.first[:mb_free]
-    json.mb_used @mnt_fs.first[:mb_used]
-    json.mb_total @mnt_fs.first[:mb_total]
-  end
-else
-  json.data_file_system
-end
 
 if @server.nil?
   json.server
