@@ -80,7 +80,6 @@ makeClusterFT <- function(type = getClusterOption("type"), ipList=NULL,
         #MPI = makeMPIcluster(spec, ...),
         stop("unknown cluster type"))
     clusterEvalQ(cl, require(NRELsnowFT))
-   # clusterEvalQ(cl, require(RMongo))
     if(ft_verbose) {
         cat('\nCluster successfully created.')
         printClusterInfo(cl)
@@ -442,7 +441,6 @@ manage.replications.and.cluster.size <- function(cl, clall, p, n, manage, mngtfi
            cat('\n after addtoCluster \n')
            if(ft_verbose) printClusterInfo(cl)
            clusterEvalQpart(cl,(p+1):(p+length(addIPs)),require(NRELsnowFT))
-           clusterEvalQpart(cl,(p+1):(p+length(addIPs)),require(RMongo))
            if(ft_verbose)
              printClusterInfo(cl)
            #if (!is.null(initlibrary)) { 

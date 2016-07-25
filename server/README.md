@@ -37,9 +37,21 @@ gem install nokogiri -- --use-system-libraries --with-xml2-include=/usr/include/
 gem install libxml-ruby -- --with-xml2-include=/usr/include/libxml2 --with-xml2-lib=/usr/lib/
 ```
 
+# Testing using Docker-compose
+
+```
+docker volume create --name=osdata
+docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+```
+
 # TODOs
 
 * Rename Data Points to Datapoints
 * Re-enable worker logs posting to Server
 * Add LogStash (or something similar)
+* Move the remaining analyses to the R folder and break out from the ruby files
+* Write tests for each analysis (expand existing SPEA test)
+* Add CLI path to config.yml
+* Add tests for embedded files on analysis model. Test result of R code that pushed to analysis model (i.e. best_point.json)
 

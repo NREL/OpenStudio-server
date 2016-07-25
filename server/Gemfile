@@ -25,9 +25,9 @@ gem 'net-ssh'
 gem 'net-sftp'
 
 # javascript
-gem 'libv8', :platforms => :ruby
+gem 'libv8', platforms: :ruby
 gem 'execjs'
-gem 'therubyracer', :platforms => :ruby
+gem 'therubyracer', platforms: :ruby
 
 # other useful gems
 gem 'parallel'
@@ -56,24 +56,37 @@ gem 'uglifier'
 gem 'sprockets-rails'
 
 # For workers - and other dependencies for measures
-gem 'openstudio-workflow', '1.0.0.pat1'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw-working'
+# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'd04d5f'
 gem 'openstudio-standards', '0.1.4'
 gem 'msgpack', '~> 1.0'
+
 gem 'multi_json'
 gem 'oj'
 gem 'rest-client'
 gem 'libxml-ruby', :platforms => :ruby
 gem 'os'
 
+if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/
+  gem 'tzinfo-data'
+end
+
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
   gem 'meta_request'
-  gem 'ruby-prof'
 
+  gem 'coveralls', require: false
+  gem 'ruby-prof', '~> 0.15'
   gem 'capybara'
   gem 'selenium-webdriver'
+  gem 'rspec', '~> 3.4'
+  gem 'rspec-retry'
   gem 'rspec-rails'
+
+  gem 'rubocop', require: false
+  gem 'rubocop-checkstyle_formatter', require: false
+
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
@@ -82,5 +95,5 @@ group :development, :test do
   # these two openstudio gems are needed for starting up the cluster
   # and running the analysis in the integration tests
   gem 'openstudio-aws', '~> 0.4'
-  gem 'openstudio-analysis', '1.0.0.pat1'
+  gem 'openstudio-analysis', '1.0.0.pat2'
 end

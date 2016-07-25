@@ -46,15 +46,15 @@ RSpec.describe Analysis, type: :model do
   end
 
   it 'should have one analysis' do
-    @project.analyses.count.should eq(1)
+    expect(@project.analyses.size).to eq 1
   end
 
   it 'should have one project' do
-    @analysis.project.should_not be_nil
+    expect(@analysis.project).not_to be_nil
   end
 
   it 'should have uuid and id the same' do
-    @analysis.id.should eq(@analysis.uuid)
+    expect(@analysis.id).to eq(@analysis.uuid)
   end
 
   after :each do

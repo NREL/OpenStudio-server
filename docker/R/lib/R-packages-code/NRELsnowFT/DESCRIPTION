@@ -8,7 +8,7 @@ Description: Extension of the snow package supporting R 3.0.2
 	as well as dynamic cluster resizing.
 Maintainer: Brian Ball <Brian.Ball@nrel.gov>
 Depends: R (>= 3.0), snow (>= 0.3-3)
-Suggests: RMongo
+Suggests:
 License: LGPL-3
 Packaged: 2013-11-21 12:00:00 MT; Brian
 NeedsCompilation: no

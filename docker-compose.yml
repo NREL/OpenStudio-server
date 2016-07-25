@@ -4,12 +4,11 @@ version: '2'
 services:
   db:
     image: mongo
-    ports:
-      - "27017:27017"
   web:
-    build: .
-    environment:
-      - RAILS_ENV=docker
+    build:
+      context: .
+      args:
+        rails_env: docker
     links:
       - db
       - rserve
@@ -18,16 +17,11 @@ services:
       - "9090:9090"
     volumes:
       - osdata:/mnt/openstudio
-  rserve:
-    build: ./docker/R
-    ports:
-      - "6311:6311"
-    volumes:
-      - osdata:/mnt/openstudio
   web-background:
-    build: .
-    environment:
-      - RAILS_ENV=docker
+    build:
+      context: .
+      args:
+        rails_env: docker
     links:
       - db
       - rserve
@@ -35,14 +29,19 @@ services:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
   worker:
-    build: .
-    environment:
-      - RAILS_ENV=docker
+    build:
+      context: .
+      args:
+        rails_env: docker
     links:
       - web
       - db
       - rserve
     command: bin/delayed_job -i worker --queue=simulations run
+  rserve:
+    build: ./docker/R
+    volumes:
+      - osdata:/mnt/openstudio
 volumes:
   osdata:
     external: true

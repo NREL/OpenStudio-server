@@ -183,6 +183,7 @@ class AnalysisLibrary::Morris  < AnalysisLibrary::Base
                    vardisplaynames: var_display_names, objnames: obj_names,
                    mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
           %{
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))

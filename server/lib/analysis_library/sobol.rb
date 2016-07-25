@@ -175,6 +175,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    mins: mins_maxes[:min], maxes: mins_maxes[:max]) do
           %{
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))

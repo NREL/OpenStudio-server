@@ -5,6 +5,8 @@
 
 FROM ubuntu:14.04
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
+ARG rails_env=docker
+ARG bundle_args="--without development test"
 
 # Install required libaries
 RUN apt-get update \
@@ -51,7 +53,7 @@ RUN mkdir -p /usr/local/etc \
 ENV RUBY_MAJOR 2.0
 ENV RUBY_VERSION 2.0.0-p648
 ENV RUBY_DOWNLOAD_SHA256 8690bd6b4949c333b3919755c4e48885dbfed6fd055fe9ef89930bde0d2376f8
-ENV RUBYGEMS_VERSION 2.5.2
+ENV RUBYGEMS_VERSION 2.6.6
 
 # some of ruby's build scripts are written in ruby
 # we purge this later to make sure our final image uses what we just built
@@ -87,6 +89,9 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION 5.0.25
+# Install Rack. Silly workaround for not having ruby 2.2.2. Rack 1.6.4 is the
+# latest for Ruby <= 2.0
+RUN gem install rack -v=1.6.4
 RUN gem install passenger -v $PASSENGER_VERSION
 RUN passenger-install-nginx-module
 
@@ -120,12 +125,23 @@ RUN apt-get update \
 ENV RUBYLIB /usr/local/lib/site_ruby/2.0.0
 ENV OPENSTUDIO_SERVER 'true'
 
+# Install vfb and firefox requirement if docker-test env
+RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
+        echo "Running in testing environment" && \
+        echo "deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main" | tee -a /etc/apt/sources.list > /dev/null && \
+        apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29 && \
+        apt-get update && apt-get install -y xvfb firefox && \
+        rm -rf /var/lib/apt/lists/*; \
+    else \
+        echo "Not Running in testing environment"; \
+    fi
+
 #### OpenStudio Server Code
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 ADD /bin /opt/openstudio/bin
 ADD /server/Gemfile /opt/openstudio/server/Gemfile
 WORKDIR /opt/openstudio/server
-RUN bundle install --without development test
+RUN bundle install $bundle_args
 
 # Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
 # have to be recompiled everytime
@@ -136,13 +152,13 @@ ADD /server/lib /opt/openstudio/server/lib
 
 # Now call precompile
 RUN mkdir /opt/openstudio/server/log
-ENV RAILS_ENV docker
+ENV RAILS_ENV $rails_env
 RUN rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
-RUN bundle install --without development test
+RUN bundle install
 
 # Where to save the assets
 RUN mkdir -p /opt/openstudio/server/public/assets/analyses && chmod 777 /opt/openstudio/server/public/assets/analyses
@@ -156,7 +172,9 @@ RUN mkdir -p /opt/openstudio/server/public/assets/data_points && chmod 777 /opt/
 RUN chmod 666 /opt/openstudio/server/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
+ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
+RUN chmod +x /usr/local/bin/run-server-tests
 
 CMD ["/usr/local/bin/start-server"]
 

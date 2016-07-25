@@ -35,7 +35,7 @@
 
 require 'rails_helper'
 
-describe "Pages Exist", :type => :feature do
+RSpec.describe "Pages Exist", :type => :feature do
   it "HomePage" do
     visit '/'
 

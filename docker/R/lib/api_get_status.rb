@@ -1,6 +1,7 @@
 # Simple script that will return the status of the analysis
 require 'optparse'
 require 'rest-client'
+require 'json'
 
 options = {submit_simulation: false, sleep_time: 5}
 o = OptionParser.new do |opts|

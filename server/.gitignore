@@ -23,6 +23,8 @@
 
 # testing artifacts
 /spec/reports
+/coverage
+/spec/runs.txt
 /*.pem
 /*.json
 
@@ -31,3 +33,4 @@ vendor/cache
 spec/files/tmp/*
 spec/files/test_model/tmp*
 faraday.log
+

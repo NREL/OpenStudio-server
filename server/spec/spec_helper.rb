@@ -50,6 +50,25 @@
 # The `.rspec` file also contains a few flags that are not defaults but that
 # users commonly want.
 #
+
+require 'factory_girl_rails'
+
+require 'ci/reporter/core'
+
+# Always create spec reports
+require 'simplecov'
+require 'coveralls'
+Coveralls.wear!
+
+require 'rspec/retry'
+
+dir = File.expand_path("../../reports/coverage", File.dirname(__FILE__))
+SimpleCov.coverage_dir(dir)
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+SimpleCov.start do
+  add_filter 'spec/files'
+end
+
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -75,17 +94,12 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-  config.filter_run_excluding broken: true
-  config.order = :random
+  # Use the specified formatter
+  config.formatter = :documentation #:documentation # :progress, :html, :textmate
+  #
+  # # The settings below are suggested to provide a good initial experience
+  # with RSpec, but feel free to customize to your heart's content.
 
-  # Allow both should and expect syntax in the tests
-  config.expect_with(:rspec) { |c| c.syntax = [:should, :expect] }
-
-
-
-# The settings below are suggested to provide a good initial experience
-# with RSpec, but feel free to customize to your heart's content.
-=begin
   # These two settings work together to allow you to limit a spec run
   # to individual examples or groups you care about by tagging them with
   # `:focus` metadata. When nothing is tagged with `:focus`, all examples
@@ -93,10 +107,12 @@ RSpec.configure do |config|
   config.filter_run :focus
   config.run_all_when_everything_filtered = true
 
+  config.filter_run_excluding broken: true
+
   # Allows RSpec to persist some state between runs in order to support
   # the `--only-failures` and `--next-failure` CLI options. We recommend
   # you configure your source control system to ignore this file.
-  config.example_status_persistence_file_path = "spec/examples.txt"
+  config.example_status_persistence_file_path = "spec/runs.txt"
 
   # Limits the available syntax to the non-monkey patched syntax that is
   # recommended. For more details, see:
@@ -105,31 +121,34 @@ RSpec.configure do |config|
   #   - http://rspec.info/blog/2014/05/notable-changes-in-rspec-3/#zero-monkey-patching-mode
   config.disable_monkey_patching!
 
-  # Many RSpec users commonly either run the entire suite or an individual
-  # file, and it's useful to allow more verbose output when running an
-  # individual spec file.
-  if config.files_to_run.one?
-    # Use the documentation formatter for detailed output,
-    # unless a formatter has already been configured
-    # (e.g. via a command-line flag).
-    config.default_formatter = 'doc'
-  end
+  # # Many RSpec users commonly either run the entire suite or an individual
+  # # file, and it's useful to allow more verbose output when running an
+  # # individual spec file.
+  # if config.files_to_run.one?
+  #   # Use the documentation formatter for detailed output,
+  #   # unless a formatter has already been configured
+  #   # (e.g. via a command-line flag).
+  #   config.default_formatter = 'doc'
+  # end
 
   # Print the 10 slowest examples and example groups at the
   # end of the spec run, to help surface which specs are running
   # particularly slow.
   config.profile_examples = 10
 
-  # Run specs in random order to surface order dependencies. If you find an
-  # order dependency and want to debug it, you can fix the order by providing
-  # the seed, which is printed after each run.
-  #     --seed 1234
-  config.order = :random
-
   # Seed global randomization in this process using the `--seed` CLI option.
   # Setting this allows you to use `--seed` to deterministically reproduce
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
+  config.order = :random
   Kernel.srand config.seed
-=end
+
+  # To handle the timeout of the first selenium test (by retrying)
+  # show retry status in spec process
+  config.verbose_retry = true
+  # Try twice (retry once)
+  config.default_retry_count = 2
+  # Only retry when Selenium raises Net::ReadTimeout
+  config.exceptions_to_retry = [Net::ReadTimeout]
+
 end

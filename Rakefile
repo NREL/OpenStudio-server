@@ -4,7 +4,6 @@ Bundler.setup
 require 'rake'
 require 'git'
 require 'logger'
-require 'rspec/core/rake_task'
 require 'colored'
 
 # To release new version, increment the value in the ./server/lib/openstudio_server/version.rb file
@@ -39,16 +38,3 @@ task :release do
 
   puts "\nSuccessfully create tag and pushed repo to server\n".green
 end
-
-require 'rubocop/rake_task'
-desc 'Run RuboCop on the lib directory'
-RuboCop::RakeTask.new(:rubocop) do |task|
-  # only show the files with failures
-  task.options = ['--no-color', '--out=rubocop-results.xml']
-  task.formatters = ['RuboCop::Formatter::CheckstyleFormatter']
-  task.requires = ['rubocop/formatter/checkstyle_formatter']
-  # don't abort rake on failure
-  task.fail_on_error = false
-end
-
-task default: :spec

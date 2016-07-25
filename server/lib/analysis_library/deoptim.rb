@@ -163,6 +163,7 @@ class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
         logger.info("variable types are #{var_types}")
         @r.command(vars: samples.to_dataframe, vartypes: var_types, gen: @analysis.problem['algorithm']['generations']) do
           %{
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
 

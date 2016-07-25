@@ -52,7 +52,7 @@ RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
   end
 
   it 'should have 3 parameters' do
-    @ps.size.should eq(7)
+    expect(@ps.size).to eq(7)
   end
 
   it 'should return all the datapoints' do
@@ -61,20 +61,20 @@ RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
     # get the full ps information
     vgls = @ps.select { |k, v| v if vgl_ids.include?(k) }
 
-    vgls.size.should eq(0)
+    expect(vgls.size).to eq(0)
 
     run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(vgls, @ps)
 
     puts "Run list was returned with #{run_list.inspect}"
     puts "run list of size of #{run_list.size} is #{run_list}"
-    run_list.size.should eq(7) # 7 because it has itself
-    run_list.should eq([['1'], ['2'], ['3'], ['4'], ['5'], ['6'], ['7']])
+    expect(run_list.size).to eq(7) # 7 because it has itself
+    expect(run_list).to eq([['1'], ['2'], ['3'], ['4'], ['5'], ['6'], ['7']])
 
     # now create the run list data
     data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)
-    data_point_list.size.should eq(7)
-    data_point_list.first[:variables].should_not be_nil
-    data_point_list.first[:name].should_not be_nil
+    expect(data_point_list.size).to eq(7)
+    expect(data_point_list.first[:variables]).not_to be_nil
+    expect(data_point_list.first[:name]).not_to be_nil
   end
 
   it "if 'vgl=1' then result should be ?" do
@@ -83,20 +83,20 @@ RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
     # get the full ps information
     vgls = @ps.select { |k, v| v if vgl_ids.include?(k) }
 
-    vgls.size.should_not eq(0)
+    expect(vgls.size).not_to eq 0
 
     run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(vgls, @ps)
 
     puts "Run list was returned with #{run_list.inspect}"
     puts "run list of size of #{run_list.size} is #{run_list}"
-    run_list.size.should eq(7) # 7 because it has itself
-    run_list.should eq([['1'], ['2'], %w(1 3), %w(1 4), %w(1 5), %w(1 6), %w(1 7)])
+    expect(run_list.size).to eq(7) # 7 because it has itself
+    expect(run_list).to eq([['1'], ['2'], %w(1 3), %w(1 4), %w(1 5), %w(1 6), %w(1 7)])
 
     # now create the run list data
     data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)
-    data_point_list.size.should eq(7)
-    data_point_list.first[:variables].should_not be_nil
-    data_point_list.first[:name].should_not be_nil
+    expect(data_point_list.size).to eq(7)
+    expect(data_point_list.first[:variables]).not_to be_nil
+    expect(data_point_list.first[:name]).not_to be_nil
   end
 
   it "if 'vgl=1' then result should be ?" do
@@ -108,14 +108,14 @@ RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
     run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(vgls, @ps)
 
     puts "run list of size of #{run_list.size} is #{run_list.uniq}"
-    run_list.size.should eq(6) # only six for now because we aren't pulling out the values
-    run_list.should eq([%w(1 3), %w(2 3), %w(1 4), %w(1 5), %w(1 6), %w(1 3 7)])
+    expect(run_list.size).to eq(6) # only six for now because we aren't pulling out the values
+    expect(run_list).to eq([%w(1 3), %w(2 3), %w(1 4), %w(1 5), %w(1 6), %w(1 3 7)])
 
     # now create the run list data
     data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)
-    data_point_list.size.should eq(6)
-    data_point_list.first[:variables].should_not be_nil
-    data_point_list.first[:variables].size.should eq(2)
-    data_point_list.first[:name].should_not be_nil
+    expect(data_point_list.size).to eq(6)
+    expect(data_point_list.first[:variables]).not_to be_nil
+    expect(data_point_list.first[:variables].size).to eq(2)
+    expect(data_point_list.first[:name]).not_to be_nil
   end
 end

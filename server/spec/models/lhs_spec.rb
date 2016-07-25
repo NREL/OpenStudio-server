@@ -50,24 +50,24 @@ RSpec.describe AnalysisLibrary::Lhs, type: :model do
   end
 
   it 'should have the right sizes' do
-    @pivots.size.should eq(2)
-    @samples.size.should eq(3)
-    @statics.size.should eq(2)
+    expect(@pivots.size).to eq 2
+    expect(@samples.size).to eq 3
+    expect(@statics.size).to eq 2
   end
 
   it 'static result should return the same length' do
     result = @lhs.add_static_variables(@samples, @statics)
     puts "Static hash returned with #{result.inspect}"
 
-    result.size.should eq(3)
-    result[0].should eq(a: 1, b: 2, s1: 'a', s2: true)
+    expect(result.size).to eq 3
+    expect(result[0]).to eq(a: 1, b: 2, s1: 'a', s2: true)
   end
 
   it 'pivot result should have double the length' do
     result = @lhs.add_pivots(@samples, @pivots)
     puts "Pivot hash returned with #{result.inspect}"
 
-    result.size.should eq(6)
-    result[0].should eq(p1: 'p1', a: 1, b: 2)
+    expect(result.size).to eq(6)
+    expect(result[0]).to eq(p1: 'p1', a: 1, b: 2)
   end
 end

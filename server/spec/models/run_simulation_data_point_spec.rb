@@ -97,7 +97,6 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
 
     a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
     a = JSON.parse(a, symbolize_names: true)
-    pp a
     expect(a[:analysis][:data_points].size).to eq 1
 
     # test using the script
