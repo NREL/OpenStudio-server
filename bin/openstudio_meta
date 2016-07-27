@@ -630,7 +630,7 @@ class RunAnalysis
 
     formulation_file = temp_filepath+'.json'
     analysis_zip_file = temp_filepath+'.zip'
-    batch_run_method = server_dns.include?('localhost') ? 'batch_run_local' : 'batch_run'
+    batch_run_method = 'batch_run'
     run_options = {
         push_to_dencity: options[:dencity],
         batch_run_method: batch_run_method
