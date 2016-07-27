@@ -578,7 +578,7 @@ class RunAnalysis
     options = {
       debug: false,
       dencity: false,
-      analysis_type: %w(batch_datapoints batch_run_local)
+      analysis_type: %w(batch_datapoints batch_run)
     }
 
     opts = ::OptionParser.new do |o|
