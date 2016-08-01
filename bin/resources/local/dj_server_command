@@ -72,7 +72,7 @@ bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bun
 ::ENV['RAILS_ENV'] = 'local'
 if options[:windows]
   # Don't stop
-  sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i server --queue=analyses,background start --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
+  sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i server --queue=analyses,background run --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
 else
   sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i server --queue=analyses,background start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
 end
