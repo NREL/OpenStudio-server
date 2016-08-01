@@ -185,6 +185,29 @@ module Analysis::R
           Rails.logger.info("disrete vars for #{var.name} are #{var.discrete_values_and_weights}")
           variable_samples = discrete_sample_from_probability(p[i_var], var)
           var_types << 'discrete'
+        elsif (var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence')
+          Rails.logger.info("creating integer sequence by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
+          @r.command(varlow: var.lower_bounds_value) do
+          %{
+            values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+            weights <- rep(1/length(values),length(values))
+          }
+          end
+          values = @r.converse 'values'
+          weights = @r.converse 'weights'
+
+          dataframe = { 'data' => p[i_var] }.to_dataframe
+          @r.command(df: dataframe, values: values, weights: weights) do
+          "
+            print(values)
+            samples <- qdiscrete(df$data, weights, values)
+          "
+          end
+          variable_samples = @r.converse 'samples'
+          variable_samples = [variable_samples] unless variable_samples.is_a? Array # ensure it is an array
+          Rails.logger.info("R created the following samples #{@r.converse('samples')}")
+
+          var_types << 'discrete'
         else
           variable_samples = samples_from_probability(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
                                                       var.lower_bounds_value, var.upper_bounds_value)

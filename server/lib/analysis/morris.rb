@@ -115,7 +115,9 @@ class Analysis::Morris
     end
     Rails.logger.info "Objective function names #{obj_names}"
 
-    pivot_array = Variable.pivot_array(@analysis.id)
+    pivot_array = Variable.pivot_array(@analysis.id, @r)
+    Rails.logger.info "pivot_array: #{pivot_array}"
+    
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 

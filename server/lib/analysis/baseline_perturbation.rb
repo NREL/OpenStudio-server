@@ -78,7 +78,8 @@ class Analysis::BaselinePerturbation
       # TODO: need to move this to the module class
       @r.converse('setwd("/mnt/openstudio")')
 
-      # pivot_array = Variable.pivot_array(@analysis.id)
+      # pivot_array = Variable.pivot_array(@analysis.id, @r)
+      #Rails.logger.info "pivot_array: #{pivot_array}"
 
       Rails.logger.info "#{Variable.variables(@analysis.id)}"
 
