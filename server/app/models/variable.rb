@@ -241,14 +241,28 @@ class Variable
   end
 
   # start with a hash and then create the hash_of_arrays
-  def self.pivot_array(analysis_id)
+  def self.pivot_array(analysis_id, r_session)
     pivot_variables = Variable.pivots(analysis_id)
 
     pivot_hash = {}
     pivot_variables.each do |var|
       Rails.logger.info "Adding variable '#{var.name}' to pivot list"
-      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
-      values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
+      if (var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence')
+        Rails.logger.info("creating integer sequence for pivot variable by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
+        @r = r_session
+        @r.command(varlow: var.lower_bounds_value) do
+        %{
+          values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+          weights <- rep(1/length(values),length(values))
+        }
+        end
+        values = @r.converse 'values'
+        values = values.map(&:to_i)
+        weights = @r.converse 'weights'
+      else
+        Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
+        values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
+      end
       Rails.logger.info "pivot variable values are #{values}"
       pivot_hash[var.uuid] = values
     end
