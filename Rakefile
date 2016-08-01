@@ -38,3 +38,4 @@ task :release do
 
   puts "\nSuccessfully create tag and pushed repo to server\n".green
 end
+
