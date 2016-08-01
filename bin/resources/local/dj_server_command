@@ -71,11 +71,10 @@ bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bun
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + rails_port
 ::ENV['RAILS_ENV'] = 'local'
 if options[:windows]
-  sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i server stop && "\
-    "bin/delayed_job -i server --queue=analyses,background start --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
+  # Don't stop
+  sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i server --queue=analyses,background start --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
 else
-  sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i server stop && bin/delayed_job -i server "\
-    "--queue=analyses,background start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
+  sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i server --queue=analyses,background start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
 end
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
