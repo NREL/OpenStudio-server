@@ -4,7 +4,6 @@ Bundler.setup
 require 'rake'
 require 'git'
 require 'logger'
-require 'rspec/core/rake_task'
 require 'colored'
 
 # To release new version, increment the value in the ./server/lib/openstudio_server/version.rb file
@@ -39,10 +38,6 @@ task :release do
   g.push('origin', 'master', true)
 
   puts "\nSuccessfully create tag and pushed repo to server\n".green
-end
-
-RSpec::Core::RakeTask.new('spec') do |_spec|
-  pwd = Dir.pwd
 end
 
 require 'rubocop/rake_task'
