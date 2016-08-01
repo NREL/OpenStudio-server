@@ -140,7 +140,8 @@ class Analysis::SpeaNrel
       fail 'number of objective functions must equal'
     end
 
-    pivot_array = Variable.pivot_array(@analysis.id)
+    pivot_array = Variable.pivot_array(@analysis.id, @r)
+    Rails.logger.info "pivot_array: #{pivot_array}"
     selected_variables = Variable.variables(@analysis.id)
     Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 

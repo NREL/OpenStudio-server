@@ -158,7 +158,7 @@ module Analysis::R
       samples
     end
 
-    def diagonal(selected_variables, number_of_samples)
+    def diagonal(selected_variables, number_of_samples, run_baseline)
       samples = {}
       samples_temp = {}
       var_types = []
@@ -197,6 +197,21 @@ module Analysis::R
           Rails.logger.info("variable_samples is #{variable_samples}")
           var_types << 'discrete'
         # IF continuous, then sample the variable to make it "discrete"
+        elsif (var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence')
+          Rails.logger.info("creating integer sequence by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
+          @r.command(varlow: var.lower_bounds_value) do
+          %{
+            values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+            weights <- rep(1/length(values),length(values))
+          }
+          end
+          values = @r.converse 'values'
+          values = values.map(&:to_i)
+          weights = @r.converse 'weights'
+          Rails.logger.info("values is #{values}")
+          variable_samples = values
+          Rails.logger.info("variable_samples is #{variable_samples}")
+          var_types << 'discrete'
         else
           variable_samples = samples_from_probability3(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
                                                        var.lower_bounds_value, var.upper_bounds_value)
@@ -219,29 +234,33 @@ module Analysis::R
         # @r.converse "#{var.name} <- #{variable_samples}"
         @r.command(var_names: var.name, var_sample: variable_samples) do
           %{
-         #print(paste("doe.orig:",doe.orig))
-      #print(paste("legnth of doe.orig:",length(doe.orig)))
+            #print(paste("doe.orig:",doe.orig))
+            #print(paste("legnth of doe.orig:",length(doe.orig)))
             #print(paste("typeof(var_names):",typeof(var_names)))
             #num_var <- length(var_names)
-      #print(paste("num_var:",num_var))
-      print(paste("var_names:",var_names))
-      #print(paste("typeof(var_sample):",typeof(var_sample)))
+            #print(paste("num_var:",num_var))
+            print(paste("var_names:",var_names))
+            #print(paste("typeof(var_sample):",typeof(var_sample)))
             #print(paste("var_sample:",var_sample))
-      #num_var_sample <- length(var_sample)
-      #print(paste("num_var_sample:",num_var_sample))
-      doe.orig[[#{var.r_index}]] <- var_sample
-      print(paste("doe.orig:",doe.orig))
-      print(paste("r_index:",#{var.r_index}))
+            #num_var_sample <- length(var_sample)
+            #print(paste("num_var_sample:",num_var_sample))
+            doe.orig[[#{var.r_index}]] <- var_sample
+            print(paste("doe.orig:",doe.orig))
+            print(paste("r_index:",#{var.r_index}))
           }
         end
       end
 
       @r.converse "print('creating diagonal')"
-      @r.command(var_names: var_names) do
+      @r.command(var_names: var_names, run_baseline: run_baseline) do
         %{
            n <- length(var_names)
            print(paste("n:",n))
-           fac_design<- rbind(rep(0,n),diag(1,n,n))
+           if(run_baseline == 1){
+             fac_design <- rbind(rep(0,n),diag(1,n,n))
+           } else {
+             fac_design <- diag(1,n,n)  
+           }
         }
       end
       @r.converse 'print(fac_design)'
