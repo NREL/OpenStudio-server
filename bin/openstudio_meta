@@ -629,6 +629,7 @@ class RunAnalysis
       return 1
     end
 
+    # Submit the job
     formulation_file = temp_filepath+'.json'
     analysis_zip_file = temp_filepath+'.zip'
     batch_run_method = 'batch_run'
@@ -636,8 +637,11 @@ class RunAnalysis
         push_to_dencity: options[:dencity],
         batch_run_method: batch_run_method
     }
+    analysis_id = server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
 
-    server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
+    # Save the analysis id to file
+    analyses_file = File.absolute_path(File.join(project_path, '../analyses.txt'))
+    ::File.open(analyses_file, 'wb') { |f| f.puts "#{Time.now.gmtime.to_s}: #{analysis_id}" }
 
     0
   end
