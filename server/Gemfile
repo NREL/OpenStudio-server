@@ -57,7 +57,7 @@ gem 'uglifier'
 gem 'sprockets-rails'
 
 # For workers - and other dependencies for measures
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw-working'
 gem 'openstudio-standards', '0.1.4'
 gem 'msgpack', '~> 1.0'
 
@@ -95,5 +95,7 @@ group :development, :test do
   # these two openstudio gems are needed for starting up the cluster
   # and running the analysis in the integration tests
   gem 'openstudio-aws', '~> 0.4'
-  gem 'openstudio-analysis', '1.0.0.pat2'
+  # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
+  # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
+  gem 'openstudio-analysis', '1.0.0.pre.rc3'
 end

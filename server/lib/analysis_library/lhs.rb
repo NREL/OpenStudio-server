@@ -77,6 +77,8 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     begin
       logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       logger.info "Setting up R for #{self.class.name}"
+      # TODO: can we move the mkdir_p to the initialize task
+      FileUtils.mkdir_p APP_CONFIG['sim_root_path'] unless Dir.exist? APP_CONFIG['sim_root_path']
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       # make this a core method
