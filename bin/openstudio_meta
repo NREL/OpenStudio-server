@@ -24,7 +24,7 @@ Signal.trap('INT') { abort }
 require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
-ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
+ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
@@ -260,7 +260,7 @@ class InstallGems
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
-	rake_bin = File.absolute_path('./../gems/bin/rake/')
+    rake_bin = File.absolute_path('./../gems/bin/rake/')
     sys_call = "gem install bundler -v 1.12.5 && #{bundler_bin} install --without development test" #### && #{rake_bin} assets:precompile"
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
@@ -608,6 +608,9 @@ class RunAnalysis
     # Create temporary folder for server inputs
     ::Dir.mkdir '.temp' unless ::File.exist?('.temp')
     temp_filepath = '.temp/analysis'
+    
+    # Convert Windows style path separators
+    project_path = project_path.gsub("\\", "/")
 
     # Process project file and retrieve cluster options
     if ::File.extname(project_path).downcase == '.xlsx'
