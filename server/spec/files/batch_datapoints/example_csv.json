@@ -1,103 +1,60 @@
 {
   "analysis": {
-    "uuid": "f89d2860-16e2-11e6-b6ba-3e1d05defe78",
-    "display_name": "Example Csv",
-    "name": "example_csv",
+    "display_name": "Example Batch Datapoints Small",
+    "name": "example_batch_datapoints_small",
     "output_variables": [
-      {
-        "display_name": "Total Natural Gas",
-        "name": "standard_report_legacy.total_natural_gas",
-        "units": "MJ/m2",
-        "visualize": true,
-        "objective_function": true
-      },
-      {
-        "display_name": "Total Electricity",
-        "name": "standard_report_legacy.total_energy",
-        "units": "MJ/m2",
-        "visualize": true
-      },
-      {
-        "display_name": "Total Site Energy",
-        "name": "standard_report_legacy.total_electricity",
-        "units": "MJ/m2",
-        "visualize": true,
-        "objective_function": true
-      },
-      {
-        "display_name": "Total Source Energy",
-        "name": "standard_report_legacy.total_source_energy",
-        "units": "MJ/m2",
-        "visualize": true
-      }
+
     ],
     "problem": {
       "analysis_type": null,
       "algorithm": {
         "objective_functions": [
-          "standard_report_legacy.total_natural_gas",
-          "standard_report_legacy.total_electricity"
+
         ]
       },
       "workflow": [
         {
-          "name": "reduce_space_infiltration_by_percentage",
-          "display_name": "Reduce Space Infiltration by Percentage",
+          "name": "adjust_thermostat_setpoints_by_degrees",
+          "display_name": "Adjust Thermostat Setpoints by Degrees",
           "measure_type": "RubyMeasure",
-          "measure_definition_class_name": "ReduceSpaceInfiltrationByPercentage",
-          "measure_definition_directory": "./measures/ReduceSpaceInfiltrationByPercentage",
-          "measure_definition_directory_local": "/Users/nlong/working/OpenStudio-analysis-spreadsheet/measures/ReduceSpaceInfiltrationByPercentage",
-          "measure_definition_display_name": "Reduce Space Infiltration by Percentage",
-          "measure_definition_name": "reduce_space_infiltration_by_percentage",
+          "measure_definition_class_name": "AdjustThermostatSetpointsByDegrees",
+          "measure_definition_directory": "./measures/AdjustThermostatSetpointsByDegrees",
+          "measure_definition_directory_local": "E:/openstudio-analysis-spreadsheet/measures/AdjustThermostatSetpointsByDegrees",
+          "measure_definition_display_name": "Adjust Thermostat Setpoints by Degrees",
+          "measure_definition_name": "adjust_thermostat_setpoints_by_degrees",
           "measure_definition_name_xml": null,
-          "measure_definition_uuid": "d8161857-8b77-4e1a-a76c-ae5deab7c1e0",
-          "measure_definition_version_uuid": "83e21dbf-635c-4c10-b016-cc4228d6d75b",
+          "measure_definition_uuid": "6e1f34f9-92e1-44ea-9279-de0b9b64f6a1",
+          "measure_definition_version_uuid": "c9e7c1e3-7b0e-48d7-86d1-8cff0a97d4f5",
           "arguments": [
             {
-              "display_name": "Increase in Material and Installation Costs for Building per Affected Floor Area",
-              "display_name_short": "Increase in Material and Installation Costs for Building per Affected Floor Area",
-              "name": "material_and_installation_cost",
-              "value_type": "double",
-              "default_value": 0.0,
-              "value": 0.0
-            },
-            {
-              "display_name": "O & M Costs for Construction per Affected Floor Area",
-              "display_name_short": "O & M Costs for Construction per Affected Floor Area",
-              "name": "om_cost",
-              "value_type": "double",
-              "default_value": 0.0,
-              "value": 0.0
-            },
-            {
-              "display_name": "O & M Frequency",
-              "display_name_short": "O & M Frequency",
-              "name": "om_frequency",
-              "value_type": "integer",
-              "default_value": 1,
-              "value": 1
+              "display_name": "alter design day thermostats?",
+              "display_name_short": "alter design day thermostats?",
+              "name": "alter_design_days",
+              "value_type": "boolean",
+              "default_value": "false",
+              "value": "false"
             }
           ],
           "variables": [
             {
               "argument": {
-                "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model",
-                "display_name_short": "Apply the Measure to a Specific Space Type or to the Entire Model",
-                "name": "space_type",
-                "value_type": "string",
-                "default_value": "*Entire Building*",
-                "value": "*Entire Building*"
+                "display_name": "degrees fahrenheit to adjust cooling setpoint by.",
+                "display_name_short": "degrees fahrenheit to adjust cooling setpoint by.",
+                "name": "cooling_adjustment",
+                "value_type": "double",
+                "default_value": "1",
+                "value": "1"
               },
-              "display_name": "Space Type",
-              "display_name_short": "Space Type",
+              "display_name": "Cooling Setpoint",
+              "display_name_short": "Cooling Setpoint",
               "variable_type": "variable",
-              "units": null,
-              "minimum": "*Entire Building*",
-              "maximum": "*Entire Building*",
+              "units": "",
+              "minimum": 1,
+              "maximum": 2,
               "relation_to_output": null,
-              "static_value": "*Entire Building*",
-              "uuid": "8f505810-8c66-4b8c-83fd-d8271ef3055a",
-              "version_uuid": "aa8af2b8-672e-44c1-aaf9-b4d0f09e87f7",
+              "static_value": 1,
+              "uuid": "f6ad6c30-c6bf-4af8-8c9f-496a6b3837e5",
+              "version_uuid": "2e000689-6778-4a9e-b205-df1f6ff6ff29",
               "variable": true,
               "uncertainty_description": {
                 "type": "discrete",
@@ -106,34 +63,34 @@
                     "name": "discrete",
                     "values_and_weights": [
                       {
-                        "value": "*Entire Building*",
+                        "value": 1,
                         "weight": 0.25
                       },
                       {
-                        "value": "*Entire Building*",
+                        "value": 1,
                         "weight": 0.25
                       },
                       {
-                        "value": "*Entire Building*",
+                        "value": 1,
                         "weight": 0.25
                       },
                       {
-                        "value": "*Entire Building*",
+                        "value": 2,
                         "weight": 0.25
                       }
                     ]
                   },
                   {
                     "name": "lower_bounds",
-                    "value": "*Entire Building*"
+                    "value": 1
                   },
                   {
                     "name": "upper_bounds",
-                    "value": "*Entire Building*"
+                    "value": 2
                   },
                   {
                     "name": "modes",
-                    "value": "*Entire Building*"
+                    "value": 1
                   },
                   {
                     "name": "delta_x",
@@ -149,23 +106,23 @@
             },
             {
               "argument": {
-                "display_name": "Space Infiltration Power Reduction",
-                "display_name_short": "Space Infiltration Power Reduction",
-                "name": "space_infiltration_reduction_percent",
+                "display_name": "degrees fahrenheit to adjust heating setpoint by.",
+                "display_name_short": "degrees fahrenheit to adjust heating setpoint by.",
+                "name": "heating_adjustment",
                 "value_type": "double",
-                "default_value": 30.0,
-                "value": 30.0
+                "default_value": "-1",
+                "value": "-1"
               },
-              "display_name": "Infiltration Reduction",
-              "display_name_short": "Infiltration Reduction",
+              "display_name": "Heating Setpoint",
+              "display_name_short": "Heating Setpoint",
               "variable_type": "variable",
-              "units": "%",
-              "minimum": 0,
-              "maximum": 20,
+              "units": "",
+              "minimum": 1,
+              "maximum": 2,
               "relation_to_output": null,
-              "static_value": 20,
-              "uuid": "03cb98b7-26d0-4ebc-9268-857ff4056887",
-              "version_uuid": "81bc1cc1-40cf-4141-b9c1-3d9c37a3ebf4",
+              "static_value": 1,
+              "uuid": "342a4cb1-72b7-45b3-8edf-288d4a62ac6d",
+              "version_uuid": "01afa5ca-2eb1-4323-a87b-5510d4124a58",
               "variable": true,
               "uncertainty_description": {
                 "type": "discrete",
@@ -174,34 +131,34 @@
                     "name": "discrete",
                     "values_and_weights": [
                       {
-                        "value": 20,
+                        "value": 1,
                         "weight": 0.25
                       },
                       {
-                        "value": 10,
+                        "value": 1,
                         "weight": 0.25
                       },
                       {
-                        "value": 5,
+                        "value": 1,
                         "weight": 0.25
                       },
                       {
-                        "value": 0,
+                        "value": 2,
                         "weight": 0.25
                       }
                     ]
                   },
                   {
                     "name": "lower_bounds",
-                    "value": 0
+                    "value": 1
                   },
                   {
                     "name": "upper_bounds",
-                    "value": 20
+                    "value": 2
                   },
                   {
                     "name": "modes",
-                    "value": 20
+                    "value": 1
                   },
                   {
                     "name": "delta_x",
@@ -217,318 +174,6 @@
             }
           ],
           "workflow_index": 0
-        },
-        {
-          "name": "reduce_lighting_loads_by_percentage",
-          "display_name": "Reduce Lighting Loads by Percentage",
-          "measure_type": "RubyMeasure",
-          "measure_definition_class_name": "ReduceLightingLoadsByPercentage",
-          "measure_definition_directory": "./measures/ReduceLightingLoadsByPercentage",
-          "measure_definition_directory_local": "/Users/nlong/working/OpenStudio-analysis-spreadsheet/measures/ReduceLightingLoadsByPercentage",
-          "measure_definition_display_name": "Reduce Lighting Loads by Percentage",
-          "measure_definition_name": "reduce_lighting_loads_by_percentage",
-          "measure_definition_name_xml": null,
-          "measure_definition_uuid": "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-          "measure_definition_version_uuid": "71cee08c-87d1-46f3-9961-c6025dedd010",
-          "arguments": [
-            {
-              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model",
-              "display_name_short": "Apply the Measure to a Specific Space Type or to the Entire Model",
-              "name": "space_type",
-              "value_type": "string",
-              "default_value": "*Entire Building*",
-              "value": "*Entire Building*"
-            },
-            {
-              "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area",
-              "display_name_short": "Increase in Material and Installation Cost for Lighting per Floor Area",
-              "name": "material_and_installation_cost",
-              "value_type": "double",
-              "default_value": 0.0,
-              "value": 0.0
-            },
-            {
-              "display_name": "Increase in Demolition Costs for Lighting per Floor Area",
-              "display_name_short": "Increase in Demolition Costs for Lighting per Floor Area",
-              "name": "demolition_cost",
-              "value_type": "double",
-              "default_value": 0.0,
-              "value": 0.0
-            },
-            {
-              "display_name": "Years Until Costs Start",
-              "display_name_short": "Years Until Costs Start",
-              "name": "years_until_costs_start",
-              "value_type": "integer",
-              "default_value": 0,
-              "value": 0
-            },
-            {
-              "display_name": "Demolition Costs Occur During Initial Construction",
-              "display_name_short": "Demolition Costs Occur During Initial Construction",
-              "name": "demo_cost_initial_const",
-              "value_type": "bool",
-              "default_value": false,
-              "value": false
-            },
-            {
-              "display_name": "Expected Life",
-              "display_name_short": "Expected Life",
-              "name": "expected_life",
-              "value_type": "integer",
-              "default_value": 15,
-              "value": 15
-            },
-            {
-              "display_name": "Increase O & M Costs for Lighting per Floor Area",
-              "display_name_short": "Increase O & M Costs for Lighting per Floor Area",
-              "name": "om_cost",
-              "value_type": "double",
-              "default_value": 0.0,
-              "value": 0.0
-            },
-            {
-              "display_name": "O & M Frequency",
-              "display_name_short": "O & M Frequency",
-              "name": "om_frequency",
-              "value_type": "integer",
-              "default_value": 1,
-              "value": 1
-            }
-          ],
-          "variables": [
-            {
-              "argument": {
-                "display_name": "Lighting Power Reduction",
-                "display_name_short": "Lighting Power Reduction",
-                "name": "lighting_power_reduction_percent",
-                "value_type": "double",
-                "default_value": 30.0,
-                "value": 30.0
-              },
-              "display_name": "LPD Reduction",
-              "display_name_short": "LPD Reduction",
-              "variable_type": "variable",
-              "units": "%",
-              "minimum": 5,
-              "maximum": 50,
-              "relation_to_output": null,
-              "static_value": 5,
-              "uuid": "db84e097-490b-4b6b-bcd3-051c3b38b5f8",
-              "version_uuid": "2bc99bbc-6995-4c10-b0ce-5a53d38a6b21",
-              "variable": true,
-              "uncertainty_description": {
-                "type": "discrete",
-                "attributes": [
-                  {
-                    "name": "discrete",
-                    "values_and_weights": [
-                      {
-                        "value": 5,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 10,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 20,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 50,
-                        "weight": 0.25
-                      }
-                    ]
-                  },
-                  {
-                    "name": "lower_bounds",
-                    "value": 5
-                  },
-                  {
-                    "name": "upper_bounds",
-                    "value": 50
-                  },
-                  {
-                    "name": "modes",
-                    "value": 5
-                  },
-                  {
-                    "name": "delta_x",
-                    "value": null
-                  },
-                  {
-                    "name": "stddev",
-                    "value": null
-                  }
-                ]
-              },
-              "workflow_index": 0
-            }
-          ],
-          "workflow_index": 1
-        },
-        {
-          "name": "adjust_thermostat_setpoints_by_degrees",
-          "display_name": "Adjust Thermostat Setpoints by Degrees",
-          "measure_type": "RubyMeasure",
-          "measure_definition_class_name": "AdjustThermostatSetpointsByDegrees",
-          "measure_definition_directory": "./measures/AdjustThermostatSetpointsByDegrees",
-          "measure_definition_directory_local": "/Users/nlong/working/OpenStudio-analysis-spreadsheet/measures/AdjustThermostatSetpointsByDegrees",
-          "measure_definition_display_name": "Adjust Thermostat Setpoints by Degrees",
-          "measure_definition_name": "adjust_thermostat_setpoints_by_degrees",
-          "measure_definition_name_xml": null,
-          "measure_definition_uuid": "6e1f34f9-92e1-44ea-9279-de0b9b64f6a1",
-          "measure_definition_version_uuid": "5a06240e-cf1a-4ff8-a871-f13372fa5f91",
-          "arguments": [
-            {
-              "display_name": "Alter Design Day Thermostats",
-              "display_name_short": "Alter Design Day Thermostats",
-              "name": "alter_design_days",
-              "value_type": "bool",
-              "default_value": false,
-              "value": false
-            }
-          ],
-          "variables": [
-            {
-              "argument": {
-                "display_name": "Degrees Fahrenheit to Adjust Cooling Setpoint By",
-                "display_name_short": "Degrees Fahrenheit to Adjust Cooling Setpoint By",
-                "name": "cooling_adjustment",
-                "value_type": "double",
-                "default_value": 1.0,
-                "value": 1.0
-              },
-              "display_name": "Cooling Setpoint",
-              "display_name_short": "Cooling Setpoint",
-              "variable_type": "variable",
-              "units": null,
-              "minimum": 1,
-              "maximum": 2,
-              "relation_to_output": null,
-              "static_value": 1,
-              "uuid": "5348fbe5-c549-4484-8f00-e2c4bded9c05",
-              "version_uuid": "e9a5ccae-012c-48fc-bf3c-b137e04a29be",
-              "variable": true,
-              "uncertainty_description": {
-                "type": "discrete",
-                "attributes": [
-                  {
-                    "name": "discrete",
-                    "values_and_weights": [
-                      {
-                        "value": 1,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 1,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 1,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 2,
-                        "weight": 0.25
-                      }
-                    ]
-                  },
-                  {
-                    "name": "lower_bounds",
-                    "value": 1
-                  },
-                  {
-                    "name": "upper_bounds",
-                    "value": 2
-                  },
-                  {
-                    "name": "modes",
-                    "value": 1
-                  },
-                  {
-                    "name": "delta_x",
-                    "value": null
-                  },
-                  {
-                    "name": "stddev",
-                    "value": null
-                  }
-                ]
-              },
-              "workflow_index": 0
-            },
-            {
-              "argument": {
-                "display_name": "Degrees Fahrenheit to Adjust heating Setpoint By",
-                "display_name_short": "Degrees Fahrenheit to Adjust heating Setpoint By",
-                "name": "heating_adjustment",
-                "value_type": "double",
-                "default_value": -1.0,
-                "value": -1.0
-              },
-              "display_name": "Heating Setpoint",
-              "display_name_short": "Heating Setpoint",
-              "variable_type": "variable",
-              "units": null,
-              "minimum": 1,
-              "maximum": 2,
-              "relation_to_output": null,
-              "static_value": 1,
-              "uuid": "b1062366-debc-4e66-8228-aa6e5f93cbd9",
-              "version_uuid": "c501e1f2-d6c3-4455-a1ef-f45794c135b4",
-              "variable": true,
-              "uncertainty_description": {
-                "type": "discrete",
-                "attributes": [
-                  {
-                    "name": "discrete",
-                    "values_and_weights": [
-                      {
-                        "value": 1,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 1,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 1,
-                        "weight": 0.25
-                      },
-                      {
-                        "value": 2,
-                        "weight": 0.25
-                      }
-                    ]
-                  },
-                  {
-                    "name": "lower_bounds",
-                    "value": 1
-                  },
-                  {
-                    "name": "upper_bounds",
-                    "value": 2
-                  },
-                  {
-                    "name": "modes",
-                    "value": 1
-                  },
-                  {
-                    "name": "delta_x",
-                    "value": null
-                  },
-                  {
-                    "name": "stddev",
-                    "value": null
-                  }
-                ]
-              },
-              "workflow_index": 1
-            }
-          ],
-          "workflow_index": 2
         }
       ]
     },
