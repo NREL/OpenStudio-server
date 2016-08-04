@@ -660,7 +660,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     unless @analysis.seed_zip.nil?
-      send_data File.open(@analysis.seed_zip.path).read, filename: 'analysis.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
+      send_data File.open(@analysis.seed_zip.path, 'rb').read, filename: 'analysis.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
     end
   end
 
