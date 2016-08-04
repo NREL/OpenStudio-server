@@ -76,22 +76,22 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
       v.save
     end
 
-    expect(selected_variables.size).to eq 5
+    expect(selected_variables.size).to eq 2
     data_point_data = {
         data_point: {
             name: "API Test Datapoint",
-            ordered_variable_values: [1, 1, 5, 20, "*Entire Building*"]
+            ordered_variable_values: [1, 1]
         }
     }
 
     a = RestClient.post "http://#{host}/analyses/#{analysis_id}/data_points.json", data_point_data
     a = JSON.parse(a, symbolize_names: true)
-    expect(a[:set_variable_values].size).to eq 5
+    expect(a[:set_variable_values].size).to eq 2
     expect(a[:set_variable_values].values[0]).to eq 1.0
     expect(a[:set_variable_values].values[1]).to eq 1.0
-    expect(a[:set_variable_values].values[2]).to eq 5
-    expect(a[:set_variable_values].values[3]).to eq 20
-    expect(a[:set_variable_values].values[4]).to eq "*Entire Building*"
+    # expect(a[:set_variable_values].values[2]).to eq 5
+    # expect(a[:set_variable_values].values[3]).to eq 20
+    # expect(a[:set_variable_values].values[4]).to eq "*Entire Building*"
 
     expect(a[:_id]).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
 

@@ -2,10 +2,7 @@
   "analysis_id": "6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79",
   "name": "Test Datapoint",
   "set_variable_values": {
-    "8f505810-8c66-4b8c-83fd-d8271ef3055a": "*Entire Building*",
-    "03cb98b7-26d0-4ebc-9268-857ff4056887": 20,
-    "db84e097-490b-4b6b-bcd3-051c3b38b5f8": 5,
-    "5348fbe5-c549-4484-8f00-e2c4bded9c05": 1,
-    "b1062366-debc-4e66-8228-aa6e5f93cbd9": 1
+    "342a4cb1-72b7-45b3-8edf-288d4a62ac6d": 1,
+    "f6ad6c30-c6bf-4af8-8c9f-496a6b3837e5": 1
   }
 }
