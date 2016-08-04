@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 gem 'rake', '~> 11.2'
 gem 'openstudio-aws', '~> 0.4'
-gem 'openstudio-analysis', '1.0.0.pre.rc3'
+gem 'openstudio-analysis', '1.0.0.pre.rc4'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 gem 'nokogiri', '1.6.5'
