@@ -32,5 +32,20 @@ docker-compose up
 
 **Note that you may need to build the containers a couple times for everything to converge**
 
+## Testing
+
+```
+docker volume create --name=osdata
+export RAILS_ENV=docker-test
+export CI=true
+export CIRCLECI=true
+docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d rserve
+docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d web-background
+docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d db
+mkdir -p reports/rspec
+docker-compose -f docker-compose.yml -f docker-compose.test.yml run web
+```
+
 #### You're done!!! ####
 Get the Docker IP address (`docker-machine ip dev`) and point your browser at [http://`ip-address`:8000](http://`ip-address`:8000)

@@ -18,4 +18,3 @@ cd /opt/openstudio/server && bundle exec rspec --format html; (( exit_status = e
 cd /opt/openstudio/server && bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
 
 exit $exit_status
-

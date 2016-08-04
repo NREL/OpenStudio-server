@@ -125,6 +125,9 @@ RUN apt-get update \
 ENV RUBYLIB /usr/local/lib/site_ruby/2.0.0
 ENV OPENSTUDIO_SERVER 'true'
 
+# Set the rails env var
+ENV RAILS_ENV $rails_env
+
 # Install vfb and firefox requirement if docker-test env
 RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
         echo "Running in testing environment" && \
@@ -152,7 +155,6 @@ ADD /server/lib /opt/openstudio/server/lib
 
 # Now call precompile
 RUN mkdir /opt/openstudio/server/log
-ENV RAILS_ENV $rails_env
 RUN rake assets:precompile
 
 # Bundle app source
