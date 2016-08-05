@@ -1,7 +1,6 @@
 source 'http://rubygems.org'
 
-
-eval_gemfile File.expand_path(File.join(File.dirname(__FILE__), "../bin/Gemfile"))
+eval_gemfile File.expand_path(File.join(File.dirname(__FILE__), '../bin/Gemfile'))
 
 gem 'rails', '4.2'
 
@@ -67,7 +66,7 @@ gem 'msgpack', '~> 1.0'
 gem 'multi_json'
 gem 'oj'
 gem 'rest-client'
-gem 'libxml-ruby', :platforms => :ruby
+gem 'libxml-ruby', platforms: :ruby
 gem 'os'
 
 if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/

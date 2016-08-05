@@ -35,12 +35,12 @@
 
 require 'rails_helper'
 
-RSpec.describe RunSimulateDataPoint, :type => :feature do
+RSpec.describe RunSimulateDataPoint, type: :feature do
   before :each do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
     Delayed::Job.destroy_all
-    
+
     # I am no longer using this factory for this purpose. It doesn't
     # link up everything, so just post the test using the Analysis Gem.
     #  FactoryGirl.create(:project_with_analyses).analyses
@@ -51,13 +51,13 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     puts "App host is: #{host}"
 
     # TODO: Make this a helper of some sort
-    options = {hostname: "http://#{host}"}
+    options = { hostname: "http://#{host}" }
     api = OpenStudio::Analysis::ServerApi.new(options)
     project_id = api.new_project
     expect(project_id).not_to be nil
     analysis_options = {
-        formulation_file: 'spec/files/batch_datapoints/example_csv.json',
-        upload_file: 'spec/files/batch_datapoints/example_csv.zip',
+      formulation_file: 'spec/files/batch_datapoints/example_csv.json',
+      upload_file: 'spec/files/batch_datapoints/example_csv.zip'
     }
     analysis_id = api.new_analysis(project_id, analysis_options)
 
@@ -65,7 +65,7 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     expect(analysis_id).not_to be nil
 
     a = RestClient.get "http://#{host}/analyses/#{analysis_id}.json"
-    
+
     # expect(...something...)
 
     # Go set the r_index of the variables because the algorithm normally
@@ -78,10 +78,10 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
 
     expect(selected_variables.size).to eq 2
     data_point_data = {
-        data_point: {
-            name: "API Test Datapoint",
-            ordered_variable_values: [1, 1]
-        }
+      data_point: {
+        name: 'API Test Datapoint',
+        ordered_variable_values: [1, 1]
+      }
     }
 
     a = RestClient.post "http://#{host}/analyses/#{analysis_id}/data_points.json", data_point_data
@@ -110,17 +110,17 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     APP_CONFIG['os_server_host_url'] = "http://#{host}"
 
     # TODO: Make this a helper of some sort
-    options = {hostname: "http://#{host}"}
+    options = { hostname: "http://#{host}" }
     api = OpenStudio::Analysis::ServerApi.new(options)
     project_id = api.new_project
     expect(project_id).not_to be nil
     analysis_options = {
-        formulation_file: 'spec/files/batch_datapoints/example_csv.json',
-        upload_file: 'spec/files/batch_datapoints/example_csv.zip',
+      formulation_file: 'spec/files/batch_datapoints/example_csv.json',
+      upload_file: 'spec/files/batch_datapoints/example_csv.zip'
     }
     analysis_id = api.new_analysis(project_id, analysis_options)
     dp_file = 'spec/files/batch_datapoints/example_data_point_1.json'
-    dp_json = api.upload_datapoint(analysis_id, {datapoint_file: dp_file})
+    dp_json = api.upload_datapoint(analysis_id, datapoint_file: dp_file)
     expect(Delayed::Job.count).to eq(0)
 
     dp = DataPoint.find(dp_json[:_id])
@@ -164,7 +164,7 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
       # TODO: Break this code out into its own class and test it there
       if File.exist? write_lock_file
         # wait until receipt file appears then return
-        while true
+        loop do
           break if File.exist? receipt_file
           sleep 1
         end
@@ -178,13 +178,11 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
         end
       end
       File.open(receipt_file, 'w') { |f| f << Time.now }
-
     end
 
     puts arr.inspect
     expect(arr.sum).to be < 5
   end
-
 
   it 'should sort worker jobs correctly' do
     a = %w(00_Job0 01_Job1 11_Job11 20_Job20 02_Job2 21_Job21)
@@ -199,5 +197,4 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
   after :each do
     Delayed::Job.destroy_all
   end
-
 end

@@ -108,11 +108,11 @@ class AnalysisLibrary::RgenoudLexical < AnalysisLibrary::Base
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
+    if @analysis.problem['algorithm']['maxit'].nil? || (@analysis.problem['algorithm']['maxit']).zero?
       raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
+    if @analysis.problem['algorithm']['popsize'].nil? || (@analysis.problem['algorithm']['popsize']).zero?
       raise 'Must have number of samples to discretize the parameter space'
     end
 

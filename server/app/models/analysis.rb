@@ -80,8 +80,8 @@ class Analysis
   embeds_many :result_files
 
   # Indexes
-  index({uuid: 1}, unique: true)
-  index({id: 1}, unique: true)
+  index({ uuid: 1 }, unique: true)
+  index({ id: 1 }, unique: true)
   index(name: 1)
   index(created_at: 1)
   index(updated_at: -1)
@@ -101,7 +101,7 @@ class Analysis
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    defaults = {skip_init: false}
+    defaults = { skip_init: false }
     options = defaults.merge(options)
 
     logger.info "Calling start on #{analysis_type} with options #{options}"
@@ -162,7 +162,7 @@ class Analysis
     end
 
     # Remove all the queued delayed jobs for this analysis
-    data_points.where(status: 'queued').each { |dp| dp.destroy }
+    data_points.where(status: 'queued').find_each(&:destroy)
 
     [save!, errors]
   end
@@ -281,14 +281,18 @@ class Analysis
 
   # Return the list of job statuses
   def jobs_status
-    jobs.order_by(:index.asc).map { |j| {analysis_type: j.analysis_type, status: j.status, status_message: j.status_message} }
+    jobs.order_by(:index.asc).map { |j| { analysis_type: j.analysis_type, status: j.status, status_message: j.status_message } }
   end
 
   # Return the last job's status for the analysis
   def status
     j = jobs_status
     if j
-      return j.last[:status] rescue 'unknown'
+      begin
+        return j.last[:status]
+      rescue
+        'unknown'
+      end
     else
       return 'unknown'
     end
@@ -298,7 +302,11 @@ class Analysis
   def job_status_message
     j = jobs_status
     if j
-      return j.last[:status_message] rescue 'unknown'
+      begin
+        return j.last[:status_message]
+      rescue
+        'unknown'
+      end
     else
       return 'unknown'
     end
@@ -342,9 +350,9 @@ class Analysis
 
   # Queue up the task to delete all the files in the background
   def queue_delete_files
-    analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{self.id}"
+    analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
 
-    logger.error "Will not delete analysis directory because it does not conform to pattern" unless analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    logger.error 'Will not delete analysis directory because it does not conform to pattern' unless analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
     Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
   end
 

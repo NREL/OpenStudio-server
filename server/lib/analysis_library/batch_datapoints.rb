@@ -85,7 +85,7 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
           raise "no hash values and weight passed in variable #{var.name}"
         end
         values, weights = var.map_discrete_hash_to_array
-        raise "'nil' value(s) found in variable #{var.id}. nil values not yet supported." if values.count(&:nil?) != 0
+        raise "'nil' value(s) found in variable #{var.id}. nil values not yet supported." if values.count(&:nil?).nonzero?
         values_length = values_length << values.length
         values_set[var.id.to_s.to_sym] = values
       end

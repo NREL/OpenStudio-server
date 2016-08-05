@@ -101,15 +101,15 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['order'].nil? || @analysis.problem['algorithm']['order'] == 0
+    if @analysis.problem['algorithm']['order'].nil? || (@analysis.problem['algorithm']['order']).zero?
       raise 'Value for order was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['conf'].nil? || @analysis.problem['algorithm']['conf'] == 0
+    if @analysis.problem['algorithm']['conf'].nil? || (@analysis.problem['algorithm']['conf']).zero?
       raise 'Value for conf was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
+    if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
       raise 'Must have number of samples to discretize the parameter space'
     end
 

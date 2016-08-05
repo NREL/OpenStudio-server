@@ -96,12 +96,12 @@ class DataPoint
 
   # Submit the simulation to run in the background task queue
   def submit_simulation
-    job = RunSimulateDataPoint.new(self.id)
+    job = RunSimulateDataPoint.new(id)
     self.job_id = job.delay(queue: 'simulations').perform.id
 
-    self.save!
+    save!
 
-    self.job_id
+    job_id
   end
 
   protected

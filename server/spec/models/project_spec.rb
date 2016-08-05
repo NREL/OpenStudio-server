@@ -46,7 +46,7 @@ RSpec.describe Project, type: :model do
 
   it 'should have a project' do
     # 'does not have just one project (either 0 or > 2)'
-    expect(Project.all.size).to eq 1 
+    expect(Project.all.size).to eq 1
   end
 
   it 'should be a project class' do

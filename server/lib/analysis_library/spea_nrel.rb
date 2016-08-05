@@ -38,28 +38,28 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
-        skip_init: false,
-        run_data_point_filename: 'run_openstudio_workflow.rb',
-        create_data_point_filename: 'create_data_point.rb',
-        output_variables: [],
-        max_queued_jobs: 32,
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                number_of_samples: 30,
-                sample_method: 'individual_variables',
-                generations: 1,
-                toursize: 2,
-                cprob: 0.7,
-                cidx: 5,
-                midx: 10,
-                mprob: 0.5,
-                normtype: 'minkowski',
-                ppower: 2,
-                exit_on_guideline14: 0,
-                objective_functions: []
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      max_queued_jobs: 32,
+      problem: {
+        random_seed: 1979,
+        algorithm: {
+          number_of_samples: 30,
+          sample_method: 'individual_variables',
+          generations: 1,
+          toursize: 2,
+          cprob: 0.7,
+          cidx: 5,
+          midx: 10,
+          mprob: 0.5,
+          normtype: 'minkowski',
+          ppower: 2,
+          exit_on_guideline14: 0,
+          objective_functions: []
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
 
@@ -103,11 +103,11 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
+    if @analysis.problem['algorithm']['generations'].nil? || (@analysis.problem['algorithm']['generations']).zero?
       raise 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
+    if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
       raise 'Must have number of samples to discretize the parameter space'
     end
 

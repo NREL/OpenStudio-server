@@ -68,13 +68,13 @@ class AdminController < ApplicationController
     FileUtils.mkdir_p(extract_dir)
 
     resp = `tar xvzf #{database_file.tempfile.path} -C #{extract_dir}`
-    if $?.exitstatus == 0
+    if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
       `mongo os_dev --eval "db.dropDatabase();"`
-      if $?.exitstatus == 0
+      if $?.exitstatus.zero?
         `mongorestore -d os_dev #{extract_dir}/os_dev`
-        if $?.exitstatus == 0
+        if $?.exitstatus.zero?
           logger.info 'Restored mongo database'
           success = true
         else
@@ -95,10 +95,10 @@ class AdminController < ApplicationController
 
     resp = `mongodump --db os_dev --out #{dump_dir}`
 
-    if $?.exitstatus == 0
+    if $?.exitstatus.zero?
       output_file = "/tmp/#{file_prefix}_#{time_stamp}.tar.gz"
       resp_2 = `tar czf #{output_file} -C #{dump_dir} os_dev`
-      if $?.exitstatus == 0
+      if $?.exitstatus.zero?
         success = true
       end
     end

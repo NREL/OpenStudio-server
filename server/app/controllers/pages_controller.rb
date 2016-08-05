@@ -64,7 +64,7 @@ class PagesController < ApplicationController
     # this would probably be better as an openstruct
     # find where the /mnt/ folder lives
     # TODO: make this cross-platform. NL -- can we just remove this. Seems like
-	  # we want to check how much storage is available in the worker-node directory
+    # we want to check how much storage is available in the worker-node directory
     # @mnt_fs = nil
     # @mnt_fs = @file_systems.select { |f| f[:mount_point] =~ /\/mnt/ }
     # @mnt_fs = @file_systems.select { |f| f[:mount_point] == '/' } if @mnt_fs.empty?
@@ -85,12 +85,12 @@ class PagesController < ApplicationController
     total_runs = DataPoint.all.count
     completed_cnt = DataPoint.where(status: 'completed').count
 
-    if failed_runs != 0 && total_runs != 0
+    if failed_runs.nonzero? && total_runs.nonzero?
       @failed_perc = (failed_runs.to_f / total_runs.to_f * 100).round(0)
     else
       @failed_perc = 0
     end
-    if completed_cnt != 0 && total_runs != 0
+    if completed_cnt.nonzero? && total_runs.nonzero?
       @completed_perc = (completed_cnt.to_f / total_runs.to_f * 100).round(0)
     else
       @completed_perc = 0
@@ -102,7 +102,8 @@ class PagesController < ApplicationController
     unless @current.nil?
       # aggregate results of current analysis
       aggregated_results = DataPoint.collection.aggregate(
-        [{ '$match' => { 'analysis_id' => @current.id } }, { '$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status' }, count: { '$sum' => 1 } } }])
+        [{ '$match' => { 'analysis_id' => @current.id } }, { '$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status' }, count: { '$sum' => 1 } } }]
+      )
     end
     # for js
     cnt = 0

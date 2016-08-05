@@ -11,7 +11,7 @@ APP_CONFIG['rails_log_path'] = File.expand_path(APP_CONFIG['rails_log_path'].gsu
 APP_CONFIG['server_asset_path'] = File.expand_path(APP_CONFIG['server_asset_path'].gsub(':rails_root', Rails.root.to_s))
 
 # Set the default URL
-Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host_url'].delete("http://")
+Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host_url'].delete('http://')
 
 # Set the log path
 FileUtils.mkdir_p APP_CONFIG['server_asset_path'] unless Dir.exist? APP_CONFIG['server_asset_path']

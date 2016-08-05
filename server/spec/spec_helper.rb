@@ -62,7 +62,7 @@ Coveralls.wear!
 
 require 'rspec/retry'
 
-dir = File.expand_path("../../reports/coverage", File.dirname(__FILE__))
+dir = File.expand_path('../../reports/coverage', File.dirname(__FILE__))
 SimpleCov.coverage_dir(dir)
 SimpleCov.formatter = Coveralls::SimpleCov::Formatter
 SimpleCov.start do
@@ -112,7 +112,7 @@ RSpec.configure do |config|
   # Allows RSpec to persist some state between runs in order to support
   # the `--only-failures` and `--next-failure` CLI options. We recommend
   # you configure your source control system to ignore this file.
-  config.example_status_persistence_file_path = "spec/runs.txt"
+  config.example_status_persistence_file_path = 'spec/runs.txt'
 
   # Limits the available syntax to the non-monkey patched syntax that is
   # recommended. For more details, see:
@@ -150,5 +150,4 @@ RSpec.configure do |config|
   config.default_retry_count = 2
   # Only retry when Selenium raises Net::ReadTimeout
   config.exceptions_to_retry = [Net::ReadTimeout]
-
 end

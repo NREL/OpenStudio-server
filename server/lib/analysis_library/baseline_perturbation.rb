@@ -70,7 +70,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
 
     # Create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
-                                                APP_CONFIG['rserve_port'])
+                                                 APP_CONFIG['rserve_port'])
     begin
       logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       logger.info "Setting up R for #{self.class.name}"

@@ -57,14 +57,14 @@ class ComputeNode
   index(hostname: 1)
   index(ip_address: 1)
   index(node_type: 1)
-  index({name: 1, hostname: 1}, unique: true)
+  index({ name: 1, hostname: 1 }, unique: true)
 
   # Return all the enabled IP addresses as a hash in prep for writing to a dataframe
   def self.worker_ips
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
 
-    ComputeNode.where(enabled: true).each do |node|
+    ComputeNode.where(enabled: true).find_each do |node|
       if node.node_type == 'server'
         (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << 'localhost' }
       elsif node.node_type == 'worker'
@@ -90,7 +90,6 @@ class ComputeNode
   def self.active_names
     select(:name)
   end
-
 
   # Report back the system inforamtion of the node for debugging purposes
   # TODO: Send system information to server, move this to a worker init because this is hitting API limits on amazon

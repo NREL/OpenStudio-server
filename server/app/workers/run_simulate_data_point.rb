@@ -47,7 +47,7 @@ class RunSimulateDataPoint
 
     # For now just track the status here. Ideally we would use delayed jobs
     # or a plugin for delayed jobs to track the status of the job.
-    
+
     # Also, should we use the API to set these or relay on mongoid?
     @data_point.update(run_queue_time: Time.now, status: 'queued')
     @data_point.save!
@@ -93,38 +93,38 @@ class RunSimulateDataPoint
 
     osw_path = "#{simulation_dir}/data_point.osw"
     osw_options = {
-        file_paths: [
-            "../weather",
-            "../seed"
-        ],
-        measure_paths: ["../measures"]
+      file_paths: [
+        '../weather',
+        '../seed'
+      ],
+      measure_paths: ['../measures']
     }
     t = OpenStudio::Analysis::Translator::Workflow.new(
-        "#{simulation_dir}/analysis.json",
-        osw_options
+      "#{simulation_dir}/analysis.json",
+      osw_options
     )
     t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
     if t_result
       File.open(osw_path, 'w') { |f| f << JSON.pretty_generate(t_result) }
     else
-      fail "Could not translate OSA, OSD into OSW"
+      raise 'Could not translate OSA, OSD into OSW'
     end
 
     sim_logger.info 'Creating Workflow Manager instance'
     sim_logger.info "Directory is #{simulation_dir}"
 
     adapter_options = {
-        workflow_filename: File.basename(osw_path),
-        datapoint_filename: "#{simulation_dir}/data_point.json",
-        analysis_filename: "#{analysis_dir}/analysis.json"
+      workflow_filename: File.basename(osw_path),
+      datapoint_filename: "#{simulation_dir}/data_point.json",
+      analysis_filename: "#{analysis_dir}/analysis.json"
     }
     input_adapter = OpenStudio::Workflow.load_input_adapter 'local', adapter_options
     adapter_options[:output_directory] = input_adapter.run_directory File.dirname(osw_path)
     output_adapter = OpenStudio::Workflow.load_output_adapter 'local', adapter_options
-    run_options = {debug: true, cleanup: false}
+    run_options = { debug: true, cleanup: false }
 
     k = OpenStudio::Workflow::Run.new input_adapter, output_adapter, File.dirname(osw_path), run_options
-    sim_logger.info "Running workflow"
+    sim_logger.info 'Running workflow'
     k.run
     sim_logger.info "Final run state is #{k.current_state}"
 

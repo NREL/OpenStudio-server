@@ -24,7 +24,6 @@ json.data_points do
   json.completed DataPoint.where(download_status: :completed).count
 end
 
-
 if @server.nil?
   json.server
 else

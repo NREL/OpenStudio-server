@@ -40,10 +40,10 @@ require 'rserve/simpler'
 module AnalysisLibrary
   module R
     module Core
-      def initialize_rserve(hostname='localhost', port=6311)
+      def initialize_rserve(hostname = 'localhost', port = 6311)
         rserve_options = {
-            hostname: hostname,
-            port_number: port
+          hostname: hostname,
+          port_number: port
         }
         Rserve::Simpler.new(rserve_options)
       end

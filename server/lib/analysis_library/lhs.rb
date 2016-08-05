@@ -43,15 +43,15 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = {
-        skip_init: false,
-        run_data_point_filename: 'run_openstudio_workflow.rb',
-        problem: {
-            random_seed: 1979,
-            algorithm: {
-                number_of_samples: 100,
-                sample_method: 'all_variables'
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      problem: {
+        random_seed: 1979,
+        algorithm: {
+          number_of_samples: 100,
+          sample_method: 'all_variables'
         }
+      }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
 
@@ -97,7 +97,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       logger.info 'Starting sampling'
       lhs = AnalysisLibrary::R::Lhs.new(@r)
       if @analysis.problem['algorithm']['sample_method'] == 'all_variables' ||
-          @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
+         @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
         samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
         if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
           # Do the work to mash up the samples and pivot variables before creating the datapoints

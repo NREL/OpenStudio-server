@@ -35,12 +35,12 @@
 
 require 'rails_helper'
 
-RSpec.describe "Run SPEA", broken: true do
+RSpec.describe 'Run SPEA', broken: true do
   before :all do
     Delayed::Job.destroy_all
   end
 
-  it "Runs the analysis", js: true do
+  it 'Runs the analysis', js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     puts "http://#{host}"
     APP_CONFIG['os_server_host_url'] = "http://#{host}"
@@ -59,7 +59,7 @@ RSpec.describe "Run SPEA", broken: true do
     formulation.save "#{workdir}/test_model.json"
 
     expect(Delayed::Job.count).to eq(0)
-    options = {hostname: "http://#{host}"}
+    options = { hostname: "http://#{host}" }
     api = OpenStudio::Analysis::ServerApi.new(options)
     analysis_id = api.run("#{workdir}/test_model.json",
                           'spec/files/test_model/test_model.zip',
@@ -68,10 +68,10 @@ RSpec.describe "Run SPEA", broken: true do
     expect(Delayed::Job.count).to eq(1)
     # Use threads to emulate the multiple queues
     threads = []
-    threads << Thread.new(1) { # analysis queue
+    threads << Thread.new(1) do # analysis queue
       expect(Delayed::Worker.new.run(Delayed::Job.first)).to eq true
-    }
-    threads << Thread.new(2) { # worker/simulations queue
+    end
+    threads << Thread.new(2) do # worker/simulations queue
       loop do
         j = Delayed::Job.where(queue: 'simulations').first
         if j
@@ -84,8 +84,8 @@ RSpec.describe "Run SPEA", broken: true do
         end
         sleep 1
       end
-    }
-    threads.each {|t| t.join}
+    end
+    threads.each(&:join)
 
     expect(Delayed::Job.count).to eq(0)
   end

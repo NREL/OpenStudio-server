@@ -47,4 +47,3 @@ DeleteAnalysisJob = Struct.new(:analysis_directory) do
     3
   end
 end
-

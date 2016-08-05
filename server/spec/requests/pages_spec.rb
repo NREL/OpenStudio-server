@@ -35,14 +35,14 @@
 
 require 'rails_helper'
 
-RSpec.describe "Pages Exist", :type => :feature do
-  it "HomePage" do
+RSpec.describe 'Pages Exist', type: :feature do
+  it 'HomePage' do
     visit '/'
 
     expect(page).to have_content 'OpenStudio Cloud Management Console'
   end
 
-  it "Home and Status Page" do
+  it 'Home and Status Page' do
     get '/'
     expect(response).to be_success
     expect(response.body).to have_content 'OpenStudio Cloud Management Console'
@@ -52,8 +52,7 @@ RSpec.describe "Pages Exist", :type => :feature do
     expect(json['status']['awake']).not_to be_nil
   end
 
-  it "Accesses the API over host using selenium", js: true do
-
+  it 'Accesses the API over host using selenium', js: true do
     visit '/'
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
 

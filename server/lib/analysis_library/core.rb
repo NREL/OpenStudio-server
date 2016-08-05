@@ -173,15 +173,14 @@ module AnalysisLibrary
     end
     module_function :initialize_analysis_job
 
-    def initialize_rserve(hostname='localhost', port=6311)
+    def initialize_rserve(hostname = 'localhost', port = 6311)
       rserve_options = {
-          hostname: hostname,
-          port_number: port
+        hostname: hostname,
+        port_number: port
       }
       require 'rserve/simpler'
       ::Rserve::Simpler.new(rserve_options)
     end
     module_function :initialize_rserve
-
   end
 end

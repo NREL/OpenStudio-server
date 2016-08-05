@@ -36,7 +36,7 @@
 require 'zip'
 
 class AnalysesController < ApplicationController
-  before_filter :set_algorithm_results_path, only: [:show, :download_algorithm_results_zip]
+  before_action :set_algorithm_results_path, only: [:show, :download_algorithm_results_zip]
 
   def set_algorithm_results_path
     @analysis = Analysis.find(params[:id])
@@ -536,7 +536,7 @@ class AnalysesController < ApplicationController
     # calculate indexes of the unique entries, not the unique entries themselves
     no_dup_indexes = []
     cum_min_arr.each_with_index do |n, i|
-      if i == 0
+      if i.zero?
         no_dup_indexes << i
       else
         if n != cum_min_arr[i - 1]
@@ -976,7 +976,7 @@ class AnalysesController < ApplicationController
     data_frame_name = 'results'
 
     r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
-                                                 APP_CONFIG['rserve_port'])
+                                                APP_CONFIG['rserve_port'])
 
     start_time = Time.now
     logger.info 'starting creation of data frame'

@@ -35,7 +35,7 @@
 
 # TODO: Fix this for new queue
 
-class AnalysisLibrary::Morris  < AnalysisLibrary::Base
+class AnalysisLibrary::Morris < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -99,11 +99,11 @@ class AnalysisLibrary::Morris  < AnalysisLibrary::Base
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['r'].nil? || @analysis.problem['algorithm']['r'] == 0
+    if @analysis.problem['algorithm']['r'].nil? || (@analysis.problem['algorithm']['r']).zero?
       raise 'Value for r was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['levels'].nil? || @analysis.problem['algorithm']['levels'] == 0
+    if @analysis.problem['algorithm']['levels'].nil? || (@analysis.problem['algorithm']['levels']).zero?
       raise 'Value for levels was not set or equal to zero (must be 1 or greater)'
     end
 

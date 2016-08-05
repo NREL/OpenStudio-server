@@ -129,7 +129,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
       new_point_to_evaluate = false
       # logger.info "Determine the Pareto Front for iteration #{@iteration}"
       # logger.info "Current pareto front is: #{@pareto.map(&:name)}"
-      if @iteration == 0
+      if @iteration.zero?
         # just add the point to the pareto curve
         min_point = @analysis.data_points.where(iteration: 0).only(:results, :name, :variable_group_list, :uuid)
         if min_point.empty?
@@ -153,7 +153,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
           logger.info "Pareto curve index #{i_pareto} of size #{@pareto.size}"
 
           # Skip the starting point when evaluating the curve
-          if i_pareto == 0
+          if i_pareto.zero?
             new_curve << pareto_point
           end
 
@@ -173,7 +173,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
 
               # check for infinite slope
               temp_slope = nil
-              if (x - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]]) == 0
+              if (x - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]]).zero?
                 # check if this has the same value, if so, then don't add#
                 # TODO: this should really cause a derivative analysis to kick off that would
                 # then use this point as a potential path as well.
@@ -244,7 +244,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
     def determine_run_list(parameter_space)
       data_point_list = []
       logger.info "Determining run list for iteration #{@iteration}"
-      if @iteration == 0
+      if @iteration.zero?
         # run the baseline
         logger.info 'setting up to run just the starting point'
         data_point_list << { variable_group: [], name: 'Starting Point', variables: {}, iteration: @iteration, sample: 1 }

@@ -37,10 +37,10 @@
 class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
-        skip_init: false,
-        data_points: [],
-        run_data_point_filename: 'run_openstudio.rb',
-        problem: {}
+      skip_init: false,
+      data_points: [],
+      run_data_point_filename: 'run_openstudio.rb',
+      problem: {}
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
     @options = defaults.deep_merge(options)
 
@@ -76,7 +76,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
 
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
-    while ids.size > 0
+    until ids.empty?
       ids.each do |id|
         ids.delete(id) if Delayed::Job.find(id).nil?
       end

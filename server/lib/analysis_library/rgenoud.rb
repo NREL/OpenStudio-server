@@ -115,11 +115,11 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
     cluster = nil
     begin
       # TODO: preflight check -- need to catch this in the analysis module
-      if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
+      if @analysis.problem['algorithm']['maxit'].nil? || (@analysis.problem['algorithm']['maxit']).zero?
         raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
       end
 
-      if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
+      if @analysis.problem['algorithm']['popsize'].nil? || (@analysis.problem['algorithm']['popsize']).zero?
         raise 'Must have number of samples to discretize the parameter space'
       end
 
@@ -140,7 +140,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
       # check to make sure there are objective functions
-      if @analysis.output_variables.count { |v| v['objective_function'] == true } == 0
+      if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
         raise 'No objective functions defined'
       end
 

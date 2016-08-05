@@ -59,8 +59,8 @@ FactoryGirl.define do
 
       after(:create) do |analysis, evaluator|
         FactoryGirl.create_list(
-            :data_point, evaluator.data_point_count,
-            analysis: analysis,
+          :data_point, evaluator.data_point_count,
+          analysis: analysis
         )
       end
     end
