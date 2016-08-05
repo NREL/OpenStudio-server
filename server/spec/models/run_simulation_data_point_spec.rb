@@ -182,7 +182,7 @@ RSpec.describe RunSimulateDataPoint, :type => :feature do
     end
 
     puts arr.inspect
-    expect(arr.sum).to eq < 5
+    expect(arr.sum).to be < 5
   end
 
 
