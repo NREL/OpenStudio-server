@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 # Allow the jobs to run for up to 1 week.  If this is ever hit, then we have other problems.
 # Delayed::Worker.destroy_failed_jobs = false

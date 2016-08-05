@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-ruby_regex = /^#\s\*{79}.*#\s\*{79}$/m
-erb_regex = /^<%.*#\s\*{79}.*#\s\*{79}.%>$/m
+ruby_regex = /^#\*{79}.*#\*{79}$/m
+erb_regex = /^<%.*#\*{79}.*#\*{79}.%>$/m
 js_regex = /^\/\* @preserve.*Copyright.*license.{2}\*\//m
 
 ruby_header_text = <<EOT
