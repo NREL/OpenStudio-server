@@ -71,9 +71,9 @@ module AnalysisLibrary::R
           }
       end
 
-      # note that if result is false it may be because the Rserve session wasn't running right, or the analysis
-      # database record was not found
-      @r.converse "flag"
+      # note that if result is false it may be because the Rserve session wasn't
+      # running right, or the analysis database record was not found
+      @r.converse 'flag'
     end
 
     # start the cluster.  Returns true if the cluster was started, false

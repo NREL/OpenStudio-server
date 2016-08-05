@@ -51,6 +51,7 @@ RSpec.describe "RunSingle" do
     workdir = 'spec/files/test_model/tmp_run_single'
     FileUtils.mkdir_p workdir unless Dir.exist? workdir
 
+    OpenStudio::Analysis.measure_paths << File.expand_path('spec/files/test_model/measures')
     formulation = OpenStudio::Analysis.load(h)
     formulation.analysis_type = 'single_run'
     formulation.save "#{workdir}/test_model.json"
