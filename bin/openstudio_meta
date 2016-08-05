@@ -224,7 +224,8 @@ end
 
 # Class to initialize packaged gems in ./../server/vendor/cache
 class InstallGems
-
+  require 'fileutils'
+  
   # Provides text for the main help functionality
   def self.synopsis
     'Installs the required packaged Gems'
@@ -236,7 +237,7 @@ class InstallGems
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = {debug: false}
+    options = {debug: false, export_dir: nil}
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta install_gems [options]'
@@ -247,6 +248,10 @@ class InstallGems
       o.on('--debug', 'Whatever makes debugging easy') do |f|
         options[:debug] = f
       end
+      
+      o.on('-e', '--export DIRECTORY', 'DIRECTORY to export server build') do |e|
+        options[:export_dir] = e
+      end
     end
 
     # Parse the options
@@ -256,6 +261,19 @@ class InstallGems
       return 1
     end
     $logger.debug("InstallGems command: #{argv.inspect} #{options.inspect}")
+    
+    # test that we have git in the path
+    if system("git --version") != true
+      $logger.error 'Git is not in your path.'
+      return 1
+    end
+    
+    # Delete existing gem dir
+    # GEM_HOME is set to location in this directory at top of script
+    if File.exists?(ENV['GEM_HOME'])
+      FileUtils.rm_rf(ENV['GEM_HOME'])
+    end
+    FileUtils.mkdir_p(ENV['GEM_HOME'])    
 
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
@@ -264,7 +282,35 @@ class InstallGems
     sys_call = "gem install bundler -v 1.12.5 && #{bundler_bin} install --without development test" #### && #{rake_bin} assets:precompile"
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
-    exec sys_call
+    if system(sys_call) != true
+      $logger.error "System call '#{sys_call}' failed"
+      return 1
+    end
+    
+    # copy all files to staging location
+    if options[:export_dir]
+      puts "Exporting server to #{options[:export_dir]}" if options[:debug]
+      
+      if File.exists?(options[:export_dir])
+        FileUtils.rm_rf(options[:export_dir])
+      end
+      FileUtils.mkdir_p(options[:export_dir])
+      
+      src = File.absolute_path(File.join(__FILE__, './../../'))
+      puts "Copying files from '#{src}' to '#{options[:export_dir]}'" if options[:debug]
+      Dir.glob(src + "/*").each do |f|
+        next if /\.git/.match(f)
+        FileUtils.cp_r(f, options[:export_dir])
+      end
+      
+      FileUtils.rm_rf(File.join(options[:export_dir], 'server/coverage'))
+      FileUtils.rm_rf(File.join(options[:export_dir], 'server/log'))
+      FileUtils.rm_rf(File.join(options[:export_dir], 'server/public/assets'))
+      FileUtils.rm_rf(File.join(options[:export_dir], 'server/tmp'))
+      FileUtils.rm_rf(File.join(options[:export_dir], 'reports'))
+      FileUtils.rm_rf(File.join(options[:export_dir], 'worker-nodes'))
+    end
+    
   end
 end
 
