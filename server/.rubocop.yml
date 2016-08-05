@@ -1,12 +1,7 @@
 AllCops:
   Exclude:
-    - 'launch-instance/**/*'
-    - 'lib/**/*'
-    - 'prototyping/**/*'
-    - 'testing/**/*'
-    - 'vagrant/**/*'
-  Include:
-    - 'server/**/*.rb'
+    - 'spec/files/**/*'
+    - 'lib/delayed/heartbeat/**/*'
 
 Rails:
   Enabled: true

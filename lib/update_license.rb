@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-ruby_regex = /^#\*{79}.*#\*{79}$/m
-erb_regex = /^<%.*#\*{79}.*#\*{79}.%>$/m
+ruby_regex = /^#\s\*{79}.*#\s\*{79}$/m
+erb_regex = /^<%.*#\s\*{79}.*#\s\*{79}.%>$/m
 js_regex = /^\/\* @preserve.*Copyright.*license.{2}\*\//m
 
 ruby_header_text = <<EOT
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,13 @@ ruby_header_text = <<EOT
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 EOT
 ruby_header_text.strip!
 
 erb_header_text = <<EOT
 <%
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ erb_header_text = <<EOT
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 %>
 EOT
 erb_header_text.strip!
