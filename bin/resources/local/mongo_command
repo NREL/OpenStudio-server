@@ -28,7 +28,7 @@ require 'pathname'
 argv = ARGV.dup
 options = {
   debug: false,
-  port: 27017,
+  port: 27_017,
   windows: false
 }
 opts = ::OptionParser.new do |o|
@@ -40,7 +40,7 @@ opts = ::OptionParser.new do |o|
   o.separator ''
   o.on('-p', '--port NUMBER', 'Port to start mongod on, defaults to 27017') { |p| options[:port] = p }
   o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
-  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
 end
 
 # Parse arguments and verify them
@@ -49,18 +49,18 @@ log_dir = argv.shift
 invocation_dir = argv.shift
 db_dir = argv.shift
 inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil?
-fail 'LOG_DIR, INVOCATION_DIR, and DB_DIR are all required for execution' if inputs_empty
+raise 'LOG_DIR, INVOCATION_DIR, and DB_DIR are all required for execution' if inputs_empty
 error_msg = ''
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
 error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute. " unless
   Pathname.new(invocation_dir).absolute?
 error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathname.new(db_dir).absolute?
-fail error_msg unless error_msg.empty?
-error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exists? log_dir
+raise error_msg unless error_msg.empty?
+error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
 error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless
-  Dir.exists? invocation_dir
-error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exists? db_dir
-fail error_msg unless error_msg.empty?
+  Dir.exist? invocation_dir
+error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exist? db_dir
+raise error_msg unless error_msg.empty?
 
 # Create the system call to use
 ::Dir.chdir(File.absolute_path(invocation_dir))

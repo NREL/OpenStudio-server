@@ -27,8 +27,8 @@ require 'pathname'
 # Set up options parsing
 argv = ARGV.dup
 options = {
-    debug: false,
-    windows: false
+  debug: false,
+  windows: false
 }
 opts = ::OptionParser.new do |o|
   o.banner = 'Usage: dj_worker_command [options] RUBY_EXE LOG_DIR PROJECT_DIR DB_PORT RAILS_PORT WORKER_NUMBER'
@@ -40,7 +40,7 @@ opts = ::OptionParser.new do |o|
   o.separator 'RAILS_PORT: Port that rails runs on'
   o.separator 'WORKER_NUMBER: Number or workers to use'
   o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
-  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true}
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
 end
 
 # Parse arguments and verify them
@@ -52,18 +52,18 @@ db_port = argv.shift
 rails_port = argv.shift
 worker_number = argv.shift
 inputs_empty = ruby_exe.nil? | log_dir.nil? | project_dir.nil? | db_port.nil? | rails_port.nil? | worker_number.nil?
-fail 'RUBY_EXE, LOG_DIR, PROJECT_DIR, DB_PORT, RAILS_PORT, and WORKER_NUMBER are all required for execution' if
+raise 'RUBY_EXE, LOG_DIR, PROJECT_DIR, DB_PORT, RAILS_PORT, and WORKER_NUMBER are all required for execution' if
   inputs_empty
 error_msg = ''
 error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, is not absolute. " unless Pathname.new(ruby_exe).absolute?
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
-fail error_msg unless error_msg.empty?
-error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, does not exist on the file system. " unless File.exists? ruby_exe
-error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exists? log_dir
+raise error_msg unless error_msg.empty?
+error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, does not exist on the file system. " unless File.exist? ruby_exe
+error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless
-  Dir.exists? project_dir
-fail error_msg unless error_msg.empty?
+  Dir.exist? project_dir
+raise error_msg unless error_msg.empty?
 
 # Create the system call to use
 bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))

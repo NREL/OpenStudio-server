@@ -53,7 +53,7 @@ def process_excel_project(filename, output_path)
   analyses = OpenStudio::Analysis.from_excel(filename)
   if analyses.size != 1
     $logger.error 'ERROR: EXCEL-PROJECT -- More than one seed model specified. This feature is deprecated'
-    fail 1
+    raise 1
   end
   analysis = analyses.first
   analysis.save "#{output_path}.json"
@@ -96,7 +96,7 @@ def lookup_target_url(target_type)
     else
       return target_type if target_type.include? 'http'
       puts "ERROR: TARGET -- Unknown 'target_type' in #{__method__}"
-      fail 1
+      raise 1
   end
   server_dns
 end
@@ -108,32 +108,32 @@ end
 #
 def parse_aws_yml(aws_yml_path)
   # Unset any AWS environment variables
-  if ::ENV.has_key? 'AWS_ACCESS_KEY'
+  if ::ENV.key? 'AWS_ACCESS_KEY'
     ::ENV.delete 'AWS_ACCESS_KEY'
     $logger.info 'Removed AWS_ACCESS_KEY from the environment'
   end
-  if ::ENV.has_key? 'AWS_SECRET_KEY'
+  if ::ENV.key? 'AWS_SECRET_KEY'
     ::ENV.delete 'AWS_SECRET_KEY'
     $logger.info 'Removed AWS_SECRET_KEY from the environment'
   end
-  if ::ENV.has_key? 'AWS_DEFAULT_REGION'
+  if ::ENV.key? 'AWS_DEFAULT_REGION'
     ::ENV.delete 'AWS_DEFAULT_REGION'
     $logger.info 'Removed AWS_DEFAULT_REGION from the environment'
   end
 
   # Load in the credentials and validate that the required fields are present
-  aws_credentials =::YAML.load_file(aws_yml_path)
+  aws_credentials = ::YAML.load_file(aws_yml_path)
   unless aws_credentials.keys.include? 'access_key_id'
     $logger.error "No access key provided in #{aws_yml_path}. An example: 'access_key_id: ABC...'"
-    fail 1
+    raise 1
   end
   unless aws_credentials.keys.include? 'secret_access_key'
     $logger.error "No secret key provided in #{aws_yml_path}. An example: 'secret_access_key: ABC...'"
-    fail 1
+    raise 1
   end
   unless aws_credentials.keys.include? 'region'
     $logger.error "No access key provided in #{aws_yml_path}. An example: 'region: us-east-1'"
-    fail 1
+    raise 1
   end
 
   # Set the AWS environment variables
@@ -141,18 +141,17 @@ def parse_aws_yml(aws_yml_path)
   ::ENV['AWS_SECRET_KEY'] = aws_credentials['secret_access_key']
   ::ENV['AWS_DEFAULT_REGION'] = aws_credentials['region']
   $logger.info 'Set new AWS environment variables using the credentials file'
-
 end
 
-# Find or create the target machine 
-# 
+# Find or create the target machine
+#
 # @param target_type [String] environment to start /find (AWS, NREL*, vagrant)
 # @param aws_instance_options [Hash] a hash defining aws options, @see #spec/schema/server_options/ex.json
 # @param project_dir [String] directory of the project to save the cluster_name.json AWS connection to
 # @return [String] return the server DNS
 #
 def find_or_create_target(target_type, aws_instance_options, project_dir)
-  if target_type.downcase == 'aws'
+  if target_type.casecmp('aws').zero?
     # Check or create new cluster on AWS
     if ::File.exist?("#{aws_instance_options[:cluster_name]}.json")
       $logger.info "It appears that a cluster for #{aws_instance_options[:cluster_name]} is already running."
@@ -161,8 +160,8 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       $logger.info 'Will try to continue'
 
       # Load AWS instance
-      aws_init_options = {credentials: {access_key_id: ::ENV['AWS_ACCESS_KEY'],
-                                        secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION']}}
+      aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
+                                          secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] } }
       aws = OpenStudio::Aws::Aws.new(aws_init_options)
       aws.load_instance_info_from_file("#{aws_instance_options[:cluster_name]}.json")
       server_dns = "http://#{aws.os_aws.server.data.dns}"
@@ -172,8 +171,8 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       $logger.info "Creating cluster for #{aws_instance_options[:user_id]}"
 
       # Don't use the old API (Version 1)
-      aws_init_options = {credentials: {access_key_id: ::ENV['AWS_ACCESS_KEY'],
-                                        secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION']}}
+      aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
+                                          secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] } }
       aws = OpenStudio::Aws::Aws.new(aws_init_options)
 
       server_options = {

@@ -1,24 +1,23 @@
 #!/usr/bin/env ruby
 
 ######################################################################
-#  Copyright (c) 2008-2016, Alliance for Sustainable Energy.  
+#  Copyright (c) 2008-2016, Alliance for Sustainable Energy.
 #  All rights reserved.
-#  
+#
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
-#  
+#
 #  This library is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ######################################################################
-
 
 Signal.trap('INT') { abort }
 require 'logger'
@@ -32,11 +31,11 @@ ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
 # @param [String] message Message to output
 # @param [Hash] opts Options hash
 #
-def safe_puts(message=nil, opts=nil)
+def safe_puts(message = nil, opts = nil)
   message ||= ''
   opts = {
-      io: $stdout,
-      printer: :puts
+    io: $stdout,
+    printer: :puts
   }.merge(opts || {})
 
   begin
@@ -55,7 +54,7 @@ end
 # @param [Array, nil] argv The argv input to be parsed, defaults to $argv
 # @return[Array, nil] If this method returns `nil`, then you should assume that help was printed and parsing failed
 #
-def parse_options(opts=nil, argv=nil)
+def parse_options(opts = nil, argv = nil)
   # Creating a shallow copy of the arguments so the OptionParser
   # doesn't destroy the originals.
   argv ||= $argv.dup
@@ -117,16 +116,15 @@ end
 
 # This CLI class processes the input args and invokes the proper command class
 class CLI
-
   # This constant maps subcommands to classes in this CLI and stores meta-data on them
   COMMAND_LIST = {
-      install_gems: [ Proc.new { ::InstallGems }, {primary: true, working:true}],
-      start_local: [ Proc.new { ::StartLocal }, {primary: true, working: true}],
-      start_remote: [ Proc.new { ::StartRemote }, {primary: true, working: true}],
-      stop_local: [ Proc.new { ::StopLocal }, {primary: true, working: true}],
-      stop_remote: [Proc.new { ::StopRemote }, {primary: true, working: true}],
-      run_analysis: [Proc.new { ::RunAnalysis }, {primary: true, working: true}]
-  }
+    install_gems: [proc { ::InstallGems }, { primary: true, working: true }],
+    start_local: [proc { ::StartLocal }, { primary: true, working: true }],
+    start_remote: [proc { ::StartRemote }, { primary: true, working: true }],
+    stop_local: [proc { ::StopLocal }, { primary: true, working: true }],
+    stop_remote: [proc { ::StopRemote }, { primary: true, working: true }],
+    run_analysis: [proc { ::RunAnalysis }, { primary: true, working: true }]
+  }.freeze
 
   # This method instantiates the global variables $main_args, $sub_command, and $sub_args
   #
@@ -186,7 +184,7 @@ class CLI
   # @return [void]
   # @see #COMMAND_LIST #::ListCommands
   #
-  def help(list_all=false)
+  def help(list_all = false)
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta [options] <command> [<args>]'
       o.separator ''
@@ -202,7 +200,7 @@ class CLI
       COMMAND_LIST.each do |key, data|
         # Skip non-primary commands. These only show up in extended
         # help output.
-        next unless data[1][:primary] unless list_all
+        next unless list_all || data[1][:primary]
 
         key           = key.to_s
         klass         = data[0].call
@@ -211,7 +209,7 @@ class CLI
       end
 
       commands.keys.sort.each do |key|
-        o.separator "     #{key.ljust(longest+2)} #{commands[key]}"
+        o.separator "     #{key.ljust(longest + 2)} #{commands[key]}"
       end
 
       o.separator ''
@@ -225,7 +223,7 @@ end
 # Class to initialize packaged gems in ./../server/vendor/cache
 class InstallGems
   require 'fileutils'
-  
+
   # Provides text for the main help functionality
   def self.synopsis
     'Installs the required packaged Gems'
@@ -237,7 +235,7 @@ class InstallGems
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = {debug: false, export_dir: nil}
+    options = { debug: false, export_dir: nil }
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta install_gems [options]'
@@ -248,7 +246,7 @@ class InstallGems
       o.on('--debug', 'Whatever makes debugging easy') do |f|
         options[:debug] = f
       end
-      
+
       o.on('-e', '--export DIRECTORY', 'DIRECTORY to export server build') do |e|
         options[:export_dir] = e
       end
@@ -261,19 +259,19 @@ class InstallGems
       return 1
     end
     $logger.debug("InstallGems command: #{argv.inspect} #{options.inspect}")
-    
+
     # test that we have git in the path
-    if system("git --version") != true
+    if system('git --version') != true
       $logger.error 'Git is not in your path.'
       return 1
     end
-    
+
     # Delete existing gem dir
     # GEM_HOME is set to location in this directory at top of script
-    if File.exists?(ENV['GEM_HOME'])
+    if File.exist?(ENV['GEM_HOME'])
       FileUtils.rm_rf(ENV['GEM_HOME'])
     end
-    FileUtils.mkdir_p(ENV['GEM_HOME'])    
+    FileUtils.mkdir_p(ENV['GEM_HOME'])
 
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
@@ -286,23 +284,23 @@ class InstallGems
       $logger.error "System call '#{sys_call}' failed"
       return 1
     end
-    
+
     # copy all files to staging location
     if options[:export_dir]
       puts "Exporting server to #{options[:export_dir]}" if options[:debug]
-      
-      if File.exists?(options[:export_dir])
+
+      if File.exist?(options[:export_dir])
         FileUtils.rm_rf(options[:export_dir])
       end
       FileUtils.mkdir_p(options[:export_dir])
-      
+
       src = File.absolute_path(File.join(__FILE__, './../../'))
       puts "Copying files from '#{src}' to '#{options[:export_dir]}'" if options[:debug]
-      Dir.glob(src + "/*").each do |f|
-        next if /\.git/.match(f)
+      Dir.glob(src + '/*').each do |f|
+        next if /\.git/ =~ f
         FileUtils.cp_r(f, options[:export_dir])
       end
-      
+
       FileUtils.rm_rf(File.join(options[:export_dir], 'server/coverage'))
       FileUtils.rm_rf(File.join(options[:export_dir], 'server/log'))
       FileUtils.rm_rf(File.join(options[:export_dir], 'server/public/assets'))
@@ -310,13 +308,11 @@ class InstallGems
       FileUtils.rm_rf(File.join(options[:export_dir], 'reports'))
       FileUtils.rm_rf(File.join(options[:export_dir], 'worker-nodes'))
     end
-    
   end
 end
 
 # Class to initialize a local server
 class StartLocal
-
   require_relative 'resources/local.rb'
 
   # Provides text for the main help functionality
@@ -330,7 +326,7 @@ class StartLocal
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = {debug: false, force_directories: false, workers: 1}
+    options = { debug: false, force_directories: false, workers: 1 }
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR MONGO_DIR RUBY_EXE'
@@ -355,7 +351,7 @@ class StartLocal
     argv = parse_options(opts, sub_argv)
     project_dir = argv.shift
     mongo_dir = argv.shift
-	  ruby_path = argv.shift
+    ruby_path = argv.shift
     unless argv == []
       $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
       return 1
@@ -365,20 +361,20 @@ class StartLocal
     # Check the directories exist
     [project_dir, mongo_dir].each do |dir|
       unless ::File.exist? dir
-        if options[:force_directories] 
+        if options[:force_directories]
           FileUtils.mkdir_p dir
-        else          
+        else
           $logger.error "Unable to find directory '#{dir}'"
           return 1
         end
       end
     end
-	
-	  # Check that ruby_path exists
-	  fail "Unable to find ruby executable at `#{ruby_path}`" unless File.exists? ruby_path
-  
+
+    # Check that ruby_path exists
+    raise "Unable to find ruby executable at `#{ruby_path}`" unless File.exist? ruby_path
+
     # Also force the creation of the log dir in the project_dir
-    if options[:force_directories]       
+    if options[:force_directories]
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
     end
 
@@ -391,7 +387,6 @@ end
 
 # Class to stop the local server
 class StopLocal
-
   require_relative 'resources/local.rb'
 
   # Provides text for the main help functionality
@@ -405,7 +400,7 @@ class StopLocal
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = {debug: false}
+    options = { debug: false }
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta stop_local [options] PROJECT_DIR'
@@ -428,26 +423,25 @@ class StopLocal
     $logger.debug("StopLocal command: #{argv.inspect} #{options.inspect}")
 
     # Retrieve the pids
-    local_state_file = ::File.absolute_path(File.join(project_dir,'local_configuration.json'))
+    local_state_file = ::File.absolute_path(File.join(project_dir, 'local_configuration.json'))
     unless ::File.exist? local_state_file
       $logger.error "Unable to find the local configuation json at #{local_state_file}"
       return 1
     end
-    local_server_config = ::JSON.parse(File.read(local_state_file), {symbolize_names: true})
+    local_server_config = ::JSON.parse(File.read(local_state_file), symbolize_names: true)
     rails_pid = local_server_config[:rails_pid]
     dj_pids = local_server_config[:dj_pids]
     mongod_pid = local_server_config[:mongod_pid]
 
     # Stop the pids, with lots of error catches
     stop_local_server rails_pid, dj_pids, mongod_pid
-    
+
     0
   end
 end
 
 # Class to boot an OS Server AMI instance on AWS or return the URL of a known remote server, i.e. nrel24a
 class StartRemote
-
   require_relative 'resources/remote.rb'
 
   # Provides text for the main help functionality
@@ -507,32 +501,30 @@ class StartRemote
     if target == 'aws'
       unless ::File.exist? options[:aws_yml]
         $logger.error "Unable to find AWS credentials file #{options[:aws_yml]}"
-        fail 1
+        raise 1
       end
-      unless ::File.exists? options[:server_options_json]
+      unless ::File.exist? options[:server_options_json]
         $logger.error "Unable to find server configuration file #{options[:server_options_json]}"
-        fail 1
+        raise 1
       end
-      unless ::File.exists? options[:project_dir]
+      unless ::File.exist? options[:project_dir]
         $logger.error "Unable to find project directory #{options[:project_dir]}"
-        fail 1
+        raise 1
       end
       parse_aws_yml(options[:aws_yml])
     end
 
     # Get OpenStudioServerApi object and ensure the instance is running
-    server_options = target == 'aws' ? ::JSON.parse(File.read(options[:server_options_json]), {symbolize_names: true}) : {}
+    server_options = target == 'aws' ? ::JSON.parse(File.read(options[:server_options_json]), symbolize_names: true) : {}
     server_dns = find_or_create_target(target, server_options, options[:project_dir])
     $logger.info "Server DNS: #{server_dns}"
 
     server_dns
-
   end
 end
 
 # Class to stop a remote AWS instance
 class StopRemote
-
   require_relative 'resources/remote.rb'
 
   # Provides text for the main help functionality
@@ -551,7 +543,7 @@ class StopRemote
     require 'openstudio-aws'
     $logger.debug 'Successfully required all gems for StopRemote'
     options = {
-        debug: false,
+      debug: false
     }
 
     opts = ::OptionParser.new do |o|
@@ -567,41 +559,39 @@ class StopRemote
 
     # Parse the options
     argv = parse_options(opts, sub_argv)
-    fail 1 unless argv
+    raise 1 unless argv
     $logger.debug("StopRemote command: #{argv.inspect} #{options.inspect}")
     aws_conn_json = argv.shift.to_s
     unless ::File.exist? aws_conn_json
       $logger.error "Unable to find AWS connection file at #{aws_conn_json}"
-      fail 1
+      raise 1
     end
     aws_yml = argv.shift.to_s
     unless ::File.exist? aws_yml
       $logger.error "Unable to find AWS credentials file at #{aws_yml}"
-      fail 1
+      raise 1
     end
     unless argv == []
       $logger.error 'Extra arguments passed to the stop_remote command. Please refer to the help documentation.'
-      fail 1
+      raise 1
     end
 
     # Set the env variables for AWS, load the instance controller, and terminate the instances.
     parse_aws_yml(aws_yml)
-    aws_init_options = {credentials: {access_key_id: ::ENV['AWS_ACCESS_KEY'], secret_access_key: ::ENV['AWS_SECRET_KEY'],
-                        region: ::ENV['AWS_DEFAULT_REGION']}}
+    aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'], secret_access_key: ::ENV['AWS_SECRET_KEY'],
+                                        region: ::ENV['AWS_DEFAULT_REGION'] } }
     aws = OpenStudio::Aws::Aws.new(aws_init_options)
     aws.load_instance_info_from_file(aws_conn_json)
     aws.terminate
 
     0
-
   end
 end
 
 # Class to submit an analysis to a OS Server instance, defined by URL
 class RunAnalysis
-
   require_relative 'resources/remote.rb'
-  BATCH_RUN_METHODS = %w(lhs preflight single_run repeat_run doe diag baseline_perturbation batch_datapoints)
+  BATCH_RUN_METHODS = %w(lhs preflight single_run repeat_run doe diag baseline_perturbation batch_datapoints).freeze
 
   # Provides text for the main help functionality
   def self.synopsis
@@ -654,17 +644,17 @@ class RunAnalysis
     # Create temporary folder for server inputs
     ::Dir.mkdir '.temp' unless ::File.exist?('.temp')
     temp_filepath = '.temp/analysis'
-    
+
     # Convert Windows style path separators
-    project_path = project_path.gsub("\\", "/")
+    project_path = project_path.tr('\\', '/')
 
     # Process project file and retrieve cluster options
-    if ::File.extname(project_path).downcase == '.xlsx'
+    if ::File.extname(project_path).casecmp('.xlsx').zero?
       analysis_type = process_excel_project(project_path, temp_filepath)
-    elsif ::File.extname(project_path).downcase == '.csv'
+    elsif ::File.extname(project_path).casecmp('.csv').zero?
       analysis_type = process_csv_project(project_path, temp_filepath)
-    elsif ::File.extname(project_path).downcase == '.json'
-      temp_filepath = File.dirname(project_path)+'/'+File.basename(project_path).gsub('.json','')
+    elsif ::File.extname(project_path).casecmp('.json').zero?
+      temp_filepath = File.dirname(project_path) + '/' + File.basename(project_path).gsub('.json', '')
       analysis_type = options[:analysis_type]
     else
       $logger.error "Did not recognize project file extension #{::File.extname(project_path)}"
@@ -679,18 +669,18 @@ class RunAnalysis
     end
 
     # Submit the job
-    formulation_file = temp_filepath+'.json'
-    analysis_zip_file = temp_filepath+'.zip'
+    formulation_file = temp_filepath + '.json'
+    analysis_zip_file = temp_filepath + '.zip'
     batch_run_method = 'batch_run'
     run_options = {
-        push_to_dencity: options[:dencity],
-        batch_run_method: batch_run_method
+      push_to_dencity: options[:dencity],
+      batch_run_method: batch_run_method
     }
     analysis_id = server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
 
     # Save the analysis id to file
     analyses_file = File.absolute_path(File.join(project_path, '../analyses.txt'))
-    ::File.open(analyses_file, 'wb') { |f| f.puts "#{Time.now.gmtime.to_s}: #{analysis_id}" }
+    ::File.open(analyses_file, 'wb') { |f| f.puts "#{Time.now.gmtime}: #{analysis_id}" }
 
     0
   end
