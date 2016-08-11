@@ -5,7 +5,7 @@ The preferred development approach for this application is to use Vagrant to pro
 
 ## Instructions
 
-- Install [Vagrant] *1.6.1*, [VirtualBox] *4.3.8*, and [ChefDK]
+- Install [Vagrant] *1.8.5*, [VirtualBox] *5.1.2*, and [ChefDK]
  
 [Vagrant]: http://www.vagrantup.com/ "Vagrant"
 [VirtualBox]: https://www.virtualbox.org/ "VirtualBox"
