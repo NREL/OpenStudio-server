@@ -1,8 +1,6 @@
 # Docker, Docker Machine, and Docker Compose
 
-* [Install Docker](https://docs.docker.com/installation/)
-* [Install Docker-Machine](https://docs.docker.com/machine/install-machine/)
-* [Install Docker-Compose](https://docs.docker.com/compose/install/)
+* [Install Docker Toolbox](https://www.docker.com/products/docker-toolbox). This installs Docker, Docker-Machine, and Docker-Compose
 
 ## Create Docker-Machine Image
 The command below will create a 100GB volume for development. This is a very large volume and can be adjusted. Make sure to create a volume greater than 30GB.
