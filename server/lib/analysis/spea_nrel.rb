@@ -1,4 +1,4 @@
-# *******************************************************************************
+#*******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,12 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# *******************************************************************************
+#*******************************************************************************
 
-# TODO: Fix this for new queue
-
-class AnalysisLibrary::Morris < AnalysisLibrary::Base
-  include AnalysisLibrary::R::Core
+# Non Sorting Genetic Algorithm
+class Analysis::SpeaNrel
+  include Analysis::Core
+  include Analysis::R
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -47,13 +47,17 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          r: 1,
-          levels: 2,
-          grid_jump: 1,
-          type: 'oat',
+          number_of_samples: 30,
+          sample_method: 'individual_variables',
+          generations: 1,
+          toursize: 2,
+          cprob: 0.7,
+          cidx: 5,
+          midx: 10,
+          mprob: 0.5,
           normtype: 'minkowski',
           ppower: 2,
-          debug: 0,
+          exit_on_guideline14: 0,
           objective_functions: []
         }
       }
@@ -70,137 +74,142 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
-                                                 APP_CONFIG['rserve_port'])
-    logger.info 'Setting up R for Morris Run'
-    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
+    @r = Rserve::Simpler.new
+    Rails.logger.info 'Setting up R for SPEA2 Run'
+    @r.converse('setwd("/mnt/openstudio")')
 
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
     # R libraries needed for this algorithm
     @r.converse 'library(rjson)'
-    @r.converse 'library(sensitivity)'
+    @r.converse 'library(mco)'
+    @r.converse 'library(NRELmoo)'
 
     # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
     # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    logger.info("Master ip: #{master_ip}")
-    logger.info('Starting Morris Run')
+    Rails.logger.info("Master ip: #{master_ip}")
+    Rails.logger.info('Starting SPEA2 Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['r'].nil? || (@analysis.problem['algorithm']['r']).zero?
-      raise 'Value for r was not set or equal to zero (must be 1 or greater)'
+    if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
+      fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['levels'].nil? || (@analysis.problem['algorithm']['levels']).zero?
-      raise 'Value for levels was not set or equal to zero (must be 1 or greater)'
+    if @analysis.problem['algorithm']['number_of_samples'].nil? || @analysis.problem['algorithm']['number_of_samples'] == 0
+      fail 'Must have number of samples to discretize the parameter space'
+    end
+
+    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    #  raise "P Norm must be non-negative"
+    # end
+
+    if @analysis.problem['algorithm']['ppower'] <= 0
+      fail 'P Norm must be non-negative'
+    end
+
+    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
+      fail 'Must have at least two objective functions defined'
+    end
+
+    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
+      fail 'Must have at least two output_variables'
     end
 
     objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
     ug = objtrue.uniq { |v| v['objective_function_group'] }
-    logger.info "Number of objective function groups are #{ug.size}"
-    obj_names = []
-    ug.each do |var|
-      obj_names << var['display_name_short']
+    Rails.logger.info "Number of objective function groups are #{ug.size}"
+
+    @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
+    @analysis.save!
+    Rails.logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+
+    if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
+      fail 'number of objective functions must equal'
     end
-    logger.info "Objective function names #{obj_names}"
 
     pivot_array = Variable.pivot_array(@analysis.id, @r)
     Rails.logger.info "pivot_array: #{pivot_array}"
-    
     selected_variables = Variable.variables(@analysis.id)
-    logger.info "Found #{selected_variables.count} variables to perturb"
-
-    var_display_names = []
-    selected_variables.each do |var|
-      var_display_names << var.display_name_short
-    end
-    logger.info "Variable display names #{var_display_names}"
+    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
-    @r.converse("print('starting lhs to get min/max')")
-    logger.info 'starting lhs to discretize the variables'
+    @r.converse("print('starting lhs to discretize the variables')")
+    Rails.logger.info 'starting lhs to discretize the variables'
 
-    lhs = AnalysisLibrary::R::Lhs.new(@r)
-    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 2 * selected_variables.count)
+    lhs = Analysis::R::Lhs.new(@r)
+    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
     if samples.empty? || samples.size <= 1
-      logger.info 'No variables were passed into the options, therefore exit'
-      raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      Rails.logger.info 'No variables were passed into the options, therefore exit'
+      fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
-    # logger.info "Samples are #{samples}"
+    Rails.logger.info "Samples are #{samples}"
 
-    logger.info "mins_maxes: #{mins_maxes}"
-    logger.info "var_names: #{var_names}"
-    logger.info("variable types are #{var_types}")
+    Rails.logger.info "mins_maxes: #{mins_maxes}"
+    Rails.logger.info "var_names: #{var_names}"
+    Rails.logger.info("variable types are #{var_types}")
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     process = nil
     begin
       # Start up the cluster and perform the analysis
-      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
+      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        raise 'could not configure R cluster'
+        fail 'could not configure R cluster'
       end
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      logger.info "Worker node ips #{worker_ips}"
+      Rails.logger.info "Worker node ips #{worker_ips}"
 
-      logger.info 'Running initialize worker scripts'
+      Rails.logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        raise 'could not run initialize worker scripts'
+        fail 'could not run initialize worker scripts'
       end
 
       # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = AnalysisLibrary::Core::BackgroundTasks.start_child_processes
+      process = Analysis::Core::BackgroundTasks.start_child_processes
 
       worker_ips = ComputeNode.worker_ips
-      logger.info "Found the following good ips #{worker_ips}"
+      Rails.logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        logger.info "Cluster Started flag is #{cluster.started}"
+        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
         @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
-                   levels: @analysis.problem['algorithm']['levels'], r: @analysis.problem['algorithm']['r'],
-                   type: @analysis.problem['algorithm']['type'], grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], debugF: @analysis.problem['algorithm']['debug'],
-                   vardisplaynames: var_display_names, objnames: obj_names,
-                   mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
+                   objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
+                   toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
+                   cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'],
+                   mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
           %{
-            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))
 
-            print(paste("levels:",levels))
-            print(paste("r:",r))
-            print(paste("grid_jump:",grid_jump))
-            print(paste("type:",type))
-            print(paste("debugF:",debugF))
-
+            print(paste("objfun:",objfun))
             objDim <- length(objfun)
             print(paste("objDim:",objDim))
             print(paste("UniqueGroups:",uniquegroups))
-            print(paste("objfun:",objfun))
-
             print(paste("normtype:",normtype))
             print(paste("ppower:",ppower))
 
@@ -217,40 +226,38 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
             }
             print(paste("vartypes:",vartypes))
             print(paste("varnames:",varnames))
-            print(paste("vardisplaynames:",vardisplaynames))
-            print(paste("objnames:",objnames))
 
             varfile <- function(x){
-              if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json")){
-               write.table(x, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+              if (!file.exists("/mnt/openstudio/analysis_#{@analysis.id}/varnames.json")){
+               write.table(x, file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
               }
             }
 
-            vardisplayfile <- function(x){
-              if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json")){
-               write.table(x, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-              }
+            if (uniquegroups == 1) {
+                 print(paste("unique groups error:",uniquegroups))
+                 write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                 stop(options("show.error.messages"=TRUE),"unique groups is 1")
             }
 
-            clusterExport(cl,"debugF")
             clusterExport(cl,"varfile")
             clusterExport(cl,"varnames")
             clusterEvalQ(cl,varfile(varnames))
-            clusterExport(cl,"vardisplayfile")
-            clusterExport(cl,"vardisplaynames")
-            clusterEvalQ(cl,vardisplayfile(vardisplaynames))
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"=FALSE),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
-              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
+              if ("#{@analysis.use_shm}" == "true"){
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
+              } else {
+                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
+              }
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               #print(paste("R returned system call with:",z))
@@ -259,35 +266,28 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
             clusterExport(cl,"f")
 
             #g(x) such that x is vector of variable values,
-            #           create a datapoint from the vector of variable values x and return the new datapoint UUID
+            #           create a data_point from the vector of variable values x and return the new data point UUID
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
               force(x)
-              #print(paste("x:",x))
-              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
-
-              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
-              #print(paste("g(y):",y))
+              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
 
-              # Call the simulate datapoint method
+              # Call the simulate data point method
             if (as.character(z[j]) == "NA") {
               cat("UUID is NA \n");
-              if (debugF == 1) {
-                NAvalue <- 1.0e19
-              } else {
-                NAvalue <- 0.0
-              }
+              NAvalue <- 1.0e19
               return(NAvalue)
-            } else {
-              try(f(z[j]), silent = TRUE)
+      } else {
+          try(f(z[j]), silent = TRUE)
 
-              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -300,11 +300,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
               if (is.null(json)) {
                 obj <- NULL
                 for (i in 1:objDim){
-                  if (debugF == 1) {
-                    obj[i] <- 1.0e19
-                  } else {
-                    obj[i] <- 0.0
-                  }
+                  obj[i] <- 1.0e19
                 }
                 print(paste(data_point_directory,"/objectives.json is NULL"))
               } else {
@@ -319,11 +315,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
                   if (json[objfuntemp] != "NULL"){
                     objvalue[i] <- as.numeric(json[objfuntemp])
                   } else {
-                    if (debugF == 1) {
-                      obj[i] <- 1.0e19
-                    } else {
-                      obj[i] <- 0.0
-                    }
+                    objvalue[i] <- 1.0e19
                     cat(data_point_directory," Missing ", objfuntemp,"\n");
                   }
                   objfuntargtemp <- paste("objective_function_target_",i,sep="")
@@ -361,7 +353,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
                 ug <- length(unique(objgroup))
                 if (ug != uniquegroups) {
                    print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
-                   write.table("unique groups", file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                   write.table("unique groups", file="/mnt/openstudio/analysis_#{@analysis.id}/uniquegroups.err", quote=FALSE,row.names=FALSE,col.names=FALSE)
                    stop(options("show.error.messages"=TRUE),"unique groups is not equal")
                 }
 
@@ -371,8 +363,34 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
 
                 print(paste("Objective function Norm:",obj))
 
-                mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
+                mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
                 flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{exit_on_guideline14:1}')
+                print(paste("exit_on_guideline14: ",flag))
+                if (flag["exit_on_guideline14"] == "true" ){
+                  # read in the results from the objective function file
+                  guideline_file <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+                  json <- NULL
+                  try(json <- fromJSON(file=guideline_file), silent=TRUE)
+                  if (is.null(json)) {
+                    print(paste("no guideline file: ",guideline_file))
+                  } else {
+                    guideline <- json[[1]]
+                    for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
+                    print(paste("guideline: ",guideline))
+                    print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+                    print(paste("all(guideline): ",all(guideline)))
+                    if (length(which(guideline)) == objDim){
+                      #write final params to json file
+                      varnames <- scan(file="/mnt/openstudio/analysis_#{@analysis.id}/varnames.json" , what=character())
+                      answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+                      write.table(answer, file="/mnt/openstudio/analysis_#{@analysis.id}/best_result.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
+                      convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+                      write(convergenceflag, file="/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json")
+                      dbDisconnect(mongo)
+                      stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
+                    }
+                  }
+                }
                 dbDisconnect(mongo)
               }
               return(as.numeric(obj))
@@ -380,87 +398,53 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
             }
             clusterExport(cl,"g")
 
-            results <- NULL
-            m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes, scale=TRUE)
-
-            m1 <- as.list(data.frame(t(m$X)))
-
-            results <- clusterApplyLB(cl, m1, g)
-            result <- as.data.frame(results)
-            print(paste("length(objnames):",length(objnames)))
-            print(paste("nrow(result):",nrow(result)))
-            print(paste("ncol(result):",ncol(result)))
-            file_names_jsons <- c("")
-            file_names_R <- c("")
-            file_names_png <- c("")
-            file_names_box_png <- c("")
-            file_names_box_sorted_png <- c("")
-            file_names_bar_png <- c("")
-            file_names_bar_sorted_png <- c("")
-            for (j in 1:nrow(result)){
-              print(paste("result[j,]:",unlist(result[j,])))
-              print(paste("result[,j]:",unlist(result[,j])))
-              n <- m
-              tell(n,as.numeric(unlist(result[j,])))
-              print(n)
-              var_mu <- rep(0, ncol(vars))
-              var_mu_star <- var_mu
-              var_sigma <- var_mu
-              for (i in 1:ncol(vars)){
-                var_mu[i] <- mean(n$ee[,i])
-                var_mu_star[i] <- mean(abs(n$ee[,i]))
-                var_sigma[i] <- sd(n$ee[,i])
-              }
-              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
-              file_names_jsons[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
-              write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
-              file_names_R[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
-              save(n, file=file_names_R[j])
-              file_names_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
-              png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-              plot(n)
-              #axis(1, las=2)
-              #axis(2, las=1)
-              dev.off()
-            #if (all(is.finite(var_mu_star))) {
-              file_names_bar_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
-              png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200)
-              op <- par(mar = c(14,4,4,2) + 0.1)
-              mp <- barplot(height=var_mu_star, ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
-              axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
-              #axis(2, las=1)
-              dev.off()
-              #sorted
-              file_names_bar_sorted_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
-              png(file_names_bar_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200)
-              op <- par(mar = c(14,4,4,2) + 0.1)
-              mp <- barplot(height=sort(var_mu_star), ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
-              axis(1, at=mp, labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)
-              #axis(2, las=1)
-              dev.off()
-
-              par(op)
-              file_names_box_png[j] <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
-              png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-              op <- par(mar = c(14,4,4,2) + 0.1)
-              #mp <- boxplot(n$ee, las=2, names=vardisplaynames)
-              boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9)
-              #axis(1, labels=vardisplaynames, las=2)
-            #}
-            file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,"#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/vardisplaynames.json")
-            if(!dir.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads")){
-              dir.create("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads")
+            if (nrow(vars) == 1) {
+              print("not sure what to do with only one datapoint so adding an NA")
+              vars <- rbind(vars, c(NA))
             }
-            zip(zipfile="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads/morris_results_#{@analysis.id}.zip",files=file_zip, flags = "-j")
+            if (nrow(vars) == 0) {
+              print("not sure what to do with no datapoint so adding an NA")
+              vars <- rbind(vars, c(NA))
+              vars <- rbind(vars, c(NA))
+            }
+
+            print(nrow(vars))
+            print(ncol(vars))
+            if (ncol(vars) == 1) {
+              print("SPEA2 needs more than one variable")
+              stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")
+            }
+
+            print(paste("Number of generations set to:",gen))
+            results <- NULL
+            try(
+            results <- spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
+            , silent = FALSE)
+              print(paste("ip workers:", ips))
+              print(paste("ip master:", master_ips))
+              ips2 <- ips[ips!=master_ips]
+              print(paste("non server ips:", ips2))
+              num_uniq_workers <- length(ips2)
+              whoami <- system('whoami', intern = TRUE)
+              for (i in 1:num_uniq_workers){
+                scp <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/best_result.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp command:",scp))
+                system(scp,intern=TRUE)
+                scp2 <- paste('scp ',whoami,'@',ips2[i],':/mnt/openstudio/analysis_#{@analysis.id}/convergence_flag.json /mnt/openstudio/analysis_#{@analysis.id}/', sep="")
+                print(paste("scp2 command:",scp2))
+                system(scp2,intern=TRUE)
+              }
+
+            save(results, file="/mnt/openstudio/analysis_#{@analysis.id}/results.R")
           }
-        }
         end
       else
-        raise 'could not start the cluster (most likely timed out)'
+        fail 'could not start the cluster (most likely timed out)'
       end
+
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      logger.error log_message
+      Rails.logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
       @analysis_job.status = 'completed'
@@ -471,26 +455,34 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       # ensure that the cluster is stopped
       cluster.stop if cluster
 
-      logger.info 'Running finalize worker scripts'
+      # Kill the downloading of data files process
+      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
+      process.stop if process
+
+      Rails.logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        raise 'could not run finalize worker scripts'
+        fail 'could not run finalize worker scripts'
       end
 
       # Post process the results and jam into the database
-      best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
+      best_result_json = "/mnt/openstudio/analysis_#{@analysis.id}/best_result.json"
       if File.exist? best_result_json
         begin
-          logger.info('read best result json')
+          Rails.logger.info('read best result json')
           temp2 = File.read(best_result_json)
           temp = JSON.parse(temp2, symbolize_names: true)
-          logger.info("temp: #{temp}")
+          Rails.logger.info("temp: #{temp}")
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
-          logger.info("analysis: #{@analysis.results}")
+          Rails.logger.info("analysis: #{@analysis.results}")
         rescue => e
-          logger.error 'Could not save post processed results for bestresult.json into the database'
+          Rails.logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
+
+      # Do one last check if there are any data points that were not downloaded
+      Rails.logger.info('Trying to download any remaining files from worker nodes')
+      @analysis.finalize_data_points
 
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
@@ -499,9 +491,10 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
         @analysis_job.save!
         @analysis.reload
       end
+
       @analysis.save!
 
-      logger.info "Finished running analysis '#{self.class.name}'"
+      Rails.logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

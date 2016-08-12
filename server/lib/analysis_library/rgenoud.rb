@@ -149,7 +149,8 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         raise 'Number of objective functions must equal between the output_variables and the problem definition'
       end
 
-      pivot_array = Variable.pivot_array(@analysis.id)
+      pivot_array = Variable.pivot_array(@analysis.id, @r)
+      Rails.logger.info "pivot_array: #{pivot_array}"
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"
 

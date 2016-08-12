@@ -77,7 +77,8 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
       # TODO: need to move this to the module class
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
-      # pivot_array = Variable.pivot_array(@analysis.id)
+      # pivot_array = Variable.pivot_array(@analysis.id, @r)
+      #Rails.logger.info "pivot_array: #{pivot_array}"
 
       logger.info Variable.variables(@analysis.id).to_s
 

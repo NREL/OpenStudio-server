@@ -288,7 +288,8 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
     @analysis.reload
 
     # get static variables.  These must be applied after the pivot vars and before the lhs
-    pivot_array = Variable.pivot_array(@analysis.id)
+    pivot_array = Variable.pivot_array(@analysis.id, @r)
+    Rails.logger.info "pivot_array: #{pivot_array}"
     selected_variables = Variable.variables(@analysis.id)
 
     if pivot_array.size > 1

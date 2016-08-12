@@ -1,5 +1,5 @@
 OpenStudio Server
-==================================
+
 Version 2.0.0-PAT Pre-Releases
 ------------------------------
 * Added in a version of the Meta-CLI to the root bin dir to allow for automated packaging, deployment (both local and remote) and analysis submission
@@ -8,6 +8,18 @@ Version 2.0.0-PAT Pre-Releases
 * Requires use of RubyGems version ~>2.5, note that the 2.6 series has a breaking bug for Ruby 2.0
 * Using cross-platform-ed delayed_job to manage analysis, backaground, and worker queues
 * Hardcoded the Meta-CLI in the root bin dir to use the local server code, allowing for the code to be self-contained
+
+Version 1.19.1-rc4
+--------------
+* OpenStudio 1.12.2.462ae9e746
+
+Version 1.19.1-rc3
+--------------
+* OpenStudio 1.12.1.7d1634ec2e
+
+Version 1.19.1-rc2
+--------------
+* OpenStudio 1.12.1.7d1634ec2e
 
 Version 1.19.1-rc1
 --------------

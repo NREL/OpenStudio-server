@@ -49,7 +49,8 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
         random_seed: 1979,
         algorithm: {
           number_of_samples: 2,
-          experiment_type: 'diagonal'
+          experiment_type: 'diagonal',
+          run_baseline: 1
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -84,7 +85,9 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
       logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
       @r.converse("set.seed(#{@analysis.problem['random_seed']})")
 
-      pivot_array = Variable.pivot_array(@analysis.id)
+      pivot_array = Variable.pivot_array(@analysis.id, @r)
+      
+      Rails.logger.info "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perform diag"
@@ -96,7 +99,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
       logger.info 'Starting sampling'
       diag = AnalysisLibrary::R::Diag.new(@r)
       if @analysis.problem['algorithm']['experiment_type'] == 'diagonal'
-        samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+        samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'],@analysis.problem['algorithm']['run_baseline'])
 
         # Do the work to mash up the samples and pivot variables before creating the datapoints
         logger.info "Samples are #{samples}"
