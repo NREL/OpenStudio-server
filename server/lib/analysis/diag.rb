@@ -98,13 +98,17 @@ class Analysis::Diag
       Rails.logger.info 'Starting sampling'
       diag = Analysis::R::Diag.new(@r)
       if @analysis.problem['algorithm']['experiment_type'] == 'diagonal'
-        samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'],@analysis.problem['algorithm']['run_baseline'])
+        if selected_variables.count > 0
+          samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'],@analysis.problem['algorithm']['run_baseline'])
 
-        # Do the work to mash up the samples and pivot variables before creating the data points
-        Rails.logger.info "Samples are #{samples}"
-        samples = hash_of_array_to_array_of_hash(samples)
-        Rails.logger.info "Flipping samples around yields #{samples}"
-
+          # Do the work to mash up the samples and pivot variables before creating the data points
+          Rails.logger.info "Samples are #{samples}"
+          samples = hash_of_array_to_array_of_hash(samples)
+          Rails.logger.info "Flipping samples around yields #{samples}"
+        else
+          samples = []
+          var_types = []
+        end
       else
         fail 'no experiment type defined (diagonal)'
       end
