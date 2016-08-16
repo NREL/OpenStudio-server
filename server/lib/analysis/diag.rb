@@ -98,19 +98,33 @@ class Analysis::Diag
       Rails.logger.info 'Starting sampling'
       diag = Analysis::R::Diag.new(@r)
       if @analysis.problem['algorithm']['experiment_type'] == 'diagonal'
-        samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'],@analysis.problem['algorithm']['run_baseline'])
+        if selected_variables.count > 0
+          samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'],@analysis.problem['algorithm']['run_baseline'])
 
-        # Do the work to mash up the samples and pivot variables before creating the data points
-        Rails.logger.info "Samples are #{samples}"
-        samples = hash_of_array_to_array_of_hash(samples)
-        Rails.logger.info "Flipping samples around yields #{samples}"
-
+          # Do the work to mash up the samples and pivot variables before creating the data points
+          Rails.logger.info "Samples are #{samples}"
+          samples = hash_of_array_to_array_of_hash(samples)
+          Rails.logger.info "Flipping samples around yields #{samples}"
+        else
+          samples = []
+          var_types = []
+        end
       else
         fail 'no experiment type defined (diagonal)'
       end
 
       Rails.logger.info 'Fixing Pivot dimension'
-      samples = add_pivots(samples, pivot_array)
+      if selected_variables.count > 0
+        samples = add_pivots(samples, pivot_array)
+      else
+        new_samples = []
+        if pivot_array.size > 0
+          pivot_array.each do |pivot|
+            new_samples << pivot
+          end
+          samples = new_samples
+        end 
+      end
       Rails.logger.info "Finished adding the pivots resulting in #{samples}"
 
       # Add the data points to the database
