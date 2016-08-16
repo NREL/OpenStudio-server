@@ -114,7 +114,17 @@ class Analysis::Diag
       end
 
       Rails.logger.info 'Fixing Pivot dimension'
-      samples = add_pivots(samples, pivot_array)
+      if selected_variables.count > 0
+        samples = add_pivots(samples, pivot_array)
+      else
+        new_samples = []
+        if pivot_array.size > 0
+          pivot_array.each do |pivot|
+            new_samples << pivot
+          end
+          samples = new_samples
+        end 
+      end
       Rails.logger.info "Finished adding the pivots resulting in #{samples}"
 
       # Add the data points to the database
