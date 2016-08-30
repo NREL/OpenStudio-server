@@ -118,12 +118,10 @@ class RunSimulateDataPoint
       datapoint_filename: "#{simulation_dir}/data_point.json",
       analysis_filename: "#{analysis_dir}/analysis.json"
     }
-    input_adapter = OpenStudio::Workflow.load_input_adapter 'local', adapter_options
-    adapter_options[:output_directory] = input_adapter.run_directory File.dirname(osw_path)
-    output_adapter = OpenStudio::Workflow.load_output_adapter 'local', adapter_options
+
     run_options = { debug: true, cleanup: false }
 
-    k = OpenStudio::Workflow::Run.new input_adapter, output_adapter, File.dirname(osw_path), run_options
+    k = OpenStudio::Workflow::Run.new osw_path, run_options
     sim_logger.info 'Running workflow'
     k.run
     sim_logger.info "Final run state is #{k.current_state}"
@@ -135,6 +133,7 @@ class RunSimulateDataPoint
       results = JSON.parse(File.read(results_file), symbolize_names: true)
 
       # push the results to the server
+      # DLM: TODO make this a RESTful call instead of Mongoid
       @data_point.update(results: results)
 
       # TODO: Need to create a chord to run at the end of all the datapoints to finalize the analysis

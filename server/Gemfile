@@ -56,7 +56,8 @@ gem 'uglifier'
 gem 'sprockets-rails'
 
 # For workers - and other dependencies for measures
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw-working'
+#gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
+gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :ref => '4edc9ecda68cf263fc63a7af6f121c9023744617'
 gem 'openstudio-standards', '0.1.4'
 gem 'openstudio-analysis', '1.0.0.pre.rc4'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
