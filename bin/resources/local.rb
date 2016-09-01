@@ -155,16 +155,16 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
       i += 1
     end
   else
-    mongod_command = "#{ruby_path} #{mongod_command_path} -p #{mongod_port} #{mongod_log_path} #{mongo_directory} "\
+    mongod_command = "'#{ruby_path}' '#{mongod_command_path}' -p #{mongod_port} '#{mongod_log_path}' '#{mongo_directory}' "\
       "#{mongo_db_directory}"
-    rails_command = "#{ruby_path} #{rails_command_path} -p #{rails_port} #{ruby_path} #{rails_log_path} "\
-      "#{project_directory} #{mongod_port}"
-    dj_server_command = "#{ruby_path} #{dj_server_command_path} #{ruby_path} #{rails_log_path} #{project_directory} "\
+    rails_command = "'#{ruby_path}' '#{rails_command_path}' -p #{rails_port} '#{ruby_path}' '#{rails_log_path}' "\
+      "'#{project_directory}' #{mongod_port}"
+    dj_server_command = "'#{ruby_path}' '#{dj_server_command_path}' '#{ruby_path}' '#{rails_log_path}' '#{project_directory}' "\
       "#{mongod_port} #{rails_port}"
     dj_worker_commands = []
     until i > worker_number
-      dj_worker_commands << "#{ruby_path} #{dj_worker_command_path} #{ruby_path} #{rails_log_path} "\
-        "#{project_directory} #{mongod_port} #{rails_port} #{i}"
+      dj_worker_commands << "'#{ruby_path}' '#{dj_worker_command_path}' '#{ruby_path}' '#{rails_log_path}' "\
+        "'#{project_directory}' #{mongod_port} #{rails_port} #{i}"
       i += 1
     end
   end

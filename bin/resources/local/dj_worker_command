@@ -76,8 +76,8 @@ bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bun
 if options[:windows]
   sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i worker_#{worker_number} --queue=simulations run --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
 else
-  sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i worker_#{worker_number} stop && bin/delayed_job -i "\
-    "worker_#{worker_number} --queue=simulations start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
+  sys_call = "'#{bundle_path}' exec '#{ruby_exe}' bin/delayed_job -i worker_#{worker_number} stop && bin/delayed_job -i "\
+    "worker_#{worker_number} --queue=simulations start --log-dir='#{log_dir}' --pid-dir='#{project_dir}'"
 end
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]

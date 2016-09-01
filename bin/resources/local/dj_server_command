@@ -74,7 +74,7 @@ if options[:windows]
   # Don't stop
   sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i server --queue=analyses,background run --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
 else
-  sys_call = "#{bundle_path} exec #{ruby_exe} bin/delayed_job -i server --queue=analyses,background start --log-dir=#{log_dir} --pid-dir=#{project_dir}"
+  sys_call = "'#{bundle_path}' exec '#{ruby_exe}' bin/delayed_job -i server --queue=analyses,background start --log-dir='#{log_dir}' --pid-dir='#{project_dir}'"
 end
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]

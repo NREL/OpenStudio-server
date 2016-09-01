@@ -67,7 +67,7 @@ raise error_msg unless error_msg.empty?
 if options[:windows]
   sys_call = "mongod.exe --port #{options[:port]} --logpath \"#{log_dir}/mongo.log\" --dbpath \"#{db_dir}\""
 else
-  sys_call = "mongod --port #{options[:port]} --logpath #{log_dir}/mongo.log --dbpath #{db_dir}"
+  sys_call = "mongod --port #{options[:port]} --logpath '#{log_dir}/mongo.log' --dbpath '#{db_dir}'"
 end
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 

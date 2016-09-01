@@ -76,7 +76,7 @@ if options[:windows]
   sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rails_path}\" s -p #{options[:port]} -P "\
     "#{local_pid_file}"
 else
-  sys_call = "#{bundle_path} exec #{rails_path} s -p #{options[:port]} -P #{local_pid_file}"
+  sys_call = "'#{bundle_path}' exec '#{rails_path}' s -p #{options[:port]} -P '#{local_pid_file}'"
 end
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
