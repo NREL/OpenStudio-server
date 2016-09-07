@@ -39,7 +39,6 @@ opts = ::OptionParser.new do |o|
   o.separator 'DB_DIR: Absolute path of directory for the mongod instance database'
   o.separator ''
   o.on('-p', '--port NUMBER', 'Port to start mongod on, defaults to 27017') { |p| options[:port] = p }
-  o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
   o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
 end
 
@@ -64,11 +63,8 @@ raise error_msg unless error_msg.empty?
 
 # Create the system call to use
 ::Dir.chdir(File.absolute_path(invocation_dir))
-if options[:windows]
-  sys_call = "mongod.exe --port #{options[:port]} --logpath \"#{log_dir}/mongo.log\" --dbpath \"#{db_dir}\""
-else
-  sys_call = "mongod --port #{options[:port]} --logpath '#{log_dir}/mongo.log' --dbpath '#{db_dir}'"
-end
+sys_call = " --port #{options[:port]} --logpath \"#{log_dir}/mongo.log\" --dbpath \"#{db_dir}\""
+sys_call = RUBY_PLATFORM != [/bccwin/i, /cygwin/i, /djgpp/i, /mingw/i, /mswin/i, /wince/i] ? './mongod' + sys_call : 'mongod.exe' + sys_call
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
 # Execute the system call

@@ -39,7 +39,6 @@ opts = ::OptionParser.new do |o|
   o.separator 'PROJECT_DIR: Absolute path to the PAT project DIRECTORY'
   o.separator 'DB_PORT: Port used by the mongod instance'
   o.on('-p', '--port NUMBER', 'Port to start rails on') { |p| options[:port] = p }
-  o.on('-w', '--windows', 'Flag to indicate running on Windows') { |_| options[:windows] = true }
   o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
 end
 
@@ -72,12 +71,8 @@ rails_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rail
 ::ENV['OS_SERVER_LOG_PATH'] = log_dir
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:port]
 ::ENV['RAILS_ENV'] = 'local'
-if options[:windows]
-  sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rails_path}\" s -p #{options[:port]} -P "\
-    "#{local_pid_file}"
-else
-  sys_call = "'#{bundle_path}' exec '#{rails_path}' s -p #{options[:port]} -P '#{local_pid_file}'"
-end
+sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rails_path}\" s -p #{options[:port]} -P "\
+  "#{local_pid_file}"
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 
