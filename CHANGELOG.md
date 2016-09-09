@@ -1,5 +1,9 @@
 OpenStudio Server
 ==================================
+Version 1.19.1-OS.1.12.5.de88f6a99d,
+
+* OpenStudio OS.1.12.5.de88f6a99d
+
 Version 1.19.1-rc5
 
 * OpenStudio 1.12.2.462ae9e746
