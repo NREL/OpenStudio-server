@@ -141,6 +141,8 @@ class RunSimulateDataPoint
       raise "Could not find results #{results_file}"
     end
 
+    sim_logger.info 'Saving files/reports back to the server'
+
     # Post the reports back to the server
     # TODO: check for timeouts and retry
     Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each do |report|
@@ -151,13 +153,26 @@ class RunSimulateDataPoint
                                    attachment: File.new(report, 'rb') })
     end
 
-    report_file = "#{simulation_dir}/objectives.json"
+    report_file = "#{simulation_dir}/run/objectives.json"
     if File.exist? report_file
       url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
       sim_logger.info "Saving report #{report_file} to #{url}"
       RestClient.post(url, file: { display_name: File.basename(report_file, '.*'),
                                    type: 'Report',
                                    attachment: File.new(report_file, 'rb') })
+    end
+
+    report_file = "#{simulation_dir}/out.osw"
+    if File.exist? report_file
+      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
+      sim_logger.info "Saving report #{report_file} to #{url}"
+      RestClient.post(url,
+                      file: {
+                        display_name: File.basename(report_file, '.*'),
+                        type: 'Report',
+                        attachment: File.new(report_file, 'rb')
+                      },
+                      content_type: 'application/json')
     end
 
     # Post the zip file of results

@@ -4,7 +4,6 @@
 module Delayed
   module Heartbeat
     class WorkerHeartbeat
-
       def initialize(worker)
         @worker_model = create_worker_model(worker)
 
@@ -39,8 +38,16 @@ module Delayed
 
         # delayed_job.worker_1 host:nlong-23980s.nrel.gov pid:89396
         name, hostname, pid = worker.name.split(' ')
-        hostname.gsub!('host:', '') rescue nil
-        pid.gsub!('pid:', '').to_i rescue 0
+        begin
+          hostname.gsub!('host:', '')
+        rescue
+          nil
+        end
+        begin
+          pid.gsub!('pid:', '').to_i
+        rescue
+          0
+        end
 
         ComputeNode.where(name: name, hostname: hostname).destroy_all
         cn = ComputeNode.create!(name: name, hostname: hostname)
@@ -56,11 +63,11 @@ module Delayed
         #   break if sleep_interruptibly(heartbeat_interval)
         #   @worker_model.update_heartbeat
         # end
-      rescue Exception => e
-        Rails.logger.error("Worker heartbeat error: #{e.message}: #{e.backtrace.join('\n')}")
-        raise e
-      ensure
-        Rails.logger.info('Shutting down worker heartbeat thread')
+        rescue Exception => e
+            Rails.logger.error("Worker heartbeat error: #{e.message}: #{e.backtrace.join('\n')}")
+            raise e
+        ensure
+            Rails.logger.info('Shutting down worker heartbeat thread')
         # @stop_reader.close
         # @worker_model.delete
         # Delayed::Backend::ActiveRecord::Job.clear_active_connections!
@@ -74,7 +81,6 @@ module Delayed
       def sleep_interruptibly(secs)
         IO.select([@stop_reader], nil, nil, secs)
       end
-
     end
   end
 end

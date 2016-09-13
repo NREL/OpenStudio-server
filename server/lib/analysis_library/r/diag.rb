@@ -197,13 +197,13 @@ module AnalysisLibrary::R
           logger.info("variable_samples is #{variable_samples}")
           var_types << 'discrete'
         # IF continuous, then sample the variable to make it "discrete"
-        elsif (var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence')
+        elsif var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence'
           Rails.logger.info("creating integer sequence by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
           @r.command(varlow: var.lower_bounds_value) do
-          %{
-            values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
-            weights <- rep(1/length(values),length(values))
-          }
+            %{
+              values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+              weights <- rep(1/length(values),length(values))
+            }
           end
           values = @r.converse 'values'
           values = values.map(&:to_i)
@@ -259,7 +259,7 @@ module AnalysisLibrary::R
            if(run_baseline == 1){
              fac_design <- rbind(rep(0,n),diag(1,n,n))
            } else {
-             fac_design <- diag(1,n,n)  
+             fac_design <- diag(1,n,n)
            }
         }
       end

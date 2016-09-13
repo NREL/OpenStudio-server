@@ -86,7 +86,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
       @r.converse("set.seed(#{@analysis.problem['random_seed']})")
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
-      
+
       Rails.logger.info "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
@@ -99,7 +99,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
       logger.info 'Starting sampling'
       diag = AnalysisLibrary::R::Diag.new(@r)
       if @analysis.problem['algorithm']['experiment_type'] == 'diagonal'
-        samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'],@analysis.problem['algorithm']['run_baseline'])
+        samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'], @analysis.problem['algorithm']['run_baseline'])
 
         # Do the work to mash up the samples and pivot variables before creating the datapoints
         logger.info "Samples are #{samples}"

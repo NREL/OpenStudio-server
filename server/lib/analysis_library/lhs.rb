@@ -87,7 +87,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
       Rails.logger.info "pivot_array: #{pivot_array}"
-      
+
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"
 

@@ -251,14 +251,14 @@ class Variable
     pivot_variables.each do |var|
       logger.info "Adding variable '#{var.name}' to pivot list"
       logger.info "Adding variable '#{var.name}' to pivot list"
-      if (var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence')
+      if var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence'
         logger.info("creating integer sequence for pivot variable by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
         @r = r_session
         @r.command(varlow: var.lower_bounds_value) do
-        %{
-          values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
-          weights <- rep(1/length(values),length(values))
-        }
+          %{
+            values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+            weights <- rep(1/length(values),length(values))
+          }
         end
         values = @r.converse 'values'
         values = values.map(&:to_i)

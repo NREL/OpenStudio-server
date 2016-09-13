@@ -101,11 +101,8 @@ class AnalysesController < ApplicationController
 
       # TODO: this is going to be slow because it returns the entire datapoint for each of these queries
       @completed_sims = @analysis.search(params[:completed_search], 'completed', @completed_page, @view_all).page(@completed_page).per(per_page)
-
       @started_sims = @analysis.search(params[:started_search], 'started', @started_page, @view_all).page(@started_page).per(per_page)
-
       @queued_sims = @analysis.search(params[:queued_search], 'queued', @queued_page, @view_all).page(@queued_page).per(per_page)
-
       @na_sims = @analysis.search(params[:na_search], 'na', @na_page, @view_all).page(@na_page).per(per_page)
 
       # Is this needed?

@@ -139,6 +139,8 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
 
+
+
     # TODO: Check results -- may need different analysis type with annual data
   end
 
