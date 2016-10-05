@@ -22,12 +22,6 @@ GIT
       multi_json
       parallel
 
-GIT
-  remote: git://github.com/NREL/openstudio-standards.git
-  revision: 75a17f5b54fc0b6dda3f6d06cc14d812f0c3450e
-  specs:
-    openstudio-standards (0.1.1)
-
 GEM
   remote: http://rubygems.org/
   specs:
