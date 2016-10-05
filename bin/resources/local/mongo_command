@@ -32,11 +32,13 @@ options = {
   windows: false
 }
 opts = ::OptionParser.new do |o|
-  o.banner = 'Usage: mongo_command [options] LOG_DIR INVOCATION_DIR DB_DIR'
+  o.banner = 'Usage: mongo_command [options] LOG_DIR INVOCATION_DIR DB_DIR STATE_FILE PROJECT_DIR'
   o.separator ''
   o.separator 'LOG_DIR: Absolute path of directory to write the mongod log to'
   o.separator 'INVOCATION_DIR: Absolute path of directory to invoke mongod from'
   o.separator 'DB_DIR: Absolute path of directory for the mongod instance database'
+  o.separator 'STATE_FILE: Absolute path to write the mongod PID to'
+  o.separator 'PROJECT_DIR: Absolute path to the PAT project DIRECTORY to write logs to'
   o.separator ''
   o.on('-p', '--port NUMBER', 'Port to start mongod on, defaults to 27017') { |p| options[:port] = p }
   o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
@@ -47,18 +49,24 @@ opts.parse!(argv)
 log_dir = argv.shift
 invocation_dir = argv.shift
 db_dir = argv.shift
-inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil?
-raise 'LOG_DIR, INVOCATION_DIR, and DB_DIR are all required for execution' if inputs_empty
+state_file = argv.shift
+project_dir = argv.shift
+inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil? | state_file.nil? | project_dir.nil?
+raise 'LOG_DIR, INVOCATION_DIR, DB_DIR, STATE_FILE, and PROJECT_DIR are all required for execution' if inputs_empty
 error_msg = ''
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
 error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute. " unless
   Pathname.new(invocation_dir).absolute?
 error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathname.new(db_dir).absolute?
+error_msg << "The STATE_FILE projvided, `#{state_file}`, is not absolute. " unless Pathname.new(state_file).absolute?
+error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
 raise error_msg unless error_msg.empty?
 error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
 error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless
   Dir.exist? invocation_dir
 error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exist? db_dir
+error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless
+  Dir.exist? project_dir
 raise error_msg unless error_msg.empty?
 
 # Create the system call to use
@@ -68,4 +76,8 @@ sys_call = RUBY_PLATFORM != [/bccwin/i, /cygwin/i, /djgpp/i, /mingw/i, /mswin/i,
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
 # Execute the system call
-exec sys_call
+process_log = File.join(project_dir, 'logs', 'mongod.log')
+mongod_pid = spawn(sys_call, [:err, :out]=>process_log)
+config_hash = File.exist? state_file ? ::JSON.parse(File.read(state_file), symbolize_names: true) : Hash.new
+config_hash[:mongod_pid] = mongod_pid
+::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(config_hash) }

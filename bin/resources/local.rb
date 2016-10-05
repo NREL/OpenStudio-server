@@ -24,6 +24,7 @@ unless $logger
   $logger.warn 'Logger not passed in from invoking script for local.rb'
 end
 require 'socket'
+require 'open3'
 
 # Determines if OS is Windows
 #
@@ -87,9 +88,9 @@ end
 
 # Kill the rails thread in start_local
 #
-def kill_rails_thread(rails_thread)
+def kill_rails_process(rails_pid)
   begin
-    ::Process.kill('KILL', rails_thread.value)
+    ::Process.kill('KILL', rails_pid)
   rescue
     $logger.error 'Attempted to kill rails process. The success of the attempt is unclear'
     return
@@ -99,14 +100,26 @@ end
 
 # Kill the mongod thread in start_local
 #
-def kill_mongod_thread(mongod_thread)
+def kill_mongod_process(mongod_pid)
   begin
-    ::Process.kill('KILL', mongod_thread.value)
+    ::Process.kill('KILL', mongod_pid)
   rescue
     $logger.error 'Attempted to kill mongod process. The success of the attempt is unclear'
     raise 1
   end
   $logger.error 'Killed the mongod process.'
+end
+
+# Kill a delayed_jobs thread in start_local
+#
+def kill_dj_process(dj_pid)
+  begin
+    ::Process.kill('KILL', dj_pid)
+  rescue
+    $logger.error "Attempted to kill dj process with PID `#{dj_pid}`. The success of the attempt is unclear"
+    raise 1
+  end
+  $logger.error "Killed the dj process with PID `#{dj_pid}`"
 end
 
 # Start the local server and save pid information to the project_directory
@@ -142,15 +155,15 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   i = 1
   mongod_command = "\"#{ruby_path}\" \"#{mongod_command_path}\" -p #{mongod_port} \"#{mongod_log_path}\" "\
-    "\"#{mongo_directory}\" \"#{mongo_db_directory}\""
+    "\"#{mongo_directory}\" \"#{mongo_db_directory}\" \"#{state_file}\" \"#{project_directory}\""
   rails_command = "\"#{ruby_path}\" \"#{rails_command_path}\" -p #{rails_port} \"#{ruby_path}\" "\
-    "\"#{rails_log_path}\" \"#{project_directory}\" #{mongod_port}"
+    "\"#{rails_log_path}\" \"#{project_directory}\" #{mongod_port} \"#{state_file}\""
   dj_server_command = "\"#{ruby_path}\" \"#{dj_server_command_path}\" \"#{ruby_path}\" \"#{rails_log_path}\" "\
-    "\"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\""
+    "\"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\" \"#{state_file}\""
   dj_worker_commands = []
   until i > worker_number
     dj_worker_commands << "\"#{ruby_path}\" \"#{dj_worker_command_path}\" \"#{ruby_path}\" "\
-      "\"#{rails_log_path}\" \"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\" #{i}"
+      "\"#{rails_log_path}\" \"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\" #{i} \"#{state_file}\""
     i += 1
   end
 
@@ -162,67 +175,116 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     dj_worker_commands.each { |cmd| cmd += ' --debug'; $logger.debug "Command for local CLI: #{cmd}" }
   end
 
-  mongod_thread = ::Thread.new { spawn(mongod_command) }
   mongod_pid = nil
   begin
-    ::Timeout.timeout(60) do
+    ::Timeout.timeout(10) do
+      mongod_out, mongod_status = ::Open3.capture2e(mongod_command)
       mongod_started = false
       until mongod_started
         sleep(0.01)
         mongod_started = true if is_port_open? mongod_port
       end
-      mongod_pid = mongod_thread.value
+      mongod_pid = mongod_status.pid
     end
   rescue ::Timeout::Error
-    $logger.error 'Mongod failed to launch, likely due to another mongod instance accessing the same db'
-    kill_mongod_thread(mongod_thread)
+    $logger.error "Mongod failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'mongod.log')}`"\
+      ". The output of the command was:\n#{mongod_out}"
+    kill_mongod_process(mongod_pid)
+    raise 1
+  elsif mongod_status.to_i != 0
+    $logger.error "Mongod returned non-zero status code `#{mongod_status.to_i}`. Please refer to "\
+      "`#{::File.join(project_directory, 'logs', 'mongod.log')}`. The output of the command was:\n`#{mongod_out}`"
+    kill_mongod_process(mongod_pid)
     raise 1
   end
   $logger.error 'Unable to access mongod PID. Please investigate' unless mongod_pid
   $logger.debug "MONGOD STARTED WITH PID #{mongod_pid}"
 
-  rails_thread = ::Thread.new { spawn(rails_command) }
   rails_pid = nil
   begin
     ::Timeout.timeout(40) do
+      rails_out, rails_status = ::Open3.capture2e(rails_command)
       rails_started = false
       until rails_started
         sleep(0.01)
         rails_started = true if is_port_open? rails_port
       end
-      rails_pid = rails_thread.value
+      rails_pid = rails_status.pid
     end
   rescue ::Timeout::Error
-    $logger.error 'Rails failed to launch'
-    kill_rails_thread(rails_thread)
-    kill_mongod_thread(mongod_thread)
+    $logger.error "Rails failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'rails.log')}`"\
+      ". The output of the command was:\n#{rails_out}"
+    kill_rails_process(rails_pid)
+    kill_mongod_process(mongod_pid)
+    raise 1
+  elsif rails_status.to_i != 0
+    $logger.error "Rails returned non-zero status code `#{mongod_status.to_i}`. Please refer to "\
+      "`#{::File.join(project_directory, 'logs', 'rails.log')}`. The output of the command was:\n`#{rails_out}`"
+    kill_rails_process(rails_pid)
+    kill_mongod_process(mongod_pid)
     raise 1
   end
   $logger.error 'Unable to access rails PID. Please investigate' unless rails_pid
   $logger.debug "RAILS STARTED WITH PID #{rails_pid}"
 
-  dj_threads = []
-  dj_threads << ::Thread.new { spawn(dj_server_command) }
-  sleep 15 # TODO: replace this sleep with a check on if the dj_thread is initialized
-  dj_worker_commands.each { |cmd| dj_threads << ::Thread.new { spawn(cmd) } }
 
-  # TODO: replace this sleep with a check on if the dj_thread is initialized
-  sleep 15
+  dj_server_pid = nil
+  begin
+    ::Timeout.timeout(5) do
+      dj_server_out, dj_server_status = ::Open3.capture2e(dj_server_command)
+      dj_server_pid = dj_server_status.pid
+    end
+  rescue ::Timeout::Error
+    $logger.error "dj_server failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'dj_server.log')}`"\
+      ". The output of the command was:\n#{dj_server_out}"
+    kill_dj_process(dj_server_pid)
+    kill_rails_process(dj_server_pid)
+    kill_mongod_process(mongod_pid)
+    raise 1
+  elsif dj_server_status.to_i != 0
+    $logger.error "dj_server returned non-zero status code `#{dj_server_status.to_i}`. Please refer to "\
+      "`#{::File.join(project_directory, 'logs', 'dj_server.log')}`. The output of the command was:\n`#{dj_server_out}`"
+    kill_dj_process(dj_server_pid)
+    kill_rails_process(rails_pid)
+    kill_mongod_process(mongod_pid)
+    raise 1
+  end
+  $logger.error 'Unable to access dj_server PID. Please investigate' unless dj_server_pid
+  $logger.debug "DELAYED JOBS SERVER MAY HAVE BEEN STARTED WITH PID #{dj_server_pid}"
 
-  dj_pids = []
-  dj_threads.each { |thread| dj_pids << thread.value }
+  dj_pids = [dj_server_pid]
+  dj_worker_commands.each_with_index do |cmd, i|
+    dj_worker_pid = nil
+    begin
+      ::Timeout.timeout(5) do
+        dj_worker_out, dj_worker_status = ::Open3.capture2e(cmd)
+        dj_worker_pid = dj_worker_status.pid
+        dj_pids << dj_worker_pid
+      end
+    rescue ::Timeout::Error
+      $logger.error "dj_worker_#{i} failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'dj_worker_' + i + '.log')}`"\
+        ". The output of the command was:\n#{dj_worker_out}"
+      dj_pids.each do { |pid| kill_dj_process(pid) }
+      kill_rails_process(rails_pid)
+      kill_mongod_process(mongod_pid)
+      raise 1
+    elsif dj_worker_status.to_i != 0
+      $logger.error "dj_worker_#{i} returned non-zero status code `#{dj_woker_status.to_i}`. Please refer to "\
+      "`#{::File.join(project_directory, 'logs', 'dj_worker_' + i + '.log')}`. The output of the command was:\n`#{dj_worker_out}`"
+      dj_pids.each do { |pid| kill_dj_process(pid) }
+      kill_rails_process(rails_pid)
+      kill_mongod_process(mongod_pid)
+      raise 1
+    end
+    $logger.error "Unable to access dj_worker_#{i} PID. Please investigate" unless dj_worker_pid
+    $logger.debug "DELAYED JOBS WORKER #{i} MAY HAVE BEEN STARTED WITH PID #{dj_worker_pid}"
+  end
 
-  $logger.debug "DELAYED JOB MAY HAVE BEEN STARTED WITH PIDs #{dj_pids}"
+  $logger.debug 'Instantiated all processes. Writing receipt file.'
 
-  $logger.debug 'Instantiated all threads'
-
-  hash_to_write = { server_url: "http://localhost:#{rails_port}", mongod_pid: mongod_pid, dj_pids: dj_pids, rails_pid: rails_pid }
-  ::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(hash_to_write) }
   ::File.open(receipt_file, 'wb') { |_| }
 
-  $logger.debug "Wrote local server configuration to #{state_file}"
-
-  "http://localhost:#{rails_port}"
+  $logger.debug "Completed writing local server configuration to #{state_file}"
 end
 
 # Stop the local server
