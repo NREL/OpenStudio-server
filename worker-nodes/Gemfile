@@ -3,7 +3,7 @@ source 'http://rubygems.org'
 # OpenStudio gem from github
 gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'develop', ref: 'ca6ec00376'
 
-gem 'openstudio-standards', github: 'NREL/openstudio-standards', require: false
+gem 'openstudio-standards', github: 'NREL/openstudio-standards', branch: 'migrate_necb_loads_to_standards', require: false
 gem 'dencity', github: 'NREL/dencity-gem', require: false
 
 # Install other gems that are needed but not required by the workflow gem
