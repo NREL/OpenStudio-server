@@ -230,7 +230,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   end
   $logger.error 'Unable to access rails PID. Please investigate' unless rails_pid
   $logger.debug "RAILS STARTED WITH PID #{rails_pid}"
-  
+
   dj_server_pid, dj_server_out, dj_server_status = nil
   begin
     ::Timeout.timeout(5) do
