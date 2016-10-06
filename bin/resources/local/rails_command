@@ -81,7 +81,7 @@ puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 
 # Execute the system call
 process_log = File.join(project_dir, 'logs', 'rails.log')
-rails_pid = spawn(sys_call, [:err, :out]=>process_log)
+rails_pid = spawn(sys_call, [:err, :out]=>[process_log, 'w'])
 config_hash = File.exist? state_file ? ::JSON.parse(File.read(state_file), symbolize_names: true) : Hash.new
 config_hash[:server_url] = "http://localhost:#{options[:port]}"
 config_hash[:rails_pid] = rails_pid
