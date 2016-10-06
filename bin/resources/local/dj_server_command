@@ -72,12 +72,13 @@ bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bun
 ::ENV['OS_SERVER_LOG_PATH'] = log_dir
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + rails_port
 ::ENV['RAILS_ENV'] = 'local'
-sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i server --queue=analyses,background run --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
+sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i server"\
+  " --queue=analyses,background run --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
 # Execute the system call
-process_log = File.join(project_dir, 'logs', "dj_server.log")
+process_log = File.join(project_dir, 'logs', 'dj_server.log')
 dj_pid = spawn(sys_call, [:err, :out]=>process_log)
 config_hash = File.exist? state_file ? ::JSON.parse(File.read(state_file), symbolize_names: true) : Hash.new
 config_hash[:dj_pids].nil? ? config_hash[:dj_pids] = [dj_pid] : config_hash[:dj_pids] << dj_pid

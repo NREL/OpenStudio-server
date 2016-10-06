@@ -175,7 +175,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     dj_worker_commands.each { |cmd| cmd += ' --debug'; $logger.debug "Command for local CLI: #{cmd}" }
   end
 
-  mongod_pid = nil
+  mongod_pid, mongod_out, mongod_status = nil
   begin
     ::Timeout.timeout(10) do
       mongod_out, mongod_status = ::Open3.capture2e(mongod_command)
@@ -191,16 +191,18 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
       ". The output of the command was:\n#{mongod_out}"
     kill_mongod_process(mongod_pid)
     raise 1
-  elsif mongod_status.to_i != 0
-    $logger.error "Mongod returned non-zero status code `#{mongod_status.to_i}`. Please refer to "\
-      "`#{::File.join(project_directory, 'logs', 'mongod.log')}`. The output of the command was:\n`#{mongod_out}`"
-    kill_mongod_process(mongod_pid)
-    raise 1
+  else
+    if mongod_status.to_i != 0
+      $logger.error "Mongod returned non-zero status code `#{mongod_status.to_i}`. Please refer to "\
+        "`#{::File.join(project_directory, 'logs', 'mongod.log')}`. The output of the command was:\n`#{mongod_out}`"
+      kill_mongod_process(mongod_pid)
+      raise 1
+    end
   end
   $logger.error 'Unable to access mongod PID. Please investigate' unless mongod_pid
   $logger.debug "MONGOD STARTED WITH PID #{mongod_pid}"
 
-  rails_pid = nil
+  rails_pid, rails_out, rails_status = nil
   begin
     ::Timeout.timeout(40) do
       rails_out, rails_status = ::Open3.capture2e(rails_command)
@@ -217,18 +219,20 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     kill_rails_process(rails_pid)
     kill_mongod_process(mongod_pid)
     raise 1
-  elsif rails_status.to_i != 0
-    $logger.error "Rails returned non-zero status code `#{mongod_status.to_i}`. Please refer to "\
-      "`#{::File.join(project_directory, 'logs', 'rails.log')}`. The output of the command was:\n`#{rails_out}`"
-    kill_rails_process(rails_pid)
-    kill_mongod_process(mongod_pid)
-    raise 1
+  else
+    if rails_status.to_i != 0
+      $logger.error "Rails returned non-zero status code `#{mongod_status.to_i}`. Please refer to "\
+        "`#{::File.join(project_directory, 'logs', 'rails.log')}`. The output of the command was:\n`#{rails_out}`"
+      kill_rails_process(rails_pid)
+      kill_mongod_process(mongod_pid)
+      raise 1
+    end
   end
   $logger.error 'Unable to access rails PID. Please investigate' unless rails_pid
   $logger.debug "RAILS STARTED WITH PID #{rails_pid}"
 
 
-  dj_server_pid = nil
+  dj_server_pid, dj_server_out, dj_server_status = nil
   begin
     ::Timeout.timeout(5) do
       dj_server_out, dj_server_status = ::Open3.capture2e(dj_server_command)
@@ -241,20 +245,22 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     kill_rails_process(dj_server_pid)
     kill_mongod_process(mongod_pid)
     raise 1
-  elsif dj_server_status.to_i != 0
-    $logger.error "dj_server returned non-zero status code `#{dj_server_status.to_i}`. Please refer to "\
-      "`#{::File.join(project_directory, 'logs', 'dj_server.log')}`. The output of the command was:\n`#{dj_server_out}`"
-    kill_dj_process(dj_server_pid)
-    kill_rails_process(rails_pid)
-    kill_mongod_process(mongod_pid)
-    raise 1
+  else
+    if dj_server_status.to_i != 0
+      $logger.error "dj_server returned non-zero status code `#{dj_server_status.to_i}`. Please refer to "\
+        "`#{::File.join(project_directory, 'logs', 'dj_server.log')}`. The output of the command was:\n`#{dj_server_out}`"
+      kill_dj_process(dj_server_pid)
+      kill_rails_process(rails_pid)
+      kill_mongod_process(mongod_pid)
+      raise 1
+    end
   end
   $logger.error 'Unable to access dj_server PID. Please investigate' unless dj_server_pid
   $logger.debug "DELAYED JOBS SERVER MAY HAVE BEEN STARTED WITH PID #{dj_server_pid}"
 
   dj_pids = [dj_server_pid]
-  dj_worker_commands.each_with_index do |cmd, i|
-    dj_worker_pid = nil
+  dj_worker_commands.each_with_index do |cmd, ind|
+    dj_worker_pid, dj_worker_out, dj_worker_status = nil
     begin
       ::Timeout.timeout(5) do
         dj_worker_out, dj_worker_status = ::Open3.capture2e(cmd)
@@ -262,19 +268,23 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
         dj_pids << dj_worker_pid
       end
     rescue ::Timeout::Error
-      $logger.error "dj_worker_#{i} failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'dj_worker_' + i + '.log')}`"\
+      $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
+                                                                                     'dj_worker_' + ind + '.log')}`"\
         ". The output of the command was:\n#{dj_worker_out}"
-      dj_pids.each do { |pid| kill_dj_process(pid) }
+      dj_pids.each { |pid| kill_dj_process(pid) }
       kill_rails_process(rails_pid)
       kill_mongod_process(mongod_pid)
       raise 1
-    elsif dj_worker_status.to_i != 0
-      $logger.error "dj_worker_#{i} returned non-zero status code `#{dj_woker_status.to_i}`. Please refer to "\
-      "`#{::File.join(project_directory, 'logs', 'dj_worker_' + i + '.log')}`. The output of the command was:\n`#{dj_worker_out}`"
-      dj_pids.each do { |pid| kill_dj_process(pid) }
-      kill_rails_process(rails_pid)
-      kill_mongod_process(mongod_pid)
-      raise 1
+    else
+      if dj_worker_status.to_i != 0
+        $logger.error "dj_worker_#{ind} returned non-zero status code `#{dj_worker_status.to_i}`. Please refer to "\
+          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + ind + '.log')}`. The output of the command was:"\
+          "\n`#{dj_worker_out}`"
+        dj_pids.each { |pid| kill_dj_process(pid) }
+        kill_rails_process(rails_pid)
+        kill_mongod_process(mongod_pid)
+        raise 1
+      end
     end
     $logger.error "Unable to access dj_worker_#{i} PID. Please investigate" unless dj_worker_pid
     $logger.debug "DELAYED JOBS WORKER #{i} MAY HAVE BEEN STARTED WITH PID #{dj_worker_pid}"

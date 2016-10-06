@@ -53,8 +53,7 @@ rails_port = argv.shift
 worker_number = argv.shift
 state_file = argv.shift
 inputs_empty = ruby_exe.nil? | log_dir.nil? | project_dir.nil? | db_port.nil? | rails_port.nil? | worker_number.nil? | state_file.nil?
-raise 'RUBY_EXE, LOG_DIR, PROJECT_DIR, DB_PORT, RAILS_PORT, WORKER_NUMBER, and STATE_FILE are all required for execution' if
-  inputs_empty
+raise 'RUBY_EXE, LOG_DIR, PROJECT_DIR, DB_PORT, RAILS_PORT, WORKER_NUMBER, and STATE_FILE are all required for execution' if inputs_empty
 error_msg = ''
 error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, is not absolute. " unless Pathname.new(ruby_exe).absolute?
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
