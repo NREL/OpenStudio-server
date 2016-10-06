@@ -230,8 +230,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   end
   $logger.error 'Unable to access rails PID. Please investigate' unless rails_pid
   $logger.debug "RAILS STARTED WITH PID #{rails_pid}"
-
-
+  
   dj_server_pid, dj_server_out, dj_server_status = nil
   begin
     ::Timeout.timeout(5) do
@@ -288,6 +287,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     end
     $logger.error "Unable to access dj_worker_#{i} PID. Please investigate" unless dj_worker_pid
     $logger.debug "DELAYED JOBS WORKER #{i} MAY HAVE BEEN STARTED WITH PID #{dj_worker_pid}"
+    sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
   end
 
   $logger.debug 'Instantiated all processes. Writing receipt file.'
@@ -305,31 +305,7 @@ end
 # @return [Void]
 #
 def stop_local_server(rails_pid, dj_pids, mongod_pid)
-  begin
-    ::Timeout.timeout (5) do
-      ::Process.kill('SIGINT', rails_pid)
-      ::Process.wait(rails_pid)
-    end
-  rescue Errno::ECHILD
-  rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}"
-  rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
-    begin
-      ::Timeout.timeout (5) do
-        ::Process.kill('KILL', rails_pid)
-        ::Process.wait(rails_pid)
-      end
-    rescue Errno::ECHILD
-    rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}. SIGINT appears to have completed successfully"
-    rescue ::Timeout::Error
-      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
-      raise 1
-    end
-  end
-
-  dj_pids.each do |dj_pid|
+  dj_pids.reverse.each do |dj_pid|
     begin
       ::Timeout.timeout (5) do
         ::Process.kill('SIGINT', dj_pid)
@@ -337,7 +313,7 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       end
     rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}"
+      $logger.warn "Unable to find delayed-jobs PID #{dj_pid}"
     rescue ::Timeout::Error, Errno::EINVAL
       $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying KILL"
       begin
@@ -347,13 +323,39 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
         end
       rescue Errno::ECHILD
       rescue Errno::ESRCH
-        $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}. SIGINT appears to have completed successfully"
+        $logger.warn "Unable to find delayed-jobs PID #{dj_pid}. SIGINT appears to have completed successfully"
       rescue ::Timeout::Error
         $logger.error "Unable to kill the dj PID #{dj_pid} with KILL"
         raise 1
       end
     end
+    $logger.debug "Killed delayed-jobs process with PID `#{dj_pid}`"
   end
+
+  begin
+    ::Timeout.timeout (5) do
+      ::Process.kill('SIGINT', rails_pid)
+      ::Process.wait(rails_pid)
+    end
+  rescue Errno::ECHILD
+  rescue Errno::ESRCH
+    $logger.warn "Unable to find rails PID #{rails_pid}"
+  rescue ::Timeout::Error, Errno::EINVAL
+    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
+    begin
+      ::Timeout.timeout (5) do
+        ::Process.kill('KILL', rails_pid)
+        ::Process.wait(rails_pid)
+      end
+    rescue Errno::ECHILD
+    rescue Errno::ESRCH
+      $logger.warn "Unable to find rails PID #{rails_pid}. SIGINT appears to have completed successfully"
+    rescue ::Timeout::Error
+      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
+      raise 1
+    end
+  end
+  $logger.debug "Killed rails process with PID `#{rails_pid}`"
 
   begin
     ::Timeout.timeout (5) do
@@ -362,9 +364,9 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
     end
   rescue Errno::ECHILD
   rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}"
+    $logger.warn "Unable to find mongod PID #{mongod_pid}"
   rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the mongo PID #{mongod_pid} with SIGINT. Trying KILL."
+    $logger.warn "Unable to kill the mongod PID #{mongod_pid} with SIGINT. Trying KILL."
     begin
       ::Timeout.timeout (5) do
         ::Process.kill('KILL', mongod_pid)
@@ -372,12 +374,13 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       end
     rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}. SIGINT appears to have completed successfully"
+      $logger.warn "Unable to find mongod PID #{mongod_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
-      $logger.error "Unable to kill the mongo PID #{mongod_pid} with KILL"
+      $logger.error "Unable to kill the mongod PID #{mongod_pid} with KILL"
       raise 1
     end
   end
+  $logger.debug "Killed mongod process with PID `#{mongod_pid}`"
 
   sleep 1 # Keep the return from beating the stdout text
 end

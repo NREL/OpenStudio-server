@@ -19,7 +19,7 @@ gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 gem 'rserve-simpler'
 
 # net-*
-gem 'net-http-persistent'
+gem 'net-http-persistent', '< 3.0.0'
 gem 'net-scp'
 gem 'net-ssh'
 gem 'net-sftp'
@@ -56,9 +56,9 @@ gem 'uglifier'
 gem 'sprockets-rails'
 
 # For workers - and other dependencies for measures
-# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :ref => '01ed781e8a03d63460fb863aa4f9160d6de28a97'
-gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
+# gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 gem 'openstudio-standards', '0.1.4'
 gem 'openstudio-analysis', '1.0.0.pre.rc4'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
