@@ -233,30 +233,6 @@ end
 # @return [Void]
 #
 def stop_local_server(rails_pid, dj_pids, mongod_pid)
-  begin
-    ::Timeout.timeout (5) do
-      ::Process.kill('SIGINT', rails_pid)
-      ::Process.wait(rails_pid)
-    end
-  rescue Errno::ECHILD
-  rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}"
-  rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
-    begin
-      ::Timeout.timeout (5) do
-        ::Process.kill('KILL', rails_pid)
-        ::Process.wait(rails_pid)
-      end
-    rescue Errno::ECHILD
-    rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}. SIGINT appears to have completed successfully"
-    rescue ::Timeout::Error
-      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
-      raise 1
-    end
-  end
-
   dj_pids.each do |dj_pid|
     begin
       ::Timeout.timeout (5) do
@@ -283,6 +259,30 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
     end
   end
 
+  begin
+    ::Timeout.timeout (5) do
+      ::Process.kill('SIGINT', rails_pid)
+      ::Process.wait(rails_pid)
+    end
+  rescue Errno::ECHILD
+  rescue Errno::ESRCH
+    $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}"
+  rescue ::Timeout::Error, Errno::EINVAL
+    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
+    begin
+      ::Timeout.timeout (5) do
+        ::Process.kill('KILL', rails_pid)
+        ::Process.wait(rails_pid)
+      end
+    rescue Errno::ECHILD
+    rescue Errno::ESRCH
+      $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}. SIGINT appears to have completed successfully"
+    rescue ::Timeout::Error
+      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
+      raise 1
+    end
+  end
+  
   begin
     ::Timeout.timeout (5) do
       ::Process.kill('SIGINT', mongod_pid)
