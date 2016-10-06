@@ -203,11 +203,11 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   dj_threads = []
   dj_threads << ::Thread.new { spawn(dj_server_command) }
-  sleep 15 # TODO: replace this sleep with a check on if the dj_thread is initialized
+  sleep 5 # TODO: replace this sleep with a check on if the dj_thread is initialized
   dj_worker_commands.each { |cmd| dj_threads << ::Thread.new { spawn(cmd) } }
 
   # TODO: replace this sleep with a check on if the dj_thread is initialized
-  sleep 15
+  sleep 20
 
   dj_pids = []
   dj_threads.each { |thread| dj_pids << thread.value }
@@ -233,7 +233,7 @@ end
 # @return [Void]
 #
 def stop_local_server(rails_pid, dj_pids, mongod_pid)
-  dj_pids.each do |dj_pid|
+  dj_pids.reverse.each do |dj_pid|
     begin
       ::Timeout.timeout (5) do
         ::Process.kill('SIGINT', dj_pid)
@@ -241,7 +241,7 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       end
     rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}"
+      $logger.warn "Unable to find delayed-jobs PID #{dj_pid}"
     rescue ::Timeout::Error, Errno::EINVAL
       $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying KILL"
       begin
@@ -251,12 +251,13 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
         end
       rescue Errno::ECHILD
       rescue Errno::ESRCH
-        $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}. SIGINT appears to have completed successfully"
+        $logger.warn "Unable to find delayed-jobs PID #{dj_pid}. SIGINT appears to have completed successfully"
       rescue ::Timeout::Error
         $logger.error "Unable to kill the dj PID #{dj_pid} with KILL"
         raise 1
       end
     end
+    $logger.debug "Killed delayed-jobs process with PID `#{dj_pid}`"
   end
 
   begin
@@ -266,7 +267,7 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
     end
   rescue Errno::ECHILD
   rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}"
+    $logger.warn "Unable to find rails PID #{rails_pid}"
   rescue ::Timeout::Error, Errno::EINVAL
     $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
     begin
@@ -276,13 +277,14 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       end
     rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}. SIGINT appears to have completed successfully"
+      $logger.warn "Unable to find rails PID #{rails_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
       $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
       raise 1
     end
   end
-  
+  $logger.debug "Killed rails process with PID `#{rails_pid}`"
+
   begin
     ::Timeout.timeout (5) do
       ::Process.kill('SIGINT', mongod_pid)
@@ -290,9 +292,9 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
     end
   rescue Errno::ECHILD
   rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}"
+    $logger.warn "Unable to find mongod PID #{mongod_pid}"
   rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the mongo PID #{mongod_pid} with SIGINT. Trying KILL."
+    $logger.warn "Unable to kill the mongod PID #{mongod_pid} with SIGINT. Trying KILL."
     begin
       ::Timeout.timeout (5) do
         ::Process.kill('KILL', mongod_pid)
@@ -300,12 +302,13 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       end
     rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}. SIGINT appears to have completed successfully"
+      $logger.warn "Unable to find mongod PID #{mongod_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
-      $logger.error "Unable to kill the mongo PID #{mongod_pid} with KILL"
+      $logger.error "Unable to kill the mongod PID #{mongod_pid} with KILL"
       raise 1
     end
   end
+  $logger.debug "Killed mongod process with PID `#{mongod_pid}`"
 
   sleep 1 # Keep the return from beating the stdout text
 end
