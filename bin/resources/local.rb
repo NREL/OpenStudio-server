@@ -241,7 +241,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
       kill_processes(state_file)
       raise 1
     end
-    $logger.debug "DELAYED JOBS WORKER #{i} MAY HAVE BEEN STARTED"
+    $logger.debug "DELAYED JOBS WORKER #{ind} MAY HAVE BEEN STARTED"
     sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
   end
 
