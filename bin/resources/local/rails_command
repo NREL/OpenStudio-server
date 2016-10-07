@@ -23,6 +23,7 @@
 
 require 'optparse'
 require 'pathname'
+require 'json'
 
 # Set up options parsing
 argv = ARGV.dup
@@ -32,12 +33,13 @@ options = {
   port: 8080
 }
 opts = ::OptionParser.new do |o|
-  o.banner = 'Usage: rails_command [options] RUBY_EXE LOG_DIR, PROJECT_DIR, DB_PORT'
+  o.banner = 'Usage: rails_command [options] RUBY_EXE LOG_DIR PROJECT_DIR DB_PORT STATE_FILE'
   o.separator ''
   o.separator 'RUBY_EXE: Absolute path to the ruby executable to use'
-  o.separator 'LOG_DIR: Absolute path of the directory to write the Delayed Jobs log to'
+  o.separator 'LOG_DIR: Absolute path of the directory to write the Rails log to'
   o.separator 'PROJECT_DIR: Absolute path to the PAT project DIRECTORY'
   o.separator 'DB_PORT: Port used by the mongod instance'
+  o.separator 'STATE_FILE: Absolute path to write server address and PID to'
   o.on('-p', '--port NUMBER', 'Port to start rails on') { |p| options[:port] = p }
   o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
 end
@@ -48,12 +50,14 @@ ruby_exe = argv.shift
 log_dir = argv.shift
 project_dir = argv.shift
 db_port = argv.shift
-inputs_empty = log_dir.nil? | project_dir.nil? | db_port.nil?
-raise 'RUBY_EXE, LOG_DIR, PROJECT_DIR, and DB_PORT are all required for execution' if inputs_empty
+state_file = argv.shift
+inputs_empty = ruby_exe.nil? | log_dir.nil? | project_dir.nil? | db_port.nil? | state_file.nil?
+raise 'RUBY_EXE, LOG_DIR, PROJECT_DIR, DB_PORT, and STATE_FILE are all required for execution' if inputs_empty
 error_msg = ''
 error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, is not absolute. " unless Pathname.new(ruby_exe).absolute?
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
+error_msg << "The STATE_FILE projvided, `#{state_file}`, is not absolute. " unless Pathname.new(state_file).absolute?
 raise error_msg unless error_msg.empty?
 error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, does not exist on the file system. " unless File.exist? ruby_exe
 error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
@@ -77,4 +81,9 @@ puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 
 # Execute the system call
-exec sys_call
+process_log = File.join(project_dir, 'logs', 'rails.log')
+rails_pid = spawn(sys_call, [:err, :out]=>[process_log, 'w'])
+config_hash = File.exist?(state_file) ? ::JSON.parse(File.read(state_file), symbolize_names: true) : Hash.new
+config_hash[:server_url] = "http://localhost:#{options[:port]}"
+config_hash[:rails_pid] = rails_pid
+::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(config_hash) }
