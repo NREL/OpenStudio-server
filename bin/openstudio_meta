@@ -23,8 +23,9 @@ Signal.trap('INT') { abort }
 require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
-ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
+
+$ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby"
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
 #
@@ -46,6 +47,17 @@ def safe_puts(message = nil, opts = nil)
   end
 end
 
+def which(cmd)
+  exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+  ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+    exts.each { |ext|
+      exe = File.join(path, "#{cmd}#{ext}")
+      return exe if File.executable?(exe) && !File.directory?(exe)
+    }
+  end
+  return nil
+end
+
 # This is a convenience method that properly handles duping the originally argv array so that it is not destroyed. This
 # method will also automatically detect "-h" and "--help" and print help. And if any invalid options are  detected, the
 # help will be printed, as well
@@ -61,6 +73,28 @@ def parse_options(opts = nil, argv = nil)
 
   # Default opts to a blank optionparser if none is given
   opts ||= ::OptionParser.new
+
+  opts.on('--ruby-lib-path PATH', 'Additional Ruby path, to locate openstudio') do |path|
+    ENV['RUBYLIB'] = path
+  end
+
+  require 'tmpdir'
+  require 'fileutils'
+  ENV['OS_SERVER_LOG_PATH'] = Dir.mktmpdir
+  opts.on('--server-log-path [PATH]', 'Path to server logs') do |path|
+    FileUtils.remove_entry ENV['OS_SERVER_LOG_PATH']
+    ENV['OS_SERVER_LOG_PATH'] = path
+  end
+
+  ENV['RAILS_ENV'] = 'local'
+  opts.on('--rails-env [ENV]', 'Rails Environment') do |env|
+    ENV['RAILS_ENV'] = env
+  end
+
+  ENV['OS_SERVER_HOST_URL'] = 'http://localhost:8080'
+  opts.on('--server-host-url [URL]', 'Rails host url') do |url|
+    ENV['OS_SERVER_HOST_URL'] = url
+  end
 
   # Add the help option, which must be on every command.
   opts.on_tail('-h', '--help', 'Print this help') do
@@ -277,7 +311,9 @@ class InstallGems
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
     rake_bin = File.absolute_path('./../gems/bin/rake/')
-    sys_call = "gem install bundler -v 1.12.5 && #{bundler_bin} install --without development test" #### && #{rake_bin} assets:precompile"
+    sys_call = "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5 && \ 
+                #{$ruby_path} #{bundler_bin} install --without development test && \
+                #{$ruby_path} #{rake_bin} assets:precompile"
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     if system(sys_call) != true
@@ -326,10 +362,16 @@ class StartLocal
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = { debug: false, force_directories: false, workers: 1 }
+    mongod = which 'mongod'
+    mongodir = ''
+    if mongod
+      mongodir = File.dirname mongod
+    end 
+
+    options = { debug: false, force_directories: false, workers: 1, ruby_path: $ruby_path, mongo_dir: mongodir }
 
     opts = ::OptionParser.new do |o|
-      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR MONGO_DIR RUBY_EXE'
+      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR'
       o.separator ''
       o.separator 'Options:'
       o.separator ''
@@ -342,16 +384,22 @@ class StartLocal
         options[:force_directories] = true
       end
 
-      o.on('--worker-number', 'Number of workers to use') do |w|
-        options[:workers] = w
+      o.on('--worker-number COUNT', 'Number of workers to use') do |w|
+        options[:workers] = w.to_i
+      end
+
+      o.on('--ruby-path PATH', 'Location of ruby executable for workers. Defaults to the calling instance of ruby') do |path|
+        options[:ruby_path] = path
+      end
+
+      o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
+        options[:mongo_dir] = path
       end
     end
 
     # Parse the options
     argv = parse_options(opts, sub_argv)
     project_dir = argv.shift
-    mongo_dir = argv.shift
-    ruby_path = argv.shift
     unless argv == []
       $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
       return 1
@@ -359,7 +407,7 @@ class StartLocal
     $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
 
     # Check the directories exist
-    [project_dir, mongo_dir].each do |dir|
+    [project_dir].each do |dir|
       unless ::File.exist? dir
         if options[:force_directories]
           FileUtils.mkdir_p dir
@@ -370,16 +418,13 @@ class StartLocal
       end
     end
 
-    # Check that ruby_path exists
-    raise "Unable to find ruby executable at `#{ruby_path}`" unless File.exist? ruby_path
-
     # Also force the creation of the log dir in the project_dir
     if options[:force_directories]
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
     end
 
     # Assemble the commands and spin off the threads
-    start_local_server project_dir, mongo_dir, ruby_path, options[:workers], options[:debug]
+    start_local_server project_dir, options[:mongo_dir], options[:ruby_path], options[:workers], options[:debug]
 
     0
   end
