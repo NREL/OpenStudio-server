@@ -25,7 +25,7 @@ gem 'net-ssh'
 gem 'net-sftp'
 
 # javascript
-gem 'libv8', platforms: :ruby
+#gem 'libv8', platforms: :ruby
 gem 'execjs'
 gem 'therubyracer', platforms: :ruby
 
@@ -70,6 +70,8 @@ gem 'oj'
 gem 'rest-client'
 gem 'libxml-ruby', platforms: :ruby
 gem 'os'
+
+gem 'rubocop'
 
 if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/
   gem 'tzinfo-data'
