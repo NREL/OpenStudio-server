@@ -65,6 +65,13 @@ class RunSimulateDataPoint
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
     FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
 
+    # create the run directory here, then make sure to pass in preserve_run_dir
+    run_dir = File.join(simulation_dir, 'run')
+    if Dir.exist? run_dir
+      FileUtils.rm_rf(run_dir)
+    end
+    FileUtils.mkdir_p(run_dir)
+
     @data_point.update(status: 'started')
 
     # Logger for the simulate datapoint
@@ -119,12 +126,19 @@ class RunSimulateDataPoint
       analysis_filename: "#{analysis_dir}/analysis.json"
     }
 
-    run_options = { debug: true, cleanup: false }
+    run_log_file = File.join(run_dir, 'run.log')
+    sim_logger.info "Opening run.log file '#{run_log_file}'"
+    
+    File.open(run_log_file, 'a') do |run_log|
+   
+      run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
-    k = OpenStudio::Workflow::Run.new osw_path, run_options
-    sim_logger.info 'Running workflow'
-    k.run
-    sim_logger.info "Final run state is #{k.current_state}"
+      k = OpenStudio::Workflow::Run.new osw_path, run_options
+      sim_logger.info 'Running workflow'
+      k.run
+      sim_logger.info "Final run state is #{k.current_state}"
+      
+    end
 
     # Save the results to the database - i was PUTing these to the server,
     # but the values were not be typed correctly within RestClient.
