@@ -24,6 +24,7 @@ unless $logger
   $logger.warn 'Logger not passed in from invoking script for local.rb'
 end
 require 'socket'
+require 'json'
 
 # Determines if OS is Windows
 #
@@ -85,28 +86,28 @@ def find_available_port(starting, range)
   test_port
 end
 
-# Kill the rails thread in start_local
-#
-def kill_rails_thread(rails_thread)
-  begin
-    ::Process.kill('KILL', rails_thread.value)
-  rescue
-    $logger.error 'Attempted to kill rails process. The success of the attempt is unclear'
-    return
-  end
-  $logger.error 'Killed the rails process'
-end
 
-# Kill the mongod thread in start_local
+# Kill all started processes as defined in the local_configuration.json
 #
-def kill_mongod_thread(mongod_thread)
-  begin
-    ::Process.kill('KILL', mongod_thread.value)
-  rescue
-    $logger.error 'Attempted to kill mongod process. The success of the attempt is unclear'
+def kill_processes(pid_json)
+  unless File.exist? pid_json
+    $logger.error "File `#{pid_json}` not found. It is possible that processes have been orphaned."
     raise 1
   end
-  $logger.error 'Killed the mongod process.'
+  pid_hash = ::JSON.parse(File.read(pid_json), symbolize_names: true)
+  pid_array = []
+  pid_array << pid_hash[:mongod_pid] if pid_hash[:mongod_pid]
+  pid_array + pid_hash[:dj_pids] if pid_hash[:dj_pids]
+  pid_array << pid_hash[:rails_pid] if pid_hash[:rails_pid]
+  pid_array.each do |pid|
+    begin
+      ::Process.kill('KILL', pid)
+    rescue
+      $logger.error "Attempted to kill process with PID `#{pid}`. The success of the attempt is unclear"
+      next
+    end
+    $logger.error "Killed process with PID `#{pid}`."
+  end
 end
 
 # Start the local server and save pid information to the project_directory
@@ -142,15 +143,15 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   i = 1
   mongod_command = "\"#{ruby_path}\" \"#{mongod_command_path}\" -p #{mongod_port} \"#{mongod_log_path}\" "\
-    "\"#{mongo_directory}\" \"#{mongo_db_directory}\""
+    "\"#{mongo_directory}\" \"#{mongo_db_directory}\" \"#{state_file}\" \"#{project_directory}\""
   rails_command = "\"#{ruby_path}\" \"#{rails_command_path}\" -p #{rails_port} \"#{ruby_path}\" "\
-    "\"#{rails_log_path}\" \"#{project_directory}\" #{mongod_port}"
+    "\"#{rails_log_path}\" \"#{project_directory}\" #{mongod_port} \"#{state_file}\""
   dj_server_command = "\"#{ruby_path}\" \"#{dj_server_command_path}\" \"#{ruby_path}\" \"#{rails_log_path}\" "\
-    "\"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\""
+    "\"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\" \"#{state_file}\""
   dj_worker_commands = []
   until i > worker_number
     dj_worker_commands << "\"#{ruby_path}\" \"#{dj_worker_command_path}\" \"#{ruby_path}\" "\
-      "\"#{rails_log_path}\" \"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\" #{i}"
+      "\"#{rails_log_path}\" \"#{project_directory}\" \"#{mongod_port}\" \"#{rails_port}\" #{i} \"#{state_file}\""
     i += 1
   end
 
@@ -162,67 +163,93 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     dj_worker_commands.each { |cmd| cmd += ' --debug'; $logger.debug "Command for local CLI: #{cmd}" }
   end
 
-  mongod_thread = ::Thread.new { spawn(mongod_command) }
-  mongod_pid = nil
   begin
-    ::Timeout.timeout(60) do
+    ::Timeout.timeout(10) do
+      success = system (mongod_command)
+      unless success
+        $logger.error "Mongod returned non-zero status code  `#{$?.exitstatus}`. Please refer to "\
+        "`#{::File.join(project_directory, 'logs', 'mongod.log')}`."
+        kill_processes(state_file)
+        raise 1
+      end
       mongod_started = false
       until mongod_started
         sleep(0.01)
         mongod_started = true if is_port_open? mongod_port
       end
-      mongod_pid = mongod_thread.value
     end
   rescue ::Timeout::Error
-    $logger.error 'Mongod failed to launch, likely due to another mongod instance accessing the same db'
-    kill_mongod_thread(mongod_thread)
+    $logger.error "Mongod failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'mongod.log')}`."
+    kill_processes(state_file)
     raise 1
   end
-  $logger.error 'Unable to access mongod PID. Please investigate' unless mongod_pid
-  $logger.debug "MONGOD STARTED WITH PID #{mongod_pid}"
+  $logger.debug 'MONGOD STARTED'
 
-  rails_thread = ::Thread.new { spawn(rails_command) }
-  rails_pid = nil
   begin
     ::Timeout.timeout(40) do
+      success = system(rails_command)
+      unless success
+        $logger.error "Rails returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
+        "`#{::File.join(project_directory, 'logs', 'rails.log')}`."
+        kill_processes(state_file)
+        raise 1
+      end
       rails_started = false
       until rails_started
         sleep(0.01)
         rails_started = true if is_port_open? rails_port
       end
-      rails_pid = rails_thread.value
     end
   rescue ::Timeout::Error
-    $logger.error 'Rails failed to launch'
-    kill_rails_thread(rails_thread)
-    kill_mongod_thread(mongod_thread)
+    $logger.error "Rails failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'rails.log')}`."
+    kill_processes(state_file)
     raise 1
   end
-  $logger.error 'Unable to access rails PID. Please investigate' unless rails_pid
-  $logger.debug "RAILS STARTED WITH PID #{rails_pid}"
+  $logger.debug 'RAILS STARTED'
 
-  dj_threads = []
-  dj_threads << ::Thread.new { spawn(dj_server_command) }
-  sleep 15 # TODO: replace this sleep with a check on if the dj_thread is initialized
-  dj_worker_commands.each { |cmd| dj_threads << ::Thread.new { spawn(cmd) } }
+  begin
+    ::Timeout.timeout(5) do
+      success = system(dj_server_command)
+      unless success
+        $logger.error "dj_server returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
+        "`#{::File.join(project_directory, 'logs', 'dj_server.log')}`."
+        kill_processes(state_file)
+        raise 1
+      end
+    end
+  rescue ::Timeout::Error
+    $logger.error "dj_server failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'dj_server.log')}`."
+    kill_processes(state_file)
+    raise 1
+  end
+  $logger.debug 'DELAYED JOBS SERVER MAY HAVE BEEN STARTED'
 
-  # TODO: replace this sleep with a check on if the dj_thread is initialized
-  sleep 15
+  dj_worker_commands.each_with_index do |cmd, ind|
+    begin
+      ::Timeout.timeout(5) do
+        success = system(cmd)
+        unless success
+          $logger.error "dj_worker_#{ind} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
+          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + ind + '.log')}`."
+          kill_processes(state_file)
+          raise 1
+        end
+      end
+    rescue ::Timeout::Error
+      $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
+                                                                                     'dj_worker_' + ind + '.log')}`."
+      kill_processes(state_file)
+      raise 1
+    end
+    $logger.debug "DELAYED JOBS WORKER #{ind} MAY HAVE BEEN STARTED"
+    sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
+  end
 
-  dj_pids = []
-  dj_threads.each { |thread| dj_pids << thread.value }
+  $logger.debug 'Instantiated all processes. Writing receipt file.'
 
-  $logger.debug "DELAYED JOB MAY HAVE BEEN STARTED WITH PIDs #{dj_pids}"
-
-  $logger.debug 'Instantiated all threads'
-
-  hash_to_write = { server_url: "http://localhost:#{rails_port}", mongod_pid: mongod_pid, dj_pids: dj_pids, rails_pid: rails_pid }
-  ::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(hash_to_write) }
   ::File.open(receipt_file, 'wb') { |_| }
 
-  $logger.debug "Wrote local server configuration to #{state_file}"
-
-  "http://localhost:#{rails_port}"
+  $logger.debug "Completed writing local server configuration to #{state_file}"
 end
 
 # Stop the local server
@@ -233,39 +260,14 @@ end
 # @return [Void]
 #
 def stop_local_server(rails_pid, dj_pids, mongod_pid)
-  begin
-    ::Timeout.timeout (5) do
-      ::Process.kill('SIGINT', rails_pid)
-      ::Process.wait(rails_pid)
-    end
-  rescue Errno::ECHILD
-  rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}"
-  rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
-    begin
-      ::Timeout.timeout (5) do
-        ::Process.kill('KILL', rails_pid)
-        ::Process.wait(rails_pid)
-      end
-    rescue Errno::ECHILD
-    rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND RAILS PID #{rails_pid}. SIGINT appears to have completed successfully"
-    rescue ::Timeout::Error
-      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
-      raise 1
-    end
-  end
-
-  dj_pids.each do |dj_pid|
+  dj_pids.reverse.each do |dj_pid|
     begin
       ::Timeout.timeout (5) do
         ::Process.kill('SIGINT', dj_pid)
         ::Process.wait(dj_pid)
       end
-    rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}"
+      $logger.warn "Unable to find delayed-jobs PID #{dj_pid}"
     rescue ::Timeout::Error, Errno::EINVAL
       $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying KILL"
       begin
@@ -273,39 +275,73 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
           ::Process.kill('KILL', dj_pid)
           ::Process.wait(dj_pid)
         end
-      rescue Errno::ECHILD
       rescue Errno::ESRCH
-        $logger.warn "UNABLE TO FIND DJ PID #{dj_pid}. SIGINT appears to have completed successfully"
+        $logger.warn "Unable to find delayed-jobs PID #{dj_pid}. SIGINT appears to have completed successfully"
       rescue ::Timeout::Error
         $logger.error "Unable to kill the dj PID #{dj_pid} with KILL"
         raise 1
+      rescue Exception => e
+        raise unless e.is_a?(Errno::ECHILD)
       end
+    rescue Exception => e
+      raise unless e.is_a?(Errno::ECHILD)
     end
+    $logger.debug "Killed delayed-jobs process with PID `#{dj_pid}`"
   end
+
+  begin
+    ::Timeout.timeout (5) do
+      ::Process.kill('SIGINT', rails_pid)
+      ::Process.wait(rails_pid)
+    end
+  rescue Errno::ESRCH
+    $logger.warn "Unable to find rails PID #{rails_pid}"
+  rescue ::Timeout::Error, Errno::EINVAL
+    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
+    begin
+      ::Timeout.timeout (5) do
+        ::Process.kill('KILL', rails_pid)
+        ::Process.wait(rails_pid)
+      end
+    rescue Errno::ESRCH
+      $logger.warn "Unable to find rails PID #{rails_pid}. SIGINT appears to have completed successfully"
+    rescue ::Timeout::Error
+      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
+      raise 1
+    rescue Exception => e
+      raise unless e.is_a?(Errno::ECHILD)
+    end
+  rescue Exception => e
+    raise unless e.is_a?(Errno::ECHILD)
+  end
+  $logger.debug "Killed rails process with PID `#{rails_pid}`"
 
   begin
     ::Timeout.timeout (5) do
       ::Process.kill('SIGINT', mongod_pid)
       ::Process.wait(mongod_pid)
     end
-  rescue Errno::ECHILD
   rescue Errno::ESRCH
-    $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}"
+    $logger.warn "Unable to find mongod PID #{mongod_pid}"
   rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the mongo PID #{mongod_pid} with SIGINT. Trying KILL."
+    $logger.warn "Unable to kill the mongod PID #{mongod_pid} with SIGINT. Trying KILL."
     begin
       ::Timeout.timeout (5) do
         ::Process.kill('KILL', mongod_pid)
         ::Process.wait(mongod_pid)
       end
-    rescue Errno::ECHILD
     rescue Errno::ESRCH
-      $logger.warn "UNABLE TO FIND MONGO PID #{mongod_pid}. SIGINT appears to have completed successfully"
+      $logger.warn "Unable to find mongod PID #{mongod_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
-      $logger.error "Unable to kill the mongo PID #{mongod_pid} with KILL"
+      $logger.error "Unable to kill the mongod PID #{mongod_pid} with KILL"
       raise 1
+    rescue Exception => e
+      raise unless e.is_a?(Errno::ECHILD)
     end
+  rescue Exception => e
+    raise unless e.is_a?(Errno::ECHILD)
   end
+  $logger.debug "Killed mongod process with PID `#{mongod_pid}`"
 
   sleep 1 # Keep the return from beating the stdout text
 end
