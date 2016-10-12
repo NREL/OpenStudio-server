@@ -25,7 +25,7 @@ $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
 
-$ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby"
+$ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTABLE_EXTS'].split[0]}"
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
 #
