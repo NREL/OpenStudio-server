@@ -48,6 +48,10 @@ Metrics/ParameterLists:
   Max: 8
 
 # ==================== Disabled on Purpose ====================
+# Mongoid doesn't like find_each.
+Rails/FindEach:
+  Enabled: false
+
 Style/AccessorMethodName:
   Enabled: true
 
