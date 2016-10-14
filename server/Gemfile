@@ -1,7 +1,5 @@
 source 'http://rubygems.org'
 
-eval_gemfile File.expand_path(File.join(File.dirname(__FILE__), '../bin/Gemfile'))
-
 gem 'rails', '4.2'
 
 # data modules
@@ -9,6 +7,7 @@ gem 'json', '1.7.7'
 gem 'jbuilder'
 gem 'rubyzip', '~> 1.2.0'
 gem 'tzinfo-data'
+gem 'nokogiri', '~> 1.6.5'
 
 # database modules
 gem 'mongoid', '~> 5.1'
