@@ -64,7 +64,7 @@ class ComputeNode
     worker_ips_hash = {}
     worker_ips_hash[:worker_ips] = []
 
-    ComputeNode.where(enabled: true).find_each do |node|
+    ComputeNode.where(enabled: true).find do |node|
       if node.node_type == 'server'
         (1..node.cores).each { |_i| worker_ips_hash[:worker_ips] << 'localhost' }
       elsif node.node_type == 'worker'
