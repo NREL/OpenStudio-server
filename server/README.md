@@ -45,6 +45,15 @@ docker-compose -f docker-compose.yml -f docker-compose.test.yml build
 docker-compose -f docker-compose.yml -f docker-compose.test.yml up
 ```
 
+# Testing Dependencies
+
+If running the tests on a local machine, then make sure to install
+geckodriver to run the webpage.
+
+```
+bundle install
+brew install geckodriver
+```
 # TODOs
 
 * Rename Data Points to Datapoints
