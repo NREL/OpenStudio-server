@@ -40,6 +40,7 @@ class DataPoint
   field :uuid, type: String
   field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :name, type: String
+  field :description, type: String, default: '' # For support of EDAPT users in PAT 2.0
   field :variable_values # This has been hijacked by OS DataPoint. Use set_variable_values
   field :set_variable_values, type: Hash, default: {} # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
 
