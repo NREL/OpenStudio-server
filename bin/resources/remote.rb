@@ -53,7 +53,7 @@ def process_excel_project(filename, output_path)
   analyses = OpenStudio::Analysis.from_excel(filename)
   if analyses.size != 1
     $logger.error 'ERROR: EXCEL-PROJECT -- More than one seed model specified. This feature is deprecated'
-    raise 1
+    exit 1
   end
   analysis = analyses.first
   analysis.save "#{output_path}.json"
@@ -76,72 +76,23 @@ def process_csv_project(filename, output_path)
   OpenStudio::Analysis.aws_instance_options(filename)[:analysis_type]
 end
 
-# Find url associated with non-aws targets
+# Verify that url associated with non-aws target is alive
 #
-# @param target_type [String] non-aws environment target to get url of
+# @param target_dns [String] non-aws environment target to check the status of
 # @return [String] URL of input environment target
 # @todo Abstract this into a target class with access keys and such not that is referenced, not defined, here
 #
-def lookup_target_url(target_type)
-  server_dns = nil
-  case target_type.downcase
-    when 'vagrant'
-      server_dns = 'http://localhost:8080'
-    when 'nrel24'
-      server_dns = 'http://bball-130449.nrel.gov:8080'
-    when 'nrel24a'
-      server_dns = 'http://bball-130553.nrel.gov:8080'
-    when 'nrel24b'
-      server_dns = 'http://bball-130590.nrel.gov:8080'
-    else
-      return target_type if target_type.include? 'http'
-      puts "ERROR: TARGET -- Unknown 'target_type' in #{__method__}"
-      raise 1
+def verify_target_dns(target_dns)
+  server_api = OpenStudio::Analysis::ServerApi.new(hostname: target_dns)
+  unless server_api.alive?
+    $logger.error "ERROR: Server at #{server_api.hostname} is not alive"
+    return 1
   end
-  server_dns
+  $logger.info "Found target_dns #{target_dns} alive"
+  $logger.debug "Returned target_dns status: #{server_api.machine_status}"
+  target_dns
 end
 
-# Parse the AWS credentials YAML file and set the appropriate environment variables
-#
-# @param aws_yml_path [String] path to the AWS credentials file
-# @return [Void]
-#
-def parse_aws_yml(aws_yml_path)
-  # Unset any AWS environment variables
-  if ::ENV.key? 'AWS_ACCESS_KEY'
-    ::ENV.delete 'AWS_ACCESS_KEY'
-    $logger.info 'Removed AWS_ACCESS_KEY from the environment'
-  end
-  if ::ENV.key? 'AWS_SECRET_KEY'
-    ::ENV.delete 'AWS_SECRET_KEY'
-    $logger.info 'Removed AWS_SECRET_KEY from the environment'
-  end
-  if ::ENV.key? 'AWS_DEFAULT_REGION'
-    ::ENV.delete 'AWS_DEFAULT_REGION'
-    $logger.info 'Removed AWS_DEFAULT_REGION from the environment'
-  end
-
-  # Load in the credentials and validate that the required fields are present
-  aws_credentials = ::YAML.load_file(aws_yml_path)
-  unless aws_credentials.keys.include? 'access_key_id'
-    $logger.error "No access key provided in #{aws_yml_path}. An example: 'access_key_id: ABC...'"
-    raise 1
-  end
-  unless aws_credentials.keys.include? 'secret_access_key'
-    $logger.error "No secret key provided in #{aws_yml_path}. An example: 'secret_access_key: ABC...'"
-    raise 1
-  end
-  unless aws_credentials.keys.include? 'region'
-    $logger.error "No access key provided in #{aws_yml_path}. An example: 'region: us-east-1'"
-    raise 1
-  end
-
-  # Set the AWS environment variables
-  ::ENV['AWS_ACCESS_KEY'] = aws_credentials['access_key_id']
-  ::ENV['AWS_SECRET_KEY'] = aws_credentials['secret_access_key']
-  ::ENV['AWS_DEFAULT_REGION'] = aws_credentials['region']
-  $logger.info 'Set new AWS environment variables using the credentials file'
-end
 
 # Find or create the target machine
 #
@@ -205,6 +156,6 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
     end
     server_dns
   else
-    lookup_target_url(target_type)
+    verify_target_dns(target_type)
   end
 end
