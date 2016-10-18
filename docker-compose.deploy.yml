@@ -3,9 +3,9 @@
 version: '2'
 services:
   db:
-    image: mongo
+    image: mongo:latest
   web:
-    image: nllong/os-server-test
+    image: nllong/os-server-test:latest
     links:
       - db
       - rserve
@@ -14,7 +14,7 @@ services:
     volumes:
       - osdata:/mnt/openstudio
   web-background:
-    image: nllong/os-server-test
+    image: nllong/os-server-test:latest
     links:
       - db
       - rserve
@@ -22,14 +22,14 @@ services:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
   worker:
-    image: nllong/os-server-test
+    image: nllong/os-server-test:latest
     links:
       - web
       - db
       - rserve
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
-    image: nllong/rserve-test
+    image: nllong/rserve-test:latest
     volumes:
       - osdata:/mnt/openstudio
 volumes:

@@ -5,14 +5,19 @@ machine:
     - docker
 
 dependencies:
+  cache_directories:
+    - "~/docker"
   pre:
     - sudo pip install docker-compose
+  override:
+    - docker volume create --name=osdata
+    - docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+#    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
+#    - docker build --rm=false -t circleci/elasticsearch .
+#    - mkdir -p ~/docker; docker save circleci/elasticsearch > ~/docker/image.tar
 
 test:
   pre:
-    - docker volume create --name=osdata
-    - docker-compose build
-    - docker-compose -f docker-compose.yml -f docker-compose.test.yml build
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d rserve
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d web-background
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d db

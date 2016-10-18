@@ -3,13 +3,13 @@
 version: '2'
 services:
   db:
-    image: mongo
+    image: mongo:latest
   web:
     build:
       context: .
       args:
         rails_env: docker
-    image: nllong/os-server-test
+    image: nllong/os-server-test:latest
     links:
       - db
       - rserve
@@ -22,7 +22,7 @@ services:
       context: .
       args:
         rails_env: docker
-    image: nllong/os-server-test
+    image: nllong/os-server-test:latest
     links:
       - db
       - rserve
@@ -34,7 +34,7 @@ services:
       context: .
       args:
         rails_env: docker
-    image: nllong/os-server-test
+    image: nllong/os-server-test:latest
     links:
       - web
       - db
@@ -42,7 +42,7 @@ services:
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
     build: ./docker/R
-    image: nllong/rserve-test
+    image: nllong/rserve-test:latest
     volumes:
       - osdata:/mnt/openstudio
 volumes:
