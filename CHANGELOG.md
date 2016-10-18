@@ -1,4 +1,15 @@
 OpenStudio Server
+=================
+
+Version 1.19.1-OS.1.12.6.c58ea292f1
+-----------------------------------
+* OpenStudio 1.12.6.c58ea292f1
+
+Version 1.19.1-rc5
+------------------
+* OpenStudio 1.12.2.462ae9e746
+
+Version 1.19.1-rc4
 
 Version 2.0.0-PAT Pre-Releases
 ------------------------------
@@ -10,7 +21,7 @@ Version 2.0.0-PAT Pre-Releases
 * Hardcoded the Meta-CLI in the root bin dir to use the local server code, allowing for the code to be self-contained
 
 Version 1.19.1-rc4
---------------
+------------------
 * OpenStudio 1.12.2.462ae9e746
 
 Version 1.19.1-rc3
