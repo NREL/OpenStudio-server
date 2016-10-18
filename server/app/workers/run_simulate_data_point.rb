@@ -36,7 +36,6 @@
 # Command line based interface to execute the Workflow manager.
 
 # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
-# ruby simulate_data_point.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -u 1364e270-2841-407d-a495-cf127fa7d1b8
 
 class RunSimulateDataPoint
   def initialize(data_point_id, options = {})
@@ -44,13 +43,6 @@ class RunSimulateDataPoint
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
-
-    # For now just track the status here. Ideally we would use delayed jobs
-    # or a plugin for delayed jobs to track the status of the job.
-
-    # Also, should we use the API to set these or relay on mongoid?
-    @data_point.update(run_queue_time: Time.now, status: 'queued')
-    @data_point.save!
   end
 
   def perform
@@ -59,7 +51,7 @@ class RunSimulateDataPoint
       return
     end
 
-    @data_point.update(run_start_time: Time.now, status: 'started')
+    @data_point.set_start_state
 
     # Create the analysis directory
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
@@ -128,20 +120,19 @@ class RunSimulateDataPoint
 
     run_log_file = File.join(run_dir, 'run.log')
     sim_logger.info "Opening run.log file '#{run_log_file}'"
-    
+
     File.open(run_log_file, 'a') do |run_log|
-   
       run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
       k = OpenStudio::Workflow::Run.new osw_path, run_options
       sim_logger.info 'Running workflow'
       k.run
       sim_logger.info "Final run state is #{k.current_state}"
-      
     end
 
     # Save the results to the database - i was PUTing these to the server,
-    # but the values were not be typed correctly within RestClient.
+    # but the values were not be typed correctly within RestClient. Since
+    # this is running as a delayed job, then access to mongoid methods is okay.
     results_file = "#{simulation_dir}/run/measure_attributes.json"
     if File.exist? results_file
       results = JSON.parse(File.read(results_file), symbolize_names: true)
@@ -205,12 +196,12 @@ class RunSimulateDataPoint
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     puts log_message
     sim_logger.info log_message if sim_logger
-    @data_point.update(status_message: 'error')
+    @data_point.set_error_state
   ensure
     sim_logger.info "Finished #{__FILE__}" if sim_logger
     sim_logger.close if sim_logger
 
-    @data_point.update(run_end_time: Time.now, status: 'completed') if @data_point
+    @data_point.set_complete_state if @data_point
 
     true
   end
