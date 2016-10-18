@@ -15,18 +15,6 @@ services:
       - ./reports:/opt/openstudio/reports
       - osdata:/mnt/openstudio
     command: /usr/local/bin/run-server-tests
-#  web-background:
-#    build:
-#      args:
-#        rails_env: docker-test
-#        bundle_args: ''
-#    volumes:
-#      - osdata:/mnt/openstudio
-#  worker:
-#    build:
-#      args:
-#        rails_env: docker-test
-#        bundle_args: ''
   rserve:
     volumes:
       - osdata:/mnt/openstudio

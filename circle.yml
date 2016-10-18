@@ -21,6 +21,16 @@ test:
     - export CIRCLECI=true
   override:
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml run web > reports/rspec/rpec_results.html
+    - docker-compose stop
   post:
     - rsync -av reports/ $CIRCLE_ARTIFACTS/reports/
+#    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+
+deployment:
+  hub:
+    branch: dockerize-build
+    commands:
+      - docker-compose build
+      - docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - docker-compose push
 
