@@ -281,10 +281,10 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
         $logger.error "Unable to kill the dj PID #{dj_pid} with KILL"
         exit 1
       rescue Exception => e
-        exit unless e.is_a?(Errno::ECHILD)
+        exit 1 unless e.is_a?(Errno::ECHILD)
       end
     rescue Exception => e
-      exit unless e.is_a?(Errno::ECHILD)
+      exit 1 unless e.is_a?(Errno::ECHILD)
     end
     $logger.debug "Killed delayed-jobs process with PID `#{dj_pid}`"
   end
@@ -309,10 +309,10 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
       exit 1
     rescue Exception => e
-      exit unless e.is_a?(Errno::ECHILD)
+      exit 1 unless e.is_a?(Errno::ECHILD)
     end
   rescue Exception => e
-    exit unless e.is_a?(Errno::ECHILD)
+    exit 1 unless e.is_a?(Errno::ECHILD)
   end
   $logger.debug "Killed rails process with PID `#{rails_pid}`"
 
@@ -336,10 +336,10 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       $logger.error "Unable to kill the mongod PID #{mongod_pid} with KILL"
       exit 1
     rescue Exception => e
-      exit unless e.is_a?(Errno::ECHILD)
+      exit 1 unless e.is_a?(Errno::ECHILD)
     end
   rescue Exception => e
-    exit unless e.is_a?(Errno::ECHILD)
+    exit 1 unless e.is_a?(Errno::ECHILD)
   end
   $logger.debug "Killed mongod process with PID `#{mongod_pid}`"
 
