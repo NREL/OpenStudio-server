@@ -55,7 +55,7 @@ def which(cmd)
       return exe if File.executable?(exe) && !File.directory?(exe)
     }
   end
-  return nil
+  nil
 end
 
 # This is a convenience method that properly handles duping the originally argv array so that it is not destroyed. This
@@ -180,7 +180,7 @@ class CLI
       # Help is next in short-circuiting everything. Print
       # the help and exit.
       help
-      return 0
+      exit 0
     end
 
     # If we reached this far then we must have a subcommand. If not,
@@ -192,7 +192,7 @@ class CLI
 
     if !command_plugin || !$sub_command
       help
-      return 1
+      exit 1
     end
 
     command_class = command_plugin[0].call
@@ -290,14 +290,14 @@ class InstallGems
     argv = parse_options(opts, sub_argv)
     unless argv == []
       $logger.error 'Extra arguments passed to the install_gems command. Please refer to the help documentation.'
-      return 1
+      exit 1
     end
     $logger.debug("InstallGems command: #{argv.inspect} #{options.inspect}")
 
     # test that we have git in the path
-    if system('git --version') != true
+    unless system('git --version')
       $logger.error 'Git is not in your path.'
-      return 1
+      exit 1
     end
 
     # Delete existing gem dir
@@ -314,9 +314,9 @@ class InstallGems
     sys_call = "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5 && #{$ruby_path} #{bundler_bin} install --without development test && #{$ruby_path} #{rake_bin} assets:precompile"
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
-    if system(sys_call) != true
+    unless system(sys_call)
       $logger.error "System call '#{sys_call}' failed"
-      return 1
+      exit 1
     end
 
     # copy all files to staging location
@@ -400,7 +400,7 @@ class StartLocal
     project_dir = argv.shift
     unless argv == []
       $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
-      return 1
+      exit 1
     end
     $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
 
@@ -411,7 +411,7 @@ class StartLocal
           FileUtils.mkdir_p dir
         else
           $logger.error "Unable to find directory '#{dir}'"
-          return 1
+          exit 1
         end
       end
     end
@@ -461,7 +461,7 @@ class StopLocal
     project_dir = argv.shift
     unless argv == []
       $logger.error 'Extra arguments passed to the stop_local command. Please refer to the help documentation.'
-      return 1
+      exit 1
     end
     $logger.debug("StopLocal command: #{argv.inspect} #{options.inspect}")
 
@@ -469,7 +469,7 @@ class StopLocal
     local_state_file = ::File.absolute_path(File.join(project_dir, 'local_configuration.json'))
     unless ::File.exist? local_state_file
       $logger.error "Unable to find the local configuation json at #{local_state_file}"
-      return 1
+      exit 1
     end
     local_server_config = ::JSON.parse(File.read(local_state_file), symbolize_names: true)
     rails_pid = local_server_config[:rails_pid]
@@ -501,6 +501,8 @@ class StartRemote
     $logger.debug 'Requiring gems for StartRemote'
     $logger.debug 'Requiring os-aws gem'
     require 'openstudio-aws'
+    $logger.debug 'Requiring os-analysis gem'
+    require 'openstudio-analysis'
     $logger.debug 'Successfully required all gems for StartRemote'
 
     options = {
@@ -519,9 +521,6 @@ class StartRemote
       o.on('--debug', 'Whatever makes debugging easy') do |f|
         options[:debug] = f
       end
-      o.on('-a', '--aws_credentials FILE', 'YAML FILE containing AWS credentials') do |a|
-        options[:aws_yml] = a
-      end
       o.on('-s', '--server_config FILE', 'JSON FILE containing the AWS server instance configuration') do |s|
         options[:server_options_json] = s
       end
@@ -532,34 +531,37 @@ class StartRemote
 
     # Parse the options
     argv = parse_options(opts, sub_argv)
-    return 1 unless argv
+    exit 1 unless argv
     $logger.debug("StartRemote command: #{argv.inspect} #{options.inspect}")
     target = argv.shift.to_s.downcase
     unless argv == []
       $logger.error 'Extra arguments passed to the start_remote command. Please refer to the help documentation.'
-      return 1
+      exit 1
     end
 
     # If target is AWS, ensure that needed directories and files exist and set the ENV for AWS
     if target == 'aws'
-      unless ::File.exist? options[:aws_yml]
-        $logger.error "Unable to find AWS credentials file #{options[:aws_yml]}"
-        raise 1
+      unless ::ENV['AWS_ACCESS_KEY'] && ::ENV['AWS_SECRET_KEY'] && ::ENV['AWS_DEFAULT_REGION']
+        $logger.error 'Unable to find required AWS_ACCESS_KEY, AWS_SECRET_KEY, and AWS_DEFAULT_REGION in the env vars.'
+        exit 1
       end
       unless ::File.exist? options[:server_options_json]
         $logger.error "Unable to find server configuration file #{options[:server_options_json]}"
-        raise 1
+        exit 1
       end
       unless ::File.exist? options[:project_dir]
         $logger.error "Unable to find project directory #{options[:project_dir]}"
-        raise 1
+        exit 1
       end
-      parse_aws_yml(options[:aws_yml])
     end
 
     # Get OpenStudioServerApi object and ensure the instance is running
     server_options = target == 'aws' ? ::JSON.parse(File.read(options[:server_options_json]), symbolize_names: true) : {}
     server_dns = find_or_create_target(target, server_options, options[:project_dir])
+    if server_dns == 1
+      $logger.error 'Encountered error in find_or_create_target; exiting with exit code 1'
+      exit 1
+    end
     $logger.info "Server DNS: #{server_dns}"
 
     server_dns
@@ -590,7 +592,7 @@ class StopRemote
     }
 
     opts = ::OptionParser.new do |o|
-      o.banner = 'Usage: openstudio_meta stop_remote [options] aws_conn_json aws_yml'
+      o.banner = 'Usage: openstudio_meta stop_remote [options] aws_conn_json'
       o.separator ''
       o.separator 'Options:'
       o.separator ''
@@ -609,9 +611,8 @@ class StopRemote
       $logger.error "Unable to find AWS connection file at #{aws_conn_json}"
       raise 1
     end
-    aws_yml = argv.shift.to_s
-    unless ::File.exist? aws_yml
-      $logger.error "Unable to find AWS credentials file at #{aws_yml}"
+    unless ::ENV['AWS_ACCESS_KEY'] && ::ENV['AWS_SECRET_KEY'] && ::ENV['AWS_DEFAULT_REGION']
+      $logger.error 'Unable to find required AWS_ACCESS_KEY, AWS_SECRET_KEY, and AWS_DEFAULT_REGION in the env vars.'
       raise 1
     end
     unless argv == []
@@ -620,7 +621,6 @@ class StopRemote
     end
 
     # Set the env variables for AWS, load the instance controller, and terminate the instances.
-    parse_aws_yml(aws_yml)
     aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'], secret_access_key: ::ENV['AWS_SECRET_KEY'],
                                         region: ::ENV['AWS_DEFAULT_REGION'] } }
     aws = OpenStudio::Aws::Aws.new(aws_init_options)
@@ -674,13 +674,13 @@ class RunAnalysis
 
     # Parse the options
     argv = parse_options(opts, sub_argv)
-    return 1 unless argv
+    exit 1 unless argv
     $logger.debug("RunAnalysis command: #{argv.inspect} #{options.inspect}")
     project_path = argv.shift.to_s
     server_dns = argv.shift.to_s
     unless argv == []
       $logger.error 'Extra arguments passed to the run_analysis command. Please refer to the help documentation.'
-      return 1
+      exit 1
     end
     ::ENV['OS_SERVER_HOSTNAME'] = server_dns
 
@@ -701,14 +701,14 @@ class RunAnalysis
       analysis_type = options[:analysis_type]
     else
       $logger.error "Did not recognize project file extension #{::File.extname(project_path)}"
-      return 1
+      exit 1
     end
 
     # Get OpenStudioServerApi object and ensure the instance is running
     server_api = OpenStudio::Analysis::ServerApi.new(hostname: server_dns)
     unless server_api.machine_status
       $logger.error "ERROR: Server at #{server_api.hostname} is not responding"
-      return 1
+      exit 1
     end
 
     # Submit the job
