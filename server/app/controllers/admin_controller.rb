@@ -35,6 +35,8 @@
 
 class AdminController < ApplicationController
   def index
+    require 'rubygems'
+    @gems = Gem::Specification.all().map{|g| [g.name, g.version.to_s] }.sort
   end
 
   def backup_database
