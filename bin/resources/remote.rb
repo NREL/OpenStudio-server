@@ -123,7 +123,9 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
 
       # Don't use the old API (Version 1)
       aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
-                                          secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] } }
+                                          secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] },
+                           ami_lookup_version: 2,
+                           openstudio_server_version: aws_instance_options['openstudio_server_version']}
       aws = OpenStudio::Aws::Aws.new(aws_init_options)
 
       server_options = {
