@@ -134,7 +134,7 @@ For OpenStudio PAT, Alex Swindler has to copy over the AMI ID from this file: ht
 
 Please contact @rhorsey, @bball, or @nllong with any question regarding this project. Thanks for you interest!
 
-[circleci-img]: https://circleci.com/gh/NREL/OpenStudio-server.svg?style=svg
+[circleci-img]: https://circleci.com/gh/NREL/OpenStudio-server/tree/dockerize.svg?style=svg
 [circleci-url]: https://circleci.com/gh/NREL/OpenStudio-server
 [coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=
 [coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
