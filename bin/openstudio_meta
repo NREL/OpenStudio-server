@@ -269,7 +269,7 @@ class InstallGems
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = { debug: false, export_dir: nil }
+    options = { debug: false, export_dir: nil, test_dev_build: false }
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta install_gems [options]'
@@ -283,6 +283,10 @@ class InstallGems
 
       o.on('-e', '--export DIRECTORY', 'DIRECTORY to export server build') do |e|
         options[:export_dir] = e
+      end
+
+      o.on('--with_test_develop', 'Include test and develop gems in the installation package') do |w|
+        options[:test_dev_build] = true
       end
     end
 
@@ -312,6 +316,7 @@ class InstallGems
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
     rake_bin = File.absolute_path('./../gems/bin/rake/')
     sys_call = "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5 && #{$ruby_path} #{bundler_bin} install --without development test && #{$ruby_path} #{rake_bin} assets:precompile"
+    sys_call.gsub('--without development test ', '') if options[:test_dev_build]
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     unless system(sys_call)

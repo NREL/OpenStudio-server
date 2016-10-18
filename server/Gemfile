@@ -62,6 +62,7 @@ gem 'openstudio-standards', '0.1.4'
 gem 'openstudio-analysis', '1.0.0.pre.rc4'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
+gem 'openstudio-aws', '~> 0.4'
 gem 'msgpack', '~> 1.0'
 
 gem 'multi_json'
@@ -96,8 +97,4 @@ group :development, :test do
   gem 'rspec-html-matchers'
   gem 'factory_girl_rails'
   gem 'ci_reporter'
-
-  # this openstudio gem is needed for starting up the cluster
-  # and running the analysis in the integration tests
-  gem 'openstudio-aws', '~> 0.4'
 end
