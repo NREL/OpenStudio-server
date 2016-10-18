@@ -9,7 +9,7 @@ services:
       context: .
       args:
         rails_env: docker
-    image: nllong/os-server-test:latest
+    image: nrel/openstudio-server:latest
     links:
       - db
       - rserve
@@ -22,7 +22,7 @@ services:
       context: .
       args:
         rails_env: docker
-    image: nllong/os-server-test:latest
+    image: nrel/openstudio-server:latest
     links:
       - db
       - rserve
@@ -34,7 +34,7 @@ services:
       context: .
       args:
         rails_env: docker
-    image: nllong/os-server-test:latest
+    image: nrel/openstudio-server:latest
     links:
       - web
       - db
@@ -42,7 +42,7 @@ services:
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
     build: ./docker/R
-    image: nllong/rserve-test:latest
+    image: nrel/openstudio-rserve:latest
     volumes:
       - osdata:/mnt/openstudio
 volumes:

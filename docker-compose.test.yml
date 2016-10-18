@@ -10,7 +10,7 @@ services:
       args:
         rails_env: docker-test
         bundle_args: ''
-    image: nllong/os-server-test:latest
+    image: nrel/openstudio-server:latest
     environment:
       - CI
       - COVERALLS_REPO_TOKEN
@@ -26,7 +26,7 @@ services:
     command: /usr/local/bin/run-server-tests
   rserve:
     build: ./docker/R
-    image: nllong/rserve-test:latest
+    image: nrel/openstudio-rserve:latest
     volumes:
       - osdata:/mnt/openstudio
 volumes:
