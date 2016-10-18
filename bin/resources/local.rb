@@ -186,7 +186,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   $logger.debug 'MONGOD STARTED'
 
   begin
-    ::Timeout.timeout(40) do
+    ::Timeout.timeout(120) do
       success = system(rails_command)
       unless success
         $logger.error "Rails returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
