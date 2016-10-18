@@ -11,10 +11,13 @@ dependencies:
     - sudo pip install docker-compose
   override:
     - docker volume create --name=osdata
+    - if [[ -e ~/docker/rserve-test.tar ]]; then docker load -i ~/docker/rserve-test.tar; fi
+    - if [[ -e ~/docker/os-server-test.tar ]]; then docker load -i ~/docker/os-server-test.tar; fi
+    - if [[ -e ~/docker/mongo.tar ]]; then docker load -i ~/docker/mongo; fi
     - docker-compose -f docker-compose.yml -f docker-compose.test.yml build
-#    - if [[ -e ~/docker/image.tar ]]; then docker load -i ~/docker/image.tar; fi
-#    - docker build --rm=false -t circleci/elasticsearch .
-#    - mkdir -p ~/docker; docker save circleci/elasticsearch > ~/docker/image.tar
+    - mkdir -p ~/docker; docker save nllong/rserve-test > ~/docker/rserve-test.tar
+    - mkdir -p ~/docker; docker save nllong/os-server-test > ~/docker/os-server-test.tar
+    - mkdir -p ~/docker; docker save mongo > ~/docker/mongo.tar
 
 test:
   pre:
