@@ -2,23 +2,31 @@
 # run `docker-compose up` to create and run/link the containers
 version: '2'
 services:
+  db:
+    image: mongo:latest
   web:
     build:
+      context: .
       args:
         rails_env: docker-test
         bundle_args: ''
     environment:
-     - CI
-     - COVERALLS_REPO_TOKEN
-     - CIRCLECI
+      - CI
+      - COVERALLS_REPO_TOKEN
+      - CIRCLECI
+    links:
+      - db
+      - rserve
+    ports:
+      - "8080:80"
     volumes:
       - ./reports:/opt/openstudio/reports
       - osdata:/mnt/openstudio
     command: /usr/local/bin/run-server-tests
   rserve:
+    build: ./docker/R
     volumes:
       - osdata:/mnt/openstudio
 volumes:
   osdata:
     external: true
-
