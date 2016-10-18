@@ -143,20 +143,20 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
       a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
       a = JSON.parse(a, symbolize_names: true)
       expect(a[:analysis][:data_points].size).to eq 1
-      #puts "accessed http://#{host}/analyses/#{analysis_id}/status.json"
+      # puts "accessed http://#{host}/analyses/#{analysis_id}/status.json"
       
       # get the analysis as html
       a = RestClient.get "http://#{host}/analyses/#{analysis_id}.html"
-      #puts "accessed http://#{host}/analyses/#{analysis_id}.html"
+      # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
       
       # get the datapoint as json
       a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
       a = JSON.parse(a, symbolize_names: true)
-      #puts "accessed http://#{host}/data_points/#{datapoint_id}.json" 
+      # puts "accessed http://#{host}/data_points/#{datapoint_id}.json" 
 
       # get the datapoint as html
       a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
-      #puts "accessed http://#{host}/data_points/#{datapoint_id}.html" 
+      puts "accessed http://#{host}/data_points/#{datapoint_id}.html" 
       
       #sleep(0.5)
     end
