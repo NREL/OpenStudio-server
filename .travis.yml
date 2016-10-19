@@ -11,6 +11,4 @@ matrix:
 services:
   - docker
   - mongod
-before_install:
-  script:
-    travis/script.sh
+before_install: ./travis/script.sh
