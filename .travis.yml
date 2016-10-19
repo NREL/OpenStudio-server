@@ -1,10 +1,16 @@
+matrix:
+  include:
+  - os: linux
+    env: REDHAT_BUILD=true
+  - os: osx
+    osx_image: xcode7.1
+    env: REDHAT_BUILD=false
+  - os: osx
+    osx_image: xcode8
+    env: REDHAT_BUILD=false
+services:
+  - docker
+  - mongod
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libxml2-dev
-  - wget http://openstudio-builds.s3.amazonaws.com/1.11.5/OpenStudio2-1.11.5.e22dad0745-Redhat.tar.gz -O ~/os2.tar.gz -q
-  - tar -xvzf ~/os2.tar.gz
-language: ruby
-rvm:
- - 2.0
- - 2.2
-
+  script:
+    travis/script.sh
