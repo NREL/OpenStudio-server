@@ -1,5 +1,5 @@
 defaults: &defaults
-  os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
+  os_server_host_url: 'http://localhost:3000'
   os_server_project_path: ':rails_root/../worker-nodes'
   r_scripts_path: ':rails_root/../docker/R/lib'
   rails_log_path: ':rails_root/log'
@@ -9,8 +9,6 @@ defaults: &defaults
 
 development:
   <<: *defaults
-  os_server_host_url: 'http://localhost:3000'
-  ruby_bin_dir: ':ruby_bin_dir'
 
 docker:
   <<: *defaults
@@ -30,13 +28,14 @@ docker-test:
 
 test:
   <<: *defaults
-  os_server_host_url: 'http://localhost:3000'
 
 production:
   <<: *defaults
+  os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
 
 local:
   <<: *defaults
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
+  os_server_project_path: <%= ENV['OS_SERVER_PROJECT_PATH'] %>
   rails_log_path: <%= ENV['OS_SERVER_LOG_PATH'] %>
 
