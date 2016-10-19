@@ -32,7 +32,7 @@ test:
 
 deployment:
   hub:
-    branch: dockerize-build
+    branch: dockerize
     commands:
       - docker-compose build
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
