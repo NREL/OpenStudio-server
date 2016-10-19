@@ -29,7 +29,7 @@ services:
       - rserve
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
-    image: nnrel/openstudio-rserve:latest
+    image: nrel/openstudio-rserve:latest
     volumes:
       - osdata:/mnt/openstudio
 volumes:
