@@ -65,7 +65,7 @@ class Analysis
 
   has_mongoid_attached_file :seed_zip,
                             url: '/assets/analyses/:id/:style/:basename.:extension',
-                            path: ':rails_root/public/assets/analyses/:id/:style/:basename.:extension'
+                            path: "#{APP_CONFIG['server_asset_path']}/assets/analyses/:id/:style/:basename.:extension"
 
   # Relationships
   belongs_to :project
@@ -162,7 +162,7 @@ class Analysis
     end
 
     # Remove all the queued delayed jobs for this analysis
-    data_points.where(status: 'queued').find_each(&:destroy)
+    data_points.where(status: 'queued').each(&:destroy)
 
     [save!, errors]
   end

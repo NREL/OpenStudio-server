@@ -70,9 +70,10 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
 
         # TODO: move this method to the datapoint model
         ids << dp.submit_simulation
-        logger.info ids
       end
     end
+
+    logger.info "Delayed Job ids are: #{ids}"
 
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
@@ -81,10 +82,12 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
         ids.delete(id) if Delayed::Job.find(id).nil?
       end
 
+      # logger.info ids
+
       sleep 5
     end
 
-    # TODO: Finalize the worker node
+    # TODO: Finalize the worker nodes
 
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
@@ -92,6 +95,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     @analysis.status_message = log_message
     @analysis.save!
   ensure
+    logger.info 'Finished running batchrun method'
     @analysis_job.end_time = Time.now
     @analysis_job.status = 'completed'
     @analysis_job.save!

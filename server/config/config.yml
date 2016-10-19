@@ -1,45 +1,42 @@
 defaults: &defaults
-  sim_root_path: /mnt/openstudio
-  server_asset_path: /mnt/openstudio/server
-  ruby_bin_dir: ':ruby_bin_dir'
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
+  os_server_project_path: ':rails_root/../worker-nodes'
+  r_scripts_path: ':rails_root/../docker/R/lib'
   rails_log_path: ':rails_root/log'
   rserve_hostname: 'localhost'
   rserve_port: 6311
-  r_scripts_path: ':rails_root/../docker/R/lib'
+  ruby_bin_dir: ':ruby_bin_dir'
 
 development:
   <<: *defaults
-  ruby_bin_dir: ':ruby_bin_dir'
-  server_asset_path: ':rails_root/public/assets/server'
-  sim_root_path: ':rails_root/../worker-nodes'
   os_server_host_url: 'http://localhost:3000'
+  ruby_bin_dir: ':ruby_bin_dir'
 
 docker:
   <<: *defaults
   os_server_host_url: 'http://web:80'
-  ruby_bin_dir: /usr/local/ruby
-  rserve_hostname: 'rserve'
+  os_server_project_path: '/mnt/openstudio'
   r_scripts_path: /opt/openstudio/R/lib
+  rserve_hostname: 'rserve'
+  ruby_bin_dir: /usr/local/ruby
 
 docker-test:
   <<: *defaults
   os_server_host_url: 'http://web:80'
-  ruby_bin_dir: /usr/local/ruby
-  rserve_hostname: 'rserve'
+  os_server_project_path: '/mnt/openstudio'
   r_scripts_path: /opt/openstudio/R/lib
+  rserve_hostname: 'rserve'
+  ruby_bin_dir: /usr/local/ruby
 
 test:
   <<: *defaults
   os_server_host_url: 'http://localhost:3000'
-  sim_root_path: ':rails_root/../worker-nodes'
 
 production:
   <<: *defaults
 
 local:
   <<: *defaults
-  sim_root_path: ':rails_root/../worker-nodes'
-  server_asset_path: ':rails_root/public/assets/server'
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
   rails_log_path: <%= ENV['OS_SERVER_LOG_PATH'] %>
+
