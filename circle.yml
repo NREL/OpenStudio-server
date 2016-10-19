@@ -13,6 +13,7 @@ dependencies:
     - docker volume create --name=osdata
     - if [[ -e ~/docker/rserve.tar ]]; then docker load -i ~/docker/rserve.tar; fi
     - if [[ -e ~/docker/server.tar ]]; then docker load -i ~/docker/server.tar; fi
+    - docker images --all
     - docker-compose -f docker-compose.test.yml build
     - mkdir -p ~/docker; docker save nrel/openstudio-rserve > ~/docker/rserve.tar
     - mkdir -p ~/docker; docker save nrel/openstudio-server > ~/docker/server.tar
