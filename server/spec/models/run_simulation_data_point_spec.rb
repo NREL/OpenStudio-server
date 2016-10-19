@@ -157,8 +157,9 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
       # get the datapoint as html
       a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
       puts "accessed http://#{host}/data_points/#{datapoint_id}.html" 
-      
-      #sleep(0.5)
+
+      # slow down the access to the datapoint
+      sleep(0.5)
     end
     t.join
     
@@ -170,7 +171,10 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
 
-
+    # verify that the data point has a log
+    j = api.get_datapoint(datapoint_id)
+    puts JSON.pretty_generate(j)
+    expect(j[:data_point][:sdp_log_file]).not_to be_empty
 
     # TODO: Check results -- may need different analysis type with annual data
   end

@@ -130,6 +130,12 @@ class RunSimulateDataPoint
       sim_logger.info "Final run state is #{k.current_state}"
     end
 
+    # Save the log to the data point. This does not update while running, rather
+    # it is saved at the very end of the simulation.
+    if File.exist? run_log_file
+      @data_point.sdp_log_file = File.read(run_log_file).lines
+    end
+
     # Save the results to the database - i was PUTing these to the server,
     # but the values were not be typed correctly within RestClient. Since
     # this is running as a delayed job, then access to mongoid methods is okay.
