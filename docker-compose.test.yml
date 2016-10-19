@@ -5,12 +5,12 @@ services:
   db:
     image: mongo:latest
   web:
+    image: nrel/openstudio-server:latest
     build:
       context: .
       args:
         rails_env: docker-test
         bundle_args: ''
-    image: nrel/openstudio-server:latest
     environment:
       - CI
       - COVERALLS_REPO_TOKEN
@@ -25,8 +25,8 @@ services:
       - osdata:/mnt/openstudio
     command: /usr/local/bin/run-server-tests
   rserve:
-    build: ./docker/R
     image: nrel/openstudio-rserve:latest
+    build: ./docker/R
     volumes:
       - osdata:/mnt/openstudio
 volumes:
