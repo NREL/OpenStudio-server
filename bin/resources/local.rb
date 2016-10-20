@@ -89,19 +89,22 @@ end
 # Find all child-processes of the processes listed in the local_configuration.json file on Windows to ensure cleanup
 #
 # @param pid_json_path [String] absolute path for the local_configuration.json file
+# @param recursion_limit [Int] maximum recursive depth to track PIDs to
 # @return [nil] (over)writes the child_pids field in the local_configuration.json file
 #
-def find_windows_pids(pid_json_path)
+def find_windows_pids(pid_json_path, recursion_limit = 6)
   pid_hash = ::JSON.parse(File.read(pid_json_path), symbolize_names: true)
   pid_array = []
   pid_array << pid_hash[:mongod_pid] if pid_hash[:mongod_pid]
   pid_array + pid_hash[:dj_pids] if pid_hash[:dj_pids]
   pid_array << pid_hash[:rails_pid] if pid_hash[:rails_pid]
-  pid_list = pid_array
+  pid_list = pid_array.clone
   pid_str = `WMIC PROCESS get Caption,ProcessId,ParentProcessId`.split("\n\n")
   pid_str.shift
   fully_recursed = false
+  recursion_level = 0
   until fully_recursed
+    recursion_level += 1
     prior_pid_list = pid_list
     pid_str.each do |p_desc|
       if pid_list.include? p_desc.gsub(/\s+/, ' ').split(' ')[-2].to_i
@@ -110,6 +113,7 @@ def find_windows_pids(pid_json_path)
       end
     end
     fully_recursed = true if pid_list == prior_pid_list
+    fully_recursed = true if recursion_level == recursion_limit
   end
   child_pids = pid_list - pid_array
   pid_hash[:child_pids] = child_pids
