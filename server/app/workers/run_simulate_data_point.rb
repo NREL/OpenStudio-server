@@ -53,22 +53,14 @@ class RunSimulateDataPoint
 
     @data_point.set_start_state
 
-    # Create the analysis directory
+    # Create the analysis, simulation, and run directory
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
     FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
-
-    # create the run directory here, then make sure to pass in preserve_run_dir
-    run_dir = File.join(simulation_dir, 'run')
-    if Dir.exist? run_dir
-      FileUtils.rm_rf(run_dir)
-    end
-    FileUtils.mkdir_p(run_dir)
-
-    @data_point.update(status: 'started')
+    FileUtils.rm_rf run_dir if Dir.exist? run_dir
+    FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
 
     # Logger for the simulate datapoint
     sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
-
     sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     sim_logger.info "Analysis directory is #{analysis_dir}"
     sim_logger.info "Simulation directory is #{simulation_dir}"
@@ -121,6 +113,7 @@ class RunSimulateDataPoint
     run_log_file = File.join(run_dir, 'run.log')
     sim_logger.info "Opening run.log file '#{run_log_file}'"
 
+    # make sure to pass in preserve_run_dir
     File.open(run_log_file, 'a') do |run_log|
       run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
@@ -139,7 +132,7 @@ class RunSimulateDataPoint
     # Save the results to the database - i was PUTing these to the server,
     # but the values were not be typed correctly within RestClient. Since
     # this is running as a delayed job, then access to mongoid methods is okay.
-    results_file = "#{simulation_dir}/run/measure_attributes.json"
+    results_file = "#{run_dir}/measure_attributes.json"
     if File.exist? results_file
       results = JSON.parse(File.read(results_file), symbolize_names: true)
 
@@ -164,7 +157,7 @@ class RunSimulateDataPoint
                                    attachment: File.new(report, 'rb') })
     end
 
-    report_file = "#{simulation_dir}/run/objectives.json"
+    report_file = "#{run_dir}/objectives.json"
     if File.exist? report_file
       url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
       sim_logger.info "Saving report #{report_file} to #{url}"
@@ -188,7 +181,7 @@ class RunSimulateDataPoint
 
     # Post the zip file of results
     # TODO: Do not save the _reports file anymore in the workflow gem
-    results_zip = "#{simulation_dir}/run/data_point.zip"
+    results_zip = "#{run_dir}/data_point.zip"
     if File.exist? results_zip
       url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
       sim_logger.info "Saving zip #{results_zip} to #{url}"
@@ -303,6 +296,10 @@ class RunSimulateDataPoint
 
   def simulation_dir
     "#{analysis_dir}/data_point_#{@data_point.id}"
+  end
+
+  def run_dir
+    "#{simulation_dir}/run"
   end
 
   # Return the logger for delayed jobs which is typically rails_root/log/delayed_job.log
