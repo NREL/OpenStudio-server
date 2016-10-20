@@ -71,7 +71,7 @@ brew install geckodriver
 
 It is possible to use Amazon's Elastic Container Service but it will
 be limited to only running one machine and it is not possible to add
-more worker nodes. The prefered approach is to use docker-machine and 
+more worker nodes. The preferred approach is to use docker-machine and 
 docker-swarm or to custom deploy.
 
 ```

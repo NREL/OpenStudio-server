@@ -35,7 +35,7 @@ if Rails.application.config.serve_static_assets
   )
 end
 
-
 # update the loggers
 Rails.logger = ActiveSupport::TaggedLogging.new(Logger.new("#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"))
+Rails.logger.extend(ActiveSupport::Logger.broadcast(ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))))
 Mongoid.logger.level = Logger::INFO
