@@ -1,7 +1,7 @@
 AllCops:
   Exclude:
-    - 'spec/files/**/*'
-    - 'lib/delayed/heartbeat/**/*'
+    - 'server/spec/files/**/*'
+    - 'server/lib/delayed/heartbeat/**/*'
 
 Rails:
   Enabled: true

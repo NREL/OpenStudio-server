@@ -130,39 +130,39 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(dp.id).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
     expect(dp.analysis.id).to eq analysis_id
     expect(Delayed::Job.count).to eq(1)
-    
+
     # Start the work
     work_result = nil
-    t = Thread.new{
+    t = Thread.new do
       work_result = Delayed::Worker.new.work_off
-    }
+    end
     t.run
-    
+
     while t.status
       # get the analysis status as json
       a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
       a = JSON.parse(a, symbolize_names: true)
       expect(a[:analysis][:data_points].size).to eq 1
       # puts "accessed http://#{host}/analyses/#{analysis_id}/status.json"
-      
+
       # get the analysis as html
       a = RestClient.get "http://#{host}/analyses/#{analysis_id}.html"
       # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
-      
+
       # get the datapoint as json
       a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
       a = JSON.parse(a, symbolize_names: true)
-      # puts "accessed http://#{host}/data_points/#{datapoint_id}.json" 
+      # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
 
       # get the datapoint as html
       a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
-      puts "accessed http://#{host}/data_points/#{datapoint_id}.html" 
+      puts "accessed http://#{host}/data_points/#{datapoint_id}.html"
 
       # slow down the access to the datapoint
       sleep(0.5)
     end
     t.join
-    
+
     expect(work_result).to eq [1, 0] # expects 1 success and 0 failures
     expect(Delayed::Job.count).to eq(0)
 

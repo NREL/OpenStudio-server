@@ -23,15 +23,14 @@ FileUtils.mkdir_p "#{APP_CONFIG['os_server_project_path']}/R" unless Dir.exist? 
 FileUtils.mkdir_p (APP_CONFIG['server_asset_path']).to_s unless Dir.exist? (APP_CONFIG['server_asset_path']).to_s
 FileUtils.mkdir_p APP_CONFIG['rails_log_path'] unless Dir.exist? APP_CONFIG['rails_log_path']
 
-
 # Enable the rails middleware to access files in the `server_asset_path` as
 # well.
 if Rails.application.config.serve_static_assets
   Rails.application.config.middleware.insert_after(
-      ActionDispatch::Static,
-      ActionDispatch::Static,
-      Rails.root.join(APP_CONFIG['server_asset_path']).to_s,
-      Rails.application.config.static_cache_control
+    ActionDispatch::Static,
+    ActionDispatch::Static,
+    Rails.root.join(APP_CONFIG['server_asset_path']).to_s,
+    Rails.application.config.static_cache_control
   )
 end
 
