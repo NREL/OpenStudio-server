@@ -188,7 +188,7 @@ class RunSimulateDataPoint
 
     # Post the zip file of results
     # TODO: Do not save the _reports file anymore in the workflow gem
-    results_zip = "#{simulation_dir}/data_point.zip"
+    results_zip = "#{simulation_dir}/run/data_point.zip"
     if File.exist? results_zip
       url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
       sim_logger.info "Saving zip #{results_zip} to #{url}"
