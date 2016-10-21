@@ -312,6 +312,9 @@ class InstallGems
     end
     FileUtils.mkdir_p(ENV['GEM_HOME'])
 
+    # Set a phony os_server_project_path because rails needs it.
+    ::ENV['OS_SERVER_PROJECT_PATH'] = Dir.home
+
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
