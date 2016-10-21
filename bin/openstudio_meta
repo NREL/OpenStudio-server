@@ -482,9 +482,10 @@ class StopLocal
     rails_pid = local_server_config[:rails_pid]
     dj_pids = local_server_config[:dj_pids]
     mongod_pid = local_server_config[:mongod_pid]
+    child_pids = local_server_config[:child_pids] if local_server_config[:child_pids]
 
     # Stop the pids, with lots of error catches
-    stop_local_server rails_pid, dj_pids, mongod_pid
+    stop_local_server rails_pid, dj_pids, mongod_pid, child_pids
 
     0
   end
