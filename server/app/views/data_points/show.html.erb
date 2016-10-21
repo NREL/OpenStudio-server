@@ -87,7 +87,7 @@
           <% @data_point.result_files.each do |h| %>
             <tr>
               <td><%= h.type %></td>
-              <td><%= link_to h.display_name, h.attachment.url(:original, false) %></td>
+              <td><%= link_to h.display_name, download_result_file_data_point_path(@data_point, filename: h.attachment.original_filename) %></td>
             </tr>
           <% end %>
         </table>

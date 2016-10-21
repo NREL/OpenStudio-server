@@ -132,7 +132,7 @@
               <td><%= link_to 'View', data_point_path(dp) %>
                 | <%= link_to 'JSON', data_point_path(dp, :format => :json) %>
                   <% dp.result_files.where(type: 'Data Point').each do |h| %>
-                    | <%= link_to 'Zip File', h.attachment.url(:original, false) %>
+                    | <%= link_to 'Zip File', download_result_file_data_point_path(dp, filename: h.attachment.original_filename) %>
                   <% end %>
                 <% if dp.status == 'completed' && @has_obj_targets %>
                   | <%= link_to('Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>

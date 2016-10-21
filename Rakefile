@@ -17,7 +17,7 @@ task :release do
   # verify that you are on master
   g = Git.open(File.dirname(__FILE__), log: Logger.new('release.log'))
 
-  if g.status.changed.size > 0 || g.status.added.size > 0 || g.status.deleted.size > 0
+  if !g.status.changed.empty? || !g.status.added.empty? || !g.status.deleted.empty?
     s = "\n Changed: #{g.status.changed.size}\n Added: #{g.status.added.size}\n Deleted: #{g.status.deleted.size}"
     puts "#{s}\n There are uncommitted changes on the branch.  Please commit before proceeding.\n".red
     exit 0
@@ -38,4 +38,3 @@ task :release do
 
   puts "\nSuccessfully create tag and pushed repo to server\n".green
 end
-

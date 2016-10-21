@@ -34,6 +34,8 @@ Rails.application.routes.draw do
         get :plot_bar
         get :download_data
         get :download_analysis_zip
+        get :download_result_file
+        get :download_seed_zip
         get :download_algorithm_results_zip
         get :dencity
 
@@ -66,6 +68,9 @@ Rails.application.routes.draw do
 
           # Download reports
           post :download_report
+
+          # download a result file
+          get :download_result_file
 
           # TODO: Review the end points
           put :run

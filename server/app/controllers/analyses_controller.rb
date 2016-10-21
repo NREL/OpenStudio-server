@@ -354,6 +354,38 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # GET /analyses/1/download_result_file
+  def download_result_file
+    @analysis = Analysis.find(params[:id])
+
+    file = @analysis.result_files.where(attachment_file_name: params[:filename]).first
+    if file && file.attachment && File.exist?(file.attachment.path)
+      file_data = File.read(file.attachment.path)
+      send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: 'attachment'
+    else
+      respond_to do |format|
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
+        format.html { redirect_to @analysis, notice: "Result file '#{params[:filename]}' does not exist. It probably was deleted from the file system." }
+      end
+    end
+  end
+
+  # GET /analyses/1/download_result_file
+  def download_seed_zip
+    @analysis = Analysis.find(params[:id])
+
+    file = @analysis.seed_zip
+    if file && File.exist?(file.path)
+      file_data = File.read(file.path)
+      send_data file_data, filename: File.basename(file.original_filename), type: file.content_type, disposition: 'attachment'
+    else
+      respond_to do |format|
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
+        format.html { redirect_to @analysis, notice: 'Seed zip does not exist. It probably was deleted from the file system.' }
+      end
+    end
+  end
+
   def upload
     @analysis = Analysis.find(params[:id])
 
