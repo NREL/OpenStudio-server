@@ -1,7 +1,7 @@
 AllCops:
   Exclude:
-    - 'spec/files/**/*'
-    - 'lib/delayed/heartbeat/**/*'
+    - 'server/spec/files/**/*'
+    - 'server/lib/delayed/heartbeat/**/*'
 
 Rails:
   Enabled: true
@@ -48,6 +48,10 @@ Metrics/ParameterLists:
   Max: 8
 
 # ==================== Disabled on Purpose ====================
+# Mongoid doesn't like find_each.
+Rails/FindEach:
+  Enabled: false
+
 Style/AccessorMethodName:
   Enabled: true
 

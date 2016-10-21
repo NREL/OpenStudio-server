@@ -84,7 +84,7 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
       expect(master_ip).to eq('localhost')
 
       ip_addresses = ComputeNode.worker_ips
-      expect(ip_addresses[:worker_ips].size).to eq(2)
+      expect(ip_addresses[:worker_ips].size).to eq 2
 
       cf = cluster_class.start(ip_addresses)
       expect(cf).to eq true

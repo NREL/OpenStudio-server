@@ -37,12 +37,12 @@ docker volume create --name=osdata
 export RAILS_ENV=docker-test
 export CI=true
 export CIRCLECI=true
-docker-compose -f docker-compose.yml -f docker-compose.test.yml build
-docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d rserve
-docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d web-background
-docker-compose -f docker-compose.yml -f docker-compose.test.yml run -d db
+docker-compose -f docker-compose.test.yml build
+docker-compose -f docker-compose.test.yml run -d rserve
+docker-compose -f docker-compose.test.yml run -d web-background
+docker-compose -f docker-compose.test.yml run -d db
 mkdir -p reports/rspec
-docker-compose -f docker-compose.yml -f docker-compose.test.yml run web
+docker-compose -f docker-compose.test.yml run web
 ```
 
 #### You're done!!! ####

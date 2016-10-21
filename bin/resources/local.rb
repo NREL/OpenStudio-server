@@ -92,7 +92,7 @@ end
 def kill_processes(pid_json)
   unless File.exist? pid_json
     $logger.error "File `#{pid_json}` not found. It is possible that processes have been orphaned."
-    raise 1
+    exit 1
   end
   pid_hash = ::JSON.parse(File.read(pid_json), symbolize_names: true)
   pid_array = []
@@ -130,11 +130,11 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   mongod_port = find_available_port 27_017, 100
   $logger.debug "Mongo port will be #{mongod_port}"
   $logger.error 'Unable to find port for mongo' unless mongod_port
-  raise 1 unless mongod_port
+  exit 1 unless mongod_port
   rails_port = find_available_port 8080, 100
   $logger.debug "Rails port will be #{rails_port}"
   $logger.error 'Unable to find port for rails' unless rails_port
-  raise 1 unless rails_port
+  exit 1 unless rails_port
 
   state_file = ::File.join(project_directory, cluster_name + '_configuration.json')
   receipt_file = ::File.join(project_directory, cluster_name + '_configuration.receipt')
@@ -170,7 +170,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
         $logger.error "Mongod returned non-zero status code  `#{$?.exitstatus}`. Please refer to "\
         "`#{::File.join(project_directory, 'logs', 'mongod.log')}`."
         kill_processes(state_file)
-        raise 1
+        exit 1
       end
       mongod_started = false
       until mongod_started
@@ -181,18 +181,18 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   rescue ::Timeout::Error
     $logger.error "Mongod failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'mongod.log')}`."
     kill_processes(state_file)
-    raise 1
+    exit 1
   end
   $logger.debug 'MONGOD STARTED'
 
   begin
-    ::Timeout.timeout(40) do
+    ::Timeout.timeout(120) do
       success = system(rails_command)
       unless success
         $logger.error "Rails returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
         "`#{::File.join(project_directory, 'logs', 'rails.log')}`."
         kill_processes(state_file)
-        raise 1
+        exit 1
       end
       rails_started = false
       until rails_started
@@ -203,7 +203,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   rescue ::Timeout::Error
     $logger.error "Rails failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'rails.log')}`."
     kill_processes(state_file)
-    raise 1
+    exit 1
   end
   $logger.debug 'RAILS STARTED'
 
@@ -214,13 +214,13 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
         $logger.error "dj_server returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
         "`#{::File.join(project_directory, 'logs', 'dj_server.log')}`."
         kill_processes(state_file)
-        raise 1
+        exit 1
       end
     end
   rescue ::Timeout::Error
     $logger.error "dj_server failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'dj_server.log')}`."
     kill_processes(state_file)
-    raise 1
+    exit 1
   end
   $logger.debug 'DELAYED JOBS SERVER MAY HAVE BEEN STARTED'
 
@@ -232,14 +232,14 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
           $logger.error "dj_worker_#{ind} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
           "`#{::File.join(project_directory, 'logs', 'dj_worker_' + ind + '.log')}`."
           kill_processes(state_file)
-          raise 1
+          exit 1
         end
       end
     rescue ::Timeout::Error
       $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
                                                                                      'dj_worker_' + ind + '.log')}`."
       kill_processes(state_file)
-      raise 1
+      exit 1
     end
     $logger.debug "DELAYED JOBS WORKER #{ind} MAY HAVE BEEN STARTED"
     sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
@@ -279,12 +279,12 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
         $logger.warn "Unable to find delayed-jobs PID #{dj_pid}. SIGINT appears to have completed successfully"
       rescue ::Timeout::Error
         $logger.error "Unable to kill the dj PID #{dj_pid} with KILL"
-        raise 1
+        exit 1
       rescue Exception => e
-        raise unless e.is_a?(Errno::ECHILD)
+        exit 1 unless e.is_a?(Errno::ECHILD)
       end
     rescue Exception => e
-      raise unless e.is_a?(Errno::ECHILD)
+      exit 1 unless e.is_a?(Errno::ECHILD)
     end
     $logger.debug "Killed delayed-jobs process with PID `#{dj_pid}`"
   end
@@ -307,12 +307,12 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       $logger.warn "Unable to find rails PID #{rails_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
       $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
-      raise 1
+      exit 1
     rescue Exception => e
-      raise unless e.is_a?(Errno::ECHILD)
+      exit 1 unless e.is_a?(Errno::ECHILD)
     end
   rescue Exception => e
-    raise unless e.is_a?(Errno::ECHILD)
+    exit 1 unless e.is_a?(Errno::ECHILD)
   end
   $logger.debug "Killed rails process with PID `#{rails_pid}`"
 
@@ -334,12 +334,12 @@ def stop_local_server(rails_pid, dj_pids, mongod_pid)
       $logger.warn "Unable to find mongod PID #{mongod_pid}. SIGINT appears to have completed successfully"
     rescue ::Timeout::Error
       $logger.error "Unable to kill the mongod PID #{mongod_pid} with KILL"
-      raise 1
+      exit 1
     rescue Exception => e
-      raise unless e.is_a?(Errno::ECHILD)
+      exit 1 unless e.is_a?(Errno::ECHILD)
     end
   rescue Exception => e
-    raise unless e.is_a?(Errno::ECHILD)
+    exit 1 unless e.is_a?(Errno::ECHILD)
   end
   $logger.debug "Killed mongod process with PID `#{mongod_pid}`"
 

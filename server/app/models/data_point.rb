@@ -89,20 +89,34 @@ class DataPoint
     [:na, :queued, :started, :completed]
   end
 
-  # Perform the final actions on the datapoint.
-  def finalize_data_point
-    logger.info 'Post-processing the JSON data that was pushed into the database by the worker'
-    save_results_from_openstudio_json
-  end
-
   # Submit the simulation to run in the background task queue
   def submit_simulation
     job = RunSimulateDataPoint.new(id)
     self.job_id = job.delay(queue: 'simulations').perform.id
+    self.status = :queued
+    self.run_queue_time = Time.now
 
     save!
 
     job_id
+  end
+
+  def set_start_state
+    self.run_start_time = Time.now
+    self.status = :started
+    save!
+  end
+
+  def set_error_state
+    self.status_message = 'error'
+    save!
+  end
+
+  def set_complete_state
+    self.run_end_time = Time.now
+    self.status = :completed
+
+    save!
   end
 
   protected

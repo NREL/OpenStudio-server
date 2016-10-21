@@ -42,7 +42,7 @@ class PreflightImage
 
   has_mongoid_attached_file :image,
                             url: '/assets/variables/:id/:style/:basename.:extension',
-                            path: ':rails_root/public/assets/variables/:id/:style/:basename.:extension',
+                            path: "#{APP_CONFIG['server_asset_path']}/assets/variables/:id/files/:style/:basename.:extension",
                             styles: {
                               original: ['1920x1680>', :png],
                               thumb: ['150x150#', :png],

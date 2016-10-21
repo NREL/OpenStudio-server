@@ -124,6 +124,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(Delayed::Job.count).to eq(0)
 
     dp = DataPoint.find(dp_json[:_id])
+    datapoint_id = dp.id
     job_id = dp.submit_simulation
     expect(job_id).to match /.{24}/
     expect(dp.id).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
@@ -131,7 +132,38 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(Delayed::Job.count).to eq(1)
 
     # Start the work
-    expect(Delayed::Worker.new.work_off).to eq [1, 0] # expects 1 success and 0 failures
+    work_result = nil
+    t = Thread.new do
+      work_result = Delayed::Worker.new.work_off
+    end
+    t.run
+
+    while t.status
+      # get the analysis status as json
+      a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+      a = JSON.parse(a, symbolize_names: true)
+      expect(a[:analysis][:data_points].size).to eq 1
+      # puts "accessed http://#{host}/analyses/#{analysis_id}/status.json"
+
+      # get the analysis as html
+      a = RestClient.get "http://#{host}/analyses/#{analysis_id}.html"
+      # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
+
+      # get the datapoint as json
+      a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
+      a = JSON.parse(a, symbolize_names: true)
+      # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
+
+      # get the datapoint as html
+      a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
+      puts "accessed http://#{host}/data_points/#{datapoint_id}.html"
+
+      # slow down the access to the datapoint
+      sleep(0.5)
+    end
+    t.join
+
+    expect(work_result).to eq [1, 0] # expects 1 success and 0 failures
     expect(Delayed::Job.count).to eq(0)
 
     # Verify that the results exist
@@ -139,7 +171,10 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
 
-
+    # verify that the data point has a log
+    j = api.get_datapoint(datapoint_id)
+    puts JSON.pretty_generate(j)
+    expect(j[:data_point][:sdp_log_file]).not_to be_empty
 
     # TODO: Check results -- may need different analysis type with annual data
   end

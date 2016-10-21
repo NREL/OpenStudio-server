@@ -127,10 +127,11 @@ ENV OPENSTUDIO_SERVER 'true'
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env
+ENV GECKODRIVER_VERSION v0.11.1
 
 # Install vfb and firefox requirement if docker-test env
 RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
-        echo "Running in testing environment" && \
+        echo "Running in testing environment - Installing Firefox and Gecko Driver" && \
         echo "deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main" | tee -a /etc/apt/sources.list > /dev/null && \
         apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29 && \
         apt-get update && \
@@ -141,7 +142,12 @@ RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
             xfonts-scalable \
             xfonts-cyrillic \
             firefox && \
-        rm -rf /var/lib/apt/lists/*; \
+        rm -rf /var/lib/apt/lists/* && \
+        cd /usr/local/bin && \
+        wget https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+        tar -xvzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+        rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+        chmod +x geckodriver; \
     else \
         echo "Not Running in testing environment"; \
     fi
@@ -166,15 +172,11 @@ RUN rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
+ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN bundle install
 
-# Where to save the assets
-RUN mkdir -p /opt/openstudio/server/public/assets/analyses && chmod 777 /opt/openstudio/server/public/assets/analyses
-RUN mkdir -p /opt/openstudio/server/public/assets/data_points && chmod 777 /opt/openstudio/server/public/assets/data_points
-
 # forward request and error logs to docker log collector
-
 # TODO: How to get logs out of this, mount shared volume?
 #RUN ln -sf /dev/stdout /var/log/nginx/access.log
 #RUN ln -sf /dev/stderr /var/log/nginx/error.log
@@ -184,6 +186,13 @@ ADD /docker/server/start-server.sh /usr/local/bin/start-server
 ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
+
+# permissions on where server assets (e.g. paperclip files) are stored
+RUN mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
+#RUN mkdir -p /mnt/openstudio/server/assets/data_points && chmod 777 /mnt/openstudio/server/assets/data_points
+#RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables
+
+
 
 CMD ["/usr/local/bin/start-server"]
 
