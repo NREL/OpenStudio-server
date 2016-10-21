@@ -114,6 +114,8 @@ class DataPoint
   def set_complete_state
     self.run_end_time = Time.now
     self.status = :completed
+
+    save!
   end
 
   protected

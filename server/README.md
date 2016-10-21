@@ -67,3 +67,31 @@ brew install geckodriver
 * Add CLI path to config.yml
 * Add tests for embedded files on analysis model. Test result of R code that pushed to analysis model (i.e. best_point.json)
 
+# AWS Elastic Container Service
+
+It is possible to use Amazon's Elastic Container Service but it will
+be limited to only running one machine and it is not possible to add
+more worker nodes. The preferred approach is to use docker-machine and 
+docker-swarm or to custom deploy.
+
+```
+ecs-cli configure --cluster openstudio
+ecs-cli up --keypair <key-pair-name> --capability-iam --size 1 --instance-type t2.medium --port 8080
+ecs-cli compose -f docker-compose.deploy.yml up
+# Get the IP address from the console `ecs-cli ps`
+ecs-cli down --force
+```
+
+
+# Docker-Machine
+
+## AWS
+
+The easiest approach to using Docker-Machine is to export your keys as
+environment variables.
+
+```
+export $AWS_ACCESS_KEY_ID=<your-access-key>
+export $AWS_SECRET_ACCESS_KEY=<your-secret-access-key>
+```
+

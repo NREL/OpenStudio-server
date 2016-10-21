@@ -44,7 +44,7 @@ class ResultFile
   # TODO: allow for various paths for saving these files
   has_mongoid_attached_file :attachment,
                             url: '/assets/data_points/:id/files/:style/:basename.:extension',
-                            path: ':rails_root/public/assets/data_points/:id/files/:style/:basename.:extension'
+                            path: "#{APP_CONFIG['server_asset_path']}/assets/data_points/:id/files/:style/:basename.:extension"
 
   # Relationships
   embedded_in :data_point
