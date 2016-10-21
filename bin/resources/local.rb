@@ -282,6 +282,8 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
   end
 
+  find_windows_pids(state_file) if is_windows?
+
   $logger.debug 'Instantiated all processes. Writing receipt file.'
 
   ::File.open(receipt_file, 'wb') { |_| }
