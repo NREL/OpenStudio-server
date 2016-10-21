@@ -51,10 +51,10 @@ end
 def which(cmd)
   exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
   ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-    exts.each { |ext|
+    exts.each do |ext|
       exe = File.join(path, "#{cmd}#{ext}")
       return exe if File.executable?(exe) && !File.directory?(exe)
-    }
+    end
   end
   nil
 end
@@ -208,7 +208,7 @@ class CLI
       result = 1
     end
 
-    result = 0 unless result.is_a?(Fixnum)
+    result = 0 unless result.is_a?(Integer)  # use to be Fixnum which is going to removed in ruby eventually
     result
   end
 
@@ -286,7 +286,7 @@ class InstallGems
         options[:export_dir] = e
       end
 
-      o.on('--with_test_develop', 'Include test and develop gems in the installation package') do |w|
+      o.on('--with_test_develop', 'Include test and develop gems in the installation package') do |_w|
         options[:test_dev_build] = true
       end
     end
@@ -373,7 +373,7 @@ class StartLocal
     mongodir = ''
     if mongod
       mongodir = File.dirname mongod
-    end 
+    end
 
     options = { debug: false, force_directories: false, workers: 1, ruby_path: $ruby_path, mongo_dir: mongodir }
 

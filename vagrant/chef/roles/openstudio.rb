@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,14 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 name 'openstudio'
 description 'Install and configure OpenStudio and EnergyPlus'
 
 run_list([
-  'recipe[openstudio]'
-])
+           'recipe[openstudio]'
+         ])
 
 default_attributes(
   # Use this for the official release versions
@@ -49,15 +49,15 @@ default_attributes(
     }
   }
 
-# Use this for custom installations from any url
-#:openstudio => {
-#    :skip_ruby_install => true,
-#    :version => "1.5.1",
-#    :installer => {
-#        :origin => 'url',
-#        :version_revision => "5d1f0768a2",
-#        :download_url => 'https://github.com/NREL/OpenStudio/releases/download/v1.5.1-workflow5',
-#        :download_filename => "OpenStudio-1.5.1.5d1f0768a2-Linux.deb"
-#    }
-# }
+  # Use this for custom installations from any url
+  #:openstudio => {
+  #    :skip_ruby_install => true,
+  #    :version => "1.5.1",
+  #    :installer => {
+  #        :origin => 'url',
+  #        :version_revision => "5d1f0768a2",
+  #        :download_url => 'https://github.com/NREL/OpenStudio/releases/download/v1.5.1-workflow5',
+  #        :download_filename => "OpenStudio-1.5.1.5d1f0768a2-Linux.deb"
+  #    }
+  # }
 )

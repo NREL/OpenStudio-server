@@ -92,7 +92,7 @@ end
 # @param recursion_limit [Int] maximum recursive depth to track PIDs to
 # @return [nil] (over)writes the child_pids field in the local_configuration.json file
 #
-def find_windows_pids(pid_json_path, recursion_limit=6)
+def find_windows_pids(pid_json_path, recursion_limit = 6)
   pid_hash = ::JSON.parse(File.read(pid_json_path), symbolize_names: true)
   pid_array = []
   pid_array << pid_hash[:mongod_pid] if pid_hash[:mongod_pid]
@@ -202,7 +202,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   begin
     ::Timeout.timeout(10) do
-      success = system (mongod_command)
+      success = system mongod_command
       unless success
         $logger.error "Mongod returned non-zero status code  `#{$?.exitstatus}`. Please refer to "\
         "`#{::File.join(project_directory, 'logs', 'mongod.log')}`."
@@ -274,7 +274,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
       end
     rescue ::Timeout::Error
       $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
-                                                                                     'dj_worker_' + ind + '.log')}`."
+                                                                                       'dj_worker_' + ind + '.log')}`."
       kill_processes(state_file)
       exit 1
     end
@@ -299,7 +299,7 @@ end
 # @param child_pids [Array] the array of process ids which may not otherwise be killed on Windows
 # @return [Void]
 #
-def stop_local_server(rails_pid, dj_pids, mongod_pid, child_pids=[])
+def stop_local_server(rails_pid, dj_pids, mongod_pid, child_pids = [])
   dj_pids.reverse.each do |dj_pid|
     begin
       ::Timeout.timeout (5) do
