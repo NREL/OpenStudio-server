@@ -312,6 +312,9 @@ class InstallGems
     end
     FileUtils.mkdir_p(ENV['GEM_HOME'])
 
+    # Set a phony os_server_project_path because rails needs it.
+    ::ENV['OS_SERVER_PROJECT_PATH'] = Dir.home
+
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
@@ -427,6 +430,9 @@ class StartLocal
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
     end
 
+    # Set the server project path
+    ::ENV['OS_SERVER_PROJECT_PATH'] = File.join(project_dir, 'temp_data')
+
     # Assemble the commands and spin off the threads
     start_local_server project_dir, options[:mongo_dir], options[:ruby_path], options[:workers], options[:debug]
 
@@ -482,7 +488,7 @@ class StopLocal
     rails_pid = local_server_config[:rails_pid]
     dj_pids = local_server_config[:dj_pids]
     mongod_pid = local_server_config[:mongod_pid]
-    child_pids = local_server_config[:child_pids] if local_server_config[:child_pids]
+    child_pids = local_server_config[:child_pids] ? local_server_config[:child_pids] : []
 
     # Stop the pids, with lots of error catches
     stop_local_server rails_pid, dj_pids, mongod_pid, child_pids
