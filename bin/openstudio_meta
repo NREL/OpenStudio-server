@@ -24,6 +24,7 @@ require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
+ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
 
 $ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTABLE_EXTS'].split[0]}"
 
@@ -476,13 +477,15 @@ class StopLocal
       $logger.error "Unable to find the local configuation json at #{local_state_file}"
       exit 1
     end
+    find_windows_pids(local_state_file) if is_windows?
     local_server_config = ::JSON.parse(File.read(local_state_file), symbolize_names: true)
     rails_pid = local_server_config[:rails_pid]
     dj_pids = local_server_config[:dj_pids]
     mongod_pid = local_server_config[:mongod_pid]
+    child_pids = local_server_config[:child_pids] if local_server_config[:child_pids]
 
     # Stop the pids, with lots of error catches
-    stop_local_server rails_pid, dj_pids, mongod_pid
+    stop_local_server rails_pid, dj_pids, mongod_pid, child_pids
 
     0
   end
