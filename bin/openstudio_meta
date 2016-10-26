@@ -346,10 +346,17 @@ class InstallGems
       FileUtils.mkdir_p(options[:export_dir])
 
       src = File.absolute_path(File.join(__FILE__, './../../'))
+      puts "Removing .git folders from gems in '#{src}'" if options[:debug]
+      Dir.glob(src + '/gems/**/.git').each do |f|
+        puts "Removing '#{f}'" if options[:debug]
+        FileUtils.rm_rf(f)
+      end
+      
       puts "Copying files from '#{src}' to '#{options[:export_dir]}'" if options[:debug]
       Dir.glob(src + '/*').each do |f|
         next if /\.git/ =~ f
-        FileUtils.cp_r(f, options[:export_dir])
+        puts "Copying files from '#{f}' to '#{options[:export_dir]}/.'" if options[:debug]
+        FileUtils.cp_r(f, options[:export_dir] + '/.')
       end
 
       FileUtils.rm_rf(File.join(options[:export_dir], 'server/coverage'))
