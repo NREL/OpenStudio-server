@@ -151,6 +151,7 @@ def kill_processes(pid_json)
     end
     $logger.error "Killed process with PID `#{pid}`."
   end
+  ::File.delete(pid_json)
 end
 
 # Start the local server and save pid information to the project_directory
@@ -300,7 +301,7 @@ end
 # Kill a PID according to OS
 def kill_pid(pid, name, windows=false)
   if windows
-    system_return = system('taskkill', '\pid', pid, '\f')
+    system_return = system('taskkill', '/pid', pid.to_s, '/f')
     unless system_return
       $logger.error "Unable to kill the #{name} PID `#{pid}` with forceful taskkill"
       return false
