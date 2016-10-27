@@ -428,16 +428,20 @@ class StartLocal
     end
     $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
 
-    # Check the directories exist
-    [project_dir].each do |dir|
-      unless ::File.exist? dir
-        if options[:force_directories]
-          FileUtils.mkdir_p dir
-        else
-          $logger.error "Unable to find directory '#{dir}'"
-          exit 1
-        end
+    # Check the project directory exists
+    unless ::File.exist? project_dir
+      if options[:force_directories]
+        FileUtils.mkdir_p project_dir
+      else
+        $logger.error "Unable to find directory '#{project_dir}'"
+        exit 1
       end
+    end
+
+    # Check if a local_configuration.json exists
+    if ::File.exist? ::File.join(project_dir, 'local_configuration.json')
+      $logger.error "A `local_configuration.json` file already exists at `#{project_dir}`"
+      exit 1
     end
 
     # Also force the creation of the log dir in the project_dir
@@ -495,7 +499,7 @@ class StopLocal
     # Retrieve the pids
     local_state_file = ::File.absolute_path(File.join(project_dir, 'local_configuration.json'))
     unless ::File.exist? local_state_file
-      $logger.error "Unable to find the local configuation json at #{local_state_file}"
+      $logger.error "Unable to find the local configuration json at #{local_state_file}"
       exit 1
     end
     find_windows_pids(local_state_file) if is_windows?
@@ -506,9 +510,19 @@ class StopLocal
     child_pids = local_server_config[:child_pids] ? local_server_config[:child_pids] : []
 
     # Stop the pids, with lots of error catches
-    stop_local_server rails_pid, dj_pids, mongod_pid, child_pids
+    successful = stop_local_server rails_pid, dj_pids, mongod_pid, child_pids
 
-    0
+    # Remove files, if PID kills were successful
+    if successful
+      ::File.delete(local_state_file) if ::File.exists? local_state_file
+      ::File.delete(local_state_file.gsub('.json', '.receipt')) if ::File.exists? local_state_file.gsub('.json', '.receipt')
+      server_pid_file =  ::File.join(::File.dirname(local_state_file), 'server.pid')
+      ::File.delete(server_pid_file) if ::File.exists? server_pid_file
+      exit 0
+    else
+      exit 1
+    end
+
   end
 end
 
