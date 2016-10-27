@@ -83,9 +83,11 @@ class RunSimulateDataPoint
     FileUtils.cp "#{analysis_dir}/analysis.json", "#{simulation_dir}/analysis.json"
 
     osw_path = "#{simulation_dir}/data_point.osw"
+    # PAT puts seeds in "seeds" folder (not "seed")
     osw_options = {
       file_paths: [
         '../weather',
+        '../seeds',
         '../seed'
       ],
       measure_paths: ['../measures']
