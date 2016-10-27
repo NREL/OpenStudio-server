@@ -327,7 +327,7 @@ class InstallGems
     else
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
     end
-    sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile"
+    sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
     sys_call = sys_cmds.join(" && ")
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
@@ -338,13 +338,20 @@ class InstallGems
 
     # copy all files to staging location
     if options[:export_dir]
-      puts "Exporting server to #{options[:export_dir]}" if options[:debug]
+      puts "Exporting OpenStudio-server to #{options[:export_dir]}" if options[:debug]
 
       if File.exist?(options[:export_dir])
+        puts "Removing '#{options[:export_dir]}'" if options[:debug]
         FileUtils.rm_rf(options[:export_dir])
       end
+      puts "Creating '#{options[:export_dir]}'" if options[:debug]
       FileUtils.mkdir_p(options[:export_dir])
+      
+      # we require root dir named OpenStudio-server
+      dest = File.join(options[:export_dir], 'OpenStudio-server')
+      FileUtils.mkdir_p(dest)
 
+      # have to remove these .git files before copying, they were causing failures on Windows
       src = File.absolute_path(File.join(__FILE__, './../../'))
       puts "Removing .git folders from gems in '#{src}'" if options[:debug]
       Dir.glob(src + '/gems/**/.git').each do |f|
@@ -352,19 +359,40 @@ class InstallGems
         FileUtils.rm_rf(f)
       end
       
-      puts "Copying files from '#{src}' to '#{options[:export_dir]}'" if options[:debug]
+      puts "Copying files from '#{src}' to '#{dest}'" if options[:debug]
       Dir.glob(src + '/*').each do |f|
         next if /\.git/ =~ f
-        puts "Copying files from '#{f}' to '#{options[:export_dir]}/.'" if options[:debug]
-        FileUtils.cp_r(f, options[:export_dir] + '/.')
+        puts "Copying files from '#{f}' to '#{dest}/.'" if options[:debug]
+        FileUtils.cp_r(f, dest + '/.')
       end
 
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/coverage'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/log'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/public/assets'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/tmp'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'reports'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'worker-nodes'))
+      FileUtils.rm_rf(File.join(dest, 'server/coverage'))
+      FileUtils.rm_rf(File.join(dest, 'server/log'))
+      FileUtils.rm_rf(File.join(dest, 'server/spec'))
+      FileUtils.rm_rf(File.join(dest, 'server/tmp'))
+      FileUtils.rm_rf(File.join(dest, 'spec'))
+      FileUtils.rm_rf(File.join(dest, 'reports'))
+      FileUtils.rm_rf(File.join(dest, 'worker-nodes'))
+      
+      platform = 'darwin'
+      if /win/.match(RUBY_PLATFORM) || /mingw/.match(RUBY_PLATFORM)
+        platform = 'win32'
+      end
+      
+      ::Dir.chdir(options[:export_dir])
+      puts "Dir.pwd = #{Dir.pwd}" if options[:debug]
+      
+      server_sha = `git -C \"#{src}\" rev-parse --short=10 HEAD`.strip
+      puts "Server SHA = #{server_sha}" if options[:debug]
+      
+      sys_call = "tar -czf OpenStudio-server-#{server_sha}-#{platform}.tar.gz OpenStudio-server"
+      puts "Creating tar.gz in #{options[:export_dir]}"
+      puts sys_call if options[:debug]
+      unless system(sys_call)
+        $logger.error "System call '#{sys_call}' failed"
+        exit 1
+      end
+      
     end
   end
 end
