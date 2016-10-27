@@ -511,7 +511,17 @@ class StopLocal
 
     # Stop the pids, with lots of error catches
     successful = stop_local_server rails_pid, dj_pids, mongod_pid, child_pids
-    exit successful ? 0 : 1
+
+    # Remove files, if PID kills were successful
+    if successful
+      ::File.delete(local_state_file) if ::File.exists? local_state_file
+      ::File.delete(local_state_file.gsub('.json', '.receipt')) if ::File.exists? local_state_file.gsub('.json', '.receipt')
+      server_pid_file =  ::File.join(::File.dirname(local_state_file), 'server.pid')
+      ::File.delete(server_pid_file) if ::File.exists? server_pid_file
+      exit 0
+    else
+      exit 1
+    end
 
   end
 end
