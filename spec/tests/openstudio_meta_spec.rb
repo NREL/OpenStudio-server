@@ -135,7 +135,7 @@ RSpec.describe OpenStudioMeta do
     # stop the server
     command = "#{ruby_cmd} \"#{meta_cli}\" stop_local \"#{project}\""
     puts command
-    # stop_local = system(command)
-    # expect(stop_local).to be true
+    stop_local = system(command)
+    expect(stop_local).to be true
   end
 end

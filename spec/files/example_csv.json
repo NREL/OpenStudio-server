@@ -9,7 +9,7 @@
       "algorithm": {
         "objective_functions": []
       },
-      "Design Alternative Array": [{
+      "design_alternatives": [{
         "name": "datapoint_1",
         "description": "Datapoint 1"
       },
