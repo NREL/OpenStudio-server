@@ -187,7 +187,8 @@ ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
 
-# permissions on where server assets (e.g. paperclip files) are stored
+# permissions on where server assets (e.g. paperclip, data points, R images, etc) are stored
+RUN mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
 RUN mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
 #RUN mkdir -p /mnt/openstudio/server/assets/data_points && chmod 777 /mnt/openstudio/server/assets/data_points
 #RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables

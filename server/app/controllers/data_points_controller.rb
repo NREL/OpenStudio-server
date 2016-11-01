@@ -373,7 +373,6 @@ class DataPointsController < ApplicationController
     file = @data_point.result_files.where(attachment_file_name: params[:filename]).first
     if file && file.attachment && File.exist?(file.attachment.path)
       file_data = File.read(file.attachment.path)
-      puts file.attachment.content_type
       disposition = ['application/json', 'text/plain'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
       send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
     else
