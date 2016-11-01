@@ -49,17 +49,17 @@ docker-compose -f docker-compose.test.yml run web
 Get the Docker IP address (`docker-machine ip dev`) and point your browser at [http://`ip-address`:8000](http://`ip-address`:8000)
 
 
-## Deploying with Docker Machine
+# Deploying with Docker Machine
 
-### Installation
+## Installation
 
 * Install Docker-Machine
     * *Windows*: [Install Docker Toolbox](https://www.docker.com/products/docker-toolbox)
     * *OSX*: [Install Docker for Mac](https://docs.docker.com/docker-for-mac/) 
     
-### Configuration
+## Configuration
 
-### AWS
+## AWS
 
 * If there is a firewall between your computer and AWS, then allow `port 2376` communication between the two. 
 (This type of firewall is commonly seen in large companies with IT departments).
@@ -99,7 +99,7 @@ Get the Docker IP address (`docker-machine ip dev`) and point your browser at [h
     ```
     
         
-### Starting Cluster
+## Starting Cluster
 
 * In root of OpenStudio-server checkout (on dockerize branch)
 * Determine the save of the machine desired. Best to use http://www.ec2instances.info/ to select an m4.* instance. 
@@ -148,10 +148,10 @@ to be updated.
     * Click *Add Rule* and add a *Custom TCP Rule*, *port 8080*, from *Anywhere*.
     * Optional: It is possible to tighten the security here if desired (e.g. allow access from *My IP*). 
 
-#### Docker-Swarm
+### Docker-Swarm
 If there is a need for more that 32 cores connected in a cluster, then use Docker-Swarm. Instructions to follow.
 
-### Running an Analysis
+## Running an Analysis
 
 * Copy for later use the IP
 
@@ -164,7 +164,7 @@ If there is a need for more that 32 cores connected in a cluster, then use Docke
 * See instructions on running analysis from the [OpenStudio Analysis Spreadsheet repo](https://github.com/NREL/OpenStudio-analysis-spreadsheet#running-analyses)
 under the *Pre-configured cluster from external source* section.
 
-### Inspection
+## Inspection
 
 * Viewing logs
     
