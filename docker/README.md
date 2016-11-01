@@ -164,6 +164,26 @@ If there is a need for more that 32 cores connected in a cluster, then use Docke
 * See instructions on running analysis from the [OpenStudio Analysis Spreadsheet repo](https://github.com/NREL/OpenStudio-analysis-spreadsheet#running-analyses)
 under the *Pre-configured cluster from external source* section.
 
+## Stopping the Cluster
+
+To shutdown the cluster (without terminating), then run the command below. Note that this stops the instances which can
+then later be rebooted for reused later. The cost of stopped instances is only storage.
+
+```
+docker-machine stop awsdocker
+```
+
+
+## Terminating the Cluster
+
+The command below will stop and remove the instances. **Make sure to verify in the AWS Console that the instances are 
+removed**
+
+```
+docker-machine rm awsdocker
+```
+
+
 ## Inspection
 
 * Viewing logs
