@@ -107,16 +107,16 @@ simulations.
 * `awsdocker` is a user defined field defining the instance of the machine.
 * Run the following command replacing your copied vpc, zone, subnet values. Select the best instance-type and Increase the root-size if needed.
        
-```
-docker-machine create -d amazonec2 \
-    --amazonec2-instance-type m4.xlarge \
-    --amazonec2-zone e \
-    --amazonec2-region us-east-1 \
-    --amazonec2-vpc-id vpc-e33af1db \
-    --amazonec2-subnet-id subnet-24fda94a \
-    --amazonec2-root-size 500 \
-    awsdocker
-```    
+    ```
+    docker-machine create -d amazonec2 \
+        --amazonec2-instance-type m4.xlarge \
+        --amazonec2-zone e \
+        --amazonec2-region us-east-1 \
+        --amazonec2-vpc-id vpc-e33af1db \
+        --amazonec2-subnet-id subnet-24fda94a \
+        --amazonec2-root-size 500 \
+        awsdocker
+    ```    
 
 * After the instance is running, export the docker environment variables
     * *OSX*
@@ -125,16 +125,17 @@ docker-machine create -d amazonec2 \
         eval $(docker-machine env awsdocker)
         ```
     * *Windows*
+    
         ```
         <tbd>
         ```
 
 * Configure Machine for OpenStudio-server
    
-```
-docker volume create --name=osdata
-docker-compose -f docker-compose.deploy.yml up
-```
+    ```
+    docker volume create --name=osdata
+    docker-compose -f docker-compose.deploy.yml up
+    ```
 
 * **IMPORTANT** If this is the first time running a cluster, then the security group that is automatically created needs
 to be updated.
@@ -152,11 +153,11 @@ If there is a need for more that 32 cores connected in a cluster, then use Docke
 
 * Copy for later use the IP
 
-The command below return the IP address. Note that the server is running on port 8080. 
+    The command below returns the IP address. Note that the server is running on port 8080. 
 
-```
-docker-machine ip awsdocker
-```
+    ```
+    docker-machine ip awsdocker
+    ```
 
 * See instructions on running analysis from the [OpenStudio Analysis Spreadsheet repo](https://github.com/NREL/OpenStudio-analysis-spreadsheet#running-analyses)
 under the *Pre-configured cluster from external source* section.
