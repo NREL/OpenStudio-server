@@ -173,7 +173,6 @@ then later be rebooted for reused later. The cost of stopped instances is only s
 docker-machine stop awsdocker
 ```
 
-
 ## Terminating the Cluster
 
 The command below will stop and remove the instances. **Make sure to verify in the AWS Console that the instances are 
@@ -182,7 +181,6 @@ removed**
 ```
 docker-machine rm awsdocker
 ```
-
 
 ## Inspection
 
