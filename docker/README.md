@@ -148,7 +148,7 @@ to be updated.
     * Click *Add Rule* and add a *Custom TCP Rule*, *port 8080*, from *Anywhere*.
     * Optional: It is possible to tighten the security here if desired (e.g. allow access from *My IP*). 
 
-### Docker-Swarm
+## Docker-Swarm
 If there is a need for more that 32 cores connected in a cluster, then use Docker-Swarm. Instructions to follow.
 
 ## Running an Analysis
