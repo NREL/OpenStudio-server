@@ -48,7 +48,6 @@ docker-compose -f docker-compose.test.yml run web
 #### You're done ####
 Get the Docker IP address (`docker-machine ip dev`) and point your browser at [http://`ip-address`:8000](http://`ip-address`:8000)
 
-
 # Deploying with Docker Machine
 
 ## Installation
