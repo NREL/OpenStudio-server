@@ -57,9 +57,7 @@ Get the Docker IP address (`docker-machine ip dev`) and point your browser at [h
     * *Windows*: [Install Docker Toolbox](https://www.docker.com/products/docker-toolbox)
     * *OSX*: [Install Docker for Mac](https://docs.docker.com/docker-for-mac/) 
     
-## Configuration
-
-## AWS
+## Configuration - AWS
 
 * If there is a firewall between your computer and AWS, then allow `port 2376` communication between the two. 
 (This type of firewall is commonly seen in large companies with IT departments).
