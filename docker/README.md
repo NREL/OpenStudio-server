@@ -87,11 +87,13 @@ Get the Docker IP address (`docker-machine ip dev`) and point your browser at [h
         export AWS_SECRET_ACCESS_KEY=<your-secret-key>
         ```
     * *Windows*
+    
         ```
         set AWS_ACCESS_KEY_ID=<your-key>
         set AWS_SECRET_ACCESS_KEY=<your-secret-key>
         ```
 * Checkout OpenStudio-server repo and change to dockerize branch
+
     ```
     git clone git@github.com:NREL/OpenStudio-server.git
     ```
