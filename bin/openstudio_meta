@@ -24,6 +24,7 @@ require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
+ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
 
 $ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTABLE_EXTS'].split[0]}"
 
@@ -50,10 +51,10 @@ end
 def which(cmd)
   exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
   ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
-    exts.each { |ext|
+    exts.each do |ext|
       exe = File.join(path, "#{cmd}#{ext}")
       return exe if File.executable?(exe) && !File.directory?(exe)
-    }
+    end
   end
   nil
 end
@@ -207,7 +208,7 @@ class CLI
       result = 1
     end
 
-    result = 0 unless result.is_a?(Fixnum)
+    result = 0 unless result.is_a?(Integer)  # use to be Fixnum which is going to removed in ruby eventually
     result
   end
 
@@ -285,7 +286,7 @@ class InstallGems
         options[:export_dir] = e
       end
 
-      o.on('--with_test_develop', 'Include test and develop gems in the installation package') do |w|
+      o.on('--with_test_develop', 'Include test and develop gems in the installation package') do |_w|
         options[:test_dev_build] = true
       end
     end
@@ -311,12 +312,23 @@ class InstallGems
     end
     FileUtils.mkdir_p(ENV['GEM_HOME'])
 
+    # Set a phony os_server_project_path because rails needs it.
+    ::ENV['OS_SERVER_PROJECT_PATH'] = Dir.home
+
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
     rake_bin = File.absolute_path('./../gems/bin/rake/')
-    sys_call = "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5 && #{$ruby_path} #{bundler_bin} install --without development test && #{$ruby_path} #{rake_bin} assets:precompile"
-    sys_call.gsub!('--without development test ', '') if options[:test_dev_build]
+    sys_cmds = []
+    sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5"
+    sys_cmds << "#{$ruby_path} #{bundler_bin} update"
+    if options[:test_dev_build]
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install"
+    else
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
+    end
+    sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
+    sys_call = sys_cmds.join(" && ")
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     unless system(sys_call)
@@ -326,26 +338,61 @@ class InstallGems
 
     # copy all files to staging location
     if options[:export_dir]
-      puts "Exporting server to #{options[:export_dir]}" if options[:debug]
+      puts "Exporting OpenStudio-server to #{options[:export_dir]}" if options[:debug]
 
       if File.exist?(options[:export_dir])
+        puts "Removing '#{options[:export_dir]}'" if options[:debug]
         FileUtils.rm_rf(options[:export_dir])
       end
+      puts "Creating '#{options[:export_dir]}'" if options[:debug]
       FileUtils.mkdir_p(options[:export_dir])
+      
+      # we require root dir named OpenStudio-server
+      dest = File.join(options[:export_dir], 'OpenStudio-server')
+      FileUtils.mkdir_p(dest)
 
+      # have to remove these .git files before copying, they were causing failures on Windows
       src = File.absolute_path(File.join(__FILE__, './../../'))
-      puts "Copying files from '#{src}' to '#{options[:export_dir]}'" if options[:debug]
+      puts "Removing .git folders from gems in '#{src}'" if options[:debug]
+      Dir.glob(src + '/gems/**/.git').each do |f|
+        puts "Removing '#{f}'" if options[:debug]
+        FileUtils.rm_rf(f)
+      end
+      
+      puts "Copying files from '#{src}' to '#{dest}'" if options[:debug]
       Dir.glob(src + '/*').each do |f|
         next if /\.git/ =~ f
-        FileUtils.cp_r(f, options[:export_dir])
+        puts "Copying files from '#{f}' to '#{dest}/.'" if options[:debug]
+        FileUtils.cp_r(f, dest + '/.')
       end
 
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/coverage'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/log'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/public/assets'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'server/tmp'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'reports'))
-      FileUtils.rm_rf(File.join(options[:export_dir], 'worker-nodes'))
+      FileUtils.rm_rf(File.join(dest, 'server/coverage'))
+      FileUtils.rm_rf(File.join(dest, 'server/log'))
+      FileUtils.rm_rf(File.join(dest, 'server/spec'))
+      FileUtils.rm_rf(File.join(dest, 'server/tmp'))
+      FileUtils.rm_rf(File.join(dest, 'spec'))
+      FileUtils.rm_rf(File.join(dest, 'reports'))
+      FileUtils.rm_rf(File.join(dest, 'worker-nodes'))
+      
+      platform = 'darwin'
+      if /win/.match(RUBY_PLATFORM) || /mingw/.match(RUBY_PLATFORM)
+        platform = 'win32'
+      end
+      
+      ::Dir.chdir(options[:export_dir])
+      puts "Dir.pwd = #{Dir.pwd}" if options[:debug]
+      
+      server_sha = `git -C \"#{src}\" rev-parse --short=10 HEAD`.strip
+      puts "Server SHA = #{server_sha}" if options[:debug]
+      
+      sys_call = "tar -czf OpenStudio-server-#{server_sha}-#{platform}.tar.gz OpenStudio-server"
+      puts "Creating tar.gz in #{options[:export_dir]}"
+      puts sys_call if options[:debug]
+      unless system(sys_call)
+        $logger.error "System call '#{sys_call}' failed"
+        exit 1
+      end
+      
     end
   end
 end
@@ -369,7 +416,7 @@ class StartLocal
     mongodir = ''
     if mongod
       mongodir = File.dirname mongod
-    end 
+    end
 
     options = { debug: false, force_directories: false, workers: 1, ruby_path: $ruby_path, mongo_dir: mongodir }
 
@@ -409,22 +456,29 @@ class StartLocal
     end
     $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
 
-    # Check the directories exist
-    [project_dir].each do |dir|
-      unless ::File.exist? dir
-        if options[:force_directories]
-          FileUtils.mkdir_p dir
-        else
-          $logger.error "Unable to find directory '#{dir}'"
-          exit 1
-        end
+    # Check the project directory exists
+    unless ::File.exist? project_dir
+      if options[:force_directories]
+        FileUtils.mkdir_p project_dir
+      else
+        $logger.error "Unable to find directory '#{project_dir}'"
+        exit 1
       end
+    end
+
+    # Check if a local_configuration.json exists
+    if ::File.exist? ::File.join(project_dir, 'local_configuration.json')
+      $logger.error "A `local_configuration.json` file already exists at `#{project_dir}`"
+      exit 1
     end
 
     # Also force the creation of the log dir in the project_dir
     if options[:force_directories]
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
     end
+
+    # Set the server project path
+    ::ENV['OS_SERVER_PROJECT_PATH'] = File.join(project_dir, 'temp_data')
 
     # Assemble the commands and spin off the threads
     start_local_server project_dir, options[:mongo_dir], options[:ruby_path], options[:workers], options[:debug]
@@ -473,18 +527,30 @@ class StopLocal
     # Retrieve the pids
     local_state_file = ::File.absolute_path(File.join(project_dir, 'local_configuration.json'))
     unless ::File.exist? local_state_file
-      $logger.error "Unable to find the local configuation json at #{local_state_file}"
+      $logger.error "Unable to find the local configuration json at #{local_state_file}"
       exit 1
     end
+    find_windows_pids(local_state_file) if is_windows?
     local_server_config = ::JSON.parse(File.read(local_state_file), symbolize_names: true)
     rails_pid = local_server_config[:rails_pid]
     dj_pids = local_server_config[:dj_pids]
     mongod_pid = local_server_config[:mongod_pid]
+    child_pids = local_server_config[:child_pids] ? local_server_config[:child_pids] : []
 
     # Stop the pids, with lots of error catches
-    stop_local_server rails_pid, dj_pids, mongod_pid
+    successful = stop_local_server rails_pid, dj_pids, mongod_pid, child_pids
 
-    0
+    # Remove files, if PID kills were successful
+    if successful
+      ::File.delete(local_state_file) if ::File.exists? local_state_file
+      ::File.delete(local_state_file.gsub('.json', '.receipt')) if ::File.exists? local_state_file.gsub('.json', '.receipt')
+      server_pid_file =  ::File.join(::File.dirname(local_state_file), 'server.pid')
+      ::File.delete(server_pid_file) if ::File.exists? server_pid_file
+      exit 0
+    else
+      exit 1
+    end
+
   end
 end
 

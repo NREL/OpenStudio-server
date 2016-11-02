@@ -93,7 +93,6 @@ def verify_target_dns(target_dns)
   target_dns
 end
 
-
 # Find or create the target machine
 #
 # @param target_type [String] environment to start /find (AWS, NREL*, vagrant)
@@ -125,7 +124,7 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
                                           secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] },
                            ami_lookup_version: 2,
-                           openstudio_server_version: aws_instance_options['openstudio_server_version']}
+                           openstudio_server_version: aws_instance_options['openstudio_server_version'] }
       aws = OpenStudio::Aws::Aws.new(aws_init_options)
 
       server_options = {

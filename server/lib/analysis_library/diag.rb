@@ -100,7 +100,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
       diag = AnalysisLibrary::R::Diag.new(@r)
       if @analysis.problem['algorithm']['experiment_type'] == 'diagonal'
         if selected_variables.count > 0
-          samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'],@analysis.problem['algorithm']['run_baseline'])
+          samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'], @analysis.problem['algorithm']['run_baseline'])
 
           # Do the work to mash up the samples and pivot variables before creating the data points
           logger.info "Samples are #{samples}"
@@ -119,12 +119,12 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
         samples = add_pivots(samples, pivot_array)
       else
         new_samples = []
-        if pivot_array.size > 0
+        unless pivot_array.empty?
           pivot_array.each do |pivot|
             new_samples << pivot
           end
           samples = new_samples
-        end 
+        end
       end
       logger.info "Finished adding the pivots resulting in #{samples}"
 

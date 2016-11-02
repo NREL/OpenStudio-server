@@ -366,40 +366,22 @@ class DataPointsController < ApplicationController
     end
   end
 
-  # def download
-  #   @data_point = DataPoint.find(params[:id])
-  #
-  #   data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
-  #   send_data data_point_zip_data, filename: File.basename(@data_point.openstudio_datapoint_file_name), type: 'application/zip; header=present', disposition: 'attachment'
-  # end
-  #
-  # def download_reports
-  #   @data_point = DataPoint.find(params[:id])
-  #
-  #   remote_filename_reports = @data_point.openstudio_datapoint_file_name.gsub('.zip', '_reports.zip')
-  #   data_point_zip_data = File.read(remote_filename_reports)
-  #   send_data data_point_zip_data, filename: File.basename(remote_filename_reports), type: 'application/zip; header=present', disposition: 'attachment'
-  # end
-  #
-  # # Render an openstudio reporting measure's HTML report. This method has protection around which file to load.
-  # # It expects the file to be in the reports directory of the datapoint. If the user try to navigate the file system
-  # # the File.basename method will remove that.
-  # def view_report
-  #   # construct the path to the report based on the routs
-  #   @data_point = DataPoint.find(params[:id])
-  #
-  #   # remove any preceding .. because an attacker could try and traverse the file system
-  #   file = File.basename(params[:file])
-  #   file_str = "#{APP_CONFIG['sim_root_path']}/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{file}"
-  #
-  #   if File.exist? file_str
-  #     render file: file_str, layout: false
-  #   else
-  #     respond_to do |format|
-  #       format.html { redirect_to @data_point, notice: "Could not find file #{file_str}" }
-  #     end
-  #   end
-  # end
+  # GET /data_points/1/download_result_file
+  def download_result_file
+    @data_point = DataPoint.find(params[:id])
+
+    file = @data_point.result_files.where(attachment_file_name: params[:filename]).first
+    if file && file.attachment && File.exist?(file.attachment.path)
+      file_data = File.read(file.attachment.path)
+      disposition = ['application/json', 'text/plain'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
+      send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
+    else
+      respond_to do |format|
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
+        format.html { redirect_to @data_point, notice: "Result file '#{params[:filename]}' does not exist. It probably was deleted from the file system." }
+      end
+    end
+  end
 
   def dencity
     @data_point = DataPoint.find(params[:id])

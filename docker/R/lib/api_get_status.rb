@@ -3,7 +3,7 @@ require 'optparse'
 require 'rest-client'
 require 'json'
 
-options = {submit_simulation: false, sleep_time: 5}
+options = { submit_simulation: false, sleep_time: 5 }
 o = OptionParser.new do |opts|
   opts.banner = 'Usage: ruby api_get_status -h <http://url.org> -a <analysis_id>'
   opts.on('-h', '--host URL', String) { |a| options[:host] = a }
@@ -14,11 +14,11 @@ o.parse!(args)
 puts options.inspect
 
 unless options[:host]
-  fail 'You must pass the host. e.g. http://localhost:3000'
+  raise 'You must pass the host. e.g. http://localhost:3000'
 end
 
 unless options[:analysis_id]
-  fail 'You must pass the analysis ID'
+  raise 'You must pass the analysis ID'
 end
 
 result = {}
@@ -26,7 +26,7 @@ result[:status] = false
 begin
   a = RestClient.get "#{options[:host]}/analyses/#{options[:analysis_id]}/status.json"
   # TODO: retries?
-  fail 'Could not create datapoint' unless a.code == 200
+  raise 'Could not create datapoint' unless a.code == 200
 
   a = JSON.parse(a, symbolize_names: true)
   result[:status] = true

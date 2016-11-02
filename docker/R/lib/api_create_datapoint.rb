@@ -4,42 +4,42 @@
 require 'optparse'
 require 'rest-client'
 
-options = {submit_simulation: false, sleep_time: 5}
+options = { submit_simulation: false, sleep_time: 5 }
 o = OptionParser.new do |opts|
   opts.banner = 'Usage: ruby api_create_datapoint -h <http://url.org> -a <analysis_id> -v <variables>'
   opts.on('-h', '--host URL', String) { |a| options[:host] = a }
   opts.on('-a', '--analysis_id ID', String) { |a| options[:analysis_id] = a }
   opts.on('-v', '--variables vars', Array) { |a| options[:variables] = a }
   opts.on('-s', '--sleep vars', Integer) { |a| options[:sleep_time] = a }
-  opts.on('--submit') { |a| options[:submit_simulation] = true }
+  opts.on('--submit') { |_a| options[:submit_simulation] = true }
 end
 args = o.order!(ARGV) {}
 o.parse!(args)
 puts options.inspect
 
 unless options[:host]
-  fail 'You must pass the host. e.g. http://localhost:3000'
+  raise 'You must pass the host. e.g. http://localhost:3000'
 end
 
 unless options[:analysis_id]
-  fail 'You must pass the analysis ID'
+  raise 'You must pass the analysis ID'
 end
 
 unless options[:variables]
-  fail 'You must pass the variables'
+  raise 'You must pass the variables'
 end
 
-result = {status: false}
+result = { status: false }
 begin
   data_point_data = {
-      data_point: {
-          name: "API Generated #{Time.now}",
-          ordered_variable_values: options[:variables]
-      }
+    data_point: {
+      name: "API Generated #{Time.now}",
+      ordered_variable_values: options[:variables]
+    }
   }
 
   a = RestClient.post "#{options[:host]}/analyses/#{options[:analysis_id]}/data_points.json", data_point_data
-  fail 'Could not create datapoint' unless a.code == 201
+  raise 'Could not create datapoint' unless a.code == 201
 
   a = JSON.parse(a, symbolize_names: true)
   datapoint_id = a[:_id]
@@ -67,7 +67,7 @@ begin
 
               # load in the objective functions by accessing the objectives file
               # that were uploaded when the datapoint completed
-              a = RestClient.post "#{options[:host]}/data_points/#{datapoint_id}/download_report.json", {data_point: {filename: 'objectives'}}
+              a = RestClient.post "#{options[:host]}/data_points/#{datapoint_id}/download_report.json", data_point: { filename: 'objectives' }
               a = JSON.parse(a, symbolize_names: true)
               # JSON will be form of:
               # {
@@ -78,7 +78,7 @@ begin
               # }
 
               if a[:status] == 'error'
-                fail "No objective functions returned"
+                raise 'No objective functions returned'
               end
 
               result[:results] = a

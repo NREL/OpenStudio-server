@@ -75,7 +75,6 @@ rails_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rail
 ::ENV['OS_SERVER_LOG_PATH'] = log_dir
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:port]
 ::ENV['RAILS_ENV'] = 'local'
-::ENV['OS_DATADIR_MNT'] = File.join(project_dir, 'temp_data')
 sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rails_path}\" s -p #{options[:port]} -P "\
   "#{local_pid_file}"
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
@@ -83,8 +82,8 @@ puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 
 # Execute the system call
 process_log = File.join(project_dir, 'logs', 'rails.log')
-rails_pid = spawn(sys_call, [:err, :out]=>[process_log, 'w'])
-config_hash = File.exist?(state_file) ? ::JSON.parse(File.read(state_file), symbolize_names: true) : Hash.new
+rails_pid = spawn(sys_call, [:err, :out] => [process_log, 'w'])
+config_hash = File.exist?(state_file) ? ::JSON.parse(File.read(state_file), symbolize_names: true) : {}
 config_hash[:server_url] = "http://localhost:#{options[:port]}"
 config_hash[:rails_pid] = rails_pid
 ::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(config_hash) }

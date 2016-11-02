@@ -86,28 +86,72 @@ def find_available_port(starting, range)
   test_port
 end
 
+# Find all child-processes of the processes listed in the local_configuration.json file on Windows to ensure cleanup
+#
+# @param pid_json_path [String] absolute path for the local_configuration.json file
+# @param recursion_limit [Int] maximum recursive depth to track PIDs to
+# @return [nil] (over)writes the child_pids field in the local_configuration.json file
+#
+def find_windows_pids(pid_json_path, recursion_limit = 6)
+  pid_hash = ::JSON.parse(File.read(pid_json_path), symbolize_names: true)
+  pid_array = []
+  pid_array << pid_hash[:mongod_pid] if pid_hash[:mongod_pid]
+  pid_array += pid_hash[:dj_pids] if pid_hash[:dj_pids]
+  pid_array << pid_hash[:rails_pid] if pid_hash[:rails_pid]
+  pid_list = pid_array.clone
+  pid_str = `WMIC PROCESS get Caption,ProcessId,ParentProcessId`.split("\n\n")
+  pid_str.shift
+  fully_recursed = false
+  recursion_level = 0
+  until fully_recursed
+    recursion_level += 1
+    prior_pid_list = pid_list
+    pid_str.each do |p_desc|
+      if pid_list.include? p_desc.gsub(/\s+/, ' ').split(' ')[-2].to_i
+        child_pid = p_desc.gsub(/\s+/, ' ').split(' ')[-1].to_i
+        pid_list << child_pid unless pid_list.include? child_pid
+      end
+    end
+    fully_recursed = true if pid_list == prior_pid_list
+    fully_recursed = true if recursion_level == recursion_limit
+  end
+  child_pids = pid_list - pid_array
+  pid_hash[:child_pids] = child_pids
+  ::File.open(pid_json_path, 'wb') { |f| f << ::JSON.pretty_generate(pid_hash) }
+end
 
 # Kill all started processes as defined in the local_configuration.json
+#
+# @param pid_json [String] absolute path for the local_configuration.json file
 #
 def kill_processes(pid_json)
   unless File.exist? pid_json
     $logger.error "File `#{pid_json}` not found. It is possible that processes have been orphaned."
     exit 1
   end
+  windows = is_windows?
+  find_windows_pids(pid_json) if windows
   pid_hash = ::JSON.parse(File.read(pid_json), symbolize_names: true)
   pid_array = []
   pid_array << pid_hash[:mongod_pid] if pid_hash[:mongod_pid]
   pid_array + pid_hash[:dj_pids] if pid_hash[:dj_pids]
   pid_array << pid_hash[:rails_pid] if pid_hash[:rails_pid]
+  pid_array << pid_hash[:child_pids] if pid_hash[:child_pids]
   pid_array.each do |pid|
     begin
-      ::Process.kill('KILL', pid)
+      if windows
+        system_return = system('taskkill', '\pid', pid, '\f', '\t')
+        raise StandardError unless system_return
+      else
+        ::Process.kill('SIGKILL', pid)
+      end
     rescue
       $logger.error "Attempted to kill process with PID `#{pid}`. The success of the attempt is unclear"
       next
     end
     $logger.error "Killed process with PID `#{pid}`."
   end
+  ::File.delete(pid_json)
 end
 
 # Start the local server and save pid information to the project_directory
@@ -138,7 +182,6 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   state_file = ::File.join(project_directory, cluster_name + '_configuration.json')
   receipt_file = ::File.join(project_directory, cluster_name + '_configuration.receipt')
-  ::File.delete state_file if ::File.exist? state_file
   ::File.delete receipt_file if ::File.exist? receipt_file
 
   i = 1
@@ -165,7 +208,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   begin
     ::Timeout.timeout(10) do
-      success = system (mongod_command)
+      success = system mongod_command
       unless success
         $logger.error "Mongod returned non-zero status code  `#{$?.exitstatus}`. Please refer to "\
         "`#{::File.join(project_directory, 'logs', 'mongod.log')}`."
@@ -237,13 +280,15 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
       end
     rescue ::Timeout::Error
       $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
-                                                                                     'dj_worker_' + ind + '.log')}`."
+                                                                                       'dj_worker_' + ind.to_s + '.log')}`."
       kill_processes(state_file)
       exit 1
     end
     $logger.debug "DELAYED JOBS WORKER #{ind} MAY HAVE BEEN STARTED"
     sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
   end
+
+  find_windows_pids(state_file) if is_windows?
 
   $logger.debug 'Instantiated all processes. Writing receipt file.'
 
@@ -252,96 +297,85 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   $logger.debug "Completed writing local server configuration to #{state_file}"
 end
 
+
+# Kill a PID according to OS
+def kill_pid(pid, name, windows=false)
+  if windows
+    system_return = system('taskkill', '/pid', pid.to_s, '/f')
+    unless system_return
+      $logger.error "Unable to kill the #{name} PID `#{pid}` with forceful taskkill"
+      return false
+    end
+    $logger.debug "Kill #{name} process with PID `#{pid}`"
+  else
+    begin
+      ::Timeout.timeout (5) do
+        ::Process.kill('SIGINT', pid)
+        ::Process.wait(pid)
+      end
+    rescue Errno::ESRCH, Errno::ECHILD
+      $logger.warn "Unable to find #{name} PID `#{pid}`. SIGINT appears to have completed successfully"
+    rescue ::Timeout::Error, Errno::EINVAL
+      $logger.warn "Unable to kill the #{name} PID `#{pid}` with SIGINT. Trying KILL"
+      begin
+        ::Timeout.timeout (5) do
+          ::Process.kill('SIGKILL', pid)
+          ::Process.wait(pid)
+        end
+      rescue Errno::ESRCH, Errno::ECHILD
+        $logger.warn "Unable to find #{name} PID `#{pid}`. SIGKILL appears to have completed successfully"
+      rescue ::Timeout::Error
+        $logger.error "Unable to kill the #{name} PID `#{pid}` with KILL"
+        return false
+      rescue Exception => e
+        $logger.error "Caught unexpected error `#{e.message}` (`#{e.inspect}`) while killing #{name} PID `#{pid}`."\
+          " Backtrace: #{e.backtrace.join("\n")}"
+        return false
+      end
+    rescue Exception => e
+      $logger.error "Caught unexpected error `#{e.message}` (`#{e.inspect}`) while killing #{name} PID `#{pid}`."\
+        " Backtrace: #{e.backtrace.join("\n")}"
+      return false
+    end
+    $logger.debug "Killed #{name} process with PID `#{pid}`"
+  end
+  true
+end
+
+
 # Stop the local server
 #
 # @param rails_pid [Integer] the process id belonging to the rails instance
 # @param dj_pids [Array] the array of process ids belonging to the delayed job instances
-# @param mongod_pid [Integer] the process id belonging to the mongo instance
+# @param mongod_pid [Integer] the process id belonging to the mongod instance
+# @param child_pids [Array] the array of process ids which may not otherwise be killed on Windows
 # @return [Void]
 #
-def stop_local_server(rails_pid, dj_pids, mongod_pid)
+def stop_local_server(rails_pid, dj_pids, mongod_pid, child_pids = [])
+  successful = true
+  windows = is_windows?
   dj_pids.reverse.each do |dj_pid|
-    begin
-      ::Timeout.timeout (5) do
-        ::Process.kill('SIGINT', dj_pid)
-        ::Process.wait(dj_pid)
-      end
-    rescue Errno::ESRCH
-      $logger.warn "Unable to find delayed-jobs PID #{dj_pid}"
-    rescue ::Timeout::Error, Errno::EINVAL
-      $logger.warn "Unable to kill the dj PID #{dj_pid} with SIGINT. Trying KILL"
-      begin
-        ::Timeout.timeout (5) do
-          ::Process.kill('KILL', dj_pid)
-          ::Process.wait(dj_pid)
-        end
-      rescue Errno::ESRCH
-        $logger.warn "Unable to find delayed-jobs PID #{dj_pid}. SIGINT appears to have completed successfully"
-      rescue ::Timeout::Error
-        $logger.error "Unable to kill the dj PID #{dj_pid} with KILL"
-        exit 1
-      rescue Exception => e
-        exit 1 unless e.is_a?(Errno::ECHILD)
-      end
-    rescue Exception => e
-      exit 1 unless e.is_a?(Errno::ECHILD)
-    end
-    $logger.debug "Killed delayed-jobs process with PID `#{dj_pid}`"
+    pid_kill_success = kill_pid(dj_pid, 'delayed-jobs', windows)
+    successful = false unless pid_kill_success
   end
 
-  begin
-    ::Timeout.timeout (5) do
-      ::Process.kill('SIGINT', rails_pid)
-      ::Process.wait(rails_pid)
-    end
-  rescue Errno::ESRCH
-    $logger.warn "Unable to find rails PID #{rails_pid}"
-  rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the rails PID #{rails_pid} with SIGINT. Trying KILL"
-    begin
-      ::Timeout.timeout (5) do
-        ::Process.kill('KILL', rails_pid)
-        ::Process.wait(rails_pid)
-      end
-    rescue Errno::ESRCH
-      $logger.warn "Unable to find rails PID #{rails_pid}. SIGINT appears to have completed successfully"
-    rescue ::Timeout::Error
-      $logger.error "Unable to kill the rails PID #{rails_pid} with KILL"
-      exit 1
-    rescue Exception => e
-      exit 1 unless e.is_a?(Errno::ECHILD)
-    end
-  rescue Exception => e
-    exit 1 unless e.is_a?(Errno::ECHILD)
-  end
-  $logger.debug "Killed rails process with PID `#{rails_pid}`"
+  pid_kill_success = kill_pid(rails_pid, 'rails', windows)
+  successful = false unless pid_kill_success
 
-  begin
-    ::Timeout.timeout (5) do
-      ::Process.kill('SIGINT', mongod_pid)
-      ::Process.wait(mongod_pid)
-    end
-  rescue Errno::ESRCH
-    $logger.warn "Unable to find mongod PID #{mongod_pid}"
-  rescue ::Timeout::Error, Errno::EINVAL
-    $logger.warn "Unable to kill the mongod PID #{mongod_pid} with SIGINT. Trying KILL."
-    begin
-      ::Timeout.timeout (5) do
-        ::Process.kill('KILL', mongod_pid)
-        ::Process.wait(mongod_pid)
-      end
-    rescue Errno::ESRCH
-      $logger.warn "Unable to find mongod PID #{mongod_pid}. SIGINT appears to have completed successfully"
-    rescue ::Timeout::Error
-      $logger.error "Unable to kill the mongod PID #{mongod_pid} with KILL"
-      exit 1
-    rescue Exception => e
-      exit 1 unless e.is_a?(Errno::ECHILD)
-    end
-  rescue Exception => e
-    exit 1 unless e.is_a?(Errno::ECHILD)
-  end
-  $logger.debug "Killed mongod process with PID `#{mongod_pid}`"
+  pid_kill_success = kill_pid(mongod_pid, 'mongod', windows)
+  successful = false unless pid_kill_success
 
-  sleep 1 # Keep the return from beating the stdout text
+  child_pids.each do |child_pid|
+    kill_pid(child_pid, 'child-process', windows)
+    successful = false unless pid_kill_success
+  end
+
+  sleep 2 # Keep the return from beating the stdout text
+
+  unless successful
+    $logger.error 'Not all PID kills were successful. Please investigate the error logs.'
+    return false
+  end
+
+  true
 end

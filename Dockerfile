@@ -101,8 +101,8 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 
 # Run this separate to cache the download
-ENV OPENSTUDIO_VERSION 1.10.4
-ENV OPENSTUDIO_SHA d32e3e491e
+ENV OPENSTUDIO_VERSION 1.13.0
+ENV OPENSTUDIO_SHA fb588cc683
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
@@ -176,12 +176,7 @@ ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN bundle install
 
-# Where to save the assets
-RUN mkdir -p /opt/openstudio/server/public/assets/analyses && chmod 777 /opt/openstudio/server/public/assets/analyses
-RUN mkdir -p /opt/openstudio/server/public/assets/data_points && chmod 777 /opt/openstudio/server/public/assets/data_points
-
 # forward request and error logs to docker log collector
-
 # TODO: How to get logs out of this, mount shared volume?
 #RUN ln -sf /dev/stdout /var/log/nginx/access.log
 #RUN ln -sf /dev/stderr /var/log/nginx/error.log
@@ -192,9 +187,11 @@ ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
 
-
-
-
+# permissions on where server assets (e.g. paperclip, data points, R images, etc) are stored
+RUN mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
+RUN mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
+#RUN mkdir -p /mnt/openstudio/server/assets/data_points && chmod 777 /mnt/openstudio/server/assets/data_points
+#RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables
 
 CMD ["/usr/local/bin/start-server"]
 

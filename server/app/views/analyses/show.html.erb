@@ -119,7 +119,7 @@
           </div>
           <div class="panel-body">
             <div class="list-group">
-              <%= link_to_if(!@analysis.seed_zip.nil?, "Seed Zip File", @analysis.seed_zip.url(:original, false), class: 'list-group-item') %>
+              <%= link_to_if(!@analysis.seed_zip.nil?, "Seed Zip File", download_seed_zip_analysis_path(@analysis), class: 'list-group-item') %>
               <%= link_to 'CSV (Metadata)', download_variables_analysis_variables_path(@analysis, format: :csv), class: 'list-group-item' %>
               <%= link_to 'CSV (Results)', download_data_analysis_path(@analysis, format: :csv, export: true), class: 'list-group-item' %>
               <%= link_to 'R Data Frame (Metadata)', download_variables_analysis_variables_path(@analysis, format: :rdata), class: 'list-group-item' %>
