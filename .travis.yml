@@ -1,13 +1,17 @@
+branches:
+  only:
+    - /^dockerize.*$/
 matrix:
   include:
   - os: linux
     env: REDHAT_BUILD=true
+  - os: linux
+    env: REDHAT_BUILD=false
+    env: OSX_BUILD=false
   - os: osx
     osx_image: xcode7.1
     env: REDHAT_BUILD=false
-  - os: osx
-    osx_image: xcode8
-    env: REDHAT_BUILD=false
+    env: OSX_BUILD=true
 services:
   - docker
   - mongod
