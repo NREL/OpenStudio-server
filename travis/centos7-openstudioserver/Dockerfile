@@ -28,8 +28,8 @@ RUN yum -y install \
 	bison \
 	curl \
 	sqlite-devel \
-	initscripts
-RUN yum clean all
+	initscripts \
+	mesa-libGL-10.6.5-3.20150824.el7.i686
 
 # Build and configure ruby
 RUN git clone git://github.com/sstephenson/rbenv.git /.rbenv
@@ -62,11 +62,11 @@ ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://openstudio-builds.s3.amazonaws.com/2.xD
 ENV OPENSTUDIO_DOWNLOAD_FILENAME OpenStudio2-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Redhat.tar.gz
 ENV OPENSTUDIO_DOWNLOAD_URL $OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
 RUN curl -SLO $OPENSTUDIO_DOWNLOAD_URL
-RUN mkdir ~/openstudio/
-RUN tar --strip-components 1 -xvf OPENSTUDIO_DOWNLOAD_FILENAME -C ~/openstudio/
+RUN mkdir /openstudio/
+RUN tar --strip-components 1 -xvf $OPENSTUDIO_DOWNLOAD_FILENAME -C /openstudio/
 RUN rm -f $OPENSTUDIO_DOWNLOAD_FILENAME
 RUN rm -rf ~/openstudio/SketchUpPlugin
-RUN echo 'export RUBYLIB="$HOME/openstudio/Ruby/:$RUBYLIB"' >> ~/.bashrc
-RUN echo 'export PATH="$HOME/openstudio/bin/:$PATH"' >> ~/.bashrc
+ENV RUBYLIB $HOME/openstudio/Ruby/:$RUBYLIB
+ENV PATH $HOME/openstudio/bin/:$PATH
 
 CMD [ "/bin/bash" ]
