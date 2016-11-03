@@ -48,22 +48,19 @@ RUN rbenv rehash
 # Install mongodb
 RUN echo "[mongodb-org-3.0]" >> /etc/yum.repos.d/mongodb-org-3.0.repo
 RUN echo "name=MongoDB Repository" >> /etc/yum.repos.d/mongodb-org-3.0.repo
-RUN echo "baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.0/x86_64/" >> 
-	/etc/yum.repos.d/mongodb-org-3.0.repo
+RUN echo "baseurl=https://repo.mongodb.org/yum/redhat/7Server/mongodb-org/3.0/x86_64/" >> /etc/yum.repos.d/mongodb-org-3.0.repo
 RUN echo "gpgcheck=0" >> /etc/yum.repos.d/mongodb-org-3.0.repo
 RUN echo "enabled=1" >> /etc/yum.repos.d/mongodb-org-3.0.repo
-RUN yum install -y mongodb-org
+RUN yum -y install mongodb-org
+RUN yum clean all
 RUN echo "SELINUX=permissive" >> /etc/selinux/config
-RUN service mongod start
 
-# Install openstudio
+# Download and install OpenStudio, then clean up
 ENV OPENSTUDIO_VERSION 1.13.0
 ENV OPENSTUDIO_SHA 2a84a34de5
-ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/2.xDevBuilds
+ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://openstudio-builds.s3.amazonaws.com/2.xDevBuilds
 ENV OPENSTUDIO_DOWNLOAD_FILENAME OpenStudio2-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Redhat.tar.gz
 ENV OPENSTUDIO_DOWNLOAD_URL $OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
-
-# Download and install OpenStudio, then clean up.
 RUN curl -SLO $OPENSTUDIO_DOWNLOAD_URL
 RUN mkdir ~/openstudio/
 RUN tar --strip-components 1 -xvf OPENSTUDIO_DOWNLOAD_FILENAME -C ~/openstudio/

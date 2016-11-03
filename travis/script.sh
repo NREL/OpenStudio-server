@@ -2,12 +2,14 @@
 set -ev
 if [ "${REDHAT_BUILD}" = "false" ]; then
 	if [ "OSX_BUILD" = "true" ]; then
+		echo "IN AN OSX BUILD"
 		brew install mongo
 		mongod --config /usr/local/etc/mongod.conf
 		unset BUNDLE_GEMFILE
 		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
 	if [ "OSX_BUILD" = "false" ]; then
+		echo "IN AN UBUNTU BUILD"
 		sudo apt-get update
 		sudo apt-get upgrade -y
 	fi
