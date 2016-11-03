@@ -1,20 +1,20 @@
 #!/bin/bash
 set -ev
 if [ "${REDHAT_BUILD}" = 'false' ]; then
-	if [ "OSX_BUILD" = 'true' ]; then
+	if [ "${OSX_BUILD}" = 'true' ]; then
 		echo 'IN AN OSX BUILD'
 		brew install mongo
 		mongod --config /usr/local/etc/mongod.conf
 		unset BUNDLE_GEMFILE
 		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
-	if [ "OSX_BUILD" = "false" ]; then
+	if [ "${OSX_BUILD}" = 'false' ]; then
 		echo 'IN AN UBUNTU BUILD'
 		sudo apt-get update
 		sudo apt-get upgrade -y
 	fi
 fi
-if [ "${REDHAT_BUILD}" = "true" ]; then
+if [ "${REDHAT_BUILD}" = 'true' ]; then
 	echo 'IN A REDHAT BUILD'
 	docker pull ${OS_FLAVOR}:${OS_VERSION}
 	CONTAINER_ID=$(mktemp)
