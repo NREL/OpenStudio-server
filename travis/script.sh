@@ -7,7 +7,7 @@ if [ "${REDHAT_BUILD}" = "false" ]; then
 		unset BUNDLE_GEMFILE
 		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
-	if [ "TRAVIS_OS_NAME" != "osx"]; then
+	if [ "TRAVIS_OS_NAME" != "osx" ]; then
 		sudo apt-get update
 		sudo apt-get upgrade -y
 	fi
