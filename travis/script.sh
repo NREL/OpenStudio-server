@@ -17,5 +17,5 @@ if [ "${REDHAT_BUILD}" = "true" ]; then
 	docker pull ${OS_FLAVOR}:${OS_VERSION}
 	CONTAINER_ID=$(mktemp)
 	docker run --detach --volume="${PWD}":/root/openstudio-server ${RUN_OPTS} ${OS_FLAVOR}:${OS_VERSION} "/usr/lib/systemd/systemd" > "${CONTAINER_ID}"
-	docker exec --tty "$(cat ${container_id})" env TERM=xterm ruby ~/openstudio-server/bin/openstudio_meta install_gems --with_test_develop --debug --verbose
+	docker exec --tty "$(cat ${CONTAINER_ID})" env TERM=xterm ruby ~/openstudio-server/bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 fi
