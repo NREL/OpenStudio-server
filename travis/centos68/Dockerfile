@@ -28,7 +28,12 @@ RUN yum -y install \
 	bison \
 	curl \
 	sqlite-devel \
-	initscripts
+	initscripts \
+	mesa-libGL-11.0.7-4.el6 \
+	libpng-1.2.49-2.el6_7 \
+	libjpeg-turbo-1.2.1-3.el6_5 \
+	freetype-2.3.11-17.el6 \
+	libicu-4.2.1-14.el6
 
 # Build and configure ruby
 RUN git clone git://github.com/sstephenson/rbenv.git /.rbenv
@@ -47,7 +52,7 @@ RUN rbenv rehash
 # Install mongodb
 RUN echo "[mongodb-org-3.0]" >> /etc/yum.repos.d/mongodb-org-3.0.repo
 RUN echo "name=MongoDB Repository" >> /etc/yum.repos.d/mongodb-org-3.0.repo
-RUN echo "baseurl=https://repo.mongodb.org/yum/redhat/7Server/mongodb-org/3.0/x86_64/" >> /etc/yum.repos.d/mongodb-org-3.0.repo
+RUN echo "baseurl=https://repo.mongodb.org/yum/redhat/6Server/mongodb-org/3.0/x86_64/" >> /etc/yum.repos.d/mongodb-org-3.0.repo
 RUN echo "gpgcheck=0" >> /etc/yum.repos.d/mongodb-org-3.0.repo
 RUN echo "enabled=1" >> /etc/yum.repos.d/mongodb-org-3.0.repo
 RUN yum -y install mongodb-org
@@ -68,4 +73,4 @@ RUN rm -rf ~/openstudio/SketchUpPlugin
 ENV RUBYLIB $HOME/openstudio/Ruby/:$RUBYLIB
 ENV PATH $HOME/openstudio/bin/:$PATH
 
-CMD [ "/bin/bash" ]
+CMD [ "/bin/sh" ]
