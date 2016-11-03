@@ -187,6 +187,9 @@ ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
 
+# set the permissions for windows users
+RUN chmod +x /opt/openstudio/server/bin/*
+
 # permissions on where server assets (e.g. paperclip, data points, R images, etc) are stored
 RUN mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
 RUN mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
