@@ -280,7 +280,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
       end
     rescue ::Timeout::Error
       $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
-                                                                                       'dj_worker_' + ind + '.log')}`."
+                                                                                       'dj_worker_' + ind.to_s + '.log')}`."
       kill_processes(state_file)
       exit 1
     end
