@@ -7,7 +7,7 @@ if [ "${REDHAT_BUILD}" = "false" ]; then
 		unset BUNDLE_GEMFILE
 		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
-	if [ "OSX_BUILD" != "false" ]; then
+	if [ "OSX_BUILD" = "false" ]; then
 		sudo apt-get update
 		sudo apt-get upgrade -y
 	fi
