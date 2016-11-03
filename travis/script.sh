@@ -19,8 +19,8 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 fi
 if [ "${REDHAT_BUILD}" = 'true' ]; then
 	echo 'IN A REDHAT BUILD'
-	docker pull ${OS_FLAVOR}:${OS_VERSION}
+	docker pull hhorsey/hpc-os-server
 	CONTAINER_ID=$(mktemp)
-	docker run --detach --volume="${PWD}":/root/openstudio-server ${RUN_OPTS} ${OS_FLAVOR}:${OS_VERSION} "/usr/lib/systemd/systemd" > "${CONTAINER_ID}"
+	docker run --detach --volume="${PWD}":/root/openstudio-server ${RUN_OPTS} hhorsey/hpc-os-server "/usr/lib/systemd/systemd" > "${CONTAINER_ID}"
 	docker exec --tty "$(cat ${CONTAINER_ID})" env TERM=xterm ruby ~/openstudio-server/bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 fi

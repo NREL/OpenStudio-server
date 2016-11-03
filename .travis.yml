@@ -6,9 +6,7 @@ matrix:
   - os: linux
     env: 
       - REDHAT_BUILD: true
-      - OS_FLAVOR: centos
       - RUN_OPTS: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-      - OS_VERSION: 7.2.1511
     services:
       - docker
   - os: linux
