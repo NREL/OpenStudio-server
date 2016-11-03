@@ -3,6 +3,7 @@ set -ev
 if [ "${REDHAT_BUILD}" = "false" ]; then
 	if [ "${OSX_BUILD}" = "true" ]; then
 		brew install mongo
+		launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mongodb.plist
 		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
 	if [ "${OSX_BUILD}" = "false"]; then
