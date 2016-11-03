@@ -5,6 +5,10 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 		echo 'IN AN OSX BUILD'
 		brew install mongo
 		unset BUNDLE_GEMFILE
+		curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio2-1.13.0.fb588cc683-darwin.zip
+		mkdir ~/openstudio
+		unzip OpenStudio2-1.13.0.fb588cc683-darwin.zip -d ~/openstudio
+		export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
 		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
 	if [ "${OSX_BUILD}" = 'false' ]; then
