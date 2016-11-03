@@ -3,7 +3,7 @@
 # Based on CentOS 7.2.1511
 ############################################################
 
-FROM centos:7.2.1511
+FROM centos:6:8
 
 MAINTAINER Henry R Horsey henry.horsey@nrel.gov, Nicholas L Long nicholas.long@nrel.gov
 
@@ -28,8 +28,7 @@ RUN yum -y install \
 	bison \
 	curl \
 	sqlite-devel \
-	initscripts \
-	mesa-libGL-10.6.5-3.20150824.el7.i686
+	initscripts
 
 # Build and configure ruby
 RUN git clone git://github.com/sstephenson/rbenv.git /.rbenv
