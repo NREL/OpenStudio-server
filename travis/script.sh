@@ -10,8 +10,8 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 	fi
 	if [ "${OSX_BUILD}" = 'false' ]; then
 		echo 'IN AN UBUNTU BUILD'
-		sudo apt-get update
-		sudo apt-get upgrade -y
+		apt-get update
+		apt-get upgrade -y
 	fi
 fi
 if [ "${REDHAT_BUILD}" = 'true' ]; then
