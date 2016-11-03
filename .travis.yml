@@ -14,11 +14,13 @@ matrix:
   - os: linux
     env:
       - REDHAT_BUILD: false
+      - OSX_BUILD: false
     services:
       - mongod
   - os: osx
     osx_image: xcode7.1
     env:
       - REDHAT_BUILD: false
+      - OSX_BUILD: true
 before_install: ./travis/script.sh
 script: rspec
