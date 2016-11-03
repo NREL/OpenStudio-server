@@ -3,7 +3,7 @@
 # Based on CentOS 7.2.1511
 ############################################################
 
-FROM centos:6:8
+FROM centos:6.8
 
 MAINTAINER Henry R Horsey henry.horsey@nrel.gov, Nicholas L Long nicholas.long@nrel.gov
 
