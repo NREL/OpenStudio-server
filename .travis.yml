@@ -4,18 +4,21 @@ branches:
 matrix:
   include:
   - os: linux
-    env: REDHAT_BUILD=true
+    env: 
+      - REDHAT_BUILD: true
+      - OS_FLAVOR: centos
+      - RUN_OPTS: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+      - OS_VERSION: 7.2.1511
+    services:
+      - docker
   - os: linux
     env:
-      - REDHAT_BUILD=false
-      - OSX_BUILD=false
+      - REDHAT_BUILD: false
+    services:
+      - mongod
   - os: osx
     osx_image: xcode7.1
     env:
-      - REDHAT_BUILD=false
-      - OSX_BUILD=true
-services:
-  - docker
-  - mongod
+      - REDHAT_BUILD: false
 before_install: ./travis/script.sh
 script: rspec
