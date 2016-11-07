@@ -13,8 +13,14 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 	fi
 	if [ "${OSX_BUILD}" = 'false' ]; then
 		echo 'IN AN UBUNTU BUILD'
-		apt-get update
-		apt-get upgrade -y
+		sudo apt-get update
+		sudo apt-get upgrade -y
+		curl -SLO https://openstudio-builds.s3.amazonaws.com/2.xDevBuilds/OpenStudio2-1.13.0.2a84a34de5-Linux.tar.gz
+        mkdir ~/openstudio
+        tar --strip-components 1 -xvf $OPENSTUDIO_DOWNLOAD_FILENAME -C ~/openstudio/
+        unzip OpenStudio2-1.13.0.2a84a34de5-Linux.tar.gz -d ~/openstudio
+        export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
+        ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
 fi
 if [ "${REDHAT_BUILD}" = 'true' ]; then
