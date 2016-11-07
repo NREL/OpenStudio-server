@@ -22,3 +22,4 @@ matrix:
       - OSX_BUILD: true
 before_install: ./travis/script.sh
 script: rspec
+after_failure: "cat /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/mongod.log"
