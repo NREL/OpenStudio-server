@@ -4,7 +4,7 @@ gem 'rails', '4.2'
 gem 'rake', '~> 11.2'
 
 # added for support of the project rakefile
-require 'colored'
+gem 'colored'
 
 # data modules
 gem 'json', '1.7.7'
