@@ -70,6 +70,8 @@ ruby_cmd = "\"#{RbConfig.ruby}\"" # full path if you care
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+FileUtils.mkdir_p File.join(project, 'logs')
+FileUtils.mkdir_p File.join(project, 'data/db')
 num_workers = 4
 
 # the actual tests
