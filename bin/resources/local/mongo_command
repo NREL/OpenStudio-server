@@ -78,8 +78,11 @@ puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:
 
 # Execute the system call
 process_log = File.join(project_dir, 'logs', 'mongod.log')
-
-mongod_pid = spawn(sys_call, [:err, :out] => [process_log, 'w'])
+if options[:debug]
+  mongod_pid = spawn(sys_call)
+else
+  mongod_pid = spawn(sys_call, [:err, :out] => [process_log, 'w'])
+end
 config_hash = File.exist?(state_file) ? ::JSON.parse(File.read(state_file), symbolize_names: true) : {}
 config_hash[:mongod_pid] = mongod_pid
 ::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(config_hash) }

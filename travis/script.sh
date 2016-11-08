@@ -13,9 +13,7 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 	fi
 	if [ "${OSX_BUILD}" = 'false' ]; then
 		echo 'IN AN UBUNTU BUILD'
-		sudo service mysql stop
 		sudo apt-get update
-		sudo apt-get upgrade -y
 		curl -SLO https://openstudio-builds.s3.amazonaws.com/2.xDevBuilds/OpenStudio2-1.13.0.2a84a34de5-Linux.tar.gz
         mkdir ~/openstudio
         tar --strip-components 1 -xvf $OPENSTUDIO_DOWNLOAD_FILENAME -C ~/openstudio/
