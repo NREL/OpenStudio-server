@@ -68,8 +68,8 @@ end
 mongod_exe = which('mongod')
 ruby_cmd = "\"#{RbConfig.ruby}\"" # full path if you care
 ruby_cmd = 'ruby'
-meta_cli = File.join(File.dirname(__FILE__), '../../bin/openstudio_meta')
-project = File.join(File.dirname(__FILE__), '../files/')
+meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
+project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 num_workers = 4
 
 # the actual tests
