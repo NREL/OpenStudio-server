@@ -137,12 +137,7 @@ class RunSimulateDataPoint
     results_file = "#{run_dir}/measure_attributes.json"
     if File.exist? results_file
       results = JSON.parse(File.read(results_file), symbolize_names: true)
-
-      # push the results to the server
-      # DLM: TODO make this a RESTful call instead of Mongoid
       @data_point.update(results: results)
-
-      # TODO: Need to create a chord to run at the end of all the datapoints to finalize the analysis
     else
       raise "Could not find results #{results_file}"
     end
@@ -211,7 +206,7 @@ class RunSimulateDataPoint
   # in order to handle multiple instances trying to download the file at the
   # same time.
   def initialize_worker(sim_logger)
-    sim_logger.info "Starting download analysis zip for datapoint #{@data_point.id}"
+    sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
 
     # If the request is local, then just copy the data over. But how do we
     # test if the request is local?
@@ -220,16 +215,23 @@ class RunSimulateDataPoint
 
     # Check if the receipt file exists, if so, then just return out of this
     # method immediately
-    return true if File.exist? receipt_file
+    if File.exist? receipt_file
+      sim_logger.info "receipt_file already exists, moving on"
+      return true
+    end
 
     # only call this block if there is no write_lock nor receipt in the dir
     if File.exist? write_lock_file
+      sim_logger.info "write_lock_file exists, checking for receipt file"
+
       # wait until receipt file appears then return
       loop do
         break if File.exist? receipt_file
-        sleep 1
+        sim_logger.info "waiting for receipt file to appear"
+        sleep 3
       end
 
+      sim_logger.info "receipt_file appeared, moving on"
       return true
     else
       # download the file, but first create the write lock
@@ -247,10 +249,13 @@ class RunSimulateDataPoint
         end
 
         # Extract the zip
+        sim_logger.info "Extracting analysis zip to #{analysis_dir}"
         OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
 
         # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
-        a = RestClient.get "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
+        analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
+        sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
+        a = RestClient.get analysis_json_url
         raise 'Analysis JSON could not be downloaded' unless a.code == 200
         # Parse to JSON to save it again with nice formatting
         File.open("#{analysis_dir}/analysis.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }

@@ -58,16 +58,16 @@ gem 'sprockets-rails'
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
-# gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :ref => '01ed781e8a03d63460fb863aa4f9160d6de28a97'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
-gem 'openstudio-analysis', '1.0.0.rc6'
+
+gem 'openstudio-analysis', '1.0.0.rc9'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 ## End commonly updated gems
 gem 'openstudio-standards', '0.1.4'
 gem 'openstudio-aws', '~> 0.4'
-gem 'msgpack', '~> 1.0'
 
+gem 'msgpack', '~> 1.0'
 gem 'multi_json'
 gem 'oj'
 gem 'rest-client'
