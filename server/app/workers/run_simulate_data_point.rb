@@ -90,7 +90,8 @@ class RunSimulateDataPoint
         '../seeds',
         '../seed'
       ],
-      measure_paths: ['../measures']
+      measure_paths: ['../measures'],
+      datapoint_index: @data_point.dp_index
     }
     t = OpenStudio::Analysis::Translator::Workflow.new(
       "#{simulation_dir}/analysis.json",

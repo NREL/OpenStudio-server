@@ -111,7 +111,7 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
           dp_name = @analysis.problem['design_alternatives'][isample]['name']
           dp_description = @analysis.problem['design_alternatives'][isample]['description']
         end
-        dp = @analysis.data_points.new(name: dp_name, description: dp_description)
+        dp = @analysis.data_points.new(name: dp_name, description: dp_description, dp_index: isample)
         dp.set_variable_values = sample
         dp.save!
         isample += 1
