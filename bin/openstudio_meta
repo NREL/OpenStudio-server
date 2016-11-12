@@ -755,12 +755,13 @@ class RunAnalysis
     end
     ::ENV['OS_SERVER_HOSTNAME'] = server_dns
 
-    # Create temporary folder for server inputs
-    ::Dir.mkdir '.temp' unless ::File.exist?('.temp')
-    temp_filepath = '.temp/analysis'
-
     # Convert Windows style path separators
     project_path = project_path.tr('\\', '/')
+
+    # Create temporary folder for server inputs
+    temp_dir = ::File.join(project_path, '.temp')
+    ::Dir.mkdir temp_dir unless ::File.exist?(temp_dir)
+    temp_filepath = temp_dir +'/analysis'
 
     # Process project file and retrieve cluster options
     if ::File.extname(project_path).casecmp('.xlsx').zero?
