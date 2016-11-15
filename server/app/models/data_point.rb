@@ -43,7 +43,7 @@ class DataPoint
   field :description, type: String, default: '' # For support of EDAPT users in PAT 2.0
   field :variable_values # This has been hijacked by OS DataPoint. Use set_variable_values
   field :set_variable_values, type: Hash, default: {} # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
-  field :dp_index, type: Integer # This enables custom seed models for batch_datapoints analyses
+  field :dp_seed, type: String, default: '' # This enables custom seed models for batch_datapoints analyses
 
   field :download_status, type: String, default: 'na'
   field :download_information, type: String
