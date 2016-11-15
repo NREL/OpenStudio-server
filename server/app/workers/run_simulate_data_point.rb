@@ -92,7 +92,9 @@ class RunSimulateDataPoint
       ],
       measure_paths: ['../measures']
     }
-    osw_options[:seed] = @data_point.da_seed if @data_point.da_seed
+    if @data_point.dp_seed
+      osw_options[:seed] = @data_point.dp_seed unless @data_point.dp_seed == ''
+    end
     t = OpenStudio::Analysis::Translator::Workflow.new(
       "#{simulation_dir}/analysis.json",
       osw_options
