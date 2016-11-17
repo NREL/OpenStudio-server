@@ -24,7 +24,6 @@ Rails.application.routes.draw do
         get :status
         get :page_data
         get :analysis_data
-        get :download_status
         get :debug_log
         get :new_view
         get :plot_parallelcoordinates

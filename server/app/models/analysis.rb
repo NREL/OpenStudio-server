@@ -86,7 +86,6 @@ class Analysis
   index(created_at: 1)
   index(updated_at: -1)
   index(project_id: 1)
-  index(uuid: 1, download_status: 1)
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
@@ -237,7 +236,6 @@ class Analysis
     "
 
     # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
-    #   old query .where({download_status: 'completed', status: 'completed'})
     var_ids = data_points.map_reduce(map, reduce).out(inline: true)
     var_ids.each do |var|
       v = Variable.where(uuid: var['_id']).only(:name).first

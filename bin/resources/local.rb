@@ -297,9 +297,8 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   $logger.debug "Completed writing local server configuration to #{state_file}"
 end
 
-
 # Kill a PID according to OS
-def kill_pid(pid, name, windows=false)
+def kill_pid(pid, name, windows = false)
   if windows
     system_return = system('taskkill', '/pid', pid.to_s, '/f')
     unless system_return
@@ -341,7 +340,6 @@ def kill_pid(pid, name, windows=false)
   end
   true
 end
-
 
 # Stop the local server
 #
