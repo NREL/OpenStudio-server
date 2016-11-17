@@ -93,6 +93,7 @@ docker-compose -f docker-compose.test.yml run web
 
     ```
     git clone git@github.com:NREL/OpenStudio-server.git
+    git checkout dockerize
     ```
     
         
