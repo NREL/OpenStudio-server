@@ -758,7 +758,7 @@ class RunAnalysis
     project_path = project_path.tr('\\', '/')
 
     # Create temporary folder for server inputs
-    temp_dir = ::File.join(project_path, '..', '.temp')
+    temp_dir = ::File.join(File.dirname(project_path), '.temp')
     ::Dir.mkdir temp_dir unless ::File.exist?(temp_dir)
     temp_filepath = temp_dir + '/analysis'
 
