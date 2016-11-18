@@ -352,7 +352,7 @@ class InstallGems
       FileUtils.mkdir_p(dest)
 
       # have to remove these .git files before copying, they were causing failures on Windows
-      src = File.absolute_path(File.join(File.dirname(__FILE__), './../../'))
+      src = File.absolute_path(File.join(File.dirname(__FILE__), './../'))
       puts "Removing .git folders from gems in '#{src}'" if options[:debug]
       Dir.glob(src + '/gems/**/.git').each do |f|
         puts "Removing '#{f}'" if options[:debug]
