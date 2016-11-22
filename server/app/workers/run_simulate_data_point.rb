@@ -116,13 +116,14 @@ class RunSimulateDataPoint
     @sim_logger.info "Opening run.log file '#{run_log_file}'"
 
     # make sure to pass in preserve_run_dir
+    run_result = nil
     File.open(run_log_file, 'a') do |run_log|
       run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
       k = OpenStudio::Workflow::Run.new osw_path, run_options
       @sim_logger.info 'Running workflow'
-      k.run
-      @sim_logger.info "Final run state is #{k.current_state}"
+      run_result = k.run
+      @sim_logger.info "Final run state is #{run_result}"
     end
 
     # Save the log to the data point. This does not update while running, rather
@@ -160,12 +161,16 @@ class RunSimulateDataPoint
     report_file = "#{run_dir}/data_point.zip"
     upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
 
-    @data_point.update(status_message: 'completed normal')
+    if run_result != :errored
+      @data_point.set_success_flag
+    else
+      @data_point.set_error_flag
+    end
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     puts log_message
     @sim_logger.info log_message if @sim_logger
-    @data_point.set_error_state
+    @data_point.set_error_flag
   ensure
     @sim_logger.info "Finished #{__FILE__}" if @sim_logger
     @sim_logger.close if @sim_logger

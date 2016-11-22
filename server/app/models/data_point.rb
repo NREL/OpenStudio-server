@@ -45,7 +45,7 @@ class DataPoint
   field :set_variable_values, type: Hash, default: {} # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
 
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
-  field :status_message, type: String, default: '' # results of the simulation [:completed normal, :error]
+  field :status_message, type: String, default: '' # results of the simulation [:completed normal, :datapoint failure]
   field :job_id, type: String
   field :results, type: Hash, default: {}
   field :run_queue_time, type: DateTime, default: nil
@@ -103,8 +103,13 @@ class DataPoint
     save!
   end
 
-  def set_error_state
-    self.status_message = 'error'
+  def set_success_flag
+    self.status_message = 'completed normal'
+    save!
+  end
+
+  def set_error_flag
+    self.status_message = 'datapoint failure'
     save!
   end
 
