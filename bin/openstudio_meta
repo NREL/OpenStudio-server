@@ -445,6 +445,10 @@ class StartLocal
       o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
         options[:mongo_dir] = path
       end
+
+      o.on('--energyplus-exe-path PATH', 'Location of the EnergyPlus executable') do |path|
+        options[:energyplus_exe_path] = path
+      end
     end
 
     # Parse the options
@@ -475,6 +479,10 @@ class StartLocal
     # Also force the creation of the log dir in the project_dir
     if options[:force_directories]
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
+    end
+
+    if options[:energyplus_exe_path] and ::File.exist? options[:energyplus_exe_path]
+      ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
 
     # Set the server project path
