@@ -11,15 +11,6 @@ services: mongodb
 
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
-  - dir C:\Ruby23-x64\DevKit\
-  - type C:\Ruby23-x64\DevKit\config.yml
-  - gem install json --platform=ruby
-  - ruby -rubygems -e "require 'json'; puts JSON.load('[42]').inspect"
-  - ruby C:\Ruby23-x64\DevKit\dk.rb init
-  - cp C:\projects\openstudio-server\ci\appveyor\devkit-config-x64.yml C:\Ruby23-x64\DevKit\config.yml
-  - dir C:\Ruby23-x64\DevKit\
-  - type C:\Ruby23-x64\DevKit\config.yml
-  - ruby C:\Ruby23-x64\DevKit\dk.rb install
   - ruby c:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
   - curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio2-1.13.0.fb588cc683-windows.zip
   - mkdir ~/openstudio

@@ -1,106 +1,105 @@
 source 'http://rubygems.org'
 
-gem 'rails', '4.2'
-gem 'rake', '~> 11.2'
+platforms :ruby do
+  gem 'rails', '4.2'
+  gem 'rake', '~> 11.2'
 
-# added for support of the project rakefile
-gem 'colored'
+  # added for support of the project rakefile
+  gem 'colored'
 
-# data modules
-gem 'json', '1.7.7'
-gem 'jbuilder'
-gem 'rubyzip', '~> 1.2.0'
-gem 'tzinfo-data'
-gem 'nokogiri', '~> 1.6.5'
-
-# database modules
-gem 'mongoid', '~> 5.1'
-gem 'paperclip', '~> 4.3'
-gem 'mongoid-paperclip', require: 'mongoid_paperclip'
-
-# R
-gem 'rserve-simpler'
-
-# net-*
-gem 'net-http-persistent', '< 3.0.0'
-gem 'net-scp'
-gem 'net-ssh'
-gem 'net-sftp'
-
-# javascript
-# gem 'libv8', platforms: :ruby
-gem 'execjs'
-gem 'therubyracer', platforms: :ruby
-
-# other useful gems
-gem 'parallel'
-gem 'sys-filesystem'
-
-# web ui
-# gem 'will_paginate'
-gem 'jquery-rails'
-gem 'kaminari'
-gem 'kaminari-mongoid'
-
-# job queuing
-gem 'delayed_job_mongoid'
-gem 'daemons'
-
-# http(s) requests
-gem 'faraday' # TODO: can this be deprecated?
-
-# Gems used only for assets and not required
-# in production environments by default.
-gem 'sass'
-gem 'coffee-rails'
-gem 'bootstrap-sass'
-gem 'sass-rails'
-gem 'uglifier'
-gem 'sprockets-rails'
-
-# For workers - and other dependencies for measures
-## Commonly update gems for testing and development
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
-# gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
-
-gem 'openstudio-analysis', '1.0.0.rc11'
-# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
-# gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
-## End commonly updated gems
-gem 'openstudio-standards', '0.1.4'
-gem 'openstudio-aws', '~> 0.4'
-
-gem 'msgpack', '~> 1.0'
-gem 'multi_json'
-gem 'oj'
-gem 'rest-client'
-gem 'libxml-ruby', platforms: :ruby
-gem 'os'
-
-gem 'rubocop'
-
-if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/
+  # data modules
+  gem 'json', '1.7.7'
+  gem 'jbuilder'
+  gem 'rubyzip', '~> 1.2.0'
   gem 'tzinfo-data'
-end
+  gem 'nokogiri', '~> 1.6.5'
 
-group :development, :test do
-  gem 'sextant' # navigate to /rails/routes to see routes
-  gem 'better_errors'
-  gem 'meta_request'
+  # database modules
+  gem 'mongoid', '~> 5.1'
+  gem 'paperclip', '~> 4.3'
+  gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 
-  gem 'coveralls', require: false
-  gem 'ruby-prof', '~> 0.15'
-  gem 'capybara'
-  gem 'selenium-webdriver'
-  gem 'rspec', '~> 3.4'
-  gem 'rspec-retry'
-  gem 'rspec-rails'
+  # R
+  gem 'rserve-simpler'
 
-  gem 'rubocop', require: false
-  gem 'rubocop-checkstyle_formatter', require: false
+  # net-*
+  gem 'net-http-persistent', '< 3.0.0'
+  gem 'net-scp'
+  gem 'net-ssh'
+  gem 'net-sftp'
 
-  gem 'mongoid-rspec'
-  gem 'rspec-html-matchers'
-  gem 'factory_girl_rails'
-  gem 'ci_reporter'
+  # javascript
+  # gem 'libv8', platforms: :ruby
+  gem 'execjs'
+  gem 'therubyracer'
+
+  # other useful gems
+  gem 'parallel'
+  gem 'sys-filesystem'
+
+  # web ui
+  # gem 'will_paginate'
+  gem 'jquery-rails'
+  gem 'kaminari'
+  gem 'kaminari-mongoid'
+
+  # job queuing
+  gem 'delayed_job_mongoid'
+  gem 'daemons'
+
+  # http(s) requests
+  gem 'faraday' # TODO: can this be deprecated?
+
+  # Gems used only for assets and not required
+  # in production environments by default.
+  gem 'sass'
+  gem 'coffee-rails'
+  gem 'bootstrap-sass'
+  gem 'sass-rails'
+  gem 'uglifier'
+  gem 'sprockets-rails'
+
+  # For workers - and other dependencies for measures
+  ## Commonly update gems for testing and development
+  gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
+  # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
+
+  gem 'openstudio-analysis', '1.0.0.rc11'
+  # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
+  # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
+  ## End commonly updated gems
+  gem 'openstudio-standards', '0.1.4'
+  gem 'openstudio-aws', '~> 0.4'
+
+  gem 'msgpack', '~> 1.0'
+  gem 'multi_json'
+  gem 'oj'
+  gem 'rest-client'
+  gem 'libxml-ruby'
+  gem 'os'
+
+  gem 'rubocop'
+
+
+  group :development, :test do
+    gem 'sextant' # navigate to /rails/routes to see routes
+    gem 'better_errors'
+    gem 'meta_request'
+
+    gem 'coveralls', require: false
+    gem 'ruby-prof', '~> 0.15'
+    gem 'capybara'
+    gem 'selenium-webdriver'
+    gem 'rspec', '~> 3.4'
+    gem 'rspec-retry'
+    gem 'rspec-rails'
+
+    gem 'rubocop', require: false
+    gem 'rubocop-checkstyle_formatter', require: false
+
+    gem 'mongoid-rspec'
+    gem 'rspec-html-matchers'
+    gem 'factory_girl_rails'
+    gem 'ci_reporter'
+  end
 end
