@@ -4,9 +4,7 @@
 
 ## Create Docker-Machine Image
 If using Docker on Windows with VirtualBox then make sure to create a larger volume (e.g. 100GB) for development with 
-more memory and cores (if possible)
-
-
+more memory and cores (if possible). From the checkout of openstudio server in the dockerize branch:
 ```
 docker-machine create --virtualbox-disk-size 100000 --virtualbox-cpu-count 4 --virtualbox-memory 4096 -d virtualbox dev
 ```
@@ -30,6 +28,10 @@ docker volume create --name=osdata
 docker-compose up
 ```
 
+#### You're done ####
+Get the Docker IP address (`docker-machine ip dev`) and point your browser at [http://`ip-address`:8080](http://`ip-address`:8080)
+
+
 ## Testing
 
 ```
@@ -45,8 +47,6 @@ mkdir -p reports/rspec
 docker-compose -f docker-compose.test.yml run web
 ```
 
-#### You're done ####
-Get the Docker IP address (`docker-machine ip dev`) and point your browser at [http://`ip-address`:8000](http://`ip-address`:8000)
 
 # Deploying with Docker Machine
 
@@ -93,6 +93,7 @@ Get the Docker IP address (`docker-machine ip dev`) and point your browser at [h
 
     ```
     git clone git@github.com:NREL/OpenStudio-server.git
+    git checkout dockerize
     ```
     
         

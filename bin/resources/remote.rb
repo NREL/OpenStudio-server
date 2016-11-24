@@ -83,6 +83,8 @@ end
 # @todo Abstract this into a target class with access keys and such not that is referenced, not defined, here
 #
 def verify_target_dns(target_dns)
+  # Seems like this is the only place that we are using the ServerApi--can we remove this or make the server API its
+  # own gem?
   server_api = OpenStudio::Analysis::ServerApi.new(hostname: target_dns)
   unless server_api.alive?
     $logger.error "ERROR: Server at #{server_api.hostname} is not alive"

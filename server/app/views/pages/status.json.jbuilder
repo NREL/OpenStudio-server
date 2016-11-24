@@ -18,10 +18,10 @@ end
 
 json.data_points do
   json.count DataPoint.count
-  json.na DataPoint.where(download_status: :na).count
-  json.queued DataPoint.where(download_status: :queued).count
-  json.started DataPoint.where(download_status: :started).count
-  json.completed DataPoint.where(download_status: :completed).count
+  json.na DataPoint.where(status: :na).count
+  json.queued DataPoint.where(status: :queued).count
+  json.started DataPoint.where(status: :started).count
+  json.completed DataPoint.where(status: :completed).count
 end
 
 if @server.nil?

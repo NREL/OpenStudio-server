@@ -39,7 +39,7 @@ class ResultFile
   include Mongoid::Paperclip
 
   field :display_name, type: String
-  field :type, type: String # Results, Rdata, Reporting (all zips)
+  field :type, type: String # Results, Rdata, Data Point, OpenStudio Model
 
   # TODO: allow for various paths for saving these files
   has_mongoid_attached_file :attachment,

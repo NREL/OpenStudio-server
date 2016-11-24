@@ -208,7 +208,7 @@ class CLI
       result = 1
     end
 
-    result = 0 unless result.is_a?(Integer)  # use to be Fixnum which is going to removed in ruby eventually
+    result = 0 unless result.is_a?(Integer) # use to be Fixnum which is going to removed in ruby eventually
     result
   end
 
@@ -328,7 +328,7 @@ class InstallGems
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
     end
     sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
-    sys_call = sys_cmds.join(" && ")
+    sys_call = sys_cmds.join(' && ')
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     unless system(sys_call)
@@ -346,19 +346,19 @@ class InstallGems
       end
       puts "Creating '#{options[:export_dir]}'" if options[:debug]
       FileUtils.mkdir_p(options[:export_dir])
-      
+
       # we require root dir named OpenStudio-server
       dest = File.join(options[:export_dir], 'OpenStudio-server')
       FileUtils.mkdir_p(dest)
 
       # have to remove these .git files before copying, they were causing failures on Windows
-      src = File.absolute_path(File.join(__FILE__, './../../'))
+      src = File.absolute_path('./../')
       puts "Removing .git folders from gems in '#{src}'" if options[:debug]
       Dir.glob(src + '/gems/**/.git').each do |f|
         puts "Removing '#{f}'" if options[:debug]
         FileUtils.rm_rf(f)
       end
-      
+
       puts "Copying files from '#{src}' to '#{dest}'" if options[:debug]
       Dir.glob(src + '/*').each do |f|
         next if /\.git/ =~ f
@@ -373,18 +373,18 @@ class InstallGems
       FileUtils.rm_rf(File.join(dest, 'spec'))
       FileUtils.rm_rf(File.join(dest, 'reports'))
       FileUtils.rm_rf(File.join(dest, 'worker-nodes'))
-      
+
       platform = 'darwin'
       if /win/.match(RUBY_PLATFORM) || /mingw/.match(RUBY_PLATFORM)
         platform = 'win32'
       end
-      
+
       ::Dir.chdir(options[:export_dir])
       puts "Dir.pwd = #{Dir.pwd}" if options[:debug]
-      
+
       server_sha = `git -C \"#{src}\" rev-parse --short=10 HEAD`.strip
       puts "Server SHA = #{server_sha}" if options[:debug]
-      
+
       sys_call = "tar -czf OpenStudio-server-#{server_sha}-#{platform}.tar.gz OpenStudio-server"
       puts "Creating tar.gz in #{options[:export_dir]}"
       puts sys_call if options[:debug]
@@ -392,7 +392,7 @@ class InstallGems
         $logger.error "System call '#{sys_call}' failed"
         exit 1
       end
-      
+
     end
   end
 end
@@ -445,6 +445,10 @@ class StartLocal
       o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
         options[:mongo_dir] = path
       end
+
+      o.on('--energyplus-exe-path PATH', 'Location of the EnergyPlus executable') do |path|
+        options[:energyplus_exe_path] = path
+      end
     end
 
     # Parse the options
@@ -475,6 +479,10 @@ class StartLocal
     # Also force the creation of the log dir in the project_dir
     if options[:force_directories]
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
+    end
+
+    if options[:energyplus_exe_path] and ::File.exist? options[:energyplus_exe_path]
+      ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
 
     # Set the server project path
@@ -542,15 +550,14 @@ class StopLocal
 
     # Remove files, if PID kills were successful
     if successful
-      ::File.delete(local_state_file) if ::File.exists? local_state_file
-      ::File.delete(local_state_file.gsub('.json', '.receipt')) if ::File.exists? local_state_file.gsub('.json', '.receipt')
-      server_pid_file =  ::File.join(::File.dirname(local_state_file), 'server.pid')
-      ::File.delete(server_pid_file) if ::File.exists? server_pid_file
+      ::File.delete(local_state_file) if ::File.exist? local_state_file
+      ::File.delete(local_state_file.gsub('.json', '.receipt')) if ::File.exist? local_state_file.gsub('.json', '.receipt')
+      server_pid_file = ::File.join(::File.dirname(local_state_file), 'server.pid')
+      ::File.delete(server_pid_file) if ::File.exist? server_pid_file
       exit 0
     else
       exit 1
     end
-
   end
 end
 
@@ -755,12 +762,13 @@ class RunAnalysis
     end
     ::ENV['OS_SERVER_HOSTNAME'] = server_dns
 
-    # Create temporary folder for server inputs
-    ::Dir.mkdir '.temp' unless ::File.exist?('.temp')
-    temp_filepath = '.temp/analysis'
-
     # Convert Windows style path separators
     project_path = project_path.tr('\\', '/')
+
+    # Create temporary folder for server inputs
+    temp_dir = ::File.join(File.dirname(project_path), '.temp')
+    ::Dir.mkdir temp_dir unless ::File.exist?(temp_dir)
+    temp_filepath = temp_dir + '/analysis'
 
     # Process project file and retrieve cluster options
     if ::File.extname(project_path).casecmp('.xlsx').zero?

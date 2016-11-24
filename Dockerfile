@@ -99,10 +99,9 @@ RUN passenger-install-nginx-module
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
-
 # Run this separate to cache the download
-ENV OPENSTUDIO_VERSION 1.13.0
-ENV OPENSTUDIO_SHA fb588cc683
+ENV OPENSTUDIO_VERSION 1.13.2
+ENV OPENSTUDIO_SHA 6103d54380
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
@@ -186,6 +185,9 @@ ADD /docker/server/start-server.sh /usr/local/bin/start-server
 ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
+
+# set the permissions for windows users
+RUN chmod +x /opt/openstudio/server/bin/*
 
 # permissions on where server assets (e.g. paperclip, data points, R images, etc) are stored
 RUN mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
