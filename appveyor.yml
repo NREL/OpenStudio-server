@@ -2,8 +2,8 @@ version: 1.0.{build}-{branch}
 
 environment:
   matrix:
-    - RUBY_VERSION: 200
-    - RUBY_VERSION: 200-x64
+    - RUBY_VERSION: "200"
+    - RUBY_VERSION: "200-x64"
 
 clone_folder: c:\projects\openstudio-server
 
@@ -11,6 +11,7 @@ services: mongodb
 
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+  - C:\Ruby21\DevKit\devkitvars.bat
   - ruby c:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
   - curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio2-1.13.0.fb588cc683-windows.zip
   - mkdir ~/openstudio
