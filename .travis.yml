@@ -21,6 +21,6 @@ matrix:
     env:
       - REDHAT_BUILD: false
       - OSX_BUILD: true
-before_install: ./travis/script.sh
-script: rspec
+before_install: ./travis/setup.sh
+script: ./travis/test.sh
 after_failure: ./travis/print_logs.sh

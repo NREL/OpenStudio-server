@@ -73,6 +73,9 @@ project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
 num_workers = 4
+::ENV.delete 'BUNDLE_BIN_PATH'
+::ENV.delete 'BUNDLE_GEMFILE'
+::ENV.delete 'RUBYOPT'
 
 # the actual tests
 RSpec.describe OpenStudioMeta do

@@ -29,8 +29,7 @@ require 'json'
 argv = ARGV.dup
 options = {
   debug: false,
-  port: 27_017,
-  windows: false
+  port: 27017
 }
 opts = ::OptionParser.new do |o|
   o.banner = 'Usage: mongo_command [options] LOG_DIR INVOCATION_DIR DB_DIR STATE_FILE PROJECT_DIR'
