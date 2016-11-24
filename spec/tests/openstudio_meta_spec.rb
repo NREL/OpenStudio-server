@@ -68,15 +68,20 @@ end
 mongod_exe = which('mongod')
 ruby_cmd = "\"#{RbConfig.ruby}\"" # full path if you care
 ruby_cmd = 'ruby'
-meta_cli = File.join(File.dirname(__FILE__), '../../bin/openstudio_meta')
-project = File.join(File.dirname(__FILE__), '../files/')
+meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
+project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+FileUtils.mkdir_p File.join(project, 'logs')
+FileUtils.mkdir_p File.join(project, 'data/db')
 num_workers = 4
+::ENV.delete 'BUNDLE_BIN_PATH'
+::ENV.delete 'BUNDLE_GEMFILE'
+::ENV.delete 'RUBYOPT'
 
 # the actual tests
 RSpec.describe OpenStudioMeta do
   before :each do
     # start the server
-    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} --debug \"#{project}\""
+    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} --debug --verbose \"#{project}\""
     puts command
     start_local = system(command)
     expect(start_local).to be true
@@ -84,7 +89,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run analysis' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true

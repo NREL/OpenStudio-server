@@ -323,7 +323,7 @@ class InstallGems
     sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5"
     sys_cmds << "#{$ruby_path} #{bundler_bin} update"
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
     else
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
     end
