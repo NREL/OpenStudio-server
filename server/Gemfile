@@ -27,11 +27,6 @@ gem 'net-scp'
 gem 'net-ssh'
 gem 'net-sftp'
 
-# javascript
-# gem 'libv8', platforms: :ruby
-gem 'execjs'
-gem 'therubyracer'
-
 # other useful gems
 gem 'parallel'
 gem 'sys-filesystem'
