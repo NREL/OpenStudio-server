@@ -24,4 +24,3 @@ matrix:
 before_install: ./travis/setup.sh
 script: ./travis/test.sh
 after_failure: ./travis/print_logs.sh
-after_success: ./travis/print_logs.sh

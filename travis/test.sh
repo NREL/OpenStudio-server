@@ -1,6 +1,7 @@
 #!/bin/bash
 if [ "${REDHAT_BUILD}" = 'false' ]; then
 	if [ "${OSX_BUILD}" = 'true' ]; then
+	    export RUBYLIB="${HOME}/openstudio/Ruby/"
 		bundle exec rspec
 		if [ $? != 0 ]; then
 		    exit 1
