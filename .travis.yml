@@ -2,6 +2,8 @@ branches:
   only:
     - /^dockerize.*$/
 matrix:
+  allow_failures:
+    - os: linux
   include:
   - os: linux
     env: 
