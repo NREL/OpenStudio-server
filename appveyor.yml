@@ -12,7 +12,7 @@ services: mongodb
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Ruby23-x64\DevKit\mingw\bin;%PATH%
   - ruby C:\Ruby23-x64\DevKit\dk.rb init
-  - cp C:\projects\openstudio-server\ci\devkit-config.yml C:\Ruby23-x64\DevKit\config.yml
+  - cp C:\projects\openstudio-server\ci\appveyor\devkit-config.yml C:\Ruby23-x64\DevKit\config.yml
   - ruby C:\Ruby23-x64\DevKit\dk.rb review
   - ruby C:\Ruby23-x64\DevKit\dk.rb install
   - ruby c:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
