@@ -17,7 +17,7 @@ matrix:
       - mongod
     sudo: required
   - os: osx
-    osx_image: xcode7.1
+    osx_image: xcode7.3
     env:
       - REDHAT_BUILD: false
       - OSX_BUILD: true

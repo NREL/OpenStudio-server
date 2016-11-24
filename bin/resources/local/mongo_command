@@ -53,7 +53,7 @@ db_dir = argv.shift
 state_file = argv.shift
 project_dir = argv.shift
 inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil? | state_file.nil? | project_dir.nil?
-raise 'LOG_DIR, INVOCATION_DIR, DB_DIR, STATE_FILE, and PROJECT_DIR are all required for execution' if inputs_empty
+puts 'LOG_DIR, INVOCATION_DIR, DB_DIR, STATE_FILE, and PROJECT_DIR are all required for execution' && exit(1) if inputs_empty
 error_msg = ''
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
 error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute. " unless
@@ -61,14 +61,14 @@ error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute.
 error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathname.new(db_dir).absolute?
 error_msg << "The STATE_FILE projvided, `#{state_file}`, is not absolute. " unless Pathname.new(state_file).absolute?
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
-raise error_msg unless error_msg.empty?
+puts error_msg  && exit(2) unless error_msg.empty?
 error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
 error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless
   Dir.exist? invocation_dir
 error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exist? db_dir
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless
   Dir.exist? project_dir
-raise error_msg unless error_msg.empty?
+puts error_msg && exit(3) unless error_msg.empty?
 
 # Create the system call to use
 ::Dir.chdir(File.absolute_path(invocation_dir))
