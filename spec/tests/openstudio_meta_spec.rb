@@ -72,7 +72,7 @@ meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/opens
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
-num_workers = 4
+num_workers = 2
 ::ENV.delete 'BUNDLE_BIN_PATH'
 ::ENV.delete 'BUNDLE_GEMFILE'
 ::ENV.delete 'RUBYOPT'
@@ -103,34 +103,40 @@ RSpec.describe OpenStudioMeta do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    while status != 'completed'
+    begin
+      ::Timeout.timeout(90) do
+        while status != 'completed'
+          # get the analysis pages
+          a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
+          a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.html"
+          a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}/status.json"
+          a = JSON.parse(a, symbolize_names: true)
+          status = a[:analysis][:status]
+          expect(status).not_to be_nil
+          puts "Accessed pages for analysis #{analysis_id}, status = #{status}"
 
-      # get the analysis pages
-      a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
-      a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.html"
-      a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}/status.json"
-      a = JSON.parse(a, symbolize_names: true)
-      status = a[:analysis][:status]
-      expect(status).not_to be_nil
-      puts "Accessed pages for analysis #{analysis_id}, status = #{status}"
+          # get all data points in this analysis
+          a = RestClient.get 'http://localhost:8080/data_points.json'
+          a = JSON.parse(a, symbolize_names: true)
+          data_points = []
+          a.each do |data_point|
+            if data_point[:analysis_id] == analysis_id
+              data_points << data_point
+            end
+          end
 
-      # get all data points in this analysis
-      a = RestClient.get 'http://localhost:8080/data_points.json'
-      a = JSON.parse(a, symbolize_names: true)
-      data_points = []
-      a.each do |data_point|
-        if data_point[:analysis_id] == analysis_id
-          data_points << data_point
+          data_points.each do |data_point|
+            # get the datapoint pages
+            data_point_id = data_point[:_id]
+            a = RestClient.get "http://localhost:8080/data_points/#{data_point_id}.json"
+            a = RestClient.get "http://localhost:8080/data_points/#{data_point_id}.html"
+            puts "Accessed pages for data_point #{data_point_id}"
+          end
+          sleep 1
         end
       end
-
-      data_points.each do |data_point|
-        # get the datapoint pages
-        data_point_id = data_point[:_id]
-        a = RestClient.get "http://localhost:8080/data_points/#{data_point_id}.json"
-        a = RestClient.get "http://localhost:8080/data_points/#{data_point_id}.html"
-        puts "Accessed pages for data_point #{data_point_id}"
-      end
+    rescue ::Timeout::Error
+      puts "Analysis status is `#{status}` after 90 seconds; assuming error."
     end
 
     expect(status).to eq('completed')
