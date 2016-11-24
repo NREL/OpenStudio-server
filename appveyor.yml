@@ -11,6 +11,7 @@ services: mongodb
 
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+  - gem update --system 2.5.0
   - ruby c:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
   - curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio2-1.13.0.fb588cc683-windows.zip
   - mkdir ~/openstudio
