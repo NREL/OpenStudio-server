@@ -128,10 +128,14 @@ RSpec.describe OpenStudioMeta do
           data_points.each do |data_point|
             # get the datapoint pages
             data_point_id = data_point[:_id]
-            a = RestClient.get "http://localhost:8080/data_points/#{data_point_id}.json"
             a = RestClient.get "http://localhost:8080/data_points/#{data_point_id}.html"
-            puts "Accessed pages for data_point #{data_point_id}"
+            a = RestClient.get "http://localhost:8080/data_points/#{data_point_id}.json"
+            a = JSON.parse(a, symbolize_names: true)
+            status = a[:data_point][:status]
+            expect(status).not_to be_nil
+            puts "Accessed pages for data_point #{data_point_id}, status = #{status}"
           end
+          puts ''
           sleep 1
         end
       end
