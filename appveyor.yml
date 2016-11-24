@@ -5,6 +5,9 @@ environment:
     - RUBY_VERSION: "200"
     - RUBY_VERSION: "200-x64"
 
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 clone_folder: c:\projects\openstudio-server
 
 services: mongodb
@@ -12,6 +15,7 @@ services: mongodb
 install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
   - gem update --system
+  - timeout 3500
   - ruby c:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
   - curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio2-1.13.0.fb588cc683-windows.zip
   - mkdir ~/openstudio
