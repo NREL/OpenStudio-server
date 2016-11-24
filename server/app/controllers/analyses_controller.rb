@@ -318,7 +318,7 @@ class AnalysesController < ApplicationController
                              id: dp.id,
                              analysis_id: dp.analysis_id,
                              status: dp.status,
-                             final_message: dp.status_message
+                             status_message: dp.status_message
                            }
                          end
           }

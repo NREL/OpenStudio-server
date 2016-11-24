@@ -323,7 +323,7 @@ class InstallGems
     sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5"
     sys_cmds << "#{$ruby_path} #{bundler_bin} update"
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
     else
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
     end
@@ -352,7 +352,7 @@ class InstallGems
       FileUtils.mkdir_p(dest)
 
       # have to remove these .git files before copying, they were causing failures on Windows
-      src = File.absolute_path(File.join(File.dirname(__FILE__), './../'))
+      src = File.absolute_path('./../')
       puts "Removing .git folders from gems in '#{src}'" if options[:debug]
       Dir.glob(src + '/gems/**/.git').each do |f|
         puts "Removing '#{f}'" if options[:debug]
@@ -445,6 +445,10 @@ class StartLocal
       o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
         options[:mongo_dir] = path
       end
+
+      o.on('--energyplus-exe-path PATH', 'Location of the EnergyPlus executable') do |path|
+        options[:energyplus_exe_path] = path
+      end
     end
 
     # Parse the options
@@ -475,6 +479,10 @@ class StartLocal
     # Also force the creation of the log dir in the project_dir
     if options[:force_directories]
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
+    end
+
+    if options[:energyplus_exe_path] and ::File.exist? options[:energyplus_exe_path]
+      ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
 
     # Set the server project path
