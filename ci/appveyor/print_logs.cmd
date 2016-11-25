@@ -8,7 +8,7 @@ echo.
 echo === PRINTING ERROR LOG REPORTS ===
 echo.
 
-for /r %%i in (C:\projects\openstudio-server\spec\files\logs\*) do (
+for %%i in (C:\projects\openstudio-server\spec\files\logs\*.log) do (
     echo ======================================================
     echo %%i
     echo ======================================================
