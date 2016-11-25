@@ -6,8 +6,6 @@ environment:
 
 clone_folder: C:\projects\openstudio-server
 
-services: mongodb
-
 install:
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
@@ -18,10 +16,10 @@ before_test:
   - gem -v
   - bundle -v
   - mongod.exe --version
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 test_script:
-  - cd C:\projects\openstudio-server\ && bundle exec rspec
+  - ps: C:\projects\openstudio-server\ci\appveyor\test.ps1
 
 on_failure:
   - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-  
