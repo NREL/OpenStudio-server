@@ -19,8 +19,7 @@ before_test:
   - bundle -v
 
 test_script:
-  - which mongod
-  - which mongo
+  - cd C:\mongodb && tree /f
   - cd C:\projects\openstudio-server\ && bundle exec rspec
 
 on_failure:
