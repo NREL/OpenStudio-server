@@ -1,6 +1,7 @@
 $env:Path = "C:\Ruby$env:RUBY_VERSION\bin;C:\Mongodb\bin;$env:Path"
 $env:RUBYLIB = "C:\projects\openstudio\Ruby"
 $tests = Start-Process -PassThru -WorkingDirectory "C:\projects\openstudio-server" -FilePath "bundle" -ArgumentList "exec rspec" -RedirectStandardOutput "C:\projects\openstudio-server\spec\files\logs\win-stdout.log" -RedirectStandardError "C:\projects\openstudio-server\spec\files\logs\win-stderr.log"
+$handle = $tests.Handle # See http://stackoverflow.com/a/23797762/1479211
 $timeout = new-timespan -Minutes 5
 $sw = [diagnostics.stopwatch]::StartNew()
 while ($sw.elapsed -lt $timeout){
