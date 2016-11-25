@@ -17,10 +17,11 @@ before_test:
   - ruby -v
   - gem -v
   - bundle -v
+  - mongod.exe --version
 
 test_script:
-  - cd C:\mongodb && tree /f
   - cd C:\projects\openstudio-server\ && bundle exec rspec
 
 on_failure:
   - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+  
