@@ -251,7 +251,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   $logger.debug 'RAILS STARTED'
 
   begin
-    ::Timeout.timeout(5) do
+    ::Timeout.timeout(10) do
       success = system(dj_server_command)
       unless success
         $logger.error "dj_server returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
@@ -269,7 +269,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   dj_worker_commands.each_with_index do |cmd, ind|
     begin
-      ::Timeout.timeout(5) do
+      ::Timeout.timeout(10) do
         success = system(cmd)
         unless success
           $logger.error "dj_worker_#{ind} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
