@@ -16,7 +16,7 @@ before_test:
   - gem -v
   - bundle -v
   - mongod.exe --version
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 test_script:
   - ps: C:\projects\openstudio-server\ci\appveyor\test.ps1
