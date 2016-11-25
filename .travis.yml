@@ -1,7 +1,10 @@
 branches:
   only:
     - /^dockerize.*$/
+    - fix_pid_kill
 matrix:
+  allow_failures:
+    - os: linux
   include:
   - os: linux
     env: 

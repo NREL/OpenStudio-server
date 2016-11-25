@@ -1,6 +1,9 @@
 # OpenStudio Server
 
 [![Build Status][circleci-img]][circleci-url] [![Coverage Status][coveralls-img]][coveralls-url]
+OSX Build: [![Build Status][travis-img]][travis-url]
+Windows Build (Under Development): [![Build status][appveyor-img]][appveyor-url]
+
 
 ## Description
 The preferred development approach for this application is to use Vagrant to provision and test the server.  To see the server instructions go to [OpenStudio Rails Application](./openstudio-server/README.md)
@@ -138,3 +141,7 @@ Please contact @rhorsey, @bball, or @nllong with any question regarding this pro
 [circleci-url]: https://circleci.com/gh/NREL/OpenStudio-server
 [coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=
 [coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
+[travis-img]: https://travis-ci.org/NREL/OpenStudio-server.svg?branch=dockerize-travis
+[travis-url]: https://travis-ci.org/NREL/OpenStudio-server
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/j7hqgh2p7bae9xn8/branch/dockerize-appveyor?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/rHorsey/openstudio-server/branch/dockerize-appveyor
