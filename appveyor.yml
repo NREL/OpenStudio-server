@@ -2,7 +2,6 @@ version: 1.0.{build}-{branch}
 
 environment:
   matrix:
-    - RUBY_VERSION: "200"
     - RUBY_VERSION: "200-x64"
 
 clone_folder: c:\projects\openstudio-server
