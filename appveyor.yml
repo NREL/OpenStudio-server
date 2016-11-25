@@ -16,6 +16,7 @@ install:
   - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
   - C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\gem update --system
   - C:\Ruby%RUBY_VERSION%\bin\ruby c:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
+  - C:\Ruby%RUBY_VERSION%\bin\bundle install --gemfile=C:\projects\openstudio-server\Gemfile
 
 build: off
 
