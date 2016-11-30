@@ -32,8 +32,8 @@
             {
               "measure_name": "adjust_thermostat_setpoints_by_degrees",
               "workflow_index": 0,
-              "name": "Option 1",
-              "description": "Option 1 Description"
+              "name": "Option 2",
+              "description": "Option 2 Description"
             }
           ]
         }
