@@ -111,7 +111,9 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
         if @analysis.problem['design_alternatives']
           dp_name = @analysis.problem['design_alternatives'][isample]['name']
           dp_description = @analysis.problem['design_alternatives'][isample]['description']
-          dp_seed = @analysis.problem['design_alternatives'][isample]['seed'] if @analysis.problem['design_alternatives'][isample]['seed']
+          if @analysis.problem['design_alternatives'][isample]['seed']
+            dp_seed = File.basename @analysis.problem['design_alternatives'][isample]['seed']['path']
+          end
         end
         if dp_seed
           dp = @analysis.data_points.new(name: dp_name, description: dp_description, dp_seed: dp_seed)
