@@ -96,7 +96,6 @@ group :development, :test do
   gem 'rspec-retry'
   gem 'rspec-rails'
 
-  gem 'rubocop', require: false
   gem 'rubocop-checkstyle_formatter', require: false
 
   gem 'mongoid-rspec'
