@@ -45,12 +45,8 @@ class DataPoint
   field :set_variable_values, type: Hash, default: {} # By default this is a hash list with the name being the id of the variable and the value is the value it was set to.
   field :dp_seed, type: String, default: '' # This enables custom seed models for batch_datapoints analyses
 
-  field :download_status, type: String, default: 'na'
-  field :download_information, type: String
-  # field :openstudio_datapoint_file_name, type: String # make this paperclip? # TODO: Delete this item
-
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
-  field :status_message, type: String, default: '' # results of the simulation [:completed normal, :error]
+  field :status_message, type: String, default: '' # results of the simulation [:completed normal, :datapoint failure]
   field :job_id, type: String
   field :results, type: Hash, default: {}
   field :run_queue_time, type: DateTime, default: nil
@@ -73,8 +69,8 @@ class DataPoint
   index(status: 1)
   index(analysis_id: 1, created_at: 1)
   index(created_at: 1)
-  index(uuid: 1, status: 1, download_status: 1)
-  index(analysis_id: 1, status: 1, download_status: 1, ip_address: 1)
+  index(uuid: 1, status: 1)
+  index(analysis_id: 1, status: 1, ip_address: 1)
   index(run_start_time: -1, name: 1)
   index(run_end_time: -1, name: 1)
   index(analysis_id: 1, iteration: 1, sample: 1)
@@ -108,8 +104,13 @@ class DataPoint
     save!
   end
 
-  def set_error_state
-    self.status_message = 'error'
+  def set_success_flag
+    self.status_message = 'completed normal'
+    save!
+  end
+
+  def set_error_flag
+    self.status_message = 'datapoint failure'
     save!
   end
 

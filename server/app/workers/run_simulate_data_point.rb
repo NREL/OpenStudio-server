@@ -60,20 +60,20 @@ class RunSimulateDataPoint
     FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
 
     # Logger for the simulate datapoint
-    sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
-    sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
-    sim_logger.info "Analysis directory is #{analysis_dir}"
-    sim_logger.info "Simulation directory is #{simulation_dir}"
-    sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
+    @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
+    @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
+    @sim_logger.info "Analysis directory is #{analysis_dir}"
+    @sim_logger.info "Simulation directory is #{simulation_dir}"
+    @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
-    initialize_worker(sim_logger)
+    initialize_worker
 
     # delete any existing data files from the server in case this is a 'rerun'
     RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
 
     # Download the datapoint to run and save to disk
     url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
-    sim_logger.info "Downloading datapoint from #{url}"
+    @sim_logger.info "Downloading datapoint from #{url}"
     r = RestClient.get url
     raise 'Analysis JSON could not be downloaded' unless r.code == 200
     # Parse to JSON to save it again with nice formatting
@@ -106,8 +106,8 @@ class RunSimulateDataPoint
       raise 'Could not translate OSA, OSD into OSW'
     end
 
-    sim_logger.info 'Creating Workflow Manager instance'
-    sim_logger.info "Directory is #{simulation_dir}"
+    @sim_logger.info 'Creating Workflow Manager instance'
+    @sim_logger.info "Directory is #{simulation_dir}"
 
     adapter_options = {
       workflow_filename: File.basename(osw_path),
@@ -116,16 +116,17 @@ class RunSimulateDataPoint
     }
 
     run_log_file = File.join(run_dir, 'run.log')
-    sim_logger.info "Opening run.log file '#{run_log_file}'"
+    @sim_logger.info "Opening run.log file '#{run_log_file}'"
 
     # make sure to pass in preserve_run_dir
+    run_result = nil
     File.open(run_log_file, 'a') do |run_log|
       run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
       k = OpenStudio::Workflow::Run.new osw_path, run_options
-      sim_logger.info 'Running workflow'
-      k.run
-      sim_logger.info "Final run state is #{k.current_state}"
+      @sim_logger.info 'Running workflow'
+      run_result = k.run
+      @sim_logger.info "Final run state is #{run_result}"
     end
 
     # Save the log to the data point. This does not update while running, rather
@@ -145,60 +146,37 @@ class RunSimulateDataPoint
       raise "Could not find results #{results_file}"
     end
 
-    sim_logger.info 'Saving files/reports back to the server'
+    @sim_logger.info 'Saving files/reports back to the server'
 
     # Post the reports back to the server
     # TODO: check for timeouts and retry
-    Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each do |report|
-      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
-      sim_logger.info "Saving report #{report} to #{url}"
-      RestClient.post(url, file: { display_name: File.basename(report, '.*'),
-                                   type: 'Report',
-                                   attachment: File.new(report, 'rb') })
-    end
+    Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |r| upload_file(r, 'Report') }
 
     report_file = "#{run_dir}/objectives.json"
-    if File.exist? report_file
-      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
-      sim_logger.info "Saving report #{report_file} to #{url}"
-      RestClient.post(url, file: { display_name: File.basename(report_file, '.*'),
-                                   type: 'Report',
-                                   attachment: File.new(report_file, 'rb') })
-    end
+    upload_file(report_file, 'Report') if File.exist?(report_file)
 
     report_file = "#{simulation_dir}/out.osw"
-    if File.exist? report_file
-      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
-      sim_logger.info "Saving report #{report_file} to #{url}"
-      RestClient.post(url,
-                      file: {
-                        display_name: File.basename(report_file, '.*'),
-                        type: 'Report',
-                        attachment: File.new(report_file, 'rb')
-                      },
-                      content_type: 'application/json')
-    end
+    upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
 
-    # Post the zip file of results
-    # TODO: Do not save the _reports file anymore in the workflow gem
-    results_zip = "#{run_dir}/data_point.zip"
-    if File.exist? results_zip
-      url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
-      sim_logger.info "Saving zip #{results_zip} to #{url}"
-      RestClient.post(url, file: { display_name: 'Zip File',
-                                   type: 'Data Point',
-                                   attachment: File.new(results_zip, 'rb') })
-    end
+    report_file = "#{simulation_dir}/in.osm"
+    upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
 
-    @data_point.update(status_message: 'completed normal')
+    report_file = "#{run_dir}/data_point.zip"
+    upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+
+    if run_result != :errored
+      @data_point.set_success_flag
+    else
+      @data_point.set_error_flag
+    end
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     puts log_message
-    sim_logger.info log_message if sim_logger
-    @data_point.set_error_state
+    @sim_logger.info log_message if @sim_logger
+    @data_point.set_error_flag
   ensure
-    sim_logger.info "Finished #{__FILE__}" if sim_logger
-    sim_logger.close if sim_logger
+    @sim_logger.info "Finished #{__FILE__}" if @sim_logger
+    @sim_logger.close if @sim_logger
 
     @data_point.set_complete_state if @data_point
 
@@ -208,8 +186,8 @@ class RunSimulateDataPoint
   # Method to download and unzip the analysis data. This has some logic
   # in order to handle multiple instances trying to download the file at the
   # same time.
-  def initialize_worker(sim_logger)
-    sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
+  def initialize_worker
+    @sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
 
     # If the request is local, then just copy the data over. But how do we
     # test if the request is local?
@@ -219,22 +197,22 @@ class RunSimulateDataPoint
     # Check if the receipt file exists, if so, then just return out of this
     # method immediately
     if File.exist? receipt_file
-      sim_logger.info "receipt_file already exists, moving on"
+      @sim_logger.info 'receipt_file already exists, moving on'
       return true
     end
 
     # only call this block if there is no write_lock nor receipt in the dir
     if File.exist? write_lock_file
-      sim_logger.info "write_lock_file exists, checking for receipt file"
+      @sim_logger.info 'write_lock_file exists, checking for receipt file'
 
       # wait until receipt file appears then return
       loop do
         break if File.exist? receipt_file
-        sim_logger.info "waiting for receipt file to appear"
+        @sim_logger.info 'waiting for receipt file to appear'
         sleep 3
       end
 
-      sim_logger.info "receipt_file appeared, moving on"
+      @sim_logger.info 'receipt_file appeared, moving on'
       return true
     else
       # download the file, but first create the write lock
@@ -242,7 +220,7 @@ class RunSimulateDataPoint
         # create write lock
         download_file = "#{analysis_dir}/analysis.zip"
         download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
-        sim_logger.info "Downloading analysis zip from #{download_url}"
+        @sim_logger.info "Downloading analysis zip from #{download_url}"
 
         File.open(download_file, 'wb') do |saved_file|
           # the following "open" is provided by open-uri
@@ -252,12 +230,12 @@ class RunSimulateDataPoint
         end
 
         # Extract the zip
-        sim_logger.info "Extracting analysis zip to #{analysis_dir}"
+        @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
         OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
 
         # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
         analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
-        sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
+        @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
         a = RestClient.get analysis_json_url
         raise 'Analysis JSON could not be downloaded' unless a.code == 200
         # Parse to JSON to save it again with nice formatting
@@ -265,9 +243,9 @@ class RunSimulateDataPoint
 
         # Find any custom worker files -- should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
         files = Dir["#{analysis_dir}/lib/worker_initialize/*.rb"].map { |n| File.basename(n) }.sort
-        sim_logger.info "The following custom worker initialize files were found #{files}"
+        @sim_logger.info "The following custom worker initialize files were found #{files}"
         files.each do |f|
-          run_file(analysis_dir, 'initialize', f, sim_logger)
+          run_file(analysis_dir, 'initialize', f)
         end
       end
 
@@ -276,12 +254,12 @@ class RunSimulateDataPoint
       File.open(receipt_file, 'w') { |f| f << Time.now }
     end
 
-    sim_logger.info 'Finished worker initialization'
+    @sim_logger.info 'Finished worker initialization'
     true
   end
 
   # Finalize the worker node by running the scripts
-  def finalize_worker(sim_logger)
+  def finalize_worker
   end
 
   # Simple method to write a lock file in order for competing threads to
@@ -300,6 +278,10 @@ class RunSimulateDataPoint
 
   private
 
+  def data_point_url
+    "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/upload_file"
+  end
+
   def analysis_dir
     "#{APP_CONFIG['sim_root_path']}/analysis_#{@data_point.analysis.id}"
   end
@@ -317,11 +299,29 @@ class RunSimulateDataPoint
     Delayed::Worker.logger
   end
 
+  def upload_file(filename, type, display_name = nil, content_type = nil)
+    @sim_logger.info "Saving report #{filename} to #{data_point_url}"
+    display_name = File.basename(filename, '.*') unless display_name
+    response = if content_type
+                 RestClient.post(data_point_url,
+                                 file: { display_name: display_name,
+                                         type: type,
+                                         attachment: File.new(filename, 'rb') },
+                                 content_type: content_type)
+               else
+                 RestClient.post(data_point_url,
+                                 file: { display_name: display_name,
+                                         type: type,
+                                         attachment: File.new(filename, 'rb') })
+               end
+    @sim_logger.info "Saving report responded with #{response}"
+  end
+
   # Run the initialize/finalize scripts
-  def run_file(analysis_dir, state, file, sim_logger)
+  def run_file(analysis_dir, state, file)
     f_fullpath = "#{analysis_dir}/lib/worker_#{state}/#{file}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
-    sim_logger.info "Running #{state} script #{f_fullpath}"
+    @sim_logger.info "Running #{state} script #{f_fullpath}"
 
     # Each worker script has a very specific format and should be loaded and run as a class
     require f_fullpath
@@ -334,15 +334,15 @@ class RunSimulateDataPoint
 
     # check if there is an argument json that accompanies the class
     args = nil
-    sim_logger.info "Looking for argument file #{f_argspath}"
+    @sim_logger.info "Looking for argument file #{f_argspath}"
     if File.exist?(f_argspath)
-      sim_logger.info "argument file exists #{f_argspath}"
+      @sim_logger.info "argument file exists #{f_argspath}"
       args = eval(File.read(f_argspath))
-      sim_logger.info "arguments are #{args}"
+      @sim_logger.info "arguments are #{args}"
     end
 
     r = klass.run(*args)
-    sim_logger.info "Script returned with #{r}"
+    @sim_logger.info "Script returned with #{r}"
 
     klass.finalize if klass.respond_to? :finalize
   end

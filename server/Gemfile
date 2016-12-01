@@ -3,6 +3,9 @@ source 'http://rubygems.org'
 gem 'rails', '4.2'
 gem 'rake', '~> 11.2'
 
+# added for support of the project rakefile
+gem 'colored'
+
 # data modules
 gem 'json', '1.7.7'
 gem 'jbuilder'
@@ -60,7 +63,7 @@ gem 'sprockets-rails'
 gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '1.0.0.rc9'
+gem 'openstudio-analysis', '1.0.0.rc11'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 ## End commonly updated gems

@@ -284,7 +284,7 @@ class AnalysesController < ApplicationController
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
     analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline14]
-    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :download_status]
+    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message]
 
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
     # analysis_states = params[:state] ? [params[:state]] : Analyses.status_states
@@ -318,8 +318,7 @@ class AnalysesController < ApplicationController
                              id: dp.id,
                              analysis_id: dp.analysis_id,
                              status: dp.status,
-                             final_message: dp.status_message,
-                             download_status: dp.download_status
+                             status_message: dp.status_message
                            }
                          end
           }
@@ -335,22 +334,6 @@ class AnalysesController < ApplicationController
           }
         end
       end
-    end
-  end
-
-  def download_status
-    @analysis = Analysis.find(params[:id])
-
-    dps = nil
-    dps = if params[:downloads].nil?
-            @analysis.data_points.where(download_status: 'completed')
-          else
-            @analysis.data_points.where(download_status: params[:downloads])
-          end
-
-    respond_to do |format|
-      #  format.html # new.html.erb
-      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
     end
   end
 

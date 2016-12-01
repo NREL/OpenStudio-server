@@ -134,14 +134,21 @@ def kill_processes(pid_json)
   pid_hash = ::JSON.parse(File.read(pid_json), symbolize_names: true)
   pid_array = []
   pid_array << pid_hash[:mongod_pid] if pid_hash[:mongod_pid]
-  pid_array + pid_hash[:dj_pids] if pid_hash[:dj_pids]
+  pid_array += pid_hash[:dj_pids] if pid_hash[:dj_pids]
   pid_array << pid_hash[:rails_pid] if pid_hash[:rails_pid]
-  pid_array << pid_hash[:child_pids] if pid_hash[:child_pids]
+  pid_array += pid_hash[:child_pids] if pid_hash[:child_pids]
   pid_array.each do |pid|
     begin
       if windows
-        system_return = system('taskkill', '\pid', pid, '\f', '\t')
-        raise StandardError unless system_return
+        # Check if a process with this PID exists before attempting to kill
+        pid_exists = system('tasklist /FI' + ' "PID eq ' + pid.to_s + '" 2>NUL | find /I /N "' + pid.to_s + '">NUL')
+        if pid_exists
+          system_return = system('taskkill', '/pid', pid.to_s, '/f', '/t')
+          raise StandardError unless system_return
+        else
+          $logger.warn "No process with PID #{pid} exists, did not attempt to kill"
+          next
+        end
       else
         ::Process.kill('SIGKILL', pid)
       end
@@ -149,7 +156,7 @@ def kill_processes(pid_json)
       $logger.error "Attempted to kill process with PID `#{pid}`. The success of the attempt is unclear"
       next
     end
-    $logger.error "Killed process with PID `#{pid}`."
+    $logger.debug "Killed process with PID `#{pid}`."
   end
   ::File.delete(pid_json)
 end
@@ -297,14 +304,19 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   $logger.debug "Completed writing local server configuration to #{state_file}"
 end
 
-
 # Kill a PID according to OS
-def kill_pid(pid, name, windows=false)
+def kill_pid(pid, name, windows = false)
   if windows
-    system_return = system('taskkill', '/pid', pid.to_s, '/f')
-    unless system_return
-      $logger.error "Unable to kill the #{name} PID `#{pid}` with forceful taskkill"
-      return false
+    # Check if a process with this PID exists
+    pid_exists = system('tasklist /FI' + ' "PID eq ' + pid.to_s + '" 2>NUL | find /I /N "' + pid.to_s + '">NUL')
+    if pid_exists
+      system_return = system('taskkill', '/pid', pid.to_s, '/f')
+      unless system_return
+        $logger.error "Failed to kill process with PID `#{pid}`"
+        return false
+      end
+    else
+      $logger.warn "No process with PID #{pid} exists, did not attempt to kill"
     end
     $logger.debug "Kill #{name} process with PID `#{pid}`"
   else
@@ -341,7 +353,6 @@ def kill_pid(pid, name, windows=false)
   end
   true
 end
-
 
 # Stop the local server
 #

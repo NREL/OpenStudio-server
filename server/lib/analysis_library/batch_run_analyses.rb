@@ -77,7 +77,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
 
     # Find all the data_points across all analyses
     dp_map = { analysis_id: [], data_point_id: [] }
-    dps = DataPoint.where(status: 'na', download_status: 'na').only(:status, :download_status, :uuid, :analysis)
+    dps = DataPoint.where(status: 'na').only(:status, :uuid, :analysis)
     dps.each do |dp|
       dp.status = 'queued'
       dp.save!

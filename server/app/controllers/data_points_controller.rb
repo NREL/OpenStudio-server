@@ -91,7 +91,7 @@ class DataPointsController < ApplicationController
 
   def status
     # The name :jobs is legacy based on how PAT queries the datapoints. Should we alias this to status?
-    only_fields = [:status, :status_message, :download_status, :analysis_id]
+    only_fields = [:status, :status_message, :analysis_id]
     dps = params[:status] ? DataPoint.where(status: params[:jobs]).only(only_fields) : DataPoint.all.only(only_fields)
 
     respond_to do |format|
@@ -104,8 +104,7 @@ class DataPointsController < ApplicationController
               id: dp.id,
               analysis_id: dp.analysis_id,
               status: dp.status,
-              final_message: dp.status_message,
-              download_status: dp.download_status
+              status_message: dp.status_message
             }
           end
         }
