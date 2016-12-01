@@ -79,10 +79,6 @@ gem 'os'
 
 gem 'rubocop'
 
-if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/
-  gem 'tzinfo-data'
-end
-
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
