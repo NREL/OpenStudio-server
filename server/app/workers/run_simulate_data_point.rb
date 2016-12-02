@@ -118,15 +118,35 @@ class RunSimulateDataPoint
     run_log_file = File.join(run_dir, 'run.log')
     @sim_logger.info "Opening run.log file '#{run_log_file}'"
 
-    # make sure to pass in preserve_run_dir
-    run_result = nil
-    File.open(run_log_file, 'a') do |run_log|
-      run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
+    # try and fail gracefully if the datapoint errors out
+    begin
+      # make sure to pass in preserve_run_dir
+      run_result = nil
+      File.open(run_log_file, 'a') do |run_log|
+        run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
-      k = OpenStudio::Workflow::Run.new osw_path, run_options
-      @sim_logger.info 'Running workflow'
-      run_result = k.run
-      @sim_logger.info "Final run state is #{run_result}"
+        k = OpenStudio::Workflow::Run.new osw_path, run_options
+        @sim_logger.info 'Running workflow'
+        run_result = k.run
+        @sim_logger.info "Final run state is #{run_result}"
+      end
+    rescue => e
+      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+      puts log_message
+      @sim_logger.info log_message if @sim_logger
+      @data_point.set_error_flag
+      @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
+
+      report_file = "#{simulation_dir}/out.osw"
+      upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+
+      report_file = "#{run_dir}/data_point.zip"
+      upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+    ensure
+      @sim_logger.info "Finished #{__FILE__}" if @sim_logger
+      @sim_logger.close if @sim_logger
+      @data_point.set_complete_state if @data_point
+      return true
     end
 
     # Save the log to the data point. This does not update while running, rather
