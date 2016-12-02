@@ -16,11 +16,26 @@
       "design_alternatives":[
         {
           "name":"datapoint_1",
-          "description":"Datapoint 1"
-        },
-        {
+          "description":"Datapoint 1",
+          "options": [
+            {
+              "measure_name": "adjust_thermostat_setpoints_by_degrees",
+              "workflow_index": 0,
+              "name": "Option 1",
+              "description": "Option 1 Description"
+            }
+          ]
+        }, {
           "name":"datapoint_2",
-          "description":"Datapoint 2"
+          "description":"Datapoint 2",
+          "options":[
+            {
+              "measure_name": "adjust_thermostat_setpoints_by_degrees",
+              "workflow_index": 0,
+              "name": "Option 2",
+              "description": "Option 2 Description"
+            }
+          ]
         }
       ],
       "workflow":[

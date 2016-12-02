@@ -92,6 +92,9 @@ class RunSimulateDataPoint
       ],
       measure_paths: ['../measures']
     }
+    if @data_point.dp_seed
+      osw_options[:seed] = @data_point.dp_seed unless @data_point.dp_seed == ''
+    end
     t = OpenStudio::Analysis::Translator::Workflow.new(
       "#{simulation_dir}/analysis.json",
       osw_options
@@ -115,69 +118,82 @@ class RunSimulateDataPoint
     run_log_file = File.join(run_dir, 'run.log')
     @sim_logger.info "Opening run.log file '#{run_log_file}'"
 
-    # make sure to pass in preserve_run_dir
-    run_result = nil
-    File.open(run_log_file, 'a') do |run_log|
-      run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
+    # try and fail gracefully if the datapoint errors out
+    begin
+      # make sure to pass in preserve_run_dir
+      run_result = nil
+      File.open(run_log_file, 'a') do |run_log|
+        run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
-      k = OpenStudio::Workflow::Run.new osw_path, run_options
-      @sim_logger.info 'Running workflow'
-      run_result = k.run
-      @sim_logger.info "Final run state is #{run_result}"
-    end
+        k = OpenStudio::Workflow::Run.new osw_path, run_options
+        @sim_logger.info 'Running workflow'
+        run_result = k.run
+        @sim_logger.info "Final run state is #{run_result}"
+      end
+      if run_result.to_s == 'errored'
+        @data_point.set_error_flag
+        @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
 
-    # Save the log to the data point. This does not update while running, rather
-    # it is saved at the very end of the simulation.
-    if File.exist? run_log_file
-      @data_point.sdp_log_file = File.read(run_log_file).lines
-    end
+        report_file = "#{simulation_dir}/out.osw"
+        puts "Uploading #{report_file} which exists? #{File.exist?(report_file)}"
+        upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
 
-    # Save the results to the database - i was PUTing these to the server,
-    # but the values were not be typed correctly within RestClient. Since
-    # this is running as a delayed job, then access to mongoid methods is okay.
-    results_file = "#{run_dir}/measure_attributes.json"
-    if File.exist? results_file
-      results = JSON.parse(File.read(results_file), symbolize_names: true)
-      @data_point.update(results: results)
-    else
-      raise "Could not find results #{results_file}"
-    end
+        report_file = "#{run_dir}/data_point.zip"
+        @sim_logger.info "Uploading #{report_file} which exists? #{File.exist?(report_file)}"
+        upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+      else
+        # Save the log to the data point. This does not update while running, rather
+        # it is saved at the very end of the simulation.
+        if File.exist? run_log_file
+          @data_point.sdp_log_file = File.read(run_log_file).lines
+        end
 
-    @sim_logger.info 'Saving files/reports back to the server'
+        # Save the results to the database - i was PUTing these to the server,
+        # but the values were not be typed correctly within RestClient. Since
+        # this is running as a delayed job, then access to mongoid methods is okay.
+        results_file = "#{run_dir}/measure_attributes.json"
+        if File.exist? results_file
+          results = JSON.parse(File.read(results_file), symbolize_names: true)
+          @data_point.update(results: results)
+        else
+          raise "Could not find results #{results_file}"
+        end
 
-    # Post the reports back to the server
-    # TODO: check for timeouts and retry
-    Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |r| upload_file(r, 'Report') }
+        @sim_logger.info 'Saving files/reports back to the server'
 
-    report_file = "#{run_dir}/objectives.json"
-    upload_file(report_file, 'Report') if File.exist?(report_file)
+        # Post the reports back to the server
+        # TODO: check for timeouts and retry
+        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |r| upload_file(r, 'Report') }
 
-    report_file = "#{simulation_dir}/out.osw"
-    upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+        report_file = "#{run_dir}/objectives.json"
+        upload_file(report_file, 'Report') if File.exist?(report_file)
 
-    report_file = "#{simulation_dir}/in.osm"
-    upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+        report_file = "#{simulation_dir}/out.osw"
+        upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
 
-    report_file = "#{run_dir}/data_point.zip"
-    upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+        report_file = "#{simulation_dir}/in.osm"
+        upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
 
-    if run_result != :errored
-      @data_point.set_success_flag
-    else
+        report_file = "#{run_dir}/data_point.zip"
+        upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+
+        if run_result != :errored
+          @data_point.set_success_flag
+        else
+          @data_point.set_error_flag
+        end
+      end
+    rescue => e
+      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+      puts log_message
+      @sim_logger.info log_message if @sim_logger
       @data_point.set_error_flag
+    ensure
+      @sim_logger.info "Finished #{__FILE__}" if @sim_logger
+      @sim_logger.close if @sim_logger
+      @data_point.set_complete_state if @data_point
+      true
     end
-  rescue => e
-    log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-    puts log_message
-    @sim_logger.info log_message if @sim_logger
-    @data_point.set_error_flag
-  ensure
-    @sim_logger.info "Finished #{__FILE__}" if @sim_logger
-    @sim_logger.close if @sim_logger
-
-    @data_point.set_complete_state if @data_point
-
-    true
   end
 
   # Method to download and unzip the analysis data. This has some logic

@@ -63,8 +63,8 @@ gem 'sprockets-rails'
 gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '1.0.0.rc11'
-# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
+gem 'openstudio-analysis', '1.0.0.rc12'
+# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'multi-seed-support'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 ## End commonly updated gems
 gem 'openstudio-standards', '0.1.4'
@@ -79,10 +79,6 @@ gem 'os'
 
 gem 'rubocop'
 
-if RUBY_PLATFORM =~ /win/ || RUBY_PLATFORM =~ /mingw/
-  gem 'tzinfo-data'
-end
-
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
@@ -96,7 +92,6 @@ group :development, :test do
   gem 'rspec-retry'
   gem 'rspec-rails'
 
-  gem 'rubocop', require: false
   gem 'rubocop-checkstyle_formatter', require: false
 
   gem 'mongoid-rspec'
