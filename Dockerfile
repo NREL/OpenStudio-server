@@ -12,6 +12,7 @@ ARG bundle_args="--without development test"
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		autoconf \
+		apt-transport-https \
 		bison \
 	    build-essential \
 		bzip2 \
