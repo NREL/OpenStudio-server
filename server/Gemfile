@@ -72,7 +72,7 @@ gem 'openstudio-aws', '~> 0.4'
 
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
-gem 'oj'
+gem 'oj', '=2.17.5' # Next release (2.18.0) doesn't install on Windows
 gem 'rest-client'
 gem 'libxml-ruby', platforms: :ruby
 gem 'os'
