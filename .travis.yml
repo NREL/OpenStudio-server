@@ -1,7 +1,7 @@
 branches:
   only:
     - /^dockerize.*$/
-    - fix_pid_kill
+    - multi-seed-support
 matrix:
   allow_failures:
     - os: linux

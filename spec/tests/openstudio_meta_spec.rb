@@ -87,9 +87,9 @@ RSpec.describe OpenStudioMeta do
     expect(start_local).to be true
   end
 
-  it 'run analysis' do
+  it 'run simple analysis' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/the_project.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
