@@ -142,65 +142,60 @@ class RunSimulateDataPoint
 
       report_file = "#{run_dir}/data_point.zip"
       upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+    else
+      begin
+        # Save the log to the data point. This does not update while running, rather
+        # it is saved at the very end of the simulation.
+        if File.exist? run_log_file
+          @data_point.sdp_log_file = File.read(run_log_file).lines
+        end
+
+        # Save the results to the database - i was PUTing these to the server,
+        # but the values were not be typed correctly within RestClient. Since
+        # this is running as a delayed job, then access to mongoid methods is okay.
+        results_file = "#{run_dir}/measure_attributes.json"
+        if File.exist? results_file
+          results = JSON.parse(File.read(results_file), symbolize_names: true)
+          @data_point.update(results: results)
+        else
+          raise "Could not find results #{results_file}"
+        end
+
+        @sim_logger.info 'Saving files/reports back to the server'
+
+        # Post the reports back to the server
+        # TODO: check for timeouts and retry
+        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |r| upload_file(r, 'Report') }
+
+        report_file = "#{run_dir}/objectives.json"
+        upload_file(report_file, 'Report') if File.exist?(report_file)
+
+        report_file = "#{simulation_dir}/out.osw"
+        upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+
+        report_file = "#{simulation_dir}/in.osm"
+        upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+
+        report_file = "#{run_dir}/data_point.zip"
+        upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+
+        if run_result != :errored
+          @data_point.set_success_flag
+        else
+          @data_point.set_error_flag
+        end
+      rescue => e
+        log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+        puts log_message
+        @sim_logger.info log_message if @sim_logger
+        @data_point.set_error_flag
+      end
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
       @sim_logger.close if @sim_logger
       @data_point.set_complete_state if @data_point
-      return true
+      true
     end
-
-    # Save the log to the data point. This does not update while running, rather
-    # it is saved at the very end of the simulation.
-    if File.exist? run_log_file
-      @data_point.sdp_log_file = File.read(run_log_file).lines
-    end
-
-    # Save the results to the database - i was PUTing these to the server,
-    # but the values were not be typed correctly within RestClient. Since
-    # this is running as a delayed job, then access to mongoid methods is okay.
-    results_file = "#{run_dir}/measure_attributes.json"
-    if File.exist? results_file
-      results = JSON.parse(File.read(results_file), symbolize_names: true)
-      @data_point.update(results: results)
-    else
-      raise "Could not find results #{results_file}"
-    end
-
-    @sim_logger.info 'Saving files/reports back to the server'
-
-    # Post the reports back to the server
-    # TODO: check for timeouts and retry
-    Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |r| upload_file(r, 'Report') }
-
-    report_file = "#{run_dir}/objectives.json"
-    upload_file(report_file, 'Report') if File.exist?(report_file)
-
-    report_file = "#{simulation_dir}/out.osw"
-    upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
-
-    report_file = "#{simulation_dir}/in.osm"
-    upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
-
-    report_file = "#{run_dir}/data_point.zip"
-    upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
-
-    if run_result != :errored
-      @data_point.set_success_flag
-    else
-      @data_point.set_error_flag
-    end
-  rescue => e
-    log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-    puts log_message
-    @sim_logger.info log_message if @sim_logger
-    @data_point.set_error_flag
-  ensure
-    @sim_logger.info "Finished #{__FILE__}" if @sim_logger
-    @sim_logger.close if @sim_logger
-
-    @data_point.set_complete_state if @data_point
-
-    true
   end
 
   # Method to download and unzip the analysis data. This has some logic
