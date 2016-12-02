@@ -46,8 +46,12 @@ class RunSimulateDataPoint
   end
 
   def perform
+    # Logger for the simulate datapoint
+    @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
+
+    # Error if @datapoint doesn't exist
     if @data_point.nil?
-      status_message = 'Could not find datapoint'
+      @sim_logger = 'Could not find datapoint; @datapoint was nil'
       return
     end
 
@@ -59,8 +63,7 @@ class RunSimulateDataPoint
     FileUtils.rm_rf run_dir if Dir.exist? run_dir
     FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
 
-    # Logger for the simulate datapoint
-    @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
+    # Register meta-level info
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     @sim_logger.info "Analysis directory is #{analysis_dir}"
     @sim_logger.info "Simulation directory is #{simulation_dir}"
@@ -85,15 +88,14 @@ class RunSimulateDataPoint
     osw_path = "#{simulation_dir}/data_point.osw"
     # PAT puts seeds in "seeds" folder (not "seed")
     osw_options = {
-      file_paths: [
-        '../weather',
-        '../seeds',
-        '../seed'
-      ],
+      file_paths: %w(../weather ../seeds ../seed),
       measure_paths: ['../measures']
     }
     if @data_point.dp_seed
       osw_options[:seed] = @data_point.dp_seed unless @data_point.dp_seed == ''
+    end
+    if @data_point.da_descriptions
+      osw_options[:da_descriptions] = @data_point.da_descriptions unless @data_point.da_description == []
     end
     t = OpenStudio::Analysis::Translator::Workflow.new(
       "#{simulation_dir}/analysis.json",
@@ -108,19 +110,12 @@ class RunSimulateDataPoint
 
     @sim_logger.info 'Creating Workflow Manager instance'
     @sim_logger.info "Directory is #{simulation_dir}"
-
-    adapter_options = {
-      workflow_filename: File.basename(osw_path),
-      datapoint_filename: "#{simulation_dir}/data_point.json",
-      analysis_filename: "#{analysis_dir}/analysis.json"
-    }
-
     run_log_file = File.join(run_dir, 'run.log')
     @sim_logger.info "Opening run.log file '#{run_log_file}'"
 
-    # try and fail gracefully if the datapoint errors out
+    # Fail gracefully if the datapoint errors out by returning the zip and out.osw
     begin
-      # make sure to pass in preserve_run_dir
+      # Make sure to pass in preserve_run_dir
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
         run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
@@ -130,7 +125,7 @@ class RunSimulateDataPoint
         run_result = k.run
         @sim_logger.info "Final run state is #{run_result}"
       end
-      if run_result.to_s == 'errored'
+      if run_result == :errored
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
 
@@ -148,7 +143,7 @@ class RunSimulateDataPoint
           @data_point.sdp_log_file = File.read(run_log_file).lines
         end
 
-        # Save the results to the database - i was PUTing these to the server,
+        # Save the results to the database - I was PUTing these to the server,
         # but the values were not be typed correctly within RestClient. Since
         # this is running as a delayed job, then access to mongoid methods is okay.
         results_file = "#{run_dir}/measure_attributes.json"
