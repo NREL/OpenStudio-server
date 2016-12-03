@@ -74,6 +74,13 @@ gem 'os'
 
 gem 'rubocop'
 
+# Docker required js runtime
+group :docker do
+  gem 'execjs'
+  gem 'libv8'
+  gem 'therubyracer', :platforms => :ruby
+end
+
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
