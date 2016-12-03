@@ -27,11 +27,6 @@ gem 'net-scp'
 gem 'net-ssh'
 gem 'net-sftp'
 
-# javascript
-# gem 'libv8', platforms: :ruby
-gem 'execjs'
-gem 'therubyracer', platforms: :ruby
-
 # other useful gems
 gem 'parallel'
 gem 'sys-filesystem'
@@ -74,10 +69,17 @@ gem 'msgpack', '~> 1.0'
 gem 'multi_json'
 gem 'oj', '=2.17.5' # Next release (2.18.0) doesn't install on Windows
 gem 'rest-client'
-gem 'libxml-ruby', platforms: :ruby
+gem 'libxml-ruby'
 gem 'os'
 
 gem 'rubocop'
+
+# Docker required js runtime
+group :docker do
+  gem 'execjs'
+  gem 'libv8'
+  gem 'therubyracer', :platforms => :ruby
+end
 
 group :development, :test do
   gem 'sextant' # navigate to /rails/routes to see routes

@@ -321,12 +321,12 @@ class InstallGems
     rake_bin = File.absolute_path('./../gems/bin/rake/')
     sys_cmds = []
     sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5"
-    sys_cmds << "#{$ruby_path} #{bundler_bin} update"
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test --without docker"
     else
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test docker"
     end
+    sys_cmds << "#{$ruby_path} #{bundler_bin} update"
     sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
     sys_call = sys_cmds.join(' && ')
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]

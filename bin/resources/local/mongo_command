@@ -72,7 +72,11 @@ puts error_msg && exit(3) unless error_msg.empty?
 # Create the system call to use
 ::Dir.chdir(File.absolute_path(invocation_dir))
 sys_call = " --port #{options[:port]} --logpath \"#{log_dir}/mongo.log\" --dbpath \"#{db_dir}\""
-sys_call = RUBY_PLATFORM != [/bccwin/i, /cygwin/i, /djgpp/i, /mingw/i, /mswin/i, /wince/i] ? './mongod' + sys_call : 'mongod.exe' + sys_call
+if RUBY_PLATFORM == [/bccwin/i, /cygwin/i, /djgpp/i, /mingw/i, /mswin/i, /wince/i] || ENV['OS'] == 'Windows_NT'
+  sys_call = 'mongod.exe' + sys_call
+else
+  sys_call = './mongod' + sys_call
+end
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
 # Execute the system call
