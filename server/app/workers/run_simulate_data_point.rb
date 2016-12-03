@@ -46,6 +46,12 @@ class RunSimulateDataPoint
   end
 
   def perform
+    # Create the analysis, simulation, and run directory
+    FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
+    FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
+    FileUtils.rm_rf run_dir if Dir.exist? run_dir
+    FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
+
     # Logger for the simulate datapoint
     @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
 
@@ -56,12 +62,6 @@ class RunSimulateDataPoint
     end
 
     @data_point.set_start_state
-
-    # Create the analysis, simulation, and run directory
-    FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
-    FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
-    FileUtils.rm_rf run_dir if Dir.exist? run_dir
-    FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
 
     # Register meta-level info
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
@@ -95,7 +95,7 @@ class RunSimulateDataPoint
       osw_options[:seed] = @data_point.dp_seed unless @data_point.dp_seed == ''
     end
     if @data_point.da_descriptions
-      osw_options[:da_descriptions] = @data_point.da_descriptions unless @data_point.da_description == []
+      osw_options[:da_descriptions] = @data_point.da_descriptions unless @data_point.da_descriptions == []
     end
     t = OpenStudio::Analysis::Translator::Workflow.new(
       "#{simulation_dir}/analysis.json",

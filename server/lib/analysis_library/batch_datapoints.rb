@@ -93,6 +93,7 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
       raise 'Length of discrete_values passed in variables was not equal across variables.' if values_length.uniq.length != 1
 
       # Create Datapoint Samples
+      logger.info 'Creating datapoint samples'
       samples = []
       for i in 0..(values_length[0] - 1)
         instance = {}
@@ -103,6 +104,7 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
       end
 
       # Add the datapoints to the database
+      logger.info 'Adding the datapoints to the database'
       isample = 0
       dp_da_options = @analysis.problem['design_alternatives'] ? true : false
       samples.each do |sample| # do this in parallel
@@ -111,19 +113,18 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
         if dp_da_options
           dp_seed, dp_da_descriptions = false
           instance_da_opts = @analysis.problem['design_alternatives'][isample]
-          if instance_da_opts['name']
-            dp_name = instance_da_opts['name']
-          end
-          if instance_da_opts['description']
-            dp_description = instance_da_opts['description']
-          end
-          if instance_da_opts['seed']
-            dp_seed = File.basename instance_da_opts['seed']['path']
-          end
+          dp_name = instance_da_opts['name'] if instance_da_opts['name']
+          dp_description = instance_da_opts['description'] if instance_da_opts['description']
+          dp_seed = File.basename instance_da_opts['seed']['path'] if instance_da_opts['seed']
           if instance_da_opts['options']
             dp_da_descriptions = []
             @analysis.problem['workflow'].each do |step_def|
-              wf_da_step = instance_da_opts['options'].select {|h| h['workflow_index'] == step_def['workflow_index']}
+              wf_da_step = instance_da_opts['options'].select {|h| h['workflow_index'].to_i == step_def['workflow_index'].to_i}
+              if wf_da_step.length != 1
+                fail "Invalid OSA; multiple workflow_index of #{step_def['workflow_index']} found in the design_alternative options"
+              else
+                wf_da_step = wf_da_step[0]
+              end
               dp_da_descriptions << {name: wf_da_step['name'], description: wf_da_step['description']}
             end
           end
