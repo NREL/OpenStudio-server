@@ -35,8 +35,7 @@
 
 class PagesController < ApplicationController
   # static page
-  def about
-  end
+  def about; end
 
   # status page
   def status

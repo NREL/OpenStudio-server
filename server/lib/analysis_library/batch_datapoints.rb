@@ -119,13 +119,13 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
           if instance_da_opts['options']
             dp_da_descriptions = []
             @analysis.problem['workflow'].each do |step_def|
-              wf_da_step = instance_da_opts['options'].select {|h| h['workflow_index'].to_i == step_def['workflow_index'].to_i}
+              wf_da_step = instance_da_opts['options'].select { |h| h['workflow_index'].to_i == step_def['workflow_index'].to_i }
               if wf_da_step.length != 1
-                fail "Invalid OSA; multiple workflow_index of #{step_def['workflow_index']} found in the design_alternative options"
+                raise "Invalid OSA; multiple workflow_index of #{step_def['workflow_index']} found in the design_alternative options"
               else
                 wf_da_step = wf_da_step[0]
               end
-              dp_da_descriptions << {name: wf_da_step['name'], description: wf_da_step['description']}
+              dp_da_descriptions << { name: wf_da_step['name'], description: wf_da_step['description'] }
             end
           end
           if dp_seed && dp_da_descriptions

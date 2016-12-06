@@ -267,8 +267,7 @@ class RunSimulateDataPoint
   end
 
   # Finalize the worker node by running the scripts
-  def finalize_worker
-  end
+  def finalize_worker; end
 
   # Simple method to write a lock file in order for competing threads to
   # wait until this operation is complete before continuing.
