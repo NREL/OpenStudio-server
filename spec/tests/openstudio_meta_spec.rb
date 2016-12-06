@@ -104,7 +104,7 @@ RSpec.describe OpenStudioMeta do
 
     status = 'queued'
     begin
-      ::Timeout.timeout(90) do
+      ::Timeout.timeout(120) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
@@ -163,7 +163,7 @@ RSpec.describe OpenStudioMeta do
 
     status = 'queued'
     begin
-      ::Timeout.timeout(90) do
+      ::Timeout.timeout(120) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
