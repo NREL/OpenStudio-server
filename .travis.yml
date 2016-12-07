@@ -1,29 +1,32 @@
 branches:
   only:
-    - /^dockerize.*$/
-    - multi-seed-support
+  - /^dockerize.*$/
+  - multi-seed-support
 matrix:
   allow_failures:
-    - os: linux
+  - os: linux
   include:
   - os: linux
-    env: 
-      - REDHAT_BUILD: true
-      - RUN_OPTS: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    env:
+    - REDHAT_BUILD: true
+    - RUN_OPTS: --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro
     services:
-      - docker
+    - docker
   - os: linux
     env:
-      - REDHAT_BUILD: false
-      - OSX_BUILD: false
+    - REDHAT_BUILD: false
+    - OSX_BUILD: false
     services:
-      - mongod
+    - mongod
     sudo: required
   - os: osx
     osx_image: xcode7.3
     env:
-      - REDHAT_BUILD: false
-      - OSX_BUILD: true
+    - REDHAT_BUILD: false
+    - OSX_BUILD: true
 before_install: ./ci/travis/setup.sh
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
+notifications:
+  slack:
+    secure: giJ9rjPF8QI4UREcBVoHDHe8S1O9NgJbWlZiWnRb1OIjH+XL8kEpZUZ8vsKK/kv8c/ItOpKSn1ZqFBuZjVcRF6K64HpkvlKCYHXtfoSvqyirRTWg7OHKWKKoqRTveFb8eXoKtH7qLUkrltlhQF4/rO1WiIpFXtrQ6E3sok0bjAICfGFGO0uca+QF2DTQgm/8zh7jgcF+eO0s0GWumPim2OPledOg58lHMwd96bBK0CcOluxCd4dwsJ7kr3fUtvyM3dG9Kv2QjIhNhLacVhPC14bPsE2HLsdpugS/Dzq5sqEyARy7pIvAa/obSJiOc8kL+UA6o9jas6oQ6guU5i2zb7RJkFNpcGBnermkcNPcLWZytx2J7zfaCkMdkfdCg0XRdcUJNC/NgIA3jr84Be8PMjabe21pwhtcxPUR7emh0v71icW5vHk5Dpo4fqD9Leml+KEZW5LciDP+4TvTkiLA9yE4ZApXzRd8ChopzpaQsRdwwf6SAGNa6sFPHseJhq91Gg7C8/tO/ArTqdIeY63zD8hnyX1nArjuY7QUUeDgkcN0q9JVqEeK6hzoXz9DXe+YPfunAUfwG48pEXzEOcgKqt0a1fYNFzosvmbjcu4gRJ5vaL3UUspnNC0IYMg0TfL/NTj6wOToU5F1ptVjXQWV+6FUIpTaD6XO2/2HYXWrZBo=
