@@ -59,7 +59,7 @@ gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'a5101a2
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '1.0.0.rc13'
+gem 'openstudio-analysis', '1.0.0.rc14'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'multi-seed-support'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 ## End commonly updated gems
