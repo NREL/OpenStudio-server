@@ -374,6 +374,8 @@ class InstallGems
       FileUtils.rm_rf(File.join(dest, 'reports'))
       FileUtils.rm_rf(File.join(dest, 'worker-nodes'))
 
+      Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each {|p| FileUtils.rm_rf(p)}
+      Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each {|p| FileUtils.rm_rf(p)}
       platform = 'darwin'
       if /win/.match(RUBY_PLATFORM) || /mingw/.match(RUBY_PLATFORM)
         platform = 'win32'
