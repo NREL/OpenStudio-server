@@ -34,6 +34,6 @@
 #*******************************************************************************
 
 module OpenstudioServer
-  VERSION = '1.21.14'
+  VERSION = '1.21.15-nrcan'
   VERSION_EXT = '' # with preceding - or +
 end
