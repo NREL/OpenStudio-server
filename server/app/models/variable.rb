@@ -1,3 +1,38 @@
+#*******************************************************************************
+# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# (1) Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# (2) Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# (3) Neither the name of the copyright holder nor the names of any contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission from the respective party.
+#
+# (4) Other than as required in clauses (1) and (2), distributions in any form
+# of modifications or other derivative works may not use the "OpenStudio"
+# trademark, "OS", "os", or any other confusingly similar designation without
+# specific prior written permission from Alliance for Sustainable Energy, LLC.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES
+# GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#*******************************************************************************
+
 class Variable
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -206,14 +241,28 @@ class Variable
   end
 
   # start with a hash and then create the hash_of_arrays
-  def self.pivot_array(analysis_id)
+  def self.pivot_array(analysis_id, r_session)
     pivot_variables = Variable.pivots(analysis_id)
 
     pivot_hash = {}
     pivot_variables.each do |var|
       Rails.logger.info "Adding variable '#{var.name}' to pivot list"
-      Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
-      values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
+      if (var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence')
+        Rails.logger.info("creating integer sequence for pivot variable by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
+        @r = r_session
+        @r.command(varlow: var.lower_bounds_value) do
+        %{
+          values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+          weights <- rep(1/length(values),length(values))
+        }
+        end
+        values = @r.converse 'values'
+        values = values.map(&:to_i)
+        weights = @r.converse 'weights'
+      else
+        Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
+        values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
+      end
       Rails.logger.info "pivot variable values are #{values}"
       pivot_hash[var.uuid] = values
     end
