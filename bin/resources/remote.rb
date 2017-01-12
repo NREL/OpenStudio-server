@@ -144,7 +144,7 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       start_time = ::Time.now
 
       # Create the server & worker
-      aws_conn_save = ::File.join(project_dir, "#{aws_instance_options[:cluster_name]}.json")
+      aws_conn_save = ::File.join(project_dir, 'clusters', "#{aws_instance_options[:cluster_name]}.json")
       $logger.info "Saving AWS connection information to #{aws_conn_save}"
       aws.create_server(server_options)
       aws.save_cluster_info(aws_conn_save)
