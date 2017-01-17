@@ -53,7 +53,7 @@ end
 #
 def is_port_open?(port)
   begin
-    ::Timeout.timeout(1) do
+    ::Timeout.timeout(5) do
       begin
         s = TCPSocket.new('localhost', port)
         s.close
