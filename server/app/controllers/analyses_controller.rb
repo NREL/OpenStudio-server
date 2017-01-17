@@ -283,101 +283,58 @@ class AnalysesController < ApplicationController
 
   # version this in order to allow for analyses/status.json to return all the analyses with the status
   # @param :id [String] The ID of the specific analysis to get the status
-  # @param :jobs [String] Constraint on the data point completion (e.g. started, queued, completed)
+  # @param :jobs [String] Constraint on the datapoint completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
-    analysis_only_fields = [:status, :analysis_type, :jobs]
-    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :download_status]
+    analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline14]
+    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message]
 
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
     # analysis_states = params[:state] ? [params[:state]] : Analyses.status_states
 
-    if params[:version] == '2'
-      logger.info 'Version 2 of analyses/status'
-      @analyses = params[:id] ? Analysis.where(id: params[:id]).only(analysis_only_fields) : Analysis.all.only(analysis_only_fields)
+    logger.info 'Version 2 of analyses/status'
+    @analyses = params[:id] ? Analysis.where(id: params[:id]).only(analysis_only_fields) : Analysis.all.only(analysis_only_fields)
 
-      logger.info "there are #{@analyses.size} analyses"
+    logger.info "there are #{@analyses.size} analyses"
 
-      respond_to do |format|
-        format.json do
-          render json: {
-            analyses: @analyses.map do |a|
-              {
-                _id: a.id,
-                id: a.id,
-                status: a.status,
-                analysis_type: a.analysis_type,
-                jobs: a.jobs.order_by(:index.asc).map do |j|
-                        {
-                          index: j.index,
-                          analysis_type: j.analysis_type,
-                          status: j.status,
-                          status_message: j.status_message
-                        }
-                      end,
-                data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
-                               {
-                                 _id: dp.id,
-                                 id: dp.id,
-                                 analysis_id: dp.analysis_id,
-                                 status: dp.status,
-                                 final_message: dp.status_message,
-                                 download_status: dp.download_status
-                               }
-                             end
-              }
-            end
-
+    respond_to do |format|
+      format.json do
+        data = @analyses.map do |a|
+          {
+              _id: a.id,
+              id: a.id,
+              status: a.status,
+              analysis_type: a.analysis_type,
+              run_flag: a.run_flag,
+              exit_on_guideline14: a.exit_on_guideline14,
+              jobs: a.jobs.order_by(:index.asc).map do |j|
+                {
+                    index: j.index,
+                    analysis_type: j.analysis_type,
+                    status: j.status,
+                    status_message: j.status_message
+                }
+              end,
+              data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
+                {
+                    _id: dp.id,
+                    id: dp.id,
+                    analysis_id: dp.analysis_id,
+                    status: dp.status,
+                    status_message: dp.status_message
+                }
+              end
           }
         end
-      end
 
-    else
-      @analysis = Analysis.where(id: params[:id])
-
-      if @analysis.size > 1
-        respond_to do |format|
-          format.json do
-            render json: { error: 'Error trying to get status of more than one Analysis. Try version 2 of /analyses/status.json?version=2' }, status: :unprocessable_entity
-          end
-        end
-      elsif @analysis.size == 0
-        respond_to do |format|
-          format.json do
-            render json: {}
-          end
-        end
-      else
-        @analysis = @analysis.first
-        dps = nil
-        if params[:jobs]
-          dps = @analysis.data_points.where(status: params[:jobs]).only(data_point_only_fields)
+        if data.size == 1
+          render json: {
+              analysis: data.first
+          }
         else
-          dps = @analysis.data_points.only(data_point_only_fields)
-        end
-
-        respond_to do |format|
-          #  format.html # new.html.erb
-          format.json do
-            render json: {
-              analysis: {
-                _id: @analysis.id,
-                id: @analysis.id,
-                status: @analysis.status,
-                analysis_type: @analysis.analysis_type,
-                jobs: @analysis.jobs.order_by(:index.asc)
-              },
-              data_points: dps.map do |dp|
-                             {
-                               _id: dp.id,
-                               id: dp.id,
-                               status: dp.status,
-                               final_message: dp.status_message,
-                               download_status: dp.download_status
-                             }
-                           end
-            }
-          end
+          render json: {
+              analyses: data
+          }
         end
       end
     end
@@ -468,7 +425,7 @@ class AnalysesController < ApplicationController
       @paretos << temp_pareto
       @pareto_data_points[p] = temp_pareto.data_points
       @pareto_names << temp_pareto.name
-    end 
+    end
 
     # include all data?
     logger.info("all_data param: #{params[:all_data]}")
@@ -934,7 +891,7 @@ class AnalysesController < ApplicationController
 
     # Eventually use this where the timestamp is processed as part of the request to save time
     # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
-    
+
     if datapoint_ids
       # check if datapoint_ids is an array or a single value
       unless datapoint_ids.kind_of?(Array)

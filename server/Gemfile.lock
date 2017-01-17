@@ -307,5 +307,8 @@ DEPENDENCIES
   therubyracer
   uglifier (>= 1.0.3)
 
+RUBY VERSION
+   ruby 2.0.0p648
+
 BUNDLED WITH
-   1.13.1
+   1.13.6
