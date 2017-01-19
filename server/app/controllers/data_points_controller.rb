@@ -49,7 +49,6 @@ class DataPointsController < ApplicationController
   # GET /data_points/1.json
   def show
     @data_point = DataPoint.find(params[:id])
-    @files = []
     respond_to do |format|
       if @data_point
         format.html do
@@ -62,22 +61,6 @@ class DataPointsController < ApplicationController
           end
 
           @data_point.set_variable_values ? @set_variable_values = @data_point.set_variable_values : @set_variable_values = []
-
-          if @data_point.openstudio_datapoint_file_name
-            local_analysis_dir = "#{File.dirname(@data_point.openstudio_datapoint_file_name.to_s)}/#{File.basename(@data_point.openstudio_datapoint_file_name.to_s, '.*')}"
-            logger.debug "Local analysis dir is #{local_analysis_dir}"
-            Dir["#{local_analysis_dir}/reports/*"].each do |h|
-              new_h = {}
-              new_h[:filename] = h
-              new_h[:name] = File.basename(h, '.*')
-              new_h[:extname] = File.extname(h).delete('.').upcase
-              new_h[:display_name] = new_h[:name].titleize
-
-              # only save the csvs and htmls/htms
-              next unless %w(HTML HTM CSV JSON).include? new_h[:extname]
-              @files << new_h
-            end
-          end
         end
 
         format.json do
@@ -94,11 +77,14 @@ class DataPointsController < ApplicationController
             end
           end
 
-          render json: @data_point
+          # look up the objective functions and report
+          # @data_point['objective_function_results'] = {}
+
+          render json: { data_point: @data_point }
         end
       else
-        format.html { redirect_to projects_path, notice: 'Could not find data point' }
-        format.json { render json: { error: 'No Data Point' }, status: :unprocessable_entity }
+        format.html { redirect_to projects_path, notice: 'Could not find datapoint' }
+        format.json { render json: { error: 'No Datapoint' }, status: :unprocessable_entity }
       end
     end
   end
