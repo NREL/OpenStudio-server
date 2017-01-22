@@ -9,6 +9,8 @@ dependencies:
     - "~/docker"
   pre:
     - sudo pip install --upgrade docker-compose
+#    - curl -L https://github.com/docker/compose/releases/download/1.10.0/docker-compose-`uname -s`-`uname -m` > /home/ubuntu/bin/docker-compose
+#    - chmod +x /home/ubuntu/bin/docker-compose
   override:
     - docker volume create --name=osdata
     - if [[ -e ~/docker/rserve.tar ]]; then docker load -i ~/docker/rserve.tar; fi
@@ -16,6 +18,7 @@ dependencies:
     - docker images --all
     - docker --version
     - docker-compose --version
+    - which docker-compose
     - docker-compose -f docker-compose.test.yml build --pull
     - mkdir -p ~/docker; docker save nrel/openstudio-rserve > ~/docker/rserve.tar
     - mkdir -p ~/docker; docker save nrel/openstudio-server > ~/docker/server.tar
