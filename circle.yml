@@ -8,7 +8,7 @@ dependencies:
   cache_directories:
     - "~/docker"
   pre:
-    - sudo pip install docker-compose
+    - sudo pip install --upgrade docker-compose
   override:
     - docker volume create --name=osdata
     - if [[ -e ~/docker/rserve.tar ]]; then docker load -i ~/docker/rserve.tar; fi
