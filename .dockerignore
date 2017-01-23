@@ -1,5 +1,5 @@
-.idea
 .git
+.idea
 vagrant
 /server/Gemfile.lock
 /server/public/assets
