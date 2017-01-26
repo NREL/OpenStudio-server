@@ -105,7 +105,8 @@ end
 def find_or_create_target(target_type, aws_instance_options, project_dir)
   if target_type.casecmp('aws').zero?
     # Check or create new cluster on AWS
-    if ::File.exist?("#{aws_instance_options[:cluster_name]}.json")
+    cluster_folder = File.join(project_dir, 'clusters', aws_instance_options[:cluster_name])
+    if ::File.exist?(File.join(cluster_folder, "#{aws_instance_options[:cluster_name]}.json"))
       $logger.info "It appears that a cluster for #{aws_instance_options[:cluster_name]} is already running."
       $logger.info "If this is not the case then delete ./#{aws_instance_options[:cluster_name]}.json file."
       $logger.info "Or run 'bundle exec rake clean'"
@@ -113,9 +114,11 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
 
       # Load AWS instance
       aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
-                                          secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] } }
+                                          secret_access_key: ::ENV['AWS_SECRET_KEY'],
+                                          region: ::ENV['AWS_DEFAULT_REGION'] },
+                           save_directory: cluster_folder }
       aws = OpenStudio::Aws::Aws.new(aws_init_options)
-      aws.load_instance_info_from_file("#{aws_instance_options[:cluster_name]}.json")
+      aws.load_instance_info_from_file(File.join(cluster_folder, "#{aws_instance_options[:cluster_name]}.json"))
       server_dns = "http://#{aws.os_aws.server.data.dns}"
       $logger.info "Server IP address #{server_dns}"
 
@@ -126,7 +129,8 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
                                           secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] },
                            ami_lookup_version: 2,
-                           openstudio_server_version: aws_instance_options['openstudio_server_version'] }
+                           openstudio_server_version: aws_instance_options['openstudio_server_version'],
+                           save_directory: cluster_folder }
       aws = OpenStudio::Aws::Aws.new(aws_init_options)
 
       server_options = {
@@ -144,7 +148,7 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       start_time = ::Time.now
 
       # Create the server & worker
-      aws_conn_save = ::File.join(project_dir, 'clusters', "#{aws_instance_options[:cluster_name]}.json")
+      aws_conn_save = File.join(cluster_folder, "#{aws_instance_options[:cluster_name]}.json")
       $logger.info "Saving AWS connection information to #{aws_conn_save}"
       aws.create_server(server_options)
       aws.save_cluster_info(aws_conn_save)
