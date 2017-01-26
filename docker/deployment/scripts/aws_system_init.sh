@@ -7,7 +7,7 @@ echo "------------------------------------------------------------------------"
 echo ""
 sudo apt-get -qq update
 sudo apt-get -y -qq upgrade
-sudo apt-get -y -qq install curl linux-image-extra-$(uname -r) linux-image-extra-virtual htop iftop unzip
+sudo apt-get -y -qq install curl linux-image-extra-$(uname -r) linux-image-extra-virtual htop iftop unzip kpartx grub
 sudo apt -qq -y install python3
 sudo apt -qq -y install ruby
 sudo perl -p -i -e 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g'  /etc/default/grub
