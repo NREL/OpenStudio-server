@@ -1,0 +1,52 @@
+{
+  "builders": [
+    {
+      "type": "amazon-instance",
+      "source_ami": "ami-369c8621",
+      "access_key": "{{ user `aws_access_key` }}",
+      "secret_key": "{{ user `aws_secret_key` }}",
+      "account_id": "{{ user `aws_account_id` }}",
+      "region": "us-east-1",
+      "ami_name": "openstudio_server_docker_base_{{ user `version` }}",
+      "instance_type": "c3.large",
+      "s3_bucket": "OpenStudio_Server_Temp_Artifact",
+      "x509_cert_path": "{{ user `x509_cert_path` }}",
+      "x509_key_path": "{{ user `x509_key_path` }}",
+      "ssh_username": "ubuntu"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "./scripts/aws_system_init.sh",
+      "environment_vars": [
+        "DOCKERD_OPTIONS=--graph=/mnt/data --group docker",
+        "DOCKER_MACHINE_VERSION={{ user `docker_machine_version` }}",
+        "DOCKER_COMPOSE_VERSION={{ user `docker_compose_version` }}"
+      ]
+    },
+    {
+      "type": "shell",
+      "script": "./scripts/aws_osserver_init.sh",
+      "pause_before": "15s",
+      "environment_vars": [
+        "OSSERVER_DOCKERHUB_TAG={{ user `openstudio_server_base_version` }}"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "./docker-compose.aws.yml",
+      "destination": "/home/ubuntu/docker-compose.yml"
+    },
+    {
+      "type": "file",
+      "source": "./../R",
+      "destination": "/home/ubuntu/"
+    },
+    {
+      "type": "file",
+      "source": "./../server",
+      "destination": "/home/ubuntu/"
+    }
+  ]
+}

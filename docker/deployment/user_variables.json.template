@@ -1,0 +1,11 @@
+{
+  "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+  "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
+  "version": "2.0.0-rc0",
+  "aws_account_id": "1234567890",
+  "x509_cert_path": "/path/to/cert.cert",
+  "x509_key_path": "/path/to/cert/key.pem",
+  "docker_machine_version": "1.13.0",
+  "docker_compose_version": "1.10.0",
+  "openstudio_server_base_version": "latest"
+}
