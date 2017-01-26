@@ -99,7 +99,7 @@ group :development, :test do
   gem 'rubocop-checkstyle_formatter', require: false
 
   gem 'mongoid-rspec'
-  gem 'rspec-html-matchers'
+  gem 'rspec-html-matchers' '0.8.1'
   gem 'factory_girl_rails'
   gem 'ci_reporter'
 end
