@@ -8,11 +8,23 @@
       "account_id": "{{ user `aws_account_id` }}",
       "region": "us-east-1",
       "ami_name": "openstudio_server_docker_base_{{ user `version` }}",
-      "instance_type": "c3.large",
+      "instance_type": "c3.xlarge",
       "s3_bucket": "OpenStudio_Server_Temp_Artifact",
       "x509_cert_path": "{{ user `x509_cert_path` }}",
       "x509_key_path": "{{ user `x509_key_path` }}",
-      "ssh_username": "ubuntu"
+      "ssh_username": "ubuntu",
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/xvdb",
+          "virtual_name": "ephemeral0"
+        },
+        {
+          "device_name": "/dev/xvdc",
+          "virtual_name": "ephemeral1"
+        }
+      ],
+      "bundle_vol_command": "sudo su --preserve-environment -c \"ec2-bundle-vol -k {{.KeyPath}} -u {{.AccountId}} -c {{.CertPath}} -r {{.Architecture}} -e {{.PrivatePath}}/* -d /mnt -p {{.Prefix}} --batch --no-filter\"",
+      "bundle_upload_command": "sudo su --preserve-environment -c \"ec2-upload-bundle -b {{.BucketName}} -m /mnt/*.manifest.xml -a {{.AccessKey}} -s {{.SecretKey}} -d /mnt --batch --region {{.Region}} --retry\""
     }
   ],
   "provisioners": [
@@ -20,7 +32,7 @@
       "type": "shell",
       "script": "./scripts/aws_system_init.sh",
       "environment_vars": [
-        "DOCKERD_OPTIONS=--graph=/mnt/data --group docker",
+        "DOCKERD_OPTIONS=--graph=/home/ubuntu/docker-data --group docker",
         "DOCKER_MACHINE_VERSION={{ user `docker_machine_version` }}",
         "DOCKER_COMPOSE_VERSION={{ user `docker_compose_version` }}"
       ]
