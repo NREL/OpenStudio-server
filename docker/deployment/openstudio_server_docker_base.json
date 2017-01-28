@@ -5,33 +5,44 @@
   },
   "builders": [
     {
-      "type": "amazon-instance",
-      "source_ami": "ami-369c8621",
+      "type": "amazon-ebs",
+      "source_ami": "ami-4ae1fb5d",
       "ami_virtualization_type": "hvm",
       "access_key": "{{ user `aws_access_key` }}",
       "secret_key": "{{ user `aws_secret_key` }}",
-      "account_id": "{{ user `aws_account_id` }}",
       "region": "us-east-1",
       "ami_name": "OpenStudio-Server-Docker-{{ user `version` }}",
       "ami_description": "This AMI serves as the base image used for deploying the OpenStudio Server on AWS using Docker. The base OpenStudio Server image from DockerHub on this AMI is {{ user `openstudio_server_base_version` }}.",
       "instance_type": "c3.large",
-      "s3_bucket": "openstudio-server-artifacts/docker-ami/{{ user `version` }}",
-      "x509_cert_path": "{{ user `x509_cert_path` }}",
-      "x509_key_path": "{{ user `x509_key_path` }}",
       "ssh_username": "ubuntu",
       "ami_block_device_mappings": [
         {
-          "device_name": "/dev/sdb",
-          "virtual_name": "ephemeral0"
+          "device_name": "/dev/sda1",
+          "volume_type": "gp2",
+          "volume_size": 10,
+          "delete_on_termination": true
         },
         {
-          "device_name": "/dev/sdc",
-          "virtual_name": "ephemeral1"
+          "device_name": "/dev/sdj",
+          "volume_type": "gp2",
+          "volume_size": 10,
+          "delete_on_termination": true
         }
       ],
-      "bundle_destination": "/mnt",
-      "bundle_vol_command": "sudo su --preserve-environment -c \"ec2-bundle-vol -k {{.KeyPath}} -u {{.AccountId}} -c {{.CertPath}} -r {{.Architecture}} -e {{.PrivatePath}}/* -d {{.Destination}} -p {{.Prefix}} --no-filter\"",
-      "bundle_upload_command": "sudo su --preserve-environment -c \"ec2-upload-bundle -b {{.BucketName}} -m {{.ManifestPath}} -a {{.AccessKey}} -s {{.SecretKey}} -d {{.BundleDirectory}} --region {{.Region}} --retry\"",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_type": "gp2",
+          "volume_size": 10,
+          "delete_on_termination": true
+        },
+        {
+          "device_name": "/dev/sdj",
+          "volume_type": "gp2",
+          "volume_size": 10,
+          "delete_on_termination": true
+        }
+      ],
       "tags": {
         "generated_by_packer": "TRUE",
         "created_on": "{{ isotime }}",

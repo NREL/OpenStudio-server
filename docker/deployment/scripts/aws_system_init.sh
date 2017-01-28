@@ -25,8 +25,8 @@ echo ""
 sleep 1
 mkdir /home/ubuntu/docker-data
 echo -e 'LABEL=cloudimg-rootfs\t/\text4\tdefaults\t0\t0' | sudo tee /etc/fstab
-echo -e '/dev/xvdb\t/home/ubuntu/docker-data\tauto\tdefaults,nofail,x-systemd.requires=cloud-init.service,comment=cloudconfig\t0\t2' | sudo tee -a /etc/fstab
-echo -e '/dev/xvdc\t/mnt\tauto\tdefaults,nofail,x-systemd.requires=cloud-init.service,comment=cloudconfig\t0\t2' | sudo tee -a /etc/fstab
+echo -e '/dev/sdb\t/home/ubuntu/docker-data\tauto\tdefaults,nofail,x-systemd.requires=cloud-init.service,comment=cloudconfig\t0\t2' | sudo tee -a /etc/fstab
+echo -e '/dev/sdc\t/mnt\tauto\tdefaults,nofail,x-systemd.requires=cloud-init.service,comment=cloudconfig\t0\t2' | sudo tee -a /etc/fstab
 sudo mount -a
 echo -e "FS Config is:\n$(sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL)"
 cat /boot/grub/menu.lst |  awk '{ gsub(/console=hvc0/, "console=tty1 console=ttyS0"); print }' | sudo tee /tmp/temp-grub-menu.lst
