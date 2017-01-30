@@ -76,7 +76,7 @@ rails_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rail
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + options[:port]
 ::ENV['RAILS_ENV'] = 'local'
 sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rails_path}\" s -p #{options[:port]} -P "\
-  "#{local_pid_file}"
+  "\"#{local_pid_file}\""
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
 

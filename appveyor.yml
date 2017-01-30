@@ -1,6 +1,7 @@
 version: 1.0.{build}-{branch}
 
 environment:
+  USE_TESTING_TIMEOUTS: "true"
   matrix:
     - RUBY_VERSION: "200-x64"
 
