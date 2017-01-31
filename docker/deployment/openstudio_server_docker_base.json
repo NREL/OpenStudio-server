@@ -23,9 +23,9 @@
           "delete_on_termination": true
         },
         {
-          "device_name": "/dev/sdj",
+          "device_name": "/dev/sdn",
           "volume_type": "gp2",
-          "volume_size": 10,
+          "volume_size": 20,
           "delete_on_termination": true
         }
       ],
@@ -37,9 +37,33 @@
           "delete_on_termination": true
         },
         {
-          "device_name": "/dev/sdj",
+          "device_name": "/dev/sdb",
+          "virtual_name": "ephemeral0"
+        },
+        {
+          "device_name": "/dev/sdc",
+          "virtual_name": "ephemeral1"
+        },
+        {
+          "device_name": "/dev/sdd",
+          "virtual_name": "ephemeral2"
+        },
+        {
+          "device_name": "/dev/sde",
+          "virtual_name": "ephemeral3"
+        },
+        {
+          "device_name": "/dev/sdf",
+          "virtual_name": "ephemeral4"
+        },
+        {
+          "device_name": "/dev/sdg",
+          "virtual_name": "ephemeral5"
+        },
+        {
+          "device_name": "/dev/sdn",
           "volume_type": "gp2",
-          "volume_size": 10,
+          "volume_size": 20,
           "delete_on_termination": true
         }
       ],
@@ -59,9 +83,10 @@
       "type": "shell",
       "script": "./scripts/aws_system_init.sh",
       "environment_vars": [
-        "DOCKERD_OPTIONS=--graph=/home/ubuntu/docker-data --group docker",
+        "DOCKERD_OPTIONS=--group=docker --storage-driver=devicemapper --storage-opt=dm.thinpooldev=/dev/mapper/docker-thinpool --storage-opt=dm.fs=ext4 --storage-opt=dm.use_deferred_removal=true --storage-opt=dm.use_deferred_deletion=true",
         "DOCKER_MACHINE_VERSION={{ user `docker_machine_version` }}",
-        "DOCKER_COMPOSE_VERSION={{ user `docker_compose_version` }}"
+        "DOCKER_COMPOSE_VERSION={{ user `docker_compose_version` }}",
+        "CONSUL_VERSION={{ user `consul_version` }}"
       ]
     },
     {
@@ -86,6 +111,11 @@
       "type": "file",
       "source": "./../server",
       "destination": "/home/ubuntu/"
+    },
+    {
+      "type": "file",
+      "source": "./scripts/server_provision.sh",
+      "destination": "/home/ubuntu/server_provision.sh"
     }
   ]
 }

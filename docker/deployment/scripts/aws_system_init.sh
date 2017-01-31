@@ -7,9 +7,9 @@ echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
 sudo apt-get -qq update
+sudo rm -f /boot/grub/menu.lst
 sudo apt-get -y -qq upgrade
-sudo apt-get -y -qq install curl linux-image-extra-$(uname -r) linux-image-extra-virtual htop iftop unzip
-sudo apt-get -y -qq install grub
+sudo apt-get -y -qq install curl linux-image-extra-$(uname -r) linux-image-extra-virtual htop iftop unzip lvm2 thin-provisioning-tools
 sudo apt-get -y -qq install gdisk kpartx parted
 sudo apt -qq -y install python3
 sudo apt -qq -y install ruby
@@ -19,18 +19,40 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Configuring the file-system mount points and grub kernel loader"
+echo "Configuring the logical mount volume thinpool-docker for the daemon"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-mkdir /home/ubuntu/docker-data
-echo -e 'LABEL=cloudimg-rootfs\t/\text4\tdefaults\t0\t0' | sudo tee /etc/fstab
-echo -e '/dev/sdb\t/home/ubuntu/docker-data\tauto\tdefaults,nofail,x-systemd.requires=cloud-init.service,comment=cloudconfig\t0\t2' | sudo tee -a /etc/fstab
-echo -e '/dev/sdc\t/mnt\tauto\tdefaults,nofail,x-systemd.requires=cloud-init.service,comment=cloudconfig\t0\t2' | sudo tee -a /etc/fstab
-sudo mount -a
+if [ "$(sudo lsblk -o NAME | grep xvda1)" = '└─xvda1' ]; then
+	sudo pvcreate /dev/xvdn
+	sudo vgcreate docker /dev/xvdn
+else
+	sudo pvcreate /dev/sdn
+	sudo vgcreate docker /dev/sdn
+fi
+sudo lvcreate --wipesignatures y -n thinpool docker -l 95%VG
+sudo lvcreate --wipesignatures y -n thinpoolmeta docker -l 1%VG
+sudo lvconvert -y --zero n -c 512K --thinpool docker/thinpool --poolmetadata docker/thinpoolmeta
+sudo mkdir -p /etc/lvm/profile/
+echo -e "activation {\nthin_pool_autoextend_threshold=80\nthin_pool_autoextend_percent=20\n}" | sudo tee /etc/lvm/profile/docker-thinpool.profile
+sudo lvchange --metadataprofile docker-thinpool docker/thinpool
+echo "Logical volume state is:"
+sudo lvs -o+seg_monitor
 echo -e "FS Config is:\n$(sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL)"
 cat /boot/grub/menu.lst |  awk '{ gsub(/console=hvc0/, "console=tty1 console=ttyS0"); print }' | sudo tee /tmp/temp-grub-menu.lst
 sudo mv /tmp/temp-grub-menu.lst /boot/grub/menu.lst
+sleep 1
+
+echo ""
+echo "------------------------------------------------------------------------"
+echo "Installing Consul version $CONSUL_VERSION"
+echo "------------------------------------------------------------------------"
+echo ""
+sleep 1
+curl -L "https://releases.hashicorp.com/consul/$CONSUL_VERSION/consul_${CONSUL_VERSION}_linux_amd64.zip" -o /tmp/consul.zip
+unzip /tmp/consul.zip
+sudo cp /tmp/consul /bin
+rm -f /tmp/consu*
 sleep 1
 
 echo ""
@@ -97,7 +119,7 @@ sudo unzip /home/ubuntu/ec2-ami-tools.zip -d /usr/local/ec2
 ec2_tools_folder=$(ls /usr/local/ec2)
 echo "export EC2_AMITOOL_HOME=/usr/local/ec2/$ec2_tools_folder" >> /home/ubuntu/.bashrc
 echo 'export PATH="$EC2_AMITOOL_HOME/bin:$PATH"' >> /home/ubuntu/.bashrc
-sudo ln -s /usr/local/ec2/$ec2_tools_folder/bin/* /bin
+sudo ln -s /usr/local/ec2/${ec2_tools_folder}/bin/* /bin
 sleep 1
 
 echo ""
