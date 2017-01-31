@@ -117,6 +117,12 @@
       "type": "file",
       "source": "./scripts/server_provision.sh",
       "destination": "/home/ubuntu/server_provision.sh"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chmod 755 /home/ubuntu/server_provision.sh"
+      ]
     }
   ]
 }
