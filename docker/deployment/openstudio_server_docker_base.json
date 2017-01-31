@@ -74,7 +74,8 @@
         "docker_compose_version" : "{{ user `docker_compose_version` }}",
         "dockerhub_release_tag": "{{ user `openstudio_server_base_version` }}",
         "oss_ami_version": "{{ user `version` }}",
-        "generated_by": "{{ user `generated_by` }}"
+        "generated_by": "{{ user `generated_by` }}",
+        "consul_version": "{{ user `consul_version` }}"
       }
     }
   ],

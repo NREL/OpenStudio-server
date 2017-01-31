@@ -23,11 +23,11 @@ else
 	sudo vgextend docker /dev/sdf
 	sudo vgextend docker /dev/sdg
 fi
-sudo lvextend -l+100%FREE -n /dev/docker/thinpool
-new_sectors="$(sudo blockdev --getsize64 /dev/docker/thinpool)"
+sudo lvextend -l+100%FREE -n docker/thinpool
+new_sectors="$(($(sudo blockdev --getsize64 /dev/docker/thinpool)/512))"
 echo "New sector count for 'docker-thinpool' is $new_sectors"
 docker_thinpool_table="$(sudo dmsetup table docker-thinpool)"
 echo "Original devicemapper table for 'docker-thinpool' is: \"$docker_thinpool_table\""
-new_table=${docker_thinpool_table/${old_sectors}/${new_sectors}}
+new_table=${docker_thinpool_table/"3166724096"/${new_sectors}}
 echo "New devicemapper table for 'docker-thinpool' will be: \"$new_table\""
 sudo dmsetup suspend docker-thinpool && sudo dmsetup reload docker-thinpool --table "$new_table" && sudo dmsetup resume docker-thinpool

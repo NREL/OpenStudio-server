@@ -7,7 +7,7 @@ echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
 sudo apt-get -qq update
-sudo rm -f /boot/grub/menu.lst
+sudo rm -f /boot/grub/menu.lst # https://bugs.launchpad.net/ubuntu/+source/cloud-init/+bug/1485685
 sudo apt-get -y -qq upgrade
 sudo apt-get -y -qq install curl linux-image-extra-$(uname -r) linux-image-extra-virtual htop iftop unzip lvm2 thin-provisioning-tools
 sudo apt-get -y -qq install gdisk kpartx parted
