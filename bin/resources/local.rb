@@ -213,8 +213,9 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     dj_worker_commands.each { |cmd| cmd += ' --debug'; $logger.debug "Command for local CLI: #{cmd}" }
   end
 
+  mongod_timeout = ::ENV['USE_TESTING_TIMEOUTS'] == 'true' ? 60 : 15
   begin
-    ::Timeout.timeout(10) do
+    ::Timeout.timeout(mongod_timeout) do
       success = system mongod_command
       unless success
         $logger.error "Mongod returned non-zero status code  `#{$?.exitstatus}`. Please refer to "\

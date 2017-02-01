@@ -9,13 +9,15 @@ matrix:
   - os: linux
     env:
     - REDHAT_BUILD: true
-    - RUN_OPTS: --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro
+    - RUN_OPTS: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+    - USE_TESTING_TIMEOUTS: "true"
     services:
     - docker
   - os: linux
     env:
     - REDHAT_BUILD: false
     - OSX_BUILD: false
+    - USE_TESTING_TIMEOUTS: "true"
     services:
     - mongod
     sudo: required
@@ -24,6 +26,7 @@ matrix:
     env:
     - REDHAT_BUILD: false
     - OSX_BUILD: true
+    - USE_TESTING_TIMEOUTS: "true"
 before_install: ./ci/travis/setup.sh
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
