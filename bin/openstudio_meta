@@ -366,6 +366,7 @@ class InstallGems
         FileUtils.cp_r(f, dest + '/.')
       end
 
+      FileUtils.rm_rf(File.join(dest, 'gems/cache'))
       FileUtils.rm_rf(File.join(dest, 'server/coverage'))
       FileUtils.rm_rf(File.join(dest, 'server/log'))
       FileUtils.rm_rf(File.join(dest, 'server/spec'))
