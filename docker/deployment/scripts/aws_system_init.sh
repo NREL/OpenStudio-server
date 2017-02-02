@@ -51,7 +51,7 @@ echo ""
 sleep 1
 curl -L "https://releases.hashicorp.com/consul/$CONSUL_VERSION/consul_${CONSUL_VERSION}_linux_amd64.zip" -o /tmp/consul.zip
 unzip /tmp/consul.zip
-sudo cp /tmp/consul /bin
+sudo cp /tmp/consul /usr/local/bin/
 rm -f /tmp/consu*
 sleep 1
 
@@ -109,7 +109,7 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Installing AWS EC2 tools for AMI registration"
+echo "Installing AWS EC2 tools"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
@@ -120,6 +120,27 @@ ec2_tools_folder=$(ls /usr/local/ec2)
 echo "export EC2_AMITOOL_HOME=/usr/local/ec2/$ec2_tools_folder" >> /home/ubuntu/.bashrc
 echo 'export PATH="$EC2_AMITOOL_HOME/bin:$PATH"' >> /home/ubuntu/.bashrc
 sudo ln -s /usr/local/ec2/${ec2_tools_folder}/bin/* /bin
+sleep 1
+
+echo ""
+echo "------------------------------------------------------------------------"
+echo "Configuring Consul"
+echo "------------------------------------------------------------------------"
+echo ""
+sleep 1
+sudo mkdir -p /etc/consul.d/
+sudo mkdir /var/consul
+echo -en '{\n\t"bootstrap": true,\n\t"server": true,\n\t"datacenter": "ec2",\n\t"data_dir": "/var/consul",\n' | sudo tee /etc/consul.d/bootstrap.json
+echo -en '\t"log_level": "INFO",\n\t"enable_syslog": true,\n' | sudo tee -a /etc/consul.d/bootstrap.json
+echo -en '\t"start_join": [],\n\t"retry_join": [],\n\t"client_addr": "0.0.0.0"\n}' | sudo tee -a /etc/consul.d/bootstrap.json
+echo -en '{\n\t"datacenter": "ec2",\n\t"bootstrap": false,\n\t"server": true,\n' | sudo tee /etc/consul.d/server.json
+echo -en '\t"data_dir": "/var/consul",\n\t"log_level": "INFO",\n\t"enable_syslog": true,\n' | sudo tee -a /etc/consul.d/server.json
+echo -en '\t"start_join": [],\n\t"retry_join": [],\n\t"client_addr": "0.0.0.0"\n}' | sudo tee -a /etc/consul.d/server.json
+echo -en '[Unit]\nDescription=consul agent\nRequires=network-online.target\n' | sudo tee /etc/systemd/system/consul.service
+echo -en 'After=network-online.target\n\n[Service]\nUser=consul\nEnvironmentFile=-/etc/sysconfig/consul\n' | sudo tee -a /etc/systemd/system/consul.service
+echo -en 'Environment=GOMAXPROCS=2\nRestart=on-failure\n' | sudo tee -a /etc/systemd/system/consul.service
+echo -en 'ExecStart=/usr/local/bin/consul agent -config-dir=/etc/consul.d -bind=INTERNAL_IP_ADDRESS\n' | sudo tee -a /etc/systemd/system/consul.service
+echo -en 'ExecReload=/bin/kill -HUP $MAINPID\nKillSignal=SIGTERM\n\n[Install]\nWantedBy=multi-user.target' | sudo tee -a /etc/systemd/system/consul.service
 sleep 1
 
 echo ""

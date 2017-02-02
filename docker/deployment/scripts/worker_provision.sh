@@ -39,6 +39,6 @@ echo "Starting the bootstrap consul service"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-sudo rm -f /etc/consul.d/server.json
+sudo rm -f /etc/consul.d/bootstrap.json
 sudo systemctl enable consul
 sudo systemctl start consul
