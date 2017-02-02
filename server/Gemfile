@@ -55,7 +55,7 @@ gem 'sprockets-rails'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'a5101a2879b341fecf0a5887f024caada8cb16b6'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
