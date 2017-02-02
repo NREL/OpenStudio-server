@@ -38,6 +38,10 @@
 # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
 
 class RunSimulateDataPoint
+
+  require 'date'
+  require 'json'
+
   def initialize(data_point_id, options = {})
     defaults = { run_workflow_method: 'workflow' }.with_indifferent_access
     @options = defaults.deep_merge(options)
@@ -70,7 +74,37 @@ class RunSimulateDataPoint
     @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
     success = initialize_worker
-    fail('Unable to successfully initialize worker') unless success
+    unless success
+      @data_point.set_error_flag
+      out_osw = {status: 'Failed',
+                 osa_id: @data_point.analysis.id,
+                 osd_id: @data_point.id,
+                 name: @data_point.name,
+                 completed_at: ::DateTime.now.iso8601,
+                 started_at: ::DateTime.now.iso8601,
+                 steps: [
+                     arguments: {},
+                     description: 'If you are a PAT desktop Windows user, this is likely that a path has exceeded 256 characters.',
+                     name: 'Initialize Worker Error',
+                     results: {
+                         completed_at: ::DateTime.now.iso8601,
+                         started_at: ::DateTime.now.iso8601,
+                         stderr: 'Please see the delayed_jobs.log file for the specific error.',
+                         stdout: '',
+                         step_errors: [],
+                         step_files: [],
+                         step_info: [],
+                         step_results: 'Failure',
+                         step_warnings: []
+                     }
+                 ]}
+      report_file = "#{simulation_dir}/out.osw"
+      File.open(report_file, 'wb') do |f|
+        f.puts ::JSON.pretty_generate(out_osw)
+      end
+      upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+      fail 'Failed to initialize the worker.'
+    end
 
     # delete any existing data files from the server in case this is a 'rerun'
     RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
