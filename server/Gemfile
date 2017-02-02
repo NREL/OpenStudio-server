@@ -64,7 +64,7 @@ gem 'openstudio-analysis', '1.0.0.rc14'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 ## End commonly updated gems
 
-gem 'openstudio-standards', '0.1.10'
+gem 'openstudio-standards', '0.1.11'
 gem 'openstudio-aws', '~> 0.4'
 
 gem 'msgpack', '~> 1.0'
