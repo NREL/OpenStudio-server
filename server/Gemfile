@@ -65,7 +65,7 @@ gem 'openstudio-analysis', '1.0.0.rc14'
 ## End commonly updated gems
 
 gem 'openstudio-standards', '0.1.10'
-gem 'openstudio-aws', '0.5.0.pre.pre0'
+gem 'openstudio-aws', '0.5.0.rc0'
 
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
