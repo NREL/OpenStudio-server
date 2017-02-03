@@ -1,38 +1,46 @@
 version: '3'
 services:
   db:
-    networks:
-      - osserverc-network
     image: mongo:latest
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
   web:
-    networks:
-      - osserverc-network
     image: nrel/openstudio-server:latest
     ports:
+      - "80:80"
       - "8080:80"
+      - "443:80"
     volumes:
       - osdata:/mnt/openstudio
+    deploy:
+          placement:
+            constraints:
+              - node.role == manager
   web-background:
-    networks:
-      - osserverc-network
     image: nrel/openstudio-server:latest
     volumes:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
   worker:
-    networks:
-      - osserverc-network
     image: nrel/openstudio-server:latest
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
-    networks:
-      - osserverc-network
     image: nrel/openstudio-rserve:latest
     volumes:
       - osdata:/mnt/openstudio
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 volumes:
   osdata:
     external: true
 networks:
-  osserverc-network:
+  default:
     driver: overlay
