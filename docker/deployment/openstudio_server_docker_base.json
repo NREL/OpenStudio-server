@@ -74,8 +74,7 @@
         "docker_compose_version" : "{{ user `docker_compose_version` }}",
         "dockerhub_release_tag": "{{ user `openstudio_server_base_version` }}",
         "oss_ami_version": "{{ user `version` }}",
-        "generated_by": "{{ user `generated_by` }}",
-        "consul_version": "{{ user `consul_version` }}"
+        "generated_by": "{{ user `generated_by` }}"
       }
     }
   ],
@@ -86,8 +85,7 @@
       "environment_vars": [
         "DOCKERD_OPTIONS=--group=docker --storage-driver=devicemapper --storage-opt=dm.thinpooldev=/dev/mapper/docker-thinpool --storage-opt=dm.fs=ext4 --storage-opt=dm.use_deferred_removal=true --storage-opt=dm.use_deferred_deletion=true",
         "DOCKER_MACHINE_VERSION={{ user `docker_machine_version` }}",
-        "DOCKER_COMPOSE_VERSION={{ user `docker_compose_version` }}",
-        "CONSUL_VERSION={{ user `consul_version` }}"
+        "DOCKER_COMPOSE_VERSION={{ user `docker_compose_version` }}"
       ]
     },
     {

@@ -35,10 +35,7 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Starting the bootstrap consul service"
+echo "Loading the swarm token and connecting to the docker swarm"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-sudo rm -f /etc/consul.d/bootstrap.json
-sudo systemctl enable consul
-sudo systemctl start consul

@@ -35,10 +35,12 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Starting the bootstrap consul service"
+echo "Generating the swarm token and swarm join command"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-sudo rm -f /etc/consul.d/server.json
-sudo systemctl enable consul
-sudo systemctl start consul
+docker swarm init --advertise-addr=$(ip route get 8.8.8.8 | awk '{print $NF; exit}') > /home/ubuntu/token.txt
+tokentxt=$(</home/ubuntu/token.txt)
+tempvar=${tokentxt##*d:}
+tempcmd=${tempvar%%To*}
+echo ${tempcmd//\\/} > /home/ubuntu/swarmjoin.sh
