@@ -1,37 +1,38 @@
-# Version used to deploy the latest version of the server from docker hub.
-
 version: '3'
 services:
   db:
+    networks:
+      - osserverc-network
     image: mongo:latest
   web:
+    networks:
+      - osserverc-network
     image: nrel/openstudio-server:latest
-    links:
-      - db
-      - rserve
     ports:
       - "8080:80"
     volumes:
       - osdata:/mnt/openstudio
   web-background:
+    networks:
+      - osserverc-network
     image: nrel/openstudio-server:latest
-    links:
-      - db
-      - rserve
     volumes:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
   worker:
+    networks:
+      - osserverc-network
     image: nrel/openstudio-server:latest
-    links:
-      - web
-      - db
-      - rserve
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
+    networks:
+      - osserverc-network
     image: nrel/openstudio-rserve:latest
     volumes:
       - osdata:/mnt/openstudio
 volumes:
   osdata:
     external: true
+networks:
+  osserverc-network:
+    driver: overlay
