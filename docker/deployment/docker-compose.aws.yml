@@ -9,15 +9,13 @@ services:
   web:
     image: nrel/openstudio-server:latest
     ports:
-      - "80:80"
       - "8080:80"
-      - "443:80"
     volumes:
       - osdata:/mnt/openstudio
     deploy:
-          placement:
-            constraints:
-              - node.role == manager
+      placement:
+        constraints:
+          - node.role == manager
   web-background:
     image: nrel/openstudio-server:latest
     volumes:
