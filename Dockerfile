@@ -51,9 +51,9 @@ RUN mkdir -p /usr/local/etc \
 		echo 'update: --no-document'; \
 	} >> /usr/local/etc/gemrc
 
-ENV RUBY_MAJOR 2.0
-ENV RUBY_VERSION 2.0.0-p648
-ENV RUBY_DOWNLOAD_SHA256 8690bd6b4949c333b3919755c4e48885dbfed6fd055fe9ef89930bde0d2376f8
+ENV RUBY_MAJOR 2.2
+ENV RUBY_VERSION 2.2.4
+ENV RUBY_DOWNLOAD_SHA256 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
 ENV RUBYGEMS_VERSION 2.6.6
 
 # some of ruby's build scripts are written in ruby
@@ -101,8 +101,8 @@ RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Run this separate to cache the download
-ENV OPENSTUDIO_VERSION 1.13.2
-ENV OPENSTUDIO_SHA 6103d54380
+ENV OPENSTUDIO_VERSION 2.0.1
+ENV OPENSTUDIO_SHA 9c93603b97
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
@@ -122,7 +122,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Add RUBYLIB link for openstudio.rb
-ENV RUBYLIB /usr/local/lib/site_ruby/2.0.0
+ENV RUBYLIB /usr/local/lib/site_ruby/2.2.4
 ENV OPENSTUDIO_SERVER 'true'
 
 # Set the rails env var
