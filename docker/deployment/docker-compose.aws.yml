@@ -9,7 +9,9 @@ services:
   web:
     image: nrel/openstudio-server:latest
     ports:
-      - "8080:80"
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
     volumes:
       - osdata:/mnt/openstudio
     deploy:
