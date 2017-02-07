@@ -34,6 +34,8 @@ RUN apt-get update \
         libffi-dev \
         libssl-dev \
         libyaml-dev \
+        libice-dev \
+        libsm-dev\
         procps \
 		ruby \
 		tar \
@@ -118,11 +120,11 @@ RUN apt-get update \
     && curl -SLO $OPENSTUDIO_DOWNLOAD_URL \
     && gdebi -n $OPENSTUDIO_DOWNLOAD_FILENAME \
     && rm -f $OPENSTUDIO_DOWNLOAD_FILENAME \
-    && rm -rf /usr/local/lib/openstudio-$OPENSTUDIO_VERSION/ruby/2.0/openstudio/sketchup_plugin \
+    && rm -rf /usr/SketchUpPlugin/openstudio
     && rm -rf /var/lib/apt/lists/*
 
 # Add RUBYLIB link for openstudio.rb
-ENV RUBYLIB /usr/local/lib/site_ruby/2.2.4
+ENV RUBYLIB /usr/Ruby
 ENV OPENSTUDIO_SERVER 'true'
 
 # Set the rails env var
