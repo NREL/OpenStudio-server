@@ -8,7 +8,7 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: 1
+          cpus: "1"
   web:
     image: nrel/openstudio-server:latest
     ports:
@@ -23,7 +23,7 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: 1
+          cpus: "1"
   web-background:
     image: nrel/openstudio-server:latest
     volumes:
@@ -35,14 +35,14 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: 1
+          cpus: "1"
   worker:
     image: nrel/openstudio-server:latest
     command: bin/delayed_job -i worker --queue=simulations run
     deploy:
       resources:
         reservations:
-          cpus: 1
+          cpus: "1"
   rserve:
     image: nrel/openstudio-rserve:latest
     volumes:
@@ -53,7 +53,7 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: 1
+          cpus: "1"
 volumes:
   osdata:
     external: true
