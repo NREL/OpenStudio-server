@@ -79,21 +79,7 @@
       </div>
     </div>
   </div>
-  <div class="span4">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Custom Reports</h3>
-      </div>
-      <div class="panel-body">
-        <div class="list-group">
-          <!-- create submit forms for each of the pages -->
-          <% @files.each do |h| %>
-              <%= link_to "#{h[:display_name]} (#{h[:extname]})", view_report_data_point_path(@data_point, file: File.basename(h[:filename])), class: 'list-group-item' %>
-          <% end %>
-        </div>
-      </div>
-    </div>
-  </div>
+
 </div>
 
 <h2>Variable Values</h2>
