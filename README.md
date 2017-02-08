@@ -139,7 +139,7 @@ Please contact @rhorsey, @bball, or @nllong with any question regarding this pro
 
 [circleci-img]: https://circleci.com/gh/NREL/OpenStudio-server/tree/dockerize.svg?style=svg
 [circleci-url]: https://circleci.com/gh/NREL/OpenStudio-server
-[coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=
+[coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=dockerize
 [coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
 [travis-img]: https://travis-ci.org/NREL/OpenStudio-server.svg?branch=dockerize-travis
 [travis-url]: https://travis-ci.org/NREL/OpenStudio-server
