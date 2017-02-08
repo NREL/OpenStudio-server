@@ -120,7 +120,7 @@ RUN apt-get update \
     && curl -SLO $OPENSTUDIO_DOWNLOAD_URL \
     && gdebi -n $OPENSTUDIO_DOWNLOAD_FILENAME \
     && rm -f $OPENSTUDIO_DOWNLOAD_FILENAME \
-    && rm -rf /usr/SketchUpPlugin/openstudio
+    && rm -rf /usr/SketchUpPlugin \
     && rm -rf /var/lib/apt/lists/*
 
 # Add RUBYLIB link for openstudio.rb
@@ -176,7 +176,7 @@ RUN bundle exec rake assets:precompile
 ADD /server /opt/openstudio/server
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
-RUN bundle install
+RUN bundle update
 
 # forward request and error logs to docker log collector
 # TODO: How to get logs out of this, mount shared volume?
