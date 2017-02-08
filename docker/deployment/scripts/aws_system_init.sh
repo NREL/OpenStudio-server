@@ -45,18 +45,6 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Installing Consul version $CONSUL_VERSION"
-echo "------------------------------------------------------------------------"
-echo ""
-sleep 1
-curl -L "https://releases.hashicorp.com/consul/$CONSUL_VERSION/consul_${CONSUL_VERSION}_linux_amd64.zip" -o /tmp/consul.zip
-unzip /tmp/consul.zip
-sudo cp /tmp/consul /bin
-rm -f /tmp/consu*
-sleep 1
-
-echo ""
-echo "------------------------------------------------------------------------"
 echo "Adding the docker GPG to apt-get"
 echo "------------------------------------------------------------------------"
 echo ""
@@ -109,7 +97,7 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Installing AWS EC2 tools for AMI registration"
+echo "Installing AWS EC2 tools"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1

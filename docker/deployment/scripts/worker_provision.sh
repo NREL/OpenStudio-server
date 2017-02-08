@@ -35,12 +35,7 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Generating the swarm token and swarm join command"
+echo "Loading the swarm token and connecting to the docker swarm"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker swarm init --advertise-addr=$(ip route get 8.8.8.8 | awk '{print $NF; exit}') > /home/ubuntu/token.txt
-tokentxt=$(</home/ubuntu/token.txt)
-tempvar=${tokentxt##*d:}
-tempcmd=${tempvar%%To*}
-echo ${tempcmd//\\/} > /home/ubuntu/swarmjoin.sh
