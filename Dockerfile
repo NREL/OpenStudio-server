@@ -176,7 +176,8 @@ RUN bundle exec rake assets:precompile
 ADD /server /opt/openstudio/server
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
-RUN bundle update
+RUN rm Gemfile.lock
+RUN bundle install
 
 # forward request and error logs to docker log collector
 # TODO: How to get logs out of this, mount shared volume?
