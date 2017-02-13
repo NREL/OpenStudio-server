@@ -68,7 +68,7 @@ gem 'openstudio-standards', '0.1.11'
 
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.5.0.rc0'
+gem 'openstudio-aws', '0.5.0.rc3'
 
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
