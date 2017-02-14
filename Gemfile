@@ -6,6 +6,7 @@ gem 'git', '~> 1.2.6'
 gem 'rake', '~> 11.2'
 
 group :development, :test do
-  gem 'rest-client'
+  # rest-client 2.0.0 breaks the multipart posting of the zip files.
+  gem 'rest-client', '1.8.0'
   gem 'rspec', '~> 3.4'
 end

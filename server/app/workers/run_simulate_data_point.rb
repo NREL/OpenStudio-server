@@ -171,7 +171,7 @@ class RunSimulateDataPoint
         upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
 
         report_file = "#{run_dir}/data_point.zip"
-        upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+        upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
 
         if run_result != :errored
           @data_point.set_success_flag
