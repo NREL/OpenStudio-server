@@ -60,7 +60,7 @@ error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute.
 error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathname.new(db_dir).absolute?
 error_msg << "The STATE_FILE projvided, `#{state_file}`, is not absolute. " unless Pathname.new(state_file).absolute?
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
-puts error_msg  && exit(2) unless error_msg.empty?
+puts error_msg && exit(2) unless error_msg.empty?
 error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
 error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless
   Dir.exist? invocation_dir

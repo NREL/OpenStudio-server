@@ -132,7 +132,7 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {analysis: @analysis} }
+      format.json { render json: { analysis: @analysis } }
       format.js
     end
   end
@@ -298,39 +298,39 @@ class AnalysesController < ApplicationController
       format.json do
         data = @analyses.map do |a|
           {
-              _id: a.id,
-              id: a.id,
-              status: a.status,
-              analysis_type: a.analysis_type,
-              run_flag: a.run_flag,
-              exit_on_guideline14: a.exit_on_guideline14,
-              jobs: a.jobs.order_by(:index.asc).map do |j|
-                {
-                    index: j.index,
-                    analysis_type: j.analysis_type,
-                    status: j.status,
-                    status_message: j.status_message
-                }
-              end,
-              data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
-                {
-                    _id: dp.id,
-                    id: dp.id,
-                    analysis_id: dp.analysis_id,
-                    status: dp.status,
-                    status_message: dp.status_message
-                }
-              end
+            _id: a.id,
+            id: a.id,
+            status: a.status,
+            analysis_type: a.analysis_type,
+            run_flag: a.run_flag,
+            exit_on_guideline14: a.exit_on_guideline14,
+            jobs: a.jobs.order_by(:index.asc).map do |j|
+                    {
+                      index: j.index,
+                      analysis_type: j.analysis_type,
+                      status: j.status,
+                      status_message: j.status_message
+                    }
+                  end,
+            data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
+                           {
+                             _id: dp.id,
+                             id: dp.id,
+                             analysis_id: dp.analysis_id,
+                             status: dp.status,
+                             status_message: dp.status_message
+                           }
+                         end
           }
         end
 
         if data.size == 1
           render json: {
-              analysis: data.first
+            analysis: data.first
           }
         else
           render json: {
-              analyses: data
+            analyses: data
           }
         end
       end
@@ -348,7 +348,7 @@ class AnalysesController < ApplicationController
       send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
     else
       respond_to do |format|
-        format.json { render json: {status: 'error', error_message: 'could not find result file'}, status: :unprocessable_entity }
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
         format.html { redirect_to @analysis, notice: "Result file '#{params[:filename]}' does not exist. It probably was deleted from the file system." }
       end
     end
@@ -364,7 +364,7 @@ class AnalysesController < ApplicationController
       send_data file_data, filename: File.basename(file.original_filename), type: file.content_type, disposition: 'attachment'
     else
       respond_to do |format|
-        format.json { render json: {status: 'error', error_message: 'could not find result file'}, status: :unprocessable_entity }
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
         format.html { redirect_to @analysis, notice: 'Seed zip does not exist. It probably was deleted from the file system.' }
       end
     end
@@ -411,14 +411,14 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       exclude_fields = [
-          :problem
+        :problem
       ]
       include_fields = [
-          :variables,
-          :measures # => {:include => :variables}
+        :variables,
+        :measures # => {:include => :variables}
       ]
       #  format.html # new.html.erb
-      format.json { render json: {analysis: @analysis.as_json(except: exclude_fields, include: include_fields)} }
+      format.json { render json: { analysis: @analysis.as_json(except: exclude_fields, include: include_fields) } }
     end
   end
 
@@ -448,24 +448,23 @@ class AnalysesController < ApplicationController
 
     # include all data?
     logger.info("all_data param: #{params[:all_data]}")
-    if (!params[:all_data].nil? && params[:all_data]) == 'true' || @pareto_series.size == 0
+    if (!params[:all_data].nil? && params[:all_data]) == 'true' || @pareto_series.empty?
       @include_all = true
     end
 
-
     # figure out actions
-    #if params[:commit] && params[:commit] == 'All Data'
+    # if params[:commit] && params[:commit] == 'All Data'
     # don't do pareto
 
-    #else
+    # else
     # check for pareto id
-    #if params[:pareto]
-    #@pareto = Pareto.find(params[:pareto])
-    #@pareto_data_points = @pareto.data_points
-    #@pareto_name = @pareto.name
-    #end
+    # if params[:pareto]
+    # @pareto = Pareto.find(params[:pareto])
+    # @pareto_data_points = @pareto.data_points
+    # @pareto_name = @pareto.name
+    # end
 
-    #end
+    # end
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
@@ -534,7 +533,7 @@ class AnalysesController < ApplicationController
       @new_pareto.name = params[:name]
       @new_pareto.data_points = params[:data_points]
       if @new_pareto.save
-        logger.info("--pareto is saved--")
+        logger.info('--pareto is saved--')
         @pareto_saved = true
         flash[:notice] = 'Pareto saved!'
       else
@@ -594,7 +593,6 @@ class AnalysesController < ApplicationController
     end
     # TODO: what do you actually want returned here?
     write_and_send_rdata(@analysis, @datapoint_ids)
-
   end
 
   # Scatter plot
@@ -653,7 +651,7 @@ class AnalysesController < ApplicationController
 
     logger.info 'sending analysis data to view'
     respond_to do |format|
-      format.json { render json: {variables: @variables, data: @data} }
+      format.json { render json: { variables: @variables, data: @data } }
       format.html # analysis_data.html.erb
     end
   end
@@ -664,20 +662,20 @@ class AnalysesController < ApplicationController
     respond_to do |format|
       format.json do
         fields = [
-            :name,
-            :data_points,
-            :analysis_type,
-            :status,
-            :start_time,
-            :end_time,
-            :seed_zip,
-            :results,
-            :run_start_time,
-            :run_end_time,
-            :output_variables
+          :name,
+          :data_points,
+          :analysis_type,
+          :status,
+          :start_time,
+          :end_time,
+          :seed_zip,
+          :results,
+          :run_start_time,
+          :run_end_time,
+          :output_variables
         ]
 
-        render json: {analysis: @analysis.as_json(only: fields, include: :data_points)}
+        render json: { analysis: @analysis.as_json(only: fields, include: :data_points) }
         # render json: {:analysis => @analysis.as_json(:only => fields, :include => :data_points ), :metadata => @analysis[:os_metadata]}
       end
     end
@@ -715,7 +713,7 @@ class AnalysesController < ApplicationController
       paths = Dir.glob(@algorithm_results_path + '*')
       begin
         # Initialize the temp file as a zip file
-        Zip::OutputStream.open(temp_file) { |zos|}
+        Zip::OutputStream.open(temp_file) { |zos| }
 
         # Add files to the zip file as usual
         Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
@@ -827,7 +825,7 @@ class AnalysesController < ApplicationController
 
   # Get data across analysis. If a datapoint_id is specified, will return only that point
   # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
-  def get_analysis_data(analysis, datapoint_ids = nil, options = {})
+  def get_analysis_data(analysis, _datapoint_ids = nil, options = {})
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
 
@@ -842,12 +840,12 @@ class AnalysesController < ApplicationController
                   :scaling_factor, :display_name, :display_name_short, :name, :units, :value_type, :data_type]
 
     # dynamic query, only add 'or' for option fields that are true
-    or_qry = [{perturbable: true}, {pivot: true}, {output: true}]
+    or_qry = [{ perturbable: true }, { pivot: true }, { output: true }]
     options.each do |k, v|
-      or_qry << {:"#{k}" => v} if v
+      or_qry << { :"#{k}" => v } if v
     end
     variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry)
-                    .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
+                        .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].tr('.', '|')] }]
@@ -905,7 +903,7 @@ class AnalysesController < ApplicationController
                                   status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
                 else
                   DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                      .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                           .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
                 end
 
     logger.info "finished fixing up data: #{Time.now - start_time}"
@@ -920,7 +918,7 @@ class AnalysesController < ApplicationController
 
     start_time = Time.now
     logger.info 'mapping variables'
-    variables.map! { |v| {:"#{v['name']}".to_sym => v} }
+    variables.map! { |v| { :"#{v['name']}".to_sym => v } }
 
     variables = variables.reduce({}, :merge)
     logger.info "finished mapping variables: #{Time.now - start_time}"
@@ -955,7 +953,7 @@ class AnalysesController < ApplicationController
     variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
   end
 
-  def write_and_send_csv(analysis, datapoint_ids=nil)
+  def write_and_send_csv(analysis, datapoint_ids = nil)
     require 'csv'
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
@@ -983,7 +981,7 @@ class AnalysesController < ApplicationController
     send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
   end
 
-  def write_and_send_rdata(analysis, datapoint_ids=nil)
+  def write_and_send_rdata(analysis, datapoint_ids = nil)
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, datapoint_ids, export: true)
 
