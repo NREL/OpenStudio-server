@@ -7,7 +7,7 @@ gem 'rake', '~> 11.2'
 gem 'colored'
 
 # data modules
-gem 'json', '1.8.6'
+gem 'json', '1.8.1'
 gem 'jbuilder'
 gem 'rubyzip', '~> 1.2.0'
 gem 'tzinfo-data'
