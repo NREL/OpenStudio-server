@@ -344,7 +344,8 @@ class AnalysesController < ApplicationController
     file = @analysis.result_files.where(attachment_file_name: params[:filename]).first
     if file && file.attachment && File.exist?(file.attachment.path)
       file_data = File.read(file.attachment.path)
-      send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: 'attachment'
+      disposition = ['application/json', 'text/plain', 'text/html'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
+      send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
     else
       respond_to do |format|
         format.json { render json: {status: 'error', error_message: 'could not find result file'}, status: :unprocessable_entity }
