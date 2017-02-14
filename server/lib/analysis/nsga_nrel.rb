@@ -194,12 +194,18 @@ class Analysis::NsgaNrel
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
-                   toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
-                   xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'], mudistidx: @analysis.problem['algorithm']['mudistidx'],
-                   mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
+        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe,
+                   vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['normtype'],
+                   ppower: @analysis.problem['algorithm']['ppower'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'],
+                   gen: @analysis.problem['algorithm']['generations'],
+                   toursize: @analysis.problem['algorithm']['toursize'],
+                   cprob: @analysis.problem['algorithm']['cprob'],
+                   xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'],
+                   mudistidx: @analysis.problem['algorithm']['mudistidx'],
+                   mprob: @analysis.problem['algorithm']['mprob'],
+                   uniquegroups: ug.size) do
           %{
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
