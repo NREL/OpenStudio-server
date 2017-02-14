@@ -2,6 +2,7 @@
 .idea
 vagrant
 /server/Gemfile.lock
+/server/log
 /server/public/assets
 /server/tmp
 /worker-nodes

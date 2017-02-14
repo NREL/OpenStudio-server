@@ -183,6 +183,7 @@ RUN bundle install
 # TODO: How to get logs out of this, mount shared volume?
 #RUN ln -sf /dev/stdout /var/log/nginx/access.log
 #RUN ln -sf /dev/stderr /var/log/nginx/error.log
+RUN chmod 775 /opt/openstudio/server/log
 RUN chmod 666 /opt/openstudio/server/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
