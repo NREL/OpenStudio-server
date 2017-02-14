@@ -35,8 +35,12 @@
 # *******************************************************************************
 %>
 
-<div id="flash_messages">
-  <% flash.each do |key, value| %>
-    <%= content_tag(:div, value, :class => "flash #{key}") %>
-  <% end %>
-</div>
+<% @css_class = '' %>
+<% flash.each do |key, value| %>
+    <% if key.to_s == 'error' %>
+        <% @css_class = '_error' %>
+        <% break %>
+    <% end %>
+<% end %>
+
+<div id="flash_messages<%= @css_class %>">
