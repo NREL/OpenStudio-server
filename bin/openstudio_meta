@@ -375,8 +375,8 @@ class InstallGems
       FileUtils.rm_rf(File.join(dest, 'reports'))
       FileUtils.rm_rf(File.join(dest, 'worker-nodes'))
 
-      Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each {|p| FileUtils.rm_rf(p)}
-      Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each {|p| FileUtils.rm_rf(p)}
+      Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each { |p| FileUtils.rm_rf(p) }
+      Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each { |p| FileUtils.rm_rf(p) }
       platform = 'darwin'
       if /win/.match(RUBY_PLATFORM) || /mingw/.match(RUBY_PLATFORM)
         platform = 'win32'
@@ -484,7 +484,7 @@ class StartLocal
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
     end
 
-    if options[:energyplus_exe_path] and ::File.exist? options[:energyplus_exe_path]
+    if options[:energyplus_exe_path] && ::File.exist?(options[:energyplus_exe_path])
       ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
 

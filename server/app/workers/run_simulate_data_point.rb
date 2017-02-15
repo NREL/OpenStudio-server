@@ -70,7 +70,7 @@ class RunSimulateDataPoint
     @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
     success = initialize_worker
-    fail('Unable to successfully initialize worker') unless success
+    raise('Unable to successfully initialize worker') unless success
 
     # delete any existing data files from the server in case this is a 'rerun'
     RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
@@ -171,7 +171,7 @@ class RunSimulateDataPoint
         upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
 
         report_file = "#{run_dir}/data_point.zip"
-        upload_file(report_file, 'Data Point', 'Zip File') if File.exist?(report_file)
+        upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
 
         if run_result != :errored
           @data_point.set_success_flag
@@ -196,82 +196,80 @@ class RunSimulateDataPoint
   # in order to handle multiple instances trying to download the file at the
   # same time.
   def initialize_worker
-    begin
-      @sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
+    @sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
 
-      # If the request is local, then just copy the data over. But how do we
-      # test if the request is local?
-      write_lock_file = "#{analysis_dir}/analysis_zip.lock"
-      receipt_file = "#{analysis_dir}/analysis_zip.receipt"
+    # If the request is local, then just copy the data over. But how do we
+    # test if the request is local?
+    write_lock_file = "#{analysis_dir}/analysis_zip.lock"
+    receipt_file = "#{analysis_dir}/analysis_zip.receipt"
 
-      # Check if the receipt file exists, if so, then just return out of this
-      # method immediately
-      if File.exist? receipt_file
-        @sim_logger.info 'receipt_file already exists, moving on'
-        return true
-      end
-
-      # only call this block if there is no write_lock nor receipt in the dir
-      if File.exist? write_lock_file
-        @sim_logger.info 'write_lock_file exists, checking for receipt file'
-
-        # wait until receipt file appears then return
-        Timeout.timeout(300) do
-          loop do
-            break if File.exist? receipt_file
-            @sim_logger.info 'waiting for receipt file to appear'
-            sleep 3
-          end
-        end
-
-        @sim_logger.info 'receipt_file appeared, moving on'
-        return true
-      else
-        # download the file, but first create the write lock
-        write_lock(write_lock_file) do |_|
-          # create write lock
-          download_file = "#{analysis_dir}/analysis.zip"
-          download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
-          @sim_logger.info "Downloading analysis zip from #{download_url}"
-
-          File.open(download_file, 'wb') do |saved_file|
-            # the following "open" is provided by open-uri
-            open(download_url, 'rb') do |read_file|
-              saved_file.write(read_file.read)
-            end
-          end
-
-          # Extract the zip
-          @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
-          OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-
-          # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
-          analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
-          @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
-          a = RestClient.get analysis_json_url
-          raise 'Analysis JSON could not be downloaded' unless a.code == 200
-          # Parse to JSON to save it again with nice formatting
-          File.open("#{analysis_dir}/analysis.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
-
-          # Find any custom worker files -- should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
-          files = Dir["#{analysis_dir}/lib/worker_initialize/*.rb"].map { |n| File.basename(n) }.sort
-          @sim_logger.info "The following custom worker initialize files were found #{files}"
-          files.each do |f|
-            run_file(analysis_dir, 'initialize', f)
-          end
-        end
-
-        # Now tell all other waiting threads that it is okay to continue
-        # by creating the receipt file.
-        File.open(receipt_file, 'w') { |f| f << Time.now }
-      end
-
-      @sim_logger.info 'Finished worker initialization'
-      true
-    rescue => e
-      @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
-      false
+    # Check if the receipt file exists, if so, then just return out of this
+    # method immediately
+    if File.exist? receipt_file
+      @sim_logger.info 'receipt_file already exists, moving on'
+      return true
     end
+
+    # only call this block if there is no write_lock nor receipt in the dir
+    if File.exist? write_lock_file
+      @sim_logger.info 'write_lock_file exists, checking for receipt file'
+
+      # wait until receipt file appears then return
+      Timeout.timeout(300) do
+        loop do
+          break if File.exist? receipt_file
+          @sim_logger.info 'waiting for receipt file to appear'
+          sleep 3
+        end
+      end
+
+      @sim_logger.info 'receipt_file appeared, moving on'
+      return true
+    else
+      # download the file, but first create the write lock
+      write_lock(write_lock_file) do |_|
+        # create write lock
+        download_file = "#{analysis_dir}/analysis.zip"
+        download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
+        @sim_logger.info "Downloading analysis zip from #{download_url}"
+
+        File.open(download_file, 'wb') do |saved_file|
+          # the following "open" is provided by open-uri
+          open(download_url, 'rb') do |read_file|
+            saved_file.write(read_file.read)
+          end
+        end
+
+        # Extract the zip
+        @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
+        OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+
+        # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
+        analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
+        @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
+        a = RestClient.get analysis_json_url
+        raise 'Analysis JSON could not be downloaded' unless a.code == 200
+        # Parse to JSON to save it again with nice formatting
+        File.open("#{analysis_dir}/analysis.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+
+        # Find any custom worker files -- should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
+        files = Dir["#{analysis_dir}/lib/worker_initialize/*.rb"].map { |n| File.basename(n) }.sort
+        @sim_logger.info "The following custom worker initialize files were found #{files}"
+        files.each do |f|
+          run_file(analysis_dir, 'initialize', f)
+        end
+      end
+
+      # Now tell all other waiting threads that it is okay to continue
+      # by creating the receipt file.
+      File.open(receipt_file, 'w') { |f| f << Time.now }
+    end
+
+    @sim_logger.info 'Finished worker initialization'
+    true
+  rescue => e
+    @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
+    false
   end
 
   # Finalize the worker node by running the scripts
