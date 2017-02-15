@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 class Variable
   include Mongoid::Document
@@ -48,7 +48,11 @@ class Variable
   field :minimum
   field :maximum
   field :mean
+  field :modes_value
   field :delta_x_value
+  field :stddev_value
+  field :lower_bounds_value
+  field :upper_bounds_value
   field :uncertainty_type, type: String
   field :units, type: String
   field :discrete_values_and_weights
@@ -71,7 +75,7 @@ class Variable
   # Relationships
   belongs_to :analysis, index: true
   belongs_to :measure
-  has_many :preflight_images
+  has_many :preflight_images, dependent: :destroy
 
   # Indexes
   index({ uuid: 1 }, unique: true)
@@ -89,16 +93,15 @@ class Variable
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :remove_dependencies
 
   def self.create_from_os_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
     if var
-      Rails.logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
+      logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
     else
-      Rails.logger.info "create new variable for os_json['uuid']"
+      logger.info "create new variable for os_json['uuid']"
       var = Variable.find_or_create_by(analysis_id: analysis_id, uuid: os_json['uuid'])
-      Rails.logger.info var.inspect
+      logger.info var.inspect
     end
 
     exclude_fields = %w(uuid type)
@@ -116,9 +119,9 @@ class Variable
   def self.create_output_variable(analysis_id, json)
     var = Variable.where(analysis_id: analysis_id, name: json['name']).first
     if var
-      Rails.logger.warn "Variable already exists for '#{var.name}'"
+      logger.warn "Variable already exists for '#{var.name}'"
     else
-      Rails.logger.info "Adding a new output variable named: '#{json['name']}'"
+      logger.info "Adding a new output variable named: '#{json['name']}'"
       var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'])
     end
 
@@ -161,12 +164,12 @@ class Variable
 
   # Create the OS argument/variable
   def self.create_and_assign_to_measure(analysis_id, measure, os_json)
-    fail 'Measure ID was not defined' unless measure && measure.id
+    raise 'Measure ID was not defined' unless measure && measure.id
     var = Variable.where(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid']).first
     if var
-      fail "Variable already exists for '#{var.name}' : '#{var.uuid}'"
+      raise "Variable already exists for '#{var.name}' : '#{var.uuid}'"
     else
-      Rails.logger.info("Adding a new variable/argument named: '#{os_json['display_name']}' with UUID '#{os_json['uuid']}'")
+      logger.info("Adding a new variable/argument named: '#{os_json['display_name']}' with UUID '#{os_json['uuid']}'")
       var = Variable.find_or_create_by(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid'])
     end
 
@@ -222,11 +225,11 @@ class Variable
     # note that the measure.name should be unique
     if os_json['variable'] || os_json['pivot']
       # Creates a unique ID for this measure
-      Rails.logger.info "Setting variable name to: '#{measure.name}.#{os_json['argument']['name']}'"
+      logger.info "Setting variable name to: '#{measure.name}.#{os_json['argument']['name']}'"
       var.name = "#{measure.name}.#{os_json['argument']['name']}"
     else
       # Just register a note when this is a static argument
-      Rails.logger.info "Static variable argument: '#{measure.name}.#{var.name}'"
+      logger.info "Static variable argument: '#{measure.name}.#{var.name}'"
       # var.name = "#{measure.name}.#{var.name}"
       # var.name_with_measure = "#{measure.name}.#{var.name}"
     end
@@ -246,31 +249,32 @@ class Variable
 
     pivot_hash = {}
     pivot_variables.each do |var|
-      Rails.logger.info "Adding variable '#{var.name}' to pivot list"
-      if (var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence')
-        Rails.logger.info("creating integer sequence for pivot variable by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
+      logger.info "Adding variable '#{var.name}' to pivot list"
+      logger.info "Adding variable '#{var.name}' to pivot list"
+      if var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence'
+        logger.info("creating integer sequence for pivot variable by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
         @r = r_session
         @r.command(varlow: var.lower_bounds_value) do
-        %{
-          values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
-          weights <- rep(1/length(values),length(values))
-        }
+          %{
+            values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+            weights <- rep(1/length(values),length(values))
+          }
         end
         values = @r.converse 'values'
         values = values.map(&:to_i)
         weights = @r.converse 'weights'
       else
-        Rails.logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
+        logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
         values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots
       end
-      Rails.logger.info "pivot variable values are #{values}"
+      logger.info "pivot variable values are #{values}"
       pivot_hash[var.uuid] = values
     end
 
     # if there are multiple pivots, then smash the hash of arrays to form a array of hashes
-    pivot_array = Analysis::Core.product_hash(pivot_hash)
-    # pivot_array = Analysis::Core.hash_of_array_to_array_of_hash(pivot_hash)
-    Rails.logger.info "pivot array is #{pivot_array}"
+    pivot_array = AnalysisLibrary::Core.product_hash(pivot_hash)
+    # pivot_array = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(pivot_hash)
+    logger.info "pivot array is #{pivot_array}"
 
     pivot_array
   end
@@ -340,10 +344,10 @@ class Variable
   end
 
   def map_discrete_hash_to_array
-    Rails.logger.info "Discrete values and weights are #{discrete_values_and_weights}"
-    Rails.logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
+    logger.info "Discrete values and weights are #{discrete_values_and_weights}"
+    logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
     ave_weight = (1.0 / discrete_values_and_weights.size)
-    Rails.logger.info "average weight is #{ave_weight}"
+    logger.info "average weight is #{ave_weight}"
     discrete_values_and_weights.each_index do |i|
       unless discrete_values_and_weights[i].key? 'weight'
         discrete_values_and_weights[i]['weight'] = ave_weight
@@ -360,13 +364,6 @@ class Variable
 
   def verify_uuid
     self.uuid = id if uuid.nil?
-    self.save!
-  end
-
-  def remove_dependencies
-    # TODO: need to reset permissions before we can actually delete the files
-    # preflight_images.each do |pfi|
-    #  pfi.destroy
-    # end
+    save!
   end
 end

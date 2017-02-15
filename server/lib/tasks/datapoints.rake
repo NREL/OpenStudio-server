@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,25 +31,12 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 namespace :datapoints do
-  desc 'download datapoints indefinitely'
-  task download: :environment do
-    # puts "Analysis id is #{args.analysis_id}"
-    # need to accept the UUID of the analysis ID
-    still_downloading = true
-    # analysis = Analysis.find(args.analysis_id)
-    while still_downloading
-      # Simple task to go through all the datapoints and download the results if they are complete
-      puts 'Checking for completed datapoints'
-      begin
-        ComputeNode.download_all_results
-      rescue => e
-        puts "Error during downloading of data points... will try to continue #{e.message}:#{e.backtrace.join("\n")}"
-      end
-
-      sleep 10
-    end
+  desc 'test uploading a result_file'
+  task test_file_upload: :environment do
+    # This test has been removed.
+    puts 'Look at the simulate_data_point.rb to see how we are uploading files'
   end
 end

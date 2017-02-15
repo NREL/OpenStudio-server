@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 class ParetosController < ApplicationController
   # GET /paretos
@@ -51,7 +51,7 @@ class ParetosController < ApplicationController
     @pareto = Pareto.find(params[:id])
 
     @analysis = @pareto.analysis
-    @dps = @pareto.data_points.split(" ").join(",")
+    @dps = @pareto.data_points.split(' ').join(',')
 
     respond_to do |format|
       format.html # show.html.erb

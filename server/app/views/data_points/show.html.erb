@@ -1,5 +1,5 @@
 <%
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -32,10 +32,10 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 %>
 
-<h2>Data Point Information</h2>
+<h2>Datapoint Information</h2>
 
 <div class="row-fluid">
   <div class="span4">
@@ -46,7 +46,7 @@
       <div class="panel-body">
         <table class="table table-striped">
           <tr>
-            <th>Data Point Name</th>
+            <th>Datapoint Name</th>
             <td><%= @data_point.name %></td>
           </tr>
           <tr>
@@ -67,24 +67,39 @@
           <% if @data_point.status == 'completed' %>
               <%= link_to "View Bar Chart", plot_bar_analysis_path(:id => @data_point.analysis.id, :datapoint_id => @data_point.id), class: 'list-group-item' %>
           <% end %>
-          <% if @data_point.openstudio_datapoint_file_name && File.exist?(@data_point.openstudio_datapoint_file_name) %>
-              <%= link_to("Download Data Point", download_data_point_path(@data_point), class: 'list-group-item') %>
-          <% end %>
-          <!--Assume that if the data point zip file exists, then the reports zip file also exists-->
-          <% if @data_point.openstudio_datapoint_file_name && File.exist?(@data_point.openstudio_datapoint_file_name) %>
-              <%= link_to("Download Data Point Reports", download_reports_data_point_path(@data_point), class: 'list-group-item') %>
-          <% end %>
           <%= link_to 'View JSON', data_point_path(@data_point, :format => :json), class: 'list-group-item' %>
         </div>
       </div>
     </div>
   </div>
-
+  <div class="span4">
+    <% unless @data_point.result_files.size == 0 %>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Result Files</h3>
+      </div>
+      <div class="panel-body">
+        <table class="table table-striped">
+          <tr>
+            <th>Type</th>
+            <th>Name</th>
+          </tr>
+          <% @data_point.result_files.each do |h| %>
+            <tr>
+              <td><%= h.type %></td>
+              <td><%= link_to h.display_name, download_result_file_data_point_path(@data_point, filename: h.attachment.original_filename) %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+    </div>
+    <% end %>
+  </div>
 </div>
 
 <h2>Variable Values</h2>
 <% if @set_variable_values.empty? %>
-    <p>No variables found for this data point</p>
+    <p>No variables found for this datapoint</p>
 <% else %>
     <table class="table table-striped">
       <thead>
@@ -155,7 +170,7 @@
     </div>
 <% end %>
 
-<h2>Data Point Fields</h2>
+<h2>Datapoint Fields</h2>
 <table class="table table-striped">
   <thead>
   <tr>

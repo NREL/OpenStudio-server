@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 class DataPointsController < ApplicationController
   # GET /data_points
@@ -89,11 +89,9 @@ class DataPointsController < ApplicationController
     end
   end
 
-  alias_method :show_full, :show
-
   def status
-    # The name :jobs is legacy based on how PAT queries the data points. Should we alias this to status?
-    only_fields = [:status, :status_message, :download_status, :analysis_id]
+    # The name :jobs is legacy based on how PAT queries the datapoints. Should we alias this to status?
+    only_fields = [:status, :status_message, :analysis_id]
     dps = params[:status] ? DataPoint.where(status: params[:jobs]).only(only_fields) : DataPoint.all.only(only_fields)
 
     respond_to do |format|
@@ -106,8 +104,7 @@ class DataPointsController < ApplicationController
               id: dp.id,
               analysis_id: dp.analysis_id,
               status: dp.status,
-              final_message: dp.status_message,
-              download_status: dp.download_status
+              status_message: dp.status_message
             }
           end
         }
@@ -134,18 +131,78 @@ class DataPointsController < ApplicationController
   # POST /data_points
   # POST /data_points.json
   def create
-    analysis_id = params[:analysis_id]
-    params[:data_point][:analysis_id] = analysis_id
+    error_message = nil
 
-    @data_point = DataPoint.new(params[:data_point])
+    dp_params = data_point_params
+    dp_params[:analysis_id] = params[:analysis_id]
+
+    # If the create method receives a list of ordered variable values, then
+    # look up the variables by the r_index, and assign the set_variable_values
+    if dp_params[:ordered_variable_values]
+      logger.info 'Mapping ordered variables to actual variables'
+
+      # grab the selected variables
+      selected_variables = Variable.variables(dp_params[:analysis_id])
+
+      selected_variables.each do |v|
+        logger.info v.inspect
+      end
+
+      variable_values = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
+      # make sure the length of the selected variables and the variables array
+      # are equal
+      if selected_variables.size == dp_params[:ordered_variable_values].size
+        dp_params[:ordered_variable_values].each_with_index do |value, index|
+          logger.info "Adding new variable value for #{selected_variables[index].name} of value #{value}"
+          if selected_variables[index]
+            uuid = selected_variables[index].uuid
+
+            # Type cast the values as they are probably strings
+            case selected_variables[index].value_type.downcase
+              when 'double'
+                variable_values[uuid] = value.to_f
+              when 'string'
+                variable_values[uuid] = value.to_s
+              when 'integer', 'int'
+                variable_values[uuid] = value.to_i
+              when 'bool', 'boolean'
+                variable_values[uuid] = value.casecmp('true').zero? ? true : false
+              else
+                raise "Unknown DataType for variable #{selected_variables[index].name} of #{selected_variables[index].value_type}"
+            end
+          else
+            raise 'Could not find variable in database'
+          end
+        end
+
+        dp_params.delete(:ordered_variable_values)
+        dp_params[:set_variable_values] = variable_values
+      else
+        error_message = 'Variable array and analysis variable size differ'
+        logger.error error_message
+
+        dp_params.delete(:ordered_variable_values)
+        dp_params[:set_variable_values] = {}
+      end
+    end
+
+    if error_message.nil?
+      logger.info "Creating datapoint with params: #{dp_params}"
+      @data_point = DataPoint.new(dp_params)
+    end
 
     respond_to do |format|
-      if @data_point.save!
-        format.html { redirect_to @data_point, notice: 'Data point was successfully created.' }
+      if error_message.nil? && @data_point.save!
+        format.html { redirect_to @data_point, notice: 'Datapoint was successfully created.' }
         format.json { render json: @data_point, status: :created, location: @data_point }
       else
         format.html { render action: 'new' }
-        format.json { render json: @data_point.errors, status: :unprocessable_entity }
+        format.json do
+          render json: {
+            message: error_message,
+            data_point_errors: @data_point.nil? ? '' : @data_point.errors
+          }, status: :unprocessable_entity
+        end
       end
     end
   end
@@ -186,14 +243,36 @@ class DataPointsController < ApplicationController
     end
   end
 
+  # PUT /data_points/1.json
+  def run
+    error = false
+    error_message = nil
+    @data_point = DataPoint.find(params[:id])
+
+    # only run simulations that are in the na state
+    if @data_point.status = 'na'
+      @data_point.job_id = @data_point.submit_simulation
+      @data_point.save!
+    end
+
+    respond_to do |format|
+      logger.info("error flag was set to #{error}")
+      if !error
+        format.json { render json: @data_point }
+      else
+        format.json { render json: error_message, status: :unprocessable_entity }
+      end
+    end
+  end
+
   # PUT /data_points/1
   # PUT /data_points/1.json
   def update
     @data_point = DataPoint.find(params[:id])
 
     respond_to do |format|
-      if @data_point.update_attributes(params[:data_point])
-        format.html { redirect_to @data_point, notice: 'Data point was successfully updated.' }
+      if @data_point.update(data_point_params)
+        format.html { redirect_to @data_point, notice: 'Datapoint was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -215,37 +294,90 @@ class DataPointsController < ApplicationController
     end
   end
 
-  def download
-    @data_point = DataPoint.find(params[:id])
+  # Delete all the result files from the datapoint
+  # API only method
+  # DELETE /data_points/1/result_files
+  def result_files
+    dp = DataPoint.find(params[:id])
+    dp.result_files.destroy
+    dp.save
 
-    data_point_zip_data = File.read(@data_point.openstudio_datapoint_file_name)
-    send_data data_point_zip_data, filename: File.basename(@data_point.openstudio_datapoint_file_name), type: 'application/zip; header=present', disposition: 'attachment'
+    # Check if we want to delete anything else here (e.g. the results hash?)
+
+    respond_to do |format|
+      format.json { head :no_content }
+    end
   end
 
-  def download_reports
-    @data_point = DataPoint.find(params[:id])
+  # upload results file
+  # POST /data_points/1/upload_file.json
+  def upload_file
+    # expected params: datapoint_id, file: {display_name, type, data, attachment}
+    error = false
+    error_messages = []
+    datapoint_id = params[:id]
+    logger.info('Attaching results file to datapoint')
 
-    remote_filename_reports = @data_point.openstudio_datapoint_file_name.gsub('.zip', '_reports.zip')
-    data_point_zip_data = File.read(remote_filename_reports)
-    send_data data_point_zip_data, filename: File.basename(remote_filename_reports), type: 'application/zip; header=present', disposition: 'attachment'
+    @data_point = DataPoint.find(datapoint_id)
+    if params[:file] && params[:file][:attachment]
+      @rf = ResultFile.new(
+        display_name: params[:file][:display_name],
+        type: params[:file][:type]
+      )
+      @rf.attachment = params[:file][:attachment]
+
+      @data_point.result_files << @rf
+
+      unless @data_point.save!
+        error = true
+        error_messages << 'Result File could not be saved: ' + @data_point.errors
+      end
+    else
+      error = true
+      error_messages << 'Missing attachment parameter'
+    end
+
+    respond_to do |format|
+      if error
+        format.json { render json: { error: error_messages, result_file: params[:file] }, status: :unprocessable_entity }
+      else
+        format.json { render 'result_file', status: :created, location: data_point_url(@data_point) }
+      end
+    end
   end
 
-  # Render an openstudio reporting measure's HTML report. This method has protection around which file to load.
-  # It expects the file to be in the reports directory of the data point. If the user try to navigate the file system
-  # the File.basename method will remove that.
-  def view_report
-    # construct the path to the report based on the routs
+  # download a datapoint report of filename
+  def download_report
     @data_point = DataPoint.find(params[:id])
 
-    # remove any preceding .. because an attacker could try and traverse the file system
-    file = File.basename(params[:file])
-    file_str = "/mnt/openstudio/analysis_#{@data_point.analysis.id}/data_point_#{@data_point.id}/reports/#{file}"
+    h = nil
+    dp_params = data_point_params
+    if dp_params[:filename]
+      h = @data_point.result_files.where(display_name: dp_params[:filename]).first
+    end
 
-    if File.exist? file_str
-      render file: file_str, layout: false
+    if h && h.attachment && File.exist?(h.attachment.path)
+      send_data File.binread(h.attachment.path)
     else
       respond_to do |format|
-        format.html { redirect_to @data_point, notice: "Could not find file #{file_str}" }
+        format.json { render json: { status: 'error', error_message: 'could not find report' }, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # GET /data_points/1/download_result_file
+  def download_result_file
+    @data_point = DataPoint.find(params[:id])
+
+    file = @data_point.result_files.where(attachment_file_name: params[:filename]).first
+    if file && file.attachment && File.exist?(file.attachment.path)
+      file_data = File.read(file.attachment.path)
+      disposition = ['application/json', 'text/plain', 'text/html'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
+      send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
+    else
+      respond_to do |format|
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
+        format.html { redirect_to @data_point, notice: "Result file '#{params[:filename]}' does not exist. It probably was deleted from the file system." }
       end
     end
   end
@@ -293,7 +425,7 @@ class DataPointsController < ApplicationController
 
       # Grab all the variables that have defined a measure ID and pull out the results
       vars = @data_point.analysis.variables.where(:metadata_id.exists => true, :metadata_id.ne => '')
-             .order_by(:name.asc).as_json(only: [:name, :metadata_id])
+                        .order_by(:name.asc).as_json(only: [:name, :metadata_id])
 
       dencity[:structure] = {}
       vars.each do |v|
@@ -317,8 +449,14 @@ class DataPointsController < ApplicationController
       if dencity
         format.json { render json: dencity.to_json }
       else
-        format.json { render json: { error: 'Could not format data point into DEnCity view' }, status: :unprocessable_entity }
+        format.json { render json: { error: 'Could not format datapoint into DEnCity view' }, status: :unprocessable_entity }
       end
     end
+  end
+
+  private
+
+  def data_point_params
+    params.require(:data_point).permit!
   end
 end

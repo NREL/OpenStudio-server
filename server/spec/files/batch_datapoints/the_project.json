@@ -1,0 +1,440 @@
+{
+  "analysis": {
+    "display_name": "the_project",
+    "name": "the_project",
+    "output_variables": [],
+    "problem": {
+      "analysis_type": null,
+      "algorithm": {
+        "objective_functions": []
+      },
+      "workflow": [
+        {
+          "name": "rotate_building",
+          "display_name": "Rotate Building",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "RotateBuilding",
+          "measure_definition_directory": "./measures/Rotate Building Relative to Current Orientation",
+          "measure_definition_directory_local": "/Users/kflemin/OpenStudio/PAT/the_project/measures/Rotate Building Relative to Current Orientation",
+          "measure_definition_display_name": "Rotate Building",
+          "measure_definition_name": "rotate_building",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+          "measure_definition_version_uuid": "212f9705-e0e3-43d4-b5eb-f17e56dd3af8",
+          "uuid": "a5be6c96-4ecc-47fa-8d32-f4216ebc2e7d",
+          "version_uuid": "212f9705-e0e3-43d4-b5eb-f17e56dd3af8",
+          "description": "Rotate your building relative to its current orientation. This will not rotate site shading objects.",
+          "taxonomy": "Envelope.Form",
+          "arguments": [],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Number of Degrees to Rotate Building (positive value is clockwise).",
+                "display_name_short": "Number of Degrees to Rotate Building (positive value is clockwise).",
+                "name": "relative_building_rotation",
+                "value_type": "double",
+                "default_value": 90,
+                "value": 90
+              },
+              "display_name": "Number of Degrees to Rotate Building (positive value is clockwise).",
+              "display_name_short": "Number of Degrees to Rotate Building (positive value is clockwise).",
+              "variable_type": "variable",
+              "units": "",
+              "minimum": 90,
+              "maximum": 270,
+              "relation_to_output": null,
+              "static_value": 90,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 90,
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": 180,
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": 270,
+                        "weight": 0.3333333333333333
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 90
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 270
+                  },
+                  {
+                    "name": "modes",
+                    "value": 90
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": null
+                  },
+                  {
+                    "name": "stddev",
+                    "value": null
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 0
+        },
+        {
+          "name": "open_studio_results",
+          "display_name": "OpenStudio Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "OpenStudioResults",
+          "measure_definition_directory": "./measures/OpenStudio Results",
+          "measure_definition_directory_local": "/Users/kflemin/OpenStudio/LocalBCL/OpenStudio Results",
+          "measure_definition_display_name": "OpenStudio Results",
+          "measure_definition_name": "open_studio_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "measure_definition_version_uuid": "15556a61-81fb-4114-8465-1d3987d4bcb2",
+          "uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "version_uuid": "15556a61-81fb-4114-8465-1d3987d4bcb2",
+          "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Model Summary",
+              "display_name_short": "Model Summary",
+              "name": "building_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Annual Overview",
+              "display_name_short": "Annual Overview",
+              "name": "annual_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Monthly Overview",
+              "display_name_short": "Monthly Overview",
+              "name": "monthly_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Utility Bills/Rates",
+              "display_name_short": "Utility Bills/Rates",
+              "name": "utility_bills_rates_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Envelope",
+              "display_name_short": "Envelope",
+              "name": "envelope_section_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Breakdown",
+              "display_name_short": "Space Type Breakdown",
+              "name": "space_type_breakdown_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Summary",
+              "display_name_short": "Space Type Summary",
+              "name": "space_type_details_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Interior Lighting Summary",
+              "display_name_short": "Interior Lighting Summary",
+              "name": "interior_lighting_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plug Loads Summary",
+              "display_name_short": "Plug Loads Summary",
+              "name": "plug_loads_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Exterior Lighting",
+              "display_name_short": "Exterior Lighting",
+              "name": "exterior_light_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Water Use Equipment",
+              "display_name_short": "Water Use Equipment",
+              "name": "water_use_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "HVAC Load Profiles",
+              "display_name_short": "HVAC Load Profiles",
+              "name": "hvac_load_profile",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Conditions",
+              "display_name_short": "Zone Conditions",
+              "name": "zone_condition_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Overview",
+              "display_name_short": "Zone Overview",
+              "name": "zone_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Equipment Detail",
+              "display_name_short": "Zone Equipment Detail",
+              "name": "zone_equipment_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Air Loops Detail",
+              "display_name_short": "Air Loops Detail",
+              "name": "air_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plant Loops Detail",
+              "display_name_short": "Plant Loops Detail",
+              "name": "plant_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Outdoor Air",
+              "display_name_short": "Outdoor Air",
+              "name": "outdoor_air_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Cash Flow",
+              "display_name_short": "Cash Flow",
+              "name": "cost_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Site and Source Summary",
+              "display_name_short": "Site and Source Summary",
+              "name": "source_energy_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Schedule Overview",
+              "display_name_short": "Schedule Overview",
+              "name": "schedules_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Skip OpenStudio Results",
+                "display_name_short": "Skip entire measure",
+                "name": "__SKIP__",
+                "value_type": "bool",
+                "default_value": false,
+                "value": false
+              },
+              "display_name": "Skip OpenStudio Results",
+              "display_name_short": "Skip entire measure",
+              "variable_type": "variable",
+              "units": null,
+              "minimum": false,
+              "maximum": true,
+              "relation_to_output": null,
+              "static_value": false,
+              "variable": true,
+              "uncertainty_description": {
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": false,
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": false,
+                        "weight": 0.3333333333333333
+                      },
+                      {
+                        "value": true,
+                        "weight": 0.3333333333333333
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": false
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": false
+                  },
+                  {
+                    "name": "modes",
+                    "value": false
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": null
+                  },
+                  {
+                    "name": "stddev",
+                    "value": null
+                  }
+                ],
+                "type": "discrete"
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 1
+        }
+      ],
+      "design_alternatives": [
+        {
+          "name": "Alternative 1",
+          "options": [
+            {
+              "measure_name": "rotate_building",
+              "workflow_index": 0,
+              "name": "Option 1 yeah",
+              "description": "Option 1 Description"
+            },
+            {
+              "measure_name": "open_studio_results",
+              "workflow_index": 1,
+              "name": "Option 1 Name",
+              "description": "Option 1 Description"
+            },
+            {
+              "measure_name": "xcel_eda_reportingand_qaqc",
+              "workflow_index": 2,
+              "name": "xcel_eda_reportingand_qaqc",
+              "description": "This measure extracts key simulation results and performs basic model QAQC checks necessary for the Xcel EDA Program."
+            }
+          ]
+        },
+        {
+          "name": "Alternative 2",
+          "seed": {
+            "file_type": "OSM",
+            "path": "./seeds/Office2.osm"
+          },
+          "options": [
+            {
+              "measure_name": "rotate_building",
+              "workflow_index": 0,
+              "name": "Option 2 hi",
+              "description": "Option 2 Description"
+            },
+            {
+              "measure_name": "open_studio_results",
+              "workflow_index": 1,
+              "name": "Option 1 Name",
+              "description": "Option 1 Description"
+            },
+            {
+              "measure_name": "xcel_eda_reportingand_qaqc",
+              "workflow_index": 2,
+              "name": "xcel_eda_reportingand_qaqc",
+              "description": "This measure extracts key simulation results and performs basic model QAQC checks necessary for the Xcel EDA Program."
+            }
+          ]
+        },
+        {
+          "name": "Alternative 3",
+          "seed": {
+            "file_type": "OSM",
+            "path": "./seeds/Office2.osm"
+          },
+          "options": [
+            {
+              "measure_name": "rotate_building",
+              "workflow_index": 0,
+              "name": "Option 3 hello",
+              "description": "Option 3 Description"
+            },
+            {
+              "measure_name": "open_studio_results",
+              "workflow_index": 1,
+              "name": "open_studio_results",
+              "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data."
+            },
+            {
+              "measure_name": "xcel_eda_reportingand_qaqc",
+              "workflow_index": 2,
+              "name": "xcel_eda_reportingand_qaqc",
+              "description": "This measure extracts key simulation results and performs basic model QAQC checks necessary for the Xcel EDA Program."
+            }
+          ]
+        }
+      ]
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seeds/Office.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw"
+    },
+    "file_format_version": 1
+  }
+}
