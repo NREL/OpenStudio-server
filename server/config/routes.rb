@@ -37,6 +37,7 @@ Rails.application.routes.draw do
         get :download_seed_zip
         get :download_algorithm_results_zip
         get :dencity
+        get :download_selected_datapoints
 
         get :plot_xy_interactive
         post :plot_xy_interactive

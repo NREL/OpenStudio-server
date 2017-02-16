@@ -2,7 +2,7 @@
 
 ## Starting Worker Pools
 
-The server is required to have a running delayed job instances watching
+The server is required to have a running delayed job instance watching
 the `analyses` queue. 
 
 ```
@@ -10,7 +10,7 @@ bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,bac
 ```
 
 Depending on the resources available on the machine, the worker nodes
-can be spun up with the following command. 
+can be spun up with the following commands:
 
 ```
 bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulations start
@@ -28,6 +28,15 @@ For development in the foreground
 ```
 bin/delayed_job -i server --queue=analyses,background run
 bin/delayed_job -i worker_1 --queue=simulations run
+```
+
+## Starting Rserve for development in the foreground
+
+```
+R
+libary(Rserve)
+Rserve()
+
 ```
 
 ## Install Nokogiri (with Brew System Libraries)

@@ -1,4 +1,5 @@
 source 'http://rubygems.org'
+ruby '2.2.4'
 
 gem 'rails', '4.2'
 gem 'rake', '~> 11.2'
@@ -7,16 +8,16 @@ gem 'rake', '~> 11.2'
 gem 'colored'
 
 # data modules
-gem 'json', '1.8.6'
+gem 'json', '1.8.1'
 gem 'jbuilder'
+gem 'nokogiri', '~> 1.6.5'
 gem 'rubyzip', '~> 1.2.0'
 gem 'tzinfo-data'
-gem 'nokogiri', '~> 1.6.5'
 
 # database modules
 gem 'mongoid', '~> 5.1'
-gem 'paperclip', '~> 4.3'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
+gem 'paperclip', '~> 4.3'
 
 # R
 gem 'rserve-simpler'
@@ -24,8 +25,8 @@ gem 'rserve-simpler'
 # net-*
 gem 'net-http-persistent', '< 3.0.0'
 gem 'net-scp'
-gem 'net-ssh'
 gem 'net-sftp'
+gem 'net-ssh'
 
 # other useful gems
 gem 'parallel'
@@ -38,24 +39,24 @@ gem 'kaminari'
 gem 'kaminari-mongoid'
 
 # job queuing
-gem 'delayed_job_mongoid'
 gem 'daemons'
+gem 'delayed_job_mongoid'
 
 # http(s) requests
 gem 'faraday' # TODO: can this be deprecated?
 
 # Gems used only for assets and not required
 # in production environments by default.
-gem 'sass'
-gem 'coffee-rails'
 gem 'bootstrap-sass'
+gem 'coffee-rails'
+gem 'sass'
 gem 'sass-rails'
-gem 'uglifier'
 gem 'sprockets-rails'
+gem 'uglifier'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
-gem 'openstudio-workflow', '= 1.1.0' 
+gem 'openstudio-workflow', '= 1.1.1'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
@@ -68,14 +69,14 @@ gem 'openstudio-standards', '0.1.11'
 
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.5.0.rc0'
+gem 'openstudio-aws', '0.5.0.rc4'
 
+gem 'libxml-ruby'
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
 gem 'oj', '=2.17.5' # Next release (2.18.0) doesn't install on Windows
-gem 'rest-client'
-gem 'libxml-ruby'
 gem 'os'
+gem 'rest-client', '1.8.0' # rest-client 2.0.0 breaks the multipart posting of the zip files.
 
 gem 'rubocop'
 
@@ -87,22 +88,22 @@ group :docker do
 end
 
 group :development, :test do
-  gem 'sextant' # navigate to /rails/routes to see routes
   gem 'better_errors'
   gem 'meta_request'
+  gem 'sextant' # navigate to /rails/routes to see routes
 
-  gem 'coveralls', require: false
-  gem 'ruby-prof', '~> 0.15'
   gem 'capybara'
-  gem 'selenium-webdriver'
+  gem 'coveralls', require: false
   gem 'rspec', '~> 3.4'
-  gem 'rspec-retry'
   gem 'rspec-rails'
+  gem 'rspec-retry'
+  gem 'ruby-prof', '~> 0.15'
+  gem 'selenium-webdriver'
 
   gem 'rubocop-checkstyle_formatter', require: false
 
+  gem 'ci_reporter'
+  gem 'factory_girl_rails'
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
-  gem 'factory_girl_rails'
-  gem 'ci_reporter'
 end

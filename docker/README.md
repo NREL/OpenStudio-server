@@ -21,11 +21,15 @@ docker-compose build
 ```
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully, then start the containers
 
+Resetting the containers can be accomplished by running:
 ``` 
 docker-compose rm -f
 docker volume rm osdata
 docker volume create --name=osdata
 docker-compose up
+
+# Or one line
+docker-compose rm -f && docker-compose build && docker volume rm osdata && docker volume create --name=osdata && docker-compose up
 ```
 
 #### You're done ####

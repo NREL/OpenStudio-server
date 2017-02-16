@@ -106,3 +106,7 @@ Style/ConditionalAssignment:
 Style/MultilineMethodCallIndentation:
   EnforcedStyle: aligned
   Enabled: true
+
+# 27000 => 27_000
+Style/NumericLiterals:
+  Enabled: false

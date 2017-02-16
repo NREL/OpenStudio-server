@@ -477,12 +477,31 @@ h2.header-large {
   padding-bottom: 20px;
 }
 
+.pad-top-10 {
+  padding-top:10px;
+}
+
+.pad-bottom-10 {
+  padding-bottom:10px;
+}
+
+.pad-5 {
+  padding:5px;
+}
+
 
 #flash_messages {
   color: green;
   padding:20px;
   margin-top:10px;
   border: 3px solid green;
+}
+
+#flash_messages_error {
+  color: red;
+  padding:20px;
+  margin-top:10px;
+  border: 3px solid red;
 }
 
 .edittable th,
@@ -777,4 +796,7 @@ h2.header-large {
 
 .badge-warning {
   background-color: #f0ad4e;
+}
+.inline {
+  display: inline;
 }
