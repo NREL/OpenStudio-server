@@ -47,6 +47,7 @@ class RunSimulateDataPoint
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
+    @intialize_worker_errs = []
   end
 
   def perform
@@ -80,7 +81,7 @@ class RunSimulateDataPoint
       err_msg_1 = 'The worker initialization failed, which means that no simulations will be run.'
       err_msg_2 = 'If you see this message once, all subsequent runs will likely fail.'
       err_msg_3 = 'If you are running PAT simulations locally on Windows, the error is likely due to a measure file whose path length has exceeded 256 characters.'
-      err_msg_4 = 'Before stopping the server, look in the /logs/delayed_jobs.log file in your PAT project for clues as to the specific issue.'
+      err_msg_4 = 'Inspect the following messages for clues as to the specific issue:'
       out_osw = {completed_status: 'Fail',
                  osa_id: @data_point.analysis.id,
                  osd_id: @data_point.id,
@@ -96,7 +97,7 @@ class RunSimulateDataPoint
                          started_at: ::DateTime.now.iso8601,
                          stderr: 'Please see the delayed_jobs.log file for the specific error.',
                          stdout: '',
-                         step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4],
+                         step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
                          step_files: [],
                          step_info: [],
                          step_result: 'Failure',
@@ -312,6 +313,7 @@ class RunSimulateDataPoint
     true
   rescue => e
     @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
+    @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
     false
   end
 
