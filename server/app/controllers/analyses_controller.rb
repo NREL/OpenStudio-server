@@ -825,7 +825,7 @@ class AnalysesController < ApplicationController
 
   # Get data across analysis. If a datapoint_id is specified, will return only that point
   # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
-  def get_analysis_data(analysis, _datapoint_ids = nil, options = {})
+  def get_analysis_data(analysis, datapoint_id = nil, options = {})
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
 
