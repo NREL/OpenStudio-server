@@ -121,7 +121,7 @@ create_and_run_datapoint = function(x){
             if (rails_exit_guideline_14){
 
                 # read in the results from the objective function file
-                guideline_file = paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+                guideline_file = paste(data_point_directory,"/run/CalibrationReportsEnhanced/guideline.json",sep="")
                 json = NULL
                 try(json = fromJSON(file=guideline_file), silent=TRUE)
                 if (is.null(json)) {

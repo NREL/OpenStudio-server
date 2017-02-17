@@ -30,6 +30,15 @@ bin/delayed_job -i server --queue=analyses,background run
 bin/delayed_job -i worker_1 --queue=simulations run
 ```
 
+## Starting Rserve for development in the foreground
+
+```
+R
+libary(Rserve)
+Rserve()
+
+```
+
 ## Install Nokogiri (with Brew System Libraries)
 
 ```
