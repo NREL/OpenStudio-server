@@ -73,10 +73,15 @@ class RunSimulateDataPoint
     @sim_logger.info "Simulation directory is #{simulation_dir}"
     @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
+    # If worker initialization fails, communicate this information
+    # to the user via the out.osw.
     success = initialize_worker
     unless success
-      @data_point.set_error_flag
-      out_osw = {status: 'Failed',
+      err_msg_1 = 'The worker initialization failed, which means that no simulations will be run.'
+      err_msg_2 = 'If you see this message once, all subsequent runs will likely fail.'
+      err_msg_3 = 'If you are running PAT simulations locally on Windows, the error is likely due to a measure file whose path length has exceeded 256 characters.'
+      err_msg_4 = 'Before stopping the server, look in the /logs/delayed_jobs.log file in your PAT project for clues as to the specific issue.'
+      out_osw = {completed_status: 'Fail',
                  osa_id: @data_point.analysis.id,
                  osd_id: @data_point.id,
                  name: @data_point.name,
@@ -84,17 +89,17 @@ class RunSimulateDataPoint
                  started_at: ::DateTime.now.iso8601,
                  steps: [
                      arguments: {},
-                     description: 'If you are a PAT desktop Windows user, this is likely that a path has exceeded 256 characters.',
+                     description: '',
                      name: 'Initialize Worker Error',
-                     results: {
+                     result: {
                          completed_at: ::DateTime.now.iso8601,
                          started_at: ::DateTime.now.iso8601,
                          stderr: 'Please see the delayed_jobs.log file for the specific error.',
                          stdout: '',
-                         step_errors: [],
+                         step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4],
                          step_files: [],
                          step_info: [],
-                         step_results: 'Failure',
+                         step_result: 'Failure',
                          step_warnings: []
                      }
                  ]}
@@ -103,7 +108,11 @@ class RunSimulateDataPoint
         f.puts ::JSON.pretty_generate(out_osw)
       end
       upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
-      fail 'Failed to initialize the worker.'
+      @data_point.set_error_flag
+      @data_point.set_complete_state if @data_point
+      @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
+      @sim_logger.close if @sim_logger
+      return false
     end
 
     # delete any existing data files from the server in case this is a 'rerun'
@@ -216,7 +225,7 @@ class RunSimulateDataPoint
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
-      @sim_logger.info log_message if @sim_logger
+      @sim_logger.error log_message if @sim_logger
       @data_point.set_error_flag
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
@@ -249,7 +258,7 @@ class RunSimulateDataPoint
       @sim_logger.info 'write_lock_file exists, checking for receipt file'
 
       # wait until receipt file appears then return
-      Timeout.timeout(300) do
+      Timeout.timeout(60) do
         loop do
           break if File.exist? receipt_file
           @sim_logger.info 'waiting for receipt file to appear'
