@@ -96,8 +96,8 @@ print(xoverdistidx)
 print(mudistidx)
 print(mprob)
 
-results = NULL
-try(results = spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
+results <- NULL
+try(results <- spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
 # results = spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
 
 #print(paste("ip workers:", ips))
