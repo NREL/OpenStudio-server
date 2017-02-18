@@ -95,6 +95,7 @@ print(cprob)
 print(xoverdistidx)
 print(mudistidx)
 print(mprob)
+#print(create_and_run_datapoint)
 
 results <- NULL
 try(results <- nsga2NREL(cl=cl, fn=create_and_run_datapoint, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob), silent=FALSE)
