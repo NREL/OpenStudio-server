@@ -122,8 +122,14 @@ create_and_run_datapoint = function(x){
 
                 # read in the results from the objective function file
                 guideline_file = paste(data_point_directory,"/run/CalibrationReportsEnhanced/guideline.json",sep="")
-                json = NULL
+                guideline_file2 = paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+                json <- NULL
+                json2 <- NULL
                 try(json = fromJSON(file=guideline_file), silent=TRUE)
+                try(json2 = fromJSON(file=guideline_file2), silent=TRUE)
+                #if json2 exists then set json = json2 and continue to test on json
+                if (!is.null(json2)) {json <- json2}
+                
                 if (is.null(json)) {
                     print(paste("no guideline file: ",guideline_file))
                 } else {
