@@ -1,4 +1,4 @@
-# create_and_run_datapoint(x) such that x is vector of variable values,
+# create_and_run_datapoint_uniquegroups(x) such that x is vector of variable values,
 #           create a datapoint from the vector of variable values x and run
 #           the new datapoint
 # x: vector of variable values
@@ -8,13 +8,13 @@
 #   rails_analysis_id
 #   ruby_command
 #   r_scripts_path
-create_and_run_datapoint <- function(x){
+create_and_run_datapoint_uniquegroups <- function(x){
   if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id)==FALSE){
       stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
   }
 
   # convert the vector to comma separated values
-  force(x) # What does this do?
+  force(x)
   w <- paste(x, collapse=",")
   y <- paste('ruby ',r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
 
@@ -50,13 +50,18 @@ create_and_run_datapoint <- function(x){
     return(NAvalue)
   } else {
     if (is.null(json)) {
-      obj <- 1.0e19
+      obj <- NULL
+      for (i in 1:objDim) {
+        obj[i] <- 1.0e19
+      }
       print(paste(data_point_directory,"/objectives.json is NULL"))
     } else {
       obj <- NULL
       objvalue <- NULL
       objtarget <- NULL
       sclfactor <- NULL
+      objgroup <- NULL
+      group_count <- 1
       for (i in 1:objDim){
         objfuntemp <- paste("objective_function_",i,sep="")
         if (json$results[objfuntemp] != "NULL"){
@@ -82,6 +87,13 @@ create_and_run_datapoint <- function(x){
         } else {
           sclfactor[i] <- 1.0
         }
+        objfungrouptemp <- paste("objective_function_group_",i,sep="")
+        if (json$results[objfungrouptemp] != "NULL"){
+          objgroup[i] <- as.numeric(json$results[objfungrouptemp])
+        } else {
+          objgroup[i] <- group_count
+          group_count <- group_count + 1
+        }
       }
       options(digits=8)
       options(scipen=-2)
@@ -91,8 +103,18 @@ create_and_run_datapoint <- function(x){
 
       objvalue <- objvalue / sclfactor
       objtarget <- objtarget / sclfactor
-      
-      obj <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
+
+      ug <- length(unique(objgroup))
+      if (ug != uniquegroups) {
+        print(paste("Json unique groups:",ug," not equal to Analysis unique groups",uniquegroups))
+        uniq_filename <- paste(analysis_dir,'/uniquegroups.err',sep='')
+        write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+        stop(options("show.error.messages"=TRUE),"unique groups is not equal")
+      }
+
+      for (i in 1:ug){
+        obj[i] <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
+      }
 
       print(paste("Objective function Norm:",obj))
 

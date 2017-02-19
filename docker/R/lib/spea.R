@@ -64,8 +64,8 @@ clusterExport(cl,"rails_exit_guideline_14")
 clusterEvalQ(cl,varfile(varnames))
 
 # Export functions for worker nodes
-source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoint")
+source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
+clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
 if (nrow(vars) == 1) {
@@ -97,7 +97,7 @@ print(mudistidx)
 print(mprob)
 
 results <- NULL
-try(results <- spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
+try(results <- spea2NREL(cl=cl, fn=create_and_run_datapoint_uniquegroups, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
 # results = spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
 
 #print(paste("ip workers:", ips))

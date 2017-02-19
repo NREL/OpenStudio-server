@@ -1,13 +1,12 @@
 clusterEvalQ(cl,library(rjson))
 clusterEvalQ(cl,library(R.utils))
+objDim <- length(objfun)
 
 print(paste("objfun:",objfun))
-objDim <- length(objfun)
 print(paste("objDim:",objDim))
 print(paste("UniqueGroups:",uniquegroups))
 print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
-
 print(paste("min:",mins))
 print(paste("max:",maxes))
 
@@ -64,8 +63,8 @@ clusterExport(cl,"rails_exit_guideline_14")
 clusterEvalQ(cl,varfile(varnames))
 
 # Export functions for worker nodes
-source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoint")
+source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
+clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
 if (nrow(vars) == 1) {
@@ -86,23 +85,22 @@ if (ncol(vars) == 1) {
 }
 
 print(paste("Number of generations set to:",gen))
-print(uniquegroups)
-print(vars[])
-print(vartypes)
-print(gen)
-print(toursize)
-print(cprob)
-print(xoverdistidx)
-print(mudistidx)
-print(mprob)
-#print(create_and_run_datapoint)
+print(paste("uniquegroups set to:",uniquegroups))
+print(paste("vars[] set to:",vars[]))
+print(paste("vartypes set to:",vartypes))
+print(paste("gen set to:",gen))
+print(paste("toursize set to:",toursize))
+print(paste("cprob set to:",cprob))
+print(paste("xoverdistidx set to:",xoverdistidx))
+print(paste("mudistidx set to:",mudistidx))
+print(paste("mprob set to:",mprob))
 
 results <- NULL
-try(results <- nsga2NREL(cl=cl, fn=create_and_run_datapoint, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob), silent=FALSE)
-# results = nsga2NREL(cl=cl, fn=create_and_run_datapoint, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob)
-
+try(results <- nsga2NREL(cl=cl, fn=create_and_run_datapoint_uniquegroups, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob), silent=FALSE)
 
 # TODO: how to get best result back in docker space? API? What is the server?
+whoami <- system('whoami', intern = TRUE)
+print(paste("whoami:", whoami))
 #for (i in 1:num_uniq_workers) {
 #    scp = paste('scp ',whoami,'@',ips2[i],':',analysis_dir,'/best_result.json ',analysis_dir,'/',sep="")
 #print(paste("scp command:",scp))

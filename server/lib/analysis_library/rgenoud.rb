@@ -35,8 +35,7 @@
 
 # TODO: Fix this for new queue
 
-# Non Sorting Genetic Algorithm
-class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
+class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -49,18 +48,26 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          number_of_samples: 30,
-          sample_method: 'individual_variables',
           generations: 1,
-          toursize: 2,
-          cprob: 0.7,
-          xoverdistidx: 5,
-          mudistidx: 10,
-          mprob: 0.5,
+          waitgenerations: 3,
+          popsize: 30,
+          boundaryenforcement: 2,
+          bfgsburnin: 2,
+          printlevel: 2,
+          BFGS: 1,
+          solutiontolerance: 0.01,
           normtype: 'minkowski',
           ppower: 2,
           exit_on_guideline14: 0,
-          objective_functions: []
+          gradientcheck: 1,
+          objective_functions: [],
+          pgtol: 1e-1,
+          factr: 4.5036e14,
+          maxit: 5,
+          epsilongradient: 1e-4,
+          debugflag: 0,
+          MM: 1,
+          balance: 0
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -87,58 +94,53 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    logger.info 'Setting up R for NSGA2 Run'
+    logger.info 'Setting up R for genoud Run'
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       # TODO: deal better with random seeds
-      @r.converse("set.seed(#{@analysis.problem['random_seed']})")
+      @r.converse "set.seed(#{@analysis.problem['random_seed']})"
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
       @r.converse 'library(mco)'
       @r.converse 'library(NRELmoo)'
+      @r.converse 'library(rgenoud)'
+
+      # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
+      # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
 
       master_ip = 'localhost'
 
       logger.info("Master ip: #{master_ip}")
-      logger.info('Starting NSGA2 Run')
+      logger.info('Starting GENOUD Run')
 
       # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
       # that the run flag is true.
 
       # TODO: preflight check -- need to catch this in the analysis module
-      if @analysis.problem['algorithm']['generations'].nil? || (@analysis.problem['algorithm']['generations']).zero?
-        raise 'Number of generations was not set or equal to zero (must be 1 or greater)'
+      if @analysis.problem['algorithm']['maxit'].nil? || (@analysis.problem['algorithm']['maxit']).zero?
+        raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
       end
 
-      if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
+      if @analysis.problem['algorithm']['popsize'].nil? || (@analysis.problem['algorithm']['popsize']).zero?
         raise 'Must have number of samples to discretize the parameter space'
       end
 
-    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    #  raise "P Norm must be non-negative"
-    # end
+      # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      #  raise "P Norm must be non-negative"
+      # end
 
       if @analysis.problem['algorithm']['ppower'] <= 0
         raise 'P Norm must be non-negative'
       end
 
-      if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
-        raise 'Must have at least two objective functions defined'
-      end
-
-      if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
-        raise 'Must have at least two output_variables'
-      end
-
-      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
-      ug = objtrue.uniq { |v| v['objective_function_group'] }
-      logger.info "Number of objective function groups are #{ug.size}"
-
       @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
+
+      @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
+
       @analysis.save!
       logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
@@ -162,8 +164,8 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       logger.info 'starting lhs to discretize the variables'
 
       lhs = AnalysisLibrary::R::Lhs.new(@r)
-      samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-
+      samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
+      
       # Result of the parameter space will be column vectors of each variable
       logger.info "Samples are #{samples}"
       logger.info "mins_maxes: #{mins_maxes}"
@@ -174,10 +176,15 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
-      #from RGenoud I think we want to do this here too
+      
       if var_names.empty? || var_names.empty?
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+      end
+
+      unless var_types.all? { |t| t.casecmp('continuous').zero? }
+        logger.info 'Must have all continous variables to run algorithm, therefore exit'
+        raise "Must have all continous variables to run algorithm.  Found #{var_types}"
       end
 
       # Start up the cluster and perform the analysis
@@ -193,23 +200,27 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
 
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
-        # gen is the number of generations to calculate
+        # maxit is the max number of iterations to calculate
         # varNo is the number of variables (ncol(vars))
-        # popSize is the number of sample points in the variable (nrow(vars))
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq,
-                   vars: samples.to_dataframe, vartypes: var_types,
-                   varnames: var_names, mins: mins_maxes[:min],
-                   maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['normtype'],
-                   ppower: @analysis.problem['algorithm']['ppower'],
+        # popsize is the number of sample points in the variable (nrow(vars))
+        # epsilongradient is epsilon in numerical gradient calc
+
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
+        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
+        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names,
+                   varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
-                   gen: @analysis.problem['algorithm']['generations'],
-                   toursize: @analysis.problem['algorithm']['toursize'],
-                   cprob: @analysis.problem['algorithm']['cprob'],
-                   xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'],
-                   mudistidx: @analysis.problem['algorithm']['mudistidx'],
-                   mprob: @analysis.problem['algorithm']['mprob'],
-                   uniquegroups: ug.size) do
+                   gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'],
+                   BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
+                   boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
+                   printLevel: @analysis.problem['algorithm']['printlevel'], BFGS: @analysis.problem['algorithm']['BFGS'],
+                   solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'],
+                   waitGenerations: @analysis.problem['algorithm']['waitgenerations'],
+                   maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'],
+                   factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol'],
+                   debugFlag: @analysis.problem['algorithm']['debugflag'], MM: @analysis.problem['algorithm']['MM'],
+                   balance: @analysis.problem['algorithm']['balance'], gradientcheck: @analysis.problem['algorithm']['gradientcheck']) do
           %{
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
@@ -222,7 +233,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
             rails_exit_guideline_14 = "#{@analysis.exit_on_guideline14}"
-            source(paste(r_scripts_path,'/nsga.R',sep=''))
+            source(paste(r_scripts_path,'/rgenoud.R',sep=''))
           }
         end
 
@@ -257,6 +268,22 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
           logger.info("analysis: #{@analysis.results}")
         rescue => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
+        end
+      end
+
+      # Post process the results and jam into the database
+      converge_flag_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/convergence_flag.json"
+      if File.exist? converge_flag_json
+        begin
+          logger.info('read converge_flag.json')
+          temp2 = File.read(converge_flag_json)
+          temp = JSON.parse(temp2, symbolize_names: true)
+          logger.info("temp: #{temp}")
+          @analysis.results[@options[:analysis_type]]['convergence_flag'] = temp
+          @analysis.save!
+          logger.info("analysis: #{@analysis.results}")
+        rescue => e
+          logger.error 'Could not save post processed results for converge_flag.json into the database'
         end
       end
 
