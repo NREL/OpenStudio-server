@@ -110,5 +110,5 @@ print(paste("whoami:", whoami))
 #system(scp2,intern=TRUE)
 #}
 
-results_filename = paste(analysis_dir,'/results.R')
+results_filename <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/results.R',sep='')
 save(results, file=results_filename)

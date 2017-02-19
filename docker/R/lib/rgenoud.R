@@ -139,9 +139,9 @@ print(paste("whoami:", whoami))
 #print(paste("par:",results$par))
 #print(paste("value:",results$value))
 #flush.console()
-results_filename = paste(analysis_dir,'/results.R')
+results_filename <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/results.R',sep='')
 save(results, file=results_filename)
-bestresults_filename = paste(analysis_dir,'/best_result.json')
+bestresults_filename <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/best_result.json',sep='')
 #if (!file.exists(bestresults_filename) && !is.null(results$par)) {
 #  #write final params to json file
 #  answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',results$par,sep='', collapse=','),'}',sep='')
