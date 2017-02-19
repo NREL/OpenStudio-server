@@ -10,7 +10,7 @@
 #   r_scripts_path
 create_and_run_datapoint <- function(x){
   if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id)==FALSE){
-      stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
+    stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
   }
 
   # convert the vector to comma separated values
@@ -34,24 +34,28 @@ create_and_run_datapoint <- function(x){
   # }
   z <- z[length(z)]
   print(paste('z:',z))
-
-  data_point_directory <- paste(rails_analysis_id,'/data_point_',z,sep='')
-  print(paste("data_point_directory:",data_point_directory))
-
-  ## save off the variables file (can be used later if number of vars gets too long)
-  write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
-#NICK: I dont understand this, z should be a UUID returned from api_create_datapoint, 
-#NICK: so why the call to fromJSON().  This used to looking for objectives.json
+  
   json <- try(fromJSON(z), silent=TRUE)
+  
+  data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
+  print(paste("data_point_directory:",data_point_directory))
+  ## save off the variables file (can be used later if number of vars gets too long)
+  if (dir.exists(data_point_directory)) {
+    write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
+  } else { 
+     print(paste("data_point_directory does not exist:",data_point_directory))
+  }
+  
   if (!json$status) {
     print(paste("json:",json))
     print("RETURNING NAvalue of 1.0e19")
     NAvalue <- 1.0e19
     return(NAvalue)
   } else {
-    if (is.null(json)) {
+    if (is.null(json$results)) {
       obj <- 1.0e19
       print(paste(data_point_directory,"/objectives.json is NULL"))
+      print("json$results is NULL")
     } else {
       obj <- NULL
       objvalue <- NULL
