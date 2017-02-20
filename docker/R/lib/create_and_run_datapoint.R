@@ -36,6 +36,9 @@ create_and_run_datapoint <- function(x){
   print(paste('z:',z))
   
   json <- try(fromJSON(z), silent=TRUE)
+  print(paste('json:',json))
+  print(paste('is.recursive(json):',is.recursive(json)))
+  print(paste('is.atomic(json):',is.atomic(json)))
   
   data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
   print(paste("data_point_directory:",data_point_directory))

@@ -104,7 +104,7 @@ if (gradientcheck == 1) {gradientcheck = TRUE} else {gradientcheck = FALSE}
 print(paste("gradientcheck:", gradientcheck))
 
 results <- NULL
-try(results <- genoud(fn=g, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck), silent=FALSE)
+try(results <- genoud(fn=create_and_run_datapoint, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck), silent=FALSE)
 
 # TODO: how to get best result back in docker space? API? What is the server? 
 #print(paste("scp command:",scp))
