@@ -40,7 +40,8 @@ create_and_run_datapoint_uniquegroups <- function(x){
   print(paste('is.recursive(json):',is.recursive(json)))
   print(paste('is.atomic(json):',is.atomic(json)))
   
-  data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
+  data_point_directory <- paste(rails_sim_root_path,'/data_point_',json$id,sep='')
+  #data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
   print(paste("data_point_directory:",data_point_directory))
   ## save off the variables file (can be used later if number of vars gets too long)
   if (dir.exists(data_point_directory)) {
@@ -131,6 +132,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
       # Check if exit on guideline 14 is enabled
       if (rails_exit_guideline_14){
         # read in the results from the guideline14 file
+        #TODO this path will not work
         guideline_file <- paste(data_point_directory,"/run/CalibrationReportsEnhanced20/guideline.json",sep="")
         guideline_file1 <- paste(data_point_directory,"/run/CalibrationReportsEnhanced/guideline.json",sep="")
         guideline_file2 <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
