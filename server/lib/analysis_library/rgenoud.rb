@@ -33,8 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# TODO: Fix this for new queue
-
+#R version of Genoud
 class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
@@ -59,7 +58,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
           normtype: 'minkowski',
           ppower: 2,
           exit_on_guideline14: 0,
-          gradientcheck: 1,
+          gradientcheck: 0,
           objective_functions: [],
           pgtol: 1e-1,
           factr: 4.5036e14,
@@ -67,7 +66,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
           epsilongradient: 1e-4,
           debugflag: 0,
           MM: 1,
-          balance: 0
+          balance: 1
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -192,7 +191,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       unless cluster.configure
         raise 'could not configure R cluster'
       end
-      #TODO This needs to be a function of the MAX number of workers
+
       worker_ips = {}
       worker_ips[:worker_ips] = ['localhost'] * @options[:max_queued_jobs]
       #TODO There is no R queue, there is an R cluster

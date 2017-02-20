@@ -16,29 +16,29 @@ clusterExport(cl,"ppower")
 clusterExport(cl,"uniquegroups")
 
 for (i in 1:ncol(vars)){
-    vars[,i] <- sort(vars[,i])
+  vars[,i] <- sort(vars[,i])
 }
 print(paste("vartypes:",vartypes))
 print(paste("varnames:",varnames))
 
 # Setup a bunch of variables for the analysis based on passed variables
 # From Ruby
-analysis_dir = paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
-ruby_command = paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
-rake_command = paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
+analysis_dir <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
+ruby_command <- paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
+rake_command <- paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
 
 varfile = function(x){
-    var_filename = paste(analysis_dir,'/varnames.json',sep='')
-    if (!file.exists(var_filename)){
-        write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-    }
+  var_filename <- paste(analysis_dir,'/varnames.json',sep='')
+  if (!file.exists(var_filename)){
+    write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
 }
 
 if (uniquegroups == 1) {
-    print(paste("unique groups error:",uniquegroups))
-    uniq_filename = paste(analysis_dir,'/uniquegroups.err')
-    write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-    stop(options("show.error.messages"=TRUE),"unique groups is 1")
+  print(paste("unique groups error:",uniquegroups))
+  uniq_filename <- paste(analysis_dir,'/uniquegroups.err')
+  write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+  stop(options("show.error.messages"=TRUE),"unique groups is 1")
 }
 
 # Export local variables for worker nodes
@@ -68,20 +68,20 @@ clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
 if (nrow(vars) == 1) {
-    print("not sure what to do with only one datapoint so adding an NA")
-    vars <- rbind(vars, c(NA))
+  print("not sure what to do with only one datapoint so adding an NA")
+  vars <- rbind(vars, c(NA))
 }
 if (nrow(vars) == 0) {
-    print("not sure what to do with no datapoint so adding an NA")
-    vars <- rbind(vars, c(NA))
-    vars <- rbind(vars, c(NA))
+  print("not sure what to do with no datapoint so adding an NA")
+  vars <- rbind(vars, c(NA))
+  vars <- rbind(vars, c(NA))
 }
 
 print(nrow(vars))
 print(ncol(vars))
 if (ncol(vars) == 1) {
-    print("NSGA2 needs more than one variable")
-    stop(options("show.error.messages"=TRUE),"NSGA2 needs more than one variable")
+  print("NSGA2 needs more than one variable")
+  stop(options("show.error.messages"=TRUE),"NSGA2 needs more than one variable")
 }
 
 print(paste("Number of generations set to:",gen))

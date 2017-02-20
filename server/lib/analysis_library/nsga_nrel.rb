@@ -33,9 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# TODO: Fix this for new queue
 
-# Non Sorting Genetic Algorithm
+# Non Sorting Genetic Algorithm 2
 class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
@@ -185,7 +184,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       unless cluster.configure
         raise 'could not configure R cluster'
       end
-      #TODO This needs to be a function of the MAX number of workers
+
       worker_ips = {}
       worker_ips[:worker_ips] = ['localhost'] * @options[:max_queued_jobs]
       #TODO There is no R queue, there is an R cluster

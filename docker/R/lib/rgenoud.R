@@ -18,21 +18,15 @@ print(paste("varnames:",varnames))
 
 # Setup a bunch of variables for the analysis based on passed variables
 # From Ruby
-analysis_dir = paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
-ruby_command = paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
-rake_command = paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
+analysis_dir <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
+ruby_command <- paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
+rake_command <- paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
 
-#varfile <- function(x){
-#  if (!file.exists("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json")){
-#   write.table(x, file="#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/varnames.json", quote=FALSE,row.names=FALSE,col.names=FALSE)
-#  }
-#}
-
-varfile = function(x){
-    var_filename = paste(analysis_dir,'/varnames.json',sep='')
-    if (!file.exists(var_filename)){
-        write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-    }
+varfile <- function(x){
+  var_filename <- paste(analysis_dir,'/varnames.json',sep='')
+  if (!file.exists(var_filename)){
+    write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
 }
 
 # Export local variables for worker nodes
@@ -57,7 +51,6 @@ clusterExport(cl,"rails_exit_guideline_14")
 clusterEvalQ(cl,varfile(varnames))
 
 # Export functions for worker nodes
-#TODO use the non-unique group version
 source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint")
 clusterExport(cl,"check_run_flag")
@@ -75,13 +68,12 @@ varDom <- cbind(varMin,varMax)
 print(paste("varDom:",varDom))
 
 print("setup gradient")
-#TODO use the non-unique group version
 gn <- create_and_run_datapoint
 clusterExport(cl,"gn")
 clusterExport(cl,"varEps")
 
 vectorGradient <- function(x, ...) { # Now use the cluster
-vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
+  vectorgrad(func=gn, x=x, method="two", eps=varEps,cl=cl, debug=TRUE, ub=varMax, lb=varMin);
 }
 
 print(paste("Lower Bounds set to:",varMin))
@@ -143,10 +135,10 @@ results_filename <- paste(rails_sim_root_path,'/results.R',sep='')
 save(results, file=results_filename)
 bestresults_filename <- paste(rails_sim_root_path,'/best_result.json',sep='')
 #if (!file.exists(bestresults_filename) && !is.null(results$par)) {
-#  #write final params to json file
+  #write final params to json file
 #  answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',results$par,sep='', collapse=','),'}',sep='')
 #  write.table(answer, file=bestresults_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-#  #convergenceflag <- toJSON(results$peakgeneration)
+  #convergenceflag <- toJSON(results$peakgeneration)
 #  convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
 #  write(convergenceflag, file=paste(analysis_dir,"/convergence_flag.json"))
 #}
