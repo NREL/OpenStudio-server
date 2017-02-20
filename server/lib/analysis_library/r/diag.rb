@@ -198,7 +198,7 @@ module AnalysisLibrary::R
           var_types << 'discrete'
         # IF continuous, then sample the variable to make it "discrete"
         elsif var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence'
-          Rails.logger.info("creating integer sequence by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
+          logger.info("creating integer sequence by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
           @r.command(varlow: var.lower_bounds_value) do
             %{
               values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
@@ -208,9 +208,9 @@ module AnalysisLibrary::R
           values = @r.converse 'values'
           values = values.map(&:to_i)
           weights = @r.converse 'weights'
-          Rails.logger.info("values is #{values}")
+          logger.info("values is #{values}")
           variable_samples = values
-          Rails.logger.info("variable_samples is #{variable_samples}")
+          logger.info("variable_samples is #{variable_samples}")
           var_types << 'discrete'
         else
           variable_samples = samples_from_probability3(p[i_var], var.uncertainty_type, var.modes_value, var.stddev_value,
