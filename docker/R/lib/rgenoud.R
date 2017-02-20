@@ -124,21 +124,20 @@ print(paste("whoami:", whoami))
 #Rlog[grep('vartypes:',Rlog)]
 #Rlog[grep('varnames:',Rlog)]
 #Rlog[grep('<=',Rlog)]
-#print(paste("popsize:",results$pop.size))
-#print(paste("peakgeneration:",results$peakgeneration))
-#print(paste("generations:",results$generations))
-#print(paste("gradients:",results$gradients))
-#print(paste("par:",results$par))
-#print(paste("value:",results$value))
-#flush.console()
-results_filename <- paste(rails_sim_root_path,'/results.R',sep='')
+print(paste("popsize:",results$pop.size))
+print(paste("peakgeneration:",results$peakgeneration))
+print(paste("generations:",results$generations))
+print(paste("gradients:",results$gradients))
+print(paste("par:",results$par))
+print(paste("value:",results$value))
+flush.console()
+results_filename <- paste(analysis_dir,'/results.R',sep='')
 save(results, file=results_filename)
-bestresults_filename <- paste(rails_sim_root_path,'/best_result.json',sep='')
-#if (!file.exists(bestresults_filename) && !is.null(results$par)) {
+bestresults_filename <- paste(analysis_dir,'/best_result.json',sep='')
+if (!file.exists(bestresults_filename) && !is.null(results$par)) {
   #write final params to json file
-#  answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',results$par,sep='', collapse=','),'}',sep='')
-#  write.table(answer, file=bestresults_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-  #convergenceflag <- toJSON(results$peakgeneration)
-#  convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
-#  write(convergenceflag, file=paste(analysis_dir,"/convergence_flag.json"))
-#}
+  answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',results$par,sep='', collapse=','),'}',sep='')
+  write.table(answer, file=bestresults_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+  convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
+  write(convergenceflag, file=paste(analysis_dir,"/convergence_flag.json",sep=''))
+}

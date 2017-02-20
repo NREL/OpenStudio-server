@@ -36,7 +36,7 @@ varfile = function(x){
 
 if (uniquegroups == 1) {
   print(paste("unique groups error:",uniquegroups))
-  uniq_filename <- paste(analysis_dir,'/uniquegroups.err')
+  uniq_filename <- paste(analysis_dir,'/uniquegroups.err',sep='')
   write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
   stop(options("show.error.messages"=TRUE),"unique groups is 1")
 }
@@ -110,5 +110,5 @@ print(paste("whoami:", whoami))
 #system(scp2,intern=TRUE)
 #}
 
-results_filename <- paste(rails_sim_root_path,'/results.R',sep='')
+results_filename <- paste(analysis_dir,'/results.R',sep='')
 save(results, file=results_filename)
