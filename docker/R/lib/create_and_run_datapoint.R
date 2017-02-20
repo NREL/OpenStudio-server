@@ -40,8 +40,10 @@ create_and_run_datapoint <- function(x){
   print(paste('is.recursive(json):',is.recursive(json)))
   print(paste('is.atomic(json):',is.atomic(json)))
   
-  data_point_directory <- paste(rails_sim_root_path,'/data_point_',json$id,sep='')
-  #data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
+  whoami <- system('whoami', intern = TRUE)
+  print(paste("whoami:", whoami))
+  #data_point_directory <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
+  data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
   print(paste("data_point_directory:",data_point_directory))
   ## save off the variables file (can be used later if number of vars gets too long)
   if (dir.exists(data_point_directory)) {
