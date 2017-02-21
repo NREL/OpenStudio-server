@@ -105,7 +105,7 @@ create_and_run_datapoint <- function(x){
       objvalue <- objvalue / sclfactor
       objtarget <- objtarget / sclfactor
       
-      obj <- force(eval(dist(rbind(objvalue[objgroup==i],objtarget[objgroup==i]),method=normtype,p=ppower)))
+      obj <- force(eval(dist(rbind(objvalue,objtarget),method=normtype,p=ppower)))
 
       print(paste("Objective function Norm:",obj))
 

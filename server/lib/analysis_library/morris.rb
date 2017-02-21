@@ -189,6 +189,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
             print(paste("Morris.rb whoami:", whoami))
             hostname <- system('hostname', intern = TRUE)
             print(paste("Morris.rb hostname:", hostname))
+            rails_exit_guideline_14 = 0
             source(paste(r_scripts_path,'/morris.R',sep=''))
         }
         end
