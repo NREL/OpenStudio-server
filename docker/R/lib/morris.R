@@ -126,13 +126,14 @@ if (nrow(result) > 0) {
     write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
     file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
     save(n, file=file_names_R[j])
-    file_names_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
-    png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-    plot(n)
-    #axis(1, las=2)
-    #axis(2, las=1)
-    dev.off()
     if (all(is.finite(var_mu_star))) {
+      file_names_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
+      png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
+      plot(n)
+      #axis(1, las=2)
+      #axis(2, las=1)
+      dev.off()
+
       file_names_bar_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
       png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
       op <- par(mar = c(14,4,4,2) + 0.1)
@@ -156,8 +157,10 @@ if (nrow(result) > 0) {
       #mp <- boxplot(n$ee, las=2, names=vardisplaynames)
       boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9)
       #axis(1, labels=vardisplaynames, las=2)
+      file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+    } else {
+      file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
-    file_zip <- c(file_names_jsons,file_names_R,file_names_png,file_names_box_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     print(paste("file_zip:",file_zip))
     if(!dir.exists(paste(analysis_dir,"/downloads",sep=''))){
       dir.create(paste(analysis_dir,"/downloads",sep=''))
