@@ -133,7 +133,7 @@ if (nrow(result) > 0) {
     dev.off()
     #if (all(is.finite(var_mu_star))) {
     file_names_bar_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
-    png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+    png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
     op <- par(mar = c(14,4,4,2) + 0.1)
     mp <- barplot(height=var_mu_star, ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
     axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
@@ -141,7 +141,7 @@ if (nrow(result) > 0) {
     dev.off()
     #sorted
     file_names_bar_sorted_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
-    png(file_names_bar_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200)
+    png(file_names_bar_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
     op <- par(mar = c(14,4,4,2) + 0.1)
     mp <- barplot(height=sort(var_mu_star), ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
     axis(1, at=mp, labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)

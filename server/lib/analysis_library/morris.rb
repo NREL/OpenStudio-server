@@ -43,7 +43,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       run_data_point_filename: 'run_openstudio_workflow.rb',
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
-      max_queued_jobs: 50,
+      max_queued_jobs: 32,
       problem: {
         random_seed: 1979,
         algorithm: {
