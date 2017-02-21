@@ -1,6 +1,5 @@
 language: ruby
-rvm:
-  - 2.2.4
+rvm: 2.2.4
 branches:
   only:
   - /^dockerize.*$/
