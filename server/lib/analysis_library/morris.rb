@@ -43,7 +43,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       run_data_point_filename: 'run_openstudio_workflow.rb',
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
-      max_queued_jobs: 32,
+      max_queued_jobs: 50,
       problem: {
         random_seed: 1979,
         algorithm: {
@@ -86,7 +86,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
     cluster = nil
     begin
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
-
+      @r.converse(" print(paste('getwd:',getwd()))")
       # TODO: deal better with random seeds
       @r.converse("set.seed(#{@analysis.problem['random_seed']})")
       # R libraries needed for this algorithm
@@ -185,6 +185,10 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
+            whoami <- system('whoami', intern = TRUE)
+            print(paste("Morris.rb whoami:", whoami))
+            hostname <- system('hostname', intern = TRUE)
+            print(paste("Morris.rb hostname:", hostname))
             source(paste(r_scripts_path,'/morris.R',sep=''))
         }
         end

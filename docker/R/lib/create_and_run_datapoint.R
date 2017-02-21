@@ -14,7 +14,7 @@ create_and_run_datapoint <- function(x){
   }
 
   # convert the vector to comma separated values
-  force(x) # What does this do?
+  force(x)
   w <- paste(x, collapse=",")
   y <- paste('ruby ',r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
 #TODO handle case where no datapoint is made or a worker container dies
@@ -41,7 +41,10 @@ create_and_run_datapoint <- function(x){
   print(paste('is.atomic(json):',is.atomic(json)))
   
   whoami <- system('whoami', intern = TRUE)
-  print(paste("whoami:", whoami))
+  print(paste("create_and_run_datapoint whoami:", whoami))
+  hostname <- system('hostname', intern = TRUE)
+  print(paste("create_and_run_datapoint hostname:", hostname))
+  #TODO THIS PATH DOESNT EXIST.  THIS IS RUNNING ON RSERVE_1 
   #data_point_directory <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
   data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
   print(paste("data_point_directory:",data_point_directory))
