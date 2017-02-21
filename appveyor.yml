@@ -3,7 +3,7 @@ version: 1.0.{build}-{branch}
 environment:
   USE_TESTING_TIMEOUTS: "true"
   matrix:
-    - RUBY_VERSION: "22-x64"
+    - RUBY_VERSION: "224-x64"
 
 clone_folder: C:\projects\openstudio-server
 
