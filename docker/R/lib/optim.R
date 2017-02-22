@@ -85,7 +85,7 @@ options(scipen=-2)
 
 results <- NULL
 try(results <- optim(par=varMean, fn=create_and_run_datapoint, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol)), silent = FALSE)
-
+print(paste("results:",results))
 #print(paste("ip workers:", ips))
 #print(paste("ip master:", master_ips))
 #ips2 <- ips[ips!=master_ips]
@@ -113,7 +113,7 @@ print(paste("whoami:", whoami))
 # print(Xlog[-grep('Cauchy',Xlog)])
 # print(Rlog[grep('norm of step',Rlog)])
 # print(Rlog[grep('Objective function Norm',Rlog)])
-print(paste("Iterations:",Iteration))
+#print(paste("Iterations:",Iteration))
 print(paste("message:",results$message))
 print(paste("convergence:",results$convergence))
 print(paste("counts:",results$counts))
