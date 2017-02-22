@@ -8,7 +8,7 @@ check_run_flag <- function(script_path, host_url, analysis_id){
     print(paste("run_flag_json:",json))
     print(paste('is.recursive(run_flag_json):',is.recursive(json)))
     print(paste('is.atomic(run_flag_json):',is.atomic(json)))
-    if (is.atomic(json)) {
+    if (is.recursive(json)) {
       return(json$result$analysis$run_flag)
     } else {
       print("API GET STATUS is empty")
