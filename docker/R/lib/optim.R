@@ -91,8 +91,8 @@ print(paste("results:",results))
 #ips2 <- ips[ips!=master_ips]
 #print(paste("non server ips:", ips2))
 #num_uniq_workers <- length(ips2)
-whoami <- system('whoami', intern = TRUE)
-print(paste("whoami:", whoami))
+#whoami <- system('whoami', intern = TRUE)
+#print(paste("whoami:", whoami))
 #for (i in 1:num_uniq_workers){
 #  scp <- paste('scp ',whoami,'@',ips2[i],':#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json #{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/', sep="")
 #  print(paste("scp command:",scp))
