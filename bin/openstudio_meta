@@ -377,9 +377,9 @@ class InstallGems
 
       Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each { |p| FileUtils.rm_rf(p) }
       Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each { |p| FileUtils.rm_rf(p) }
-      platform = 'darwin'
-      if /win/.match(RUBY_PLATFORM) || /mingw/.match(RUBY_PLATFORM)
-        platform = 'win32'
+      platform = 'win32'
+      if /darwin/.match(RUBY_PLATFORM) 
+        platform = 'darwin'
       end
 
       ::Dir.chdir(options[:export_dir])
