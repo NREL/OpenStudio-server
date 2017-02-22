@@ -132,7 +132,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
         raise 'Must have at least two output_variables'
       end
-
+      
       objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
       ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
