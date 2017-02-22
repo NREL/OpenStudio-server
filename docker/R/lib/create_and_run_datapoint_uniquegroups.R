@@ -17,11 +17,11 @@ create_and_run_datapoint_uniquegroups <- function(x){
   force(x)
   w <- paste(x, collapse=",")
   y <- paste('ruby ',r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
-#TODO handle case where no datapoint is made or a worker container dies
+
   # Call the system command to submit the simulation to the API / queue
   print(paste('run command:', y))
   z <- system(y,intern=TRUE)
-
+#TODO handle case where a worker container dies mid run
   # The last line of the system command will be a json string
   # {
   #   "status": false
