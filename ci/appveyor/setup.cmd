@@ -4,9 +4,11 @@
   curl -SLO https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.4-x64-mingw32.7z
   mkdir c:\Ruby224-x64
   7z x ruby-2.2.4-x64-mingw32.7z -oc:\Ruby224-x64
+  robocopy c:\Ruby224-x64\ruby-2.2.4-x64-mingw32\ c:\Ruby224-x64\ /E /MOVE /LOG:C:\projects\openstudio-server\spec\files\logs\robocopy.log /NFL /NDL
   copy /y c:\projects\openstudio-server\ci\appveyor\config.yml c:\Ruby23-x64\DevKit\config.yml
-
-  ruby c:\Ruby23-x64\DevKit\dk.rb install
+  cd c:\Ruby23-x64\DevKit
+  ruby dk.rb install
+  cd c:\projects\openstudio-server
   set RUBYLIB=C:\projects\openstudio\Ruby
   set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Mongodb\bin;%PATH%
   C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\gem update --system
