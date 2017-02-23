@@ -9,6 +9,7 @@
 #   ruby_command
 #   r_scripts_path
 create_and_run_datapoint_uniquegroups <- function(x){
+  options(warn=-1)
   if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id)==FALSE){
     stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
   }
@@ -16,12 +17,17 @@ create_and_run_datapoint_uniquegroups <- function(x){
   # convert the vector to comma separated values
   force(x)
   w <- paste(x, collapse=",")
-  y <- paste('ruby ',r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
-
+  #y <- paste('ruby ',r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
   # Call the system command to submit the simulation to the API / queue
-  print(paste('run command:', y))
-  z <- system(y,intern=TRUE)
-#TODO handle case where a worker container dies mid run
+  #print(paste('run command:', y))
+  #z <- system(y,intern=TRUE)
+  
+  y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
+  # Call the system command to submit the simulation to the API / queue
+  #print(paste('run command: ruby ', y))
+  z <- system2("ruby",y, stdout = TRUE, stderr = TRUE)
+  #print(paste("Create and Run Datapoint z:",z))
+  #TODO handle case where a worker container dies mid run
   # The last line of the system command will be a json string
   # {
   #   "status": false
@@ -33,26 +39,33 @@ create_and_run_datapoint_uniquegroups <- function(x){
   #   }
   # }
   z <- z[length(z)]
-  print(paste('z:',z))
-  
+  #print(paste('z:',z))
+  #check if return status is NULL (means no errors)
+  if(!is.null(attr(z, "status"))) {
+    print(paste("CREATE AND RUN DATAPOINT FAILED"))
+    print(paste('z:',z))
+    print("RETURNING NAvalue of 1.0e19")
+    NAvalue <- 1.0e19
+    return(NAvalue)
+  }
   json <- try(fromJSON(z), silent=TRUE)
   print(paste('json:',json))
-  print(paste('is.recursive(json):',is.recursive(json)))
-  print(paste('is.atomic(json):',is.atomic(json)))
+  #print(paste('is.recursive(json):',is.recursive(json)))
+  #print(paste('is.atomic(json):',is.atomic(json)))
   
-  whoami <- system('whoami', intern = TRUE)
-  print(paste("create_and_run_datapoint whoami:", whoami))
-  hostname <- system('hostname', intern = TRUE)
-  print(paste("create_and_run_datapoint hostname:", hostname))
+  #whoami <- system('whoami', intern = TRUE)
+  #print(paste("create_and_run_datapoint whoami:", whoami))
+  #hostname <- system('hostname', intern = TRUE)
+  #print(paste("create_and_run_datapoint hostname:", hostname))
   #TODO THIS PATH DOESNT EXIST.  THIS IS RUNNING ON RSERVE_1 
   #data_point_directory <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
   data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
-  print(paste("data_point_directory:",data_point_directory))
+  #print(paste("data_point_directory:",data_point_directory))
   ## save off the variables file (can be used later if number of vars gets too long)
   if (dir.exists(data_point_directory)) {
     write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
   } else { 
-     print(paste("data_point_directory does not exist:",data_point_directory))
+     #print(paste("data_point_directory does not exist:",data_point_directory))
   }
 
   if (!json$status) {
@@ -176,7 +189,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
       }
     }
   }
-
+  options(warn=0)
   return(as.numeric(obj))
 }
 
