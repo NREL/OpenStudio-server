@@ -11,10 +11,10 @@ check_run_flag <- function(script_path, host_url, analysis_id){
       z <- z[length(z)] # Get last line of output
 
       json <- try(fromJSON(z), silent=TRUE)
-      #print(paste("run_flag_json:",json))
+      print(paste("run_flag_json:",json))
       #print(paste('is.recursive(run_flag_json):',is.recursive(json)))
       if (is.recursive(json)) {
-        return(json$result$analysis$run_flag)
+        return(json$result)
       } else {
         print("API GET STATUS is not json")
         return(TRUE)
