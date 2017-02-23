@@ -8,6 +8,7 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 		curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio-2.0.3.40f61c64a3-darwin.zip
 		mkdir ~/openstudio
 		unzip OpenStudio-2.0.3.40f61c64a3-darwin.zip -d ~/openstudio
+		mv -r ~/openstudio/openstudio-2.0.3/* ~/openstudio/
 		export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
 		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
 	fi
