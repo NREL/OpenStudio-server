@@ -5,6 +5,7 @@
   mkdir c:\Ruby224-x64
   7z x ruby-2.2.4-x64-mingw32.7z -oc:\Ruby224-x64
   copy /y c:\projects\openstudio-server\ci\appveyor\config.yml c:\Ruby23-x64\DevKit\config.yml
+
   ruby c:\Ruby23-x64\DevKit\dk.rb install
   set RUBYLIB=C:\projects\openstudio\Ruby
   set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Mongodb\bin;%PATH%
