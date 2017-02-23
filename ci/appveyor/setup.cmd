@@ -1,6 +1,6 @@
-  curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio2-1.13.0.fb588cc683-win32.zip
+  curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio-2.0.3.40f61c64a3-win32.zip
   mkdir c:\projects\openstudio
-  7z x OpenStudio2-1.13.0.fb588cc683-win32.zip -oc:\projects\openstudio
+  7z x OpenStudio-2.0.3.40f61c64a3-win32.zip -oc:\projects\openstudio
   curl -SLO https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.4-x64-mingw32.7z
   mkdir c:\Ruby224-x64
   7z x ruby-2.2.4-x64-mingw32.7z -oc:\Ruby224-x64
