@@ -51,9 +51,10 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
           levels: 2,
           grid_jump: 1,
           type: 'oat',
-          normtype: 'minkowski',
-          ppower: 2,
-          debug: 0,
+          norm_type: 'minkowski',
+          p_power: 2,
+          debug_messages: 0,
+          failed_f_value: 1e19,
           objective_functions: []
         }
       }
@@ -170,11 +171,22 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
-                   levels: @analysis.problem['algorithm']['levels'], r: @analysis.problem['algorithm']['r'],
-                   type: @analysis.problem['algorithm']['type'], grid_jump: @analysis.problem['algorithm']['grid_jump'],
-                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], debugF: @analysis.problem['algorithm']['debug'],
+        @r.command(master_ips: master_ip, 
+                   ips: worker_ips[:worker_ips].uniq, 
+                   vars: samples.to_dataframe, 
+                   vartypes: var_types, 
+                   varnames: var_names, 
+                   mins: mins_maxes[:min], 
+                   maxes: mins_maxes[:max],
+                   levels: @analysis.problem['algorithm']['levels'], 
+                   r: @analysis.problem['algorithm']['r'],
+                   type: @analysis.problem['algorithm']['type'], 
+                   grid_jump: @analysis.problem['algorithm']['grid_jump'],
+                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   ppower: @analysis.problem['algorithm']['p_power'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'], 
+                   debug_messages: @analysis.problem['algorithm']['debug_messages'],
+                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
                    vardisplaynames: var_display_names, objnames: obj_names,
                    mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
           %{

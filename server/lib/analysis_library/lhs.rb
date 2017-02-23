@@ -49,7 +49,9 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
         random_seed: 1979,
         algorithm: {
           number_of_samples: 100,
-          sample_method: 'all_variables'
+          sample_method: 'all_variables',
+          failed_f_value: 1e19,
+          debug_messages: 0
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential

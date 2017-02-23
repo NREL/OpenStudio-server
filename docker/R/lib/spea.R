@@ -14,6 +14,8 @@ clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
 clusterExport(cl,"ppower")
 clusterExport(cl,"uniquegroups")
+clusterExport(cl,"failed_f")
+clusterExport(cl,"debug_messages")
 
 for (i in 1:ncol(vars)){
   vars[,i] <- sort(vars[,i])

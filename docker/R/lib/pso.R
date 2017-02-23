@@ -13,6 +13,9 @@ clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
 clusterExport(cl,"ppower")
 
+clusterExport(cl,"failed_f")
+clusterExport(cl,"debug_messages")
+
 print(paste("vartypes:",vartypes))
 print(paste("varnames:",varnames))
 

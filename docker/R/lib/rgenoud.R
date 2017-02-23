@@ -13,6 +13,9 @@ clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
 clusterExport(cl,"ppower")
 
+clusterExport(cl,"failed_f")
+clusterExport(cl,"debug_messages")
+
 print(paste("vartypes:",vartypes))
 print(paste("varnames:",varnames))
 
@@ -84,8 +87,8 @@ print(paste("factr set to:",factr))
 print(paste("pgtol set to:",pgtol))
 print(paste("BFGSburnin set to:",BFGSburnin))
 print(paste("Number of generations set to:",gen))
-if (debugFlag == 1) {debugFlag = TRUE} else {debugFlag = FALSE}
-print(paste("debugFlag:", debugFlag))
+if (r_genoud_debug_flag == 1) {r_genoud_debug_flag = TRUE} else {r_genoud_debug_flag = FALSE}
+print(paste("r_genoud_debug_flag:", r_genoud_debug_flag))
 if (BFGS == 1) {BFGS = TRUE} else {BFGS = FALSE}
 print(paste("BFGS:", BFGS))
 if (MM == 1) {MM = TRUE} else {MM = FALSE}
@@ -96,7 +99,7 @@ if (gradientcheck == 1) {gradientcheck = TRUE} else {gradientcheck = FALSE}
 print(paste("gradientcheck:", gradientcheck))
 
 results <- NULL
-try(results <- genoud(fn=create_and_run_datapoint, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=debugFlag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck), silent=FALSE)
+try(results <- genoud(fn=create_and_run_datapoint, nvars=length(varMin), gr=vectorGradient, pop.size=popSize, BFGSburnin=BFGSburnin, max.generations=gen, Domains=varDom, boundary.enforcement=boundaryEnforcement, print.level=printLevel, cluster=cl, BFGS=BFGS, solution.tolerance=solutionTolerance, wait.generations=waitGenerations, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol), debug=r_genoud_debug_flag, P1=50, P2=50, P3=50, P4=50, P5=50, P6=50, P7=50, P8=50, P9=0, MemoryMatrix=MM, balance=balance, gradient.check=gradientcheck), silent=FALSE)
 
 # TODO: how to get best result back in docker space? API? What is the server? 
 #print(paste("scp command:",scp))

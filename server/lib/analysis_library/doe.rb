@@ -51,7 +51,9 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
         random_seed: 1979,
         algorithm: {
           number_of_samples: 10,
-          experiment_type: 'full_factorial'
+          experiment_type: 'full_factorial',
+          failed_f_value: 1e19,
+          debug_messages: 0
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential

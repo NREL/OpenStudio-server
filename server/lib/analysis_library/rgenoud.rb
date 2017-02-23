@@ -48,25 +48,27 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         random_seed: 1979,
         algorithm: {
           generations: 1,
-          waitgenerations: 3,
+          wait_generations: 3,
           popsize: 30,
           boundaryenforcement: 2,
-          bfgsburnin: 2,
-          printlevel: 2,
-          BFGS: 1,
-          solutiontolerance: 0.01,
-          normtype: 'minkowski',
-          ppower: 2,
+          bfgs_burnin: 2,
+          print_level: 2,
+          bfgs: 1,
+          solution_tolerance: 0.01,
+          norm_type: 'minkowski',
+          p_power: 2,
           exit_on_guideline14: 0,
-          gradientcheck: 0,
+          gradient_check: 0,
           objective_functions: [],
           pgtol: 1e-1,
           factr: 4.5036e14,
           maxit: 5,
-          epsilongradient: 1e-4,
-          debugflag: 0,
-          MM: 1,
-          balance: 1
+          epsilon_gradient: 1e-4,
+          r_genoud_debug_flag: 0,
+          memory_matrix: 1,
+          balance: 1,
+          debug_messages: 0,
+          failed_f_value: 1e19
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -128,11 +130,11 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       end
 
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-      # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
 
-      if @analysis.problem['algorithm']['ppower'] <= 0
+      if @analysis.problem['algorithm']['p_power'] <= 0
         raise 'P Norm must be non-negative'
       end
 
@@ -206,20 +208,34 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names,
-                   varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
+        @r.command(master_ips: master_ip, 
+                   ips: worker_ips[:worker_ips].uniq, 
+                   vartypes: var_types, 
+                   varnames: var_names,
+                   varseps: mins_maxes[:eps], 
+                   mins: mins_maxes[:min], 
+                   maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
-                   gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'],
-                   BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
+                   gen: @analysis.problem['algorithm']['generations'], 
+                   popSize: @analysis.problem['algorithm']['popsize'],
+                   BFGSburnin: @analysis.problem['algorithm']['bfgs_burnin'],
                    boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
-                   printLevel: @analysis.problem['algorithm']['printlevel'], BFGS: @analysis.problem['algorithm']['BFGS'],
-                   solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'],
-                   waitGenerations: @analysis.problem['algorithm']['waitgenerations'],
-                   maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'],
-                   factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol'],
-                   debugFlag: @analysis.problem['algorithm']['debugflag'], MM: @analysis.problem['algorithm']['MM'],
-                   balance: @analysis.problem['algorithm']['balance'], gradientcheck: @analysis.problem['algorithm']['gradientcheck']) do
+                   printLevel: @analysis.problem['algorithm']['print_level'], 
+                   BFGS: @analysis.problem['algorithm']['bfgs'],
+                   solutionTolerance: @analysis.problem['algorithm']['solution_tolerance'],
+                   waitGenerations: @analysis.problem['algorithm']['wait_generations'],
+                   maxit: @analysis.problem['algorithm']['maxit'], 
+                   epsilongradient: @analysis.problem['algorithm']['epsilon_gradient'],
+                   factr: @analysis.problem['algorithm']['factr'], 
+                   pgtol: @analysis.problem['algorithm']['pgtol'],
+                   r_genoud_debug_flag: @analysis.problem['algorithm']['r_genoud_debug_flag'], 
+                   MM: @analysis.problem['algorithm']['memory_matrix'],
+                   balance: @analysis.problem['algorithm']['balance'], 
+                   debug_messages: @analysis.problem['algorithm']['debug_messages'],
+                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
+                   gradientcheck: @analysis.problem['algorithm']['gradient_check']) do
           %{
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"

@@ -50,14 +50,16 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
           number_of_samples: 30,
           sample_method: 'individual_variables',
           generations: 1,
-          toursize: 2,
+          tournament_size: 2,
           cprob: 0.7,
           cidx: 5,
           midx: 10,
           mprob: 0.5,
-          normtype: 'minkowski',
-          ppower: 2,
+          norm_type: 'minkowski',
+          p_power: 2,
           exit_on_guideline14: 0,
+          debug_messages: 0,
+          failed_f_value: 1e19,
           objective_functions: []
         }
       }
@@ -116,11 +118,11 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       end
 
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-      # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
 
-      if @analysis.problem['algorithm']['ppower'] <= 0
+      if @analysis.problem['algorithm']['p_power'] <= 0
         raise 'P Norm must be non-negative'
       end
 
@@ -195,12 +197,25 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
-                   toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
-                   cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'],
-                   mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
+        @r.command(master_ips: master_ip, 
+                   ips: worker_ips[:worker_ips].uniq, 
+                   vars: samples.to_dataframe, 
+                   vartypes: var_types, 
+                   varnames: var_names, 
+                   mins: mins_maxes[:min], 
+                   maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   ppower: @analysis.problem['algorithm']['p_power'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'], 
+                   gen: @analysis.problem['algorithm']['generations'],
+                   toursize: @analysis.problem['algorithm']['tournament_size'], 
+                   cprob: @analysis.problem['algorithm']['cprob'],
+                   cidx: @analysis.problem['algorithm']['cidx'], 
+                   midx: @analysis.problem['algorithm']['midx'],
+                   mprob: @analysis.problem['algorithm']['mprob'], 
+                   debug_messages: @analysis.problem['algorithm']['debug_messages'],
+                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
+                   uniquegroups: ug.size) do
           %{
               rails_analysis_id = "#{@analysis.id}"
               rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"

@@ -54,7 +54,9 @@ class AnalysisLibrary::Preflight < AnalysisLibrary::Base
           run_max: true,
           run_min: true,
           run_mode: true,
-          run_all_samples_for_pivots: true
+          run_all_samples_for_pivots: true,
+          debug_messages: 0,
+          failed_f_value: 1e19
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential

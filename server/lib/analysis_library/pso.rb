@@ -60,9 +60,11 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
           c1: 1.193147,
           c2: 1.193147,
           lambda: 1,
-          normtype: 'minkowski',
-          ppower: 2,
+          norm_type: 'minkowski',
+          p_power: 2,
           exit_on_guideline14: 0,
+          debug_messages: 0,
+          failed_f_value: 1e19,
           objective_functions: []
         }
       }
@@ -116,7 +118,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       end
 
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-      # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
       unless %w(spso2007 spso2011 ipso fips wfips).include?(@analysis.problem['algorithm']['method'])
@@ -139,7 +141,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
         raise 'unknown Topology type'
       end
 
-      if @analysis.problem['algorithm']['ppower'] <= 0
+      if @analysis.problem['algorithm']['p_power'] <= 0
         raise 'P Norm must be non-negative'
       end
 
@@ -205,9 +207,15 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['abstol'] = @analysis.problem['algorithm']['abstol'].to_f
         @analysis.problem['algorithm']['reltol'] = @analysis.problem['algorithm']['reltol'].to_f
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vartypes: var_types, varnames: var_names,
-                   varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
+        @r.command(master_ips: master_ip, 
+                   ips: worker_ips[:worker_ips].uniq, 
+                   vartypes: var_types, 
+                   varnames: var_names,
+                   varseps: mins_maxes[:eps], 
+                   mins: mins_maxes[:min], 
+                   maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    npart: @analysis.problem['algorithm']['npart'],
                    maxfn: @analysis.problem['algorithm']['maxfn'],
@@ -221,6 +229,8 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
                    vini: @analysis.problem['algorithm']['vini'],
                    boundary: @analysis.problem['algorithm']['boundary'],
                    topology: @analysis.problem['algorithm']['topology'],
+                   debug_messages: @analysis.problem['algorithm']['debug_messages'],
+                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
                    method: @analysis.problem['algorithm']['method']) do
           %{
             rails_analysis_id = "#{@analysis.id}"

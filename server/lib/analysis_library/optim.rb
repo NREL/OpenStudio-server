@@ -49,14 +49,15 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
         algorithm: {
           number_of_samples: 3,
           sample_method: 'individual_variables',
-          generations: 1,
           method: 'L-BFGS-B',
           pgtol: 1e-2,
           factr: 4.5036e13,
           maxit: 100,
-          normtype: 'minkowski',
-          ppower: 2,
+          norm_type: 'minkowski',
+          p_power: 2,
           exit_on_guideline14: 0,
+          debug_messages: 0,
+          failed_f_value: 1e19,
           objective_functions: [],
           epsilongradient: 1e-4
         }
@@ -119,11 +120,11 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
       end
 
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-      # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
 
-      if @analysis.problem['algorithm']['ppower'] <= 0
+      if @analysis.problem['algorithm']['p_power'] <= 0
         raise 'P Norm must be non-negative'
       end
 
@@ -185,7 +186,23 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol']) do
+        @r.command(master_ips: master_ip, 
+                   ips: worker_ips[:worker_ips].uniq, 
+                   vars: samples.to_dataframe, 
+                   vartypes: var_types, 
+                   varnames: var_names, 
+                   varseps: mins_maxes[:eps], 
+                   mins: mins_maxes[:min], 
+                   maxes: mins_maxes[:max], 
+                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   ppower: @analysis.problem['algorithm']['p_power'], 
+                   objfun: @analysis.problem['algorithm']['objective_functions'], 
+                   maxit: @analysis.problem['algorithm']['maxit'], 
+                   epsilongradient: @analysis.problem['algorithm']['epsilongradient'], 
+                   factr: @analysis.problem['algorithm']['factr'], 
+                   debug_messages: @analysis.problem['algorithm']['debug_messages'],
+                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
+                   pgtol: @analysis.problem['algorithm']['pgtol']) do
           %{
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
