@@ -18,7 +18,8 @@
   C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\update_rubygems --no-ri --no-rdoc
   C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\gem update --system
   C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\gem uninstall rubygems-update -x -v 2.6.7
-  C:\Ruby%RUBY_VERSION%\bin\ruby c:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
-  C:\Ruby%RUBY_VERSION%\bin\gem install bundler -v 1.12.5
+  C:\Ruby%RUBY_VERSION%\bin\ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
+  C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\gem install bundler -v 1.12.5
+  echo "HELP ME WHAT IS HAPPENING"
   cd c:\projects\openstudio-server
-  C:\Ruby%RUBY_VERSION%\bin\bundle install
+  C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\bundle install
