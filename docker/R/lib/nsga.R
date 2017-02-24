@@ -70,7 +70,14 @@ clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
 f <- function(x){
-  try(create_and_run_datapoint_uniquegroups(x))
+  tryCatch(create_and_run_datapoint_uniquegroups(x),
+            error=function(x){
+              for (i in 1:objDim) {
+                obj[i] <- failed_f
+              }
+              return(obj)
+            }
+          )
 }
 clusterExport(cl,"f")
 
