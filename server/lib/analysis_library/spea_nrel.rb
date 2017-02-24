@@ -197,6 +197,8 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
+        @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
         @r.command(master_ips: master_ip, 
                    ips: worker_ips[:worker_ips].uniq, 
                    vars: samples.to_dataframe, 

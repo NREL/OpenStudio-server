@@ -205,6 +205,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
         # maxit is the max number of iterations to calculate
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
+        @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
         @analysis.problem['algorithm']['abstol'] = @analysis.problem['algorithm']['abstol'].to_f
         @analysis.problem['algorithm']['reltol'] = @analysis.problem['algorithm']['reltol'].to_f
         @r.command(master_ips: master_ip, 

@@ -186,6 +186,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
+        @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
         @r.command(master_ips: master_ip, 
                    ips: worker_ips[:worker_ips].uniq, 
                    vars: samples.to_dataframe, 
