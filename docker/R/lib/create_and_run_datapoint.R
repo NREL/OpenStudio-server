@@ -110,8 +110,8 @@ create_and_run_datapoint <- function(x){
           sclfactor[i] <- 1.0
         }
       }
-      options(digits=8)
-      options(scipen=-2)
+      #options(digits=8)
+      #options(scipen=-2)
       print(paste("Objective function results are:",objvalue))
       print(paste("Objective function targets are:",objtarget))
       print(paste("Objective function scaling factors are:",sclfactor))

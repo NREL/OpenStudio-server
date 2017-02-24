@@ -126,8 +126,8 @@ create_and_run_datapoint_uniquegroups <- function(x){
           group_count <- group_count + 1
         }
       }
-      options(digits=8)
-      options(scipen=-2)
+      #options(digits=8)
+      #options(scipen=-2)
       print(paste("Objective function results are:",objvalue))
       print(paste("Objective function targets are:",objtarget))
       print(paste("Objective function scaling factors are:",sclfactor))
