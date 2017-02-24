@@ -45,7 +45,8 @@ create_and_run_datapoint_uniquegroups <- function(x){
   if(!is.null(attr(z, "status"))) {
     print(paste("CREATE AND RUN DATAPOINT FAILED"))
     print(paste('z:',z))
-    print(paste("RETURNING of",failed_f))
+   # print(paste("RETURNING of",failed_f))
+    print(paste("RETURNING of"),failed_f)
     options(warn=0)
     return(failed_f)
   }
@@ -71,7 +72,8 @@ create_and_run_datapoint_uniquegroups <- function(x){
 
   if (!json$status) {
     print(paste("json:",json))
-    print(paste("RETURNING of",failed_f))
+   # print(paste("RETURNING of",failed_f))
+    print(paste("RETURNING of"),failed_f)
     obj <- NULL
     for (i in 1:objDim) {
       obj[i] <- failed_f
