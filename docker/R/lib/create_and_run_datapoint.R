@@ -45,7 +45,7 @@ create_and_run_datapoint <- function(x){
   if(!is.null(attr(z, "status"))) {
     print(paste("CREATE AND RUN DATAPOINT FAILED"))
     print(paste('z:',z))
-    print(paste("RETURNING of"),failed_f)
+    print(paste("RETURNING of",failed_f))
     options(warn=0)
     return(failed_f)
   }
@@ -71,7 +71,7 @@ create_and_run_datapoint <- function(x){
   
   if (!json$status) {
     print(paste("json:",json))
-    print(paste("RETURNING NAvalue of"),failed_f)
+    print(paste("RETURNING NAvalue of",failed_f))
     options(warn=0)
     return(failed_f)
   } else {
@@ -110,8 +110,8 @@ create_and_run_datapoint <- function(x){
           sclfactor[i] <- 1.0
         }
       }
-      #options(digits=8)
-      #options(scipen=-2)
+      options(digits=8)
+      options(scipen=-2)
       print(paste("Objective function results are:",objvalue))
       print(paste("Objective function targets are:",objtarget))
       print(paste("Objective function scaling factors are:",sclfactor))
