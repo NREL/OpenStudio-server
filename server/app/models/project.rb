@@ -47,7 +47,7 @@ class Project
 
   # Indexes
   index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index(id: 1)
   index(name: 1)
 
   # Callbacks

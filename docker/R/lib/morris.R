@@ -69,8 +69,6 @@ clusterExport(cl,"vardisplayfile")
 clusterExport(cl,"vardisplaynames")
 clusterEvalQ(cl,vardisplayfile(vardisplaynames))
 
-clusterExport(cl,"debugF")
-
 # Export functions for worker nodes
 source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint_uniquegroups")
@@ -80,12 +78,6 @@ print(paste("levels:",levels))
 print(paste("r:",r))
 print(paste("grid_jump:",grid_jump))
 print(paste("type:",type))
-print(paste("debugF:",debugF))
-
-  whoami <- system('whoami', intern = TRUE)
-  print(paste("Morris.R whoami:", whoami))
-  hostname <- system('hostname', intern = TRUE)
-  print(paste("Morris.R hostname:", hostname))
   
 results <- NULL
 m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes, scale=TRUE)

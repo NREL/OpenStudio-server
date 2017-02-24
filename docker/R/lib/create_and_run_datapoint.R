@@ -11,6 +11,7 @@
 create_and_run_datapoint <- function(x){
   options(warn=-1)
   if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id)==FALSE){
+    options(warn=0)
     stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
   }
 
@@ -44,9 +45,9 @@ create_and_run_datapoint <- function(x){
   if(!is.null(attr(z, "status"))) {
     print(paste("CREATE AND RUN DATAPOINT FAILED"))
     print(paste('z:',z))
-    print("RETURNING NAvalue of 1.0e19")
-    NAvalue <- 1.0e19
-    return(NAvalue)
+    print(paste("RETURNING of"),failed_f)
+    options(warn=0)
+    return(failed_f)
   }
   json <- try(fromJSON(z), silent=TRUE)
   print(paste('json:',json))
@@ -70,12 +71,12 @@ create_and_run_datapoint <- function(x){
   
   if (!json$status) {
     print(paste("json:",json))
-    print("RETURNING NAvalue of 1.0e19")
-    NAvalue <- 1.0e19
-    return(NAvalue)
+    print(paste("RETURNING NAvalue of"),failed_f)
+    options(warn=0)
+    return(failed_f)
   } else {
     if (is.null(json$results)) {
-      obj <- 1.0e19
+      obj <- failed_f
       print(paste(data_point_directory,"/objectives.json is NULL"))
       print("json$results is NULL")
     } else {
@@ -88,7 +89,7 @@ create_and_run_datapoint <- function(x){
         if (json$results[objfuntemp] != "NULL"){
           objvalue[i] <- as.numeric(json$results[objfuntemp])
         } else {
-          objvalue[i] <- 1.0e19
+          objvalue[i] <- failed_f
           cat(data_point_directory," Missing ", objfuntemp,"\n");
         }
         objfuntargtemp <- paste("objective_function_target_",i,sep="")
@@ -158,6 +159,7 @@ create_and_run_datapoint <- function(x){
             convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
             write_filename <- paste(analysis_dir,'/convergence_flag.json',sep='')
             write(convergenceflag, file=write_filename)
+            options(warn=0)
             stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
           }
         }
