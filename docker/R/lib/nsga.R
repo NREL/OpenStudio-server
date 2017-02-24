@@ -9,6 +9,7 @@ print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
 print(paste("min:",mins))
 print(paste("max:",maxes))
+print(paste("failed_f:",failed_f))
 
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
@@ -72,6 +73,7 @@ clusterExport(cl,"check_run_flag")
 f <- function(x){
   tryCatch(create_and_run_datapoint_uniquegroups(x),
             error=function(x){
+              obj <- NULL
               for (i in 1:objDim) {
                 obj[i] <- failed_f
               }
