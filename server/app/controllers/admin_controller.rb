@@ -66,16 +66,16 @@ class AdminController < ApplicationController
   def reload_database(database_file)
     success = false
 
-    extract_dir = "/tmp/#{Time.now.to_i}"
+    extract_dir = "#{APP_CONFIG['rails_tmp_path']}/#{Time.now.to_i}"
     FileUtils.mkdir_p(extract_dir)
 
     resp = `tar xvzf #{database_file.tempfile.path} -C #{extract_dir}`
     if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
-      `mongo os_dev --eval "db.dropDatabase();"`
+      `mongo #{Mongoid.default_client.database.name} --eval "db.dropDatabase();"`
       if $?.exitstatus.zero?
-        `mongorestore -d os_dev #{extract_dir}/os_dev`
+        `mongorestore -d #{Mongoid.default_client.database.name} #{extract_dir}/#{Mongoid.default_client.database.name}`
         if $?.exitstatus.zero?
           logger.info 'Restored mongo database'
           success = true
@@ -92,14 +92,14 @@ class AdminController < ApplicationController
     success = false
 
     time_stamp = Time.now.to_i
-    dump_dir = "/tmp/#{file_prefix}_#{time_stamp}"
+    dump_dir = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    resp = `mongodump --db os_dev --out #{dump_dir}`
+    resp = `mongodump --db #{Mongoid.default_client.database.name} --out #{dump_dir}`
 
     if $?.exitstatus.zero?
-      output_file = "/tmp/#{file_prefix}_#{time_stamp}.tar.gz"
-      resp_2 = `tar czf #{output_file} -C #{dump_dir} os_dev`
+      output_file = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}.tar.gz"
+      resp_2 = `tar czf #{output_file} -C #{dump_dir} #{Mongoid.default_client.database.name}`
       if $?.exitstatus.zero?
         success = true
       end
