@@ -1,3 +1,5 @@
+language: ruby
+rvm: 2.2.4
 branches:
   only:
   - /^dockerize.*$/
@@ -27,6 +29,7 @@ matrix:
     - REDHAT_BUILD: false
     - OSX_BUILD: true
     - USE_TESTING_TIMEOUTS: "true"
+
 before_install: ./ci/travis/setup.sh
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
