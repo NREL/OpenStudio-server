@@ -8,6 +8,7 @@ print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
 print(paste("min:",mins))
 print(paste("max:",maxes))
+print(paste("failed_f:",failed_f))
 
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
@@ -58,6 +59,20 @@ source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint")
 clusterExport(cl,"check_run_flag")
 
+f <- function(x){
+  tryCatch(create_and_run_datapoint(x),
+            error=function(x){
+              obj <- NULL
+              for (i in 1:objDim) {
+                obj[i] <- failed_f
+              }
+              print("create_and_run_datapoint failed")
+              return(obj)
+            }
+          )
+}
+clusterExport(cl,"f")
+
 print(paste("order:",order))
 print(paste("nboot:",nboot))
 print(paste("conf:",conf))
@@ -81,7 +96,7 @@ print(paste("m:", m))
 print(paste("m$X:", m$X))
 m1 <- as.list(data.frame(t(m$X)))
 print(paste("m1:", m1))
-results <- clusterApplyLB(cl, m1, create_and_run_datapoint)
+results <- clusterApplyLB(cl, m1, f)
 print(mode(as.numeric(results)))
 print(is.list(results))
 print(paste("results:", as.numeric(results)))

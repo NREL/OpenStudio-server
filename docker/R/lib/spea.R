@@ -9,6 +9,7 @@ print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
 print(paste("min:",mins))
 print(paste("max:",maxes))
+print(paste("failed_f:",failed_f))
 
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
@@ -69,6 +70,20 @@ source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
+f <- function(x){
+  tryCatch(create_and_run_datapoint_uniquegroups(x),
+            error=function(x){
+              obj <- NULL
+              for (i in 1:objDim) {
+                obj[i] <- failed_f
+              }
+              print("create_and_run_datapoint_uniquegroups failed")
+              return(obj)
+            }
+          )
+}
+clusterExport(cl,"f")
+
 if (nrow(vars) == 1) {
   print("not sure what to do with only one datapoint so adding an NA")
   vars <- rbind(vars, c(NA))
@@ -98,7 +113,7 @@ print(paste("midx set to:",midx))
 print(paste("mprob set to:",mprob))
 
 results <- NULL
-try(results <- spea2NREL(cl=cl, fn=create_and_run_datapoint_uniquegroups, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
+try(results <- spea2NREL(cl=cl, fn=f, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
 
 # TODO: how to get best result back in docker space? API? What is the server?
 whoami <- system('whoami', intern = TRUE)

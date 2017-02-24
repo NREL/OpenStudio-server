@@ -58,6 +58,20 @@ source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint")
 clusterExport(cl,"check_run_flag")
 
+f <- function(x){
+  tryCatch(create_and_run_datapoint(x),
+            error=function(x){
+              obj <- NULL
+              for (i in 1:objDim) {
+                obj[i] <- failed_f
+              }
+              print("create_and_run_datapoint failed")
+              return(obj)
+            }
+          )
+}
+clusterExport(cl,"f")
+
 varMin <- mins
 varMax <- maxes
 varMean <- (mins+maxes)/2.0
@@ -85,7 +99,7 @@ print(paste("c2:", c2))
 print(paste("lambda:", lambda))
 
 results <- NULL
-try(results <- NRELpso(cl=cl, fn=create_and_run_datapoint, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda)), silent=FALSE)
+try(results <- NRELpso(cl=cl, fn=f, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda)), silent=FALSE)
 #print(paste("scp command:",scp))
 #print(paste("scp command:",scp2))
 #system(scp,intern=TRUE)

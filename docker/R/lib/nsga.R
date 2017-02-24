@@ -77,6 +77,7 @@ f <- function(x){
               for (i in 1:objDim) {
                 obj[i] <- failed_f
               }
+              print("create_and_run_datapoint_uniquegroups failed")
               return(obj)
             }
           )

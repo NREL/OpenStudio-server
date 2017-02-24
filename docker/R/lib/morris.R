@@ -9,6 +9,7 @@ print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
 print(paste("min:",mins))
 print(paste("max:",maxes))
+print(paste("failed_f:",failed_f))
 
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
@@ -74,6 +75,20 @@ source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
+f <- function(x){
+  tryCatch(create_and_run_datapoint_uniquegroups(x),
+            error=function(x){
+              obj <- NULL
+              for (i in 1:objDim) {
+                obj[i] <- failed_f
+              }
+              print("create_and_run_datapoint_uniquegroups failed")
+              return(obj)
+            }
+          )
+}
+clusterExport(cl,"f")
+
 print(paste("levels:",levels))
 print(paste("r:",r))
 print(paste("grid_jump:",grid_jump))
@@ -84,7 +99,7 @@ m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels
 
 m1 <- as.list(data.frame(t(m$X)))
 print(paste("m1:",m1))
-try(results <- clusterApplyLB(cl, m1, create_and_run_datapoint_uniquegroups),silent=FALSE)
+try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
 print(paste("nrow(results):",nrow(results)))
 print(paste("ncol(results):",ncol(results)))
 result <- as.data.frame(results)

@@ -58,6 +58,20 @@ source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint")
 clusterExport(cl,"check_run_flag")
 
+f <- function(x){
+  tryCatch(create_and_run_datapoint(x),
+            error=function(x){
+              obj <- NULL
+              for (i in 1:objDim) {
+                obj[i] <- failed_f
+              }
+              print("create_and_run_datapoint failed")
+              return(obj)
+            }
+          )
+}
+clusterExport(cl,"f")
+
 varMin <- mins
 varMax <- maxes
 varMean <- (mins+maxes)/2.0
@@ -69,7 +83,7 @@ varEps <- ifelse(varseps!=0,varseps,varEps)
 print(paste("merged varEps:",varEps))
 
 print("setup gradient")
-gn <- create_and_run_datapoint
+gn <- f
 clusterExport(cl,"gn")
 clusterExport(cl,"varEps")
 
@@ -87,7 +101,7 @@ options(digits=8)
 options(scipen=-2)
 
 results <- NULL
-try(results <- optim(par=varMean, fn=create_and_run_datapoint, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol)), silent = FALSE)
+try(results <- optim(par=varMean, fn=f, gr=vectorGradient, method='L-BFGS-B',lower=varMin, upper=varMax, control=list(trace=6, factr=factr, maxit=maxit, pgtol=pgtol)), silent = FALSE)
 print(paste("results:",results))
 #print(paste("ip workers:", ips))
 #print(paste("ip master:", master_ips))
