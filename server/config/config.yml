@@ -3,6 +3,7 @@ defaults: &defaults
   os_server_project_path: ':rails_root/../worker-nodes'
   r_scripts_path: ':rails_root/../docker/R/lib'
   rails_log_path: ':rails_root/log'
+  rails_tmp_path: ':rails_root/tmp'
   rserve_hostname: 'localhost'
   rserve_port: 6311
   ruby_bin_dir: ':ruby_bin_dir'
