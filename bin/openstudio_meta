@@ -488,8 +488,9 @@ class StartLocal
       ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
 
-    # Set the server project path
+    # Set the server project path and temp dir
     ::ENV['OS_SERVER_PROJECT_PATH'] = File.join(project_dir, 'temp_data')
+    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
 
     # Assemble the commands and spin off the threads
     start_local_server project_dir, options[:mongo_dir], options[:ruby_path], options[:workers], options[:debug]
@@ -819,6 +820,8 @@ $logger.debug "Input ARGV is #{$argv}"
 
 # Require the files. Given no bundler context until incorporation into commands classes this is pretty fragile
 $logger.debug 'Executing requires'
+$logger.debug 'Requiring tmpdir'
+require 'tmpdir'
 $logger.debug 'Requiring optsparse'
 require 'optparse'
 $logger.debug 'Requiring timeout'
