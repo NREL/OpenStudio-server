@@ -312,8 +312,9 @@ class InstallGems
     end
     FileUtils.mkdir_p(ENV['GEM_HOME'])
 
-    # Set a phony os_server_project_path because rails needs it.
+    # Set a phony os_server_project_path and os_server_rails_temp_dir because rails needs it.
     ::ENV['OS_SERVER_PROJECT_PATH'] = Dir.home
+    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
 
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
