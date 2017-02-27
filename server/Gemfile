@@ -15,7 +15,7 @@ gem 'rubyzip', '~> 1.2.0'
 gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 5.1'
+gem 'mongoid', '~> 5.1.0'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 gem 'paperclip', '~> 4.3'
 
@@ -63,11 +63,9 @@ gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-# gem 'openstudio-analysis', '1.0.0.rc14'
+gem 'openstudio-analysis', '1.0.0.rc16'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'multi-seed-support'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
-
-gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 
 gem 'openstudio-standards', '0.1.11'
 
