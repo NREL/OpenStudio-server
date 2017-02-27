@@ -51,7 +51,7 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
           number_of_samples: 2,
           experiment_type: 'diagonal',
           run_baseline: 1,
-          failed_f_value: 1e19,
+          failed_f_value: 1e18,
           debug_messages: 0
         }
       }

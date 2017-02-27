@@ -57,7 +57,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
           p_power: 2,
           exit_on_guideline14: 0,
           debug_messages: 0,
-          failed_f_value: 1e19,
+          failed_f_value: 1e18,
           objective_functions: [],
           epsilongradient: 1e-4
         }

@@ -47,11 +47,11 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          generations: 1,
-          wait_generations: 3,
+          generations: 2,
+          wait_generations: 2,
           popsize: 30,
           boundaryenforcement: 2,
-          bfgs_burnin: 2,
+          bfgsburnin: 2,
           print_level: 2,
           bfgs: 1,
           solution_tolerance: 0.01,
@@ -62,13 +62,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
           objective_functions: [],
           pgtol: 1e-1,
           factr: 4.5036e14,
-          maxit: 5,
+          maxit: 3,
           epsilon_gradient: 1e-4,
           r_genoud_debug_flag: 0,
           memory_matrix: 1,
           balance: 1,
           debug_messages: 0,
-          failed_f_value: 1e19
+          failed_f_value: 1e18
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -221,7 +221,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    gen: @analysis.problem['algorithm']['generations'], 
                    popSize: @analysis.problem['algorithm']['popsize'],
-                   BFGSburnin: @analysis.problem['algorithm']['bfgs_burnin'],
+                   BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
                    boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
                    printLevel: @analysis.problem['algorithm']['print_level'], 
                    BFGS: @analysis.problem['algorithm']['bfgs'],

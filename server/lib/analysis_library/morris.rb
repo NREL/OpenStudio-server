@@ -47,14 +47,14 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          r: 1,
+          r: 2,
           levels: 2,
           grid_jump: 1,
           type: 'oat',
           norm_type: 'minkowski',
           p_power: 2,
           debug_messages: 0,
-          failed_f_value: 1e19,
+          failed_f_value: 1e18,
           objective_functions: []
         }
       }

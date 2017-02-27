@@ -57,7 +57,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
           norm_type: 'minkowski',
           p_power: 2,
           debug_messages: 0,
-          failed_f_value: 1e19,
+          failed_f_value: 1e18,
           objective_functions: []
         }
       }

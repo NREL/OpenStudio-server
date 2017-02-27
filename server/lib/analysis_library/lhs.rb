@@ -48,9 +48,9 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          number_of_samples: 100,
-          sample_method: 'all_variables',
-          failed_f_value: 1e19,
+          number_of_samples: 5,
+          sample_method: 'individual_variables',
+          failed_f_value: 1e18,
           debug_messages: 0
         }
       }

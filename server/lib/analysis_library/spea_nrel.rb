@@ -49,17 +49,17 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
         algorithm: {
           number_of_samples: 30,
           sample_method: 'individual_variables',
-          generations: 1,
+          generations: 2,
           tournament_size: 2,
-          cprob: 0.7,
+          cprob: 0.85,
           cidx: 5,
-          midx: 10,
-          mprob: 0.5,
+          midx: 5,
+          mprob: 0.8,
           norm_type: 'minkowski',
           p_power: 2,
           exit_on_guideline14: 0,
           debug_messages: 0,
-          failed_f_value: 1e19,
+          failed_f_value: 1e18,
           objective_functions: []
         }
       }

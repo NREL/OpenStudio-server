@@ -50,9 +50,9 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          number_of_samples: 10,
+          number_of_samples: 2,
           experiment_type: 'full_factorial',
-          failed_f_value: 1e19,
+          failed_f_value: 1e18,
           debug_messages: 0
         }
       }

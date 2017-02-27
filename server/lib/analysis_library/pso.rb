@@ -47,7 +47,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          npart: 0,
+          npart: 4,
           maxfn: 100,
           maxit: 20,
           abstol: 1e-2,
@@ -55,16 +55,16 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
           method: 'spso2011',
           xini: 'lhs',
           vini: 'lhs2011',
-          boundary: 'default',
+          boundary: 'reflecting',
           topology: 'random',
           c1: 1.193147,
           c2: 1.193147,
-          lambda: 1,
+          lambda: 0.9,
           norm_type: 'minkowski',
           p_power: 2,
           exit_on_guideline14: 0,
           debug_messages: 0,
-          failed_f_value: 1e19,
+          failed_f_value: 1e18,
           objective_functions: []
         }
       }
