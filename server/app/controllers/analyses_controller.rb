@@ -391,9 +391,15 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     @rserve_log = nil
-    rserve_file = File.join(Rails.root, 'log', 'Rserve.log')
+    rserve_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'Rserve.log')
     if File.exist? rserve_file
       @rserve_log = File.read(rserve_file)
+    end
+
+    @snow_log = nil
+    snow_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'snow.log')
+    if File.exist? snow_file
+      @snow_log = File.read(snow_file)
     end
 
     exclude_fields = [:_id, :user, :password]

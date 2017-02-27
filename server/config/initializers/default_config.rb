@@ -19,6 +19,7 @@ Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host
 # Ensure that the paths exist
 FileUtils.mkdir_p APP_CONFIG['os_server_project_path'] unless Dir.exist? APP_CONFIG['os_server_project_path']
 FileUtils.mkdir_p "#{APP_CONFIG['os_server_project_path']}/R" unless Dir.exist? "#{APP_CONFIG['os_server_project_path']}/R"
+FileUtils.mkdir_p "#{APP_CONFIG['os_server_project_path']}/log" unless Dir.exist? "#{APP_CONFIG['os_server_project_path']}/log"
 FileUtils.mkdir_p (APP_CONFIG['server_asset_path']).to_s unless Dir.exist? (APP_CONFIG['server_asset_path']).to_s
 FileUtils.mkdir_p APP_CONFIG['rails_log_path'] unless Dir.exist? APP_CONFIG['rails_log_path']
 FileUtils.mkdir_p APP_CONFIG['rails_tmp_path'] unless Dir.exist? APP_CONFIG['rails_tmp_path']
