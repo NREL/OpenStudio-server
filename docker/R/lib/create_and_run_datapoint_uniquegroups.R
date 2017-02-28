@@ -17,15 +17,12 @@ create_and_run_datapoint_uniquegroups <- function(x){
 
   # convert the vector to comma separated values
   force(x)
-  w <- paste(x, collapse=",")
-  #y <- paste('ruby ',r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
-  # Call the system command to submit the simulation to the API / queue
-  #print(paste('run command:', y))
-  #z <- system(y,intern=TRUE)
-  
+  w <- paste(x, collapse=",") 
   y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
+  if(debug_messages == 1){
+    print(paste('run command: ruby ', y))
+  }
   # Call the system command to submit the simulation to the API / queue
-  #print(paste('run command: ruby ', y))
   z <- system2("ruby",y, stdout = TRUE, stderr = TRUE)
   #print(paste("Create and Run Datapoint z:",z))
   #TODO handle case where a worker container dies mid run
@@ -54,10 +51,6 @@ create_and_run_datapoint_uniquegroups <- function(x){
   #print(paste('is.recursive(json):',is.recursive(json)))
   #print(paste('is.atomic(json):',is.atomic(json)))
   
-  #whoami <- system('whoami', intern = TRUE)
-  #print(paste("create_and_run_datapoint whoami:", whoami))
-  #hostname <- system('hostname', intern = TRUE)
-  #print(paste("create_and_run_datapoint hostname:", hostname))
   #TODO THIS PATH DOESNT EXIST.  THIS IS RUNNING ON RSERVE_1 
   #data_point_directory <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
   data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')

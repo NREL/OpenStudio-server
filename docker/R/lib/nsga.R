@@ -29,6 +29,11 @@ print(paste("varnames:",varnames))
 analysis_dir <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
 ruby_command <- paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
 rake_command <- paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
+if (debug_messages == 1) {
+  print(paste("analysis_dir: ",analysis_dir))
+  print(paste("ruby_command: ",ruby_command))
+  print(paste("rake_command: ",))
+}
 
 varfile = function(x){
   var_filename <- paste(analysis_dir,'/varnames.json',sep='')
@@ -89,13 +94,14 @@ if (nrow(vars) == 1) {
   vars <- rbind(vars, c(NA))
 }
 if (nrow(vars) == 0) {
-  print("not sure what to do with no datapoint so adding an NA")
+  print("not sure what to do with no datapoint so adding an 2 NA's")
   vars <- rbind(vars, c(NA))
   vars <- rbind(vars, c(NA))
 }
 
-print(nrow(vars))
-print(ncol(vars))
+print(paste("nrow(vars):",nrow(vars)))
+print(paste("ncol(vars):",ncol(vars)))
+
 if (ncol(vars) == 1) {
   print("NSGA2 needs more than one variable")
   stop(options("show.error.messages"=TRUE),"NSGA2 needs more than one variable")
@@ -115,9 +121,10 @@ print(paste("mprob set to:",mprob))
 results <- NULL
 try(results <- nsga2NREL(cl=cl, fn=f, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, XoverDistIdx=xoverdistidx, MuDistIdx=mudistidx, mprob=mprob), silent=FALSE)
 
-# TODO: how to get best result back in docker space? API? What is the server?
-whoami <- system('whoami', intern = TRUE)
-print(paste("whoami:", whoami))
+if (debug_messages == 1) {
+  whoami <- system('whoami', intern = TRUE)
+  print(paste("whoami:", whoami))
+}
 #for (i in 1:num_uniq_workers) {
 #    scp = paste('scp ',whoami,'@',ips2[i],':',analysis_dir,'/best_result.json ',analysis_dir,'/',sep="")
 #print(paste("scp command:",scp))
