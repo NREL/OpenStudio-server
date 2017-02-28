@@ -32,7 +32,7 @@ rake_command <- paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle e
 if (debug_messages == 1) {
   print(paste("analysis_dir: ",analysis_dir))
   print(paste("ruby_command: ",ruby_command))
-  print(paste("rake_command: ",))
+  print(paste("rake_command: ",rake_command))
 }
 
 varfile = function(x){
