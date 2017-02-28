@@ -92,11 +92,14 @@ class RunSimulateDataPoint
       file_paths: %w(../weather ../seeds ../seed),
       measure_paths: ['../measures']
     }
-    if @data_point.dp_seed
-      osw_options[:seed] = @data_point.dp_seed unless @data_point.dp_seed == ''
+    if @data_point.seed
+      osw_options[:seed] = @data_point.seed unless @data_point.seed == ''
     end
     if @data_point.da_descriptions
       osw_options[:da_descriptions] = @data_point.da_descriptions unless @data_point.da_descriptions == []
+    end
+    if @data_point.weather_file
+      osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
     end
     t = OpenStudio::Analysis::Translator::Workflow.new(
       "#{simulation_dir}/analysis.json",
