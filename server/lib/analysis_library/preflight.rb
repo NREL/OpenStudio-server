@@ -54,7 +54,9 @@ class AnalysisLibrary::Preflight < AnalysisLibrary::Base
           run_max: true,
           run_min: true,
           run_mode: true,
-          run_all_samples_for_pivots: true
+          run_all_samples_for_pivots: true,
+          debug_messages: 0,
+          failed_f_value: 1e19
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -85,7 +87,7 @@ class AnalysisLibrary::Preflight < AnalysisLibrary::Base
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
-      Rails.logger.info "pivot_array: #{pivot_array}"
+      logger.info "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"

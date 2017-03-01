@@ -1,45 +1,52 @@
 clusterEvalQ(cl,library(rjson))
 clusterEvalQ(cl,library(R.utils))
+objDim <- length(objfun)
 
 print(paste("objfun:",objfun))
-objDim <- length(objfun)
 print(paste("objDim:",objDim))
 print(paste("UniqueGroups:",uniquegroups))
 print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
-
 print(paste("min:",mins))
 print(paste("max:",maxes))
+print(paste("failed_f:",failed_f))
 
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
 clusterExport(cl,"ppower")
 clusterExport(cl,"uniquegroups")
+clusterExport(cl,"failed_f")
+clusterExport(cl,"debug_messages")
 
 for (i in 1:ncol(vars)){
-    vars[,i] <- sort(vars[,i])
+  vars[,i] <- sort(vars[,i])
 }
 print(paste("vartypes:",vartypes))
 print(paste("varnames:",varnames))
 
 # Setup a bunch of variables for the analysis based on passed variables
 # From Ruby
-analysis_dir = paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
-ruby_command = paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
-rake_command = paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
+analysis_dir <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
+ruby_command <- paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
+rake_command <- paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
+if (debug_messages == 1) {
+  print(paste("analysis_dir: ",analysis_dir))
+  print(paste("ruby_command: ",ruby_command))
+  print(paste("rake_command: ",rake_command))
+}
 
-varfile = function(x){
-    var_filename = paste(analysis_dir,'/varnames.json',sep='')
-    if (!file.exists(var_filename)){
-        write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-    }
+varfile <- function(x){
+  var_filename <- paste(analysis_dir,'/varnames.json',sep='')
+  if (!file.exists(var_filename)){
+    write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
 }
 
 if (uniquegroups == 1) {
-    print(paste("unique groups error:",uniquegroups))
-    uniq_filename = paste(analysis_dir,'/uniquegroups.err')
-    write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-    stop(options("show.error.messages"=TRUE),"unique groups is 1")
+  print(paste("unique groups error:",uniquegroups))
+  uniq_filename <- paste(analysis_dir,'/uniquegroups.err',sep='')
+  write.table("unique groups", file=uniq_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+  stop(options("show.error.messages"=TRUE),"unique groups is 1")
 }
 
 # Export local variables for worker nodes
@@ -64,56 +71,66 @@ clusterExport(cl,"rails_exit_guideline_14")
 clusterEvalQ(cl,varfile(varnames))
 
 # Export functions for worker nodes
-source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoint")
+source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
+clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
+f <- function(x){
+  tryCatch(create_and_run_datapoint_uniquegroups(x),
+            error=function(x){
+              obj <- NULL
+              for (i in 1:objDim) {
+                obj[i] <- failed_f
+              }
+              print("create_and_run_datapoint_uniquegroups failed")
+              return(obj)
+            }
+          )
+}
+clusterExport(cl,"f")
+
 if (nrow(vars) == 1) {
-    print("not sure what to do with only one datapoint so adding an NA")
-    vars <- rbind(vars, c(NA))
+  print("not sure what to do with only one datapoint so adding an NA")
+  vars <- rbind(vars, c(NA))
 }
 if (nrow(vars) == 0) {
-    print("not sure what to do with no datapoint so adding an NA")
-    vars <- rbind(vars, c(NA))
-    vars <- rbind(vars, c(NA))
+  print("not sure what to do with no datapoint so adding an NA")
+  vars <- rbind(vars, c(NA))
+  vars <- rbind(vars, c(NA))
 }
 
-print(nrow(vars))
-print(ncol(vars))
+print(paste("nrow(vars):",nrow(vars)))
+print(paste("ncol(vars):",ncol(vars)))
 if (ncol(vars) == 1) {
-    print("SPEA2 needs more than one variable")
-    stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")
+  print("SPEA2 needs more than one variable")
+  stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")
 }
 
 print(paste("Number of generations set to:",gen))
-print(uniquegroups)
-print(vars[])
-print(vartypes)
-print(gen)
-print(toursize)
-print(cprob)
-print(xoverdistidx)
-print(mudistidx)
-print(mprob)
+print(paste("uniquegroups set to:",uniquegroups))
+print(paste("vars[] set to:",vars[]))
+print(paste("vartypes set to:",vartypes))
+print(paste("gen set to:",gen))
+print(paste("toursize set to:",toursize))
+print(paste("cprob set to:",cprob))
+print(paste("cidx set to:",cidx))
+print(paste("midx set to:",midx))
+print(paste("mprob set to:",mprob))
 
-results = NULL
-try(results = spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
-# results = spea2NREL(cl=cl, fn=g, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx)
+results <- NULL
+try(results <- spea2NREL(cl=cl, fn=f, objDim=uniquegroups, variables=vars[], vartype=vartypes, generations=gen, tourSize=toursize, cprob=cprob, cidx=cidx, mprob=mprob, midx=midx), silent = FALSE)
 
-#print(paste("ip workers:", ips))
-#print(paste("ip master:", master_ips))
-#ips2 <- ips[ips!=master_ips]
-#print(paste("non server ips:", ips2))
-#num_uniq_workers <- length(ips2)
-#whoami <- system('whoami', intern = TRUE)
-#for (i in 1:num_uniq_workers){
-#    scp <- paste('scp ',whoami,'@',ips2[i],':#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json #{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/', sep="")
+# TODO: how to get best result back in docker space? API? What is the server?
+whoami <- system('whoami', intern = TRUE)
+print(paste("whoami:", whoami))
+#for (i in 1:num_uniq_workers) {
+#    scp = paste('scp ',whoami,'@',ips2[i],':',analysis_dir,'/best_result.json ',analysis_dir,'/',sep="")
 #print(paste("scp command:",scp))
 #system(scp,intern=TRUE)
-#scp2 <- paste('scp ',whoami,'@',ips2[i],':#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/convergence_flag.json #{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/', sep="")
+#scp2 <- paste('scp ',whoami,'@',ips2[i],':',analysis_dir,'/convergence_flag.json ',analysis_dir,'/', sep="")
 #print(paste("scp2 command:",scp2))
 #system(scp2,intern=TRUE)
 #}
 
-results_filename = paste(analysis_dir,'/results.R')
+results_filename <- paste(analysis_dir,'/results.R',sep='')
 save(results, file=results_filename)

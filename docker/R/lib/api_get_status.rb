@@ -30,9 +30,11 @@ begin
 
   a = JSON.parse(a, symbolize_names: true)
   result[:status] = true
-  result[:result] = a
+  result[:result] = a[:analysis][:run_flag]
 rescue => e
   puts "#{__FILE__} Error: #{e.message}:#{e.backtrace.join("\n")}"
+  result[:status] = false
+  result[:result] = true
 ensure
   puts result.to_json
 end

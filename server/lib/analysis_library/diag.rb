@@ -50,7 +50,9 @@ class AnalysisLibrary::Diag < AnalysisLibrary::Base
         algorithm: {
           number_of_samples: 2,
           experiment_type: 'diagonal',
-          run_baseline: 1
+          run_baseline: 1,
+          failed_f_value: 1e18,
+          debug_messages: 0
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential

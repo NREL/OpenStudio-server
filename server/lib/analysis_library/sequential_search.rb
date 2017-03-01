@@ -388,10 +388,4 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
 
     logger.info "Finished running analysis '#{self.class.name}'"
   end
-
-  # Since this is a delayed job, if it crashes it will typically try multiple times.
-  # Fix this to 1 retry for now.
-  def max_attempts
-    1
-  end
 end
