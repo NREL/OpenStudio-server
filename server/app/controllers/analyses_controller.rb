@@ -284,7 +284,7 @@ class AnalysesController < ApplicationController
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
     analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline14]
-    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message]
+    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :name]
 
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
     # analysis_states = params[:state] ? [params[:state]] : Analyses.status_states
@@ -316,6 +316,7 @@ class AnalysesController < ApplicationController
                            {
                              _id: dp.id,
                              id: dp.id,
+                             name: dp.name,
                              analysis_id: dp.analysis_id,
                              status: dp.status,
                              status_message: dp.status_message
@@ -390,9 +391,15 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     @rserve_log = nil
-    rserve_file = File.join(Rails.root, 'log', 'Rserve.log')
+    rserve_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'Rserve.log')
     if File.exist? rserve_file
       @rserve_log = File.read(rserve_file)
+    end
+
+    @snow_log = nil
+    snow_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'snow.log')
+    if File.exist? snow_file
+      @snow_log = File.read(snow_file)
     end
 
     exclude_fields = [:_id, :user, :password]

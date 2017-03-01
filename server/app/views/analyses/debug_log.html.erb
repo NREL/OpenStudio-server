@@ -114,6 +114,19 @@
 <table id="datapointtable" class="tablesorter table table-striped">
   <thead>
   <tr>
+    <th>SNOW Cluster Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @snow_log.gsub("\n", "</br>").html_safe unless @snow_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
     <th>Simulate Datapoint Log Messages</th>
   </tr>
   </thead>

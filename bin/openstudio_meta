@@ -312,8 +312,9 @@ class InstallGems
     end
     FileUtils.mkdir_p(ENV['GEM_HOME'])
 
-    # Set a phony os_server_project_path because rails needs it.
+    # Set a phony os_server_project_path and os_server_rails_temp_dir because rails needs it.
     ::ENV['OS_SERVER_PROJECT_PATH'] = Dir.home
+    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
 
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
@@ -377,9 +378,9 @@ class InstallGems
 
       Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each { |p| FileUtils.rm_rf(p) }
       Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each { |p| FileUtils.rm_rf(p) }
-      platform = 'darwin'
-      if /win/.match(RUBY_PLATFORM) || /mingw/.match(RUBY_PLATFORM)
-        platform = 'win32'
+      platform = 'win32'
+      if /darwin/.match(RUBY_PLATFORM) 
+        platform = 'darwin'
       end
 
       ::Dir.chdir(options[:export_dir])
@@ -488,8 +489,9 @@ class StartLocal
       ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
 
-    # Set the server project path
+    # Set the server project path and temp dir
     ::ENV['OS_SERVER_PROJECT_PATH'] = File.join(project_dir, 'temp_data')
+    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
 
     # Assemble the commands and spin off the threads
     start_local_server project_dir, options[:mongo_dir], options[:ruby_path], options[:workers], options[:debug]
@@ -819,6 +821,8 @@ $logger.debug "Input ARGV is #{$argv}"
 
 # Require the files. Given no bundler context until incorporation into commands classes this is pretty fragile
 $logger.debug 'Executing requires'
+$logger.debug 'Requiring tmpdir'
+require 'tmpdir'
 $logger.debug 'Requiring optsparse'
 require 'optparse'
 $logger.debug 'Requiring timeout'
