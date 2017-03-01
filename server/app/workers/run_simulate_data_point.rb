@@ -38,11 +38,16 @@
 # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
 
 class RunSimulateDataPoint
+
+  require 'date'
+  require 'json'
+
   def initialize(data_point_id, options = {})
     defaults = { run_workflow_method: 'workflow' }.with_indifferent_access
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
+    @intialize_worker_errs = []
   end
 
   def perform
@@ -69,8 +74,47 @@ class RunSimulateDataPoint
     @sim_logger.info "Simulation directory is #{simulation_dir}"
     @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
+    # If worker initialization fails, communicate this information
+    # to the user via the out.osw.
     success = initialize_worker
-    raise('Unable to successfully initialize worker') unless success
+    unless success
+      err_msg_1 = 'The worker initialization failed, which means that no simulations will be run.'
+      err_msg_2 = 'If you see this message once, all subsequent runs will likely fail.'
+      err_msg_3 = 'If you are running PAT simulations locally on Windows, the error is likely due to a measure file whose path length has exceeded 256 characters.'
+      err_msg_4 = 'Inspect the following messages for clues as to the specific issue:'
+      out_osw = {completed_status: 'Fail',
+                 osa_id: @data_point.analysis.id,
+                 osd_id: @data_point.id,
+                 name: @data_point.name,
+                 completed_at: ::DateTime.now.iso8601,
+                 started_at: ::DateTime.now.iso8601,
+                 steps: [
+                     arguments: {},
+                     description: '',
+                     name: 'Initialize Worker Error',
+                     result: {
+                         completed_at: ::DateTime.now.iso8601,
+                         started_at: ::DateTime.now.iso8601,
+                         stderr: 'Please see the delayed_jobs.log file for the specific error.',
+                         stdout: '',
+                         step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
+                         step_files: [],
+                         step_info: [],
+                         step_result: 'Failure',
+                         step_warnings: []
+                     }
+                 ]}
+      report_file = "#{simulation_dir}/out.osw"
+      File.open(report_file, 'wb') do |f|
+        f.puts ::JSON.pretty_generate(out_osw)
+      end
+      upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+      @data_point.set_error_flag
+      @data_point.set_complete_state if @data_point
+      @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
+      @sim_logger.close if @sim_logger
+      return false
+    end
 
     # delete any existing data files from the server in case this is a 'rerun'
     RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
@@ -182,7 +226,7 @@ class RunSimulateDataPoint
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
-      @sim_logger.info log_message if @sim_logger
+      @sim_logger.error log_message if @sim_logger
       @data_point.set_error_flag
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
@@ -215,7 +259,7 @@ class RunSimulateDataPoint
       @sim_logger.info 'write_lock_file exists, checking for receipt file'
 
       # wait until receipt file appears then return
-      Timeout.timeout(300) do
+      Timeout.timeout(60) do
         loop do
           break if File.exist? receipt_file
           @sim_logger.info 'waiting for receipt file to appear'
@@ -269,6 +313,7 @@ class RunSimulateDataPoint
     true
   rescue => e
     @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
+    @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
     false
   end
 
