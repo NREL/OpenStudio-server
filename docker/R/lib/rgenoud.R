@@ -25,6 +25,11 @@ print(paste("varnames:",varnames))
 analysis_dir <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
 ruby_command <- paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
 rake_command <- paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
+if (debug_messages == 1) {
+  print(paste("analysis_dir: ",analysis_dir))
+  print(paste("ruby_command: ",ruby_command))
+  print(paste("rake_command: ",rake_command))
+}
 
 varfile <- function(x){
   var_filename <- paste(analysis_dir,'/varnames.json',sep='')

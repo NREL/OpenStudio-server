@@ -27,7 +27,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
     # Call the system command to submit the simulation to the API / queue
     z <- system2("ruby",y, stdout = TRUE, stderr = TRUE)
     z <- z[length(z)]
-    if(debug_messages == 2){
+    if(debug_messages == 1){
       print(paste("Create and Run Datapoint ",counter," z:",z))
     }
     #check if return status is not NULL (means errors and z is not a json)
@@ -46,7 +46,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
       next
     }
     #if gotten this far then json is good
-    if(debug_messages == 2){
+    if(debug_messages == 1){
       print(paste("Success ",counter))
     }
     counter <- 11

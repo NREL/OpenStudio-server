@@ -29,8 +29,13 @@ print(paste("varnames:",varnames))
 analysis_dir <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,sep='')
 ruby_command <- paste('cd ',analysis_dir,' && ',rails_ruby_bin_dir,'/bundle exec ruby ',sep='')
 rake_command <- paste('cd ',rails_root_path,' && ',rails_ruby_bin_dir,'/bundle exec rake ',sep='')
+if (debug_messages == 1) {
+  print(paste("analysis_dir: ",analysis_dir))
+  print(paste("ruby_command: ",ruby_command))
+  print(paste("rake_command: ",rake_command))
+}
 
-varfile = function(x){
+varfile <- function(x){
   var_filename <- paste(analysis_dir,'/varnames.json',sep='')
   if (!file.exists(var_filename)){
     write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
@@ -94,8 +99,8 @@ if (nrow(vars) == 0) {
   vars <- rbind(vars, c(NA))
 }
 
-print(nrow(vars))
-print(ncol(vars))
+print(paste("nrow(vars):",nrow(vars)))
+print(paste("ncol(vars):",ncol(vars)))
 if (ncol(vars) == 1) {
   print("SPEA2 needs more than one variable")
   stop(options("show.error.messages"=TRUE),"SPEA2 needs more than one variable")

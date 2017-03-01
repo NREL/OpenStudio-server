@@ -35,7 +35,7 @@ if (debug_messages == 1) {
   print(paste("rake_command: ",rake_command))
 }
 
-varfile = function(x){
+varfile <- function(x){
   var_filename <- paste(analysis_dir,'/varnames.json',sep='')
   if (!file.exists(var_filename)){
     write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
