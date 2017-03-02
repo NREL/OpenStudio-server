@@ -48,6 +48,9 @@ class Pareto
   belongs_to :analysis
 
   # Indexes
-  index({ id: 1 }, unique: true)
+  index(id: 1)
   index(analysis_id: 1)
+
+  # Validation
+  validates :name, uniqueness: { scope: :anlysis_id }
 end

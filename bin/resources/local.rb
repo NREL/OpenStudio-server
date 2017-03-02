@@ -30,12 +30,12 @@ require 'json'
 #
 def is_windows?
   win_patterns = [
-    /bccwin/i,
-    /cygwin/i,
-    /djgpp/i,
-    /mingw/i,
-    /mswin/i,
-    /wince/i
+      /bccwin/i,
+      /cygwin/i,
+      /djgpp/i,
+      /mingw/i,
+      /mswin/i,
+      /wince/i
   ]
 
   case RUBY_PLATFORM
@@ -53,7 +53,7 @@ end
 #
 def is_port_open?(port)
   begin
-    ::Timeout.timeout(1) do
+    ::Timeout.timeout(5) do
       begin
         s = TCPSocket.new('localhost', port)
         s.close
@@ -300,7 +300,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
 
   $logger.debug 'Instantiated all processes. Writing receipt file.'
 
-  ::File.open(receipt_file, 'wb') { |_| }
+  ::File.open(receipt_file, 'wb') { |_|}
 
   $logger.debug "Completed writing local server configuration to #{state_file}"
 end

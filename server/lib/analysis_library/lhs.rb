@@ -48,8 +48,10 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       problem: {
         random_seed: 1979,
         algorithm: {
-          number_of_samples: 100,
-          sample_method: 'all_variables'
+          number_of_samples: 5,
+          sample_method: 'individual_variables',
+          failed_f_value: 1e18,
+          debug_messages: 0
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -86,7 +88,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       @r.converse("set.seed(#{@analysis.problem['random_seed']})")
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
-      Rails.logger.info "pivot_array: #{pivot_array}"
+      logger.info "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"

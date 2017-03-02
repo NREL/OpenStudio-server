@@ -1,5 +1,6 @@
 $env:Path = "C:\Ruby$env:RUBY_VERSION\bin;C:\Mongodb\bin;$env:Path"
 $env:RUBYLIB = "C:\projects\openstudio\Ruby"
+Write-Host "RUBYLIB is: $env:RUBYLIB and the PATH is: $env:Path"
 $iteration = 0
 :retry While ($iteration -lt 4)
     {

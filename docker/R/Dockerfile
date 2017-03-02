@@ -122,7 +122,7 @@ RUN cd /opt/openstudio/R/lib && bundle install
 
 ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
-CMD Rscript start.R
+CMD Rscript start.R 2>&1 | tee /mnt/openstudio/log/Rserve.log
 
 EXPOSE 6311
 

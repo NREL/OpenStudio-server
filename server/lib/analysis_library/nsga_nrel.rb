@@ -33,9 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# TODO: Fix this for new queue
 
-# Non Sorting Genetic Algorithm
+# Non Sorting Genetic Algorithm 2
 class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
@@ -52,14 +51,16 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
           number_of_samples: 30,
           sample_method: 'individual_variables',
           generations: 1,
-          toursize: 2,
+          tournament_size: 2,
           cprob: 0.7,
-          xoverdistidx: 5,
-          mudistidx: 10,
+          xover_dist_idx: 5,
+          mu_dist_idx: 10,
           mprob: 0.5,
-          normtype: 'minkowski',
-          ppower: 2,
+          norm_type: 'minkowski',
+          p_power: 2,
           exit_on_guideline14: 0,
+          debug_messages: 0,
+          failed_f_value: 1e18,
           objective_functions: []
         }
       }
@@ -87,7 +88,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-
+    logger.info 'Setting up R for NSGA2 Run'
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
@@ -102,6 +103,9 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
 
       master_ip = 'localhost'
 
+      logger.info("Master ip: #{master_ip}")
+      logger.info('Starting NSGA2 Run')
+
       # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
       # that the run flag is true.
 
@@ -114,9 +118,12 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
         raise 'Must have number of samples to discretize the parameter space'
       end
 
-      # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+    #  raise "P Norm must be non-negative"
+    # end
 
-      if @analysis.problem['algorithm']['ppower'] <= 0
+      if @analysis.problem['algorithm']['p_power'] <= 0
         raise 'P Norm must be non-negative'
       end
 
@@ -127,7 +134,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
         raise 'Must have at least two output_variables'
       end
-
+      
       objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
       ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
@@ -136,11 +143,18 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       @analysis.save!
       logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
 
-      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-        raise 'number of objective functions must equal'
+      # check to make sure there are objective functions
+      if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
+        raise 'No objective functions defined'
       end
 
-      pivot_array = Variable.pivot_array(@analysis.id)
+      # find the total number of objective functions
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
+        raise 'Number of objective functions must equal between the output_variables and the problem definition'
+      end
+
+      pivot_array = Variable.pivot_array(@analysis.id, @r)
+      logger.info "pivot_array: #{pivot_array}"
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"
 
@@ -151,16 +165,21 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       lhs = AnalysisLibrary::R::Lhs.new(@r)
       samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-      if samples.empty? || samples.size <= 1
-        logger.info 'No variables were passed into the options, therefore exit'
-        raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
-      end
-
       # Result of the parameter space will be column vectors of each variable
       logger.info "Samples are #{samples}"
       logger.info "mins_maxes: #{mins_maxes}"
       logger.info "var_names: #{var_names}"
       logger.info("variable types are #{var_types}")
+      
+      if samples.empty? || samples.size <= 1
+        logger.info 'No variables were passed into the options, therefore exit'
+        raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      end
+      #from RGenoud I think we want to do this here too
+      if var_names.empty? || var_names.empty?
+        logger.info 'No variables were passed into the options, therefore exit'
+        raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+      end
 
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
@@ -170,7 +189,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
 
       worker_ips = {}
       worker_ips[:worker_ips] = ['localhost'] * @options[:max_queued_jobs]
-
+      #TODO There is no R queue, there is an R cluster
       logger.info "Starting R queue to hold #{@options[:max_queued_jobs]} jobs"
 
       if cluster.start(worker_ips)
@@ -178,19 +197,26 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq,
-                   vars: samples.to_dataframe, vartypes: var_types,
-                   varnames: var_names, mins: mins_maxes[:min],
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
+        @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
+        @r.command(master_ips: master_ip, 
+                   ips: worker_ips[:worker_ips].uniq,
+                   vars: samples.to_dataframe, 
+                   vartypes: var_types,
+                   varnames: var_names, 
+                   mins: mins_maxes[:min],
                    maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['normtype'],
-                   ppower: @analysis.problem['algorithm']['ppower'],
+                   normtype: @analysis.problem['algorithm']['norm_type'],
+                   ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    gen: @analysis.problem['algorithm']['generations'],
-                   toursize: @analysis.problem['algorithm']['toursize'],
+                   toursize: @analysis.problem['algorithm']['tournament_size'],
                    cprob: @analysis.problem['algorithm']['cprob'],
-                   xoverdistidx: @analysis.problem['algorithm']['xoverdistidx'],
-                   mudistidx: @analysis.problem['algorithm']['mudistidx'],
+                   xoverdistidx: @analysis.problem['algorithm']['xover_dist_idx'],
+                   mudistidx: @analysis.problem['algorithm']['mu_dist_idx'],
                    mprob: @analysis.problem['algorithm']['mprob'],
+                   debug_messages: @analysis.problem['algorithm']['debug_messages'],
+                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
                    uniquegroups: ug.size) do
           %{
             rails_analysis_id = "#{@analysis.id}"

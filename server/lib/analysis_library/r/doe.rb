@@ -220,19 +220,19 @@ module AnalysisLibrary::R
         # @r.converse "#{var.name} <- #{variable_samples}"
         @r.command(var_names: var.name, var_sample: variable_samples) do
           %{
-         #print(paste("doe.orig:",doe.orig))
-      #print(paste("legnth of doe.orig:",length(doe.orig)))
+            #print(paste("doe.orig:",doe.orig))
+            #print(paste("legnth of doe.orig:",length(doe.orig)))
             #print(paste("typeof(var_names):",typeof(var_names)))
             #num_var <- length(var_names)
-      #print(paste("num_var:",num_var))
-      print(paste("var_names:",var_names))
-      #print(paste("typeof(var_sample):",typeof(var_sample)))
+            #print(paste("num_var:",num_var))
+            print(paste("var_names:",var_names))
+            #print(paste("typeof(var_sample):",typeof(var_sample)))
             #print(paste("var_sample:",var_sample))
-      #num_var_sample <- length(var_sample)
-      #print(paste("num_var_sample:",num_var_sample))
-      doe.orig[[#{var.r_index}]] <- var_sample
-      print(paste("doe.orig:",doe.orig))
-      print(paste("r_index:",#{var.r_index}))
+            #num_var_sample <- length(var_sample)
+            #print(paste("num_var_sample:",num_var_sample))
+            doe.orig[[#{var.r_index}]] <- var_sample
+            print(paste("doe.orig:",doe.orig))
+            print(paste("r_index:",#{var.r_index}))
           }
         end
       end

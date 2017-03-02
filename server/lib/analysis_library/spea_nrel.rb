@@ -33,6 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
+#Strength Pareto Evolutionary Algorithm 2
 class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
@@ -48,15 +49,17 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
         algorithm: {
           number_of_samples: 30,
           sample_method: 'individual_variables',
-          generations: 1,
-          toursize: 2,
-          cprob: 0.7,
+          generations: 2,
+          tournament_size: 2,
+          cprob: 0.85,
           cidx: 5,
-          midx: 10,
-          mprob: 0.5,
-          normtype: 'minkowski',
-          ppower: 2,
+          midx: 5,
+          mprob: 0.8,
+          norm_type: 'minkowski',
+          p_power: 2,
           exit_on_guideline14: 0,
+          debug_messages: 0,
+          failed_f_value: 1e18,
           objective_functions: []
         }
       }
@@ -78,94 +81,105 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
+    # Make the analysis directory if it doesn't already exist
+    FileUtils.mkdir_p analysis_dir(@analysis.id) unless Dir.exist? analysis_dir(@analysis.id)
+
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
     logger.info 'Setting up R for SPEA2 Run'
-    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
-
-    # TODO: deal better with random seeds
-    @r.converse("set.seed(#{@analysis.problem['random_seed']})")
-    # R libraries needed for this algorithm
-    @r.converse 'library(rjson)'
-    @r.converse 'library(mco)'
-    @r.converse 'library(NRELmoo)'
-
-    # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
-    # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
-
-    # get the master ip address
-    master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    logger.info("Master ip: #{master_ip}")
-    logger.info('Starting SPEA2 Run')
-
-    # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
-    # that the run flag is true.
-
-    # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['generations'].nil? || (@analysis.problem['algorithm']['generations']).zero?
-      raise 'Number of generations was not set or equal to zero (must be 1 or greater)'
-    end
-
-    if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
-      raise 'Must have number of samples to discretize the parameter space'
-    end
-
-    # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    # if @analysis.problem['algorithm']['normtype'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
-    #  raise "P Norm must be non-negative"
-    # end
-
-    if @analysis.problem['algorithm']['ppower'] <= 0
-      raise 'P Norm must be non-negative'
-    end
-
-    if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
-      raise 'Must have at least two objective functions defined'
-    end
-
-    if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
-      raise 'Must have at least two output_variables'
-    end
-
-    objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
-    ug = objtrue.uniq { |v| v['objective_function_group'] }
-    logger.info "Number of objective function groups are #{ug.size}"
-
-    @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
-    @analysis.save!
-    logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
-
-    if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-      raise 'number of objective functions must equal'
-    end
-
-    pivot_array = Variable.pivot_array(@analysis.id)
-    selected_variables = Variable.variables(@analysis.id)
-    logger.info "Found #{selected_variables.count} variables to perturb"
-
-    # discretize the variables using the LHS sampling method
-    @r.converse("print('starting lhs to discretize the variables')")
-    logger.info 'starting lhs to discretize the variables'
-
-    lhs = AnalysisLibrary::R::Lhs.new(@r)
-    samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-
-    if samples.empty? || samples.size <= 1
-      logger.info 'No variables were passed into the options, therefore exit'
-      raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
-    end
-
-    # Result of the parameter space will be column vectors of each variable
-    logger.info "Samples are #{samples}"
-
-    logger.info "mins_maxes: #{mins_maxes}"
-    logger.info "var_names: #{var_names}"
-    logger.info("variable types are #{var_types}")
-
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
+      @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
+
+      # TODO: deal better with random seeds
+      @r.converse("set.seed(#{@analysis.problem['random_seed']})")
+      # R libraries needed for this algorithm
+      @r.converse 'library(rjson)'
+      @r.converse 'library(mco)'
+      @r.converse 'library(NRELmoo)'
+
+      master_ip = 'localhost'
+
+      logger.info("Master ip: #{master_ip}")
+      logger.info('Starting SPEA2 Run')
+
+      # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
+      # that the run flag is true.
+
+      # TODO: preflight check -- need to catch this in the analysis module
+      if @analysis.problem['algorithm']['generations'].nil? || (@analysis.problem['algorithm']['generations']).zero?
+        raise 'Number of generations was not set or equal to zero (must be 1 or greater)'
+      end
+
+      if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
+        raise 'Must have number of samples to discretize the parameter space'
+      end
+
+      # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
+      #  raise "P Norm must be non-negative"
+      # end
+
+      if @analysis.problem['algorithm']['p_power'] <= 0
+        raise 'P Norm must be non-negative'
+      end
+
+      if @analysis.problem['algorithm']['objective_functions'].nil? || @analysis.problem['algorithm']['objective_functions'].size < 2
+        raise 'Must have at least two objective functions defined'
+      end
+
+      if @analysis.output_variables.empty? || @analysis.output_variables.size < 2
+        raise 'Must have at least two output_variables'
+      end
+
+      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+      ug = objtrue.uniq { |v| v['objective_function_group'] }
+      logger.info "Number of objective function groups are #{ug.size}"
+
+      @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
+      @analysis.save!
+      logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+
+      # check to make sure there are objective functions
+      if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
+        raise 'No objective functions defined'
+      end
+
+      # find the total number of objective functions
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
+        raise 'Number of objective functions must equal between the output_variables and the problem definition'
+      end
+
+      pivot_array = Variable.pivot_array(@analysis.id, @r)
+      logger.info "pivot_array: #{pivot_array}"
+      selected_variables = Variable.variables(@analysis.id)
+      logger.info "Found #{selected_variables.count} variables to perturb"
+
+      # discretize the variables using the LHS sampling method
+      @r.converse("print('starting lhs to discretize the variables')")
+      logger.info 'starting lhs to discretize the variables'
+
+      lhs = AnalysisLibrary::R::Lhs.new(@r)
+      samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+
+      # Result of the parameter space will be column vectors of each variable
+      logger.info "Samples are #{samples}"
+      logger.info "mins_maxes: #{mins_maxes}"
+      logger.info "var_names: #{var_names}"
+      logger.info("variable types are #{var_types}")
+      
+      if samples.empty? || samples.size <= 1
+        logger.info 'No variables were passed into the options, therefore exit'
+        raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      end
+      #from RGenoud I think we want to do this here too
+      if var_names.empty? || var_names.empty?
+        logger.info 'No variables were passed into the options, therefore exit'
+        raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+      end
+
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure
@@ -174,7 +188,7 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
 
       worker_ips = {}
       worker_ips[:worker_ips] = ['localhost'] * @options[:max_queued_jobs]
-
+      #TODO There is no R queue, there is an R cluster
       logger.info "Starting R queue to hold #{@options[:max_queued_jobs]} jobs"
 
       if cluster.start(worker_ips)
@@ -183,12 +197,27 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        @r.command(master_ips: master_ip, ips: worker_ips[:worker_ips].uniq, vars: samples.to_dataframe, vartypes: var_types, varnames: var_names, mins: mins_maxes[:min], maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'],
-                   toursize: @analysis.problem['algorithm']['toursize'], cprob: @analysis.problem['algorithm']['cprob'],
-                   cidx: @analysis.problem['algorithm']['cidx'], midx: @analysis.problem['algorithm']['midx'],
-                   mprob: @analysis.problem['algorithm']['mprob'], uniquegroups: ug.size) do
+        # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
+        @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
+        @r.command(master_ips: master_ip, 
+                   ips: worker_ips[:worker_ips].uniq, 
+                   vars: samples.to_dataframe, 
+                   vartypes: var_types, 
+                   varnames: var_names, 
+                   mins: mins_maxes[:min], 
+                   maxes: mins_maxes[:max],
+                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   ppower: @analysis.problem['algorithm']['p_power'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'], 
+                   gen: @analysis.problem['algorithm']['generations'],
+                   toursize: @analysis.problem['algorithm']['tournament_size'], 
+                   cprob: @analysis.problem['algorithm']['cprob'],
+                   cidx: @analysis.problem['algorithm']['cidx'], 
+                   midx: @analysis.problem['algorithm']['midx'],
+                   mprob: @analysis.problem['algorithm']['mprob'], 
+                   debug_messages: @analysis.problem['algorithm']['debug_messages'],
+                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
+                   uniquegroups: ug.size) do
           %{
               rails_analysis_id = "#{@analysis.id}"
               rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
@@ -204,6 +233,8 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
               source(paste(r_scripts_path,'/spea.R',sep=''))
            }
         end
+
+        # TODO: find any results of the algorithm and save to the analysis
       else
         raise 'could not start the cluster (most likely timed out)'
       end
@@ -220,11 +251,6 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
     ensure
       # ensure that the cluster is stopped
       cluster.stop if cluster
-
-      logger.info 'Running finalize worker scripts'
-      unless cluster.finalize_workers(worker_ips, @analysis.id)
-        raise 'could not run finalize worker scripts'
-      end
 
       # Post process the results and jam into the database
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
@@ -254,11 +280,5 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
 
       logger.info "Finished running analysis '#{self.class.name}'"
     end
-  end
-
-  # Since this is a delayed job, if it crashes it will typically try multiple times.
-  # Fix this to 1 retry for now.
-  def max_attempts
-    1
   end
 end

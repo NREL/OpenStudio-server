@@ -54,7 +54,7 @@ class Measure
 
   # Indexes
   index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index(id: 1)
   index(name: 1)
   index(analysis_id: 1)
   index(analysis_id: 1, uuid: 1)

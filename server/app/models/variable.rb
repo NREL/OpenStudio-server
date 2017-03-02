@@ -79,7 +79,7 @@ class Variable
 
   # Indexes
   index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index(id: 1)
   index(name: 1)
   index(r_index: 1)
   index(analysis_id: 1)
