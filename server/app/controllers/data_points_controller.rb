@@ -371,7 +371,11 @@ class DataPointsController < ApplicationController
 
     file = @data_point.result_files.where(attachment_file_name: params[:filename]).first
     if file && file.attachment && File.exist?(file.attachment.path)
-      file_data = /darwin/.match(RUBY_PLATFORM) ? File.read(file.attachment.path) : File.binread(file.attachment.path)
+      if /darwin/.match(RUBY_PLATFORM) || /linux/.match(RUBY_PLATFORM)
+        file_data = File.read(file.attachment.path)
+      else
+        file_data = File.binread(file.attachment.path)
+      end
       disposition = ['application/json', 'text/plain', 'text/html'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
       send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
     else
