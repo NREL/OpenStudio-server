@@ -15,6 +15,8 @@ services:
       - "80:80"
       - "443:443"
       - "8080:8080"
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     volumes:
       - osdata:/mnt/openstudio
     deploy:
