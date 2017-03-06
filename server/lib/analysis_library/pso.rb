@@ -133,7 +133,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
         raise 'unknown Vini type'
       end
 
-      unless %w(invisible damping reflecting absorbing2007 absorbing2007 default).include?(@analysis.problem['algorithm']['boundary'])
+      unless %w(invisible damping reflecting absorbing2011 absorbing2007 default).include?(@analysis.problem['algorithm']['boundary'])
         raise 'unknown Boundary type'
       end
 
