@@ -54,6 +54,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
           p_power: 2,
           debug_messages: 0,
           failed_f_value: 1e18,
+          max_queued_jobs: 0,
           objective_functions: []
         }
       }
@@ -160,11 +161,14 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
         raise 'could not configure R cluster'
       end
 
-      worker_ips = {}
-      worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
-      #TODO There is no R queue, there is an R cluster
-      logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
-
+      worker_ips = {}  
+      if @analysis.problem['algorithm']['max_queued_jobs'] > 0
+        worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
+        logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
+      else
+        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
+        logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
+      end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
 

@@ -64,6 +64,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
           exit_on_guideline14: 0,
           debug_messages: 0,
           failed_f_value: 1e18,
+          max_queued_jobs: 0,
           objective_functions: []
         }
       }
@@ -195,10 +196,13 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       end
 
       worker_ips = {}
-      worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
-      #TODO There is no R queue, there is an R cluster
-      logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
-
+      if @analysis.problem['algorithm']['max_queued_jobs'] > 0
+        worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
+        logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
+      else
+        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
+        logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
+      end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
         # maxit is the max number of iterations to calculate
