@@ -190,9 +190,12 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       if @analysis.problem['algorithm']['max_queued_jobs'] > 0
         worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
         logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
-      else
+      elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
+      else
+        worker_ips[:worker_ips] = ['localhost'] * 0
+        logger.info "Starting R queue to hold 0 jobs"
       end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
