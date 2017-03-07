@@ -61,7 +61,7 @@ gem 'openstudio-workflow', '= 1.1.2'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '1.0.0.rc17'
+gem 'openstudio-analysis', '1.0.0.rc18'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'multi-seed-support'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
