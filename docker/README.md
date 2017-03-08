@@ -39,16 +39,26 @@ Get the Docker IP address (`docker-machine ip dev`) and point your browser at [h
 ## Testing
 
 ```
+docker-compose rm -f
+docker volume rm osdata
 docker volume create --name=osdata
 export RAILS_ENV=docker-test
 export CI=true
 export CIRCLECI=true
+sed -i -E "s/#TEST#//g" Dockerfile
+sed -i -E "s/.git//g" .dockerignore
 docker-compose -f docker-compose.test.yml build
 docker-compose -f docker-compose.test.yml run -d rserve
 docker-compose -f docker-compose.test.yml run -d web-background
 docker-compose -f docker-compose.test.yml run -d db
 mkdir -p reports/rspec
 docker-compose -f docker-compose.test.yml run web
+
+# One line
+sed -i -E "s/#TEST#//g" Dockerfile
+sed -i -E "s/.git//g" .dockerignore
+docker-compose rm -f && docker-compose -f docker-compose.test.yml build && docker volume rm osdata && docker volume create --name=osdata && docker-compose -f docker-compose.test.yml up
+git checkout -- Dockerfile .dockerignore
 ```
 
 
