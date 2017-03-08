@@ -125,9 +125,11 @@ RUN apt-get update \
     && rm -rf /usr/SketchUpPlugin \
     && rm -rf /var/lib/apt/lists/*
 
-# Add RUBYLIB link for openstudio.rb
+# Add RUBYLIB link for openstudio.rb and Radiance env vars
 ENV RUBYLIB /usr/Ruby
 ENV OPENSTUDIO_SERVER 'true'
+ENV OS_RAYPATH /usr/Radiance
+ENV PERL_EXE_PATH /usr/bin
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env
