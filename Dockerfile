@@ -24,9 +24,11 @@ RUN apt-get update \
 		git \
 		libbz2-dev \
 		libcurl4-openssl-dev \
+		libdbus-glib-1-2 \
 		libgdbm3 \
 		libgdbm-dev \
 		libglib2.0-dev \
+		libglu1 \
 		libncurses-dev \
 		libreadline-dev \
 		libxml2-dev \
