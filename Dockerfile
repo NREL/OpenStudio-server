@@ -133,7 +133,7 @@ ENV PERL_EXE_PATH /usr/bin
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env
-ENV GECKODRIVER_VERSION v0.11.1
+ENV GECKODRIVER_VERSION v0.15.0
 
 # Install vfb and firefox requirement if docker-test env
 RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
