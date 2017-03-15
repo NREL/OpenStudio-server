@@ -40,6 +40,8 @@ module AnalysisLibrary::R
 
       @r.converse 'library(DoE.base)'
       @r.converse 'library(lhs)'
+      @r.converse 'library(triangle)'
+      @r.converse 'library(e1071)'
     end
 
     # Take the number of variables and number of samples and generate the bins for
