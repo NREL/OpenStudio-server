@@ -69,8 +69,8 @@ gem 'openstudio-standards', '= 0.1.12'
 
 ## End commonly updated gems
 
-# gem 'openstudio-aws', '0.5.0.rc5'
-gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
+gem 'openstudio-aws', '0.5.0.rc6'
+# gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
 
 gem 'libxml-ruby'
 gem 'msgpack', '~> 1.0'
