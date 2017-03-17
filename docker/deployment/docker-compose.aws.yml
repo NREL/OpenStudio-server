@@ -41,10 +41,15 @@ services:
   worker:
     image: nrel/openstudio-server:latest
     command: bin/delayed_job -i worker --queue=simulations run
+    depends_on:
+      - web
+      - web-background
+      - db
+      - rserve
     deploy:
       resources:
         reservations:
-          cpus: "1"
+          cpus: "0.99"
   rserve:
     image: nrel/openstudio-rserve:latest
     volumes:
