@@ -69,7 +69,7 @@ gem 'openstudio-standards', '= 0.1.12'
 
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.5.0.rc7'
+gem 'openstudio-aws', '0.5.0.rc8'
 
 gem 'libxml-ruby'
 gem 'msgpack', '~> 1.0'
