@@ -106,7 +106,7 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Run this separate to cache the download
 ENV OPENSTUDIO_VERSION 2.0.5
-ENV OPENSTUDIO_SHA 0a2578157f
+ENV OPENSTUDIO_SHA 31a1faa854
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
