@@ -2,36 +2,34 @@ source 'http://rubygems.org'
 ruby "2.0.0"
 
 gem 'rails', '3.2.22'
-gem 'rake', '< 11.0'
+gem 'rake', '10.5.0'
 # data modules
-gem 'json'
-gem 'jbuilder'
-gem 'rubyzip'
+gem 'json', '1.8.6'
+gem 'jbuilder', '2.6.3'
+gem 'rubyzip', '1.2.1'
 
 # database modules
-gem 'mongoid', '~> 3.1.6'
-# gem 'mongoid', '~> 4.0'
-gem 'paperclip', '~> 4.1.1'
-gem 'mongoid-paperclip', require: 'mongoid_paperclip'
-# gem 'mongoid-locker', '~> 0.3'
+gem 'mongoid', '3.1.7'
+gem 'paperclip', '4.1.1'
+gem 'mongoid-paperclip', '0.0.11', require: 'mongoid_paperclip'
 
 # R
-gem 'rserve-simpler'
+gem 'rserve-simpler', '0.0.6'
 
 # net-*
-gem 'net-http-persistent'
-gem 'net-scp'
-gem 'net-ssh'
-gem 'net-sftp'
+gem 'net-http-persistent', '2.9.4'
+gem 'net-scp', '1.2.1'
+gem 'net-ssh', '3.0.2'
+gem 'net-sftp', '2.1.2'
 
 # javascript
-gem 'libv8', :platforms => :ruby
-gem 'execjs'
-gem 'therubyracer', :platforms => :ruby
+gem 'libv8', '3.16.14.19', :platforms => :ruby
+gem 'execjs', '2.7.0'
+gem 'therubyracer', '0.12.3', :platforms => :ruby
 
 # other useful gems
-gem 'parallel'
-gem 'sys-filesystem'
+gem 'parallel', '1.11.1'
+gem 'sys-filesystem', '1.1.7'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -44,37 +42,36 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-gem 'jquery-rails'
+gem 'jquery-rails', '3.1.4'
 
 group :test do
-  gem 'rspec'
-  gem 'rspec-rails', '~> 2.0'
-  gem 'mongoid-rspec'
-  gem 'rspec-html-matchers'
-  gem 'factory_girl_rails'
+  gem 'rspec', '2.99.0'
+  gem 'rspec-rails', '2.99.0'
+  gem 'mongoid-rspec', '1.11.0'
+  gem 'rspec-html-matchers', '0.5.0'
+  gem 'factory_girl_rails', '4.8.0'
   gem 'ci_reporter', '~> 1.9.0'
 
   # these two openstudio gems are needed for starting up the cluster
   # and running the analysis in the integration tests
-  gem 'openstudio-aws'
-  gem 'openstudio-analysis'
+  gem 'openstudio-aws', '0.4.2'
+  gem 'openstudio-analysis', '0.4.5'
 end
 
 # web ui
-# gem 'will_paginate'
-gem 'kaminari'
+gem 'kaminari', '0.17.0'
 
 # job queuing
-gem 'delayed_job_mongoid'
-gem 'daemons'
-gem 'childprocess'
+gem 'delayed_job_mongoid', '2.3.0'
+gem 'daemons', '1.2.4'
+gem 'childprocess', '0.6.2'
 
 # http(s) requests
-gem 'faraday'
+gem 'faraday', '0.11.0'
 
 group :development do
-  gem 'sextant' # navigate to /rails/routes to see routes
-  gem 'better_errors'
-  gem 'meta_request'
-  gem 'ruby-prof'
+  gem 'sextant', '0.2.4' # navigate to /rails/routes to see routes
+  gem 'better_errors', '2.1.1'
+  gem 'meta_request', '0.4.0'
+  gem 'ruby-prof', '0.16.2'
 end
