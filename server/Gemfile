@@ -1,6 +1,11 @@
 source 'http://rubygems.org'
 ruby '2.2.4'
 
+# unclear if this will actually force this version of rubygems to be used
+# if not, run the following command to change system gem version:
+# gem update --system 2.4.5
+gem 'rubygems-update', '2.4.5'
+
 gem 'rails', '4.2'
 gem 'rake', '~> 11.2'
 
