@@ -39,6 +39,8 @@ module AnalysisLibrary::R
       @r = r_session
 
       @r.converse 'library(lhs)'
+      @r.converse 'library(triangle)'
+      @r.converse 'library(e1071)'
     end
 
     # Take the number of variables and number of samples and generate the bins for

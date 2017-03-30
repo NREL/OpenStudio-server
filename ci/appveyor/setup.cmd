@@ -1,3 +1,4 @@
+  set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
   curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio-2.0.3.40f61c64a3-win32.zip
   mkdir c:\projects\openstudio
   7z x OpenStudio-2.0.3.40f61c64a3-win32.zip -oc:\projects\openstudio

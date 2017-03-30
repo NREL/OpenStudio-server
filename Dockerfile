@@ -24,9 +24,11 @@ RUN apt-get update \
 		git \
 		libbz2-dev \
 		libcurl4-openssl-dev \
+		libdbus-glib-1-2 \
 		libgdbm3 \
 		libgdbm-dev \
 		libglib2.0-dev \
+		libglu1 \
 		libncurses-dev \
 		libreadline-dev \
 		libxml2-dev \
@@ -103,8 +105,8 @@ RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Run this separate to cache the download
-ENV OPENSTUDIO_VERSION 2.0.1
-ENV OPENSTUDIO_SHA 9c93603b97
+ENV OPENSTUDIO_VERSION 2.0.5
+ENV OPENSTUDIO_SHA 31a1faa854
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
@@ -123,13 +125,15 @@ RUN apt-get update \
     && rm -rf /usr/SketchUpPlugin \
     && rm -rf /var/lib/apt/lists/*
 
-# Add RUBYLIB link for openstudio.rb
+# Add RUBYLIB link for openstudio.rb and Radiance env vars
 ENV RUBYLIB /usr/Ruby
 ENV OPENSTUDIO_SERVER 'true'
+ENV OS_RAYPATH /usr/Radiance
+ENV PERL_EXE_PATH /usr/bin
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env
-ENV GECKODRIVER_VERSION v0.11.1
+ENV GECKODRIVER_VERSION v0.15.0
 
 # Install vfb and firefox requirement if docker-test env
 RUN if [ "$RAILS_ENV" = "docker-test" ]; then \

@@ -13,8 +13,6 @@ done
 
 
 # Always create new indexes in case the models have changed
-# cd /opt/openstudio/server && bundle exec rspec --format html
-# cd /opt/openstudio/server && bundle exec rspec spec/requests/pages_spec.rb --format html
 cd /opt/openstudio/server && bundle exec rspec --format html; (( exit_status = exit_status || $? ))
 cd /opt/openstudio/server && bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
 

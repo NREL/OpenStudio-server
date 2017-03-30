@@ -1,6 +1,11 @@
 source 'http://rubygems.org'
 ruby '2.2.4'
 
+# unclear if this will actually force this version of rubygems to be used
+# if not, run the following command to change system gem version:
+# gem update --system 2.4.5
+gem 'rubygems-update', '2.4.5'
+
 gem 'rails', '4.2'
 gem 'rake', '~> 11.2'
 
@@ -56,20 +61,22 @@ gem 'uglifier'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
-gem 'openstudio-workflow', '= 1.1.2'
+
+gem 'openstudio-workflow', '= 1.2.1'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '1.0.0.rc17'
+
+gem 'openstudio-analysis', '1.0.0.rc18'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'multi-seed-support'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
-gem 'openstudio-standards', '= 0.1.11'
+gem 'openstudio-standards', '= 0.1.13'
 
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.5.0.rc5'
+gem 'openstudio-aws', '0.5.0.rc8'
 
 gem 'libxml-ruby'
 gem 'msgpack', '~> 1.0'
