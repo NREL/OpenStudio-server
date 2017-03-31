@@ -13,6 +13,7 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /log/*.json
+/log/.Rhistory
 
 # Ignore subfolders in tmp
 /tmp/*
@@ -22,7 +23,14 @@
 
 # testing artifacts
 /spec/reports
+/coverage
+/spec/runs.txt
 /*.pem
 /*.json
 
 vendor/cache
+.sass-cache
+spec/files/tmp/*
+spec/files/test_model/tmp*
+faraday.log
+

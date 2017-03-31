@@ -1,0 +1,3 @@
+source 'http://rubygems.org'
+
+eval_gemfile File.expand_path(File.join(File.dirname(__FILE__), '../server/Gemfile'))

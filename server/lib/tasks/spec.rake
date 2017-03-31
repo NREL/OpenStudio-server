@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,24 +31,22 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
-require 'rspec/core/rake_task'
+if defined?(RSpec)
+  require 'rspec/core/rake_task'
 
-namespace :spec do
-  RSpec::Core::RakeTask.new(:unit) do |t|
-    puts 'Running tests'
-    t.pattern = Dir['spec/*/**/*_spec.rb'].reject { |f| f['/api/v1'] || f['/integration'] }
-    t.rspec_opts = %w(--format CI::Reporter::RSpec)
+  namespace :spec do
+    RSpec::Core::RakeTask.new(:unit) do |t|
+      puts 'Running tests'
+      t.pattern = Dir['spec/*/**/*_spec.rb'].reject { |f| f['/api/v1'] || f['/integration'] }
+      t.rspec_opts = %w(--format CI::Reporter::RSpec)
+    end
+
+    RSpec::Core::RakeTask.new(:integration) do |t|
+      puts 'Running only the integration tests...'
+      t.pattern = 'spec/integration/**/*_spec.rb'
+      t.rspec_opts = %w(--format CI::Reporter::RSpec)
+    end
   end
-
-  RSpec::Core::RakeTask.new(:integration) do |t|
-    puts 'Running only the integration tests...'
-    t.pattern = 'spec/integration/**/*_spec.rb'
-    t.rspec_opts = %w(--format CI::Reporter::RSpec)
-  end
-
-  # RSpec::Core::RakeTask.new(:api) do |t|
-  #  t.pattern = "spec/*/{api/v1}*/**/*_spec.rb"
-  # end
 end

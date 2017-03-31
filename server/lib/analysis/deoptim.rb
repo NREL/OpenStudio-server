@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,13 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
+
+# TODO: Fix this for new queue
 
 # Non Sorting Genetic Algorithm
-class Analysis::Deoptim
-  include Analysis::Core
-  include Analysis::R
+class AnalysisLibrary::Deoptim < AnalysisLibrary::Base
+  include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -78,15 +79,16 @@ class Analysis::Deoptim
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = Rserve::Simpler.new
-    Rails.logger.info 'Setting up R for Batch Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
+    logger.info 'Setting up R for Batch Run'
+    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: fix statically setting the random seed
     @r.converse('set.seed(1979)')
@@ -101,71 +103,68 @@ class Analysis::Deoptim
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting Batch Run')
+    logger.info("Master ip: #{master_ip}")
+    logger.info('Starting Batch Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['generations'].nil? || @analysis.problem['algorithm']['generations'] == 0
-      fail 'Number of generations was not set or equal to zero (must be 1 or greater)'
+    if @analysis.problem['algorithm']['generations'].nil? || (@analysis.problem['algorithm']['generations']).zero?
+      raise 'Number of generations was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['number_of_samples'].nil? || @analysis.problem['number_of_samples'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
+    if @analysis.problem['number_of_samples'].nil? || @analysis.problem['number_of_samples'].zero?
+      raise 'Must have number of samples to discretize the parameter space'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id, @r)
     Rails.logger.info "pivot_array: #{pivot_array}"
     selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+    logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
-    Rails.logger.info 'starting lhs to discretize the variables'
+    logger.info 'starting lhs to discretize the variables'
 
-    lhs = Analysis::R::Lhs.new(@r)
+    lhs = AnalysisLibrary::R::Lhs.new(@r)
     samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['number_of_samples'])
 
     if samples.empty? || samples.size <= 1
-      Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      logger.info 'No variables were passed into the options, therefore exit'
+      raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
     end
 
     # Result of the parameter space will be column vectors of each variable
-    Rails.logger.info "Samples are #{samples}"
+    logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
-    process = nil
     begin
       # Start up the cluster and perform the analysis
-      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
-      Rails.logger.info 'Running initialize worker scripts'
+      logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
-      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes
-
       if cluster.start(worker_ips)
-        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        logger.info "Cluster Started flag is #{cluster.started}"
         # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        Rails.logger.info("variable types are #{var_types}")
+        logger.info("variable types are #{var_types}")
         @r.command(vars: samples.to_dataframe, vartypes: var_types, gen: @analysis.problem['algorithm']['generations']) do
           %{
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
 
@@ -178,19 +177,15 @@ class Analysis::Deoptim
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
-              if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
-              } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
-              }
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               print(paste("R returned system call with:",z))
@@ -199,22 +194,22 @@ class Analysis::Deoptim
             clusterExport(cl,"f")
 
             #g(x) such that x is vector of variable values,
-            #           create a data_point from the vector of variable values x and return the new data point UUID
+            #           create a datapoint from the vector of variable values x and return the new data point UUID
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
 
-              # Call the simulate data point method
+              # Call the simulate datapoint method
               f(z[j])
 
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -260,11 +255,11 @@ class Analysis::Deoptim
             #results <- genoud(g,ncol(vars),pop.size=100,Domains=dom,boundary.enforcement=2,print.level=2,cluster=cl)
             #results <- nsga2NREL(cl=cl, fn=g, objDim=2, variables=vars[], vartype=vartypes, generations=gen, mprob=0.8)
             #results <- sfLapply(vars[,1], f)
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            save(results, file="#{APP_CONFIG['sim_root_path']}/results_#{@analysis.id}.R")
           }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
 
     rescue => e
@@ -276,18 +271,10 @@ class Analysis::Deoptim
       # ensure that the cluster is stopped
       cluster.stop if cluster
 
-      # Kill the downloading of data files process
-      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
-      process.stop if process
-
-      Rails.logger.info 'Running finalize worker scripts'
+      logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
-
-      # Do one last check if there are any data points that were not downloaded
-      Rails.logger.info('Trying to download any remaining files from worker nodes')
-      @analysis.finalize_data_points
 
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
@@ -297,7 +284,7 @@ class Analysis::Deoptim
 
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

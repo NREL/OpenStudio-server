@@ -18,34 +18,22 @@ end
 
 json.data_points do
   json.count DataPoint.count
-  json.na DataPoint.where(download_status: :na).count
-  json.queued DataPoint.where(download_status: :queued).count
-  json.started DataPoint.where(download_status: :started).count
-  json.completed DataPoint.where(download_status: :completed).count
-end
-
-if @mnt_fs
-  json.data_file_system do
-    json.mount_point @mnt_fs.first[:mount_point]
-    json.percent_used @mnt_fs.first[:percent_used]
-    json.mb_free @mnt_fs.first[:mb_free]
-    json.mb_used @mnt_fs.first[:mb_used]
-    json.mb_total @mnt_fs.first[:mb_total]
-  end
-else
-  json.data_file_system
+  json.na DataPoint.where(status: :na).count
+  json.queued DataPoint.where(status: :queued).count
+  json.started DataPoint.where(status: :started).count
+  json.completed DataPoint.where(status: :completed).count
 end
 
 if @server.nil?
   json.server
 else
-  json.server @server, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :valid
+  json.server @server, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :enabled
 end
 
 if @workers.empty?
   json.workers
 else
-  json.workers @workers, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :valid
+  json.workers @workers, :id, :node_type, :ip_address, :hostname, :local_hostname, :user, :cores, :ami_id, :instance_id, :enabled
 end
 
 if @file_systems.nil?

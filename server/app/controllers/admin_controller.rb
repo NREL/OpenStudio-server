@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,12 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 class AdminController < ApplicationController
   def index
+    require 'rubygems'
+    @gems = Gem::Specification.all.map { |g| [g.name, g.version.to_s] }.sort
   end
 
   def backup_database
@@ -52,30 +54,6 @@ class AdminController < ApplicationController
     end
   end
 
-  def clear_database
-    success_1 = false
-    success_2 = false
-
-    logger.info "Working directory is #{Dir.pwd} and I am #{`whoami`}"
-
-    `mongo os_dev --eval "db.dropDatabase();"`
-    if $?.exitstatus == 0
-      success_1 = true
-    end
-
-    # call_rake 'routes' #'db:mongoid:create_indexes'
-    # if $?.exitstatus == 0
-    #   success_2 = true
-    # end
-
-    if success_1 # && success_2
-      redirect_to admin_index_path, notice: 'Database deleted successfully.'
-    else
-      logger.info "Error deleting mongo database: #{success_1}, #{success_2}"
-      redirect_to admin_index_path, notice: 'Error deleting database.'
-    end
-  end
-
   private
 
   #  http://railscasts.com/episodes/127-rake-in-background
@@ -88,17 +66,17 @@ class AdminController < ApplicationController
   def reload_database(database_file)
     success = false
 
-    extract_dir = "/tmp/#{Time.now.to_i}"
+    extract_dir = "#{APP_CONFIG['rails_tmp_path']}/#{Time.now.to_i}"
     FileUtils.mkdir_p(extract_dir)
 
     resp = `tar xvzf #{database_file.tempfile.path} -C #{extract_dir}`
-    if $?.exitstatus == 0
+    if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
-      `mongo os_dev --eval "db.dropDatabase();"`
-      if $?.exitstatus == 0
-        `mongorestore -d os_dev #{extract_dir}/os_dev`
-        if $?.exitstatus == 0
+      `mongo #{Mongoid.default_client.database.name} --eval "db.dropDatabase();"`
+      if $?.exitstatus.zero?
+        `mongorestore -d #{Mongoid.default_client.database.name} #{extract_dir}/#{Mongoid.default_client.database.name}`
+        if $?.exitstatus.zero?
           logger.info 'Restored mongo database'
           success = true
         else
@@ -114,15 +92,15 @@ class AdminController < ApplicationController
     success = false
 
     time_stamp = Time.now.to_i
-    dump_dir = "/tmp/#{file_prefix}_#{time_stamp}"
+    dump_dir = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    resp = `mongodump --db os_dev --out #{dump_dir}`
+    resp = `mongodump --db #{Mongoid.default_client.database.name} --out #{dump_dir}`
 
-    if $?.exitstatus == 0
-      output_file = "/tmp/#{file_prefix}_#{time_stamp}.tar.gz"
-      resp_2 = `tar czf #{output_file} -C #{dump_dir} os_dev`
-      if $?.exitstatus == 0
+    if $?.exitstatus.zero?
+      output_file = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}.tar.gz"
+      resp_2 = `tar czf #{output_file} -C #{dump_dir} #{Mongoid.default_client.database.name}`
+      if $?.exitstatus.zero?
         success = true
       end
     end
@@ -131,7 +109,7 @@ class AdminController < ApplicationController
       send_data File.open(output_file).read, filename: File.basename(output_file), type: 'application/targz; header=present', disposition: 'attachment'
       success = true
     else
-      fail 'could not create dump'
+      raise 'could not create dump'
     end
 
     success

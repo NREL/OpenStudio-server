@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,12 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
-# Non Sorting Genetic Algorithm
-class Analysis::RgenoudLexical
-  include Analysis::Core
-  include Analysis::R
+# TODO: Fix this for new queue
+
+class AnalysisLibrary::RgenoudLexical < AnalysisLibrary::Base
+  include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = {
@@ -77,15 +77,16 @@ class Analysis::RgenoudLexical
     @analysis = Analysis.find(@analysis_id)
 
     # get the analysis and report that it is running
-    @analysis_job = Analysis::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
+    @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # create an instance for R
-    @r = Rserve::Simpler.new
-    Rails.logger.info 'Setting up R for genoud Run'
-    @r.converse('setwd("/mnt/openstudio")')
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
+    logger.info 'Setting up R for genoud Run'
+    @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
     # TODO: deal better with random seeds
     @r.converse("set.seed(#{@analysis.problem['random_seed']})")
@@ -100,19 +101,19 @@ class Analysis::RgenoudLexical
 
     # get the master ip address
     master_ip = ComputeNode.where(node_type: 'server').first.ip_address
-    Rails.logger.info("Master ip: #{master_ip}")
-    Rails.logger.info('Starting genoud Run')
+    logger.info("Master ip: #{master_ip}")
+    logger.info('Starting genoud Run')
 
     # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
     # that the run flag is true.
 
     # TODO: preflight check -- need to catch this in the analysis module
-    if @analysis.problem['algorithm']['maxit'].nil? || @analysis.problem['algorithm']['maxit'] == 0
-      fail 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
+    if @analysis.problem['algorithm']['maxit'].nil? || (@analysis.problem['algorithm']['maxit']).zero?
+      raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
     end
 
-    if @analysis.problem['algorithm']['popsize'].nil? || @analysis.problem['algorithm']['popsize'] == 0
-      fail 'Must have number of samples to discretize the parameter space'
+    if @analysis.problem['algorithm']['popsize'].nil? || (@analysis.problem['algorithm']['popsize']).zero?
+      raise 'Must have number of samples to discretize the parameter space'
     end
 
     # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
@@ -121,69 +122,65 @@ class Analysis::RgenoudLexical
     # end
 
     if @analysis.problem['algorithm']['ppower'] <= 0
-      fail 'P Norm must be non-negative'
+      raise 'P Norm must be non-negative'
     end
 
     ug = @analysis.output_variables.uniq { |v| v['objective_function_group'] }
-    Rails.logger.info "Number of objective function groups are #{ug.size}"
+    logger.info "Number of objective function groups are #{ug.size}"
     if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-      fail 'number of objective functions must equal'
+      raise 'number of objective functions must equal'
     end
 
     pivot_array = Variable.pivot_array(@analysis.id)
     selected_variables = Variable.variables(@analysis.id)
-    Rails.logger.info "Found #{selected_variables.count} variables to perturb"
+    logger.info "Found #{selected_variables.count} variables to perturb"
 
     # discretize the variables using the LHS sampling method
     @r.converse("print('starting lhs to discretize the variables')")
-    Rails.logger.info 'starting lhs to discretize the variables'
+    logger.info 'starting lhs to discretize the variables'
 
-    lhs = Analysis::R::Lhs.new(@r)
+    lhs = AnalysisLibrary::R::Lhs.new(@r)
     samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
 
-    if var_names.empty? || var_names.size < 1
-      Rails.logger.info 'No variables were passed into the options, therefore exit'
-      fail "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+    if var_names.empty? || var_names.empty?
+      logger.info 'No variables were passed into the options, therefore exit'
+      raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
     end
 
-    unless var_types.all? { |t| t.downcase == 'continuous' }
-      Rails.logger.info 'Must have all continous variables to run algorithm, therefore exit'
-      fail "Must have all continous variables to run algorithm.  Found #{var_types}"
+    unless var_types.all? { |t| t.casecmp('continuous').zero? }
+      logger.info 'Must have all continous variables to run algorithm, therefore exit'
+      raise "Must have all continous variables to run algorithm.  Found #{var_types}"
     end
 
-    Rails.logger.info "mins_maxes: #{mins_maxes}"
-    Rails.logger.info "var_names: #{var_names}"
+    logger.info "mins_maxes: #{mins_maxes}"
+    logger.info "var_names: #{var_names}"
 
     # Result of the parameter space will be column vectors of each variable
-    # Rails.logger.info "Samples are #{samples}"
+    # logger.info "Samples are #{samples}"
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
-    process = nil
     begin
       # Start up the cluster and perform the analysis
-      cluster = Analysis::R::Cluster.new(@r, @analysis.id)
+      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure(master_ip)
-        fail 'could not configure R cluster'
+        raise 'could not configure R cluster'
       end
 
       # Initialize each worker node
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Worker node ips #{worker_ips}"
+      logger.info "Worker node ips #{worker_ips}"
 
-      Rails.logger.info 'Running initialize worker scripts'
+      logger.info 'Running initialize worker scripts'
       unless cluster.initialize_workers(worker_ips, @analysis.id)
-        fail 'could not run initialize worker scripts'
+        raise 'could not run initialize worker scripts'
       end
 
-      # Before kicking off the Analysis, make sure to setup the downloading of the files child process
-      process = Analysis::Core::BackgroundTasks.start_child_processes
-
       worker_ips = ComputeNode.worker_ips
-      Rails.logger.info "Found the following good ips #{worker_ips}"
+      logger.info "Found the following good ips #{worker_ips}"
 
       if cluster.start(worker_ips)
-        Rails.logger.info "Cluster Started flag is #{cluster.started}"
+        logger.info "Cluster Started flag is #{cluster.started}"
         # maxit is the max number of iterations to calculate
         # varNo is the number of variables (ncol(vars))
         # popsize is the number of sample points in the variable (nrow(vars))
@@ -193,6 +190,7 @@ class Analysis::RgenoudLexical
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
         @r.command(vartypes: var_types, varnames: var_names, varseps: mins_maxes[:eps], mins: mins_maxes[:min], maxes: mins_maxes[:max], normtype: @analysis.problem['algorithm']['normtype'], ppower: @analysis.problem['algorithm']['ppower'], objfun: @analysis.problem['algorithm']['objective_functions'], gen: @analysis.problem['algorithm']['generations'], popSize: @analysis.problem['algorithm']['popsize'], BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'], boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'], printLevel: @analysis.problem['algorithm']['printlevel'], balance: @analysis.problem['algorithm']['balance'], solutionTolerance: @analysis.problem['algorithm']['solutiontolerance'], waitGenerations: @analysis.problem['algorithm']['waitgenerations'], maxit: @analysis.problem['algorithm']['maxit'], epsilongradient: @analysis.problem['algorithm']['epsilongradient'], factr: @analysis.problem['algorithm']['factr'], pgtol: @analysis.problem['algorithm']['pgtol'], uniquegroups: ug.size) do
           %{
+            # TODO: remove rmongo
             clusterEvalQ(cl,library(RMongo))
             clusterEvalQ(cl,library(rjson))
             clusterEvalQ(cl,library(R.utils))
@@ -219,19 +217,15 @@ class Analysis::RgenoudLexical
 
             #f(x) takes a UUID (x) and runs the datapoint
             f <- function(x){
-              mongo <- mongoDbConnect("#{Analysis::Core.database_name}", host="#{master_ip}", port=27017)
+              mongo <- mongoDbConnect("#{AnalysisLibrary::Core.database_name}", host="#{master_ip}", port=27017)
               flag <- dbGetQueryForKeys(mongo, "analyses", '{_id:"#{@analysis.id}"}', '{run_flag:1}')
               if (flag["run_flag"] == "false" ){
                 stop(options("show.error.messages"="Not TRUE"),"run flag is not TRUE")
               }
               dbDisconnect(mongo)
 
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
-              if ("#{@analysis.use_shm}" == "true"){
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]} --run-shm",sep="")
-              } else {
-                y <- paste(ruby_command," /mnt/openstudio/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
-              }
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/simulate_data_point.rb -a #{@analysis.id} -u ",x," -x #{@options[:run_data_point_filename]}",sep="")
               #print(paste("R is calling system command as:",y))
               z <- system(y,intern=TRUE)
               #print(paste("R returned system call with:",z))
@@ -240,23 +234,23 @@ class Analysis::RgenoudLexical
             clusterExport(cl,"f")
 
             #g(x) such that x is vector of variable values,
-            #           create a data_point from the vector of variable values x and return the new data point UUID
+            #           create a datapoint from the vector of variable values x and return the new datapoint UUID
             #           create a UUID for that data_point and put in database
             #           call f(u) where u is UUID of data_point
             g <- function(x){
-              ruby_command <- "cd /mnt/openstudio && #{RUBY_BIN_DIR}/bundle exec ruby"
+              ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
 
               # convert the vector to comma separated values
               w = paste(x, collapse=",")
-              y <- paste(ruby_command," /mnt/openstudio/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
+              y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/#{@options[:create_data_point_filename]} -a #{@analysis.id} -v ",w, sep="")
               z <- system(y,intern=TRUE)
               j <- length(z)
               z
 
-              # Call the simulate data point method
+              # Call the simulate datapoint method
               f(z[j])
 
-              data_point_directory <- paste("/mnt/openstudio/analysis_#{@analysis.id}/data_point_",z[j],sep="")
+              data_point_directory <- paste("#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/data_point_",z[j],sep="")
 
               # save off the variables file (can be used later if number of vars gets too long)
               write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
@@ -380,33 +374,25 @@ class Analysis::RgenoudLexical
             print(paste("par:",results$par))
             print(paste("value:",results$value))
             flush.console()
-            save(results, file="/mnt/openstudio/results_#{@analysis.id}.R")
+            save(results, file="#{APP_CONFIG['sim_root_path']}/results_#{@analysis.id}.R")
           }
         end
       else
-        fail 'could not start the cluster (most likely timed out)'
+        raise 'could not start the cluster (most likely timed out)'
       end
 
-      Rails.logger.info 'Running finalize worker scripts'
+      logger.info 'Running finalize worker scripts'
       unless cluster.finalize_workers(worker_ips, @analysis.id)
-        fail 'could not run finalize worker scripts'
+        raise 'could not run finalize worker scripts'
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      Rails.logger.error log_message
+      logger.error log_message
       @analysis.status_message = log_message
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
       cluster.stop if cluster
-
-      # Kill the downloading of data files process
-      Rails.logger.info('Ensure block of analysis cleaning up any remaining processes')
-      process.stop if process
-
-      # Do one last check if there are any data points that were not downloaded
-      Rails.logger.info('Trying to download any remaining files from worker nodes')
-      @analysis.finalize_data_points
 
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
@@ -417,7 +403,7 @@ class Analysis::RgenoudLexical
       end
       @analysis.save!
 
-      Rails.logger.info "Finished running analysis '#{self.class.name}'"
+      logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
 

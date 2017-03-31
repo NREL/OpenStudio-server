@@ -1,9 +1,16 @@
 # OpenStudio Server
 
+[![Build Status][circleci-img]][circleci-url] [![Coverage Status][coveralls-img]][coveralls-url]
+OSX Build: [![Build Status][travis-img]][travis-url]
+Windows Build (Under Development): [![Build status][appveyor-img]][appveyor-url]
+
+
 ## Description
 The preferred development approach for this application is to use Vagrant to provision and test the server.  To see the server instructions go to [OpenStudio Rails Application](./openstudio-server/README.md)
 
 ## Instructions
+
+### Vagrant
 
 - Install [Vagrant] *1.8.5*, [VirtualBox] *5.1.2*, and [ChefDK]
  
@@ -122,10 +129,19 @@ git config --global url."https://".insteadOf git://
 - NOTE: THIS STEP WILL BE CHANGED SHORTLY: Follow the instructions found [here](./vagrant) to run the [create_vms.rb](./vagrant/create_vms.rb) script. This will build the AMIs and register them with Amazon EC2.
 - Check the [available OSServer AMI json](http://s3.amazonaws.com//openstudio-resources/server/api/v2/amis.json) regularly to see when the build becomes available
 
-### Other Notes
+### Official AMI Generation
 
 For OpenStudio PAT, Alex Swindler has to copy over the AMI ID from this file: http://developer.nrel.gov/downloads/buildings/openstudio/api/amis_v2.json to this file: http://developer.nrel.gov/downloads/buildings/openstudio/rsrc/amis.json
 
 ## Questions?
 
 Please contact @rhorsey, @bball, or @nllong with any question regarding this project. Thanks for you interest!
+
+[circleci-img]: https://circleci.com/gh/NREL/OpenStudio-server/tree/dockerize.svg?style=svg
+[circleci-url]: https://circleci.com/gh/NREL/OpenStudio-server
+[coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=dockerize
+[coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
+[travis-img]: https://travis-ci.org/NREL/OpenStudio-server.svg?branch=dockerize-travis
+[travis-url]: https://travis-ci.org/NREL/OpenStudio-server
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/j7hqgh2p7bae9xn8/branch/dockerize-appveyor?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/rHorsey/openstudio-server/branch/dockerize-appveyor

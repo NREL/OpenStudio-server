@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 class PreflightImage
   include Mongoid::Document
@@ -42,7 +42,7 @@ class PreflightImage
 
   has_mongoid_attached_file :image,
                             url: '/assets/variables/:id/:style/:basename.:extension',
-                            path: ':rails_root/public/assets/variables/:id/:style/:basename.:extension',
+                            path: "#{APP_CONFIG['server_asset_path']}/assets/variables/:id/files/:style/:basename.:extension",
                             styles: {
                               original: ['1920x1680>', :png],
                               thumb: ['150x150#', :png],

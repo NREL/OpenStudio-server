@@ -1,0 +1,5 @@
+# DO NOT MODIFY THIS FILE
+# Make sure to add/remove cops from the ../.rubocop.yml file.
+
+inherit_from:
+  - ../.rubocop.yml

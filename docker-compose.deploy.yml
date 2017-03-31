@@ -1,0 +1,37 @@
+# Version used to deploy the latest version of the server from docker hub.
+
+version: '2'
+services:
+  db:
+    image: mongo:latest
+  web:
+    image: nrel/openstudio-server:latest
+    links:
+      - db
+      - rserve
+    ports:
+      - "8080:80"
+    volumes:
+      - osdata:/mnt/openstudio
+  web-background:
+    image: nrel/openstudio-server:latest
+    links:
+      - db
+      - rserve
+    volumes:
+      - osdata:/mnt/openstudio
+    command: bin/delayed_job -i server --queues=analyses,background run
+  worker:
+    image: nrel/openstudio-server:latest
+    links:
+      - web
+      - db
+      - rserve
+    command: bin/delayed_job -i worker --queue=simulations run
+  rserve:
+    image: nrel/openstudio-rserve:latest
+    volumes:
+      - osdata:/mnt/openstudio
+volumes:
+  osdata:
+    external: true

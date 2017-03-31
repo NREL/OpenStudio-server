@@ -1,0 +1,53 @@
+# Docker Compose creates multiple containers on a single machine.
+# run `docker-compose up` to create and run/link the containers
+version: '2'
+services:
+  db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+  web:
+    build:
+      context: .
+      args:
+        rails_env: docker
+    image: nrel/openstudio-server:latest
+    links:
+      - db
+      - rserve
+    ports:
+      - "8080:80"
+    volumes:
+      - osdata:/mnt/openstudio
+  web-background:
+    build:
+      context: .
+      args:
+        rails_env: docker
+    image: nrel/openstudio-server:latest
+    links:
+      - db
+      - rserve
+    volumes:
+      - osdata:/mnt/openstudio
+    command: bin/delayed_job -i server --queues=analyses,background run
+  worker:
+    build:
+      context: .
+      args:
+        rails_env: docker
+    image: nrel/openstudio-server:latest
+    links:
+      - web
+      - db
+      - rserve
+    command: bin/delayed_job -i worker --queue=simulations run
+  rserve:
+    build: ./docker/R
+    image: nrel/openstudio-rserve:latest
+    volumes:
+      - osdata:/mnt/openstudio
+volumes:
+  osdata:
+    external: true
+

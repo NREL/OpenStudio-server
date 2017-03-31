@@ -1,5 +1,5 @@
 OpenStudio Server
-==================================
+=================
 
 Version 1.21.16
 ---------------
@@ -17,9 +17,14 @@ Version 1.19.1-rc5
 ------------------
 * OpenStudio 1.12.2.462ae9e746
 
-Version 1.19.1-rc4
-------------------
-* OpenStudio 1.12.2.462ae9e746
+Version 2.0.0-PAT Pre-Releases
+------------------------------
+* Added in a version of the Meta-CLI to the root bin dir to allow for automated packaging, deployment (both local and remote) and analysis submission
+* Updated gems to ensure the OpenStudio Analysis Framework can be deployed together through this repo
+* Added in tzinfo-data for Windows deployment support
+* Requires use of RubyGems version ~>2.5, note that the 2.6 series has a breaking bug for Ruby 2.0
+* Using cross-platform-ed delayed_job to manage analysis, backaground, and worker queues
+* Hardcoded the Meta-CLI in the root bin dir to use the local server code, allowing for the code to be self-contained
 
 Version 1.19.1-rc3
 ------------------
@@ -115,7 +120,7 @@ Version 1.12.9
 
 Version 1.12.7
 --------------
-* Render JSON and HTML reports from data points.
+* Render JSON and HTML reports from datapoints.
 * Add new R libraries for worker nodes. Allow measures to run R scripts.
 * OpenStudio 1.8.5
 
