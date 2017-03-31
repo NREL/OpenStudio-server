@@ -1,79 +1,116 @@
 source 'http://rubygems.org'
+ruby '2.2.4'
 
-gem 'rails', '3.2.22'
-gem 'rake', '< 11.0'
+# unclear if this will actually force this version of rubygems to be used
+# if not, run the following command to change system gem version:
+# gem update --system 2.4.5
+gem 'rubygems-update', '2.4.5'
+
+gem 'rails', '4.2'
+gem 'rake', '~> 11.2'
+
+# added for support of the project rakefile
+gem 'colored'
+
 # data modules
-gem 'json'
+gem 'json', '1.8.1'
 gem 'jbuilder'
-gem 'rubyzip'
+gem 'nokogiri', '~> 1.6.5'
+gem 'rubyzip', '~> 1.2.0'
+gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 3.1.6'
-# gem 'mongoid', '~> 4.0'
-gem 'paperclip', '~> 4.1.1'
+gem 'mongoid', '~> 5.1.0'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
-# gem 'mongoid-locker', '~> 0.3'
+gem 'paperclip', '~> 4.3'
 
 # R
 gem 'rserve-simpler'
 
 # net-*
-gem 'net-http-persistent'
+gem 'net-http-persistent', '< 3.0.0'
 gem 'net-scp'
-gem 'net-ssh'
 gem 'net-sftp'
-
-# javascript
-gem 'libv8', :platforms => :ruby
-gem 'execjs'
-gem 'therubyracer', :platforms => :ruby
+gem 'net-ssh'
 
 # other useful gems
 gem 'parallel'
 gem 'sys-filesystem'
 
-# Gems used only for assets and not required
-# in production environments by default.
-group :assets do
-  # sass versions above 3.2.10 giving 'text file busy' error on vagrant windows
-  gem 'sass', '3.2.10'
-  gem 'sass-rails', '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
-  gem 'bootstrap-sass', '~> 2.3.2.2'
-  gem 'uglifier', '>= 1.0.3'
-end
-
-gem 'jquery-rails'
-
-group :test do
-  gem 'rspec'
-  gem 'rspec-rails', '~> 2.0'
-  gem 'mongoid-rspec'
-  gem 'rspec-html-matchers'
-  gem 'factory_girl_rails'
-  gem 'ci_reporter', '~> 1.9.0'
-
-  # these two openstudio gems are needed for starting up the cluster
-  # and running the analysis in the integration tests
-  gem 'openstudio-aws'
-  gem 'openstudio-analysis'
-end
-
 # web ui
 # gem 'will_paginate'
+gem 'jquery-rails'
 gem 'kaminari'
+gem 'kaminari-mongoid'
 
 # job queuing
-gem 'delayed_job_mongoid'
 gem 'daemons'
-gem 'childprocess'
+gem 'delayed_job_mongoid'
 
 # http(s) requests
-gem 'faraday'
+gem 'faraday' # TODO: can this be deprecated?
 
-group :development do
-  gem 'sextant' # navigate to /rails/routes to see routes
+# Gems used only for assets and not required
+# in production environments by default.
+gem 'bootstrap-sass'
+gem 'coffee-rails'
+gem 'sass'
+gem 'sass-rails'
+gem 'sprockets-rails'
+gem 'uglifier'
+
+# For workers - and other dependencies for measures
+## Commonly update gems for testing and development
+
+gem 'openstudio-workflow', '= 1.2.1'
+# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
+# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
+# gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
+
+
+gem 'openstudio-analysis', '1.0.0.rc18'
+# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'multi-seed-support'
+# gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
+
+gem 'openstudio-standards', '= 0.1.13'
+
+## End commonly updated gems
+
+gem 'openstudio-aws', '0.5.0.rc8'
+
+gem 'libxml-ruby'
+gem 'msgpack', '~> 1.0'
+gem 'multi_json'
+gem 'oj', '=2.17.5' # Next release (2.18.0) doesn't install on Windows
+gem 'os'
+gem 'rest-client', '1.8.0' # rest-client 2.0.0 breaks the multipart posting of the zip files.
+
+gem 'rubocop'
+
+# Docker required js runtime
+group :docker do
+  gem 'execjs'
+  gem 'libv8'
+  gem 'therubyracer', platforms: :ruby
+end
+
+group :development, :test do
   gem 'better_errors'
   gem 'meta_request'
-  gem 'ruby-prof'
+  gem 'sextant' # navigate to /rails/routes to see routes
+
+  gem 'capybara'
+  gem 'coveralls', require: false
+  gem 'rspec', '~> 3.4'
+  gem 'rspec-rails'
+  gem 'rspec-retry'
+  gem 'ruby-prof', '~> 0.15'
+  gem 'selenium-webdriver'
+
+  gem 'rubocop-checkstyle_formatter', require: false
+
+  gem 'ci_reporter'
+  gem 'factory_girl_rails'
+  gem 'mongoid-rspec'
+  gem 'rspec-html-matchers', '0.8.1'
 end

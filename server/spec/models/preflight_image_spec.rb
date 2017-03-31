@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,14 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
-describe PreflightImage do
+require 'rails_helper'
+
+RSpec.describe PreflightImage, type: :model do
   before :all do
     # delete all the analyses
-    Project.delete_all
-    Analysis.delete_all
-    DataPoint.delete_all
+    Project.destroy_all
     FactoryGirl.create(:project_with_analyses).analyses
 
     @project = Project.first

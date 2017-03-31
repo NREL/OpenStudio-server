@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,20 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
-# Allow the jobs to run for up to 1 week.  If this is ever hit, then we have
-# other problems.
+# Allow the jobs to run for up to 1 week.  If this is ever hit, then we have other problems.
+# Delayed::Worker.destroy_failed_jobs = false
+# Delayed::Worker.sleep_delay = 60
+# Delayed::Worker.max_attempts = 3
+
 Delayed::Worker.max_run_time = 168.hours
+# Delayed::Worker.read_ahead = 10
+# Delayed::Worker.default_queue_name = 'default'
+# Delayed::Worker.delay_jobs = !Rails.env.test?
+Delayed::Worker.raise_signal_exceptions = :term
+Delayed::Worker.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'delayed_job.log'))
+
+# require 'delayed/plugins/heartbeat'
+Delayed::Worker.plugins << Delayed::Heartbeat::Plugin
+# Delayed::Worker.plugins << Delayed::TaggedLogging::Plugin

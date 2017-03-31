@@ -5,7 +5,7 @@ erb_regex = /^<%.*#\*{79}.*#\*{79}.%>$/m
 js_regex = /^\/\* @preserve.*Copyright.*license.{2}\*\//m
 
 ruby_header_text = <<EOT
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,13 @@ ruby_header_text = <<EOT
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 EOT
 ruby_header_text.strip!
 
 erb_header_text = <<EOT
 <%
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ erb_header_text = <<EOT
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 %>
 EOT
 erb_header_text.strip!
@@ -91,22 +91,22 @@ EOT
 js_header_text.strip!
 
 paths = [
-  { glob: "lib/openstudio-server/**/*.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/app/**/*.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/config/environments/*.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/config/initializers/delayed_job_config.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/config/initializers/ruby_path.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/lib/Rscripts/*.R", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/lib/analysis/**/*.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/lib/openstudio_server/**/*.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/lib/tasks/**/*.rake", license: ruby_header_text, regex: ruby_regex},
-  { glob: "server/spec/**/*.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "vagrant/**/*.rb", license: ruby_header_text, regex: ruby_regex},
-  { glob: "worker-nodes/*.rb", license: ruby_header_text, regex: ruby_regex},
+  { glob: 'lib/openstudio-server/**/*.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/app/**/*.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/config/environments/*.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/config/initializers/delayed_job_config.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/config/initializers/ruby_path.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/lib/Rscripts/*.R', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/lib/analysis_library/**/*.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/lib/openstudio_server/**/*.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/lib/tasks/**/*.rake', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'server/spec/**/*.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'vagrant/**/*.rb', license: ruby_header_text, regex: ruby_regex },
+  { glob: 'worker-nodes/*.rb', license: ruby_header_text, regex: ruby_regex },
   # erb
-  { glob: "server/app/views/**/*.html.erb", license: erb_header_text, regex: erb_regex},
+  { glob: 'server/app/views/**/*.html.erb', license: erb_header_text, regex: erb_regex },
   # js
-  { glob: "server/app/views/**/*.js.erb", license: js_header_text, regex: js_regex},
+  { glob: 'server/app/views/**/*.js.erb', license: js_header_text, regex: js_regex }
 ]
 
 paths.each do |path|
@@ -115,15 +115,15 @@ paths.each do |path|
 
     f = File.read(file)
     if f =~ path[:regex]
-      puts "  License found -- updating"
-      File.open(file, 'w') { |write| write << f.gsub(path[:regex], path[:license])}
+      puts '  License found -- updating'
+      File.open(file, 'w') { |write| write << f.gsub(path[:regex], path[:license]) }
     else
-      puts "  No license found -- adding"
+      puts '  No license found -- adding'
       if f =~ /#!/
-        puts "  CANNOT update file automatically"
+        puts '  CANNOT update file automatically'
         next
       end
-      File.open(file, 'w') { |write| write << f.insert(0, path[:license] + "\n\n")}
+      File.open(file, 'w') { |write| write << f.insert(0, path[:license] + "\n\n") }
     end
   end
 end

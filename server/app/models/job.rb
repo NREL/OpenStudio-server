@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 class Job
   include Mongoid::Document
@@ -51,7 +51,7 @@ class Job
 
   belongs_to :analysis
 
-  index({ id: 1 }, unique: true)
+  index(id: 1)
   index(created_at: 1)
   index(analysis_id: 1)
   index(analysis_id: 1, index: 1, analysis_type: 1)

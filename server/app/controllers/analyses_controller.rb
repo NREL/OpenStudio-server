@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,16 +31,16 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 require 'zip'
 
 class AnalysesController < ApplicationController
-  before_filter :set_algorithm_results_path, only: [:show, :download_algorithm_results_zip]
+  before_action :set_algorithm_results_path, only: [:show, :download_algorithm_results_zip]
 
   def set_algorithm_results_path
     @analysis = Analysis.find(params[:id])
-    @algorithm_results_path = "/mnt/openstudio/analysis_#{@analysis.id}/downloads/"
+    @algorithm_results_path = @analysis ? "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/downloads/" : ''
   end
 
   # GET /analyses
@@ -101,11 +101,8 @@ class AnalysesController < ApplicationController
 
       # TODO: this is going to be slow because it returns the entire datapoint for each of these queries
       @completed_sims = @analysis.search(params[:completed_search], 'completed', @completed_page, @view_all).page(@completed_page).per(per_page)
-
       @started_sims = @analysis.search(params[:started_search], 'started', @started_page, @view_all).page(@started_page).per(per_page)
-
-      @queued_sims =  @analysis.search(params[:queued_search], 'queued', @queued_page, @view_all).page(@queued_page).per(per_page)
-
+      @queued_sims = @analysis.search(params[:queued_search], 'queued', @queued_page, @view_all).page(@queued_page).per(per_page)
       @na_sims = @analysis.search(params[:na_search], 'na', @na_page, @view_all).page(@na_page).per(per_page)
 
       # Is this needed?
@@ -160,9 +157,10 @@ class AnalysesController < ApplicationController
   # POST /analyses.json
   def create
     project_id = params[:project_id]
-    params[:analysis].merge!(project_id: project_id)
+    params = analysis_params
+    params[:project_id] = project_id
 
-    @analysis = Analysis.new(params[:analysis])
+    @analysis = Analysis.new(params)
 
     # Need to pull out the variables that are in this analysis so that we can stitch the problem
     # back together when it goes to run
@@ -229,16 +227,15 @@ class AnalysesController < ApplicationController
   def action
     @analysis = Analysis.find(params[:id])
     logger.info("action #{params.inspect}")
-    params[:analysis_type].nil? ? @analysis_type = 'batch_run' : @analysis_type = params[:analysis_type]
+    @analysis_type = params[:analysis_type].nil? ? 'batch_run' : params[:analysis_type]
 
-    logger.info("without delay was set #{params[:without_delay]} with class #{params[:without_delay].class}")
     options = params.symbolize_keys # read the defaults from the HTTP request
     options[:run_data_point_filename] = params[:run_data_point_filename] if params[:run_data_point_filename]
 
     logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
 
     if params[:analysis_action] == 'start'
-      params[:without_delay].to_s == 'true' ? no_delay = true : no_delay = false
+      no_delay = params[:without_delay].to_s == 'true' ? true : false
       res = @analysis.run_analysis(no_delay, @analysis_type, options)
       result = {}
       if res[0]
@@ -283,119 +280,94 @@ class AnalysesController < ApplicationController
 
   # version this in order to allow for analyses/status.json to return all the analyses with the status
   # @param :id [String] The ID of the specific analysis to get the status
-  # @param :jobs [String] Constraint on the data point completion (e.g. started, queued, completed)
+  # @param :jobs [String] Constraint on the datapoint completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
-    analysis_only_fields = [:status, :analysis_type, :jobs]
-    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :download_status]
+    analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline14]
+    data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :name]
 
     job_statuses = params[:jobs] ? [params[:jobs]] : DataPoint.status_states
     # analysis_states = params[:state] ? [params[:state]] : Analyses.status_states
 
-    if params[:version] == '2'
-      logger.info 'Version 2 of analyses/status'
-      @analyses = params[:id] ? Analysis.where(id: params[:id]).only(analysis_only_fields) : Analysis.all.only(analysis_only_fields)
+    logger.info 'Version 2 of analyses/status'
+    @analyses = params[:id] ? Analysis.where(id: params[:id]).only(analysis_only_fields) : Analysis.all.only(analysis_only_fields)
 
-      logger.info "there are #{@analyses.size} analyses"
+    logger.info "there are #{@analyses.size} analyses"
 
-      respond_to do |format|
-        format.json do
-          render json: {
-            analyses: @analyses.map do |a|
-              {
-                _id: a.id,
-                id: a.id,
-                status: a.status,
-                analysis_type: a.analysis_type,
-                jobs: a.jobs.order_by(:index.asc).map do |j|
-                        {
-                          index: j.index,
-                          analysis_type: j.analysis_type,
-                          status: j.status,
-                          status_message: j.status_message
-                        }
-                      end,
-                data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
-                               {
-                                 _id: dp.id,
-                                 id: dp.id,
-                                 analysis_id: dp.analysis_id,
-                                 status: dp.status,
-                                 final_message: dp.status_message,
-                                 download_status: dp.download_status
-                               }
-                             end
-              }
-            end
-
+    respond_to do |format|
+      format.json do
+        data = @analyses.map do |a|
+          {
+            _id: a.id,
+            id: a.id,
+            status: a.status,
+            analysis_type: a.analysis_type,
+            run_flag: a.run_flag,
+            exit_on_guideline14: a.exit_on_guideline14,
+            jobs: a.jobs.order_by(:index.asc).map do |j|
+                    {
+                      index: j.index,
+                      analysis_type: j.analysis_type,
+                      status: j.status,
+                      status_message: j.status_message
+                    }
+                  end,
+            data_points: a.data_points.where(:status.in => job_statuses).only(data_point_only_fields).map do |dp|
+                           {
+                             _id: dp.id,
+                             id: dp.id,
+                             name: dp.name,
+                             analysis_id: dp.analysis_id,
+                             status: dp.status,
+                             status_message: dp.status_message
+                           }
+                         end
           }
         end
-      end
 
-    else
-      @analysis = Analysis.where(id: params[:id])
-
-      if @analysis.size > 1
-        respond_to do |format|
-          format.json do
-            render json: { error: 'Error trying to get status of more than one Analysis. Try version 2 of /analyses/status.json?version=2' }, status: :unprocessable_entity
-          end
-        end
-      elsif @analysis.size == 0
-        respond_to do |format|
-          format.json do
-            render json: {}
-          end
-        end
-      else
-        @analysis = @analysis.first
-        dps = nil
-        if params[:jobs]
-          dps = @analysis.data_points.where(status: params[:jobs]).only(data_point_only_fields)
+        if data.size == 1
+          render json: {
+            analysis: data.first
+          }
         else
-          dps = @analysis.data_points.only(data_point_only_fields)
-        end
-
-        respond_to do |format|
-          #  format.html # new.html.erb
-          format.json do
-            render json: {
-              analysis: {
-                _id: @analysis.id,
-                id: @analysis.id,
-                status: @analysis.status,
-                analysis_type: @analysis.analysis_type,
-                jobs: @analysis.jobs.order_by(:index.asc)
-              },
-              data_points: dps.map do |dp|
-                             {
-                               _id: dp.id,
-                               id: dp.id,
-                               status: dp.status,
-                               final_message: dp.status_message,
-                               download_status: dp.download_status
-                             }
-                           end
-            }
-          end
+          render json: {
+            analyses: data
+          }
         end
       end
     end
   end
 
-  def download_status
+  # GET /analyses/1/download_result_file
+  def download_result_file
     @analysis = Analysis.find(params[:id])
 
-    dps = nil
-    if params[:downloads].nil?
-      dps = @analysis.data_points.where(download_status: 'completed')
+    file = @analysis.result_files.where(attachment_file_name: params[:filename]).first
+    if file && file.attachment && File.exist?(file.attachment.path)
+      file_data = File.read(file.attachment.path)
+      disposition = ['application/json', 'text/plain', 'text/html'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
+      send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
     else
-      dps = @analysis.data_points.where(download_status: params[:downloads])
+      respond_to do |format|
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
+        format.html { redirect_to @analysis, notice: "Result file '#{params[:filename]}' does not exist. It probably was deleted from the file system." }
+      end
     end
+  end
 
-    respond_to do |format|
-      #  format.html # new.html.erb
-      format.json { render json: { analysis: { status: @analysis.status }, data_points: dps.map { |k| { _id: k.id, status: k.status, download_status: k.download_status } } } }
+  # GET /analyses/1/download_result_file
+  def download_seed_zip
+    @analysis = Analysis.find(params[:id])
+
+    file = @analysis.seed_zip
+    if file && File.exist?(file.path)
+      file_data = File.read(file.path)
+      send_data file_data, filename: File.basename(file.original_filename), type: file.content_type, disposition: 'attachment'
+    else
+      respond_to do |format|
+        format.json { render json: { status: 'error', error_message: 'could not find result file' }, status: :unprocessable_entity }
+        format.html { redirect_to @analysis, notice: 'Seed zip does not exist. It probably was deleted from the file system.' }
+      end
     end
   end
 
@@ -418,7 +390,17 @@ class AnalysesController < ApplicationController
   def debug_log
     @analysis = Analysis.find(params[:id])
 
-    @rserve_log = File.read(File.join(Rails.root, 'log', 'Rserve.log'))
+    @rserve_log = nil
+    rserve_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'Rserve.log')
+    if File.exist? rserve_file
+      @rserve_log = File.read(rserve_file)
+    end
+
+    @snow_log = nil
+    snow_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'snow.log')
+    if File.exist? snow_file
+      @snow_log = File.read(snow_file)
+    end
 
     exclude_fields = [:_id, :user, :password]
     @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
@@ -430,6 +412,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # TODO: Check if we can delete this!
   def new_view
     @analysis = Analysis.find(params[:id])
 
@@ -446,32 +429,49 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Parallel Coordinates plot
+  # TODO: rename this def with underscore
   def plot_parallelcoordinates
     @analysis = Analysis.find(params[:id])
     @saved_paretos = @analysis.paretos
+    @include_all = false
 
     # variables for chart
-    @pareto_data_points = []
-    @pareto_name = ''
+    @pareto_data_points = {}
+    @pareto_names = []
+    @paretos = []
 
     # variables represent the variables we want graphed
     @visualizes = get_plot_variables(@analysis)
     @variables = params[:variables] ? params[:variables] : @visualizes.map(&:name)
+    # pareto_series represent the paretos to include in the chart
+    @pareto_series = params[:paretos] ? params[:paretos] : []
+
+    @pareto_series.each do |p|
+      temp_pareto = Pareto.find(p)
+      @paretos << temp_pareto
+      @pareto_data_points[p] = temp_pareto.data_points
+      @pareto_names << temp_pareto.name
+    end
+
+    # include all data?
+    logger.info("all_data param: #{params[:all_data]}")
+    if (!params[:all_data].nil? && params[:all_data]) == 'true' || @pareto_series.empty?
+      @include_all = true
+    end
 
     # figure out actions
-    if params[:commit] && params[:commit] == 'All Data'
-      # don't do pareto
+    # if params[:commit] && params[:commit] == 'All Data'
+    # don't do pareto
 
-    else
-      # check for pareto id
-      if params[:pareto]
-        @pareto = Pareto.find(params[:pareto])
-        @pareto_data_points = @pareto.data_points
-        @pareto_name = @pareto.name
-      end
+    # else
+    # check for pareto id
+    # if params[:pareto]
+    # @pareto = Pareto.find(params[:pareto])
+    # @pareto_data_points = @pareto.data_points
+    # @pareto_name = @pareto.name
+    # end
 
-    end
+    # end
 
     respond_to do |format|
       format.html # plot_parallelcoordinates.html.erb
@@ -495,16 +495,16 @@ class AnalysesController < ApplicationController
     if params[:variables].nil?
       @variables << @plotvars[0].name << @plotvars[1].name
     else
-      if params[:variables][:x]
-        @variables << params[:variables][:x]
-      else
-        @variables << @plotvars[0].name
-      end
-      if params[:variables][:y]
-        @variables << params[:variables][:y]
-      else
-        @variables << @plotvars[0].name
-      end
+      @variables << if params[:variables][:x]
+                      params[:variables][:x]
+                    else
+                      @plotvars[0].name
+                    end
+      @variables << if params[:variables][:y]
+                      params[:variables][:y]
+                    else
+                      @plotvars[0].name
+                    end
     end
 
     # load a pareto by id
@@ -516,7 +516,6 @@ class AnalysesController < ApplicationController
 
     # calculate pareto or update chart?
     if params[:commit] && params[:commit] == 'Calculate Pareto Front'
-      logger.info "PARETO! COMMIT VALUES IS: #{params[:commit]}"
       # set variable for view
       @pareto = true
       # keep these pts in a variable, but mainly for quick debug
@@ -534,21 +533,20 @@ class AnalysesController < ApplicationController
       @pareto_data_points = params[:data_points]
 
       # save
-      pareto = Pareto.new
-      pareto.analysis = @analysis
-      pareto.x_var = params[:x_var]
-      pareto.y_var = params[:y_var]
-      pareto.name = params[:name]
-      pareto.data_points = params[:data_points]
-      if pareto.save!
+      @new_pareto = Pareto.new
+      @new_pareto.analysis = @analysis
+      @new_pareto.x_var = params[:x_var]
+      @new_pareto.y_var = params[:y_var]
+      @new_pareto.name = params[:name]
+      @new_pareto.data_points = params[:data_points]
+      if @new_pareto.save
+        logger.info('--pareto is saved--')
         @pareto_saved = true
         flash[:notice] = 'Pareto saved!'
       else
-        flash[:notice] = 'The pareto front could not be saved.'
+        flash[:error] = "The pareto front could not be saved: #{@new_pareto.errors.full_messages}"
       end
     end
-
-    logger.info("PARAMS!! #{params}")
 
     respond_to do |format|
       format.html # plot_xy.html.erb
@@ -573,7 +571,7 @@ class AnalysesController < ApplicationController
     # calculate indexes of the unique entries, not the unique entries themselves
     no_dup_indexes = []
     cum_min_arr.each_with_index do |n, i|
-      if i == 0
+      if i.zero?
         no_dup_indexes << i
       else
         if n != cum_min_arr[i - 1]
@@ -593,6 +591,17 @@ class AnalysesController < ApplicationController
     pareto_points
   end
 
+  def download_selected_datapoints
+    @analysis = Analysis.find(params[:id])
+    logger.info("DPS: #{params[:dps]}")
+    if params[:dps]
+      # get datapoints (make array)
+      @datapoint_ids = params[:dps].split(',')
+    end
+    # TODO: what do you actually want returned here?
+    write_and_send_rdata(@analysis, @datapoint_ids)
+  end
+
   # Scatter plot
   def plot_scatter
     @analysis = Analysis.find(params[:id])
@@ -605,16 +614,16 @@ class AnalysesController < ApplicationController
   # Radar plot (single datapoint, must have objective functions)
   def plot_radar
     @analysis = Analysis.find(params[:id])
-    if params[:datapoint_id]
-      @datapoint = DataPoint.find(params[:datapoint_id])
-    else
+    @datapoint = if params[:datapoint_id]
+                   DataPoint.find(params[:datapoint_id])
+                 else
 
-      if @analysis.analysis_type == 'sequential_search'
-        @datapoint = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
-      else
-        @datapoint = @analysis.data_points.all.order_by(:run_end_time.desc).first
-      end
-    end
+                   @datapoint = if @analysis.analysis_type == 'sequential_search'
+                                  @analysis.data_points.all.order_by(:iteration.asc, :sample.asc).last
+                                else
+                                  @analysis.data_points.all.order_by(:run_end_time.desc).first
+                                end
+                 end
 
     respond_to do |format|
       format.html # plot_radar.html.erb
@@ -657,14 +666,6 @@ class AnalysesController < ApplicationController
   def page_data
     @analysis = Analysis.find(params[:id])
 
-    # once we know that for all the buildings.
-    # @time_zone = "America/Denver"
-    # @data.each do |d|
-    #  time, tz_abbr = Util::Date.fake_zone_in_utc(d[:time].to_i / 1000, @time_zone)
-    #  d[:fake_tz_time] = time.to_i * 1000
-    #  d[:tz_abbr] = tz_abbr
-    # end
-
     respond_to do |format|
       format.json do
         fields = [
@@ -678,7 +679,6 @@ class AnalysesController < ApplicationController
           :results,
           :run_start_time,
           :run_end_time,
-          :openstudio_datapoint_file_name,
           :output_variables
         ]
 
@@ -706,7 +706,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     unless @analysis.seed_zip.nil?
-      send_data File.open(@analysis.seed_zip.path).read, filename: 'analysis.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
+      send_data File.open(@analysis.seed_zip.path, 'rb').read, filename: 'analysis.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
     end
   end
 
@@ -852,13 +852,13 @@ class AnalysesController < ApplicationController
       or_qry << { :"#{k}" => v } if v
     end
     variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry)
-                .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
+                        .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].tr('.', '|')] }]
     # logger.info "Variable name map is #{variable_name_map}"
 
-    # logger.info 'looking for data points'
+    # logger.info 'looking for datapoints'
 
     # This map/reduce method is much faster than trying to do all this munging via mongoid/json/hashes. The concept
     # below is to map the inputs/outputs to a flat hash.
@@ -903,15 +903,16 @@ class AnalysesController < ApplicationController
       }
     }
 
-    # Eventaully use this where the timestamp is processed as part of the request to save time
+    # Eventually use this where the timestamp is processed as part of the request to save time
     # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
-    if datapoint_id
-      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
+    plot_data = if datapoint_id
+                  DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
                                   status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
-    else
-      plot_data = DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                  .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
-    end
+                else
+                  DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
+                           .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                end
+
     logger.info "finished fixing up data: #{Time.now - start_time}"
 
     # TODO: how to handle to sorting by iteration?
@@ -959,11 +960,11 @@ class AnalysesController < ApplicationController
     variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
   end
 
-  def write_and_send_csv(analysis)
+  def write_and_send_csv(analysis, datapoint_ids = nil)
     require 'csv'
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_analysis_data(analysis, nil, export: true)
+    variables, data = get_analysis_data(analysis, datapoint_ids, export: true)
     static_fields = %w(name _id run_start_time run_end_time status status_message)
 
     logger.info variables
@@ -974,11 +975,11 @@ class AnalysesController < ApplicationController
         # this is really slow right now because it is iterating over each piece of data because i can't guarentee the existence of all the values
         arr = []
         (static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }).each do |v|
-          if dp[v].nil?
-            arr << nil
-          else
-            arr << dp[v]
-          end
+          arr << if dp[v].nil?
+                   nil
+                 else
+                   dp[v]
+                 end
         end
         csv << arr
       end
@@ -987,9 +988,9 @@ class AnalysesController < ApplicationController
     send_data csv_string, filename: filename, type: 'text/csv; charset=iso-8859-1; header=present', disposition: 'attachment'
   end
 
-  def write_and_send_rdata(analysis)
+  def write_and_send_rdata(analysis, datapoint_ids = nil)
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_analysis_data(analysis, nil, export: true)
+    variables, data = get_analysis_data(analysis, datapoint_ids, export: true)
 
     static_fields = %w(name _id run_start_time run_end_time status status_message)
     names_of_vars = static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
@@ -1007,25 +1008,26 @@ class AnalysesController < ApplicationController
     end
     logger.info "finished conversion: #{Time.now - start_time}"
 
-    # If the data are guaranteed to exist in the same column structure for each data point AND the
+    # If the data are guaranteed to exist in the same column structure for each datapoint AND the
     # length of each column is the same (especially no nils), then you can use the method below
     # out_hash = data.each_with_object(Hash.new([])) do |ex_hash, h|
     # ex_hash.each { |k, v| h[k] = h[k] + [v] }
     # end
 
     # out_hash.each_key do |k|
-    #  #Rails.logger.info "Length is #{out_hash[k].size}"
-    #  Rails.logger.info "#{k}  -   #{out_hash[k]}"
+    #  #logger.info "Length is #{out_hash[k].size}"
+    #  logger.info "#{k}  -   #{out_hash[k]}"
     # end
 
     download_filename = "#{analysis.name}_results.RData"
     data_frame_name = 'results'
 
-    require 'rserve/simpler'
-    r = Rserve::Simpler.new
+    r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                APP_CONFIG['rserve_port'])
 
     start_time = Time.now
     logger.info 'starting creation of data frame'
+    # TODO: check these permissions and make them less open
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %{
             temp <- tempfile('rdata', tmpdir="/tmp")
@@ -1039,7 +1041,13 @@ class AnalysesController < ApplicationController
     if File.exist?(tmp_filename)
       send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
     else
-      fail 'could not create R dataframe'
+      raise 'could not create R dataframe'
     end
+  end
+
+  private
+
+  def analysis_params
+    params.require(:analysis).permit!
   end
 end

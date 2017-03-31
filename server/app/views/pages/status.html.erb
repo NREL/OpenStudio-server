@@ -1,5 +1,5 @@
 <%
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 %>
 
 <h2>Status</h2>
@@ -96,7 +96,7 @@
         <td><%= @server.cores %></td>
         <td><%= @server.ami_id %></td>
         <td><%= @server.instance_id %></td>
-        <td><%= @server.valid %></td>
+        <td><%= @server.enabled %></td>
       </tr>
     </table>
 <% end %>
@@ -125,7 +125,7 @@
             <td><%= worker.cores %></td>
             <td><%= worker.ami_id %></td>
             <td><%= worker.instance_id %></td>
-            <td><%= worker.valid %></td>
+            <td><%= worker.enabled %></td>
           </tr>
       <% end %>
     </table>

@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 class Project
   include Mongoid::Document
@@ -43,21 +43,19 @@ class Project
   field :display_name, type: String, default: ''
 
   # Relationships
-  has_many :analyses
+  has_many :analyses, dependent: :destroy
 
   # Indexes
   index({ uuid: 1 }, unique: true)
-  index({ id: 1 }, unique: true)
+  index(id: 1)
   index(name: 1)
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :remove_dependencies
 
   def create_single_analysis(analysis_uuid, analysis_name, problem_uuid, problem_name)
     analysis = analyses.find_or_create_by(uuid: analysis_uuid)
     analysis.name = analysis_name
-    puts analysis.inspect
     analysis.save!
 
     problem = analysis.problems.find_or_create_by(uuid: problem_uuid)
@@ -68,16 +66,8 @@ class Project
 
   protected
 
-  def remove_dependencies
-    logger.info("Found #{analyses.size} sensors")
-    analyses.each do |analysis|
-      logger.info("removing analysis #{analysis.id}")
-      analysis.destroy
-    end
-  end
-
   def verify_uuid
     self.uuid = id if uuid.nil?
-    self.save!
+    save!
   end
 end

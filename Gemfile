@@ -1,12 +1,12 @@
 source 'http://rubygems.org'
+ruby '2.2.4'
 
-gem 'rake', '~> 10.4'
-gem 'rubocop', require: false
-gem 'rubocop-checkstyle_formatter', require: false
-gem 'git', '~> 1.2.6'
 gem 'colored'
+gem 'git', '~> 1.2.6'
+gem 'rake', '~> 11.2'
 
-group :test do
-  gem 'rspec', '~> 2.12'
-  gem 'ci_reporter', '~> 1.9.0'
+group :development, :test do
+  # rest-client 2.0.0 breaks the multipart posting of the zip files.
+  gem 'rest-client', '1.8.0'
+  gem 'rspec', '~> 3.4'
 end

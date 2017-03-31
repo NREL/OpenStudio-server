@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
@@ -31,25 +31,37 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#*******************************************************************************
+# *******************************************************************************
 
 FactoryGirl.define do
   factory :data_point do
-    name 'Example Data Point'
+    name 'Example Datapoint'
     analysis
+
+    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_data_point_1.json"))
+    initialize_with { new(json) }
   end
 
   factory :analysis do
     name 'Example Analysis'
     project
 
+    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_csv.json"))
+
+    initialize_with { new(json['analysis']) }
+
+    seed_zip { File.new("#{Rails.root}/spec/files/batch_datapoints/example_csv.zip") }
+
     factory :analysis_with_data_points do
-      ignore do
+      transient do
         data_point_count 1
       end
 
       after(:create) do |analysis, evaluator|
-        FactoryGirl.create_list(:data_point, evaluator.data_point_count, analysis: analysis)
+        FactoryGirl.create_list(
+          :data_point, evaluator.data_point_count,
+          analysis: analysis
+        )
       end
     end
   end
@@ -58,7 +70,7 @@ FactoryGirl.define do
     name 'Test Project'
 
     factory :project_with_analyses do
-      ignore do
+      transient do
         analyses_count 1
       end
 
