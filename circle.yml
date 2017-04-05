@@ -38,7 +38,7 @@ test:
 
 deployment:
   hub:
-    branch: dockerize
+    branch: master
     commands:
       - git checkout -- .dockerignore && git checkout -- Dockerfile
       - docker-compose build --pull
