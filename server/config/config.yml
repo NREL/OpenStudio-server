@@ -7,6 +7,7 @@ defaults: &defaults
   rserve_hostname: 'localhost'
   rserve_port: 6311
   ruby_bin_dir: ':ruby_bin_dir'
+  max_queued_jobs: 0
 
 development:
   <<: *defaults

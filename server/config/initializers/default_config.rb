@@ -12,6 +12,7 @@ APP_CONFIG['rails_tmp_path'] = File.expand_path(APP_CONFIG['rails_tmp_path'].gsu
 APP_CONFIG['os_server_project_path'] = File.expand_path(APP_CONFIG['os_server_project_path'].gsub(':rails_root', Rails.root.to_s))
 APP_CONFIG['sim_root_path'] = APP_CONFIG['os_server_project_path'] # TODO: go through the code and rename sim_root_path to os_server_project_path
 APP_CONFIG['server_asset_path'] = "#{APP_CONFIG['os_server_project_path']}/server"
+APP_CONFIG['max_queued_jobs'] = ENV['OS_SERVER_NUMBER_OF_WORKERS'] if ENV['OS_SERVER_NUMBER_OF_WORKERS']
 
 # Set the default URL
 Rails.application.routes.default_url_options[:host] = APP_CONFIG['os_server_host_url'].delete('http://')

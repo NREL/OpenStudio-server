@@ -43,7 +43,6 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
       run_data_point_filename: 'run_openstudio_workflow.rb',
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
-      max_queued_jobs: 32,
       problem: {
         random_seed: 1979,
         algorithm: {
@@ -58,6 +57,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
           exit_on_guideline14: 0,
           debug_messages: 0,
           failed_f_value: 1e18,
+          max_queued_jobs: 0,
           objective_functions: [],
           epsilongradient: 1e-4
         }
@@ -173,10 +173,16 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
       end
 
       worker_ips = {}
-      worker_ips[:worker_ips] = ['localhost'] * @options[:max_queued_jobs]
-      #TODO There is no R queue, there is an R cluster
-      logger.info "Starting R queue to hold #{@options[:max_queued_jobs]} jobs"
-
+      if @analysis.problem['algorithm']['max_queued_jobs'] > 0
+        worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
+        logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
+      elsif !APP_CONFIG['max_queued_jobs'].nil?
+        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
+        logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
+      else
+        worker_ips[:worker_ips] = ['localhost'] * 0
+        logger.info "Starting R queue to hold 0 jobs"
+      end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
         # maxit is the max number of iterations to calculate
