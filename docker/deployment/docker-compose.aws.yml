@@ -2,6 +2,8 @@ version: '3'
 services:
   db:
     image: mongo:latest
+    ports:
+      - "27017:27017"
     deploy:
       placement:
         constraints:
@@ -14,7 +16,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     volumes:
