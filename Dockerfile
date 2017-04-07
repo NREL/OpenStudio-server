@@ -202,7 +202,7 @@ RUN chmod +x /opt/openstudio/server/bin/*
 RUN mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
 RUN mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
 #RUN mkdir -p /mnt/openstudio/server/assets/data_points && chmod 777 /mnt/openstudio/server/assets/data_points
-#RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables
+RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables
 
 # Test adding the git repo to the container for coveralls
 # The #TEST# will be removed in the circleci test script to be run in the test container
