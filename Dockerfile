@@ -208,6 +208,10 @@ RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudi
 # The #TEST# will be removed in the circleci test script to be run in the test container
 #TEST#ADD .git /opt/openstudio/.git
 
+ADD /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
+RUN chmod 755 /usr/local/bin/rails-entrypoint
+ENTRYPOINT ["rails-entrypoint"]
+
 CMD ["/usr/local/bin/start-server"]
 
 # Expose ports.
