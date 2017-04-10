@@ -95,7 +95,8 @@ class AdminController < ApplicationController
     dump_dir = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    `mongodump --db #{Mongoid.default_client.database.name} --out #{dump_dir}`
+    exec_str = "mongodump --db #{Mongoid.default_client.database.name} --host #{Mongoid.default_client.cluster.addresses[0].seed} --out #{dump_dir}"
+    `#{exec_str}`
 
     if $?.exitstatus.zero?
       output_file = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}.tar.gz"
@@ -107,7 +108,7 @@ class AdminController < ApplicationController
       send_data File.open(output_file).read, filename: File.basename(output_file), type: 'application/targz; header=present', disposition: 'attachment'
       success = true
     else
-      logger.info "Could not create mongodump; erred with exit status of #{$?.exitstatus}"
+      logger.info "Could not create mongodump with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
     end
 
     success
