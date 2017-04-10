@@ -73,15 +73,13 @@ class AdminController < ApplicationController
     if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
-      `mongo #{Mongoid.default_client.database.name} --eval "db.dropDatabase();"`
+      exec_str = "mongorestore -d #{Mongoid.default_client.database.name} -h #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
+      `#{exec_str}`
       if $?.exitstatus.zero?
-        `mongorestore -d #{Mongoid.default_client.database.name} #{extract_dir}/#{Mongoid.default_client.database.name}`
-        if $?.exitstatus.zero?
-          logger.info 'Restored mongo database'
-          success = true
-        else
-          logger.info 'Error trying to reload mongo database'
-        end
+        logger.info 'Restored mongo database'
+        success = true
+      else
+        logger.info "Could not restore database with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
       end
     end
 
