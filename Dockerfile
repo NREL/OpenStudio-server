@@ -9,7 +9,10 @@ ARG rails_env=docker
 ARG bundle_args="--without development test"
 
 # Install required libaries
-RUN apt-get update \
+RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
+    echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | \
+    sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list && \
+    apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		autoconf \
 		apt-transport-https \
@@ -37,7 +40,8 @@ RUN apt-get update \
         libssl-dev \
         libyaml-dev \
         libice-dev \
-        libsm-dev\
+        libsm-dev \
+        mongodb-org-tools \
         procps \
 		ruby \
 		tar \
@@ -203,6 +207,7 @@ RUN mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
 RUN mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
 #RUN mkdir -p /mnt/openstudio/server/assets/data_points && chmod 777 /mnt/openstudio/server/assets/data_points
 RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables
+RUN mkdir -p /opt/openstudio/server/tmp && chmod 777 /opt/openstudio/server/tmp
 
 # Test adding the git repo to the container for coveralls
 # The #TEST# will be removed in the circleci test script to be run in the test container
