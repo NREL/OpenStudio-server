@@ -1,9 +1,5 @@
 language: ruby
 rvm: 2.2.4
-branches:
-  only:
-  - /^dockerize.*$/
-  - pat-builds
 matrix:
   allow_failures:
   - os: linux

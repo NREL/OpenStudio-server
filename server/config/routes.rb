@@ -25,6 +25,7 @@ Rails.application.routes.draw do
         get :page_data
         get :analysis_data
         get :debug_log
+        get :snow_log
         get :new_view
         get :plot_parallelcoordinates
         post :plot_parallelcoordinates
