@@ -50,5 +50,5 @@ class ResultFile
   embedded_in :data_point
 
   # Validations
-  validates_attachment_content_type :attachment, content_type: %w(application/zip text/html application/json text/plain), message: 'Only html, zip, and json files are allowed to be uploaded'
+  do_not_validate_attachment_file_type :attachment
 end

@@ -83,7 +83,7 @@ module AnalysisLibrary::R
       @r.command(ips: ip_addresses.to_dataframe) do
         %{
           print("Starting cluster...")
-          print(paste("Worker IPs:", ips))
+          print(paste("Number of Workers:", nrow(ips)))
           if (nrow(ips) == 0) {
             stop(options("show.error.messages"="No Worker Nodes")," No Worker Nodes")
           }
