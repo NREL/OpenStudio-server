@@ -44,7 +44,8 @@ deployment:
       - docker-compose build --pull
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - imagetag="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
-      - docker tag nrel/openstudio-server:latest nrel/openstudio-server:$imagetag
-      - docker tag nrel/openstudio-rserve:latest nrel/openstudio-rserve:$imagetag
+      - echo $imagetag
+      - docker tag nrel/openstudio-server nrel/openstudio-server:$imagetag
+      - docker tag nrel/openstudio-rserve nrel/openstudio-rserve:$imagetag
       - docker push nrel/openstudio-server:$imagetag
       - docker push nrel/openstudio-rserve:$imagetag
