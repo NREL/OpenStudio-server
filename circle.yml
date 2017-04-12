@@ -43,9 +43,4 @@ deployment:
       - git checkout -- .dockerignore && git checkout -- Dockerfile
       - docker-compose build --pull
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - export IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
-      - echo $IMAGETAG
-      - docker tag nrel/openstudio-server nrel/openstudio-server:$IMAGETAG
-      - docker tag nrel/openstudio-rserve nrel/openstudio-rserve:$IMAGETAG
-      - docker push nrel/openstudio-server:$IMAGETAG
-      - docker push nrel/openstudio-rserve:$IMAGETAG
+      - source docker/deployment/scripts/circle_deployment.sh 
