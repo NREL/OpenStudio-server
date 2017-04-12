@@ -43,7 +43,7 @@ deployment:
       - git checkout -- .dockerignore && git checkout -- Dockerfile
       - docker-compose build --pull
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - imagetag="$(ruby -e "load 'lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
+      - imagetag="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
       - docker tag nrel/openstudio-server:latest nrel/openstudio-server:$imagetag
       - docker tag nrel/openstudio-rserve:latest nrel/openstudio-rserve:$imagetag
       - docker push nrel/openstudio-server:$imagetag
