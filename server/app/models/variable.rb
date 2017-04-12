@@ -93,6 +93,7 @@ class Variable
 
   # Callbacks
   after_create :verify_uuid
+  before_destroy :destroy_preflight_images
 
   def self.create_from_os_json(analysis_id, os_json)
     var = Variable.where(analysis_id: analysis_id, uuid: os_json['uuid']).first
@@ -366,4 +367,9 @@ class Variable
     self.uuid = id if uuid.nil?
     save!
   end
+
+  def destroy_preflight_images
+    preflight_images.destroy_all
+  end
+
 end

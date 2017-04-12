@@ -62,6 +62,7 @@ class PreflightImage
       file = File.open(filename, 'rb')
       pfi.image = file
       file.close
+      File.chmod(0666, filename)
     end
     pfi.save!
 

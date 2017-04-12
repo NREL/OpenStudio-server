@@ -122,7 +122,13 @@ RUN cd /opt/openstudio/R/lib && bundle install
 
 ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
-CMD touch /mnt/openstudio/log/Rserve.log & Rscript start.R 2>&1 | tee /mnt/openstudio/log/Rserve.log
+RUN mkdir -p /mnt/openstudio/log && chmod 775 /mnt/openstudio/log
+
+ADD /rserve-entrypoint.sh /usr/local/bin/rserve-entrypoint
+RUN chmod 755 /usr/local/bin/rserve-entrypoint
+ENTRYPOINT ["rserve-entrypoint"]
+
+CMD Rscript start.R 2>&1 | tee /mnt/openstudio/log/Rserve.log
 
 EXPOSE 6311
 

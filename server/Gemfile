@@ -64,12 +64,12 @@ gem 'uglifier'
 
 gem 'openstudio-workflow', '= 1.2.1'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
-# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
+#gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'osw'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
 
 gem 'openstudio-analysis', '1.0.0.rc18'
-# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'multi-seed-support'
+# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
 gem 'openstudio-standards', '= 0.1.13'
@@ -77,6 +77,7 @@ gem 'openstudio-standards', '= 0.1.13'
 ## End commonly updated gems
 
 gem 'openstudio-aws', '0.5.0.rc8'
+# gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
 
 gem 'libxml-ruby'
 gem 'msgpack', '~> 1.0'

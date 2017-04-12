@@ -73,15 +73,13 @@ class AdminController < ApplicationController
     if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
-      `mongo #{Mongoid.default_client.database.name} --eval "db.dropDatabase();"`
+      exec_str = "mongorestore -d #{Mongoid.default_client.database.name} -h #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
+      `#{exec_str}`
       if $?.exitstatus.zero?
-        `mongorestore -d #{Mongoid.default_client.database.name} #{extract_dir}/#{Mongoid.default_client.database.name}`
-        if $?.exitstatus.zero?
-          logger.info 'Restored mongo database'
-          success = true
-        else
-          logger.info 'Error trying to reload mongo database'
-        end
+        logger.info 'Restored mongo database'
+        success = true
+      else
+        logger.info "Could not restore database with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
       end
     end
 
@@ -95,21 +93,20 @@ class AdminController < ApplicationController
     dump_dir = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    resp = `mongodump --db #{Mongoid.default_client.database.name} --out #{dump_dir}`
+    exec_str = "mongodump --db #{Mongoid.default_client.database.name} --host #{Mongoid.default_client.cluster.addresses[0].seed} --out #{dump_dir}"
+    `#{exec_str}`
 
     if $?.exitstatus.zero?
       output_file = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}.tar.gz"
-      resp_2 = `tar czf #{output_file} -C #{dump_dir} #{Mongoid.default_client.database.name}`
-      if $?.exitstatus.zero?
-        success = true
+      `tar czf #{output_file} -C #{dump_dir} #{Mongoid.default_client.database.name}`
+      unless $?.exitstatus.zero?
+        logger.info "Could not create archive from mongodump; erred with exit status of #{$?.exitstatus}"
+        return success
       end
-    end
-
-    if File.exist?(output_file)
       send_data File.open(output_file).read, filename: File.basename(output_file), type: 'application/targz; header=present', disposition: 'attachment'
       success = true
     else
-      raise 'could not create dump'
+      logger.info "Could not create mongodump with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
     end
 
     success

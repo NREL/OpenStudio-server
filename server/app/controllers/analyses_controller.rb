@@ -396,18 +396,27 @@ class AnalysesController < ApplicationController
       @rserve_log = File.read(rserve_file)
     end
 
-    @snow_log = nil
-    snow_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'snow.log')
-    if File.exist? snow_file
-      @snow_log = File.read(snow_file)
-    end
-
     exclude_fields = [:_id, :user, :password]
     @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
     @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
 
     respond_to do |format|
       format.html # debug_log.html.erb
+      format.json { render json: log_message }
+    end
+  end
+
+  def snow_log
+    @analysis = Analysis.find(params[:id])
+
+    @snow_log = nil
+    snow_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'snow.log')
+    if File.exist? snow_file
+      @snow_log = File.read(snow_file)
+    end
+
+    respond_to do |format|
+      format.html # snow_log.html.erb
       format.json { render json: log_message }
     end
   end
