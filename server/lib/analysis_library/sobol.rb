@@ -175,16 +175,15 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
       end
 
       worker_ips = {}
-      if @analysis.problem['algorithm']['max_queued_jobs'] > 0
+      if @analysis.problem['algorithm']['max_queued_jobs'] == 0
+        raise 'MAX_QUEUED_JOBS is 0'
+      elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
         worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
         logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
       else
-        # STOP in R since the cluster is of size zero or not set
-@r.converse('stop(options("show.error.messages"=TRUE)),"Cluster size is not set correctly"')
-        # STOP in Ruby
         raise 'could not start the cluster (cluster size not set correctly)'
       end
       if cluster.start(worker_ips)
