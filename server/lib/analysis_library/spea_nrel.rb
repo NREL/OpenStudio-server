@@ -194,8 +194,10 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
       else
-        worker_ips[:worker_ips] = ['localhost'] * 0
-        logger.info "Starting R queue to hold 0 jobs"
+        # STOP in R since the cluster is of size zero or not set
+@r.converse('stop(options("show.error.messages"=TRUE)),"Cluster size is not set correctly"')
+        # STOP in Ruby
+        raise 'could not start the cluster (cluster size not set correctly)'
       end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
