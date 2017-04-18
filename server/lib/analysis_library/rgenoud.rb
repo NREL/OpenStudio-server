@@ -67,7 +67,6 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
           memory_matrix: 1,
           balance: 1,
           debug_messages: 0,
-          max_queued_jobs: 0,
           failed_f_value: 1e18
         }
       }
@@ -195,11 +194,14 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       end
 
       worker_ips = {}
-      if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-        raise 'MAX_QUEUED_JOBS is 0'
-      elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
-        worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
-        logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
+      if @analysis.problem['algorithm']['max_queued_jobs']
+        if @analysis.problem['algorithm']['max_queued_jobs'] == 0
+          logger.info "MAX_QUEUED_JOBS is 0"
+          raise 'MAX_QUEUED_JOBS is 0'
+        elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
+          worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
+          logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
+        end  
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"

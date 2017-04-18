@@ -12,6 +12,8 @@ services:
       args:
         rails_env: docker
     image: nrel/openstudio-server:latest
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
       - db
       - rserve
