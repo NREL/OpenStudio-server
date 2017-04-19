@@ -193,6 +193,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         raise 'could not configure R cluster'
       end
 
+      @r.converse("cat('max_queued_jobs: #{APP_CONFIG['max_queued_jobs']}')")
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
@@ -203,7 +204,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
           logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
         end  
       elsif !APP_CONFIG['max_queued_jobs'].nil?
-        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
+        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
       else
         raise 'could not start the cluster (cluster size not set correctly)'
