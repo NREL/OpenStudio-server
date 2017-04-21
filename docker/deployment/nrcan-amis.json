@@ -1,0 +1,28 @@
+ {
+      "name": "2.1.1-nrcan",
+      "standards": {
+        "ref": "0.1.13",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.2.2",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.7",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.1.1",
+        "version_sha": "141d4b9cb6",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "175da2274792460c578b7c2dc6479bbe2934b8b5",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-70fb6466"
+    }
