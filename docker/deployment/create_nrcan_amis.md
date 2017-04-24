@@ -32,7 +32,7 @@ git push
 
 Then go to https://circleci.com/gh/NREL/OpenStudio-server and wait for the nrcan-master branch to finish building successfully
 
-## 4.Create Amazon AMI
+## 4.Configuring Amazon AMI
 Now once the build is complete, you will see it listed on DockerHub here https://hub.docker.com/r/nrel/openstudio-server/tags.  You now need to create the image on Amazon for others to use. Go into your OpenStudio-server/docker/deployment folder. Open the file user_variables.json.template in an editor. Change the "version" and "openstudio_server_base_version" to the same name to reflect the version of Openstudio.  
 
 So your file may look like this if your version of OS was 2.1.1
