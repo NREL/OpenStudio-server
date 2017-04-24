@@ -12,6 +12,8 @@ services:
       args:
         rails_env: docker
     image: nrel/openstudio-server:latest
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
       - db
       - rserve
@@ -25,6 +27,8 @@ services:
       args:
         rails_env: docker
     image: nrel/openstudio-server:latest
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
       - db
       - rserve
@@ -37,6 +41,8 @@ services:
       args:
         rails_env: docker
     image: nrel/openstudio-server:latest
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
       - web
       - db
@@ -45,6 +51,8 @@ services:
   rserve:
     build: ./docker/R
     image: nrel/openstudio-rserve:latest
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     volumes:
       - osdata:/mnt/openstudio
 volumes:
