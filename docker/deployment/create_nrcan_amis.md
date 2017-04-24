@@ -105,12 +105,16 @@ So change the three lines below from this...
       "ami": "ami-01ff6317"
     }
 ``
+
+
  to this
+
+
 ``
      {
       "name": "2.1.1-nrcan",
       "standards": {
-        "ref": "0.1.13",
+        "ref": "0.1.13-nrcan",
         "repo": "nrel/openstudio-standards"
       },
       "workflow": {
