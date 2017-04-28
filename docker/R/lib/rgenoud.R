@@ -63,6 +63,7 @@ clusterEvalQ(cl,varfile(varnames))
 source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint")
 clusterExport(cl,"check_run_flag")
+clusterExport(cl,"check_guideline14")
 
 #f <- function(x){
 #  tryCatch(create_and_run_datapoint(x),
