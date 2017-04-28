@@ -32,10 +32,16 @@ begin
   a = JSON.parse(a, symbolize_names: true)
   result[:status] = true
   result[:electricity_cvrmse_within_limit] = a[:data_point][:results][:CalibrationReportsEnhanced21][:electricity_cvrmse_within_limit]
+  result[:electricity_nmbe_within_limit] = a[:data_point][:results][:CalibrationReportsEnhanced21][:electricity_nmbe_within_limit]
+  result[:natural_gas_cvrmse_within_limit] = a[:data_point][:results][:CalibrationReportsEnhanced21][:natural_gas_cvrmse_within_limit]
+  result[:natural_gas_nmbe_within_limit] = a[:data_point][:results][:CalibrationReportsEnhanced21][:natural_gas_nmbe_within_limit]
 rescue => e
   puts "#{__FILE__} Error: #{e.message}:#{e.backtrace.join("\n")}"
   result[:status] = false
-  result[:electricity_cvrmse_within_limit] = false
+  result[:electricity_cvrmse_within_limit] = 0
+  result[:electricity_nmbe_within_limit] = 0
+  result[:natural_gas_cvrmse_within_limit] = 0
+  result[:natural_gas_nmbe_within_limit] = 0
 ensure
   puts result.to_json
 end

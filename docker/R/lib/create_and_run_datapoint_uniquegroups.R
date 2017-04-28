@@ -162,18 +162,22 @@ create_and_run_datapoint_uniquegroups <- function(x){
         }
         # read in the results from the guideline14 file
         #TODO this path will not work
-        guideline_file <- paste(data_point_directory,"/reports/calibration_reports_enhanced_21_report_guideline.json",sep="")
-        json <- NULL
-        try(json <- fromJSON(file=guideline_file), silent=TRUE)
-        if (is.null(json)) {
-          print(paste("no guideline file: ",guideline_file))
+        #guideline_file <- paste(data_point_directory,"/reports/calibration_reports_enhanced_21_report_guideline.json",sep="")
+        #json <- NULL
+        #try(json <- fromJSON(file=guideline_file), silent=TRUE)
+        if (is.null(guide)) {
+          print("no guideline14 return ")
+        } else if (!is.recursive(guide)) {
+          print(paste("guideline14 return is not a json: ",guide))
         } else {
-          guideline <- json[[1]]
-          for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
-          print(paste("guideline: ",guideline))
-          print(paste("isTRUE(guideline): ",isTRUE(guideline)))
-          print(paste("all(guideline): ",all(guideline)))
-          if (length(which(guideline)) == objDim){
+          #guideline <- json[[1]]
+          #for (i in 2:length(json)) guideline <- cbind(guideline,json[[i]])
+          print(paste("guide: ",guide))
+          #print(paste("isTRUE(guideline): ",isTRUE(guideline)))
+          #print(paste("all(guideline): ",all(guideline)))
+          #if (length(which(guideline)) == objDim){
+          #if (guide$electricity_cvrmse_within_limit == 0 && guide$electricity_nmbe_within_limit == 0 && guide$natural_gas_cvrmse_within_limit == 0 && guide$natural_gas_nmbe_within_limit == 0) {
+          if (guide$electricity_cvrmse_within_limit == 0 && guide$electricity_nmbe_within_limit == 0) {
             #write final params to json file
             write_filename <- paste(analysis_dir,'/varnames.json',sep='')
             varnames <- scan(file=write_filename, what=character())

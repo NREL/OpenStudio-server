@@ -41,13 +41,13 @@ check_guideline14 <- function(script_path, host_url, data_point_id, debug_messag
       }
       #print(paste('is.recursive(run_flag_json):',is.recursive(json)))
       if (is.recursive(json)) {
-        return(json$result)
+        return(json)
       } else {
         print("API Check Guideline14 is not json")
-        return(TRUE)
+        return(FALSE)
       }
     } else {
       print("API Check Guideline14 failed")
-      return(TRUE)
+      return(FALSE)
     }
 }
