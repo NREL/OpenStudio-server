@@ -150,7 +150,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
       if(debug_messages == 1){
         print(paste("Objective function Norm:",obj))
       }
-      f(debug_messages == 1){
+      if(debug_messages == 1){
         print(paste("rails_exit_guideline_14:",rails_exit_guideline_14))
       }
       # Check if exit on guideline 14 is enabled
