@@ -164,6 +164,6 @@ if (!file.exists(bestresults_filename) && !is.null(results$par)) {
   #write final params to json file
   answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',results$par,sep='', collapse=','),'}',sep='')
   write.table(answer, file=bestresults_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
-  convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"false",sep='', collapse=','),'}',sep='')
+  convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"false",sep='', collapse=','),'}',sep='')
   write(convergenceflag, file=paste(analysis_dir,"/convergence_flag.json",sep=''))
 }

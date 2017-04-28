@@ -56,7 +56,7 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
           mprob: 0.8,
           norm_type: 'minkowski',
           p_power: 2,
-          exit_on_guideline14: 0,
+          exit_on_guideline_14: 0,
           debug_messages: 0,
           failed_f_value: 1e18,
           objective_functions: []
@@ -137,9 +137,9 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
 
-      @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
+      @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
       @analysis.save!
-      logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       # check to make sure there are objective functions
       if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
@@ -239,7 +239,7 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
               rails_root_path = "#{Rails.root}"
               rails_host = "#{APP_CONFIG['os_server_host_url']}"
               r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
-              rails_exit_guideline_14 = "#{@analysis.exit_on_guideline14}"
+              rails_exit_guideline_14 = "#{@analysis.exit_on_guideline_14}"
               source(paste(r_scripts_path,'/spea.R',sep=''))
            }
         end

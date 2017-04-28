@@ -53,15 +53,22 @@ create_and_run_datapoint <- function(x){
     if(counter > 10){break}
   }
   
-  #TODO THIS PATH DOESNT EXIST.  THIS IS RUNNING ON RSERVE_1 
-  #data_point_directory <- paste(rails_sim_root_path,'/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
+  #THIS PATH DOESNT EXIST on Workers.  THIS IS RUNNING ON RSERVE_1 
   data_point_directory <- paste('/mnt/openstudio/analysis_',rails_analysis_id,'/data_point_',json$id,sep='')
-  #print(paste("data_point_directory:",data_point_directory))
+  if(debug_messages == 1){
+    print(paste("data_point_directory:",data_point_directory))
+  }
+  if(!dir.exists(data_point_directory)){
+    dir.create(data_point_directory)
+    if(debug_messages == 1){
+      print(paste("data_point_directory created: ",data_point_directory))
+    }
+  }
   ## save off the variables file (can be used later if number of vars gets too long)
   if (dir.exists(data_point_directory)) {
     write.table(x, paste(data_point_directory,"/input_variables_from_r.data",sep=""),row.names = FALSE, col.names = FALSE)
   } else { 
-     #print(paste("data_point_directory does not exist:",data_point_directory))
+     print(paste("data_point_directory does not exist! ",data_point_directory))
   }
   #if json$status is FALSE then datapoint status is false
   if (!json$status) {
@@ -118,22 +125,16 @@ create_and_run_datapoint <- function(x){
       if(debug_messages == 1){
         print(paste("Objective function Norm:",obj))
       }
+      if(debug_messages == 1){
+        print(paste("rails_exit_guideline_14:",rails_exit_guideline_14))
+      }
       # Check if exit on guideline 14 is enabled
       if (rails_exit_guideline_14){
         # read in the results from the guideline14 file
         #TODO this path will not work
-        guideline_file <- paste(data_point_directory,"/run/CalibrationReportsEnhanced20/guideline.json",sep="")
-        guideline_file1 <- paste(data_point_directory,"/run/CalibrationReportsEnhanced/guideline.json",sep="")
-        guideline_file2 <- paste(data_point_directory,"/run/CalibrationReports/guideline.json",sep="")
+        guideline_file <- paste(data_point_directory,"/reports/calibration_reports_enhanced_21_report_guideline.json",sep="")
         json <- NULL
-        json1 <- NULL
-        json2 <- NULL
         try(json <- fromJSON(file=guideline_file), silent=TRUE)
-        try(json1 <- fromJSON(file=guideline_file1), silent=TRUE)
-        try(json2 <- fromJSON(file=guideline_file2), silent=TRUE)
-        #if json2 exists then set json = json2 and continue to test on json
-        if (!is.null(json2)) {json <- json2}
-        if (!is.null(json1)) {json <- json1}
         if (is.null(json)) {
           print(paste("no guideline file: ",guideline_file))
         } else {
@@ -151,11 +152,11 @@ create_and_run_datapoint <- function(x){
             write_filename <- paste(analysis_dir,'/best_result.json',sep='')
             write.table(answer, file=write_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
 
-            convergenceflag <- paste('{',paste('"',"exit_on_guideline14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+            convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"true",sep='', collapse=','),'}',sep='')
             write_filename <- paste(analysis_dir,'/convergence_flag.json',sep='')
             write(convergenceflag, file=write_filename)
             options(warn=0)
-            stop(options("show.error.messages"=FALSE),"exit_on_guideline14")
+            stop(options("show.error.messages"=FALSE),"exit_on_guideline_14")
           }
         }
       }
