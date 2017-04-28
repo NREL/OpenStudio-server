@@ -176,8 +176,8 @@ create_and_run_datapoint_uniquegroups <- function(x){
           #print(paste("isTRUE(guideline): ",isTRUE(guideline)))
           #print(paste("all(guideline): ",all(guideline)))
           #if (length(which(guideline)) == objDim){
-          #if (guide$electricity_cvrmse_within_limit == 0 && guide$electricity_nmbe_within_limit == 0 && guide$natural_gas_cvrmse_within_limit == 0 && guide$natural_gas_nmbe_within_limit == 0) {
-          if (guide$electricity_cvrmse_within_limit == 0 && guide$electricity_nmbe_within_limit == 0) {
+          #if (guide$electricity_cvrmse_within_limit == 1 && guide$electricity_nmbe_within_limit == 1 && guide$natural_gas_cvrmse_within_limit == 1 && guide$natural_gas_nmbe_within_limit == 1) {
+          if (guide$electricity_cvrmse_within_limit == 1 && guide$electricity_nmbe_within_limit == 1) {
             #write final params to json file
             write_filename <- paste(analysis_dir,'/varnames.json',sep='')
             varnames <- scan(file=write_filename, what=character())
