@@ -155,6 +155,11 @@ create_and_run_datapoint_uniquegroups <- function(x){
       }
       # Check if exit on guideline 14 is enabled
       if (rails_exit_guideline_14){
+      
+        guide <- check_guideline14(r_scripts_path, rails_host, json$id, debug_messages)
+        if(debug_messages == 1){
+          print(paste("guide:",guide))
+        }
         # read in the results from the guideline14 file
         #TODO this path will not work
         guideline_file <- paste(data_point_directory,"/reports/calibration_reports_enhanced_21_report_guideline.json",sep="")
