@@ -155,7 +155,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
       }
       # Check if exit on guideline 14 is enabled
       #if (rails_exit_guideline_14){
-       if (rails_exit_guideline_14 %in% c(0,1,2,3)) { 
+       if (rails_exit_guideline_14 %in% c(1,2,3)) { 
         guide <- check_guideline14(r_scripts_path, rails_host, json$id, debug_messages)
         if(debug_messages == 1){
           print(paste("guide:",guide))
