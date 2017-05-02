@@ -161,7 +161,9 @@ class Analysis
     end
 
     # Remove all the queued delayed jobs for this analysis
-    data_points.where(status: 'queued').each(&:destroy)
+    data_points.where(status: 'queued').each do |dp|
+      dp.set_canceled_state
+    end
 
     [save!, errors]
   end

@@ -135,7 +135,7 @@ module AnalysisLibrary::R
             sigma <- sqrt(log(#{stddev}/(#{mean}^2)+1))
             mu <- log((#{mean}^2)/sqrt(#{stddev}+#{mean}^2))
             samples <- #{r_dist_name}(df$data, mu, sigma)
-            samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
+            samples[(samples > #{max}) | (samples < #{min})] <- runif(length(samples[(samples > #{max}) | (samples < #{min})]),#{min},#{max})
           "
         end
       elsif distribution_type == 'triangle'
@@ -149,7 +149,7 @@ module AnalysisLibrary::R
         @r.command(df: dataframe) do
           "
             samples <- #{r_dist_name}(df$data, #{mean}, #{stddev})
-            samples[(samples > #{max}) | (samples < #{min})] <- runif(1,#{min},#{max})
+            samples[(samples > #{max}) | (samples < #{min})] <- runif(length(samples[(samples > #{max}) | (samples < #{min})]),#{min},#{max})
           "
         end
       end
