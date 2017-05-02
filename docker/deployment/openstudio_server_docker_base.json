@@ -93,7 +93,7 @@
       "script": "./scripts/aws_osserver_init.sh",
       "pause_before": "15s",
       "environment_vars": [
-        "OSSERVER_DOCKERHUB_TAG={{ user `openstudio_server_base_version` }}"
+        "OSSERVER_DOCKERHUB_TAG={{ user `version` }}"
       ]
     },
     {
