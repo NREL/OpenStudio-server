@@ -137,10 +137,19 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         raise 'P Norm must be non-negative'
       end
 
-      @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      # exit on guideline 14 is no longer true/false.  its 0,1,2,3
+      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+        @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
+        logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
+      else
+        @analysis.exit_on_guideline_14 = 0
+        logger.info "exit_on_guideline_14 is forced to #{@analysis.exit_on_guideline_14}"
+      end
+      @analysis.save!
+      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
-
       @analysis.save!
       logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 

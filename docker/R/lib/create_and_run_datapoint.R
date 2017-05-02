@@ -129,8 +129,8 @@ create_and_run_datapoint <- function(x){
         print(paste("rails_exit_guideline_14:",rails_exit_guideline_14))
       }
       # Check if exit on guideline 14 is enabled
-      if (rails_exit_guideline_14){
-      
+      #if (rails_exit_guideline_14){
+       if (rails_exit_guideline_14 %in% c(1,2,3)) { 
         guide <- check_guideline14(r_scripts_path, rails_host, json$id, debug_messages)
         if(debug_messages == 1){
           print(paste("guide:",guide))
@@ -152,20 +152,54 @@ create_and_run_datapoint <- function(x){
           #print(paste("all(guideline): ",all(guideline)))
           #if (length(which(guideline)) == objDim){
           #if (guide$electricity_cvrmse_within_limit == 1 && guide$electricity_nmbe_within_limit == 1 && guide$natural_gas_cvrmse_within_limit == 1 && guide$natural_gas_nmbe_within_limit == 1) {
-          if (guide$electricity_cvrmse_within_limit == 1 && guide$electricity_nmbe_within_limit == 1) {
-            #write final params to json file
-            write_filename <- paste(analysis_dir,'/varnames.json',sep='')
-            varnames <- scan(file=write_filename, what=character())
+          if (rails_exit_guideline_14 == 1) {
+            if (guide$electricity_cvrmse_within_limit == 1 && guide$electricity_nmbe_within_limit == 1 && guide$natural_gas_cvrmse_within_limit == 1 && guide$natural_gas_nmbe_within_limit == 1) {
+              #write final params to json file
+              write_filename <- paste(analysis_dir,'/varnames.json',sep='')
+              varnames <- scan(file=write_filename, what=character())
 
-            answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
-            write_filename <- paste(analysis_dir,'/best_result.json',sep='')
-            write.table(answer, file=write_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+              write_filename <- paste(analysis_dir,'/best_result.json',sep='')
+              write.table(answer, file=write_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
 
-            convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"true",sep='', collapse=','),'}',sep='')
-            write_filename <- paste(analysis_dir,'/convergence_flag.json',sep='')
-            write(convergenceflag, file=write_filename)
-            options(warn=0)
-            stop(options("show.error.messages"=FALSE),"exit_on_guideline_14")
+              convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+              write_filename <- paste(analysis_dir,'/convergence_flag.json',sep='')
+              write(convergenceflag, file=write_filename)
+              options(warn=0)
+              stop(options("show.error.messages"=FALSE),"exit_on_guideline_14")
+            }
+          } else if (rails_exit_guideline_14 == 2) { 
+            if (guide$electricity_cvrmse_within_limit == 1 && guide$electricity_nmbe_within_limit == 1) {
+              #write final params to json file
+              write_filename <- paste(analysis_dir,'/varnames.json',sep='')
+              varnames <- scan(file=write_filename, what=character())
+
+              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+              write_filename <- paste(analysis_dir,'/best_result.json',sep='')
+              write.table(answer, file=write_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+
+              convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+              write_filename <- paste(analysis_dir,'/convergence_flag.json',sep='')
+              write(convergenceflag, file=write_filename)
+              options(warn=0)
+              stop(options("show.error.messages"=FALSE),"exit_on_guideline_14")
+            }
+          } else if (rails_exit_guideline_14 == 3) {
+             if (guide$natural_gas_cvrmse_within_limit == 1 && guide$natural_gas_nmbe_within_limit == 1) {
+              #write final params to json file
+              write_filename <- paste(analysis_dir,'/varnames.json',sep='')
+              varnames <- scan(file=write_filename, what=character())
+
+              answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'"',': ',x,sep='', collapse=','),'}',sep='')
+              write_filename <- paste(analysis_dir,'/best_result.json',sep='')
+              write.table(answer, file=write_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+
+              convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"true",sep='', collapse=','),'}',sep='')
+              write_filename <- paste(analysis_dir,'/convergence_flag.json',sep='')
+              write(convergenceflag, file=write_filename)
+              options(warn=0)
+              stop(options("show.error.messages"=FALSE),"exit_on_guideline_14")
+            }
           }
         }
       }
