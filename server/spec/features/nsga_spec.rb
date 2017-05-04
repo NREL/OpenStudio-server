@@ -54,7 +54,7 @@ require 'rails_helper'
 #     formulation = OpenStudio::Analysis.load(h)
 #     formulation.analysis_type = 'nsga_nrel'
 #     formulation.algorithm.set_attribute('generations', 1)
-#     formulation.algorithm.set_attribute('exit_on_guideline14', 1)
+#     formulation.algorithm.set_attribute('exit_on_guideline_14', 1)
 #
 #     formulation.save "#{workdir}/test_model.json"
 #

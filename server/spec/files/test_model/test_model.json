@@ -331,7 +331,7 @@
         "toursize": 2,
         "normtype": "minkowski",
         "ppower": 2,
-        "exit_on_guideline14": 0,
+        "exit_on_guideline_14": 0,
         "objective_functions": [
           "standard_report_legacy.total_natural_gas",
           "standard_report_legacy.total_electricity"

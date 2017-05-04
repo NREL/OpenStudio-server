@@ -48,7 +48,7 @@ class Analysis
   field :display_name, type: String
   field :description, type: String
   field :run_flag, type: Boolean, default: false
-  field :exit_on_guideline14, type: Boolean, default: false
+  field :exit_on_guideline_14, type: Integer, default: 0
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format

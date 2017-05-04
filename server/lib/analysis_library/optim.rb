@@ -54,7 +54,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
           maxit: 100,
           norm_type: 'minkowski',
           p_power: 2,
-          exit_on_guideline14: 0,
+          exit_on_guideline_14: 0,
           debug_messages: 0,
           failed_f_value: 1e18,
           objective_functions: [],
@@ -127,12 +127,22 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
         raise 'P Norm must be non-negative'
       end
 
-      @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
+      # exit on guideline 14 is no longer true/false.  its 0,1,2,3
+      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+        @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
+        logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
+      else
+        @analysis.exit_on_guideline_14 = 0
+        logger.info "exit_on_guideline_14 is forced to #{@analysis.exit_on_guideline_14}"
+      end
+      @analysis.save!
+      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
 
       @analysis.save!
-      logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
         raise 'number of objective functions must equal'
@@ -225,7 +235,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
-            rails_exit_guideline_14 = "#{@analysis.exit_on_guideline14}"
+            rails_exit_guideline_14 = "#{@analysis.exit_on_guideline_14}"
             source(paste(r_scripts_path,'/optim.R',sep=''))
             }
         end
