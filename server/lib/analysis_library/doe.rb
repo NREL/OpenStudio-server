@@ -93,6 +93,9 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
 
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perform DOE"
+      if selected_variables.count < 2
+        raise 'DOE needs more than one variable'
+      end
 
       # generate the probabilities for all variables as column vectors
       @r.converse("print('starting doe')")
