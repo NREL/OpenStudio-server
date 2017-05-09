@@ -1,61 +1,79 @@
-# Docker Compose creates multiple containers on a single machine.
-# run `docker-compose up` to create and run/link the containers
-version: '2'
+version: '3'
 services:
   db:
-    image: mongo:latest
+    image: 127.0.0.1:5000/mongo
     ports:
       - "27017:27017"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "1"
   web:
-    build:
-      context: .
-      args:
-        rails_env: docker
-    image: nrel/openstudio-server:latest
-    environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-    links:
-      - db
-      - rserve
+    image: 127.0.0.1:5000/openstudio-server
     ports:
       - "8080:80"
-    volumes:
-      - osdata:/mnt/openstudio
-  web-background:
-    build:
-      context: .
-      args:
-        rails_env: docker
-    image: nrel/openstudio-server:latest
+      - "443:443"
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-    links:
+    volumes:
+      - osdata:/mnt/openstudio
+    depends_on:
       - db
-      - rserve
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "1"
+  web-background:
+    image: 127.0.0.1:5000/openstudio-server
     volumes:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
-  worker:
-    build:
-      context: .
-      args:
-        rails_env: docker
-    image: nrel/openstudio-server:latest
-    environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-    links:
+    depends_on:
+      - db
       - web
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "1"
+  worker:
+    image: 127.0.0.1:5000/openstudio-server
+    command: bin/delayed_job -i worker --queue=simulations run
+    depends_on:
+      - web
+      - web-background
       - db
       - rserve
-    command: bin/delayed_job -i worker --queue=simulations run
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.99"
   rserve:
-    build: ./docker/R
-    image: nrel/openstudio-rserve:latest
-    environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+    image: 127.0.0.1:5000/openstudio-rserve
     volumes:
       - osdata:/mnt/openstudio
+    depends_on:
+      - web
+      - web-background
+      - db
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "1"
 volumes:
   osdata:
     external: true
-
+networks:
+  default:
+    driver: overlay

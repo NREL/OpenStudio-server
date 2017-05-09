@@ -10,7 +10,7 @@ sudo apt-get -qq update
 sudo rm -f /boot/grub/menu.lst # https://bugs.launchpad.net/ubuntu/+source/cloud-init/+bug/1485685
 sudo apt-get -y -qq upgrade
 sudo apt-get -y -qq install curl linux-image-extra-$(uname -r) linux-image-extra-virtual htop iftop unzip lvm2 thin-provisioning-tools
-sudo apt-get -y -qq install gdisk kpartx parted
+sudo apt-get -y -qq install gdisk kpartx parted ca-certificates software-properties-common apt-transport-https
 sudo apt -qq -y install python3
 sudo apt -qq -y install ruby
 sudo perl -p -i -e 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g'  /etc/default/grub
@@ -49,22 +49,21 @@ echo "Adding the docker GPG to apt-get"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-curl -fsSL https://yum.dockerproject.org/gpg | sudo apt-key add -
-apt-key fingerprint 58118E89F3A912897C070ADBF76221572C52609D
-sudo add-apt-repository "deb https://apt.dockerproject.org/repo/ ubuntu-$(lsb_release -cs) main"
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get -qq update
 sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Installing docker-engine version $DOCKER_MACHINE_VERSION~ubuntu-yakkety"
+echo "Installing docker server version $DOCKER_MACHINE_VERSION"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
 echo "" >> /home/ubuntu/.bashrc
 echo "# Configuration variables used to build the OpenStudio Server base image"
 echo "export DOCKER_MACHINE_VERSION=$DOCKER_MACHINE_VERSION" >> /home/ubuntu/.bashrc
-sudo apt-get -y -qq install docker-engine=1.13.0-0~ubuntu-yakkety
+sudo apt-get -y -qq install docker-ce=$DOCKER_MACHINE_VERSION~ce-0~ubuntu-yakkety
 sleep 1
 
 echo ""
@@ -82,18 +81,6 @@ echo -en "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd $DOCKERD_OPTIONS" | 
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 sleep 1
-
-echo ""
-echo "------------------------------------------------------------------------"
-echo "Installing docker-compose version $DOCKER_COMPOSE_VERSION"
-echo "------------------------------------------------------------------------"
-echo ""
-sleep 1
-echo "export DOCKER_COMPOSE_VERSION=$DOCKER_COMPOSE_VERSION" >> /home/ubuntu/.bashrc
-sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-sleep 1
-
 
 echo ""
 echo "------------------------------------------------------------------------"

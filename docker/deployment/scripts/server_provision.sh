@@ -39,8 +39,26 @@ echo "Generating the swarm token and swarm join command"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker swarm init --advertise-addr=$(ip route get 8.8.8.8 | awk '{print $NF; exit}') > /home/ubuntu/token.txt
+internalip=$(ip route get 8.8.8.8 | awk '{print $NF; exit}')
+docker swarm init --advertise-addr=$internalip > /home/ubuntu/token.txt
 tokentxt=$(</home/ubuntu/token.txt)
 tempvar=${tokentxt##*d:}
 tempcmd=${tempvar%%To*}
-echo ${tempcmd//\\/} > /home/ubuntu/swarmjoin.sh
+echo ${tempcmd//\\/} > /home/ubuntu/
+sleep 1
+
+echo ""
+echo "------------------------------------------------------------------------"
+echo "Creating the private registry and pushing the local images"
+echo "------------------------------------------------------------------------"
+echo ""
+sleep 1
+docker service create --name registry --publish 5000:5000 registry:2.6
+while ( nc -zv $internalip 5000 3>&1 1>&2- 2>&3- ) | awk -F ":" '$3 != " Connection refused" {exit 1}'; do sleep 5; done
+echo "registry initialized"
+docker tag nrel/openstudio-server:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-server
+docker tag nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-rserve
+docker tag mongo localhost:5000/mongo
+docker push localhost:5000/openstudio-server
+docker push localhost:5000/openstudio-rserve
+docker push localhost:5000/mongo
