@@ -48,7 +48,7 @@ class Analysis
   field :display_name, type: String
   field :description, type: String
   field :run_flag, type: Boolean, default: false
-  field :exit_on_guideline14, type: Boolean, default: false
+  field :exit_on_guideline_14, type: Integer, default: 0
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
@@ -161,7 +161,9 @@ class Analysis
     end
 
     # Remove all the queued delayed jobs for this analysis
-    data_points.where(status: 'queued').each(&:destroy)
+    data_points.where(status: 'queued').each do |dp|
+      dp.set_canceled_state
+    end
 
     [save!, errors]
   end

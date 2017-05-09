@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: mongo:latest
+    image: localhost:5000/mongo
     ports:
       - "27017:27017"
     deploy:
@@ -12,9 +12,9 @@ services:
         reservations:
           cpus: "1"
   web:
-    image: nrel/openstudio-server:latest
+    image: localhost:5000/openstudio-server
     ports:
-      - "80:80"
+      - "8080:80"
       - "443:443"
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
@@ -30,7 +30,7 @@ services:
         reservations:
           cpus: "1"
   web-background:
-    image: nrel/openstudio-server:latest
+    image: localhost:5000/openstudio-server
     volumes:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
@@ -45,7 +45,7 @@ services:
         reservations:
           cpus: "1"
   worker:
-    image: nrel/openstudio-server:latest
+    image: localhost:5000/openstudio-server
     command: bin/delayed_job -i worker --queue=simulations run
     depends_on:
       - web
@@ -57,7 +57,7 @@ services:
         reservations:
           cpus: "0.99"
   rserve:
-    image: nrel/openstudio-rserve:latest
+    image: localhost:5000/openstudio-rserve
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
