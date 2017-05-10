@@ -11,6 +11,7 @@ echo "Original 512 sector count for 'docker-thinpool' is $old_sectors"
 docker_thinpool_table="$(sudo dmsetup table docker-thinpool)"
 echo "Original devicemapper table for 'docker-thinpool' is: \"$docker_thinpool_table\""
 if [ "$(sudo lsblk -o NAME | grep xvda1)" = '└─xvda1' ]; then
+    sudo umount /dev/xvdb
 	sudo vgextend docker -y /dev/xvdb
 	sudo vgextend docker -y /dev/xvdc
 	sudo vgextend docker -y /dev/xvdd
@@ -44,7 +45,7 @@ docker swarm init --advertise-addr=$internalip > /home/ubuntu/token.txt
 tokentxt=$(</home/ubuntu/token.txt)
 tempvar=${tokentxt##*d:}
 tempcmd=${tempvar%%To*}
-echo ${tempcmd//\\/} > /home/ubuntu/
+echo ${tempcmd//\\/} > /home/ubuntu/swarmjoin.sh
 sleep 1
 
 echo ""
