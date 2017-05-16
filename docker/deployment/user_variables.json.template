@@ -1,7 +1,5 @@
 {
   "version": "2.0.0-rc0",
-  "docker_machine_version": "1.13.0",
-  "docker_compose_version": "1.10.0",
-  "openstudio_server_base_version": "latest",
+  "docker_machine_version": "17.03.0",
   "generated_by": "Your Name Here"
 }

@@ -123,6 +123,14 @@ class DataPoint
     save!
   end
 
+  def set_canceled_state
+    self.destroy_delayed_job # Remove the datapoint from the delayed jobs queue
+    self.run_end_time = Time.now
+    self.status = :completed
+    self.status_message = 'datapoint canceled'
+    save!
+  end
+
   protected
 
   def verify_uuid
@@ -131,7 +139,9 @@ class DataPoint
   end
 
   def destroy_delayed_job
-    dj = Delayed::Job.where(id: job_id).first
-    dj.destroy if dj
+    if job_id
+      dj = Delayed::Job.where(id: job_id).first
+      dj.destroy if dj
+    end
   end
 end

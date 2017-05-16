@@ -54,10 +54,9 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
           maxit: 100,
           norm_type: 'minkowski',
           p_power: 2,
-          exit_on_guideline14: 0,
+          exit_on_guideline_14: 0,
           debug_messages: 0,
           failed_f_value: 1e18,
-          max_queued_jobs: 0,
           objective_functions: [],
           epsilongradient: 1e-4
         }
@@ -128,12 +127,22 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
         raise 'P Norm must be non-negative'
       end
 
-      @analysis.exit_on_guideline14 = @analysis.problem['algorithm']['exit_on_guideline14'] == 1 ? true : false
+      # exit on guideline 14 is no longer true/false.  its 0,1,2,3
+      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+        @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
+        logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
+      else
+        @analysis.exit_on_guideline_14 = 0
+        logger.info "exit_on_guideline_14 is forced to #{@analysis.exit_on_guideline_14}"
+      end
+      @analysis.save!
+      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
 
       @analysis.save!
-      logger.info("exit_on_guideline14: #{@analysis.exit_on_guideline14}")
+      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
         raise 'number of objective functions must equal'
@@ -172,16 +181,21 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
         raise 'could not configure R cluster'
       end
 
+      @r.converse("cat('max_queued_jobs: #{APP_CONFIG['max_queued_jobs']}')")
       worker_ips = {}
-      if @analysis.problem['algorithm']['max_queued_jobs'] > 0
-        worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
-        logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
+      if @analysis.problem['algorithm']['max_queued_jobs']
+        if @analysis.problem['algorithm']['max_queued_jobs'] == 0
+          logger.info "MAX_QUEUED_JOBS is 0"
+          raise 'MAX_QUEUED_JOBS is 0'
+        elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
+          worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
+          logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
+        end  
       elsif !APP_CONFIG['max_queued_jobs'].nil?
-        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
+        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
       else
-        worker_ips[:worker_ips] = ['localhost'] * 0
-        logger.info "Starting R queue to hold 0 jobs"
+        raise 'could not start the cluster (cluster size not set correctly)'
       end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
@@ -221,7 +235,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
-            rails_exit_guideline_14 = "#{@analysis.exit_on_guideline14}"
+            rails_exit_guideline_14 = "#{@analysis.exit_on_guideline_14}"
             source(paste(r_scripts_path,'/optim.R',sep=''))
             }
         end

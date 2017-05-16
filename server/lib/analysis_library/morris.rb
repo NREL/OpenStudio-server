@@ -54,7 +54,6 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
           p_power: 2,
           debug_messages: 0,
           failed_f_value: 1e18,
-          max_queued_jobs: 0,
           objective_functions: []
         }
       }
@@ -160,17 +159,22 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       unless cluster.configure
         raise 'could not configure R cluster'
       end
-
-      worker_ips = {}  
-      if @analysis.problem['algorithm']['max_queued_jobs'] > 0
-        worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
-        logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"    
+      
+      @r.converse("cat('max_queued_jobs: #{APP_CONFIG['max_queued_jobs']}')")
+      worker_ips = {}
+      if @analysis.problem['algorithm']['max_queued_jobs']
+        if @analysis.problem['algorithm']['max_queued_jobs'] == 0
+          logger.info "MAX_QUEUED_JOBS is 0"
+          raise 'MAX_QUEUED_JOBS is 0'
+        elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
+          worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
+          logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
+        end  
       elsif !APP_CONFIG['max_queued_jobs'].nil?
-        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs']
+        worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
       else
-        worker_ips[:worker_ips] = ['localhost'] * 0
-        logger.info "Starting R queue to hold 0 jobs"
+        raise 'could not start the cluster (cluster size not set correctly)'
       end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"

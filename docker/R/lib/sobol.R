@@ -64,17 +64,20 @@ source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
 clusterExport(cl,"create_and_run_datapoint")
 clusterExport(cl,"check_run_flag")
 
+#f <- function(x){
+#  tryCatch(create_and_run_datapoint(x),
+#            error=function(x){
+#              obj <- NULL
+#              for (i in 1:objDim) {
+#                obj[i] <- failed_f
+#              }
+#              print("create_and_run_datapoint failed")
+#              return(obj)
+#            }
+#          )
+#}
 f <- function(x){
-  tryCatch(create_and_run_datapoint(x),
-            error=function(x){
-              obj <- NULL
-              for (i in 1:objDim) {
-                obj[i] <- failed_f
-              }
-              print("create_and_run_datapoint failed")
-              return(obj)
-            }
-          )
+  try(create_and_run_datapoint(x), silent=TRUE)
 }
 clusterExport(cl,"f")
 
