@@ -15,6 +15,7 @@ services:
     image: localhost:5000/openstudio-server
     ports:
       - "8080:80"
+      - "80:80"
       - "443:443"
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
