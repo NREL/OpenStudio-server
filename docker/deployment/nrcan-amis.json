@@ -1,4 +1,286 @@
- {
+{
+  "builds": [
+    {
+      "name": "2.0.1-rc0",
+      "standards": {
+        "ref": "0.1.10",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.1.0",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.6",
+      "radiance": null,
+      "analysis": {
+        "ref": "1.0.0.rc14",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.0.1",
+        "version_sha": "9c93603b97",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "25ed573c515ce4cbab03d859717a71378f3f79f7",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-5a54924c"
+    },
+    {
+      "name": "2.0.1-rc1",
+      "standards": {
+        "ref": "0.1.10",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.1.0",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.6",
+      "radiance": null,
+      "analysis": {
+        "ref": "1.0.0.rc14",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.0.1",
+        "version_sha": "9c93603b97",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "aae2f80cc4cfe1a67c8163cd483ed63688911286",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-d5cf06c3"
+    },
+    {
+      "name": "2.0.4-default",
+      "standards": {
+        "ref": "0.1.11",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.1.3",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.6",
+      "radiance": null,
+      "analysis": {
+        "ref": "1.0.0.rc14",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.0.4",
+        "version_sha": "85b68591e6",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "c92963a3c73aadcff2a910c634d1c1690468291d",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-b1e241a7"
+    },
+    {
+      "name": "2.0.4-p0",
+      "standards": {
+        "ref": "0.1.11",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.1.3",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.6",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.0.4",
+        "version_sha": "85b68591e6",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "cfb7ebaf0abe1ea3db6bf6388e8c7e5150a9230c",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-855ef793"
+    },
+    {
+      "name": "2.0.5-rc1",
+      "standards": {
+        "ref": "0.1.11",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.1.3",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.7",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.0.5",
+        "version_sha": "4c654385ee",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "1f7e0a157bfa1391d950a78292fc5dac18b0f506",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-4405ac52"
+    },
+    {
+      "name": "2.0.5-rc2",
+      "standards": {
+        "ref": "0.1.12",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.2.0",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.7",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.0.5",
+        "version_sha": "0a2578157f",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "1faa2f62eef989fc2ed196b3f5eda9807e16e1c5",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-81872d97"
+    },
+    {
+      "name": "2.0.5-rc3",
+      "standards": {
+        "ref": "0.1.12",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.2.0",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.7",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.0.5",
+        "version_sha": "31a1faa854",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "cf55f15680ed5c725f7280fcef14884a23239049",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-0de1571b"
+    },
+    {
+      "name": "2.1.0-rc0",
+      "standards": {
+        "ref": "0.1.13",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.2.1",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.7",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.1.0",
+        "version_sha": "31a1faa854",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "37102930dae3593f2d882997faa6d0cbcc9b07d1",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-dbb83bcd"
+    },
+    {
+      "name": "2.1.0-rc1",
+      "standards": {
+        "ref": "0.1.13",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.2.1",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.7",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.1.0",
+        "version_sha": "fae436fc10",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "f192b2dd434ee9a7ffe3c732355321019cb66faa",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-ff3eb5e9"
+    },
+    {
+      "name": "2.1.0",
+      "standards": {
+        "ref": "0.1.13",
+        "repo": "nrel/openstudio-standards"
+      },
+      "workflow": {
+        "ref": "1.2.1",
+        "repo": "nrel/openstudio-workflow-gem"
+      },
+      "energyplus": "8.7",
+      "radiance": "5.0.a.12",
+      "analysis": {
+        "ref": "1.0.0.rc18",
+        "repo": "nrel/openstudio-analysis-gem"
+      },
+      "openstudio": {
+        "version_number": "2.1.0",
+        "version_sha": "fae436fc10",
+        "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
+      },
+      "server": {
+        "ref": "f192b2dd434ee9a7ffe3c732355321019cb66faa",
+        "repo": "nrel/openstudio-server"
+      },
+      "R": "3.2.3",
+      "ami": "ami-4064f556"
+    },
+    {
       "name": "2.1.1-nrcan",
       "standards": {
         "ref": "0.1.13-nrcan",
@@ -20,9 +302,11 @@
         "url_base": "https://s3.amazonaws.com/openstudio-builds/NUMBER/OpenStudio-NUMBER.SHA-Linux.deb"
       },
       "server": {
-        "ref": "175da2274792460c578b7c2dc6479bbe2934b8b5",
+        "ref": "70333369e208b521a12d0e8f2b036c9ed00c5339",
         "repo": "nrel/openstudio-server"
       },
       "R": "3.2.3",
-      "ami": "ami-70fb6466"
+      "ami": "ami-7ad1ae6c"
     }
+  ]
+}
