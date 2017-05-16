@@ -40,11 +40,10 @@ So your file may look like this if your version of OS was 2.1.1
 ``
 {
   "version": "2.1.1-nrcan",
-  "docker_machine_version": "1.13.0",
-  "docker_compose_version": "1.10.0",
-  "openstudio_server_base_version": "2.1.1-nrcan",
-  "generated_by": "Phylroy Lopez NRCan"
+  "docker_machine_version": "17.03.0",
+  "generated_by": "Phylroy.Lopez@canada.ca"
 }
+
 ``
 
 Save this file as **user_variables.json** in the deployment folder. 
