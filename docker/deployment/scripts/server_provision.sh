@@ -57,8 +57,8 @@ sleep 1
 docker service create --name registry --publish 5000:5000 registry:2.6
 while ( nc -zv $internalip 5000 3>&1 1>&2- 2>&3- ) | awk -F ":" '$3 != " Connection refused" {exit 1}'; do sleep 5; done
 echo "registry initialized"
-docker tag nrel/openstudio-server:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-server
-docker tag nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-rserve
+docker tag nrel/openstudio-server:OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-server
+docker tag nrel/openstudio-rserve:OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-rserve
 docker tag mongo localhost:5000/mongo
 docker push localhost:5000/openstudio-server
 docker push localhost:5000/openstudio-rserve

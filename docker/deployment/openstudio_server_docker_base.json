@@ -123,7 +123,12 @@
     },
     {
       "type": "shell",
+      "environment_vars": [
+        "OSSERVER_DOCKERHUB_TAG={{ user `version` }}"
+      ],
       "inline": [
+        "cat /home/ubuntu/server_provision.sh | sed -e \"s/OSSERVER_DOCKERHUB_TAG/${OSSERVER_DOCKERHUB_TAG}/\" > /home/ubuntu/tmp.sh",
+        "mv /home/ubuntu/tmp.sh /home/ubuntu/server_provision.sh",
         "chmod 755 /home/ubuntu/*_provision.sh"
       ]
     }
