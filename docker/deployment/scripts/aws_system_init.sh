@@ -30,9 +30,15 @@ else
 	sudo pvcreate /dev/sdn
 	sudo vgcreate docker /dev/sdn
 fi
-sudo lvcreate --wipesignatures y -n thinpool docker -l 95%VG
+sudo lvcreate --wipesignatures y -n graph docker -l 5%VG
+sudo lvcreate --wipesignatures y -n thinpool docker -l 90%VG
 sudo lvcreate --wipesignatures y -n thinpoolmeta docker -l 1%VG
 sudo lvconvert -y --zero n -c 512K --thinpool docker/thinpool --poolmetadata docker/thinpoolmeta
+sudo mkdir /var/lib/docker
+sudo chmod 722 /var/lib/docker
+sudo mkfs.ext4 /dev/docker/graph
+echo '/dev/mapper/docker-graph /var/lib/docker ext4 defaults 0 2' | sudo tee -a /etc/fstab
+sudo mount -a
 sudo mkdir -p /etc/lvm/profile/
 echo -e "activation {\nthin_pool_autoextend_threshold=80\nthin_pool_autoextend_percent=20\n}" | sudo tee /etc/lvm/profile/docker-thinpool.profile
 sudo lvchange --metadataprofile docker-thinpool docker/thinpool
