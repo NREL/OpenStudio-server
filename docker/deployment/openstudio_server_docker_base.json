@@ -11,7 +11,7 @@
       "access_key": "{{ user `aws_access_key` }}",
       "secret_key": "{{ user `aws_secret_key` }}",
       "region": "us-east-1",
-      "ami_name": "OpenStudio-Server-Docker-{{ user `version` }}",
+      "ami_name": "OpenStudio-Server-Docker-{{ user `version` }}{{ user `ami_version_extension` }}",
       "ami_description": "This AMI serves as the base image used for deploying the OpenStudio Server on AWS using Docker. The base OpenStudio Server image from DockerHub on this AMI is {{ user `openstudio_server_base_version` }}.",
       "instance_type": "c3.large",
       "ssh_username": "ubuntu",
@@ -25,7 +25,7 @@
         {
           "device_name": "/dev/sdn",
           "volume_type": "gp2",
-          "volume_size": 20,
+          "volume_size": 200,
           "delete_on_termination": true
         }
       ],
@@ -37,33 +37,9 @@
           "delete_on_termination": true
         },
         {
-          "device_name": "/dev/sdb",
-          "virtual_name": "ephemeral0"
-        },
-        {
-          "device_name": "/dev/sdc",
-          "virtual_name": "ephemeral1"
-        },
-        {
-          "device_name": "/dev/sdd",
-          "virtual_name": "ephemeral2"
-        },
-        {
-          "device_name": "/dev/sde",
-          "virtual_name": "ephemeral3"
-        },
-        {
-          "device_name": "/dev/sdf",
-          "virtual_name": "ephemeral4"
-        },
-        {
-          "device_name": "/dev/sdg",
-          "virtual_name": "ephemeral5"
-        },
-        {
           "device_name": "/dev/sdn",
           "volume_type": "gp2",
-          "volume_size": 20,
+          "volume_size": 200,
           "delete_on_termination": true
         }
       ],

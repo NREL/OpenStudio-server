@@ -26,7 +26,9 @@ else
 	sudo vgextend docker -y /dev/sdf
 	sudo vgextend docker -y /dev/sdg
 fi
-sudo lvextend -l+100%FREE -n docker/thinpool
+sudo lvextend -l+25%FREE -n docker/thinpool
+sudo lvextend -l+75%FREE -n docker/graph
+sudo resize2fs /dev/docker/graph
 new_sectors="$(($(sudo blockdev --getsize64 /dev/docker/thinpool)/512))"
 echo "New 512 sector count for 'docker-thinpool' is $new_sectors"
 new_table=${docker_thinpool_table/${old_sectors}/${new_sectors}}
