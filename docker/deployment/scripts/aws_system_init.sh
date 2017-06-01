@@ -30,8 +30,8 @@ else
 	sudo pvcreate /dev/sdn
 	sudo vgcreate docker /dev/sdn
 fi
-sudo lvcreate --wipesignatures y -n graph docker -l 5%VG
-sudo lvcreate --wipesignatures y -n thinpool docker -l 90%VG
+sudo lvcreate --wipesignatures y -n graph docker -l 1%VG
+sudo lvcreate --wipesignatures y -n thinpool docker -l 5%VG
 sudo lvcreate --wipesignatures y -n thinpoolmeta docker -l 1%VG
 sudo lvconvert -y --zero n -c 512K --thinpool docker/thinpool --poolmetadata docker/thinpoolmeta
 sudo mkdir /var/lib/docker
