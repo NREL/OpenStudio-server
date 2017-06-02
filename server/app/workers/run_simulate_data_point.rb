@@ -257,6 +257,7 @@ class RunSimulateDataPoint
       download_file = "#{analysis_dir}/analysis.zip"
       download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
       @sim_logger.info "Downloading analysis zip from #{download_url}"
+      sleep Random.new.rand(3.0) # Try and stagger the initial hits to the zip download url
       begin
         zip_download_count += 1
         File.open(download_file, 'wb') do |saved_file|
