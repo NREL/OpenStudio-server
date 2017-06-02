@@ -95,7 +95,7 @@ class RunSimulateDataPoint
                      result: {
                          completed_at: ::DateTime.now.iso8601,
                          started_at: ::DateTime.now.iso8601,
-                         stderr: 'Please see the delayed_jobs.log file for the specific error.',
+                         stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
                          stdout: '',
                          step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
                          step_files: [],
@@ -133,8 +133,8 @@ class RunSimulateDataPoint
     osw_path = "#{simulation_dir}/data_point.osw"
     # PAT puts seeds in "seeds" folder (not "seed")
     osw_options = {
-      file_paths: %w(../weather ../seeds ../seed),
-      measure_paths: ['../measures']
+        file_paths: %w(../weather ../seeds ../seed),
+        measure_paths: ['../measures']
     }
     if @data_point.seed
       osw_options[:seed] = @data_point.seed unless @data_point.seed == ''
@@ -146,8 +146,8 @@ class RunSimulateDataPoint
       osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
     end
     t = OpenStudio::Analysis::Translator::Workflow.new(
-      "#{simulation_dir}/analysis.json",
-      osw_options
+        "#{simulation_dir}/analysis.json",
+        osw_options
     )
     t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
     if t_result
@@ -255,87 +255,79 @@ class RunSimulateDataPoint
     if File.exist? receipt_file
       @sim_logger.info 'receipt_file already exists, moving on'
       return true
-    end
-
-    # only call this block if there is no write_lock nor receipt in the dir
-    if File.exist? write_lock_file
-      @sim_logger.info 'write_lock_file exists, checking for receipt file'
-
-      # wait until receipt file appears then return
-      Timeout.timeout(60) do
-        loop do
-          break if File.exist? receipt_file
-          @sim_logger.info 'waiting for receipt file to appear'
-          sleep 3
-        end
-      end
-
-      @sim_logger.info 'receipt_file appeared, moving on'
-      return true
     else
-      # download the file, but first create the write lock
-      write_lock(write_lock_file) do |_|
-        # create write lock
-        download_file = "#{analysis_dir}/analysis.zip"
-        download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
-        @sim_logger.info "Downloading analysis zip from #{download_url}"
-
+      # Try to download the analysis zip
+      zip_download_count = 0
+      zip_max_download_count = 5
+      download_file = "#{analysis_dir}/analysis.zip"
+      download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
+      @sim_logger.info "Downloading analysis zip from #{download_url}"
+      begin
+        zip_download_count += 1
         File.open(download_file, 'wb') do |saved_file|
           # the following "open" is provided by open-uri
           open(download_url, 'rb') do |read_file|
             saved_file.write(read_file.read)
           end
         end
-
-        # Extract the zip
-        @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
-        OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-
-        # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
-        analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
-        @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
-        a = RestClient.get analysis_json_url
-        raise 'Analysis JSON could not be downloaded' unless a.code == 200
-        # Parse to JSON to save it again with nice formatting
-        File.open("#{analysis_dir}/analysis.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
-
-        # Find any custom worker files -- should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
-        files = Dir["#{analysis_dir}/lib/worker_initialize/*.rb"].map { |n| File.basename(n) }.sort
-        @sim_logger.info "The following custom worker initialize files were found #{files}"
-        files.each do |f|
-          run_file(analysis_dir, 'initialize', f)
-        end
+      rescue => e
+        FileUtils.rm_rf download_file if Dir.exist? download_file
+        sleep Random.new.rand(1.0..10.0)
+        retry if zip_download_count < zip_max_download_count
+        raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
       end
 
-      # Now tell all other waiting threads that it is okay to continue
-      # by creating the receipt file.
-      File.open(receipt_file, 'w') { |f| f << Time.now }
-    end
+      # Extract the zip
+      extract_count = 0
+      extract_max_count = 2
+      @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
+      begin
+        extract_count += 1
+        OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+      rescue => e
+        retry if extract_count < extract_max_count
+        raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
+      end
 
-    @sim_logger.info 'Finished worker initialization'
-    true
+      # Download only one copy of the analysis.json
+      json_download_count = 0
+      json_max_download_count = 3
+      analysis_json_file = "#{analysis_dir}/analysis.json"
+      analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
+      @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
+      begin
+        json_download_count += 1
+        a = RestClient.get analysis_json_url
+        raise "Analysis JSON could not be downloaded - responce code of #{a.code} recieved." unless a.code == 200
+        # Parse to JSON to save it again with nice formatting
+        File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+      rescue => e
+        FileUtils.rm_rf analysis_json_file
+        retry if json_download_count < json_max_download_count
+        raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
+      end
+
+      # Run the server data_point initialization script with defined arguments, if it exists.
+      files = Dir["#{analysis_dir}/lib/worker_initialize/*.rb"].map { |n| File.basename(n) }.sort
+      @sim_logger.info "The following custom worker initialize files were found #{files}"
+      files.each do |f|
+        run_file(analysis_dir, 'initialize', f)
+      end
+
+      # Now tell all other future datapoints that it is okay to skip this step by creating the receipt file.
+      File.open(receipt_file, 'w') { |f| f << Time.now }
+
+      @sim_logger.info 'Finished worker initialization'
+      return true
+    end
   rescue => e
     @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
     @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
-    false
+    return false
   end
 
   # Finalize the worker node by running the scripts
   def finalize_worker; end
-
-  # Simple method to write a lock file in order for competing threads to
-  # wait until this operation is complete before continuing.
-  def write_lock(lock_file_path)
-    lock_file = File.open(lock_file_path, 'a')
-    begin
-      lock_file.flock(File::LOCK_EX)
-      lock_file << Time.now
-
-      yield
-    ensure
-      lock_file.flock(File::LOCK_UN)
-    end
-  end
 
   private
 
