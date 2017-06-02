@@ -357,7 +357,12 @@ class DataPointsController < ApplicationController
     end
 
     if h && h.attachment && File.exist?(h.attachment.path)
-      send_data File.binread(h.attachment.path)
+      if /darwin/.match(RUBY_PLATFORM) || /linux/.match(RUBY_PLATFORM)
+        file_data = File.read(h.attachment.path)
+      else
+        file_data = File.binread(h.attachment.path)
+      end
+      send_data file_data
     else
       respond_to do |format|
         format.json { render json: { status: 'error', error_message: 'could not find report' }, status: :unprocessable_entity }
