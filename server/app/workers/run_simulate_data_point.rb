@@ -245,13 +245,8 @@ class RunSimulateDataPoint
   def initialize_worker
     @sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
 
-    # If the request is local, then just copy the data over. But how do we
-    # test if the request is local?
-    write_lock_file = "#{analysis_dir}/analysis_zip.lock"
+    # Check if the receipt file exists, if so, then just return out of this method immediately
     receipt_file = "#{analysis_dir}/analysis_zip.receipt"
-
-    # Check if the receipt file exists, if so, then just return out of this
-    # method immediately
     if File.exist? receipt_file
       @sim_logger.info 'receipt_file already exists, moving on'
       return true
@@ -271,7 +266,7 @@ class RunSimulateDataPoint
           end
         end
       rescue => e
-        FileUtils.rm_rf download_file if Dir.exist? download_file
+        FileUtils.rm_f download_file if File.exist? download_file
         sleep Random.new.rand(1.0..10.0)
         retry if zip_download_count < zip_max_download_count
         raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
@@ -298,11 +293,12 @@ class RunSimulateDataPoint
       begin
         json_download_count += 1
         a = RestClient.get analysis_json_url
-        raise "Analysis JSON could not be downloaded - responce code of #{a.code} recieved." unless a.code == 200
+        raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
         # Parse to JSON to save it again with nice formatting
         File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
       rescue => e
-        FileUtils.rm_rf analysis_json_file
+        FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
+        sleep Random.new.rand(1.0..10.0)
         retry if json_download_count < json_max_download_count
         raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
       end
@@ -314,7 +310,7 @@ class RunSimulateDataPoint
         run_file(analysis_dir, 'initialize', f)
       end
 
-      # Now tell all other future datapoints that it is okay to skip this step by creating the receipt file.
+      # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
       File.open(receipt_file, 'w') { |f| f << Time.now }
 
       @sim_logger.info 'Finished worker initialization'
