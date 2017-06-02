@@ -205,20 +205,23 @@ class RunSimulateDataPoint
         @sim_logger.info 'Saving files/reports back to the server'
 
         # Post the reports back to the server
-        # TODO: check for timeouts and retry
-        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |r| upload_file(r, 'Report') }
+        upload_successful = []
+
+        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| upload_successful << upload_file(rep, 'Report') }
 
         report_file = "#{run_dir}/objectives.json"
-        upload_file(report_file, 'Report') if File.exist?(report_file)
+        upload_successful << upload_file(report_file, 'Report') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/out.osw"
-        upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+        upload_successful << upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/in.osm"
-        upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+        upload_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
 
         report_file = "#{run_dir}/data_point.zip"
-        upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
+        upload_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
+
+        run_result = :errored unless upload_successful.all?
 
         if run_result != :errored
           @data_point.set_success_flag
@@ -259,17 +262,18 @@ class RunSimulateDataPoint
       @sim_logger.info "Downloading analysis zip from #{download_url}"
       sleep Random.new.rand(3.0) # Try and stagger the initial hits to the zip download url
       begin
-        zip_download_count += 1
-        File.open(download_file, 'wb') do |saved_file|
-          # the following "open" is provided by open-uri
-          open(download_url, 'rb') do |read_file|
-            saved_file.write(read_file.read)
+        Timeout.timeout(120) do
+          zip_download_count += 1
+          File.open(download_file, 'wb') do |saved_file|
+            # the following "open" is provided by open-uri
+            open(download_url, 'rb') do |read_file|
+              saved_file.write(read_file.read)
+            end
           end
         end
       rescue => e
         FileUtils.rm_f download_file if File.exist? download_file
-        sleep Random.new.rand(1.0..10.0)
-        retry if zip_download_count < zip_max_download_count
+        sleep Random.new.rand(1.0..10.0) & retry if zip_download_count < zip_max_download_count
         raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
       end
 
@@ -278,8 +282,10 @@ class RunSimulateDataPoint
       extract_max_count = 2
       @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
       begin
-        extract_count += 1
-        OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+        Timeout.timeout(120) do
+          extract_count += 1
+          OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+        end
       rescue => e
         retry if extract_count < extract_max_count
         raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
@@ -292,23 +298,32 @@ class RunSimulateDataPoint
       analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
       @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
       begin
-        json_download_count += 1
-        a = RestClient.get analysis_json_url
-        raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
-        # Parse to JSON to save it again with nice formatting
-        File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+        Timeout.timeout(30) do
+          json_download_count += 1
+          a = RestClient.get analysis_json_url
+          raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
+          # Parse to JSON to save it again with nice formatting
+          File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+        end
       rescue => e
         FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
-        sleep Random.new.rand(1.0..10.0)
-        retry if json_download_count < json_max_download_count
+        sleep Random.new.rand(1.0..10.0) & retry if json_download_count < json_max_download_count
         raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
       end
 
       # Run the server data_point initialization script with defined arguments, if it exists.
-      files = Dir["#{analysis_dir}/lib/worker_initialize/*.rb"].map { |n| File.basename(n) }.sort
-      @sim_logger.info "The following custom worker initialize files were found #{files}"
-      files.each do |f|
-        run_file(analysis_dir, 'initialize', f)
+      begin
+        Timeout.timeout(600) do
+          data_point_initialization_file = "#{analysis_dir}/lib/worker_initialize/worker_initialize.sh"
+          if File.exist? data_point_initialization_file
+            @sim_logger.info 'Found worker data point initialization file.'
+            run_file(analysis_dir, 'initialize', data_point_initialization_file)
+          else
+            @sim_logger.info "No worker data point initialization file found at #{data_point_initialization_file}. Continuing."
+          end
+        end
+      rescue
+
       end
 
       # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
@@ -350,22 +365,34 @@ class RunSimulateDataPoint
   end
 
   def upload_file(filename, type, display_name = nil, content_type = nil)
-    @sim_logger.info "Saving report #{filename} to #{data_point_url}"
+    upload_file_attempt = 0
+    upload_file_max_attempt = 3
     display_name = File.basename(filename, '.*') unless display_name
-    response = if content_type
-                 RestClient.post(data_point_url,
-                                 file: { display_name: display_name,
-                                         type: type,
-                                         attachment: File.new(filename, 'rb') },
-                                 content_type: content_type)
-               else
-                 RestClient.post(data_point_url,
-                                 file: { display_name: display_name,
-                                         type: type,
-                                         attachment: File.new(filename, 'rb') })
-               end
-    @sim_logger.info "Saving report responded with #{response}"
-  end
+    @sim_logger.info "Saving report #{filename} to #{data_point_url}"
+    begin
+      Timeout.timeout(120)
+        upload_file_attempt += 1
+        Timeout.new
+        response = if content_type
+                     RestClient.post(data_point_url,
+                                     file: { display_name: display_name,
+                                             type: type,
+                                             attachment: File.new(filename, 'rb') },
+                                     content_type: content_type)
+                   else
+                     RestClient.post(data_point_url,
+                                     file: { display_name: display_name,
+                                             type: type,
+                                             attachment: File.new(filename, 'rb') })
+                   end
+      end
+      @sim_logger.info "Saving report responded with #{response}"
+      return true
+    rescue => e
+      sleep Random.new.rand(1.0..10.0) & retry if upload_file_attempt < upload_file_max_attempt
+      @sim_logger.error "Could not save report #{display_name} with message: #{e.message} in #{e.backtrace.join("\n")}"
+      return false
+    end
 
   # Run the initialize/finalize scripts
   def run_file(analysis_dir, state, file)
