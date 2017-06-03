@@ -382,7 +382,7 @@ class RunSimulateDataPoint
 
   def upload_file(filename, type, display_name = nil, content_type = nil)
     upload_file_attempt = 0
-    upload_file_max_attempt = 3
+    upload_file_max_attempt = 4
     display_name = File.basename(filename, '.*') unless display_name
     @sim_logger.info "Saving report #{filename} to #{data_point_url}"
     begin
