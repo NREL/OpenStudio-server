@@ -212,6 +212,9 @@ class RunSimulateDataPoint
         report_file = "#{run_dir}/objectives.json"
         uploads_successful << upload_file(report_file, 'Report', 'Objectives JSON', 'application/json') if File.exist?(report_file)
 
+        report_file = "#{run_dir}/#{@data_point.id}.log"
+        uploads_successful << upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
+
         report_file = "#{simulation_dir}/out.osw"
         uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
 
@@ -384,18 +387,18 @@ class RunSimulateDataPoint
     begin
       Timeout.timeout(120) do
         upload_file_attempt += 1
-        res = if content_type
-                RestClient.post(data_point_url,
+        if content_type
+          res = RestClient.post(data_point_url,
                                 file: { display_name: display_name,
                                         type: type,
                                         attachment: File.new(filename, 'rb') },
                                 content_type: content_type)
-              else
-                RestClient.post(data_point_url,
-                                 file: { display_name: display_name,
-                                         type: type,
-                                         attachment: File.new(filename, 'rb') })
-              end
+        else
+          res = RestClient.post(data_point_url,
+                                file: { display_name: display_name,
+                                        type: type,
+                                        attachment: File.new(filename, 'rb') })
+        end
       end
       @sim_logger.info "Saving report responded with #{res}"
       return true
