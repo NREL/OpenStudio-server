@@ -113,6 +113,8 @@ class RunSimulateDataPoint
       @data_point.set_complete_state if @data_point
       @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
       @sim_logger.close if @sim_logger
+      report_file = "#{simulation_dir}/#{@data_point.id}.log"
+      upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
       return false
     end
 
@@ -212,9 +214,6 @@ class RunSimulateDataPoint
         report_file = "#{run_dir}/objectives.json"
         uploads_successful << upload_file(report_file, 'Report', 'Objectives JSON', 'application/json') if File.exist?(report_file)
 
-        report_file = "#{run_dir}/#{@data_point.id}.log"
-        uploads_successful << upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
-
         report_file = "#{simulation_dir}/out.osw"
         uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
 
@@ -256,6 +255,8 @@ class RunSimulateDataPoint
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
       @sim_logger.close if @sim_logger
       @data_point.set_complete_state if @data_point
+      report_file = "#{simulation_dir}/#{@data_point.id}.log"
+      upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
       true
     end
   end
@@ -399,9 +400,9 @@ class RunSimulateDataPoint
                                         type: type,
                                         attachment: File.new(filename, 'rb') })
         end
+        @sim_logger.info "Saving report responded with #{res}"
+        return true
       end
-      @sim_logger.info "Saving report responded with #{res}"
-      return true
     rescue => e
       sleep Random.new.rand(1.0..10.0)
       retry if upload_file_attempt < upload_file_max_attempt
