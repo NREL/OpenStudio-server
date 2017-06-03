@@ -205,24 +205,39 @@ class RunSimulateDataPoint
         @sim_logger.info 'Saving files/reports back to the server'
 
         # Post the reports back to the server
-        upload_successful = []
+        uploads_successful = []
 
-        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| upload_successful << upload_file(rep, 'Report') }
+        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
 
         report_file = "#{run_dir}/objectives.json"
-        upload_successful << upload_file(report_file, 'Report') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Report') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/out.osw"
-        upload_successful << upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/in.osm"
-        upload_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
 
         report_file = "#{run_dir}/data_point.zip"
-        upload_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
 
-        run_result = :errored unless upload_successful.all?
+        run_result = :errored unless uploads_successful.all?
 
+        # Run any data point finalization scripts
+        begin
+          Timeout.timeout(600) do
+            files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+            files.each do |f|
+              @sim_logger.info "Found data point finalization file #{f}."
+              run_file(analysis_dir, 'finalization', f)
+            end
+          end
+        rescue => e
+          @sim_logger.error "Error in data point finalization script: #{e.message} in #{e.backtrace.join("\n")}"
+          run_result = :errored
+        end
+
+        # Set completed state and return
         if run_result != :errored
           @data_point.set_success_flag
         else
@@ -314,16 +329,14 @@ class RunSimulateDataPoint
       # Run the server data_point initialization script with defined arguments, if it exists.
       begin
         Timeout.timeout(600) do
-          data_point_initialization_file = "#{analysis_dir}/lib/worker_initialize/worker_initialize.sh"
-          if File.exist? data_point_initialization_file
-            @sim_logger.info 'Found worker data point initialization file.'
-            run_file(analysis_dir, 'initialize', data_point_initialization_file)
-          else
-            @sim_logger.info "No worker data point initialization file found at #{data_point_initialization_file}. Continuing."
+          files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+          files.each do |f|
+            @sim_logger.info "Found data point initialization file #{f}."
+            run_file(analysis_dir, 'initialization', f)
           end
         end
-      rescue
-
+      rescue => e
+        raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
       end
 
       # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
@@ -396,31 +409,29 @@ class RunSimulateDataPoint
 
   # Run the initialize/finalize scripts
   def run_file(analysis_dir, state, file)
-    f_fullpath = "#{analysis_dir}/lib/worker_#{state}/#{file}"
+    f_fullpath = "#{analysis_dir}/scripts/worker_#{state}/#{file}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
+    f_logpath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.log"
     @sim_logger.info "Running #{state} script #{f_fullpath}"
 
-    # Each worker script has a very specific format and should be loaded and run as a class
-    require f_fullpath
-
-    # Remove the digits that specify the order and then create the class name
-    klass_name = File.basename(f, '.*').gsub(/^\d*_/, '').split('_').map(&:capitalize).join
-
-    # instantiate a class
-    klass = Object.const_get(klass_name).new
-
-    # check if there is an argument json that accompanies the class
+    # Check to see if there is an argument json that accompanies the class
     args = nil
     @sim_logger.info "Looking for argument file #{f_argspath}"
     if File.exist?(f_argspath)
       @sim_logger.info "argument file exists #{f_argspath}"
+      #TODO replace eval with JSON.load
       args = eval(File.read(f_argspath))
       @sim_logger.info "arguments are #{args}"
     end
 
-    r = klass.run(*args)
-    @sim_logger.info "Script returned with #{r}"
+    # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
+    pid = spawn({'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id},
+                ['source', f_fullpath], *args, [:out, :err] => f_logpath, :unsetenv_other => true)
+    Process.wait pid
 
-    klass.finalize if klass.respond_to? :finalize
+    # Ensure the process exited with code 0
+    exit_code = $?.exitstatus
+    @sim_logger.info "Script returned with exit code #{exit_code} of class #{exit_code.class}"
+    raise "Worker #{state} file #{file} returned with non-zero exit code. See #{f_logpath}." unless exit_code == 0
   end
 end
