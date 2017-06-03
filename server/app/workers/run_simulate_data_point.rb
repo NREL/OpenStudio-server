@@ -405,6 +405,7 @@ class RunSimulateDataPoint
       @sim_logger.error "Could not save report #{display_name} with message: #{e.message} in #{e.backtrace.join("\n")}"
       return false
     end
+  end
 
   # Run the initialize/finalize scripts
   def run_file(analysis_dir, state, file)
