@@ -430,7 +430,7 @@ class RunSimulateDataPoint
 
     # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
     pid = spawn({'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id},
-                ['source', f_fullpath], *args, [:out, :err] => f_logpath, :unsetenv_others => true)
+                f_fullpath, *args, [:out, :err] => f_logpath, :unsetenv_others => true)
     Process.wait pid
 
     # Ensure the process exited with code 0
