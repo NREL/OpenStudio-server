@@ -416,6 +416,7 @@ class RunSimulateDataPoint
     f_fullpath = "#{analysis_dir}/scripts/worker_#{state}/#{file}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
     f_logpath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.log"
+    File.chmod(777, f_fullpath)
     @sim_logger.info "Running #{state} script #{f_fullpath}"
 
     # Check to see if there is an argument json that accompanies the class
