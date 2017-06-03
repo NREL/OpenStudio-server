@@ -287,7 +287,8 @@ class RunSimulateDataPoint
         end
       rescue => e
         FileUtils.rm_f download_file if File.exist? download_file
-        sleep Random.new.rand(1.0..10.0) & retry if zip_download_count < zip_max_download_count
+        sleep Random.new.rand(1.0..10.0)
+        retry if zip_download_count < zip_max_download_count
         raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
       end
 
@@ -321,7 +322,8 @@ class RunSimulateDataPoint
         end
       rescue => e
         FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
-        sleep Random.new.rand(1.0..10.0) & retry if json_download_count < json_max_download_count
+        sleep Random.new.rand(1.0..10.0)
+        retry if json_download_count < json_max_download_count
         raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
       end
 
@@ -383,23 +385,24 @@ class RunSimulateDataPoint
       Timeout.timeout(120)
         upload_file_attempt += 1
         Timeout.new
-        response = if content_type
-                     RestClient.post(data_point_url,
-                                     file: { display_name: display_name,
-                                             type: type,
-                                             attachment: File.new(filename, 'rb') },
-                                     content_type: content_type)
-                   else
-                     RestClient.post(data_point_url,
-                                     file: { display_name: display_name,
-                                             type: type,
-                                             attachment: File.new(filename, 'rb') })
-                   end
+        res = if content_type
+                RestClient.post(data_point_url,
+                                file: { display_name: display_name,
+                                        type: type,
+                                        attachment: File.new(filename, 'rb') },
+                                content_type: content_type)
+              else
+                RestClient.post(data_point_url,
+                                 file: { display_name: display_name,
+                                         type: type,
+                                         attachment: File.new(filename, 'rb') })
+              end
       end
-      @sim_logger.info "Saving report responded with #{response}"
+      @sim_logger.info "Saving report responded with #{res}"
       return true
     rescue => e
-      sleep Random.new.rand(1.0..10.0) & retry if upload_file_attempt < upload_file_max_attempt
+      sleep Random.new.rand(1.0..10.0)
+      retry if upload_file_attempt < upload_file_max_attempt
       @sim_logger.error "Could not save report #{display_name} with message: #{e.message} in #{e.backtrace.join("\n")}"
       return false
     end
