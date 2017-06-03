@@ -266,8 +266,7 @@ class RunSimulateDataPoint
     # Check if the receipt file exists, if so, then just return out of this method immediately
     receipt_file = "#{analysis_dir}/analysis_zip.receipt"
     if File.exist? receipt_file
-      @sim_logger.info 'receipt_file already exists, moving on'
-      return true
+      @sim_logger.info 'receipt_file already exists; skipping analysis download'
     else
       # Try to download the analysis zip
       zip_download_count = 0
@@ -326,33 +325,31 @@ class RunSimulateDataPoint
         raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
       end
 
-      # Run the server data_point initialization script with defined arguments, if it exists.
-      begin
-        Timeout.timeout(600) do
-          files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
-          files.each do |f|
-            @sim_logger.info "Found data point initialization file #{f}."
-            run_file(analysis_dir, 'initialization', f)
-          end
-        end
-      rescue => e
-        raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
-      end
-
       # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
       File.open(receipt_file, 'w') { |f| f << Time.now }
-
-      @sim_logger.info 'Finished worker initialization'
-      return true
     end
+
+    # Run the server data_point initialization script with defined arguments, if it exists.
+    begin
+      Timeout.timeout(600) do
+        files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+        files.each do |f|
+          @sim_logger.info "Found data point initialization file #{f}."
+          run_file(analysis_dir, 'initialization', f)
+        end
+      end
+    rescue => e
+      raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
+    end
+
+    @sim_logger.info 'Finished worker initialization'
+    return true
+
   rescue => e
     @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
     @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
     return false
   end
-
-  # Finalize the worker node by running the scripts
-  def finalize_worker; end
 
   private
 
