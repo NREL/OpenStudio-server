@@ -382,7 +382,7 @@ class RunSimulateDataPoint
     display_name = File.basename(filename, '.*') unless display_name
     @sim_logger.info "Saving report #{filename} to #{data_point_url}"
     begin
-      Timeout.timeout(120)
+      Timeout.timeout(120) do
         upload_file_attempt += 1
         res = if content_type
                 RestClient.post(data_point_url,
