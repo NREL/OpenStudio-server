@@ -210,10 +210,10 @@ class RunSimulateDataPoint
         Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
 
         report_file = "#{run_dir}/objectives.json"
-        uploads_successful << upload_file(report_file, 'Report') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Report', 'Objectives JSON', 'application/json') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/out.osw"
-        uploads_successful << upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/in.osm"
         uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
@@ -384,7 +384,6 @@ class RunSimulateDataPoint
     begin
       Timeout.timeout(120)
         upload_file_attempt += 1
-        Timeout.new
         res = if content_type
                 RestClient.post(data_point_url,
                                 file: { display_name: display_name,
