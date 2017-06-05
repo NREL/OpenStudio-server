@@ -168,12 +168,18 @@ class RunSimulateDataPoint
       # Make sure to pass in preserve_run_dir
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
-        run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
+        begin
+          run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
-        k = OpenStudio::Workflow::Run.new osw_path, run_options
-        @sim_logger.info 'Running workflow'
-        run_result = k.run
-        @sim_logger.info "Final run state is #{run_result}"
+          k = OpenStudio::Workflow::Run.new osw_path, run_options
+          @sim_logger.info 'Running workflow'
+          run_result = k.run
+          @sim_logger.info "Final run state is #{run_result}"
+        rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
+          log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
+          @sim_logger.error log_message if @sim_logger
+          run_result = :errored
+        end
       end
       if run_result == :errored
         @data_point.set_error_flag
