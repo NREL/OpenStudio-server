@@ -246,7 +246,7 @@ class RunSimulateDataPoint
       else
         @data_point.set_error_flag
       end
-    rescue => e
+    rescue ScriptError, NoMemoryError, StandardError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       @sim_logger.error log_message if @sim_logger
       @data_point.set_error_flag
