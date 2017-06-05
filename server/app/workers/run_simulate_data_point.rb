@@ -125,11 +125,11 @@ class RunSimulateDataPoint
     url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
     @sim_logger.info "Downloading datapoint from #{url}"
     r = RestClient.get url
-    raise 'Analysis JSON could not be downloaded' unless r.code == 200
+    raise 'Datapoint JSON could not be downloaded' unless r.code == 200
     # Parse to JSON to save it again with nice formatting
     File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
 
-    # copy over the test file to the run directory
+    # copy over required file to the run directory
     FileUtils.cp "#{analysis_dir}/analysis.json", "#{simulation_dir}/analysis.json"
 
     osw_path = "#{simulation_dir}/data_point.osw"
@@ -224,33 +224,33 @@ class RunSimulateDataPoint
         uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
 
         run_result = :errored unless uploads_successful.all?
+      end
 
-        # Run any data point finalization scripts
-        begin
-          Timeout.timeout(600) do
-            files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
-            files.each do |f|
-              @sim_logger.info "Found data point finalization file #{f}."
-              run_file(analysis_dir, 'finalization', f)
-            end
+      # Run any data point finalization scripts
+      begin
+        Timeout.timeout(600) do
+          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+          files.each do |f|
+            @sim_logger.info "Found data point finalization file #{f}."
+            run_file(analysis_dir, 'finalization', f)
           end
-        rescue => e
-          @sim_logger.error "Error in data point finalization script: #{e.message} in #{e.backtrace.join("\n")}"
-          run_result = :errored
         end
+      rescue => e
+        @sim_logger.error "Error in data point finalization script: #{e.message} in #{e.backtrace.join("\n")}"
+        run_result = :errored
+      end
 
-        # Set completed state and return
-        if run_result != :errored
-          @data_point.set_success_flag
-        else
-          @data_point.set_error_flag
-        end
+      # Set completed state and return
+      if run_result != :errored
+        @data_point.set_success_flag
+      else
+        @data_point.set_error_flag
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      puts log_message
       @sim_logger.error log_message if @sim_logger
       @data_point.set_error_flag
+      @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
       @sim_logger.close if @sim_logger
@@ -429,7 +429,6 @@ class RunSimulateDataPoint
       @sim_logger.info "arguments are #{args}"
     end
 
-    @sim_logger.info "id command is #{`id`}"
     # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
     pid = spawn({'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id},
                 f_fullpath, *args, [:out, :err] => f_logpath, :unsetenv_others => true)
