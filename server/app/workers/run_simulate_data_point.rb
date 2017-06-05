@@ -415,8 +415,8 @@ class RunSimulateDataPoint
   def run_file(analysis_dir, state, file)
     f_fullpath = "#{analysis_dir}/scripts/worker_#{state}/#{file}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
-    f_logpath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.log"
-    File.chmod(777, f_fullpath)
+    f_logpath = "#{simulation_dir}/#{File.basename(f_fullpath, '.*')}.log"
+    File.chmod(0777, f_fullpath)
     @sim_logger.info "Running #{state} script #{f_fullpath}"
 
     # Check to see if there is an argument json that accompanies the class
@@ -429,6 +429,7 @@ class RunSimulateDataPoint
       @sim_logger.info "arguments are #{args}"
     end
 
+    @sim_logger.info "id command is #{`id`}"
     # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
     pid = spawn({'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id},
                 f_fullpath, *args, [:out, :err] => f_logpath, :unsetenv_others => true)
