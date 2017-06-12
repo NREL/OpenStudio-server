@@ -40,17 +40,24 @@ create_and_run_datapoint_uniquegroups <- function(x){
     if(debug_messages == 1){
       print(paste('json:',json))
     }
+    #if json$status is failed, then exit
+    if(json$status == 'failed'){
+      print("Datapoint Failed")
+      break
+    }
     #if json$status is false, then try again
     if(!json$status){
       counter = counter + 1
+      #only do this 10 times
+      if(counter > 10){break}
       next
-    }
+    }  
     #if gotten this far then json is good
     if(debug_messages == 1){
       print(paste("Success ",counter))
     }
-    counter <- 11
-    if(counter > 10){break}
+    #only do this 10 times and should be good at this point so break
+    break
   }
   
   #THIS PATH DOESNT EXIST on Workers.  THIS IS RUNNING ON RSERVE_1 

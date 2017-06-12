@@ -63,26 +63,33 @@ begin
             a = JSON.parse(a, symbolize_names: true)
             puts "Status is #{a[:data_point][:status]}"
             if a[:data_point][:status] == 'completed'
-              result[:status] = true
+              if a[:data_point][:status_message] == 'completed normal'
+                result[:status] = true
 
-              # load in the objective functions by accessing the objectives file
-              # that were uploaded when the datapoint completed
-              a = RestClient.post "#{options[:host]}/data_points/#{datapoint_id}/download_report.json", data_point: { filename: 'objectives' }
-              a = JSON.parse(a, symbolize_names: true)
-              # JSON will be form of:
-              # {
-              #     "objective_function_1": 24.125,
-              #     "objective_function_group_1": 1.0,
-              #     "objective_function_2": 266.425,
-              #     "objective_function_group_2": 2.0
-              # }
+                # load in the objective functions by accessing the objectives file
+                # that were uploaded when the datapoint completed
+                a = RestClient.post "#{options[:host]}/data_points/#{datapoint_id}/download_report.json", data_point: { filename: 'objectives' }
+                a = JSON.parse(a, symbolize_names: true)
+                # JSON will be form of:
+                # {
+                #     "objective_function_1": 24.125,
+                #     "objective_function_group_1": 1.0,
+                #     "objective_function_2": 266.425,
+                #     "objective_function_group_2": 2.0
+                # }
 
-              if a[:status] == 'error'
-                raise 'No objective functions returned'
+                if a[:status] == 'error'
+                  #return failed instead of false so it doesnt try to retry
+                  result[:status] = failed
+                  #raise 'No objective functions returned'
+                end
+
+                result[:results] = a
+                
+              elsif if a[:data_point][:status_message] == 'datapoint failure'
+                result[:status] = failed
               end
-
-              result[:results] = a
-
+              
               break
             end
           end
