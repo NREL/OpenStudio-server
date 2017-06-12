@@ -46,7 +46,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
       break
     }
     #if json$status is false, then try again
-    if(!json$status){
+    if(!isTRUE(json$status)){
       counter = counter + 1
       #only do this 10 times
       if(counter > 10){break}
@@ -78,7 +78,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
      print(paste("data_point_directory does not exist! ",data_point_directory))
   }
   #if json$status is FALSE then datapoint status is false
-  if (!json$status) {
+  if (!isTRUE(json$status)) {
     print(paste("json$status is false, RETURNING: ",failed_f))
     obj <- NULL
     for (i in 1:objDim) {

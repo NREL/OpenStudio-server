@@ -80,14 +80,14 @@ begin
 
                 if a[:status] == 'error'
                   #return failed instead of false so it doesnt try to retry
-                  result[:status] = failed
+                  result[:status] = 'failed'
                   #raise 'No objective functions returned'
                 end
 
                 result[:results] = a
                 
-              elsif if a[:data_point][:status_message] == 'datapoint failure'
-                result[:status] = failed
+              elsif a[:data_point][:status_message] == 'datapoint failure'
+                result[:status] = 'failed'
               end
               
               break
