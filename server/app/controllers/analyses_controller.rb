@@ -96,7 +96,7 @@ class AnalysesController < ApplicationController
         @view_all = 1
         @all_sims = @analysis.search(params[:all_search], 'all', @all_page, @view_all)
       else
-        @all_sims = @analysis.search(params[:all_search], 'all', @all_page, @view_all).page(1).per(50)
+        @all_sims = @analysis.search(params[:all_search], 'all', @all_page, @view_all).page(@all_page).per(per_page)
       end
 
       # TODO: this is going to be slow because it returns the entire datapoint for each of these queries
