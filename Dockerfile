@@ -22,6 +22,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
 		ca-certificates \
 		curl \
 		default-jdk \
+		dos2unix \
 		imagemagick \
 		gdebi-core \
 		git \

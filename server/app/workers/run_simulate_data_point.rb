@@ -341,9 +341,10 @@ class RunSimulateDataPoint
       File.open(receipt_file, 'w') { |f| f << Time.now }
     end
 
-    # Run the server data_point initialization script with defined arguments, if it exists.
+    # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
     begin
       Timeout.timeout(600) do
+        exec("find #{analysis_dir}/scripts -type f -print0 | xargs -0 dos2unix")
         files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
         files.each do |f|
           @sim_logger.info "Found data point initialization file #{f}."
