@@ -345,7 +345,6 @@ class RunSimulateDataPoint
     begin
       Timeout.timeout(600) do
         if File.directory? File.join(analysis_dir, 'scripts')
-          exec("find #{analysis_dir}/scripts -type f -print0 | xargs -0 dos2unix")
           files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
           files.each do |f|
             @sim_logger.info "Found data point initialization file #{f}."
@@ -425,8 +424,13 @@ class RunSimulateDataPoint
     f_fullpath = "#{analysis_dir}/scripts/worker_#{state}/#{file}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
     f_logpath = "#{simulation_dir}/#{File.basename(f_fullpath, '.*')}.log"
+
+    # Make the file executable and remove DOS endings
     File.chmod(0777, f_fullpath)
-    @sim_logger.info "Running #{state} script #{f_fullpath}"
+    @sim_logger.info "Preparing to run #{state} script #{f_fullpath}"
+    file_text = File.read(f_fullpath)
+    file_text.gsub!(/\r\n/m, "\n")
+    File.open(f_fullpath, 'wb') { |f| f.print file_text }
 
     # Check to see if there is an argument json that accompanies the class
     args = nil
