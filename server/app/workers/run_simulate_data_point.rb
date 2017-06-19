@@ -423,7 +423,7 @@ class RunSimulateDataPoint
   def run_file(analysis_dir, state, file)
     f_fullpath = "#{analysis_dir}/scripts/worker_#{state}/#{file}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
-    f_logpath = "#{simulation_dir}/#{File.basename(f_fullpath, '.*')}.log"
+    f_logpath = "#{run_dir}/#{File.basename(f_fullpath, '.*')}.log"
 
     # Make the file executable and remove DOS endings
     File.chmod(0777, f_fullpath)
