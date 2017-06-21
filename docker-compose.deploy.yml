@@ -33,6 +33,8 @@ services:
           cpus: "1"
   web-background:
     image: nrel/openstudio-server:latest
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     volumes:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
