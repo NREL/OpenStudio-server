@@ -246,6 +246,9 @@ class RunSimulateDataPoint
         run_result = :errored
       end
 
+      report_file = "#{run_dir}/datapoint_final.log"
+      uploads_successful << upload_file(report_file, 'Report', 'Finalization Script Log', 'application/txt') if File.exist?(report_file)
+
       # Set completed state and return
       if run_result != :errored
         if File.exist? "#{simulation_dir}/out.osw"
