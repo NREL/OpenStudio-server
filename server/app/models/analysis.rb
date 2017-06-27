@@ -155,7 +155,7 @@ class Analysis
       unless j.status == 'completed'
         j.status = 'completed'
         j.end_time = Time.new
-        j.status_message = 'Canceled by user'
+        j.status_message = 'datapoint canceled'
         j.save!
       end
     end
