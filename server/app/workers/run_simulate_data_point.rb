@@ -248,7 +248,20 @@ class RunSimulateDataPoint
 
       # Set completed state and return
       if run_result != :errored
-        @data_point.set_success_flag
+        if File.exist? "#{simulation_dir}/out.osw"
+          status = JSON.parse(File.read("#{simulation_dir}/out.osw"), symbolize_names: true)[:completed_status]
+        else
+          raise "Could not find out.osw file at #{simulation_dir}/out.osw"
+        end
+        if status == 'Invalid'
+          @data_point.set_invalid_flag
+        elsif status == 'Cancel'
+          @data_point.set_cancel_flag
+        elsif status == 'Success'
+          @data_point.set_success_flag
+        else
+          raise "Unknown completion status of #{status} in out.osw file."
+        end
       else
         @data_point.set_error_flag
       end
