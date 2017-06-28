@@ -111,6 +111,16 @@ class DataPoint
     save!
   end
 
+  def set_invalid_flag
+    self.status_message = 'invalid workflow'
+    save!
+  end
+
+  def set_cancel_flag
+    self.status_message = 'datapoint canceled'
+    save!
+  end
+
   def set_error_flag
     self.status_message = 'datapoint failure'
     save!

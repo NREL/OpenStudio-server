@@ -663,7 +663,7 @@ class AnalysesController < ApplicationController
     options['perturbable'] = params[:perturbable] == 'true' ? true : false
 
     # get data
-    @variables, @data = get_analysis_data(@analysis, datapoint_id, options)
+    @variables, @data = get_analysis_data(@analysis, datapoint_id, true, options)
 
     logger.info 'sending analysis data to view'
     respond_to do |format|
@@ -841,7 +841,7 @@ class AnalysesController < ApplicationController
 
   # Get data across analysis. If a datapoint_id is specified, will return only that point
   # options control the query of returned variables, and can contain: visualize, export, pivot, and perturbable toggles
-  def get_analysis_data(analysis, datapoint_id = nil, options = {})
+  def get_analysis_data(analysis, datapoint_id = nil, only_completed_normal = true, options = {})
     # Get the mappings of the variables that were used - use the as_json only to hide the null default fields that show
     # up from the database only operator
 
@@ -913,13 +913,24 @@ class AnalysesController < ApplicationController
     }
 
     # Eventually use this where the timestamp is processed as part of the request to save time
-    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     plot_data = if datapoint_id
-                  DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
-                                  status_message: 'completed normal').map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                  if only_completed_normal
+                    DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
+                                  status_message: 'completed normal')
+                             .map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                  else
+                    DataPoint.where(analysis_id: analysis, id: datapoint_id)
+                             .map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                  end
                 else
-                  DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                           .order_by(:created_at.asc).map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                  if only_completed_normal
+                    DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
+                             .order_by(:created_at.asc).map_reduce(map, reduce)
+                             .out(merge: "datapoints_mr_#{analysis.id}")
+                  else
+                    DataPoint.where(analysis_id: analysis) .order_by(:created_at.asc).map_reduce(map, reduce)
+                        .out(merge: "datapoints_mr_#{analysis.id}")
+                  end
                 end
 
     logger.info "finished fixing up data: #{Time.now - start_time}"
@@ -973,7 +984,7 @@ class AnalysesController < ApplicationController
     require 'csv'
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_analysis_data(analysis, datapoint_ids, export: true)
+    variables, data = get_analysis_data(analysis, datapoint_ids, false, export: true)
     static_fields = %w(name _id run_start_time run_end_time status status_message)
 
     logger.info variables
@@ -999,7 +1010,7 @@ class AnalysesController < ApplicationController
 
   def write_and_send_rdata(analysis, datapoint_ids = nil)
     # get variables from the variables object now instead of using the "superset_of_input_variables"
-    variables, data = get_analysis_data(analysis, datapoint_ids, export: true)
+    variables, data = get_analysis_data(analysis, datapoint_ids, false, export: true)
 
     static_fields = %w(name _id run_start_time run_end_time status status_message)
     names_of_vars = static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
