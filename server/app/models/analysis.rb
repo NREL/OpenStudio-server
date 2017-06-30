@@ -155,7 +155,7 @@ class Analysis
       unless j.status == 'completed'
         j.status = 'completed'
         j.end_time = Time.new
-        j.status_message = 'Canceled by user'
+        j.status_message = 'datapoint canceled'
         j.save!
       end
     end
@@ -317,7 +317,7 @@ class Analysis
   end
 
   def analysis_type
-    j = jobs.last
+    j = jobs.order_by(:index.asc).last
     if j && j.analysis_type
       return j.analysis_type
     else
@@ -326,7 +326,7 @@ class Analysis
   end
 
   def start_time
-    j = jobs.first
+    j = jobs.order_by(:index.asc).first
 
     return j.start_time if j
 
@@ -334,7 +334,7 @@ class Analysis
   end
 
   def end_time
-    j = jobs.last
+    j = jobs.order_by(:index.asc).last
     if j && j['end_time']
       return j['end_time']
     else
