@@ -15,6 +15,8 @@ sudo apt -qq -y install python3
 sudo apt -qq -y install ruby
 sudo perl -p -i -e 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g'  /etc/default/grub
 sudo /usr/sbin/update-grub
+sudo mkdir /tmp/coredumps/ && chmod 777 /tmp/coredumps/
+echo "/tmp/coredumps/core.%e.%p.%h.%t" | sudo tee /proc/sys/kernel/core_pattern
 sleep 1
 
 echo ""
