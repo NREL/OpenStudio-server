@@ -242,35 +242,30 @@ module AnalysisLibrary::R
       logger.info "Creating image for #{variable.name} with samples #{samples}"
       save_file_name = nil
       if samples && samples.count > 0
-        save_file_name = "#{APP_CONFIG['server_asset_path']}/R/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.png'], nil)}"
-        logger.info("R image filename is #{save_file_name}")
+        save_file_name = "/#{APP_CONFIG['server_asset_path']}/R/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.jpg'], nil)}"
+        logger.info("R image file name is #{save_file_name}")
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
           @r.command(d: { samples: samples }.to_dataframe) do
             %{
-              png(filename="#{save_file_name}", width = 1024, height = 1024)
+              png(filename="#{save_file_name}", width = 1024, height = 1024, type="cairo")
               hist(d$samples, freq=F, breaks=20)
               dev.off()
-            }
+          }
           end
         else # plot as a table
           @r.command(d: { samples: samples }.to_dataframe) do
             %{
-              png(filename="#{save_file_name}", width = 1024, height = 1024)
+              png(filename="#{save_file_name}", width = 1024, height = 1024, type="cairo")
               plot(table(d$samples), ylab='count')
               dev.off()
-            }
+          }
           end
         end
 
-        if save_file_name && File.exist?(save_file_name)
+        if save_file_name
           pfi = PreflightImage.add_from_disk(variable.id, 'histogram', save_file_name)
           variable.preflight_images << pfi unless variable.preflight_images.include?(pfi)
-        else
-          logger.info("No R image file found at #{save_file_name}")
         end
-
-
-
       end
     end
 
