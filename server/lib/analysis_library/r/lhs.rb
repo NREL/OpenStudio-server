@@ -244,12 +244,10 @@ module AnalysisLibrary::R
       if samples && samples.count > 0
         save_file_name = "#{APP_CONFIG['server_asset_path']}/R/#{Dir::Tmpname.make_tmpname(['r_samples_plot', '.png'], nil)}"
         logger.info("R image filename is #{save_file_name}")
-        # If running on Docker, then use type='cairo' to create PNG (since it is headless and cairo is installed)
-        png_type = Rails.env =~ /docker/ ? ', type="cairo"' : ''
         if samples[0].is_a?(Float) || samples[0].is_a?(Integer)
           @r.command(d: { samples: samples }.to_dataframe) do
             %{
-              png(filename="#{save_file_name}", width = 1024, height = 1024#{png_type})
+              png(filename="#{save_file_name}", width = 1024, height = 1024)
               hist(d$samples, freq=F, breaks=20)
               dev.off()
             }
@@ -257,7 +255,7 @@ module AnalysisLibrary::R
         else # plot as a table
           @r.command(d: { samples: samples }.to_dataframe) do
             %{
-              png(filename="#{save_file_name}", width = 1024, height = 1024#{png_type})
+              png(filename="#{save_file_name}", width = 1024, height = 1024)
               plot(table(d$samples), ylab='count')
               dev.off()
             }
