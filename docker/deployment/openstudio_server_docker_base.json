@@ -12,7 +12,7 @@
       "secret_key": "{{ user `aws_secret_key` }}",
       "region": "us-east-1",
       "ami_name": "OpenStudio-Server-Docker-{{ user `version` }}{{ user `ami_version_extension` }}",
-      "ami_description": "This AMI serves as the base image used for deploying the OpenStudio Server on AWS using Docker. The base OpenStudio Server image from DockerHub on this AMI is {{ user `openstudio_server_base_version` }}.",
+      "ami_description": "This AMI serves as the base image used for deploying the OpenStudio Server on AWS using Docker. The base OpenStudio Server image from DockerHub on this AMI is {{ user `version` }}.",
       "instance_type": "c3.large",
       "ssh_username": "ubuntu",
       "ami_block_device_mappings": [
@@ -46,9 +46,8 @@
       "tags": {
         "generated_by_packer": "TRUE",
         "created_on": "{{ isotime }}",
-        "docker_machine_version": "{{ user `docker_machine_version` }}",
-        "docker_compose_version" : "{{ user `docker_compose_version` }}",
-        "dockerhub_release_tag": "{{ user `openstudio_server_base_version` }}",
+        "docker_version": "{{ user `docker_version` }}",
+        "dockerhub_release_tag": "{{ user `version` }}",
         "oss_ami_version": "{{ user `version` }}",
         "generated_by": "{{ user `generated_by` }}"
       }
@@ -60,8 +59,7 @@
       "script": "./scripts/aws_system_init.sh",
       "environment_vars": [
         "DOCKERD_OPTIONS=--group=docker --storage-driver=devicemapper --storage-opt=dm.thinpooldev=/dev/mapper/docker-thinpool --storage-opt=dm.fs=ext4 --storage-opt=dm.use_deferred_removal=true --storage-opt=dm.use_deferred_deletion=true --default-ulimit core=-1",
-        "DOCKER_MACHINE_VERSION={{ user `docker_machine_version` }}",
-        "DOCKER_COMPOSE_VERSION={{ user `docker_compose_version` }}"
+        "DOCKER_VERSION={{ user `docker_version` }}"
       ]
     },
     {
