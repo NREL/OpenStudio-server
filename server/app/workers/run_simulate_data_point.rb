@@ -289,87 +289,114 @@ class RunSimulateDataPoint
   def initialize_worker
     @sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
 
-    # Check if the receipt file exists, if so, then just return out of this method immediately
+    write_lock_file = "#{analysis_dir}/analysis_zip.lock"
     receipt_file = "#{analysis_dir}/analysis_zip.receipt"
+
+    # Check if the receipt file exists, if so, then just return out of this method immediately
     if File.exist? receipt_file
-      @sim_logger.info 'receipt_file already exists; skipping analysis download'
-    else
-      # Try to download the analysis zip
-      zip_download_count = 0
-      zip_max_download_count = 6
-      download_file = "#{analysis_dir}/analysis.zip"
-      download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
-      @sim_logger.info "Downloading analysis zip from #{download_url}"
-      sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
+      @sim_logger.info 'receipt_file already exists, moving on'
+      return true
+    end
+
+    # This block makes this code threadsafe for non-docker deployments, i.e. desktop usage
+    if File.exist? write_lock_file
+      @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
+
+      # wait until receipt file appears then return or error
+      zip_download_timeout = 120
       begin
-        Timeout.timeout(240) do
-          zip_download_count += 1
-          File.open(download_file, 'wb') do |saved_file|
-            # the following "open" is provided by open-uri
-            open(download_url, 'rb') do |read_file|
-              saved_file.write(read_file.read)
+        Timeout.timeout(zip_download_timeout) do
+          loop do
+            break if File.exist? receipt_file
+            @sim_logger.info 'waiting for receipt file to appear'
+            sleep 3
+          end
+        end
+
+        @sim_logger.info 'receipt_file appeared, moving on'
+        return true
+      rescue ::Timeout::Error
+        @sim_logger.error "Required analysis objects were not retrieved after #{zip_download_timeout} seconds."
+      end
+    else
+      # Try to download the analysis zip, but first lock simultanious threads
+      write_lock(write_lock_file) do |_|
+        zip_download_count = 0
+        zip_max_download_count = 6
+        download_file = "#{analysis_dir}/analysis.zip"
+        download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
+        @sim_logger.info "Downloading analysis zip from #{download_url}"
+        sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
+        begin
+          Timeout.timeout(240) do
+            zip_download_count += 1
+            File.open(download_file, 'wb') do |saved_file|
+              # the following "open" is provided by open-uri
+              open(download_url, 'rb') do |read_file|
+                saved_file.write(read_file.read)
+              end
+            end
+          end
+        rescue => e
+          FileUtils.rm_f download_file if File.exist? download_file
+          sleep Random.new.rand(1.0..10.0)
+          retry if zip_download_count < zip_max_download_count
+          raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
+        end
+
+        # Extract the zip
+        extract_count = 0
+        extract_max_count = 2
+        @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
+        begin
+          Timeout.timeout(130) do
+            extract_count += 1
+            OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+          end
+        rescue => e
+          retry if extract_count < extract_max_count
+          raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
+        end
+
+        # Download only one copy of the analysis.json
+        json_download_count = 0
+        json_max_download_count = 6
+        analysis_json_file = "#{analysis_dir}/analysis.json"
+        analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
+        @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
+        begin
+          Timeout.timeout(90) do
+            json_download_count += 1
+            a = RestClient.get analysis_json_url
+            raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
+            # Parse to JSON to save it again with nice formatting
+            File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+          end
+        rescue => e
+          FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
+          sleep Random.new.rand(1.0..10.0)
+          retry if json_download_count < json_max_download_count
+          raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
+        end
+
+        # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
+        File.open(receipt_file, 'w') { |f| f << Time.now }
+      end
+
+      # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
+      begin
+        Timeout.timeout(600) do
+          if File.directory? File.join(analysis_dir, 'scripts')
+            files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+            files.each do |f|
+              @sim_logger.info "Found data point initialization file #{f}."
+              run_file(analysis_dir, 'initialization', f)
             end
           end
         end
       rescue => e
-        FileUtils.rm_f download_file if File.exist? download_file
-        sleep Random.new.rand(1.0..10.0)
-        retry if zip_download_count < zip_max_download_count
-        raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
+        raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
       end
-
-      # Extract the zip
-      extract_count = 0
-      extract_max_count = 2
-      @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
-      begin
-        Timeout.timeout(130) do
-          extract_count += 1
-          OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-        end
-      rescue => e
-        retry if extract_count < extract_max_count
-        raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
-      end
-
-      # Download only one copy of the analysis.json
-      json_download_count = 0
-      json_max_download_count = 6
-      analysis_json_file = "#{analysis_dir}/analysis.json"
-      analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
-      @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
-      begin
-        Timeout.timeout(90) do
-          json_download_count += 1
-          a = RestClient.get analysis_json_url
-          raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
-          # Parse to JSON to save it again with nice formatting
-          File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
-        end
-      rescue => e
-        FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
-        sleep Random.new.rand(1.0..10.0)
-        retry if json_download_count < json_max_download_count
-        raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
-      end
-
-      # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
-      File.open(receipt_file, 'w') { |f| f << Time.now }
-    end
-
-    # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
-    begin
-      Timeout.timeout(600) do
-        if File.directory? File.join(analysis_dir, 'scripts')
-          files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
-          files.each do |f|
-            @sim_logger.info "Found data point initialization file #{f}."
-            run_file(analysis_dir, 'initialization', f)
-          end
-        end
-      end
-    rescue => e
-      raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
     end
 
     @sim_logger.info 'Finished worker initialization'
@@ -379,6 +406,19 @@ class RunSimulateDataPoint
     @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
     @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
     return false
+  end
+
+  # Simple method to write a lock file in order for competing threads to wait before continuing.
+  def write_lock(lock_file_path)
+    lock_file = File.open(lock_file_path, 'a')
+    begin
+      lock_file.flock(File::LOCK_EX)
+      lock_file << Time.now
+
+      yield
+    ensure
+      lock_file.flock(File::LOCK_UN)
+    end
   end
 
   private
