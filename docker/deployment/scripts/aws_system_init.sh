@@ -64,14 +64,14 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Installing docker server version $DOCKER_MACHINE_VERSION"
+echo "Installing docker server version $DOCKER_VERSION"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
 echo "" >> /home/ubuntu/.bashrc
 echo "# Configuration variables used to build the OpenStudio Server base image"
-echo "export DOCKER_MACHINE_VERSION=$DOCKER_MACHINE_VERSION" >> /home/ubuntu/.bashrc
-sudo apt-get -y -qq install docker-ce=$DOCKER_MACHINE_VERSION~ce-0~ubuntu-yakkety
+echo "export DOCKER_VERSION=$DOCKER_VERSION" >> /home/ubuntu/.bashrc
+sudo apt-get -y -qq install docker-ce=$DOCKER_VERSION~ce-0~ubuntu
 sleep 1
 
 echo ""
