@@ -42,7 +42,7 @@ class PreflightImage
 
   has_mongoid_attached_file :image,
                             url: '/assets/variables/:id/:style/:basename.:extension',
-                            path: "#{APP_CONFIG['server_asset_path']}/assets/variables/:id/files/:style/:basename.:extension",
+                            path: "#{APP_CONFIG['server_asset_path']}/assets/variables/:id/:style/:basename.:extension",
                             styles: {
                               original: ['1920x1680>', :png],
                               thumb: ['150x150#', :png],
@@ -57,8 +57,8 @@ class PreflightImage
   def self.add_from_disk(var_id, image_type, filename)
     pfi = PreflightImage.new(variable_id: var_id, image_type: image_type)
 
-    logger.info("adding preflight file #{filename}")
     if File.exist?(filename)
+      logger.info("adding preflight file #{filename}")
       file = File.open(filename, 'rb')
       pfi.image = file
       file.close
