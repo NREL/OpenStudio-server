@@ -58,7 +58,7 @@
       "type": "shell",
       "script": "./scripts/aws_system_init.sh",
       "environment_vars": [
-        "DOCKERD_OPTIONS=--group=docker --storage-driver=devicemapper --storage-opt=dm.thinpooldev=/dev/mapper/docker-thinpool --storage-opt=dm.fs=ext4 --storage-opt=dm.use_deferred_removal=true --storage-opt=dm.use_deferred_deletion=true --default-ulimit core=-1",
+        "DOCKERD_OPTIONS=--group=docker --storage-driver=overlay2 --default-ulimit core=-1",
         "DOCKER_VERSION={{ user `docker_version` }}"
       ]
     },
@@ -67,7 +67,7 @@
       "script": "./scripts/aws_osserver_init.sh",
       "pause_before": "15s",
       "environment_vars": [
-        "OSSERVER_DOCKERHUB_TAG={{ user `version` }}"
+        "OSSERVER_DOCKERHUB_TAG={{ user `version` }}{{ user `ami_version_extension` }}"
       ]
     },
     {
@@ -108,3 +108,4 @@
     }
   ]
 }
+
