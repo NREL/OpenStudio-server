@@ -95,7 +95,7 @@ class RunSimulateDataPoint
                      result: {
                          completed_at: ::DateTime.now.iso8601,
                          started_at: ::DateTime.now.iso8601,
-                         stderr: 'Please see the delayed_jobs.log file for the specific error.',
+                         stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
                          stdout: '',
                          step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
                          step_files: [],
@@ -113,6 +113,8 @@ class RunSimulateDataPoint
       @data_point.set_complete_state if @data_point
       @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
       @sim_logger.close if @sim_logger
+      report_file = "#{simulation_dir}/#{@data_point.id}.log"
+      upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
       return false
     end
 
@@ -123,18 +125,18 @@ class RunSimulateDataPoint
     url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
     @sim_logger.info "Downloading datapoint from #{url}"
     r = RestClient.get url
-    raise 'Analysis JSON could not be downloaded' unless r.code == 200
+    raise 'Datapoint JSON could not be downloaded' unless r.code == 200
     # Parse to JSON to save it again with nice formatting
     File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
 
-    # copy over the test file to the run directory
+    # copy over required file to the run directory
     FileUtils.cp "#{analysis_dir}/analysis.json", "#{simulation_dir}/analysis.json"
 
     osw_path = "#{simulation_dir}/data_point.osw"
     # PAT puts seeds in "seeds" folder (not "seed")
     osw_options = {
-      file_paths: %w(../weather ../seeds ../seed),
-      measure_paths: ['../measures']
+        file_paths: %w(../weather ../seeds ../seed),
+        measure_paths: ['../measures']
     }
     if @data_point.seed
       osw_options[:seed] = @data_point.seed unless @data_point.seed == ''
@@ -146,8 +148,8 @@ class RunSimulateDataPoint
       osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
     end
     t = OpenStudio::Analysis::Translator::Workflow.new(
-      "#{simulation_dir}/analysis.json",
-      osw_options
+        "#{simulation_dir}/analysis.json",
+        osw_options
     )
     t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
     if t_result
@@ -166,12 +168,18 @@ class RunSimulateDataPoint
       # Make sure to pass in preserve_run_dir
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
-        run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
+        begin
+          run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
 
-        k = OpenStudio::Workflow::Run.new osw_path, run_options
-        @sim_logger.info 'Running workflow'
-        run_result = k.run
-        @sim_logger.info "Final run state is #{run_result}"
+          k = OpenStudio::Workflow::Run.new osw_path, run_options
+          @sim_logger.info 'Running workflow'
+          run_result = k.run
+          @sim_logger.info "Final run state is #{run_result}"
+        rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
+          log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
+          @sim_logger.error log_message if @sim_logger
+          run_result = :errored
+        end
       end
       if run_result == :errored
         @data_point.set_error_flag
@@ -205,49 +213,72 @@ class RunSimulateDataPoint
         @sim_logger.info 'Saving files/reports back to the server'
 
         # Post the reports back to the server
-        # TODO: check for timeouts and retry
-        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |r| upload_file(r, 'Report') }
+        uploads_successful = []
+
+        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
 
         report_file = "#{run_dir}/objectives.json"
-        upload_file(report_file, 'Report') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Report', 'Objectives JSON', 'application/json') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/out.osw"
-        upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/in.osm"
-        upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
 
         report_file = "#{run_dir}/data_point.zip"
-        upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
 
-        if run_result != :errored
-          if File.exist? "#{simulation_dir}/out.osw"
-            status = JSON.parse(File.read("#{simulation_dir}/out.osw"), symbolize_names: true)[:completed_status]
-          else
-            raise "Could not find out.osw file at #{simulation_dir}/out.osw"
-          end
-          if status == 'Invalid'
-            @data_point.set_invalid_flag
-          elsif status == 'Cancel'
-            @data_point.set_cancel_flag
-          elsif status == 'Success'
-            @data_point.set_success_flag
-          else
-            raise "Unknown completion status of #{status} in out.osw file."
-          end
-        else
-          @data_point.set_error_flag
-        end
+        run_result = :errored unless uploads_successful.all?
       end
-    rescue => e
+
+      # Run any data point finalization scripts
+      begin
+        Timeout.timeout(600) do
+          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+          files.each do |f|
+            @sim_logger.info "Found data point finalization file #{f}."
+            run_file(analysis_dir, 'finalization', f)
+          end
+        end
+      rescue => e
+        @sim_logger.error "Error in data point finalization script: #{e.message} in #{e.backtrace.join("\n")}"
+        run_result = :errored
+      end
+
+      report_file = "#{run_dir}/datapoint_final.log"
+      uploads_successful << upload_file(report_file, 'Report', 'Finalization Script Log', 'application/txt') if File.exist?(report_file)
+
+      # Set completed state and return
+      if run_result != :errored
+        if File.exist? "#{simulation_dir}/out.osw"
+          status = JSON.parse(File.read("#{simulation_dir}/out.osw"), symbolize_names: true)[:completed_status]
+        else
+          raise "Could not find out.osw file at #{simulation_dir}/out.osw"
+        end
+        if status == 'Invalid'
+          @data_point.set_invalid_flag
+        elsif status == 'Cancel'
+          @data_point.set_cancel_flag
+        elsif status == 'Success'
+          @data_point.set_success_flag
+        else
+          raise "Unknown completion status of #{status} in out.osw file."
+        end
+      else
+        @data_point.set_error_flag
+      end
+    rescue ScriptError, NoMemoryError, StandardError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      puts log_message
       @sim_logger.error log_message if @sim_logger
       @data_point.set_error_flag
+      @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
       @sim_logger.close if @sim_logger
       @data_point.set_complete_state if @data_point
+      report_file = "#{simulation_dir}/#{@data_point.id}.log"
+      upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
       true
     end
   end
@@ -258,86 +289,126 @@ class RunSimulateDataPoint
   def initialize_worker
     @sim_logger.info "Starting initialize_worker for datapoint #{@data_point.id}"
 
-    # If the request is local, then just copy the data over. But how do we
-    # test if the request is local?
     write_lock_file = "#{analysis_dir}/analysis_zip.lock"
     receipt_file = "#{analysis_dir}/analysis_zip.receipt"
 
-    # Check if the receipt file exists, if so, then just return out of this
-    # method immediately
+    # Check if the receipt file exists, if so, then just return out of this method immediately
     if File.exist? receipt_file
       @sim_logger.info 'receipt_file already exists, moving on'
       return true
     end
 
-    # only call this block if there is no write_lock nor receipt in the dir
+    # This block makes this code threadsafe for non-docker deployments, i.e. desktop usage
     if File.exist? write_lock_file
-      @sim_logger.info 'write_lock_file exists, checking for receipt file'
+      @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
 
-      # wait until receipt file appears then return
-      Timeout.timeout(60) do
-        loop do
-          break if File.exist? receipt_file
-          @sim_logger.info 'waiting for receipt file to appear'
-          sleep 3
-        end
-      end
-
-      @sim_logger.info 'receipt_file appeared, moving on'
-      return true
-    else
-      # download the file, but first create the write lock
-      write_lock(write_lock_file) do |_|
-        # create write lock
-        download_file = "#{analysis_dir}/analysis.zip"
-        download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
-        @sim_logger.info "Downloading analysis zip from #{download_url}"
-
-        File.open(download_file, 'wb') do |saved_file|
-          # the following "open" is provided by open-uri
-          open(download_url, 'rb') do |read_file|
-            saved_file.write(read_file.read)
+      # wait until receipt file appears then return or error
+      zip_download_timeout = 120
+      begin
+        Timeout.timeout(zip_download_timeout) do
+          loop do
+            break if File.exist? receipt_file
+            @sim_logger.info 'waiting for receipt file to appear'
+            sleep 3
           end
         end
 
-        # Extract the zip
-        @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
-        OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+        @sim_logger.info 'receipt_file appeared, moving on'
+        return true
+      rescue ::Timeout::Error
+        @sim_logger.error "Required analysis objects were not retrieved after #{zip_download_timeout} seconds."
+      end
+    else
+      # Try to download the analysis zip, but first lock simultanious threads
+      write_lock(write_lock_file) do |_|
+        zip_download_count = 0
+        zip_max_download_count = 6
+        download_file = "#{analysis_dir}/analysis.zip"
+        download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
+        @sim_logger.info "Downloading analysis zip from #{download_url}"
+        sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
+        begin
+          Timeout.timeout(240) do
+            zip_download_count += 1
+            File.open(download_file, 'wb') do |saved_file|
+              # the following "open" is provided by open-uri
+              open(download_url, 'rb') do |read_file|
+                saved_file.write(read_file.read)
+              end
+            end
+          end
+        rescue => e
+          FileUtils.rm_f download_file if File.exist? download_file
+          sleep Random.new.rand(1.0..10.0)
+          retry if zip_download_count < zip_max_download_count
+          raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
+        end
 
-        # Download only one copy of the analysis.json # http://localhost:3000/analyses/6adb98a1-a8b0-41d0-a5aa-9a4c6ec2bc79.json
+        # Extract the zip
+        extract_count = 0
+        extract_max_count = 2
+        @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
+        begin
+          Timeout.timeout(130) do
+            extract_count += 1
+            OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+          end
+        rescue => e
+          retry if extract_count < extract_max_count
+          raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
+        end
+
+        # Download only one copy of the analysis.json
+        json_download_count = 0
+        json_max_download_count = 6
+        analysis_json_file = "#{analysis_dir}/analysis.json"
         analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
         @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
-        a = RestClient.get analysis_json_url
-        raise 'Analysis JSON could not be downloaded' unless a.code == 200
-        # Parse to JSON to save it again with nice formatting
-        File.open("#{analysis_dir}/analysis.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
-
-        # Find any custom worker files -- should we just call these via system ruby? Then we could have any gem that is installed (not bundled)
-        files = Dir["#{analysis_dir}/lib/worker_initialize/*.rb"].map { |n| File.basename(n) }.sort
-        @sim_logger.info "The following custom worker initialize files were found #{files}"
-        files.each do |f|
-          run_file(analysis_dir, 'initialize', f)
+        begin
+          Timeout.timeout(90) do
+            json_download_count += 1
+            a = RestClient.get analysis_json_url
+            raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
+            # Parse to JSON to save it again with nice formatting
+            File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+          end
+        rescue => e
+          FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
+          sleep Random.new.rand(1.0..10.0)
+          retry if json_download_count < json_max_download_count
+          raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
         end
+
+        # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
+        File.open(receipt_file, 'w') { |f| f << Time.now }
       end
 
-      # Now tell all other waiting threads that it is okay to continue
-      # by creating the receipt file.
-      File.open(receipt_file, 'w') { |f| f << Time.now }
+      # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
+      begin
+        Timeout.timeout(600) do
+          if File.directory? File.join(analysis_dir, 'scripts')
+            files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+            files.each do |f|
+              @sim_logger.info "Found data point initialization file #{f}."
+              run_file(analysis_dir, 'initialization', f)
+            end
+          end
+        end
+      rescue => e
+        raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
+      end
     end
 
     @sim_logger.info 'Finished worker initialization'
-    true
+    return true
+
   rescue => e
     @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
     @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
-    false
+    return false
   end
 
-  # Finalize the worker node by running the scripts
-  def finalize_worker; end
-
-  # Simple method to write a lock file in order for competing threads to
-  # wait until this operation is complete before continuing.
+  # Simple method to write a lock file in order for competing threads to wait before continuing.
   def write_lock(lock_file_path)
     lock_file = File.open(lock_file_path, 'a')
     begin
@@ -374,50 +445,67 @@ class RunSimulateDataPoint
   end
 
   def upload_file(filename, type, display_name = nil, content_type = nil)
-    @sim_logger.info "Saving report #{filename} to #{data_point_url}"
+    upload_file_attempt = 0
+    upload_file_max_attempt = 4
     display_name = File.basename(filename, '.*') unless display_name
-    response = if content_type
-                 RestClient.post(data_point_url,
-                                 file: { display_name: display_name,
-                                         type: type,
-                                         attachment: File.new(filename, 'rb') },
-                                 content_type: content_type)
-               else
-                 RestClient.post(data_point_url,
-                                 file: { display_name: display_name,
-                                         type: type,
-                                         attachment: File.new(filename, 'rb') })
-               end
-    @sim_logger.info "Saving report responded with #{response}"
+    @sim_logger.info "Saving report #{filename} to #{data_point_url}"
+    begin
+      Timeout.timeout(120) do
+        upload_file_attempt += 1
+        if content_type
+          res = RestClient.post(data_point_url,
+                                file: { display_name: display_name,
+                                        type: type,
+                                        attachment: File.new(filename, 'rb') },
+                                content_type: content_type)
+        else
+          res = RestClient.post(data_point_url,
+                                file: { display_name: display_name,
+                                        type: type,
+                                        attachment: File.new(filename, 'rb') })
+        end
+        @sim_logger.info "Saving report responded with #{res}"
+        return true
+      end
+    rescue => e
+      sleep Random.new.rand(1.0..10.0)
+      retry if upload_file_attempt < upload_file_max_attempt
+      @sim_logger.error "Could not save report #{display_name} with message: #{e.message} in #{e.backtrace.join("\n")}"
+      return false
+    end
   end
 
   # Run the initialize/finalize scripts
   def run_file(analysis_dir, state, file)
-    f_fullpath = "#{analysis_dir}/lib/worker_#{state}/#{file}"
+    f_fullpath = "#{analysis_dir}/scripts/worker_#{state}/#{file}"
     f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
-    @sim_logger.info "Running #{state} script #{f_fullpath}"
+    f_logpath = "#{run_dir}/#{File.basename(f_fullpath, '.*')}.log"
 
-    # Each worker script has a very specific format and should be loaded and run as a class
-    require f_fullpath
+    # Make the file executable and remove DOS endings
+    File.chmod(0777, f_fullpath)
+    @sim_logger.info "Preparing to run #{state} script #{f_fullpath}"
+    file_text = File.read(f_fullpath)
+    file_text.gsub!(/\r\n/m, "\n")
+    File.open(f_fullpath, 'wb') { |f| f.print file_text }
 
-    # Remove the digits that specify the order and then create the class name
-    klass_name = File.basename(f, '.*').gsub(/^\d*_/, '').split('_').map(&:capitalize).join
-
-    # instantiate a class
-    klass = Object.const_get(klass_name).new
-
-    # check if there is an argument json that accompanies the class
+    # Check to see if there is an argument json that accompanies the class
     args = nil
     @sim_logger.info "Looking for argument file #{f_argspath}"
     if File.exist?(f_argspath)
       @sim_logger.info "argument file exists #{f_argspath}"
+      #TODO replace eval with JSON.load
       args = eval(File.read(f_argspath))
       @sim_logger.info "arguments are #{args}"
     end
 
-    r = klass.run(*args)
-    @sim_logger.info "Script returned with #{r}"
+    # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
+    pid = spawn({'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id},
+                f_fullpath, *args, [:out, :err] => f_logpath, :unsetenv_others => true)
+    Process.wait pid
 
-    klass.finalize if klass.respond_to? :finalize
+    # Ensure the process exited with code 0
+    exit_code = $?.exitstatus
+    @sim_logger.info "Script returned with exit code #{exit_code} of class #{exit_code.class}"
+    raise "Worker #{state} file #{file} returned with non-zero exit code. See #{f_logpath}." unless exit_code == 0
   end
 end
