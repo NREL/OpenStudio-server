@@ -224,7 +224,7 @@ module AnalysisLibrary::R
         # save the samples to the
         samples[var.id.to_s] = variable_samples
 
-        # plot_samples(var, variable_samples)
+        plot_samples(var, variable_samples)
 
         var.r_index = i_var + 1 # r_index is 1-based
         var.save!
