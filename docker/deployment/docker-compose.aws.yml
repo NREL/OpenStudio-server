@@ -50,6 +50,8 @@ services:
   worker:
     image: localhost:5000/openstudio-server
     command: bin/delayed_job -i worker --queue=simulations run
+    volumes:
+      - /mnt/openstudio
     depends_on:
       - web
       - web-background
