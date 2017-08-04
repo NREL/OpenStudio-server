@@ -4,13 +4,15 @@ services:
     image: localhost:5000/mongo
     ports:
       - "27017:27017"
+    volumes:
+      - dbdata:/data/db
     deploy:
       placement:
         constraints:
           - node.role == manager
       resources:
         reservations:
-          cpus: "1"
+          cpus: ${MONGO_CORES}
   web:
     image: localhost:5000/openstudio-server
     ports:
@@ -19,6 +21,8 @@ services:
       - "443:443"
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - MAX_REQUESTS=${MAX_REQUESTS}
+      - MAX_POOL=${MAX_POOL}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -29,7 +33,7 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: "1"
+          cpus: ${WEB_CORES}
   web-background:
     image: localhost:5000/openstudio-server
     environment:
@@ -78,6 +82,8 @@ services:
           cpus: "1"
 volumes:
   osdata:
+    external: true
+  dbdata:
     external: true
 networks:
   default:
