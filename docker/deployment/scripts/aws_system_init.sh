@@ -15,13 +15,13 @@ sudo apt -qq -y install python3
 sudo apt -qq -y install ruby
 sudo perl -p -i -e 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g'  /etc/default/grub
 sudo /usr/sbin/update-grub
-sudo mkdir /tmp/coredumps/ && chmod 777 /tmp/coredumps/
-echo "/tmp/coredumps/core.%e.%p.%h.%t" | sudo tee /proc/sys/kernel/core_pattern
+sudo mkdir /mnt/coredumps/ && sudo chown ubuntu:ubuntu /mnt/coredumps && chmod 777 /mnt/coredumps/
+echo "/mnt/coredumps/core.%e.%p.%h.%t" | sudo tee /proc/sys/kernel/core_pattern
 sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Configuring the logical mount volume thinpool-docker for the daemon"
+echo "Configuring the logical mount volume on /var/lib/docker"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
@@ -32,20 +32,12 @@ else
 	sudo pvcreate /dev/sdn
 	sudo vgcreate docker /dev/sdn
 fi
-sudo lvcreate --wipesignatures y -n graph docker -l 1%VG
-sudo lvcreate --wipesignatures y -n thinpool docker -l 5%VG
-sudo lvcreate --wipesignatures y -n thinpoolmeta docker -l 1%VG
-sudo lvconvert -y --zero n -c 512K --thinpool docker/thinpool --poolmetadata docker/thinpoolmeta
+sudo lvcreate --wipesignatures y -n graph docker -l 95%VG
 sudo mkdir /var/lib/docker
 sudo chmod 722 /var/lib/docker
 sudo mkfs.ext4 /dev/docker/graph
-echo '/dev/mapper/docker-graph /var/lib/docker ext4 defaults 0 2' | sudo tee -a /etc/fstab
+echo '/dev/docker/graph /var/lib/docker ext4 defaults 0 2' | sudo tee -a /etc/fstab
 sudo mount -a
-sudo mkdir -p /etc/lvm/profile/
-echo -e "activation {\nthin_pool_autoextend_threshold=80\nthin_pool_autoextend_percent=20\n}" | sudo tee /etc/lvm/profile/docker-thinpool.profile
-sudo lvchange --metadataprofile docker-thinpool docker/thinpool
-echo "Logical volume state is:"
-sudo lvs -o+seg_monitor
 echo -e "FS Config is:\n$(sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL)"
 cat /boot/grub/menu.lst |  awk '{ gsub(/console=hvc0/, "console=tty1 console=ttyS0"); print }' | sudo tee /tmp/temp-grub-menu.lst
 sudo mv /tmp/temp-grub-menu.lst /boot/grub/menu.lst
@@ -85,7 +77,7 @@ sudo systemctl enable docker
 sudo groupadd docker
 sudo usermod -aG docker ubuntu
 sudo mkdir /etc/systemd/system/docker.service.d
-echo -en "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd $DOCKERD_OPTIONS" | sudo tee -a "/etc/systemd/system/docker.service.d/graph.conf"
+echo -en "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd $DOCKERD_OPTIONS" | sudo tee -a "/etc/systemd/system/docker.service.d/config.conf"
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 sleep 1

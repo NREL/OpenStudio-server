@@ -1,5 +1,11 @@
 # OpenStudio Rails Application
 
+## Algorithmic Development Dependencies
+
+```bash
+# Install R and packages in ../docker/R/install_packages.R
+brew install ImageMagick
+```
 ## Starting Worker Pools
 
 The server is required to have a running delayed job instance watching

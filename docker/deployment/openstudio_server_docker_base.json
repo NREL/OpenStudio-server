@@ -47,8 +47,7 @@
         "generated_by_packer": "TRUE",
         "created_on": "{{ isotime }}",
         "docker_version": "{{ user `docker_version` }}",
-        "dockerhub_release_tag": "{{ user `version` }}",
-        "oss_ami_version": "{{ user `version` }}",
+        "dockerhub_release_tag": "{{ user `version` }}{{ user `ami_version_extension` }}",
         "generated_by": "{{ user `generated_by` }}"
       }
     }
