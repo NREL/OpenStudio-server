@@ -16,21 +16,21 @@ sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Pulling hhorsey/openstudio-server:$OSSERVER_DOCKERHUB_TAG from DockerHub"
+echo "Pulling nrel/openstudio-server:$OSSERVER_DOCKERHUB_TAG from DockerHub"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker pull hhorsey/openstudio-server:$OSSERVER_DOCKERHUB_TAG
+docker pull nrel/openstudio-server:$OSSERVER_DOCKERHUB_TAG
 echo "export OSSERVER_DOCKERHUB_TAG=$OSSERVER_DOCKERHUB_TAG" >> /home/ubuntu/.bashrc
 sleep 1
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Pulling hhorsey/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG from DockerHub"
+echo "Pulling nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG from DockerHub"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker pull hhorsey/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG
+docker pull nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG
 sleep 1
 
 echo ""
