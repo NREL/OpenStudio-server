@@ -2,15 +2,13 @@
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Expanding the logical volume docker-thinpool"
+echo "Expanding the logical volume mount docker/docker-graph"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-old_sectors="$(($(sudo blockdev --getsize64 /dev/docker/thinpool)/512))"
-echo "Original 512 sector count for 'docker-thinpool' is $old_sectors"
-docker_thinpool_table="$(sudo dmsetup table docker-thinpool)"
-echo "Original devicemapper table for 'docker-thinpool' is: \"$docker_thinpool_table\""
+echo "Original FS Config is:\n$(sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL)"
 if [ "$(sudo lsblk -o NAME | grep xvda1)" = '└─xvda1' ]; then
+    sudo umount /dev/xvdb
 	sudo vgextend docker -y /dev/xvdb
 	sudo vgextend docker -y /dev/xvdc
 	sudo vgextend docker -y /dev/xvdd
@@ -25,12 +23,9 @@ else
 	sudo vgextend docker -y /dev/sdf
 	sudo vgextend docker -y /dev/sdg
 fi
-sudo lvextend -l+100%FREE -n docker/thinpool
-new_sectors="$(($(sudo blockdev --getsize64 /dev/docker/thinpool)/512))"
-echo "New 512 sector count for 'docker-thinpool' is $new_sectors"
-new_table=${docker_thinpool_table/${old_sectors}/${new_sectors}}
-echo "New devicemapper table for 'docker-thinpool' will be: \"$new_table\""
-sudo dmsetup suspend docker-thinpool && sudo dmsetup reload docker-thinpool --table "$new_table" && sudo dmsetup resume docker-thinpool
+sudo lvextend -l+95%FREE -n docker/graph
+sudo resize2fs /dev/docker/graph
+echo "New FS Config is:\n$(sudo lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL)"
 sleep 1
 
 echo ""
