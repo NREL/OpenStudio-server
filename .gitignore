@@ -1,7 +1,6 @@
 .vagrant
 .ruby-uuid
 .idea
-.ruby-version
 .DS_Store
 .bundle
 Gemfile.lock

@@ -14,29 +14,29 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
     sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list && \
     apt-get update \
 	&& apt-get install -y --no-install-recommends \
-		autoconf \
-		apt-transport-https \
-		bison \
-	    build-essential \
-		bzip2 \
-		ca-certificates \
-		curl \
-		default-jdk \
-		dos2unix \
-		imagemagick \
-		gdebi-core \
-		git \
-		libbz2-dev \
-		libcurl4-openssl-dev \
-		libdbus-glib-1-2 \
-		libgdbm3 \
-		libgdbm-dev \
-		libglib2.0-dev \
-		libglu1 \
-		libncurses-dev \
-		libreadline-dev \
-		libxml2-dev \
-		libxslt-dev \
+        autoconf \
+        apt-transport-https \
+        bison \
+        build-essential \
+        bzip2 \
+        ca-certificates \
+        curl \
+        default-jdk \
+        dos2unix \
+        imagemagick \
+        gdebi-core \
+        git \
+        libbz2-dev \
+        libcurl4-openssl-dev \
+        libdbus-glib-1-2 \
+        libgdbm3 \
+        libgdbm-dev \
+        libglib2.0-dev \
+        libglu1 \
+        libncurses-dev \
+        libreadline-dev \
+        libxml2-dev \
+        libxslt-dev \
         libffi-dev \
         libssl-dev \
         libyaml-dev \
@@ -44,12 +44,12 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libsm-dev \
         mongodb-org-tools \
         procps \
-		ruby \
-		tar \
-		unzip \
-		wget \
-		zip \
-		zlib1g-dev \
+        ruby \
+        tar \
+        unzip \
+        wget \
+        zip \
+        zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Build and Install Ruby
@@ -111,7 +111,7 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Run this separate to cache the download
 ENV OPENSTUDIO_VERSION 2.2.0
-ENV OPENSTUDIO_SHA 0a5e9cec3f 
+ENV OPENSTUDIO_SHA 0a5e9cec3f
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
