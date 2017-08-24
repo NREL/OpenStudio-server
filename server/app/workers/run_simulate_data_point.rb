@@ -218,7 +218,7 @@ class RunSimulateDataPoint
         Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
 
         report_file = "#{run_dir}/objectives.json"
-        uploads_successful << upload_file(report_file, 'Report', 'Objectives JSON', 'application/json') if File.exist?(report_file)
+        uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
 
         report_file = "#{simulation_dir}/out.osw"
         uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
