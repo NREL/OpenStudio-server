@@ -78,7 +78,27 @@ Enter this command to get the currrent SHA of nrcan-master. Copy this down somew
 ``
 	git rev-parse HEAD
 ``
-## 8.Send JSON data for NREL to update. 
+
+## 8.Change AMI to public
+
+<p align="center">
+  <img src ="https://github.com/canmet-energy/necb-analysis-spreadsheet/blob/pat-nrel-ecm/img/public-ami.png" />
+  <br>
+  <b>Figure 1: Steps to change AMI public</b>
+  <br>
+</p>
+
+As per image above:
+
+1. Click on `AMIs` section
+2. Search for `OpenStudio`
+3. Select the AMI image you wish to make public
+4. Click on `Permissions` tab
+5. Click on `Edit` button
+6. Click on the `Public` radio buttion
+7. Click on Save button
+
+## 9.Send JSON data for NREL to update. 
 Switch to the nrcan branch. 
 
 ``
