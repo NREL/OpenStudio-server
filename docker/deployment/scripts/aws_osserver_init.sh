@@ -48,9 +48,9 @@ echo "Pushing pulled images to registry for persistence and stopping the swarm"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker tag hhorsey/openstudio-server:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-server
+docker tag nrel/openstudio-server:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-server
 docker push localhost:5000/openstudio-server
-docker tag hhorsey/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-rserve
+docker tag nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-rserve
 docker push localhost:5000/openstudio-rserve
 docker tag mongo localhost:5000/mongo
 docker push localhost:5000/mongo
