@@ -303,7 +303,7 @@ class RunSimulateDataPoint
       @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
 
       # wait until receipt file appears then return or error
-      zip_download_timeout = 120
+      zip_download_timeout = 240
       begin
         Timeout.timeout(zip_download_timeout) do
           loop do
@@ -322,13 +322,13 @@ class RunSimulateDataPoint
       # Try to download the analysis zip, but first lock simultanious threads
       write_lock(write_lock_file) do |_|
         zip_download_count = 0
-        zip_max_download_count = 6
+        zip_max_download_count = 12
         download_file = "#{analysis_dir}/analysis.zip"
         download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
         @sim_logger.info "Downloading analysis zip from #{download_url}"
         sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
         begin
-          Timeout.timeout(240) do
+          Timeout.timeout(360) do
             zip_download_count += 1
             File.open(download_file, 'wb') do |saved_file|
               # the following "open" is provided by open-uri
@@ -346,10 +346,10 @@ class RunSimulateDataPoint
 
         # Extract the zip
         extract_count = 0
-        extract_max_count = 2
+        extract_max_count = 3
         @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
         begin
-          Timeout.timeout(130) do
+          Timeout.timeout(180) do
             extract_count += 1
             OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
           end
@@ -360,12 +360,12 @@ class RunSimulateDataPoint
 
         # Download only one copy of the analysis.json
         json_download_count = 0
-        json_max_download_count = 6
+        json_max_download_count = 12
         analysis_json_file = "#{analysis_dir}/analysis.json"
         analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
         @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
         begin
-          Timeout.timeout(90) do
+          Timeout.timeout(120) do
             json_download_count += 1
             a = RestClient.get analysis_json_url
             raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
