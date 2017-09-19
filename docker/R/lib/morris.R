@@ -167,14 +167,26 @@ if (nrow(result) > 0) {
       #axis(2, las=1)
       dev.off()
 
-      par(op)
       file_names_box_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
       png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-      op <- par(mar = c(14,4,4,2) + 0.1)
-      #mp <- boxplot(n$ee, las=2, names=vardisplaynames)
-      boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9)
-      #axis(1, labels=vardisplaynames, las=2)
-      file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+      bottommar <- max(strwidth(vardisplaynames[which.max(nchar(vardisplaynames))], "inch")+0.1, na.rm = TRUE)
+      leftmar <- max(strwidth(nchar(max(n$ee)), "inch")+0.25, na.rm = TRUE)
+      par(mai=c(bottommar,leftmar, 0.25,0.25))
+      mp <- boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9, main="BoxPlot of Elementary Effects", ylab=paste("EE of",objnames[j]))
+      axis(1, at=seq(1,length(vardisplaynames)), labels=vardisplaynames, las=2, cex.axis=0.9)
+      dev.off()
+      
+      file_names_box_sorted_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box_sorted.png",sep="")
+      png(file_names_box_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
+      bottommar <- max(strwidth(vardisplaynames[which.max(nchar(vardisplaynames))], "inch")+0.1, na.rm = TRUE)
+      leftmar <- max(strwidth(nchar(max(n$ee)), "inch")+0.25, na.rm = TRUE)
+      par(mai=c(bottommar,leftmar, 0.25,0.25))
+      mp <- boxplot(n$ee[,order(colMeans(abs(n$ee)))], las=2, names=vardisplaynames[order(var_mu_star)], cex.axis=0.9, main="BoxPlot of Elementary Effects", ylab=paste("EE of",objnames[j]))
+      axis(1, at=seq(1,length(vardisplaynames)), labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)
+      dev.off()
+      file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,file_names_box_sorted_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+
+      #file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     } else {
       file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }

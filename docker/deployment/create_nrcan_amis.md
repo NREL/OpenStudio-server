@@ -37,14 +37,15 @@ Now once the build is complete, you will see it listed on DockerHub here https:/
 
 So your file may look like this if your version of OS was 2.1.1
 
-``
+```json
 {
-  "version": "2.1.1-nrcan",
-  "docker_version": "17.03.0",
-  "generated_by": "Phylroy.Lopez@canada.ca"
-}
-
-``
+    "version": "2.1.1-nrcan",
+    "ami_version_extension": "",
+    "docker_machine_version": "17.06.0",
+    "docker_version": "17.06.0",
+    "generated_by": "Phylroy.Lopez@canada.ca"
+ }
+```
 
 Save this file as **user_variables.json** in the deployment folder. 
 
@@ -77,7 +78,27 @@ Enter this command to get the currrent SHA of nrcan-master. Copy this down somew
 ``
 	git rev-parse HEAD
 ``
-## 8.Send JSON data for NREL to update. 
+
+## 8.Change AMI to public
+
+<p align="center">
+  <img src ="https://github.com/canmet-energy/necb-analysis-spreadsheet/blob/pat-nrel-ecm/img/public-ami.png" />
+  <br>
+  <b>Figure 1: Steps to change AMI public</b>
+  <br>
+</p>
+
+As per image above:
+
+1. Click on `AMIs` section
+2. Search for `OpenStudio`
+3. Select the AMI image you wish to make public
+4. Click on `Permissions` tab
+5. Click on `Edit` button
+6. Click on the `Public` radio buttion
+7. Click on Save button
+
+## 9.Send JSON data for NREL to update. 
 Switch to the nrcan branch. 
 
 ``
@@ -87,7 +108,7 @@ git checkout nrcan
 Examine the http://s3.amazonaws.com/openstudio-resources/server/api/v3/amis.json file determine the most recent version, use that as a basis and change only the name: , the server:ref: and the ami: values. 
 
 So change the three lines below from this...
-``
+```
     {
       "name": "2.1.1",
       "standards": {
@@ -116,13 +137,13 @@ So change the three lines below from this...
       "R": "3.2.3",
       "ami": "ami-01ff6317"
     }
-``
+```
 
 
  to this
 
 
-``
+```
      {
       "name": "2.1.1-nrcan",
       "standards": {
@@ -151,6 +172,6 @@ So change the three lines below from this...
       "R": "3.2.3",
       "ami": "ami-<the new ami from step 5>"
     }
-``
+```
 
 You can add it to the nrcan-amis.json and commit it the nrcan branch.  Then send the link to henry.horsey@nrel.gov to update the json file that PAT and OS Spreadsheet use. 
