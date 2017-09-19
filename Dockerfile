@@ -33,6 +33,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libgdbm-dev \
         libglib2.0-dev \
         libglu1 \
+        libgsl0ldbl \
+        libgsl0-dev \
         libncurses-dev \
         libreadline-dev \
         libxml2-dev \
@@ -110,8 +112,8 @@ RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Run this separate to cache the download
-ENV OPENSTUDIO_VERSION 2.2.0
-ENV OPENSTUDIO_SHA 0a5e9cec3f
+ENV OPENSTUDIO_VERSION 2.2.1
+ENV OPENSTUDIO_SHA 92a7ed37f1
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
