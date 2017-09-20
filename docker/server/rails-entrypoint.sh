@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo 'Update Standards gem to nrcan standards branch'
-#bundle update openstudio-standards
+bundle update openstudio-standards
 echo 'Provisioning data volume osdata'
 sleep 1
 mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
