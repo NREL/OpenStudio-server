@@ -73,6 +73,10 @@ gem 'openstudio-analysis', '1.0.0.rc18'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
 #gem 'openstudio-standards', '= 0.1.15'
+gem 'aes','0.5.0'
+gem 'geocoder', '1.4.4'
+gem 'highline'
+gem 'launchy' 
 gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan'
 
 ## End commonly updated gems
