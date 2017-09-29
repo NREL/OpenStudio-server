@@ -35,5 +35,5 @@
 
 module OpenstudioServer
   VERSION = '2.3.0'.freeze
-  VERSION_EXT = '-rc0'.freeze # with preceding - or +
+  VERSION_EXT = ''.freeze # with preceding - or +
 end
