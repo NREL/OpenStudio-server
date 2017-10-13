@@ -124,6 +124,10 @@ ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
 RUN mkdir -p /mnt/openstudio/log && chmod 775 /mnt/openstudio/log
 
+# Configure keepalive for IPVS
+ADD /ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
+RUN sudo sysctl --system
+
 ADD /rserve-entrypoint.sh /usr/local/bin/rserve-entrypoint
 RUN chmod 755 /usr/local/bin/rserve-entrypoint
 ENTRYPOINT ["rserve-entrypoint"]
