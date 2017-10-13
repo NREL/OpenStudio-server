@@ -228,7 +228,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(master_ips: master_ip, 
+        @r.command(master_ips: master_ip,
                    ips: worker_ips[:worker_ips].uniq, 
                    vartypes: var_types, 
                    varnames: var_names,
@@ -271,13 +271,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
             source(paste(r_scripts_path,'/rgenoud.R',sep=''))
           }
         end
-
+        logger.info 'Returned from rserve rgenound block'
         # TODO: find any results of the algorithm and save to the analysis
       else
         raise 'could not start the cluster (most likely timed out)'
       end
 
-    rescue => e
+    rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message = log_message
@@ -288,7 +288,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster
+      logger.info 'Executing rgenound.rb ensure block'
+      begin
+        cluster.stop if cluster
+      rescue StandardError, ScriptError, NoMemoryError => e
+        logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
+      end
+      logger.info 'Successfully executed cluster.stop'
 
       # Post process the results and jam into the database
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"

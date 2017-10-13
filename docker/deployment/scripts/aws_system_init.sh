@@ -77,7 +77,7 @@ sudo systemctl enable docker
 sudo groupadd docker
 sudo usermod -aG docker ubuntu
 sudo mkdir /etc/systemd/system/docker.service.d
-echo -en "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd $DOCKERD_OPTIONS" | sudo tee -a "/etc/systemd/system/docker.service.d/config.conf"
+echo -en "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd $DOCKERD_OPTIONS\n" | sudo tee -a /etc/systemd/system/docker.service.d/config.conf
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 sleep 1
@@ -95,6 +95,17 @@ ec2_tools_folder=$(ls /usr/local/ec2)
 echo "export EC2_AMITOOL_HOME=/usr/local/ec2/$ec2_tools_folder" >> /home/ubuntu/.bashrc
 echo 'export PATH="$EC2_AMITOOL_HOME/bin:$PATH"' >> /home/ubuntu/.bashrc
 sudo ln -s /usr/local/ec2/${ec2_tools_folder}/bin/* /bin
+sleep 1
+
+echo ""
+echo "------------------------------------------------------------------------"
+echo "Setting IPVS keepalive configuration"
+echo "------------------------------------------------------------------------"
+echo ""
+sleep 1
+echo -en "net.ipv4.tcp_keepalive_time = 600\nnet.ipv4.tcp_keepalive_intvl = 60\nnet.ipv4.tcp_keepalive_probes = 5\n" | sudo tee /etc/sysctl.d/ipvs-keepalive.conf
+sudo chmod 644 /etc/sysctl.d/ipvs-keepalive.conf
+sudo sysctl --system
 sleep 1
 
 echo ""

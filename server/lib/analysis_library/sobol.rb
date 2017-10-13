@@ -230,13 +230,13 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
             source(paste(r_scripts_path,'/sobol.R',sep=''))
           }
         end
-
+        logger.info 'Returned from rserve sobol block'
         # TODO: find any results of the algorithm and save to the analysis
       else
         raise 'could not start the cluster (most likely timed out)'
       end
 
-    rescue => e
+    rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message = log_message
@@ -247,7 +247,13 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster
+      logger.info 'Executing rgenound.rb ensure block'
+      begin
+        cluster.stop if cluster
+      rescue StandardError, ScriptError, NoMemoryError => e
+        logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
+      end
+      logger.info 'Successfully executed cluster.stop'
 
       # Post process the results and jam into the database
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
