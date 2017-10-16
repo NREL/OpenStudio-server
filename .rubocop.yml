@@ -110,3 +110,10 @@ Style/MultilineMethodCallIndentation:
 # 27000 => 27_000
 Style/NumericLiterals:
   Enabled: false
+
+# Do not use %w, %W, %i, etc
+Style/WordArray:
+  EnforcedStyle: brackets
+  
+Style/SymbolArray:
+  EnforcedStyle: brackets

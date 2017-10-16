@@ -6,7 +6,6 @@ module DelayedJobView
     class << self
       def used_backend
         @@used_backend ||= begin
-
           DelayedJobView::Backend::Mongoid
         rescue
           raise 'Delayed Job Viewer has no backend for Mongoid'

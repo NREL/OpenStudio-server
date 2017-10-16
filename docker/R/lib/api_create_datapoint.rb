@@ -79,17 +79,17 @@ begin
                 # }
 
                 if a[:status] == 'error'
-                  #return failed instead of false so it doesnt try to retry
+                  # return failed instead of false so it doesnt try to retry
                   result[:status] = 'failed'
-                  #raise 'No objective functions returned'
+                  # raise 'No objective functions returned'
                 end
 
                 result[:results] = a
-                
+
               elsif a[:data_point][:status_message] == 'datapoint failure'
                 result[:status] = 'failed'
               end
-              
+
               break
             end
           end
@@ -99,7 +99,6 @@ begin
       end
     end
   end
-
 rescue => e
   result[:status] = false
   puts "#{__FILE__} Error: #{e.message}:#{e.backtrace.join("\n")}"

@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Particle Swarm Optimization
+# Particle Swarm Optimization
 class AnalysisLibrary::Pso < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
@@ -120,23 +120,23 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
-      unless %w(spso2007 spso2011 ipso fips wfips).include?(@analysis.problem['algorithm']['method'])
+      unless ['spso2007', 'spso2011', 'ipso', 'fips', 'wfips'].include?(@analysis.problem['algorithm']['method'])
         raise 'unknown method type'
       end
 
-      unless %w(lhs random).include?(@analysis.problem['algorithm']['xini'])
+      unless ['lhs', 'random'].include?(@analysis.problem['algorithm']['xini'])
         raise 'unknown Xini type'
       end
 
-      unless %w(zero lhs2011 random2011 lhs2007 random2007 default).include?(@analysis.problem['algorithm']['vini'])
+      unless ['zero', 'lhs2011', 'random2011', 'lhs2007', 'random2007', 'default'].include?(@analysis.problem['algorithm']['vini'])
         raise 'unknown Vini type'
       end
 
-      unless %w(invisible damping reflecting absorbing2011 absorbing2007 default).include?(@analysis.problem['algorithm']['boundary'])
+      unless ['invisible', 'damping', 'reflecting', 'absorbing2011', 'absorbing2007', 'default'].include?(@analysis.problem['algorithm']['boundary'])
         raise 'unknown Boundary type'
       end
 
-      unless %w(gbest lbest vonneumann random).include?(@analysis.problem['algorithm']['topology'])
+      unless ['gbest', 'lbest', 'vonneumann', 'random'].include?(@analysis.problem['algorithm']['topology'])
         raise 'unknown Topology type'
       end
 
@@ -145,8 +145,8 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       end
 
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+      # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
         @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
         logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
       else
@@ -206,12 +206,12 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
           logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
-        end  
+        end
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
@@ -226,14 +226,14 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
         @analysis.problem['algorithm']['abstol'] = @analysis.problem['algorithm']['abstol'].to_f
         @analysis.problem['algorithm']['reltol'] = @analysis.problem['algorithm']['reltol'].to_f
-        @r.command(master_ips: master_ip, 
-                   ips: worker_ips[:worker_ips].uniq, 
-                   vartypes: var_types, 
+        @r.command(master_ips: master_ip,
+                   ips: worker_ips[:worker_ips].uniq,
+                   vartypes: var_types,
                    varnames: var_names,
-                   varseps: mins_maxes[:eps], 
-                   mins: mins_maxes[:min], 
+                   varseps: mins_maxes[:eps],
+                   mins: mins_maxes[:min],
                    maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   normtype: @analysis.problem['algorithm']['norm_type'],
                    ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    npart: @analysis.problem['algorithm']['npart'],
@@ -271,7 +271,6 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message

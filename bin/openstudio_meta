@@ -323,7 +323,7 @@ class InstallGems
     sys_cmds = []
 
     sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5"
-    if /darwin/.match(RUBY_PLATFORM) 
+    if /darwin/.match(RUBY_PLATFORM)
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-include=/usr/include"
     end
     if options[:test_dev_build]
@@ -383,7 +383,7 @@ class InstallGems
       Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each { |p| FileUtils.rm_rf(p) }
       Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each { |p| FileUtils.rm_rf(p) }
       platform = 'win32'
-      if /darwin/.match(RUBY_PLATFORM) 
+      if /darwin/.match(RUBY_PLATFORM)
         platform = 'darwin'
       end
 
@@ -723,7 +723,7 @@ end
 # Class to submit an analysis to a OS Server instance, defined by URL
 class RunAnalysis
   require_relative 'resources/remote.rb'
-  BATCH_RUN_METHODS = %w(lhs preflight single_run repeat_run doe diag baseline_perturbation batch_datapoints).freeze
+  BATCH_RUN_METHODS = ['lhs', 'preflight', 'single_run', 'repeat_run', 'doe', 'diag', 'baseline_perturbation', 'batch_datapoints'].freeze
 
   # Provides text for the main help functionality
   def self.synopsis

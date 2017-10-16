@@ -38,7 +38,6 @@
 # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
 
 class RunSimulateDataPoint
-
   require 'date'
   require 'json'
 
@@ -82,28 +81,28 @@ class RunSimulateDataPoint
       err_msg_2 = 'If you see this message once, all subsequent runs will likely fail.'
       err_msg_3 = 'If you are running PAT simulations locally on Windows, the error is likely due to a measure file whose path length has exceeded 256 characters.'
       err_msg_4 = 'Inspect the following messages for clues as to the specific issue:'
-      out_osw = {completed_status: 'Fail',
-                 osa_id: @data_point.analysis.id,
-                 osd_id: @data_point.id,
-                 name: @data_point.name,
-                 completed_at: ::DateTime.now.iso8601,
-                 started_at: ::DateTime.now.iso8601,
-                 steps: [
-                     arguments: {},
-                     description: '',
-                     name: 'Initialize Worker Error',
-                     result: {
-                         completed_at: ::DateTime.now.iso8601,
-                         started_at: ::DateTime.now.iso8601,
-                         stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
-                         stdout: '',
-                         step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
-                         step_files: [],
-                         step_info: [],
-                         step_result: 'Failure',
-                         step_warnings: []
-                     }
-                 ]}
+      out_osw = { completed_status: 'Fail',
+                  osa_id: @data_point.analysis.id,
+                  osd_id: @data_point.id,
+                  name: @data_point.name,
+                  completed_at: ::DateTime.now.iso8601,
+                  started_at: ::DateTime.now.iso8601,
+                  steps: [
+                    arguments: {},
+                    description: '',
+                    name: 'Initialize Worker Error',
+                    result: {
+                      completed_at: ::DateTime.now.iso8601,
+                      started_at: ::DateTime.now.iso8601,
+                      stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
+                      stdout: '',
+                      step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
+                      step_files: [],
+                      step_info: [],
+                      step_result: 'Failure',
+                      step_warnings: []
+                    }
+                  ] }
       report_file = "#{simulation_dir}/out.osw"
       File.open(report_file, 'wb') do |f|
         f.puts ::JSON.pretty_generate(out_osw)
@@ -135,8 +134,8 @@ class RunSimulateDataPoint
     osw_path = "#{simulation_dir}/data_point.osw"
     # PAT puts seeds in "seeds" folder (not "seed")
     osw_options = {
-        file_paths: %w(../weather ../seeds ../seed),
-        measure_paths: ['../measures']
+      file_paths: ['../weather', '../seeds', '../seed'],
+      measure_paths: ['../measures']
     }
     if @data_point.seed
       osw_options[:seed] = @data_point.seed unless @data_point.seed == ''
@@ -148,8 +147,8 @@ class RunSimulateDataPoint
       osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
     end
     t = OpenStudio::Analysis::Translator::Workflow.new(
-        "#{simulation_dir}/analysis.json",
-        osw_options
+      "#{simulation_dir}/analysis.json",
+      osw_options
     )
     t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
     if t_result
@@ -235,7 +234,7 @@ class RunSimulateDataPoint
       # Run any data point finalization scripts
       begin
         Timeout.timeout(600) do
-          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").reject { |f| f.match(/.*args$/) }.map { |f| File.basename(f) }
           files.each do |f|
             @sim_logger.info "Found data point finalization file #{f}."
             run_file(analysis_dir, 'finalization', f)
@@ -387,7 +386,7 @@ class RunSimulateDataPoint
       begin
         Timeout.timeout(600) do
           if File.directory? File.join(analysis_dir, 'scripts')
-            files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+            files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").reject { |f| f.match(/.*args$/) }.map { |f| File.basename(f) }
             files.each do |f|
               @sim_logger.info "Found data point initialization file #{f}."
               run_file(analysis_dir, 'initialization', f)
@@ -401,7 +400,6 @@ class RunSimulateDataPoint
 
     @sim_logger.info 'Finished worker initialization'
     return true
-
   rescue => e
     @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
     @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
@@ -447,7 +445,7 @@ class RunSimulateDataPoint
   def upload_file(filename, type, display_name = nil, content_type = nil)
     upload_file_attempt = 0
     upload_file_max_attempt = 4
-    display_name = File.basename(filename, '.*') unless display_name
+    display_name ||= File.basename(filename, '.*')
     @sim_logger.info "Saving report #{filename} to #{data_point_url}"
     begin
       Timeout.timeout(120) do
@@ -482,7 +480,7 @@ class RunSimulateDataPoint
     f_logpath = "#{run_dir}/#{File.basename(f_fullpath, '.*')}.log"
 
     # Make the file executable and remove DOS endings
-    File.chmod(0777, f_fullpath)
+    File.chmod(0o777, f_fullpath)
     @sim_logger.info "Preparing to run #{state} script #{f_fullpath}"
     file_text = File.read(f_fullpath)
     file_text.gsub!(/\r\n/m, "\n")
@@ -493,13 +491,13 @@ class RunSimulateDataPoint
     @sim_logger.info "Looking for argument file #{f_argspath}"
     if File.exist?(f_argspath)
       @sim_logger.info "argument file exists #{f_argspath}"
-      #TODO replace eval with JSON.load
+      # TODO: replace eval with JSON.load
       args = eval(File.read(f_argspath))
       @sim_logger.info "arguments are #{args}"
     end
 
     # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
-    pid = spawn({'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id},
+    pid = spawn({ 'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id },
                 f_fullpath, *args, [:out, :err] => f_logpath, :unsetenv_others => true)
     Process.wait pid
 
