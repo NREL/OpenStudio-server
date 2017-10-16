@@ -91,10 +91,10 @@ class DataPoint
   # Submit the simulation to run in the background task queue
   def submit_simulation
     job = RunSimulateDataPoint.new(id)
-    self.job_id = job.delay(queue: 'simulations').perform.id
     self.status = :queued
     self.run_queue_time = Time.now
-
+    self.job_id = job.delay(queue: 'simulations').perform.id
+    logger.info "created new simulation with #{self.job_id}"
     save!
 
     job_id
