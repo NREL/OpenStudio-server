@@ -46,7 +46,11 @@ class RunSimulateDataPoint
     defaults = {run_workflow_method: 'workflow'}.with_indifferent_access
     @options = defaults.deep_merge(options)
 
-    @data_point = DataPoint.find(data_point_id)
+    # atomically update the datapoint status to started while returning the @data_point
+    @data_point = DataPoint.where(uuid: data_point_id).find_one_and_update(
+        {:$set => {status: :queued, run_queue_time: Time.now}},
+        return_document: :after
+    )
     @intialize_worker_errs = []
   end
 
@@ -60,13 +64,12 @@ class RunSimulateDataPoint
     # Logger for the simulate datapoint
     @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
 
+
     # Error if @datapoint doesn't exist
     if @data_point.nil?
       @sim_logger = 'Could not find datapoint; @datapoint was nil'
       return
     end
-
-    @data_point.set_start_state
 
     # Register meta-level info
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
@@ -238,7 +241,7 @@ class RunSimulateDataPoint
       # Run any data point finalization scripts
       begin
         Timeout.timeout(600) do
-          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select {|f| !f.match(/.*args$/)}.map { |f| File.basename(f)}
+          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select {|f| !f.match(/.*args$/)}.map {|f| File.basename(f)}
           files.each do |f|
             @sim_logger.info "Found data point finalization file #{f}."
             run_file(analysis_dir, 'finalization', f)

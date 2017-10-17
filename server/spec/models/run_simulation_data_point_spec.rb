@@ -39,6 +39,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
   before :each do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
+    DataPoint.destroy_all  # this really isn't needed, but is here to deal with data points that aren't attached to analyses
     Delayed::Job.destroy_all
     ComputeNode.destroy_all
 
@@ -249,14 +250,14 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     analysis_id = api.new_analysis(project_id, analysis_options)
 
     # Start the workers first, wheee
-    n_workers = 20
+    n_workers = 6
     (0..n_workers-1).to_a.each do |i_worker|
       command = "bundle exec bin/delayed_job -i worker_#{i_worker} --queues=test run --log-dir=log --pid-dir tmp/pids"
       puts "Starting worker with command #{command}"
       spawn(command, [:err, :out] => ["log/dj_worker_#{i_worker}.log", 'w'])
     end
 
-    Thread.new do
+    thread_watch = Thread.new do
       while true
         dp_na = DataPoint.where(analysis_id: analysis_id, status: :na).count
         dp_queued = DataPoint.where(analysis_id: analysis_id, status: :queued).count
@@ -271,16 +272,13 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(Delayed::Job.count).to eq(0)
     analysis = Analysis.find(analysis_id)
     # create n number of simulations
-    n = 10000
+    n = n_workers * 15
     (0..n-1).to_a.each do |i|
       puts "creating datapoint for #{i}" if i % 1000 == 0
-      dp = analysis.data_points.new(name: "Test #{n}")
+      dp = analysis.data_points.new(analysis_id: analysis_id, name: "Test #{n}")
       dp.save!
 
-      job = TestWorker.new(dp.id)
-      # self.job_id = job.delay(queue: 'simulations').perform.id
-      # logger.info "created new simulation wtih #{self.job_id}"
-      job.delay(queue: 'test').perform.id
+      dp.submit_simulation(TestWorker, 'test')
     end
 
     while Delayed::Job.count > 0
@@ -289,6 +287,8 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
 
     expect(DataPoint.where(analysis_id: analysis_id ).count).to eq n
     expect(Delayed::Job.count).to eq(0)
+
+    thread_watch.exit
   end
 
 

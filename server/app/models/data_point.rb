@@ -38,7 +38,7 @@ class DataPoint
   include Mongoid::Timestamps
 
   field :uuid, type: String
-  field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
+  field :_id, type: String, default: -> {uuid || SecureRandom.uuid}
   field :name, type: String
   field :description, type: String, default: '' # For support of EDAPT users in PAT 2.0
   field :variable_values # This has been hijacked by OS DataPoint. Use set_variable_values
@@ -65,7 +65,7 @@ class DataPoint
   embeds_many :result_files
 
   # Indexes
-  index({ uuid: 1 }, unique: true)
+  index({uuid: 1}, unique: true)
   index(id: 1)
   index(name: 1)
   index(status: 1)
@@ -89,21 +89,18 @@ class DataPoint
   end
 
   # Submit the simulation to run in the background task queue
-  def submit_simulation
-    job = RunSimulateDataPoint.new(id)
-    self.status = :queued
-    self.run_queue_time = Time.now
-    self.job_id = job.delay(queue: 'simulations').perform.id
-    logger.info "created new simulation with #{self.job_id}"
+  def submit_simulation(job_klass=RunSimulateDataPoint, queue='simulations')
+    job = job_klass.new(id)
+    self.job_id = job.delay(queue: queue).perform.id
     save!
+
+    logger.info "created new simulation with #{self.job_id}"
 
     job_id
   end
 
   def set_start_state
-    self.run_start_time = Time.now
-    self.status = :started
-    save!
+    DataPoint.where(uuid: id).find_one_and_update({:$set => {status: :started, run_start_time: Time.now}})
   end
 
   def set_success_flag
@@ -127,10 +124,7 @@ class DataPoint
   end
 
   def set_complete_state
-    self.run_end_time = Time.now
-    self.status = :completed
-
-    save!
+    DataPoint.where(uuid: id).find_one_and_update({:$set => {status: :completed, run_end_time: Time.now}})
   end
 
   def set_canceled_state

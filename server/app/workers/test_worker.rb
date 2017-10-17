@@ -35,21 +35,18 @@
 
 class TestWorker
   def initialize(data_point_id)
-    @data_point = DataPoint.find(data_point_id)
-    @data_point.status = :queued
-    @data_point.save!
+    @data_point = DataPoint.where(uuid: data_point_id).find_one_and_update(
+        {:$set => {status: :queued, run_queue_time: Time.now}},
+        return_document: :after
+    )
 
     sleep 0.01
   end
 
   def perform
-    puts @data_point
-    @data_point.status = :started
-    @data_point.save!
-    
+    @data_point.set_start_state
     sleep 2.5
 
-    @data_point.status = :completed
-    @data_point.save!
+    @data_point.set_complete_state
   end
 end
