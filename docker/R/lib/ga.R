@@ -115,6 +115,7 @@ print(paste("run:",run))
 print(paste("popSize:",popSize))
 print(paste("maxFitness:",maxFitness))
 print(paste("maxiter:",maxiter))
+print(paste("parallel:",length(ips)))
 
 results <- NULL
 try(results <- ga(type = 'real-valued', fitness=f, min=varMin, max=varMax, popSize=popSize, maxiter=maxiter, monitor=TRUE, parallel=length(ips)), silent=FALSE)
