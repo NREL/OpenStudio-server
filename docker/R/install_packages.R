@@ -20,4 +20,8 @@ install.packages('Rcpp', repos=c('http://cloud.r-project.org','http://cran.r-pro
 install.packages('plyr', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('ggplot2', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('sensitivity', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
+install.packages('foreach', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
+install.packages('iterators', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
+install.packages('doParallel', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
+install.packages('GA', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('Rserve', configure.args=c('PKG_CPPFLAGS=-DNODAEMON'), repos=c('http://rforge.net'))
