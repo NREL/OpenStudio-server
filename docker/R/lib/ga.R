@@ -118,7 +118,7 @@ print(paste("maxiter:",maxiter))
 print(paste("parallel:",length(ips)))
 
 results <- NULL
-try(results <- ga(type = 'real-valued', fitness=f, min=varMin, max=varMax, popSize=popSize, maxiter=maxiter, monitor=TRUE, parallel=length(ips)), silent=FALSE)
+try(results <- ga(type = 'real-valued', fitness=-f, min=varMin, max=varMax, popSize=popSize, maxiter=maxiter, monitor=TRUE, parallel=length(ips)), silent=FALSE)
 print(paste("summary(results):",summary(results)))
 # TODO: how to get best result back in docker space? API? What is the server? 
 #print(paste("scp command:",scp))
