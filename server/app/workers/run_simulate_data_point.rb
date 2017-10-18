@@ -64,12 +64,13 @@ class RunSimulateDataPoint
     # Logger for the simulate datapoint
     @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
 
-
     # Error if @datapoint doesn't exist
     if @data_point.nil?
       @sim_logger = 'Could not find datapoint; @datapoint was nil'
       return
     end
+
+    @data_point.set_start_state
 
     # Register meta-level info
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
