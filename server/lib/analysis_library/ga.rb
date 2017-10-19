@@ -56,8 +56,6 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
           p_power: 2,
           exit_on_guideline_14: 0,
           objective_functions: [],
-          pgtol: 1e-1,
-          factr: 4.5036e14,
           maxiter: 1000,
           epsilon_gradient: 1e-4,
           debug_messages: 0,
@@ -234,7 +232,6 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
-        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
         @r.command(master_ips: master_ip,
                    ips: worker_ips[:worker_ips], 
                    vartypes: var_types, 
@@ -253,8 +250,6 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
                    pmutation: @analysis.problem['algorithm']['pmutation'], 
                    elitism: @analysis.problem['algorithm']['elitism'],
                    epsilongradient: @analysis.problem['algorithm']['epsilon_gradient'],
-                   factr: @analysis.problem['algorithm']['factr'], 
-                   pgtol: @analysis.problem['algorithm']['pgtol'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value']) do
           %{
