@@ -52,6 +52,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
           pcrossover: 0.8,
           pmutation: 0.1,
           elitism: 0.05,
+          numIslands: 4,
           norm_type: 'minkowski',
           p_power: 2,
           exit_on_guideline_14: 0,
@@ -249,6 +250,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
                    pcrossover: @analysis.problem['algorithm']['pcrossover'], 
                    pmutation: @analysis.problem['algorithm']['pmutation'], 
                    elitism: @analysis.problem['algorithm']['elitism'],
+                   numIslands: @analysis.problem['algorithm']['numIslands'],
                    epsilongradient: @analysis.problem['algorithm']['epsilon_gradient'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value']) do

@@ -23,5 +23,5 @@ install.packages('sensitivity', repos=c('http://cloud.r-project.org','http://cra
 install.packages('foreach', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('iterators', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('doParallel', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('GA', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
+install.packages('doMC', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('Rserve', configure.args=c('PKG_CPPFLAGS=-DNODAEMON'), repos=c('http://rforge.net'))
