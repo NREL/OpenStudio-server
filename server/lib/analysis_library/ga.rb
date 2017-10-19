@@ -49,6 +49,9 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
           popSize: 30,
           run: 2,
           maxFitness: 0.01,
+          pcrossover: 0.8,
+          pmutation: 0.1,
+          elitism: 0.05,
           norm_type: 'minkowski',
           p_power: 2,
           exit_on_guideline_14: 0,
@@ -120,6 +123,18 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
         raise 'Must have number of samples to discretize the parameter space'
       end
 
+      if @analysis.problem['algorithm']['elitism'] < 0 || @analysis.problem['algorithm']['elitism'] > 1
+        raise 'elitism must be 0 <= elitism <= 1'
+      end
+      
+      if @analysis.problem['algorithm']['pcrossover'] < 0 || @analysis.problem['algorithm']['pcrossover'] > 1
+        raise 'pcrossover must be 0 <= pcrossover <= 1'
+      end
+      
+      if @analysis.problem['algorithm']['pmutation'] < 0 || @analysis.problem['algorithm']['pmutation'] > 1
+        raise 'pmutation must be 0 <= pmutation <= 1'
+      end
+      
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
       # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
@@ -234,6 +249,9 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
                    run: @analysis.problem['algorithm']['run'],
                    maxFitness: @analysis.problem['algorithm']['maxFitness'],
                    maxiter: @analysis.problem['algorithm']['maxiter'], 
+                   pcrossover: @analysis.problem['algorithm']['pcrossover'], 
+                   pmutation: @analysis.problem['algorithm']['pmutation'], 
+                   elitism: @analysis.problem['algorithm']['elitism'],
                    epsilongradient: @analysis.problem['algorithm']['epsilon_gradient'],
                    factr: @analysis.problem['algorithm']['factr'], 
                    pgtol: @analysis.problem['algorithm']['pgtol'],
