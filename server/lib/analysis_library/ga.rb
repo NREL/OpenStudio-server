@@ -277,7 +277,7 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
             source(paste(r_scripts_path,'/ga.R',sep=''))
           }
         end
-        logger.info 'Returned from rserve rgenound block'
+        logger.info 'Returned from rserve ga block'
         # TODO: find any results of the algorithm and save to the analysis
 
     rescue StandardError, ScriptError, NoMemoryError => e
@@ -291,7 +291,7 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      logger.info 'Executing rgenound.rb ensure block'
+      logger.info 'Executing ga.rb ensure block'
       begin
         #cluster.stop if cluster
       rescue StandardError, ScriptError, NoMemoryError => e
