@@ -118,11 +118,11 @@ print(paste("pmutation:",pmutation))
 print(paste("elitism %:",elitism))
 elitism <- max(1, round(popSize*elitism))
 print(paste("elitism #:",elitism))
-print(paste("parallel:",length(ips)))
+print(paste("numCores:",length(ips)))
 
 fmin <- function(x) - f(x)
 results <- NULL
-try(results <- ga(type = 'real-valued', fitness=fmin, min=varMin, max=varMax, popSize=popSize, pcrossover=pcrossover, pmutation=pmutation, elitism=elitism, maxiter=maxiter, run=run, maxFitness=(-1*maxFitness), names=varnames, monitor=TRUE, parallel=length(ips)), silent=FALSE)
+try(results <- ga(type = 'real-valued', fitness=fmin, min=varMin, max=varMax, popSize=popSize, pcrossover=pcrossover, pmutation=pmutation, elitism=elitism, maxiter=maxiter, run=run, maxFitness=(-1*maxFitness), names=varnames, monitor=TRUE, numCores=length(ips)), silent=FALSE)
 print("summary(results):")
 print(summary(results))
 # TODO: how to get best result back in docker space? API? What is the server? 
