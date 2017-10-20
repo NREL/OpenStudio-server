@@ -56,7 +56,7 @@ class AnalysisLibrary::Ga < AnalysisLibrary::Base
           p_power: 2,
           exit_on_guideline_14: 0,
           objective_functions: [],
-          maxiter: 1000,
+          maxiter: 100,
           epsilon_gradient: 1e-4,
           debug_messages: 0,
           failed_f_value: 1e18

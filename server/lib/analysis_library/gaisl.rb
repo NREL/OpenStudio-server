@@ -57,7 +57,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
           p_power: 2,
           exit_on_guideline_14: 0,
           objective_functions: [],
-          maxiter: 1000,
+          maxiter: 100,
           epsilon_gradient: 1e-4,
           debug_messages: 0,
           failed_f_value: 1e18
@@ -100,7 +100,6 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
       @r.converse 'library(R.utils)'
       @r.converse 'library(parallel)'
       @r.converse 'library(doParallel)'
-      @r.converse 'library(doMC)'
       @r.converse 'library(GA)'
 
       # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs

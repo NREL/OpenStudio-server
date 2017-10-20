@@ -20,7 +20,7 @@ gaisl <- function(type = c("binary", "real-valued", "permutation"),
                   elitism = base::max(1, round(popSize/numIslands*0.05)), 
                   updatePop = FALSE,
                   postFitness = NULL,
-                  maxiter = 1000,
+                  maxiter = 100,
                   run = maxiter,
                   maxFitness = Inf,
                   names = NULL,
@@ -110,9 +110,11 @@ gaisl <- function(type = c("binary", "real-valued", "permutation"),
   numiter <- max(1, floor(maxiter/migrationInterval))
 
   # Start parallel computing (if needed)
-  cl <- parallel::makeCluster(numCores, type = "FORK")
-  doParallel::registerDoParallel(cl, cores = numIslands) 
+  cl <- parallel::makeCluster(numCores, type = "FORK", outfile='cluster.log')
+  doParallel::registerDoParallel(cl, cores = numCores) 
   on.exit(parallel::stopCluster(cl) )
+  on.exit(stopImplicitCluster)
+  on.exit(registerDoSEQ())
   # define operator to use depending on parallel being TRUE or FALSE
   # `%DO%` <- if(parallel) `%dorng%` else `%do%`
   # `%DO%` <- if(parallel && requireNamespace("doRNG", quietly = TRUE)) 
@@ -156,10 +158,11 @@ gaisl <- function(type = c("binary", "real-valued", "permutation"),
 
   for(iter in seq_len(numiter))
   {
+    opts <- list(preschedule=FALSE)
     # GA evolution in islands
-    GAs <- foreach(j. = seq_len(numIslands), .packages='doMC') %dopar%
+    GAs <- foreach(j. = seq_len(numIslands), .options.multicore=opts) %dopar% {
                    # .options.multicore = list(set.seed = seed)
-                  { ga(type = type, 
+                   ga(type = type, 
                        fitness = fitness, ...,
                        min = min, max = max, nBits = nBits,
                        suggestions = POPs[[j.]],
