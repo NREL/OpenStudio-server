@@ -35,7 +35,7 @@ gaControl <- function(...)
       current[nargs] <- args
     }
 
-  if(sys.parent() == 0) env <- asNamespace("GA") else env <- parent.frame()
+  if(sys.parent() == 0) env <- asNamespace("NRELGA") else env <- parent.frame()
   assign(".ga.default", current, envir = env)
   invisible(current)
 }

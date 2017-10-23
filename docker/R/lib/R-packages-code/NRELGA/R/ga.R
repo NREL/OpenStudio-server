@@ -393,7 +393,7 @@ setClass(Class = "ga",
                         fitnessValue = "numeric",
                         solution = "matrix"
                       ),
-         package = "GA" 
+         package = "NRELGA" 
 ) 
 
 setMethod("print", "ga", function(x, ...) str(x))
