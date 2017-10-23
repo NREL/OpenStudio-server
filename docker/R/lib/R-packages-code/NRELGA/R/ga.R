@@ -132,17 +132,16 @@ ga <- function(type = c("binary", "real-valued", "permutation"),
   # Start parallel computing (if needed)
   if(!calledFromIsl)
   {
-    cat('cluster does not exist, create one')
+    cat('cluster does not exist, create one\n')
     cl <- parallel::makeCluster(numCores, type = "FORK")
     doParallel::registerDoParallel(cl, cores = numCores) 
     on.exit(parallel::stopCluster(cl) )
     on.exit(stopImplicitCluster)
     on.exit(registerDoSEQ())
   }  else {
-    cat('cluster exists')
     cat(paste("GA numCores:",numCores))
-    #numCores <- max(2,numCores)
-    #registerDoMC(cl, cores=numCores)
+    numCores <- max(2,numCores)
+    registerDoMC(cl, cores=numCores)
   }
   # define operator to use depending on parallel being TRUE or FALSE
   # `%DO%` <- if(parallel && requireNamespace("doRNG", quietly = TRUE)) 

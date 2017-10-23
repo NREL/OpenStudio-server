@@ -111,7 +111,7 @@ RUN Rscript install_packages.R
 
 # Install custom packages
 ADD /lib/R-packages /opt/openstudio/R/lib/R-packages
-RUN R CMD INSTALL /opt/openstudio/R/lib/R-packages/NRELmoo*.tar.gz /opt/openstudio/R/lib/R-packages/NRELpso*.tar.gz /opt/openstudio/R/lib/R-packages/GA*.tar.gz
+RUN R CMD INSTALL /opt/openstudio/R/lib/R-packages/NRELmoo*.tar.gz /opt/openstudio/R/lib/R-packages/NRELpso*.tar.gz /opt/openstudio/R/lib/R-packages/NRELGA*.tar.gz
 
 # Add the remaining files
 ADD /lib /opt/openstudio/R/lib
