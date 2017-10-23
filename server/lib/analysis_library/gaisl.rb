@@ -102,7 +102,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
       @r.converse 'library(R.utils)'
       @r.converse 'library(parallel)'
       @r.converse 'library(doParallel)'
-      @r.converse 'library(GA)'
+      @r.converse 'library(NRELGA)'
 
       # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
       # This would allow us to easily replace the queuing system with rabbit or any other json based versions.

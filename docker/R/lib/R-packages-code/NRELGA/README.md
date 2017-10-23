@@ -13,24 +13,10 @@ An R package for optimization using genetic algorithms. The package provides a f
 Get the released version from CRAN:
 
 ```R
-install.packages("GA")
-```
-
-Or the development version from github:
-
-```R
-# install.packages("devtools")
-devtools::install_github("luca/GA")
+install.packages("NRELGA")
 ```
 
 ## How to Use This Package
-
-See the papers in the references section below. 
-A quick intro vignette is also available, which can be accessed using
-
-```R
-vignette("GA")
-```
 
 ## References:
 

@@ -1,6 +1,6 @@
 .onAttach <- function(lib, pkg)
 {
-  unlockBinding(".ga.default", asNamespace("GA")) 
+  unlockBinding(".ga.default", asNamespace("NRELGA")) 
   version <- read.dcf(file.path(lib, pkg, "DESCRIPTION"), "Version")
   
   if(interactive())
