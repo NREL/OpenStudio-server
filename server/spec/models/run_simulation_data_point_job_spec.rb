@@ -35,7 +35,7 @@
 
 require 'rails_helper'
 
-RSpec.describe RunSimulateDataPoint, type: :feature do
+RSpec.describe RunSimulateDataPointJob, type: :feature do
   before :each do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
@@ -187,7 +187,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
 
     dp = DataPoint.new
     dp.save!
-    a = RunSimulateDataPoint.new(dp.id)
+    a = RunSimulateDataPointJob.new(dp.id)
     write_lock_file = 'spec/files/tmp/write.lock'
     receipt_file = 'spec/files/tmp/write.receipt'
     FileUtils.mkdir_p 'spec/files/tmp'
@@ -252,7 +252,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     # Start the workers first, wheee
     n_workers = 2
     (0..n_workers-1).to_a.each do |i_worker|
-      command = "bundle exec bin/delayed_job -i worker_#{i_worker} --queues=test run --log-dir=log --pid-dir tmp/pids"
+      command = "bundle exec bin/delayed_job -i worker_#{i_worker} --queues=test_queue run --log-dir=log --pid-dir tmp/pids"
       puts "Starting worker with command #{command}"
       spawn(command, [:err, :out] => ["log/dj_worker_#{i_worker}.log", 'w'])
     end
@@ -278,7 +278,8 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
       dp = analysis.data_points.new(analysis_id: analysis_id, name: "Test #{n}")
       dp.save!
 
-      dp.submit_simulation(TestWorker, 'test')
+      id = dp.submit_simulation(TestWorkerJob)
+      expect(id.to_s.size).to be 24
     end
 
     while Delayed::Job.count > 0

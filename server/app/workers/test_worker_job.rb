@@ -33,10 +33,22 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-class TestWorker
-  def initialize(data_point_id)
-    @data_point = DataPoint.where(uuid: data_point_id).find_one_and_update(
-        {:$set => {status: :queued, run_queue_time: Time.now}},
+
+# Struct for delayed_job to use
+TestWorkerStruct = Struct.new(:data_point_id) do
+  def queue_name
+    'test_queue'
+  end
+
+  def max_attempts
+    1
+  end
+end
+
+class TestWorkerJob < TestWorkerStruct
+  def enqueue(job)
+    DataPoint.where(uuid: data_point_id).find_one_and_update(
+        {:$set => {status: :queued, run_queue_time: Time.now, job_id: job.id}},
         return_document: :after
     )
 
@@ -44,6 +56,7 @@ class TestWorker
   end
 
   def perform
+    @data_point = DataPoint.where(uuid: data_point_id).first
     @data_point.set_start_state
     sleep 2.5
 

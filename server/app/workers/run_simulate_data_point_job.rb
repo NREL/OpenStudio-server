@@ -33,28 +33,38 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# Command line based interface to execute the Workflow manager.
+require 'date'
+require 'json'
 
+# Command line based interface to execute the Workflow manager.
 # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
 
-class RunSimulateDataPoint
+# Struct for delayed_job to use instead of calling this on the class. The overall goal
+# here is to reduce the likelihood of a race condition. In this case, each job will start
+# and then set the datapoint status upon the perform method. Before the status was being updated
+# as the job was being submitted.
+RunSimulateDataPointStruct = Struct.new(:data_point_id) do
+  def queue_name
+    'simulations'
+  end
 
-  require 'date'
-  require 'json'
+  def max_attempts
+    1
+  end
+end
 
-  def initialize(data_point_id, options = {})
-    defaults = {run_workflow_method: 'workflow'}.with_indifferent_access
-    @options = defaults.deep_merge(options)
-
-    # atomically update the datapoint status to started while returning the @data_point
-    @data_point = DataPoint.where(uuid: data_point_id).find_one_and_update(
-        {:$set => {status: :queued, run_queue_time: Time.now}},
+class RunSimulateDataPointJob < RunSimulateDataPointStruct
+  def enqueue(job)
+    DataPoint.where(uuid: data_point_id).find_one_and_update(
+        {:$set => {status: :queued, run_queue_time: Time.now, job_id: job.id}},
         return_document: :after
     )
-    @intialize_worker_errs = []
   end
 
   def perform
+    @data_point = DataPoint.where(uuid: data_point_id).first
+    @intialize_worker_errs = []
+
     # Create the analysis, simulation, and run directory
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
     FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
@@ -76,7 +86,6 @@ class RunSimulateDataPoint
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     @sim_logger.info "Analysis directory is #{analysis_dir}"
     @sim_logger.info "Simulation directory is #{simulation_dir}"
-    @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
     # If worker initialization fails, communicate this information
     # to the user via the out.osw.
@@ -116,7 +125,7 @@ class RunSimulateDataPoint
       end
       upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
       @data_point.set_error_flag
-      @data_point.set_complete_state if @data_point
+      @data_point.set_complete_state
       @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
       @sim_logger.close if @sim_logger
       report_file = "#{simulation_dir}/#{@data_point.id}.log"
@@ -283,7 +292,7 @@ class RunSimulateDataPoint
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
       @sim_logger.close if @sim_logger
-      @data_point.set_complete_state if @data_point
+      @data_point.set_complete_state
       report_file = "#{simulation_dir}/#{@data_point.id}.log"
       upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
       true
