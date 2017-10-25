@@ -102,39 +102,33 @@ class DataPoint
   end
 
   def set_start_state
-    DataPoint.where(uuid: id).find_one_and_update({:$set => {status: :started, run_start_time: Time.now}})
+    DataPoint.where(uuid: id).find_one_and_update({ "$set" => { status: :started, run_start_time: Time.now }}, :return_document => :after)
   end
 
   def set_success_flag
-    self.status_message = 'completed normal'
-    save!
+    DataPoint.where(uuid: id).find_one_and_update({ "$set" => { status_message: 'completed normal' }}, :return_document => :after)
   end
 
   def set_invalid_flag
-    self.status_message = 'invalid workflow'
-    save!
+    DataPoint.where(uuid: id).find_one_and_update({ "$set" => { status_message: 'invalid workflow' }}, :return_document => :after)
   end
 
   def set_cancel_flag
-    self.status_message = 'datapoint canceled'
-    save!
+    DataPoint.where(uuid: id).find_one_and_update({ "$set" => { status_message: 'datapoint canceled' }}, :return_document => :after)
   end
 
   def set_error_flag
-    self.status_message = 'datapoint failure'
-    save!
+    DataPoint.where(uuid: id).find_one_and_update({ "$set" => { status_message: 'datapoint failure' }}, :return_document => :after)
   end
 
   def set_complete_state
-    DataPoint.where(uuid: id).find_one_and_update({:$set => {status: :completed, run_end_time: Time.now}})
+    DataPoint.where(uuid: id).find_one_and_update({ "$set" => { status: :completed, run_end_time: Time.now }}, :return_document => :after)
   end
 
   def set_canceled_state
     self.destroy_delayed_job # Remove the datapoint from the delayed jobs queue
-    self.run_end_time = Time.now
-    self.status = :completed
-    self.status_message = 'datapoint canceled'
-    save!
+    self.set_complete_state
+    self.set_cancel_flag
   end
 
   protected
