@@ -48,13 +48,14 @@ class AnalysisLibrary::RepeatRun < AnalysisLibrary::Base
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
       problem: {
-        random_seed: 1979,
         algorithm: {
           number_of_runs: 2,
           number_of_samples: 1,
           sample_method: 'all_variables',
           debug_messages: 0,
           failed_f_value: 1e18,
+          objective_functions: [],
+          seed: nil
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -77,8 +78,11 @@ class AnalysisLibrary::RepeatRun < AnalysisLibrary::Base
 
     logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
 
-    # make this a core method
-    logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
+      # make this a core method
+      if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
+        logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
+        @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
+      end
 
     selected_variables = Variable.pivots(@analysis.id) + Variable.variables(@analysis.id)
     logger.info "Found #{selected_variables.count} variables to perturb"

@@ -44,7 +44,6 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-        random_seed: 1979,
         algorithm: {
           r: 2,
           levels: 2,
@@ -54,7 +53,8 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
           p_power: 2,
           debug_messages: 0,
           failed_f_value: 1e18,
-          objective_functions: []
+          objective_functions: [],
+          seed: nil
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -87,8 +87,11 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
     begin
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
       @r.converse(" print(paste('getwd:',getwd()))")
-      # TODO: deal better with random seeds
-      @r.converse("set.seed(#{@analysis.problem['random_seed']})")
+      # make this a core method
+      if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
+        logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
+        @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
+      end
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
       @r.converse 'library(sensitivity)'

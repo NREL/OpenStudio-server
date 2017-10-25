@@ -58,11 +58,11 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
         }
       ],
       problem: {
-        random_seed: 1979,
         algorithm: {
           number_of_samples: 10, # to discretize any continuous variables
           max_iterations: 1000,
-          objective_functions: %w(total_energy total_life_cycle_cost)
+          objective_functions: %w(total_energy total_life_cycle_cost),
+          seed: nil
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
