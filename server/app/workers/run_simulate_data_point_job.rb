@@ -125,7 +125,7 @@ class RunSimulateDataPointJob < RunSimulateDataPointStruct
       end
       upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
       @data_point.set_error_flag
-      @data_point.set_complete_state if @data_point
+      @data_point.set_complete_state
       @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
       @sim_logger.close if @sim_logger
       report_file = "#{simulation_dir}/#{@data_point.id}.log"
@@ -292,7 +292,7 @@ class RunSimulateDataPointJob < RunSimulateDataPointStruct
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
       @sim_logger.close if @sim_logger
-      @data_point.set_complete_state if @data_point
+      @data_point.set_complete_state
       report_file = "#{simulation_dir}/#{@data_point.id}.log"
       upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
       true
