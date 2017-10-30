@@ -45,9 +45,10 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       output_variables: [],
       problem: {
         algorithm: {
-          r: 2,
-          levels: 2,
-          grid_jump: 1,
+          r: 10,
+          r2: 20,
+          levels: 4,
+          grid_jump: 2,
           type: 'oat',
           norm_type: 'minkowski',
           p_power: 2,
@@ -193,6 +194,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
                    maxes: mins_maxes[:max],
                    levels: @analysis.problem['algorithm']['levels'], 
                    r: @analysis.problem['algorithm']['r'],
+                   r2: @analysis.problem['algorithm']['r2'],
                    type: @analysis.problem['algorithm']['type'], 
                    grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['norm_type'], 
