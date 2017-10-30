@@ -157,6 +157,11 @@ gaisl <- function(type = c("binary", "real-valued", "permutation"),
                                dimnames = list(NULL, 
                                                names(gaSummary(rnorm(10)))))), 
                    numIslands)
+cat(paste("sumryStat = ", sumryStat, "\n"))
+cat(paste("length(sumryStat) = ", length(sumryStat), "\n"))
+cat(paste("nrow(sumryStat[[1]]) = ", nrow(sumryStat[[1]]), "\n"))
+cat(paste("seq_len(numIslands) = ", seq_len(numIslands), "\n"))
+cat(paste("seq_len(numiter) = ", seq_len(numiter), "\n"))
 
   for(iter in seq_len(numiter))
   {
@@ -195,7 +200,24 @@ gaisl <- function(type = c("binary", "real-valued", "permutation"),
     { 
       # get summary of GAs evolution
       j <- seq((iter-1)*migrationInterval+1, iter*migrationInterval)
-      sumryStat[[i]][j,] <- GAs[[i]]@summary
+      cat(paste("j = ", j, "\n"))
+      cat(paste("i = ", i, "\n"))
+      cat(paste("GAs[[i]]@summary = ", GAs[[i]]@summary, "\n"))
+      cat(paste("sumryStat[[i]][j,] = ", sumryStat[[i]][j,], "\n"))
+      if (length(sumryStat[[i]][j,]) >= length(GAs[[i]]@summary)) {
+      #sumryStat[[i]][j,] <- GAs[[i]]@summary
+        if (length(GAs[[i]]@summary) > 0) {
+          for (k in 1:length(GAs[[i]]@summary)) {
+            sumryStat[[i]][j,][k] <- GAs[[i]]@summary[k]
+          }
+        } else {
+          cat(paste("length(GAs[[i]]@summary) = ", length(GAs[[i]]@summary), "\n"))
+        }
+      }  else {
+        cat(paste("length(sumryStat[[i]][j,]) = ", length(sumryStat[[i]][j,]), "\n"))
+        cat(paste("length(GAs[[i]]@summary) = ", length(GAs[[i]]@summary), "\n"))
+      }
+      cat(paste("sumryStat[[i]][j,] = ", sumryStat[[i]][j,], "\n"))
       # migration step
       from <- i
       to <- (i %% numIslands) + 1
@@ -400,6 +422,7 @@ setMethod("plot", "gaisl", plot.gaisl)
 garun <- function(x)
 {
   x <- as.vector(x)
+  x <- na.omit(x)
   sum(rev(x) >= (max(x, na.rm = TRUE) - gaControl("eps")))
 }
 
