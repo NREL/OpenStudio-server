@@ -1,0 +1,160 @@
+# AUTHOR:           Nicholas Long
+# DESCRIPTION:      OpenStudio Server Docker Container
+# TO_BUILD_AND_RUN: docker-compose up
+# NOTES:            Currently this is one big dockerfile and non-optimal.
+
+FROM ubuntu:14.04
+MAINTAINER Nicholas Long nicholas.long@nrel.gov
+ARG rails_env=docker-dev
+
+# Install required libaries
+RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
+    echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | \
+    sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list && \
+    apt-get update \
+	&& apt-get install -y --no-install-recommends \
+        autoconf \
+        apt-transport-https \
+        bison \
+        build-essential \
+        bzip2 \
+        ca-certificates \
+        curl \
+        default-jdk \
+        dos2unix \
+        imagemagick \
+        gdebi-core \
+        git \
+        libbz2-dev \
+        libcurl4-openssl-dev \
+        libdbus-glib-1-2 \
+        libgdbm3 \
+        libgdbm-dev \
+        libglib2.0-dev \
+        libglu1 \
+        libgsl0ldbl \
+        libgsl0-dev \
+        libncurses-dev \
+        libreadline-dev \
+        libxml2-dev \
+        libxslt-dev \
+        libffi-dev \
+        libssl-dev \
+        libyaml-dev \
+        libice-dev \
+        libsm-dev \
+        mongodb-org-tools \
+        procps \
+        ruby \
+        tar \
+        unzip \
+        wget \
+        zip \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build and Install Ruby
+#   -- skip installing gem documentation
+RUN mkdir -p /usr/local/etc \
+	&& { \
+		echo 'install: --no-document'; \
+		echo 'update: --no-document'; \
+	} >> /usr/local/etc/gemrc
+
+ENV RUBY_MAJOR 2.2
+ENV RUBY_VERSION 2.2.4
+ENV RUBY_DOWNLOAD_SHA256 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
+ENV RUBYGEMS_VERSION 2.6.6
+
+# some of ruby's build scripts are written in ruby
+# we purge this later to make sure our final image uses what we just built
+RUN curl -fSL -o ruby.tar.gz "http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR/ruby-$RUBY_VERSION.tar.gz" \
+	&& echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.gz" | sha256sum -c - \
+	&& mkdir -p /usr/src/ruby \
+	&& tar -xzf ruby.tar.gz -C /usr/src/ruby --strip-components=1 \
+	&& rm ruby.tar.gz \
+	&& cd /usr/src/ruby \
+	&& { echo '#define ENABLE_PATH_CHECK 0'; echo; cat file.c; } > file.c.new && mv file.c.new file.c \
+	&& autoconf \
+	&& ./configure --disable-install-doc --enable-shared \
+	&& make -j"$(nproc)" \
+	&& make install \
+	&& apt-get purge -y --auto-remove $buildDeps \
+	&& gem update --system $RUBYGEMS_VERSION \
+	&& rm -r /usr/src/ruby
+
+ENV BUNDLER_VERSION 1.11.2
+
+RUN gem install bundler --version "$BUNDLER_VERSION"
+
+# install things globally, for great justice
+# and don't create ".bundle" in all our apps
+ENV GEM_HOME /usr/local/bundle
+ENV BUNDLE_PATH="$GEM_HOME" \
+	BUNDLE_BIN="$GEM_HOME/bin" \
+	BUNDLE_SILENCE_ROOT_WARNING=1 \
+	BUNDLE_APP_CONFIG="$GEM_HOME"
+ENV PATH $BUNDLE_BIN:$PATH
+RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
+	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
+
+# Run this separate to cache the download
+ENV OPENSTUDIO_VERSION 2.3.0
+ENV OPENSTUDIO_SHA cf58ee1e38
+
+# Download from S3
+ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
+ENV OPENSTUDIO_DOWNLOAD_FILENAME OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Linux.deb
+ENV OPENSTUDIO_DOWNLOAD_URL $OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
+
+# Install gdebi, then download and install OpenStudio, then clean up.
+# gdebi handles the installation of OpenStudio's dependencies including Qt5,
+# Boost, and Ruby 2.0.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libboost-thread1.55.0 \
+    && curl -SLO $OPENSTUDIO_DOWNLOAD_URL \
+    && gdebi -n $OPENSTUDIO_DOWNLOAD_FILENAME \
+    && rm -f $OPENSTUDIO_DOWNLOAD_FILENAME \
+    && rm -rf /usr/SketchUpPlugin \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add RUBYLIB link for openstudio.rb and Radiance env vars
+ENV RUBYLIB /usr/Ruby
+ENV OPENSTUDIO_SERVER 'true'
+ENV OS_RAYPATH /usr/Radiance
+ENV PERL_EXE_PATH /usr/bin
+
+# Set the rails env var
+ENV RAILS_ENV $rails_env
+ENV GECKODRIVER_VERSION v0.15.0
+
+# Configure IPVS keepalive
+ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
+RUN sudo sysctl --system
+
+### ADD Gemfile to cache the installation of Gems. If you change the Gemfile, then you will need to rebuild
+### your docker containers
+ADD /bin /opt/openstudio/bin
+ADD /server/Gemfile /opt/openstudio/server/Gemfile
+WORKDIR /opt/openstudio/server
+RUN bundle install
+
+#### OpenStudio Server Code
+VOLUME ["/opt/openstudio"]
+
+# Define working directory
+WORKDIR /opt/openstudio/server
+
+COPY /docker/server/start-server-dev.sh /usr/local/bin/start-server-dev
+COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+RUN chmod +x /usr/local/bin/start-server-dev
+RUN chmod +x /usr/local/bin/run-server-tests
+
+COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
+RUN chmod 755 /usr/local/bin/rails-entrypoint
+ENTRYPOINT ["rails-entrypoint"]
+
+CMD ["/usr/local/bin/start-server-dev"]
+
+# Expose ports.
+EXPOSE 8080 9090
