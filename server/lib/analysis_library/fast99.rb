@@ -45,8 +45,8 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
       output_variables: [],
       problem: {
         algorithm: {
-          n: 10,
-          M: 20,
+          n: 65,
+          M: 4,
           norm_type: 'minkowski',
           p_power: 2,
           debug_messages: 0,
@@ -108,6 +108,10 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
       # TODO: preflight check -- need to catch this in the analysis module
       if @analysis.problem['algorithm']['n'].nil? || (@analysis.problem['algorithm']['n']).zero?
         raise 'Value for n was not set or equal to zero (must be 1 or greater)'
+      end
+      
+      if (4*@analysis.problem['algorithm']['M']*@analysis.problem['algorithm']['M']) <= (@analysis.problem['algorithm']['n'])
+        logger.info 'Value for n was not > 4*M^2, will adjust value'
       end
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
