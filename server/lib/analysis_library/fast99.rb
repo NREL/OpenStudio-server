@@ -45,7 +45,7 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
       output_variables: [],
       problem: {
         algorithm: {
-          n: 65,
+          n: 66,
           M: 4,
           norm_type: 'minkowski',
           p_power: 2,
