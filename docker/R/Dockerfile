@@ -90,9 +90,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 #### Build R and install R packages.
-ENV R_VERSION 3.4.1
+ENV R_VERSION 3.4.2
 ENV R_MAJOR_VERSION 3
-ENV R_SHA 02b1135d15ea969a3582caeb95594a05e830a6debcdb5b85ed2d5836a6a3fc78
+ENV R_SHA 971e30c2436cf645f58552905105d75788bd9733bddbcb7c4fbff4c1a6d80c64
 RUN curl -fSL -o R.tar.gz "http://cran.fhcrc.org/src/base/R-$R_MAJOR_VERSION/R-$R_VERSION.tar.gz" \
     && echo "$R_SHA R.tar.gz" | sha256sum -c - \
     && mkdir /usr/src/R \
