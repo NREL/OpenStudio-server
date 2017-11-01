@@ -110,8 +110,8 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
         raise 'Value for n was not set or equal to zero (must be 1 or greater)'
       end
       
-      if (4*@analysis.problem['algorithm']['M']*@analysis.problem['algorithm']['M']) <= (@analysis.problem['algorithm']['n'])
-        logger.info 'Value for n was not > 4*M^2, will adjust value'
+      if (4*@analysis.problem['algorithm']['M']*@analysis.problem['algorithm']['M']+2) <= (@analysis.problem['algorithm']['n'])
+        logger.info 'Value for n was not > 4*M^2+2, will adjust value'
       end
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
