@@ -93,6 +93,10 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
       @r.converse 'library(sensitivity)'
+      @r.converse 'library(ggplot2)'
+      @r.converse 'library(cowplot)'
+      @r.converse 'library(ggsci)'
+      @r.converse 'library(reshape2)'
 
       # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
       # This would allow us to easily replace the queuing system with rabbit or any other json based versions.

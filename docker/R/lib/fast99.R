@@ -124,101 +124,47 @@ results <- NULL
   m <- fast99(model=NULL, factors=ncol(vars), n=n, M=M, q.arg = temp_list)
 #}
 m1 <- as.list(data.frame(t(m$X)))
-print(paste("m1:",m1))
+if (debug_messages == 1) {
+  print(paste("m1:",m1))
+}
 try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
 
- #print(paste("nrow(results):",nrow(results)))
- #print(paste("ncol(results):",ncol(results)))
  result <- as.data.frame(results)
- print(paste("length(objnames):",length(objnames)))
- print(paste("nrow(result):",nrow(result)))
- print(paste("ncol(result):",ncol(result)))
- #file_names_jsons <- c("")
+ if (debug_messages == 1) {
+  print(paste("length(objnames):",length(objnames)))
+  print(paste("nrow(result):",nrow(result)))
+  print(paste("ncol(result):",ncol(result)))
+ }
  file_names_R <- c("")
- #file_names_png <- c("")
- #file_names_box_png <- c("")
- #file_names_box_sorted_png <- c("")
  file_names_bar_png <- c("")
- #file_names_bar_sorted_png <- c("")
  
 if (nrow(result) > 0) {
    for (j in 1:nrow(result)){
-     #print(paste("result[j,]:",unlist(result[j,])))
-     #print(paste("result[,j]:",unlist(result[,j])))
+
      n <- m
      tell(n,as.numeric(unlist(result[j,])))
      print(n)
-    # print(paste("is.recursive(n):",is.recursive(n)))
-    # print(paste("is.atomic(n):",is.atomic(n)))
-    # var_mu <- rep(0, ncol(vars))
-    # var_mu_star <- var_mu
-    # var_sigma <- var_mu
-    # for (i in 1:ncol(vars)){
-      # var_mu[i] <- mean(n$ee[,i])
-      # var_mu_star[i] <- mean(abs(n$ee[,i]))
-      # var_sigma[i] <- sd(n$ee[,i])
-    # }
-    # answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
-     #file_names_jsons[j] <- paste(analysis_dir,"/fast99_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
-    # write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
      file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
      save(n, file=file_names_R[j])
-    # if (all(is.finite(var_mu_star))) {
-      # file_names_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
-      # png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-      # plot(n)
-      ##axis(1, las=2)
-      ##axis(2, las=1)
-      # dev.off()
-       file_names_bar_png[j] <- paste(analysis_dir,"/fast99_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
-       png(file_names_bar_png[j], width=12, height=8, units="in", pointsize=10, res=200, type="cairo")
-       op <- par(mar = c(14,4,4,2) + 0.1)
-       #mp <- barplot(height=var_mu_star, ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
-       #plot(n)
-       if (! is.null(n$y)) {
-        S <- rbind(n$D1 / n$V, 1 - n$Dt / n$V - n$D1 / n$V)
-        colnames(S) <- vardisplaynames
-        bar.col <- c("white","grey")
-        mp <- barplot(S, ylim = c(0,1), col = bar.col, , xaxt="n")
-        axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
-        legend("topright", c("main effect", "interactions"), fill = bar.col)
-       }
-      # axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
-      ##axis(2, las=1)
-       dev.off()
-      ##sorted
-      # file_names_bar_sorted_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
-      # png(file_names_bar_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-      # op <- par(mar = c(14,4,4,2) + 0.1)
-      # mp <- barplot(height=sort(var_mu_star), ylab="mu.star", main="Mu Star of Elementary Effects", xaxt="n")
-      # axis(1, at=mp, labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)
-      ##axis(2, las=1)
-      # dev.off()
 
-      # file_names_box_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
-      # png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-      # bottommar <- max(strwidth(vardisplaynames[which.max(nchar(vardisplaynames))], "inch")+0.1, na.rm = TRUE)
-      # leftmar <- max(strwidth(nchar(max(n$ee)), "inch")+0.25, na.rm = TRUE)
-      # par(mai=c(bottommar,leftmar, 0.25,0.25))
-      # mp <- boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9, main="BoxPlot of Elementary Effects", ylab=paste("EE of",objnames[j]))
-      # axis(1, at=seq(1,length(vardisplaynames)), labels=vardisplaynames, las=2, cex.axis=0.9)
-      # dev.off()
-      
-      # file_names_box_sorted_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box_sorted.png",sep="")
-      # png(file_names_box_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-      # bottommar <- max(strwidth(vardisplaynames[which.max(nchar(vardisplaynames))], "inch")+0.1, na.rm = TRUE)
-      # leftmar <- max(strwidth(nchar(max(n$ee)), "inch")+0.25, na.rm = TRUE)
-      # par(mai=c(bottommar,leftmar, 0.25,0.25))
-      # mp <- boxplot(n$ee[,order(colMeans(abs(n$ee)))], las=2, names=vardisplaynames[order(var_mu_star)], cex.axis=0.9, main="BoxPlot of Elementary Effects", ylab=paste("EE of",objnames[j]))
-      # axis(1, at=seq(1,length(vardisplaynames)), labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)
-      # dev.off()
-       #file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,file_names_box_sorted_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
-       file_zip <- c(file_names_R,file_names_bar_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
-      ##file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
-     #} else {
-     #  file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
-     #}
-     print(paste("file_zip:",file_zip))
+     file_names_bar_png[j] <- paste(analysis_dir,"/fast99_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
+     png(file_names_bar_png[j], width=12, height=8, units="in", pointsize=10, res=200, type="cairo")
+     op <- par(mar = c(14,4,4,2) + 0.1)
+     if (! is.null(n$y)) {
+      S <- rbind(n$D1 / n$V, 1 - n$Dt / n$V - n$D1 / n$V)
+      colnames(S) <- vardisplaynames
+      bar.col <- c("white","grey")
+      mp <- barplot(S, ylim = c(0,1), col = bar.col, , xaxt="n")
+      axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
+      legend("topright", c("main effect", "interactions"), fill = bar.col)
+     }
+     dev.off()
+
+     #file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,file_names_box_sorted_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+     file_zip <- c(file_names_R,file_names_bar_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+     if (debug_messages == 1) {
+      print(paste("file_zip:",file_zip))
+     }
      if(!dir.exists(paste(analysis_dir,"/downloads",sep=''))){
        dir.create(paste(analysis_dir,"/downloads",sep=''))
        print(paste("created dir:",analysis_dir,"/downloads",sep=''))
