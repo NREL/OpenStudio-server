@@ -175,7 +175,6 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
 
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
-
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.info log_message

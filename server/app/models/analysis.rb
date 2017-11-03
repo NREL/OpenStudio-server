@@ -89,14 +89,14 @@ class Analysis
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
-  validates_attachment_content_type :seed_zip, content_type: %w(application/zip)
+  validates_attachment_content_type :seed_zip, content_type: ['application/zip']
 
   # Callbacks
   after_create :verify_uuid
   before_destroy :queue_delete_files
 
   def self.status_states
-    %w(na init queued started completed)
+    ['na', 'init', 'queued', 'started', 'completed']
   end
 
   def start(no_delay, analysis_type = 'batch_run', options = {})
@@ -161,9 +161,7 @@ class Analysis
     end
 
     # Remove all the queued delayed jobs for this analysis
-    data_points.where(status: 'queued').each do |dp|
-      dp.set_canceled_state
-    end
+    data_points.where(status: 'queued').each(&:set_canceled_state)
 
     [save!, errors]
   end

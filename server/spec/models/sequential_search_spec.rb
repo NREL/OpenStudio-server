@@ -90,7 +90,7 @@ RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
     puts "Run list was returned with #{run_list.inspect}"
     puts "run list of size of #{run_list.size} is #{run_list}"
     expect(run_list.size).to eq(7) # 7 because it has itself
-    expect(run_list).to eq([['1'], ['2'], %w(1 3), %w(1 4), %w(1 5), %w(1 6), %w(1 7)])
+    expect(run_list).to eq([['1'], ['2'], ['1', '3'], ['1', '4'], ['1', '5'], ['1', '6'], ['1', '7']])
 
     # now create the run list data
     data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)
@@ -100,7 +100,7 @@ RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
   end
 
   it "if 'vgl=1' then result should be ?" do
-    vgl_ids = %w(1 3)
+    vgl_ids = ['1', '3']
 
     # get the full ps information
     vgls = @ps.select { |k, v| v if vgl_ids.include?(k) }
@@ -109,7 +109,7 @@ RSpec.describe AnalysisLibrary::SequentialSearch, type: :model do
 
     puts "run list of size of #{run_list.size} is #{run_list.uniq}"
     expect(run_list.size).to eq(6) # only six for now because we aren't pulling out the values
-    expect(run_list).to eq([%w(1 3), %w(2 3), %w(1 4), %w(1 5), %w(1 6), %w(1 3 7)])
+    expect(run_list).to eq([['1', '3'], ['2', '3'], ['1', '4'], ['1', '5'], ['1', '6'], ['1', '3', '7']])
 
     # now create the run list data
     data_point_list = AnalysisLibrary::SequentialSearch.create_data_point_list(@ps, run_list, 1)

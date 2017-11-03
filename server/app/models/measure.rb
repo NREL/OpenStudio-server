@@ -121,7 +121,7 @@ class Measure
     logger.info("Adding/updating measure #{measure.name} for analysis #{analysis_id}")
     i_measure = 0
     os_json.each do |k, v|
-      exclude_fields = %w(arguments variables)
+      exclude_fields = ['arguments', 'variables']
 
       # check for null measures
       # logger.info("trying to add #{k} : #{v}")

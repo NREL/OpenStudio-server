@@ -1,7 +1,7 @@
 # Load in the APP_CONFIG
 # Read in default config settings unique to this application.
 path = File.join(Rails.root, '/config/config.yml')
-APP_CONFIG = YAML.load(ERB.new(File.new(path).read).result)[Rails.env]
+APP_CONFIG = YAML.safe_load(ERB.new(File.new(path).read).result)[Rails.env]
 
 # Go through and interpret some of the variables
 APP_CONFIG['r_scripts_path'] = File.expand_path(APP_CONFIG['r_scripts_path'].gsub(':rails_root', Rails.root.to_s))
@@ -32,4 +32,3 @@ Mongoid.logger.level = Logger::INFO
 
 # Make sure to add the assets to the asset pipeline
 Rails.application.config.assets.paths << "#{APP_CONFIG['server_asset_path']}/assets"
-

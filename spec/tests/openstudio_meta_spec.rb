@@ -96,7 +96,7 @@ RSpec.describe OpenStudioMeta do
 
     a = RestClient.get 'http://localhost:8080/analyses.json'
     a = JSON.parse(a, symbolize_names: true)
-    a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
+    a = a.sort_by { |a| a[:created_at] }.reverse
     expect(a).not_to be_empty
 
     analysis = a[0]
@@ -155,7 +155,7 @@ RSpec.describe OpenStudioMeta do
 
     a = RestClient.get 'http://localhost:8080/analyses.json'
     a = JSON.parse(a, symbolize_names: true)
-    a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
+    a = a.sort_by { |a| a[:created_at] }.reverse
     expect(a).not_to be_empty
 
     analysis = a[0]

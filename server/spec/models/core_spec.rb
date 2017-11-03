@@ -101,7 +101,7 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
     end
 
     it 'should deal with non-integers' do
-      result = AnalysisLibrary::Core.product_hash(a: [1.23, 4.56], b: [true, false], c: %w(p q))
+      result = AnalysisLibrary::Core.product_hash(a: [1.23, 4.56], b: [true, false], c: ['p', 'q'])
 
       expect(result.size).to eq 8
     end
@@ -138,14 +138,14 @@ RSpec.describe AnalysisLibrary::Core, type: :model do
     end
 
     it 'should work with any type of data' do
-      h = { a: [1, 2, 3], b: %w(4 5 6), c: [true, false, false] }
+      h = { a: [1, 2, 3], b: ['4', '5', '6'], c: [true, false, false] }
       r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash(h)
       expect(r.size).to eq h[:a].size
       expect(r[0]).to eq(a: 1, b: '4', c: true)
     end
 
     it 'should return non-combined hashes' do
-      h = { a: [1, 2, 3], b: %w(4 5 6), c: [true, false, false] }
+      h = { a: [1, 2, 3], b: ['4', '5', '6'], c: [true, false, false] }
       vars = [OpenStruct.new(_id: 'c', static_value: 123)]
       r = AnalysisLibrary::Core.hash_of_array_to_array_of_hash_non_combined(h, vars)
       puts "Non combined hash returned with #{r.inspect}"

@@ -70,7 +70,7 @@ class AnalysesController < ApplicationController
 
     if @analysis
 
-      @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0 ? true : false
+      @has_obj_targets = @analysis.variables.where(:objective_function_target.ne => nil).count > 0
 
       # tab status
       @status = 'all'
@@ -235,7 +235,7 @@ class AnalysesController < ApplicationController
     logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
 
     if params[:analysis_action] == 'start'
-      no_delay = params[:without_delay].to_s == 'true' ? true : false
+      no_delay = params[:without_delay].to_s == 'true'
       res = @analysis.run_analysis(no_delay, @analysis_type, options)
       result = {}
       if res[0]
@@ -657,10 +657,10 @@ class AnalysesController < ApplicationController
     datapoint_id = params[:datapoint_id] ? params[:datapoint_id] : nil
     # other variables that can be specified
     options = {}
-    options['visualize'] = params[:visualize] == 'true' ? true : false
-    options['export'] = params[:export] == 'true' ? true : false
-    options['pivot'] = params[:pivot] == 'true' ? true : false
-    options['perturbable'] = params[:perturbable] == 'true' ? true : false
+    options['visualize'] = params[:visualize] == 'true'
+    options['export'] = params[:export] == 'true'
+    options['pivot'] = params[:pivot] == 'true'
+    options['perturbable'] = params[:perturbable] == 'true'
 
     # get data
     @variables, @data = get_analysis_data(@analysis, datapoint_id, true, options)
@@ -761,7 +761,7 @@ class AnalysesController < ApplicationController
 
     if @analysis
       # reformat the data slightly to get a concise view of the data
-      prov_fields = %w(uuid created_at name display_name description)
+      prov_fields = ['uuid', 'created_at', 'name', 'display_name', 'description']
 
       a = @analysis.as_json
       a.each do |k, _v|
@@ -916,7 +916,7 @@ class AnalysesController < ApplicationController
     plot_data = if datapoint_id
                   if only_completed_normal
                     DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
-                                  status_message: 'completed normal')
+                                    status_message: 'completed normal')
                              .map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
                   else
                     DataPoint.where(analysis_id: analysis, id: datapoint_id)
@@ -929,7 +929,7 @@ class AnalysesController < ApplicationController
                              .out(merge: "datapoints_mr_#{analysis.id}")
                   else
                     DataPoint.where(analysis_id: analysis) .order_by(:created_at.asc).map_reduce(map, reduce)
-                        .out(merge: "datapoints_mr_#{analysis.id}")
+                             .out(merge: "datapoints_mr_#{analysis.id}")
                   end
                 end
 
@@ -985,7 +985,7 @@ class AnalysesController < ApplicationController
 
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, datapoint_ids, false, export: true)
-    static_fields = %w(name _id run_start_time run_end_time status status_message)
+    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
 
     logger.info variables
     filename = "#{analysis.name}.csv"
@@ -1012,7 +1012,7 @@ class AnalysesController < ApplicationController
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, datapoint_ids, false, export: true)
 
-    static_fields = %w(name _id run_start_time run_end_time status status_message)
+    static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
     names_of_vars = static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
 
     # TODO: this is reeeally slow and needs to be addressed # finished conversion: 1764.665880011 ~ 13k points

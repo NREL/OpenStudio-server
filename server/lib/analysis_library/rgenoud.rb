@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#R version of Genoud
+# R version of Genoud
 class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
@@ -138,8 +138,8 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       end
 
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+      # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
         @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
         logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
       else
@@ -174,18 +174,18 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
 
       lhs = AnalysisLibrary::R::Lhs.new(@r)
       samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
-      
+
       # Result of the parameter space will be column vectors of each variable
       logger.info "Samples are #{samples}"
       logger.info "mins_maxes: #{mins_maxes}"
       logger.info "var_names: #{var_names}"
       logger.info("variable types are #{var_types}")
-      
+
       if samples.empty? || samples.size <= 1
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
-      
+
       if var_names.empty? || var_names.empty?
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
@@ -206,12 +206,12 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
           logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
-        end  
+        end
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
@@ -229,30 +229,30 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
         @r.command(master_ips: master_ip,
-                   ips: worker_ips[:worker_ips].uniq, 
-                   vartypes: var_types, 
+                   ips: worker_ips[:worker_ips].uniq,
+                   vartypes: var_types,
                    varnames: var_names,
-                   varseps: mins_maxes[:eps], 
-                   mins: mins_maxes[:min], 
+                   varseps: mins_maxes[:eps],
+                   mins: mins_maxes[:min],
                    maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   normtype: @analysis.problem['algorithm']['norm_type'],
                    ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
-                   gen: @analysis.problem['algorithm']['generations'], 
+                   gen: @analysis.problem['algorithm']['generations'],
                    popSize: @analysis.problem['algorithm']['popsize'],
                    BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
                    boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
-                   printLevel: @analysis.problem['algorithm']['print_level'], 
+                   printLevel: @analysis.problem['algorithm']['print_level'],
                    BFGS: @analysis.problem['algorithm']['bfgs'],
                    solutionTolerance: @analysis.problem['algorithm']['solution_tolerance'],
                    waitGenerations: @analysis.problem['algorithm']['wait_generations'],
-                   maxit: @analysis.problem['algorithm']['maxit'], 
+                   maxit: @analysis.problem['algorithm']['maxit'],
                    epsilongradient: @analysis.problem['algorithm']['epsilon_gradient'],
-                   factr: @analysis.problem['algorithm']['factr'], 
+                   factr: @analysis.problem['algorithm']['factr'],
                    pgtol: @analysis.problem['algorithm']['pgtol'],
-                   r_genoud_debug_flag: @analysis.problem['algorithm']['r_genoud_debug_flag'], 
+                   r_genoud_debug_flag: @analysis.problem['algorithm']['r_genoud_debug_flag'],
                    MM: @analysis.problem['algorithm']['memory_matrix'],
-                   balance: @analysis.problem['algorithm']['balance'], 
+                   balance: @analysis.problem['algorithm']['balance'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value'],
                    gradientcheck: @analysis.problem['algorithm']['gradient_check']) do
@@ -276,7 +276,6 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message

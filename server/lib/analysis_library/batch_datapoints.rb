@@ -139,9 +139,7 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
         isample += 1
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
-
     ensure
-
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis_job.end_time = Time.now

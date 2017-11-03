@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Strength Pareto Evolutionary Algorithm 2
+# Strength Pareto Evolutionary Algorithm 2
 class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
@@ -138,8 +138,8 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       logger.info "Number of objective function groups are #{ug.size}"
 
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+      # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
         @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
         logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
       else
@@ -176,12 +176,12 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       logger.info "mins_maxes: #{mins_maxes}"
       logger.info "var_names: #{var_names}"
       logger.info("variable types are #{var_types}")
-      
+
       if samples.empty? || samples.size <= 1
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
-      #from RGenoud I think we want to do this here too
+      # from RGenoud I think we want to do this here too
       if var_names.empty? || var_names.empty?
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
@@ -197,12 +197,12 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
           logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
-        end  
+        end
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
@@ -217,22 +217,22 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
         # popSize is the number of sample points in the variable (nrow(vars))
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
-        @r.command(master_ips: master_ip, 
-                   ips: worker_ips[:worker_ips].uniq, 
-                   vars: samples.to_dataframe, 
-                   vartypes: var_types, 
-                   varnames: var_names, 
-                   mins: mins_maxes[:min], 
+        @r.command(master_ips: master_ip,
+                   ips: worker_ips[:worker_ips].uniq,
+                   vars: samples.to_dataframe,
+                   vartypes: var_types,
+                   varnames: var_names,
+                   mins: mins_maxes[:min],
                    maxes: mins_maxes[:max],
-                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   normtype: @analysis.problem['algorithm']['norm_type'],
                    ppower: @analysis.problem['algorithm']['p_power'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], 
+                   objfun: @analysis.problem['algorithm']['objective_functions'],
                    gen: @analysis.problem['algorithm']['generations'],
-                   toursize: @analysis.problem['algorithm']['tournament_size'], 
+                   toursize: @analysis.problem['algorithm']['tournament_size'],
                    cprob: @analysis.problem['algorithm']['cprob'],
-                   cidx: @analysis.problem['algorithm']['cidx'], 
+                   cidx: @analysis.problem['algorithm']['cidx'],
                    midx: @analysis.problem['algorithm']['midx'],
-                   mprob: @analysis.problem['algorithm']['mprob'], 
+                   mprob: @analysis.problem['algorithm']['mprob'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value'],
                    uniquegroups: ug.size) do
@@ -256,7 +256,6 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message

@@ -105,7 +105,7 @@ class Variable
       logger.info var.inspect
     end
 
-    exclude_fields = %w(uuid type)
+    exclude_fields = ['uuid', 'type']
     os_json.each do |k, v|
       var[k] = v unless exclude_fields.include? k
     end
@@ -176,7 +176,7 @@ class Variable
 
     var.measure_id = measure.id
 
-    exclude_fields = %w(uuid type argument uncertainty_description)
+    exclude_fields = ['uuid', 'type', 'argument', 'uncertainty_description']
     os_json.each do |k, v|
       var[k] = v unless exclude_fields.include? k
 
@@ -196,7 +196,7 @@ class Variable
 
       if k == 'argument'
         # this is main portion of the variable
-        exclude_fields_2 = %w(uuid version_uuid)
+        exclude_fields_2 = ['uuid', 'version_uuid']
         v.each do |k2, v2|
           var[k2] = v2 unless exclude_fields_2.include? k2
         end
@@ -214,7 +214,7 @@ class Variable
             attribute['name'] ? att_name = attribute['name'] : att_name = nil
             next unless att_name
             attribute.each do |k2, v2|
-              exclude_fields_2 = %w(uuid version_uuid)
+              exclude_fields_2 = ['uuid', 'version_uuid']
               var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
             end
           end
@@ -371,5 +371,4 @@ class Variable
   def destroy_preflight_images
     preflight_images.destroy_all
   end
-
 end

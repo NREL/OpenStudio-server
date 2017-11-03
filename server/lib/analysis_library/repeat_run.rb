@@ -54,7 +54,7 @@ class AnalysisLibrary::RepeatRun < AnalysisLibrary::Base
           number_of_samples: 1,
           sample_method: 'all_variables',
           debug_messages: 0,
-          failed_f_value: 1e18,
+          failed_f_value: 1e18
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential

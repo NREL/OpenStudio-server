@@ -271,8 +271,6 @@ module AnalysisLibrary::R
           logger.info("No R image file found at #{save_file_name}")
         end
 
-
-
       end
     end
 
