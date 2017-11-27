@@ -20,6 +20,14 @@ docker:
   rserve_hostname: 'rserve'
   ruby_bin_dir: /usr/local/ruby
 
+docker-dev:
+  <<: *defaults
+  os_server_host_url: 'http://web:80'
+  os_server_project_path: '/mnt/openstudio'
+  r_scripts_path: /opt/openstudio/R/lib
+  rserve_hostname: 'rserve'
+  ruby_bin_dir: /usr/local/ruby
+
 docker-test:
   <<: *defaults
   os_server_host_url: 'http://web:80'
