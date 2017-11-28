@@ -33,8 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#R version of Genoud
-class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
+#Fast99 Screening and Sensitivity method
+class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -45,28 +45,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       output_variables: [],
       problem: {
         algorithm: {
-          generations: 2,
-          wait_generations: 2,
-          popsize: 30,
-          boundaryenforcement: 2,
-          bfgsburnin: 2,
-          print_level: 2,
-          bfgs: 1,
-          solution_tolerance: 0.01,
+          n: 66,
+          M: 4,
           norm_type: 'minkowski',
           p_power: 2,
-          exit_on_guideline_14: 0,
-          gradient_check: 0,
-          objective_functions: [],
-          pgtol: 1e-1,
-          factr: 4.5036e14,
-          maxit: 3,
-          epsilon_gradient: 1e-4,
-          r_genoud_debug_flag: 0,
-          memory_matrix: 1,
-          balance: 1,
           debug_messages: 0,
           failed_f_value: 1e18,
+          objective_functions: [],
           seed: nil
         }
       }
@@ -94,12 +79,12 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    logger.info 'Setting up R for genoud Run'
+    logger.info 'Setting up R for Fast99 Run'
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
-
+      @r.converse(" print(paste('getwd:',getwd()))")
       # make this a core method
       if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
         logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
@@ -107,9 +92,11 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       end
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
-      @r.converse 'library(mco)'
-      @r.converse 'library(NRELmoo)'
-      @r.converse 'library(rgenoud)'
+      @r.converse 'library(sensitivity)'
+      @r.converse 'library(ggplot2)'
+      @r.converse 'library(cowplot)'
+      @r.converse 'library(ggsci)'
+      @r.converse 'library(reshape2)'
 
       # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
       # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -117,67 +104,50 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       master_ip = 'localhost'
 
       logger.info("Master ip: #{master_ip}")
-      logger.info('Starting GENOUD Run')
+      logger.info('Starting Fast99 Run')
 
       # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
       # that the run flag is true.
 
       # TODO: preflight check -- need to catch this in the analysis module
-      if @analysis.problem['algorithm']['maxit'].nil? || (@analysis.problem['algorithm']['maxit']).zero?
-        raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
+      if @analysis.problem['algorithm']['n'].nil? || (@analysis.problem['algorithm']['n']).zero?
+        raise 'Value for n was not set or equal to zero (must be 1 or greater)'
       end
-
-      if @analysis.problem['algorithm']['popsize'].nil? || (@analysis.problem['algorithm']['popsize']).zero?
-        raise 'Must have number of samples to discretize the parameter space'
+      
+      if (4*@analysis.problem['algorithm']['M']*@analysis.problem['algorithm']['M']+2) <= (@analysis.problem['algorithm']['n'])
+        logger.info 'Value for n was not > 4*M^2+2, will adjust value'
       end
-
-      # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
-      # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
-      #  raise "P Norm must be non-negative"
-      # end
-
-      if @analysis.problem['algorithm']['p_power'] <= 0
-        raise 'P Norm must be non-negative'
-      end
-
-      # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
-        @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
-        logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
-      else
-        @analysis.exit_on_guideline_14 = 0
-        logger.info "exit_on_guideline_14 is forced to #{@analysis.exit_on_guideline_14}"
-      end
-      @analysis.save!
-      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
       @analysis.save!
-      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
-
-      # check to make sure there are objective functions
-      if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
-        raise 'No objective functions defined'
+      
+      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+      ug = objtrue.uniq { |v| v['objective_function_group'] }
+      logger.info "Number of objective function groups are #{ug.size}"
+      obj_names = []
+      ug.each do |var|
+        obj_names << var['display_name_short']
       end
-
-      # find the total number of objective functions
-      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-        raise 'Number of objective functions must equal between the output_variables and the problem definition'
-      end
+      logger.info "Objective function names #{obj_names}"
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
       logger.info "pivot_array: #{pivot_array}"
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"
 
+      var_display_names = []
+      selected_variables.each do |var|
+        var_display_names << var.display_name_short
+      end
+      logger.info "Variable display names #{var_display_names}"
+
       # discretize the variables using the LHS sampling method
-      @r.converse("print('starting lhs to discretize the variables')")
+      @r.converse("print('starting lhs to get min/max')")
       logger.info 'starting lhs to discretize the variables'
 
       lhs = AnalysisLibrary::R::Lhs.new(@r)
-      samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 3)
-      
+      samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, 2 * selected_variables.count)
+
       # Result of the parameter space will be column vectors of each variable
       logger.info "Samples are #{samples}"
       logger.info "mins_maxes: #{mins_maxes}"
@@ -188,23 +158,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
-      
-      if var_names.empty? || var_names.empty?
-        logger.info 'No variables were passed into the options, therefore exit'
-        raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
-      end
-
-      unless var_types.all? { |t| t.casecmp('continuous').zero? }
-        logger.info 'Must have all continous variables to run algorithm, therefore exit'
-        raise "Must have all continous variables to run algorithm.  Found #{var_types}"
-      end
 
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       unless cluster.configure
         raise 'could not configure R cluster'
       end
-
+      
       @r.converse("cat('max_queued_jobs: #{APP_CONFIG['max_queued_jobs']}')")
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
@@ -223,42 +183,25 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
-        # maxit is the max number of iterations to calculate
-        # varNo is the number of variables (ncol(vars))
-        # popsize is the number of sample points in the variable (nrow(vars))
-        # epsilongradient is epsilon in numerical gradient calc
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
-        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(master_ips: master_ip,
+        @r.command(master_ips: master_ip, 
                    ips: worker_ips[:worker_ips].uniq, 
+                   vars: samples.to_dataframe, 
                    vartypes: var_types, 
-                   varnames: var_names,
-                   varseps: mins_maxes[:eps], 
+                   varnames: var_names, 
                    mins: mins_maxes[:min], 
                    maxes: mins_maxes[:max],
+                   n: @analysis.problem['algorithm']['n'],
+                   M: @analysis.problem['algorithm']['M'],
                    normtype: @analysis.problem['algorithm']['norm_type'], 
                    ppower: @analysis.problem['algorithm']['p_power'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'],
-                   gen: @analysis.problem['algorithm']['generations'], 
-                   popSize: @analysis.problem['algorithm']['popsize'],
-                   BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
-                   boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
-                   printLevel: @analysis.problem['algorithm']['print_level'], 
-                   BFGS: @analysis.problem['algorithm']['bfgs'],
-                   solutionTolerance: @analysis.problem['algorithm']['solution_tolerance'],
-                   waitGenerations: @analysis.problem['algorithm']['wait_generations'],
-                   maxit: @analysis.problem['algorithm']['maxit'], 
-                   epsilongradient: @analysis.problem['algorithm']['epsilon_gradient'],
-                   factr: @analysis.problem['algorithm']['factr'], 
-                   pgtol: @analysis.problem['algorithm']['pgtol'],
-                   r_genoud_debug_flag: @analysis.problem['algorithm']['r_genoud_debug_flag'], 
-                   MM: @analysis.problem['algorithm']['memory_matrix'],
-                   balance: @analysis.problem['algorithm']['balance'], 
+                   objfun: @analysis.problem['algorithm']['objective_functions'], 
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value'],
-                   gradientcheck: @analysis.problem['algorithm']['gradient_check']) do
+                   vardisplaynames: var_display_names, objnames: obj_names,
+                   mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
           %{
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
@@ -270,16 +213,18 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
-            rails_exit_guideline_14 = "#{@analysis.exit_on_guideline_14}"
-            source(paste(r_scripts_path,'/rgenoud.R',sep=''))
-          }
+            whoami <- system('whoami', intern = TRUE)
+            print(paste("Fast99.rb whoami:", whoami))
+            hostname <- system('hostname', intern = TRUE)
+            print(paste("Fast99.rb hostname:", hostname))
+            rails_exit_guideline_14 = 0
+            source(paste(r_scripts_path,'/fast99.R',sep=''))
+        }
         end
-        logger.info 'Returned from rserve rgenound block'
-        # TODO: find any results of the algorithm and save to the analysis
+        logger.info 'Returned from rserve Fast99 block'
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
@@ -312,22 +257,6 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
           logger.info("analysis: #{@analysis.results}")
         rescue => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
-        end
-      end
-
-      # Post process the results and jam into the database
-      converge_flag_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/convergence_flag.json"
-      if File.exist? converge_flag_json
-        begin
-          logger.info('read converge_flag.json')
-          temp2 = File.read(converge_flag_json)
-          temp = JSON.parse(temp2, symbolize_names: true)
-          logger.info("temp: #{temp}")
-          @analysis.results[@options[:analysis_type]]['convergence_flag'] = temp
-          @analysis.save!
-          logger.info("analysis: #{@analysis.results}")
-        rescue => e
-          logger.error 'Could not save post processed results for converge_flag.json into the database'
         end
       end
 

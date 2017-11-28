@@ -1,0 +1,21 @@
+import("stats", "graphics", "methods", "foreach", "iterators")
+importFrom("grDevices", "adjustcolor", "colorRampPalette")
+importFrom("utils", "str", "flush.console")
+
+export("ga", "gaControl", "gaMonitor", "gaSummary")
+
+exportClasses("ga")
+exportMethods("print", "show", "summary", "plot")
+
+S3method("plot", "ga")
+S3method("summary", "ga")
+S3method("print", "summary.ga")
+
+exportClasses("gaisl")
+exportMethods("print", "show", "summary", "plot")
+
+S3method("plot", "gaisl")
+S3method("summary", "gaisl")
+S3method("print", "summary.gaisl")
+
+exportPattern("^[^\\.]")

@@ -33,8 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#R version of Genoud
-class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
+#R version of GA
+class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -45,26 +45,21 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       output_variables: [],
       problem: {
         algorithm: {
-          generations: 2,
-          wait_generations: 2,
-          popsize: 30,
-          boundaryenforcement: 2,
-          bfgsburnin: 2,
-          print_level: 2,
-          bfgs: 1,
-          solution_tolerance: 0.01,
+          popSize: 30,
+          run: 2,
+          maxFitness: 0.01,
+          pcrossover: 0.8,
+          pmutation: 0.1,
+          elitism: 0.05,
+          maxiter: 100,
+          numIslands: 4,
+          migrationRate: 0.1,
+          migrationInterval: 10,
           norm_type: 'minkowski',
           p_power: 2,
           exit_on_guideline_14: 0,
-          gradient_check: 0,
           objective_functions: [],
-          pgtol: 1e-1,
-          factr: 4.5036e14,
-          maxit: 3,
           epsilon_gradient: 1e-4,
-          r_genoud_debug_flag: 0,
-          memory_matrix: 1,
-          balance: 1,
           debug_messages: 0,
           failed_f_value: 1e18,
           seed: nil
@@ -94,22 +89,22 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    logger.info 'Setting up R for genoud Run'
+    logger.info 'Setting up R for GA Run'
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
-      # make this a core method
       if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
         logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
         @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
       end
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
-      @r.converse 'library(mco)'
-      @r.converse 'library(NRELmoo)'
-      @r.converse 'library(rgenoud)'
+      @r.converse 'library(R.utils)'
+      @r.converse 'library(parallel)'
+      @r.converse 'library(doParallel)'
+      @r.converse 'library(NRELGA)'
 
       # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
       # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -117,20 +112,32 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       master_ip = 'localhost'
 
       logger.info("Master ip: #{master_ip}")
-      logger.info('Starting GENOUD Run')
+      logger.info('Starting GA Isl Run')
 
       # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
       # that the run flag is true.
 
       # TODO: preflight check -- need to catch this in the analysis module
-      if @analysis.problem['algorithm']['maxit'].nil? || (@analysis.problem['algorithm']['maxit']).zero?
+      if @analysis.problem['algorithm']['maxiter'].nil? || (@analysis.problem['algorithm']['maxiter']).zero?
         raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
       end
 
-      if @analysis.problem['algorithm']['popsize'].nil? || (@analysis.problem['algorithm']['popsize']).zero?
+      if @analysis.problem['algorithm']['popSize'].nil? || (@analysis.problem['algorithm']['popSize']).zero?
         raise 'Must have number of samples to discretize the parameter space'
       end
 
+      if @analysis.problem['algorithm']['elitism'] < 0 || @analysis.problem['algorithm']['elitism'] > 1
+        raise 'elitism must be 0 <= elitism <= 1'
+      end
+      
+      if @analysis.problem['algorithm']['pcrossover'] < 0 || @analysis.problem['algorithm']['pcrossover'] > 1
+        raise 'pcrossover must be 0 <= pcrossover <= 1'
+      end
+      
+      if @analysis.problem['algorithm']['pmutation'] < 0 || @analysis.problem['algorithm']['pmutation'] > 1
+        raise 'pmutation must be 0 <= pmutation <= 1'
+      end
+      
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
       # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
@@ -200,10 +207,10 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       end
 
       # Start up the cluster and perform the analysis
-      cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
-      unless cluster.configure
-        raise 'could not configure R cluster'
-      end
+      #cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
+      #unless cluster.configure
+      #  raise 'could not configure R cluster'
+      #end
 
       @r.converse("cat('max_queued_jobs: #{APP_CONFIG['max_queued_jobs']}')")
       worker_ips = {}
@@ -221,18 +228,17 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (cluster size not set correctly)'
       end
-      if cluster.start(worker_ips)
-        logger.info "Cluster Started flag is #{cluster.started}"
-        # maxit is the max number of iterations to calculate
+
+        #logger.info "Cluster Started flag is #{cluster.started}"
+        # maxiter is the max number of iterations to calculate
         # varNo is the number of variables (ncol(vars))
-        # popsize is the number of sample points in the variable (nrow(vars))
+        # popSize is the number of sample points in the variable (nrow(vars))
         # epsilongradient is epsilon in numerical gradient calc
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
-        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
         @r.command(master_ips: master_ip,
-                   ips: worker_ips[:worker_ips].uniq, 
+                   ips: worker_ips[:worker_ips], 
                    vartypes: var_types, 
                    varnames: var_names,
                    varseps: mins_maxes[:eps], 
@@ -241,24 +247,19 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
                    normtype: @analysis.problem['algorithm']['norm_type'], 
                    ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
-                   gen: @analysis.problem['algorithm']['generations'], 
-                   popSize: @analysis.problem['algorithm']['popsize'],
-                   BFGSburnin: @analysis.problem['algorithm']['bfgsburnin'],
-                   boundaryEnforcement: @analysis.problem['algorithm']['boundaryenforcement'],
-                   printLevel: @analysis.problem['algorithm']['print_level'], 
-                   BFGS: @analysis.problem['algorithm']['bfgs'],
-                   solutionTolerance: @analysis.problem['algorithm']['solution_tolerance'],
-                   waitGenerations: @analysis.problem['algorithm']['wait_generations'],
-                   maxit: @analysis.problem['algorithm']['maxit'], 
+                   popSize: @analysis.problem['algorithm']['popSize'],
+                   run: @analysis.problem['algorithm']['run'],
+                   maxFitness: @analysis.problem['algorithm']['maxFitness'],
+                   maxiter: @analysis.problem['algorithm']['maxiter'], 
+                   pcrossover: @analysis.problem['algorithm']['pcrossover'], 
+                   pmutation: @analysis.problem['algorithm']['pmutation'], 
+                   elitism: @analysis.problem['algorithm']['elitism'],
+                   numIslands: @analysis.problem['algorithm']['numIslands'],
+                   migrationInterval: @analysis.problem['algorithm']['migrationInterval'],
+                   migrationRate: @analysis.problem['algorithm']['migrationRate'],
                    epsilongradient: @analysis.problem['algorithm']['epsilon_gradient'],
-                   factr: @analysis.problem['algorithm']['factr'], 
-                   pgtol: @analysis.problem['algorithm']['pgtol'],
-                   r_genoud_debug_flag: @analysis.problem['algorithm']['r_genoud_debug_flag'], 
-                   MM: @analysis.problem['algorithm']['memory_matrix'],
-                   balance: @analysis.problem['algorithm']['balance'], 
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
-                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
-                   gradientcheck: @analysis.problem['algorithm']['gradient_check']) do
+                   failed_f: @analysis.problem['algorithm']['failed_f_value']) do
           %{
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
@@ -271,14 +272,21 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
             rails_exit_guideline_14 = "#{@analysis.exit_on_guideline_14}"
-            source(paste(r_scripts_path,'/rgenoud.R',sep=''))
+            
+            init <- function(x){
+                ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
+                y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s 'initialize'",sep="")
+                print(paste("Run command",y))
+                z <- system(y,intern=TRUE)
+                z
+            }
+            init
+            source(paste(r_scripts_path,'/functions.R',sep=''))
+            source(paste(r_scripts_path,'/gaisl.R',sep=''))
           }
         end
-        logger.info 'Returned from rserve rgenound block'
+        logger.info 'Returned from rserve gaisl block'
         # TODO: find any results of the algorithm and save to the analysis
-      else
-        raise 'could not start the cluster (most likely timed out)'
-      end
 
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
@@ -291,13 +299,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      logger.info 'Executing rgenound.rb ensure block'
+      logger.info 'Executing gaisl.rb ensure block'
       begin
-        cluster.stop if cluster
+        #cluster.stop if cluster
       rescue StandardError, ScriptError, NoMemoryError => e
-        logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
+        #logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
       end
-      logger.info 'Successfully executed cluster.stop'
+      #logger.info 'Successfully executed cluster.stop'
 
       # Post process the results and jam into the database
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
