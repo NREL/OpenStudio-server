@@ -73,10 +73,11 @@ gem 'openstudio-analysis', '1.0.0.rc18'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
 gem 'openstudio-standards', '= 0.1.15'
+# gem 'openstudio-standards', path: '../../openstudio-standards/openstudio-standards'
 
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.5.0'
+gem 'openstudio-aws', '0.6.0'
 # gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
 
 gem 'libxml-ruby'

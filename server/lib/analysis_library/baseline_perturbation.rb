@@ -44,10 +44,10 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
       problem: {
-        random_seed: 1298,
         algorithm: {
           in_measure_combinations: 'false',
-          include_baseline_in_combinations: 'false'
+          include_baseline_in_combinations: 'false',
+          seed: nil
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -77,6 +77,12 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
       # TODO: need to move this to the module class
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
+      # make this a core method
+      if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
+        logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
+        @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
+      end
+    
       # pivot_array = Variable.pivot_array(@analysis.id, @r)
       # Rails.logger.info "pivot_array: #{pivot_array}"
 
