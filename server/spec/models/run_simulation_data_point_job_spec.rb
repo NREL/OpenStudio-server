@@ -35,11 +35,13 @@
 
 require 'rails_helper'
 
-RSpec.describe RunSimulateDataPoint, type: :feature do
+RSpec.describe RunSimulateDataPointJob, type: :feature do
   before :each do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
+    DataPoint.destroy_all  # this really isn't needed, but is here to deal with data points that aren't attached to analyses
     Delayed::Job.destroy_all
+    ComputeNode.destroy_all
 
     # I am no longer using this factory for this purpose. It doesn't
     # link up everything, so just post the test using the Analysis Gem.
@@ -185,7 +187,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
 
     dp = DataPoint.new
     dp.save!
-    a = RunSimulateDataPoint.new(dp.id)
+    a = RunSimulateDataPointJob.new(dp.id)
     write_lock_file = 'spec/files/tmp/write.lock'
     receipt_file = 'spec/files/tmp/write.receipt'
     FileUtils.mkdir_p 'spec/files/tmp'
@@ -231,7 +233,69 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     expect(a[3]).to eq '11_Job11'
   end
 
+  it 'should not step on datapoints', js: true do
+    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+    # Set the os server url for use by the run simulation
+    APP_CONFIG['os_server_host_url'] = "http://#{host}"
+
+    # TODO: Make this a helper of some sort
+    options = { hostname: "http://#{host}" }
+    api = OpenStudio::Analysis::ServerApi.new(options)
+    project_id = api.new_project
+    expect(project_id).not_to be nil
+    analysis_options = {
+        formulation_file: 'spec/files/batch_datapoints/example_csv.json',
+        upload_file: 'spec/files/batch_datapoints/example_csv.zip'
+    }
+    analysis_id = api.new_analysis(project_id, analysis_options)
+
+    # Start the workers first, wheee
+    n_workers = 2
+    (0..n_workers-1).to_a.each do |i_worker|
+      command = "bundle exec bin/delayed_job -i worker_#{i_worker} --queues=test_queue run --log-dir=log --pid-dir tmp/pids"
+      puts "Starting worker with command #{command}"
+      spawn(command, [:err, :out] => ["log/dj_worker_#{i_worker}.log", 'w'])
+    end
+
+    thread_watch = Thread.new do
+      while true
+        dp_na = DataPoint.where(analysis_id: analysis_id, status: :na).count
+        dp_queued = DataPoint.where(analysis_id: analysis_id, status: :queued).count
+        dp_started = DataPoint.where(analysis_id: analysis_id, status: :started).count
+        dp_completed = DataPoint.where(analysis_id: analysis_id, status: :completed).count
+
+        puts "na: #{dp_na}, queued: #{dp_queued}, started: #{dp_started}, completed: #{dp_completed}"
+        sleep 0.49
+      end
+    end.run
+
+    expect(Delayed::Job.count).to eq(0)
+    analysis = Analysis.find(analysis_id)
+    # create n number of simulations
+    n = n_workers * 10
+    (0..n-1).to_a.each do |i|
+      puts "creating datapoint for #{i}" if i % 1000 == 0
+      dp = analysis.data_points.new(analysis_id: analysis_id, name: "Test #{n}")
+      dp.save!
+
+      id = dp.submit_simulation(TestWorkerJob)
+      expect(id.to_s.size).to be 24
+    end
+
+    while Delayed::Job.count > 0
+      sleep 5
+    end
+
+    expect(DataPoint.where(analysis_id: analysis_id ).count).to eq n
+    expect(Delayed::Job.count).to eq(0)
+
+    thread_watch.exit
+  end
+
+
   after :each do
     Delayed::Job.destroy_all
+    # Project.destroy_all
+    # kill all the pids that may be running
   end
 end

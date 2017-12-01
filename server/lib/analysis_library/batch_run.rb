@@ -73,7 +73,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       end
     end
 
-    logger.info "Delayed Job ids are: #{ids}"
+    logger.info "Delayed Job ids are: #{ids}" if ids.count < 1000
 
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
@@ -84,7 +84,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
 
       # logger.info ids
 
-      sleep 5
+      sleep 15
     end
 
     # TODO: Finalize the worker nodes

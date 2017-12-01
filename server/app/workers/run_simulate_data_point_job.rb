@@ -33,24 +33,38 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# Command line based interface to execute the Workflow manager.
+require 'date'
+require 'json'
 
+# Command line based interface to execute the Workflow manager.
 # ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
 
-class RunSimulateDataPoint
+# Struct for delayed_job to use instead of calling this on the class. The overall goal
+# here is to reduce the likelihood of a race condition. In this case, each job will start
+# and then set the datapoint status upon the perform method. Before the status was being updated
+# as the job was being submitted.
+RunSimulateDataPointStruct = Struct.new(:data_point_id) do
+  def queue_name
+    'simulations'
+  end
 
-  require 'date'
-  require 'json'
+  def max_attempts
+    1
+  end
+end
 
-  def initialize(data_point_id, options = {})
-    defaults = { run_workflow_method: 'workflow' }.with_indifferent_access
-    @options = defaults.deep_merge(options)
-
-    @data_point = DataPoint.find(data_point_id)
-    @intialize_worker_errs = []
+class RunSimulateDataPointJob < RunSimulateDataPointStruct
+  def enqueue(job)
+    DataPoint.where(uuid: data_point_id).find_one_and_update(
+        {:$set => {status: :queued, run_queue_time: Time.now, job_id: job.id}},
+        return_document: :after
+    )
   end
 
   def perform
+    @data_point = DataPoint.where(uuid: data_point_id).first
+    @intialize_worker_errs = []
+
     # Create the analysis, simulation, and run directory
     FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
     FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
@@ -72,7 +86,6 @@ class RunSimulateDataPoint
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     @sim_logger.info "Analysis directory is #{analysis_dir}"
     @sim_logger.info "Simulation directory is #{simulation_dir}"
-    @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
     # If worker initialization fails, communicate this information
     # to the user via the out.osw.
@@ -82,35 +95,37 @@ class RunSimulateDataPoint
       err_msg_2 = 'If you see this message once, all subsequent runs will likely fail.'
       err_msg_3 = 'If you are running PAT simulations locally on Windows, the error is likely due to a measure file whose path length has exceeded 256 characters.'
       err_msg_4 = 'Inspect the following messages for clues as to the specific issue:'
-      out_osw = {completed_status: 'Fail',
-                 osa_id: @data_point.analysis.id,
-                 osd_id: @data_point.id,
-                 name: @data_point.name,
-                 completed_at: ::DateTime.now.iso8601,
-                 started_at: ::DateTime.now.iso8601,
-                 steps: [
-                     arguments: {},
-                     description: '',
-                     name: 'Initialize Worker Error',
-                     result: {
-                         completed_at: ::DateTime.now.iso8601,
-                         started_at: ::DateTime.now.iso8601,
-                         stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
-                         stdout: '',
-                         step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
-                         step_files: [],
-                         step_info: [],
-                         step_result: 'Failure',
-                         step_warnings: []
-                     }
-                 ]}
+      out_osw = {
+          completed_status: 'Fail',
+          osa_id: @data_point.analysis.id,
+          osd_id: @data_point.id,
+          name: @data_point.name,
+          completed_at: ::DateTime.now.iso8601,
+          started_at: ::DateTime.now.iso8601,
+          steps: [
+              arguments: {},
+              description: '',
+              name: 'Initialize Worker Error',
+              result: {
+                  completed_at: ::DateTime.now.iso8601,
+                  started_at: ::DateTime.now.iso8601,
+                  stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
+                  stdout: '',
+                  step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
+                  step_files: [],
+                  step_info: [],
+                  step_result: 'Failure',
+                  step_warnings: []
+              }
+          ]
+      }
       report_file = "#{simulation_dir}/out.osw"
       File.open(report_file, 'wb') do |f|
         f.puts ::JSON.pretty_generate(out_osw)
       end
       upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
       @data_point.set_error_flag
-      @data_point.set_complete_state if @data_point
+      @data_point.set_complete_state
       @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
       @sim_logger.close if @sim_logger
       report_file = "#{simulation_dir}/#{@data_point.id}.log"
@@ -127,7 +142,7 @@ class RunSimulateDataPoint
     r = RestClient.get url
     raise 'Datapoint JSON could not be downloaded' unless r.code == 200
     # Parse to JSON to save it again with nice formatting
-    File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
+    File.open("#{simulation_dir}/data_point.json", 'w') {|f| f << JSON.pretty_generate(JSON.parse(r))}
 
     # copy over required file to the run directory
     FileUtils.cp "#{analysis_dir}/analysis.json", "#{simulation_dir}/analysis.json"
@@ -153,7 +168,7 @@ class RunSimulateDataPoint
     )
     t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
     if t_result
-      File.open(osw_path, 'w') { |f| f << JSON.pretty_generate(t_result) }
+      File.open(osw_path, 'w') {|f| f << JSON.pretty_generate(t_result)}
     else
       raise 'Could not translate OSA, OSD into OSW'
     end
@@ -169,7 +184,7 @@ class RunSimulateDataPoint
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
         begin
-          run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
+          run_options = {debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log]}
 
           k = OpenStudio::Workflow::Run.new osw_path, run_options
           @sim_logger.info 'Running workflow'
@@ -181,6 +196,7 @@ class RunSimulateDataPoint
           run_result = :errored
         end
       end
+
       if run_result == :errored
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
@@ -215,7 +231,7 @@ class RunSimulateDataPoint
         # Post the reports back to the server
         uploads_successful = []
 
-        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
+        Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each {|rep| uploads_successful << upload_file(rep, 'Report')}
 
         report_file = "#{run_dir}/objectives.json"
         uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
@@ -235,7 +251,7 @@ class RunSimulateDataPoint
       # Run any data point finalization scripts
       begin
         Timeout.timeout(600) do
-          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+          files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select {|f| !f.match(/.*args$/)}.map {|f| File.basename(f)}
           files.each do |f|
             @sim_logger.info "Found data point finalization file #{f}."
             run_file(analysis_dir, 'finalization', f)
@@ -276,7 +292,7 @@ class RunSimulateDataPoint
     ensure
       @sim_logger.info "Finished #{__FILE__}" if @sim_logger
       @sim_logger.close if @sim_logger
-      @data_point.set_complete_state if @data_point
+      @data_point.set_complete_state
       report_file = "#{simulation_dir}/#{@data_point.id}.log"
       upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
       true
@@ -319,7 +335,7 @@ class RunSimulateDataPoint
         @sim_logger.error "Required analysis objects were not retrieved after #{zip_download_timeout} seconds."
       end
     else
-      # Try to download the analysis zip, but first lock simultanious threads
+      # Try to download the analysis zip, but first lock simultaneous threads
       write_lock(write_lock_file) do |_|
         zip_download_count = 0
         zip_max_download_count = 12
@@ -370,7 +386,7 @@ class RunSimulateDataPoint
             a = RestClient.get analysis_json_url
             raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
             # Parse to JSON to save it again with nice formatting
-            File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+            File.open(analysis_json_file, 'w') {|f| f << JSON.pretty_generate(JSON.parse(a))}
           end
         rescue => e
           FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
@@ -380,14 +396,14 @@ class RunSimulateDataPoint
         end
 
         # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
-        File.open(receipt_file, 'w') { |f| f << Time.now }
+        File.open(receipt_file, 'w') {|f| f << Time.now}
       end
 
       # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
       begin
         Timeout.timeout(600) do
           if File.directory? File.join(analysis_dir, 'scripts')
-            files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
+            files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select {|f| !f.match(/.*args$/)}.map {|f| File.basename(f)}
             files.each do |f|
               @sim_logger.info "Found data point initialization file #{f}."
               run_file(analysis_dir, 'initialization', f)
@@ -454,15 +470,15 @@ class RunSimulateDataPoint
         upload_file_attempt += 1
         if content_type
           res = RestClient.post(data_point_url,
-                                file: { display_name: display_name,
-                                        type: type,
-                                        attachment: File.new(filename, 'rb') },
+                                file: {display_name: display_name,
+                                       type: type,
+                                       attachment: File.new(filename, 'rb')},
                                 content_type: content_type)
         else
           res = RestClient.post(data_point_url,
-                                file: { display_name: display_name,
-                                        type: type,
-                                        attachment: File.new(filename, 'rb') })
+                                file: {display_name: display_name,
+                                       type: type,
+                                       attachment: File.new(filename, 'rb')})
         end
         @sim_logger.info "Saving report responded with #{res}"
         return true
@@ -486,7 +502,7 @@ class RunSimulateDataPoint
     @sim_logger.info "Preparing to run #{state} script #{f_fullpath}"
     file_text = File.read(f_fullpath)
     file_text.gsub!(/\r\n/m, "\n")
-    File.open(f_fullpath, 'wb') { |f| f.print file_text }
+    File.open(f_fullpath, 'wb') {|f| f.print file_text}
 
     # Check to see if there is an argument json that accompanies the class
     args = nil

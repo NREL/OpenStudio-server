@@ -161,7 +161,7 @@ module AnalysisLibrary
       end
 
       # some algorithm specific data to be stored in the database
-      # TODO: I have a feeling that this is not initalized in some cases -- so lazily initializing here
+      # TODO: I have a feeling that this is not initialized in some cases -- so lazily initializing here
       @iteration ||= -1
       analysis['iteration'] = @iteration
 
