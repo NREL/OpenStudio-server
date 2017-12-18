@@ -35,16 +35,18 @@
 
 require 'rails_helper'
 
-RSpec.describe 'RunSingle', broken: true do
+RSpec.describe 'RunSingle' do
   before :all do
     Delayed::Job.destroy_all
   end
 
   it 'Runs the analysis', js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+    expect(host).to match /\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:\d{2,5}/
+    # host = "localhost:3000"
     puts "http://#{host}"
     APP_CONFIG['os_server_host_url'] = "http://#{host}"
-    expect(host).to match /\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:\d{2,5}/
+
 
     h = JSON.parse(File.read('spec/files/test_model/test_model.json'), symbolize_names: true)
 

@@ -179,6 +179,7 @@ class AnalysesController < ApplicationController
     end
   end
 
+
   # PUT /analyses/1
   # PUT /analyses/1.json
   def update
