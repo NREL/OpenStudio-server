@@ -466,6 +466,6 @@ class DataPointsController < ApplicationController
   private
 
   def data_point_params
-    params.require(:data_point).permit!
+    params.require(:data_point).permit!.to_h
   end
 end
