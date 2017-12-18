@@ -183,7 +183,11 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     # okay, threadsafe is a misnomer here -- is this really thread safe?
     # if it downloads it twice, then okay, but 100 times, ughly.
 
-    dp = DataPoint.new
+    project = Project.new
+    project.save!
+    analysis = Analysis.new(project_id: project.id)
+    analysis.save!
+    dp = DataPoint.new(analysis_id: analysis.id)
     dp.save!
     a = RunSimulateDataPoint.new(dp.id)
     write_lock_file = 'spec/files/tmp/write.lock'

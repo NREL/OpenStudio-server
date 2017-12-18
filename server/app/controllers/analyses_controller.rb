@@ -161,6 +161,7 @@ class AnalysesController < ApplicationController
     params[:project_id] = project_id
 
     @analysis = Analysis.new(params)
+    @analysis.save!  # Make sure to save it before processing it further. Rails 5 upgrade issue.
 
     # Need to pull out the variables that are in this analysis so that we can stitch the problem
     # back together when it goes to run
@@ -229,7 +230,8 @@ class AnalysesController < ApplicationController
     logger.info("action #{params.inspect}")
     @analysis_type = params[:analysis_type].nil? ? 'batch_run' : params[:analysis_type]
 
-    options = params.symbolize_keys # read the defaults from the HTTP request
+    # params is now an object. Call to_h to get all the permitted parameters, and in this case, all of the params.
+    options = params.permit!.to_h
     options[:run_data_point_filename] = params[:run_data_point_filename] if params[:run_data_point_filename]
 
     logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
@@ -1068,6 +1070,6 @@ class AnalysesController < ApplicationController
   private
 
   def analysis_params
-    params.require(:analysis).permit!
+    params.require(:analysis).permit!.to_h
   end
 end

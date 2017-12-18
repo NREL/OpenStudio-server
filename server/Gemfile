@@ -6,7 +6,7 @@ ruby '2.2.4'
 # gem update --system 2.4.5
 gem 'rubygems-update', '2.4.5'
 
-gem 'rails', '4.2.10'
+gem 'rails', '5.0.6'
 gem 'rake', '~> 12.3'
 
 # added for support of the project rakefile
@@ -19,7 +19,7 @@ gem 'rubyzip', '~> 1.2'
 gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 5.1'
+gem 'mongoid', '~> 6.1'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 gem 'paperclip', '~> 4.3.7'
 
@@ -67,7 +67,7 @@ gem 'openstudio-workflow', '= 1.3.1'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
 
-gem 'openstudio-analysis', '1.0.0.rc18'
+gem 'openstudio-analysis', '1.0.0.rc19'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 

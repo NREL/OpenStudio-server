@@ -35,7 +35,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'RunSingle' do
+RSpec.describe 'RunSingle', broken: true do
   before :all do
     Delayed::Job.destroy_all
   end

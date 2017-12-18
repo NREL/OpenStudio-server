@@ -214,6 +214,8 @@ class Analysis
     save!
   end
 
+
+
   # Method goes through all the data_points in an analysis and finds all the
   # input variables (set_variable_values). It uses map/reduce putting the load
   # on the database to do the unique check. Result is a hash of ids and variable
