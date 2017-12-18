@@ -6,7 +6,7 @@ ruby '2.2.4'
 # gem update --system 2.4.5
 gem 'rubygems-update', '2.4.5'
 
-gem 'rails', '5.0.6'
+gem 'rails', '5.1.4'
 gem 'rake', '~> 12.3'
 
 # added for support of the project rakefile
@@ -19,7 +19,7 @@ gem 'rubyzip', '~> 1.2'
 gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 6.1'
+gem 'mongoid', '~> 6.2'
 gem 'mongoid-paperclip', require: 'mongoid_paperclip'
 gem 'paperclip', '~> 4.3.7'
 
