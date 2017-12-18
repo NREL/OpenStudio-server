@@ -3,6 +3,7 @@ set -ev
 if [ "${REDHAT_BUILD}" = 'false' ]; then
 	if [ "${OSX_BUILD}" = 'true' ]; then
 		echo 'IN AN OSX BUILD'
+                brew pin mongo
 		brew update
 		brew install mongo
 		unset BUNDLE_GEMFILE
