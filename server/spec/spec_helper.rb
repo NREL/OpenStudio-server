@@ -51,7 +51,7 @@
 # users commonly want.
 #
 
-require 'factory_girl_rails'
+require 'factory_bot_rails'
 
 require 'ci/reporter/core'
 
