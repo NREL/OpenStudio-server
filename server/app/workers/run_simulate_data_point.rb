@@ -35,8 +35,6 @@
 
 # Command line based interface to execute the Workflow manager.
 
-# ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
-
 class RunSimulateDataPoint
 
   require 'date'
@@ -441,6 +439,7 @@ class RunSimulateDataPoint
 
   # Return the logger for delayed jobs which is typically rails_root/log/delayed_job.log
   def logger
+    # TODO: Fix for resque
     Delayed::Worker.logger
   end
 

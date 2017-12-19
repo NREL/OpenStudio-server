@@ -45,6 +45,11 @@ gem 'kaminari-mongoid'
 # job queuing
 gem 'daemons'
 gem 'delayed_job_mongoid'
+# Catch if this is not a server deployment
+# if ENV['DOCKER_DEPLOY']
+  gem 'resque', '~> 1.27'
+# end
+
 
 # http(s) requests
 gem 'faraday' # TODO: can this be deprecated?
@@ -98,7 +103,6 @@ end
 group :development, :test do
   gem 'better_errors'
   gem 'meta_request'
-  gem 'sextant' # navigate to /rails/routes to see routes
 
   gem 'capybara'
   gem 'coveralls', require: false

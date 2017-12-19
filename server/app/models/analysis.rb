@@ -121,8 +121,13 @@ class Analysis
     else
       logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
-      aj.delayed_job_id = job.id
+      if Rails.env == 'local' || Rails.env == 'local-test'
+        job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
+        aj.delayed_job_id = job.id
+      else
+        Resque.enqueue(RunAnalysisResque, analysis_type, id, aj.id, options)
+        aj.delayed_job_id = nil
+      end
       aj.save!
 
       save!
@@ -354,8 +359,16 @@ class Analysis
   def queue_delete_files
     analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
 
-    logger.error 'Will not delete analysis directory because it does not conform to pattern' unless analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-    Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
+    if analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      if Rails.env == 'local' || Rails.env == 'local-test'
+        Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
+      else
+        Resque.enqueue(DeleteAnalysisJobResque, analysis_dir)
+      end
+    else
+      logger.error 'Will not delete analysis directory because it does not conform to pattern'
+    end
+
   end
 
   def verify_uuid

@@ -79,18 +79,10 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
 
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
-    until ids.empty?
-      ids.each do |id|
-        ids.delete(id) if Delayed::Job.find(id).nil?
-      end
-
-      # logger.info ids
-
+    until @analysis.data_points.where(:_id.in => ids, :status.ne => 'completed').count == 0
+      logger.info 'waiting'
       sleep 5
     end
-
-      # TODO: Finalize the worker nodes
-
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     logger.error log_message
