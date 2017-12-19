@@ -203,8 +203,8 @@ RUN chmod 666 /opt/openstudio/server/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
 ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
-ADD /docker/server/memfix-controler.rb /usr/local/bin/memfix-controler.rb
-ADD /docker/server/memfix.rb /usr/local/bin/memfix.rb
+ADD /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
+ADD /docker/server/memfix.rb /usr/local/lib/memfix.rb
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/memfix-controler.rb
