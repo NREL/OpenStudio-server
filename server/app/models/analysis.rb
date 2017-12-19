@@ -119,7 +119,7 @@ class Analysis
       abr = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
-      logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
+      logger.info("Running in background analysis queue for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
       if Rails.env == 'local' || Rails.env == 'local-test'
         job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'

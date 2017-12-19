@@ -49,7 +49,7 @@ class DataPoint
 
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation [:completed normal, :datapoint failure]
-  field :job_id, type: String  # The job_id that is being tracked in Resque/DelayedJob
+  field :job_id, type: String  # The job_id that is being tracked in Resque/Delayed Job
   field :results, type: Hash, default: {}
   field :run_queue_time, type: DateTime, default: nil
   field :run_start_time, type: DateTime, default: nil

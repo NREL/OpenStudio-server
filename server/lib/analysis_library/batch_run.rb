@@ -73,7 +73,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       end
     end
 
-    logger.info "Delayed Job ids are: #{ids}"
+    logger.info "Background job ids are: #{ids}"
 
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
