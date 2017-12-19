@@ -45,6 +45,4 @@ Delayed::Worker.max_run_time = 168.hours
 Delayed::Worker.raise_signal_exceptions = :term
 Delayed::Worker.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'delayed_job.log'))
 
-# require 'delayed/plugins/heartbeat'
-Delayed::Worker.plugins << Delayed::Heartbeat::Plugin
 # Delayed::Worker.plugins << Delayed::TaggedLogging::Plugin
