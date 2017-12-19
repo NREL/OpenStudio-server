@@ -43,7 +43,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
 
     # I am no longer using this factory for this purpose. It doesn't
     # link up everything, so just post the test using the Analysis Gem.
-    #  FactoryGirl.create(:project_with_analyses).analyses
+    #  FactoryBot.create(:project_with_analyses).analyses
   end
 
   it 'should create the datapoint', js: true do
