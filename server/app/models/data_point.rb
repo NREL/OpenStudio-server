@@ -49,7 +49,7 @@ class DataPoint
 
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation [:completed normal, :datapoint failure]
-  field :job_id, type: String
+  field :job_id, type: String  # The job_id that is being tracked in Resque/DelayedJob
   field :results, type: Hash, default: {}
   field :run_queue_time, type: DateTime, default: nil
   field :run_start_time, type: DateTime, default: nil
@@ -90,10 +90,19 @@ class DataPoint
 
   # Submit the simulation to run in the background task queue
   def submit_simulation
-    job = RunSimulateDataPoint.new(id)
-    self.job_id = job.delay(queue: 'simulations').perform.id
-    self.status = :queued
-    self.run_queue_time = Time.now
+    if Rails.env == 'local' || Rails.env == 'local-test'
+      job = RunSimulateDataPoint.new(id)
+      job.delay(queue: 'simulations').perform.id
+      self.job_id = id  # now pass in the data point id as the job id
+      # TODO: Figure out how to track the ids to kill jobs if we need to stop an analysis.
+      self.status = :queued
+      self.run_queue_time = Time.now
+    else
+      Resque.enqueue(RunSimulateDataPointResque, id)
+      self.job_id = id
+      self.status = :queued
+      self.run_queue_time = Time.now
+    end
 
     save!
 
@@ -149,6 +158,7 @@ class DataPoint
   end
 
   def destroy_delayed_job
+    # TODO: Check if we can delete the jobs with Resque
     if job_id
       dj = Delayed::Job.where(id: job_id).first
       dj.destroy if dj

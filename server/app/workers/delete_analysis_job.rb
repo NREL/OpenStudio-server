@@ -42,8 +42,4 @@ DeleteAnalysisJob = Struct.new(:analysis_directory) do
   def queue_name
     'background'
   end
-
-  def max_attempts
-    3
-  end
 end

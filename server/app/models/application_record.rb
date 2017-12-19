@@ -33,6 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-class ApplicationRecord < ActiveRecord::Base
-  self.abstract_class = true
-end
+# This is not needed for Rails 5.1 because we are not using ActiveRecord because of mongoid
+# class ApplicationRecord < ActiveRecord::Base
+#   self.abstract_class = true
+# end
