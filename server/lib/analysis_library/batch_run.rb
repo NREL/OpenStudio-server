@@ -69,8 +69,6 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       # queue up the simulations
       @analysis.data_points.where(status: 'na').each do |dp|
         logger.info "Adding #{dp.uuid} to simulations queue"
-
-        # TODO: move this method to the datapoint model
         ids << dp.submit_simulation
       end
     end

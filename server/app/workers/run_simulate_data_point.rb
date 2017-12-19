@@ -439,8 +439,11 @@ class RunSimulateDataPoint
 
   # Return the logger for delayed jobs which is typically rails_root/log/delayed_job.log
   def logger
-    # TODO: Fix for resque
-    Delayed::Worker.logger
+    if Rails.env == 'local' || Rails.env == 'local-test'
+      Delayed::Worker.logger
+    else
+      Resque.logger
+    end
   end
 
   def upload_file(filename, type, display_name = nil, content_type = nil)

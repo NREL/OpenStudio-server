@@ -98,7 +98,7 @@ class DataPoint
       self.status = :queued
       self.run_queue_time = Time.now
     else
-      job = Resque.enqueue(RunSimulateDataPointResque, id)
+      Resque.enqueue(RunSimulateDataPointResque, id)
       self.job_id = id
       self.status = :queued
       self.run_queue_time = Time.now
