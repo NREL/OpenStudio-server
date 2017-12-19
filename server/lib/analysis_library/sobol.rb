@@ -38,29 +38,31 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [],
-      problem: {
-        algorithm: {
-          number_of_samples: 30,
-          random_seed: 1979,
-          random_seed2: 1973,
-          order: 1,
-          nboot: 0,
-          conf: 0.95,
-          type: 'sobol',
-          norm_type: 'minkowski',
-          p_power: 2,
-          debug_messages: 0,
-          failed_f_value: 1e18,
-          objective_functions: [],
-          seed: nil
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            create_data_point_filename: 'create_data_point.rb',
+            output_variables: [],
+            problem: {
+                algorithm: {
+                    number_of_samples: 30,
+                    random_seed: 1979,
+                    random_seed2: 1973,
+                    order: 1,
+                    nboot: 0,
+                    conf: 0.95,
+                    type: 'sobol',
+                    norm_type: 'minkowski',
+                    p_power: 2,
+                    debug_messages: 0,
+                    failed_f_value: 1e18,
+                    objective_functions: [],
+                    seed: nil
+                }
+            }
         }
-      }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -127,14 +129,14 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
       if @analysis.problem['algorithm']['p_power'] <= 0
         raise 'P Norm must be non-negative'
       end
-      
+
       if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
         raise 'Must have number of samples to discretize the parameter space'
       end
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
       @analysis.save!
-      
+
       pivot_array = Variable.pivot_array(@analysis.id, @r)
       logger.info "pivot_array: #{pivot_array}"
       selected_variables = Variable.variables(@analysis.id)
@@ -161,7 +163,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
       end
-      
+
       # Result of the parameter space will be column vectors of each variable
       logger.info "Samples are #{samples}"
       logger.info "Samples2 are #{samples2}"
@@ -185,7 +187,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
           logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
-        end  
+        end
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
@@ -199,24 +201,24 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
         # popSize is the number of sample points in the variable (nrow(vars))
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
-        @r.command(master_ips: master_ip, 
-                   ips: worker_ips[:worker_ips].uniq, 
-                   vars: samples.to_dataframe, 
-                   vars2: samples2.to_dataframe, 
-                   vartypes: var_types, 
-                   varnames: var_names, 
-                   mins: mins_maxes[:min], 
+        @r.command(master_ips: master_ip,
+                   ips: worker_ips[:worker_ips].uniq,
+                   vars: samples.to_dataframe,
+                   vars2: samples2.to_dataframe,
+                   vartypes: var_types,
+                   varnames: var_names,
+                   mins: mins_maxes[:min],
                    maxes: mins_maxes[:max],
-                   order: @analysis.problem['algorithm']['order'], 
+                   order: @analysis.problem['algorithm']['order'],
                    nboot: @analysis.problem['algorithm']['nboot'],
-                   type: @analysis.problem['algorithm']['type'], 
+                   type: @analysis.problem['algorithm']['type'],
                    conf: @analysis.problem['algorithm']['conf'],
-                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   normtype: @analysis.problem['algorithm']['norm_type'],
                    ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value'],
-                   mins: mins_maxes[:min], 
+                   mins: mins_maxes[:min],
                    maxes: mins_maxes[:max]) do
           %{
             rails_analysis_id = "#{@analysis.id}"
