@@ -43,7 +43,7 @@ class RunSimulateDataPoint
   require 'json'
 
   def initialize(data_point_id, options = {})
-    defaults = { run_workflow_method: 'workflow' }.with_indifferent_access
+    defaults = ActiveSupport::HashWithIndifferentAccess.new({ run_workflow_method: 'workflow' })
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
