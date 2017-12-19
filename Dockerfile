@@ -207,8 +207,8 @@ ADD /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
 ADD /docker/server/memfix.rb /usr/local/lib/memfix.rb
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
-RUN chmod +x /usr/local/bin/memfix-controler.rb
-RUN chmod +x /usr/local/bin/memfix.rb
+RUN chmod +x /usr/local/lib/memfix-controller.rb
+RUN chmod +x /usr/local/lib/memfix.rb
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
