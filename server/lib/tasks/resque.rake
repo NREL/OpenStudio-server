@@ -4,7 +4,7 @@ task 'resque:setup' => :environment
 namespace :resque do
   task :setup do
     require 'resque'
-    ENV['QUEUE'] = '*'
+    ENV['QUEUE'] = ''
 
     # TODO: setup the redis URL based on the different environments
     Resque.redis = 'localhost:6379' unless Rails.env == 'production'
