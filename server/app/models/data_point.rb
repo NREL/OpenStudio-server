@@ -92,7 +92,9 @@ class DataPoint
   def submit_simulation
     if Rails.env == 'local' || Rails.env == 'local-test'
       job = RunSimulateDataPoint.new(id)
-      self.job_id = job.delay(queue: 'simulations').perform.id
+      job.delay(queue: 'simulations').perform.id
+      self.job_id = id  # now pass in the data point id as the job id
+      # TODO: Figure out how to track the ids to kill jobs if we need to stop an analysis.
       self.status = :queued
       self.run_queue_time = Time.now
     else
