@@ -50,10 +50,6 @@ gem 'delayed_job_mongoid'
   gem 'resque', '~> 1.27'
 # end
 
-
-# http(s) requests
-gem 'faraday' # TODO: can this be deprecated?
-
 # Gems used only for assets and not required
 # in production environments by default.
 gem 'bootstrap-sass'

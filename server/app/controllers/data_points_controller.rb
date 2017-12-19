@@ -251,8 +251,7 @@ class DataPointsController < ApplicationController
 
     # only run simulations that are in the na state
     if @data_point.status = 'na'
-      @data_point.job_id = @data_point.submit_simulation
-      @data_point.save!
+      @data_point.submit_simulation
     end
 
     respond_to do |format|

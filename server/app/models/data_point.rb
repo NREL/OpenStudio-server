@@ -80,7 +80,7 @@ class DataPoint
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :destroy_delayed_job
+  before_destroy :destroy_background_job
 
   # Before destroy make sure the delayed job ID is also destroyed
 
@@ -92,9 +92,7 @@ class DataPoint
   def submit_simulation
     if Rails.env == 'local' || Rails.env == 'local-test'
       job = RunSimulateDataPoint.new(id)
-      job.delay(queue: 'simulations').perform.id
-      self.job_id = id  # now pass in the data point id as the job id
-      # TODO: Figure out how to track the ids to kill jobs if we need to stop an analysis.
+      self.job_id = job.delay(queue: 'simulations').perform.id
       self.status = :queued
       self.run_queue_time = Time.now
     else
@@ -105,8 +103,6 @@ class DataPoint
     end
 
     save!
-
-    job_id
   end
 
   def set_start_state
@@ -143,7 +139,8 @@ class DataPoint
   end
 
   def set_canceled_state
-    self.destroy_delayed_job # Remove the datapoint from the delayed jobs queue
+    self.destroy_background_job # Remove the datapoint from the delayed jobs queue
+    self.run_start_time ||= Time.now
     self.run_end_time = Time.now
     self.status = :completed
     self.status_message = 'datapoint canceled'
@@ -157,11 +154,16 @@ class DataPoint
     save!
   end
 
-  def destroy_delayed_job
-    # TODO: Check if we can delete the jobs with Resque
-    if job_id
-      dj = Delayed::Job.where(id: job_id).first
-      dj.destroy if dj
+  def destroy_background_job
+    if Rails.env == 'local' || Rails.env == 'local-test'
+      if job_id
+        dj = Delayed::Job.where(id: job_id).first
+        dj.destroy if dj
+      end
+    else
+      if job_id
+        Resque::Job.destroy(:simulations, 'RunSimulateDataPointResque', job_id)
+      end
     end
   end
 end

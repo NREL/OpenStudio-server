@@ -165,7 +165,7 @@ class Analysis
       end
     end
 
-    # Remove all the queued delayed jobs for this analysis
+    # Remove all the queued background jobs for this analysis
     data_points.where(status: 'queued').each do |dp|
       dp.set_canceled_state
     end
@@ -244,11 +244,9 @@ class Analysis
       function(key, nothing) { return null; }
     "
 
-    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     var_ids = data_points.map_reduce(map, reduce).out(inline: true)
     var_ids.each do |var|
       v = Variable.where(uuid: var['_id']).only(:name).first
-      # TODO: can we delete the gsub'ing -- as i think the v.name is always the machine name now
       mappings[var['_id']] = v.name.tr(' ', '_') if v
     end
     logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
