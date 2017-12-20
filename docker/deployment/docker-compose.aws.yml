@@ -50,9 +50,10 @@ services:
     image: localhost:5000/openstudio-server
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=AWS_OS_SERVER_NUMBER_OF_WORKERS
+      - QUEUES=background,analyses
     volumes:
       - osdata:/mnt/openstudio
-    command: bin/delayed_job -i server --queues=analyses,background run
+    command: rake resque:work
     depends_on:
       - db
       - web
@@ -66,7 +67,10 @@ services:
           cpus: "1"
   worker:
     image: localhost:5000/openstudio-server
-    command: bin/delayed_job -i worker --queue=simulations run
+    environment:
+      - QUEUES=simulations
+      - COUNT=1
+    command: rake resque:workers
     volumes:
       - /mnt/openstudio
     depends_on:

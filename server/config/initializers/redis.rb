@@ -33,4 +33,16 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-Resque.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'resque.log'))
+# Skip this if in a local deployment, otherwise configure the Redis connection
+if Rails.env =~ /local/
+elsif Rails.env == 'production'
+  require 'resque'
+  uri = URI.parse(ENV["REDIS_URL"])
+  Resque.redis = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+elsif Rails.env == 'development'
+  require 'resque'
+  Resque.redis = 'localhost:6379'
+else
+  require 'resque'
+  Resque.redis = 'queue:6379'
+end
