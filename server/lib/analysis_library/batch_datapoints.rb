@@ -40,11 +40,13 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
     #   Options under problem will be merged together and persisted into the database.  The order of
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      problem: {}
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferent
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            problem: {}
+        }
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -120,13 +122,13 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
           if instance_da_opts['options']
             da_descriptions = []
             @analysis.problem['workflow'].each do |step_def|
-              wf_da_step = instance_da_opts['options'].select { |h| h['workflow_index'].to_i == step_def['workflow_index'].to_i }
+              wf_da_step = instance_da_opts['options'].select {|h| h['workflow_index'].to_i == step_def['workflow_index'].to_i}
               if wf_da_step.length != 1
                 raise "Invalid OSA; multiple workflow_index of #{step_def['workflow_index']} found in the design_alternative options"
               else
                 wf_da_step = wf_da_step[0]
               end
-              da_descriptions << { name: wf_da_step['name'], description: wf_da_step['description'] }
+              da_descriptions << {name: wf_da_step['name'], description: wf_da_step['description']}
             end
           end
         end

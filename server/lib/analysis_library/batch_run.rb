@@ -36,12 +36,14 @@
 # Run a batch of simulations using the local queue.
 class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
-    defaults = {
-      skip_init: false,
-      data_points: [],
-      run_data_point_filename: 'run_openstudio.rb',
-      problem: {}
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            data_points: [],
+            run_data_point_filename: 'run_openstudio.rb',
+            problem: {}
+        }
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -67,28 +69,18 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       # queue up the simulations
       @analysis.data_points.where(status: 'na').each do |dp|
         logger.info "Adding #{dp.uuid} to simulations queue"
-
-        # TODO: move this method to the datapoint model
-        ids << dp.submit_simulation
+        ids << dp.id if dp.submit_simulation
       end
     end
 
-    logger.info "Delayed Job ids are: #{ids}"
+    logger.info "Background job ids are: #{ids}"
 
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
-    until ids.empty?
-      ids.each do |id|
-        ids.delete(id) if Delayed::Job.find(id).nil?
-      end
-
-      # logger.info ids
-
+    until @analysis.data_points.where(:_id.in => ids, :status.ne => 'completed').count == 0
+      logger.info 'waiting'
       sleep 5
     end
-
-    # TODO: Finalize the worker nodes
-
   rescue => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     logger.error log_message

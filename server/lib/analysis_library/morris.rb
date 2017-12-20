@@ -38,27 +38,29 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [],
-      problem: {
-        algorithm: {
-          r: 10,
-          r2: 20,
-          levels: 4,
-          grid_jump: 2,
-          type: 'oat',
-          norm_type: 'minkowski',
-          p_power: 2,
-          debug_messages: 0,
-          failed_f_value: 1e18,
-          objective_functions: [],
-          seed: nil
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            create_data_point_filename: 'create_data_point.rb',
+            output_variables: [],
+            problem: {
+                algorithm: {
+                    r: 10,
+                    r2: 20,
+                    levels: 4,
+                    grid_jump: 2,
+                    type: 'oat',
+                    norm_type: 'minkowski',
+                    p_power: 2,
+                    debug_messages: 0,
+                    failed_f_value: 1e18,
+                    objective_functions: [],
+                    seed: nil
+                }
+            }
         }
-      }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -119,9 +121,9 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
       @analysis.save!
-      
-      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
-      ug = objtrue.uniq { |v| v['objective_function_group'] }
+
+      objtrue = @analysis.output_variables.select {|v| v['objective_function'] == true}
+      ug = objtrue.uniq {|v| v['objective_function_group']}
       logger.info "Number of objective function groups are #{ug.size}"
       obj_names = []
       ug.each do |var|
@@ -152,7 +154,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       logger.info "mins_maxes: #{mins_maxes}"
       logger.info "var_names: #{var_names}"
       logger.info("variable types are #{var_types}")
-      
+
       if samples.empty? || samples.size <= 1
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
@@ -163,7 +165,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       unless cluster.configure
         raise 'could not configure R cluster'
       end
-      
+
       @r.converse("cat('max_queued_jobs: #{APP_CONFIG['max_queued_jobs']}')")
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
@@ -173,7 +175,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
           logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
-        end  
+        end
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
@@ -185,21 +187,21 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
 
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
-        @r.command(master_ips: master_ip, 
-                   ips: worker_ips[:worker_ips].uniq, 
-                   vars: samples.to_dataframe, 
-                   vartypes: var_types, 
-                   varnames: var_names, 
-                   mins: mins_maxes[:min], 
+        @r.command(master_ips: master_ip,
+                   ips: worker_ips[:worker_ips].uniq,
+                   vars: samples.to_dataframe,
+                   vartypes: var_types,
+                   varnames: var_names,
+                   mins: mins_maxes[:min],
                    maxes: mins_maxes[:max],
-                   levels: @analysis.problem['algorithm']['levels'], 
+                   levels: @analysis.problem['algorithm']['levels'],
                    r: @analysis.problem['algorithm']['r'],
                    r2: @analysis.problem['algorithm']['r2'],
-                   type: @analysis.problem['algorithm']['type'], 
+                   type: @analysis.problem['algorithm']['type'],
                    grid_jump: @analysis.problem['algorithm']['grid_jump'],
-                   normtype: @analysis.problem['algorithm']['norm_type'], 
+                   normtype: @analysis.problem['algorithm']['norm_type'],
                    ppower: @analysis.problem['algorithm']['p_power'],
-                   objfun: @analysis.problem['algorithm']['objective_functions'], 
+                   objfun: @analysis.problem['algorithm']['objective_functions'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value'],
                    vardisplaynames: var_display_names, objnames: obj_names,

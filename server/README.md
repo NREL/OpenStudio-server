@@ -8,33 +8,39 @@ brew install ImageMagick
 ```
 ## Starting Worker Pools
 
-The server is required to have a running delayed job instance watching
-the `analyses` queue. 
+The worker pool can be either Delayed Jobs or Resque depending on the Rails environment. The
+delayed jobs queue is only for local and local-test environments. All other environments are 
+assuming Resque.
+
+There are 3 queues that need to be watched and are described below:
+
+* *Background*: These are background tasks that run on the web server volume in order to execute long running tasks in the background. The only task currently is deleting the analysis directory.
+* *Analyses*: This queues holds the analyses until all the simulations are complete.
+* *Simulations*: This queue is the simulation queue which runs the simulations on worker nodes.
+ 
+### Delayed Jobs
 
 ```
+# Web Server
 bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,background start
-```
 
-Depending on the resources available on the machine, the worker nodes
-can be spun up with the following commands:
-
-```
+# Workers
+# Change the number of workers based on the resources available
 bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulations start
 bin/delayed_job -i worker_2 stop && bin/delayed_job -i worker_2 --queue=simulations start
-```
 
-
-```
 # All in one command
 bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,background start && bin/delayed_job -i worker_1 stop && bin/delayed_job -i worker_1 --queue=simulations start
 ```
 
-For development in the foreground
+### Resque
 
+```bash
+# Foreground - one terminal for each command
+QUEUES=background,analyses rake resque:work
+COUNT=4 QUEUES=simulations rake resque:workers
 ```
-bin/delayed_job -i server --queue=analyses,background run
-bin/delayed_job -i worker_1 --queue=simulations run
-```
+
 
 ## Starting Rserve for development in the foreground
 
@@ -77,7 +83,6 @@ brew install geckodriver
 * Rename Data Points to Datapoints
 * Re-enable worker logs posting to Server
 * Add LogStash (or something similar)
-* Move the remaining analyses to the R folder and break out from the ruby files
 * Write tests for each analysis (expand existing SPEA test)
 * Add CLI path to config.yml
 * Add tests for embedded files on analysis model. Test result of R code that pushed to analysis model (i.e. best_point.json)
@@ -96,7 +101,6 @@ ecs-cli compose -f docker-compose.deploy.yml up
 # Get the IP address from the console `ecs-cli ps`
 ecs-cli down --force
 ```
-
 
 # Docker-Machine
 

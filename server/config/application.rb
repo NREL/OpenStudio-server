@@ -1,5 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
+# require 'rails/all'
+# require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'action_mailer/railtie'
 require 'sprockets/railtie'
@@ -46,5 +48,9 @@ module OpenstudioServer
 
     # remove x-frame-options header
     config.action_dispatch.default_headers.delete('X-Frame-Options')
+
+
+    # Rails 5 upgrade additions
+    # ActiveSupport.halt_callback_chains_on_return_false = false
   end
 end

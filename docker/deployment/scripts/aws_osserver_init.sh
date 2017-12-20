@@ -39,7 +39,16 @@ echo "Pulling mongo from DockerHub"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker pull mongo
+docker pull mongo:3.4.10
+sleep 1
+
+echo ""
+echo "------------------------------------------------------------------------"
+echo "Pulling redis from DockerHub"
+echo "------------------------------------------------------------------------"
+echo ""
+sleep 1
+docker pull redis:4.0.6
 sleep 1
 
 echo ""
@@ -54,6 +63,8 @@ docker tag nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstu
 docker push localhost:5000/openstudio-rserve
 docker tag mongo localhost:5000/mongo
 docker push localhost:5000/mongo
+docker tag redis localhost:5000/redis
+docker push localhost:5000/redis
 docker service rm registry
 docker swarm leave -f
 sleep 1

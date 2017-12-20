@@ -45,7 +45,8 @@ class Job
   field :analysis_type, type: String, default: ''
   field :delayed_job_id, type: String
   field :index, type: Integer
-  field :options, type: Hash # these are the passed in options
+  # Options is now a destructive field. Rename options to initial_options
+  field :initial_options, type: Hash # these are the passed in options
   field :run_options, type: Hash, default: {} # these are the options after merging with the default
   field :results, type: Hash, default: {}
 
@@ -57,7 +58,7 @@ class Job
   index(analysis_id: 1, index: 1, analysis_type: 1)
 
   # Create a new job
-  def self.new_job(analysis_id, analysis_type, index, options)
+  def self.new_job(analysis_id, analysis_type, index, initial_options)
     aj = Job.find_or_create_by(analysis_id: analysis_id, analysis_type: analysis_type, index: index)
 
     aj.status = 'queued'
@@ -65,7 +66,7 @@ class Job
     aj.queued_time = Time.now
     aj.analysis_type = analysis_type
     aj.index = index
-    aj.options = options
+    aj.initial_options = initial_options
     aj.save
 
     aj

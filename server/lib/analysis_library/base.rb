@@ -48,7 +48,11 @@ module AnalysisLibrary
 
     # Return the logger for the delayed job
     def logger
-      Delayed::Worker.logger
+      if Rails.env == 'local' || Rails.env == 'local-test'
+        Delayed::Worker.logger
+      else
+        Resque.logger
+      end
     end
 
     # Return the Ruby system call string for ease

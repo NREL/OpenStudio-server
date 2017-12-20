@@ -40,17 +40,19 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
     #   Options under problem will be merged together and persisted into the database.  The order of
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      problem: {
-        algorithm: {
-          in_measure_combinations: 'false',
-          include_baseline_in_combinations: 'false',
-          seed: nil
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            problem: {
+                algorithm: {
+                    in_measure_combinations: 'false',
+                    include_baseline_in_combinations: 'false',
+                    seed: nil
+                }
+            }
         }
-      }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -82,7 +84,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
         logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
         @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
       end
-    
+
       # pivot_array = Variable.pivot_array(@analysis.id, @r)
       # Rails.logger.info "pivot_array: #{pivot_array}"
 

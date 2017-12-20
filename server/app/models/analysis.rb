@@ -119,10 +119,15 @@ class Analysis
       abr = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
-      logger.info("Running in delayed jobs analysis for #{uuid} with #{analysis_type}")
+      logger.info("Running in background analysis queue for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
-      aj.delayed_job_id = job.id
+      if Rails.env == 'local' || Rails.env == 'local-test'
+        job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
+        aj.delayed_job_id = job.id
+      else
+        Resque.enqueue(RunAnalysisResque, analysis_type, id, aj.id, options)
+        aj.delayed_job_id = nil
+      end
       aj.save!
 
       save!
@@ -160,7 +165,7 @@ class Analysis
       end
     end
 
-    # Remove all the queued delayed jobs for this analysis
+    # Remove all the queued background jobs for this analysis
     data_points.where(status: 'queued').each do |dp|
       dp.set_canceled_state
     end
@@ -214,6 +219,8 @@ class Analysis
     save!
   end
 
+
+
   # Method goes through all the data_points in an analysis and finds all the
   # input variables (set_variable_values). It uses map/reduce putting the load
   # on the database to do the unique check. Result is a hash of ids and variable
@@ -237,11 +244,9 @@ class Analysis
       function(key, nothing) { return null; }
     "
 
-    # TODO: do we want to filter this on only completed simulations--i don't think so anymore.
     var_ids = data_points.map_reduce(map, reduce).out(inline: true)
     var_ids.each do |var|
       v = Variable.where(uuid: var['_id']).only(:name).first
-      # TODO: can we delete the gsub'ing -- as i think the v.name is always the machine name now
       mappings[var['_id']] = v.name.tr(' ', '_') if v
     end
     logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
@@ -352,8 +357,16 @@ class Analysis
   def queue_delete_files
     analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
 
-    logger.error 'Will not delete analysis directory because it does not conform to pattern' unless analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-    Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
+    if analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      if Rails.env == 'local' || Rails.env == 'local-test'
+        Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
+      else
+        Resque.enqueue(DeleteAnalysisJobResque, analysis_dir)
+      end
+    else
+      logger.error 'Will not delete analysis directory because it does not conform to pattern'
+    end
+
   end
 
   def verify_uuid
