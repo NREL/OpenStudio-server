@@ -177,7 +177,7 @@ RUN bundle install $bundle_args
 ADD /server/Rakefile /opt/openstudio/server/Rakefile
 ADD /server/config/ /opt/openstudio/server/config/
 ADD /server/app/assets/ /opt/openstudio/server/app/assets/
-ADD /server/lib /opt/openstudio/server/lib
+#ADD /server/lib /opt/openstudio/server/lib
 
 # Now call precompile
 RUN mkdir /opt/openstudio/server/log
