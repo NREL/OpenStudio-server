@@ -33,49 +33,56 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-FactoryBot.define do
-  factory :data_point do
-    name 'Example Datapoint'
-    analysis
+module AnalysisLibrary
+  module R
+    class DataFrame
+      def self.save_dataframe(hash, dataframe_name, savepath)
+        FileUtils.rm(savepath) if File.exist?(savepath)
 
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_data_point_1.json"))
-    initialize_with { new(json) }
-  end
+        # force directory
+        dir = File.expand_path(File.dirname(savepath))
+        FileUtils.mkdir_p(dir)
+        filename = File.basename(savepath)
 
-  factory :analysis do
-    name 'Example Analysis'
-    project
+        r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                    APP_CONFIG['rserve_port'])
+        r.command "setwd('#{File.expand_path(dir)}')"
 
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_csv.json"))
-
-    initialize_with { new(json['analysis']) }
-
-    seed_zip { File.new("#{Rails.root}/spec/files/batch_datapoints/example_csv.zip") }
-
-    factory :analysis_with_data_points do
-      transient do
-        data_point_count 1
+        save_string = "save('#{dataframe_name}', file = '#{dir}/#{filename}')"
+        r.converse(save_string, dataframe_name.to_sym => hash.to_dataframe)
       end
 
-      after(:create) do |analysis, evaluator|
-        FactoryBot.create_list(
-          :data_point, evaluator.data_point_count,
-          analysis: analysis
-        )
-      end
-    end
-  end
+      def self.generate_summaries(dataframe)
+        r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                    APP_CONFIG['rserve_port'])
+        result = r.converse('summary(df)', df: dataframe)
+        result = result.each_slice(6).to_a
 
-  factory :project do
-    name 'Test Project'
+        hash = OrderedHash.new
+        dataframe.colnames.each_index do |i|
+          hash[dataframe.colnames[i]] = { raw: result[i].each { |v| v.strip! unless v.nil? } }
+        end
 
-    factory :project_with_analyses do
-      transient do
-        analyses_count 1
-      end
+        # now clean up the names
+        hash.each_key do |key|
+          hash[key][:raw].each do |v|
+            if v =~ /^Min./
+              hash[key][:min] = v.split(':')[1].to_f
+            elsif v =~ /^1st Qu./
+              hash[key][:first_q] = v.split(':')[1].to_f
+            elsif v =~ /^Median./
+              hash[key][:median] = v.split(':')[1].to_f
+            elsif v =~ /Mean./
+              hash[key][:mean] = v.split(':')[1].to_f
+            elsif v =~ /3rd Qu./
+              hash[key][:third_q] = v.split(':')[1].to_f
+            elsif v =~ /Max./
+              hash[key][:max] = v.split(':')[1].to_f
+            end
+          end
+        end
 
-      after(:create) do |project, evaluator|
-        FactoryBot.create_list(:analysis_with_data_points, evaluator.analyses_count, project: project)
+        hash
       end
     end
   end

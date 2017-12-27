@@ -39,12 +39,14 @@
 # for differing workflows and single_runs. This is not an ideal implementation and should be an actual queue
 class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
-    defaults = {
-      skip_init: false,
-      data_points: [],
-      run_data_point_filename: 'run_openstudio.rb',
-      problem: {}
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            data_points: [],
+            run_data_point_filename: 'run_openstudio.rb',
+            problem: {}
+        }
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -76,7 +78,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
     logger.info('Starting Batch Run Analysis')
 
     # Find all the data_points across all analyses
-    dp_map = { analysis_id: [], data_point_id: [] }
+    dp_map = {analysis_id: [], data_point_id: []}
     dps = DataPoint.where(status: 'na').only(:status, :uuid, :analysis)
     dps.each do |dp|
       dp.status = 'queued'
@@ -88,7 +90,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
 
     # Gather all the analyses as objects of the datapoints
     logger.info("Found #{dp_map[:data_point_id].size} across all analyses to run")
-    analyses = dp_map[:analysis_id].map { |id| Analysis.find(id) }.uniq
+    analyses = dp_map[:analysis_id].map {|id| Analysis.find(id)}.uniq
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil

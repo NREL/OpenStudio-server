@@ -58,6 +58,16 @@ local:
   options:
     raise_not_found_error: false
     log_level: :info
+local-test:
+  clients:
+    default:
+      database: <%= ENV['OS_SERVER_DATABASE_NAME'] %>
+      hosts:
+        - localhost:<%= ENV['OS_SERVER_MONGO_PORT'] %>
+      options:
+  options:
+    raise_not_found_error: false
+    log_level: :info
 test:
   clients:
     default:

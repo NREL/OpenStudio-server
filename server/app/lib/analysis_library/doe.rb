@@ -33,7 +33,9 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-class AnalysisLibrary::Lhs < AnalysisLibrary::Base
+# TODO: Fix this for new queue
+
+class AnalysisLibrary::Doe < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -42,19 +44,21 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     #   Options under problem will be merged together and persisted into the database.  The order of
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      problem: {
-        algorithm: {
-          number_of_samples: 5,
-          sample_method: 'individual_variables',
-          failed_f_value: 1e18,
-          debug_messages: 0,
-          seed: nil
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            problem: {
+                algorithm: {
+                    number_of_samples: 2,
+                    experiment_type: 'full_factorial',
+                    failed_f_value: 1e18,
+                    debug_messages: 0,
+                    seed: nil
+                }
+            }
         }
-      }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -79,8 +83,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     begin
       logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       logger.info "Setting up R for #{self.class.name}"
-      # TODO: can we move the mkdir_p to the initialize task
-      FileUtils.mkdir_p APP_CONFIG['sim_root_path'] unless Dir.exist? APP_CONFIG['sim_root_path']
+      # TODO: need to move this to the module class
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
       # make this a core method
@@ -88,35 +91,32 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
         logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
         @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
       end
-      
+
       pivot_array = Variable.pivot_array(@analysis.id, @r)
-      logger.info "pivot_array: #{pivot_array}"
+      Rails.logger.info "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
-      logger.info "Found #{selected_variables.count} variables to perturb"
+      logger.info "Found #{selected_variables.count} variables to perform DOE"
+      if selected_variables.count < 2
+        raise 'DOE needs more than one variable'
+      end
 
       # generate the probabilities for all variables as column vectors
-      @r.converse("print('starting lhs')")
+      @r.converse("print('starting doe')")
       samples = nil
       var_types = nil
       logger.info 'Starting sampling'
-      lhs = AnalysisLibrary::R::Lhs.new(@r)
-      if @analysis.problem['algorithm']['sample_method'] == 'all_variables' ||
-         @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
-        samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
-        if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
-          # Do the work to mash up the samples and pivot variables before creating the datapoints
-          logger.info "Samples are #{samples}"
-          samples = hash_of_array_to_array_of_hash(samples)
-          logger.info "Flipping samples around yields #{samples}"
-        elsif @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
-          # Do the work to mash up the samples and pivot variables before creating the datapoints
-          logger.info "Samples are #{samples}"
-          samples = hash_of_array_to_array_of_hash_non_combined(samples, selected_variables)
-          logger.info "Non-combined samples yields #{samples}"
-        end
+      doe = AnalysisLibrary::R::Doe.new(@r)
+      if @analysis.problem['algorithm']['experiment_type'] == 'full_factorial'
+        samples, var_types = doe.full_factorial(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+
+        # Do the work to mash up the samples and pivot variables before creating the datapoints
+        logger.info "Samples are #{samples}"
+        samples = hash_of_array_to_array_of_hash(samples)
+        logger.info "Flipping samples around yields #{samples}"
+
       else
-        raise 'no sampling method defined (all_variables or individual_variables)'
+        raise 'no experiment type defined (full_factorial)'
       end
 
       logger.info 'Fixing Pivot dimension'
@@ -127,12 +127,14 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       isample = 0
       samples.uniq.each do |sample| # do this in parallel
         isample += 1
-        dp_name = "LHS Autogenerated #{isample}"
+        dp_name = "DOE Autogenerated #{isample}"
         dp = @analysis.data_points.new(name: dp_name)
         dp.set_variable_values = sample
         dp.save!
 
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
+        logger.info("UUID #{dp.uuid}")
+        logger.info("variable values: #{dp.set_variable_values}")
       end
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
@@ -151,5 +153,11 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
 
       logger.info "Finished running analysis '#{self.class.name}'"
     end
+  end
+
+  # Since this is a delayed job, if it crashes it will typically try multiple times.
+  # Fix this to 1 retry for now.
+  def max_attempts
+    1
   end
 end

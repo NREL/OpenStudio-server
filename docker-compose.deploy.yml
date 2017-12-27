@@ -35,9 +35,10 @@ services:
     image: nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUES=background,analyses
     volumes:
       - osdata:/mnt/openstudio
-    command: bin/delayed_job -i server --queues=analyses,background run
+    command: rake resque:work
     depends_on:
       - db
       - web
@@ -50,7 +51,10 @@ services:
           cpus: "1"
   worker:
     image: nrel/openstudio-server:latest
-    command: bin/delayed_job -i worker --queue=simulations run
+    command: rake resque:workers
+    environment:
+      - QUEUES=simulations
+      - COUNT=1
     volumes:
       - /mnt/openstudio
     depends_on:

@@ -37,35 +37,37 @@
 
 class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
         {
-          display_name: 'Total Site Energy (EUI)',
-          name: 'total_energy',
-          objective_function: true,
-          objective_function_index: 0,
-          index: 0
-        },
-        {
-          display_name: 'Total Life Cycle Cost',
-          name: 'total_life_cycle_cost',
-          objective_function: true,
-          objective_function_index: 1,
-          index: 1
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            create_data_point_filename: 'create_data_point.rb',
+            output_variables: [
+                {
+                    display_name: 'Total Site Energy (EUI)',
+                    name: 'total_energy',
+                    objective_function: true,
+                    objective_function_index: 0,
+                    index: 0
+                },
+                {
+                    display_name: 'Total Life Cycle Cost',
+                    name: 'total_life_cycle_cost',
+                    objective_function: true,
+                    objective_function_index: 1,
+                    index: 1
+                }
+            ],
+            problem: {
+                algorithm: {
+                    number_of_samples: 10, # to discretize any continuous variables
+                    max_iterations: 1000,
+                    objective_functions: %w(total_energy total_life_cycle_cost),
+                    seed: nil
+                }
+            }
         }
-      ],
-      problem: {
-        algorithm: {
-          number_of_samples: 10, # to discretize any continuous variables
-          max_iterations: 1000,
-          objective_functions: %w(total_energy total_life_cycle_cost),
-          seed: nil
-        }
-      }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -88,7 +90,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
       end
       name_moniker = 'Datapoint' if name_moniker == ''
       name = "#{name_moniker} [iteration #{iteration} sample #{i_sample}]"
-      result << { variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample }
+      result << {variable_group: run_list, name: name, variables: variables, iteration: iteration, sample: i_sample}
     end
 
     result
@@ -185,7 +187,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
               else
                 if x < pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]]
                   temp_slope = (y - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][1]]) /
-                               (x - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]])
+                      (x - pareto_point.results[@analysis.problem['algorithm']['objective_functions'][0]])
                 else
                   temp_slope = -Float::MAX # set this to an invalid point to consider
                 end
@@ -213,10 +215,10 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
               logger.info 'Pareto search found the same point or values'
               new_curve << min_point # just add in the same point to the new curve
             elsif min_point.results[@analysis.problem['algorithm']['objective_functions'][0]] ==
-                  @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][0]] && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
-                                                                                                             @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
+                @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][0]] && min_point.results[@analysis.problem['algorithm']['objective_functions'][1]] ==
+                @pareto[i_pareto + 1].results[@analysis.problem['algorithm']['objective_functions'][1]]
               logger.info 'Found the same objective function values in array, skipping'
-            # new_curve << min_point # just add in the same point to the new curve
+              # new_curve << min_point # just add in the same point to the new curve
             else
               # the min point is new and was found before the end of the array.  Orphaning the other points
               logger.info "Orphaning previous point in array.  Replacing #{@pareto[i_pareto + 1].name} with #{min_point.name}"
@@ -247,7 +249,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
       if @iteration.zero?
         # run the baseline
         logger.info 'setting up to run just the starting point'
-        data_point_list << { variable_group: [], name: 'Starting Point', variables: {}, iteration: @iteration, sample: 1 }
+        data_point_list << {variable_group: [], name: 'Starting Point', variables: {}, iteration: @iteration, sample: 1}
         # elsif @iteration == 1
         #  # no need to look at anything, just return the array
         #  run_list = AnalysisLibrary::SequentialSearch.mash_up_hash([], parameter_space)
@@ -258,7 +260,7 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
           variable_group_list = last_dp['variable_group_list']
           # get the full ps information
           logger.info("Last pareto front point was #{last_dp.name} with parameter space index #{variable_group_list}")
-          full_variable_group_list = parameter_space.select { |k, v| v if variable_group_list.include?(k) }
+          full_variable_group_list = parameter_space.select {|k, v| v if variable_group_list.include?(k)}
 
           # Fix the previous variable groups in the next run
           run_list = AnalysisLibrary::SequentialSearch.mash_up_hash(full_variable_group_list, parameter_space)
@@ -327,11 +329,11 @@ class AnalysisLibrary::SequentialSearch < AnalysisLibrary::Base
       end
       logger.info "measure values with variables are #{measure_values}"
       # TODO: test the length of each measure value array
-      measure_values = measure_values.map { |k, v| [k].product(v) }.transpose.map { |ps| Hash[ps] }
+      measure_values = measure_values.map {|k, v| [k].product(v)}.transpose.map {|ps| Hash[ps]}
       logger.info "measure values array hash is  #{measure_values}"
 
       measure_values.each do |mvs|
-        parameter_space[SecureRandom.uuid] = { measure_id: measure._id, variables: mvs }
+        parameter_space[SecureRandom.uuid] = {measure_id: measure._id, variables: mvs}
       end
     end
     logger.info "Parameter space has #{parameter_space.count} and are #{parameter_space}"

@@ -33,18 +33,31 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
+# TODO: Fix this for new queue
+
+class AnalysisLibrary::Diag < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.
     #   Options under problem will be merged together and persisted into the database.  The order of
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      problem: {}
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferent
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            problem: {
+                algorithm: {
+                    number_of_samples: 2,
+                    experiment_type: 'diagonal',
+                    run_baseline: 1,
+                    failed_f_value: 1e18,
+                    debug_messages: 0,
+                    seed: nil
+                }
+            }
+        }
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -59,89 +72,86 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
     # get the analysis and report that it is running
     @analysis_job = AnalysisLibrary::Core.initialize_analysis_job(@analysis, @analysis_job_id, @options)
 
-    # reload the object (which is required) because the sub-documents (jobs) may have changed
+    # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
     # Create an instance for R
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                 APP_CONFIG['rserve_port'])
+
     begin
       logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       logger.info "Setting up R for #{self.class.name}"
+      # TODO: need to move this to the module class
+      @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
+
+      # make this a core method
+      if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
+        logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
+        @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
+      end
+      pivot_array = Variable.pivot_array(@analysis.id, @r)
+
+      Rails.logger.info "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
-      logger.info "Found #{selected_variables.count} non-default variables in the batch datapoint set."
+      logger.info "Found #{selected_variables.count} variables to perform diag"
 
       # generate the probabilities for all variables as column vectors
+      @r.converse("print('starting diag')")
       samples = nil
+      var_types = nil
+      logger.info 'Starting sampling'
+      diag = AnalysisLibrary::R::Diag.new(@r)
+      if @analysis.problem['algorithm']['experiment_type'] == 'diagonal'
+        if selected_variables.count > 0
+          samples, var_types = diag.diagonal(selected_variables, @analysis.problem['algorithm']['number_of_samples'], @analysis.problem['algorithm']['run_baseline'])
 
-      logger.info 'Starting batch datapoint extraction.'
-
-      # Iterate through each variable based on the method and add to the samples array in the form of
-      # [{a: 1, b: true, c: 's'}, {a: 2, b: false, c: 'n'}]
-      values_length = []
-      values_set = {}
-
-      selected_variables.each do |var|
-        if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
-          raise "no hash values and weight passed in variable #{var.name}"
+          # Do the work to mash up the samples and pivot variables before creating the data points
+          logger.info "Samples are #{samples}"
+          samples = hash_of_array_to_array_of_hash(samples)
+          logger.info "Flipping samples around yields #{samples}"
+        else
+          samples = []
+          var_types = []
         end
-        values, weights = var.map_discrete_hash_to_array
-        raise "'nil' value(s) found in variable #{var.id}. nil values not yet supported." if values.count(&:nil?).nonzero?
-        values_length = values_length << values.length
-        values_set[var.id.to_s.to_sym] = values
+      else
+        raise 'no experiment type defined (diagonal)'
       end
 
-      raise 'Length of discrete_values passed in variables was not equal across variables.' if values_length.uniq.length != 1
-
-      # Create Datapoint Samples
-      logger.info 'Creating datapoint samples'
-      samples = []
-      for i in 0..(values_length[0] - 1)
-        instance = {}
-        selected_variables.each do |var|
-          instance[var.id.to_s.to_sym] = values_set[var.id.to_s.to_sym][i]
+      logger.info 'Fixing Pivot dimension'
+      if selected_variables.count > 0
+        samples = add_pivots(samples, pivot_array)
+      else
+        new_samples = []
+        unless pivot_array.empty?
+          pivot_array.each do |pivot|
+            new_samples << pivot
+          end
+          samples = new_samples
         end
-        samples << instance
       end
+      logger.info "Finished adding the pivots resulting in #{samples}"
 
       # Add the datapoints to the database
-      logger.info 'Adding the datapoints to the database'
       isample = 0
-      da_options = @analysis.problem['design_alternatives'] ? true : false
-      samples.each do |sample| # do this in parallel
-        name = "Autogenerated #{isample}"
-        description = "Autogenerated #{isample}"
-        seed_path, da_descriptions, weather_file = false
-        if da_options
-          instance_da_opts = @analysis.problem['design_alternatives'][isample]
-          name = instance_da_opts['name'] if instance_da_opts['name']
-          description = instance_da_opts['description'] if instance_da_opts['description']
-          seed_path = File.basename instance_da_opts['seed']['path'] if instance_da_opts['seed']
-          weather_file = File.basename instance_da_opts['weather_file']['path'] if instance_da_opts['weather_file']
-          if instance_da_opts['options']
-            da_descriptions = []
-            @analysis.problem['workflow'].each do |step_def|
-              wf_da_step = instance_da_opts['options'].select { |h| h['workflow_index'].to_i == step_def['workflow_index'].to_i }
-              if wf_da_step.length != 1
-                raise "Invalid OSA; multiple workflow_index of #{step_def['workflow_index']} found in the design_alternative options"
-              else
-                wf_da_step = wf_da_step[0]
-              end
-              da_descriptions << { name: wf_da_step['name'], description: wf_da_step['description'] }
-            end
-          end
-        end
-        dp = @analysis.data_points.new(name: name, description: description)
-        dp.da_descriptions = da_descriptions if da_descriptions
-        dp.seed = seed_path if seed_path
-        dp.weather_file = weather_file if weather_file
+      samples.uniq.each do |sample| # do this in parallel
+        isample += 1
+        dp_name = "diag Autogenerated #{isample}"
+        dp = @analysis.data_points.new(name: dp_name)
         dp.set_variable_values = sample
         dp.save!
-        isample += 1
+
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
+        logger.info("UUID #{dp.uuid}")
+        logger.info("variable values: #{dp.set_variable_values}")
       end
-
+    rescue => e
+      log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+      puts log_message
+      @analysis.status_message = log_message
+      @analysis.save!
     ensure
-
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis_job.end_time = Time.now

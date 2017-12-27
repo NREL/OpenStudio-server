@@ -98,4 +98,10 @@ Rails.application.routes.draw do
   match '/status', to: 'pages#status', via: :get
 
   root to: 'pages#dashboard'
+
+  # Catch if this is not a server deployment
+  if Rails.env != 'production' && Rails.env != 'docker'
+    require "resque_web"
+    mount ResqueWeb::Engine => "/resque"
+  end
 end

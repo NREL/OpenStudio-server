@@ -33,30 +33,26 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# TODO: Fix this for new queue
-
-class AnalysisLibrary::Doe < AnalysisLibrary::Base
-  include AnalysisLibrary::R::Core
-
+class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     # Setup the defaults for the Analysis.  Items in the root are typically used to control the running of
     #   the script below and are not necessarily persisted to the database.
     #   Options under problem will be merged together and persisted into the database.  The order of
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      problem: {
-        algorithm: {
-          number_of_samples: 2,
-          experiment_type: 'full_factorial',
-          failed_f_value: 1e18,
-          debug_messages: 0,
-          seed: nil
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            problem: {
+                algorithm: {
+                    in_measure_combinations: 'false',
+                    include_baseline_in_combinations: 'false',
+                    seed: nil
+                }
+            }
         }
-      }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -77,7 +73,6 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
     # Create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-
     begin
       logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       logger.info "Setting up R for #{self.class.name}"
@@ -90,53 +85,108 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
         @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
       end
 
-      pivot_array = Variable.pivot_array(@analysis.id, @r)
-      Rails.logger.info "pivot_array: #{pivot_array}"
+      # pivot_array = Variable.pivot_array(@analysis.id, @r)
+      # Rails.logger.info "pivot_array: #{pivot_array}"
+
+      logger.info Variable.variables(@analysis.id).to_s
 
       selected_variables = Variable.variables(@analysis.id)
-      logger.info "Found #{selected_variables.count} variables to perform DOE"
-      if selected_variables.count < 2
-        raise 'DOE needs more than one variable'
-      end
+      logger.info "Found #{selected_variables.count} variables to perturb"
 
       # generate the probabilities for all variables as column vectors
-      @r.converse("print('starting doe')")
+      @r.converse("print('starting single perturbation')")
       samples = nil
-      var_types = nil
+
       logger.info 'Starting sampling'
-      doe = AnalysisLibrary::R::Doe.new(@r)
-      if @analysis.problem['algorithm']['experiment_type'] == 'full_factorial'
-        samples, var_types = doe.full_factorial(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
-        # Do the work to mash up the samples and pivot variables before creating the datapoints
-        logger.info "Samples are #{samples}"
-        samples = hash_of_array_to_array_of_hash(samples)
-        logger.info "Flipping samples around yields #{samples}"
+      # Iterate through each variable based on the method and add to the samples array in the form of
+      # [{a: 1, b: true, c: 's'}, {a: 2, b: false, c: 'n'}]
+      samples = []
 
-      else
-        raise 'no experiment type defined (full_factorial)'
+      selected_variables.each do |var|
+        logger.info "name: #{var.measure.name}; id: #{var.measure.id}"
       end
 
-      logger.info 'Fixing Pivot dimension'
-      samples = add_pivots(samples, pivot_array)
-      logger.info "Finished adding the pivots resulting in #{samples}"
+      # Make baseline case
+      instance = {}
+      selected_variables.each do |variable|
+        instance[variable.id.to_s.to_sym] = variable.static_value
+      end
+      samples << instance
 
+      # Make perturbed cases
+      if @analysis.problem['algorithm']['in_measure_combinations'].casecmp('false').zero?
+        logger.info 'In False'
+        selected_variables.each do |variable|
+          if variable.map_discrete_hash_to_array.nil? || variable.discrete_values_and_weights.empty?
+            raise 'no hash values and weight passed'
+          end
+          values, weights = variable.map_discrete_hash_to_array
+          values.each do |val|
+            instance = {}
+            instance[variable.id.to_s.to_sym] = val
+            selected_variables.each do |variable2|
+              if variable != variable2
+                instance[variable2.id.to_s.to_sym] = variable2.static_value
+              end
+            end
+            samples << instance
+          end
+        end
+      elsif @analysis.problem['algorithm']['in_measure_combinations'].casecmp('true').zero?
+        logger.info 'In True'
+        measure_list = []
+        selected_variables.each do |var|
+          measure_list << var.measure.id unless measure_list.include? var.measure.id
+        end
+        measure_list.each do |meas|
+          meas_var_val = {}
+          meas_var = []
+          meas_var_num = []
+          selected_variables.each do |var|
+            if var.measure.id == meas
+              values, weights = var.map_discrete_hash_to_array
+              if @analysis.problem['algorithm']['include_baseline_in_combinations'].casecmp('true').zero?
+                values << var.static_value
+              end
+              meas_var_val[var.id.to_s] = values
+              meas_var << var.id
+              meas_var_num << [0..(values.length - 1)][0].to_a
+            end
+          end
+          # logger.info "meas_var_num: #{meas_var_num}; meas_var_val: #{meas_var_val}; meas_var: #{meas_var}"
+          combinations = meas_var_num.first.product(*meas_var_num[1..-1])
+          combinations.each do |combination|
+            instance = {}
+            combination.each_with_index do |value_ind, var_ind|
+              instance[(meas_var[var_ind]).to_s.to_sym] = meas_var_val[meas_var[var_ind]][value_ind]
+            end
+            selected_variables.each do |var|
+              instance[var.id.to_s.to_sym] = var.static_value unless meas_var.include? var.id
+            end
+            # logger.info "instance: #{instance}"
+            sleep 1
+            samples << instance
+          end
+        end
+      else
+        raise "Algorithm variable 'in_measure_combinations' was not set to valid values 'true' or 'false', instead '#{@analysis.problem['algorithm']['in_measure_combinations'].downcase}'"
+      end
       # Add the datapoints to the database
       isample = 0
       samples.uniq.each do |sample| # do this in parallel
         isample += 1
-        dp_name = "DOE Autogenerated #{isample}"
+        dp_name = "Autogenerated #{isample}"
         dp = @analysis.data_points.new(name: dp_name)
         dp.set_variable_values = sample
         dp.save!
 
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
-        logger.info("UUID #{dp.uuid}")
-        logger.info("variable values: #{dp.set_variable_values}")
       end
+
     rescue => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      puts log_message
+      logger.info log_message
       @analysis.status_message = log_message
       @analysis.save!
     ensure
@@ -148,7 +198,6 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
         @analysis.reload
       end
       @analysis.save!
-
       logger.info "Finished running analysis '#{self.class.name}'"
     end
   end

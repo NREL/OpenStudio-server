@@ -33,50 +33,35 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-FactoryBot.define do
-  factory :data_point do
-    name 'Example Datapoint'
-    analysis
+# Base class for all analyses. These methods need to be independent of R.
+# If a method is needed from R, then include AnalysisLibrary::R::Core
 
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_data_point_1.json"))
-    initialize_with { new(json) }
-  end
+module AnalysisLibrary
+  class Base
+    include AnalysisLibrary::Core
 
-  factory :analysis do
-    name 'Example Analysis'
-    project
+    # Since this is a delayed job, if it crashes it will typically try multiple times.
+    # Fix this to 1 retry for now.
+    def max_attempts
+      1
+    end
 
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_csv.json"))
-
-    initialize_with { new(json['analysis']) }
-
-    seed_zip { File.new("#{Rails.root}/spec/files/batch_datapoints/example_csv.zip") }
-
-    factory :analysis_with_data_points do
-      transient do
-        data_point_count 1
-      end
-
-      after(:create) do |analysis, evaluator|
-        FactoryBot.create_list(
-          :data_point, evaluator.data_point_count,
-          analysis: analysis
-        )
+    # Return the logger for the delayed job
+    def logger
+      if Rails.env == 'local' || Rails.env == 'local-test'
+        Delayed::Worker.logger
+      else
+        Resque.logger
       end
     end
-  end
 
-  factory :project do
-    name 'Test Project'
+    # Return the Ruby system call string for ease
+    def sys_call_ruby
+      "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/ruby"
+    end
 
-    factory :project_with_analyses do
-      transient do
-        analyses_count 1
-      end
-
-      after(:create) do |project, evaluator|
-        FactoryBot.create_list(:analysis_with_data_points, evaluator.analyses_count, project: project)
-      end
+    def analysis_dir(id)
+      "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
     end
   end
 end

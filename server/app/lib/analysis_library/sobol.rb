@@ -33,35 +33,36 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Optim
-class AnalysisLibrary::Optim < AnalysisLibrary::Base
+#Monte Carlo Estimation of Sobol’ Indices 
+class AnalysisLibrary::Sobol < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
-    defaults = {
-      skip_init: false,
-      run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
-      output_variables: [],
-      problem: {
-        algorithm: {
-          number_of_samples: 3,
-          sample_method: 'individual_variables',
-          method: 'L-BFGS-B',
-          pgtol: 1e-2,
-          factr: 4.5036e13,
-          maxit: 100,
-          norm_type: 'minkowski',
-          p_power: 2,
-          exit_on_guideline_14: 0,
-          debug_messages: 0,
-          failed_f_value: 1e18,
-          objective_functions: [],
-          epsilongradient: 1e-4,
-          seed: nil
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(
+        {
+            skip_init: false,
+            run_data_point_filename: 'run_openstudio_workflow.rb',
+            create_data_point_filename: 'create_data_point.rb',
+            output_variables: [],
+            problem: {
+                algorithm: {
+                    number_of_samples: 30,
+                    random_seed: 1979,
+                    random_seed2: 1973,
+                    order: 1,
+                    nboot: 0,
+                    conf: 0.95,
+                    type: 'sobol',
+                    norm_type: 'minkowski',
+                    p_power: 2,
+                    debug_messages: 0,
+                    failed_f_value: 1e18,
+                    objective_functions: [],
+                    seed: nil
+                }
+            }
         }
-      }
-    }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
+    )
     @options = defaults.deep_merge(options)
 
     @analysis_id = analysis_id
@@ -85,7 +86,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    logger.info 'Setting up R for Optim Run'
+    logger.info 'Setting up R for SOBOL Run'
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
@@ -98,8 +99,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
       end
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
-      @r.converse 'library(mco)'
-      @r.converse 'library(NRELmoo)'
+      @r.converse 'library(sensitivity)'
 
       # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
       # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -107,18 +107,18 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
       master_ip = 'localhost'
 
       logger.info("Master ip: #{master_ip}")
-      logger.info('Starting Optim Run')
+      logger.info('Starting GENOUD Run')
 
       # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
       # that the run flag is true.
 
       # TODO: preflight check -- need to catch this in the analysis module
-      if @analysis.problem['algorithm']['maxit'].nil? || (@analysis.problem['algorithm']['maxit']).zero?
-        raise 'Number of max iterations was not set or equal to zero (must be 1 or greater)'
+      if @analysis.problem['algorithm']['order'].nil? || (@analysis.problem['algorithm']['order']).zero?
+        raise 'Value for order was not set or equal to zero (must be 1 or greater)'
       end
 
-      if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
-        raise 'Must have number of samples to discretize the parameter space'
+      if @analysis.problem['algorithm']['conf'].nil? || (@analysis.problem['algorithm']['conf']).zero?
+        raise 'Value for conf was not set or equal to zero (must be 1 or greater)'
       end
 
       # TODO: add test for not "minkowski", "maximum", "euclidean", "binary", "manhattan"
@@ -130,26 +130,12 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
         raise 'P Norm must be non-negative'
       end
 
-      # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0,1,2,3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
-        @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
-        logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
-      else
-        @analysis.exit_on_guideline_14 = 0
-        logger.info "exit_on_guideline_14 is forced to #{@analysis.exit_on_guideline_14}"
+      if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
+        raise 'Must have number of samples to discretize the parameter space'
       end
-      @analysis.save!
-      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
-
       @analysis.save!
-      logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
-
-      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
-        raise 'number of objective functions must equal'
-      end
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
       logger.info "pivot_array: #{pivot_array}"
@@ -157,26 +143,34 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
       logger.info "Found #{selected_variables.count} variables to perturb"
 
       # discretize the variables using the LHS sampling method
-      @r.converse("print('starting lhs to discretize the variables')")
+      @r.converse("print('starting lhs to get min/max')")
       logger.info 'starting lhs to discretize the variables'
 
       lhs = AnalysisLibrary::R::Lhs.new(@r)
+      logger.info "Setting R base random seed to #{@analysis.problem['random_seed']}"
+      @r.converse("set.seed(#{@analysis.problem['algorithm']['random_seed']})")
       samples, var_types, mins_maxes, var_names = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+      logger.info "Setting R base random seed to #{@analysis.problem['random_seed2']}"
+      @r.converse("set.seed(#{@analysis.problem['algorithm']['random_seed2']})")
+      samples2, var_types2, mins_maxes2, var_names2 = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
+
+      if samples.empty? || samples.size <= 1
+        logger.info 'No variables were passed into the options, therefore exit'
+        raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
+      end
+
+      if var_names.empty? || var_names.empty?
+        logger.info 'No variables were passed into the options, therefore exit'
+        raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
+      end
+
       # Result of the parameter space will be column vectors of each variable
       logger.info "Samples are #{samples}"
+      logger.info "Samples2 are #{samples2}"
       logger.info "mins_maxes: #{mins_maxes}"
       logger.info "var_names: #{var_names}"
+      logger.info "var_names2: #{var_names2}"
       logger.info("variable types are #{var_types}")
-
-      if samples.empty? || samples.empty?
-        logger.info 'No variables were passed into the options, therefore exit'
-        raise "Must have at least one variable to run algorithm.  Found #{samples.size} variables"
-      end
-
-      unless var_types.all? { |t| t.casecmp('continuous').zero? }
-        logger.info 'Must have all continous variables to run algorithm, therefore exit'
-        raise "Must have all continous variables to run algorithm.  Found #{var_types}"
-      end
 
       # Start up the cluster and perform the analysis
       cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
@@ -193,7 +187,7 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
           logger.info "Starting R queue to hold #{@analysis.problem['algorithm']['max_queued_jobs']} jobs"
-        end  
+        end
       elsif !APP_CONFIG['max_queued_jobs'].nil?
         worker_ips[:worker_ips] = ['localhost'] * APP_CONFIG['max_queued_jobs'].to_i
         logger.info "Starting R queue to hold #{APP_CONFIG['max_queued_jobs']} jobs"
@@ -202,31 +196,28 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
       end
       if cluster.start(worker_ips)
         logger.info "Cluster Started flag is #{cluster.started}"
-        # maxit is the max number of iterations to calculate
+        # gen is the number of generations to calculate
         # varNo is the number of variables (ncol(vars))
         # popSize is the number of sample points in the variable (nrow(vars))
-        # epsilongradient is epsilon in numerical gradient calc
-
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
-        @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
-        @r.command(master_ips: master_ip, 
-                   ips: worker_ips[:worker_ips].uniq, 
-                   vars: samples.to_dataframe, 
-                   vartypes: var_types, 
-                   varnames: var_names, 
-                   varseps: mins_maxes[:eps], 
-                   mins: mins_maxes[:min], 
-                   maxes: mins_maxes[:max], 
-                   normtype: @analysis.problem['algorithm']['norm_type'], 
-                   ppower: @analysis.problem['algorithm']['p_power'], 
-                   objfun: @analysis.problem['algorithm']['objective_functions'], 
-                   maxit: @analysis.problem['algorithm']['maxit'], 
-                   epsilongradient: @analysis.problem['algorithm']['epsilongradient'], 
-                   factr: @analysis.problem['algorithm']['factr'], 
+        @r.command(master_ips: master_ip,
+                   ips: worker_ips[:worker_ips].uniq,
+                   vars: samples.to_dataframe,
+                   vars2: samples2.to_dataframe,
+                   vartypes: var_types,
+                   varnames: var_names,
+                   mins: mins_maxes[:min],
+                   maxes: mins_maxes[:max],
+                   order: @analysis.problem['algorithm']['order'],
+                   nboot: @analysis.problem['algorithm']['nboot'],
+                   type: @analysis.problem['algorithm']['type'],
+                   conf: @analysis.problem['algorithm']['conf'],
+                   normtype: @analysis.problem['algorithm']['norm_type'],
+                   ppower: @analysis.problem['algorithm']['p_power'],
+                   objfun: @analysis.problem['algorithm']['objective_functions'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
-                   failed_f: @analysis.problem['algorithm']['failed_f_value'],
-                   pgtol: @analysis.problem['algorithm']['pgtol']) do
+                   failed_f: @analysis.problem['algorithm']['failed_f_value']) do
           %{
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
@@ -238,11 +229,12 @@ class AnalysisLibrary::Optim < AnalysisLibrary::Base
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
-            rails_exit_guideline_14 = "#{@analysis.exit_on_guideline_14}"
-            source(paste(r_scripts_path,'/optim.R',sep=''))
-            }
+            rails_exit_guideline_14 = 0
+            source(paste(r_scripts_path,'/sobol.R',sep=''))
+          }
         end
-        logger.info 'Returned from rserve optim block'
+        logger.info 'Returned from rserve sobol block'
+        # TODO: find any results of the algorithm and save to the analysis
       else
         raise 'could not start the cluster (most likely timed out)'
       end

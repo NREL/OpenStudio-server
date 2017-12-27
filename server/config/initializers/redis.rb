@@ -33,50 +33,16 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-FactoryBot.define do
-  factory :data_point do
-    name 'Example Datapoint'
-    analysis
-
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_data_point_1.json"))
-    initialize_with { new(json) }
-  end
-
-  factory :analysis do
-    name 'Example Analysis'
-    project
-
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_csv.json"))
-
-    initialize_with { new(json['analysis']) }
-
-    seed_zip { File.new("#{Rails.root}/spec/files/batch_datapoints/example_csv.zip") }
-
-    factory :analysis_with_data_points do
-      transient do
-        data_point_count 1
-      end
-
-      after(:create) do |analysis, evaluator|
-        FactoryBot.create_list(
-          :data_point, evaluator.data_point_count,
-          analysis: analysis
-        )
-      end
-    end
-  end
-
-  factory :project do
-    name 'Test Project'
-
-    factory :project_with_analyses do
-      transient do
-        analyses_count 1
-      end
-
-      after(:create) do |project, evaluator|
-        FactoryBot.create_list(:analysis_with_data_points, evaluator.analyses_count, project: project)
-      end
-    end
-  end
+# Skip this if in a local deployment, otherwise configure the Redis connection
+if Rails.env =~ /local/
+elsif Rails.env == 'production'
+  require 'resque'
+  uri = URI.parse(ENV["REDIS_URL"])
+  Resque.redis = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+elsif Rails.env == 'development'
+  require 'resque'
+  Resque.redis = 'localhost:6379'
+else
+  require 'resque'
+  Resque.redis = 'queue:6379'
 end

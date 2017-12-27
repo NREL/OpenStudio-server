@@ -33,31 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# Base class for all analyses. These methods need to be independent of R.
-# If a method is needed from R, then include AnalysisLibrary::R::Core
-
-module AnalysisLibrary
-  class Base
-    include AnalysisLibrary::Core
-
-    # Since this is a delayed job, if it crashes it will typically try multiple times.
-    # Fix this to 1 retry for now.
-    def max_attempts
-      1
-    end
-
-    # Return the logger for the delayed job
-    def logger
-      Delayed::Worker.logger
-    end
-
-    # Return the Ruby system call string for ease
-    def sys_call_ruby
-      "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/ruby"
-    end
-
-    def analysis_dir(id)
-      "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
-    end
-  end
-end
+# This is not needed for Rails 5.1 because we are not using ActiveRecord because of mongoid
+# class ApplicationRecord < ActiveRecord::Base
+#   self.abstract_class = true
+# end
