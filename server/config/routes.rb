@@ -98,4 +98,11 @@ Rails.application.routes.draw do
   match '/status', to: 'pages#status', via: :get
 
   root to: 'pages#dashboard'
+
+  # TODO: Ry, need to decide how we are going to handle this on windows vs other platforms
+  # Catch if this is not a server deployment
+  # if ENV['DOCKER_DEPLOY']
+    require "resque_web"
+    mount ResqueWeb::Engine => "/resque"
+  # end
 end

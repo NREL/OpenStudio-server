@@ -38,37 +38,43 @@
 <h2>Admin</h2>
 
 <div class="row-fluid">
-  <h3 class="pad-bottom-20">Backup</h3>
+  <h3 class="pad-bottom-20">Queue</h3>
+  <div class="span3 pad-bottom-20">
+    <!-- TODO: How to test if this exists when on Windows -->
+    <%= link_to 'View Resque Dashboard', resque_web_path, class: "btn btn-mini btn-primary" %>
+  </div>
+</div>
 
+<div class="row-fluid">
+  <h3 class="pad-bottom-20">Backup</h3>
   <div class="span3 pad-bottom-20">
     <%= link_to 'Backup Database', backup_database_admin_index_path, class: "btn btn-mini btn-primary" %>
   </div>
 </div>
+
 <div class='row-fluid'>
   <h3 class="pad-bottom-20">Restore</h3>
-
   <div class="span3 pad-bottom-20">
     <%= form_tag 'admin/restore_database', :multipart => true do %>
-        Upload Previous Database Dump (targz) <%= file_field_tag "file", class: "btn btn-mini" %>
+      Upload Previous Database Dump (targz) <%= file_field_tag "file", class: "btn btn-mini" %>
+      </div>
+      <div class="span3 pad-bottom-20">
+        <div class="pad-top-20">
+          <%= submit_tag "Upload and Restore Database", class: "btn btn-mini btn-primary" %>
         </div>
-        <div class="span3 pad-bottom-20">
-          <div class="pad-top-20">
-            <%= submit_tag "Upload and Restore Database", class: "btn btn-mini btn-primary" %>
-          </div>
     <% end %>
-    </div>
-    </div>
+  </div>
+</div>
+
 <div class='row-fluid'>
   <h3 class="pad-bottom-20">Server Information</h3>
   <div class="span3 pad-bottom-20">
-    <p>Version of OpenStudio Server: <%="#{OpenstudioServer::VERSION}#{OpenstudioServer::VERSION_EXT}" %> </p>
+    <p>Version of OpenStudio Server: <%= "#{OpenstudioServer::VERSION}#{OpenstudioServer::VERSION_EXT}" %> </p>
   </div>
-
 </div>
 
 <div class='row-fluid'>
   <h3 class="pad-bottom-20">Gems Installed</h3>
-
 </div>
 
 <table class="table table-striped">
@@ -79,12 +85,12 @@
   <tr>
   </thead>
   <tbody>
-    <% @gems.each do |gem| %>
+  <% @gems.each do |gem| %>
     <tr>
       <td><%= gem[0] %></td>
       <td><%= gem[1] %></td>
     </tr>
-    <% end %>
+  <% end %>
   </tbody>
 </table>
 
