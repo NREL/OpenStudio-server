@@ -99,10 +99,9 @@ Rails.application.routes.draw do
 
   root to: 'pages#dashboard'
 
-  # TODO: Ry, need to decide how we are going to handle this on windows vs other platforms
   # Catch if this is not a server deployment
-  # if ENV['DOCKER_DEPLOY']
+  if Rails.env != 'production' && Rails.env != 'docker'
     require "resque_web"
     mount ResqueWeb::Engine => "/resque"
-  # end
+  end
 end

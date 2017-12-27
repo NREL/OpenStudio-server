@@ -37,6 +37,7 @@
 
 <h2>Admin</h2>
 
+<% if Rails.env != 'production' && Rails.env != 'docker' %>
 <div class="row-fluid">
   <h3 class="pad-bottom-20">Queue</h3>
   <div class="span3 pad-bottom-20">
@@ -44,6 +45,7 @@
     <%= link_to 'View Resque Dashboard', resque_web_path, class: "btn btn-mini btn-primary" %>
   </div>
 </div>
+<% end %>
 
 <div class="row-fluid">
   <h3 class="pad-bottom-20">Backup</h3>
