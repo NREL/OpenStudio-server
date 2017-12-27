@@ -45,9 +45,12 @@ gem 'kaminari-mongoid'
 # job queuing
 gem 'daemons'
 gem 'delayed_job_mongoid'
+
+# TODO: Ry, need to decide how we are going to handle this on windows vs other platforms
 # Catch if this is not a server deployment
 # if ENV['DOCKER_DEPLOY']
   gem 'resque', '~> 1.27'
+  gem 'resque-web', require: 'resque_web'
 # end
 
 # Gems used only for assets and not required
