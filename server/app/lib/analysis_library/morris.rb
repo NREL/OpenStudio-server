@@ -33,8 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Fast99 Screening and Sensitivity method
-class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
+#Morris Screening and Sensitivity method
+class AnalysisLibrary::Morris < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
@@ -46,8 +46,11 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
             output_variables: [],
             problem: {
                 algorithm: {
-                    n: 66,
-                    M: 4,
+                    r: 10,
+                    r2: 20,
+                    levels: 4,
+                    grid_jump: 2,
+                    type: 'oat',
                     norm_type: 'minkowski',
                     p_power: 2,
                     debug_messages: 0,
@@ -81,7 +84,7 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
     # create an instance for R
     @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                  APP_CONFIG['rserve_port'])
-    logger.info 'Setting up R for Fast99 Run'
+    logger.info 'Setting up R for Morris Run'
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
     begin
@@ -95,10 +98,6 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
       @r.converse 'library(sensitivity)'
-      @r.converse 'library(ggplot2)'
-      @r.converse 'library(cowplot)'
-      @r.converse 'library(ggsci)'
-      @r.converse 'library(reshape2)'
 
       # At this point we should really setup the JSON that can be sent to the worker nodes with everything it needs
       # This would allow us to easily replace the queuing system with rabbit or any other json based versions.
@@ -106,18 +105,18 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
       master_ip = 'localhost'
 
       logger.info("Master ip: #{master_ip}")
-      logger.info('Starting Fast99 Run')
+      logger.info('Starting Morris Run')
 
       # Quick preflight check that R, MongoDB, and Rails are working as expected. Checks to make sure
       # that the run flag is true.
 
       # TODO: preflight check -- need to catch this in the analysis module
-      if @analysis.problem['algorithm']['n'].nil? || (@analysis.problem['algorithm']['n']).zero?
-        raise 'Value for n was not set or equal to zero (must be 1 or greater)'
+      if @analysis.problem['algorithm']['r'].nil? || (@analysis.problem['algorithm']['r']).zero?
+        raise 'Value for r was not set or equal to zero (must be 1 or greater)'
       end
 
-      if (4*@analysis.problem['algorithm']['M']*@analysis.problem['algorithm']['M']+2) <= (@analysis.problem['algorithm']['n'])
-        logger.info 'Value for n was not > 4*M^2+2, will adjust value'
+      if @analysis.problem['algorithm']['levels'].nil? || (@analysis.problem['algorithm']['levels']).zero?
+        raise 'Value for levels was not set or equal to zero (must be 1 or greater)'
       end
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
@@ -195,15 +194,18 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
                    varnames: var_names,
                    mins: mins_maxes[:min],
                    maxes: mins_maxes[:max],
-                   n: @analysis.problem['algorithm']['n'],
-                   M: @analysis.problem['algorithm']['M'],
+                   levels: @analysis.problem['algorithm']['levels'],
+                   r: @analysis.problem['algorithm']['r'],
+                   r2: @analysis.problem['algorithm']['r2'],
+                   type: @analysis.problem['algorithm']['type'],
+                   grid_jump: @analysis.problem['algorithm']['grid_jump'],
                    normtype: @analysis.problem['algorithm']['norm_type'],
                    ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value'],
                    vardisplaynames: var_display_names, objnames: obj_names,
-                   mins: mins_maxes[:min], maxes: mins_maxes[:max], uniquegroups: ug.size) do
+                   uniquegroups: ug.size) do
           %{
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
@@ -216,14 +218,14 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
             whoami <- system('whoami', intern = TRUE)
-            print(paste("Fast99.rb whoami:", whoami))
+            print(paste("Morris.rb whoami:", whoami))
             hostname <- system('hostname', intern = TRUE)
-            print(paste("Fast99.rb hostname:", hostname))
+            print(paste("Morris.rb hostname:", hostname))
             rails_exit_guideline_14 = 0
-            source(paste(r_scripts_path,'/fast99.R',sep=''))
+            source(paste(r_scripts_path,'/morris.R',sep=''))
         }
         end
-        logger.info 'Returned from rserve Fast99 block'
+        logger.info 'Returned from rserve morris block'
       else
         raise 'could not start the cluster (most likely timed out)'
       end

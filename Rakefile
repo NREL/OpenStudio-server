@@ -7,7 +7,7 @@ require 'logger'
 require 'colored'
 
 # To release new version, increment the value in the ./server/lib/openstudio_server/version.rb file
-require_relative 'server/lib/openstudio_server/version'
+require_relative 'server/app/lib/openstudio_server/version'
 
 # VERSION_APPEND = Openstudioserver::VERSION_EXT
 OPENSTUDIO_SERVER_VERSION = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT

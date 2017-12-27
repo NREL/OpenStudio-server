@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-module Analysis
+module AnalysisLibrary
   module R
     class DataFrame
       def self.save_dataframe(hash, dataframe_name, savepath)
