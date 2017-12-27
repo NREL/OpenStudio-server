@@ -4,7 +4,8 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 	if [ "${OSX_BUILD}" = 'true' ]; then
 		echo 'IN AN OSX BUILD'
 		brew update
-		brew install mongo
+		brew install mongodb@3.4 
+                ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
 		unset BUNDLE_GEMFILE
 		curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio-2.0.3.40f61c64a3-darwin.zip
 		mkdir ~/openstudio
