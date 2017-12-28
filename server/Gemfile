@@ -44,14 +44,6 @@ gem 'kaminari-mongoid'
 
 # job queuing
 gem 'daemons'
-gem 'delayed_job_mongoid'
-
-# TODO: Ry, need to decide how we are going to handle this on windows vs other platforms
-# Catch if this is not a server deployment
-# if ENV['DOCKER_DEPLOY']
-  gem 'resque', '~> 1.27'
-  gem 'resque-web', require: 'resque_web'
-# end
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -97,6 +89,15 @@ group :docker do
   gem 'execjs'
   gem 'libv8'
   gem 'therubyracer', platforms: :ruby
+end
+
+group :docker, :production do
+  gem 'resque', '~> 1.27'
+  gem 'resque-web', require: 'resque_web'
+end
+
+group :local, :development do
+  gem 'delayed_job_mongoid'
 end
 
 group :development, :test do

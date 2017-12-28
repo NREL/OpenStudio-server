@@ -99,9 +99,7 @@ Rails.application.routes.draw do
 
   root to: 'pages#dashboard'
 
-  # Catch if this is not a server deployment
-  if Rails.env != 'production' && Rails.env != 'docker'
-    require "resque_web"
-    mount ResqueWeb::Engine => "/resque"
-  end
+  # Always provide this for debugging, at least to start with. Redact the link in case of production runs
+  require "resque_web"
+  mount ResqueWeb::Engine => "/resque"
 end
