@@ -65,11 +65,15 @@ end
 class OpenStudioMeta
 end
 
+class LocalRspecTest
+end
+
 mongod_exe = which('mongod')
 ruby_cmd = "\"#{RbConfig.ruby}\"" # full path if you care
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../results/'))
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
 num_workers = 2
@@ -81,7 +85,7 @@ num_workers = 2
 RSpec.describe OpenStudioMeta do
   before :all do
     # start the server
-    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} --debug --verbose \"#{project}\""
+    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} \"#{tests}\""
     puts command
     start_local = system(command)
     expect(start_local).to be true
@@ -89,7 +93,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run simple analysis' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -148,7 +152,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run a complicated design alternative set' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} \"#{project}\""
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -207,6 +211,24 @@ RSpec.describe OpenStudioMeta do
 
   after :all do
     # stop the server
+    command = "#{ruby_cmd} \"#{meta_cli}\" stop_local \"#{project}\""
+    puts command
+    stop_local = system(command)
+    expect(stop_local).to be true
+  end
+end
+
+RSpec.describe LocalRspecTest do
+  it should 'run RSpec tests against a local server configuration' do
+    # run the full set of RSpec tests, discounted internally by the local-test rails environ
+    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{test_dir}\""
+    puts command
+    test_results = system(command)
+    expect(test_results).to be 0
+  end
+
+  after :all do
+    # kill any and all remaining processes
     command = "#{ruby_cmd} \"#{meta_cli}\" stop_local \"#{project}\""
     puts command
     stop_local = system(command)

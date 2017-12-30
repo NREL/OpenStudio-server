@@ -174,7 +174,9 @@ class CLI
     start_remote: [proc { ::StartRemote }, { primary: true, working: true }],
     stop_local: [proc { ::StopLocal }, { primary: true, working: true }],
     stop_remote: [proc { ::StopRemote }, { primary: true, working: true }],
-    run_analysis: [proc { ::RunAnalysis }, { primary: true, working: true }]
+    run_analysis: [proc { ::RunAnalysis }, { primary: true, working: true }],
+    run_rspec: [proc { ::RunRspec }, {primary: true, working: true}],
+    run_codecov: [proc { ::RunCoverage }, {primary: false, working: false}]
   }.freeze
 
   # This method instantiates the global variables $main_args, $sub_command, and $sub_args
@@ -826,6 +828,200 @@ class RunAnalysis
       batch_run_method: batch_run_method
     }
     server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
+  end
+end
+
+# Class to initialize a local server
+class RunRspec
+  require_relative 'resources/local.rb'
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Executes a suite of local tests for the OS Server'
+  end
+
+  # Executes the command line calls through threads, and sends their pids to file for shutdown
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    mongod = which 'mongod'
+    mongodir = ''
+    if mongod
+      mongodir = File.dirname mongod
+    end
+
+    options = { debug: false, force_directories: true, ruby_path: $ruby_path, mongo_dir: mongodir }
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta run_rspec [options] TEST_DIR'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('--debug', 'Whatever makes debugging easy') do |f|
+        options[:debug] = f
+      end
+
+      o.on('--no-force-directories', 'Do not force creation of directories') do |_|
+        options[:force_directories] = false
+      end
+
+      o.on('--ruby-path PATH', 'Location of ruby executable for workers. Defaults to the calling instance of ruby') do |path|
+        options[:ruby_path] = path
+      end
+
+      o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
+        options[:mongo_dir] = path
+      end
+
+      o.on('--energyplus-exe-path PATH', 'Location of the EnergyPlus executable') do |path|
+        options[:energyplus_exe_path] = path
+      end
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    test_dir = argv.shift
+    unless argv == []
+      $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
+      exit 1
+    end
+    $logger.debug("RunRSpec command: #{argv.inspect} #{options.inspect}")
+
+    # Check the project directory exists
+    unless ::File.exist? test_dir
+        FileUtils.mkdir_p test_dir if options[:force_directories]
+    end
+
+    # Check if a local_configuration.json exists
+    if ::File.exist? ::File.join(test_dir, 'local_test_configuration.json')
+      $logger.error "A `local_test_configuration.json` file already exists at `#{test_dir}`"
+      exit 1
+    end
+
+    # Also force the creation of the log dir in the project_dir
+    log_dir = File.absolute_path(File.join(__FILE__, './../../../../server', 'logs'))
+    if options[:force_directories]
+      FileUtils.mkdir_p log_dir unless Dir.exist? log_dir
+    end
+
+    if options[:energyplus_exe_path] && ::File.exist?(options[:energyplus_exe_path])
+      ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
+    end
+
+    # Set the server project path and temp dir
+    ::ENV['OS_SERVER_PROJECT_PATH'] = test_dir
+    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
+
+    # Create the required project files
+    FileUtils.mkdir_p File.join(test_dir, 'logs')
+    FileUtils.mkdir_p File.join(test_dir, 'data', 'db')
+
+    # Assemble the commands and spin off the threads
+    run_rspec test_dir, options[:mongo_dir], options[:ruby_path], options[:debug]
+
+    0
+  end
+end
+
+# Class to initialize a local server
+class RunCoverage
+  require_relative 'resources/local.rb'
+
+  # Provides text for the main help functionality
+  def self.synopsis
+    'Starts local processes for the OS Server'
+  end
+
+  # Executes the command line calls through threads, and sends their pids to file for shutdown
+  #
+  # @param [Array] sub_argv Options passed to the run subcommand from the user input
+  # @return [Fixnum] Return status
+  #
+  def execute(sub_argv)
+    mongod = which 'mongod'
+    mongodir = ''
+    if mongod
+      mongodir = File.dirname mongod
+    end
+
+    options = { debug: false, force_directories: false, workers: 1, ruby_path: $ruby_path, mongo_dir: mongodir }
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('--debug', 'Whatever makes debugging easy') do |f|
+        options[:debug] = f
+      end
+
+      o.on('--force-directories', 'Force creation of directories') do |_|
+        options[:force_directories] = true
+      end
+
+      o.on('--worker-number COUNT', 'Number of workers to use') do |w|
+        options[:workers] = w.to_i
+      end
+
+      o.on('--ruby-path PATH', 'Location of ruby executable for workers. Defaults to the calling instance of ruby') do |path|
+        options[:ruby_path] = path
+      end
+
+      o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
+        options[:mongo_dir] = path
+      end
+
+      o.on('--energyplus-exe-path PATH', 'Location of the EnergyPlus executable') do |path|
+        options[:energyplus_exe_path] = path
+      end
+    end
+
+    # Parse the options
+    argv = parse_options(opts, sub_argv)
+    project_dir = argv.shift
+    unless argv == []
+      $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
+      exit 1
+    end
+    $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
+
+    # Check the project directory exists
+    unless ::File.exist? project_dir
+      if options[:force_directories]
+        FileUtils.mkdir_p project_dir
+      else
+        $logger.error "Unable to find directory '#{project_dir}'"
+        exit 1
+      end
+    end
+
+    # Check if a local_configuration.json exists
+    if ::File.exist? ::File.join(project_dir, 'local_configuration.json')
+      $logger.error "A `local_configuration.json` file already exists at `#{project_dir}`"
+      exit 1
+    end
+
+    # Also force the creation of the log dir in the project_dir
+    if options[:force_directories]
+      FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
+    end
+
+    if options[:energyplus_exe_path] && ::File.exist?(options[:energyplus_exe_path])
+      ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
+    end
+
+    # Set the server project path and temp dir
+    ::ENV['OS_SERVER_PROJECT_PATH'] = File.join(project_dir, 'temp_data')
+    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
+
+    # Assemble the commands and spin off the threads
+    start_local_server project_dir, options[:mongo_dir], options[:ruby_path], options[:workers], options[:debug]
+
+    0
   end
 end
 
