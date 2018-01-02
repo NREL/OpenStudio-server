@@ -12,6 +12,9 @@ install:
 
 build: off
 
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 before_test:
   - ruby -v
   - gem -v
@@ -23,3 +26,6 @@ test_script:
 
 on_failure:
   - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
