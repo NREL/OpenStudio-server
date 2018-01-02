@@ -901,12 +901,7 @@ class RunRspec
       exit 1
     end
 
-    # Also force the creation of the log dir in the project_dir
-    log_dir = File.absolute_path(File.join(__FILE__, './../../../../server', 'logs'))
-    if options[:force_directories]
-      FileUtils.mkdir_p log_dir unless Dir.exist? log_dir
-    end
-
+    # Set the E+ path
     if options[:energyplus_exe_path] && ::File.exist?(options[:energyplus_exe_path])
       ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
@@ -916,8 +911,10 @@ class RunRspec
     ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
 
     # Create the required project files
-    FileUtils.mkdir_p File.join(test_dir, 'logs')
-    FileUtils.mkdir_p File.join(test_dir, 'data', 'db')
+    if options[:force_directories]
+      FileUtils.mkdir_p File.join(test_dir, 'logs')
+      FileUtils.mkdir_p File.join(test_dir, 'data', 'db')
+    end
 
     # Assemble the commands and spin off the threads
     run_rspec test_dir, options[:mongo_dir], options[:ruby_path], options[:debug]

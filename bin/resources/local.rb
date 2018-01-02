@@ -190,7 +190,7 @@ def run_rspec(test_directory, mongo_directory, ruby_path, debug)
   mongod_log_path = ::File.absolute_path(::File.join(test_directory, 'logs'))
   mongo_db_directory = ::File.absolute_path(::File.join(test_directory, 'data/db'))
   rspec_command_path = ::File.absolute_path(::File.join(__FILE__, '../local/rspec_command'))
-  rspec_output_path = ::File.absolute_path(::File.join(test_directory, 'rspec.html'))
+  rspec_output_path = ::File.absolute_path(::File.join(test_directory))
 
   mongod_port = find_available_port 27017, 100
   $logger.debug "Mongo port will be #{mongod_port}"
@@ -248,9 +248,9 @@ def run_rspec(test_directory, mongo_directory, ruby_path, debug)
   end
   $logger.debug 'RSPEC FINISHED'
 
-  #$logger.debug 'Killing outstanding processes'
+  $logger.debug 'Killing outstanding processes'
   find_windows_pids(state_file) if is_windows?
-  #kill_processes(state_file)
+  kill_processes(state_file)
 
   $logger.debug 'Finished rspec testing.'
 end

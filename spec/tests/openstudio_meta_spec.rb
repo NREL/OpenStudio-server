@@ -73,9 +73,11 @@ ruby_cmd = "\"#{RbConfig.ruby}\"" # full path if you care
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
-test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../results/'))
+server_rspec_test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../server_results/'))
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
+FileUtils.mkdir_p File.join(server_rspec_test_dir, 'logs')
+FileUtils.mkdir_p File.join(server_rspec_test_dir, 'data/db')
 num_workers = 2
 ::ENV.delete 'BUNDLE_BIN_PATH'
 ::ENV.delete 'BUNDLE_GEMFILE'
@@ -108,7 +110,7 @@ RSpec.describe OpenStudioMeta do
 
     status = 'queued'
     begin
-      ::Timeout.timeout(120) do
+      ::Timeout.timeout(180) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
@@ -167,7 +169,7 @@ RSpec.describe OpenStudioMeta do
 
     status = 'queued'
     begin
-      ::Timeout.timeout(120) do
+      ::Timeout.timeout(180) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
@@ -219,19 +221,11 @@ RSpec.describe OpenStudioMeta do
 end
 
 RSpec.describe LocalRspecTest do
-  it should 'run RSpec tests against a local server configuration' do
+  it 'should run RSpec tests against a local server configuration' do
     # run the full set of RSpec tests, discounted internally by the local-test rails environ
-    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{test_dir}\""
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_rspec --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{server_rspec_test_dir}\""
     puts command
     test_results = system(command)
-    expect(test_results).to be 0
-  end
-
-  after :all do
-    # kill any and all remaining processes
-    command = "#{ruby_cmd} \"#{meta_cli}\" stop_local \"#{project}\""
-    puts command
-    stop_local = system(command)
-    expect(stop_local).to be true
+    expect(test_results).to be true
   end
 end
