@@ -81,14 +81,14 @@ rspec_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rspe
 ::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server')))
 ::ENV['OS_SERVER_MONGO_PORT'] = db_port
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
-::ENV['OS_SERVER_LOG_PATH'] = File.join(File.absolute_path(File.join(__FILE__, './../../../../server')), 'logs', 'rails.log')
+::ENV['OS_SERVER_LOG_PATH'] = File.join(File.absolute_path(File.join(__FILE__, './../../../../results')), 'logs', 'rails.log')
 ::ENV['RAILS_ENV'] = 'local-test'
 sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --format html -o \"#{output_file}\""
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rspec: #{::ENV.inspect}" if options[:debug]
 
 # Execute the system call
-process_log = File.join(File.absolute_path(File.join(__FILE__, './../../../../server')), 'logs', 'rspec.log')
+process_log = File.join(File.absolute_path(File.join(__FILE__, './../../../../results')), 'logs', 'rspec.log')
 rspec_pid = spawn(sys_call, [:err, :out] => [process_log, 'w'])
 config_hash = File.exist?(state_file) ? ::JSON.parse(File.read(state_file), symbolize_names: true) : {}
 config_hash[:rspec_pid] = rspec_pid

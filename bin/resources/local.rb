@@ -187,7 +187,7 @@ end
 def run_rspec(test_directory, mongo_directory, ruby_path, debug)
   cluster_name = 'local_test'
   mongod_command_path = ::File.absolute_path(::File.join(__FILE__, '../local/mongo_command'))
-  mongod_log_path = ::File.absolute_path(::File.join(test_directory))
+  mongod_log_path = ::File.absolute_path(::File.join(test_directory, 'logs'))
   mongo_db_directory = ::File.absolute_path(::File.join(test_directory, 'data/db'))
   rspec_command_path = ::File.absolute_path(::File.join(__FILE__, '../local/rspec_command'))
   rspec_output_path = ::File.absolute_path(::File.join(test_directory, 'rspec.html'))
@@ -248,7 +248,9 @@ def run_rspec(test_directory, mongo_directory, ruby_path, debug)
   end
   $logger.debug 'RSPEC FINISHED'
 
+  #$logger.debug 'Killing outstanding processes'
   find_windows_pids(state_file) if is_windows?
+  #kill_processes(state_file)
 
   $logger.debug 'Finished rspec testing.'
 end

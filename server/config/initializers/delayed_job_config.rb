@@ -33,6 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
+require 'delayed_job'
+
 if ['development', 'local', 'local-test'].include? Rails.env
   # Allow the jobs to run for up to 1 week.  If this is ever hit, then we have other problems.
   # Delayed::Worker.destroy_failed_jobs = false
