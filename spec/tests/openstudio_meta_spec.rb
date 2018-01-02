@@ -154,7 +154,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run a complicated design alternative set' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} \"#{project}\""
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
