@@ -53,12 +53,14 @@ RSpec.describe 'Pages Exist', type: :feature do
   end
 
   it 'Accesses the API over host using selenium', js: true do
-    visit '/'
-    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+    unless ENV['RAILS_ENV'] == 'local-test'
+      visit '/'
+      host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
 
-    expect(host).to match /\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:\d{2,5}/
-    a = RestClient.get "http://#{host}"
+      expect(host).to match /\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:\d{2,5}/
+      a = RestClient.get "http://#{host}"
 
-    expect(a.body).to have_content 'OpenStudio Cloud Management Console'
+      expect(a.body).to have_content 'OpenStudio Cloud Management Console'
+    end
   end
 end

@@ -65,13 +65,19 @@ end
 class OpenStudioMeta
 end
 
+class LocalRspecTest
+end
+
 mongod_exe = which('mongod')
 ruby_cmd = "\"#{RbConfig.ruby}\"" # full path if you care
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+server_rspec_test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../server_results/'))
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
+FileUtils.mkdir_p File.join(server_rspec_test_dir, 'logs')
+FileUtils.mkdir_p File.join(server_rspec_test_dir, 'data/db')
 num_workers = 2
 ::ENV.delete 'BUNDLE_BIN_PATH'
 ::ENV.delete 'BUNDLE_GEMFILE'
@@ -81,7 +87,7 @@ num_workers = 2
 RSpec.describe OpenStudioMeta do
   before :all do
     # start the server
-    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} --debug --verbose \"#{project}\""
+    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} \"#{project}\""
     puts command
     start_local = system(command)
     expect(start_local).to be true
@@ -89,7 +95,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run simple analysis' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -104,7 +110,7 @@ RSpec.describe OpenStudioMeta do
 
     status = 'queued'
     begin
-      ::Timeout.timeout(120) do
+      ::Timeout.timeout(180) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
@@ -148,7 +154,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run a complicated design alternative set' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -163,7 +169,7 @@ RSpec.describe OpenStudioMeta do
 
     status = 'queued'
     begin
-      ::Timeout.timeout(120) do
+      ::Timeout.timeout(180) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
@@ -211,5 +217,15 @@ RSpec.describe OpenStudioMeta do
     puts command
     stop_local = system(command)
     expect(stop_local).to be true
+  end
+end
+
+RSpec.describe LocalRspecTest do
+  it 'should run RSpec tests against a local server configuration' do
+    # run the full set of RSpec tests, discounted internally by the local-test rails environ
+    command = "#{ruby_cmd} \"#{meta_cli}\" run_rspec --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{server_rspec_test_dir}\""
+    puts command
+    test_results = system(command)
+    expect(test_results).to be true
   end
 end

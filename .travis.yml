@@ -4,21 +4,21 @@ matrix:
   allow_failures:
   - os: linux
   include:
-  - os: linux
-    env:
-    - REDHAT_BUILD: true
-    - RUN_OPTS: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    - USE_TESTING_TIMEOUTS: "true"
-    services:
-    - docker
-  - os: linux
-    env:
-    - REDHAT_BUILD: false
-    - OSX_BUILD: false
-    - USE_TESTING_TIMEOUTS: "true"
-    services:
-    - mongod
-    sudo: required
+#  - os: linux
+#    env:
+#    - REDHAT_BUILD: true
+#    - RUN_OPTS: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+#    - USE_TESTING_TIMEOUTS: "true"
+#    services:
+#    - docker
+#  - os: linux
+#    env:
+#    - REDHAT_BUILD: false
+#    - OSX_BUILD: false
+#    - USE_TESTING_TIMEOUTS: "true"
+#    services:
+#    - mongod
+#    sudo: required
   - os: osx
     osx_image: xcode7.3
     env:
@@ -27,6 +27,9 @@ matrix:
     - USE_TESTING_TIMEOUTS: "true"
 
 before_install: ./ci/travis/setup.sh
+before_script:
+  - sudo Xvfb :99 -ac -screen 0 1024x768x8 &
+  - sleep 3
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
 notifications:

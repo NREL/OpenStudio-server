@@ -12,7 +12,7 @@ if [ "${REDHAT_BUILD}" = 'false' ]; then
 		unzip OpenStudio-2.0.3.40f61c64a3-darwin.zip -d ~/openstudio
 		mv ~/openstudio/openstudio-2.0.3/* ~/openstudio/
 		export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
-		ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose
+		ruby ./bin/openstudio_meta install_gems --with_test_develop
 	fi
 	if [ "${OSX_BUILD}" = 'false' ]; then
 		echo 'IN AN UBUNTU BUILD'
