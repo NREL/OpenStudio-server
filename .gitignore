@@ -13,6 +13,7 @@ rubocop-results.xml
 /reports
 /docker/deployment/user_variables.json
 *.log
+.rubocop-https*
 
 # in some configs the server and worker data are persisted in this directory, never commit
 server-data
