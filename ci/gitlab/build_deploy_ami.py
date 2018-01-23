@@ -4,6 +4,7 @@ import os
 from subprocess import Popen, PIPE, STDOUT
 import argparse
 import json
+import boto3
 
 
 # A helper method for executing command line calls cleanly
@@ -45,18 +46,10 @@ verbose = args.verbose
 # Ensure the required environment variables exist
 try:
     home = os.environ['HOME']
-    access = os.environ['AWS_ACCESS_KEY']
-    secret = os.environ['AWS_SECRET_KEY']
+    access = os.environ['AWS_ACCESS_KEY_ID']
+    secret = os.environ['AWS_SECRET_ACCESS_KEY']
 except KeyError as e:
-    raise 'ERROR: needed enviornment variable is not set: {}'.format(e.stderr)
-
-# Write the config file to set the default AWS region
-with open(os.path.join(home, '.aws/config'), 'w') as f:
-    f.write('[default]\nregion=us-east-1')
-
-# Write the credentials file to allow for authentication
-with open(os.path.join(home, '.aws/credentials'), 'w') as f:
-    f.write('[default]\naws_access_key_id = {}\naws_secret_access_key = {}'.format(access, secret))
+    raise 'ERROR: needed environment variable is not set: {}'.format(e.stderr)
 
 # Get the docker version to use
 template_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -239,7 +232,6 @@ ami_entry = {
 }
 
 # Now that we have the required artifacts, we boot up the AWS library and download the latest amis.json
-import boto3
 s3 = boto3.resource('s3')
 file_obj = s3.Object('openstudio-resources', 'server/api/v3/amis.json')
 amis = json.loads(file_obj.get()['Body'].read().decode('utf-8'))
