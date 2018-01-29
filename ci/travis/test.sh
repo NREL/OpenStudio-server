@@ -1,18 +1,23 @@
-#!/bin/bash
-if [ "${REDHAT_BUILD}" = 'false' ]; then
-	if [ "${OSX_BUILD}" = 'true' ]; then
-	    export RUBYLIB="${HOME}/openstudio/Ruby/"
-		bundle exec rspec
-		if [ $? != 0 ]; then
-		    exit 1
-		fi
-	fi
-	if [ "${OSX_BUILD}" = 'false' ]; then
-	    echo 'Tests not wired up for Ubuntu Build'
-		exit 1
-	fi
-fi
-if [ "${REDHAT_BUILD}" = 'true' ]; then
+#!/usr/bin/env bash
+
+if [ "${BUILD_ARCH}" == "OSX" ]; then
+    export RUBYLIB="${HOME}/openstudio/Ruby/"
+    bundle exec rspec; (( exit_status = exit_status || $? ))
+    bundle exec rspec --tag ~requires_gecko --format documentation; (( exit_status = exit_status || $? ))
+
+    exit $exit_status
+elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
+    exit_status=0
+    printenv RUBYLIB
+    ruby -r openstudio -e "puts 'loaded'"
+
+    cd server
+    bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation; (( exit_status = exit_status || $? ))
+#    bundle exec rspec; (( exit_status = exit_status || $? ))
+    bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
+
+    exit $exit_status
+elif [ "${BUILD_ARCH}" == "RedHat" ]; then
     echo 'Tests not wired up for Centos 6.8 Build'
 	exit 1
 fi
