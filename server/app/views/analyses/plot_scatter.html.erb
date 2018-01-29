@@ -107,7 +107,7 @@
 
           var color = d3.scale.category10();
 
-          var excludedData = ['wwr_west_static', 'data_point_uuid', '_id', 'name', 'run_start_time', 'run_end_time', 'status', 'status_message'];
+          var excludedData = ['data_point_uuid', '_id', 'name', 'run_start_time', 'run_end_time', 'status', 'status_message'];
 
           d3.json("analysis_data.json?visualize=true", function (error, data) {
               var domainByTrait = {},
