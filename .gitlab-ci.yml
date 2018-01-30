@@ -1,26 +1,28 @@
 stages:
-- build
+  - build
 
 build:windows:
   variables:
     CI_DEBUG_TRACE: "true"
   stage: build
   only:
-  - develop  
+    - develop
   tags:
-  - windows
+    - windows
   script:
-  - ruby bin/openstudio_meta install_gems -e /c/server-export
+    - ruby bin/openstudio_meta install_gems -e /c/server-export
+    - ./bin/openstudio_meta install_gems --export="/Users/alex/server-export" --with_test_develop --debug --verbose
+    - bundle exec rspec
 
 build:mac:
   variables:
     CI_DEBUG_TRACE: "true"
   stage: build
   only:
-  - develop  
+    - develop
   tags:
-  - mac
+    - mac
   script:
-  - export RUBYLIB=/Applications/OpenStudio-2.3.0/Ruby/
-  - ./bin/openstudio_meta  install_gems --export="/Users/alex/server-export"
-
+    - export RUBYLIB=/Applications/OpenStudio-2.3.0/Ruby/
+    - ./bin/openstudio_meta install_gems --export="/Users/alex/server-export" --with_test_develop --debug --verbose
+    - bundle exec rspec
