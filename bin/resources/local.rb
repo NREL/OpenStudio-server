@@ -178,7 +178,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   rails_command_path = ::File.absolute_path(::File.join(__FILE__, '../local/rails_command'))
   rails_log_path = ::File.absolute_path(::File.join(project_directory, 'logs'))
 
-  mongod_port = find_available_port 27_017, 100
+  mongod_port = find_available_port 27017, 100
   $logger.debug "Mongo port will be #{mongod_port}"
   $logger.error 'Unable to find port for mongo' unless mongod_port
   exit 1 unless mongod_port

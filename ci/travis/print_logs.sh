@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+
 echo "Current directory is $(pwd)"
 echo "\n=== PRINTING ERROR LOG REPORTS ===\n"
 
