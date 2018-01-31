@@ -2,6 +2,7 @@ AllCops:
   Exclude:
     - 'server/spec/files/**/*'
     - 'server/lib/delayed/heartbeat/**/*'
+    - 'server/vendor/bundle/**/*'
 
 Rails:
   Enabled: true

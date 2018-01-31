@@ -19,7 +19,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ######################################################################
 
-Signal.trap('INT') { abort }
+Signal.trap('INT') {abort}
 require 'logger'
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
@@ -36,8 +36,8 @@ $ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTAB
 def safe_puts(message = nil, opts = nil)
   message ||= ''
   opts = {
-    io: $stdout,
-    printer: :puts
+      io: $stdout,
+      printer: :puts
   }.merge(opts || {})
 
   begin
@@ -124,9 +124,9 @@ end
 #
 def split_main_and_subcommand(argv)
   # Initialize return variables
-  main_args   = nil
+  main_args = nil
   sub_command = nil
-  sub_args    = []
+  sub_args = []
 
   # We split the arguments into two: One set containing any flags before a word, and then the rest. The rest are what
   # get actually sent on to the subcommand
@@ -134,9 +134,9 @@ def split_main_and_subcommand(argv)
     unless argv[i].start_with?('-')
       # We found the beginning of the sub command. Split the
       # args up.
-      main_args   = argv[0, i]
+      main_args = argv[0, i]
       sub_command = argv[i]
-      sub_args    = argv[i + 1, argv.length - i + 1]
+      sub_args = argv[i + 1, argv.length - i + 1]
 
       # Break so we don't find the next non flag and shift our main args
       break
@@ -153,12 +153,12 @@ end
 class CLI
   # This constant maps subcommands to classes in this CLI and stores meta-data on them
   COMMAND_LIST = {
-    install_gems: [proc { ::InstallGems }, { primary: true, working: true }],
-    start_local: [proc { ::StartLocal }, { primary: true, working: true }],
-    start_remote: [proc { ::StartRemote }, { primary: true, working: true }],
-    stop_local: [proc { ::StopLocal }, { primary: true, working: true }],
-    stop_remote: [proc { ::StopRemote }, { primary: true, working: true }],
-    run_analysis: [proc { ::RunAnalysis }, { primary: true, working: true }]
+      install_gems: [proc {::InstallGems}, {primary: true, working: true}],
+      start_local: [proc {::StartLocal}, {primary: true, working: true}],
+      start_remote: [proc {::StartRemote}, {primary: true, working: true}],
+      stop_local: [proc {::StopLocal}, {primary: true, working: true}],
+      stop_remote: [proc {::StopRemote}, {primary: true, working: true}],
+      run_analysis: [proc {::RunAnalysis}, {primary: true, working: true}]
   }.freeze
 
   # This method instantiates the global variables $main_args, $sub_command, and $sub_args
@@ -237,10 +237,10 @@ class CLI
         # help output.
         next unless list_all || data[1][:primary]
 
-        key           = key.to_s
-        klass         = data[0].call
+        key = key.to_s
+        klass = data[0].call
         commands[key] = klass.synopsis
-        longest       = key.length if key.length > longest
+        longest = key.length if key.length > longest
       end
 
       commands.keys.sort.each do |key|
@@ -270,7 +270,7 @@ class InstallGems
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = { debug: false, export_dir: nil, test_dev_build: false }
+    options = {debug: false, export_dir: nil, test_dev_build: false, use_cached_gems: false}
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta install_gems [options]'
@@ -288,6 +288,10 @@ class InstallGems
 
       o.on('--with_test_develop', 'Include test and develop gems in the installation package') do |_w|
         options[:test_dev_build] = true
+      end
+
+      o.on('--use_cached_gems', 'Use the cached gems') do |_w|
+        options[:use_cached_gems] = true
       end
     end
 
@@ -307,7 +311,7 @@ class InstallGems
 
     # Delete existing gem dir
     # GEM_HOME is set to location in this directory at top of script
-    if File.exist?(ENV['GEM_HOME'])
+    if File.exist?(ENV['GEM_HOME']) && !options[:use_cached_gems]
       FileUtils.rm_rf(ENV['GEM_HOME'])
     end
     FileUtils.mkdir_p(ENV['GEM_HOME'])
@@ -323,15 +327,16 @@ class InstallGems
     sys_cmds = []
 
     sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.12.5"
-    if /darwin/.match(RUBY_PLATFORM) 
+    if /darwin/.match(RUBY_PLATFORM)
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-include=/usr/include"
     end
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test --without docker"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
     else
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test docker"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
     end
     sys_cmds << "#{$ruby_path} #{bundler_bin} update"
+    sys_cmds << 'echo "Calling assets:precompile"'
     sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
     sys_call = sys_cmds.join(' && ')
     puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
@@ -380,10 +385,10 @@ class InstallGems
       FileUtils.rm_rf(File.join(dest, 'reports'))
       FileUtils.rm_rf(File.join(dest, 'worker-nodes'))
 
-      Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each { |p| FileUtils.rm_rf(p) }
-      Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each { |p| FileUtils.rm_rf(p) }
+      Dir.glob(dest + '/**/OpenStudio-workflow*/spec/').each {|p| FileUtils.rm_rf(p)}
+      Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each {|p| FileUtils.rm_rf(p)}
       platform = 'win32'
-      if /darwin/.match(RUBY_PLATFORM) 
+      if /darwin/.match(RUBY_PLATFORM)
         platform = 'darwin'
       end
 
@@ -426,7 +431,7 @@ class StartLocal
       mongodir = File.dirname mongod
     end
 
-    options = { debug: false, force_directories: false, workers: 1, ruby_path: $ruby_path, mongo_dir: mongodir }
+    options = {debug: false, force_directories: false, workers: 1, ruby_path: $ruby_path, mongo_dir: mongodir}
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR'
@@ -519,7 +524,7 @@ class StopLocal
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
-    options = { debug: false }
+    options = {debug: false}
 
     opts = ::OptionParser.new do |o|
       o.banner = 'Usage: openstudio_meta stop_local [options] PROJECT_DIR'
@@ -593,10 +598,10 @@ class StartRemote
     $logger.debug 'Successfully required all gems for StartRemote'
 
     options = {
-      debug: false,
-      aws_yml: '',
-      server_options_json: '',
-      project_dir: ''
+        debug: false,
+        aws_yml: '',
+        server_options_json: '',
+        project_dir: ''
     }
 
     opts = ::OptionParser.new do |o|
@@ -675,7 +680,7 @@ class StopRemote
     require 'openstudio-aws'
     $logger.debug 'Successfully required all gems for StopRemote'
     options = {
-      debug: false
+        debug: false
     }
 
     opts = ::OptionParser.new do |o|
@@ -709,9 +714,9 @@ class StopRemote
 
     # Set the env variables for AWS, load the instance controller, and terminate the instances.
     cluster_folder = File.dirname aws_conn_json
-    aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'], secret_access_key: ::ENV['AWS_SECRET_KEY'],
-                                        region: ::ENV['AWS_DEFAULT_REGION'] },
-                         save_directory: cluster_folder }
+    aws_init_options = {credentials: {access_key_id: ::ENV['AWS_ACCESS_KEY'], secret_access_key: ::ENV['AWS_SECRET_KEY'],
+                                      region: ::ENV['AWS_DEFAULT_REGION']},
+                        save_directory: cluster_folder}
     aws = OpenStudio::Aws::Aws.new(aws_init_options)
     aws.load_instance_info_from_file(aws_conn_json)
     aws.terminate
@@ -745,9 +750,9 @@ class RunAnalysis
     require 'openstudio-aws'
     $logger.debug 'Successfully required all gems for RunAnalysis'
     options = {
-      debug: false,
-      dencity: false,
-      analysis_type: 'batch_datapoints'
+        debug: false,
+        dencity: false,
+        analysis_type: 'batch_datapoints'
     }
 
     opts = ::OptionParser.new do |o|
@@ -756,9 +761,9 @@ class RunAnalysis
       o.separator 'Options:'
       o.separator ''
 
-      o.on('-a', '--analysis TYPE', 'Analysis type to run') { |a| options[:analysis_type] = a }
-      o.on('-d', '--push_to_dencity', 'Push the analysis to DEnCity') { |_| options[:dencity] = true }
-      o.on('--debug', 'Whatever makes debugging easy') { |_| options[:debug] = true }
+      o.on('-a', '--analysis TYPE', 'Analysis type to run') {|a| options[:analysis_type] = a}
+      o.on('-d', '--push_to_dencity', 'Push the analysis to DEnCity') {|_| options[:dencity] = true}
+      o.on('--debug', 'Whatever makes debugging easy') {|_| options[:debug] = true}
     end
 
     # Parse the options
@@ -806,8 +811,8 @@ class RunAnalysis
     analysis_zip_file = temp_filepath + '.zip'
     batch_run_method = 'batch_run'
     run_options = {
-      push_to_dencity: options[:dencity],
-      batch_run_method: batch_run_method
+        push_to_dencity: options[:dencity],
+        batch_run_method: batch_run_method
     }
     server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
   end

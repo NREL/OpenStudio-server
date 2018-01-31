@@ -63,7 +63,8 @@ test:
     default:
       database: os_test
       hosts:
-        - localhost:27017
+        # For some reason localhost isn't working for mongo anymore
+        - 127.0.0.1:27017
       options:
         read:
           mode: :primary
