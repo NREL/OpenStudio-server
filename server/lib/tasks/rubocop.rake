@@ -37,9 +37,9 @@ namespace :rubocop do
   if Rails.env != 'production' && Rails.env != 'docker'
     require 'rubocop/rake_task'
 
-    desc 'Run Rubocop on the lib directory'
+    desc 'Run Rubocop on the server directory'
     RuboCop::RakeTask.new(:run) do |task|
-      task.options = ['--no-color', '--out=../reports/rubocop/rubocop-results.xml', '--rails']
+      task.options = ['--no-color', '--rails', '--out=../reports/rubocop/rubocop-results.xml', '--format', 'simple']
       task.formatters = ['RuboCop::Formatter::CheckstyleFormatter']
       task.requires = ['rubocop/formatter/checkstyle_formatter']
       # don't abort rake on failure
