@@ -2,6 +2,7 @@ AllCops:
   Exclude:
     - 'server/spec/files/**/*'
     - 'server/lib/delayed/heartbeat/**/*'
+    - 'server/vendor/bundle/**/*'
 
 inherit_from:
   - https://raw.githubusercontent.com/NREL/OpenStudio-resources/add-styles-linters/styles/rubocop.yml

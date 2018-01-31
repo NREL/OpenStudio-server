@@ -87,12 +87,13 @@ gem 'oj', '=2.17.5' # Next release (2.18.0) doesn't install on Windows
 gem 'os'
 gem 'rest-client', '1.8.0' # rest-client 2.0.0 breaks the multipart posting of the zip files.
 
-# Docker required js runtime
-group :docker do
+# linux based js runtime libraries
+if RUBY_PLATFORM =~ /linux/
   gem 'execjs'
   gem 'libv8'
-  gem 'therubyracer', platforms: :ruby
+  gem 'therubyracer'
 end
+
 
 group :development, :test do
   gem 'better_errors'
