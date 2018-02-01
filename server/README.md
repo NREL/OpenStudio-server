@@ -69,7 +69,7 @@ docker-compose -f docker-compose.test.yml up
 docker-compose rm -f && docker-compose -f docker-compose.test.yml build && docker-compose -f docker-compose.test.yml up
 ```
 
-# Testing Dependencies
+# Testing
 
 If running the tests on a local machine, then make sure to install
 geckodriver to run the webpage.
@@ -78,6 +78,14 @@ geckodriver to run the webpage.
 bundle install
 brew install geckodriver
 ```
+
+There are several layers of testing for OpenStudio Server and each uses a different software solution.
+
+* Unit/Functional Tests: Unit tests are run using gitlab and a cluster of machines for Windows, Mac, and Linux. The functional tests use geckodriver and selenium to test the frontend end.
+* Integration Tests: These tests verify that the version of OpenStudio works with the version of OpenStudio Server and the meta CLI. These are run as part of the Unit/Functional tests.
+* Docker Tests and Publishing Containers: The Docker tests are run before publishing the new containers. The tests and publishing scripts are run}} on Circle CI because of the time needed to build the containers. These are only run the develop and master branch.
+* Rubocop: These tests verify that the code meets the ruby / rails standard. These tests are currently run on travis but will be moved to gitlab.
+ 
 # TODOs
 
 * Rename Data Points to Datapoints

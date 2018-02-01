@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 echo ""
 echo "------------------------------------------------------------------------"
@@ -76,7 +76,6 @@ echo ""
 sleep 1
 echo "export DOCKERD_OPTIONS=\"$DOCKERD_OPTIONS\"" >> /home/ubuntu/.bashrc
 sudo systemctl enable docker
-sudo groupadd docker
 sudo usermod -aG docker ubuntu
 sudo mkdir /etc/systemd/system/docker.service.d
 echo -en "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd $DOCKERD_OPTIONS\n" | sudo tee -a /etc/systemd/system/docker.service.d/config.conf
