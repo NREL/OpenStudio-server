@@ -35,7 +35,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-::Signal.trap('INT') { abort }
+::Signal.trap('INT') {abort}
 
 require 'optparse'
 require 'pathname'
@@ -44,8 +44,8 @@ require 'json'
 # Set up options parsing
 argv = ARGV.dup
 options = {
-  debug: false,
-  port: 27017
+    debug: false,
+    port: 27017
 }
 opts = ::OptionParser.new do |o|
   o.banner = 'Usage: mongo_command [options] LOG_DIR INVOCATION_DIR DB_DIR STATE_FILE PROJECT_DIR'
@@ -56,8 +56,8 @@ opts = ::OptionParser.new do |o|
   o.separator 'STATE_FILE: Absolute path to write the mongod PID to'
   o.separator 'PROJECT_DIR: Absolute path to the PAT project DIRECTORY to write logs to'
   o.separator ''
-  o.on('-p', '--port NUMBER', 'Port to start mongod on, defaults to 27017') { |p| options[:port] = p }
-  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
+  o.on('-p', '--port NUMBER', 'Port to start mongod on, defaults to 27017') {|p| options[:port] = p}
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') {|_| options[:debug] = true}
 end
 
 # Parse arguments and verify them
@@ -68,22 +68,28 @@ db_dir = argv.shift
 state_file = argv.shift
 project_dir = argv.shift
 inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil? | state_file.nil? | project_dir.nil?
-puts 'LOG_DIR, INVOCATION_DIR, DB_DIR, STATE_FILE, and PROJECT_DIR are all required for execution' && exit(1) if inputs_empty
+if inputs_empty
+  puts 'LOG_DIR, INVOCATION_DIR, DB_DIR, STATE_FILE, and PROJECT_DIR are all required for execution'
+  exit(1)
+end
 error_msg = ''
 error_msg << "The LOG_DIR provided, `#{log_dir}`, is not absolute. " unless Pathname.new(log_dir).absolute?
-error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute. " unless
-  Pathname.new(invocation_dir).absolute?
+error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, is not absolute. " unless Pathname.new(invocation_dir).absolute?
 error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathname.new(db_dir).absolute?
 error_msg << "The STATE_FILE projvided, `#{state_file}`, is not absolute. " unless Pathname.new(state_file).absolute?
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
-puts error_msg && exit(2) unless error_msg.empty?
+unless error_msg.empty?
+  puts error_msg
+  exit 2
+end
 error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
-error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless
-  Dir.exist? invocation_dir
+error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist on the file system. " unless Dir.exist? invocation_dir
 error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exist? db_dir
-error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless
-  Dir.exist? project_dir
-puts error_msg && exit(3) unless error_msg.empty?
+error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless Dir.exist? project_dir
+unless error_msg.empty?
+  puts error_msg
+  exit 3
+end
 
 # Create the system call to use
 ::Dir.chdir(File.absolute_path(invocation_dir))
@@ -104,4 +110,4 @@ else
 end
 config_hash = File.exist?(state_file) ? ::JSON.parse(File.read(state_file), symbolize_names: true) : {}
 config_hash[:mongod_pid] = mongod_pid
-::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(config_hash) }
+::File.open(state_file, 'wb') {|f| f << ::JSON.pretty_generate(config_hash)}
