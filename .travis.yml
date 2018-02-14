@@ -10,8 +10,6 @@ matrix:
     - BUILD_TYPE: test
     - USE_TESTING_TIMEOUTS: "true"
     - RUBYLIB: /usr/Ruby
-    gemfile:
-    - server/Gemfile
     services:
     - mongod
   - os: osx
@@ -19,6 +17,7 @@ matrix:
     env:
     - BUILD_ARCH: OSX
     - USE_TESTING_TIMEOUTS: "true"
+    - RUBYLIB: /Users/travis/openstudio/Ruby/
 before_install: ./ci/travis/setup.sh
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh

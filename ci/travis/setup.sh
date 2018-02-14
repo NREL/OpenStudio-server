@@ -35,6 +35,7 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     export RUBYLIB="/usr/Ruby:$RUBYLIB"
     if [ "${BUILD_TYPE}" == "test" ]; then
         echo "In test mode"
+        BUNDLE_GEMFILE=./server/Gemfile bundle install --with=test develop
     elif [ "${BUILD_TYPE}" == "integration" ]; then
         # If we are running integration tests, then we need to get the openstudio_meta install_gems working
         ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
