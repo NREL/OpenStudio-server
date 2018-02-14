@@ -10,6 +10,8 @@ matrix:
     - BUILD_TYPE: test
     - USE_TESTING_TIMEOUTS: "true"
     - RUBYLIB: /usr/Ruby
+    gemfile:
+    - server/Gemfile
     services:
     - mongod
   - os: osx
