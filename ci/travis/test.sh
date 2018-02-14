@@ -11,7 +11,7 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     printenv RUBYLIB
     ruby -r openstudio -e "puts 'loaded'"
 
-    cd ~/server/server
+    cd ~/server
     echo 'PWD:'
     echo $pwd
     echo 'LS -ALT'

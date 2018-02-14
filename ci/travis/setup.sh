@@ -8,19 +8,11 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
 
-    OPENSTUDIO_VERSION=2.4.0
-    OPENSTUDIO_SHA=f58a3e1808
-    OPENSTUDIO_DOWNLOAD_BASE_URL=https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
-    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Darwin.zip
-    OPENSTUDIO_DOWNLOAD_URL=$OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
-
-    curl -SLO ${OPENSTUDIO_DOWNLOAD_URL}
+    curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio-2.0.3.40f61c64a3-darwin.zip
     mkdir ~/openstudio
-    mkdir ~/to_rm
-    unzip ${OPENSTUDIO_DOWNLOAD_FILENAME} -d ~/to_rm
-    mv ~/to_rm/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Darwin.app/Contents/Resources/Ruby/* ~/openstudio/
-    rm -rf ~/to_rm
-    export RUBYLIB="${HOME}/openstudio/:$RUBYLIB"
+    unzip OpenStudio-2.0.3.40f61c64a3-darwin.zip -d ~/openstudio
+    mv ~/openstudio/openstudio-2.0.3/* ~/openstudio/
+    export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo "Setting up Ubuntu for unit tests and Rubocop"
