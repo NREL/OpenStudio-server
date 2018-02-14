@@ -15,24 +15,11 @@ matrix:
   - os: osx
     osx_image: xcode7.3
     env:
-    - OSX_BUILD: true
+    - BUILD_ARCH: OSX
     - USE_TESTING_TIMEOUTS: "true"
-gemfile:
-  - server/Gemfile
+before_install: ./ci/travis/setup.sh
+script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
-stages:
-  - build
-  - test
-jobs:
-  include:
-    - stage: build
-      os: osx
-      script: ./ci/travis/setup.sh
-    - stage: test
-      os: osx
-      script:g
-      - ./ci/travis/setup.sh
-      - ./ci/travis/test.sh
 notifications:
   slack:
     on_pull_requests: true
