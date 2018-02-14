@@ -12,6 +12,7 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     ruby -r openstudio -e "puts 'loaded'"
 
     cd server
+    bundle update
     bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation; (( exit_status = exit_status || $? ))
 #    bundle exec rspec; (( exit_status = exit_status || $? ))
     bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))

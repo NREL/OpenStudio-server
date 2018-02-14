@@ -2,7 +2,8 @@
 
 echo "The build architecture is ${BUILD_ARCH}"
 if [ "${BUILD_ARCH}" == "OSX" ]; then
-    brew update
+    mkdir /Users/travis/build/NREL/OpenStudio-server/spec/files/logs
+    brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
     brew install mongodb@3.4
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
@@ -16,7 +17,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     curl -SLO ${OPENSTUDIO_DOWNLOAD_URL}
     mkdir ~/openstudio
     unzip ${OPENSTUDIO_DOWNLOAD_FILENAME} -d ~/openstudio
-    mv ~/openstudio/openstudio-2.0.3/* ~/openstudio/
+    mv ~/openstudio/openstudio-$OPENSTUDIO_VERSION ~/openstudio/
     export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
