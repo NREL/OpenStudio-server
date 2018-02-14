@@ -11,11 +11,11 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     printenv RUBYLIB
     ruby -r openstudio -e "puts 'loaded'"
 
-    cd ~/server
+    cd ~/server/server
     echo 'PWD:'
-    echo pwd
+    echo $pwd
     echo 'LS -ALT'
-    echo ls -alt
+    echo $(ls -alt)
     echo 'CAT GEMFILE'
     cat Gemfile
     bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation; (( exit_status = exit_status || $? ))

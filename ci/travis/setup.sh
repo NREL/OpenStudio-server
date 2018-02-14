@@ -18,7 +18,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     mkdir ~/openstudio
     mkdir ~/to_rm
     unzip ${OPENSTUDIO_DOWNLOAD_FILENAME} -d ~/to_rm
-    mv ~/to_rm/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Darwin.app/Contents/Resources/Ruby ~/openstudio/
+    mv ~/to_rm/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Darwin.app/Contents/Resources/Ruby/* ~/openstudio/
     rm -rf ~/to_rm
     export RUBYLIB="${HOME}/openstudio/:$RUBYLIB"
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
