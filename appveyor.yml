@@ -5,11 +5,14 @@ environment:
   matrix:
     - RUBY_VERSION: "224-x64"
 
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
 install:
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 build: off
 

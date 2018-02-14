@@ -11,9 +11,9 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     printenv RUBYLIB
     ruby -r openstudio -e "puts 'loaded'"
 
-    cd ~/server
+    cd ./server
     echo 'PWD:'
-    echo $pwd
+    echo $(pwd)
     echo 'LS -ALT'
     echo $(ls -alt)
     echo 'CAT GEMFILE'
