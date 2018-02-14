@@ -16,9 +16,11 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
 
     curl -SLO ${OPENSTUDIO_DOWNLOAD_URL}
     mkdir ~/openstudio
-    unzip ${OPENSTUDIO_DOWNLOAD_FILENAME} -d ~/openstudio
-    mv ~/openstudio/openstudio-$OPENSTUDIO_VERSION ~/openstudio/
-    export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
+    mkdir ~/to_rm
+    unzip ${OPENSTUDIO_DOWNLOAD_FILENAME} -d ~/to_rm
+    mv ~/to_rm/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Darwin.app/Contents/Resources/Ruby ~/openstudio/
+    rm -rf ~/to_rm
+    export RUBYLIB="${HOME}/openstudio/:$RUBYLIB"
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo "Setting up Ubuntu for unit tests and Rubocop"
