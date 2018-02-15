@@ -1,54 +1,28 @@
-sudo: required
-dist: trusty
-group: deprecated-2017Q4
-cache:
-  bundler: true
-  directories:
-    - $HOME/docker
-    - gems
-    - server/public/assets
-    - server/vendor/
 language: ruby
 rvm: 2.2.4
-gemfile:
-  - server/Gemfile
-before_install:
-  - ./ci/travis/setup.sh
+matrix:
+  allow_failures:
+  - os: linux
+  include:
+  - os: linux
+    sudo: required
+    dist: trusty
+    env:
+    - BUILD_ARCH: Ubuntu
+    - BUILD_TYPE: test
+    - USE_TESTING_TIMEOUTS: "true"
+    - RUBYLIB: /usr/Ruby
+    services:
+    - mongod
+  - os: osx
+    osx_image: xcode7.3
+    env:
+    - BUILD_ARCH: OSX
+    - USE_TESTING_TIMEOUTS: "true"
+    - RUBYLIB: /Users/travis/openstudio/Ruby/
+before_install: ./ci/travis/setup.sh
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
-
-jobs:
-  include:
-    - stage: test
-      os: linux
-      env:
-        - BUILD_ARCH: Ubuntu
-        - BUILD_TYPE: test
-        - RUBYLIB: /usr/Ruby
-      services:
-        - mongod
-#    - stage: integration test
-#      os: osx
-#      osx_image: xcode7.3
-#      env:
-#        - BUILD_ARCH: OSX
-#        - USE_TESTING_TIMEOUTS: "true"
-#    - stage: integration test
-#      os: linux
-#      env:
-#        - BUILD_ARCH: RedHat
-#        - RUN_OPTS: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-#        - USE_TESTING_TIMEOUTS: "true"
-#      services:
-#        - docker
-#    - stage: integration test
-#      os: linux
-#      env:
-#        - BUILD_ARCH: Ubuntu
-#        - DOCKER_BUILD: false
-#        - USE_TESTING_TIMEOUTS: "true"
-#      services:
-#        - mongod
 notifications:
   slack:
     on_pull_requests: true
