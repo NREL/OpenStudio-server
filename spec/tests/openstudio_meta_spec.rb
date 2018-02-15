@@ -72,9 +72,9 @@ mongod_exe = which('mongod')
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
-server_rspec_test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../server_results/'))
-# if project directory exists, then remove it
-FileUtils.rm_rf(project) if Dir.exist? project
+# remove leftover files from previous tests if they exist
+to_rm = [File.join(project, 'temp_data'), File.join(project, 'localResults')]
+to_rm.each { |dir| FileUtils.rm_rf(dir) if Dir.exist? dir }
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
 FileUtils.mkdir_p File.join(server_rspec_test_dir, 'logs')
