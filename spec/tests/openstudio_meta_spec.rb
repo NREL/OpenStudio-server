@@ -70,7 +70,7 @@ ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 # remove leftover files from previous tests if they exist
-to_rm = [File.join(project, 'data'), File.join(project, 'localResults'), File.join(project, 'logs')]
+to_rm = [File.join(project, 'temp_data'), File.join(project, 'localResults')]
 to_rm.each { |dir| FileUtils.rm_rf(dir) if Dir.exist? dir }
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
