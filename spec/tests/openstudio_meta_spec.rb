@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -66,10 +66,12 @@ class OpenStudioMeta
 end
 
 mongod_exe = which('mongod')
-ruby_cmd = "\"#{RbConfig.ruby}\"" # full path if you care
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+# remove leftover files from previous tests if they exist
+to_rm = [File.join(project, 'temp_data'), File.join(project, 'localResults')]
+to_rm.each { |dir| FileUtils.rm_rf(dir) if Dir.exist? dir }
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
 num_workers = 2

@@ -5,8 +5,6 @@ machine:
     - docker
 
 dependencies:
-  cache_directories:
-    - "~/docker"
   pre:
     - curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /home/ubuntu/bin/docker-compose
     - chmod +x /home/ubuntu/bin/docker-compose
@@ -14,14 +12,10 @@ dependencies:
     - sed -i -E "s/#TEST#//g" Dockerfile
     - sed -i -E "s/.git//g" .dockerignore
     - docker volume create --name=osdata
-    - if [[ -e ~/docker/rserve.tar ]]; then docker load -i ~/docker/rserve.tar; fi
-    - if [[ -e ~/docker/server.tar ]]; then docker load -i ~/docker/server.tar; fi
     - docker images --all
     - docker --version
     - docker-compose --version
     - docker-compose -f docker-compose.test.yml build --pull
-    - mkdir -p ~/docker; docker save nrel/openstudio-rserve > ~/docker/rserve.tar
-    - mkdir -p ~/docker; docker save nrel/openstudio-server > ~/docker/server.tar
 
 test:
   pre:
@@ -39,9 +33,8 @@ test:
 
 deployment:
   hub:
-    branch: master
     commands:
       - git checkout -- .dockerignore && git checkout -- Dockerfile
       - docker-compose build --pull
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - source docker/deployment/scripts/circle_deployment.sh 
+      - docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - source docker/deployment/scripts/circle_deployment.sh

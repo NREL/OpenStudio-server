@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -304,6 +304,7 @@ class AnalysesController < ApplicationController
             analysis_type: a.analysis_type,
             run_flag: a.run_flag,
             exit_on_guideline_14: a.exit_on_guideline_14,
+            total_datapoints: a.data_points.where(:status.in => job_statuses).only(:id).count,
             jobs: a.jobs.order_by(:index.asc).map do |j|
                     {
                       index: j.index,

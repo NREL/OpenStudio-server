@@ -118,7 +118,7 @@ ADD /lib /opt/openstudio/R/lib
 
 # Install Gems
 RUN gem install bundler
-RUN cd /opt/openstudio/R/lib && bundle install
+RUN cd /opt/openstudio/R/lib && bundle install --jobs=3 --retry=3
 
 ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
