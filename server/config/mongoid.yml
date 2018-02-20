@@ -18,6 +18,16 @@ docker:
   options:
     raise_not_found_error: false
     log_level: :info
+docker-dev:
+  clients:
+    default:
+      database: os_docker_dev
+      hosts:
+        - db:27017
+      options:
+  options:
+    raise_not_found_error: false
+    log_level: :info
 docker-test:
   clients:
     default:

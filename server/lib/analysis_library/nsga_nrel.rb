@@ -45,7 +45,6 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-        random_seed: 1979,
         algorithm: {
           number_of_samples: 30,
           sample_method: 'individual_variables',
@@ -60,7 +59,8 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
           exit_on_guideline_14: 0,
           debug_messages: 0,
           failed_f_value: 1e18,
-          objective_functions: []
+          objective_functions: [],
+          seed: nil
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -93,8 +93,11 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
     begin
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
-      # TODO: deal better with random seeds
-      @r.converse("set.seed(#{@analysis.problem['random_seed']})")
+      # make this a core method
+      if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
+        logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
+        @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
+      end
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
       @r.converse 'library(mco)'
@@ -251,13 +254,13 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
             source(paste(r_scripts_path,'/nsga.R',sep=''))
           }
         end
-
+        logger.info 'Returned from rserve nsga_nrel block'
         # TODO: find any results of the algorithm and save to the analysis
       else
         raise 'could not start the cluster (most likely timed out)'
       end
 
-    rescue => e
+    rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message = log_message
@@ -268,7 +271,13 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster
+      logger.info 'Executing rgenound.rb ensure block'
+      begin
+        cluster.stop if cluster
+      rescue StandardError, ScriptError, NoMemoryError => e
+        logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
+      end
+      logger.info 'Successfully executed cluster.stop'
 
       # Post process the results and jam into the database
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"

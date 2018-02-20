@@ -99,8 +99,16 @@ clusterExport(cl,"f")
 
 print(paste("levels:",levels))
 print(paste("r:",r))
+print(paste("r2:",r2))
 print(paste("grid_jump:",grid_jump))
 print(paste("type:",type))
+
+if (r2 > r) {
+  r <- c(r,r2)
+}  else {
+  print("r2 is <= r so not using the Campolongo space filling improvement")
+}
+print(paste("r:",r))
   
 results <- NULL
 m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes, scale=TRUE)

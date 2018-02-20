@@ -90,9 +90,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 #### Build R and install R packages.
-ENV R_VERSION 3.2.3
+ENV R_VERSION 3.4.2
 ENV R_MAJOR_VERSION 3
-ENV R_SHA b93b7d878138279234160f007cb9b7f81b8a72c012a15566e9ec5395cfd9b6c1
+ENV R_SHA 971e30c2436cf645f58552905105d75788bd9733bddbcb7c4fbff4c1a6d80c64
 RUN curl -fSL -o R.tar.gz "http://cran.fhcrc.org/src/base/R-$R_MAJOR_VERSION/R-$R_VERSION.tar.gz" \
     && echo "$R_SHA R.tar.gz" | sha256sum -c - \
     && mkdir /usr/src/R \
@@ -111,7 +111,7 @@ RUN Rscript install_packages.R
 
 # Install custom packages
 ADD /lib/R-packages /opt/openstudio/R/lib/R-packages
-RUN R CMD INSTALL /opt/openstudio/R/lib/R-packages/NRELmoo*.tar.gz /opt/openstudio/R/lib/R-packages/NRELpso*.tar.gz
+RUN R CMD INSTALL /opt/openstudio/R/lib/R-packages/NRELmoo*.tar.gz /opt/openstudio/R/lib/R-packages/NRELpso*.tar.gz /opt/openstudio/R/lib/R-packages/NRELGA*.tar.gz
 
 # Add the remaining files
 ADD /lib /opt/openstudio/R/lib
@@ -123,6 +123,10 @@ RUN cd /opt/openstudio/R/lib && bundle install
 ADD /start.R /start.R
 ADD /Rserv.conf /etc/Rserv.conf
 RUN mkdir -p /mnt/openstudio/log && chmod 775 /mnt/openstudio/log
+
+# Configure keepalive for IPVS
+ADD /ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
+RUN sudo sysctl --system
 
 ADD /rserve-entrypoint.sh /usr/local/bin/rserve-entrypoint
 RUN chmod 755 /usr/local/bin/rserve-entrypoint

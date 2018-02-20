@@ -12,7 +12,7 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: ${MONGO_CORES}
+          cpus: "AWS_MONGO_CORES"
   web:
     image: localhost:5000/openstudio-server
     ports:
@@ -20,9 +20,9 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-      - MAX_REQUESTS=${MAX_REQUESTS}
-      - MAX_POOL=${MAX_POOL}
+      - OS_SERVER_NUMBER_OF_WORKERS=AWS_OS_SERVER_NUMBER_OF_WORKERS
+      - MAX_REQUESTS=AWS_MAX_REQUESTS
+      - MAX_POOL=AWS_MAX_POOL
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -33,11 +33,11 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: ${WEB_CORES}
+          cpus: "AWS_WEB_CORES"
   web-background:
     image: localhost:5000/openstudio-server
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=AWS_OS_SERVER_NUMBER_OF_WORKERS
     volumes:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
@@ -64,7 +64,7 @@ services:
     deploy:
       resources:
         reservations:
-          cpus: "0.99"
+          cpus: "1"
   rserve:
     image: localhost:5000/openstudio-rserve
     volumes:
@@ -88,3 +88,7 @@ volumes:
 networks:
   default:
     driver: overlay
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

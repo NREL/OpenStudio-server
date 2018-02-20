@@ -1,0 +1,8 @@
+pytest>=2.8.0
+codecov
+pytest-cov
+pytest-xdist
+setuptools>=18.5
+flake8
+multiprocessing
+

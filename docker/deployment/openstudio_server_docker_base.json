@@ -6,7 +6,7 @@
   "builders": [
     {
       "type": "amazon-ebs",
-      "source_ami": "ami-4ae1fb5d",
+      "source_ami": "ami-5cd4a126",
       "ami_virtualization_type": "hvm",
       "access_key": "{{ user `aws_access_key` }}",
       "secret_key": "{{ user `aws_secret_key` }}",
@@ -56,6 +56,7 @@
     {
       "type": "shell",
       "script": "./scripts/aws_system_init.sh",
+      "expect_disconnect": true,
       "environment_vars": [
         "DOCKERD_OPTIONS=--group=docker --storage-driver=overlay2 --default-ulimit core=-1",
         "DOCKER_VERSION={{ user `docker_version` }}"

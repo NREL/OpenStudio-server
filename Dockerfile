@@ -112,8 +112,8 @@ RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Run this separate to cache the download
-ENV OPENSTUDIO_VERSION 2.2.1
-ENV OPENSTUDIO_SHA 92a7ed37f1
+ENV OPENSTUDIO_VERSION 2.4.0
+ENV OPENSTUDIO_SHA f58a3e1808
 
 # Download from S3
 ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
@@ -190,6 +190,10 @@ ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 RUN rm Gemfile.lock
 RUN bundle install
 
+# Configure IPVS keepalive
+ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
+RUN sudo sysctl --system
+
 # forward request and error logs to docker log collector
 # TODO: How to get logs out of this, mount shared volume?
 #RUN ln -sf /dev/stdout /var/log/nginx/access.log
@@ -199,8 +203,12 @@ RUN chmod 666 /opt/openstudio/server/log/*.log
 
 ADD /docker/server/start-server.sh /usr/local/bin/start-server
 ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+ADD /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
+ADD /docker/server/memfix.rb /usr/local/lib/memfix.rb
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
+RUN chmod +x /usr/local/lib/memfix-controller.rb
+RUN chmod +x /usr/local/lib/memfix.rb
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
