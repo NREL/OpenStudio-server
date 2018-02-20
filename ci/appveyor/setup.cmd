@@ -18,7 +18,7 @@ ruby dk.rb install
 cd c:\projects\openstudio-server
 
 REM If you change RUBYLIB here, make sure to change it in test.ps1 too
-set RUBYLIB=C:\openstudio\Ruby
+set RUBYLIB=C:\projects\openstudio\Ruby
 set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Mongodb\bin;%PATH%
 cd c:\
 curl -SLO https://rubygems.org/downloads/rubygems-update-2.6.7.gem
