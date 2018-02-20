@@ -116,4 +116,7 @@ group :development, :test do
   gem 'factory_girl_rails'
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
+  #required for btap_costing.
+  gem 'aes'
+  gem 'rest-client'
 end
