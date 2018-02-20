@@ -93,7 +93,7 @@ gem 'os'
 gem 'rest-client', '1.8.0' # rest-client 2.0.0 breaks the multipart posting of the zip files.
 
 gem 'rubocop'
-gem 'aes'
+
 
 # Docker required js runtime
 group :docker do
