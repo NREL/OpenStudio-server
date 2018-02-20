@@ -89,6 +89,7 @@ gem 'os'
 gem 'rest-client', '1.8.0' # rest-client 2.0.0 breaks the multipart posting of the zip files.
 
 gem 'rubocop'
+gem 'aes'
 
 # Docker required js runtime
 group :docker do
@@ -116,7 +117,4 @@ group :development, :test do
   gem 'factory_girl_rails'
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
-  #required for btap_costing.
-  gem 'aes'
-  gem 'rest-client'
 end
