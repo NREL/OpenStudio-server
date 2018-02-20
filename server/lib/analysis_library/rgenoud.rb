@@ -44,7 +44,6 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
-        random_seed: 1979,
         algorithm: {
           generations: 2,
           wait_generations: 2,
@@ -67,7 +66,8 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
           memory_matrix: 1,
           balance: 1,
           debug_messages: 0,
-          failed_f_value: 1e18
+          failed_f_value: 1e18,
+          seed: nil
         }
       }
     }.with_indifferent_access # make sure to set this because the params object from rails is indifferential
@@ -100,8 +100,11 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
     begin
       @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
 
-      # TODO: deal better with random seeds
-      @r.converse "set.seed(#{@analysis.problem['random_seed']})"
+      # make this a core method
+      if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
+        logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
+        @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
+      end
       # R libraries needed for this algorithm
       @r.converse 'library(rjson)'
       @r.converse 'library(mco)'
@@ -228,7 +231,7 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
         # convert to float because the value is normally an integer and rserve/rserve-simpler only handles maxint
         @analysis.problem['algorithm']['failed_f_value'] = @analysis.problem['algorithm']['failed_f_value'].to_f
         @analysis.problem['algorithm']['factr'] = @analysis.problem['algorithm']['factr'].to_f
-        @r.command(master_ips: master_ip, 
+        @r.command(master_ips: master_ip,
                    ips: worker_ips[:worker_ips].uniq, 
                    vartypes: var_types, 
                    varnames: var_names,
@@ -271,13 +274,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
             source(paste(r_scripts_path,'/rgenoud.R',sep=''))
           }
         end
-
+        logger.info 'Returned from rserve rgenound block'
         # TODO: find any results of the algorithm and save to the analysis
       else
         raise 'could not start the cluster (most likely timed out)'
       end
 
-    rescue => e
+    rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message = log_message
@@ -288,7 +291,13 @@ class AnalysisLibrary::Rgenoud < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster
+      logger.info 'Executing rgenound.rb ensure block'
+      begin
+        cluster.stop if cluster
+      rescue StandardError, ScriptError, NoMemoryError => e
+        logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
+      end
+      logger.info 'Successfully executed cluster.stop'
 
       # Post process the results and jam into the database
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"

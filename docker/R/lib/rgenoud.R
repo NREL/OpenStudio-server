@@ -6,7 +6,9 @@ print(paste("objfun:",objfun))
 print(paste("objDim:",objDim))
 print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
+mins <- mins * 1.0
 print(paste("min:",mins))
+maxes <- maxes * 1.0
 print(paste("max:",maxes))
 print(paste("failed_f:",failed_f))
 
