@@ -3,8 +3,9 @@ echo Downloading and Installing OpenStudio
 curl -SLO --insecure https://raw.githubusercontent.com/NREL/OpenStudio/develop/install.qs
 curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/2.4.0/OpenStudio-2.4.0.f58a3e1808-Windows.exe
 OpenStudio-2.4.0.f58a3e1808-Windows.exe --script install.qs
-dir C:\openstudio
-dir C:\openstudio\Ruby
+move C:\openstudio C:\projects\openstudio
+dir C:\projects\openstudio
+dir C:\projects\openstudio\Ruby
 
 echo Downloading and Installing Ruby
 curl -SLO https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.4-x64-mingw32.7z
