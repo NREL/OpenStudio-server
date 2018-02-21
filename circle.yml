@@ -33,7 +33,7 @@ test:
 
 deployment:
   production:
-    branch: [develop, master]
+    branch: [develop, master, nrcan-master]
     commands:
       - git checkout -- .dockerignore && git checkout -- Dockerfile
       - docker-compose build --pull
