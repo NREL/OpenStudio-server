@@ -18,6 +18,8 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo $(ls -alt)
     echo 'CAT GEMFILE'
     cat Gemfile
+    echo 'bundle list'
+    bundle list
     bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation; (( exit_status = exit_status || $? ))
 #    bundle exec rspec; (( exit_status = exit_status || $? ))
     bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
