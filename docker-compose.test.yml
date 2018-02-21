@@ -4,6 +4,8 @@ version: '2'
 services:
   db:
     image: mongo:latest
+    ports:
+      - "27017:27017"
   web:
     image: nrel/openstudio-server:latest
     build:

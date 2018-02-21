@@ -32,9 +32,9 @@ test:
     - rsync -av reports/ $CIRCLE_ARTIFACTS/reports/
 
 deployment:
-  hub:
+  production:
+    branch: [develop, master]
     commands:
       - git checkout -- .dockerignore && git checkout -- Dockerfile
       - docker-compose build --pull
-      - docker login -u $DOCKER_USER -p $DOCKER_PASS
       - source docker/deployment/scripts/circle_deployment.sh
