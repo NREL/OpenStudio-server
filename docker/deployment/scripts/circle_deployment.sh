@@ -3,8 +3,8 @@
 IMAGETAG=skip
 if [ "${CIRCLE_BRANCH}" == "develop" ]; then
     IMAGETAG=latest
-elif [ "${CIRCLE_BRANCH}" == "240-270-docker-hub" ]; then
-    IMAGETAG=test
+elif [ "${CIRCLE_BRANCH}" == "nrcan-master" ]; then
+    IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")-nrcan"
 elif [ "${CIRCLE_BRANCH}" == "master" ]; then
     # Retrieve the version number from rails
     IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
