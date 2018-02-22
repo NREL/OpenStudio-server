@@ -9,7 +9,7 @@ matrix:
     dist: trusty
     env:
     - BUILD_ARCH: Ubuntu
-    - BUILD_TYPE: integration
+    - BUILD_TYPE: test
     - USE_TESTING_TIMEOUTS: "true"
     - RUBYLIB: /usr/Ruby
     services:
