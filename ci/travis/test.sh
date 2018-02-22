@@ -16,10 +16,11 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo $(pwd)
     echo 'LS -ALT'
     echo $(ls -alt)
-    echo 'gemfile'
+    printenv BUNDLE_GEMFILE
+    export BUNDLE_GEMFILE=./Gemfile
     printenv BUNDLE_GEMFILE
     echo 'CAT GEMFILE'
-    cat BUNDLE_GEMFILE
+    cat $BUNDLE_GEMFILE
     echo 'bundle list'
     bundle list
     bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation; (( exit_status = exit_status || $? ))
