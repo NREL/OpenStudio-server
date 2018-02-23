@@ -240,8 +240,8 @@
           tooltip.transition().duration(200).style("opacity", .9);
           return tooltip.style("left", (d3.event.pageX - 190) + "px")
               .style("top", (d3.event.pageY - 60) + "px")
-              .html("X: " + d.x.toFixed(2) +
-                  "</br>Y: " + d.y.toFixed(2) +
+              .html("X: " + parseFloat(d.x).toFixed(2) +
+                  "</br>Y: " + parseFloat(d.y).toFixed(2) +
                   "</br><a href=/data_points/" + d.id + ">View Data Point</a>");
         }); 
 
