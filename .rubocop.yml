@@ -5,5 +5,5 @@ AllCops:
     - 'server/vendor/bundle/**/*'
 
 inherit_from:
-  - https://raw.githubusercontent.com/NREL/OpenStudio-resources/add-styles-linters/styles/rubocop.yml
-  - https://raw.githubusercontent.com/NREL/OpenStudio-resources/add-styles-linters/styles/rubocop-rails.yml
+  - https://raw.githubusercontent.com/NREL/OpenStudio-resources/develop/styles/rubocop.yml
+  - https://raw.githubusercontent.com/NREL/OpenStudio-resources/develop/styles/rubocop-rails.yml

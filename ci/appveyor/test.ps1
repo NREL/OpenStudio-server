@@ -5,7 +5,7 @@ $iteration = 0
 :retry While ($iteration -lt 4)
     {
     Write-Host "Attempting to run rspec test; attempt $iteration"
-    $tests = Start-Process -PassThru -WorkingDirectory "C:\projects\openstudio-server" -FilePath "bundle" -ArgumentList "exec rspec" -RedirectStandardOutput "C:\projects\openstudio-server\spec\files\logs\win-stdout.log" -RedirectStandardError "C:\projects\openstudio-server\spec\files\logs\win-stderr.log"
+    $tests = Start-Process -PassThru -WorkingDirectory "C:\projects\openstudio-server" -FilePath "bundle" -ArgumentList "exec rspec --tag ~depends_r --tag ~depends_gecko" -RedirectStandardOutput "C:\projects\openstudio-server\spec\files\logs\win-stdout.log" -RedirectStandardError "C:\projects\openstudio-server\spec\files\logs\win-stderr.log"
     $handle = $tests.Handle # See http://stackoverflow.com/a/23797762/1479211
     $timeout = new-timespan -Minutes 5
     $sw = [diagnostics.stopwatch]::StartNew()
