@@ -1,8 +1,6 @@
 language: ruby
 rvm: 2.2.4
 matrix:
-  allow_failures:
-  - os: linux
   include:
   - os: linux
     sudo: required

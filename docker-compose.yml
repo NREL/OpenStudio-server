@@ -13,11 +13,11 @@ services:
     ports:
       - "6379:6379"
   web:
+    image: nrel/openstudio-server:latest
     build:
       context: .
       args:
         rails_env: docker
-    image: nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     depends_on:
@@ -28,11 +28,11 @@ services:
     volumes:
       - osdata:/mnt/openstudio
   web-background:
+    image: nrel/openstudio-server:latest
     build:
       context: .
       args:
         rails_env: docker
-    image: nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=background,analyses
@@ -44,11 +44,11 @@ services:
       - osdata:/mnt/openstudio
     command: rake resque:work
   worker:
+    image: nrel/openstudio-server:latest
     build:
       context: .
       args:
         rails_env: docker
-    image: nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=simulations
@@ -60,8 +60,8 @@ services:
       - rserve
     command: rake resque:workers
   rserve:
-    build: ./docker/R
     image: nrel/openstudio-rserve:latest
+    build: ./docker/R
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     volumes:
