@@ -2,9 +2,10 @@
 
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     export RUBYLIB="${HOME}/openstudio/Ruby/"
+    echo 'Beginning first rspec exec'
     bundle exec rspec; (( exit_status = exit_status || $? ))
+    echo 'Beginning second rspec exec'
     bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation; (( exit_status = exit_status || $? ))
-
     exit $exit_status
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     exit_status=0

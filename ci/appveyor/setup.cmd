@@ -17,7 +17,7 @@ cd c:\Ruby23-x64\DevKit
 ruby dk.rb install
 cd c:\projects\openstudio-server
 
-REM If you change RUBYLIB here, make sure to change it in test.ps1 too
+REM If you change RUBYLIB here, make sure to change it in integration-test.ps1 and unit-test.cmd too
 set RUBYLIB=C:\projects\openstudio\Ruby
 set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Mongodb\bin;%PATH%
 cd c:\

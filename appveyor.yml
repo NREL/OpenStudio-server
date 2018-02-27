@@ -19,7 +19,8 @@ before_test:
   - mongod.exe --version
 
 test_script:
-  - ps: C:\projects\openstudio-server\ci\appveyor\test.ps1
+  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
+  - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 
 on_failure:
   - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
