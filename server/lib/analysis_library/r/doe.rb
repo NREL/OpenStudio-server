@@ -33,13 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-module AnalysisLibrary::R
-  class String
-    def is_number? string
-      true if Float(string) rescue false
-    end
-  end
-  
+module AnalysisLibrary::R  
   class Doe
     def initialize(r_session)
       @r = r_session
@@ -255,9 +249,14 @@ module AnalysisLibrary::R
       samples_temp = @r.converse 'fac_design'
       logger.info("samples_temp is #{samples_temp}")
 
+      def is_number? string
+        true if Float(string) rescue false
+      end
+      
       selected_variables.each_with_index do |var, idx|
-        if samples_temp[idx][0].is_number?
-          samples[var.id.to_s] = samples_temp[idx].to_f
+        if is_number?(samples_temp[idx][0])
+          #samples[var.id.to_s] = samples_temp[idx].to_f
+          samples[var.id.to_s] =  samples_temp[idx].map {|i| i.to_f}
         else
           samples[var.id.to_s] = samples_temp[idx]
         end
