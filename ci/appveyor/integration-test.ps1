@@ -5,7 +5,7 @@ $iteration = 0
 :retry While ($iteration -lt 3)
     {
     Write-Host "Attempting to run rspec test; attempt $iteration"
-    $tests = Start-Process -PassThru -WorkingDirectory "C:\projects\openstudio-server" -FilePath "bundle" -ArgumentList "exec rspec --tag ~depends_r --tag ~depends_gecko" -RedirectStandardOutput "C:\projects\openstudio-server\spec\files\logs\win-stdout.log" -RedirectStandardError "C:\projects\openstudio-server\spec\files\logs\win-stderr.log"
+    $tests = Start-Process -PassThru -WorkingDirectory "C:\projects\openstudio-server" -FilePath "bundle" -ArgumentList "exec rspec -e 'analysis'" -RedirectStandardOutput "C:\projects\openstudio-server\spec\files\logs\win-stdout.log" -RedirectStandardError "C:\projects\openstudio-server\spec\files\logs\win-stderr.log"
     $handle = $tests.Handle # See http://stackoverflow.com/a/23797762/1479211
     $timeout = new-timespan -Minutes 15
     $sw = [diagnostics.stopwatch]::StartNew()
@@ -22,6 +22,10 @@ $iteration = 0
             Else
             {
                 Write-Host "Process completed successfully"
+                Get-ChildItem "C:\projects\openstudio-server\spec\files\logs" -Filter *.log | Foreach-Object {
+                    Write-Host "Deleting file $_.FullName after successful integration test completion"
+                    Remove-Item –path $_.FullName
+                }
                 Exit 0
             }
         }

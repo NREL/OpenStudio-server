@@ -154,7 +154,7 @@ RSpec.describe OpenStudioMeta do
     expect(status).to eq('completed')
   end
 
-  it 'run a complicated design alternative set' do
+  it 'run a complicated design alternative analysis set' do
     # run an analysis
     command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
@@ -223,7 +223,7 @@ RSpec.describe OpenStudioMeta do
 end
 
 RSpec.describe LocalRspecTest do
-  it 'should run RSpec tests against a local server configuration' do
+  it 'run RSpec unit tests' do
     # run the full set of RSpec tests, discounted internally by the local-test rails environ
     command = "#{ruby_cmd} \"#{meta_cli}\" run_rspec --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{server_rspec_test_dir}\""
     puts command
