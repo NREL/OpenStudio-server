@@ -34,6 +34,12 @@
 # *******************************************************************************
 
 module AnalysisLibrary::R
+  class String
+    def is_number? string
+      true if Float(string) rescue false
+    end
+  end
+  
   class Doe
     def initialize(r_session)
       @r = r_session
@@ -250,7 +256,11 @@ module AnalysisLibrary::R
       logger.info("samples_temp is #{samples_temp}")
 
       selected_variables.each_with_index do |var, idx|
-        samples[var.id.to_s] = samples_temp[idx]
+        if samples_temp[idx][0].is_number?
+          samples[var.id.to_s] = samples_temp[idx].to_f
+        else
+          samples[var.id.to_s] = samples_temp[idx]
+        end
       end
 
       logger.info("samples is #{samples}")
