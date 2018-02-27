@@ -14,19 +14,19 @@ $iteration = 0
         If ($tests.HasExited)
             {
             If ($tests.ExitCode -ne 0) {
-            $TestsExitCode = $tests.ExitCode
-                Write-Host "Process exited with non-zero exit code $TestsExitCode"
-                $iteration += 1
-                Continue retry
-            }
-            Else
-            {
+                $TestsExitCode = $tests.ExitCode
+                    Write-Host "Process exited with non-zero exit code $TestsExitCode"
+                    $iteration += 1
+                    Continue retry
+                }
+            Else {
                 Write-Host "Process completed successfully"
                 Get-ChildItem "C:\projects\openstudio-server\spec\files\logs" -Filter *.log | Foreach-Object {
-                    Write-Host "Deleting file $_.FullName after successful integration test completion"
-                    Remove-Item –path $_.FullName
-                }
+                        Write-Host "Deleting file $_.FullName after successful integration test completion"
+                        Remove-Item –path $_.FullName
+                    }
                 Exit 0
+                }
             }
         }
         start-sleep -seconds 1

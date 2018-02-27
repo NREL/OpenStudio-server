@@ -12,6 +12,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     fi
     echo 'Beginning unit tests'
     bundle exec rspec -e 'unit test'; (( exit_status = exit_status || $? ))
+    echo "Completed tests with exit code $exit_status"
     exit $exit_status
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     exit_status=0
