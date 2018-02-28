@@ -5,7 +5,6 @@ environment:
   matrix:
     - RUBY_VERSION: "224-x64"
 
-
 clone_folder: C:\projects\openstudio-server
 
 install:

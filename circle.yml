@@ -4,12 +4,6 @@ machine:
   services:
     - docker
 
-general:
-  branches:
-    only:
-      - master
-      - develop
-
 dependencies:
   pre:
     - curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /home/ubuntu/bin/docker-compose
@@ -38,12 +32,9 @@ test:
     - rsync -av reports/ $CIRCLE_ARTIFACTS/reports/
 
 deployment:
-  hub:
-    branches:
-      - master
-      - develop
+  production:
+    branch: [develop, master, nrcan-master]
     commands:
       - git checkout -- .dockerignore && git checkout -- Dockerfile
       - docker-compose build --pull
-      - docker login -u $DOCKER_USER -p $DOCKER_PASS
       - source docker/deployment/scripts/circle_deployment.sh
