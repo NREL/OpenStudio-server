@@ -23,10 +23,10 @@ $iteration = 0
             Else
                 {
                 Write-Host "Process completed successfully"
-                Get-ChildItem "C:\projects\openstudio-server\spec\files\logs" -Filter *.log | Foreach-Object
-                    {
+                Get-ChildItem "C:\projects\openstudio-server\spec\files\logs" -Filter *.log |
+                Foreach-Object {
                     Write-Host "Deleting file $_.FullName after successful integration test completion"
-                    Remove-Item –path $_.FullName
+                    Remove-Item -path $_.FullName
                     }
                 Exit 0
                 }

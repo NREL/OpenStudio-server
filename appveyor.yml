@@ -7,9 +7,6 @@ environment:
 
 clone_folder: C:\projects\openstudio-server
 
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 install:
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
@@ -22,7 +19,6 @@ before_test:
   - mongod.exe --version
 
 test_script:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 
