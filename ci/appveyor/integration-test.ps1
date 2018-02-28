@@ -13,26 +13,29 @@ $iteration = 0
         {
         If ($tests.HasExited)
             {
-            If ($tests.ExitCode -ne 0) {
-            $TestsExitCode = $tests.ExitCode
+            If ($tests.ExitCode -ne 0)
+                {
+                $TestsExitCode = $tests.ExitCode
                 Write-Host "Process exited with non-zero exit code $TestsExitCode"
                 $iteration += 1
                 Continue retry
-            }
+                }
             Else
-            {
+                {
                 Write-Host "Process completed successfully"
-                Get-ChildItem "C:\projects\openstudio-server\spec\files\logs" -Filter *.log | Foreach-Object {
+                Get-ChildItem "C:\projects\openstudio-server\spec\files\logs" -Filter *.log | Foreach-Object
+                    {
                     Write-Host "Deleting file $_.FullName after successful integration test completion"
                     Remove-Item –path $_.FullName
+                    }
+                Exit 0
                 }
-            }
-        }
+           }
         start-sleep -seconds 1
-    }
+        }
     Write-Host "Process has not completed after 300 seconds. Invoking timeout"
     taskkill /T /F /PID $tests.ID
     Exit 1
-}
+    }
 Write-Host "After 3 attempts assuming broken"
 Exit 1
