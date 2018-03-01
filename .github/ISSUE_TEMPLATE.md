@@ -33,7 +33,7 @@ type of issue being submitted, i.e. meta-cli vs local server vs local docker
 deployment vs aws docker deployment.
 You do NOT have to include this information if this is a FEATURE REQUEST
 -->
-###General Issue
+### General Issue / Feature Information
 
 **Description**
 
@@ -62,7 +62,7 @@ analysis as expected. This includes issues with PAT starting or stopping
 local or remote servers, or submitting analyses to the servers. Otherwise,
 please delete this section from your issue submission.
 -->
-###Meta-CLI / PAT Server Fails to Launch Details
+### Meta-CLI / PAT Server Fails to Launch Details
 
 **Client operating system version:**
 
@@ -97,7 +97,7 @@ of the openstudio-server locally deployed via the meta-cli,
 i.e. if using a local server launched on start-up by PAT
 -->
 
-###Error on Local Server Details
+### Error on Local Server Details
 
 **Client operating system version:**
 
@@ -123,7 +123,7 @@ of the openstudio-server running on AWS, or using docker on a user
 controlled workstation
 -->
 
-###Error on Remote Server Details
+### Error on Remote Server Details
 
 **AMI version being used**
 
@@ -144,7 +144,7 @@ docker based deployment of the OpenStudio Server on a user controlled
 workstation, i.e. if `docker stack deploy` fails to deploy the server
 -->
 
-###Docker Provisioning Error Details
+### Docker Provisioning Error Details
 
 **Deployment machine operating system version**
 
