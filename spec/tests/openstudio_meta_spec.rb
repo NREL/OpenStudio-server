@@ -72,7 +72,7 @@ mongod_exe = which('mongod')
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
-server_rspec_test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../server_results/'))
+server_rspec_test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../unit-test/'))
 # remove leftover files from previous tests if they exist
 to_rm = [File.join(project, 'temp_data'), File.join(project, 'localResults')]
 to_rm.each { |dir| FileUtils.rm_rf(dir) if Dir.exist? dir }
@@ -154,7 +154,7 @@ RSpec.describe OpenStudioMeta do
     expect(status).to eq('completed')
   end
 
-  it 'run a complicated design alternative set' do
+  it 'run a complicated design alternative analysis set' do
     # run an analysis
     command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
@@ -223,7 +223,7 @@ RSpec.describe OpenStudioMeta do
 end
 
 RSpec.describe LocalRspecTest do
-  it 'should run RSpec tests against a local server configuration' do
+  it 'run RSpec unit tests' do
     # run the full set of RSpec tests, discounted internally by the local-test rails environ
     command = "#{ruby_cmd} \"#{meta_cli}\" run_rspec --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{server_rspec_test_dir}\""
     puts command

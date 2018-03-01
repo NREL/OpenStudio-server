@@ -12,3 +12,12 @@ do
     cat $F
     echo
 done
+
+for F in /Users/travis/build/NREL/OpenStudio-server/spec/unit-test/logs/*
+do
+    echo '======================================================'
+    echo $F
+    echo '======================================================'
+    cat $F
+    echo
+done

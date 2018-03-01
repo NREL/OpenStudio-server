@@ -49,7 +49,7 @@ options = {
   port: 8080
 }
 opts = ::OptionParser.new do |o|
-  o.banner = 'Usage: rspec_command [options] RUBY_EXE OUTPUT_FILE DB_PORT STATE_FILE'
+  o.banner = 'Usage: rspec_command [options] RUBY_EXE OUTPUT_DIR DB_PORT STATE_FILE'
   o.separator ''
   o.separator 'RUBY_EXE: Absolute path to the ruby executable to use'
   o.separator 'OUTPUT_DIR: Absolute path of the directory to write the rspec results to'

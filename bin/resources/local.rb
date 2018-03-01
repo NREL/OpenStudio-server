@@ -233,7 +233,7 @@ def run_rspec(test_directory, mongo_directory, ruby_path, debug)
 
   begin
     ::Timeout.timeout(480) do
-      success = system(rspec_command)
+      success = system rspec_command
       unless success
         $logger.error "Rspec returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
         "`#{::File.join(test_directory, 'logs', 'rspec.log')}` and `#{rspec_output_path}`."
