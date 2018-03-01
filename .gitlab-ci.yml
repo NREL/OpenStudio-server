@@ -7,7 +7,7 @@ build:windows:
   tags:
     - windows
   script:
-    - C:/Ruby22-x64/bin/ruby.exe ./bin/openstudio_meta install_gems --export="C:/openstudioServerExport" --ruby-lib-path="C:/openstudio/Ruby/" --with_test_develop --verbose --debug
+    - C:/Ruby22-x64/bin/ruby.exe ./bin/openstudio_meta install_gems --export="C:/openstudioServerExport" --ruby-lib-path="C:/openstudio/Ruby/" --verbose --debug
   artifacts:
     expire_in: 24 hrs
     paths:
@@ -18,7 +18,7 @@ build:mac:
   tags:
     - mac
   script:
-    - /Users/alex/.rvm/rubies/ruby-2.2.4/bin/ruby ./bin/openstudio_meta install_gems --export="/Users/alex/Desktop/server-export" --ruby-lib-path=/Applications/openstudio/Ruby/ --with_test_develop --verbose --debug
+    - /Users/alex/.rvm/rubies/ruby-2.2.4/bin/ruby ./bin/openstudio_meta install_gems --export="/Users/alex/Desktop/server-export" --ruby-lib-path=/Applications/openstudio/Ruby/ --verbose --debug
   artifacts:
     expire_in: 24 hrs
     paths:
@@ -33,7 +33,6 @@ deploy:windows:
   script:
     - cd C:/openstudioServerExport/
     - aws s3 cp ./ s3://openstudio-builds/CI/ --debug --recursive --exclude "*" --include "OpenStudio-server-*-win32.tar.gz"
-  allow_failure: true
 
 deploy:mac:
   stage: deploy
