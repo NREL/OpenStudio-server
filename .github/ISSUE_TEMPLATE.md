@@ -5,7 +5,7 @@ In the case that there is a duplicate issue, please close the issue you have
 opened and add any clarifying information to the issue with precedence.
 
 Should you believe that the issue you're opening classifies as a bug, please
-fill out the BUG REPORT INFOMATION form listed below. Should you not provide
+fill out the BUG REPORT INFORMATION form listed below. Should you not provide
 this information within two weeks the issue will be closed until the
 information is provided, at which point the issue will be re-opened and
 addressed.
@@ -29,11 +29,11 @@ BUG REPORT INFORMATION
 ---------------------------------------------------
 Please execute the commands below to provide key information regarding the
 bug you are reporting. Note that the commands to execute are dependent on the
-type of issue being submittied, i.e. meta-cli vs local server vs local docker
+type of issue being submitted, i.e. meta-cli vs local server vs local docker
 deployment vs aws docker deployment.
 You do NOT have to include this information if this is a FEATURE REQUEST
 -->
-*General Issue*
+###General Issue
 
 **Description**
 
@@ -62,7 +62,7 @@ analysis as expected. This includes issues with PAT starting or stopping
 local or remote servers, or submitting analyses to the servers. Otherwise,
 please delete this section from your issue submission.
 -->
-*Meta-CLI / PAT Server Fails to Launch Details*
+###Meta-CLI / PAT Server Fails to Launch Details
 
 **Client operating system version:**
 
@@ -94,10 +94,10 @@ sensitive information - e.g. sensitive environment variables
 ERROR ON LOCAL SERVER
 Please provide this information if the issue relates to an instance
 of the openstudio-server locally deployed via the meta-cli,
-i.e. if using a local server launched on startup by PAT
+i.e. if using a local server launched on start-up by PAT
 -->
 
-*Error on Local Server Details*
+###Error on Local Server Details
 
 **Client operating system version:**
 
@@ -111,7 +111,7 @@ i.e. if using a local server launched on startup by PAT
 **Local log files**
 
 
-(While the server is still running in the errored state - i.e. PAT is still
+(While the server is still running in the erred state - i.e. PAT is still
 open - please go to the project directory, and zip the log directory. Then
 attach the zip file to the issue submission, and replace this text with
 'Attached'.)
@@ -123,7 +123,7 @@ of the openstudio-server running on AWS, or using docker on a user
 controlled workstation
 -->
 
-*Error on Remote Server Details*
+###Error on Remote Server Details
 
 **AMI version being used**
 
@@ -133,7 +133,7 @@ header on the Admin page of the OpenStudio Server instance.)
 **Server management log file**
 
 (Navigate to the server management console, click on the analysis that 
-errored, and then click on the 'View: Log' button. Copy the entire page
+erred, and then click on the 'View: Log' button. Copy the entire page
 using control/command a into a text editor, and save the file as a .txt
 file. Then, please attach the file to the issue submission.)
 
@@ -144,7 +144,7 @@ docker based deployment of the OpenStudio Server on a user controlled
 workstation, i.e. if `docker stack deploy` fails to deploy the server
 -->
 
-*Docker Provisioning Error Details*
+###Docker Provisioning Error Details
 
 **Deployment machine operating system version**
 
