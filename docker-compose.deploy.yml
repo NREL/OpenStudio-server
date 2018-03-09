@@ -38,7 +38,7 @@ services:
       - QUEUES=background,analyses
     volumes:
       - osdata:/mnt/openstudio
-    command: rake resque:work
+    command: bundle exec rake environment resque:work
     depends_on:
       - db
       - web
@@ -51,7 +51,7 @@ services:
           cpus: "1"
   worker:
     image: nrel/openstudio-server:latest
-    command: rake resque:workers
+    command: bundle exec rake environment resque:workers
     environment:
       - QUEUES=simulations
       - COUNT=1

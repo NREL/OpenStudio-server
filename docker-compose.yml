@@ -42,7 +42,7 @@ services:
       - web
     volumes:
       - osdata:/mnt/openstudio
-    command: rake resque:work
+    command: bundle exec rake environment resque:work
   worker:
     image: nrel/openstudio-server:latest
     build:
@@ -58,7 +58,7 @@ services:
       - db
       - queue
       - rserve
-    command: rake resque:workers
+    command: bundle exec rake environment resque:workers
   rserve:
     image: nrel/openstudio-rserve:latest
     build: ./docker/R
