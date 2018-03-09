@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-q# Install Packages
+# Install Packages
 install.packages('lhs', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('e1071', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('triangle', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
