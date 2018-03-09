@@ -90,16 +90,18 @@ class DataPoint
 
   # Submit the simulation to run in the background task queue
   def submit_simulation
-    if Rails.env == 'local' || Rails.env == 'local-test'
+    if Rails.config.job_manager == :delayed_job
       job = RunSimulateDataPoint.new(id)
       self.job_id = job.delay(queue: 'simulations').perform.id
       self.status = :queued
       self.run_queue_time = Time.now
-    else
+    elsif Rails.config.job_manager == :resque
       Resque.enqueue(RunSimulateDataPointResque, id)
       self.job_id = id
       self.status = :queued
       self.run_queue_time = Time.now
+    else
+      raise 'Rails.config.job_manager must be set to :resque or :delayed_job'
     end
 
     save!
@@ -155,15 +157,17 @@ class DataPoint
   end
 
   def destroy_background_job
-    if Rails.env == 'local' || Rails.env == 'local-test'
+    if Rails.config.job_manager == :delayed_job
       if job_id
         dj = Delayed::Job.where(id: job_id).first
         dj.destroy if dj
       end
-    else
+    elsif Rails.config.job_manager == :resque
       if job_id
         Resque::Job.destroy(:simulations, 'RunSimulateDataPointResque', job_id)
       end
+    else
+      raise 'Rails.config.job_manager must be set to :resque or :delayed_job'
     end
   end
 end

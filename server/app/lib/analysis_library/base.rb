@@ -48,10 +48,12 @@ module AnalysisLibrary
 
     # Return the logger for the delayed job
     def logger
-      if Rails.env == 'local' || Rails.env == 'local-test'
+      if Rails.config.job_manager == :delayed_job
         Delayed::Worker.logger
-      else
+      elsif Rails.config.job_manager == :resque
         Resque.logger
+      else
+        raise 'Rails.config.job_manager must be set to :resque or :delayed_job'
       end
     end
 
