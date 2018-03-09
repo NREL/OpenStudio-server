@@ -11,10 +11,11 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     OPENSTUDIO_DOWNLOAD_URL=$OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     # Install gdebi, then download and install OpenStudio, then clean up.
-    # gdebi handles the installation of OpenStudio's dependencies including Qt5,
-    # Boost, and Ruby 2.0.
+    # gdebi handles the installation of OpenStudio's dependencies including Qt5 and Boost
+    # libwxgtk3.0-0 is a new dependency as of 3/8/2018
     sudo apt-get update && sudo apt-get install -y --no-install-recommends \
         libboost-thread1.55.0 \
+        libwxgtk3.0-0 \
         gdebi-core \
         curl \
         git \
