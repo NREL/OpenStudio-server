@@ -2,22 +2,22 @@ language: ruby
 rvm: 2.2.4
 matrix:
   include:
-  - os: linux
-    sudo: required
-    dist: trusty
-    env:
-    - BUILD_ARCH: Ubuntu
-    - BUILD_TYPE: test
-    - USE_TESTING_TIMEOUTS: "true"
-    - RUBYLIB: /usr/Ruby
-    services:
-    - mongod
-  - os: osx
-    osx_image: xcode7.3
-    env:
-    - BUILD_ARCH: OSX
-    - USE_TESTING_TIMEOUTS: "true"
-    - RUBYLIB: /Users/travis/openstudio/Ruby/
+    - os: linux
+      sudo: required
+      dist: trusty
+      env:
+        - BUILD_ARCH: Ubuntu
+        - BUILD_TYPE: test
+        - USE_TESTING_TIMEOUTS: "true"
+        - RUBYLIB: /usr/Ruby
+      services:
+        - mongod
+    - os: osx
+      osx_image: xcode7.3
+      env:
+        - BUILD_ARCH: OSX
+        - USE_TESTING_TIMEOUTS: "true"
+        - RUBYLIB: /Users/travis/openstudio/Ruby/
 gemfile:
   - server/Gemfile
 before_install:
