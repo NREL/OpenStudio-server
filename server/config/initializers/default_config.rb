@@ -63,7 +63,7 @@ FileUtils.mkdir_p APP_CONFIG['rails_tmp_path'] unless Dir.exist? APP_CONFIG['rai
 
 # update the loggers
 Rails.logger = ActiveSupport::TaggedLogging.new(Logger.new("#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"))
-unless['development', 'local', 'local-test'].include? Rails.env
+unless['local', 'local-test'].include? Rails.env
   Resque.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'resque.log'))
   Resque.logger.level = Logger::INFO
 end

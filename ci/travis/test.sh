@@ -2,6 +2,7 @@
 
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     export RUBYLIB="${HOME}/openstudio/Ruby/"
+    export RUBY_ENV=local-test
     echo 'Beginning integration test'
     bundle exec rspec -e 'analysis'; (( exit_status = exit_status || $? ))
     if [ "$exit_status" = "0" ]; then
@@ -15,6 +16,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     echo "Completed tests with exit code $exit_status"
     exit $exit_status
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
+    export RUBY_ENV=local-test
     exit_status=0
     cd ./server
     export BUNDLE_GEMFILE=./Gemfile #set correct path.  see issue 272
