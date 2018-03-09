@@ -43,5 +43,4 @@ deploy:mac:
   script:
     - cd /Users/alex/Desktop/server-export/
     - aws s3 cp ./ s3://openstudio-builds/CI/ --debug --recursive --exclude "*" --include "OpenStudio-server-*-darwin.tar.gz"
-  allow_failure: true
 
