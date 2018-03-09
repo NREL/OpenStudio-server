@@ -7,11 +7,11 @@ services:
     ports:
       - "27017:27017"
   web:
+    image: nrel/openstudio-server:latest
     build:
       context: .
       args:
         rails_env: docker
-    image: nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
@@ -22,11 +22,11 @@ services:
     volumes:
       - osdata:/mnt/openstudio
   web-background:
+    image: nrel/openstudio-server:latest
     build:
       context: .
       args:
         rails_env: docker
-    image: nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
@@ -36,11 +36,11 @@ services:
       - osdata:/mnt/openstudio
     command: bin/delayed_job -i server --queues=analyses,background run
   worker:
+    image: nrel/openstudio-server:latest
     build:
       context: .
       args:
         rails_env: docker
-    image: nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
@@ -49,8 +49,8 @@ services:
       - rserve
     command: bin/delayed_job -i worker --queue=simulations run
   rserve:
-    build: ./docker/R
     image: nrel/openstudio-rserve:latest
+    build: ./docker/R
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     volumes:
