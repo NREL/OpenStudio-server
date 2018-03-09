@@ -23,7 +23,7 @@ module OpenstudioServer
     config.active_support.escape_html_entities_in_json = true
 
     # Set the queue adapter
-    #config.active_job.queue_adapter = :delayed_job
+    config.active_job.queue_adapter = :delayed_job
 
     # custom config var which will be overriden in environment file for environments that use :delayed_job
     config.job_manager = :resque
