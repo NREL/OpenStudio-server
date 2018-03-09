@@ -71,8 +71,8 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Install OpenStudio
 ADD /docker/deployment/scripts/install_openstudio.sh /usr/local/bin/install_openstudio.sh
-ENV OPENSTUDIO_VERSION 2.4.1
-ENV OPENSTUDIO_SHA fcd9a4317a
+ENV OPENSTUDIO_VERSION 2.4.3
+ENV OPENSTUDIO_SHA 29a61f6637
 RUN /usr/local/bin/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_SHA
 
 # Add RUBYLIB link for openstudio.rb and Radiance env vars
