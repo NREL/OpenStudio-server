@@ -96,7 +96,7 @@ group :development, :docker, :'docker-dev', :'docker-test', :production, :test d
   gem 'resque-web', require: 'resque_web'
 end
 
-group :local, :'local-test' do
+group :development, :local, :'local-test' do
   gem 'delayed_job_mongoid'
 end
 
