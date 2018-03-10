@@ -37,8 +37,8 @@ bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,bac
 
 ```bash
 # Foreground - one terminal for each command
-QUEUES=background,analyses rake resque:work
-COUNT=4 QUEUES=simulations rake resque:workers
+QUEUES=background,analyses bundle exec rake environment resque:work
+COUNT=4 QUEUES=simulations bundle exec rake environment resque:workers
 ```
 
 

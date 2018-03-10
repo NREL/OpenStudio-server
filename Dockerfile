@@ -3,7 +3,7 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-FROM ubuntu:14.04
+FROM nrel/openstudio:2.4.3
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 ARG rails_env=docker
 ARG bundle_args="--without development test"
@@ -53,10 +53,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ruby
-ADD /docker/deployment/scripts/install_ruby.sh /usr/local/bin/install_ruby.sh
-RUN /usr/local/bin/install_ruby.sh 2.2.4 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
-
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION 5.0.25
 # Install Rack. Silly workaround for not having ruby 2.2.2. Rack 1.6.4 is the
@@ -68,12 +64,6 @@ RUN passenger-install-nginx-module
 # Configure the nginx server
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
-
-# Install OpenStudio
-ADD /docker/deployment/scripts/install_openstudio.sh /usr/local/bin/install_openstudio.sh
-ENV OPENSTUDIO_VERSION 2.4.1
-ENV OPENSTUDIO_SHA fcd9a4317a
-RUN /usr/local/bin/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_SHA
 
 # Add RUBYLIB link for openstudio.rb and Radiance env vars
 ENV RUBYLIB /usr/Ruby

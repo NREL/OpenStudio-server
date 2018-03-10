@@ -53,7 +53,7 @@ services:
       - QUEUES=background,analyses
     volumes:
       - osdata:/mnt/openstudio
-    command: rake resque:work
+    command: bundle exec rake environment resque:work
     depends_on:
       - db
       - web
@@ -70,7 +70,7 @@ services:
     environment:
       - QUEUES=simulations
       - COUNT=1
-    command: rake resque:workers
+    command: bundle exec rake environment resque:workers
     volumes:
       - /mnt/openstudio
     depends_on:
