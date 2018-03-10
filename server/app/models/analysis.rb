@@ -121,14 +121,14 @@ class Analysis
     else
       logger.info("Running in background analysis queue for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      if Rails.config.job_manager == :delayed_job
+      if Rails.application.config.job_manager == :delayed_job
         job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
         aj.delayed_job_id = job.id
-      elsif Rails.config.job_manager == :resque
+      elsif Rails.application.config.job_manager == :resque
         Resque.enqueue(RunAnalysisResque, analysis_type, id, aj.id, options)
         aj.delayed_job_id = nil
       else
-        raise 'Rails.config.job_manager must be set to :resque or :delayed_job'
+        raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
       end
       aj.save!
 
@@ -360,12 +360,12 @@ class Analysis
     analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
 
     if analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-      if Rails.config.job_manager == :delayed_job
+      if Rails.application.config.job_manager == :delayed_job
         Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
-      elsif Rails.config.job_manager == :resque
+      elsif Rails.application.config.job_manager == :resque
         Resque.enqueue(DeleteAnalysisJobResque, analysis_dir)
       else
-        raise 'Rails.config.job_manager must be set to :resque or :delayed_job'
+        raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
       end
     else
       logger.error 'Will not delete analysis directory because it does not conform to pattern'

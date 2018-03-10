@@ -439,12 +439,12 @@ class RunSimulateDataPoint
 
   # Return the logger for delayed jobs which is typically rails_root/log/delayed_job.log
   def logger
-    if Rails.config.job_manager == :delayed_job
+    if Rails.application.config.job_manager == :delayed_job
       Delayed::Worker.logger
-    elsif Rails.config.job_manager == :resque
+    elsif Rails.application.config.job_manager == :resque
       Resque.logger
     else
-      raise 'Rails.config.job_manager must be set to :resque or :delayed_job'
+      raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
     end
   end
 
