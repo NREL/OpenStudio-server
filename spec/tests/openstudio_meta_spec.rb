@@ -228,6 +228,7 @@ RSpec.describe LocalRspecTest do
     command = "#{ruby_cmd} \"#{meta_cli}\" run_rspec --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{server_rspec_test_dir}\""
     puts command
     test_results = system(command)
+    puts test_results
     expect(test_results).to be true
   end
 end

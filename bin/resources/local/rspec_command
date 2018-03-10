@@ -85,7 +85,7 @@ rspec_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rspe
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
 ::ENV['OS_SERVER_LOG_PATH'] = File.join(output_dir, 'logs', 'rails.log')
 ::ENV['RAILS_ENV'] = 'local-test'
-sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --exclude-pattern "\
+sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
   "\"**/models/cluster_spec.rb\""
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rspec: #{::ENV.inspect}" if options[:debug]

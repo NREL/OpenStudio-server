@@ -27,7 +27,7 @@ test:
     - export OS_SERVER_NUMBER_OF_WORKERS=4
   override:
     - docker-compose -f docker-compose.test.yml run web > reports/rspec/rpec_results.html
-    - docker-compose stop
+#    - docker-compose stop
   post:
     - rsync -av reports/ $CIRCLE_ARTIFACTS/reports/
 
