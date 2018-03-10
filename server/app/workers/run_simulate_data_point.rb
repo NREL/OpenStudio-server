@@ -45,6 +45,8 @@ class RunSimulateDataPoint
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
+    @data_point.status = :queued
+    @data_point.run_queue_time = Time.now
     @intialize_worker_errs = []
   end
 

@@ -35,7 +35,16 @@
 
 require 'rails_helper'
 
-RSpec.describe RunSimulateDataPoint, type: :feature do
+RSpec.describe RunSimulateDataPoint, type: :feature, foreground: true do
+  before :all do
+    @previous_job_manager = Rails.application.config.job_manager
+    Rails.application.config.job_manager = :resque
+  end
+
+  after :all do
+    Rails.application.config.job_manager = @previous_job_manager
+  end
+
   before :each do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
@@ -126,46 +135,33 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     dp = DataPoint.find(dp_json[:_id])
     datapoint_id = dp.id
     job_id = dp.submit_simulation
-    puts "job_id for datapoint is `#{job_id}"
-    # expect(job_id).to match /.{24}/
     expect(dp.id).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
     expect(dp.analysis.id).to eq analysis_id
-    expect(Delayed::Job.count).to eq(1)
-
-    # Start the work
-    work_result = nil
-    t = Thread.new do
-      work_result = Delayed::Worker.new.work_off
-    end
-    t.run
-
-    while t.status
-      # get the analysis status as json
-      a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
-      a = JSON.parse(a, symbolize_names: true)
-      expect(a[:analysis][:data_points].size).to eq 1
-      # puts "accessed http://#{host}/analyses/#{analysis_id}/status.json"
-
-      # get the analysis as html
-      a = RestClient.get "http://#{host}/analyses/#{analysis_id}.html"
-      # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
-
-      # get the datapoint as json
-      a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
-      a = JSON.parse(a, symbolize_names: true)
-      # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
-
-      # get the datapoint as html
-      a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
-      puts "accessed http://#{host}/data_points/#{datapoint_id}.html"
-
-      # slow down the access to the datapoint
-      sleep(0.5)
-    end
-    t.join
-
-    expect(work_result).to eq [1, 0] # expects 1 success and 0 failures
     expect(Delayed::Job.count).to eq(0)
+
+    # check the results of the simulation
+    a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+    a = JSON.parse(a, symbolize_names: true)
+    expect(a[:analysis][:data_points].size).to eq 1
+    # puts "accessed http://#{host}/analyses/#{analysis_id}/status.json"
+
+    # get the analysis as html
+    a = RestClient.get "http://#{host}/analyses/#{analysis_id}.html"
+    expect(a).to include("OpenStudio Cloud Management Console")
+    # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
+
+    # get the datapoint as json
+    a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
+    a = JSON.parse(a, symbolize_names: true)
+    puts a
+    expect(a[:data_point][:name]).to eq('Test Datapoint')
+    expect(a[:data_point][:status_message]).to eq('completed normal')
+    expect(a[:data_point][:status]).to eq('completed')
+    # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
+
+    # get the datapoint as html
+    a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
+    puts "accessed http://#{host}/data_points/#{datapoint_id}.html"
 
     # Verify that the results exist
     j = api.get_analysis_results(analysis_id)
@@ -176,64 +172,6 @@ RSpec.describe RunSimulateDataPoint, type: :feature do
     j = api.get_datapoint(datapoint_id)
     puts JSON.pretty_generate(j)
     expect(j[:data_point][:sdp_log_file]).not_to be_empty
-
-    # TODO: Check results -- may need different analysis type with annual data
-  end
-
-  it 'should create a write lock that is threadsafe' do
-    # okay, threadsafe is a misnomer here -- is this really thread safe?
-    # if it downloads it twice, then okay, but 100 times, ughly.
-
-    project = Project.new
-    project.save!
-    analysis = Analysis.new(project_id: project.id)
-    analysis.save!
-    dp = DataPoint.new(analysis_id: analysis.id)
-    dp.save!
-    a = RunSimulateDataPoint.new(dp.id)
-    write_lock_file = 'spec/files/tmp/write.lock'
-    receipt_file = 'spec/files/tmp/write.receipt'
-    FileUtils.mkdir_p 'spec/files/tmp'
-    File.delete(write_lock_file) if File.exist? write_lock_file
-    File.delete(receipt_file) if File.exist? receipt_file
-
-    thread_count = 500
-    arr = Array.new(thread_count)
-    puts arr.inspect
-    Parallel.each(0..thread_count, in_threads: thread_count) do |index|
-      arr[index] = 0 if File.exist? receipt_file
-
-      # TODO: Break this code out into its own class and test it there
-      if File.exist? write_lock_file
-        # wait until receipt file appears then return
-        loop do
-          break if File.exist? receipt_file
-          sleep 1
-        end
-
-        arr[index] = 0
-      else
-        a.write_lock(write_lock_file) do |_|
-          puts "Downloading for index #{index}..."
-          arr[index] = 1
-          sleep 3
-        end
-      end
-      File.open(receipt_file, 'w') { |f| f << Time.now }
-    end
-
-    puts arr.inspect
-    expect(arr.sum).to be < 5
-  end
-
-  it 'should sort worker jobs correctly' do
-    a = %w(00_Job0 01_Job1 11_Job11 20_Job20 02_Job2 21_Job21)
-
-    a.sort!
-
-    expect(a.first).to eq '00_Job0'
-    expect(a.last).to eq '21_Job21'
-    expect(a[3]).to eq '11_Job11'
   end
 
   after :each do

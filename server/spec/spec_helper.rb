@@ -54,7 +54,7 @@
 require 'factory_bot_rails'
 
 require 'ci/reporter/core'
-
+require_relative 'support/background_jobs'
 # Always create spec reports
 require 'simplecov'
 require 'coveralls'
@@ -150,4 +150,13 @@ RSpec.configure do |config|
   config.default_retry_count = 5
   # Only retry when Selenium raises Net::ReadTimeout
   config.exceptions_to_retry = [Net::ReadTimeout]
+
+  # run jobs immediately if type is feature
+  config.around(:each, foreground: true) do |example|
+    run_background_jobs_immediately do
+      example.run
+    end
+  end
+
+  config.include BackgroundJobs
 end

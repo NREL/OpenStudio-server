@@ -93,13 +93,9 @@ class DataPoint
     if Rails.application.config.job_manager == :delayed_job
       job = RunSimulateDataPoint.new(id)
       self.job_id = job.delay(queue: 'simulations').perform.id
-      self.status = :queued
-      self.run_queue_time = Time.now
     elsif Rails.application.config.job_manager == :resque
       Resque.enqueue(RunSimulateDataPointResque, id)
       self.job_id = id
-      self.status = :queued
-      self.run_queue_time = Time.now
     else
       raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
     end
