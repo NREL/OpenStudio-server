@@ -4,7 +4,7 @@ echo "The build architecture is ${BUILD_ARCH}"
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     mkdir /Users/travis/build/NREL/OpenStudio-server/spec/files/logs
     brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-    brew install mongodb@3.4
+    brew install mongodb@3.4 pv
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
 
@@ -21,6 +21,8 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo "Setting up Ubuntu for unit tests and Rubocop"
+    # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
+    sudo apt-get install -y pv
     mkdir -p reports/rspec
 
     # If not running on travis, then to install MongoDB and Ruby, run the following:

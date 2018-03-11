@@ -9,7 +9,8 @@ do
     echo '======================================================'
     echo $F
     echo '======================================================'
-    cat $F
+    # Limit the rate of printing the log (with pv) to keep travis happy. https://github.com/travis-ci/travis-ci/issues/6018
+    cat $F | pv -q -L 3k
     echo
 done
 
@@ -18,6 +19,7 @@ do
     echo '======================================================'
     echo $F
     echo '======================================================'
-    cat $F
+    # Limit the rate of printing the log (with pv) to keep travis happy. https://github.com/travis-ci/travis-ci/issues/6018
+    cat $F | pv -q -L 3k
     echo
 done
