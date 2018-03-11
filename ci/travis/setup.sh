@@ -8,15 +8,15 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
 
-#    curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/2.4.3/OpenStudio-2.4.3.29a61f6637-Darwin.zip
+    curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/2.4.3/OpenStudio-2.4.3.29a61f6637-Darwin.zip
+    unzip OpenStudio-2.4.3.29a61f6637-Darwin.zip
     curl -SLO --insecure https://raw.githubusercontent.com/NREL/OpenStudio/develop/install.qs
-    sed -i -e 's/c:\\\\/~\//' install.qs
-    cat install.qs
+    # Change the install directory to ~/openstudio (was c:\openstudio in original install.qs)
+    sed -i -e "s|c:..|$HOME/|" install.qs
+    rm -rf $HOME/openstudio
+    # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
+    sudo ./OpenStudio-2.4.3.29a61f6637-Darwin.app/Contents/MacOS/OpenStudio-2.4.3.29a61f6637-Darwin --script install.qs
 
-    curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio-2.0.3.40f61c64a3-darwin.zip
-    mkdir ~/openstudio
-    unzip OpenStudio-2.0.3.40f61c64a3-darwin.zip -d ~/openstudio
-    mv ~/openstudio/openstudio-2.0.3/* ~/openstudio/
     export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
