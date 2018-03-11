@@ -27,6 +27,14 @@ matrix:
       osx_image: xcode7.3
       env:
         - BUILD_ARCH: OSX
+        - BUILD_TYPE: test
+        - USE_TESTING_TIMEOUTS: "true"
+        - RUBYLIB: /Users/travis/openstudio/Ruby/
+    - os: osx
+      osx_image: xcode7.3
+      env:
+        - BUILD_ARCH: OSX
+        - BUILD_TYPE: integration
         - USE_TESTING_TIMEOUTS: "true"
         - RUBYLIB: /Users/travis/openstudio/Ruby/
 gemfile:

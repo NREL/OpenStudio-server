@@ -3,20 +3,25 @@
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     export RUBYLIB="${HOME}/openstudio/Ruby/"
     export RUBY_ENV=local-test
-    echo 'Beginning integration test'
-    bundle exec rspec -e 'analysis'; (( exit_status = exit_status || $? ))
-    if [ "$exit_status" = "0" ]; then
-        for F in /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/*; do
-            echo "Deleting $F to limit verbosity in case of unit test failure"
-            rm $F
-        done
+    if [ "${BUILD_TYPE}" == "test" ]; then
+        echo 'Beginning unit tests'
+        bundle exec rspec -e 'unit test'; (( exit_status = exit_status || $? ))
+        echo "Completed tests with exit code $exit_status"
+        exit $exit_status
+    elif [ "${BUILD_TYPE}" == "integration" ]; then
+        echo 'Beginning integration test'
+        bundle exec rspec -e 'analysis'; (( exit_status = exit_status || $? ))
+        if [ "$exit_status" = "0" ]; then
+            for F in /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/*; do
+                echo "Deleting $F to limit verbosity in case of unit test failure"
+                rm $F
+            done
+        fi
+        exit $exit_status
     fi
-    echo 'Beginning unit tests'
-    bundle exec rspec -e 'unit test'; (( exit_status = exit_status || $? ))
-    echo "Completed tests with exit code $exit_status"
-    exit $exit_status
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     if [ "${BUILD_TYPE}" == "test" ]; then
+        echo 'Beginning unit tests'
         export RUBY_ENV=test
         exit_status=0
         cd ./server

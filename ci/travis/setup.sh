@@ -8,6 +8,11 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
 
+#    curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/2.4.3/OpenStudio-2.4.3.29a61f6637-Darwin.zip
+    curl -SLO --insecure https://raw.githubusercontent.com/NREL/OpenStudio/develop/install.qs
+    sed -i -e 's/c:\\\\/~\//' install.qs
+    cat install.qs
+
     curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies/OpenStudio-2.0.3.40f61c64a3-darwin.zip
     mkdir ~/openstudio
     unzip OpenStudio-2.0.3.40f61c64a3-darwin.zip -d ~/openstudio
