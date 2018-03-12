@@ -27,7 +27,7 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
         cd ./server
         export BUNDLE_GEMFILE=./Gemfile #set correct path.  see issue 272
         bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation; (( exit_status = exit_status || $? ))
-#        bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
+        bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
         exit $exit_status
     elif [ "${BUILD_TYPE}" == "integration" ]; then
         echo 'Beginning integration test'
