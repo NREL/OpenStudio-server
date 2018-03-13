@@ -7,6 +7,7 @@ import json
 import boto3
 import fileinput
 import re
+import sys
 
 
 # A helper method for executing command line calls cleanly
