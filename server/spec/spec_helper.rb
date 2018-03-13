@@ -52,19 +52,22 @@
 #
 
 require 'factory_bot_rails'
-
 require 'ci/reporter/core'
 require_relative 'support/background_jobs'
-# Always create spec reports
-require 'simplecov'
-require 'coveralls'
-Coveralls.wear!
-
 require 'rspec/retry'
+
+require 'simplecov'
+require 'net/https' # for net::readtimeout
 
 dir = File.expand_path('../../reports/coverage', File.dirname(__FILE__))
 SimpleCov.coverage_dir(dir)
-SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+
+unless ENV['SKIP_COVERALLS']
+  require 'coveralls'
+  Coveralls.wear!
+  SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+end
+
 SimpleCov.start do
   add_filter 'spec/files'
 end
