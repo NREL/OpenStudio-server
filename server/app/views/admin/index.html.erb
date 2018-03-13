@@ -37,7 +37,7 @@
 
 <h2>Admin</h2>
 
-<% if Rails.env != 'production' && Rails.env != 'docker' %>
+<% if Rails.application.config.job_manager == :resque %>
 <div class="row-fluid">
   <h3 class="pad-bottom-20">Queue</h3>
   <div class="span3 pad-bottom-20">
