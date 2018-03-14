@@ -126,10 +126,6 @@ RUN bundle install --jobs=3 --retry=3
 ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
 RUN sudo sysctl --system
 
-# forward request and error logs to docker log collector
-# TODO: How to get logs out of this, mount shared volume?
-#RUN ln -sf /dev/stdout /var/log/nginx/access.log
-#RUN ln -sf /dev/stderr /var/log/nginx/error.log
 RUN chmod 775 /opt/openstudio/server/log
 RUN chmod 666 /opt/openstudio/server/log/*.log
 

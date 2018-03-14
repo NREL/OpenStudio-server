@@ -1,8 +1,13 @@
 .git
 .idea
 vagrant
+/server/.bundle/
 /server/Gemfile.lock
 /server/log
 /server/public/assets
 /server/tmp
+/server/spec/runs.txt
+/server/spec/files/tmp/
+/server/spec/files/test_model/tmp_run_single
+/spec/unit-test
 /worker-nodes
