@@ -48,7 +48,16 @@ COUNT=4 QUEUES=simulations bundle exec rake environment resque:workers
 R
 libary(Rserve)
 Rserve()
+```
 
+It is also possible to run Rserve from the docker container which contains all of the needed 
+libraries already installed.
+
+```bash
+# from OpenStudio-server root directory
+mkdir -p worker-nodes
+cd worker-nodes
+docker run -it -v $(pwd):$(pwd) -p 6311:6311 nrel/openstudio-rserve
 ```
 
 ## Install Nokogiri (with Brew System Libraries)
