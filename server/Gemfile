@@ -72,7 +72,7 @@ gem 'openstudio-analysis', '1.0.0.rc18'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
-gem 'openstudio-standards', '= 0.2.0.rc1'
+gem 'openstudio-standards', '= 0.2.0.rc2'
 # gem 'openstudio-standards', path: '../../openstudio-standards/openstudio-standards'
 
 ## End commonly updated gems
