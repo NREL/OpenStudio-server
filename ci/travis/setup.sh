@@ -10,12 +10,11 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
 
     curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/2.4.3/OpenStudio-2.4.3.29a61f6637-Darwin.zip
     unzip OpenStudio-2.4.3.29a61f6637-Darwin.zip
-    curl -SLO --insecure https://raw.githubusercontent.com/NREL/OpenStudio/develop/install.qs
-    # Change the install directory to ~/openstudio (was c:\openstudio in original install.qs)
-    sed -i -e "s|c:..|$HOME/|" install.qs
+    # Use the install script that is in this repo now, the one on OpenStudio/develop has changed
+    sed -i -e "s|REPLACEME|$HOME/|" ci/travis/install-mac.qs
     rm -rf $HOME/openstudio
     # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-    sudo ./OpenStudio-2.4.3.29a61f6637-Darwin.app/Contents/MacOS/OpenStudio-2.4.3.29a61f6637-Darwin --script install.qs
+    sudo ./OpenStudio-2.4.3.29a61f6637-Darwin.app/Contents/MacOS/OpenStudio-2.4.3.29a61f6637-Darwin --script ci/travis/install-mac.qs
     tree ${HOME}/openstudio/
 
     export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
