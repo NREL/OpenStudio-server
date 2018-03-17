@@ -4,7 +4,7 @@ echo "The build architecture is ${BUILD_ARCH}"
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     mkdir /Users/travis/build/NREL/OpenStudio-server/spec/files/logs
     brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-    brew install mongodb@3.4 pv
+    brew install mongodb@3.4 pv tree
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
 
@@ -16,6 +16,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     rm -rf $HOME/openstudio
     # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
     sudo ./OpenStudio-2.4.3.29a61f6637-Darwin.app/Contents/MacOS/OpenStudio-2.4.3.29a61f6637-Darwin --script install.qs
+    tree ${HOME}/openstudio/
 
     export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
@@ -33,7 +34,7 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
 #    sudo apt-get install -y mongodb-org
 #    ./docker/deployment/scripts/install_ruby.sh 2.2.4 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
 
-    ./docker/deployment/scripts/install_openstudio.sh 2.4.0 f58a3e1808
+    ./docker/deployment/scripts/install_openstudio.sh 2.4.3 29a61f6637
     export RUBYLIB="/usr/Ruby:$RUBYLIB"
     if [ "${BUILD_TYPE}" == "test" ]; then
         echo "In test mode"
