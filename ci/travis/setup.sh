@@ -4,18 +4,18 @@ echo "The build architecture is ${BUILD_ARCH}"
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     mkdir /Users/travis/build/NREL/OpenStudio-server/spec/files/logs
     brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-    brew install mongodb@3.4 pv
+    brew install mongodb@3.4 pv tree
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
 
-    curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/2.4.3/OpenStudio-2.4.3.29a61f6637-Darwin.zip
-    unzip OpenStudio-2.4.3.29a61f6637-Darwin.zip
-    curl -SLO --insecure https://raw.githubusercontent.com/NREL/OpenStudio/develop/install.qs
-    # Change the install directory to ~/openstudio (was c:\openstudio in original install.qs)
-    sed -i -e "s|c:..|$HOME/|" install.qs
+    curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.zip
+    unzip OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.zip
+    # Use the install script that is in this repo now, the one on OpenStudio/develop has changed
+    sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
     rm -rf $HOME/openstudio
     # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-    sudo ./OpenStudio-2.4.3.29a61f6637-Darwin.app/Contents/MacOS/OpenStudio-2.4.3.29a61f6637-Darwin --script install.qs
+    sudo ./OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
+    tree ${HOME}/openstudio/Ruby
 
     export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
     ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
@@ -33,7 +33,7 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
 #    sudo apt-get install -y mongodb-org
 #    ./docker/deployment/scripts/install_ruby.sh 2.2.4 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
 
-    ./docker/deployment/scripts/install_openstudio.sh 2.4.0 f58a3e1808
+    ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA
     export RUBYLIB="/usr/Ruby:$RUBYLIB"
     if [ "${BUILD_TYPE}" == "test" ]; then
         echo "In test mode"

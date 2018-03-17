@@ -2,6 +2,8 @@ version: 1.0.{build}-{branch}
 
 environment:
   USE_TESTING_TIMEOUTS: "true"
+  OPENSTUDIO_VERSION: 2.4.3
+  OPENSTUDIO_VERSION_SHA: 29a61f6637
   matrix:
     - RUBY_VERSION: "224-x64"
 

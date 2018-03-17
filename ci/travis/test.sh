@@ -23,6 +23,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
         exit $exit_status
     fi
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
+    export RUBYLIB="/usr/Ruby"
     if [ "${BUILD_TYPE}" == "test" ]; then
         echo 'Beginning unit tests'
         export RUBY_ENV=test
