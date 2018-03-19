@@ -9,18 +9,19 @@ import boto3
 
 # A helper method for executing command line calls cleanly
 def run_cmd(exec_str, description):
-    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
-    exit_code = p.wait()
+    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
+    (stdout, stderr) = p.communicate(None)
+    exit_code = p.returncode
     if exit_code is not 0:
         print '{} returned non-zero exit status. Returned status `{}`'.format(description, exit_code)
-        if p.stdout is not None:
+        if stdout != '':
             print 'STDOUT:'
-            print p.stdout.read()
-        if p.stderr is not None:
+            print stdout
+        if stderr != '':
             print 'STDERR:'
-            print p.stderr.read()
-        raise RuntimeError('Aborting.')
-    return p.stdout.read()
+            print stderr
+        raise RuntimeError('Aborting due to previous failure')
+    return stdout
 
 # Define the CLI
 parser = argparse.ArgumentParser()
@@ -55,7 +56,7 @@ except KeyError as e:
 template_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              '../../docker/deployment/user_variables.json.template'))
 with open(template_path) as f:
-    docker_version = json.load(f)["docker_version"]
+    docker_version = str(json.load(f)["docker_version"])
 
 # Get the OpenStudioServer version and version extension to use
 version_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../server/lib/openstudio_server/version.rb'))
@@ -96,17 +97,23 @@ with open(variables_write_path, 'w') as f:
     json.dump(defaults, f)
 
 # Next we need to run packer and retrieve the new AMI ID
-origional_dir = os.getcwd()
 os.chdir(os.path.dirname(template_path))
-
-cmd_call = 'packer build -machine-readable -var-file=user_variables.json packer.json | tee {}'.\
-    format(os.path.join(output_dir, 'build.log'))
+os.environ['AWS_ACCESS_KEY'] = access
+os.environ['AWS_SECRET_KEY'] = secret
+packer_log = os.path.join(output_dir, 'build.log')
+cmd_call = 'packer build -machine-readable -var-file=user_variables.json openstudio_server_docker_base.json 2>&1 | ' \
+           'tee {}'.format(packer_log)
 if verbose:
     print 'Packer command is: {}'.format(cmd_call)
-# stdout_str = run_cmd(cmd_call, 'Packer')
-# if verbose:
-    print 'STDOUT: {}'.format(stdout_str)
-ami_id = 'ami-12345678'  # TODO Get this properly from build.log
+stdout_str = run_cmd(cmd_call, 'Packer')
+if verbose:
+    print 'STDOUT written to {}'.format(packer_log)
+ami_id_line = stdout_str.split('\\n')[-2]
+if ami_id_line.split(':')[0] != 'us-east-1':
+    raise RuntimeError('Unexpected return from the packer script. Please review {}'.format(packer_log))
+if ami_id_line.split(':')[1].strip()[0:4] != 'ami-':
+    raise RuntimeError('Unexpected return from the packer script. Please review {}'.format(packer_log))
+ami_id = ami_id_line.split(':')[1].strip()
 
 # Now we retrieve the additional required fields for the amis.json file, starting with the server SHA
 cmd_call = 'git log -n 1 | grep commit'
@@ -128,7 +135,7 @@ cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -e "puts Ope
     format(defaults['version'] + defaults['ami_version_extension'])
 if verbose:
     print 'openstudio-server OpenStudio version command is: {}'.format(cmd_call)
-stdout_arr = run_cmd(cmd_call, 'OpenStudio version retrieval').split('/n')[-1].split('.')
+stdout_arr = run_cmd(cmd_call, 'OpenStudio version retrieval').split('\n')[-2].split('.')
 os_version = stdout_arr[0] + '.' + stdout_arr[1] + '.' + stdout_arr[2]
 os_sha = stdout_arr[3]
 if verbose:
@@ -139,7 +146,7 @@ cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudi
            'OpenstudioStandards::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
 if verbose:
     print 'openstudio-server OpenStudio-Standards version command is: {}'.format(cmd_call)
-stdout_str = run_cmd(cmd_call, 'OpenStudio-Standards version retrieval').split('/n')[-1]
+stdout_str = run_cmd(cmd_call, 'OpenStudio-Standards version retrieval').split('\n')[-2]
 standards_version = stdout_str.strip()
 if verbose:
     print 'OpenStudio-Standards version retrieved is {}'.format(standards_version)
@@ -149,7 +156,7 @@ cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudi
            'OpenStudio::Analysis::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
 if verbose:
     print 'openstudio-server OpenStudio-Analysis version command is: {}'.format(cmd_call)
-stdout_str = run_cmd(cmd_call, 'OpenStudio-Analysis version retrieval').split('/n')[-1]
+stdout_str = run_cmd(cmd_call, 'OpenStudio-Analysis version retrieval').split('\n')[-2]
 analysis_version = stdout_str.strip()
 if verbose:
     print 'OpenStudio-Analysis version retrieved is {}'.format(analysis_version)
@@ -159,7 +166,7 @@ cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudi
            'OpenStudio::Workflow::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
 if verbose:
     print 'openstudio-server OpenStudio-Workflow version command is: {}'.format(cmd_call)
-stdout_str = run_cmd(cmd_call, 'OpenStudio version retrieval').split('/n')[-1]
+stdout_str = run_cmd(cmd_call, 'OpenStudio version retrieval').split('\n')[-2]
 workflow_version = stdout_str.strip()
 if verbose:
     print 'OpenStudio-Workflow version retrieved is {}'.format(workflow_version)
@@ -169,7 +176,7 @@ cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -e "puts Ope
     format(defaults['version'] + defaults['ami_version_extension'])
 if verbose:
     print 'openstudio-server EnergyPlus version command is: {}'.format(cmd_call)
-stdout_arr = run_cmd(cmd_call, 'EnergyPlus version retrieval').split('/n')[-1].split('.')
+stdout_arr = run_cmd(cmd_call, 'EnergyPlus version retrieval').split('\n')[-2].split('.')
 eplus_version = stdout_arr[0] + '.' + stdout_arr[1]
 if verbose:
     print 'EnergyPlus version retrieved is {}'.format(eplus_version)
@@ -179,7 +186,7 @@ cmd_call = 'docker run nrel/openstudio-server:{} /usr/Radiance/bin/rtrace -versi
     format(defaults['version'] + defaults['ami_version_extension'])
 if verbose:
     print 'openstudio-server Radiance version command is: {}'.format(cmd_call)
-stdout_arr = run_cmd(cmd_call, 'Radiance version retrieval').split('/n')[-1].split('.')
+stdout_arr = run_cmd(cmd_call, 'Radiance version retrieval').split('\n')[-2].split('.')
 radiance_version = stdout_arr[0] + '.' + stdout_arr[1] + '.' + stdout_arr[2]
 if verbose:
     print 'Radiance version retrieved is {}'.format(radiance_version)
@@ -195,8 +202,8 @@ cmd_call = 'docker run nrel/openstudio-rserve:{} R --version'.\
     format(defaults['version'] + defaults['ami_version_extension'])
 if verbose:
     print 'openstudio-rserve R version command is: {}'.format(cmd_call)
-stdout_arr = run_cmd(cmd_call, 'R version retrieval').split('/n')[-1].split('.')
-r_version = stdout_arr[0] + '.' + stdout_arr[1] + '.' + stdout_arr[2]
+stdout_arr = run_cmd(cmd_call, 'R version retrieval').split('\n')[2].split('.')
+r_version = stdout_arr[0][-1] + '.' + stdout_arr[1] + '.' + stdout_arr[2][0]
 if verbose:
     print 'R version retrieved is {}'.format(r_version)
 
@@ -241,6 +248,12 @@ amis['builds'].append(ami_entry)
 ec2 = boto3.resource('ec2')
 image = ec2.Image(ami_id)
 response = image.modify_attribute(LaunchPermission={'Add': [{'Group': 'all'}]})
+if response['ResponseMetadata']['HTTPStatusCode'] is not 200:
+    raise RuntimeError('API request setting AMI {} permissions to public failed to return status code 200, instead '
+                       'returning code {}'.format(ami_id, response['ResponseMetadata']['HTTPStatusCode']))
 
 # Last of all, we add and upload the amis.json file
-s3.Bucket('openstudio-resources').put_object('server/api/v3/amis.json', Body=json.dump(amis))
+file_obj.put(ACL='public-read', Body=json.dumps(amis, indent=4))
+if response['ResponseMetadata']['HTTPStatusCode'] is not 200:
+    raise RuntimeError('API request uploading the updated amis.json file failed to return status code 200, instead '
+                       'returning code {}'.format(response['ResponseMetadata']['HTTPStatusCode']))

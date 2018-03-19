@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,12 +34,12 @@
 # *******************************************************************************
 
 namespace :rubocop do
-  if Rails.env != 'production' && Rails.env != 'docker'
+  if Rails.env != 'production' && Rails.env != 'docker' && Rails.env != 'local'
     require 'rubocop/rake_task'
 
-    desc 'Run Rubocop on the lib directory'
+    desc 'Run Rubocop on the server directory'
     RuboCop::RakeTask.new(:run) do |task|
-      task.options = ['--no-color', '--out=../reports/rubocop/rubocop-results.xml', '--rails']
+      task.options = ['--no-color', '--rails', '--out=../reports/rubocop/rubocop-results.xml', '--format', 'simple']
       task.formatters = ['RuboCop::Formatter::CheckstyleFormatter']
       task.requires = ['rubocop/formatter/checkstyle_formatter']
       # don't abort rake on failure
