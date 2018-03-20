@@ -4,6 +4,7 @@ import os
 from subprocess import Popen, PIPE, STDOUT
 import argparse
 import json
+import signal
 import boto3
 import fileinput
 import re
@@ -12,7 +13,15 @@ import sys
 
 # A helper method for executing command line calls cleanly
 def run_cmd(exec_str, description):
-    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
+    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True, preexec_fn=os.setsid)
+    pgid = os.getpgid(p.pid)
+
+    def signal_handler(sig_type, _):
+        if sig_type == signal.SIGINT:
+            os.killpg(pgid, signal.SIGINT)
+        sys.exit(1)
+
+    signal.signal(signal.SIGINT, signal_handler)
     (stdout, stderr) = p.communicate(None)
     exit_code = p.returncode
     if exit_code is not 0:
@@ -111,10 +120,13 @@ stdout_str = run_cmd(cmd_call, 'OpenStudio Server version extension retrieval')
 ami_version_ext = stdout_str.strip()
 if verbose:
     print 'OSS version extension retrieved is {}\n'.format(ami_version_ext)
-if override_ami_version is not None:
+if override_ami_extension is not None:
+    if override_ami_extension[0] != '-':
+        override_ami_extension = '-' + override_ami_extension.strip()
     if verbose:
         print 'AMI version extension being overwritten from `{}` to `{}`'.format(ami_version_ext,
                                                                                  override_ami_extension)
+    ami_version_ext = override_ami_extension
 
 # Write the packer user variables json file
 defaults = {
@@ -192,8 +204,9 @@ if verbose:
     print 'OpenStudio version retrieved is {}, with SHA {}'.format(os_version, os_sha)
 
 # OpenStudio-Standards version
-cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudio-standards -e "puts ' \
-           'OpenstudioStandards::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
+cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
+           '\'openstudio-standards\'; puts OpenstudioStandards::VERSION"'.format(defaults['version'] +
+                                                                                 defaults['ami_version_extension'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -204,8 +217,9 @@ if verbose:
     print 'OpenStudio-Standards version retrieved is {}'.format(standards_version)
 
 # OpenStudio-Analysis version
-cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudio-analysis -e "puts ' \
-           'OpenStudio::Analysis::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
+cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
+           '\'openstudio-analysis\'; puts OpenStudio::Analysis::VERSION"'.format(defaults['version'] +
+                                                                                 defaults['ami_version_extension'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -216,8 +230,9 @@ if verbose:
     print 'OpenStudio-Analysis version retrieved is {}'.format(analysis_version)
 
 # OpenStudio-Workflow version
-cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudio-workflow -e "puts ' \
-           'OpenStudio::Workflow::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
+cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
+           '\'openstudio-workflow\'; puts OpenStudio::Workflow::VERSION"'.format(defaults['version'] +
+                                                                                 defaults['ami_version_extension'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
