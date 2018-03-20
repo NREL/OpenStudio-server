@@ -91,9 +91,9 @@ For official release use, the only flags used are `-v` to enable verbose outputs
 The below is an example of executing this script.
 
 ```sh
-$ export AWS_ACCESS_KEY=ABCDEFABCDEFABCDEF
+$ export AWS_ACCESS_KEY_ID=ABCDEFABCDEFABCDEF
 
-$ export AWS_SECRET_KEY=!1qa@2ws#3ed$4rf%5tg^6yh&7uj*8ik(9ol)0p;
+$ export AWS_SECRET_ACCESS_KEY=!1qa@2ws#3ed$4rf%5tg^6yh&7uj*8ik(9ol)0p;
 
 $ python build_deploy_ami.py -o /Path/to/log/artifact/ -n "Official automated release of OpenStudio Server 2.4.1 by NREL" -v
 
@@ -120,9 +120,9 @@ Following the generation of the AMI, the only remaining tasks are to make the AM
 The first step in building a one-off AMI is ensuring that the `openstudio-server` and `openstudio-rserve` containers that should be deployed are publicly available on a [DockerHub](http://hub.docker.com) repository. This repository does not [need to be the official NREL repository](http://hub.docker.com/r/hhorsey/openstudio-server/tags/) however it does need to be available publicly. For this example, we will use the `2.3.0-test1` tag from `hhorsey`'s [openstudio-server](http://hub.docker.com/r/hhorsey/openstudio-server/tags/) and [openstudio-rserve](http://hub.docker.com/r/hhorsey/openstudio-rserve/tags/) DockerHub repositories. In addition, we assume that the account creating this build is not the official NREL AMI release account, and as such cannot alter the amis.json file persisted to S3. Instead, the JSON document specifying the AMI will be persisted as `amis_extension.json`. The command for this situation would be as follows.
 
 ```sh
-$ export AWS_ACCESS_KEY=ABCDEFABCDEFABCDEF
+$ export AWS_ACCESS_KEY_ID=ABCDEFABCDEFABCDEF
 
-$ export AWS_SECRET_KEY=!1qa@2ws#3ed$4rf%5tg^6yh&7uj*8ik(9ol)0p;
+$ export AWS_SECRET_ACCESS_KEY=!1qa@2ws#3ed$4rf%5tg^6yh&7uj*8ik(9ol)0p;
 
 $ python build_deploy_ami.py -o /Path/to/artifacts/ -n "Official automated release of OpenStudio Server 2.4.1 by NREL" -v --generated_by "README Author" --ami_version 2.3.0 --ami_extension "-test1" --dockerhub_repo hhorsey --write_json --enable_custom_build
 
