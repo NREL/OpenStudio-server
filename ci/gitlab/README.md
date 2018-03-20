@@ -124,7 +124,7 @@ $ export AWS_ACCESS_KEY=ABCDEFABCDEFABCDEF
 
 $ export AWS_SECRET_KEY=!1qa@2ws#3ed$4rf%5tg^6yh&7uj*8ik(9ol)0p;
 
-$ python build_deploy_ami.py -o /Path/to/artifacts/ -n 'Test release of the 2.3.0-test1 tagged docker images from the hhorsey dockerhub repository.' -v --generated_by 'README Author' --ami_version '2.3.0' --ami_extension 'test1' --dockerhub_repo 'hhorsey' --write_json --enable_custom_build
+$ python build_deploy_ami.py -o /Path/to/artifacts/ -n "Official automated release of OpenStudio Server 2.4.1 by NREL" -v --generated_by "README Author" --ami_version 2.3.0 --ami_extension "-test1" --dockerhub_repo hhorsey --write_json --enable_custom_build
 
 <output omitted>
 ```

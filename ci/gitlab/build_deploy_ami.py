@@ -4,7 +4,6 @@ import os
 from subprocess import Popen, PIPE, STDOUT
 import argparse
 import json
-import signal
 import boto3
 import fileinput
 import re
@@ -13,15 +12,7 @@ import sys
 
 # A helper method for executing command line calls cleanly
 def run_cmd(exec_str, description):
-    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True, preexec_fn=os.setsid)
-    pgid = os.getpgid(p.pid)
-
-    def signal_handler(sig_type, _):
-        if sig_type == signal.SIGINT:
-            os.killpg(pgid, signal.SIGINT)
-        sys.exit(1)
-
-    signal.signal(signal.SIGINT, signal_handler)
+    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
     (stdout, stderr) = p.communicate(None)
     exit_code = p.returncode
     if exit_code is not 0:
@@ -120,13 +111,10 @@ stdout_str = run_cmd(cmd_call, 'OpenStudio Server version extension retrieval')
 ami_version_ext = stdout_str.strip()
 if verbose:
     print 'OSS version extension retrieved is {}\n'.format(ami_version_ext)
-if override_ami_extension is not None:
-    if override_ami_extension[0] != '-':
-        override_ami_extension = '-' + override_ami_extension.strip()
+if override_ami_version is not None:
     if verbose:
         print 'AMI version extension being overwritten from `{}` to `{}`'.format(ami_version_ext,
                                                                                  override_ami_extension)
-    ami_version_ext = override_ami_extension
 
 # Write the packer user variables json file
 defaults = {
