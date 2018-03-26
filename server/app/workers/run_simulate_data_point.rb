@@ -41,7 +41,8 @@ class RunSimulateDataPoint
   require 'json'
 
   def initialize(data_point_id, options = {})
-    defaults = ActiveSupport::HashWithIndifferentAccess.new({ run_workflow_method: 'workflow' })
+    # not currently using defaults but leave in place for now.
+    defaults = ActiveSupport::HashWithIndifferentAccess.new()
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
@@ -72,7 +73,7 @@ class RunSimulateDataPoint
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     @sim_logger.info "Analysis directory is #{analysis_dir}"
     @sim_logger.info "Simulation directory is #{simulation_dir}"
-    @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
+    # @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
     # If worker initialization fails, communicate this information
     # to the user via the out.osw.
