@@ -33,33 +33,21 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-q# Install Packages
+# Note that there are a bunch of base packages that are installed in the base
+# OpenStudio-R image here:
+# https://raw.githubusercontent.com/NREL/docker-openstudio-r/master/base_packages.R
+
+# Install Probability / Optimization / Analysis Packages
 install.packages('lhs', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('e1071', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('triangle', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('RUnit', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('R.methodsS3', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('R.oo', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('R.utils', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('NMOF', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('mco', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('rgenoud', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('conf.design', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('vcd', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('combinat', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('DoE.base', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('xts', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('rjson', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('RSQLite', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('Rcpp', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('plyr', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('ggplot2', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('reshape2', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('cowplot', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('ggsci', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
 install.packages('sensitivity', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('foreach', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('iterators', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('doParallel', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
-install.packages('doMC', repos=c('http://cloud.r-project.org','http://cran.r-project.org'))
+
+# R Serve
 install.packages('Rserve', configure.args=c('PKG_CPPFLAGS=-DNODAEMON'), repos=c('http://rforge.net'))
