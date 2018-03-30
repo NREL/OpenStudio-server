@@ -3,7 +3,7 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-FROM nrel/openstudio:2.5.0
+FROM nrel/openstudio:2.4.3
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 ARG rails_env=docker
 ARG bundle_args="--without development test"
