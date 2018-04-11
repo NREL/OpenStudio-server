@@ -41,8 +41,9 @@ class RunSimulateDataPoint
   require 'json'
 
   def initialize(data_point_id, options = {})
-    # not currently using defaults but leave in place for now.
-    defaults = ActiveSupport::HashWithIndifferentAccess.new()
+    # full path currently required on Mac - see https://github.com/NREL/OpenStudio/issues/2911
+    os_cmd = (Gem.win_platform?) ? 'openstudio.exe' : '/usr/bin/openstudio'
+    defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
@@ -73,7 +74,6 @@ class RunSimulateDataPoint
     @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
     @sim_logger.info "Analysis directory is #{analysis_dir}"
     @sim_logger.info "Simulation directory is #{simulation_dir}"
-    # @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
     # If worker initialization fails, communicate this information
     # to the user via the out.osw.
@@ -170,19 +170,18 @@ class RunSimulateDataPoint
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
         begin
-          run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
-
-          k = OpenStudio::Workflow::Run.new osw_path, run_options
-          @sim_logger.info 'Running workflow'
-          run_result = k.run
-          @sim_logger.info "Final run state is #{run_result}"
+          cmd = "#{@options[:openstudio_executable]} run --workflow #{osw_path} --debug"
+          @sim_logger.info "Running workflow using cmd #{cmd}"
+          `#{cmd}`
         rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
           log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
           @sim_logger.error log_message if @sim_logger
           run_result = :errored
         end
       end
-      if run_result == :errored
+      failed_run_file = "#{run_dir}/failed.job"
+      # with cli, check for presence of run/failed.job
+      if File.exist?(failed_run_file)
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
 
