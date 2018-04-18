@@ -185,7 +185,7 @@ class RunSimulateDataPoint
           log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
           @sim_logger.error log_message if @sim_logger
           run_result = :errored
-        else Exception => e
+        rescue Exception => e
           @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
           run_result = :errored
         end
