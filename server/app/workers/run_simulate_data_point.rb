@@ -170,13 +170,23 @@ class RunSimulateDataPoint
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
         begin
-          
           cmd = "#{@options[:openstudio_executable]} run --workflow #{osw_path} --debug"
           @sim_logger.info "Running workflow using cmd #{cmd}"
-          `#{cmd}`
+          pid = Process.spawn(cmd)
+          # give it 2 hours
+          Timeout.timeout(60*60*2) do
+            Process.wait(pid)
+          end
+        rescue Timeout::Error
+          @sim_logger.error "Killing process for #{osw_path} due to timeout."
+          Process.kill('TERM', pid)
+          run_result = :errored
         rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
           log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
           @sim_logger.error log_message if @sim_logger
+          run_result = :errored
+        else Exception => e
+          @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
           run_result = :errored
         end
       end
