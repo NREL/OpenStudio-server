@@ -170,6 +170,7 @@ class RunSimulateDataPoint
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
         begin
+          
           cmd = "#{@options[:openstudio_executable]} run --workflow #{osw_path} --debug"
           @sim_logger.info "Running workflow using cmd #{cmd}"
           `#{cmd}`
