@@ -42,7 +42,7 @@ class RunSimulateDataPoint
 
   def initialize(data_point_id, options = {})
     # full path currently required on Mac - see https://github.com/NREL/OpenStudio/issues/2911
-    os_cmd = (Gem.win_platform?) ? 'C:\projects\openstudio\bin\openstudio.exe' : '/usr/bin/openstudio'
+    os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : '/usr/bin/openstudio'
     defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
     @options = defaults.deep_merge(options)
 
@@ -173,8 +173,8 @@ class RunSimulateDataPoint
           cmd = "#{@options[:openstudio_executable]} run --workflow #{osw_path} --debug"
           @sim_logger.info "Running workflow using cmd #{cmd}"
           pid = Process.spawn(cmd)
-          # give it 2 hours
-          Timeout.timeout(60*60*2) do
+          # give it 4 hours
+          Timeout.timeout(60*60*4) do
             Process.wait(pid)
           end
         rescue Timeout::Error
