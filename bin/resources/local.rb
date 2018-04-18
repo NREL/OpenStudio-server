@@ -42,26 +42,6 @@ end
 require 'socket'
 require 'json'
 
-# Determines if OS is Windows
-#
-def is_windows?
-  win_patterns = [
-      /bccwin/i,
-      /cygwin/i,
-      /djgpp/i,
-      /mingw/i,
-      /mswin/i,
-      /wince/i
-  ]
-
-  case RUBY_PLATFORM
-    when *win_patterns
-      return true
-    else
-      return false
-  end
-end
-
 # Check to see if the port is open on the local computer
 #
 # @param port [Integer] localhost port to check
@@ -145,7 +125,7 @@ def kill_processes(pid_json)
     $logger.error "File `#{pid_json}` not found. It is possible that processes have been orphaned."
     exit 1
   end
-  windows = is_windows?
+  windows = Gem.win_platform?
   find_windows_pids(pid_json) if windows
   pid_hash = ::JSON.parse(File.read(pid_json), symbolize_names: true)
   pid_array = []
@@ -249,7 +229,7 @@ def run_rspec(test_directory, mongo_directory, ruby_path, debug)
   $logger.debug 'RSPEC FINISHED'
 
   $logger.debug 'Killing outstanding processes'
-  find_windows_pids(state_file) if is_windows?
+  find_windows_pids(state_file) if Gem.win_platform?
   kill_processes(state_file)
 
   $logger.debug 'Finished rspec testing.'
@@ -390,7 +370,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
   end
 
-  find_windows_pids(state_file) if is_windows?
+  find_windows_pids(state_file) if Gem.win_platform?
 
   $logger.debug 'Instantiated all processes. Writing receipt file.'
 
@@ -459,7 +439,7 @@ end
 #
 def stop_local_server(rails_pid, dj_pids, mongod_pid, child_pids = [])
   successful = true
-  windows = is_windows?
+  windows = Gem.win_platform?
   dj_pids.reverse.each do |dj_pid|
     pid_kill_success = kill_pid(dj_pid, 'delayed-jobs', windows)
     successful = false unless pid_kill_success
