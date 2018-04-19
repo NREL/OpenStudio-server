@@ -172,6 +172,8 @@ class RunSimulateDataPoint
         begin
           cmd = "#{@options[:openstudio_executable]} run --workflow #{osw_path} --debug"
           @sim_logger.info "Running workflow using cmd #{cmd}"
+
+          # TODO confirm that any ENV variables that we want OSS to use are set correctly, probably pass explicitly to spawn
           pid = Process.spawn(cmd)
           # give it 4 hours
           Timeout.timeout(60*60*4) do
