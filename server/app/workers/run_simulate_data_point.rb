@@ -42,7 +42,7 @@ class RunSimulateDataPoint
 
   def initialize(data_point_id, options = {})
     # full path currently required on Mac - see https://github.com/NREL/OpenStudio/issues/2911
-    os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : '/usr/bin/openstudio'
+    os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : '/usr/bin/openstudio' 
     defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
     @options = defaults.deep_merge(options)
 
