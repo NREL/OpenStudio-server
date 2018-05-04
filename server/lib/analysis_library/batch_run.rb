@@ -101,5 +101,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     @analysis_job.save!
     @analysis.reload
     @analysis.save!
+    require_relative "gather_results"
+    zip_all_results(@analysis_id, 1)
   end
 end

@@ -201,7 +201,8 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
         @analysis.reload
       end
       @analysis.save!
-
+      require_relative "gather_results"
+      zip_all_results(@analysis_id, 1)
       logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
