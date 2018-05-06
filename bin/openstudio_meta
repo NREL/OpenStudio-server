@@ -570,7 +570,7 @@ class StopLocal
       $logger.error "Unable to find the local configuration json at #{local_state_file}"
       exit 1
     end
-    find_windows_pids(local_state_file) if is_windows?
+    find_windows_pids(local_state_file) if Gem.win_platform?
     local_server_config = ::JSON.parse(File.read(local_state_file), symbolize_names: true)
     rails_pid = local_server_config[:rails_pid]
     dj_pids = local_server_config[:dj_pids]
