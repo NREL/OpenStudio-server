@@ -110,7 +110,7 @@
               <div class="span3">
                 <div class="button-container">
                   <% if @current.status == 'completed' %>
-                      <td><%= link_to 'Download Results', download_gather_results_zip_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                      <td><%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
                   <% end %>
                 </div>
               </div>

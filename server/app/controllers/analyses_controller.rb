@@ -720,13 +720,13 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Download the analysis zipped by gather_results.rb
-  def download_gather_results_zip
+  # Download the BTAP analysis zipped by gather_results.rb
+  def download_BTAP_results_zip
     @analysis = Analysis.find(params[:id])
     path = "/mnt/openstudio/server/assets/results.#{@analysis.id}.zip";
 
     unless @analysis.seed_zip.nil?
-      send_data File.open(path, 'rb').read, filename: 'results.#{@analysis.id}.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
+      send_data File.open(path, 'rb').read, filename: "results.#{@analysis.id}.zip", type: @analysis.seed_zip.content_type, disposition: 'attachment'
     end
   end
 
