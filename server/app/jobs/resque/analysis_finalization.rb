@@ -33,8 +33,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-class ResqueJobs::AnalysisFinalization
-  @queue = :analysis_finalization
+class AnalysisFinalization
+  @queue = :analysis_scripts
 
   def self.perform(analysis_id, options = {})
     # todo error handling and logging around looking up analysis and detecting start/complete
