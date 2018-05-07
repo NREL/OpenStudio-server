@@ -720,6 +720,17 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # Download the analysis zipped by gather_results.rb
+  def download_gather_results_zip
+    @analysis = Analysis.find(params[:id])
+    path = "/mnt/openstudio/server/assets/results.#{@analysis.id}.zip";
+
+    unless @analysis.seed_zip.nil?
+      send_data File.open(path, 'rb').read, filename: 'results.#{@analysis.id}.zip', type: @analysis.seed_zip.content_type, disposition: 'attachment'
+    end
+  end
+
+
   def download_algorithm_results_zip
     @analysis = Analysis.find(params[:id])
 
