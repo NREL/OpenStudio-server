@@ -39,6 +39,8 @@ class AnalysisFinalization
   def self.perform(analysis_id, options = {})
     # todo error handling and logging around looking up analysis and detecting start/complete
     analysis = Analysis.find(analysis_id)
+    # TODO check status of analysis for successful complete
     analysis.run_finalization_scripts
   end
+
 end
