@@ -47,8 +47,8 @@ def gather_output_results(aid, num_cores=1)
   unless Dir.exists? basepath
     fail "ERROR: Unable to find base data point path #{basepath}"
   end
-  resultspath = "/mnt/openstudio/server/assets/results/osw_files/"
-  outputpath = "/mnt/openstudio/server/assets/results/"
+  resultspath = "/mnt/openstudio/server/assets/results/#{aid}/osw_files/"
+  outputpath = "/mnt/openstudio/server/assets/results/#{aid}/"
 
   simulations_json_folder = outputpath
   
@@ -514,7 +514,7 @@ def zip_all_results(uuid, cores=1)
   gather_output_results(options[:analysis_id], options[:num_cores])
 
   # Zip Results
-  directory_to_zip = "/mnt/openstudio/server/assets/results"
+  directory_to_zip = "/mnt/openstudio/server/assets/results/#{uuid}"
   output_file = "/mnt/openstudio/server/assets/results.#{uuid}.zip"
   puts "Zipping Files...".cyan
   zf = ZipFileGenerator.new(directory_to_zip, output_file)
