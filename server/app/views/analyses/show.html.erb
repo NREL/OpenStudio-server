@@ -130,6 +130,7 @@
               <% end %>
               <% if @analysis.status == 'completed' %>
                   <%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@analysis), data: { confirm: 'Are you sure?' }, class: "list-group-item" %>
+                  <%= link_to 'BTAP Error Log', download_BTAP_error_log_analysis_path(@analysis), class: "list-group-item" %>
               <% end %>
             </div>
           </div>

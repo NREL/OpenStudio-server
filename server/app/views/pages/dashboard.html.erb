@@ -91,7 +91,11 @@
               <% end %>
             </p>
             <div class="row-fluid pad-top-20">
-              <div class="span3">
+              <% if @current.status == 'completed' %>
+                  <div class="span3">
+              <% else %>
+                  <div class="span3 offset3">
+              <% end %>
                 <div class="button-container">
                   <%= link_to 'View Analysis', analysis_path(@current), class: "btn btn-mini" %>
                 </div>
