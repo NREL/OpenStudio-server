@@ -736,7 +736,7 @@ class AnalysesController < ApplicationController
     #"/mnt/openstudio/server/assets/results/#{@analysis.id}/failed_run_error_log.csv"
     path = "/mnt/openstudio/server/assets/results/#{@analysis.id}/failed_run_error_log.csv";
 
-    unless File.exist?(path)
+    if File.exist?(path)
       send_data File.open(path, 'rb').read, filename: "log.#{@analysis.id}.csv", type: "text/csv", disposition: 'attachment'
     end
   end
