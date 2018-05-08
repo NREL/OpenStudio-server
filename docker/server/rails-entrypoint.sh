@@ -2,6 +2,7 @@
 
 echo 'Provisioning data volume osdata'
 sleep 1
+mkdir -p /mnt/openstudio/analyses && chmod 777 /mnt/openstudio/analyses
 mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
 mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
 mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables
