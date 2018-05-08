@@ -169,6 +169,11 @@
                     <td><%= link_to 'Delete Project', project_path(res.project), method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %></td>
                 <% end %>
               </div>
+              <div class="button-container">
+                <% if @res.status == 'completed' %>
+                    <td><%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@res), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                <% end %>
+              </div>
             </div>
           </div>
         </div>

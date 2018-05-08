@@ -128,6 +128,9 @@
               <%if @algorithm_results %>
                 <%= link_to "Algorithm Results Zip", download_algorithm_results_zip_analysis_path(@analysis), class: 'list-group-item' %>
               <% end %>
+              <% if @analysis.status == 'completed' %>
+                  <%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "list-group-item" %>
+              <% end %>
             </div>
           </div>
         </div>
