@@ -170,8 +170,8 @@
                 <% end %>
               </div>
               <div class="button-container">
-                <% if @res.status == 'completed' %>
-                    <td><%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@res), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                <% if res.status == 'completed' %>
+                    <td><%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(res.project), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
                 <% end %>
               </div>
             </div>
