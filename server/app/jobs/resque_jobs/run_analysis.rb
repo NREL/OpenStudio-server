@@ -32,16 +32,23 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
-# Runs on web node
-module ResqueJobs
-  class FinalizeAnalysis
-    @queue = :analysis_wrappers
 
-    def self.perform(analysis_id, options = {})
-      # todo error handling and logging around looking up analysis
-      analysis = Analysis.find(analysis_id)
-      # TODO check status of analysis for successful complete:  analysis.status == 'completed'
-      analysis.run_finalization
+# Runs on background node.  Wraps older DJ code to work w/Resque
+module ResqueJobs
+  class RunAnalysis
+    @queue = :analyses
+
+    def self.perform(analysis_type, analysis_id, job_id, options = {})
+      job = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(analysis_id, job_id, options)
+      job.perform
+    end
+
+    # see https://github.com/resque/resque/blob/master/docs/HOOKS.md
+    # after_perform called with job arguments after it performs
+    # not called if job fails.
+    # note that we are enqueuing regardless of error status; that will need to be checked in FinalizeAnalysis job.
+    def self.after_perform_finalize_analysis(analysis_type, analysis_id, job_id, options = {})
+      Resque.enqueue(Jobs::Resque::FinalizeAnalysis, analysis_id)
     end
   end
 end

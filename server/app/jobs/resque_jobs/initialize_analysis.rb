@@ -34,14 +34,24 @@
 # *******************************************************************************
 # Runs on web node
 module ResqueJobs
-  class FinalizeAnalysis
+  class InitializeAnalysis
     @queue = :analysis_wrappers
 
-    def self.perform(analysis_id, options = {})
-      # todo error handling and logging around looking up analysis
+    # Perform set up before running an analysis
+    # this is enqueued in Analysis#start.
+    # todo error handling
+    # todo handle cleanup if this fails
+    def self.perform(analysis_type, analysis_id, job_id, options = {})
+      # todo error handling and logging around looking up analysis and detecting start/complete
       analysis = Analysis.find(analysis_id)
-      # TODO check status of analysis for successful complete:  analysis.status == 'completed'
-      analysis.run_finalization
+      # this will handle unzipping to osdata volume and running any initialization scripts
+      analysis.run_initialization
+    end
+
+    # after_perform hooks only called if job completes successfully
+    def self.after_perform_run_analysis(analysis_type, analysis_id, job_id, options = {})
+      #enqueue for run
+      Resque.enqueue(RunAnalysisResque, analysis_type, id, job_id, options)
     end
   end
 end
