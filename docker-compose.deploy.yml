@@ -20,7 +20,7 @@ services:
       - "443:443"
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-      - QUEUES=analysis_scripts
+      - QUEUES=analysis_wrappers
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
