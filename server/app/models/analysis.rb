@@ -95,10 +95,14 @@ class Analysis
   after_create :verify_uuid
   before_destroy :queue_delete_files
 
+  # TODO dynamically include as appropriate, depending on environment
+  include WebNode::Resque::Analysis
+
   def self.status_states
     %w(na init queued started completed)
   end
 
+  # FIXME analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
   def start(no_delay, analysis_type = 'batch_run', options = {})
     defaults = { skip_init: false }
     options = defaults.merge(options)
