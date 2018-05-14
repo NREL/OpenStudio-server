@@ -13,9 +13,11 @@ end
 
 def zip_all_results(uuid, cores=1)
 
-  repo_folder = git_clean_rep('https://github.com/canmet-energy/btap_gather_results.git', options = { })
+  #repo_folder = git_clean_rep('https://github.com/canmet-energy/btap_gather_results.git', options = { })
 
-  %x[cd #{repo_folder} && bundle install && bundle exec ruby gather_results.rb -a #{uuid} ]
+  %x[git clone https://github.com/canmet-energy/btap_gather_results.git /mnt/openstudio/server/assets/btap_gather_results]
+
+  %x[cd /mnt/openstudio/server/assets/btap_gather_results && bundle install && bundle exec ruby gather_results.rb -a #{uuid} ]
 
   # Finish up
   puts 'SUCCESS'
