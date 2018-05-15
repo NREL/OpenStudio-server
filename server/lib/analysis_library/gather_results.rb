@@ -12,12 +12,12 @@ def git_clean_rep(url,options)
 end
 
 def zip_all_results(uuid, cores=1)
-
-  #repo_folder = git_clean_rep('https://github.com/canmet-energy/btap_gather_results.git', options = { })
-
-  %x[git clone https://github.com/canmet-energy/btap_gather_results.git /mnt/openstudio/server/assets/btap_gather_results]
-
-  %x[cd /mnt/openstudio/server/assets/btap_gather_results && bundle install && bundle exec ruby gather_results.rb -a #{uuid} ]
+  
+  repo_folder = git_clean_rep('https://github.com/canmet-energy/btap_gather_results.git', options = { })
+  # %x[git clone https://github.com/canmet-energy/btap_gather_results.git /mnt/openstudio/server/assets/btap_gather_results]
+  require "#{repo_folder}/gather_results.rb"
+  start_gather_result(uuid, cores)
+  #%x[cd /mnt/openstudio/server/assets/btap_gather_results && bundle install && bundle exec ruby gather_results.rb -a #{uuid} ]
 
   # Finish up
   puts 'SUCCESS'
