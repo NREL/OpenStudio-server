@@ -1,0 +1,100 @@
+#!/usr/bin/env ruby
+
+# *******************************************************************************
+# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# (1) Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# (2) Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# (3) Neither the name of the copyright holder nor the names of any contributors
+# may be used to endorse or promote products derived from this software without
+# specific prior written permission from the respective party.
+#
+# (4) Other than as required in clauses (1) and (2), distributions in any form
+# of modifications or other derivative works may not use the "OpenStudio"
+# trademark, "OS", "os", or any other confusingly similar designation without
+# specific prior written permission from Alliance for Sustainable Energy, LLC.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES
+# GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# *******************************************************************************
+
+::Signal.trap('INT') { abort }
+
+require 'optparse'
+require 'pathname'
+require 'json'
+
+# Set up options parsing
+argv = ARGV.dup
+options = {
+  debug: false,
+  windows: false,
+  port: 8080
+}
+opts = ::OptionParser.new do |o|
+  o.banner = 'Usage: rspec_command [options] RUBY_EXE OUTPUT_DIR DB_PORT STATE_FILE'
+  o.separator ''
+  o.separator 'RUBY_EXE: Absolute path to the ruby executable to use'
+  o.separator 'OUTPUT_DIR: Absolute path of the directory to write the rspec results to'
+  o.separator 'DB_PORT: Port used by the mongod instance'
+  o.separator 'STATE_FILE: Absolute path to write PIDs to'
+  o.on('-d', '--debug', 'Print debugging information to STDOUT') { |_| options[:debug] = true }
+end
+
+# Parse arguments and verify them
+opts.parse!(argv)
+ruby_exe = argv.shift
+output_dir = argv.shift
+db_port = argv.shift
+state_file = argv.shift
+inputs_empty = ruby_exe.nil? | output_dir.nil? | db_port.nil? | state_file.nil?
+raise 'RUBY_EXE, LOG_DIR, PROJECT_DIR, DB_PORT, and STATE_FILE are all required for execution' if inputs_empty
+error_msg = ''
+error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, is not absolute. " unless Pathname.new(ruby_exe).absolute?
+error_msg << "The OUTPUT_DIR provided, `#{output_dir}`, is not absolute. " unless Pathname.new(output_dir).absolute?
+error_msg << "The STATE_FILE projvided, `#{state_file}`, is not absolute. " unless Pathname.new(state_file).absolute?
+raise error_msg unless error_msg.empty?
+error_msg << "The RUBY_EXE provided, `#{ruby_exe}`, does not exist on the file system. " unless File.exist? ruby_exe
+unless Dir.exist? File.dirname(output_dir)
+  error_msg << "The OUTPUT_DIR provided, `#{output_dir}`, does not exist on the file system. "
+end
+raise error_msg unless error_msg.empty?
+
+# Create the system call to use
+bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bundle'))
+rspec_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rspec'))
+::Dir.chdir(File.absolute_path(File.join(__FILE__, './../../../../server')))
+::ENV['OS_SERVER_MONGO_PORT'] = db_port
+::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
+::ENV['OS_SERVER_LOG_PATH'] = File.join(output_dir, 'logs', 'rails.log')
+::ENV['RAILS_ENV'] = 'local-test'
+sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
+  "\"**/models/cluster_spec.rb\""
+puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
+puts "ENV for starting rspec: #{::ENV.inspect}" if options[:debug]
+
+# Execute the system call
+process_log = File.join(output_dir, 'logs', 'rspec.log')
+rspec_pid = spawn(sys_call, [:err, :out] => [process_log, 'w'])
+config_hash = File.exist?(state_file) ? ::JSON.parse(File.read(state_file), symbolize_names: true) : {}
+config_hash[:rspec_pid] = rspec_pid
+::File.open(state_file, 'wb') { |f| f << ::JSON.pretty_generate(config_hash) }
+Process.wait rspec_pid
+exit $?.exitstatus

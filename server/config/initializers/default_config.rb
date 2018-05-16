@@ -63,6 +63,11 @@ FileUtils.mkdir_p APP_CONFIG['rails_tmp_path'] unless Dir.exist? APP_CONFIG['rai
 
 # update the loggers
 Rails.logger = ActiveSupport::TaggedLogging.new(Logger.new("#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"))
+
+if Rails.application.config.job_manager == :resque
+  Resque.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'resque.log'))
+  Resque.logger.level = Logger::INFO
+end
 Mongoid.logger.level = Logger::INFO
 
 # Make sure to add the assets to the asset pipeline
