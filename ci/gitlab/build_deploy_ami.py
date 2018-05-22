@@ -4,12 +4,24 @@ import os
 from subprocess import Popen, PIPE, STDOUT
 import argparse
 import json
+import signal
 import boto3
+import fileinput
+import re
+import sys
 
 
 # A helper method for executing command line calls cleanly
 def run_cmd(exec_str, description):
-    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
+    p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True, preexec_fn=os.setsid)
+    pgid = os.getpgid(p.pid)
+
+    def signal_handler(sig_type, _):
+        if sig_type == signal.SIGINT:
+            os.killpg(pgid, signal.SIGINT)
+        sys.exit(1)
+
+    signal.signal(signal.SIGINT, signal_handler)
     (stdout, stderr) = p.communicate(None)
     exit_code = p.returncode
     if exit_code is not 0:
@@ -27,22 +39,46 @@ def run_cmd(exec_str, description):
 parser = argparse.ArgumentParser()
 parser.add_argument('-o', '--output_dir', default=os.getcwd(),
                     help='Absolute path to the directory to write the output log to')
-parser.add_argument('--generated_by', default=None, help='Overwrite the Author metadata field')
+parser.add_argument('-n', '--notes', default=None, help='Provide notes to be persisted in the amis.json entry')
+parser.add_argument('-v', '--verbose', help='Verbose output', action='store_true')
+parser.add_argument('--generated_by', default='GitLabCI', help='Set the Author metadata field')
 parser.add_argument('--docker_version', default=None, help='Overwrite the docker version in the AMI')
 parser.add_argument('--ami_version', default=None, help='Overwrite the AMI version')
 parser.add_argument('--ami_extension', default=None, help='Overwrite the AMI version extension')
-parser.add_argument('-n', '--notes', default=None, help='Provide notes to be persisted in the amis.json entry')
-parser.add_argument('-v', '--verbose', help='Verbose output', action='store_true')
+parser.add_argument('--dockerhub_repo', default=None, help='Release from a non-NREL DockerHub repository')
+parser.add_argument('--write_json', help='Write AMI JSON specification to file instead of S3', action='store_true')
+parser.add_argument('--disable_public', help='Do not make the AMI public', action='store_true')
+parser.add_argument('--enable_custom_build', help='Flag to allow non-standard AMI release', action='store_true')
 args = parser.parse_args()
 
 # Parse ARGV
 output_dir = args.output_dir
-override_generated_by = args.generated_by
+generated_by = args.generated_by
 override_docker_version = args.docker_version
 override_ami_version = args.ami_version
 override_ami_extension = args.ami_extension
+override_dockerhub_repo = args.dockerhub_repo
+write_to_file = args.write_json
+disable_public = args.disable_public
+custom_enabled = args.enable_custom_build
 notes = args.notes
 verbose = args.verbose
+
+if not custom_enabled:
+    if generated_by is not 'GitLabCI':
+        raise EnvironmentError('Cannot parse --generated_by, as custom builds is not enabled')
+    if override_docker_version is not None:
+        raise EnvironmentError('Cannot parse --docker_version, as custom builds is not enabled')
+    if override_ami_version is not None:
+        raise EnvironmentError('Cannot parse --ami_version, as custom builds is not enabled')
+    if override_ami_extension is not None:
+        raise EnvironmentError('Cannon prase --ami_extension, as custom builds is not enabled')
+    if override_dockerhub_repo is not None:
+        raise EnvironmentError('Cannot parse --dockerhub_repo, as custom builds is not enabled')
+    if write_to_file:
+        raise EnvironmentError('Cannot parse --write_json, as custom builds is not enabled')
+    if disable_public:
+        raise EnvironmentError('Cannot parse --disable_public, as custom builds is not enabled')
 
 # Ensure the required environment variables exist
 try:
@@ -57,44 +93,66 @@ template_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              '../../docker/deployment/user_variables.json.template'))
 with open(template_path) as f:
     docker_version = str(json.load(f)["docker_version"])
+if override_docker_version is not None:
+    if verbose:
+        print 'Docker version being overwritten from `{}` to `{}`'.format(docker_version, override_docker_version)
+    docker_version = override_docker_version
 
 # Get the OpenStudioServer version and version extension to use
-version_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../server/lib/openstudio_server/version.rb'))
+version_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../server/app/lib/openstudio_server/version.rb'))
 
 cmd_call = 'ruby -r {} -e "puts OpenstudioServer::VERSION"'.format(version_path)
 if verbose:
     print 'OSS version retrieval command is: {}'.format(cmd_call)
 stdout_str = run_cmd(cmd_call, 'OpenStudio Server version retrieval')
-version = stdout_str.strip()
+ami_version = stdout_str.strip()
 if verbose:
-    print 'OSS version retrieved is {}\n'.format(version)
+    print 'OSS version retrieved is {}\n'.format(ami_version)
+if override_ami_version is not None:
+    if verbose:
+        print 'AMI version being overwritten from `{}` to `{}`'.format(ami_version, override_ami_version)
+    ami_version = override_ami_version
 
 cmd_call = 'ruby -r {} -e "puts OpenstudioServer::VERSION_EXT"'.format(version_path)
 if verbose:
     print 'OSS version extension retrieval command is: {}'.format(cmd_call)
 stdout_str = run_cmd(cmd_call, 'OpenStudio Server version extension retrieval')
-version_ext = stdout_str.strip()
+ami_version_ext = stdout_str.strip()
 if verbose:
-    print 'OSS version extension retrieved is {}\n'.format(version_ext)
+    print 'OSS version extension retrieved is {}\n'.format(ami_version_ext)
+if override_ami_extension is not None:
+    if override_ami_extension[0] != '-':
+        override_ami_extension = '-' + override_ami_extension.strip()
+    if verbose:
+        print 'AMI version extension being overwritten from `{}` to `{}`'.format(ami_version_ext,
+                                                                                 override_ami_extension)
+    ami_version_ext = override_ami_extension
 
 # Write the packer user variables json file
 defaults = {
-    'generated_by': 'GitLabCI',
+    'generated_by': '',
     'docker_version': docker_version,
-    'version': version,
-    'ami_version_extension': version_ext
+    'version': ami_version,
+    'ami_version_extension': ami_version_ext
 }
-if override_generated_by is not None:
-    defaults['generated_by'] = override_generated_by
-if override_docker_version is not None:
-    defaults['docker_version'] = override_docker_version
-if override_ami_version is not None:
-    defaults['version'] = override_ami_version
-if override_ami_extension is not None:
-    defaults['ami_version_extension'] = override_ami_extension
+if generated_by is not 'GitLabCI':
+    if verbose:
+        print 'AMI author being overwritten from `GitLabCI` to `{}`'.format(generated_by)
+defaults['generated_by'] = generated_by
 variables_write_path = os.path.join(os.path.dirname(template_path), 'user_variables.json')
 with open(variables_write_path, 'w') as f:
     json.dump(defaults, f)
+
+# If using a custom DockerHub repo, change the docker images loaded into the AMI
+if override_dockerhub_repo is not None:
+    docker_config_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                      '../../docker/deployment/scripts/aws_osserver_init.sh'))
+    for line in fileinput.input(docker_config_path, inplace=1, backup='.bak'):
+        line = re.sub('docker pull nrel', 'docker pull {}'.format(override_dockerhub_repo), line.rstrip())
+        line = re.sub('docker tag nrel', 'docker tag {}'.format(override_dockerhub_repo), line)
+        print(line)
+    if verbose:
+        print 'Replaced `nrel` with `{}` in docker pull and docker tag commands'.format(override_dockerhub_repo)
 
 # Next we need to run packer and retrieve the new AMI ID
 os.chdir(os.path.dirname(template_path))
@@ -126,6 +184,8 @@ if verbose:
 
 # Next we pull the openstudio-server container and parse out each version required
 cmd_call = 'docker pull nrel/openstudio-server:{}'.format(defaults['version'] + defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker pull nrel', 'docker pull {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-server container pull command is: {}'.format(cmd_call)
 run_cmd(cmd_call, 'openstudio-server container retrieval')
@@ -133,6 +193,8 @@ run_cmd(cmd_call, 'openstudio-server container retrieval')
 # OpenStudio version and SHA
 cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -e "puts OpenStudio.openStudioLongVersion"'.\
     format(defaults['version'] + defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-server OpenStudio version command is: {}'.format(cmd_call)
 stdout_arr = run_cmd(cmd_call, 'OpenStudio version retrieval').split('\n')[-2].split('.')
@@ -142,8 +204,11 @@ if verbose:
     print 'OpenStudio version retrieved is {}, with SHA {}'.format(os_version, os_sha)
 
 # OpenStudio-Standards version
-cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudio-standards -e "puts ' \
-           'OpenstudioStandards::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
+cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
+           '\'openstudio-standards\'; puts OpenstudioStandards::VERSION"'.format(defaults['version'] +
+                                                                                 defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-server OpenStudio-Standards version command is: {}'.format(cmd_call)
 stdout_str = run_cmd(cmd_call, 'OpenStudio-Standards version retrieval').split('\n')[-2]
@@ -152,8 +217,11 @@ if verbose:
     print 'OpenStudio-Standards version retrieved is {}'.format(standards_version)
 
 # OpenStudio-Analysis version
-cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudio-analysis -e "puts ' \
-           'OpenStudio::Analysis::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
+cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
+           '\'openstudio-analysis\'; puts OpenStudio::Analysis::VERSION"'.format(defaults['version'] +
+                                                                                 defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-server OpenStudio-Analysis version command is: {}'.format(cmd_call)
 stdout_str = run_cmd(cmd_call, 'OpenStudio-Analysis version retrieval').split('\n')[-2]
@@ -162,8 +230,11 @@ if verbose:
     print 'OpenStudio-Analysis version retrieved is {}'.format(analysis_version)
 
 # OpenStudio-Workflow version
-cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -r openstudio-workflow -e "puts ' \
-           'OpenStudio::Workflow::VERSION"'.format(defaults['version'] + defaults['ami_version_extension'])
+cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
+           '\'openstudio-workflow\'; puts OpenStudio::Workflow::VERSION"'.format(defaults['version'] +
+                                                                                 defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-server OpenStudio-Workflow version command is: {}'.format(cmd_call)
 stdout_str = run_cmd(cmd_call, 'OpenStudio version retrieval').split('\n')[-2]
@@ -174,6 +245,8 @@ if verbose:
 # EnergyPlus version
 cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -e "puts OpenStudio.energyPlusVersion"'.\
     format(defaults['version'] + defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-server EnergyPlus version command is: {}'.format(cmd_call)
 stdout_arr = run_cmd(cmd_call, 'EnergyPlus version retrieval').split('\n')[-2].split('.')
@@ -184,6 +257,8 @@ if verbose:
 # Radiance version
 cmd_call = 'docker run nrel/openstudio-server:{} /usr/Radiance/bin/rtrace -version'.\
     format(defaults['version'] + defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-server Radiance version command is: {}'.format(cmd_call)
 stdout_arr = run_cmd(cmd_call, 'Radiance version retrieval').split('\n')[-2].split('.')
@@ -193,6 +268,8 @@ if verbose:
 
 # Next we pull the openstudio-rserve container and parse the R version
 cmd_call = 'docker pull nrel/openstudio-rserve:{}'.format(defaults['version'] + defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker pull nrel', 'docker pull {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-rserve container pull command is: {}'.format(cmd_call)
 run_cmd(cmd_call, 'openstudio-rserve container retrieval')
@@ -200,6 +277,8 @@ run_cmd(cmd_call, 'openstudio-rserve container retrieval')
 # R version
 cmd_call = 'docker run nrel/openstudio-rserve:{} R --version'.\
     format(defaults['version'] + defaults['ami_version_extension'])
+if override_dockerhub_repo is not None:
+    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print 'openstudio-rserve R version command is: {}'.format(cmd_call)
 stdout_arr = run_cmd(cmd_call, 'R version retrieval').split('\n')[2].split('.')
@@ -238,22 +317,39 @@ ami_entry = {
     "ami": ami_id
 }
 
+# We set the AMI as publically available, unless disable_public is true
+if not disable_public:
+    ec2 = boto3.resource('ec2')
+    image = ec2.Image(ami_id)
+    response = image.modify_attribute(LaunchPermission={'Add': [{'Group': 'all'}]})
+    if response['ResponseMetadata']['HTTPStatusCode'] is not 200:
+        raise RuntimeError('API request setting AMI {} permissions to public failed to return status code 200, instead '
+                           'returning code {}'.format(ami_id, response['ResponseMetadata']['HTTPStatusCode']))
+    if verbose:
+        print 'API request to make {} public returned status code 200'.format(ami_id)
+
+# If the ami entry is getting persisted to file, instead of to S3, then short-circuit here
+if write_to_file:
+    write_path = os.path.abspath(os.path.join(output_dir, 'amis_extension.json'))
+    with open(write_path, 'w') as f:
+        f.write(json.dumps(ami_entry, indent=4))
+    if verbose:
+        print 'Wrote AMI entry to {}. Exiting with exit code 0'.format(write_path)
+    sys.exit(0)
+
 # Now that we have the required artifacts, we boot up the AWS library and download the latest amis.json
 s3 = boto3.resource('s3')
 file_obj = s3.Object('openstudio-resources', 'server/api/v3/amis.json')
 amis = json.loads(file_obj.get()['Body'].read().decode('utf-8'))
+if verbose:
+    print 'Retrieved amis.json file from S3'
 amis['builds'].append(ami_entry)
 
-# We set the AMI as publically available
-ec2 = boto3.resource('ec2')
-image = ec2.Image(ami_id)
-response = image.modify_attribute(LaunchPermission={'Add': [{'Group': 'all'}]})
-if response['ResponseMetadata']['HTTPStatusCode'] is not 200:
-    raise RuntimeError('API request setting AMI {} permissions to public failed to return status code 200, instead '
-                       'returning code {}'.format(ami_id, response['ResponseMetadata']['HTTPStatusCode']))
-
 # Last of all, we add and upload the amis.json file
-file_obj.put(ACL='public-read', Body=json.dumps(amis, indent=4))
+response = file_obj.put(ACL='public-read', Body=json.dumps(amis, indent=4))
 if response['ResponseMetadata']['HTTPStatusCode'] is not 200:
     raise RuntimeError('API request uploading the updated amis.json file failed to return status code 200, instead '
                        'returning code {}'.format(response['ResponseMetadata']['HTTPStatusCode']))
+if verbose:
+    print 'Submitted updated amis.json file to S3 API which returned status code 200. Exiting'
+sys.exit(0)
