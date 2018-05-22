@@ -128,6 +128,14 @@
               <%if @algorithm_results %>
                 <%= link_to "Algorithm Results Zip", download_algorithm_results_zip_analysis_path(@analysis), class: 'list-group-item' %>
               <% end %>
+              <% if @analysis.status == 'completed' %>
+                  <%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@analysis), data: { confirm: 'Are you sure?' }, class: "list-group-item" %>
+                  <% #fails = @analysis.data_points.where(status_message: 'datapoint failure').count %>
+                  <% path = "/mnt/openstudio/server/assets/results/#{@analysis.id}/failed_run_error_log.csv"%>
+                  <% if File.exist?(path) %>
+                    <%= link_to 'BTAP Error Log', download_BTAP_error_log_analysis_path(@analysis), class: "list-group-item" %>
+                  <% end %>
+              <% end %>
             </div>
           </div>
         </div>

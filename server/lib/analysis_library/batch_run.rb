@@ -95,6 +95,8 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     @analysis.status_message = log_message
     @analysis.save!
   ensure
+    require_relative "gather_results"
+    zip_all_results(@analysis_id, 1)
     logger.info 'Finished running batchrun method'
     @analysis_job.end_time = Time.now
     @analysis_job.status = 'completed'
