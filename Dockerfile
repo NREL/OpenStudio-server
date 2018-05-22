@@ -14,8 +14,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
     sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list && \
     apt-get update \
 	&& apt-get install -y --no-install-recommends \
-        autoconf \
         apt-transport-https \
+        autoconf \
         bison \
         build-essential \
         bzip2 \
@@ -46,7 +46,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libsm-dev \
         mongodb-org-tools \
         procps \
-        ruby \
         tar \
         unzip \
         wget \
@@ -54,50 +53,9 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Build and Install Ruby
-#   -- skip installing gem documentation
-RUN mkdir -p /usr/local/etc \
-	&& { \
-		echo 'install: --no-document'; \
-		echo 'update: --no-document'; \
-	} >> /usr/local/etc/gemrc
-
-ENV RUBY_MAJOR 2.2
-ENV RUBY_VERSION 2.2.4
-ENV RUBY_DOWNLOAD_SHA256 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
-ENV RUBYGEMS_VERSION 2.6.6
-
-# some of ruby's build scripts are written in ruby
-# we purge this later to make sure our final image uses what we just built
-RUN curl -fSL -o ruby.tar.gz "http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR/ruby-$RUBY_VERSION.tar.gz" \
-	&& echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.gz" | sha256sum -c - \
-	&& mkdir -p /usr/src/ruby \
-	&& tar -xzf ruby.tar.gz -C /usr/src/ruby --strip-components=1 \
-	&& rm ruby.tar.gz \
-	&& cd /usr/src/ruby \
-	&& { echo '#define ENABLE_PATH_CHECK 0'; echo; cat file.c; } > file.c.new && mv file.c.new file.c \
-	&& autoconf \
-	&& ./configure --disable-install-doc --enable-shared \
-	&& make -j"$(nproc)" \
-	&& make install \
-	&& apt-get purge -y --auto-remove $buildDeps \
-	&& gem update --system $RUBYGEMS_VERSION \
-	&& rm -r /usr/src/ruby
-
-ENV BUNDLER_VERSION 1.11.2
-
-RUN gem install bundler --version "$BUNDLER_VERSION"
-
-# install things globally, for great justice
-# and don't create ".bundle" in all our apps
-ENV GEM_HOME /usr/local/bundle
-ENV BUNDLE_PATH="$GEM_HOME" \
-	BUNDLE_BIN="$GEM_HOME/bin" \
-	BUNDLE_SILENCE_ROOT_WARNING=1 \
-	BUNDLE_APP_CONFIG="$GEM_HOME"
-ENV PATH $BUNDLE_BIN:$PATH
-RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
-	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
+# Install Ruby
+ADD /docker/deployment/scripts/install_ruby.sh /usr/local/bin/install_ruby.sh
+RUN /usr/local/bin/install_ruby.sh 2.2.4 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
 
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION 5.0.25
@@ -111,26 +69,11 @@ RUN passenger-install-nginx-module
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
-# Run this separate to cache the download
-ENV OPENSTUDIO_VERSION 2.4.0
-ENV OPENSTUDIO_SHA f58a3e1808
-
-# Download from S3
-ENV OPENSTUDIO_DOWNLOAD_BASE_URL https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
-ENV OPENSTUDIO_DOWNLOAD_FILENAME OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Linux.deb
-ENV OPENSTUDIO_DOWNLOAD_URL $OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
-
-# Install gdebi, then download and install OpenStudio, then clean up.
-# gdebi handles the installation of OpenStudio's dependencies including Qt5,
-# Boost, and Ruby 2.0.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        libboost-thread1.55.0 \
-    && curl -SLO $OPENSTUDIO_DOWNLOAD_URL \
-    && gdebi -n $OPENSTUDIO_DOWNLOAD_FILENAME \
-    && rm -f $OPENSTUDIO_DOWNLOAD_FILENAME \
-    && rm -rf /usr/SketchUpPlugin \
-    && rm -rf /var/lib/apt/lists/*
+# Install OpenStudio
+ADD /docker/deployment/scripts/install_openstudio.sh /usr/local/bin/install_openstudio.sh
+ENV OPENSTUDIO_VERSION 2.4.3
+ENV OPENSTUDIO_SHA 29a61f6637
+RUN /usr/local/bin/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_SHA
 
 # Add RUBYLIB link for openstudio.rb and Radiance env vars
 ENV RUBYLIB /usr/Ruby
@@ -170,7 +113,7 @@ RUN if [ "$RAILS_ENV" = "docker-test" ]; then \
 ADD /bin /opt/openstudio/bin
 ADD /server/Gemfile /opt/openstudio/server/Gemfile
 WORKDIR /opt/openstudio/server
-RUN bundle install $bundle_args
+RUN bundle install --jobs=3 --retry=3 $bundle_args
 
 # Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
 # have to be recompiled everytime
@@ -188,7 +131,7 @@ ADD /server /opt/openstudio/server
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
-RUN bundle install
+RUN bundle install --jobs=3 --retry=3
 
 # Configure IPVS keepalive
 ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf

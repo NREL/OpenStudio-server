@@ -1,26 +1,46 @@
 stages:
-- build
+  - build
+  - deploy
 
 build:windows:
-  variables:
-    CI_DEBUG_TRACE: "true"
   stage: build
-  only:
-  - develop  
   tags:
-  - windows
+    - windows
   script:
-  - ruby bin/openstudio_meta install_gems -e /c/server-export
+    - C:/Ruby22-x64/bin/ruby.exe ./bin/openstudio_meta install_gems --export="C:/openstudioServerExport" --ruby-lib-path="C:/openstudio/Ruby/" --verbose --debug
+  artifacts:
+    expire_in: 24 hrs
+    paths:
+      - C:/openstudioServerExport/OpenStudio-server-*-win32.tar.gz
 
 build:mac:
-  variables:
-    CI_DEBUG_TRACE: "true"
   stage: build
-  only:
-  - develop  
   tags:
-  - mac
+    - mac
   script:
-  - export RUBYLIB=/Applications/OpenStudio-2.3.0/Ruby/
-  - ./bin/openstudio_meta  install_gems --export="/Users/alex/server-export"
+    - /Users/alex/.rvm/rubies/ruby-2.2.4/bin/ruby ./bin/openstudio_meta install_gems --export="/Users/alex/Desktop/server-export" --ruby-lib-path=/Applications/openstudio/Ruby/ --verbose --debug
+  artifacts:
+    expire_in: 24 hrs
+    paths:
+      - /Users/alex/Desktop/server-export/OpenStudio-server-*-darwin.tar.gz
+
+deploy:windows:
+  stage: deploy
+  tags:
+    - windows
+  dependencies:
+    - build:windows
+  script:
+    - cd C:/openstudioServerExport/
+    - aws s3 cp ./ s3://openstudio-builds/CI/ --debug --recursive --exclude "*" --include "OpenStudio-server-*-win32.tar.gz"
+
+deploy:mac:
+  stage: deploy
+  tags:
+    - mac
+  dependencies:
+    - build:mac
+  script:
+    - cd /Users/alex/Desktop/server-export/
+    - aws s3 cp ./ s3://openstudio-builds/CI/ --debug --recursive --exclude "*" --include "OpenStudio-server-*-darwin.tar.gz"
 

@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -48,12 +48,11 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
     @analysis.save!
 
     # create an instance for R
-    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
-                                                 APP_CONFIG['rserve_port'])
+    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'], APP_CONFIG['rserve_port'])
   end
 
   context 'create local cluster' do
-    it 'should create an R session' do
+    it 'should create an R session', depends_r: true do
       expect(@r).not_to be_nil
     end
 
@@ -75,7 +74,7 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
       expect(cf).to eq true
     end
 
-    it 'should start snow cluster' do
+    it 'should start snow cluster', depends_r: true do
       cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       expect(cluster_class).not_to be_nil
 
