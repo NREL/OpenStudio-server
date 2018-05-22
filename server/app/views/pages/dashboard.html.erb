@@ -91,11 +91,16 @@
               <% end %>
             </p>
             <div class="row-fluid pad-top-20">
-              <div class="span3 offset3">
+              <% if @current.status == 'completed' %>
+                  <div class="span3">
+              <% else %>
+                  <div class="span3 offset3">
+              <% end %>
                 <div class="button-container">
                   <%= link_to 'View Analysis', analysis_path(@current), class: "btn btn-mini" %>
                 </div>
               </div>
+
               <div class="span3">
                 <div class="button-container">
                   <% if @current.status == 'started' %>
@@ -105,6 +110,15 @@
                   <% end %>
                 </div>
               </div>
+
+              <div class="span3">
+                <div class="button-container">
+                  <% if @current.status == 'completed' %>
+                      <td><%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                  <% end %>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -157,6 +171,11 @@
                     <td><%= link_to 'Stop Analysis', stop_analysis_path(res.project), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
                 <% else %>
                     <td><%= link_to 'Delete Project', project_path(res.project), method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %></td>
+                <% end %>
+              </div>
+              <div class="button-container">
+                <% if res.status == 'completed' %>
+                    <td><%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(res), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
                 <% end %>
               </div>
             </div>

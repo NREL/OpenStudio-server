@@ -195,13 +195,14 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
     ensure
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
+        require_relative "gather_results"
+        zip_all_results(@analysis_id, 1)
         @analysis_job.end_time = Time.now
         @analysis_job.status = 'completed'
         @analysis_job.save!
         @analysis.reload
       end
       @analysis.save!
-
       logger.info "Finished running analysis '#{self.class.name}'"
     end
   end
