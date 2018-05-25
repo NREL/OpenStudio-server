@@ -2,14 +2,27 @@
 
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     export RUBYLIB="${HOME}/openstudio/Ruby/"
-    export RUBY_ENV=local-test
+#    run in local environment - same as PAT
+    export RAILS_ENV=local
     # Do not report coverage from these build, use the build from CircleCI with no excluded tags
     export SKIP_COVERALLS=true
-    if [ "${BUILD_TYPE}" == "test" ]; then
-
-        echo 'Beginning unit tests'
-        bundle exec rspec -e 'unit test'; (( exit_status = exit_status || $? ))
-        echo "Completed tests with exit code $exit_status"
+    if [ "${BUILD_TYPE}" == "test" ];then
+        cd ./server
+        attempt=1
+        exit_status=0
+#        3 tries - not sure why
+        while [ $attempt -lt 3 ];do
+            echo "starting unit test attempt $attempt"
+            bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation;
+            exit_status=$?
+            if [ $exit_status == 0 ];then
+                echo "Completed unit tests successfully"
+                exit 0
+            fi
+            attempt=$[$attempt+1]
+        done
+#       rspec failed if we made it here:
+        echo "Unit tests failed with status $exit_status"
         exit $exit_status
     elif [ "${BUILD_TYPE}" == "integration" ]; then
         echo 'Beginning integration test'
