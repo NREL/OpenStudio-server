@@ -14,7 +14,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
 #        increase from 2 to allow multiple attempts.  not sure why this is necessary but we do seem to have multiple tries w/rspec throughout our ci
         while [ $attempt -lt 2 ];do
             echo "starting unit test attempt $attempt"
-            RAILS_ENV=local bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation
+            RAILS_ENV=test bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation
             exit_status=$?
             if [ $exit_status == 0 ];then
                 echo "Completed unit tests successfully"
@@ -29,7 +29,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     #    run the specs in the root directory: "integration tests"
         cd ./
         echo 'Beginning integration test'
-        RAILS_ENV=local bundle exec rspec; (( exit_status = exit_status || $? ))
+        RAILS_ENV=test bundle exec rspec; (( exit_status = exit_status || $? ))
         if [ "$exit_status" = "0" ]; then
             for F in /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/*; do
                 echo "Deleting $F to limit verbosity in case of unit test failure"
