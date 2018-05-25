@@ -12,7 +12,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
 #        increase from 2 to allow multiple attempts.  not sure why this is necessary but we do seem to have multiple tries w/rspec throughout our ci
         while [ $attempt -lt 2 ];do
             echo "starting unit test attempt $attempt"
-            RAILS_ENV=test bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation
+            RAILS_ENV=local-test bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation
             exit_status=$?
             if [ $exit_status == 0 ];then
                 echo "Completed unit tests successfully"
