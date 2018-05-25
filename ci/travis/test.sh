@@ -2,8 +2,6 @@
 
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     export RUBYLIB="${HOME}/openstudio/Ruby/"
-#    run in local environment - same as PAT
-    export RAILS_ENV=local
     # Do not report coverage from these build, use the build from CircleCI with no excluded tags
     export SKIP_COVERALLS=true
     if [ "${BUILD_TYPE}" == "test" ];then
@@ -29,7 +27,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     #    run the specs in the root directory: "integration tests"
         cd ./
         echo 'Beginning integration test'
-        RAILS_ENV=test bundle exec rspec; (( exit_status = exit_status || $? ))
+        RAILS_ENV=local bundle exec rspec; (( exit_status = exit_status || $? ))
         if [ "$exit_status" = "0" ]; then
             for F in /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/*; do
                 echo "Deleting $F to limit verbosity in case of unit test failure"
