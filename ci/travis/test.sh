@@ -7,13 +7,14 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     # Do not report coverage from these build, use the build from CircleCI with no excluded tags
     export SKIP_COVERALLS=true
     if [ "${BUILD_TYPE}" == "test" ];then
+#    run the specs in the server directory: "unit tests"
         cd ./server
         attempt=1
         exit_status=0
-#        3 tries - not sure why
-        while [ $attempt -lt 3 ];do
+#        increase from 2 to allow multiple attempts.  not sure why this is necessary but we do seem to have multiple tries w/rspec throughout our ci
+        while [ $attempt -lt 2 ];do
             echo "starting unit test attempt $attempt"
-            bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation;
+            RAILS_ENV=local bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation
             exit_status=$?
             if [ $exit_status == 0 ];then
                 echo "Completed unit tests successfully"
@@ -25,8 +26,10 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
         echo "Unit tests failed with status $exit_status"
         exit $exit_status
     elif [ "${BUILD_TYPE}" == "integration" ]; then
+    #    run the specs in the root directory: "integration tests"
+        cd ./
         echo 'Beginning integration test'
-        bundle exec rspec -e 'analysis'; (( exit_status = exit_status || $? ))
+        RAILS_ENV=local bundle exec rspec; (( exit_status = exit_status || $? ))
         if [ "$exit_status" = "0" ]; then
             for F in /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/*; do
                 echo "Deleting $F to limit verbosity in case of unit test failure"
