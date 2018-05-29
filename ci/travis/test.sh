@@ -5,14 +5,16 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     # Do not report coverage from these build, use the build from CircleCI with no excluded tags
     export SKIP_COVERALLS=true
     if [ "${BUILD_TYPE}" == "test" ];then
-#    run the specs in the server directory: "unit tests"
-        cd ./server
+        mkdir ./spec/unit-test
+        RAILS_ENV=local-test
+#        cd ./server
         attempt=1
         exit_status=0
 #        increase from 2 to allow multiple attempts.  not sure why this is necessary but we do seem to have multiple tries w/rspec throughout our ci
         while [ $attempt -lt 2 ];do
             echo "starting unit test attempt $attempt"
-            RAILS_ENV=local-test bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation
+#            RAILS_ENV=local-test bundle exec rspec --tag ~depends_r --tag ~depends_gecko --format documentation
+            ruby "/Users/travis/build/NREL/OpenStudio-server/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="/usr/local/bin" "/Users/travis/build/NREL/OpenStudio-server/spec/unit-test"
             exit_status=$?
             if [ $exit_status == 0 ];then
                 echo "Completed unit tests successfully"
