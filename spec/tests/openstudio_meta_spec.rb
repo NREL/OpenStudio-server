@@ -221,3 +221,13 @@ RSpec.describe OpenStudioMeta do
     expect(stop_local).to be true
   end
 end
+
+# RSpec.describe LocalRspecTest do
+#   it 'run RSpec unit tests' do
+#     # run the full set of RSpec tests, discounted internally by the local-test rails environ
+#     command = "#{ruby_cmd} \"#{meta_cli}\" run_rspec --debug --verbose --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{server_rspec_test_dir}\""
+#     puts command
+#     test_results = system(command)
+#     expect(test_results).to be true
+#   end
+# end
