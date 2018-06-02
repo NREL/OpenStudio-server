@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
 
 # platform-specific config here:
-if [ "${BUILD_ARCH}" == "OSX" ]; then
-    export RUBYLIB="${HOME}/openstudio/Ruby/"
-    home_dir="/Users/travis/build/NREL/OpenStudio-server"
-elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
-    export RUBYLIB="/usr/Ruby"
-    home_dir="/home/travis/build/NREL/OpenStudio-server"
-fi
+## TODO move into/consolidate with setup.sh
+#if [ "${BUILD_ARCH}" == "OSX" ]; then
+##    export RUBYLIB="${HOME}/openstudio/Ruby/"
+##    home_dir="/Users/travis/build/NREL/OpenStudio-server"
+#elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
+#    export RUBYLIB="/usr/Ruby"
+#    home_dir="/home/travis/build/NREL/OpenStudio-server"
+#fi
 
 # run unit tests via openstudio_meta run_rspec command which attempts to reproduce the PAT local environment
 # prior to running tests, so we should not set enviroment variables here
 if [ "${BUILD_TYPE}" == "test" ];then
 #    run_rspec command uses this directory for output files, which will be printed in event of failure
-    mkdir "$home_dir/spec/unit-test"
+#    mkdir "$home_dir/spec/unit-test"
     echo "starting unit tests"
-    ruby "$home_dir/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="/usr/local/bin" "$home_dir/spec/unit-test"
+    ruby "$home_dir/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" "$home_dir/spec/unit-test"
     exit_status=$?
     if [ $exit_status == 0 ];then
         echo "Completed unit tests successfully"
