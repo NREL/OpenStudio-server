@@ -4,7 +4,7 @@
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     export RUBYLIB="${HOME}/openstudio/Ruby/"
     home_dir="/Users/travis/build/NREL/OpenStudio-server"
-elif [ "${BUILD_ARCH}" == "OSX" ]; then
+elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     export RUBYLIB="/usr/Ruby"
     home_dir="/home/travis/build/NREL/OpenStudio-server"
 fi
