@@ -4,7 +4,7 @@ echo "Current directory is $(pwd)"
 echo "\n=== PRINTING ERROR LOG REPORTS ===\n"
 
 shopt -s nullglob
-for F in "${BUILD_DIR}/spec/files/logs/"*
+for F in "${TRAVIS_BUILD_DIR}/spec/files/logs/"*
 do
     echo '======================================================'
     echo $F
@@ -14,7 +14,7 @@ do
     echo
 done
 
-for F in "${BUILD_DIR}/spec/unit-test/logs/"*
+for F in "${TRAVIS_BUILD_DIR}/spec/unit-test/logs/"*
 do
     echo '======================================================'
     echo $F
