@@ -3,7 +3,7 @@
 .idea
 .DS_Store
 .bundle
-.rubocop-https*
+.rubocop-http*
 *.log
 *.pem
 *.swp
