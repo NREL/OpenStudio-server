@@ -40,6 +40,6 @@ ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --
 #used in test.sh
 export BUILD_DIR="${HOME}/build/NREL/OpenStudio-server"
 # create dir for output files which will be generated in case of failure
-mkdir "$BUILD_HOME_DIR/spec/unit-test"
+mkdir "$BUILD_DIR/spec/unit-test"
 # Do not report coverage from these build, use the build from CircleCI with no excluded tags
 export SKIP_COVERALLS=true
