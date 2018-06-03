@@ -4,6 +4,7 @@ echo "The build architecture is ${BUILD_ARCH}"
 
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
+#    AP: do we need mongo install here ? seems to be handled by service defined in travis yml
     brew install mongodb@3.4 pv tree
     ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
     unset BUNDLE_GEMFILE
@@ -22,7 +23,6 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
 #    home_dir="/Users/travis/build/NREL/OpenStudio-server"
 #    mongo_dir="/usr/local/bin"
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
-# we do not seem to be installing mongo...?
     echo "Setting up Ubuntu for unit tests and Rubocop"
     # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
     sudo apt-get install -y pv

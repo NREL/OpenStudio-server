@@ -43,11 +43,5 @@ elif [ "${BUILD_TYPE}" == "integration" ]; then
     cd ./
     echo 'Beginning integration tests'
     bundle exec rspec; (( exit_status = exit_status || $? ))
-    if [ $exit_status -ne 0 ]; then
-        for F in "$home_dir/spec/files/logs/*"; do
-            echo "Deleting $F to limit verbosity in case of unit test failure"
-            rm $F
-        done
-    fi
     exit $exit_status
 fi
