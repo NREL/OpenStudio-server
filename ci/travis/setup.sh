@@ -24,9 +24,6 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     sudo apt-get install -y pv
     mkdir -p reports/rspec
     ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA
-    export RUBYLIB="/usr/Ruby:$RUBYLIB"
-#    #    these are used in test.sh
-    export BUILD_DIR="/home/travis/build/NREL/OpenStudio-server"
 
 fi
 
