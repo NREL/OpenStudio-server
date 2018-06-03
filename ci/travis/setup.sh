@@ -16,11 +16,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     rm -rf $HOME/openstudio
     # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
     sudo ./OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
-    tree ${HOME}/openstudio/Ruby
 
-    export RUBYLIB="${HOME}/openstudio/Ruby/:$RUBYLIB"
-##    these are used in test.sh
-    export BUILD_HOME_DIR="/Users/travis/build/NREL/OpenStudio-server"
 #    mongo_dir="/usr/local/bin"
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo "Setting up Ubuntu for unit tests and Rubocop"
@@ -30,13 +26,19 @@ elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA
     export RUBYLIB="/usr/Ruby:$RUBYLIB"
 #    #    these are used in test.sh
-    export BUILD_HOME_DIR="/home/travis/build/NREL/OpenStudio-server"
-#    mongo_dir="/usr/bin"
+    export BUILD_DIR="/home/travis/build/NREL/OpenStudio-server"
+
 fi
 
 # We are testing for PAT so all tests will be run by openstudio_meta and require install_gems
 # ? must run after RUBYLIB is set?
+tree ${HOME}/openstudio/Ruby
+
+export RUBYLIB="${HOME}/openstudio/Ruby:$RUBYLIB"
+
 ruby ./bin/openstudio_meta install_gems --with_test_develop --debug --verbose --use_cached_gems
+#used in test.sh
+export BUILD_DIR="${HOME}/build/NREL/OpenStudio-server"
 # create dir for output files which will be generated in case of failure
 mkdir "$BUILD_HOME_DIR/spec/unit-test"
 # Do not report coverage from these build, use the build from CircleCI with no excluded tags
