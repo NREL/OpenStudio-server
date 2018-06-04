@@ -31,11 +31,8 @@ fi
 # ? must run after RUBYLIB is set?
 tree ${HOME}/openstudio/Ruby
 
-export RUBYLIB="${RUBYLIB}:${HOME}/openstudio/Ruby"
-#export BUILD_DIR="${HOME}/build/NREL/OpenStudio-server"
+#export RUBYLIB="${RUBYLIB}:${HOME}/openstudio/Ruby"
 ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
 
 # create dir for output files which will be generated in case of failure
 mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
-# Do not report coverage from these build, use the build from CircleCI with no excluded tags
-export SKIP_COVERALLS=true

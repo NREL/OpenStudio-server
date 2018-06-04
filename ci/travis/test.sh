@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 
-# platform-specific config here:
+# platform-specific config here (also in setup.sh):
 ## TODO move into/consolidate with setup.sh
 if [ "${BUILD_ARCH}" == "OSX" ]; then
-
-#    these are used in test.sh
     mongo_dir="/usr/local/bin"
-
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
-#    export RUBYLIB="/usr/Ruby"
-#    export RUBYLIB="/usr/Ruby:$RUBYLIB"
-    #    these are used in test.sh
     mongo_dir="/usr/bin"
 fi
+
+# Env variables set in setup.sh do not seem to be available in test.sh
+
+# Dir containing openstudio
+export RUBYLIB="${HOME}/openstudio/Ruby"
+# Do not report coverage from these build, use the build from CircleCI with no excluded tags
+export SKIP_COVERALLS=true
 
 # run unit tests via openstudio_meta run_rspec command which attempts to reproduce the PAT local environment
 # prior to running tests, so we should not set enviroment variables here
