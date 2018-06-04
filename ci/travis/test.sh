@@ -3,15 +3,18 @@
 # platform-specific config here (also in setup.sh):
 ## TODO move into/consolidate with setup.sh
 if [ "${BUILD_ARCH}" == "OSX" ]; then
+    # Dir containing openstudio
+    export RUBYLIB="${HOME}/openstudio/Ruby"
     mongo_dir="/usr/local/bin"
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
+    # Dir containing openstudio
+    export RUBYLIB="/usr/Ruby"
     mongo_dir="/usr/bin"
 fi
 
 # Env variables set in setup.sh do not seem to be available in test.sh
 
-# Dir containing openstudio
-export RUBYLIB="${HOME}/openstudio/Ruby"
+
 # Do not report coverage from these build, use the build from CircleCI with no excluded tags
 export SKIP_COVERALLS=true
 

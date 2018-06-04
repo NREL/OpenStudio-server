@@ -21,7 +21,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo "Setting up Ubuntu for unit tests and Rubocop"
     # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
-    sudo apt-get install -y pv
+    sudo apt-get install -y pv tree
     mkdir -p reports/rspec
     ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA
 
@@ -32,6 +32,7 @@ fi
 tree ${HOME}/openstudio/Ruby
 
 #export RUBYLIB="${RUBYLIB}:${HOME}/openstudio/Ruby"
+#export BUILD_DIR="${HOME}/build/NREL/OpenStudio-server"
 ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
 
 # create dir for output files which will be generated in case of failure
