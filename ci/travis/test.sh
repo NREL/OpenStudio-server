@@ -17,7 +17,7 @@ fi
 # run unit tests via openstudio_meta run_rspec command which attempts to reproduce the PAT local environment
 # prior to running tests, so we should not set enviroment variables here
 if [ "${BUILD_TYPE}" == "test" ];then
-    echo "starting unit tests"
+    echo "starting unit tests. RUBYLIB=$RUBYLIB"
     ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" "${TRAVIS_BUILD_DIR}/spec/unit-test"
     exit_status=$?
     if [ $exit_status == 0 ];then
