@@ -9,7 +9,7 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     # Dir containing openstudio
     #    per nick, Openstudio >= 2.5.1 expects RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby:/usr/Ruby
-    export RUBYLIB="/usr/Ruby"
+    export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby:/usr/Ruby
     mongo_dir="/usr/bin"
 fi
 
