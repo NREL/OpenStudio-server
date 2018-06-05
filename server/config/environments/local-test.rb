@@ -33,6 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
+# This environment is explicitly used by the /bin/local/resources/rspec_command which is how openstudio_meta runs rspec.
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 

@@ -46,7 +46,7 @@ require 'rest-client'
 require 'json'
 
 # mongod must be in the path, if you are on Windows you can use the following
-if /mingw/.match(RUBY_PLATFORM) || /win/.match(RUBY_PLATFORM)
+if Gem.win_platform?
   ENV['PATH'] = "C:/Program Files/MongoDB/Server/3.0/bin;#{ENV['PATH']}" # @todo it would be good to un-hard-code this
 end
 
@@ -222,12 +222,3 @@ RSpec.describe OpenStudioMeta do
   end
 end
 
-RSpec.describe LocalRspecTest do
-  it 'run RSpec unit tests' do
-    # run the full set of RSpec tests, discounted internally by the local-test rails environ
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_rspec --debug --verbose --mongo-dir=\"#{File.dirname(mongod_exe)}\" \"#{server_rspec_test_dir}\""
-    puts command
-    test_results = system(command)
-    expect(test_results).to be true
-  end
-end
