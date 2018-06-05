@@ -37,10 +37,9 @@ elif [ "${BUILD_TYPE}" == "integration" ]; then
     #    use same environment as PAT
     # AP do we need this or is this handled by the openstudio_meta build + start_server and stop_server commands?
     export RAILS_ENV=local
-    export SKIP_COVERALLS=true
     #    explicitly set directory.  Probably unnecessary
     cd ./
-    echo 'Beginning integration tests'
+    echo "Beginning integration tests. RUBYLIB=$RUBYLIB"
     bundle exec rspec; (( exit_status = exit_status || $? ))
     exit $exit_status
 fi
