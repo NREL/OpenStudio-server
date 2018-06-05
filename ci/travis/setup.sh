@@ -17,6 +17,8 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
     sudo ./OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
     tree ${HOME}/openstudio/Ruby
+    tree /usr/local/bin
+
 #    mongo_dir="/usr/local/bin"
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     echo "Setting up Ubuntu for unit tests and Rubocop"

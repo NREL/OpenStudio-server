@@ -41,7 +41,8 @@ class RunSimulateDataPoint
   require 'json'
 
   def initialize(data_point_id, options = {})
-    os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : 'openstudio'
+    # for openstudio < 2.5.1, full path will be required for Linux/OSX: https://github.com/NREL/OpenStudio/issues/2911
+    os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : '/Users/travis/openstudio/bin/openstudio'
     defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
     @options = defaults.deep_merge(options)
 
