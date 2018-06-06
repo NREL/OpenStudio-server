@@ -1,5 +1,5 @@
 #!/bin/bash -e
-
+MONGO_VERSION=3.4.10
 echo ""
 echo "------------------------------------------------------------------------"
 echo "Creating data volume regdata to persist registry data for provision"
@@ -39,7 +39,7 @@ echo "Pulling mongo from DockerHub"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker pull mongo:3.4.10
+docker pull mongo:$MONGO_VERSION
 sleep 1
 
 echo ""
@@ -61,7 +61,7 @@ docker tag nrel/openstudio-server:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstu
 docker push localhost:5000/openstudio-server
 docker tag nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-rserve
 docker push localhost:5000/openstudio-rserve
-docker tag mongo localhost:5000/mongo:latest
+docker tag mongo:SMONGO_VERSION localhost:5000/mongo:latest
 docker push localhost:5000/mongo:latest
 docker tag redis localhost:5000/redis
 docker push localhost:5000/redis
