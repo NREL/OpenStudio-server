@@ -15,10 +15,4 @@
 #   inflect.acronym 'RESTful'
 # end
 
-# Fix the anlaysis inflector
-ActiveSupport::Inflector.inflections do |inflect|
-  # inflect.irregular 'analysis', 'analyses'
-  inflect.singular 'analysis', 'analysis'
-  inflect.singular 'analyses', 'analysis'
-  inflect.plural 'analysis', 'analyses'
-end
+# Recent inflectors have fixed the anlaysis / analyses

@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :data_point do
     name 'Example Datapoint'
     analysis
@@ -58,7 +58,7 @@ FactoryGirl.define do
       end
 
       after(:create) do |analysis, evaluator|
-        FactoryGirl.create_list(
+        FactoryBot.create_list(
           :data_point, evaluator.data_point_count,
           analysis: analysis
         )
@@ -75,7 +75,7 @@ FactoryGirl.define do
       end
 
       after(:create) do |project, evaluator|
-        FactoryGirl.create_list(:analysis_with_data_points, evaluator.analyses_count, project: project)
+        FactoryBot.create_list(:analysis_with_data_points, evaluator.analyses_count, project: project)
       end
     end
   end
