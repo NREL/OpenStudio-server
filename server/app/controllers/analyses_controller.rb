@@ -723,12 +723,15 @@ class AnalysesController < ApplicationController
     end
   end
 
+
   # Download the BTAP analysis zipped by gather_results.rb
   def download_BTAP_results_zip
     @analysis = Analysis.find(params[:id])
     path = "/mnt/openstudio/server/assets/results.#{@analysis.id}.zip";
 
     if File.exist?(path)
+      file_size = File.size(path)
+      response.headers['Content-Length'] = file_size.to_s
       send_data File.open(path, 'rb').read, filename: "results.#{@analysis.id}.zip", type: "application/zip", disposition: 'attachment'
     end
   end
@@ -740,10 +743,11 @@ class AnalysesController < ApplicationController
     path = "/mnt/openstudio/server/assets/results/#{@analysis.id}/failed_run_error_log.csv";
 
     if File.exist?(path)
+      file_size = File.size(path)
+      response.headers['Content-Length'] = file_size.to_s
       send_data File.open(path, 'rb').read, filename: "log.#{@analysis.id}.csv", type: "text/csv", disposition: 'attachment'
     end
   end
-
 
   def download_algorithm_results_zip
     @analysis = Analysis.find(params[:id])

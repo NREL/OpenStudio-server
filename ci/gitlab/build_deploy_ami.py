@@ -338,7 +338,7 @@ if write_to_file:
     sys.exit(0)
 
 # Now that we have the required artifacts, we boot up the AWS library and download the latest amis.json
-s3 = boto3.resource('s3')
+s3 = boto3.resource('s3',region_name='us-east-1')
 file_obj = s3.Object('openstudio-resources', 'server/api/v3/amis.json')
 amis = json.loads(file_obj.get()['Body'].read().decode('utf-8'))
 if verbose:
