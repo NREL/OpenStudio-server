@@ -15,7 +15,7 @@ import boto3
 # A helper method for executing command line calls cleanly
 def run_cmd(exec_str, description):
     p = Popen(exec_str, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True,
-              preexec_fn=os.setsid)
+              preexec_fn=os.setsid, encoding='utf8')
     pgid = os.getpgid(p.pid)
 
     def signal_handler(sig_type, _):
@@ -46,7 +46,7 @@ parser.add_argument('-o', '--output_dir', default=os.getcwd(),
 parser.add_argument('-n', '--notes', default=None,
                     help='Provide notes to be persisted in the amis.json entry')
 parser.add_argument('-v', '--verbose', help='Verbose output', action='store_true')
-parser.add_argument('--generated_by', default='GitLabCI', help='Set the Author metadata field')
+parser.add_argument('--generated_by', default='NREL-CI', help='Set the Author metadata field')
 parser.add_argument('--docker_version', default=None,
                     help='Overwrite the docker version in the AMI')
 parser.add_argument('--ami_version', default=None, help='Overwrite the AMI version')
@@ -74,7 +74,7 @@ notes = args.notes
 verbose = args.verbose
 
 if not custom_enabled:
-    if generated_by is not 'GitLabCI':
+    if generated_by is not 'NREL-CI':
         raise EnvironmentError('Cannot parse --generated_by, as custom builds is not enabled')
     if override_docker_version is not None:
         raise EnvironmentError('Cannot parse --docker_version, as custom builds is not enabled')
@@ -139,8 +139,9 @@ with open(version_path, 'r') as version_file:
             override_ami_extension = '-' + override_ami_extension.strip()
         if verbose:
             print(
-                'AMI version extension being overwritten from `{}` to `{}`'.format(ami_version_ext,
-                                                                                   override_ami_extension))
+                'AMI version extension being overwritten from `{}` to `{}`'.format(
+                    ami_version_ext, override_ami_extension)
+            )
         ami_version_ext = override_ami_extension
 
 # Write the packer user variables json file
@@ -150,9 +151,9 @@ defaults = {
     'version': ami_version,
     'ami_version_extension': ami_version_ext
 }
-if generated_by is not 'GitLabCI':
+if generated_by is not 'NREL-CI':
     if verbose:
-        print('AMI author being overwritten from `GitLabCI` to `{}`'.format(generated_by))
+        print('AMI author being overwritten from `NREL-CI` to `{}`'.format(generated_by))
 defaults['generated_by'] = generated_by
 variables_write_path = os.path.join(os.path.dirname(template_path), 'user_variables.json')
 with open(variables_write_path, 'w') as f:
@@ -298,8 +299,9 @@ if verbose:
 cmd_call = 'docker pull nrel/openstudio-rserve:{}'.format(
     defaults['version'] + defaults['ami_version_extension'])
 if override_dockerhub_repo is not None:
-    cmd_call = cmd_call.replace('docker pull nrel',
-                                'docker pull {}'.format(override_dockerhub_repo))
+    cmd_call = cmd_call.replace(
+        'docker pull nrel', 'docker pull {}'.format(override_dockerhub_repo)
+    )
 if verbose:
     print('openstudio-rserve container pull command is: {}'.format(cmd_call))
 run_cmd(cmd_call, 'openstudio-rserve container retrieval')
@@ -308,7 +310,9 @@ run_cmd(cmd_call, 'openstudio-rserve container retrieval')
 cmd_call = 'docker run nrel/openstudio-rserve:{} R --version'. \
     format(defaults['version'] + defaults['ami_version_extension'])
 if override_dockerhub_repo is not None:
-    cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
+    cmd_call = cmd_call.replace(
+        'docker run nrel', 'docker run {}'.format(override_dockerhub_repo)
+    )
 if verbose:
     print('openstudio-rserve R version command is: {}'.format(cmd_call))
 stdout_arr = run_cmd(cmd_call, 'R version retrieval').split('\n')[2].split('.')
