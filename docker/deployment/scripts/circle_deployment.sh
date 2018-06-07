@@ -4,10 +4,11 @@ IMAGETAG=skip
 if [ "${CIRCLE_BRANCH}" == "develop" ]; then
     IMAGETAG=latest
 elif [ "${CIRCLE_BRANCH}" == "nrcan-master" ]; then
+    # NRCAN is still using pre 2.4.1 version of Server. This will break when they upgrade.
     IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")-nrcan"
 elif [ "${CIRCLE_BRANCH}" == "master" ]; then
     # Retrieve the version number from rails
-    IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
+    IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
 fi
 
 if [ "${IMAGETAG}" != "skip" ] && [ -z ${CI_PULL_REQUEST} ]; then
