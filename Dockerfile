@@ -5,8 +5,6 @@
 
 FROM nrel/openstudio:2.5.0
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
-ARG rails_env=docker
-ARG bundle_args="--without development test"
 
 # Install required libaries
 RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
@@ -70,6 +68,10 @@ ENV RUBYLIB /usr/Ruby
 ENV OPENSTUDIO_SERVER 'true'
 ENV OS_RAYPATH /usr/Radiance
 ENV PERL_EXE_PATH /usr/bin
+
+# Specify a couple arguments here, after running the majority of the installation above
+ARG rails_env=docker
+ARG bundle_args="--without development test"
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env
