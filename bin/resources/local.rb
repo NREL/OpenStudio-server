@@ -33,25 +33,6 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-######################################################################
-#  Copyright (c) 2008-2016, Alliance for Sustainable Energy.
-#  All rights reserved.
-#
-#  This library is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU Lesser General Public
-#  License as published by the Free Software Foundation; either
-#  version 2.1 of the License, or (at your option) any later version.
-#
-#  This library is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#  Lesser General Public License for more details.
-#
-#  You should have received a copy of the GNU Lesser General Public
-#  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-######################################################################
-
 unless $logger
   require 'logger'
   $logger = ::Logger.new STDOUT
@@ -60,26 +41,6 @@ unless $logger
 end
 require 'socket'
 require 'json'
-
-# Determines if OS is Windows
-#
-def is_windows?
-  win_patterns = [
-      /bccwin/i,
-      /cygwin/i,
-      /djgpp/i,
-      /mingw/i,
-      /mswin/i,
-      /wince/i
-  ]
-
-  case RUBY_PLATFORM
-    when *win_patterns
-      return true
-    else
-      return false
-  end
-end
 
 # Check to see if the port is open on the local computer
 #
@@ -164,13 +125,14 @@ def kill_processes(pid_json)
     $logger.error "File `#{pid_json}` not found. It is possible that processes have been orphaned."
     exit 1
   end
-  windows = is_windows?
+  windows = Gem.win_platform?
   find_windows_pids(pid_json) if windows
   pid_hash = ::JSON.parse(File.read(pid_json), symbolize_names: true)
   pid_array = []
   pid_array << pid_hash[:mongod_pid] if pid_hash[:mongod_pid]
   pid_array += pid_hash[:dj_pids] if pid_hash[:dj_pids]
   pid_array << pid_hash[:rails_pid] if pid_hash[:rails_pid]
+  pid_array << pid_hash[:rspec_pid] if pid_hash[:rspec_pid]
   pid_array += pid_hash[:child_pids] if pid_hash[:child_pids]
   pid_array.each do |pid|
     begin
@@ -194,6 +156,83 @@ def kill_processes(pid_json)
     $logger.debug "Killed process with PID `#{pid}`."
   end
   ::File.delete(pid_json)
+end
+
+# Run rspec on a local server to verify functionality
+#
+# @param test_directory [String] directory where information regarding the server tests should be recorded
+# @param mongo_directory [String] directory of the mongo install, (only matters for Windows)
+# @return [String] URL of the started local server
+#
+def run_rspec(test_directory, mongo_directory, ruby_path, debug)
+  cluster_name = 'local_test'
+  mongod_command_path = ::File.absolute_path(::File.join(__FILE__, '../local/mongo_command'))
+  mongod_log_path = ::File.absolute_path(::File.join(test_directory, 'logs'))
+  mongo_db_directory = ::File.absolute_path(::File.join(test_directory, 'data/db'))
+  rspec_command_path = ::File.absolute_path(::File.join(__FILE__, '../local/rspec_command'))
+  rspec_output_path = ::File.absolute_path(::File.join(test_directory))
+
+  mongod_port = find_available_port 27017, 100
+  $logger.debug "Mongo port will be #{mongod_port}"
+  $logger.error 'Unable to find port for mongo' unless mongod_port
+  exit 1 unless mongod_port
+  state_file = ::File.join(test_directory, cluster_name + '_configuration.json')
+
+  mongod_command = "\"#{ruby_path}\" \"#{mongod_command_path}\" -p #{mongod_port} \"#{mongod_log_path}\" "\
+    "\"#{mongo_directory}\" \"#{mongo_db_directory}\" \"#{state_file}\" \"#{test_directory}\""
+  rspec_command = "\"#{ruby_path}\" \"#{rspec_command_path}\" \"#{ruby_path}\" \"#{rspec_output_path}\" "\
+    "#{mongod_port} \"#{state_file}\""
+
+  if debug
+    mongod_command += ' --debug'
+    rspec_command += ' --debug'
+    [mongod_command, rspec_command].each { |cmd| $logger.debug "Command for local CLI: #{cmd}" }
+  end
+
+  begin
+    ::Timeout.timeout(60) do
+      success = system mongod_command
+      unless success
+        $logger.error "Mongod returned non-zero status code  `#{$?.exitstatus}`. Please refer to "\
+        "`#{::File.join(test_directory, 'logs', 'mongod.log')}`."
+        kill_processes(state_file)
+        exit 1
+      end
+      mongod_started = false
+      until mongod_started
+        sleep(0.01)
+        mongod_started = true if is_port_open? mongod_port
+      end
+    end
+  rescue ::Timeout::Error
+    $logger.error "Mongod failed to launch. Please refer to `#{::File.join(test_directory, 'logs', 'mongod.log')}`."
+    kill_processes(state_file)
+    exit 1
+  end
+  $logger.debug 'MONGOD STARTED'
+
+  begin
+    ::Timeout.timeout(480) do
+      success = system rspec_command
+      unless success
+        $logger.error "Rspec returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
+        "`#{::File.join(test_directory, 'logs', 'rspec.log')}` and `#{rspec_output_path}`."
+        kill_processes(state_file)
+        exit 1
+      end
+    end
+  rescue ::Timeout::Error
+    $logger.error "RSpec failed to complete within 8 minutes. Please refer to `#{::File.join(test_directory, 'logs', 'rspec.log')}`."
+    kill_processes(state_file)
+    exit 1
+  end
+  $logger.debug 'RSPEC FINISHED'
+
+  $logger.debug 'Killing outstanding processes'
+  find_windows_pids(state_file) if Gem.win_platform?
+  kill_processes(state_file)
+
+  $logger.debug 'Finished rspec testing.'
 end
 
 # Start the local server and save pid information to the project_directory
@@ -331,7 +370,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
   end
 
-  find_windows_pids(state_file) if is_windows?
+  find_windows_pids(state_file) if Gem.win_platform?
 
   $logger.debug 'Instantiated all processes. Writing receipt file.'
 
@@ -400,7 +439,7 @@ end
 #
 def stop_local_server(rails_pid, dj_pids, mongod_pid, child_pids = [])
   successful = true
-  windows = is_windows?
+  windows = Gem.win_platform?
   dj_pids.reverse.each do |dj_pid|
     pid_kill_success = kill_pid(dj_pid, 'delayed-jobs', windows)
     successful = false unless pid_kill_success

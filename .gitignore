@@ -3,7 +3,7 @@
 .idea
 .DS_Store
 .bundle
-.rubocop-https*
+.rubocop-http*
 *.log
 *.pem
 *.swp
@@ -19,6 +19,7 @@ rubocop-results.xml
 # in some configs the server and worker data are persisted in this directory, never commit
 server-data
 worker-data
+
 
 # ignore files with ~ at end
 *~

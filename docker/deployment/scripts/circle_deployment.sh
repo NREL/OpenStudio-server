@@ -12,7 +12,7 @@ fi
 
 if [ "${IMAGETAG}" != "skip" ] && [ -z ${CI_PULL_REQUEST} ]; then
     # If CI_PULL_REQUEST is set, then the -z returns false (counter-intuitive)
-    docker-compose build --pull
+
     # Still need email with circleci, presumably because of the version of docker.
     docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
 

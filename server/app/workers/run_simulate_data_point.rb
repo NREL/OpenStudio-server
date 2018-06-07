@@ -35,18 +35,18 @@
 
 # Command line based interface to execute the Workflow manager.
 
-# ruby worker_init_final.rb -h localhost:3000 -a 330f3f4a-dbc0-469f-b888-a15a85ddd5b4 -s initialize
-
 class RunSimulateDataPoint
 
   require 'date'
   require 'json'
 
   def initialize(data_point_id, options = {})
-    defaults = { run_workflow_method: 'workflow' }.with_indifferent_access
+    defaults = ActiveSupport::HashWithIndifferentAccess.new({ run_workflow_method: 'workflow' })
     @options = defaults.deep_merge(options)
 
     @data_point = DataPoint.find(data_point_id)
+    @data_point.status = :queued
+    @data_point.run_queue_time = Time.now
     @intialize_worker_errs = []
   end
 
@@ -441,7 +441,13 @@ class RunSimulateDataPoint
 
   # Return the logger for delayed jobs which is typically rails_root/log/delayed_job.log
   def logger
-    Delayed::Worker.logger
+    if Rails.application.config.job_manager == :delayed_job
+      Delayed::Worker.logger
+    elsif Rails.application.config.job_manager == :resque
+      Resque.logger
+    else
+      raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+    end
   end
 
   def upload_file(filename, type, display_name = nil, content_type = nil)

@@ -3,7 +3,8 @@ AllCops:
     - 'server/spec/files/**/*'
     - 'server/lib/delayed/heartbeat/**/*'
     - 'server/vendor/bundle/**/*'
+    - 'lib/update_license.rb'
 
 inherit_from:
-  - https://raw.githubusercontent.com/NREL/OpenStudio-resources/develop/styles/rubocop.yml
-  - https://raw.githubusercontent.com/NREL/OpenStudio-resources/develop/styles/rubocop-rails.yml
+  - http://s3.amazonaws.com/openstudio-resources/styles/rubocop.yml
+  - http://s3.amazonaws.com/openstudio-resources/styles/rubocop-rails.yml
