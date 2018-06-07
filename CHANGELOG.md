@@ -9,6 +9,7 @@ Major Changes:
 * Backend for Docker deployment now used Resque with Redis instead of delayed jobs.
 
 Date Range: 2018-03-21 to 2018-06-07
+
 Closed Issues: 5
 - Improved [#50]( https://github.com/NREL/OpenStudio-server/issues/50 ), Add OpenStudio Server Icon to the place where Icons go in web browsers
 - Fixed [#249]( https://github.com/NREL/OpenStudio-server/issues/249 ), Large Uploads to Server (i.e. lots of weather files) Seem to Timeout
