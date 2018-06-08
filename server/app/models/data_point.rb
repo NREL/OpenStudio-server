@@ -49,7 +49,7 @@ class DataPoint
 
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation [:completed normal, :datapoint failure]
-  field :job_id, type: String  # The job_id that is being tracked in Resque/Delayed Job
+  field :job_id, type: String
   field :results, type: Hash, default: {}
   field :run_queue_time, type: DateTime, default: nil
   field :run_start_time, type: DateTime, default: nil
@@ -80,7 +80,7 @@ class DataPoint
 
   # Callbacks
   after_create :verify_uuid
-  before_destroy :destroy_background_job
+  before_destroy :destroy_delayed_job
 
   # Before destroy make sure the delayed job ID is also destroyed
 
@@ -90,17 +90,14 @@ class DataPoint
 
   # Submit the simulation to run in the background task queue
   def submit_simulation
-    if Rails.application.config.job_manager == :delayed_job
-      job = RunSimulateDataPoint.new(id)
-      self.job_id = job.delay(queue: 'simulations').perform.id
-    elsif Rails.application.config.job_manager == :resque
-      Resque.enqueue(RunSimulateDataPointResque, id)
-      self.job_id = id
-    else
-      raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
-    end
+    job = RunSimulateDataPoint.new(id)
+    self.job_id = job.delay(queue: 'simulations').perform.id
+    self.status = :queued
+    self.run_queue_time = Time.now
 
     save!
+
+    job_id
   end
 
   def set_start_state
@@ -137,8 +134,7 @@ class DataPoint
   end
 
   def set_canceled_state
-    self.destroy_background_job # Remove the datapoint from the delayed jobs queue
-    self.run_start_time ||= Time.now
+    self.destroy_delayed_job # Remove the datapoint from the delayed jobs queue
     self.run_end_time = Time.now
     self.status = :completed
     self.status_message = 'datapoint canceled'
@@ -152,18 +148,10 @@ class DataPoint
     save!
   end
 
-  def destroy_background_job
-    if Rails.application.config.job_manager == :delayed_job
-      if job_id
-        dj = Delayed::Job.where(id: job_id).first
-        dj.destroy if dj
-      end
-    elsif Rails.application.config.job_manager == :resque
-      if job_id
-        Resque::Job.destroy(:simulations, 'RunSimulateDataPointResque', job_id)
-      end
-    else
-      raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+  def destroy_delayed_job
+    if job_id
+      dj = Delayed::Job.where(id: job_id).first
+      dj.destroy if dj
     end
   end
 end

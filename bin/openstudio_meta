@@ -1,39 +1,23 @@
 #!/usr/bin/env ruby
 
-# *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
-# All rights reserved.
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
+######################################################################
+#  Copyright (c) 2008-2016, Alliance for Sustainable Energy.
+#  All rights reserved.
 #
-# (1) Redistributions of source code must retain the above copyright notice,
-# this list of conditions and the following disclaimer.
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
 #
-# (2) Redistributions in binary form must reproduce the above copyright notice,
-# this list of conditions and the following disclaimer in the documentation
-# and/or other materials provided with the distribution.
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
 #
-# (3) Neither the name of the copyright holder nor the names of any contributors
-# may be used to endorse or promote products derived from this software without
-# specific prior written permission from the respective party.
-#
-# (4) Other than as required in clauses (1) and (2), distributions in any form
-# of modifications or other derivative works may not use the "OpenStudio"
-# trademark, "OS", "os", or any other confusingly similar designation without
-# specific prior written permission from Alliance for Sustainable Energy, LLC.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER, THE UNITED STATES
-# GOVERNMENT, OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# *******************************************************************************
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+######################################################################
 
 Signal.trap('INT') {abort}
 require 'logger'
@@ -174,9 +158,7 @@ class CLI
       start_remote: [proc {::StartRemote}, {primary: true, working: true}],
       stop_local: [proc {::StopLocal}, {primary: true, working: true}],
       stop_remote: [proc {::StopRemote}, {primary: true, working: true}],
-      run_analysis: [proc {::RunAnalysis}, {primary: true, working: true}],
-      run_rspec: [proc {::RunRspec}, {primary: true, working: true}],
-      run_codecov: [proc {::RunCoverage}, {primary: false, working: false}]
+      run_analysis: [proc {::RunAnalysis}, {primary: true, working: true}]
   }.freeze
 
   # This method instantiates the global variables $main_args, $sub_command, and $sub_args
@@ -833,197 +815,6 @@ class RunAnalysis
         batch_run_method: batch_run_method
     }
     server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
-  end
-end
-
-# Class to initialize a local server
-class RunRspec
-  require_relative 'resources/local.rb'
-
-  # Provides text for the main help functionality
-  def self.synopsis
-    'Executes a suite of local tests for the OS Server'
-  end
-
-  # Executes the command line calls through threads, and sends their pids to file for shutdown
-  #
-  # @param [Array] sub_argv Options passed to the run subcommand from the user input
-  # @return [Fixnum] Return status
-  #
-  def execute(sub_argv)
-    mongod = which 'mongod'
-    mongodir = ''
-    if mongod
-      mongodir = File.dirname mongod
-    end
-
-    options = {debug: false, force_directories: true, ruby_path: $ruby_path, mongo_dir: mongodir}
-
-    opts = ::OptionParser.new do |o|
-      o.banner = 'Usage: openstudio_meta run_rspec [options] TEST_DIR'
-      o.separator ''
-      o.separator 'Options:'
-      o.separator ''
-
-      o.on('--debug', 'Whatever makes debugging easy') do |f|
-        options[:debug] = f
-      end
-
-      o.on('--no-force-directories', 'Do not force creation of directories') do |_|
-        options[:force_directories] = false
-      end
-
-      o.on('--ruby-path PATH', 'Location of ruby executable for workers. Defaults to the calling instance of ruby') do |path|
-        options[:ruby_path] = path
-      end
-
-      o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
-        options[:mongo_dir] = path
-      end
-
-      o.on('--energyplus-exe-path PATH', 'Location of the EnergyPlus executable') do |path|
-        options[:energyplus_exe_path] = path
-      end
-    end
-
-    # Parse the options
-    argv = parse_options(opts, sub_argv)
-    test_dir = argv.shift
-    unless argv == []
-      $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
-      exit 1
-    end
-    $logger.debug("RunRSpec command: #{argv.inspect} #{options.inspect}")
-
-    # Check the project directory exists
-    unless ::File.exist? test_dir
-      FileUtils.mkdir_p test_dir if options[:force_directories]
-    end
-
-    # Check if a local_configuration.json exists
-    if ::File.exist? ::File.join(test_dir, 'local_test_configuration.json')
-      $logger.error "A `local_test_configuration.json` file already exists at `#{test_dir}`"
-      exit 1
-    end
-
-    # Set the E+ path
-    if options[:energyplus_exe_path] && ::File.exist?(options[:energyplus_exe_path])
-      ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
-    end
-
-    # Set the server project path and temp dir
-    ::ENV['OS_SERVER_PROJECT_PATH'] = test_dir
-    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
-
-    # Create the required project files
-    if options[:force_directories]
-      FileUtils.mkdir_p File.join(test_dir, 'logs')
-      FileUtils.mkdir_p File.join(test_dir, 'data', 'db')
-    end
-
-    # Assemble the commands and spin off the threads
-    run_rspec test_dir, options[:mongo_dir], options[:ruby_path], options[:debug]
-
-    0
-  end
-end
-
-# Class to initialize a local server
-class RunCoverage
-  require_relative 'resources/local.rb'
-
-  # Provides text for the main help functionality
-  def self.synopsis
-    'Starts local processes for the OS Server'
-  end
-
-  # Executes the command line calls through threads, and sends their pids to file for shutdown
-  #
-  # @param [Array] sub_argv Options passed to the run subcommand from the user input
-  # @return [Fixnum] Return status
-  #
-  def execute(sub_argv)
-    mongod = which 'mongod'
-    mongodir = ''
-    if mongod
-      mongodir = File.dirname mongod
-    end
-
-    options = {debug: false, force_directories: false, workers: 1, ruby_path: $ruby_path, mongo_dir: mongodir}
-
-    opts = ::OptionParser.new do |o|
-      o.banner = 'Usage: openstudio_meta start_local [options] PROJECT_DIR'
-      o.separator ''
-      o.separator 'Options:'
-      o.separator ''
-
-      o.on('--debug', 'Whatever makes debugging easy') do |f|
-        options[:debug] = f
-      end
-
-      o.on('--force-directories', 'Force creation of directories') do |_|
-        options[:force_directories] = true
-      end
-
-      o.on('--worker-number COUNT', 'Number of workers to use') do |w|
-        options[:workers] = w.to_i
-      end
-
-      o.on('--ruby-path PATH', 'Location of ruby executable for workers. Defaults to the calling instance of ruby') do |path|
-        options[:ruby_path] = path
-      end
-
-      o.on('--mongo-dir PATH', 'Location of mongo installation prefix. Defaults to the location of any mongod in the current system path.') do |path|
-        options[:mongo_dir] = path
-      end
-
-      o.on('--energyplus-exe-path PATH', 'Location of the EnergyPlus executable') do |path|
-        options[:energyplus_exe_path] = path
-      end
-    end
-
-    # Parse the options
-    argv = parse_options(opts, sub_argv)
-    project_dir = argv.shift
-    unless argv == []
-      $logger.error 'Extra arguments passed to the start_local command. Please refer to the help documentation.'
-      exit 1
-    end
-    $logger.debug("StartLocal command: #{argv.inspect} #{options.inspect}")
-
-    # Check the project directory exists
-    unless ::File.exist? project_dir
-      if options[:force_directories]
-        FileUtils.mkdir_p project_dir
-      else
-        $logger.error "Unable to find directory '#{project_dir}'"
-        exit 1
-      end
-    end
-
-    # Check if a local_configuration.json exists
-    if ::File.exist? ::File.join(project_dir, 'local_configuration.json')
-      $logger.error "A `local_configuration.json` file already exists at `#{project_dir}`"
-      exit 1
-    end
-
-    # Also force the creation of the log dir in the project_dir
-    if options[:force_directories]
-      FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
-    end
-
-    if options[:energyplus_exe_path] && ::File.exist?(options[:energyplus_exe_path])
-      ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
-    end
-
-    # Set the server project path and temp dir
-    ::ENV['OS_SERVER_PROJECT_PATH'] = File.join(project_dir, 'temp_data')
-    ::ENV['OS_SERVER_RAILS_TMP_PATH'] = Dir.mktmpdir
-
-    # Assemble the commands and spin off the threads
-    start_local_server project_dir, options[:mongo_dir], options[:ruby_path], options[:workers], options[:debug]
-
-    0
   end
 end
 

@@ -6,22 +6,23 @@ ruby '2.2.4'
 # gem update --system 2.4.5
 gem 'rubygems-update', '2.4.5'
 
-gem 'rails', '5.1.4'
-gem 'rake', '~> 12.3'
+gem 'rails', '4.2'
+gem 'rake', '~> 11.2'
 
 # added for support of the project rakefile
 gem 'colored'
 
 # data modules
+gem 'json', '1.8.1'
 gem 'jbuilder'
-gem 'nokogiri', '~> 1.6'
-gem 'rubyzip', '~> 1.2'
+gem 'nokogiri', '~> 1.6.5'
+gem 'rubyzip', '~> 1.2.0'
 gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 6.3.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
-gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
-gem 'paperclip', '~> 4.3.7'
+gem 'mongoid', '~> 5.1.0'
+gem 'mongoid-paperclip', require: 'mongoid_paperclip'
+gem 'paperclip', '~> 4.3'
 
 # R
 gem 'rserve-simpler'
@@ -44,6 +45,10 @@ gem 'kaminari-mongoid'
 
 # job queuing
 gem 'daemons'
+gem 'delayed_job_mongoid'
+
+# http(s) requests
+gem 'faraday' # TODO: can this be deprecated?
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -63,18 +68,19 @@ gem 'openstudio-workflow', '= 1.3.2'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
 
-gem 'openstudio-analysis', '~> 1.0'
+gem 'openstudio-analysis', '1.0.0.rc18'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
-# gem 'openstudio-standards', '= 0.2.0.rc2'
-# gem 'openstudio-standards', path: '../../openstudio-standards/openstudio-standards'
-# gem 'openstudio-standards', github: 'NREL/openstudio-standards', branch: 'ambient-loop'
-gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan'
 
+#gem 'openstudio-standards', '= 0.1.15'
 gem 'aes','0.5.0'
 gem 'geocoder', '1.4.4'
+gem 'highline'
+gem 'launchy' 
+gem "openstudio-standards", :git => 'https://github.com/NREL/openstudio-standards.git', :branch => 'nrcan'
  
+
 ## End commonly updated gems
 
 gem 'openstudio-aws', '0.6.0'
@@ -89,6 +95,10 @@ gem 'rest-client', '1.8.0' # rest-client 2.0.0 breaks the multipart posting of t
 
 gem 'git'
 
+gem 'rubocop'
+
+
+
 # linux based js runtime libraries
 if RUBY_PLATFORM =~ /linux/
   gem 'execjs'
@@ -96,19 +106,11 @@ if RUBY_PLATFORM =~ /linux/
   gem 'therubyracer'
 end
 
-# The only resque only is :docker, :docker-dev, :production
-group :development, :docker, :'docker-dev', :'docker-test', :production, :test do
-  gem 'resque', '~> 1.27'
-  gem 'resque-web', require: 'resque_web'
-end
-
-group :development, :'docker-test', :test, :local, :'local-test' do
-  gem 'delayed_job_mongoid'
-end
 
 group :development, :test do
   gem 'better_errors'
   gem 'meta_request'
+  gem 'sextant' # navigate to /rails/routes to see routes
 
   gem 'capybara'
   gem 'coveralls', require: false
@@ -122,7 +124,7 @@ group :development, :test do
   gem 'rubocop-checkstyle_formatter', require: false
 
   gem 'ci_reporter'
-  gem 'factory_bot_rails'
+  gem 'factory_girl_rails'
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
 end

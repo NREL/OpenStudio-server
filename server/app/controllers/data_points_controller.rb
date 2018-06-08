@@ -251,7 +251,8 @@ class DataPointsController < ApplicationController
 
     # only run simulations that are in the na state
     if @data_point.status = 'na'
-      @data_point.submit_simulation
+      @data_point.job_id = @data_point.submit_simulation
+      @data_point.save!
     end
 
     respond_to do |format|
@@ -465,6 +466,6 @@ class DataPointsController < ApplicationController
   private
 
   def data_point_params
-    params.require(:data_point).permit!.to_h
+    params.require(:data_point).permit!
   end
 end
