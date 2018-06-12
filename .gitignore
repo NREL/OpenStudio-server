@@ -20,5 +20,6 @@ rubocop-results.xml
 server-data
 worker-data
 
+
 # ignore files with ~ at end
 *~
