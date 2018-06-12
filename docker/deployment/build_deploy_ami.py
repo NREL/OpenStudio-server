@@ -99,7 +99,7 @@ except KeyError as e:
 
 # Get the docker version to use
 template_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../../docker/deployment/user_variables.json.template')
+    os.path.join(os.path.dirname(__file__), 'user_variables.json.template')
 )
 with open(template_path) as f:
     docker_version = str(json.load(f)["docker_version"])
@@ -163,8 +163,7 @@ with open(variables_write_path, 'w') as f:
 if override_dockerhub_repo is not None:
     docker_config_path = os.path.abspath(
         os.path.join(
-            os.path.dirname(__file__),
-            '../../docker/deployment/scripts/aws_osserver_init.sh'
+            os.path.dirname(__file__), 'scripts/aws_osserver_init.sh'
         )
     )
     for line in fileinput.input(docker_config_path, inplace=1, backup='.bak'):
