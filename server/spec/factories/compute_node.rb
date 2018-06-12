@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :compute_node do
     node_type 'server'
     ip_address 'localhost'
