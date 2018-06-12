@@ -113,7 +113,8 @@
 
               <div class="span3">
                 <div class="button-container">
-                  <% if @current.status == 'completed' %>
+                  <% path = "/mnt/openstudio/server/assets/results.#{@current.id}.zip"%>
+                  <% if @current.status == 'completed' && File.exist?(path) %>
                       <td><%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
                   <% end %>
                 </div>
