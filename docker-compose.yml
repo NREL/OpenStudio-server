@@ -1,17 +1,11 @@
 # Docker Compose creates multiple containers on a single machine.
 # run `docker-compose up` to create and run/link the containers
-version: '3'
+version: '2'
 services:
   db:
-    image: mongo:3.4.10
+    image: mongo:latest
     ports:
       - "27017:27017"
-    volumes:
-      - dbdata:/data/db
-  queue:
-    image: redis:4.0.6
-    ports:
-      - "6379:6379"
   web:
     image: nrel/openstudio-server:latest
     build:
@@ -20,9 +14,9 @@ services:
         rails_env: docker
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-    depends_on:
+    links:
       - db
-      - queue
+      - rserve
     ports:
       - "8080:80"
     volumes:
@@ -35,14 +29,12 @@ services:
         rails_env: docker
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-      - QUEUES=background,analyses
-    depends_on:
+    links:
       - db
-      - queue
-      - web
+      - rserve
     volumes:
       - osdata:/mnt/openstudio
-    command: bundle exec rake environment resque:work
+    command: bin/delayed_job -i server --queues=analyses,background run
   worker:
     image: nrel/openstudio-server:latest
     build:
@@ -51,14 +43,11 @@ services:
         rails_env: docker
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-      - QUEUES=simulations
-      - COUNT=1
-    depends_on:
+    links:
       - web
       - db
-      - queue
       - rserve
-    command: bundle exec rake environment resque:workers
+    command: bin/delayed_job -i worker --queue=simulations run
   rserve:
     image: nrel/openstudio-rserve:latest
     build: ./docker/R
@@ -66,12 +55,6 @@ services:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     volumes:
       - osdata:/mnt/openstudio
-    depends_on:
-      - web
-      - web-background
-      - db
 volumes:
   osdata:
-    external: true
-  dbdata:
     external: true

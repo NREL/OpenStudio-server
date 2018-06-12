@@ -39,7 +39,7 @@ RSpec.describe Project, type: :model do
   before :all do
     # delete all the analyses
     Project.destroy_all
-    FactoryBot.create(:project_with_analyses).analyses
+    FactoryGirl.create(:project_with_analyses).analyses
 
     @project = Project.first
   end

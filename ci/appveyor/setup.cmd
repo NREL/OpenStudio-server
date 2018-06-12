@@ -1,7 +1,8 @@
 set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
-echo Downloading and Installing OpenStudio (%OPENSTUDIO_VERSION%.%OPENSTUDIO_VERSION_SHA%)
-curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/%OPENSTUDIO_VERSION%/OpenStudio-%OPENSTUDIO_VERSION%.%OPENSTUDIO_VERSION_SHA%-Windows.exe
-OpenStudio-%OPENSTUDIO_VERSION%.%OPENSTUDIO_VERSION_SHA%-Windows.exe --script ci/appveyor/install-windows.qs
+echo Downloading and Installing OpenStudio
+curl -SLO --insecure https://raw.githubusercontent.com/NREL/OpenStudio/develop/install.qs
+curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/2.4.0/OpenStudio-2.4.0.f58a3e1808-Windows.exe
+OpenStudio-2.4.0.f58a3e1808-Windows.exe --script install.qs
 move C:\openstudio C:\projects\openstudio
 dir C:\projects\openstudio
 dir C:\projects\openstudio\Ruby
@@ -16,7 +17,7 @@ cd c:\Ruby23-x64\DevKit
 ruby dk.rb install
 cd c:\projects\openstudio-server
 
-REM If you change RUBYLIB here, make sure to change it in integration-test.ps1 and unit-test.cmd too
+REM If you change RUBYLIB here, make sure to change it in test.ps1 too
 set RUBYLIB=C:\projects\openstudio\Ruby
 set PATH=C:\Ruby%RUBY_VERSION%\bin;C:\Mongodb\bin;%PATH%
 cd c:\

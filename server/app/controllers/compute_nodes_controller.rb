@@ -74,6 +74,6 @@ class ComputeNodesController < ApplicationController
   end
 
   def compute_node_params
-    params.require(:compute_node).permit!.to_h
+    params.require(:compute_node).permit!
   end
 end

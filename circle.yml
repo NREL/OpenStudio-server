@@ -27,9 +27,7 @@ test:
     - export OS_SERVER_NUMBER_OF_WORKERS=4
   override:
     - docker-compose -f docker-compose.test.yml run web > reports/rspec/rpec_results.html
-    # Need to comment out the stop because circle is complaining about the version of docker. This will be
-    # moved to travis soon, so not worrying about it.
-    # - docker-compose stop
+    - docker-compose stop
   post:
     - rsync -av reports/ $CIRCLE_ARTIFACTS/reports/
 

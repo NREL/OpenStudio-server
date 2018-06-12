@@ -1,7 +1,5 @@
 require File.expand_path('../boot', __FILE__)
 
-# require 'rails/all'
-# require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'action_mailer/railtie'
 require 'sprockets/railtie'
@@ -23,10 +21,7 @@ module OpenstudioServer
     config.active_support.escape_html_entities_in_json = true
 
     # Set the queue adapter
-    # config.active_job.queue_adapter = :delayed_job
-
-    # custom config var which will be overriden in environment file for environments that use :delayed_job
-    config.job_manager = :resque
+    config.active_job.queue_adapter = :delayed_job
 
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = 'utf-8'
@@ -51,9 +46,5 @@ module OpenstudioServer
 
     # remove x-frame-options header
     config.action_dispatch.default_headers.delete('X-Frame-Options')
-
-
-    # Rails 5 upgrade additions
-    # ActiveSupport.halt_callback_chains_on_return_false = false
   end
 end

@@ -51,23 +51,20 @@
 # users commonly want.
 #
 
-require 'factory_bot_rails'
-require 'ci/reporter/core'
-require_relative 'support/background_jobs'
-require 'rspec/retry'
+require 'factory_girl_rails'
 
+require 'ci/reporter/core'
+
+# Always create spec reports
 require 'simplecov'
-require 'net/https' # for net::readtimeout
+require 'coveralls'
+Coveralls.wear!
+
+require 'rspec/retry'
 
 dir = File.expand_path('../../reports/coverage', File.dirname(__FILE__))
 SimpleCov.coverage_dir(dir)
-
-unless ENV['SKIP_COVERALLS']
-  require 'coveralls'
-  Coveralls.wear!
-  SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-end
-
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter
 SimpleCov.start do
   add_filter 'spec/files'
 end
@@ -153,13 +150,4 @@ RSpec.configure do |config|
   config.default_retry_count = 5
   # Only retry when Selenium raises Net::ReadTimeout
   config.exceptions_to_retry = [Net::ReadTimeout]
-
-  # run jobs immediately if type is feature
-  config.around(:each, foreground: true) do |example|
-    run_background_jobs_immediately do
-      example.run
-    end
-  end
-
-  config.include BackgroundJobs
 end

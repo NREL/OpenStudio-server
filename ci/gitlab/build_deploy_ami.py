@@ -99,7 +99,7 @@ if override_docker_version is not None:
     docker_version = override_docker_version
 
 # Get the OpenStudioServer version and version extension to use
-version_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../server/app/lib/openstudio_server/version.rb'))
+version_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../server/lib/openstudio_server/version.rb'))
 
 cmd_call = 'ruby -r {} -e "puts OpenstudioServer::VERSION"'.format(version_path)
 if verbose:

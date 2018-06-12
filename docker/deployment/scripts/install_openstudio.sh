@@ -19,7 +19,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
         gdebi-core \
         curl \
         git \
-        && curl -SLO --insecure --retry 3 $OPENSTUDIO_DOWNLOAD_URL \
+        && curl -SLO --retry 3 $OPENSTUDIO_DOWNLOAD_URL \
         && sudo gdebi -n $OPENSTUDIO_DOWNLOAD_FILENAME \
         && rm -f $OPENSTUDIO_DOWNLOAD_FILENAME \
         && sudo rm -rf /usr/SketchUpPlugin \
