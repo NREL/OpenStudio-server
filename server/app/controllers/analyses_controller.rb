@@ -742,7 +742,7 @@ class AnalysesController < ApplicationController
     if File.exist?(path)
       file_size = File.size(path)
       response.headers['Content-Length'] = file_size.to_s
-      send_data File.open(path, 'rb').read, filename: "log.#{@analysis.id}.csv", type: "application/zip", disposition: 'attachment'
+      send_data File.open(path, 'rb').read, filename: "log.#{@analysis.id}.csv.zip", type: "application/zip", disposition: 'attachment'
     end
   end
 
@@ -755,7 +755,7 @@ class AnalysesController < ApplicationController
     if File.exist?(path)
       file_size = File.size(path)
       response.headers['Content-Length'] = file_size.to_s
-      send_data File.open(path, 'rb').read, filename: "log.#{@analysis.id}.csv", type: "application/zip", disposition: 'attachment'
+      send_data File.open(path, 'rb').read, filename: "simulations.#{@analysis.id}.zip", type: "application/zip", disposition: 'attachment'
     end
   end
 
