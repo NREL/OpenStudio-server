@@ -81,7 +81,7 @@ if not custom_enabled:
     if override_ami_version is not None:
         raise EnvironmentError('Cannot parse --ami_version, as custom builds is not enabled')
     if override_ami_extension is not None:
-        raise EnvironmentError('Cannon prase --ami_extension, as custom builds is not enabled')
+        raise EnvironmentError('Cannot prase --ami_extension, as custom builds is not enabled')
     if override_dockerhub_repo is not None:
         raise EnvironmentError('Cannot parse --dockerhub_repo, as custom builds is not enabled')
     if write_to_file:

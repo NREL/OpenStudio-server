@@ -1,5 +1,6 @@
 #!/bin/bash -e
-
+MONGO_VERSION=3.4.10
+REDIS_VERSION=4.0.6
 echo ""
 echo "------------------------------------------------------------------------"
 echo "Creating data volume regdata to persist registry data for provision"
@@ -39,7 +40,7 @@ echo "Pulling mongo from DockerHub"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker pull mongo:3.4.10
+docker pull mongo:$MONGO_VERSION
 sleep 1
 
 echo ""
@@ -48,7 +49,7 @@ echo "Pulling redis from DockerHub"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
-docker pull redis:4.0.6
+docker pull redis:$REDIS_VERSION
 sleep 1
 
 echo ""
@@ -61,10 +62,10 @@ docker tag nrel/openstudio-server:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstu
 docker push localhost:5000/openstudio-server
 docker tag nrel/openstudio-rserve:$OSSERVER_DOCKERHUB_TAG localhost:5000/openstudio-rserve
 docker push localhost:5000/openstudio-rserve
-docker tag mongo localhost:5000/mongo
-docker push localhost:5000/mongo
-docker tag redis localhost:5000/redis
-docker push localhost:5000/redis
+docker tag mongo:$MONGO_VERSION localhost:5000/mongo:latest
+docker push localhost:5000/mongo:latest
+docker tag redis:$REDIS_VERSION localhost:5000/redis:latest
+docker push localhost:5000/redis:latest
 docker service rm registry
 docker swarm leave -f
 sleep 1
