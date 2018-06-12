@@ -32,11 +32,13 @@ test:
     # - docker-compose stop
   post:
     - rsync -av reports/ $CIRCLE_ARTIFACTS/reports/
+    # Reset the git checkout to remove the test-based data in the containers and rebuild
+    # Rebuild the web container as the env var affects
+    - git checkout -- .dockerignore && git checkout -- Dockerfile
+    - docker-compose -f docker-compose.test.yml build --build-arg rails_env=docker --build-arg bundle_args="--without development test" web
 
 deployment:
   production:
     branch: [develop, master, nrcan-master]
     commands:
-      - git checkout -- .dockerignore && git checkout -- Dockerfile
-      - docker-compose build --pull
       - source docker/deployment/scripts/circle_deployment.sh

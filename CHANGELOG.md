@@ -1,6 +1,32 @@
 OpenStudio Server
 =================
 
+Version 2.5.1
+-------------
+Version 2.5.0 did not include a changelog, therefore, the list below includes updates to 2.5.0 as well.
+
+Major Changes:
+* Backend for Docker deployment now used Resque with Redis instead of delayed jobs.
+
+Date Range: 2018-03-21 to 2018-06-07
+
+Closed Issues: 5
+- Improved [#50]( https://github.com/NREL/OpenStudio-server/issues/50 ), Add OpenStudio Server Icon to the place where Icons go in web browsers
+- Fixed [#249]( https://github.com/NREL/OpenStudio-server/issues/249 ), Large Uploads to Server (i.e. lots of weather files) Seem to Timeout
+- Fixed [#328]( https://github.com/NREL/OpenStudio-server/issues/328 ), Travis test.sh not running unit tests for OSX / test
+- Fixed [#329]( https://github.com/NREL/OpenStudio-server/issues/329 ), output from unit tests should be available for appveyor, travis
+
+Accepted Pull Requests: 16
+- Fixed [#325]( https://github.com/NREL/OpenStudio-server/pull/325 ), Code cleanup
+- Fixed [#327]( https://github.com/NREL/OpenStudio-server/pull/327 ), Updates openstudio-standards to 0.2.1
+- Fixed [#334]( https://github.com/NREL/OpenStudio-server/pull/334 ), Added btap download features
+- Fixed [#335]( https://github.com/NREL/OpenStudio-server/pull/335 ), Bumping the wfg to 1.3.3
+- Fixed [#336]( https://github.com/NREL/OpenStudio-server/pull/336 ), use win_platform?
+- Fixed [#338]( https://github.com/NREL/OpenStudio-server/pull/338 ), Pad nrcan 2.4.3
+- Fixed [#339]( https://github.com/NREL/OpenStudio-server/pull/339 ), Ci refactor
+- Fixed [#341]( https://github.com/NREL/OpenStudio-server/pull/341 ), NRCAN OS-Server[2.5.0] AWS AMI creation: latest tag not found for MongoDB and Redis fix
+- Fixed [#343]( https://github.com/NREL/OpenStudio-server/pull/343 ), cleanup deploy script
+
 Version 2.4.3
 -------------
 The CHANGELOG has not been updated lately. These changes are fixes/updates that have occurred between 01-01-2018 and 03-20-2018.
