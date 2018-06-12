@@ -5,7 +5,8 @@
 if [ "${BUILD_ARCH}" == "OSX" ]; then
     # Dir containing openstudio
     export RUBYLIB="${HOME}/openstudio/Ruby"
-    export PATH="${PATH}:${HOME}/openstudio/bin"
+#    required as of OS 2.5.1
+#    export PATH="${PATH}:${HOME}/openstudio/bin"
     mongo_dir="/usr/local/bin"
 elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
     # Dir containing openstudio.  /usr/Ruby is for OS < 2.5.1

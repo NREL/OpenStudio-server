@@ -42,7 +42,7 @@ class RunSimulateDataPoint
 
   def initialize(data_point_id, options = {})
     # for openstudio < 2.5.1, full path will be required for Linux/OSX: https://github.com/NREL/OpenStudio/issues/2911
-    # as of openstudio 2.5.1, absolute path is still required for OSX. 
+    # as of openstudio 2.5.1, OSX still requires absolute path or explicit update to PATH (see travis test.sh).
     os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : 'openstudio'
     defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
     @options = defaults.deep_merge(options)
