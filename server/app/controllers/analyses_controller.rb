@@ -729,7 +729,7 @@ class AnalysesController < ApplicationController
     if File.exist?(path)
       file_size = File.size(path)
       response.headers['Content-Length'] = file_size.to_s
-      send_data File.open(path, 'rb').read, filename: "results.#{@analysis.id}.zip", type: "application/zip", disposition: 'attachment'
+      send_file path, filename: "results.#{@analysis.id}.zip", type: "application/zip", disposition: 'attachment'
     end
   end
 
