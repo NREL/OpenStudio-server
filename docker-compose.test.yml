@@ -3,7 +3,11 @@
 version: '2'
 services:
   db:
-    image: mongo:latest
+    image: mongo:3.4.10
+  queue:
+    image: redis:4.0.6
+    ports:
+      - "6379:6379"
   web:
     image: nrel/openstudio-server:latest
     build:
@@ -17,6 +21,7 @@ services:
       - CIRCLECI
     links:
       - db
+      - queue
       - rserve
     ports:
       - "8080:80"

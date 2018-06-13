@@ -3,7 +3,7 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-FROM ubuntu:14.04
+FROM nrel/openstudio:2.5.0
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 ARG rails_env=docker
 ARG bundle_args="--without development test"
@@ -53,10 +53,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ruby
-ADD /docker/deployment/scripts/install_ruby.sh /usr/local/bin/install_ruby.sh
-RUN /usr/local/bin/install_ruby.sh 2.2.4 b6eff568b48e0fda76e5a36333175df049b204e91217aa32a65153cc0cdcb761
-
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION 5.0.25
 # Install Rack. Silly workaround for not having ruby 2.2.2. Rack 1.6.4 is the
@@ -68,12 +64,6 @@ RUN passenger-install-nginx-module
 # Configure the nginx server
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
-
-# Install OpenStudio
-ADD /docker/deployment/scripts/install_openstudio.sh /usr/local/bin/install_openstudio.sh
-ENV OPENSTUDIO_VERSION 2.4.3
-ENV OPENSTUDIO_SHA 29a61f6637
-RUN /usr/local/bin/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_SHA
 
 # Add RUBYLIB link for openstudio.rb and Radiance env vars
 ENV RUBYLIB /usr/Ruby
@@ -120,7 +110,6 @@ RUN bundle install --jobs=3 --retry=3 $bundle_args
 ADD /server/Rakefile /opt/openstudio/server/Rakefile
 ADD /server/config/ /opt/openstudio/server/config/
 ADD /server/app/assets/ /opt/openstudio/server/app/assets/
-ADD /server/lib /opt/openstudio/server/lib
 
 # Now call precompile
 RUN mkdir /opt/openstudio/server/log
@@ -137,10 +126,6 @@ RUN bundle install --jobs=3 --retry=3
 ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
 RUN sudo sysctl --system
 
-# forward request and error logs to docker log collector
-# TODO: How to get logs out of this, mount shared volume?
-#RUN ln -sf /dev/stdout /var/log/nginx/access.log
-#RUN ln -sf /dev/stderr /var/log/nginx/error.log
 RUN chmod 775 /opt/openstudio/server/log
 RUN chmod 666 /opt/openstudio/server/log/*.log
 
