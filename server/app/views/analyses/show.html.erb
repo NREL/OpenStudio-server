@@ -129,11 +129,17 @@
                 <%= link_to "Algorithm Results Zip", download_algorithm_results_zip_analysis_path(@analysis), class: 'list-group-item' %>
               <% end %>
               <% if @analysis.status == 'completed' %>
-                  <%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@analysis), data: { confirm: 'Are you sure?' }, class: "list-group-item" %>
-                  <% #fails = @analysis.data_points.where(status_message: 'datapoint failure').count %>
-                  <% path = "/mnt/openstudio/server/assets/results/#{@analysis.id}/failed_run_error_log.csv"%>
+                  <% path = "/mnt/openstudio/server/assets/results.#{@analysis.id}.zip"%>
+                  <% if File.exist?(path) %>
+                    <%= link_to 'Download BTAP Results', download_BTAP_results_zip_analysis_path(@analysis), data: { confirm: 'Are you sure?' }, class: "list-group-item" %>
+                  <% end %>
+                  <% path = "/mnt/openstudio/server/assets/results/#{@analysis.id}/failed_run_error_log.csv.zip"%>
                   <% if File.exist?(path) %>
                     <%= link_to 'BTAP Error Log', download_BTAP_error_log_analysis_path(@analysis), class: "list-group-item" %>
+                  <% end %>
+                  <% path = "/mnt/openstudio/server/assets/results/#{@analysis.id}/simulations.json.zip"%>
+                  <% if File.exist?(path) %>
+                      <%= link_to 'BTAP Simulations.json', download_BTAP_simulations_analysis_path(@analysis), class: "list-group-item" %>
                   <% end %>
               <% end %>
             </div>
