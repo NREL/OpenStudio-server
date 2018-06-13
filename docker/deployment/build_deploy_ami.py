@@ -175,6 +175,15 @@ if override_dockerhub_repo is not None:
         print('Replaced `nrel` with `{}` in docker pull and docker tag commands'.format(
             override_dockerhub_repo))
 
+# Check if this version name has already been released
+ami_name = "OpenStudio-Server-Docker-%s%s" % (ami_version, ami_version_ext)
+ec2 = boto3.resource('ec2')
+for image in ec2.images.filter(Filters=[{'Name': 'name', 'Values': [ami_name]}]).all():
+    # I really don't like iterating over this, but it was the easiest. $.count() and len didn't work.
+    if image.name == ami_name:
+        print("Image name already exists, update version for a new instance. Not failing.")
+        exit(0)
+
 # Next we need to run packer and retrieve the new AMI ID
 os.chdir(os.path.dirname(template_path))
 os.environ['AWS_ACCESS_KEY'] = access

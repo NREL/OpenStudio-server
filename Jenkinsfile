@@ -1,25 +1,44 @@
 pipeline {
   agent {
     dockerfile {
-      filename 'docker/deployment/Dockerfile'
+      filename 'Dockerfile'
+      dir 'docker/deployment'
+      // set root user to access docker daemon and default region for s3 data
+      args '-u root -e AWS_DEFAULT_REGION=us-east-1'
     }
-
   }
   stages {
     stage('Wait for Tests') {
       steps {
-        echo 'Checking for completion of builds, tests, and images on Docker Hub'
+        sh 'cat /etc/issue'
+        echo 'Checking for completion of builds, tests, and images on Docker Hub.'
+        echo 'This is still to be done.'
       }
     }
-    stage('You Ready?') {
+    stage('You ready?') {
       steps {
-        input 'Ready to Build and Deploy AMI?'
+        script {
+          if (env.BRANCH_NAME == 'master') {
+            input 'Ready to build and deploy AMI?'
+          } else {
+            echo 'Unable to deploy when not on master'
+          }
+        }
       }
     }
     stage('Build AMI') {
       steps {
-        echo 'Building AMI'
-        sh 'docker run -it -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/go/run packer /bin/bash -c \'cd /go/run/docker/deployment; python build_deploy_ami.py --verbose\''
+        script {
+          if (env.BRANCH_NAME == 'master') {
+            withAWS(credentials: 'ec2NRELIS') {
+                sh 'pwd'
+                sh 'docker --version'
+                sh 'python --version'
+                sh 'packer --version'
+                sh 'cd docker/deployment && python build_deploy_ami.py --verbose'
+            }
+          }
+        }
       }
     }
   }
