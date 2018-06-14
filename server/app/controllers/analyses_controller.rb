@@ -944,8 +944,19 @@ class AnalysesController < ApplicationController
     logger.info "finished mapping variables: #{Time.now - start_time}"
 
     start_time = Time.now
-    logger.info 'Start map/reduce and as_json'
-    plot_data = plot_data.map_reduce(map, reduce).out(replace: "datapoints_mr_#{analysis.id}").as_json
+    logger.info 'Start map/reduce'
+    # Remove all the old items first
+    Mongoid.default_client.database.collection(:"datapoints_mr_#{analysis.id}").drop
+    plot_data = plot_data.map_reduce(map, reduce).out(replace: "datapoints_mr_#{analysis.id}")
+    # just call the first one so that is flushes the results to the database
+    plot_data.first
+    logger.info "Finished map/reduce: #{Time.now - start_time}"
+
+    # Go query the map reduce results again. For some reason the results of the map/reduce is
+    # limited to only the first 100 documents.
+    start_time = Time.now
+    logger.info 'Start as_json'
+    plot_data = Mongoid.default_client.database.collection(:"datapoints_mr_#{analysis.id}").find.as_json
     logger.info "Finished as_json: #{Time.now - start_time}"
 
     start_time = Time.now

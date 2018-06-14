@@ -73,8 +73,8 @@ RSpec.describe 'Pages Exist', type: :feature do
 
     it 'return data_points' do
       expect(json).not_to be_empty
-      pp json
-      expect(json.size).to eq(1003)
+      # there must be 3 datapoints in the uploaded example
+      expect(json.size).to eq(200)
     end
   end
 
@@ -83,8 +83,8 @@ RSpec.describe 'Pages Exist', type: :feature do
 
     it 'return data_points' do
       expect(json).not_to be_empty
-      pp json
-      expect(json['data'].size).to eq(1003)
+      # Only returns the successful ones, so the 3 in the example file are not valid
+      expect(json['data'].size).to eq(200)
     end
   end
 
