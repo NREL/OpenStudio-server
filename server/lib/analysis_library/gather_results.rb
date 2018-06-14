@@ -7,7 +7,7 @@ def git_clean_rep(url,options)
   folder =File.join('/mnt/openstudio/server/assets', basename)
   FileUtils.rm_rf(folder)
   puts "Creating clone of #{url} with options  #{options}."
-  system("git clone #{url} #{folder} -b nrcan_60")
+  system("git clone #{url} #{folder}")
   #Git.clone(url,folder,options)
   return folder
 end
