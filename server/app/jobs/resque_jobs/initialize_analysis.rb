@@ -51,7 +51,7 @@ module ResqueJobs
     # after_perform hooks only called if job completes successfully
     def self.after_perform_run_analysis(analysis_type, analysis_id, job_id, options = {})
       #enqueue for run
-      Resque.enqueue(RunAnalysisResque, analysis_type, id, job_id, options)
+      Resque.enqueue(RunAnalysis, analysis_type, analysis_id, job_id, options)
     end
   end
 end

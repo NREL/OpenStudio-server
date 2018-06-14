@@ -46,7 +46,7 @@ module AnalysisLibrary
       1
     end
 
-    # Return the logger for the delayed job
+    # Return the logger for the worker
     def logger
       # Ternaries handle loggers with running without delayed_jobs or resque (without_delay)
       if Rails.application.config.job_manager == :delayed_job
@@ -66,5 +66,6 @@ module AnalysisLibrary
     def analysis_dir(id)
       "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
     end
+
   end
 end

@@ -99,6 +99,7 @@ paths = [
     { glob: 'server/app/mailers/*.rb', license: ruby_header_text, regex: ruby_regex },
     { glob: 'server/app/models/*.rb', license: ruby_header_text, regex: ruby_regex },
     { glob: 'server/app/workers/*.rb', license: ruby_header_text, regex: ruby_regex },
+    { glob: 'server/app/jobs/resque_jobs/*.rb', license: ruby_header_text, regex: ruby_regex },
     { glob: 'server/config/environments/*.rb', license: ruby_header_text, regex: ruby_regex },
     { glob: 'server/config/initializers/delayed_job_config.rb', license: ruby_header_text, regex: ruby_regex },
     { glob: 'server/config/initializers/default_config.rb', license: ruby_header_text, regex: ruby_regex },
