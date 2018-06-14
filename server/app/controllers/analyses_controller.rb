@@ -919,33 +919,22 @@ class AnalysesController < ApplicationController
     # Eventually use this where the timestamp is processed as part of the request to save time
     plot_data = if datapoint_id
                   if only_completed_normal
-                    DataPoint.where(analysis_id: analysis, status: 'completed', id: datapoint_id,
-                                  status_message: 'completed normal')
-                             .map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
+                    DataPoint.where(
+                        analysis_id: analysis, status: 'completed', id: datapoint_id, status_message: 'completed normal'
+                    )
                   else
                     DataPoint.where(analysis_id: analysis, id: datapoint_id)
-                             .map_reduce(map, reduce).out(merge: "datapoints_mr_#{analysis.id}")
                   end
                 else
                   if only_completed_normal
                     DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                             .order_by(:created_at.asc).map_reduce(map, reduce)
-                             .out(merge: "datapoints_mr_#{analysis.id}")
+                        .order_by(:created_at.asc)
                   else
-                    DataPoint.where(analysis_id: analysis) .order_by(:created_at.asc).map_reduce(map, reduce)
-                        .out(merge: "datapoints_mr_#{analysis.id}")
+                    DataPoint.where(analysis_id: analysis).order_by(:created_at.asc)
                   end
                 end
 
     logger.info "finished fixing up data: #{Time.now - start_time}"
-
-    # TODO: how to handle to sorting by iteration?
-    # if @analysis.analysis_type == 'sequential_search'
-    #   dps = @analysis.data_points.all.order_by(:iteration.asc, :sample.asc)
-    #   dps = dps.rotate(1) # put the starting point on top
-    # else
-    #   dps = @analysis.data_points.all
-    # end
 
     start_time = Time.now
     logger.info 'mapping variables'
@@ -955,8 +944,8 @@ class AnalysesController < ApplicationController
     logger.info "finished mapping variables: #{Time.now - start_time}"
 
     start_time = Time.now
-    logger.info 'Start as_json'
-    plot_data = plot_data.as_json
+    logger.info 'Start map/reduce and as_json'
+    plot_data = plot_data.map_reduce(map, reduce).out(replace: "datapoints_mr_#{analysis.id}").as_json
     logger.info "Finished as_json: #{Time.now - start_time}"
 
     start_time = Time.now
