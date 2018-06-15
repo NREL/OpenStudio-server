@@ -75,7 +75,7 @@ test:
     default:
       database: os_test
       hosts:
-        # For some reason localhost isn't working for mongo anymore
+        # For some reason localhost isn't working for mongo anymore. This is an NREL issue with IT overwriting hosts file
         - 127.0.0.1:27017
       options:
         read:
