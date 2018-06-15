@@ -22,7 +22,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservation:
+        reservations:
           cpus: "1"
   web:
     image: localhost:5000/openstudio-server

@@ -33,52 +33,59 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-FactoryBot.define do
-  factory :data_point do
-    name 'Example Datapoint'
-    analysis
+require 'rails_helper'
+require 'pp'
 
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_data_point_1.json"))
-    initialize_with { new(json) }
+RSpec.describe 'Pages Exist', type: :feature do
+  before :all do
+    # delete all the analyses
+    Project.destroy_all
+
+    FactoryBot.create(:project_with_analyses).analyses
+
+    @project = Project.first
+    @analysis = @project.analyses.first
   end
 
-  factory :analysis do
-    name 'Example Analysis'
-    project
+  describe 'GET /analyses' do
 
-    json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_csv.json"))
+    before { get '/analyses.json' }
 
-    initialize_with { new(json['analysis']) }
+    it 'return analyses' do
+      expect(json).not_to be_empty
+    end
 
-    seed_zip { File.new("#{Rails.root}/spec/files/batch_datapoints/example_csv.zip") }
-
-    factory :analysis_with_data_points do
-      transient do
-        data_point_count 200
-      end
-
-      after(:create) do |analysis, evaluator|
-        FactoryBot.create_list(
-          :data_point, evaluator.data_point_count,
-          status: 'completed',
-          status_message: 'completed normal',
-          analysis: analysis
-        )
-      end
+    it 'returns status code 200' do
+      expect(response).to have_http_status(200)
     end
   end
 
-  factory :project do
-    name 'Test Project'
+  describe 'GET /analysis/{id}' do
+    before { get "/analyses/#{@analysis.id}.json"}
 
-    factory :project_with_analyses do
-      transient do
-        analyses_count 1
-      end
-
-      after(:create) do |project, evaluator|
-        FactoryBot.create_list(:analysis_with_data_points, evaluator.analyses_count, project: project)
-      end
+    it 'return analysis' do
+      expect(json).not_to be_empty
     end
   end
+
+  describe 'GET /analysis/{id}/data_points' do
+    before { get "/analyses/#{@analysis.id}/data_points.json"}
+
+    it 'return data_points' do
+      expect(json).not_to be_empty
+      # there must be 3 datapoints in the uploaded example
+      expect(json.size).to eq(200)
+    end
+  end
+
+  describe 'GET /analysis/{id}/get' do
+    before { get "/analyses/#{@analysis.id}/analysis_data.json"}
+
+    it 'return data_points' do
+      expect(json).not_to be_empty
+      # Only returns the successful ones, so the 3 in the example file are not valid
+      expect(json['data'].size).to eq(200)
+    end
+  end
+
 end

@@ -4,7 +4,7 @@ Currently, the only automation process for the OpenStudio Server repository that
 
 ## AMI generation requirements
 
-To execute the AMI automation script `build_deploy_ami.py` in this folder several software dependencies are required. Please note that this script was written for execution on Ubuntu 17.04. First, docker version 17.09.01-ce is required. Notes for installing this are available on [the wiki](http://github.com/NREL/OpenStudio-server/wiki/User-OpenStudio-Server-Deployment). Next, [packer](http://www.packer.io/) version 1.1.3 or later is required. Finally, python version 2.7.13 or later is required, as well as the python extension pip. To ensure that docker, packer, and python are available, please run the following in a bash shell.
+To execute the AMI automation script `build_deploy_ami.py` in this folder several software dependencies are required. Please note that this script was written for execution on Ubuntu 17.04. First, docker version 17.09.01-ce is required. Notes for installing this are available on [the wiki](http://github.com/NREL/OpenStudio-server/wiki/User-OpenStudio-Server-Deployment). Next, [packer](http://www.packer.io/) version 1.1.3 or later is required. Finally, python version Python 3.6.3 or later is required, as well as the python extension pip. To ensure that docker, packer, and python are available, please run the following in a bash shell.
 
 ```sh
 $ docker --version
@@ -17,7 +17,7 @@ $ packer --version
 
 $ python --version
 
-Python 2.7.13
+Python 3.6.3
 ```
 
 Once the above dependencies are installed, please execute the following command in a bash shell in this folder.
