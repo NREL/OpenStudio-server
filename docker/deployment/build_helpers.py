@@ -1,6 +1,7 @@
 import os
 import boto3
 import re
+import requests
 
 try:
     access = os.environ['AWS_ACCESS_KEY_ID']
@@ -45,7 +46,7 @@ def get_latest_openstudio_version_from_s3():
     ]
 
 def check_dockerhub_published(repo, version):
-    pass
+    r = requests.get('https://hub.docker.com/r/nrel/openstudio-server/tags/'
 
 if __name__ == '__main__':
     print("Latest version of OpenStudio from S3 is:")
