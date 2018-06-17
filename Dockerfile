@@ -3,7 +3,7 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-FROM nrel/openstudio:2.5.1
+FROM nrel/openstudio:2.5.2
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Install required libaries
