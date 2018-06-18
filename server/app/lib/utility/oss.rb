@@ -1,13 +1,14 @@
 module Utility
-  class File
+  class Oss
     # Run script identified by full_path.  Set timeout unless nil
     def self.run_script full_path, timeout = nil, env_vars = {}, logger = Rails.logger
       begin
-        logger.info "updating permissions for #{init_file_path}"
-        File.chmod(0777, init_file_path)
-        logger.info "running #{init_file_path}"
+        logger.info "updating permissions for #{full_path}"
+        File.chmod(0755, full_path) #755
+        logger.info "running #{full_path}"
 
         # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
+        # todo handle nil timeout - don't interrupt
         # todo consider passing log
         pid = spawn(env_vars, full_path, :unsetenv_others => true)
         Timeout.timeout(timeout) do

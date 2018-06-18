@@ -32,7 +32,7 @@ module WebNode
         logger.info "Checking for presence of initialization file at #{file_path}"
         if File.file? file_path
           # TODO how long do we want to set timeout?
-          Utility::File.run_script(file_path, 60*60*4, {'ANALYSIS_ID' => id}, logger)
+          Utility::Oss.run_script(file_path, 60*60*4, {'ANALYSIS_ID' => id}, logger)
         end
      end
 
@@ -44,7 +44,7 @@ module WebNode
         logger.info "Checking for presence of initialization file at #{init_file_path}"
         if File.file? ifile_path
           # TODO how long do we want to set timeout?
-          Utility::File.run_script(file_path, 60*60*4)
+          Utility::Oss.run_script(file_path, 60*60*4)
         end
       end
     end
