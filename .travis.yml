@@ -2,8 +2,8 @@ language: ruby
 rvm: 2.2.4
 env:
   global:
-    - OPENSTUDIO_VERSION: 2.4.3 #see comment in test.sh if you change this to >= 2.5.1
-    - OPENSTUDIO_VERSION_SHA: 29a61f6637
+    - OPENSTUDIO_VERSION: 2.5.2 #see comment in test.sh if you change this to >= 2.5.1
+    - OPENSTUDIO_VERSION_SHA: 8d7aa85fe5
 matrix:
   include:
     - os: linux
