@@ -3,7 +3,7 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-FROM nrel/openstudio:2.4.3
+FROM nrel/openstudio:2.5.2
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 ARG rails_env=docker-dev
 
@@ -64,8 +64,7 @@ RUN passenger-install-nginx-module
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
-# Add RUBYLIB link for openstudio.rb and Radiance env vars
-ENV RUBYLIB /usr/Ruby
+# Radiance env vars. RUBYLIB is set in the base openstudio container
 ENV OPENSTUDIO_SERVER 'true'
 ENV OS_RAYPATH /usr/Radiance
 ENV PERL_EXE_PATH /usr/bin
