@@ -156,7 +156,7 @@ RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudi
 RUN mkdir -p /opt/openstudio/server/tmp && chmod 777 /opt/openstudio/server/tmp
 
 # Test adding the git repo to the container for coveralls
-# The #TEST# will be removed in the circleci test script to be run in the test container
+# The #TEST# will be removed in the travis test script to be run in the test container
 #TEST#ADD .git /opt/openstudio/.git
 
 ADD /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint

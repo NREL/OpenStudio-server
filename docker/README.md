@@ -44,7 +44,6 @@ docker volume rm osdata
 docker volume create --name=osdata
 export RAILS_ENV=docker-test
 export CI=true
-export CIRCLECI=true
 sed -i -E "s/#TEST#//g" Dockerfile
 sed -i -E "s/.git//g" .dockerignore
 docker-compose -f docker-compose.test.yml build

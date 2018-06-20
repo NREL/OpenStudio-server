@@ -1,7 +1,7 @@
 # OpenStudio Server
 
-[![Build Status][circleci-img]][circleci-url] [![Coverage Status][coveralls-img]][coveralls-url]
-OSX Build: [![Build Status][travis-img]][travis-url]
+[![Build Status][travis-img]][travis-url] 
+[![Coverage Status][coveralls-img]][coveralls-url]
 Windows Build (Under Development): [![Build status][appveyor-img]][appveyor-url]
 
 
@@ -53,8 +53,6 @@ docker-compose rm -f
 docker volume rm osdata
 docker volume create --name=osdata
 export RAILS_ENV=docker-test
-export CI=true
-export CIRCLECI=true
 sed -i -E "s/#TEST#//g" Dockerfile
 sed -i -E "s/.git//g" .dockerignore
 docker-compose -f docker-compose.test.yml build
@@ -104,8 +102,6 @@ chmod -R 777 gems # Modify privileges on the installed gems
 
 Please contact @rhorsey, @bball, or @nllong with any question regarding this project. Thanks for you interest!
 
-[circleci-img]: https://circleci.com/gh/NREL/OpenStudio-server/tree/dockerize.svg?style=svg
-[circleci-url]: https://circleci.com/gh/NREL/OpenStudio-server
 [coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=dockerize
 [coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
 [travis-img]: https://travis-ci.org/NREL/OpenStudio-server.svg?branch=dockerize-travis
