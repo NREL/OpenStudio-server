@@ -1,8 +1,8 @@
-#!/bin/bash -x
+#!/usr/bin/env bash
 
 IMAGETAG=skip
 if [ "${CIRCLE_BRANCH}" == "develop" ]; then
-    IMAGETAG=latest
+    IMAGETAG=develop
 elif [ "${CIRCLE_BRANCH}" == "nrcan-master" ]; then
     # NRCAN is still using pre 2.4.1 version of Server. This will break when they upgrade.
     IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")-nrcan"
@@ -22,6 +22,16 @@ if [ "${IMAGETAG}" != "skip" ] && [ -z ${CI_PULL_REQUEST} ]; then
     docker tag nrel/openstudio-rserve nrel/openstudio-rserve:$IMAGETAG
     docker push nrel/openstudio-server:$IMAGETAG
     docker push nrel/openstudio-rserve:$IMAGETAG
+
+    if [ "${CIRCLE_BRANCH}" == "master" ]; then
+        # Deploy master as the latest.
+        docker tag nrel/openstudio-server nrel/openstudio-server:latest
+        docker tag nrel/openstudio-rserve nrel/openstudio-rserve:latest
+
+        docker push nrel/openstudio-server:latest
+        docker push nrel/openstudio-rserve:latest
+    fi
+
 else
     echo "Not on a deployable branch [develop/master] or this is a pull request"
 fi
