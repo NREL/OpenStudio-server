@@ -7,6 +7,9 @@
 #FROM nrel/openstudio:$OPENSTUDIO_VERSION
 FROM nrel/openstudio:2.5.2
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
+# This env var is temporary until we can pass the arg. We can't at the moment because version of docker on circle is
+# too old.
+ENV OPENSTUDIO_VERSION=2.5.2
 
 RUN ruby -r openstudio -e "require 'openstudio'; puts OpenStudio.openStudioLongVersion"
 # Install required libaries
@@ -68,7 +71,7 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Radiance env vars. RUBYLIB is set in the base openstudio container
 ENV OPENSTUDIO_SERVER 'true'
-ENV OS_RAYPATH /usr/Radiance
+ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 ENV PERL_EXE_PATH /usr/bin
 
 # Specify a couple arguments here, after running the majority of the installation above

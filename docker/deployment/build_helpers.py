@@ -46,7 +46,8 @@ def get_latest_openstudio_version_from_s3():
     ]
 
 def check_dockerhub_published(repo, version):
-    r = requests.get('https://hub.docker.com/r/nrel/openstudio-server/tags/'
+    r = requests.get('https://hub.docker.com/r/nrel/openstudio-server/tags/')
+
 
 if __name__ == '__main__':
     print("Latest version of OpenStudio from S3 is:")
