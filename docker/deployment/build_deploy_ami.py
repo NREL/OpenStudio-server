@@ -291,9 +291,10 @@ eplus_version = stdout_arr[0] + '.' + stdout_arr[1]
 if verbose:
     print('EnergyPlus version retrieved is {}'.format(eplus_version))
 
-# Radiance version
-cmd_call = 'docker run nrel/openstudio-server:{} /usr/Radiance/bin/rtrace -version'. \
-    format(defaults['version'] + defaults['ami_version_extension'])
+# Radiance version - The location of radiance is now under openstudio-x.y.x. Need to figure out how to get the
+# version without calling defaults['version'] as this may not be consistent with
+cmd_call = 'docker run nrel/openstudio-server:{} /usr/local/openstudio-{}/Radiance/bin/rtrace -version'. \
+    format(defaults['version'] + defaults['ami_version_extension'], defaults['version'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
