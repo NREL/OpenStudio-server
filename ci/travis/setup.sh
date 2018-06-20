@@ -1,8 +1,9 @@
 #!/bin/bash -x
 
-echo "The build architecture is ${BUILD_ARCH}"
+echo "The build architecture is ${TRAVIS_OS_NAME}"
 
-if [ "${BUILD_ARCH}" == "OSX" ]; then
+if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+    env
     brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
 #    AP: do we need mongo install here ? seems to be handled by service defined in travis yml
     brew install mongodb@3.4 pv tree
@@ -18,13 +19,13 @@ if [ "${BUILD_ARCH}" == "OSX" ]; then
     sudo ./OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
     tree ${HOME}/openstudio/Ruby
 #    mongo_dir="/usr/local/bin"
-elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
+elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+    env
     echo "Setting up Ubuntu for unit tests and Rubocop"
     # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
     sudo apt-get install -y pv
     mkdir -p reports/rspec
     ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA
-
 fi
 
 ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems

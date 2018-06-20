@@ -2,11 +2,11 @@
 
 # platform-specific config here (also in setup.sh):
 ## TODO move into/consolidate with setup.sh
-if [ "${BUILD_ARCH}" == "OSX" ]; then
+if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
     # Dir containing openstudio
     export RUBYLIB="${HOME}/openstudio/Ruby"
     mongo_dir="/usr/local/bin"
-elif [ "${BUILD_ARCH}" == "Ubuntu" ]; then
+elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
     # Dir containing openstudio
     export RUBYLIB="/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby:/usr/Ruby"
     mongo_dir="/usr/bin"
