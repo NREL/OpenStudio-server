@@ -1,6 +1,6 @@
 # Docker Compose creates multiple containers on a single machine.
 # run `docker-compose up` to create and run/link the containers
-version: '2'
+version: '3.4'
 services:
   db:
     image: mongo:3.4.10

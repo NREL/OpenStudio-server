@@ -82,7 +82,8 @@ jobs:
         - docker --version
         - docker-compose --version
         - docker volume create --name=osdata
-        - docker-compose -f docker-compose.test.yml build
+        - docker-compose build web
+        - docker-compose build rserve
       script: ./docker/deployment/scripts/deploy_docker.sh
 
 notifications:

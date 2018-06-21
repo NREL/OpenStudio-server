@@ -14,7 +14,7 @@ elif [ "${TRAVIS_BRANCH}" == "358-docker-in-travis" ]; then
 fi
 
 if [ "${IMAGETAG}" != "skip" ] && [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
-    docker login -u $DOCKER_USER -p $DOCKER_PASS
+    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
     echo "Tagging image as $IMAGETAG"
     docker tag nrel/openstudio-server nrel/openstudio-server:$IMAGETAG; (( exit_status = exit_status || $? ))
