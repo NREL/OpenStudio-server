@@ -56,7 +56,7 @@ jobs:
         - OS_SERVER_NUMBER_OF_WORKERS=4
         - BUILD_TYPE=docker
       before_script:
-        - sed -i -E "s/#TEST#//g" Dockerfile
+        # remove the .git in the .dockerignore so coverage can be reported correctly to coveralls
         - sed -i -E "s/.git//g" .dockerignore
         - docker volume create --name=osdata
         - docker images --all
