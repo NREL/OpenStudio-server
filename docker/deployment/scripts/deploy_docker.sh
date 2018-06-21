@@ -9,7 +9,7 @@ elif [ "${TRAVIS_BRANCH}" == "nrcan-master" ]; then
 elif [ "${TRAVIS_BRANCH}" == "master" ]; then
     # Retrieve the version number from rails
     IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
-elif [ "${TRAVIS_BRANCH}" == "358-docker-in-travis" ]; then
+elif [ "${TRAVIS_BRANCH}" == "experimental" ]; then
     IMAGETAG=experimental
 fi
 
