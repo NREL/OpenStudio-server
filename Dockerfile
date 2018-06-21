@@ -3,9 +3,15 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-FROM nrel/openstudio:2.5.1
+#ARG OPENSTUDIO_VERSION=2.5.2
+#FROM nrel/openstudio:$OPENSTUDIO_VERSION
+FROM nrel/openstudio:2.5.2
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
+# This env var is temporary until we can pass the arg. We can't at the moment because version of docker on circle is
+# too old.
+ENV OPENSTUDIO_VERSION=2.5.2
 
+RUN ruby -r openstudio -e "require 'openstudio'; puts OpenStudio.openStudioLongVersion"
 # Install required libaries
 RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
     echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | \
@@ -63,10 +69,9 @@ RUN passenger-install-nginx-module
 RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
-# Add RUBYLIB link for openstudio.rb and Radiance env vars
-ENV RUBYLIB /usr/Ruby
+# Radiance env vars. RUBYLIB is set in the base openstudio container
 ENV OPENSTUDIO_SERVER 'true'
-ENV OS_RAYPATH /usr/Radiance
+ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 ENV PERL_EXE_PATH /usr/bin
 
 # Specify a couple arguments here, after running the majority of the installation above

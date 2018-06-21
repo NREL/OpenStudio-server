@@ -54,12 +54,14 @@ FactoryBot.define do
 
     factory :analysis_with_data_points do
       transient do
-        data_point_count 1
+        data_point_count 200
       end
 
       after(:create) do |analysis, evaluator|
         FactoryBot.create_list(
           :data_point, evaluator.data_point_count,
+          status: 'completed',
+          status_message: 'completed normal',
           analysis: analysis
         )
       end
