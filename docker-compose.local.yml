@@ -1,6 +1,6 @@
 # Docker Compose creates multiple containers on a single machine.
 # run `docker-compose up` to create and run/link the containers
-version: '3'
+version: '3.4'
 services:
   db:
     image: mongo:3.4.10
@@ -16,6 +16,7 @@ services:
     image: 127.0.0.1:5000/openstudio-server
     build:
       context: .
+      target: base
       args:
         rails_env: docker
     environment:
@@ -31,6 +32,7 @@ services:
     image: 127.0.0.1:5000/openstudio-server
     build:
       context: .
+      target: base
       args:
         rails_env: docker
     environment:
@@ -47,6 +49,7 @@ services:
     image: 127.0.0.1:5000/openstudio-server
     build:
       context: .
+      target: base
       args:
         rails_env: docker
     environment:
