@@ -1,6 +1,13 @@
 OpenStudio Server
 =================
 
+Version 2.6.0
+-------------
+
+Date Range: 2018-06-14 to 2018-06-24
+
+* Update version of OpenStudio
+
 Version 2.5.2
 -------------
 
