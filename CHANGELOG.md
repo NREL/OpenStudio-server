@@ -1,6 +1,22 @@
 OpenStudio Server
 =================
 
+Version 2.6.0
+-------------
+
+Date Range: 2018-06-14 to 2018-06-24
+
+* Update version of OpenStudio
+
+Version 2.5.2
+-------------
+
+Date Range: 2018-06-08 to 2018-06-14
+
+* Fix cursor deleted with accessing /analyses/<id>/analysis_data
+* OpenStudio Standards 2.2.
+* Set version of mongo and redis for docker deploys
+
 Version 2.5.1
 -------------
 Version 2.5.0 did not include a changelog, therefore, the list below includes updates to 2.5.0 as well.

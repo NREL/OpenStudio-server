@@ -1,9 +1,9 @@
 # Version used to deploy the latest version of the server from docker hub.
 
-version: '3'
+version: '3.4'
 services:
   db:
-    image: mongo:latest
+    image: mongo:3.4.10
     ports:
       - "27017:27017"
     deploy:
@@ -13,6 +13,10 @@ services:
       resources:
         reservations:
           cpus: "1"
+  queue:
+      image: redis:4.0.6
+      ports:
+        - "6379:6379"
   web:
     image: nrel/openstudio-server:latest
     ports:
@@ -41,6 +45,7 @@ services:
     command: bundle exec rake environment resque:work
     depends_on:
       - db
+      - queue
       - web
     deploy:
       placement:
