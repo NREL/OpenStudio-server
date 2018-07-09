@@ -48,7 +48,7 @@ module ResqueJobs
     # not called if job fails.
     # note that we are enqueuing regardless of error status; that will need to be checked in FinalizeAnalysis job.
     def self.after_perform_finalize_analysis(analysis_type, analysis_id, job_id, options = {})
-      Resque.enqueue(Jobs::Resque::FinalizeAnalysis, analysis_id)
+      Resque.enqueue(FinalizeAnalysis, analysis_id)
     end
   end
 end

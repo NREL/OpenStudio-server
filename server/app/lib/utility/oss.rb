@@ -1,16 +1,23 @@
 module Utility
   class Oss
-    # Run script identified by full_path.  Set timeout unless nil
-    def self.run_script full_path, timeout = nil, env_vars = {}, logger = Rails.logger
+
+    # Load args from file.  Returns array or nil.
+    def self.load_args full_path
+      args_array = JSON.parse(File.read(full_path))
+      # if not array, ignore file contents and return nil
+      (args_array.kind_of? Array) ? args_array : nil
+    end
+
+    # Run script identified by full_path.
+    def self.run_script full_path, timeout = nil, env_vars = {}, args_array = nil, logger = Rails.logger, spawned_log_path = nil
       begin
         logger.info "updating permissions for #{full_path}"
         File.chmod(0755, full_path) #755
         logger.info "running #{full_path}"
-
+        logger.info "env vars: #{env_vars}"
         # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
         # todo handle nil timeout - don't interrupt
-        # todo consider passing log
-        pid = spawn(env_vars, full_path, :unsetenv_others => true)
+        pid = spawn(env_vars, full_path, *args_array, [:out, :err] => spawned_log_path, :unsetenv_others => true)
         Timeout.timeout(timeout) do
           Process.wait pid
         end
