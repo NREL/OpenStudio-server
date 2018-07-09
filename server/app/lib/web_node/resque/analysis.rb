@@ -26,25 +26,35 @@ module WebNode
           retry if extract_count < extract_max_count
           raise "Extraction of the seed.zip file failed #{extract_max_count} times with error #{e.message}"
         end
-
-        #   check for presence of analysis initialization script and if present
-        file_path = "#{shared_directory_path}/scripts/analysis/initialize.sh"
-        logger.info "Checking for presence of initialization file at #{file_path}"
-        if File.file? file_path
-          # TODO how long do we want to set timeout?
-          Utility::Oss.run_script(file_path, 60*60*4, {'ANALYSIS_ID' => id, 'ANALYSIS_DIRECTORY' => shared_directory_path}, logger)
-        end
+        run_script_with_args "initialize"
      end
 
       # runs on web node
       def run_finalization
-        logger.info "running finalization method for #{id}"
-        #   check for presence of analysis finalizaiton script and if present
-        file_path = "#{shared_directory_path}/scripts/analysis/finalize.sh"
-        logger.info "Checking for presence of initialization file at #{init_file_path}"
-        if File.file? ifile_path
+        run_script_with_args "finalize"
+      end
+
+    private
+
+      def run_script_with_args script_name
+        dir_path = "#{shared_directory_path}/example_csv/scripts/analysis"
+        #  paths to check for args and script files
+        args_path = "#{dir_path}/#{script_name}.args"
+        script_path = "#{dir_path}/#{script_name}.sh"
+        log_path = "#{dir_path}/#{script_name}.log"
+
+        logger.info "Checking for presence of args file at #{args_path}"
+        args = nil
+        if File.file? args_path
+          args = Utility::Oss.load_args args_path
+          logger.info " args loaded from file #{args_path}: #{args}"
+        end
+
+
+        logger.info "Checking for presence of script file at #{script_path}"
+        if File.file? script_path
           # TODO how long do we want to set timeout?
-          Utility::Oss.run_script(file_path, 60*60*4,{'ANALYSIS_ID' => id, 'ANALYSIS_DIRECTORY' => shared_directory_path}, logger )
+          Utility::Oss.run_script(script_path, 60*60*4, {'ANALYSIS_ID' => id, 'ANALYSIS_DIRECTORY' => shared_directory_path}, args, logger,log_path)
         end
       end
     end
