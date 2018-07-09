@@ -37,7 +37,7 @@ module WebNode
     private
 
       def run_script_with_args script_name
-        dir_path = "#{shared_directory_path}/example_csv/scripts/analysis"
+        dir_path = "#{shared_directory_path}/scripts/analysis"
         #  paths to check for args and script files
         args_path = "#{dir_path}/#{script_name}.args"
         script_path = "#{dir_path}/#{script_name}.sh"
