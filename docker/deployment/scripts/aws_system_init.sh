@@ -1,11 +1,13 @@
-#!/bin/bash -e
+#!/bin/bash
 
 echo ""
 echo "------------------------------------------------------------------------"
-echo "Updating Ubuntu 16.10 Yakkety system"
+echo "Updating Ubuntu 17.04 Zesty system"
 echo "------------------------------------------------------------------------"
 echo ""
 sleep 1
+echo "REMOVE THE MIRROR ALTERATION UPON UPDATING OS"
+sudo sed -i -e 's/us-east-1.ec2.archive.ubuntu.com\|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
 sudo apt-get -qq update
 sudo rm -f /boot/grub/menu.lst # https://bugs.launchpad.net/ubuntu/+source/cloud-init/+bug/1485685
 sudo apt-get -y -qq upgrade
@@ -74,6 +76,7 @@ echo ""
 sleep 1
 echo "export DOCKERD_OPTIONS=\"$DOCKERD_OPTIONS\"" >> /home/ubuntu/.bashrc
 sudo systemctl enable docker
+sudo groupadd docker
 sudo usermod -aG docker ubuntu
 sudo mkdir /etc/systemd/system/docker.service.d
 echo -en "[Service]\nExecStart=\nExecStart=/usr/bin/dockerd $DOCKERD_OPTIONS\n" | sudo tee -a /etc/systemd/system/docker.service.d/config.conf
