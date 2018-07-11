@@ -34,7 +34,7 @@
 # *******************************************************************************
 module DjJobs
 # Delete the files on the server
-  AnalysisJob = Struct.new(:analysis_directory) do
+  DeleteAnalysis = Struct.new(:analysis_directory) do
     def perform
       FileUtils.rm_rf analysis_directory if Dir.exist? analysis_directory
     end
