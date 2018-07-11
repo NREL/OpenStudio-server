@@ -472,40 +472,6 @@ module DjJobs
       end
     end
 
-    # Run the initialize/finalize scripts
-    def run_file(analysis_dir, state, file)
-      f_fullpath = "#{analysis_dir}/scripts/worker_#{state}/#{file}"
-      f_argspath = "#{File.dirname(f_fullpath)}/#{File.basename(f_fullpath, '.*')}.args"
-      f_logpath = "#{run_dir}/#{File.basename(f_fullpath, '.*')}.log"
-
-      # Make the file executable and remove DOS endings
-      File.chmod(0777, f_fullpath)
-      @sim_logger.info "Preparing to run #{state} script #{f_fullpath}"
-      file_text = File.read(f_fullpath)
-      file_text.gsub!(/\r\n/m, "\n")
-      File.open(f_fullpath, 'wb') { |f| f.print file_text }
-
-      # Check to see if there is an argument json that accompanies the class
-      args = nil
-      @sim_logger.info "Looking for argument file #{f_argspath}"
-      if File.exist?(f_argspath)
-        @sim_logger.info "argument file exists #{f_argspath}"
-        #TODO replace eval with JSON.load
-        args = eval(File.read(f_argspath))
-        @sim_logger.info "arguments are #{args}"
-      end
-
-      # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
-      pid = spawn({'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id},
-                  f_fullpath, *args, [:out, :err] => f_logpath, :unsetenv_others => true)
-      Process.wait pid
-
-      # Ensure the process exited with code 0
-      exit_code = $?.exitstatus
-      @sim_logger.info "Script returned with exit code #{exit_code} of class #{exit_code.class}"
-      raise "Worker #{state} file #{file} returned with non-zero exit code. See #{f_logpath}." unless exit_code == 0
-    end
-
 private
     def run_script_with_args script_name
       dir_path = "#{analysis_dir}/scripts/data_point"
