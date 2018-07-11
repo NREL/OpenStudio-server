@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,13 +33,13 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# Delete the files on the server
-DeleteAnalysisJob = Struct.new(:analysis_directory) do
-  def perform
-    FileUtils.rm_rf analysis_directory if Dir.exist? analysis_directory
-  end
+module ResqueJobs
+  class DeleteAnalysis
+    @queue = :background
 
-  def queue_name
-    'background'
+    def self.perform(analysis_directory)
+      job = DjJobs::DeleteAnalysis.new(analysis_directory)
+      job.perform
+    end
   end
 end

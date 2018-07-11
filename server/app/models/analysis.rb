@@ -365,9 +365,9 @@ class Analysis
 
     if analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
       if Rails.application.config.job_manager == :delayed_job
-        Delayed::Job.enqueue ::DeleteAnalysisJob.new(analysis_dir)
+        Delayed::Job.enqueue DjJobs::DeleteAnalysis.new(analysis_dir)
       elsif Rails.application.config.job_manager == :resque
-        Resque.enqueue(DeleteAnalysisJobResque, analysis_dir)
+        Resque.enqueue(ResqueJobs::DeleteAnalysis, analysis_dir)
       else
         raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
       end

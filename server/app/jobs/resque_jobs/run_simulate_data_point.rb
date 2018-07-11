@@ -33,11 +33,15 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-class DeleteAnalysisJobResque
-  @queue = :background
+# Wrap the RunSimulateDataPoint job for use in Resque/Redis
+module ResqueJobs
 
-  def self.perform(analysis_directory)
-    job = DeleteAnalysisJob.new(analysis_directory)
-    job.perform
+  class RunSimulateDataPoint
+    @queue = :simulations
+
+    def self.perform(data_point_id, options = {})
+      job = DjJobs::RunSimulateDataPoint.new(data_point_id, options)
+      job.perform
+    end
   end
 end

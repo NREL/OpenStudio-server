@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -32,13 +32,15 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
+module DjJobs
+# Delete the files on the server
+  AnalysisJob = Struct.new(:analysis_directory) do
+    def perform
+      FileUtils.rm_rf analysis_directory if Dir.exist? analysis_directory
+    end
 
-# Wrap the RunSimulateDataPoint job for use in Resque/Redis
-class RunSimulateDataPointResque
-  @queue = :simulations
-
-  def self.perform(data_point_id, options = {})
-    job = RunSimulateDataPoint.new(data_point_id, options)
-    job.perform
+    def queue_name
+      'background'
+    end
   end
 end

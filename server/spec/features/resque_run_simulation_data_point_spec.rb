@@ -35,7 +35,7 @@
 
 require 'rails_helper'
 
-RSpec.describe RunSimulateDataPoint, type: :feature, foreground: true, depends_resque: true do
+RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, depends_resque: true do
   before :all do
     @previous_job_manager = Rails.application.config.job_manager
     Rails.application.config.job_manager = :resque
@@ -109,6 +109,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature, foreground: true, depends_r
     expect(a[:analysis][:data_points].size).to eq 1
 
     # test using the script
+    # FIXME we aren't actually running the script here - mistake?
     script = File.expand_path('../docker/R/api_create_datapoint.rb', Rails.root)
     puts script
   end
