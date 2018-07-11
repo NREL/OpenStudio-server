@@ -234,18 +234,8 @@ module DjJobs
         end
 
         # Run any data point finalization scripts
-        begin
-          Timeout.timeout(600) do
-            files = Dir.glob("#{analysis_dir}/scripts/worker_finalization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
-            files.each do |f|
-              @sim_logger.info "Found data point finalization file #{f}."
-              run_file(analysis_dir, 'finalization', f)
-            end
-          end
-        rescue => e
-          @sim_logger.error "Error in data point finalization script: #{e.message} in #{e.backtrace.join("\n")}"
-          run_result = :errored
-        end
+        run_script_with_args 'finalize'
+
 
         report_file = "#{run_dir}/datapoint_final.log"
         uploads_successful << upload_file(report_file, 'Report', 'Finalization Script Log', 'application/txt') if File.exist?(report_file)
@@ -515,5 +505,29 @@ module DjJobs
       @sim_logger.info "Script returned with exit code #{exit_code} of class #{exit_code.class}"
       raise "Worker #{state} file #{file} returned with non-zero exit code. See #{f_logpath}." unless exit_code == 0
     end
+
+private
+    def run_script_with_args script_name
+      dir_path = "#{analysis_dir}/scripts/data_point"
+      #  paths to check for args and script files
+      args_path = "#{dir_path}/#{script_name}.args"
+      script_path = "#{dir_path}/#{script_name}.sh"
+      log_path = "#{dir_path}/#{script_name}.log"
+
+      @sim_logger.info "Checking for presence of args file at #{args_path}"
+      args = nil
+      if File.file? args_path
+        args = Utility::Oss.load_args args_path
+        @sim_logger.info " args loaded from file #{args_path}: #{args}"
+      end
+
+
+      @sim_logger.info "Checking for presence of script file at #{script_path}"
+      if File.file? script_path
+        # TODO how long do we want to set timeout?
+        Utility::Oss.run_script(script_path, 60*60*4, {'ANALYSIS_ID' => id, 'ANALYSIS_DIRECTORY' => shared_directory_path}, args, @sim_logger,log_path)
+      end
+    end
+
   end
 end
