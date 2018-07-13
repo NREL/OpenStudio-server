@@ -42,15 +42,12 @@ RSpec.describe 'Pages Exist', type: :feature do
     expect(page).to have_content 'OpenStudio Cloud Management Console'
   end
 
-  it 'Home and Status Page' do
-    get '/'
-    expect(response).to be_success
-    expect(response.body).to have_content 'OpenStudio Cloud Management Console'
-
-    get '/status.json'
-    expect(response).to be_success
-    expect(json['status']['awake']).not_to be_nil
-  end
+  # it 'Home and Status Page' do
+  #   get '/status.json'
+  #
+  #   expect(response).to be_success
+  #   expect(json['status']['awake']).not_to be_nil
+  # end
 
   it 'Accesses the API over host using selenium', js: true, depends_gecko: true do
     visit '/'
