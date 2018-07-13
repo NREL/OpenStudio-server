@@ -58,6 +58,9 @@ module DjJobs
       FileUtils.rm_rf run_dir if Dir.exist? run_dir
       FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
 
+      # Run any data point finalization scripts
+      run_script_with_args 'initialize'
+
       # Logger for the simulate datapoint
       @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
 
@@ -491,7 +494,7 @@ private
       @sim_logger.info "Checking for presence of script file at #{script_path}"
       if File.file? script_path
         # TODO how long do we want to set timeout?
-        Utility::Oss.run_script(script_path, 60*60*4, {'ANALYSIS_ID' => id, 'ANALYSIS_DIRECTORY' => shared_directory_path}, args, @sim_logger,log_path)
+        Utility::Oss.run_script(script_path, 60*60*4, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
       end
     end
 
