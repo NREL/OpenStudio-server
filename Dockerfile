@@ -144,11 +144,9 @@ EXPOSE 8080 9090
 # Multistage build includes test library. To build without testing run
 # docker build --target base -t some-tag .
 FROM base
-ENV GECKODRIVER_VERSION v0.15.0
+ENV GECKODRIVER_VERSION v0.21.0
 # Install vfb and firefox requirement if docker-test env
 RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" && \
-    echo "deb http://downloads.sourceforge.net/project/ubuntuzilla/mozilla/apt all main" | tee -a /etc/apt/sources.list > /dev/null && \
-    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com C1289A29 && \
     apt-get update && \
     apt-get install -y xvfb \
         x11-xkb-utils \
