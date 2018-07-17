@@ -29,6 +29,7 @@ services:
       - "8080:80"
     volumes:
       - osdata:/mnt/openstudio
+    command: /usr/local/bin/start-server
   web-background:
     image: 127.0.0.1:5000/openstudio-server
     build:
@@ -45,7 +46,7 @@ services:
       - web
     volumes:
       - osdata:/mnt/openstudio
-    command: bundle exec rake environment resque:work
+    command: /usr/local/bin/start-web-background
   worker:
     image: 127.0.0.1:5000/openstudio-server
     build:
@@ -62,7 +63,7 @@ services:
       - db
       - queue
       - rserve
-    command: bundle exec rake environment resque:workers
+    command: /usr/local/bin/start-workers
   rserve:
     image: 127.0.0.1:5000/openstudio-rserve
     build: ./docker/R

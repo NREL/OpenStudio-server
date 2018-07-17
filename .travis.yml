@@ -50,7 +50,6 @@ jobs:
       os: linux
       sudo: required
       dist: trusty
-      gemfile: skip
       env:
         - CI=true
         - OS_SERVER_NUMBER_OF_WORKERS=4
@@ -74,7 +73,6 @@ jobs:
       os: linux
       sudo: required
       dist: trusty
-      gemfile: skip
       env:
         - BUILD_TYPE=docker
       before_script:
