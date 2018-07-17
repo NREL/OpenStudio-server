@@ -58,11 +58,11 @@ module DjJobs
       FileUtils.rm_rf run_dir if Dir.exist? run_dir
       FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
 
-      # Run any data point finalization scripts
-      run_script_with_args 'initialize'
-
       # Logger for the simulate datapoint
       @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
+
+      # Run  data point initialize script if present
+      run_script_with_args 'initialize'
 
       # Error if @datapoint doesn't exist
       if @data_point.nil?
