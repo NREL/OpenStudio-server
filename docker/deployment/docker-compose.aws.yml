@@ -46,6 +46,7 @@ services:
       resources:
         reservations:
           cpus: "AWS_WEB_CORES"
+    command: /usr/local/bin/start-server
   web-background:
     image: localhost:5000/openstudio-server
     environment:
@@ -53,7 +54,6 @@ services:
       - QUEUES=background,analyses
     volumes:
       - osdata:/mnt/openstudio
-    command: bundle exec rake environment resque:work
     depends_on:
       - db
       - web
@@ -65,12 +65,12 @@ services:
       resources:
         reservations:
           cpus: "1"
+    command: /usr/local/bin/start-web-background
   worker:
     image: localhost:5000/openstudio-server
     environment:
       - QUEUES=simulations
       - COUNT=1
-    command: bundle exec rake environment resque:workers
     volumes:
       - /mnt/openstudio
     depends_on:
@@ -83,6 +83,7 @@ services:
       resources:
         reservations:
           cpus: "1"
+    command: /usr/local/bin/start-workers
   rserve:
     image: localhost:5000/openstudio-rserve
     volumes:
