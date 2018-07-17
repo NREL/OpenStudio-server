@@ -9,7 +9,8 @@ MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 RUN ruby -r openstudio -e "require 'openstudio'; puts OpenStudio.openStudioLongVersion"
 
-# Install required libaries
+# Install required libaries.
+#   realpath - needed for wait-for-it
 RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
     echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | \
     sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list && \
@@ -47,6 +48,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libsm-dev \
         mongodb-org-tools \
         procps \
+        realpath \
         tar \
         unzip \
         wget \
@@ -106,34 +108,28 @@ RUN bundle install --jobs=3 --retry=3
 ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
 RUN sudo sysctl --system
 
-RUN chmod 775 /opt/openstudio/server/log
-RUN chmod 666 /opt/openstudio/server/log/*.log
-
-ADD /docker/server/start-server.sh /usr/local/bin/start-server
-ADD /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
-ADD /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
-ADD /docker/server/memfix.rb /usr/local/lib/memfix.rb
+# Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
+# started before starting the main process.
+COPY /docker/server/wait-for-it.sh /usr/local/bin/wait-for-it
+COPY /docker/server/start-server.sh /usr/local/bin/start-server
+COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
+COPY /docker/server/start-web-background.sh /usr/local/bin/start-web-background
+COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
+COPY /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
+COPY /docker/server/memfix.rb /usr/local/lib/memfix.rb
+RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
+RUN chmod 755 /usr/local/bin/rails-entrypoint
+RUN chmod 755 /usr/local/bin/start-web-background
+RUN chmod 755 /usr/local/bin/start-workers
 RUN chmod +x /usr/local/lib/memfix-controller.rb
 RUN chmod +x /usr/local/lib/memfix.rb
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
 
-# permissions on where server assets (e.g. paperclip, data points, R images, etc) are stored
-RUN mkdir -p /mnt/openstudio/server/R && chmod 777 /mnt/openstudio/server/R
-RUN mkdir -p /mnt/openstudio/server/assets && chmod 777 /mnt/openstudio/server/assets
-#RUN mkdir -p /mnt/openstudio/server/assets/data_points && chmod 777 /mnt/openstudio/server/assets/data_points
-RUN mkdir -p /mnt/openstudio/server/assets/variables && chmod 777 /mnt/openstudio/server/assets/variables
-RUN mkdir -p /opt/openstudio/server/tmp && chmod 777 /opt/openstudio/server/tmp
-
-# Test adding the git repo to the container for coveralls
-# The #TEST# will be removed in the travis test script to be run in the test container
-#TEST#ADD .git /opt/openstudio/.git
-
-ADD /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
-RUN chmod 755 /usr/local/bin/rails-entrypoint
 ENTRYPOINT ["rails-entrypoint"]
 
 CMD ["/usr/local/bin/start-server"]
@@ -162,3 +158,6 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
     rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
     chmod +x geckodriver;
 
+# Test adding the git repo to the container for coveralls
+# The #TEST# will be removed in the travis test script to be run in the test container
+#TEST#COPY .git /opt/openstudio/.git

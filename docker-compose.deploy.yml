@@ -35,6 +35,7 @@ services:
       resources:
         reservations:
           cpus: "1"
+    command: /usr/local/bin/start-server
   web-background:
     image: nrel/openstudio-server:latest
     environment:
@@ -42,7 +43,6 @@ services:
       - QUEUES=background,analyses
     volumes:
       - osdata:/mnt/openstudio
-    command: bundle exec rake environment resque:work
     depends_on:
       - db
       - queue
@@ -54,9 +54,9 @@ services:
       resources:
         reservations:
           cpus: "1"
+    command: /usr/local/bin/start-web-background
   worker:
     image: nrel/openstudio-server:latest
-    command: bundle exec rake environment resque:workers
     environment:
       - QUEUES=simulations
       - COUNT=1
@@ -71,6 +71,7 @@ services:
       resources:
         reservations:
           cpus: "0.99"
+    command: /usr/local/bin/start-workers
   rserve:
     image: nrel/openstudio-rserve:latest
     volumes:

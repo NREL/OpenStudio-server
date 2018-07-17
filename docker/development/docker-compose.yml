@@ -38,6 +38,7 @@ services:
     volumes:
       - osdata:/mnt/openstudio
       - ../..:/opt/openstudio/
+    # TODO: This is not using the wait-for-it script, not sure if we still want this file.
     command: ../server/bin/delayed_job -i server --queues=analyses,background run
   worker:
     build:
