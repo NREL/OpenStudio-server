@@ -147,8 +147,13 @@ module AnalysisLibrary
 
       # Clear out any former results on the analysis
       analysis.results ||= {} # make sure that the analysis results is a hash and exists
-      analysis.results[options[:analysis_type]] = {}
 
+      # AP hack: ensure that the options include analysis_type -
+      # this isn't set during my testing and i don't see how it ever is/worked without this hack
+      options[:analysis_type] = analysis_job.analysis_type unless options[:analysis_type].present?
+
+      analysis.results[options[:analysis_type]] = {}
+      
       # merge in the output variables and objective functions into the analysis object which are needed for problem execution
       if options[:output_variables]
         options[:output_variables].reverse_each { |v| analysis.output_variables.unshift(v) unless analysis.output_variables.include?(v) }
