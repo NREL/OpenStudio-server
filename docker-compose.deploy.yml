@@ -11,7 +11,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
+        limits:
           cpus: "1"
   queue:
       image: redis:4.0.6
@@ -33,7 +33,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
+        limits:
           cpus: "1"
     command: /usr/local/bin/start-server
   web-background:
@@ -52,7 +52,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
+        limits:
           cpus: "1"
     command: /usr/local/bin/start-web-background
   worker:
@@ -69,8 +69,8 @@ services:
       - rserve
     deploy:
       resources:
-        reservations:
-          cpus: "0.99"
+        limits:
+          cpus: "1"
     command: /usr/local/bin/start-workers
   rserve:
     image: nrel/openstudio-rserve:latest
@@ -85,7 +85,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
+        limits:
           cpus: "1"
 volumes:
   osdata:
