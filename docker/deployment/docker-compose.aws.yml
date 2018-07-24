@@ -22,7 +22,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
+        limits:
           cpus: "1"
   web:
     image: localhost:5000/openstudio-server
@@ -63,7 +63,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
+        limits:
           cpus: "1"
     command: /usr/local/bin/start-web-background
   worker:
@@ -81,7 +81,7 @@ services:
       - rserve
     deploy:
       resources:
-        reservations:
+        limits:
           cpus: "1"
     command: /usr/local/bin/start-workers
   rserve:
@@ -97,7 +97,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
+        limits:
           cpus: "1"
 volumes:
   osdata:
