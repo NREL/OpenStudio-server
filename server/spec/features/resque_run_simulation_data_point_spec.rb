@@ -61,6 +61,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, d
 
     # TODO: Make this a helper of some sort
     options = { hostname: "http://#{host}" }
+    # TODO: Convert this over to the openstudio_meta
     api = OpenStudio::Analysis::ServerApi.new(options)
     project_id = api.new_project
     expect(project_id).not_to be nil
@@ -107,11 +108,6 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, d
     a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
     a = JSON.parse(a, symbolize_names: true)
     expect(a[:analysis][:data_points].size).to eq 1
-
-    # test using the script
-    # FIXME we aren't actually running the script here - mistake?
-    script = File.expand_path('../docker/R/api_create_datapoint.rb', Rails.root)
-    puts script
   end
 
   it 'should run a datapoint', js: true do
