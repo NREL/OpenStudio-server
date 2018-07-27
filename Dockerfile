@@ -3,11 +3,17 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-ARG OPENSTUDIO_VERSION=2.5.1
+ARG OPENSTUDIO_VERSION=2.6.0
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
-RUN ruby -r openstudio -e "require 'openstudio'; puts OpenStudio.openStudioLongVersion"
+#ARG not available after from, so we need to set this again.  Maybe we should set as an ENV in the openstudio Docker container?
+ARG OPENSTUDIO_VERSION=2.6.0
+# The OpenStudio Gemfile contains a fixed bundler version, so you have to install and run specific to that version
+ARG OS_BUNDLER_VERSION=1.14.4
+RUN ruby -r openstudio -e "require 'openstudio'; puts OpenStudio.openStudioLongVersion" && \
+    gem install bundler -v $OS_BUNDLER_VERSION && \
+    bundle _${OS_BUNDLER_VERSION}_ install --gemfile=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby/Gemfile
 
 # Install required libaries.
 #   realpath - needed for wait-for-it
