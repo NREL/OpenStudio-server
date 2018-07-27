@@ -170,7 +170,9 @@ class RunSimulateDataPoint
       run_result = nil
       File.open(run_log_file, 'a') do |run_log|
         begin
-          cmd = "#{@options[:openstudio_executable]} run --workflow #{osw_path} --debug"
+          # use bundle option only if we have a path to openstudio gemfile.  expect this to be
+          bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle #{Rails.application.config.os_gemfile_path} ": ""
+          cmd = "#{@options[:openstudio_executable]} run --workflow #{osw_path} --debug #{bundle}"
           @sim_logger.info "Running workflow using cmd #{cmd}"
 
           # TODO confirm that any ENV variables that we want OSS to use are set correctly, probably pass explicitly to spawn
