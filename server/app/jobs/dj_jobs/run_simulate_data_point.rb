@@ -475,7 +475,6 @@ module DjJobs
       end
     end
 
-private
     def run_script_with_args script_name
       dir_path = "#{analysis_dir}/scripts/data_point"
       #  paths to check for args and script files

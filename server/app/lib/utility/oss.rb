@@ -20,8 +20,11 @@ module Utility
 
         logger.debug "running #{full_path}"
         # Spawn the process and wait for completion. Note only the specified env vars are available in the subprocess
-        # todo handle nil timeout - don't interrupt
-        pid = spawn(env_vars, full_path, *args_array, [:out, :err] => spawned_log_path, :unsetenv_others => true)
+        # TODO: handle nil timeout - don't interrupt
+        # NOTE! -- I'm leaving the env vars set so that the user can access rails / models. If we unsetenv vars, then
+        # we need to figure out the bare list of env vars that we need to copy to the new ones in order to keep
+        # rails, bundler, gem, etc working.
+        pid = spawn(env_vars, full_path, *args_array, [:out, :err] => spawned_log_path, :unsetenv_others => false)
         Timeout.timeout(timeout) do
           Process.wait pid
         end

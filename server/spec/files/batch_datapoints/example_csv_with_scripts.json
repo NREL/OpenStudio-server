@@ -1,8 +1,8 @@
 {
   "analysis": {
     "uuid": "5b7d47ca-9cb5-4173-b80b-baa07f60ab42",
-    "display_name": "Example Batch Datapoints Small",
-    "name": "example_batch_datapoints_small",
+    "display_name": "Example Batch Datapoints with Scripts",
+    "name": "example_batch_datapoints_with_scripts",
     "output_variables": [
 
     ],

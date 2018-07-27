@@ -16,6 +16,7 @@ module WebNode
         # Extract the zip
         extract_count = 0
         extract_max_count = 3
+        logger.info "Running analysis initialization scripts"
         logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
         begin
           Timeout.timeout(180) do
@@ -31,6 +32,7 @@ module WebNode
 
       # runs on web node
       def run_finalization
+        logger.info "Running analysis finalization scripts"
         run_script_with_args "finalize"
       end
 
@@ -54,7 +56,10 @@ module WebNode
         logger.info "Checking for presence of script file at #{script_path}"
         if File.file? script_path
           # TODO how long do we want to set timeout?
-          Utility::Oss.run_script(script_path, 60*60*4, {'ANALYSIS_ID' => id, 'ANALYSIS_DIRECTORY' => shared_directory_path}, args, logger,log_path)
+          # SCRIPT_PATH - path to where the scripts were extracted
+          # HOST_URL - URL of the server
+          # RAILS_ROOT - location of rails
+          Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_PATH' => dir_path, 'ANALYSIS_ID' => id, 'HOST_URL' => APP_CONFIG['os_server_host_url'], 'RAILS_ROOT' => Rails.root.to_s, 'ANALYSIS_DIRECTORY' => shared_directory_path}, args, logger,log_path)
         end
       end
     end
