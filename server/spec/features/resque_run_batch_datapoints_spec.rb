@@ -35,8 +35,9 @@
 
 require 'rails_helper'
 
-# Make sure to not make this a feature, otherwise the spec_helper will try to run the jobs in the foreground
-RSpec.describe 'RunBatchDatapoints', type: :feature do
+# Make sure to not make this a feature, otherwise the spec_helper will try to run the jobs in the foreground. Also,
+# make sure that this is not set to foreground, similar reason.
+RSpec.describe 'RunBatchDatapoints', type: :feature, depends_resque: true do
   before :all do
     @previous_job_manager = Rails.application.config.job_manager
     Rails.application.config.job_manager = :resque
@@ -64,41 +65,10 @@ RSpec.describe 'RunBatchDatapoints', type: :feature do
     APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
-  def wait_and_run_queue(queue)
-    loop do
-      puts "waiting for item in queue: #{queue}"
-      job = queue.reserve
-      if job
-        puts "job found in queue: #{queue}... performing"
-        queue.perform(job)
-
-        # check for another job and run if exists
-        loop do
-          puts "looking for another job in queue: #{queue}"
-          job = queue.reserve
-          if job
-            puts "another job found in queue: #{queue}... performing"
-            queue.perform(job)
-          else
-            # No more jobs in the queue, so break out
-            break
-          end
-        end
-
-        break  # break when there are no more jobs and after it found the first simulation
-      else
-        puts "Waiting for job to appear in queue: #{queue}"
-      end
-      sleep 1
-    end
-  end
-
-
   it 'Runs the analysis', js: true do
     analysis_id = @api.run('spec/files/batch_datapoints/example_csv_with_scripts.json',
                           'spec/files/batch_datapoints/example_csv_with_scripts.zip',
                           'batch_datapoints')
-
 
     # analysis_wrappers
     analysis_wrapper_worker = Resque::Worker.new('analysis_wrappers')
