@@ -35,7 +35,8 @@
 
 require 'rails_helper'
 
-RSpec.describe Utility::Oss, type: :model do
+# Tag this as depending on resque because the test script does not run on windows.
+RSpec.describe Utility::Oss, type: :model, depends_resque: true do
   context 'arguments' do
     before :each do
       @example_arg = { arg_1: 525600, arg_2: 'string', arg_3: 3.14 }
