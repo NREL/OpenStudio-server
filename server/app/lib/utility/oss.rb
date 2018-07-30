@@ -1,9 +1,10 @@
 module Utility
   class Oss
+
     # Set some env_vars from the running env var list, ignore the rest
     #
     # Why are these all class methods?
-    def self.resolve_env_vars(env_vars)
+    def self.resolve_env_vars env_vars
       # List of items to keep as regex
       keep_starts_with = [/^RUBY/, /^BUNDLE/, /^GEM/, /^RAILS_ENV/, /PATH/]
 

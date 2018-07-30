@@ -493,7 +493,7 @@ module DjJobs
       @sim_logger.info "Checking for presence of script file at #{script_path}"
       if File.file? script_path
         # TODO how long do we want to set timeout?
-        Utility::Oss.run_script(script_path, 60*60*4, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
+        Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
       end
     end
 

@@ -80,6 +80,10 @@ RSpec.describe Utility::Oss, type: :model do
       # Log file must be passes otherwise the Utility::Oss.run_script errors with
       result = Utility::Oss.run_script(tempfile.path, 4.hours, {}, nil, Logger.new(STDOUT), @log_file)
 
+      result_log = File.read(@log_file).chomp
+      puts result_log
+      expect(result_log).to eq 'successfully ran'
+
       expect(result).to eq true
       expect(File.exist?(@log_file)).to eq true
 

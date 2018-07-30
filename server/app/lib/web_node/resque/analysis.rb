@@ -36,7 +36,7 @@ module WebNode
         run_script_with_args "finalize"
       end
 
-    private
+      private
 
       def run_script_with_args script_name
         dir_path = "#{shared_directory_path}/scripts/analysis"
