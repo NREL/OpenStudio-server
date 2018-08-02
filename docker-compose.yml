@@ -13,7 +13,7 @@ services:
     ports:
       - "6379:6379"
   web:
-    image: nrel/openstudio-server:latest
+    image: hhorsey/openstudio-server:2.6.1-rc1
     build:
       context: .
       target: base
@@ -30,7 +30,7 @@ services:
       - osdata:/mnt/openstudio
     command: /usr/local/bin/start-server
   web-background:
-    image: nrel/openstudio-server:latest
+    image: hhorsey/openstudio-server:2.6.1-rc1
     build:
       context: .
       target: base
@@ -47,7 +47,7 @@ services:
       - osdata:/mnt/openstudio
     command: /usr/local/bin/start-web-background
   worker:
-    image: nrel/openstudio-server:latest
+    image: hhorsey/openstudio-server:2.6.1-rc1
     build:
       context: .
       target: base
@@ -64,7 +64,7 @@ services:
       - rserve
     command: /usr/local/bin/start-workers
   rserve:
-    image: nrel/openstudio-rserve:latest
+    image: hhorsey/openstudio-rserve:2.6.1-rc1
     build: ./docker/R
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
