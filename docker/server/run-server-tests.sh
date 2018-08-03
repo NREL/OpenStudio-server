@@ -12,10 +12,10 @@ do
 done
 
 echo "Waiting for Mongo to start"
-/usr/local/bin/wait-for-it --strict db:27017
+/usr/local/bin/wait-for-it --strict -t 0 db:27017
 
 echo "Waiting for Redis to start"
-/usr/local/bin/wait-for-it --strict queue:6379
+/usr/local/bin/wait-for-it --strict -t 0 queue:6379
 
 # Always create new indexes in case the models have changed
 cd /opt/openstudio/server && bundle exec rspec; (( exit_status = exit_status || $? ))

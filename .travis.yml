@@ -5,7 +5,7 @@ rvm: 2.2.4
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=2.6.0 OPENSTUDIO_VERSION_SHA=ac20db5eff
+    - OPENSTUDIO_VERSION=2.6.1 OPENSTUDIO_VERSION_SHA=ab0dddde0b
     - DOCKER_COMPOSE_VERSION=1.21.1
 
 gemfile:
@@ -69,7 +69,7 @@ jobs:
         # Reset the git checkout to remove the test-based data in the containers and rebuild
         - git checkout -- .dockerignore && git checkout -- Dockerfile
     - stage: Deploy Docker Image
-      if: branch = branch = master OR branch = nrcan-master OR branch = develop
+      if: branch = master OR branch = nrcan-master OR branch = develop
       os: linux
       sudo: required
       dist: trusty
