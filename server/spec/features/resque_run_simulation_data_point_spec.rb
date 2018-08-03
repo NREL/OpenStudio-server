@@ -50,30 +50,28 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, d
     Project.destroy_all
     Delayed::Job.destroy_all
 
-    # I am no longer using this factory for this purpose. It doesn't
-    # link up everything, so just post the test using the Analysis Gem.
-    #  FactoryBot.create(:project_with_analyses).analyses
-  end
-
-  it 'should create the datapoint', js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-    puts "App host is: #{host}"
+    puts "App host is: http://#{host}"
 
     # TODO: Make this a helper of some sort
     options = { hostname: "http://#{host}" }
-    api = OpenStudio::Analysis::ServerApi.new(options)
-    project_id = api.new_project
+    # TODO: Convert this over to the openstudio_meta
+    @api = OpenStudio::Analysis::ServerApi.new(options)
+    APP_CONFIG['os_server_host_url'] = options[:hostname]
+  end
+
+  it 'should create the datapoint', js: true do
+    project_id = @api.new_project
     expect(project_id).not_to be nil
     analysis_options = {
       formulation_file: 'spec/files/batch_datapoints/example_csv.json',
       upload_file: 'spec/files/batch_datapoints/example_csv.zip'
     }
-    analysis_id = api.new_analysis(project_id, analysis_options)
-
-    puts analysis_id
+    analysis_id = @api.new_analysis(project_id, analysis_options)
     expect(analysis_id).not_to be nil
 
-    a = RestClient.get "http://#{host}/analyses/#{analysis_id}.json"
+    a = @api.get_analysis(analysis_id)
+    expect(a[:display_name]).to eq 'Example Batch Datapoints Small'
 
     # expect(...something...)
 
@@ -93,7 +91,8 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, d
       }
     }
 
-    a = RestClient.post "http://#{host}/analyses/#{analysis_id}/data_points.json", data_point_data
+    # TODO: Add this endpoint ot the ServerAPI... the ability to create a datapoint from a hash, not a file.
+    a = RestClient.post "#{@api.hostname}/analyses/#{analysis_id}/data_points.json", data_point_data
     a = JSON.parse(a, symbolize_names: true)
     expect(a[:set_variable_values].size).to eq 2
     expect(a[:set_variable_values].values[0]).to eq 1.0
@@ -104,33 +103,21 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, d
 
     expect(a[:_id]).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
 
-    a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
-    a = JSON.parse(a, symbolize_names: true)
-    expect(a[:analysis][:data_points].size).to eq 1
-
-    # test using the script
-    # FIXME we aren't actually running the script here - mistake?
-    script = File.expand_path('../docker/R/api_create_datapoint.rb', Rails.root)
-    puts script
+    # TODO: What, why is the analysis type unknown!
+    _status, j = @api.get_analysis_status_and_json(analysis_id, 'unknown')
+    expect(j[:analysis][:data_points].size).to eq 1
   end
 
   it 'should run a datapoint', js: true do
-    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-    # Set the os server url for use by the run simulation
-    APP_CONFIG['os_server_host_url'] = "http://#{host}"
-
-    # TODO: Make this a helper of some sort
-    options = { hostname: "http://#{host}" }
-    api = OpenStudio::Analysis::ServerApi.new(options)
-    project_id = api.new_project
+    project_id = @api.new_project
     expect(project_id).not_to be nil
     analysis_options = {
       formulation_file: 'spec/files/batch_datapoints/example_csv.json',
       upload_file: 'spec/files/batch_datapoints/example_csv.zip'
     }
-    analysis_id = api.new_analysis(project_id, analysis_options)
+    analysis_id = @api.new_analysis(project_id, analysis_options)
     dp_file = 'spec/files/batch_datapoints/example_data_point_1.json'
-    dp_json = api.upload_datapoint(analysis_id, datapoint_file: dp_file)
+    dp_json = @api.upload_datapoint(analysis_id, datapoint_file: dp_file)
     expect(Delayed::Job.count).to eq(0)
 
     dp = DataPoint.find(dp_json[:_id])
@@ -138,40 +125,35 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, d
     job_id = dp.submit_simulation
     expect(dp.id).to match /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
     expect(dp.analysis.id).to eq analysis_id
-    expect(Delayed::Job.count).to eq(0)
 
     # check the results of the simulation
-    a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
-    a = JSON.parse(a, symbolize_names: true)
-    expect(a[:analysis][:data_points].size).to eq 1
+    _status, j = @api.get_analysis_status_and_json(analysis_id, 'unknown')
+    expect(j[:analysis][:data_points].size).to eq 1
     # puts "accessed http://#{host}/analyses/#{analysis_id}/status.json"
 
     # get the analysis as html
-    a = RestClient.get "http://#{host}/analyses/#{analysis_id}.html"
+    a = RestClient.get "#{@api.hostname}/analyses/#{analysis_id}.html"
     expect(a).to include("OpenStudio Cloud Management Console")
     # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
 
     # get the datapoint as json
-    a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
-    a = JSON.parse(a, symbolize_names: true)
-    puts a
-    expect(a[:data_point][:name]).to eq('Test Datapoint')
-    expect(a[:data_point][:status_message]).to eq('completed normal')
-    expect(a[:data_point][:status]).to eq('completed')
+    j = @api.get_datapoint(datapoint_id)
+    expect(j[:data_point][:name]).to eq('Test Datapoint')
+    expect(j[:data_point][:status_message]).to eq('completed normal')
+    expect(j[:data_point][:status]).to eq('completed')
     # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
 
     # get the datapoint as html
-    a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
+    a = RestClient.get "#{@api.hostname}/data_points/#{datapoint_id}.html"
     puts "accessed http://#{host}/data_points/#{datapoint_id}.html"
 
     # Verify that the results exist
-    j = api.get_analysis_results(analysis_id)
+    j = @api.get_analysis_results(analysis_id)
     expect(j).to be_a Hash
     expect(j[:data]).to be_an Array
 
     # verify that the data point has a log
-    j = api.get_datapoint(datapoint_id)
-    puts JSON.pretty_generate(j)
+    j = @api.get_datapoint(datapoint_id)
     expect(j[:data_point][:sdp_log_file]).not_to be_empty
   end
 
