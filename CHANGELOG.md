@@ -4,6 +4,17 @@ OpenStudio Server
 Version 2.6.1
 -------------
 
+Date Range: 06/24/18 - 08/06/18:
+
+Closed Issues: 3
+- Fixed [#333]( https://github.com/NREL/OpenStudio-server/issues/333 ), audit, consolidate & upgrade docker compose files
+
+Accepted Pull Requests: 10
+- Fixed [#367]( https://github.com/NREL/OpenStudio-server/pull/367 ), Add version of openstudio to server admin page
+- Fixed [#368]( https://github.com/NREL/OpenStudio-server/pull/368 ), ignore gemfile and rvml
+- Fixed [#371]( https://github.com/NREL/OpenStudio-server/pull/371 ), add wait-for-it to ensure processes start  in the correct order
+- Fixed [#374]( https://github.com/NREL/OpenStudio-server/pull/374 ), replace reservations with limits except for AWS_MONGO_CORES and AWS_W…
+
 Version 2.6.0
 -------------
 

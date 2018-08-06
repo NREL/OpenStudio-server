@@ -33,22 +33,15 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# Include these gems/libraries for all the analyses
-require 'rserve/simpler'
+# Wrap the RunSimulateDataPoint job for use in Resque/Redis
+module ResqueJobs
 
-# Core functions for analysis
-module AnalysisLibrary
-  module R
-    module Core
-      def initialize_rserve(hostname = 'localhost', port = 6311)
-        rserve_options = {
-          hostname: hostname,
-          port_number: port
-        }
-        Rserve::Simpler.new(rserve_options)
-      end
+  class RunSimulateDataPoint
+    @queue = :simulations
 
-      module_function :initialize_rserve
+    def self.perform(data_point_id, options = {})
+      job = DjJobs::RunSimulateDataPoint.new(data_point_id, options)
+      job.perform
     end
   end
 end

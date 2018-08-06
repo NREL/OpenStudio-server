@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -32,12 +32,26 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
+# Runs on web node
+module ResqueJobs
+  class InitializeAnalysis
+    @queue = :analysis_wrappers
 
-class DeleteAnalysisJobResque
-  @queue = :background
+    # Perform set up before running an analysis
+    # this is enqueued in Analysis#start.
+    # todo error handling
+    # todo handle cleanup if this fails
+    def self.perform(analysis_type, analysis_id, job_id, options = {})
+      # todo error handling and logging around looking up analysis and detecting start/complete
+      analysis = Analysis.find(analysis_id)
+      # this will handle unzipping to osdata volume and running any initialization scripts
+      analysis.run_initialization
+    end
 
-  def self.perform(analysis_directory)
-    job = DeleteAnalysisJob.new(analysis_directory)
-    job.perform
+    # after_perform hooks only called if job completes successfully
+    def self.after_perform_run_analysis(analysis_type, analysis_id, job_id, options = {})
+      #enqueue for run
+      Resque.enqueue(RunAnalysis, analysis_type, analysis_id, job_id, options)
+    end
   end
 end
