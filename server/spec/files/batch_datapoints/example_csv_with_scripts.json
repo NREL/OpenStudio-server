@@ -1,0 +1,191 @@
+{
+  "analysis": {
+    "uuid": "5b7d47ca-9cb5-4173-b80b-baa07f60ab42",
+    "display_name": "Example Batch Datapoints with Scripts",
+    "name": "example_batch_datapoints_with_scripts",
+    "output_variables": [
+
+    ],
+    "problem": {
+      "analysis_type": null,
+      "algorithm": {
+        "objective_functions": [
+
+        ]
+      },
+      "workflow": [
+        {
+          "name": "adjust_thermostat_setpoints_by_degrees",
+          "display_name": "Adjust Thermostat Setpoints by Degrees",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AdjustThermostatSetpointsByDegrees",
+          "measure_definition_directory": "./measures/AdjustThermostatSetpointsByDegrees",
+          "measure_definition_directory_local": "E:/openstudio-analysis-spreadsheet/measures/AdjustThermostatSetpointsByDegrees",
+          "measure_definition_display_name": "Adjust Thermostat Setpoints by Degrees",
+          "measure_definition_name": "adjust_thermostat_setpoints_by_degrees",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "6e1f34f9-92e1-44ea-9279-de0b9b64f6a1",
+          "measure_definition_version_uuid": "c9e7c1e3-7b0e-48d7-86d1-8cff0a97d4f5",
+          "arguments": [
+            {
+              "display_name": "alter design day thermostats?",
+              "display_name_short": "alter design day thermostats?",
+              "name": "alter_design_days",
+              "value_type": "boolean",
+              "default_value": "false",
+              "value": "false"
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "degrees fahrenheit to adjust cooling setpoint by.",
+                "display_name_short": "degrees fahrenheit to adjust cooling setpoint by.",
+                "name": "cooling_adjustment",
+                "value_type": "double",
+                "default_value": "1",
+                "value": "1"
+              },
+              "display_name": "Cooling Setpoint",
+              "display_name_short": "Cooling Setpoint",
+              "variable_type": "variable",
+              "units": "",
+              "minimum": 1,
+              "maximum": 2,
+              "relation_to_output": null,
+              "static_value": 1,
+              "uuid": "f6ad6c30-c6bf-4af8-8c9f-496a6b3837e5",
+              "version_uuid": "2e000689-6778-4a9e-b205-df1f6ff6ff29",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 1,
+                        "weight": 0.25
+                      },
+                      {
+                        "value": 1,
+                        "weight": 0.25
+                      },
+                      {
+                        "value": 1,
+                        "weight": 0.25
+                      },
+                      {
+                        "value": 2,
+                        "weight": 0.25
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 2
+                  },
+                  {
+                    "name": "modes",
+                    "value": 1
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": null
+                  },
+                  {
+                    "name": "stddev",
+                    "value": null
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+                "display_name": "degrees fahrenheit to adjust heating setpoint by.",
+                "display_name_short": "degrees fahrenheit to adjust heating setpoint by.",
+                "name": "heating_adjustment",
+                "value_type": "double",
+                "default_value": "-1",
+                "value": "-1"
+              },
+              "display_name": "Heating Setpoint",
+              "display_name_short": "Heating Setpoint",
+              "variable_type": "variable",
+              "units": "",
+              "minimum": 1,
+              "maximum": 2,
+              "relation_to_output": null,
+              "static_value": 1,
+              "uuid": "342a4cb1-72b7-45b3-8edf-288d4a62ac6d",
+              "version_uuid": "01afa5ca-2eb1-4323-a87b-5510d4124a58",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 1,
+                        "weight": 0.25
+                      },
+                      {
+                        "value": 1,
+                        "weight": 0.25
+                      },
+                      {
+                        "value": 1,
+                        "weight": 0.25
+                      },
+                      {
+                        "value": 2,
+                        "weight": 0.25
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 2
+                  },
+                  {
+                    "name": "modes",
+                    "value": 1
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": null
+                  },
+                  {
+                    "name": "stddev",
+                    "value": null
+                  }
+                ]
+              },
+              "workflow_index": 1
+            }
+          ],
+          "workflow_index": 0
+        }
+      ]
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seed/Office.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw"
+    },
+    "file_format_version": 1
+  }
+}
