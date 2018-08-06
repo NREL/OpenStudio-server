@@ -21,7 +21,7 @@ There are 3 queues that need to be watched and are described below:
 ### Delayed Jobs
 
 ```
-# Web Server
+# Background and Analysis Jobs
 bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,background start
 
 # Workers
