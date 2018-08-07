@@ -80,12 +80,6 @@ class AnalysisLibrary::RepeatRun < AnalysisLibrary::Base
 
     logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
 
-    # make this a core method
-    if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
-      logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
-      @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
-    end
-
     selected_variables = Variable.pivots(@analysis.id) + Variable.variables(@analysis.id)
     logger.info "Found #{selected_variables.count} variables to perturb"
 
