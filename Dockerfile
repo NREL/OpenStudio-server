@@ -3,8 +3,9 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-FROM hhorsey/openstudio:2.6.1-rc1 as base
-MAINTAINER Nicholas Long nicholas.long@nrel.gov
+
+ARG OPENSTUDIO_VERSION=2.6.1
+FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 
 # Install required libaries.
 #   realpath - needed for wait-for-it
