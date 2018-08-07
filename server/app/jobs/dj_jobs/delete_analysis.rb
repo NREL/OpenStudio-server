@@ -32,23 +32,15 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
+module DjJobs
+# Delete the files on the server
+  DeleteAnalysis = Struct.new(:analysis_directory) do
+    def perform
+      FileUtils.rm_rf analysis_directory if Dir.exist? analysis_directory
+    end
 
-# Include these gems/libraries for all the analyses
-require 'rserve/simpler'
-
-# Core functions for analysis
-module AnalysisLibrary
-  module R
-    module Core
-      def initialize_rserve(hostname = 'localhost', port = 6311)
-        rserve_options = {
-          hostname: hostname,
-          port_number: port
-        }
-        Rserve::Simpler.new(rserve_options)
-      end
-
-      module_function :initialize_rserve
+    def queue_name
+      'background'
     end
   end
 end

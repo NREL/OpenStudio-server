@@ -21,6 +21,7 @@ services:
         rails_env: docker
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUES=analysis_wrappers
     depends_on:
       - db
       - queue

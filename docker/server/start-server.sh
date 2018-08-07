@@ -13,4 +13,7 @@ cd /opt/openstudio/server && bundle exec rake db:mongoid:create_indexes
 # https://github.com/NREL/OpenStudio-server/issues/348
 ruby /usr/local/lib/memfix-controller.rb start
 
+# AP hack for now to ensure both resque and nginx/rails are running on web
+bundle exec rake environment resque:work &
+
 /opt/nginx/sbin/nginx
