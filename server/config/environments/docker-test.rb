@@ -80,5 +80,5 @@ Rails.application.configure do
 
   # detect os version build path to gemfile.  this is passed to cli as --bundle
   os_version = `openstudio openstudio_version`
-  config.os_gemfile_path = "/var/gemdata"
+  config.os_gemfile_path = "/var/oscli"
 end

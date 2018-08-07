@@ -173,7 +173,7 @@ class RunSimulateDataPoint
           # use bundle option only if we have a path to openstudio gemfile.  expect this to be
           bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'custom_gems'} --verbose " : ""
+            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} --verbose " : ""
           cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug"
           @sim_logger.info "Running workflow using cmd #{cmd}"
 

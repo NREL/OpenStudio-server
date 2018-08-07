@@ -6,6 +6,7 @@
 
 ARG OPENSTUDIO_VERSION=2.6.1
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
+MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Install required libaries.
 #   realpath - needed for wait-for-it
