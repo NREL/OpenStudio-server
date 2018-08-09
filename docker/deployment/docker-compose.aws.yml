@@ -34,6 +34,7 @@ services:
       - OS_SERVER_NUMBER_OF_WORKERS=AWS_OS_SERVER_NUMBER_OF_WORKERS
       - MAX_REQUESTS=AWS_MAX_REQUESTS
       - MAX_POOL=AWS_MAX_POOL
+      - QUEUES=analysis_wrappers
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
