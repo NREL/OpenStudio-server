@@ -91,10 +91,10 @@ class DataPoint
   # Submit the simulation to run in the background task queue
   def submit_simulation
     if Rails.application.config.job_manager == :delayed_job
-      job = RunSimulateDataPoint.new(id)
+      job = DjJobs::RunSimulateDataPoint.new(id)
       self.job_id = job.delay(queue: 'simulations').perform.id
     elsif Rails.application.config.job_manager == :resque
-      Resque.enqueue(RunSimulateDataPointResque, id)
+      Resque.enqueue(ResqueJobs::RunSimulateDataPoint, id)
       self.job_id = id
     else
       raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
@@ -160,7 +160,7 @@ class DataPoint
       end
     elsif Rails.application.config.job_manager == :resque
       if job_id
-        Resque::Job.destroy(:simulations, 'RunSimulateDataPointResque', job_id)
+        Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPointResque', job_id)
       end
     else
       raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'

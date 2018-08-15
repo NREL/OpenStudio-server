@@ -35,7 +35,7 @@
 
 require 'rails_helper'
 
-RSpec.describe RunSimulateDataPoint, type: :feature, foreground: true do
+RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
   before :all do
     @previous_job_manager = Rails.application.config.job_manager
     Rails.application.config.job_manager = :delayed_job
@@ -184,7 +184,7 @@ RSpec.describe RunSimulateDataPoint, type: :feature, foreground: true do
     analysis.save!
     dp = DataPoint.new(analysis_id: analysis.id)
     dp.save!
-    a = RunSimulateDataPoint.new(dp.id)
+    a = DjJobs::RunSimulateDataPoint.new(dp.id)
     write_lock_file = 'spec/files/tmp/write.lock'
     receipt_file = 'spec/files/tmp/write.receipt'
     FileUtils.mkdir_p 'spec/files/tmp'

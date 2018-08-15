@@ -72,6 +72,35 @@ SimpleCov.start do
   add_filter 'spec/files'
 end
 
+def wait_and_run_queue(queue)
+  loop do
+    puts "waiting for item in queue: #{queue}"
+    job = queue.reserve
+    if job
+      puts "job found in queue: #{queue}... performing"
+      queue.perform(job)
+
+      # check for another job and run if exists
+      loop do
+        puts "looking for another job in queue: #{queue}"
+        job = queue.reserve
+        if job
+          puts "another job found in queue: #{queue}... performing"
+          queue.perform(job)
+        else
+          # No more jobs in the queue, so break out
+          break
+        end
+      end
+
+      break  # break when there are no more jobs and after it found the first simulation
+    else
+      puts "Waiting for job to appear in queue: #{queue}"
+    end
+    sleep 1
+  end
+end
+
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate

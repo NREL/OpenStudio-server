@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -74,12 +74,6 @@ class AnalysisLibrary::SingleRun < AnalysisLibrary::Base
     @analysis.reload
 
     logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
-
-    # make this a core method
-    if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
-      logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
-      @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
-    end
 
     selected_variables = Variable.pivots(@analysis.id) + Variable.variables(@analysis.id)
     logger.info "Found #{selected_variables.count} variables to perturb"

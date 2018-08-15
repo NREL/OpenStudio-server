@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2016, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,12 +33,13 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-# Wrap the RunSimulateDataPoint job for use in Resque/Redis
-class RunAnalysisResque
-  @queue = :analyses
+module ResqueJobs
+  class DeleteAnalysis
+    @queue = :background
 
-  def self.perform(analysis_type, analysis_id, job_id, options = {})
-    job = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(analysis_id, job_id, options)
-    job.perform
+    def self.perform(analysis_directory)
+      job = DjJobs::DeleteAnalysis.new(analysis_directory)
+      job.perform
+    end
   end
 end

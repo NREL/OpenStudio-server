@@ -12,16 +12,17 @@ The worker pool can be either Delayed Jobs or Resque depending on the Rails envi
 delayed jobs queue is only for local and local-test environments. All other environments are 
 assuming Resque.
 
-There are 3 queues that need to be watched and are described below:
+There are 4 queues that need to be watched and are described below:
 
 * *Background*: These are background tasks that run on the web server volume in order to execute long running tasks in the background. The only task currently is deleting the analysis directory.
 * *Analyses*: This queues holds the analyses until all the simulations are complete.
 * *Simulations*: This queue is the simulation queue which runs the simulations on worker nodes.
+* *Analysis Finalization*: This queue runs analysis finalization scripts on the web_1 node.
  
 ### Delayed Jobs
 
 ```
-# Web Server
+# Background and Analysis Jobs
 bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,background start
 
 # Workers
@@ -39,6 +40,7 @@ bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,bac
 # Foreground - one terminal for each command
 QUEUES=background,analyses bundle exec rake environment resque:work
 COUNT=4 QUEUES=simulations bundle exec rake environment resque:workers
+QUEUES=analysis_wrappers bundle exec rake environment resque:work
 ```
 
 
