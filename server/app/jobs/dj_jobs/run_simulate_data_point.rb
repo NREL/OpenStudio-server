@@ -384,7 +384,7 @@ module DjJobs
               files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
               files.each do |f|
                 @sim_logger.info "Found data point initialization file #{f}."
-                run_file(analysis_dir, 'initialization', f)
+                run_script_with_args "initialize"
               end
             end
           end
