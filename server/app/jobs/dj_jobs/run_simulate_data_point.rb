@@ -380,13 +380,8 @@ module DjJobs
         # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
         begin
           Timeout.timeout(600) do
-            if File.directory? File.join(analysis_dir, 'scripts')
-              files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
-              files.each do |f|
-                @sim_logger.info "Found data point initialization file #{f}."
-                run_script_with_args "initialize"
-              end
-            end
+            @sim_logger.debug "Running datapoint initialization file if present."
+            run_script_with_args "initialize"
           end
         rescue => e
           raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
