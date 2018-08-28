@@ -472,7 +472,7 @@ module DjJobs
         #  paths to check for args and script files
         args_path = "#{dir_path}/#{script_name}.args"
         script_path = "#{dir_path}/#{script_name}.sh"
-        log_path = "#{dir_path}/#{@data_point.id}.log"
+        log_path = "#{analysis_dir}/data_point_#{@data_point.id}/#{script_name}.log"
 
         @sim_logger.info "Checking for presence of args file at #{args_path}"
         args = nil
