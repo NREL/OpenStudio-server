@@ -377,19 +377,10 @@ module DjJobs
           File.open(receipt_file, 'w') { |f| f << Time.now }
         end
 
-        # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
-        begin
-          Timeout.timeout(600) do
-            if File.directory? File.join(analysis_dir, 'scripts')
-              files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
-              files.each do |f|
-                @sim_logger.info "Found data point initialization file #{f}."
-                run_script_with_args "initialize"
-              end
-            end
-          end
-        rescue => e
-          raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
+        # Run the server data_point initialization script with defined arguments, if it exists.
+        Timeout.timeout(600) do
+          @sim_logger.debug "Running datapoint initialization file if present."
+          run_script_with_args "initialize"
         end
       end
 
@@ -476,24 +467,30 @@ module DjJobs
     end
 
     def run_script_with_args script_name
-      dir_path = "#{analysis_dir}/scripts/data_point"
-      #  paths to check for args and script files
-      args_path = "#{dir_path}/#{script_name}.args"
-      script_path = "#{dir_path}/#{script_name}.sh"
-      log_path = "#{dir_path}/#{script_name}.log"
+      begin
+        dir_path = "#{analysis_dir}/scripts/data_point"
+        #  paths to check for args and script files
+        args_path = "#{dir_path}/#{script_name}.args"
+        script_path = "#{dir_path}/#{script_name}.sh"
+        log_path = "#{dir_path}/#{@data_point.id}.log"
 
-      @sim_logger.info "Checking for presence of args file at #{args_path}"
-      args = nil
-      if File.file? args_path
-        args = Utility::Oss.load_args args_path
-        @sim_logger.info " args loaded from file #{args_path}: #{args}"
-      end
+        @sim_logger.info "Checking for presence of args file at #{args_path}"
+        args = nil
+        if File.file? args_path
+          args = Utility::Oss.load_args args_path
+          @sim_logger.info " args loaded from file #{args_path}: #{args}"
+        end
 
 
-      @sim_logger.info "Checking for presence of script file at #{script_path}"
-      if File.file? script_path
-        # TODO how long do we want to set timeout?
-        Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
+        @sim_logger.info "Checking for presence of script file at #{script_path}"
+        if File.file? script_path
+          # TODO how long do we want to set timeout?
+          Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
+        end
+      rescue => e
+        msg = "Error #{e.message} running #{script_name}: #{e.backtrace.join("\n")}"
+        @sim_logger.error msg
+        raise msg
       end
     end
 
