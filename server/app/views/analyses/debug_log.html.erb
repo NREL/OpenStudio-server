@@ -119,7 +119,7 @@
   </thead>
   <tbody>
   <tr>
-    <td><%= @initialization_log.gsub("\n", "</br>").html_safe unless @initialization_log.nil? %></td>
+    <td><%= @initialize_log.gsub("\n", "</br>").html_safe unless @initialize_log.nil? %></td>
   </tr>
   </tbody>
 </table>
@@ -132,7 +132,7 @@
   </thead>
   <tbody>
   <tr>
-    <td><%= @finalization_log.gsub("\n", "</br>").html_safe unless @finalization_log.nil? %></td>
+    <td><%= @finalize_log.gsub("\n", "</br>").html_safe unless @finalize_log.nil? %></td>
   </tr>
   </tbody>
 </table>
