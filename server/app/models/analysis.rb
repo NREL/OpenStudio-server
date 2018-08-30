@@ -420,6 +420,7 @@ class Analysis
     #  paths to check for args and script files
     args_path = "#{dir_path}/#{script_name}.args"
     script_path = "#{dir_path}/#{script_name}.sh"
+    # if you change this path, also change it in analyses controller debug_log action
     log_path = "#{dir_path}/#{script_name}.log"
 
     logger.info "Checking for presence of args file at #{args_path}"
