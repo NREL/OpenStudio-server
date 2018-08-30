@@ -400,6 +400,12 @@ class AnalysesController < ApplicationController
       @rserve_log = File.read(rserve_file)
     end
 
+    initialize_log_path = "#{@analysis.shared_directory_path}/scripts/analysis/intialize.log"
+    @initialize_log = (File.exist? initialize_log_path) ? File.read(initialize_log_path) : nil
+
+    finalize_log_path = "#{@analysis.shared_directory_path}/scripts/analysis/finalize.log"
+    @finalize_log = (File.exist? finalize_log_path) ? File.read(finalize_log_path) : nil
+
     exclude_fields = [:_id, :user, :password]
     @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
     @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
