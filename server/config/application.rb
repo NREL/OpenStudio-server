@@ -28,6 +28,9 @@ module OpenstudioServer
     # custom config var which will be overriden in environment file for environments that use :delayed_job
     config.job_manager = :resque
 
+    # if present, will be used with --bundle option in calls to OpenStudio CLI
+    config.os_gemfile_path = nil
+
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = 'utf-8'
 

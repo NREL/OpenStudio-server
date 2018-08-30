@@ -78,4 +78,3 @@ echo ""
 sleep 1
 docker volume create --name=osdata
 docker volume create --name=dbdata
-sleep 1
