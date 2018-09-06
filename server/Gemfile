@@ -67,10 +67,6 @@ gem 'openstudio-analysis', '~> 1.0'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
-gem 'openstudio-standards', '= 0.2.2'
-# gem 'openstudio-standards', path: '../../openstudio-standards/openstudio-standards'
-# gem 'openstudio-standards', github: 'NREL/openstudio-standards', branch: 'ambient-loop'
-
 ## End commonly updated gems
 
 gem 'openstudio-aws', '0.6.0'

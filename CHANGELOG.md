@@ -1,6 +1,30 @@
 OpenStudio Server
 =================
 
+Version 2.6.2
+-------------
+
+Major Changes: 
+- Models are run via the OpenStudio Command Line Interface rather than Workflow Gem.
+- OpenStudio gems (bundle) can be customized independent of OpenStudio Server bundle.  See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Gem-Bundle-used-by-OpenStudio) for additional details.
+- Analysis Initialize and Finalize Scripts can be run for Resque-based environments (ie not on local PAT). See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Server-Analysis-Scripts) for additional details.
+- Datapoint Initialize and Finalize Scripts have been restructured and can be run on Resque-based environments. See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Server-Datapoint-Scripts) for additional details.
+
+Date Range: 08/07/18 - 09/04/18:
+
+New Issues: 3 (#384, #386, #388)
+
+Closed Issues: 4
+- Fixed [#248]( https://github.com/NREL/OpenStudio-server/issues/248 ), Implement server & worker init & final scripts
+- Improved [#269]( https://github.com/NREL/OpenStudio-server/issues/269 ), Migrate to the openstudio CLI
+- Improved [#316]( https://github.com/NREL/OpenStudio-server/issues/316 ), Remove sourceforge build dependency
+- Fixed [#378]( https://github.com/NREL/OpenStudio-server/issues/378 ), Unable to run_single when seed value is set
+
+Accepted Pull Requests: 7
+- Fixed [#324]( https://github.com/NREL/OpenStudio-server/pull/324 ), OpenStudio CLI
+- Fixed [#381]( https://github.com/NREL/OpenStudio-server/pull/381 ), Bundle enablement for Oscli PR
+...
+
 Version 2.6.1
 -------------
 

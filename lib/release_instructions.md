@@ -13,3 +13,4 @@
 1. Draft new Release from Github (https://github.com/NREL/openstudio-server/releases).
 1. Include list of changes since previous release (i.e. the content in the CHANGELOG.md)
 1. Verify that the Docker versions are built and pushed to Docker hub (https://hub.docker.com/r/nrel/openstudio-server/tags/).
+1. Update OpenStudio version references in OSS CI config once the new version is released.
