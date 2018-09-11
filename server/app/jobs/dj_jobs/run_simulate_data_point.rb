@@ -174,7 +174,7 @@ module DjJobs
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
-          begin
+          # begin
             # use bundle option only if we have a path to openstudio gemfile.  expect this to be
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
@@ -188,18 +188,18 @@ module DjJobs
             Timeout.timeout(60*60*4) do
               Process.wait(pid)
             end
-          rescue Timeout::Error
-            @sim_logger.error "Killing process for #{osw_path} due to timeout."
-            Process.kill('TERM', pid)
-            run_result = :errored
-          rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
-            log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
-            @sim_logger.error log_message if @sim_logger
-            run_result = :errored
-          rescue Exception => e
-            @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
-            run_result = :errored
-          end
+          # rescue Timeout::Error
+          #   @sim_logger.error "Killing process for #{osw_path} due to timeout."
+          #   Process.kill('TERM', pid)
+          #   run_result = :errored
+          # rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
+          #   log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
+          #   @sim_logger.error log_message if @sim_logger
+          #   run_result = :errored
+          # rescue Exception => e
+          #   @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
+          #   run_result = :errored
+          # end
         end
         if run_result == :errored
           @data_point.set_error_flag
