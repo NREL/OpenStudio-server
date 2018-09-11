@@ -170,11 +170,11 @@ module DjJobs
       @sim_logger.info "Opening run.log file '#{run_log_file}'"
 
       # Fail gracefully if the datapoint errors out by returning the zip and out.osw
-      # begin
+      begin
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
-          # begin
+          begin
             # use bundle option only if we have a path to openstudio gemfile.  expect this to be
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
@@ -188,18 +188,18 @@ module DjJobs
             Timeout.timeout(60*60*4) do
               Process.wait(pid)
             end
-          # rescue Timeout::Error
-          #   @sim_logger.error "Killing process for #{osw_path} due to timeout."
-          #   Process.kill('TERM', pid)
-          #   run_result = :errored
-          # rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
-          #   log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
-          #   @sim_logger.error log_message if @sim_logger
-          #   run_result = :errored
-          # rescue Exception => e
-          #   @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
-          #   run_result = :errored
-          # end
+          rescue Timeout::Error
+            @sim_logger.error "Killing process for #{osw_path} due to timeout."
+            Process.kill('TERM', pid)
+            run_result = :errored
+          rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
+            log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
+            @sim_logger.error log_message if @sim_logger
+            run_result = :errored
+          rescue Exception => e
+            @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
+            run_result = :errored
+          end
         end
         if run_result == :errored
           @data_point.set_error_flag
@@ -279,19 +279,19 @@ module DjJobs
         else
           @data_point.set_error_flag
         end
-      # rescue ScriptError, NoMemoryError, StandardError => e
-      #   log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-      #   @sim_logger.error log_message if @sim_logger
-      #   @data_point.set_error_flag
-      #   @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
-      # ensure
+      rescue ScriptError, NoMemoryError, StandardError => e
+        log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
+        @sim_logger.error log_message if @sim_logger
+        @data_point.set_error_flag
+        @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
+      ensure
         @sim_logger.info "Finished #{__FILE__}" if @sim_logger
         @sim_logger.close if @sim_logger
         @data_point.set_complete_state if @data_point
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         true
-      # end
+      end
     end
 
     # Method to download and unzip the analysis data. This has some logic

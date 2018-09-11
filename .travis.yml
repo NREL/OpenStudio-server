@@ -19,6 +19,7 @@ before_script:
   - sleep 3
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
+after_success: ./ci/travis/print_logs.sh
 
 # Services for linux -- all instances
 services:
