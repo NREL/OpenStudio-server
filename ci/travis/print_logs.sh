@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-echo "Current directory is $(pwd)"
+echo "Current directory is $(pwd)\n"
+"tree: \n"
+tree .
 echo "\n=== PRINTING ERROR LOG REPORTS ===\n"
 
 shopt -s nullglob
