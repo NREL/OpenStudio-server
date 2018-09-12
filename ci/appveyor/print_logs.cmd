@@ -26,7 +26,7 @@ for %%i in (C:\projects\openstudio-server\spec\unit-test\logs\*.log) do (
 
 echo === PRINTING DATAPOINT LOGS ===
 
-for %%i in (C:\projects\openstudio-server\files\temp_data\analysis_*\data_point*\*.log) do (
+for %%i in (C:\projects\openstudio-server\spec\files\temp_data\analysis_*\data_point*\*.log) do (
     echo ======================================================
     echo %%i
     echo ======================================================

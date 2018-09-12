@@ -29,7 +29,7 @@ done
 
 echo "\n=== PRINTING datapoint logs ===\n"
 
-for F in "${TRAVIS_BUILD_DIR}/files/temp_data/analysis_*/data_point*/*.log"
+for F in "${TRAVIS_BUILD_DIR}/spec/files/temp_data/analysis_*/data_point*/*.log"
 do
     echo '======================================================'
     echo $F
