@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Current directory is $(pwd)\n"
-"tree: \n"
+echo "tree: \n"
 tree .
 echo "\n=== PRINTING ERROR LOG REPORTS ===\n"
 
