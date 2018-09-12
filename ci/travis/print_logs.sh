@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 echo "Current directory is $(pwd)\n"
-echo "tree: \n"
-tree .
+echo "tree: ${TRAVIS_BUILD_DIR}/spec"
+tree "${TRAVIS_BUILD_DIR}/spec"
 echo "\n=== PRINTING ERROR LOG REPORTS ===\n"
 
 shopt -s nullglob
