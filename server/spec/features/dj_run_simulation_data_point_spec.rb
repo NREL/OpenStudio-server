@@ -160,7 +160,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
     # 
     # print log file before it is deleted
-    puts "datapoint log for #{datapoint_id}: #{j[:data_point][:sdp_log_file]}"
+    puts "datapoint log for #{datapoint_id}: #{a[:data_point][:sdp_log_file]}"
     # get the datapoint as html
     a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
     puts "accessed http://#{host}/data_points/#{datapoint_id}.html"
