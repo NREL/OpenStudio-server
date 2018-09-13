@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-echo "Current directory is $(pwd)\n"
+echo "Current directory is $(pwd)"
 echo "tree: ${TRAVIS_BUILD_DIR}/spec"
 tree "${TRAVIS_BUILD_DIR}/spec"
-echo "\n=== PRINTING ERROR LOG REPORTS ===\n"
+echo "=== PRINTING ERROR LOG REPORTS ==="
 
 shopt -s nullglob
 
-echo "\n=== PRINTING spec/files/logs/* ===\n"
+echo "=== PRINTING spec/files/logs/* ==="
 for F in "${TRAVIS_BUILD_DIR}/spec/files/logs/"*
 do
     echo '======================================================'
@@ -18,7 +18,7 @@ do
     echo
 done
 
-echo "\n=== PRINTING /spec/unit-test/logs/*  ===\n"
+echo "=== PRINTING /spec/unit-test/logs/*  ==="
 for F in "${TRAVIS_BUILD_DIR}/spec/unit-test/logs/"*
 do
     echo '======================================================'
@@ -29,7 +29,7 @@ do
     echo
 done
 
-echo "\n=== PRINTING datapoint logs ===\n"
+echo "=== PRINTING datapoint logs ==="
 
 for F in "${TRAVIS_BUILD_DIR}/spec/files/temp_data/analysis_*/data_point*/*.log"
 do
