@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 echo "Current directory is $(pwd)"
-echo "tree: ${TRAVIS_BUILD_DIR}/spec"
-tree "${TRAVIS_BUILD_DIR}/spec"
+# echo "tree: ${TRAVIS_BUILD_DIR}/spec"
+# tree "${TRAVIS_BUILD_DIR}/spec"
 echo "=== PRINTING ERROR LOG REPORTS ==="
 
 shopt -s nullglob
@@ -20,18 +20,6 @@ done
 
 echo "=== PRINTING /spec/unit-test/logs/*  ==="
 for F in "${TRAVIS_BUILD_DIR}/spec/unit-test/logs/"*
-do
-    echo '======================================================'
-    echo $F
-    echo '======================================================'
-    # Limit the rate of printing the log (with pv) to keep travis happy. https://github.com/travis-ci/travis-ci/issues/6018
-    cat $F | pv -q -L 3k
-    echo
-done
-
-echo "=== PRINTING datapoint logs ==="
-
-for F in "${TRAVIS_BUILD_DIR}/spec/files/temp_data/analysis_*/data_point*/*.log"
 do
     echo '======================================================'
     echo $F
