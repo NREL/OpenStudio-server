@@ -140,6 +140,8 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, d
     j = @api.get_datapoint(datapoint_id)
     expect(j[:data_point][:name]).to eq('Test Datapoint')
     expect(j[:data_point][:status_message]).to eq('completed normal')
+    # print log file before it is deleted
+    puts "datapoint log for #{datapoint_id}: #{j[:data_point][:sdp_log_file]}"
     expect(j[:data_point][:status]).to eq('completed')
     # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
 
