@@ -42,7 +42,9 @@ module DjJobs
     require 'json'
 
     def initialize(data_point_id, options = {})
-      defaults = ActiveSupport::HashWithIndifferentAccess.new({ run_workflow_method: 'workflow' })
+      # as there have been issues requiring full path on linux/osx, use which openstudio to pull absolute path
+      os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
+      defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
       @options = defaults.deep_merge(options)
 
       @data_point = DataPoint.find(data_point_id)
@@ -173,15 +175,29 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
+            # use bundle option only if we have a path to openstudio gemfile.  expect this to be
+            bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
+            "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
+            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} --verbose " : ""
+            cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug"
+            @sim_logger.info "Running workflow using cmd #{cmd}"
 
-            k = OpenStudio::Workflow::Run.new osw_path, run_options
-            @sim_logger.info 'Running workflow'
-            run_result = k.run
-            @sim_logger.info "Final run state is #{run_result}"
+            # TODO confirm that any ENV variables that we want OSS to use are set correctly, probably pass explicitly to spawn
+            pid = Process.spawn(cmd, :unsetenv_others=>true)
+            # give it 4 hours
+            Timeout.timeout(60*60*4) do
+              Process.wait(pid)
+            end
+          rescue Timeout::Error
+            @sim_logger.error "Killing process for #{osw_path} due to timeout."
+            Process.kill('TERM', pid)
+            run_result = :errored
           rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
             log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
             @sim_logger.error log_message if @sim_logger
+            run_result = :errored
+          rescue Exception => e
+            @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           end
         end

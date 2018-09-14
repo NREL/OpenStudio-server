@@ -140,6 +140,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     expect(Delayed::Job.count).to eq(0)
 
     # check the results of the simulation
+    # check the results of the simulation
     a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
     a = JSON.parse(a, symbolize_names: true)
     expect(a[:analysis][:data_points].size).to eq 1
@@ -158,7 +159,9 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     expect(a[:data_point][:status_message]).to eq('completed normal')
     expect(a[:data_point][:status]).to eq('completed')
     # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
-
+    # 
+    # print log file before it is deleted
+    Rails.logger.info "datapoint log for #{datapoint_id}: #{a[:data_point][:sdp_log_file]}"
     # get the datapoint as html
     a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.html"
     puts "accessed http://#{host}/data_points/#{datapoint_id}.html"
