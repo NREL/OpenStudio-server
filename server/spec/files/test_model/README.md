@@ -4,4 +4,4 @@ directories.
 
 # Rebuilding Test Zip/JSON
 
-zip -r test_model.zip . -x .DS_Store -x tmp_run_single
+zip -r test_model.zip . -x \*.DS_Store -x tmp_run_single\* -x test_model.json -x README.md
