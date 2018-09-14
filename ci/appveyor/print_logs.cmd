@@ -23,3 +23,12 @@ for %%i in (C:\projects\openstudio-server\spec\unit-test\logs\*.log) do (
     type %%i
     echo.
 )
+
+
+for %%i in (C:\projects\openstudio-server\spec\unit-test\logs\rails.log/*) do (
+    echo ======================================================
+    echo %%i
+    echo ======================================================
+    type %%i
+    echo.
+)
