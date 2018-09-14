@@ -75,6 +75,17 @@ class AdjustTheromstatSetpointsByDegrees < OpenStudio::Ruleset::ModelUserScript
       return false
     end
 
+    # Add a superfluous require for openstudio-standards.
+    # https://github.com/NREL/OpenStudio-measures/blob/4bcbaa183d327cd1fd765c4b45e4c22a1381c537/nrel_published/create_baseline_building/measure.rb
+    require 'openstudio-standards'
+    std = Standard.build('90.1-2013')
+    if std
+      runner.registerInfo("OpenStudio-standards library loaded")
+    else
+      runner.registerError("Could not load OpenStudio-standards library")
+      return false
+    end
+
     #assign the user inputs to variables
     cooling_adjustment = runner.getDoubleArgumentValue("cooling_adjustment",user_arguments)
     heating_adjustment = runner.getDoubleArgumentValue("heating_adjustment",user_arguments)

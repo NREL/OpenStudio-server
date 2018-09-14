@@ -1,6 +1,7 @@
 .git
 .idea
 vagrant
+/gems
 /server/.bundle/
 /server/Gemfile.lock
 /server/log
