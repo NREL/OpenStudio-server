@@ -27,5 +27,3 @@ test_script:
 
 on_failure:
   - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-on_success:
-  - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
