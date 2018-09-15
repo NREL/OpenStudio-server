@@ -183,7 +183,7 @@ module DjJobs
             @sim_logger.info "Running workflow using cmd #{cmd}"
 
             # TODO confirm that any ENV variables that we want OSS to use are set correctly, probably pass explicitly to spawn
-            pid = Process.spawn(cmd)
+            pid = Process.spawn(cmd, :unsetenv_others=>true)
             # give it 4 hours
             Timeout.timeout(60*60*4) do
               Process.wait(pid)
