@@ -178,8 +178,8 @@ module DjJobs
             # use bundle option only if we have a path to openstudio gemfile.  expect this to be
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} --verbose " : ""
-            cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug"
+            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
+            cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug --verbose"
             @sim_logger.info "Running workflow using cmd #{cmd}"
 
             # TODO confirm that any ENV variables that we want OSS to use are set correctly, probably pass explicitly to spawn
