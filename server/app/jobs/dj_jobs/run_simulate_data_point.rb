@@ -175,19 +175,31 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
+            # pipes used by spawned process
+            out_r, out_w = IO.pipe
+            err_r, err_w = IO.pipe
+
             # use bundle option only if we have a path to openstudio gemfile.  expect this to be
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} --verbose " : ""
-            cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug"
+            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
+            cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug --verbose"
             @sim_logger.info "Running workflow using cmd #{cmd}"
 
-            # TODO confirm that any ENV variables that we want OSS to use are set correctly, probably pass explicitly to spawn
-            pid = Process.spawn(cmd, :unsetenv_others=>true)
+            # todo keep path and unset appropriate bundle vars
+            pid = Process.spawn({"PATH"=>ENV["PATH"]}, cmd, out: out_w, err: err_w)
             # give it 4 hours
             Timeout.timeout(60*60*4) do
               Process.wait(pid)
             end
+
+            # Log standard output from OS CLI call
+            @sim_logger.info "Oscli standard output: " + out_r.read
+
+            # Check for nonzero exitcode.  Process.spawn sets $? to Process::Status on completion
+            # OscliError class generates descriptive message from pipe endpoint
+            raise Utility::OscliError.new(err_r) if $?.exitstatus != 0
+
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             Process.kill('TERM', pid)
@@ -199,7 +211,14 @@ module DjJobs
           rescue Exception => e
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
+          ensure
+            # close io pipes
+            out_w.close
+            err_w.close
+            out_r.close
+            err_r.close
           end
+
         end
         if run_result == :errored
           @data_point.set_error_flag

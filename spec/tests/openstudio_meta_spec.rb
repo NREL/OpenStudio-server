@@ -109,6 +109,8 @@ RSpec.describe OpenStudioMeta do
 
     analysis = a[0]
     analysis_id = analysis[:_id]
+    # used in after_each
+    @analysis_id = analysis
 
     status = 'queued'
     begin
@@ -132,7 +134,7 @@ RSpec.describe OpenStudioMeta do
               data_points << data_point
             end
           end
-
+          # confirm that queueing is working
           data_points.each do |data_point|
             # get the datapoint pages
             data_point_id = data_point[:_id]
@@ -144,7 +146,7 @@ RSpec.describe OpenStudioMeta do
             puts "Accessed pages for data_point #{data_point_id}, status = #{status}"
           end
           puts ''
-          sleep 1
+          sleep 5
         end
       end
     rescue ::Timeout::Error
@@ -152,6 +154,7 @@ RSpec.describe OpenStudioMeta do
     end
 
     expect(status).to eq('completed')
+
   end
 
   it 'run a complicated design alternative analysis set' do
@@ -168,6 +171,8 @@ RSpec.describe OpenStudioMeta do
 
     analysis = a[0]
     analysis_id = analysis[:_id]
+    # used in after_each
+    @analysis_id = analysis_id
 
     status = 'queued'
     begin
@@ -203,7 +208,7 @@ RSpec.describe OpenStudioMeta do
             puts "Accessed pages for data_point #{data_point_id}, status = #{status}"
           end
           puts ''
-          sleep 1
+          sleep 5
         end
       end
     rescue ::Timeout::Error
@@ -211,6 +216,24 @@ RSpec.describe OpenStudioMeta do
     end
 
     expect(status).to eq('completed')
+
+  end
+
+  after :each do
+    # confirm that datapoints ran successfully
+    a = RestClient.get 'http://localhost:8080/data_points.json'
+    a = JSON.parse(a, symbolize_names: true)
+    data_points = []
+    a.each do |data_point|
+      if data_point[:analysis_id] == @analysis_id
+        data_points << data_point
+      end
+    end
+    data_points.each do |data_point|
+      a = RestClient.get "http://localhost:8080/data_points/#{data_point[:_id]}.json"
+      a = JSON.parse(a, symbolize_names: true)
+      expect (a[:data_point][:status_message]).to eq('completed normal')
+    end
   end
 
   after :all do
