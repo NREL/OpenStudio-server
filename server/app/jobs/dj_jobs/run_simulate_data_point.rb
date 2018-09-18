@@ -183,7 +183,7 @@ module DjJobs
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
             "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
-            cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug --verbose"
+            cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
             @sim_logger.info "Running workflow using cmd #{cmd}"
 
             # todo keep path and unset appropriate bundle vars
