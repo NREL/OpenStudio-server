@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # platform-specific config here (also in setup.sh):
-## TODO move into/consolidate with setup.sh
+## TODO should be able to remove this now that it's included in setup.sh
 if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
     # Dir containing openstudio
     export RUBYLIB="${HOME}/openstudio/Ruby"
