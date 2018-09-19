@@ -213,6 +213,7 @@ module DjJobs
             run_result = :errored
           ensure
             # close io pipes
+            @sim_logger.info "closing io pipes"
             out_w.close
             err_w.close
             out_r.close
