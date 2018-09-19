@@ -68,11 +68,23 @@ end
 class LocalRspecTest
 end
 
+# Set obvious paths for start-local & run-analysis invocation
 mongod_exe = which('mongod')
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 server_rspec_test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../unit-test/'))
+
+# Attempt to locate oscli if it is not set via env var for the rspec test
+if ENV['OPENSTUDIO_TEST_EXE']
+  unless File.exist? ENV['OPENSTUDIO_TEST_EXE']
+    raise "Can't find OPENSTUDIO_TEST_EXE at #{ENV['OPENSTUDIO_TEST_EXE']}"
+  end
+else
+  oscli_path = which('openstudio')
+  oscli_path ? ENV['OPENSTUDIO_TEST_EXE'] = oscli_path : raise "Can't find openstudio cli on path - please specify via env var OPENSTUDIO_TEST_EXE"
+end
+
 # remove leftover files from previous tests if they exist
 to_rm = [File.join(project, 'temp_data'), File.join(project, 'localResults')]
 to_rm.each { |dir| FileUtils.rm_rf(dir) if Dir.exist? dir }
@@ -89,7 +101,7 @@ num_workers = 2
 RSpec.describe OpenStudioMeta do
   before :all do
     # start the server
-    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --worker-number=#{num_workers} \"#{project}\""
+    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --openstudio-exe-path=#{ENV['OPENSTUDIO_TEST_EXE']} --worker-number=#{num_workers} \"#{project}\""
     puts command
     start_local = system(command)
     expect(start_local).to be true

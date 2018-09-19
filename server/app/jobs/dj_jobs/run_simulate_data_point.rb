@@ -175,6 +175,20 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
+            # determine if an explicit oscli path has been set via the meta-cli option, warn if not
+            if ENV['OPENSTUDIO_EXE_PATH']
+              if File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
+                @options[:openstudio_executable] = ENV['OPENSTUDIO_EXE_PATH']
+              else
+                @sim_logger.warn "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`"
+              end
+            else
+              @sim_logger.warn "OPENSTUDIO_EXE_PATH not set - defaulting to #{@options[:openstudio_executable]}"
+              unless File.exist?(@options[:openstudio_executable])
+                @sim_logger.warn "Unable to find the default specified file for the OSCLI: `#{@options[:openstudio_executable]}`"
+              end
+            end
+
             # pipes used by spawned process
             out_r, out_w = IO.pipe
             err_r, err_w = IO.pipe

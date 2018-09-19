@@ -4,6 +4,7 @@ environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 2.6.2
   OPENSTUDIO_VERSION_SHA: 331d60a836
+  OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
 
   
   matrix:
@@ -21,11 +22,11 @@ before_test:
   - cmd: gem -v
   - cmd: bundle -v
   - cmd: mongod.exe --version
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 test_script:
   - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 
 on_failure:
-  - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+  - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
