@@ -51,6 +51,13 @@ module DjJobs
       @data_point.status = :queued
       @data_point.run_queue_time = Time.now
       @intialize_worker_errs = []
+
+      # Initialize bundler & then reset for the CLI call
+      require 'bundler'
+      Bundler.setup
+      Bundler.require
+      ENV["BUNDLE_PATH"] = nil
+      ENV["BUNDLE_GEMFILE"] = nil
     end
 
     def perform
