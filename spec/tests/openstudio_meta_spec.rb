@@ -82,7 +82,11 @@ if ENV['OPENSTUDIO_TEST_EXE']
   end
 else
   oscli_path = which('openstudio')
-  oscli_path ? ENV['OPENSTUDIO_TEST_EXE'] = oscli_path : raise "Can't find openstudio cli on path - please specify via env var OPENSTUDIO_TEST_EXE"
+  if oscli_path
+    ENV['OPENSTUDIO_TEST_EXE'] = oscli_path
+    else
+      raise "Can't find openstudio cli on path - please specify via env var OPENSTUDIO_TEST_EXE"
+  end
 end
 
 # remove leftover files from previous tests if they exist
