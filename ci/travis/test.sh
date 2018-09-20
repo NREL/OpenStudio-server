@@ -27,7 +27,7 @@ else
     # prior to running tests, so we should not set enviroment variables here
     if [ "${BUILD_TYPE}" == "test" ];then
         echo "starting unit tests. RUBYLIB=$RUBYLIB"
-        ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" ${TRAVIS_BUILD_DIR}/spec/unit-test"
+        ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" "${TRAVIS_BUILD_DIR}/spec/unit-test"
         exit_status=$?
         if [ $exit_status == 0 ];then
             echo "Completed unit tests successfully"
