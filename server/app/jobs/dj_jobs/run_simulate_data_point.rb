@@ -208,7 +208,7 @@ module DjJobs
             @sim_logger.info "Running workflow using cmd #{cmd}"
 
             # todo keep path and unset appropriate bundle vars
-            pid = Process.spawn({"PATH"=>ENV["PATH"]}, cmd, out: out_w, err: err_w)
+            pid = Process.spawn(cmd, out: out_w, err: err_w)
             # give it 4 hours
             Timeout.timeout(30) do
               Process.wait(pid)
