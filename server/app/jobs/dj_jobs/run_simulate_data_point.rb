@@ -52,12 +52,6 @@ module DjJobs
       @data_point.run_queue_time = Time.now
       @intialize_worker_errs = []
 
-      # Initialize bundler & then reset for the CLI call
-      require 'bundler'
-      Bundler.setup
-      Bundler.require
-      ENV["BUNDLE_PATH"] = nil
-      ENV["BUNDLE_GEMFILE"] = nil
     end
 
     def perform
@@ -211,7 +205,7 @@ module DjJobs
             pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, out: out_w, err: err_w)
 
             # timeout the process if it doesn't return in x seconds
-            Timeout.timeout(60*60*4) do
+            Timeout.timeout(120) do
               Process.wait(pid)
             end
 
