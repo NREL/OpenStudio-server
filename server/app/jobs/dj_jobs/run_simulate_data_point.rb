@@ -177,8 +177,8 @@ module DjJobs
         File.open(run_log_file, 'a') do |run_log|
           begin
             # pipes used by spawned process
-            out_r, out_w = IO.pipe
-            err_r, err_w = IO.pipe
+            # out_r, out_w = IO.pipe
+            # err_r, err_w = IO.pipe
 
             # determine if an explicit oscli path has been set via the meta-cli option, warn if not
             if ENV['OPENSTUDIO_EXE_PATH']
@@ -202,7 +202,7 @@ module DjJobs
             cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
             @sim_logger.info "Running workflow using cmd #{cmd}"
 
-            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, out: out_w, err: err_w)
+            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd)
 
             # timeout the process if it doesn't return in x seconds
             Timeout.timeout(120) do
@@ -213,8 +213,7 @@ module DjJobs
             # OscliError class generates descriptive message from pipe endpoint
             if $?.exitstatus != 0
               # must close pipe before reading from it
-              err_w.close
-              raise Utility::OscliError.new(err_r)
+              raise "error from cli spawn call"
             end
 
           rescue Timeout::Error
@@ -230,14 +229,13 @@ module DjJobs
             run_result = :errored
           ensure
             # Log standard output from OS CLI call
-            out_w.close
-            @sim_logger.info "Oscli standard output: " + out_r.read
+            # NOTE that because this is ensure block
+            # it will be logged AFTER an error logged in above rescue blocks
+
 
             # close io pipes
             @sim_logger.info "closing io pipes"
-            err_w.close unless err_w.closed?
-            out_r.close
-            err_r.close
+
           end
 
         end
