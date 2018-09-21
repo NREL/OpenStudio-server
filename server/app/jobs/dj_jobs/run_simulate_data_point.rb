@@ -182,6 +182,10 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
+            # pipes used by spawned process
+            out_r, out_w = IO.pipe
+            err_r, err_w = IO.pipe
+
             # determine if an explicit oscli path has been set via the meta-cli option, warn if not
             if ENV['OPENSTUDIO_EXE_PATH']
               if File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
@@ -196,9 +200,6 @@ module DjJobs
               end
             end
 
-            # pipes used by spawned process
-            out_r, out_w = IO.pipe
-            err_r, err_w = IO.pipe
 
             # use bundle option only if we have a path to openstudio gemfile.  expect this to be
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
@@ -207,8 +208,7 @@ module DjJobs
             cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
             @sim_logger.info "Running workflow using cmd #{cmd}"
 
-            # todo keep path and unset appropriate bundle vars
-            pid = Process.spawn(cmd, out: out_w, err: err_w)
+            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, out: out_w, err: err_w)
 
             # timeout the process if it doesn't return in x seconds
             Timeout.timeout(60*60*4) do
@@ -223,9 +223,6 @@ module DjJobs
               raise Utility::OscliError.new(err_r)
             end
 
-            # Log standard output from OS CLI call
-            out_w.close
-            @sim_logger.info "Oscli standard output: " + out_r.read
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             Process.kill('TERM', pid)
@@ -238,9 +235,12 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
+            # Log standard output from OS CLI call
+            out_w.close
+            @sim_logger.info "Oscli standard output: " + out_r.read
+
             # close io pipes
             @sim_logger.info "closing io pipes"
-            out_w.close unless out_w.closed?
             err_w.close unless err_w.closed?
             out_r.close
             err_r.close
