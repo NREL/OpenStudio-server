@@ -209,8 +209,8 @@ module DjJobs
 
             # todo keep path and unset appropriate bundle vars
             pid = Process.spawn(cmd, out: out_w, err: err_w)
-            # timeout the process if it doesn't return in x seconds
 
+            # timeout the process if it doesn't return in x seconds
             Timeout.timeout(60) do
               Process.wait(pid)
             end

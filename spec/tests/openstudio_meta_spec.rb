@@ -129,8 +129,9 @@ RSpec.describe OpenStudioMeta do
     @analysis_id = analysis
 
     status = 'queued'
+    timeout_seconds = 240
     begin
-      ::Timeout.timeout(180) do
+      ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
@@ -166,7 +167,7 @@ RSpec.describe OpenStudioMeta do
         end
       end
     rescue ::Timeout::Error
-      puts "Analysis status is `#{status}` after 90 seconds; assuming error."
+      puts "Analysis status is `#{status}` after #{timeout_seconds} seconds; assuming error."
     end
 
     expect(status).to eq('completed')
@@ -191,8 +192,9 @@ RSpec.describe OpenStudioMeta do
     @analysis_id = analysis_id
 
     status = 'queued'
+    timeout_seconds = 240
     begin
-      ::Timeout.timeout(180) do
+      ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
           # get the analysis pages
           a = RestClient.get "http://localhost:8080/analyses/#{analysis_id}.json"
@@ -228,7 +230,7 @@ RSpec.describe OpenStudioMeta do
         end
       end
     rescue ::Timeout::Error
-      puts "Analysis status is `#{status}` after 90 seconds; assuming error."
+      puts "Analysis status is `#{status}` after #{timeout_seconds} seconds; assuming error."
     end
 
     expect(status).to eq('completed')
@@ -248,7 +250,7 @@ RSpec.describe OpenStudioMeta do
     data_points.each do |data_point|
       a = RestClient.get "http://localhost:8080/data_points/#{data_point[:_id]}.json"
       a = JSON.parse(a, symbolize_names: true)
-      expect (a[:data_point][:status_message]).to eq('completed normal')
+      expect(a[:data_point][:status_message]).to eq('completed normal')
     end
   end
 
