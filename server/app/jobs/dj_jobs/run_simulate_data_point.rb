@@ -200,12 +200,13 @@ module DjJobs
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
             "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
             cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
-            @sim_logger.info "Running workflow using cmd #{cmd}"
+            process_log = File.join(simulation_dir, 'oscli_simulation.log')
+            @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
-            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd)
+            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, [:err, :out] => [process_log, 'w'])
 
-            # timeout the process if it doesn't return in x seconds
-            Timeout.timeout(120) do
+            # timeout the process if it doesn't return in 2 hours
+            Timeout.timeout(7200) do
               Process.wait(pid)
             end
 
