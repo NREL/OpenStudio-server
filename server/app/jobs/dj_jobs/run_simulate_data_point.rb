@@ -214,13 +214,17 @@ module DjJobs
               Process.wait(pid)
             end
 
-            # Log standard output from OS CLI call
-            @sim_logger.info "Oscli standard output: " + out_r.read
-
             # Check for nonzero exitcode.  Process.spawn sets $? to Process::Status on completion
             # OscliError class generates descriptive message from pipe endpoint
-            raise Utility::OscliError.new(err_r) if $?.exitstatus != 0
+            if $?.exitstatus != 0
+              # must close pipe before reading from it
+              err_w.close
+              raise Utility::OscliError.new(err_r)
+            end
 
+            # Log standard output from OS CLI call
+            out_w.close
+            @sim_logger.info "Oscli standard output: " + out_r.read
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             Process.kill('TERM', pid)
@@ -235,8 +239,8 @@ module DjJobs
           ensure
             # close io pipes
             @sim_logger.info "closing io pipes"
-            out_w.close
-            err_w.close
+            out_w.close unless out_w.closed?
+            err_w.close unless err_w.closed?
             out_r.close
             err_r.close
           end
