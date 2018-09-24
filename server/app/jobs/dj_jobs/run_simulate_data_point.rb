@@ -51,6 +51,7 @@ module DjJobs
       @data_point.status = :queued
       @data_point.run_queue_time = Time.now
       @intialize_worker_errs = []
+
     end
 
     def perform
@@ -175,19 +176,44 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
+            # pipes used by spawned process
+            # out_r, out_w = IO.pipe
+            # err_r, err_w = IO.pipe
+
+            # determine if an explicit oscli path has been set via the meta-cli option, warn if not
+            if ENV['OPENSTUDIO_EXE_PATH']
+              if File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
+                @options[:openstudio_executable] = ENV['OPENSTUDIO_EXE_PATH']
+              else
+                @sim_logger.warn "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`"
+              end
+            else
+              @sim_logger.warn "OPENSTUDIO_EXE_PATH not set - defaulting to #{@options[:openstudio_executable]}"
+              unless File.exist?(@options[:openstudio_executable])
+                @sim_logger.warn "Unable to find the default specified file for the OSCLI: `#{@options[:openstudio_executable]}`"
+              end
+            end
+
+
             # use bundle option only if we have a path to openstudio gemfile.  expect this to be
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} --verbose " : ""
-            cmd = "#{@options[:openstudio_executable]} #{bundle}run --workflow #{osw_path} --debug"
-            @sim_logger.info "Running workflow using cmd #{cmd}"
+            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
+            cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
+            process_log = File.join(simulation_dir, 'oscli_simulation.log')
+            @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
-            # TODO confirm that any ENV variables that we want OSS to use are set correctly, probably pass explicitly to spawn
-            pid = Process.spawn(cmd, :unsetenv_others=>true)
-            # give it 4 hours
-            Timeout.timeout(60*60*4) do
+            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, [:err, :out] => [process_log, 'w'])
+
+            # timeout the process if it doesn't return in 2 hours
+            Timeout.timeout(7200) do
               Process.wait(pid)
             end
+
+            if $?.exitstatus != 0
+              raise "Oscli returned error code #{$?.exitstatus}"
+            end
+
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             Process.kill('TERM', pid)
@@ -200,6 +226,7 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           end
+
         end
         if run_result == :errored
           @data_point.set_error_flag

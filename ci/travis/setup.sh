@@ -25,15 +25,14 @@ else
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         sudo ./OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
-        tree ${HOME}/openstudio/Ruby
-    #    mongo_dir="/usr/local/bin"
+        # tree ${HOME}/openstudio/Ruby
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update
         sudo apt-get install -y pv tree
         mkdir -p reports/rspec
-        ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA
+        sudo ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA
     fi
 
     ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
@@ -41,4 +40,3 @@ else
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
 fi
-

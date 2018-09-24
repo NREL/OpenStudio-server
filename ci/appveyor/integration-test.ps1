@@ -1,6 +1,7 @@
 $env:Path = "C:\Ruby$env:RUBY_VERSION\bin;C:\Mongodb\bin;$env:Path"
 $env:RUBYLIB = "C:\projects\openstudio\Ruby"
-Write-Host "RUBYLIB is: $env:RUBYLIB and the PATH is: $env:Path"
+$env:OPENSTUDIO_TEST_EXE = "C:\projects\openstudio\bin\openstudio.exe"
+Write-Host "RUBYLIB is: $env:RUBYLIB ; the PATH is: $env:Path ; the OPENSTUDIO_TEST_EXE is: $env:OPENSTUDIO_TEST_EXE"
 $iteration = 0
 :retry While ($iteration -lt 3)
     {
