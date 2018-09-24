@@ -210,11 +210,8 @@ module DjJobs
               Process.wait(pid)
             end
 
-            # Check for nonzero exitcode.  Process.spawn sets $? to Process::Status on completion
-            # OscliError class generates descriptive message from pipe endpoint
             if $?.exitstatus != 0
-              # must close pipe before reading from it
-              raise "error from cli spawn call"
+              raise "Oscli returned error code #{$?.exitstatus}"
             end
 
           rescue Timeout::Error
@@ -228,15 +225,6 @@ module DjJobs
           rescue Exception => e
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
-          ensure
-            # Log standard output from OS CLI call
-            # NOTE that because this is ensure block
-            # it will be logged AFTER an error logged in above rescue blocks
-
-
-            # close io pipes
-            @sim_logger.info "closing io pipes"
-
           end
 
         end
