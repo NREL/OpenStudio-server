@@ -52,12 +52,6 @@ module DjJobs
       @data_point.run_queue_time = Time.now
       @intialize_worker_errs = []
 
-      # Initialize bundler & then reset for the CLI call
-      require 'bundler'
-      Bundler.setup
-      Bundler.require
-      ENV["BUNDLE_PATH"] = nil
-      ENV["BUNDLE_GEMFILE"] = nil
     end
 
     def perform
@@ -182,6 +176,10 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
+            # pipes used by spawned process
+            # out_r, out_w = IO.pipe
+            # err_r, err_w = IO.pipe
+
             # determine if an explicit oscli path has been set via the meta-cli option, warn if not
             if ENV['OPENSTUDIO_EXE_PATH']
               if File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
@@ -196,21 +194,19 @@ module DjJobs
               end
             end
 
-            # pipes used by spawned process
-            out_r, out_w = IO.pipe
-            err_r, err_w = IO.pipe
 
             # use bundle option only if we have a path to openstudio gemfile.  expect this to be
             bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
             "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
             "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
             cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
-            @sim_logger.info "Running workflow using cmd #{cmd}"
+            process_log = File.join(simulation_dir, 'oscli_simulation.log')
+            @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
-            # todo keep path and unset appropriate bundle vars
-            pid = Process.spawn(cmd, out: out_w, err: err_w)
-            # give it 4 hours
-            Timeout.timeout(240) do
+            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, [:err, :out] => [process_log, 'w'])
+
+            # timeout the process if it doesn't return in 2 hours
+            Timeout.timeout(7200) do
               Process.wait(pid)
             end
 
@@ -218,13 +214,9 @@ module DjJobs
             # OscliError class generates descriptive message from pipe endpoint
             if $?.exitstatus != 0
               # must close pipe before reading from it
-              err_w.close
-              raise Utility::OscliError.new(err_r)
+              raise "error from cli spawn call"
             end
 
-            # Log standard output from OS CLI call
-            out_w.close
-            @sim_logger.info "Oscli standard output: " + out_r.read
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             Process.kill('TERM', pid)
@@ -237,12 +229,14 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
+            # Log standard output from OS CLI call
+            # NOTE that because this is ensure block
+            # it will be logged AFTER an error logged in above rescue blocks
+
+
             # close io pipes
             @sim_logger.info "closing io pipes"
-            out_w.close unless out_w.closed?
-            err_w.close unless err_w.closed?
-            out_r.close
-            err_r.close
+
           end
 
         end
