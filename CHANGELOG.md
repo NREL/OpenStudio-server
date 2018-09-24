@@ -7,8 +7,8 @@ Version 2.6.2
 Major Changes: 
 - Models are run via the OpenStudio Command Line Interface rather than Workflow Gem.
 - OpenStudio gems (bundle) can be customized independent of OpenStudio Server bundle.  See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Gem-Bundle-used-by-OpenStudio) for additional details.
-- Analysis Initialize and Finalize Scripts can be run for Resque-based environments (ie not on local PAT). See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Server-Analysis-Scripts) for additional details.
-- Datapoint Initialize and Finalize Scripts have been restructured and can be run on Resque-based environments. See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Server-Datapoint-Scripts) for additional details.
+- Analysis Initialize and Finalize Scripts can be run for Resque-based environments (ie not on local PAT). See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Analysis-Scripts) for additional details.
+- Datapoint Initialize and Finalize Scripts have been restructured and can be run on Resque-based environments. See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Data-Point-Scripts) for additional details.
 
 Date Range: 08/07/18 - 09/04/18:
 

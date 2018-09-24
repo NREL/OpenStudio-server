@@ -5,7 +5,7 @@ rvm: 2.2.4
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=2.6.1 OPENSTUDIO_VERSION_SHA=ab0dddde0b
+    - OPENSTUDIO_VERSION=2.6.2 OPENSTUDIO_VERSION_SHA=331d60a836
     - DOCKER_COMPOSE_VERSION=1.21.1
 
 gemfile:
@@ -19,7 +19,6 @@ before_script:
   - sleep 3
 script: ./ci/travis/test.sh
 after_failure: ./ci/travis/print_logs.sh
-after_success: ./ci/travis/print_logs.sh
 
 # Services for linux -- all instances
 services:
