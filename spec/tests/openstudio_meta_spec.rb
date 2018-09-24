@@ -89,9 +89,11 @@ else
   end
 end
 
-# remove leftover files from previous tests if they exist
-to_rm = [File.join(project, 'temp_data'), File.join(project, 'localResults')]
+# Uncomment below to remove leftover files from previous tests if they exist.
+# Note that this can make debugging more difficult as logs in temp_data disappear after tests run.
+# to_rm = [File.join(project, 'temp_data'), File.join(project, 'localResults')]
 # to_rm.each { |dir| FileUtils.rm_rf(dir) if Dir.exist? dir }
+#
 FileUtils.mkdir_p File.join(project, 'logs')
 FileUtils.mkdir_p File.join(project, 'data/db')
 FileUtils.mkdir_p File.join(server_rspec_test_dir, 'logs')

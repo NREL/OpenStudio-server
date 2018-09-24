@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 
 # platform-specific config here (also in setup.sh):
-## TODO should be able to remove this now that it's included in setup.sh
 if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
     # Dir containing openstudio
     export RUBYLIB="${HOME}/openstudio/Ruby"
     export OPENSTUDIO_TEST_EXE="${HOME}/openstudio/bin/openstudio"
-#    required as of OS 2.5.1
-#    export PATH="${PATH}:${HOME}/openstudio/bin"
     mongo_dir="/usr/local/bin"
 elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
     # Dir containing openstudio
