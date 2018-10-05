@@ -54,6 +54,9 @@ gem 'sass-rails'
 gem 'sprockets-rails'
 gem 'uglifier'
 
+# don't try to install sassc 2.
+gem 'sassc', '~>1.12.1'
+
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
