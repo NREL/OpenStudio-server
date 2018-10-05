@@ -54,6 +54,9 @@ gem 'sass-rails'
 gem 'sprockets-rails'
 gem 'uglifier'
 
+# explicitly include sassc at ~1.  otherwise, resque-web requirement attempts to install 2.0.0 version which requires ruby >= 2.3.3
+gem 'sassc', '~>1.12.1'
+
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
