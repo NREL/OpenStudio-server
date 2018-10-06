@@ -238,7 +238,7 @@ if verbose:
     print('OpenStudio version retrieved is {}, with SHA {}'.format(os_version, os_sha))
 
 # OpenStudio-Standards version
-cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
+cmd_call = 'docker run nrel/openstudio-server:{} openstudio -e "require \'openstudio\'; require ' \
            '\'openstudio-standards\'; puts OpenstudioStandards::VERSION"'.format(
     defaults['version'] +
     defaults['ami_version_extension'])
