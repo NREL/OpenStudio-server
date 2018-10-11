@@ -9,6 +9,7 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
     chmod +x docker-compose
     sudo mv docker-compose /usr/local/bin
     # install pipeviewer
+    sudo apt-get update
     sudo apt-get install -y pv
 else
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
