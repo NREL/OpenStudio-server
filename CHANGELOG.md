@@ -1,6 +1,27 @@
 OpenStudio Server
 =================
 
+Version 2.7.0 
+-------------
+
+Date Range: 09/05/18 - 10/11/18:
+
+New Issues: 15 (#390, #391, #392, #394, #396, #397, #398, #399, #400, #403, #404, #405, #409, #411, #412)
+
+Closed Issues: 5
+- Fixed [#396]( https://github.com/NREL/OpenStudio-server/issues/396 ), print_logs.sh doesn't run on travis/ubuntu
+- Fixed [#398]( https://github.com/NREL/OpenStudio-server/issues/398 ), nokogiri error on travis (ubuntu/osx)
+- Fixed [#399]( https://github.com/NREL/OpenStudio-server/issues/399 ), supported platforms error on appveyor
+- Fixed [#403]( https://github.com/NREL/OpenStudio-server/issues/403 ), Appveyor VMs not failing when unable to discover openstudio.exe
+- Fixed [#405]( https://github.com/NREL/OpenStudio-server/issues/405 ), Ensuring openstudio.exe discovery process on Windows is reflected in Appveyor
+
+Accepted Pull Requests: 11
+
+- Fixed [#401]( https://github.com/NREL/OpenStudio-server/pull/401 ), Add require 'openstudio-standards' to measure
+- Fixed [#402]( https://github.com/NREL/OpenStudio-server/pull/402 ), remove sudo from install scripts for openstudio and ruby
+- Fixed [#410]( https://github.com/NREL/OpenStudio-server/pull/410 ), check OpenStudio Standards version via Oscli.
+- Fixed [#413]( https://github.com/NREL/OpenStudio-server/pull/413 ), control sassc version in Gemfile.
+
 Version 2.6.2
 -------------
 
