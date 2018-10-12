@@ -42,13 +42,16 @@ module DjJobs
     require 'json'
 
     def initialize(data_point_id, options = {})
-      defaults = ActiveSupport::HashWithIndifferentAccess.new({ run_workflow_method: 'workflow' })
+      # as there have been issues requiring full path on linux/osx, use which openstudio to pull absolute path
+      os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
+      defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
       @options = defaults.deep_merge(options)
 
       @data_point = DataPoint.find(data_point_id)
       @data_point.status = :queued
       @data_point.run_queue_time = Time.now
       @intialize_worker_errs = []
+
     end
 
     def perform
@@ -173,17 +176,57 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            run_options = { debug: true, cleanup: false, preserve_run_dir: true, targets: [run_log] }
+            # pipes used by spawned process
+            # out_r, out_w = IO.pipe
+            # err_r, err_w = IO.pipe
 
-            k = OpenStudio::Workflow::Run.new osw_path, run_options
-            @sim_logger.info 'Running workflow'
-            run_result = k.run
-            @sim_logger.info "Final run state is #{run_result}"
+            # determine if an explicit oscli path has been set via the meta-cli option, warn if not
+            if ENV['OPENSTUDIO_EXE_PATH']
+              if File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
+                @options[:openstudio_executable] = ENV['OPENSTUDIO_EXE_PATH']
+              else
+                @sim_logger.warn "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`"
+              end
+            else
+              @sim_logger.warn "OPENSTUDIO_EXE_PATH not set - defaulting to #{@options[:openstudio_executable]}"
+              unless File.exist?(@options[:openstudio_executable])
+                @sim_logger.warn "Unable to find the default specified file for the OSCLI: `#{@options[:openstudio_executable]}`"
+              end
+            end
+
+
+            # use bundle option only if we have a path to openstudio gemfile.  expect this to be
+            bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
+            "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
+            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
+            cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
+            process_log = File.join(simulation_dir, 'oscli_simulation.log')
+            @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
+
+            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, [:err, :out] => [process_log, 'w'])
+
+            # timeout the process if it doesn't return in 2 hours
+            Timeout.timeout(7200) do
+              Process.wait(pid)
+            end
+
+            if $?.exitstatus != 0
+              raise "Oscli returned error code #{$?.exitstatus}"
+            end
+
+          rescue Timeout::Error
+            @sim_logger.error "Killing process for #{osw_path} due to timeout."
+            Process.kill('TERM', pid)
+            run_result = :errored
           rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
             log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
             @sim_logger.error log_message if @sim_logger
             run_result = :errored
+          rescue Exception => e
+            @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
+            run_result = :errored
           end
+
         end
         if run_result == :errored
           @data_point.set_error_flag
@@ -211,7 +254,8 @@ module DjJobs
             results = JSON.parse(File.read(results_file), symbolize_names: true)
             @data_point.update(results: results)
           else
-            raise "Could not find results #{results_file}"
+            run_result = :errored
+            @sim_logger.error "Could not find results #{results_file}"
           end
 
           @sim_logger.info 'Saving files/reports back to the server'
@@ -377,19 +421,10 @@ module DjJobs
           File.open(receipt_file, 'w') { |f| f << Time.now }
         end
 
-        # Run the server data_point initialization script with defined arguments, if it exists. Convert CRLF if required
-        begin
-          Timeout.timeout(600) do
-            if File.directory? File.join(analysis_dir, 'scripts')
-              files = Dir.glob("#{analysis_dir}/scripts/worker_initialization/*").select { |f| !f.match(/.*args$/) }.map { |f| File.basename(f) }
-              files.each do |f|
-                @sim_logger.info "Found data point initialization file #{f}."
-                run_file(analysis_dir, 'initialization', f)
-              end
-            end
-          end
-        rescue => e
-          raise "Error in data point initialization script: #{e.message} in #{e.backtrace.join("\n")}"
+        # Run the server data_point initialization script with defined arguments, if it exists.
+        Timeout.timeout(600) do
+          @sim_logger.debug "Running datapoint initialization file if present."
+          run_script_with_args "initialize"
         end
       end
 
@@ -476,24 +511,30 @@ module DjJobs
     end
 
     def run_script_with_args script_name
-      dir_path = "#{analysis_dir}/scripts/data_point"
-      #  paths to check for args and script files
-      args_path = "#{dir_path}/#{script_name}.args"
-      script_path = "#{dir_path}/#{script_name}.sh"
-      log_path = "#{dir_path}/#{script_name}.log"
+      begin
+        dir_path = "#{analysis_dir}/scripts/data_point"
+        #  paths to check for args and script files
+        args_path = "#{dir_path}/#{script_name}.args"
+        script_path = "#{dir_path}/#{script_name}.sh"
+        log_path = "#{analysis_dir}/data_point_#{@data_point.id}/#{script_name}.log"
 
-      @sim_logger.info "Checking for presence of args file at #{args_path}"
-      args = nil
-      if File.file? args_path
-        args = Utility::Oss.load_args args_path
-        @sim_logger.info " args loaded from file #{args_path}: #{args}"
-      end
+        @sim_logger.info "Checking for presence of args file at #{args_path}"
+        args = nil
+        if File.file? args_path
+          args = Utility::Oss.load_args args_path
+          @sim_logger.info " args loaded from file #{args_path}: #{args}"
+        end
 
 
-      @sim_logger.info "Checking for presence of script file at #{script_path}"
-      if File.file? script_path
-        # TODO how long do we want to set timeout?
-        Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
+        @sim_logger.info "Checking for presence of script file at #{script_path}"
+        if File.file? script_path
+          # TODO how long do we want to set timeout?
+          Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
+        end
+      rescue => e
+        msg = "Error #{e.message} running #{script_name}: #{e.backtrace.join("\n")}"
+        @sim_logger.error msg
+        raise msg
       end
     end
 

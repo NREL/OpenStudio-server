@@ -1,4 +1,4 @@
-set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
+set PATH=C:\Program Files\Git\mingw64\bin;C:\projects\openstudio\bin;%PATH%
 echo Downloading and Installing OpenStudio (%OPENSTUDIO_VERSION%.%OPENSTUDIO_VERSION_SHA%)
 curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/%OPENSTUDIO_VERSION%/OpenStudio-%OPENSTUDIO_VERSION%.%OPENSTUDIO_VERSION_SHA%-Windows.exe
 OpenStudio-%OPENSTUDIO_VERSION%.%OPENSTUDIO_VERSION_SHA%-Windows.exe --script ci/appveyor/install-windows.qs

@@ -23,3 +23,4 @@ for %%i in (C:\projects\openstudio-server\spec\unit-test\logs\*.log) do (
     type %%i
     echo.
 )
+

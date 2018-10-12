@@ -114,6 +114,33 @@
 <table id="datapointtable" class="tablesorter table table-striped">
   <thead>
   <tr>
+    <th>Analysis Initialization Log: </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @initialize_log.gsub("\n", "</br>").html_safe unless @initialize_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>Analysis Finalization Log: </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @finalize_log.gsub("\n", "</br>").html_safe unless @finalize_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
+
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
     <th>Simulate Datapoint Log Messages</th>
   </tr>
   </thead>

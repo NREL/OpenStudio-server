@@ -2,8 +2,11 @@ version: 1.0.{build}-{branch}
 
 environment:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 2.6.1
-  OPENSTUDIO_VERSION_SHA: ab0dddde0b
+  OPENSTUDIO_VERSION: 2.7.0
+  OPENSTUDIO_VERSION_SHA: 916dc2f7f7
+  OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+
+  
   matrix:
     - RUBY_VERSION: "224-x64"
 
@@ -15,14 +18,14 @@ install:
 build: off
 
 before_test:
-  - ruby -v
-  - gem -v
-  - bundle -v
-  - mongod.exe --version
+  - cmd: ruby -v
+  - cmd: gem -v
+  - cmd: bundle -v
+  - cmd: mongod.exe --version
 
 test_script:
   - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 
 on_failure:
-  - C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+  - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd

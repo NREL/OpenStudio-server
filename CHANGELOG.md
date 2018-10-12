@@ -1,6 +1,51 @@
 OpenStudio Server
 =================
 
+Version 2.7.0 
+-------------
+
+Date Range: 09/05/18 - 10/11/18:
+
+New Issues: 15 (#390, #391, #392, #394, #396, #397, #398, #399, #400, #403, #404, #405, #409, #411, #412)
+
+Closed Issues: 5
+- Fixed [#396]( https://github.com/NREL/OpenStudio-server/issues/396 ), print_logs.sh doesn't run on travis/ubuntu
+- Fixed [#398]( https://github.com/NREL/OpenStudio-server/issues/398 ), nokogiri error on travis (ubuntu/osx)
+- Fixed [#399]( https://github.com/NREL/OpenStudio-server/issues/399 ), supported platforms error on appveyor
+- Fixed [#403]( https://github.com/NREL/OpenStudio-server/issues/403 ), Appveyor VMs not failing when unable to discover openstudio.exe
+- Fixed [#405]( https://github.com/NREL/OpenStudio-server/issues/405 ), Ensuring openstudio.exe discovery process on Windows is reflected in Appveyor
+
+Accepted Pull Requests: 11
+
+- Fixed [#401]( https://github.com/NREL/OpenStudio-server/pull/401 ), Add require 'openstudio-standards' to measure
+- Fixed [#402]( https://github.com/NREL/OpenStudio-server/pull/402 ), remove sudo from install scripts for openstudio and ruby
+- Fixed [#410]( https://github.com/NREL/OpenStudio-server/pull/410 ), check OpenStudio Standards version via Oscli.
+- Fixed [#413]( https://github.com/NREL/OpenStudio-server/pull/413 ), control sassc version in Gemfile.
+
+Version 2.6.2
+-------------
+
+Major Changes: 
+- Models are run via the OpenStudio Command Line Interface rather than Workflow Gem.
+- OpenStudio gems (bundle) can be customized independent of OpenStudio Server bundle.  See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Gem-Bundle-used-by-OpenStudio) for additional details.
+- Analysis Initialize and Finalize Scripts can be run for Resque-based environments (ie not on local PAT). See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Analysis-Scripts) for additional details.
+- Datapoint Initialize and Finalize Scripts have been restructured and can be run on Resque-based environments. See [Wiki](https://github.com/NREL/OpenStudio-server/wiki/Data-Point-Scripts) for additional details.
+
+Date Range: 08/07/18 - 09/04/18:
+
+New Issues: 3 (#384, #386, #388)
+
+Closed Issues: 4
+- Fixed [#248]( https://github.com/NREL/OpenStudio-server/issues/248 ), Implement server & worker init & final scripts
+- Improved [#269]( https://github.com/NREL/OpenStudio-server/issues/269 ), Migrate to the openstudio CLI
+- Improved [#316]( https://github.com/NREL/OpenStudio-server/issues/316 ), Remove sourceforge build dependency
+- Fixed [#378]( https://github.com/NREL/OpenStudio-server/issues/378 ), Unable to run_single when seed value is set
+
+Accepted Pull Requests: 7
+- Fixed [#324]( https://github.com/NREL/OpenStudio-server/pull/324 ), OpenStudio CLI
+- Fixed [#381]( https://github.com/NREL/OpenStudio-server/pull/381 ), Bundle enablement for Oscli PR
+...
+
 Version 2.6.1
 -------------
 
