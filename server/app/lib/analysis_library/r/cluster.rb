@@ -94,7 +94,7 @@ module AnalysisLibrary::R
           res <- NULL;
           starttime <- Sys.time()
           tryCatch({
-             res <- evalWithTimeout({
+             res <- R.utils::withTimeout({
              cl <- makePSOCKcluster(ips[,1], master='openstudio.server', outfile="/mnt/openstudio/log/snow.log")
               }, timeout=numunique);
               }, TimeoutException=function(ex) {
