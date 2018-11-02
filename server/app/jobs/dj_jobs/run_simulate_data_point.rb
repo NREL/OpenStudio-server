@@ -64,6 +64,9 @@ module DjJobs
       # Logger for the simulate datapoint
       @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
 
+      # Run  data point initialize script if present
+      run_script_with_args 'initialize'
+
       # Error if @datapoint doesn't exist
       if @data_point.nil?
         @sim_logger = 'Could not find datapoint; @datapoint was nil'
@@ -419,8 +422,10 @@ module DjJobs
         end
 
         # Run the server data_point initialization script with defined arguments, if it exists.
-        run_script_with_args "initialize"
-
+        Timeout.timeout(600) do
+          @sim_logger.debug "Running datapoint initialization file if present."
+          run_script_with_args "initialize"
+        end
       end
 
       @sim_logger.info 'Finished worker initialization'
@@ -523,6 +528,7 @@ module DjJobs
 
         @sim_logger.info "Checking for presence of script file at #{script_path}"
         if File.file? script_path
+          # TODO how long do we want to set timeout?
           Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
         end
       rescue => e
