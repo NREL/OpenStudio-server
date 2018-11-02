@@ -225,6 +225,10 @@ module DjJobs
           rescue Exception => e
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
+          ensure
+            if process_log
+              @sim_logger.info "Oscli output: #{File.read(process_log)}"
+            end
           end
 
         end
