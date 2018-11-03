@@ -195,7 +195,7 @@ module DjJobs
 
 
 
-            cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
+            cmd = "#{@options[:openstudio_executable]} --verbose run --workflow #{osw_path} --debug"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
