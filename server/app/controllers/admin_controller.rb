@@ -38,8 +38,7 @@ class AdminController < ApplicationController
     require 'rubygems'
     @gems = Gem::Specification.all.map { |g| [g.name, g.version.to_s] }.sort
 
-    # TODO: make this work on windows
-    version = `openstudio openstudio_version`
+    version = `#{Utility::Oss.oscli_cmd} openstudio_version`
     @os_cli = version ? version.strip : 'Unknown'
   end
 

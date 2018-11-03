@@ -1,6 +1,24 @@
 module Utility
   class Oss
 
+    #return command to run openstudio cli on current platform
+    def self.oscli_cmd
+      # as there have been issues requiring full path on linux/osx, use which openstudio to pull absolute path
+      cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
+      cmd + oscli_bundle
+    end
+
+    # use bundle option only if we have a path to openstudio gemfile.
+    # if BUNDLE_PATH is not set (ie Docker), we must add these options
+    def oscli_bundle
+      bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
+      "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
+      "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
+    end
+
+
+
+
     # Set some env_vars from the running env var list, ignore the rest
     #
     # Why are these all class methods?

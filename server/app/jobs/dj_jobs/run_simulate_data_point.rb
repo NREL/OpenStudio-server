@@ -42,9 +42,8 @@ module DjJobs
     require 'json'
 
     def initialize(data_point_id, options = {})
-      # as there have been issues requiring full path on linux/osx, use which openstudio to pull absolute path
-      os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
-      defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
+
+      defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: Utility::Oss.oscli_cmd )
       @options = defaults.deep_merge(options)
 
       @data_point = DataPoint.find(data_point_id)
@@ -195,10 +194,7 @@ module DjJobs
             end
 
 
-            # use bundle option only if we have a path to openstudio gemfile.  expect this to be
-            bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
+
             cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
