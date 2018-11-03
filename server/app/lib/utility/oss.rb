@@ -10,7 +10,7 @@ module Utility
 
     # use bundle option only if we have a path to openstudio gemfile.
     # if BUNDLE_PATH is not set (ie Docker), we must add these options
-    def oscli_bundle
+    def self.oscli_bundle
       bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
       "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
       "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
