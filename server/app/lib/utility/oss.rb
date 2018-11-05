@@ -2,10 +2,24 @@ module Utility
   class Oss
 
     #return command to run openstudio cli on current platform
-    def self.oscli_cmd
-      # as there have been issues requiring full path on linux/osx, use which openstudio to pull absolute path
-      cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
-      cmd + oscli_bundle
+    def self.oscli_cmd(logger = Rails.logger)
+      # determine if an explicit oscli path has been set via the meta-cli option, warn if not
+      begin
+        raise "OPENSTUDIO_EXE_PATH not set" unless ENV['OPENSTUDIO_EXE_PATH']
+        raise "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`" unless File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
+        # set cmd from ENV variable
+        cmd = ENV['OPENSTUDIO_EXE_PATH']
+      rescue Exception=>e
+        logger.warn "Error finding Oscli: #{e}"
+        cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
+        if File.exist?(cmd)
+          logger.warn "Defaulting to fun Oscli via #{cmd}"
+        else
+          logger.error "Unable to find Oscli."
+        end
+        logger.info "Returning Oscli cmd: #{cmd + oscli_bundle}"
+        cmd + oscli_bundle
+      end
     end
 
     # use bundle option only if we have a path to openstudio gemfile.

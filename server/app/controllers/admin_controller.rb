@@ -37,8 +37,9 @@ class AdminController < ApplicationController
   def index
     require 'rubygems'
     @gems = Gem::Specification.all.map { |g| [g.name, g.version.to_s] }.sort
-
+    Rails.logger.debug "oscli version command: #{Utility::Oss.oscli_cmd} openstudio_version"
     version = `#{Utility::Oss.oscli_cmd} openstudio_version`
+    Rails.logger.debug "oscli version output: #{version}"
     @os_cli = version ? version.strip : 'Unknown'
   end
 

@@ -43,8 +43,7 @@ module DjJobs
 
     def initialize(data_point_id, options = {})
 
-      defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: Utility::Oss.oscli_cmd )
-      @options = defaults.deep_merge(options)
+      @options = options
 
       @data_point = DataPoint.find(data_point_id)
       @data_point.status = :queued
@@ -175,27 +174,8 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            # pipes used by spawned process
-            # out_r, out_w = IO.pipe
-            # err_r, err_w = IO.pipe
 
-            # determine if an explicit oscli path has been set via the meta-cli option, warn if not
-            if ENV['OPENSTUDIO_EXE_PATH']
-              if File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
-                @options[:openstudio_executable] = ENV['OPENSTUDIO_EXE_PATH']
-              else
-                @sim_logger.warn "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`"
-              end
-            else
-              @sim_logger.warn "OPENSTUDIO_EXE_PATH not set - defaulting to #{@options[:openstudio_executable]}"
-              unless File.exist?(@options[:openstudio_executable])
-                @sim_logger.warn "Unable to find the default specified file for the OSCLI: `#{@options[:openstudio_executable]}`"
-              end
-            end
-
-
-
-            cmd = "#{@options[:openstudio_executable]} --verbose run --workflow #{osw_path} --debug"
+            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow #{osw_path} --debug"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
