@@ -149,7 +149,9 @@ results <- NULL
 m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes, scale=TRUE)
 
 m1 <- as.list(data.frame(t(m$X)))
-print(paste("m1:",m1))
+if (debug_messages == 1) {
+  print(paste("m1:",m1))
+}
 print("check bounds")
 boundary_check <- logical(ncol(vars))
 for (i in 1:ncol(vars)){
@@ -162,12 +164,16 @@ if(!all(boundary_check)){
 print("bounds are satisfied, continuing...")
 
 try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
-print(paste("nrow(results):",nrow(results)))
-print(paste("ncol(results):",ncol(results)))
+if (debug_messages == 1) {
+  print(paste("nrow(results):",nrow(results)))
+  print(paste("ncol(results):",ncol(results)))
+}
 result <- as.data.frame(results)
-print(paste("length(objnames):",length(objnames)))
-print(paste("nrow(result):",nrow(result)))
-print(paste("ncol(result):",ncol(result)))
+if (debug_messages == 1) {
+  print(paste("length(objnames):",length(objnames)))
+  print(paste("nrow(result):",nrow(result)))
+  print(paste("ncol(result):",ncol(result)))
+}
 file_names_jsons <- c("")
 file_names_R <- c("")
 file_names_png <- c("")
@@ -177,13 +183,13 @@ file_names_bar_png <- c("")
 file_names_bar_sorted_png <- c("")
 if (nrow(result) > 0) {
   for (j in 1:nrow(result)){
-    print(paste("result[j,]:",unlist(result[j,])))
-    print(paste("result[,j]:",unlist(result[,j])))
+    #print(paste("result[j,]:",unlist(result[j,])))
+    #print(paste("result[,j]:",unlist(result[,j])))
     n <- m
     tell(n,as.numeric(unlist(result[j,])))
     print(n)
-    print(paste("is.recursive(n):",is.recursive(n)))
-    print(paste("is.atomic(n):",is.atomic(n)))
+    #print(paste("is.recursive(n):",is.recursive(n)))
+    #print(paste("is.atomic(n):",is.atomic(n)))
     var_mu <- rep(0, ncol(vars))
     var_mu_star <- var_mu
     var_sigma <- var_mu
@@ -244,7 +250,9 @@ if (nrow(result) > 0) {
     } else {
       file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
-    print(paste("file_zip:",file_zip))
+    if (debug_messages == 1) {
+      print(paste("file_zip:",file_zip))
+    }
     if(!dir.exists(paste(analysis_dir,"/downloads",sep=''))){
       dir.create(paste(analysis_dir,"/downloads",sep=''))
       print(paste("created dir:",analysis_dir,"/downloads",sep=''))

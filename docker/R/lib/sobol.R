@@ -37,8 +37,9 @@ clusterEvalQ(cl,library(rjson))
 clusterEvalQ(cl,library(R.utils))
 objDim <- length(objfun)
 
-print(paste("objfun:",objfun))
 print(paste("objDim:",objDim))
+print(paste("UniqueGroups:",uniquegroups))
+print(paste("objfun:",objfun))
 print(paste("normtype:",normtype))
 print(paste("ppower:",ppower))
 print(paste("min:",mins))
@@ -48,12 +49,20 @@ print(paste("failed_f:",failed_f))
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
 clusterExport(cl,"ppower")
-
+clusterExport(cl,"uniquegroups")
 clusterExport(cl,"failed_f")
 clusterExport(cl,"debug_messages")
 
+for (i in 1:ncol(vars)){
+  vars[,i] <- sort(vars[,i])
+}
+for (i in 1:ncol(vars2)){
+  vars2[,i] <- sort(vars2[,i])
+}
 print(paste("vartypes:",vartypes))
 print(paste("varnames:",varnames))
+print(paste("vardisplaynames:",vardisplaynames))
+print(paste("objnames:",objnames))
 
 # Setup a bunch of variables for the analysis based on passed variables
 # From Ruby
@@ -68,6 +77,13 @@ if (debug_messages == 1) {
 
 varfile <- function(x){
   var_filename <- paste(analysis_dir,'/varnames.json',sep='')
+  if (!file.exists(var_filename)){
+    write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+vardisplayfile <- function(x){
+  var_filename <- paste(analysis_dir,'/vardisplaynames.json',sep='')
   if (!file.exists(var_filename)){
     write.table(x, file=var_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
   }
@@ -93,10 +109,13 @@ clusterExport(cl,"rails_host")
 clusterExport(cl,"r_scripts_path")
 clusterExport(cl,"rails_exit_guideline_14")
 clusterEvalQ(cl,varfile(varnames))
+clusterExport(cl,"vardisplayfile")
+clusterExport(cl,"vardisplaynames")
+clusterEvalQ(cl,vardisplayfile(vardisplaynames))
 
 # Export functions for worker nodes
-source(paste(r_scripts_path,'create_and_run_datapoint.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoint")
+source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
+clusterExport(cl,"create_and_run_datapoint_uniquegroups")
 clusterExport(cl,"check_run_flag")
 
 #f <- function(x){
@@ -112,7 +131,7 @@ clusterExport(cl,"check_run_flag")
 #          )
 #}
 f <- function(x){
-  try(create_and_run_datapoint(x), silent=TRUE)
+  try(create_and_run_datapoint_uniquegroups(x), silent=TRUE)
 }
 clusterExport(cl,"f")
 
@@ -135,16 +154,69 @@ if (type == "sobol") {
 } else if (type == "martinez") {
   m <- sobolmartinez(model=NULL, X1=vars, X2=vars2, nboot=nboot, conf=conf)
 } else { print("unknown method")}
-print(paste("m:", m))
-print(paste("m$X:", m$X))
+if (debug_messages == 1) {
+  print(paste("m:", m))
+  print(paste("m$X:", m$X))
+}
 m1 <- as.list(data.frame(t(m$X)))
-print(paste("m1:", m1))
-results <- clusterApplyLB(cl, m1, f)
-print(mode(as.numeric(results)))
-print(is.list(results))
-print(paste("results:", as.numeric(results)))
-tell(m,as.numeric(results))
-print(m)
+if (debug_messages == 1) {
+  print(paste("m1:",m1))
+}
+print("check bounds")
+boundary_check <- logical(ncol(vars))
+for (i in 1:ncol(vars)){
+  boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+}
+if(!all(boundary_check)){
+  print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')
+  stop(options("show.error.messages"=TRUE),"SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run")
+}
+print("bounds are satisfied, continuing...")
 
-results_filename <- paste(analysis_dir,'/m.R',sep='')
-save(m, file=results_filename)
+try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
+#print(paste("nrow(results):",nrow(results)))
+#print(paste("ncol(results):",ncol(results)))
+result <- as.data.frame(results)
+if (debug_messages == 1) {
+  print(paste("length(objnames):",length(objnames)))
+  print(paste("nrow(result):",nrow(result)))
+  print(paste("ncol(result):",ncol(result)))
+}
+file_names_R <- c("")
+file_names_png <- c("")
+if (nrow(result) > 0) {
+  for (j in 1:nrow(result)){
+    #print(paste("result[j,]:",unlist(result[j,])))
+    #print(paste("result[,j]:",unlist(result[,j])))
+    n <- m
+    tell(n,as.numeric(unlist(result[j,])))
+    print(n)
+    #print(paste("is.recursive(n):",is.recursive(n)))
+    #print(paste("is.atomic(n):",is.atomic(n)))
+
+    file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
+    save(n, file=file_names_R[j])
+    if (debug_messages == 1) {
+      print(paste("n$S: "),n$S)
+    }
+    if (all(is.finite(n$S))) {
+      file_names_png[j] <- paste(analysis_dir,"/sobol_",gsub(" ","_",objnames[j],fixed=TRUE),".png",sep="")
+      png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
+      plot(n,ylim=c(min(n$S),max(n$S)))
+      dev.off()
+
+      file_zip <- c(file_names_R,file_names_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+
+    } else {
+      file_zip <- c(file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+    }
+    print(paste("file_zip:",file_zip))
+    if(!dir.exists(paste(analysis_dir,"/downloads",sep=''))){
+      dir.create(paste(analysis_dir,"/downloads",sep=''))
+      print(paste("created dir:",analysis_dir,"/downloads",sep=''))
+    }
+    zip(zipfile=paste(analysis_dir,"/downloads/sobol_results_",rails_analysis_id,".zip",sep=''),files=file_zip, flags = "-j")
+  }
+} else {
+  print("Results is null")
+}
