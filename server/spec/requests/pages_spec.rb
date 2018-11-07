@@ -49,6 +49,12 @@ RSpec.describe 'Pages Exist', type: :feature do
     expect(json['status']['awake']).not_to be_nil
   end
 
+  it 'Admin page' do
+    visit '/admin'
+    expect(page).to have_content 'Version of OpenStudio'
+    expect(page).not_to have_content 'Error'
+  end
+
   it 'Accesses the API over host using selenium', js: true, depends_gecko: true do
     visit '/'
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
