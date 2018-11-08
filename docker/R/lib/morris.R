@@ -181,6 +181,7 @@ file_names_box_png <- c("")
 file_names_box_sorted_png <- c("")
 file_names_bar_png <- c("")
 file_names_bar_sorted_png <- c("")
+total_answer <- '{"Morris":{'
 if (nrow(result) > 0) {
   for (j in 1:nrow(result)){
     #print(paste("result[j,]:",unlist(result[j,])))
@@ -198,7 +199,13 @@ if (nrow(result) > 0) {
       var_mu_star[i] <- mean(abs(n$ee[,i]))
       var_sigma[i] <- sd(n$ee[,i])
     }
-    answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+    answer <- paste('"',gsub(" ","_",objnames[j],fixed=TRUE),'":{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+    #answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+    if (j < nrow(result)) {
+      total_answer <- paste(total_answer,answer,',',sep="")
+    } else {
+      total_answer <- paste(total_answer,answer)
+    }
     file_names_jsons[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
     write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
     file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
@@ -250,7 +257,13 @@ if (nrow(result) > 0) {
     } else {
       file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
-    # here
+    }# here
+    total_answer <- paste(total_answer,'}}')
+    bestresults_filename <- paste(analysis_dir,'/best_result.json',sep='')
+    print(bestresults_filename)
+    print(paste("best json:",total_answer))
+    write.table(total_answer, file=bestresults_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+    file_zip <- append(file_zip,bestresults_filename)
     if (debug_messages == 1) {
       print(paste("file_zip:",file_zip))
     }
@@ -259,7 +272,7 @@ if (nrow(result) > 0) {
       print(paste("created dir:",analysis_dir,"/downloads",sep=''))
     }
     zip(zipfile=paste(analysis_dir,"/downloads/morris_results_",rails_analysis_id,".zip",sep=''),files=file_zip, flags = "-j")
-  } #move this?
+  #} #move this?
 } else {
   print("Results is null")
 }

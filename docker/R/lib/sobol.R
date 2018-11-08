@@ -220,7 +220,7 @@ if (nrow(result) > 0) {
     } else {
       file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
-  } #here  
+  }
     total_answer <- paste(total_answer,'}}')
     bestresults_filename <- paste(analysis_dir,'/best_result.json',sep='')
     print(bestresults_filename)
@@ -235,7 +235,6 @@ if (nrow(result) > 0) {
       print(paste("created dir:",analysis_dir,"/downloads",sep=''))
     }
     zip(zipfile=paste(analysis_dir,"/downloads/sobol_results_",rails_analysis_id,".zip",sep=''),files=file_zip, flags = "-j")
-  #} #move this?
 } else {
   print("Results is null")
 }
