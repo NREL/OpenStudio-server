@@ -250,6 +250,7 @@ if (nrow(result) > 0) {
     } else {
       file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
+    # here
     if (debug_messages == 1) {
       print(paste("file_zip:",file_zip))
     }
@@ -258,7 +259,7 @@ if (nrow(result) > 0) {
       print(paste("created dir:",analysis_dir,"/downloads",sep=''))
     }
     zip(zipfile=paste(analysis_dir,"/downloads/morris_results_",rails_analysis_id,".zip",sep=''),files=file_zip, flags = "-j")
-  }
+  } #move this?
 } else {
   print("Results is null")
 }
