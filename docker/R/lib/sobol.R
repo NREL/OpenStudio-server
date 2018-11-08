@@ -197,9 +197,9 @@ if (nrow(result) > 0) {
     file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
     save(n, file=file_names_R[j])
     if (debug_messages == 1) {
-      print(paste("n$S: "),n$S)
+      print(paste("n$S: ",n$S))
     }
-    if (all(is.finite(n$S))) {
+    if (all(is.finite(unlist(n$S)))) {
       file_names_png[j] <- paste(analysis_dir,"/sobol_",gsub(" ","_",objnames[j],fixed=TRUE),".png",sep="")
       png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
       plot(n,ylim=c(min(n$S),max(n$S)))
@@ -210,7 +210,9 @@ if (nrow(result) > 0) {
     } else {
       file_zip <- c(file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
-    print(paste("file_zip:",file_zip))
+    if (debug_messages == 1) {
+      print(paste("file_zip:",file_zip))
+    }
     if(!dir.exists(paste(analysis_dir,"/downloads",sep=''))){
       dir.create(paste(analysis_dir,"/downloads",sep=''))
       print(paste("created dir:",analysis_dir,"/downloads",sep=''))
