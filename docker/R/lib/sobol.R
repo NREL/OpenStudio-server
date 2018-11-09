@@ -154,6 +154,7 @@ if (type == "sobol") {
 } else if (type == "martinez") {
   m <- sobolmartinez(model=NULL, X1=vars, X2=vars2, nboot=nboot, conf=conf)
 } else { print("unknown method")}
+
 if (debug_messages == 1) {
   print(paste("m:", m))
   print(paste("m$X:", m$X))
@@ -176,6 +177,7 @@ print("bounds are satisfied, continuing...")
 try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
 #print(paste("nrow(results):",nrow(results)))
 #print(paste("ncol(results):",ncol(results)))
+print(paste("results:",results))
 result <- as.data.frame(results)
 if (debug_messages == 1) {
   print(paste("length(objnames):",length(objnames)))
@@ -192,7 +194,15 @@ if (nrow(result) > 0) {
     #print(paste("result[,j]:",unlist(result[,j])))
     n <- m
     tell(n,as.numeric(unlist(result[j,])))
-    print(n)
+    if (debug_messages == 1) {
+      print(paste("nrow(n$S):",nrow(n$S)))
+      print(paste("(n$S):",(n$S)))
+      print(paste("(vardisplaynames):",(vardisplaynames)))
+    }
+    if (!any(duplicated(vardisplaynames))) {
+      rownames(n$S) <- vardisplaynames
+    }
+    print(paste("n:",n))
     #print(paste("is.recursive(n):",is.recursive(n)))
     #print(paste("is.atomic(n):",is.atomic(n)))
     answer <- paste('"',gsub(" ","_",objnames[j],fixed=TRUE),'":{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":',as.numeric(unlist(n$S)),sep='', collapse=','),'}',sep='')
