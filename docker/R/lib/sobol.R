@@ -154,6 +154,7 @@ if (type == "sobol") {
 } else if (type == "martinez") {
   m <- sobolmartinez(model=NULL, X1=vars, X2=vars2, nboot=nboot, conf=conf)
 } else { print("unknown method")}
+
 if (debug_messages == 1) {
   print(paste("m:", m))
   print(paste("m$X:", m$X))
@@ -176,47 +177,74 @@ print("bounds are satisfied, continuing...")
 try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
 #print(paste("nrow(results):",nrow(results)))
 #print(paste("ncol(results):",ncol(results)))
+print(paste("results:",results))
 result <- as.data.frame(results)
 if (debug_messages == 1) {
   print(paste("length(objnames):",length(objnames)))
   print(paste("nrow(result):",nrow(result)))
   print(paste("ncol(result):",ncol(result)))
 }
+file_names_jsons <- c("")
 file_names_R <- c("")
 file_names_png <- c("")
+total_answer <- '{"Sobol_Indicies":{'
 if (nrow(result) > 0) {
   for (j in 1:nrow(result)){
     #print(paste("result[j,]:",unlist(result[j,])))
     #print(paste("result[,j]:",unlist(result[,j])))
     n <- m
     tell(n,as.numeric(unlist(result[j,])))
-    print(n)
+    if (debug_messages == 1) {
+      print(paste("nrow(n$S):",nrow(n$S)))
+      print(paste("(n$S):",(n$S)))
+      print(paste("(vardisplaynames):",(vardisplaynames)))
+    }
+    if (!any(duplicated(vardisplaynames))) {
+      rownames(n$S) <- vardisplaynames
+    }
+    print(paste("n:",n))
     #print(paste("is.recursive(n):",is.recursive(n)))
     #print(paste("is.atomic(n):",is.atomic(n)))
-
+    answer <- paste('"',gsub(" ","_",objnames[j],fixed=TRUE),'":{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":',as.numeric(unlist(n$S)),sep='', collapse=','),'}',sep='')
+    if (j < nrow(result)) {
+      total_answer <- paste(total_answer,answer,',',sep="")
+    } else {
+      total_answer <- paste(total_answer,answer)
+    }
+    
+    file_names_jsons[j] <- paste(analysis_dir,"/sobol_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
+    write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
     file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
     save(n, file=file_names_R[j])
     if (debug_messages == 1) {
-      print(paste("n$S: "),n$S)
+      print(paste("n$S: ",n$S))
     }
-    if (all(is.finite(n$S))) {
+    if (all(is.finite(unlist(n$S)))) {
       file_names_png[j] <- paste(analysis_dir,"/sobol_",gsub(" ","_",objnames[j],fixed=TRUE),".png",sep="")
       png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
       plot(n,ylim=c(min(n$S),max(n$S)))
       dev.off()
 
-      file_zip <- c(file_names_R,file_names_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+      file_zip <- c(file_names_jsons,file_names_R,file_names_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
 
     } else {
-      file_zip <- c(file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
+      file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
-    print(paste("file_zip:",file_zip))
+  }
+    total_answer <- paste(total_answer,'}}')
+    bestresults_filename <- paste(analysis_dir,'/best_result.json',sep='')
+    print(bestresults_filename)
+    print(paste("best json:",total_answer))
+    write.table(total_answer, file=bestresults_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+    file_zip <- append(file_zip,bestresults_filename)
+    if (debug_messages == 1) {
+      print(paste("file_zip:",file_zip))
+    }
     if(!dir.exists(paste(analysis_dir,"/downloads",sep=''))){
       dir.create(paste(analysis_dir,"/downloads",sep=''))
       print(paste("created dir:",analysis_dir,"/downloads",sep=''))
     }
     zip(zipfile=paste(analysis_dir,"/downloads/sobol_results_",rails_analysis_id,".zip",sep=''),files=file_zip, flags = "-j")
-  }
 } else {
   print("Results is null")
 }
