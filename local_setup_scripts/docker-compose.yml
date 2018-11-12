@@ -1,0 +1,112 @@
+version: '3'
+services:
+  db:
+    image: 127.0.0.1:5000/mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - dbdata:/data/db
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "${AWS_MONGO_CORES}"
+  queue:
+    image: 127.0.0.1:5000/redis
+    ports:
+      - "6379:6379"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "1"
+  web:
+    image: 127.0.0.1:5000/openstudio-server
+    ports:
+      - "8080:80"
+      - "80:80"
+      - "443:443"
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${AWS_OS_SERVER_NUMBER_OF_WORKERS}
+      - MAX_REQUESTS=${AWS_MAX_REQUESTS}
+      - MAX_POOL=${AWS_MAX_POOL}
+    volumes:
+      - osdata:/mnt/openstudio
+    depends_on:
+      - db
+      - queue
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "${AWS_WEB_CORES}"
+  web-background:
+    image: 127.0.0.1:5000/openstudio-server
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${AWS_OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUES=background,analyses
+    volumes:
+      - osdata:/mnt/openstudio
+    command: bundle exec rake environment resque:work
+    depends_on:
+      - db
+      - web
+      - queue
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "1"
+  worker:
+    image: 127.0.0.1:5000/openstudio-server
+    environment:
+      - QUEUES=simulations
+      - COUNT=1
+    command: bundle exec rake environment resque:workers
+    volumes:
+      - /mnt/openstudio
+    depends_on:
+      - web
+      - web-background
+      - db
+      - queue
+      - rserve
+    deploy:
+      resources:
+        reservations:
+          cpus: "1"
+  rserve:
+    image: 127.0.0.1:5000/openstudio-rserve
+    volumes:
+      - osdata:/mnt/openstudio
+    depends_on:
+      - web
+      - web-background
+      - db
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          cpus: "1"
+volumes:
+  osdata:
+    external: true
+  dbdata:
+    external: true
+networks:
+  default:
+    driver: overlay
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
