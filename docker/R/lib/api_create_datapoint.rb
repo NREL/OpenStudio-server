@@ -84,9 +84,12 @@ begin
     # check the response
     if datapoint_id
       puts 'Datapoint created, submitting to run queue'
-
-      a = RestClient.put "#{options[:host]}/data_points/#{datapoint_id}/run.json", {}
-      a = JSON.parse(a, symbolize_names: true)
+      post_count = 0
+      post_count_max = 5
+      begin
+        post_count += 1
+        a = RestClient.put "#{options[:host]}/data_points/#{datapoint_id}/run.json", {}
+        a = JSON.parse(a, symbolize_names: true)
 
       # check to make sure that it was submitted and grab the run id
       if a[:job_id]
@@ -131,6 +134,10 @@ begin
 
           sleep options[:sleep_time]
         end
+      end
+      rescue => e
+        retry if post_count <= post_count_max
+        raise "Posting of the run.json file failed #{post_count_max} times with error #{e.message}"
       end
     end
   end

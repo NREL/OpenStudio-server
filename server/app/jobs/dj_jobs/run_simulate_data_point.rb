@@ -121,12 +121,34 @@ module DjJobs
       end
 
       # delete any existing data files from the server in case this is a 'rerun'
-      RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
-
+      @sim_logger.info "RestClient delete"
+      post_count = 0
+      post_count_max = 50
+      begin
+        post_count += 1
+        @sim_logger.info "delete post_count = #{post_count}"
+        RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
+      rescue => e
+        sleep Random.new.rand(1.0..10.0)
+        retry if post_count <= post_count_max
+        @sim_logger.error "RestClient.delete failed with error #{e.message}"
+        raise "RestClient.delete failed with error #{e.message}"
+      end
       # Download the datapoint to run and save to disk
       url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
       @sim_logger.info "Downloading datapoint from #{url}"
-      r = RestClient.get url
+      post_count = 0
+      post_count_max = 50
+      begin
+        post_count += 1
+        @sim_logger.info "get url post_count = #{post_count}"
+        r = RestClient.get url
+      rescue => e
+        sleep Random.new.rand(1.0..10.0)
+        retry if post_count <= post_count_max
+        @sim_logger.error "RestClient.get url failed with error #{e.message}"
+        raise "RestClient.get url failed with error #{e.message}"
+      end
       raise 'Datapoint JSON could not be downloaded' unless r.code == 200
       # Parse to JSON to save it again with nice formatting
       File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
