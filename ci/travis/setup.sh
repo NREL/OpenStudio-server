@@ -17,8 +17,6 @@ else
     #    AP: do we need mongo install here ? seems to be handled by service defined in travis yml
         brew install mongodb@3.4 pv tree
         ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
-        unset BUNDLE_GEMFILE
-
         curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.zip
         unzip OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.zip
         # Use the install script that is in this repo now, the one on OpenStudio/develop has changed

@@ -149,14 +149,31 @@ results <- NULL
 m <- morris(model=NULL, factors=ncol(vars), r=r, design = list(type=type, levels=levels, grid.jump=grid_jump), binf = mins, bsup = maxes, scale=TRUE)
 
 m1 <- as.list(data.frame(t(m$X)))
-print(paste("m1:",m1))
+if (debug_messages == 1) {
+  print(paste("m1:",m1))
+}
+print("check bounds")
+boundary_check <- logical(ncol(vars))
+for (i in 1:ncol(vars)){
+  boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+}
+if(!all(boundary_check)){
+  print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')
+  stop(options("show.error.messages"=TRUE),"SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run")
+}
+print("bounds are satisfied, continuing...")
+
 try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
-print(paste("nrow(results):",nrow(results)))
-print(paste("ncol(results):",ncol(results)))
+if (debug_messages == 1) {
+  print(paste("nrow(results):",nrow(results)))
+  print(paste("ncol(results):",ncol(results)))
+}
 result <- as.data.frame(results)
-print(paste("length(objnames):",length(objnames)))
-print(paste("nrow(result):",nrow(result)))
-print(paste("ncol(result):",ncol(result)))
+if (debug_messages == 1) {
+  print(paste("length(objnames):",length(objnames)))
+  print(paste("nrow(result):",nrow(result)))
+  print(paste("ncol(result):",ncol(result)))
+}
 file_names_jsons <- c("")
 file_names_R <- c("")
 file_names_png <- c("")
@@ -164,15 +181,16 @@ file_names_box_png <- c("")
 file_names_box_sorted_png <- c("")
 file_names_bar_png <- c("")
 file_names_bar_sorted_png <- c("")
+total_answer <- '{"Morris":{'
 if (nrow(result) > 0) {
   for (j in 1:nrow(result)){
-    print(paste("result[j,]:",unlist(result[j,])))
-    print(paste("result[,j]:",unlist(result[,j])))
+    #print(paste("result[j,]:",unlist(result[j,])))
+    #print(paste("result[,j]:",unlist(result[,j])))
     n <- m
     tell(n,as.numeric(unlist(result[j,])))
     print(n)
-    print(paste("is.recursive(n):",is.recursive(n)))
-    print(paste("is.atomic(n):",is.atomic(n)))
+    #print(paste("is.recursive(n):",is.recursive(n)))
+    #print(paste("is.atomic(n):",is.atomic(n)))
     var_mu <- rep(0, ncol(vars))
     var_mu_star <- var_mu
     var_sigma <- var_mu
@@ -181,7 +199,13 @@ if (nrow(result) > 0) {
       var_mu_star[i] <- mean(abs(n$ee[,i]))
       var_sigma[i] <- sd(n$ee[,i])
     }
-    answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+    answer <- paste('"',gsub(" ","_",objnames[j],fixed=TRUE),'":{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+    #answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
+    if (j < nrow(result)) {
+      total_answer <- paste(total_answer,answer,',',sep="")
+    } else {
+      total_answer <- paste(total_answer,answer)
+    }
     file_names_jsons[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),".json",sep="")
     write.table(answer, file=file_names_jsons[j], quote=FALSE,row.names=FALSE,col.names=FALSE)
     file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
@@ -233,13 +257,22 @@ if (nrow(result) > 0) {
     } else {
       file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
-    print(paste("file_zip:",file_zip))
+    }# here
+    total_answer <- paste(total_answer,'}}')
+    bestresults_filename <- paste(analysis_dir,'/best_result.json',sep='')
+    print(bestresults_filename)
+    print(paste("best json:",total_answer))
+    write.table(total_answer, file=bestresults_filename, quote=FALSE,row.names=FALSE,col.names=FALSE)
+    file_zip <- append(file_zip,bestresults_filename)
+    if (debug_messages == 1) {
+      print(paste("file_zip:",file_zip))
+    }
     if(!dir.exists(paste(analysis_dir,"/downloads",sep=''))){
       dir.create(paste(analysis_dir,"/downloads",sep=''))
       print(paste("created dir:",analysis_dir,"/downloads",sep=''))
     }
     zip(zipfile=paste(analysis_dir,"/downloads/morris_results_",rails_analysis_id,".zip",sep=''),files=file_zip, flags = "-j")
-  }
+  #} #move this?
 } else {
   print("Results is null")
 }

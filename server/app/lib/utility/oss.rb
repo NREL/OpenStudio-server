@@ -1,6 +1,38 @@
 module Utility
   class Oss
 
+    #return command to run openstudio cli on current platform
+    def self.oscli_cmd(logger = Rails.logger)
+      # determine if an explicit oscli path has been set via the meta-cli option, warn if not
+      begin
+        raise "OPENSTUDIO_EXE_PATH not set" unless ENV['OPENSTUDIO_EXE_PATH']
+        raise "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`" unless File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
+        # set cmd from ENV variable
+        cmd = ENV['OPENSTUDIO_EXE_PATH']
+      rescue Exception=>e
+        logger.warn "Error finding Oscli: #{e}"
+        cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
+        if File.exist?(cmd)
+          logger.warn "Defaulting to fun Oscli via #{cmd}"
+        else
+          logger.error "Unable to find Oscli."
+        end
+        logger.info "Returning Oscli cmd: #{cmd + oscli_bundle}"
+        cmd + oscli_bundle
+      end
+    end
+
+    # use bundle option only if we have a path to openstudio gemfile.
+    # if BUNDLE_PATH is not set (ie Docker), we must add these options
+    def self.oscli_bundle
+      bundle = Rails.application.config.os_gemfile_path.present? ? " --bundle "\
+      "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
+      "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
+    end
+
+
+
+
     # Set some env_vars from the running env var list, ignore the rest
     #
     # Why are these all class methods?

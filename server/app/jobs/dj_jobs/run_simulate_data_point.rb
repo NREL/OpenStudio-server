@@ -42,10 +42,8 @@ module DjJobs
     require 'json'
 
     def initialize(data_point_id, options = {})
-      # as there have been issues requiring full path on linux/osx, use which openstudio to pull absolute path
-      os_cmd = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'openstudio.exe' : `which openstudio`.strip
-      defaults = ActiveSupport::HashWithIndifferentAccess.new(openstudio_executable: os_cmd )
-      @options = defaults.deep_merge(options)
+
+      @options = options
 
       @data_point = DataPoint.find(data_point_id)
       @data_point.status = :queued
@@ -63,10 +61,7 @@ module DjJobs
 
       # Logger for the simulate datapoint
       @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
-
-      # Run  data point initialize script if present
-      run_script_with_args 'initialize'
-
+      
       # Error if @datapoint doesn't exist
       if @data_point.nil?
         @sim_logger = 'Could not find datapoint; @datapoint was nil'
@@ -126,12 +121,34 @@ module DjJobs
       end
 
       # delete any existing data files from the server in case this is a 'rerun'
-      RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
-
+      @sim_logger.info "RestClient delete"
+      post_count = 0
+      post_count_max = 50
+      begin
+        post_count += 1
+        @sim_logger.info "delete post_count = #{post_count}"
+        RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
+      rescue => e
+        sleep Random.new.rand(1.0..10.0)
+        retry if post_count <= post_count_max
+        @sim_logger.error "RestClient.delete failed with error #{e.message}"
+        raise "RestClient.delete failed with error #{e.message}"
+      end
       # Download the datapoint to run and save to disk
       url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
       @sim_logger.info "Downloading datapoint from #{url}"
-      r = RestClient.get url
+      post_count = 0
+      post_count_max = 50
+      begin
+        post_count += 1
+        @sim_logger.info "get url post_count = #{post_count}"
+        r = RestClient.get url
+      rescue => e
+        sleep Random.new.rand(1.0..10.0)
+        retry if post_count <= post_count_max
+        @sim_logger.error "RestClient.get url failed with error #{e.message}"
+        raise "RestClient.get url failed with error #{e.message}"
+      end
       raise 'Datapoint JSON could not be downloaded' unless r.code == 200
       # Parse to JSON to save it again with nice formatting
       File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
@@ -176,30 +193,8 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            # pipes used by spawned process
-            # out_r, out_w = IO.pipe
-            # err_r, err_w = IO.pipe
 
-            # determine if an explicit oscli path has been set via the meta-cli option, warn if not
-            if ENV['OPENSTUDIO_EXE_PATH']
-              if File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
-                @options[:openstudio_executable] = ENV['OPENSTUDIO_EXE_PATH']
-              else
-                @sim_logger.warn "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`"
-              end
-            else
-              @sim_logger.warn "OPENSTUDIO_EXE_PATH not set - defaulting to #{@options[:openstudio_executable]}"
-              unless File.exist?(@options[:openstudio_executable])
-                @sim_logger.warn "Unable to find the default specified file for the OSCLI: `#{@options[:openstudio_executable]}`"
-              end
-            end
-
-
-            # use bundle option only if we have a path to openstudio gemfile.  expect this to be
-            bundle = Rails.application.config.os_gemfile_path.present? ? "--bundle "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-            "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ""
-            cmd = "#{@options[:openstudio_executable]} --verbose #{bundle}run --workflow #{osw_path} --debug"
+            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow '#{osw_path}' --debug"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
@@ -225,6 +220,10 @@ module DjJobs
           rescue Exception => e
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
+          ensure
+            if process_log
+              @sim_logger.info "Oscli output: #{File.read(process_log)}"
+            end
           end
 
         end
@@ -422,10 +421,7 @@ module DjJobs
         end
 
         # Run the server data_point initialization script with defined arguments, if it exists.
-        Timeout.timeout(600) do
-          @sim_logger.debug "Running datapoint initialization file if present."
-          run_script_with_args "initialize"
-        end
+        run_script_with_args "initialize"
       end
 
       @sim_logger.info 'Finished worker initialization'
@@ -528,7 +524,6 @@ module DjJobs
 
         @sim_logger.info "Checking for presence of script file at #{script_path}"
         if File.file? script_path
-          # TODO how long do we want to set timeout?
           Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
         end
       rescue => e
