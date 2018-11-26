@@ -6,4 +6,5 @@ echo "Waiting for Mongo to start"
 echo "Waiting for Redis to start"
 /usr/local/bin/wait-for-it --strict -t 0 queue:6379
 
-cd /opt/openstudio/server && bundle exec rake environment resque:workers
+# Only start a single worker when calling this script (do not use resque:workers).
+cd /opt/openstudio/server && bundle exec rake environment resque:work
