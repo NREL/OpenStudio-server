@@ -137,6 +137,7 @@ print(paste("r:",r))
 print(paste("r2:",r2))
 print(paste("grid_jump:",grid_jump))
 print(paste("type:",type))
+print(paste("check_boundary:",check_boundary))
 
 if (r2 > r) {
   r <- c(r,r2)
@@ -152,17 +153,18 @@ m1 <- as.list(data.frame(t(m$X)))
 if (debug_messages == 1) {
   print(paste("m1:",m1))
 }
-print("check bounds")
-boundary_check <- logical(ncol(vars))
-for (i in 1:ncol(vars)){
-  boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+if (check_boundary == 1) {
+  print("check bounds")
+  boundary_check <- logical(ncol(vars))
+  for (i in 1:ncol(vars)){
+    boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+  }
+  if(!all(boundary_check)){
+    print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')
+    stop(options("show.error.messages"=TRUE),"SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run")
+  }
+  print("bounds are satisfied, continuing...")
 }
-if(!all(boundary_check)){
-  print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')
-  stop(options("show.error.messages"=TRUE),"SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run")
-}
-print("bounds are satisfied, continuing...")
-
 try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
 if (debug_messages == 1) {
   print(paste("nrow(results):",nrow(results)))
