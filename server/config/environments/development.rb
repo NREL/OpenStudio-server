@@ -76,4 +76,7 @@ Rails.application.configure do
 
   # Use a different logger for distributed setups.
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
+
+  # TODO: Remove assumption that we are developing on a machine that has which installed! Make cross platform...
+  config.os_gemfile_path = File.expand_path(File.join(File.dirname(`which openstudio`), '../Ruby'))
 end
