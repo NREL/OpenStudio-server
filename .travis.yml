@@ -13,7 +13,7 @@ gemfile:
 
 # Set the default scripts that are used for the majority of the tests in the matrix
 before_install:
-  - ./ci/travis/setup.sh
+  - travis_wait ./ci/travis/setup.sh
 before_script:
   - sudo Xvfb :99 -ac -screen 0 1024x768x8 &
   - sleep 3
