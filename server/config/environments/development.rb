@@ -77,6 +77,9 @@ Rails.application.configure do
   # Use a different logger for distributed setups.
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
 
-  # TODO: Remove assumption that we are developing on a machine that has which installed! Make cross platform...
-  config.os_gemfile_path = File.expand_path(File.join(File.dirname(`which openstudio`), '../Ruby'))
+  # If you need to use custom gems in your development environment, then uncomment the line below. You will
+  # also need to run `bundle install` in your local openstudio Gemfile path. For example:
+  #     cd /Applications/OpenStudio-x.y.z/Ruby
+  #     bundle install --path ./gems
+  # config.os_gemfile_path = File.expand_path(File.join(File.dirname(`which openstudio`), '../Ruby'))
 end
