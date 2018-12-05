@@ -81,11 +81,11 @@ docker-compose rm -f
 docker volume rm osdata dbdata
 docker volume create --name=osdata
 docker volume create --name=dbdata
-docker-compose up
+OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up
 docker-compose service scale worker=N
 
 # Or one line
-docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=5 docker-compose up && docker-compose service scale worker=N
+docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up && docker-compose service scale worker=N
 ```
 
 Congratulations! Visit `http://localhost:8080` to see the OpenStudio Server Management Console.
