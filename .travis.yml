@@ -22,7 +22,7 @@ after_failure: ./ci/travis/print_logs.sh
 
 # Services for linux -- all instances
 services:
-  - mongod
+  - mongodb
   - redis-server
   - docker
 

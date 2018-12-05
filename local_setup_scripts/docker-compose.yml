@@ -70,7 +70,7 @@ services:
     environment:
       - QUEUES=simulations
       - COUNT=1
-    command: bundle exec rake environment resque:workers
+    command: bundle exec rake environment resque:work
     volumes:
       - /mnt/openstudio
     depends_on:
