@@ -297,13 +297,41 @@ class Analysis
     j = jobs_status
     if j
       begin
-        return j.last[:status]
+        # in environments using Resque, we allow finalization script to run ('post-processing') and do not consider analysis "completed"
+        # until after finalization script step completes ('post-processing completed').
+        if Rails.application.config.job_manager == :resque
+          s = j.last[:status]
+          if s == 'completed'
+            return 'post-processing'
+          #   job status is updated to post-processing completed
+          elsif s == 'post-processing completed'
+            return 'completed'
+          end
+        end
+        # if resque env specific checks above didn't trigger return, proceed as usual
+        return s
       rescue
         'unknown'
       end
     else
       return 'unknown'
     end
+  end
+
+  # update the job status to indicate that postprocessing is complete.
+  # used from finalize method which is only called for environments using resque
+  def complete_postprocessing!
+    j = jobs_status
+    begin
+      raise "Postprocessing should only happen in environments that use Resque for job management." unless Rails.application.config.job_manager == :resque
+      job = j.last
+      raise "Attempt to complete postprocessing for job with status '#{job[:status]}'.  Only permitted for status 'completed'." unless job[:status] == 'completed'
+      job[:status] = 'post-processing completed'
+      job.save
+    rescue Exception => e
+      logger.error e
+    end
+
   end
 
   # Return the last job's status message
@@ -386,6 +414,8 @@ class Analysis
   def run_finalization
     logger.info "Running analysis finalization scripts"
     run_script_with_args "finalize"
+    # update status to reflect that finalization has run
+    complete_postprocessing!
   end
 
   protected
