@@ -297,10 +297,10 @@ class Analysis
     j = jobs_status
     if j
       begin
+        s = j.last[:status]
         # in environments using Resque, we allow finalization script to run ('post-processing') and do not consider analysis "completed"
         # until after finalization script step completes ('post-processing completed').
         if Rails.application.config.job_manager == :resque
-          s = j.last[:status]
           if s == 'completed'
             return 'post-processing'
           #   job status is updated to post-processing completed
@@ -308,7 +308,7 @@ class Analysis
             return 'completed'
           end
         end
-        # if resque env specific checks above didn't trigger return, proceed as usual
+        # if resque env -specific checks above didn't trigger return, proceed as usual
         return s
       rescue
         'unknown'
