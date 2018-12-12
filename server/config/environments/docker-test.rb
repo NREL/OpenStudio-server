@@ -42,6 +42,10 @@ Rails.application.configure do
   # and recreated between test runs. Don't rely on the data there!
   config.cache_classes = true
 
+  # queuing is not currently working for this environment.  instead, it relies
+  # on magic in the rspec setup to run unit tests.
+  config.job_manager = :fake
+
   # Do not eager load code on boot. This avoids loading your whole application
   # just for the purpose of running a single test. If you are using a tool that
   # preloads Rails for running tests, you may have to set it to true.
