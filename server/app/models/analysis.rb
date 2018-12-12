@@ -322,15 +322,15 @@ class Analysis
   # used from finalize method which is only called for environments using resque
   def complete_postprocessing!
     j = jobs_status
-    begin
+    # begin
       raise "Postprocessing should only happen in environments that use Resque for job management." unless Rails.application.config.job_manager == :resque
       job = j.last
       raise "Attempt to complete postprocessing for job with status '#{job[:status]}'.  Only permitted for status 'completed'." unless job[:status] == 'completed'
       job[:status] = 'post-processing completed'
       job.save
-    rescue Exception => e
+    # rescue Exception => e
       logger.error e
-    end
+    # end
 
   end
 
