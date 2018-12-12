@@ -96,7 +96,7 @@ class Analysis
   before_destroy :queue_delete_files
 
   def self.status_states
-    %w(na init queued started completed)
+    %w(na init queued started post-processing completed)
   end
 
   # FIXME analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
@@ -304,7 +304,7 @@ class Analysis
           if s == 'completed'
             return 'post-processing'
           #   job status is updated to post-processing completed
-          elsif s == 'post-processing completed'
+          elsif s == 'post-processing finished'
             return 'completed'
           end
         end
@@ -321,16 +321,15 @@ class Analysis
   # update the job status to indicate that postprocessing is complete.
   # used from finalize method which is only called for environments using resque
   def complete_postprocessing!
-    j = jobs_status
-    # begin
-      raise "Postprocessing should only happen in environments that use Resque for job management." unless Rails.application.config.job_manager == :resque
-      job = j.last
-      raise "Attempt to complete postprocessing for job with status '#{job[:status]}'.  Only permitted for status 'completed'." unless job[:status] == 'completed'
-      job[:status] = 'post-processing completed'
-      job.save
-    # rescue Exception => e
+    begin
+      raise "Post-processing should only happen in environments that use Resque for job management." unless Rails.application.config.job_manager == :resque
+      job = jobs.order_by(:index.asc).last
+      raise "Attempt to complete postprocessing for job with status '#{job.status}'.  Only permitted for status 'completed'." unless job.status == 'completed'
+      job.status = 'post-processing finished'
+      job.save!
+    rescue Exception => e
       logger.error e
-    # end
+    end
 
   end
 
