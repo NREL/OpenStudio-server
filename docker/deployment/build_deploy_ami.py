@@ -150,8 +150,7 @@ defaults = {
     'docker_version': docker_version,
     'version': ami_version,
     'ami_version_extension': ami_version_ext,
-    'dockertag': ami_version + ami_version_ext,
-    'dockertag_rserve': ami_version + ami_version_ext
+    'dockertag': ami_version + ami_version_ext
 }
 if generated_by is not 'NREL-CI':
     if verbose:
@@ -304,7 +303,7 @@ if verbose:
 
 # Next we pull the openstudio-rserve container and parse the R version
 cmd_call = 'docker pull nrel/openstudio-rserve:{}'.format(
-    defaults['dockertag_rserve'])
+    defaults['dockertag'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace(
         'docker pull nrel', 'docker pull {}'.format(override_dockerhub_repo)
@@ -315,7 +314,7 @@ run_cmd(cmd_call, 'openstudio-rserve container retrieval')
 
 # R version
 cmd_call = 'docker run nrel/openstudio-rserve:{} R --version'. \
-    format(defaults['dockertag_rserve'])
+    format(defaults['dockertag'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace(
         'docker run nrel', 'docker run {}'.format(override_dockerhub_repo)
