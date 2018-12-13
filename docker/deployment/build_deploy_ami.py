@@ -149,7 +149,8 @@ defaults = {
     'generated_by': '',
     'docker_version': docker_version,
     'version': ami_version,
-    'ami_version_extension': ami_version_ext
+    'ami_version_extension': ami_version_ext,
+    'dockertag': ami_version + ami_version_ext
 }
 if generated_by is not 'NREL-CI':
     if verbose:
@@ -215,8 +216,7 @@ if verbose:
     print('OpenStudio Server SHA retrieved is {}'.format(server_sha))
 
 # Next we pull the openstudio-server container and parse out each version required
-cmd_call = 'docker pull nrel/openstudio-server:{}'.format(
-    defaults['version'] + defaults['ami_version_extension'])
+cmd_call = 'docker pull nrel/openstudio-server:{}'.format(defaults['dockertag'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker pull nrel',
                                 'docker pull {}'.format(override_dockerhub_repo))
