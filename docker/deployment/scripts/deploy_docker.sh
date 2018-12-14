@@ -9,6 +9,13 @@ elif [ "${TRAVIS_BRANCH}" == "nrcan-master" ]; then
 elif [ "${TRAVIS_BRANCH}" == "master" ]; then
     # Retrieve the version number from rails
     IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
+elif [ "${TRAVIS_BRANCH}" == "analysis-complete" ]; then
+    # Retrieve the version number from rails
+    IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
+    # avoid accidental publishing of master versions from custom branch by confirming the imagetag includes an extension w/ expected format
+    if ! [[ "${IMAGETAG}" =~ ^.*\-{1}[a-z]+[0-9]+ ]]; then
+        IMAGETAG=skip
+    fi
 elif [ "${TRAVIS_BRANCH}" == "experimental" ]; then
     IMAGETAG=experimental
 fi
