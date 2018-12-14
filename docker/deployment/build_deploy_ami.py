@@ -150,7 +150,7 @@ defaults = {
     'docker_version': docker_version,
     'version': ami_version,
     'ami_version_extension': ami_version_ext,
-    'dockertag': ami_version + ami_version_ext
+    'dockertag_ext': ami_version_ext
 }
 if generated_by is not 'NREL-CI':
     if verbose:
@@ -216,7 +216,7 @@ if verbose:
     print('OpenStudio Server SHA retrieved is {}'.format(server_sha))
 
 # Next we pull the openstudio-server container and parse out each version required
-cmd_call = 'docker pull nrel/openstudio-server:{}'.format(defaults['dockertag'])
+cmd_call = 'docker pull nrel/openstudio-server:{}'.format(defaults['version'] + defaults['dockertag_ext')
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker pull nrel',
                                 'docker pull {}'.format(override_dockerhub_repo))
@@ -226,7 +226,7 @@ run_cmd(cmd_call, 'openstudio-server container retrieval')
 
 # OpenStudio version and SHA
 cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -e "puts OpenStudio.openStudioLongVersion"'. \
-    format(defaults['dockertag'])
+    format(defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -239,8 +239,7 @@ if verbose:
 
 # OpenStudio-Standards version
 cmd_call = 'docker run nrel/openstudio-server:{} openstudio -e "require \'openstudio\'; require ' \
-           '\'openstudio-standards\'; puts OpenstudioStandards::VERSION"'.format(
-    defaults['dockertag'])
+           '\'openstudio-standards\'; puts OpenstudioStandards::VERSION"'.format(defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -252,8 +251,7 @@ if verbose:
 
 # OpenStudio-Analysis version
 cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
-           '\'openstudio-analysis\'; puts OpenStudio::Analysis::VERSION"'.format(
-    defaults['dockertag'])
+           '\'openstudio-analysis\'; puts OpenStudio::Analysis::VERSION"'.format(defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -265,8 +263,7 @@ if verbose:
 
 # OpenStudio-Workflow version
 cmd_call = 'docker run nrel/openstudio-server:{} bundle exec ruby -e "require \'openstudio\'; require ' \
-           '\'openstudio-workflow\'; puts OpenStudio::Workflow::VERSION"'.format(
-    defaults['dockertag'])
+           '\'openstudio-workflow\'; puts OpenStudio::Workflow::VERSION"'.format(defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -278,7 +275,7 @@ if verbose:
 
 # EnergyPlus version
 cmd_call = 'docker run nrel/openstudio-server:{} ruby -r openstudio -e "puts OpenStudio.energyPlusVersion"'. \
-    format(defaults['dockertag'])
+    format(defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -291,7 +288,7 @@ if verbose:
 # Radiance version - The location of radiance is now under openstudio-x.y.x. Need to figure out how to get the
 # version without calling defaults['version'] as this may not be consistent with
 cmd_call = 'docker run nrel/openstudio-server:{} /usr/local/openstudio-{}/Radiance/bin/rtrace -version'. \
-    format(defaults['dockertag'], defaults['version'])
+    format(defaults['version'] + defaults['dockertag_ext'], defaults['version'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
@@ -303,7 +300,7 @@ if verbose:
 
 # Next we pull the openstudio-rserve container and parse the R version
 cmd_call = 'docker pull nrel/openstudio-rserve:{}'.format(
-    defaults['dockertag'])
+    defaults['version] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace(
         'docker pull nrel', 'docker pull {}'.format(override_dockerhub_repo)
@@ -314,7 +311,7 @@ run_cmd(cmd_call, 'openstudio-rserve container retrieval')
 
 # R version
 cmd_call = 'docker run nrel/openstudio-rserve:{} R --version'. \
-    format(defaults['dockertag'])
+    format(defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace(
         'docker run nrel', 'docker run {}'.format(override_dockerhub_repo)
