@@ -56,6 +56,8 @@ gem 'uglifier'
 
 # don't try to install sassc 2.
 gem 'sassc', '~>1.12.1'
+# don't try to install roo 2.8.0 (requires Ruby >= 2.3.0)
+gem 'roo', '~>2.7.1'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
