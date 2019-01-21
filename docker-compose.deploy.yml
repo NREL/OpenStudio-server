@@ -11,7 +11,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        limits:
+        reservations:
           cpus: "1"
   queue:
       image: redis:4.0.6
@@ -34,7 +34,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        limits:
+        reservations:
           cpus: "1"
     command: /usr/local/bin/start-server
   web-background:
@@ -53,7 +53,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        limits:
+        reservations:
           cpus: "1"
     command: /usr/local/bin/start-web-background
   worker:
@@ -70,7 +70,7 @@ services:
       - rserve
     deploy:
       resources:
-        limits:
+        reservations:
           cpus: "1"
     command: /usr/local/bin/start-workers
   rserve:
@@ -86,7 +86,7 @@ services:
         constraints:
           - node.role == manager
       resources:
-        limits:
+        reservations:
           cpus: "1"
 volumes:
   osdata:
