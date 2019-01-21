@@ -11,7 +11,9 @@ elif [ "${TRAVIS_BRANCH}" == "master" ]; then
     IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
 elif [ "${TRAVIS_BRANCH}" == "experimental" ]; then
     IMAGETAG=experimental
-#uncomment to publish from a branch.  an extension is required in server/app/lib/openstudio_server/version.rb
+# Uncomment to publish from a branch.  An extension is required in server/app/lib/openstudio_server/version.rb
+# A change to .travis.yml is also be required.  See comments in the "Deploy Docker Image" page there.
+# Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
 #elif [ "${TRAVIS_BRANCH}" == "my-branch-name" ]; then
 #    # Retrieve the version number from rails
 #    IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
