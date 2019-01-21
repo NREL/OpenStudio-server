@@ -1,10 +1,8 @@
 # Automation scripts for CI
 
-Currently, the only automation process for the OpenStudio Server repository that is being migrated to an Internal CI is 
-Amazon Machine Image (AMI) generation for commits to the master branch of the repository. This script, however, can 
-also be used to create custom one-off AMIs. This README begins by defining requirements for running the AMI generation 
-script, followed by specification of the script user interface. The process for official AMI releases is the specified,
-followed by the recommended process for one-off releases. 
+OpenStudio Server AMI build and publishing is handled by an internal CI server.   The workflow for publishing release and one-off AMIs is documented in the [wiki](https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-AMIs).
+
+Additional details related to the specifics of the AMI publishing script are provided below.
 
 ## AMI generation requirements
 
