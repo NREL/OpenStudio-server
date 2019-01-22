@@ -67,7 +67,7 @@
       "script": "./scripts/aws_osserver_init.sh",
       "pause_before": "15s",
       "environment_vars": [
-        "OSSERVER_DOCKERHUB_TAG={{ user `version` }}{{ user `ami_version_extension` }}"
+        "OSSERVER_DOCKERHUB_TAG={{ user `version` }}{{ user `dockertag_ext` }}"
       ]
     },
     {
