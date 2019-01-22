@@ -69,7 +69,11 @@ jobs:
         # Reset the git checkout to remove the test-based data in the containers and rebuild
         - git checkout -- .dockerignore && git checkout -- Dockerfile
     - stage: Deploy Docker Image
-      if: branch = master OR branch = nrcan-master OR branch = develop OR branch = analysis-complete
+      # Include your branch name below to publish a custom image.
+      # This change must be made in combination with a modification to
+      # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
+      # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
+      if: branch = master OR branch = nrcan-master OR branch = develop
       os: linux
       sudo: required
       dist: trusty
