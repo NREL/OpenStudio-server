@@ -300,7 +300,7 @@ if verbose:
 
 # Next we pull the openstudio-rserve container and parse the R version
 cmd_call = 'docker pull nrel/openstudio-rserve:{}'.format(
-    defaults['version] + defaults['dockertag_ext'])
+    defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace(
         'docker pull nrel', 'docker pull {}'.format(override_dockerhub_repo)
