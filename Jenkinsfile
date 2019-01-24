@@ -18,7 +18,7 @@ pipeline {
     stage('You ready?') {
       steps {
         script {
-          if (env.BRANCH_NAME == 'analysis-complete') {
+          if (env.BRANCH_NAME == 'master') {
             input 'Ready to build and deploy AMI?'
           } else {
             echo 'Unable to deploy when not on master'
@@ -29,7 +29,7 @@ pipeline {
     stage('Build AMI') {
       steps {
         script {
-          if (env.BRANCH_NAME == 'analysis-complete') {
+          if (env.BRANCH_NAME == 'master') {
             withAWS(credentials: 'ec2NRELIS') {
                 sh 'pwd'
                 sh 'docker --version'
