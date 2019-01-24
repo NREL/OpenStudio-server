@@ -216,7 +216,7 @@ if verbose:
     print('OpenStudio Server SHA retrieved is {}'.format(server_sha))
 
 # Next we pull the openstudio-server container and parse out each version required
-cmd_call = 'docker pull nrel/openstudio-server:{}'.format(defaults['version'] + defaults['dockertag_ext')
+cmd_call = 'docker pull nrel/openstudio-server:{}'.format(defaults['version'] + defaults['dockertag_ext'])
 if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker pull nrel',
                                 'docker pull {}'.format(override_dockerhub_repo))
