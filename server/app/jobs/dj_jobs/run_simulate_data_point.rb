@@ -211,7 +211,23 @@ module DjJobs
 
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
-            Process.kill('TERM', pid)
+            # openstudio process actually runs in a child of pid.  to prevent orphaned processes on timeout, we
+            # need to identify the child and kill it as well.
+            # exception handing and a lot of logging in case we discover cases with >1 child process or other behavior
+            # that is not currently handled.
+            begin
+              @sim_logger.info "looking up any children of timed out process #{pid}"
+              child_pid = `ps -o pid= --ppid "#{pid}"`.to_i
+              if child_pid > 0
+                @sim_logger.info "killing child #{child_pid} of timed out process #{pid}"
+                Process.kill('KILL',child_pid)
+              end
+              @sim_logger.info "killing timed out process #{pid}"
+              Process.kill('KILL',pid)
+            rescue Exception=>e
+              @sim_logger.error "Error killing process #{pid}: #{e}"
+            end
+
             run_result = :errored
           rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
             log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
@@ -232,7 +248,7 @@ module DjJobs
           @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
 
           report_file = "#{simulation_dir}/out.osw"
-          puts "Uploading #{report_file} which exists? #{File.exist?(report_file)}"
+          @sim_logger.info "Uploading #{report_file} which exists? #{File.exist?(report_file)}"
           upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
 
           report_file = "#{run_dir}/data_point.zip"
@@ -279,7 +295,7 @@ module DjJobs
           run_result = :errored unless uploads_successful.all?
         end
 
-        # Run any data point finalization scripts
+        # Run any data point finalization scripts - note this currently runs whether or not the datapoint errored out
         run_script_with_args 'finalize'
 
 
