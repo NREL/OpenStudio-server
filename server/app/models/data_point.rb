@@ -160,7 +160,7 @@ class DataPoint
       end
     elsif Rails.application.config.job_manager == :resque
       if job_id
-        Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPointResque', job_id)
+        Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPoint', job_id)
       end
     else
       raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
