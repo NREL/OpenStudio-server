@@ -137,11 +137,17 @@ class DataPoint
   end
 
   def set_canceled_state
-    self.destroy_background_job # Remove the datapoint from the delayed jobs queue
+    self.destroy_background_job # destroy queued job
     self.run_start_time ||= Time.now
     self.run_end_time = Time.now
     self.status = :completed
     self.status_message = 'datapoint canceled'
+    save!
+  end
+
+  def set_queued_state
+    self.status = :queued
+    self.run_queue_time = Time.now
     save!
   end
 
