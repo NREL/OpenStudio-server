@@ -53,6 +53,7 @@ module DjJobs
     end
 
     def perform
+      
       # Create the analysis, simulation, and run directory
       FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
       FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
