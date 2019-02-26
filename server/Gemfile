@@ -120,7 +120,7 @@ group :development, :test do
   gem 'rubocop-checkstyle_formatter', require: false
 
   gem 'ci_reporter'
-  gem 'factory_bot_rails'
+  gem 'factory_bot_rails', '4.11.1'  # 5.0.2 require ruby 2.3
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
 end
