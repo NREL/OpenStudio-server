@@ -199,10 +199,10 @@ class ComputeNode
     remote_file_exists = false
     remote_file_downloaded = false
 
-    # Timeout After 2 Minutes / 120 seconds
+    # Timeout After 10 Minutes / 600 seconds
     retries = 0
     begin
-      Timeout.timeout(120) do
+      Timeout.timeout(600) do
         logger.info 'Checking if the remote file exists'
         session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |_channel, _stream, data|
           # logger.info("Check remote file data is #{data}")
