@@ -3,8 +3,8 @@ ruby '2.2.4'
 
 # unclear if this will actually force this version of rubygems to be used
 # if not, run the following command to change system gem version:
-# gem update --system 2.4.5
-gem 'rubygems-update', '2.4.5'
+# gem update --system 2.7.8
+# gem 'rubygems-update', '2.7.8'
 
 gem 'rails', '5.1.4'
 gem 'rake', '~> 12.3'
@@ -116,11 +116,12 @@ group :development, :test do
   gem 'ruby-prof', '~> 0.15'
   gem 'selenium-webdriver'
 
-  gem 'rubocop'
-  gem 'rubocop-checkstyle_formatter', require: false
+  gem 'psych', '3.0.3'
+  gem 'rubocop', '0.64.0'
+  gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
 
   gem 'ci_reporter'
-  gem 'factory_bot_rails'
+  gem 'factory_bot_rails', '4.11.1'  # 5.0.2 require ruby 2.3
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
 end
