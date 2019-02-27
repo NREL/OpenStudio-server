@@ -398,7 +398,7 @@ class Analysis
     logger.info "Running analysis initialization scripts"
     logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
     begin
-      Timeout.timeout(180) do
+      Timeout.timeout(300) do
         extract_count += 1
         OpenStudio::Workflow.extract_archive(seed_zip.path, shared_directory_path)
       end

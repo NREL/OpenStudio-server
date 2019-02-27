@@ -201,8 +201,8 @@ module DjJobs
 
             pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, [:err, :out] => [process_log, 'w'])
 
-            # timeout the process if it doesn't return in 2 hours
-            Timeout.timeout(7200) do
+            # timeout the process if it doesn't return in 4 hours
+            Timeout.timeout(14400) do
               Process.wait(pid)
             end
 
