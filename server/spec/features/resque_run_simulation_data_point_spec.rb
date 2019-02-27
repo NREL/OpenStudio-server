@@ -35,7 +35,7 @@
 
 require 'rails_helper'
 
-RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true, depends_resque: true do
+RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: true, depends_resque: true do
   before :all do
     @previous_job_manager = Rails.application.config.job_manager
     Rails.application.config.job_manager = :resque
