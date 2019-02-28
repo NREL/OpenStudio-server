@@ -42,18 +42,18 @@ module DjJobs
     require 'json'
 
     def initialize(data_point_id, options = {})
-
-      @options = options
-
       @data_point = DataPoint.find(data_point_id)
-      @data_point.status = :queued
-      @data_point.run_queue_time = Time.now
+      @options = options
       @intialize_worker_errs = []
 
+      # this is also run from resque job, which leverages perform code below.
+      # only queue data_point on initialize for delayed_jobs
+      @data_point.set_queued_state if Rails.application.config.job_manager == :delayed_job
     end
 
+
     def perform
-      
+
       # Create the analysis, simulation, and run directory
       FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
       FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir

@@ -39,6 +39,11 @@ module ResqueJobs
   class RunSimulateDataPoint
     @queue = :simulations
 
+    def self.after_enqueue(data_point_id, options = {})
+      d = DataPoint.find(data_point_id)
+      d.set_queued_state
+    end
+
     def self.perform(data_point_id, options = {})
       job = DjJobs::RunSimulateDataPoint.new(data_point_id, options)
       job.perform

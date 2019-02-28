@@ -4,6 +4,8 @@ AllCops:
     - 'server/lib/delayed/heartbeat/**/*'
     - 'server/vendor/bundle/**/*'
     - 'lib/update_license.rb'
+    - 'server/gems/**/*'
+    - 'gems/**/*'
 
 inherit_from:
   - http://s3.amazonaws.com/openstudio-resources/styles/rubocop.yml

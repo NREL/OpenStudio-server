@@ -157,7 +157,6 @@ class Analysis
     logger.info('attempting to stop analysis')
 
     self.run_flag = false
-    # The ensure block will clean up the jobs and save the statuses
 
     jobs.each do |j|
       unless j.status == 'completed'
