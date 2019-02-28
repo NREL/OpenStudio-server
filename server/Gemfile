@@ -118,6 +118,7 @@ group :development, :test do
 
   gem 'psych', '3.0.3'
   gem 'rubocop', '0.64.0'
+  gem 'rubocop-rspec'
   gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
 
   gem 'ci_reporter'
