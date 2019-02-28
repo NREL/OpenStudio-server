@@ -49,12 +49,11 @@ module DjJobs
       # this is also run from resque job, which leverages perform code below.
       # only queue data_point on initialize for delayed_jobs
       @data_point.set_queued_state if Rails.application.config.job_manager == :delayed_job
-      
     end
 
 
     def perform
-      
+
       # Create the analysis, simulation, and run directory
       FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
       FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
