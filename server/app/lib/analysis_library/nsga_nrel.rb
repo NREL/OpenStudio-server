@@ -33,38 +33,35 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-
 # Non Sorting Genetic Algorithm 2
 class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            create_data_point_filename: 'create_data_point.rb',
-            output_variables: [],
-            problem: {
-                algorithm: {
-                    number_of_samples: 30,
-                    sample_method: 'individual_variables',
-                    generations: 1,
-                    tournament_size: 2,
-                    cprob: 0.7,
-                    xover_dist_idx: 5,
-                    mu_dist_idx: 10,
-                    mprob: 0.5,
-                    norm_type: 'minkowski',
-                    p_power: 2,
-                    exit_on_guideline_14: 0,
-                    debug_messages: 0,
-                    failed_f_value: 1e18,
-                    objective_functions: [],
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        algorithm: {
+          number_of_samples: 30,
+          sample_method: 'individual_variables',
+          generations: 1,
+          tournament_size: 2,
+          cprob: 0.7,
+          xover_dist_idx: 5,
+          mu_dist_idx: 10,
+          mprob: 0.5,
+          norm_type: 'minkowski',
+          p_power: 2,
+          exit_on_guideline_14: 0,
+          debug_messages: 0,
+          failed_f_value: 1e18,
+          objective_functions: [],
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -139,13 +136,13 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
         raise 'Must have at least two output_variables'
       end
 
-      objtrue = @analysis.output_variables.select {|v| v['objective_function'] == true}
-      ug = objtrue.uniq {|v| v['objective_function_group']}
+      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+      ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
 
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0, 1, 2, 3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+      # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
         @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
         logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
       else
@@ -156,12 +153,12 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       # check to make sure there are objective functions
-      if @analysis.output_variables.count {|v| v['objective_function'] == true}.zero?
+      if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
         raise 'No objective functions defined'
       end
 
       # find the total number of objective functions
-      if @analysis.output_variables.count {|v| v['objective_function'] == true} != @analysis.problem['algorithm']['objective_functions'].size
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
         raise 'Number of objective functions must equal between the output_variables and the problem definition'
       end
 
@@ -187,7 +184,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have more than one variable to run algorithm.  Found #{samples.size} variables"
       end
-      #from RGenoud I think we want to do this here too
+      # from RGenoud I think we want to do this here too
       if var_names.empty? || var_names.empty?
         logger.info 'No variables were passed into the options, therefore exit'
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
@@ -203,7 +200,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
@@ -261,7 +258,6 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
@@ -292,7 +288,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end

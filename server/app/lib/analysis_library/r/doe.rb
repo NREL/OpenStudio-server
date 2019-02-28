@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-module AnalysisLibrary::R  
+module AnalysisLibrary::R
   class Doe
     def initialize(r_session)
       @r = r_session
@@ -68,6 +68,7 @@ module AnalysisLibrary::R
       if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
         raise 'no hash values and weight passed'
       end
+
       values, weights = var.map_discrete_hash_to_array
 
       dataframe = { 'data' => probabilities_array }.to_dataframe
@@ -194,6 +195,7 @@ module AnalysisLibrary::R
           if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
             raise 'no hash values and weight passed'
           end
+
           values, weights = var.map_discrete_hash_to_array
           logger.info("values is #{values}")
           variable_samples = values
@@ -249,14 +251,16 @@ module AnalysisLibrary::R
       samples_temp = @r.converse 'fac_design'
       logger.info("samples_temp is #{samples_temp}")
 
-      def is_number? string
-        true if Float(string) rescue false
+      def is_number?(string)
+        true if Float(string)
+      rescue StandardError
+        false
       end
-      
+
       selected_variables.each_with_index do |var, idx|
         if is_number?(samples_temp[idx][0])
-          #samples[var.id.to_s] = samples_temp[idx].to_f
-          samples[var.id.to_s] =  samples_temp[idx].map {|i| i.to_f}
+          # samples[var.id.to_s] = samples_temp[idx].to_f
+          samples[var.id.to_s] = samples_temp[idx].map(&:to_f)
         else
           samples[var.id.to_s] = samples_temp[idx]
         end

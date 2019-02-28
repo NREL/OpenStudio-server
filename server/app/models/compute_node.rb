@@ -231,7 +231,7 @@ class ComputeNode
     rescue Timeout::Error
       logger.error 'TimeoutError trying to download datapoint from remote server'
       retry if (retries += 1) <= 3
-    rescue => e
+    rescue StandardError => e
       logger.error "Exception while trying to download datapoint from remote server #{e.message}"
       retry if (retries += 1) <= 3
     end

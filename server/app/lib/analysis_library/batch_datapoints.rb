@@ -41,11 +41,9 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            problem: {}
-        }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      problem: {}
     )
     @options = defaults.deep_merge(options)
 
@@ -86,8 +84,10 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
         if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
           raise "no hash values and weight passed in variable #{var.name}"
         end
+
         values, weights = var.map_discrete_hash_to_array
         raise "'nil' value(s) found in variable #{var.id}. nil values not yet supported." if values.count(&:nil?).nonzero?
+
         values_length = values_length << values.length
         values_set[var.id.to_s.to_sym] = values
       end
@@ -122,13 +122,14 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
           if instance_da_opts['options']
             da_descriptions = []
             @analysis.problem['workflow'].each do |step_def|
-              wf_da_step = instance_da_opts['options'].select {|h| h['workflow_index'].to_i == step_def['workflow_index'].to_i}
+              wf_da_step = instance_da_opts['options'].select { |h| h['workflow_index'].to_i == step_def['workflow_index'].to_i }
               if wf_da_step.length != 1
                 raise "Invalid OSA; multiple workflow_index of #{step_def['workflow_index']} found in the design_alternative options"
               else
                 wf_da_step = wf_da_step[0]
               end
-              da_descriptions << {name: wf_da_step['name'], description: wf_da_step['description']}
+
+              da_descriptions << { name: wf_da_step['name'], description: wf_da_step['description'] }
             end
           end
         end
@@ -141,9 +142,7 @@ class AnalysisLibrary::BatchDatapoints < AnalysisLibrary::Base
         isample += 1
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
-
     ensure
-
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis_job.end_time = Time.now
