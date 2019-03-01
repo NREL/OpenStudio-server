@@ -52,7 +52,7 @@ class PreflightImage
 
   belongs_to :variable
 
-  validates_attachment_content_type :image, content_type: %w(image/png)
+  validates_attachment_content_type :image, content_type: ['image/png']
 
   def self.add_from_disk(var_id, image_type, filename)
     pfi = PreflightImage.new(variable_id: var_id, image_type: image_type)
@@ -62,7 +62,7 @@ class PreflightImage
       file = File.open(filename, 'rb')
       pfi.image = file
       file.close
-      File.chmod(0666, filename)
+      File.chmod(0o666, filename)
     end
     pfi.save!
 

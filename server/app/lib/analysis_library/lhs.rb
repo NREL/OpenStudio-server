@@ -43,19 +43,17 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            problem: {
-                algorithm: {
-                    number_of_samples: 5,
-                    sample_method: 'individual_variables',
-                    failed_f_value: 1e18,
-                    debug_messages: 0,
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      problem: {
+        algorithm: {
+          number_of_samples: 5,
+          sample_method: 'individual_variables',
+          failed_f_value: 1e18,
+          debug_messages: 0,
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -104,7 +102,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       logger.info 'Starting sampling'
       lhs = AnalysisLibrary::R::Lhs.new(@r)
       if @analysis.problem['algorithm']['sample_method'] == 'all_variables' ||
-          @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
+         @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
         samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
         if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
           # Do the work to mash up the samples and pivot variables before creating the datapoints
@@ -136,7 +134,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
 
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
-    rescue => e
+    rescue StandardError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       puts log_message
       @analysis.status_message = log_message

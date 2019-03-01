@@ -47,13 +47,13 @@ RSpec.describe 'RunBatchDatapoints', type: :feature, depends_resque: true do
     Rails.application.config.job_manager = @previous_job_manager
   end
 
-  before :each do
+  before do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
     Delayed::Job.destroy_all
 
-    Resque.workers.each {|w| w.unregister_worker}
-    Resque.queues.each{|q| Resque.redis.del "queue:#{q}" }
+    Resque.workers.each(&:unregister_worker)
+    Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
 
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     puts "App host is: http://#{host}"
@@ -67,8 +67,8 @@ RSpec.describe 'RunBatchDatapoints', type: :feature, depends_resque: true do
 
   it 'Runs the analysis', js: true do
     analysis_id = @api.run('spec/files/batch_datapoints/example_csv_with_scripts.json',
-                          'spec/files/batch_datapoints/example_csv_with_scripts.zip',
-                          'batch_datapoints')
+                           'spec/files/batch_datapoints/example_csv_with_scripts.zip',
+                           'batch_datapoints')
 
     # analysis_wrappers
     analysis_wrapper_worker = Resque::Worker.new('analysis_wrappers')

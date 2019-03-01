@@ -35,7 +35,6 @@
 
 # Wrap the RunSimulateDataPoint job for use in Resque/Redis
 module ResqueJobs
-
   class RunSimulateDataPoint
     @queue = :simulations
 

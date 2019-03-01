@@ -45,7 +45,7 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: tru
     Rails.application.config.job_manager = @previous_job_manager
   end
 
-  before :each do
+  before do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
     Delayed::Job.destroy_all
@@ -60,7 +60,11 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: tru
     APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
-  it 'should create the datapoint', js: true do
+  after do
+    Delayed::Job.destroy_all
+  end
+
+  it 'creates the datapoint', js: true do
     project_id = @api.new_project
     expect(project_id).not_to be nil
     analysis_options = {
@@ -108,7 +112,7 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: tru
     expect(j[:analysis][:data_points].size).to eq 1
   end
 
-  it 'should run a datapoint', js: true do
+  it 'runs a datapoint', js: true do
     project_id = @api.new_project
     expect(project_id).not_to be nil
     analysis_options = {
@@ -133,7 +137,7 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: tru
 
     # get the analysis as html
     a = RestClient.get "#{@api.hostname}/analyses/#{analysis_id}.html"
-    expect(a).to include("OpenStudio Cloud Management Console")
+    expect(a).to include('OpenStudio Cloud Management Console')
     # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
 
     # get the datapoint as json
@@ -168,9 +172,5 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: tru
     # verify that the data point has a log
     j = @api.get_datapoint(datapoint_id)
     expect(j[:data_point][:sdp_log_file]).not_to be_empty
-  end
-
-  after :each do
-    Delayed::Job.destroy_all
   end
 end

@@ -33,35 +33,33 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Monte Carlo Estimation of Sobol’ Indices 
+# Monte Carlo Estimation of Sobol’ Indices
 class AnalysisLibrary::Sobol < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            create_data_point_filename: 'create_data_point.rb',
-            output_variables: [],
-            problem: {
-                algorithm: {
-                    number_of_samples: 30,
-                    random_seed: 1979,
-                    random_seed2: 1973,
-                    order: 1,
-                    nboot: 0,
-                    conf: 0.95,
-                    type: 'sobol',
-                    norm_type: 'minkowski',
-                    p_power: 2,
-                    debug_messages: 0,
-                    failed_f_value: 1e18,
-                    objective_functions: [],
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        algorithm: {
+          number_of_samples: 30,
+          random_seed: 1979,
+          random_seed2: 1973,
+          order: 1,
+          nboot: 0,
+          conf: 0.95,
+          type: 'sobol',
+          norm_type: 'minkowski',
+          p_power: 2,
+          debug_messages: 0,
+          failed_f_value: 1e18,
+          objective_functions: [],
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -128,15 +126,15 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
       @analysis.save!
 
-      objtrue = @analysis.output_variables.select {|v| v['objective_function'] == true}
-      ug = objtrue.uniq {|v| v['objective_function_group']}
+      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+      ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
       obj_names = []
       ug.each do |var|
         obj_names << var['display_name_short']
       end
       logger.info "Objective function names #{obj_names}"
-      
+
       pivot_array = Variable.pivot_array(@analysis.id, @r)
       logger.info "pivot_array: #{pivot_array}"
       selected_variables = Variable.variables(@analysis.id)
@@ -147,7 +145,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
         var_display_names << var.display_name_short
       end
       logger.info "Variable display names #{var_display_names}"
-      
+
       # discretize the variables using the LHS sampling method
       @r.converse("print('starting lhs to get min/max')")
       logger.info 'starting lhs to discretize the variables'
@@ -188,7 +186,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
@@ -245,7 +243,6 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
@@ -276,7 +273,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end

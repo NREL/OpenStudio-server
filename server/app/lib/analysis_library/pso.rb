@@ -33,42 +33,40 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Particle Swarm Optimization
+# Particle Swarm Optimization
 class AnalysisLibrary::Pso < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            create_data_point_filename: 'create_data_point.rb',
-            output_variables: [],
-            problem: {
-                algorithm: {
-                    npart: 4,
-                    maxfn: 100,
-                    maxit: 20,
-                    abstol: 1e-2,
-                    reltol: 1e-2,
-                    method: 'spso2011',
-                    xini: 'lhs',
-                    vini: 'lhs2011',
-                    boundary: 'reflecting',
-                    topology: 'random',
-                    c1: 1.193147,
-                    c2: 1.193147,
-                    lambda: 0.9,
-                    norm_type: 'minkowski',
-                    p_power: 2,
-                    exit_on_guideline_14: 0,
-                    debug_messages: 0,
-                    failed_f_value: 1e18,
-                    objective_functions: [],
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        algorithm: {
+          npart: 4,
+          maxfn: 100,
+          maxit: 20,
+          abstol: 1e-2,
+          reltol: 1e-2,
+          method: 'spso2011',
+          xini: 'lhs',
+          vini: 'lhs2011',
+          boundary: 'reflecting',
+          topology: 'random',
+          c1: 1.193147,
+          c2: 1.193147,
+          lambda: 0.9,
+          norm_type: 'minkowski',
+          p_power: 2,
+          exit_on_guideline_14: 0,
+          debug_messages: 0,
+          failed_f_value: 1e18,
+          objective_functions: [],
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -125,23 +123,23 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       # if @analysis.problem['algorithm']['norm_type'] != "minkowski", "maximum", "euclidean", "binary", "manhattan"
       #  raise "P Norm must be non-negative"
       # end
-      unless %w(spso2007 spso2011 ipso fips wfips).include?(@analysis.problem['algorithm']['method'])
+      unless ['spso2007', 'spso2011', 'ipso', 'fips', 'wfips'].include?(@analysis.problem['algorithm']['method'])
         raise 'unknown method type'
       end
 
-      unless %w(lhs random).include?(@analysis.problem['algorithm']['xini'])
+      unless ['lhs', 'random'].include?(@analysis.problem['algorithm']['xini'])
         raise 'unknown Xini type'
       end
 
-      unless %w(zero lhs2011 random2011 lhs2007 random2007 default).include?(@analysis.problem['algorithm']['vini'])
+      unless ['zero', 'lhs2011', 'random2011', 'lhs2007', 'random2007', 'default'].include?(@analysis.problem['algorithm']['vini'])
         raise 'unknown Vini type'
       end
 
-      unless %w(invisible damping reflecting absorbing2011 absorbing2007 default).include?(@analysis.problem['algorithm']['boundary'])
+      unless ['invisible', 'damping', 'reflecting', 'absorbing2011', 'absorbing2007', 'default'].include?(@analysis.problem['algorithm']['boundary'])
         raise 'unknown Boundary type'
       end
 
-      unless %w(gbest lbest vonneumann random).include?(@analysis.problem['algorithm']['topology'])
+      unless ['gbest', 'lbest', 'vonneumann', 'random'].include?(@analysis.problem['algorithm']['topology'])
         raise 'unknown Topology type'
       end
 
@@ -150,8 +148,8 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       end
 
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0, 1, 2, 3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+      # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
         @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
         logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
       else
@@ -165,12 +163,12 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       @analysis.save!
 
       # check to make sure there are objective functions
-      if @analysis.output_variables.count {|v| v['objective_function'] == true}.zero?
+      if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
         raise 'No objective functions defined'
       end
 
       # find the total number of objective functions
-      if @analysis.output_variables.count {|v| v['objective_function'] == true} != @analysis.problem['algorithm']['objective_functions'].size
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
         raise 'Number of objective functions must equal between the output_variables and the problem definition'
       end
 
@@ -196,7 +194,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
       end
 
-      unless var_types.all? {|t| t.casecmp('continuous').zero?}
+      unless var_types.all? { |t| t.casecmp('continuous').zero? }
         logger.info 'Must have all continous variables to run algorithm, therefore exit'
         raise "Must have all continous variables to run algorithm.  Found #{var_types}"
       end
@@ -211,7 +209,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
@@ -276,7 +274,6 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
@@ -307,7 +304,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
@@ -323,7 +320,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['convergence_flag'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for converge_flag.json into the database'
         end
       end

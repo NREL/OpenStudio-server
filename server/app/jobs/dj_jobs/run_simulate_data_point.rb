@@ -37,7 +37,6 @@
 
 module DjJobs
   class RunSimulateDataPoint
-
     require 'date'
     require 'json'
 
@@ -51,9 +50,7 @@ module DjJobs
       @data_point.set_queued_state if Rails.application.config.job_manager == :delayed_job
     end
 
-
     def perform
-
       # Create the analysis, simulation, and run directory
       FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
       FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
@@ -62,7 +59,7 @@ module DjJobs
 
       # Logger for the simulate datapoint
       @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
-      
+
       # Error if @datapoint doesn't exist
       if @data_point.nil?
         @sim_logger = 'Could not find datapoint; @datapoint was nil'
@@ -85,28 +82,28 @@ module DjJobs
         err_msg_2 = 'If you see this message once, all subsequent runs will likely fail.'
         err_msg_3 = 'If you are running PAT simulations locally on Windows, the error is likely due to a measure file whose path length has exceeded 256 characters.'
         err_msg_4 = 'Inspect the following messages for clues as to the specific issue:'
-        out_osw = {completed_status: 'Fail',
-                   osa_id: @data_point.analysis.id,
-                   osd_id: @data_point.id,
-                   name: @data_point.name,
-                   completed_at: ::DateTime.now.iso8601,
-                   started_at: ::DateTime.now.iso8601,
-                   steps: [
-                       arguments: {},
-                       description: '',
-                       name: 'Initialize Worker Error',
-                       result: {
-                           completed_at: ::DateTime.now.iso8601,
-                           started_at: ::DateTime.now.iso8601,
-                           stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
-                           stdout: '',
-                           step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
-                           step_files: [],
-                           step_info: [],
-                           step_result: 'Failure',
-                           step_warnings: []
-                       }
-                   ]}
+        out_osw = { completed_status: 'Fail',
+                    osa_id: @data_point.analysis.id,
+                    osd_id: @data_point.id,
+                    name: @data_point.name,
+                    completed_at: ::DateTime.now.iso8601,
+                    started_at: ::DateTime.now.iso8601,
+                    steps: [
+                      arguments: {},
+                      description: '',
+                      name: 'Initialize Worker Error',
+                      result: {
+                        completed_at: ::DateTime.now.iso8601,
+                        started_at: ::DateTime.now.iso8601,
+                        stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for the specific error.",
+                        stdout: '',
+                        step_errors: [err_msg_1, err_msg_2, err_msg_3, err_msg_4] + @intialize_worker_errs,
+                        step_files: [],
+                        step_info: [],
+                        step_result: 'Failure',
+                        step_warnings: []
+                      }
+                    ] }
         report_file = "#{simulation_dir}/out.osw"
         File.open(report_file, 'wb') do |f|
           f.puts ::JSON.pretty_generate(out_osw)
@@ -122,14 +119,14 @@ module DjJobs
       end
 
       # delete any existing data files from the server in case this is a 'rerun'
-      @sim_logger.info "RestClient delete"
+      @sim_logger.info 'RestClient delete'
       post_count = 0
       post_count_max = 50
       begin
         post_count += 1
         @sim_logger.info "delete post_count = #{post_count}"
         RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
-      rescue => e
+      rescue StandardError => e
         sleep Random.new.rand(1.0..10.0)
         retry if post_count <= post_count_max
         @sim_logger.error "RestClient.delete failed with error #{e.message}"
@@ -144,13 +141,14 @@ module DjJobs
         post_count += 1
         @sim_logger.info "get url post_count = #{post_count}"
         r = RestClient.get url
-      rescue => e
+      rescue StandardError => e
         sleep Random.new.rand(1.0..10.0)
         retry if post_count <= post_count_max
         @sim_logger.error "RestClient.get url failed with error #{e.message}"
         raise "RestClient.get url failed with error #{e.message}"
       end
       raise 'Datapoint JSON could not be downloaded' unless r.code == 200
+
       # Parse to JSON to save it again with nice formatting
       File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
 
@@ -160,8 +158,8 @@ module DjJobs
       osw_path = "#{simulation_dir}/data_point.osw"
       # PAT puts seeds in "seeds" folder (not "seed")
       osw_options = {
-          file_paths: %w(../weather ../seeds ../seed),
-          measure_paths: ['../measures']
+        file_paths: ['../weather', '../seeds', '../seed'],
+        measure_paths: ['../measures']
       }
       if @data_point.seed
         osw_options[:seed] = @data_point.seed unless @data_point.seed == ''
@@ -173,8 +171,8 @@ module DjJobs
         osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
       end
       t = OpenStudio::Analysis::Translator::Workflow.new(
-          "#{simulation_dir}/analysis.json",
-          osw_options
+        "#{simulation_dir}/analysis.json",
+        osw_options
       )
       t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
       if t_result
@@ -194,12 +192,11 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-
             cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow '#{osw_path}' --debug"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
-            pid = Process.spawn({'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil}, cmd, [:err, :out] => [process_log, 'w'])
+            pid = Process.spawn({ 'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil }, cmd, [:err, :out] => [process_log, 'w'])
 
             # timeout the process if it doesn't return in 4 hours
             Timeout.timeout(14400) do
@@ -209,7 +206,6 @@ module DjJobs
             if $?.exitstatus != 0
               raise "Oscli returned error code #{$?.exitstatus}"
             end
-
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             # openstudio process actually runs in a child of pid.  to prevent orphaned processes on timeout, we
@@ -221,11 +217,11 @@ module DjJobs
               child_pid = `ps -o pid= --ppid "#{pid}"`.to_i
               if child_pid > 0
                 @sim_logger.info "killing child #{child_pid} of timed out process #{pid}"
-                Process.kill('KILL',child_pid)
+                Process.kill('KILL', child_pid)
               end
               @sim_logger.info "killing timed out process #{pid}"
-              Process.kill('KILL',pid)
-            rescue Exception=>e
+              Process.kill('KILL', pid)
+            rescue Exception => e
               @sim_logger.error "Error killing process #{pid}: #{e}"
             end
 
@@ -242,7 +238,6 @@ module DjJobs
               @sim_logger.info "Oscli output: #{File.read(process_log)}"
             end
           end
-
         end
         if run_result == :errored
           @data_point.set_error_flag
@@ -298,7 +293,6 @@ module DjJobs
 
         # Run any data point finalization scripts - note this currently runs whether or not the datapoint errored out
         run_script_with_args 'finalize'
-
 
         report_file = "#{run_dir}/datapoint_final.log"
         uploads_successful << upload_file(report_file, 'Report', 'Finalization Script Log', 'application/txt') if File.exist?(report_file)
@@ -362,6 +356,7 @@ module DjJobs
           Timeout.timeout(zip_download_timeout) do
             loop do
               break if File.exist? receipt_file
+
               @sim_logger.info 'waiting for receipt file to appear'
               sleep 3
             end
@@ -391,7 +386,7 @@ module DjJobs
                 end
               end
             end
-          rescue => e
+          rescue StandardError => e
             FileUtils.rm_f download_file if File.exist? download_file
             sleep Random.new.rand(1.0..10.0)
             retry if zip_download_count < zip_max_download_count
@@ -407,7 +402,7 @@ module DjJobs
               extract_count += 1
               OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
             end
-          rescue => e
+          rescue StandardError => e
             retry if extract_count < extract_max_count
             raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
           end
@@ -423,10 +418,11 @@ module DjJobs
               json_download_count += 1
               a = RestClient.get analysis_json_url
               raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
+
               # Parse to JSON to save it again with nice formatting
               File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
             end
-          rescue => e
+          rescue StandardError => e
             FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
             sleep Random.new.rand(1.0..10.0)
             retry if json_download_count < json_max_download_count
@@ -438,13 +434,12 @@ module DjJobs
         end
 
         # Run the server data_point initialization script with defined arguments, if it exists.
-        run_script_with_args "initialize"
+        run_script_with_args 'initialize'
       end
 
       @sim_logger.info 'Finished worker initialization'
       return true
-
-    rescue => e
+    rescue StandardError => e
       @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
       @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
       return false
@@ -495,7 +490,7 @@ module DjJobs
     def upload_file(filename, type, display_name = nil, content_type = nil)
       upload_file_attempt = 0
       upload_file_max_attempt = 4
-      display_name = File.basename(filename, '.*') unless display_name
+      display_name ||= File.basename(filename, '.*')
       @sim_logger.info "Saving report #{filename} to #{data_point_url}"
       begin
         Timeout.timeout(120) do
@@ -515,7 +510,7 @@ module DjJobs
           @sim_logger.info "Saving report responded with #{res}"
           return true
         end
-      rescue => e
+      rescue StandardError => e
         sleep Random.new.rand(1.0..10.0)
         retry if upload_file_attempt < upload_file_max_attempt
         @sim_logger.error "Could not save report #{display_name} with message: #{e.message} in #{e.backtrace.join("\n")}"
@@ -523,32 +518,28 @@ module DjJobs
       end
     end
 
-    def run_script_with_args script_name
-      begin
-        dir_path = "#{analysis_dir}/scripts/data_point"
-        #  paths to check for args and script files
-        args_path = "#{dir_path}/#{script_name}.args"
-        script_path = "#{dir_path}/#{script_name}.sh"
-        log_path = "#{analysis_dir}/data_point_#{@data_point.id}/#{script_name}.log"
+    def run_script_with_args(script_name)
+      dir_path = "#{analysis_dir}/scripts/data_point"
+      #  paths to check for args and script files
+      args_path = "#{dir_path}/#{script_name}.args"
+      script_path = "#{dir_path}/#{script_name}.sh"
+      log_path = "#{analysis_dir}/data_point_#{@data_point.id}/#{script_name}.log"
 
-        @sim_logger.info "Checking for presence of args file at #{args_path}"
-        args = nil
-        if File.file? args_path
-          args = Utility::Oss.load_args args_path
-          @sim_logger.info " args loaded from file #{args_path}: #{args}"
-        end
-
-
-        @sim_logger.info "Checking for presence of script file at #{script_path}"
-        if File.file? script_path
-          Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id}, args, @sim_logger,log_path)
-        end
-      rescue => e
-        msg = "Error #{e.message} running #{script_name}: #{e.backtrace.join("\n")}"
-        @sim_logger.error msg
-        raise msg
+      @sim_logger.info "Checking for presence of args file at #{args_path}"
+      args = nil
+      if File.file? args_path
+        args = Utility::Oss.load_args args_path
+        @sim_logger.info " args loaded from file #{args_path}: #{args}"
       end
-    end
 
+      @sim_logger.info "Checking for presence of script file at #{script_path}"
+      if File.file? script_path
+        Utility::Oss.run_script(script_path, 4.hours, { 'SCRIPT_ANALYSIS_ID' => @data_point.analysis.id, 'SCRIPT_DATA_POINT_ID' => @data_point.id }, args, @sim_logger, log_path)
+      end
+    rescue StandardError => e
+      msg = "Error #{e.message} running #{script_name}: #{e.backtrace.join("\n")}"
+      @sim_logger.error msg
+      raise msg
+    end
   end
 end
