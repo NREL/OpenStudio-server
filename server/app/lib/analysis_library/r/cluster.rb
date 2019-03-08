@@ -153,7 +153,7 @@ module AnalysisLibrary::R
           # Check the length and the last result (which should be true)
           c = @r.converse('r')
           result = (c.size == uniq_ips[:worker_ips].size) && c.map { |i| i.last == 'true' }.all?
-        rescue => e
+        rescue StandardError => e
           raise e
         ensure
           stop

@@ -35,7 +35,7 @@
 
 FactoryBot.define do
   factory :data_point do
-    name 'Example Datapoint'
+    name { 'Example Datapoint' }
     analysis
 
     json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_data_point_1.json"))
@@ -43,7 +43,7 @@ FactoryBot.define do
   end
 
   factory :analysis do
-    name 'Example Analysis'
+    name { 'Example Analysis' }
     project
 
     json = JSON.parse(File.read("#{Rails.root}/spec/files/batch_datapoints/example_csv.json"))
@@ -54,7 +54,7 @@ FactoryBot.define do
 
     factory :analysis_with_data_points do
       transient do
-        data_point_count 200
+        data_point_count { 200 }
       end
 
       after(:create) do |analysis, evaluator|
@@ -69,11 +69,11 @@ FactoryBot.define do
   end
 
   factory :project do
-    name 'Test Project'
+    name { 'Test Project' }
 
     factory :project_with_analyses do
       transient do
-        analyses_count 1
+        analyses_count { 1 }
       end
 
       after(:create) do |project, evaluator|

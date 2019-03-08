@@ -67,6 +67,7 @@ module AnalysisLibrary::R
       if var.map_discrete_hash_to_array.nil? || var.discrete_values_and_weights.empty?
         raise 'no hash values and weight passed'
       end
+
       values, weights = var.map_discrete_hash_to_array
 
       dataframe = { 'data' => probabilities_array }.to_dataframe
@@ -271,8 +272,6 @@ module AnalysisLibrary::R
         else
           logger.info("No R image file found at #{save_file_name}")
         end
-
-
 
       end
     end

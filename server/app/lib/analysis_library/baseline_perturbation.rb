@@ -41,17 +41,15 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            problem: {
-                algorithm: {
-                    in_measure_combinations: 'false',
-                    include_baseline_in_combinations: 'false',
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      problem: {
+        algorithm: {
+          in_measure_combinations: 'false',
+          include_baseline_in_combinations: 'false',
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -121,6 +119,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
           if variable.map_discrete_hash_to_array.nil? || variable.discrete_values_and_weights.empty?
             raise 'no hash values and weight passed'
           end
+
           values, weights = variable.map_discrete_hash_to_array
           values.each do |val|
             instance = {}
@@ -183,8 +182,7 @@ class AnalysisLibrary::BaselinePerturbation < AnalysisLibrary::Base
 
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
-
-    rescue => e
+    rescue StandardError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.info log_message
       @analysis.status_message = log_message

@@ -38,11 +38,11 @@ require 'rails_helper'
 # Tag this as depending on resque because the test script does not run on windows.
 RSpec.describe Utility::Oss, type: :model, depends_resque: true do
   context 'arguments' do
-    before :each do
+    before do
       @example_arg = { arg_1: 525600, arg_2: 'string', arg_3: 3.14 }
     end
 
-    it 'should not load incorrect arguments' do
+    it 'does not load incorrect arguments' do
       tempfile = Tempfile.new('wrong_arguments.txt')
       tempfile.write(JSON.pretty_generate(@example_arg))
       tempfile.close
@@ -51,7 +51,7 @@ RSpec.describe Utility::Oss, type: :model, depends_resque: true do
       tempfile.unlink
     end
 
-    it 'should load correct arguments' do
+    it 'loads correct arguments' do
       tempfile = Tempfile.new('right_arguments.txt')
       tempfile.write(@example_arg.values)
       tempfile.close
@@ -64,16 +64,16 @@ RSpec.describe Utility::Oss, type: :model, depends_resque: true do
   end
 
   context 'run_script' do
-    before :each do
+    before do
       @log_file = File.expand_path('oss_spec.log', File.dirname(__FILE__))
       @example_script = 'echo "successfully ran"'
     end
 
-    after :each do
+    after do
       File.delete(@log_file) if File.exist? @log_file
     end
 
-    it 'should run_script with no arguments' do
+    it 'run_scripts with no arguments' do
       tempfile = Tempfile.new('script.sh')
       tempfile.write(@example_script)
       tempfile.close
@@ -94,11 +94,11 @@ RSpec.describe Utility::Oss, type: :model, depends_resque: true do
       tempfile.unlink
     end
 
-    it 'should set only some env vars' do
+    it 'sets only some env vars' do
       ENV['BUNDLE_POINTLESS'] = 'Affirmative'
-      env_vars = Utility::Oss.resolve_env_vars({ 'my_custom_env' => 'set_to_this_value'})
-      expect(env_vars.has_key?('my_custom_env')).to eq true
-      expect(env_vars.has_key?('USER')).to eq false
+      env_vars = Utility::Oss.resolve_env_vars('my_custom_env' => 'set_to_this_value')
+      expect(env_vars.key?('my_custom_env')).to eq true
+      expect(env_vars.key?('USER')).to eq false
       expect(env_vars['BUNDLE_POINTLESS']).to eq 'Affirmative'
     end
   end

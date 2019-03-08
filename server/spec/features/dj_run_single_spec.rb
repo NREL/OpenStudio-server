@@ -46,7 +46,7 @@ RSpec.describe 'RunSingle', type: :feature do
     Rails.application.config.job_manager = @previous_job_manager
   end
 
-  before :each do
+  before do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
     Delayed::Job.destroy_all
@@ -58,7 +58,6 @@ RSpec.describe 'RunSingle', type: :feature do
     # host = "localhost:3000"
     puts "http://#{host}"
     APP_CONFIG['os_server_host_url'] = "http://#{host}"
-
 
     h = JSON.parse(File.read('spec/files/test_model/test_model.json'), symbolize_names: true)
 

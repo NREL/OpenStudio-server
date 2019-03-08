@@ -78,5 +78,5 @@ Rails.application.configure do
   # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
 
   # detect os version build path to gemfile.  this is passed to cli as --bundle
-  config.os_gemfile_path = "/var/oscli"
+  config.os_gemfile_path = '/var/oscli'
 end
