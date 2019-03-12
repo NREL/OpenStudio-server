@@ -50,9 +50,9 @@ module AnalysisLibrary
     def logger
       # Ternaries handle loggers with running without delayed_jobs or resque (without_delay)
       if Rails.application.config.job_manager == :delayed_job
-        Delayed::Worker.logger ? Delayed::Worker.logger : Logger.new(STDOUT)
+        Delayed::Worker.logger || Logger.new(STDOUT)
       elsif Rails.application.config.job_manager == :resque
-        Resque.logger ? Resque.logger : Logger.new(STDOUT)
+        Resque.logger || Logger.new(STDOUT)
       else
         raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
       end
@@ -66,6 +66,5 @@ module AnalysisLibrary
     def analysis_dir(id)
       "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
     end
-
   end
 end

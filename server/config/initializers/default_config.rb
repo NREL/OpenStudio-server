@@ -72,4 +72,3 @@ Mongoid.logger.level = Logger::INFO
 
 # Make sure to add the assets to the asset pipeline
 Rails.application.config.assets.paths << "#{APP_CONFIG['server_asset_path']}/assets"
-

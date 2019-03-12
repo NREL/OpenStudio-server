@@ -45,7 +45,7 @@ RSpec.describe PreflightImage, type: :model do
     @analysis = @project.analyses.first
   end
 
-  it 'should add a variable and preflight image' do
+  it 'adds a variable and preflight image' do
     # create a measure to us in the analysis
     new_measure = Measure.new(analysis_id: @analysis.id)
     new_measure.save!

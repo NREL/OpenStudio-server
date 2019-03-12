@@ -48,7 +48,6 @@ RSpec.describe 'Pages Exist', type: :feature do
   end
 
   describe 'GET /analyses' do
-
     before { get '/analyses.json' }
 
     it 'return analyses' do
@@ -56,12 +55,12 @@ RSpec.describe 'Pages Exist', type: :feature do
     end
 
     it 'returns status code 200' do
-      expect(response).to have_http_status(200)
+      expect(response).to have_http_status(:ok)
     end
   end
 
   describe 'GET /analysis/{id}' do
-    before { get "/analyses/#{@analysis.id}.json"}
+    before { get "/analyses/#{@analysis.id}.json" }
 
     it 'return analysis' do
       expect(json).not_to be_empty
@@ -69,7 +68,7 @@ RSpec.describe 'Pages Exist', type: :feature do
   end
 
   describe 'GET /analysis/{id}/data_points' do
-    before { get "/analyses/#{@analysis.id}/data_points.json"}
+    before { get "/analyses/#{@analysis.id}/data_points.json" }
 
     it 'return data_points' do
       expect(json).not_to be_empty
@@ -79,7 +78,7 @@ RSpec.describe 'Pages Exist', type: :feature do
   end
 
   describe 'GET /analysis/{id}/get' do
-    before { get "/analyses/#{@analysis.id}/analysis_data.json"}
+    before { get "/analyses/#{@analysis.id}/analysis_data.json" }
 
     it 'return data_points' do
       expect(json).not_to be_empty
@@ -87,5 +86,4 @@ RSpec.describe 'Pages Exist', type: :feature do
       expect(json['data'].size).to eq(200)
     end
   end
-
 end

@@ -33,30 +33,28 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Fast99 Screening and Sensitivity method
+# Fast99 Screening and Sensitivity method
 class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            create_data_point_filename: 'create_data_point.rb',
-            output_variables: [],
-            problem: {
-                algorithm: {
-                    n: 66,
-                    M: 4,
-                    norm_type: 'minkowski',
-                    p_power: 2,
-                    debug_messages: 0,
-                    failed_f_value: 1e18,
-                    objective_functions: [],
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        algorithm: {
+          n: 66,
+          M: 4,
+          norm_type: 'minkowski',
+          p_power: 2,
+          debug_messages: 0,
+          failed_f_value: 1e18,
+          objective_functions: [],
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -116,15 +114,15 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
         raise 'Value for n was not set or equal to zero (must be 1 or greater)'
       end
 
-      if (4*@analysis.problem['algorithm']['M']*@analysis.problem['algorithm']['M']+2) <= (@analysis.problem['algorithm']['n'])
+      if (4 * @analysis.problem['algorithm']['M'] * @analysis.problem['algorithm']['M'] + 2) <= (@analysis.problem['algorithm']['n'])
         logger.info 'Value for n was not > 4*M^2+2, will adjust value'
       end
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
       @analysis.save!
 
-      objtrue = @analysis.output_variables.select {|v| v['objective_function'] == true}
-      ug = objtrue.uniq {|v| v['objective_function_group']}
+      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+      ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
       obj_names = []
       ug.each do |var|
@@ -171,7 +169,7 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
@@ -202,7 +200,7 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
                    objfun: @analysis.problem['algorithm']['objective_functions'],
                    debug_messages: @analysis.problem['algorithm']['debug_messages'],
                    failed_f: @analysis.problem['algorithm']['failed_f_value'],
-                   vardisplaynames: var_display_names, 
+                   vardisplaynames: var_display_names,
                    objnames: obj_names,
                    uniquegroups: ug.size) do
           %{
@@ -258,7 +256,7 @@ class AnalysisLibrary::Fast99 < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end

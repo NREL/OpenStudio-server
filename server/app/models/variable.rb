@@ -105,7 +105,7 @@ class Variable
       logger.info var.inspect
     end
 
-    exclude_fields = %w(uuid type)
+    exclude_fields = ['uuid', 'type']
     os_json.each do |k, v|
       var[k] = v unless exclude_fields.include? k
     end
@@ -145,7 +145,7 @@ class Variable
     var.output = true
     var.display_name = json['display_name'] if json['display_name']
     # Until 12/30/2014 keep providing the display_name option
-    var.display_name_short = json['display_name_short'] ? json['display_name_short'] : json['display_name']
+    var.display_name_short = json['display_name_short'] || json['display_name']
     var.metadata_id = json['metadata_id'] if json['metadata_id']
     var.units = json['units'] if json['units']
     var.visualize = json['visualize'] if json['visualize']
@@ -166,6 +166,7 @@ class Variable
   # Create the OS argument/variable
   def self.create_and_assign_to_measure(analysis_id, measure, os_json)
     raise 'Measure ID was not defined' unless measure && measure.id
+
     var = Variable.where(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid']).first
     if var
       raise "Variable already exists for '#{var.name}' : '#{var.uuid}'"
@@ -176,7 +177,7 @@ class Variable
 
     var.measure_id = measure.id
 
-    exclude_fields = %w(uuid type argument uncertainty_description)
+    exclude_fields = ['uuid', 'type', 'argument', 'uncertainty_description']
     os_json.each do |k, v|
       var[k] = v unless exclude_fields.include? k
 
@@ -196,7 +197,7 @@ class Variable
 
       if k == 'argument'
         # this is main portion of the variable
-        exclude_fields_2 = %w(uuid version_uuid)
+        exclude_fields_2 = ['uuid', 'version_uuid']
         v.each do |k2, v2|
           var[k2] = v2 unless exclude_fields_2.include? k2
         end
@@ -213,8 +214,9 @@ class Variable
             # other characteristics
             attribute['name'] ? att_name = attribute['name'] : att_name = nil
             next unless att_name
+
             attribute.each do |k2, v2|
-              exclude_fields_2 = %w(uuid version_uuid)
+              exclude_fields_2 = ['uuid', 'version_uuid']
               var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
             end
           end
@@ -371,5 +373,4 @@ class Variable
   def destroy_preflight_images
     preflight_images.destroy_all
   end
-
 end

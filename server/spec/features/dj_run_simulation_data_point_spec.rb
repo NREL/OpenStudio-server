@@ -45,7 +45,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     Rails.application.config.job_manager = @previous_job_manager
   end
 
-  before :each do
+  before do
     # Look at DatabaseCleaner gem in the future to deal with this.
     Project.destroy_all
     Delayed::Job.destroy_all
@@ -55,7 +55,11 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     #  FactoryBot.create(:project_with_analyses).analyses
   end
 
-  it 'should create the datapoint', js: true do
+  after do
+    Delayed::Job.destroy_all
+  end
+
+  it 'creates the datapoint', js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     puts "App host is: #{host}"
 
@@ -113,7 +117,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     puts script
   end
 
-  it 'should run a datapoint', js: true do
+  it 'runs a datapoint', js: true do
     host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     # Set the os server url for use by the run simulation
     APP_CONFIG['os_server_host_url'] = "http://#{host}"
@@ -148,7 +152,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
     # get the analysis as html
     a = RestClient.get "http://#{host}/analyses/#{analysis_id}.html"
-    expect(a).to include("OpenStudio Cloud Management Console")
+    expect(a).to include('OpenStudio Cloud Management Console')
     # puts "accessed http://#{host}/analyses/#{analysis_id}.html"
 
     # get the datapoint as json
@@ -159,7 +163,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     expect(a[:data_point][:status_message]).to eq('completed normal')
     expect(a[:data_point][:status]).to eq('completed')
     # puts "accessed http://#{host}/data_points/#{datapoint_id}.json"
-    # 
+    #
     # print log file before it is deleted
     Rails.logger.info "datapoint log for #{datapoint_id}: #{a[:data_point][:sdp_log_file]}"
     # get the datapoint as html
@@ -168,7 +172,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
     # pulling data point simulation log
     l = RestClient.get "http://#{host}/data_points/#{datapoint_id}/download_result_file?filename=#{datapoint_id}.log"
-    expect(l.include? 'Oscli output:').to eq(true)
+    expect(l.include?('Oscli output:')).to eq(true)
 
     # Verify that the results exist
     j = api.get_analysis_results(analysis_id)
@@ -181,7 +185,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     expect(j[:data_point][:sdp_log_file]).not_to be_empty
   end
 
-  it 'should create a write lock that is threadsafe' do
+  it 'creates a write lock that is threadsafe' do
     # okay, threadsafe is a misnomer here -- is this really thread safe?
     # if it downloads it twice, then okay, but 100 times, ughly.
 
@@ -209,6 +213,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
         # wait until receipt file appears then return
         loop do
           break if File.exist? receipt_file
+
           sleep 1
         end
 
@@ -227,17 +232,13 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     expect(arr.sum).to be < 5
   end
 
-  it 'should sort worker jobs correctly' do
-    a = %w(00_Job0 01_Job1 11_Job11 20_Job20 02_Job2 21_Job21)
+  it 'sorts worker jobs correctly' do
+    a = ['00_Job0', '01_Job1', '11_Job11', '20_Job20', '02_Job2', '21_Job21']
 
     a.sort!
 
     expect(a.first).to eq '00_Job0'
     expect(a.last).to eq '21_Job21'
     expect(a[3]).to eq '11_Job11'
-  end
-
-  after :each do
-    Delayed::Job.destroy_all
   end
 end

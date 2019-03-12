@@ -93,7 +93,7 @@ def wait_and_run_queue(queue)
         end
       end
 
-      break  # break when there are no more jobs and after it found the first simulation
+      break # break when there are no more jobs and after it found the first simulation
     else
       puts "Waiting for job to appear in queue: #{queue}"
     end

@@ -45,22 +45,20 @@ class AnalysisLibrary::Preflight < AnalysisLibrary::Base
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            problem: {
-                algorithm: {
-                    sample_method: 'individual_variables',
-                    run_max: true,
-                    run_min: true,
-                    run_mode: true,
-                    run_all_samples_for_pivots: true,
-                    debug_messages: 0,
-                    failed_f_value: 1e19,
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      problem: {
+        algorithm: {
+          sample_method: 'individual_variables',
+          run_max: true,
+          run_min: true,
+          run_mode: true,
+          run_all_samples_for_pivots: true,
+          debug_messages: 0,
+          failed_f_value: 1e19,
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -208,9 +206,7 @@ class AnalysisLibrary::Preflight < AnalysisLibrary::Base
 
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
       end
-
     ensure
-
       # Only set this data if the analysis was NOT called from another analysis
       unless @options[:skip_init]
         @analysis_job.end_time = Time.now

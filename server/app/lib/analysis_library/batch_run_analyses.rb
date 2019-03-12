@@ -40,12 +40,10 @@
 class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            data_points: [],
-            run_data_point_filename: 'run_openstudio.rb',
-            problem: {}
-        }
+      skip_init: false,
+      data_points: [],
+      run_data_point_filename: 'run_openstudio.rb',
+      problem: {}
     )
     @options = defaults.deep_merge(options)
 
@@ -78,7 +76,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
     logger.info('Starting Batch Run Analysis')
 
     # Find all the data_points across all analyses
-    dp_map = {analysis_id: [], data_point_id: []}
+    dp_map = { analysis_id: [], data_point_id: [] }
     dps = DataPoint.where(status: 'na').only(:status, :uuid, :analysis)
     dps.each do |dp|
       dp.status = 'queued'
@@ -90,7 +88,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
 
     # Gather all the analyses as objects of the datapoints
     logger.info("Found #{dp_map[:data_point_id].size} across all analyses to run")
-    analyses = dp_map[:analysis_id].map {|id| Analysis.find(id)}.uniq
+    analyses = dp_map[:analysis_id].map { |id| Analysis.find(id) }.uniq
 
     # Initialize some variables that are in the rescue/ensure blocks
     cluster = nil
@@ -163,7 +161,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-    rescue => e
+    rescue StandardError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message = log_message
@@ -189,7 +187,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
         dp.status = 'na'
         dp.save!
       end
-    rescue => e
+    rescue StandardError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message += log_message
