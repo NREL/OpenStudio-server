@@ -17,8 +17,9 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # libwxgtk3.0-0 is a new dependency as of 3/8/2018
     apt-get update && apt-get install -y --no-install-recommends \
         libboost-thread1.55.0 \
-        libwxgtk3.0-0 \
+        libwxgtk3.0-0v5 \
         gdebi-core \
+        locales \
         curl \
         git \
         && curl -SLO --insecure --retry 3 $OPENSTUDIO_DOWNLOAD_URL \
