@@ -2,7 +2,7 @@
 # DESCRIPTION:      OpenStudio Server R Container
 # TO_BUILD_AND_RUN: docker-compose up
 
-FROM nrel/openstudio-r:3.4.2-2
+FROM nrel/openstudio-r:3.5.2-1
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Add in the additional R packages
