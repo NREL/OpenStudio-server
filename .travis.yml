@@ -5,7 +5,7 @@ rvm: 2.2.4
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=2.7.1 OPENSTUDIO_VERSION_SHA=b8d47b8b9d
+    - OPENSTUDIO_VERSION=2.7.2 OPENSTUDIO_VERSION_SHA=7a62c14b0f
     - DOCKER_COMPOSE_VERSION=1.21.1
 
 gemfile:
@@ -31,12 +31,12 @@ jobs:
     - stage: test
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env: BUILD_TYPE=test
     - stage: test
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env: BUILD_TYPE=integration
     - stage: test
       os: osx
@@ -49,7 +49,7 @@ jobs:
     - stage: test
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env:
         - CI=true
         - OS_SERVER_NUMBER_OF_WORKERS=4
@@ -76,7 +76,7 @@ jobs:
       if: branch = master OR branch = nrcan-master OR branch = develop
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env:
         - BUILD_TYPE=docker
       before_script:
