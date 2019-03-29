@@ -2,6 +2,7 @@
 .ruby-uuid
 .idea
 .DS_Store
+.vscode
 .bundle
 .rubocop-http*
 *.log
