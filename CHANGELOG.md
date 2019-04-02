@@ -1,10 +1,61 @@
 OpenStudio Server
 =================
 
+Version 2.8.0
+-------------
+Date Range 11/17/18 - 4/12/19
+
+Closed Issues: 11
+- Fixed [#422]( https://github.com/NREL/OpenStudio-server/issues/422 ), Sobol method plots
+- Fixed [#425]( https://github.com/NREL/OpenStudio-server/issues/425 ), analysis marked "complete" before finalization scripts run
+- Fixed [#437]( https://github.com/NREL/OpenStudio-server/issues/437 ), cancel run does not work anymore
+- Fixed [#448]( https://github.com/NREL/OpenStudio-server/issues/448 ), New AWS YML configuration leads to rails & mongo throttling issues
+- Fixed [#461]( https://github.com/NREL/OpenStudio-server/issues/461 ), Timed out openstudio processes aren't terminating
+
+Accepted Pull Requests: 14
+- Fixed [#442]( https://github.com/NREL/OpenStudio-server/pull/442 ), add param to do out of bounds check for morris
+- Fixed [#443]( https://github.com/NREL/OpenStudio-server/pull/443 ), 2.7.1 unexpected return
+- Fixed [#447]( https://github.com/NREL/OpenStudio-server/pull/447 ), Hack into analysis status method to return "completed" only when fina…
+- Fixed [#450]( https://github.com/NREL/OpenStudio-server/pull/450 ), Dockertag
+- Fixed [#451]( https://github.com/NREL/OpenStudio-server/pull/451 ), change limits back to reservations in docker swarm config file
+- Fixed [#453]( https://github.com/NREL/OpenStudio-server/pull/453 ), support publishing custom docker image
+- Fixed [#454]( https://github.com/NREL/OpenStudio-server/pull/454 ), manage roo and bundler versions
+- Fixed [#462]( https://github.com/NREL/OpenStudio-server/pull/462 ), OpenStudio runs in a child of the spawned process. We need to kill bo…
+- Fixed [#463]( https://github.com/NREL/OpenStudio-server/pull/463 ), Fix cancel
+- Fixed [#465]( https://github.com/NREL/OpenStudio-server/pull/465 ), bump up timeouts until they can be made user selectable
+- Fixed [#466]( https://github.com/NREL/OpenStudio-server/pull/466 ), Code cleanup
+
+
+Version 2.7.1 
+-------------
+
+Date Range: 10/16/18 - 11/16/18:
+
+New Issues: 11 (#420, #421, #422, #424, #425, #429, #430, #432, #435, #437, #438)
+
+Closed Issues: 9
+- Fixed [#384]( https://github.com/NREL/OpenStudio-server/issues/384 ), logs from finalize and initialize scripts should be accessible via web dashboard
+- Fixed [#418]( https://github.com/NREL/OpenStudio-server/issues/418 ), Standardize calls to Oscli
+- Fixed [#420]( https://github.com/NREL/OpenStudio-server/issues/420 ), include oscli output with data point log
+- Fixed [#421]( https://github.com/NREL/OpenStudio-server/issues/421 ), Need to escape some characters in Oscli calls.
+- Fixed [#424]( https://github.com/NREL/OpenStudio-server/issues/424 ), run data point initialization script after worker_initialization
+- Fixed [#430]( https://github.com/NREL/OpenStudio-server/issues/430 ), Morris method can create points that dont satisfy boundary
+- Fixed [#435]( https://github.com/NREL/OpenStudio-server/issues/435 ), Incomplete datapoints are created causing server hang
+
+Accepted Pull Requests: 11
+- Fixed [#423]( https://github.com/NREL/OpenStudio-server/pull/423 ), Check if R libraries install correctly
+- Fixed [#426]( https://github.com/NREL/OpenStudio-server/pull/426 ), run data_point initialize scripts only once: at the end of initialize…
+- Fixed [#427]( https://github.com/NREL/OpenStudio-server/pull/427 ), Oscli output
+- Fixed [#428]( https://github.com/NREL/OpenStudio-server/pull/428 ), function to encapsulate the platform- and config- specific logic for Oscli calls
+- Fixed [#431]( https://github.com/NREL/OpenStudio-server/pull/431 ), add boundary checks to make sure solution space is within min/max
+- Fixed [#434]( https://github.com/NREL/OpenStudio-server/pull/434 ), Algorithm upgrade
+- Fixed [#436]( https://github.com/NREL/OpenStudio-server/pull/436 ), Restclient retry
+
+
 Version 2.7.0 
 -------------
 
-Date Range: 09/05/18 - 10/11/18:
+Date Range: 09/05/18 - 10/15/18:
 
 New Issues: 15 (#390, #391, #392, #394, #396, #397, #398, #399, #400, #403, #404, #405, #409, #411, #412)
 
