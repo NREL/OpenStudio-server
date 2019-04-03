@@ -73,7 +73,7 @@ jobs:
       # This change must be made in combination with a modification to
       # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
       # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
-      if: branch = master OR branch = nrcan-master OR branch = develop
+      if: branch = master OR branch = nrcan-master OR branch = develop OR branch=v2.8.0-rc1
       os: linux
       sudo: required
       dist: xenial
