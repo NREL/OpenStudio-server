@@ -34,7 +34,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libgdbm-dev \
         libglib2.0-dev \
         libglu1 \
-        libgsl0ldbl \
         libgsl0-dev \
         libncurses-dev \
         libreadline-dev \
