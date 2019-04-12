@@ -100,6 +100,6 @@ Rails.application.routes.draw do
   root to: 'pages#dashboard'
 
   # Always provide this for debugging, at least to start with. Redact the link in case of production runs
-  require "resque_web"
-  mount ResqueWeb::Engine => "/resque"
+  require 'resque_web'
+  mount ResqueWeb::Engine => '/resque'
 end

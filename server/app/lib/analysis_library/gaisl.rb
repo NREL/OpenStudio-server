@@ -33,40 +33,38 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#R version of GA
+# R version of GA
 class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            create_data_point_filename: 'create_data_point.rb',
-            output_variables: [],
-            problem: {
-                algorithm: {
-                    popSize: 30,
-                    run: 2,
-                    maxFitness: 0.01,
-                    pcrossover: 0.8,
-                    pmutation: 0.1,
-                    elitism: 0.05,
-                    maxiter: 100,
-                    numIslands: 4,
-                    migrationRate: 0.1,
-                    migrationInterval: 10,
-                    norm_type: 'minkowski',
-                    p_power: 2,
-                    exit_on_guideline_14: 0,
-                    objective_functions: [],
-                    epsilon_gradient: 1e-4,
-                    debug_messages: 0,
-                    failed_f_value: 1e18,
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        algorithm: {
+          popSize: 30,
+          run: 2,
+          maxFitness: 0.01,
+          pcrossover: 0.8,
+          pmutation: 0.1,
+          elitism: 0.05,
+          maxiter: 100,
+          numIslands: 4,
+          migrationRate: 0.1,
+          migrationInterval: 10,
+          norm_type: 'minkowski',
+          p_power: 2,
+          exit_on_guideline_14: 0,
+          objective_functions: [],
+          epsilon_gradient: 1e-4,
+          debug_messages: 0,
+          failed_f_value: 1e18,
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -150,8 +148,8 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
       end
 
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
-      #@analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
-      if ([0, 1, 2, 3]).include? @analysis.problem['algorithm']['exit_on_guideline_14']
+      # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
+      if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
         @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'].to_i
         logger.info "exit_on_guideline_14 is #{@analysis.exit_on_guideline_14}"
       else
@@ -166,12 +164,12 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
       logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
 
       # check to make sure there are objective functions
-      if @analysis.output_variables.count {|v| v['objective_function'] == true}.zero?
+      if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
         raise 'No objective functions defined'
       end
 
       # find the total number of objective functions
-      if @analysis.output_variables.count {|v| v['objective_function'] == true} != @analysis.problem['algorithm']['objective_functions'].size
+      if @analysis.output_variables.count { |v| v['objective_function'] == true } != @analysis.problem['algorithm']['objective_functions'].size
         raise 'Number of objective functions must equal between the output_variables and the problem definition'
       end
 
@@ -203,22 +201,22 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
         raise "Must have at least one variable to run algorithm.  Found #{var_names.size} variables"
       end
 
-      unless var_types.all? {|t| t.casecmp('continuous').zero?}
+      unless var_types.all? { |t| t.casecmp('continuous').zero? }
         logger.info 'Must have all continous variables to run algorithm, therefore exit'
         raise "Must have all continous variables to run algorithm.  Found #{var_types}"
       end
 
       # Start up the cluster and perform the analysis
-      #cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
-      #unless cluster.configure
+      # cluster = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
+      # unless cluster.configure
       #  raise 'could not configure R cluster'
-      #end
+      # end
 
       @r.converse("cat('max_queued_jobs: #{APP_CONFIG['max_queued_jobs']}')")
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
@@ -231,7 +229,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
         raise 'could not start the cluster (cluster size not set correctly)'
       end
 
-      #logger.info "Cluster Started flag is #{cluster.started}"
+      # logger.info "Cluster Started flag is #{cluster.started}"
       # maxiter is the max number of iterations to calculate
       # varNo is the number of variables (ncol(vars))
       # popSize is the number of sample points in the variable (nrow(vars))
@@ -274,7 +272,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
             rails_exit_guideline_14 = "#{@analysis.exit_on_guideline_14}"
-            
+
             init <- function(x){
                 ruby_command <- "cd #{APP_CONFIG['sim_root_path']} && #{APP_CONFIG['ruby_bin_dir']}/bundle exec ruby"
                 y <- paste(ruby_command," #{APP_CONFIG['sim_root_path']}/worker_init_final.rb -h #{APP_CONFIG['os_server_host_url']} -a #{@analysis_id} -s 'initialize'",sep="")
@@ -288,8 +286,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
           }
       end
       logger.info 'Returned from rserve gaisl block'
-        # TODO: find any results of the algorithm and save to the analysis
-
+    # TODO: find any results of the algorithm and save to the analysis
     rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
@@ -303,11 +300,11 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
       # ensure that the cluster is stopped
       logger.info 'Executing gaisl.rb ensure block'
       begin
-        #cluster.stop if cluster
+        # cluster.stop if cluster
       rescue StandardError, ScriptError, NoMemoryError => e
-        #logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
+        # logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
       end
-      #logger.info 'Successfully executed cluster.stop'
+      # logger.info 'Successfully executed cluster.stop'
 
       # Post process the results and jam into the database
       best_result_json = "#{APP_CONFIG['sim_root_path']}/analysis_#{@analysis.id}/best_result.json"
@@ -320,7 +317,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end
@@ -336,7 +333,7 @@ class AnalysisLibrary::Gaisl < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['convergence_flag'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for converge_flag.json into the database'
         end
       end

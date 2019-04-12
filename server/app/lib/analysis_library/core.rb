@@ -97,6 +97,7 @@ module AnalysisLibrary
     # [{:a=>1, :b=>4}, {:a=>1, :b=>5}, {:a=>1, :b=>6}, {:a=>2, :b=>4}, {:a=>2, :b=>5}, {:a=>2, :b=>6}, {:a=>3, :b=>4}, {:a=>3, :b=>5}, {:a=>3, :b=>6}]
     def product_hash(hash_array)
       return [] if hash_array.empty?
+
       attrs   = hash_array.values
       keys    = hash_array.keys
       product = attrs[0].product(*attrs[1..-1])
@@ -147,7 +148,7 @@ module AnalysisLibrary
 
       # Clear out any former results on the analysis
       analysis.results ||= {} # make sure that the analysis results is a hash and exists
-      
+
       analysis.results[options[:analysis_type]] = {}
 
       # merge in the output variables and objective functions into the analysis object which are needed for problem execution

@@ -37,12 +37,10 @@
 class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            data_points: [],
-            run_data_point_filename: 'run_openstudio.rb',
-            problem: {}
-        }
+      skip_init: false,
+      data_points: [],
+      run_data_point_filename: 'run_openstudio.rb',
+      problem: {}
     )
     @options = defaults.deep_merge(options)
 
@@ -81,7 +79,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       logger.info 'waiting'
       sleep 5
     end
-  rescue => e
+  rescue StandardError => e
     log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
     logger.error log_message
     @analysis.status_message = log_message

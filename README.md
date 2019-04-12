@@ -4,13 +4,7 @@
 [![Coverage Status][coveralls-img]][coveralls-url]
 Windows Build (Under Development): [![Build status][appveyor-img]][appveyor-url]
 
-## Standard Use Cases:
-
-There are two primary ways for non-application-developers to use this codebase. The first is through the Parametric 
-Analysis Tool (PAT) which both runs this codebase locally on a system and interfaces with local and AWS docker based 
-instances. This can be accessed through downloading the [official OpenStudio release](https://www.openstudio.net/downloads). 
-The second is through the OpenStudio Analysis Spreadsheet, (the Spreadsheet) which is can be downloaded or cloned from 
-it's [github repository](https://github.com/NREL/OpenStudio-analysis-spreadsheet). 
+The below documentation has not been recently reviewed. Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for current documentation.
 
 ## Application Development and Deployment:
 
@@ -81,11 +75,11 @@ docker-compose rm -f
 docker volume rm osdata dbdata
 docker volume create --name=osdata
 docker volume create --name=dbdata
-docker-compose up
+OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up
 docker-compose service scale worker=N
 
 # Or one line
-docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=5 docker-compose up && docker-compose service scale worker=N
+docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up && docker-compose service scale worker=N
 ```
 
 Congratulations! Visit `http://localhost:8080` to see the OpenStudio Server Management Console.

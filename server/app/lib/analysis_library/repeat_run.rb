@@ -45,21 +45,19 @@ class AnalysisLibrary::RepeatRun < AnalysisLibrary::Base
     #   preference is objects in the database, objects passed via options, then the defaults below.
     #   Parameters posted in the API become the options hash that is passed into this initializer.
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            problem: {
-                algorithm: {
-                    number_of_runs: 2,
-                    number_of_samples: 1,
-                    sample_method: 'all_variables',
-                    debug_messages: 0,
-                    failed_f_value: 1e18,
-                    objective_functions: [],
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      problem: {
+        algorithm: {
+          number_of_runs: 2,
+          number_of_samples: 1,
+          sample_method: 'all_variables',
+          debug_messages: 0,
+          failed_f_value: 1e18,
+          objective_functions: [],
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 

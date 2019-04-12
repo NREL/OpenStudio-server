@@ -44,23 +44,23 @@ RSpec.describe Project, type: :model do
     @project = Project.first
   end
 
-  it 'should have a project' do
+  after :all do
+  end
+
+  it 'has a project' do
     # 'does not have just one project (either 0 or > 2)'
     expect(Project.all.size).to eq 1
   end
 
-  it 'should be a project class' do
+  it 'is a project class' do
     puts @project.class
   end
 
-  it 'should have uuid and id the same' do
+  it 'has uuid and id the same' do
     expect(@project.id).to eq @project.uuid
   end
 
-  it 'should have 1 analysis' do
+  it 'has 1 analysis' do
     expect(@project.analyses.size).to eq 1
-  end
-
-  after :all do
   end
 end

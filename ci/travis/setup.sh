@@ -14,12 +14,18 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
 else
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-    #    AP: do we need mongo install here ? seems to be handled by service defined in travis yml
-        brew install mongodb@3.4 pv tree
-        ln -s /usr/local/opt/mongodb@3.4/bin/* /usr/local/bin
+        # AP: do we need mongo install here ? seems to be handled by service defined in travis yml.
+        # NL: Services are not handled in osx
+        brew install pv tree
+
+        # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
+        curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
+        tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
+        cp mongodb-osx-x86_64-3.4.18/bin/* /usr/local/bin/
+
+        # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         curl -SLO --insecure https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.zip
         unzip OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.zip
-        # Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby

@@ -38,9 +38,9 @@ module ResqueJobs
     @queue = :analysis_wrappers
 
     def self.perform(analysis_id, options = {})
-      # todo error handling and logging around looking up analysis
+      # TODO: error handling and logging around looking up analysis
       analysis = Analysis.find(analysis_id)
-      # TODO check status of analysis for successful complete:  analysis.status == 'completed'
+      # TODO: check status of analysis for successful complete:  analysis.status == 'completed'
       analysis.run_finalization
     end
   end

@@ -42,7 +42,7 @@ module ResqueJobs
     # todo error handling
     # todo handle cleanup if this fails
     def self.perform(analysis_type, analysis_id, job_id, options = {})
-      # todo error handling and logging around looking up analysis and detecting start/complete
+      # TODO: error handling and logging around looking up analysis and detecting start/complete
       analysis = Analysis.find(analysis_id)
       # this will handle unzipping to osdata volume and running any initialization scripts
       analysis.run_initialization
@@ -50,7 +50,7 @@ module ResqueJobs
 
     # after_perform hooks only called if job completes successfully
     def self.after_perform_run_analysis(analysis_type, analysis_id, job_id, options = {})
-      #enqueue for run
+      # enqueue for run
       Resque.enqueue(RunAnalysis, analysis_type, analysis_id, job_id, options)
     end
   end

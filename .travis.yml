@@ -5,7 +5,7 @@ rvm: 2.2.4
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=2.7.1 OPENSTUDIO_VERSION_SHA=2b00619665
+    - OPENSTUDIO_VERSION=2.8.0 OPENSTUDIO_VERSION_SHA=55665635f0
     - DOCKER_COMPOSE_VERSION=1.21.1
 
 gemfile:
@@ -22,7 +22,7 @@ after_failure: ./ci/travis/print_logs.sh
 
 # Services for linux -- all instances
 services:
-  - mongod
+  - mongodb
   - redis-server
   - docker
 
@@ -31,12 +31,12 @@ jobs:
     - stage: test
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env: BUILD_TYPE=test
     - stage: test
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env: BUILD_TYPE=integration
     - stage: test
       os: osx
@@ -49,7 +49,7 @@ jobs:
     - stage: test
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env:
         - CI=true
         - OS_SERVER_NUMBER_OF_WORKERS=4
@@ -69,10 +69,14 @@ jobs:
         # Reset the git checkout to remove the test-based data in the containers and rebuild
         - git checkout -- .dockerignore && git checkout -- Dockerfile
     - stage: Deploy Docker Image
+      # Include your branch name below to publish a custom image.
+      # This change must be made in combination with a modification to
+      # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
+      # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
       if: branch = master OR branch = nrcan-master OR branch = develop
       os: linux
       sudo: required
-      dist: trusty
+      dist: xenial
       env:
         - BUILD_TYPE=docker
       before_script:

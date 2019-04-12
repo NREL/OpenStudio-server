@@ -33,33 +33,32 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 
-#Morris Screening and Sensitivity method
+# Morris Screening and Sensitivity method
 class AnalysisLibrary::Morris < AnalysisLibrary::Base
   include AnalysisLibrary::R::Core
 
   def initialize(analysis_id, analysis_job_id, options = {})
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
-        {
-            skip_init: false,
-            run_data_point_filename: 'run_openstudio_workflow.rb',
-            create_data_point_filename: 'create_data_point.rb',
-            output_variables: [],
-            problem: {
-                algorithm: {
-                    r: 10,
-                    r2: 20,
-                    levels: 4,
-                    grid_jump: 2,
-                    type: 'oat',
-                    norm_type: 'minkowski',
-                    p_power: 2,
-                    debug_messages: 0,
-                    failed_f_value: 1e18,
-                    objective_functions: [],
-                    seed: nil
-                }
-            }
+      skip_init: false,
+      run_data_point_filename: 'run_openstudio_workflow.rb',
+      create_data_point_filename: 'create_data_point.rb',
+      output_variables: [],
+      problem: {
+        algorithm: {
+          r: 10,
+          r2: 20,
+          levels: 4,
+          grid_jump: 2,
+          check_boundary: 0,
+          type: 'oat',
+          norm_type: 'minkowski',
+          p_power: 2,
+          debug_messages: 0,
+          failed_f_value: 1e18,
+          objective_functions: [],
+          seed: nil
         }
+      }
     )
     @options = defaults.deep_merge(options)
 
@@ -122,8 +121,8 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
       @analysis.save!
 
-      objtrue = @analysis.output_variables.select {|v| v['objective_function'] == true}
-      ug = objtrue.uniq {|v| v['objective_function_group']}
+      objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
+      ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
       obj_names = []
       ug.each do |var|
@@ -170,7 +169,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       worker_ips = {}
       if @analysis.problem['algorithm']['max_queued_jobs']
         if @analysis.problem['algorithm']['max_queued_jobs'] == 0
-          logger.info "MAX_QUEUED_JOBS is 0"
+          logger.info 'MAX_QUEUED_JOBS is 0'
           raise 'MAX_QUEUED_JOBS is 0'
         elsif @analysis.problem['algorithm']['max_queued_jobs'] > 0
           worker_ips[:worker_ips] = ['localhost'] * @analysis.problem['algorithm']['max_queued_jobs']
@@ -199,6 +198,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
                    r2: @analysis.problem['algorithm']['r2'],
                    type: @analysis.problem['algorithm']['type'],
                    grid_jump: @analysis.problem['algorithm']['grid_jump'],
+                   check_boundary: @analysis.problem['algorithm']['check_boundary'],
                    normtype: @analysis.problem['algorithm']['norm_type'],
                    ppower: @analysis.problem['algorithm']['p_power'],
                    objfun: @analysis.problem['algorithm']['objective_functions'],
@@ -259,7 +259,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
           @analysis.results[@options[:analysis_type]]['best_result'] = temp
           @analysis.save!
           logger.info("analysis: #{@analysis.results}")
-        rescue => e
+        rescue StandardError => e
           logger.error 'Could not save post processed results for bestresult.json into the database'
         end
       end

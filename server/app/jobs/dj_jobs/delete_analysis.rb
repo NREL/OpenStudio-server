@@ -33,7 +33,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *******************************************************************************
 module DjJobs
-# Delete the files on the server
+  # Delete the files on the server
   DeleteAnalysis = Struct.new(:analysis_directory) do
     def perform
       FileUtils.rm_rf analysis_directory if Dir.exist? analysis_directory

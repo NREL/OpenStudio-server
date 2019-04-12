@@ -49,7 +49,7 @@ class DataPoint
 
   field :status, type: String, default: 'na' # The available states are [:na, :queued, :started, :completed]
   field :status_message, type: String, default: '' # results of the simulation [:completed normal, :datapoint failure]
-  field :job_id, type: String  # The job_id that is being tracked in Resque/Delayed Job
+  field :job_id, type: String # The job_id that is being tracked in Resque/Delayed Job
   field :results, type: Hash, default: {}
   field :run_queue_time, type: DateTime, default: nil
   field :run_start_time, type: DateTime, default: nil
@@ -137,11 +137,17 @@ class DataPoint
   end
 
   def set_canceled_state
-    self.destroy_background_job # Remove the datapoint from the delayed jobs queue
+    destroy_background_job # destroy queued job
     self.run_start_time ||= Time.now
     self.run_end_time = Time.now
     self.status = :completed
     self.status_message = 'datapoint canceled'
+    save!
+  end
+
+  def set_queued_state
+    self.status = :queued
+    self.run_queue_time = Time.now
     save!
   end
 
@@ -160,7 +166,7 @@ class DataPoint
       end
     elsif Rails.application.config.job_manager == :resque
       if job_id
-        Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPointResque', job_id)
+        Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPoint', job_id)
       end
     else
       raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'

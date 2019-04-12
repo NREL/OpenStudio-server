@@ -52,11 +52,11 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
   end
 
   context 'create local cluster' do
-    it 'should create an R session', depends_r: true do
+    it 'creates an R session', depends_r: true do
       expect(@r).not_to be_nil
     end
 
-    it 'should configure the cluster with an analysis run_flag', js: true, broken: true do
+    it 'configures the cluster with an analysis run_flag', js: true, broken: true do
       expect(@analysis.id).not_to be_nil
 
       cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
@@ -64,7 +64,7 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
 
       # Catch if we are running tests on docker, if so, then the host is web
       # but the port is dynamically configured by Capybara. - Still not working tho, flagged as broken
-      if Rails.env == 'docker-test'
+      if Rails.env.docker - test?
         APP_CONFIG['os_server_host_url'] = "http://web:#{Capybara.current_session.server.port}"
       else
         APP_CONFIG['os_server_host_url'] = "http://#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
@@ -74,7 +74,7 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
       expect(cf).to eq true
     end
 
-    it 'should start snow cluster', depends_r: true do
+    it 'starts snow cluster', depends_r: true do
       cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
       expect(cluster_class).not_to be_nil
 

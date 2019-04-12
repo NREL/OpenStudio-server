@@ -89,17 +89,17 @@ class Analysis
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
-  validates_attachment_content_type :seed_zip, content_type: %w(application/zip)
+  validates_attachment_content_type :seed_zip, content_type: ['application/zip']
 
   # Callbacks
   after_create :verify_uuid
   before_destroy :queue_delete_files
 
   def self.status_states
-    %w(na init queued started completed)
+    ['na', 'init', 'queued', 'started', 'post-processing', 'completed']
   end
 
-  # FIXME analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
+  # FIXME: analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
   def start(no_delay, analysis_type = 'batch_run', options = {})
     defaults = { skip_init: false }
     options = defaults.merge(options)
@@ -157,7 +157,6 @@ class Analysis
     logger.info('attempting to stop analysis')
 
     self.run_flag = false
-    # The ensure block will clean up the jobs and save the statuses
 
     jobs.each do |j|
       unless j.status == 'completed'
@@ -169,9 +168,7 @@ class Analysis
     end
 
     # Remove all the queued background jobs for this analysis
-    data_points.where(status: 'queued').each do |dp|
-      dp.set_canceled_state
-    end
+    data_points.where(status: 'queued').each(&:set_canceled_state)
 
     [save!, errors]
   end
@@ -222,8 +219,6 @@ class Analysis
     save!
   end
 
-
-
   # Method goes through all the data_points in an analysis and finds all the
   # input variables (set_variable_values). It uses map/reduce putting the load
   # on the database to do the unique check. Result is a hash of ids and variable
@@ -260,7 +255,7 @@ class Analysis
 
   # filter results on analysis show page (per status)
   def search(search, status, page_no = 1, view_all = 0)
-    page_no = page_no.blank? ? 1 : page_no
+    page_no = page_no.presence || 1
     logger.info("search: #{search}, status: #{status}, page: #{page_no}, view_all: #{view_all}")
 
     if search
@@ -297,13 +292,39 @@ class Analysis
     j = jobs_status
     if j
       begin
-        return j.last[:status]
-      rescue
+        s = j.last[:status]
+        # in environments using Resque, we allow finalization script to run ('post-processing') and do not consider analysis "completed"
+        # until after finalization script step completes ('post-processing completed').
+        if Rails.application.config.job_manager == :resque
+          if s == 'completed'
+            return 'post-processing'
+          #   job status is updated to post-processing completed
+          elsif s == 'post-processing finished'
+            return 'completed'
+          end
+        end
+        # if resque env -specific checks above didn't trigger return, proceed as usual
+        return s
+      rescue StandardError
         'unknown'
       end
     else
       return 'unknown'
     end
+  end
+
+  # update the job status to indicate that postprocessing is complete.
+  # used from finalize method which is only called for environments using resque
+  def complete_postprocessing!
+    raise 'Post-processing should only happen in environments that use Resque for job management.' unless Rails.application.config.job_manager == :resque
+
+    job = jobs.order_by(:index.asc).last
+    raise "Attempt to complete postprocessing for job with status '#{job.status}'.  Only permitted for status 'completed'." unless job.status == 'completed'
+
+    job.status = 'post-processing finished'
+    job.save!
+  rescue Exception => e
+    logger.error e
   end
 
   # Return the last job's status message
@@ -312,7 +333,7 @@ class Analysis
     if j
       begin
         return j.last[:status_message]
-      rescue
+      rescue StandardError
         'unknown'
       end
     else
@@ -358,6 +379,7 @@ class Analysis
   def shared_directory_path
     "#{APP_CONFIG['server_asset_path']}/analyses/#{id}"
   end
+
   # Unpack analysis.zip into the osdata volume for use by background and web
   # specific usecase is to run analysis initialization and finalization scripts.
   # currently only used with Resque, as it's called by ResqueJobs::InitializeAnalysis job
@@ -368,24 +390,26 @@ class Analysis
     # Extract the zip
     extract_count = 0
     extract_max_count = 3
-    logger.info "Running analysis initialization scripts"
+    logger.info 'Running analysis initialization scripts'
     logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
     begin
-      Timeout.timeout(180) do
+      Timeout.timeout(300) do
         extract_count += 1
         OpenStudio::Workflow.extract_archive(seed_zip.path, shared_directory_path)
       end
-    rescue => e
+    rescue StandardError => e
       retry if extract_count < extract_max_count
       raise "Extraction of the seed.zip file failed #{extract_max_count} times with error #{e.message}"
     end
-    run_script_with_args "initialize"
+    run_script_with_args 'initialize'
   end
 
   # runs on web node
   def run_finalization
-    logger.info "Running analysis finalization scripts"
-    run_script_with_args "finalize"
+    logger.info 'Running analysis finalization scripts'
+    run_script_with_args 'finalize'
+    # update status to reflect that finalization has run
+    complete_postprocessing!
   end
 
   protected
@@ -394,7 +418,7 @@ class Analysis
   def queue_delete_files
     analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
 
-    if analysis_dir =~ /^.*\/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+    if analysis_dir =~ %r{^.*/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$}
       if Rails.application.config.job_manager == :delayed_job
         Delayed::Job.enqueue DjJobs::DeleteAnalysis.new(analysis_dir)
       elsif Rails.application.config.job_manager == :resque
@@ -407,7 +431,6 @@ class Analysis
     else
       logger.error 'Will not delete analysis directory because it does not conform to pattern'
     end
-
   end
 
   def verify_uuid
@@ -415,7 +438,7 @@ class Analysis
     save!
   end
 
-  def run_script_with_args script_name
+  def run_script_with_args(script_name)
     dir_path = "#{shared_directory_path}/scripts/analysis"
     #  paths to check for args and script files
     args_path = "#{dir_path}/#{script_name}.args"
@@ -430,15 +453,13 @@ class Analysis
       logger.info " args loaded from file #{args_path}: #{args}"
     end
 
-
     logger.info "Checking for presence of script file at #{script_path}"
     if File.file? script_path
-      # TODO how long do we want to set timeout?
+      # TODO: how long do we want to set timeout?
       # SCRIPT_PATH - path to where the scripts were extracted
       # HOST_URL - URL of the server
       # RAILS_ROOT - location of rails
-      Utility::Oss.run_script(script_path, 4.hours, {'SCRIPT_PATH' => dir_path, 'ANALYSIS_ID' => id, 'HOST_URL' => APP_CONFIG['os_server_host_url'], 'RAILS_ROOT' => Rails.root.to_s, 'ANALYSIS_DIRECTORY' => shared_directory_path}, args, logger,log_path)
+      Utility::Oss.run_script(script_path, 4.hours, { 'SCRIPT_PATH' => dir_path, 'ANALYSIS_ID' => id, 'HOST_URL' => APP_CONFIG['os_server_host_url'], 'RAILS_ROOT' => Rails.root.to_s, 'ANALYSIS_DIRECTORY' => shared_directory_path }, args, logger, log_path)
     end
   end
-
 end
