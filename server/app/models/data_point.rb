@@ -55,6 +55,7 @@ class DataPoint
   field :run_start_time, type: DateTime, default: nil
   field :run_end_time, type: DateTime, default: nil
   field :sdp_log_file, type: Array, default: []
+  field :worker_logs, type: Hash, default: {}
 
   # Run location information
   field :ip_address, type: String

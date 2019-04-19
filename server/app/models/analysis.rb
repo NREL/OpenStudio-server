@@ -59,6 +59,7 @@ class Analysis
   field :status_message, type: String, default: '' # the resulting message from the analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
+  field :analysis_logs, type: Hash, default: {} # store the logs from the analysis init and finalize
 
   # Temp location for these vas
   field :samples, type: Integer
@@ -460,6 +461,10 @@ class Analysis
       # HOST_URL - URL of the server
       # RAILS_ROOT - location of rails
       Utility::Oss.run_script(script_path, 4.hours, { 'SCRIPT_PATH' => dir_path, 'ANALYSIS_ID' => id, 'HOST_URL' => APP_CONFIG['os_server_host_url'], 'RAILS_ROOT' => Rails.root.to_s, 'ANALYSIS_DIRECTORY' => shared_directory_path }, args, logger, log_path)
+    end
+  ensure
+    if File.exist? log_path
+      analysis_logs[script_name] = File.read(log_path).lines
     end
   end
 end
