@@ -49,8 +49,12 @@ RSpec.describe 'RunBatchDatapoints', type: :feature, depends_resque: true do
 
   before do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    Project.destroy_all
-    Delayed::Job.destroy_all
+    begin
+      Project.destroy_all
+      Delayed::Job.destroy_all
+    rescue Errno::EACCES => e
+      puts "Cannot unlink files, will try and continue"
+    end
 
     Resque.workers.each(&:unregister_worker)
     Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }

@@ -47,8 +47,12 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
   before do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    Project.destroy_all
-    Delayed::Job.destroy_all
+    begin
+      Project.destroy_all
+      Delayed::Job.destroy_all
+    rescue Errno::EACCES => e
+      puts "Cannot unlink files, will try and continue"
+    end
 
     # I am no longer using this factory for this purpose. It doesn't
     # link up everything, so just post the test using the Analysis Gem.
@@ -245,7 +249,11 @@ end
 
 RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: true do
   before :each do
-    Project.destroy_all
+    begin
+      Project.destroy_all
+    rescue Errno::EACCES => e
+      puts "Cannot unlink files, will try and continue"
+    end
     FactoryBot.create(:project_with_analyses).analyses
 
     @project = Project.first
