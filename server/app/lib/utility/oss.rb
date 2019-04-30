@@ -33,8 +33,9 @@ module Utility
     #
     # Why are these all class methods?
     def self.resolve_env_vars(env_vars)
-      # List of items to keep as regex
-      keep_starts_with = [/^RUBY/, /^BUNDLE/, /^GEM/, /^RAILS_ENV/, /PATH/]
+      # List of items to keep as regex.
+      # 4/19/2019 Keep rbenv related env vars for when running locally
+      keep_starts_with = [/^RUBY/, /^BUNDLE/, /^GEM/, /^RAILS_ENV/, /PATH/, /^RBENV/]
 
       new_env_vars = {}
       ENV.each do |var, value|
@@ -43,7 +44,7 @@ module Utility
         end
       end
 
-      # overwrite any custom env vars
+      # add and/or overwrite any custom env vars
       env_vars.each do |var, value|
         new_env_vars[var] = value
       end
