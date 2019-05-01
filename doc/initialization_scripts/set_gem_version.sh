@@ -79,6 +79,14 @@ NEW_GEM_REPO=$2
 NEW_GEM_BRANCH=$3
 GEMFILEUPDATE=$NEW_GEMFILE_DIR/analysis_$SCRIPT_ANALYSIS_ID.lock
 
+# First check if there is a file that indicates the gem has already been updated.
+# We only need to update the bundle once / worker, not every time a data point is initialized.
+echo "Checking if Gemfile has been updated in ${GEMFILEUPDATE}"
+if [ -e $GEMFILEUPDATE ]; then
+    echo "***The gem bundle has already been updated"
+    exit 0
+fi
+
 # Determine the version of Bundler and make sure it is installed
 if [ -e ${GEMFILE_DIR}/Gemfile.lock ]; then
   LOCAL_BUNDLER_VERSION=$(tail -n 1 ${GEMFILE_DIR}/Gemfile.lock | tr -dc '[0-9.]')
@@ -109,13 +117,7 @@ if [ ! -f "$GEMFILE_DIR/openstudio-gems.gemspec" ]; then
   exit 1
 fi
 
-# First check if there is a file that indicates the gem has already been updated.
-# We only need to update the bundle once / worker, not every time a data point is initialized.
-echo "Checking if Gemfile has been updated in ${GEMFILEUPDATE}"
-if [ -e $GEMFILEUPDATE ]; then
-    echo "***The gem bundle has already been updated"
-    exit 0
-fi
+
 
 # Modify the reference Gemfile and gemspec in place
 mkdir -p $NEW_GEMFILE_DIR
