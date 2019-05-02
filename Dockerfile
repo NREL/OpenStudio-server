@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 
-ARG OPENSTUDIO_VERSION=2.7.1
+ARG OPENSTUDIO_VERSION=2.8.0
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -34,7 +34,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libgdbm-dev \
         libglib2.0-dev \
         libglu1 \
-        libgsl0ldbl \
         libgsl0-dev \
         libncurses-dev \
         libreadline-dev \
