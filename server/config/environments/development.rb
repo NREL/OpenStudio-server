@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -82,4 +82,5 @@ Rails.application.configure do
   #     cd /Applications/OpenStudio-x.y.z/Ruby
   #     bundle install --path ./gems
   # config.os_gemfile_path = File.expand_path(File.join(File.dirname(`which openstudio`), '../Ruby'))
+  # config.os_gemfile_path = '/var/oscli'
 end
