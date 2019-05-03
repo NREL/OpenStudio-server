@@ -15,7 +15,7 @@ echo "pull images"
 docker pull registry:2.6
 docker pull nrel/openstudio-server:$1
 docker pull nrel/openstudio-rserve:$1
-docker pull mongo
+docker pull mongo:3.4.10
 docker pull redis:4.0.6
 
 echo "create registry"
