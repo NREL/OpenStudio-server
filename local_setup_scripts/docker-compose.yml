@@ -121,6 +121,9 @@ services:
     depends_on:
       - web
       - web-background
+      - db
+      - queue
+      - rserve
     environment: 
       - PASSWORD=password
       - DISABLE_AUTH=true     
