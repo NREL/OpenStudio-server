@@ -26,9 +26,14 @@ sleep 10
 echo "tag"
 docker tag nrel/openstudio-server:$1 127.0.0.1:5000/openstudio-server
 docker tag nrel/openstudio-rserve:$1 127.0.0.1:5000/openstudio-rserve
-docker tag mongo:latest 127.0.0.1:5000/mongo
+docker tag mongo:3.4.10 127.0.0.1:5000/mongo
 docker tag redis:4.0.6 127.0.0.1:5000/redis
 sleep 3
+echo "cleanup"
+docker image rm mongo:3.4.10 -f
+docker image rm redis:4.0.6 -f
+docker image rm nrel/openstudio-server:$1 -f
+docker image rm nrel/openstudio-rserve:$1 -f
 echo "push"
 docker push 127.0.0.1:5000/openstudio-server
 docker push 127.0.0.1:5000/openstudio-rserve
