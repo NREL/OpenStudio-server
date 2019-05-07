@@ -111,7 +111,19 @@ services:
       - web-background
       - db
       - queue
-      - rserve  
+      - rserve
+  r-notebook:
+    image: 127.0.0.1:5000/openstudio-rstudio
+    ports:
+      - "8787:8787"
+    volumes:
+      - osdata:/mnt/openstudio
+    depends_on:
+      - web
+      - web-background
+    environment: 
+      - PASSWORD=password
+      - DISABLE_AUTH=true     
 volumes:
   osdata:
     external: true
