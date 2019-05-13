@@ -27,7 +27,7 @@ docker build . -t="127.0.0.1:5000/openstudio-rnotebook"
 docker push 127.0.0.1:5000/openstudio-rnotebook
 echo "pull mongo"
 docker pull mongo:3.4.10
-docker tag mongo 127.0.0.1:5000/mongo
+docker tag mongo:3.4.10 127.0.0.1:5000/mongo
 docker push 127.0.0.1:5000/mongo
 docker image rm mongo:3.4.10 -f || true
 echo "pull redis"
