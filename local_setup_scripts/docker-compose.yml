@@ -113,7 +113,7 @@ services:
       - queue
       - rserve
   r-notebook:
-    image: 127.0.0.1:5000/openstudio-rstudio
+    image: 127.0.0.1:5000/openstudio-rnotebook
     ports:
       - "8787:8787"
     volumes:
