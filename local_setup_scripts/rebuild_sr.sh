@@ -29,7 +29,7 @@ echo "pull mongo"
 docker pull mongo:3.4.10
 docker tag mongo 127.0.0.1:5000/mongo
 docker push 127.0.0.1:5000/mongo
-docker image rm mongo -f || true
+docker image rm mongo:3.4.10 -f || true
 echo "pull redis"
 docker pull redis:4.0.6
 docker tag redis:4.0.6 127.0.0.1:5000/redis
