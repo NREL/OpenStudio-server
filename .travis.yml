@@ -80,11 +80,12 @@ jobs:
       env:
         - BUILD_TYPE=docker
       before_script:
+        - export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
         - docker images --all
         - docker --version
         - docker-compose --version
         - docker volume create --name=osdata
-        - docker-compose build web
+        - docker-compose build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web
         - docker-compose build rserve
       script: ./docker/deployment/scripts/deploy_docker.sh
 
