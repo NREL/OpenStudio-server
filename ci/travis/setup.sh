@@ -29,7 +29,7 @@ else
         sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-        sudo ./OpenStudio-$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION_EXT.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION_EXT.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
+        sudo ./OpenStudio-$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION_EXT.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION_EXT.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
         # tree ${HOME}/openstudio/Ruby
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
