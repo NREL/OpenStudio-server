@@ -48,9 +48,7 @@ module DjJobs
       # this is also run from resque job, which leverages perform code below.
       # only queue data_point on initialize for delayed_jobs
       @data_point.set_queued_state if Rails.application.config.job_manager == :delayed_job
-    end
 
-    def perform
       # Create the analysis, simulation, and run directory
       FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
       FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
@@ -59,7 +57,9 @@ module DjJobs
 
       # Logger for the simulate datapoint
       @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
+    end
 
+    def perform
       # Error if @datapoint doesn't exist
       if @data_point.nil?
         @sim_logger = 'Could not find datapoint; @datapoint was nil'
@@ -540,6 +540,11 @@ module DjJobs
       msg = "Error #{e.message} running #{script_name}: #{e.backtrace.join("\n")}"
       @sim_logger.error msg
       raise msg
+    ensure
+      # save the log information to the datapoint if it exists
+      if File.exist? log_path
+        @data_point.worker_logs[script_name] = File.read(log_path).lines
+      end
     end
   end
 end

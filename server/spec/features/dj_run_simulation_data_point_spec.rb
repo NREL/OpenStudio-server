@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -47,8 +47,12 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
   before do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    Project.destroy_all
-    Delayed::Job.destroy_all
+    begin
+      Project.destroy_all
+      Delayed::Job.destroy_all
+    rescue Errno::EACCES => e
+      puts "Cannot unlink files, will try and continue"
+    end
 
     # I am no longer using this factory for this purpose. It doesn't
     # link up everything, so just post the test using the Analysis Gem.
@@ -240,5 +244,46 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     expect(a.first).to eq '00_Job0'
     expect(a.last).to eq '21_Job21'
     expect(a[3]).to eq '11_Job11'
+  end
+end
+
+RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: true do
+  before :each do
+    begin
+      Project.destroy_all
+    rescue Errno::EACCES => e
+      puts "Cannot unlink files, will try and continue"
+    end
+    FactoryBot.create(:project_with_analyses).analyses
+
+    @project = Project.first
+    @analysis = @project.analyses.first
+    @data_point = @analysis.data_points.first
+  end
+
+  it 'launches a script successfully' do
+    job = DjJobs::RunSimulateDataPoint.new(@data_point.id)
+
+    # copy over the test script to the directory
+    FileUtils.mkdir_p "#{job.send :analysis_dir}/scripts/data_point"
+    FileUtils.cp('spec/files/worker_init_test.sh', "#{job.send :analysis_dir}/scripts/data_point")
+    FileUtils.cp('spec/files/worker_init_test.args', "#{job.send :analysis_dir}/scripts/data_point")
+
+    # call the private method for testing purposes
+    job.send :run_script_with_args, 'worker_init_test'
+
+    # verify that a log file was created
+
+    log_file = "#{job.send :analysis_dir}/data_point_#{@data_point.id}/worker_init_test.log"
+    expect(File.exist? log_file).to eq true
+    if File.exist? log_file
+      file_contents =  File.read(log_file)
+      expect(file_contents.include? 'argument number 1')
+    end
+
+    # verify that the init log is attached to the datapoint
+    # For some reason the worker_logs aren't working within the testing framework. They work in
+    # actual deployment. # TODO: Figure out why worker_logs don't show up for tests
+    puts @data_point.worker_logs.inspect
   end
 end

@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -49,8 +49,12 @@ RSpec.describe 'RunBatchDatapoints', type: :feature, depends_resque: true do
 
   before do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    Project.destroy_all
-    Delayed::Job.destroy_all
+    begin
+      Project.destroy_all
+      Delayed::Job.destroy_all
+    rescue Errno::EACCES => e
+      puts "Cannot unlink files, will try and continue"
+    end
 
     Resque.workers.each(&:unregister_worker)
     Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }

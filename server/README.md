@@ -39,8 +39,8 @@ bin/delayed_job -i server stop && bin/delayed_job -i server --queue=analyses,bac
 ```bash
 # Foreground - one terminal for each command
 QUEUES=background,analyses bundle exec rake environment resque:work
-COUNT=4 QUEUES=simulations bundle exec rake environment resque:workers
 QUEUES=analysis_wrappers bundle exec rake environment resque:work
+COUNT=2 QUEUES=simulations bundle exec rake environment resque:workers
 ```
 
 ### Running Simulations for development in the foreground
@@ -66,7 +66,7 @@ libraries already installed.
 
 ```bash
 # from OpenStudio-server root directory
-mkdir -p worker-nodes
+mkdir -p worker-nodes/server/R
 cd worker-nodes
 docker run -it -v $(pwd):$(pwd) -p 6311:6311 nrel/openstudio-rserve
 ```

@@ -1,9 +1,11 @@
 .git
+.bundle
 .idea
 vagrant
+/doc
 /gems
 /server/gems
-/server/.bundle/
+/server/.bundle
 /server/Gemfile.lock
 /server/log
 /server/public/assets
