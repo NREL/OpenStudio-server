@@ -8,11 +8,7 @@ OPENSTUDIO_VERSION_EXT=$3
 
 if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # OPENSTUDIO_VERSION_EXT may be empty
-    if [ ! -z ${OPENSTUDIO_VERSION_EXT} ];
-        OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION_EXT.$OPENSTUDIO_SHA-Linux.deb
-    else
-        OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Linux.deb
-    fi
+    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Linux.deb
     
     echo "Installing OpenStudio ${OPENSTUDIO_DOWNLOAD_FILENAME}"
 
@@ -34,6 +30,6 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
         && rm -rf /usr/SketchUpPlugin \
         && rm -rf /var/lib/apt/lists/*
 else
-    echo "Must pass in the OpenStudio version,  and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
+    echo "Must pass in the OpenStudio version, and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
     exit 9
 fi
