@@ -2,6 +2,8 @@
 
 # This script assumes you are running as a superuser.
 
+# Revision 5/24/2019 - NL removed libwxgtk3.0-0v5 in favor of ibwxgtk3.0. The former package is not long available.
+
 OPENSTUDIO_VERSION=$1
 OPENSTUDIO_SHA=$2
 
@@ -16,7 +18,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # gdebi handles the installation of OpenStudio's dependencies including Qt5 and Boost
     # libwxgtk3.0-0 is a new dependency as of 3/8/2018
     apt-get update && apt-get install -y --no-install-recommends \
-        libwxgtk3.0-0v5 \
+        libwxgtk3.0 \
         gdebi-core \
         locales \
         curl \
