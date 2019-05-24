@@ -121,6 +121,7 @@ paths = [
     # single files
     { glob: 'bin/openstudio_meta', license: ruby_header_text, regex: ruby_regex },
     { glob: 'bin/resources/local/*', license: ruby_header_text, regex: ruby_regex },
+    { glob: 'LICENSE', license: ruby_header_text, regex: ruby_regex },
 
     # erb
     { glob: 'server/app/views/**/*.html.erb', license: erb_header_text, regex: erb_regex },

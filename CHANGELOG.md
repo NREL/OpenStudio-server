@@ -1,6 +1,19 @@
 OpenStudio Server
 =================
 
+Version 2.8.1
+-------------
+
+Date Range 4/13/19 - 5/24/19
+
+* Update AWS Gem
+
+Accepted Pull Requests: 4
+- Fixed [#472]( https://github.com/NREL/OpenStudio-server/pull/472 ), add rstan and field to R
+- Fixed [#482]( https://github.com/NREL/OpenStudio-server/pull/482 ), Worker Init/Final Log on Datapoint
+- Fixed [#484]( https://github.com/NREL/OpenStudio-server/pull/484 ), Copyrights and Set Gem Version Update
+- Fixed [#485]( https://github.com/NREL/OpenStudio-server/pull/485 ), rubocop-rspec 1.32.0
+
 Version 2.8.0
 -------------
 Date Range 11/17/18 - 4/12/19
