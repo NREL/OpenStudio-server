@@ -2,9 +2,9 @@ version: 1.0.{build}-{branch}
 
 environment:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 2.8.0
-  OPENSTUDIO_VERSION_SHA: 55665635f0
-  OPENSTUDIO_VERSION_EXT: 
+  OPENSTUDIO_VERSION: 2.8.1
+  OPENSTUDIO_VERSION_SHA: 809785b98f
+  OPENSTUDIO_VERSION_EXT: -rc1
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
 
   
