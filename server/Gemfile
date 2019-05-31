@@ -109,6 +109,7 @@ group :development, :test do
   gem 'meta_request'
 
   gem 'capybara'
+  gem 'public_suffix', '=3.0.3'
   gem 'coveralls', require: false
   gem 'rspec', '~> 3.4'
   gem 'rspec-rails'
