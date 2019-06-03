@@ -176,6 +176,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
     # pulling data point simulation log
     l = RestClient.get "http://#{host}/data_points/#{datapoint_id}/download_result_file?filename=#{datapoint_id}.log"
+    expect(l).to eq('hack to inspect oscli output')
     expect(l.include?('Oscli output:')).to eq(true)
 
     # Verify that the results exist
