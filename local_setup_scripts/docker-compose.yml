@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 services:
   db:
     image: 127.0.0.1:5000/mongo
@@ -34,6 +34,7 @@ services:
       - OS_SERVER_NUMBER_OF_WORKERS=${AWS_OS_SERVER_NUMBER_OF_WORKERS}
       - MAX_REQUESTS=${AWS_MAX_REQUESTS}
       - MAX_POOL=${AWS_MAX_POOL}
+      - QUEUES=analysis_wrappers
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -46,6 +47,7 @@ services:
       resources:
         reservations:
           cpus: "${AWS_WEB_CORES}"
+    command: /usr/local/bin/start-server
   web-background:
     image: 127.0.0.1:5000/openstudio-server
     environment:
@@ -53,7 +55,6 @@ services:
       - QUEUES=background,analyses
     volumes:
       - osdata:/mnt/openstudio
-    command: bundle exec rake environment resque:work
     depends_on:
       - db
       - web
@@ -65,12 +66,12 @@ services:
       resources:
         reservations:
           cpus: "1"
+    command: /usr/local/bin/start-web-background
   worker:
     image: 127.0.0.1:5000/openstudio-server
     environment:
       - QUEUES=simulations
       - COUNT=1
-    command: bundle exec rake environment resque:work
     volumes:
       - /mnt/openstudio
     depends_on:
@@ -83,6 +84,7 @@ services:
       resources:
         reservations:
           cpus: "1"
+    command: /usr/local/bin/start-workers
   rserve:
     image: 127.0.0.1:5000/openstudio-rserve
     volumes:
@@ -98,6 +100,18 @@ services:
       resources:
         reservations:
           cpus: "1"
+  notebook:
+    image: 127.0.0.1:5000/openstudio-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - osdata:/mnt/openstudio
+    depends_on:
+      - web
+      - web-background
+      - db
+      - queue
+      - rserve  
 volumes:
   osdata:
     external: true

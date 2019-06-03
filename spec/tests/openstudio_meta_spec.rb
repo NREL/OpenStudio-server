@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -250,6 +250,8 @@ RSpec.describe OpenStudioMeta do
       end
     end
     data_points.each do |data_point|
+      # l = RestClient.get "http://localhost:8080/data_points/#{data_point[:_id]}/download_result_file?filename=#{data_point[:_id]}.log"
+      # expect(l).to eq('hack to view oscli output')
       a = RestClient.get "http://localhost:8080/data_points/#{data_point[:_id]}.json"
       a = JSON.parse(a, symbolize_names: true)
       expect(a[:data_point][:status_message]).to eq('completed normal')

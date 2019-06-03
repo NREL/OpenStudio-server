@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,8 +34,9 @@
 # *******************************************************************************
 
 module OpenstudioServer
-  VERSION = '2.8.0'.freeze
+  VERSION = '2.8.1'.freeze
   # format should be ^.*\-{1}[a-z]+[0-9]+
-  # for example: -rc0, -beta6, -customusecase0
-  VERSION_EXT = ''.freeze # with preceding - or +
+  # for example: -rc1, -beta6, -customusecase0
+  VERSION_EXT = '-rc1'.freeze # with preceding - or +
+  OS_SHA = '809785b98f'
 end

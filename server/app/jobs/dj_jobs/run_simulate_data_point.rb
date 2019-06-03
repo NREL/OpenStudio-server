@@ -48,9 +48,7 @@ module DjJobs
       # this is also run from resque job, which leverages perform code below.
       # only queue data_point on initialize for delayed_jobs
       @data_point.set_queued_state if Rails.application.config.job_manager == :delayed_job
-    end
 
-    def perform
       # Create the analysis, simulation, and run directory
       FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
       FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
@@ -59,7 +57,9 @@ module DjJobs
 
       # Logger for the simulate datapoint
       @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
+    end
 
+    def perform
       # Error if @datapoint doesn't exist
       if @data_point.nil?
         @sim_logger = 'Could not find datapoint; @datapoint was nil'
@@ -195,8 +195,22 @@ module DjJobs
             cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow '#{osw_path}' --debug"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
-
-            pid = Process.spawn({ 'BUNDLE_GEMFILE' => nil, 'BUNDLE_PATH' => nil }, cmd, [:err, :out] => [process_log, 'w'])
+            oscli_env_unset = { 
+              'BUNDLE_GEMFILE' => nil, 
+              'BUNDLE_PATH' => nil, 
+              'RUBYLIB' => nil, 
+              'RUBYOPT' => nil, 
+              'BUNDLE_BIN_PATH' => nil, 
+              'BUNDLER_VERSION' => nil,
+              'BUNDLER_ORIG_PATH' => nil,
+              'BUNDLER_ORIG_MANPATH' => nil, 
+              'GEM_PATH' => nil,
+              'GEM_HOME' => nil,
+              'BUNDLE_GEMFILE' => nil,
+              'BUNDLE_PATH' => nil,
+              'BUNDLE_WITHOUT' => nil
+            }
+            pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
 
             # timeout the process if it doesn't return in 4 hours
             Timeout.timeout(14400) do
@@ -540,6 +554,11 @@ module DjJobs
       msg = "Error #{e.message} running #{script_name}: #{e.backtrace.join("\n")}"
       @sim_logger.error msg
       raise msg
+    ensure
+      # save the log information to the datapoint if it exists
+      if File.exist? log_path
+        @data_point.worker_logs[script_name] = File.read(log_path).lines
+      end
     end
   end
 end
