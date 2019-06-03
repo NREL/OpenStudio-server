@@ -250,6 +250,8 @@ RSpec.describe OpenStudioMeta do
       end
     end
     data_points.each do |data_point|
+      # l = RestClient.get "http://localhost:8080/data_points/#{data_point[:_id]}/download_result_file?filename=#{data_point[:_id]}.log"
+      # expect(l).to eq('hack to view oscli output')
       a = RestClient.get "http://localhost:8080/data_points/#{data_point[:_id]}.json"
       a = JSON.parse(a, symbolize_names: true)
       expect(a[:data_point][:status_message]).to eq('completed normal')

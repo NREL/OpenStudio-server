@@ -5,7 +5,7 @@ rvm: 2.2.4
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=2.8.0 OPENSTUDIO_VERSION_SHA=55665635f0
+    - OPENSTUDIO_VERSION=2.8.1 OPENSTUDIO_VERSION_SHA=809785b98f OPENSTUDIO_VERSION_EXT=-rc1
     - DOCKER_COMPOSE_VERSION=1.21.1
 
 gemfile:
@@ -56,13 +56,14 @@ jobs:
         - BUILD_TYPE=docker
       before_script:
         # remove the .git in the .dockerignore so coverage can be reported correctly to coveralls
+        - export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
         - sed -i -E "s/.git//g" .dockerignore
         - docker volume create --name=osdata
         - docker images --all
         - docker --version
         - docker-compose --version
         - docker-compose -f docker-compose.test.yml pull
-        - docker-compose -f docker-compose.test.yml build
+        - docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
       script:
         - docker-compose -f docker-compose.test.yml run web && docker-compose stop
       after_script:
@@ -80,11 +81,12 @@ jobs:
       env:
         - BUILD_TYPE=docker
       before_script:
+        - export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
         - docker images --all
         - docker --version
         - docker-compose --version
         - docker volume create --name=osdata
-        - docker-compose build web
+        - docker-compose build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web
         - docker-compose build rserve
       script: ./docker/deployment/scripts/deploy_docker.sh
 
