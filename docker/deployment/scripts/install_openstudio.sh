@@ -7,12 +7,15 @@
 
 OPENSTUDIO_VERSION=$1
 OPENSTUDIO_SHA=$2
+OPENSTUDIO_VERSION_EXT=$3
 
 if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
-    echo "Installing OpenStudio ${OPENSTUDIO_VERSION}.${OPENSTUDIO_SHA}"
+    # OPENSTUDIO_VERSION_EXT may be empty
+    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION_EXT.$OPENSTUDIO_SHA-Linux.deb
+    
+    echo "Installing OpenStudio ${OPENSTUDIO_DOWNLOAD_FILENAME}"
 
     OPENSTUDIO_DOWNLOAD_BASE_URL=https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
-    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_SHA-Linux.deb
     OPENSTUDIO_DOWNLOAD_URL=$OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     # Install gdebi, then download and install OpenStudio, then clean up.
@@ -29,6 +32,6 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
         && rm -rf /usr/SketchUpPlugin \
         && rm -rf /var/lib/apt/lists/*
 else
-    echo "Must pass in the OpenStudio version and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
+    echo "Must pass in the OpenStudio version, and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
     exit 9
 fi

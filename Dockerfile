@@ -3,8 +3,8 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-
-ARG OPENSTUDIO_VERSION=2.8.0
+#may include suffix
+ARG OPENSTUDIO_VERSION
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
