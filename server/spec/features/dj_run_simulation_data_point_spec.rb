@@ -163,6 +163,10 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
     a = JSON.parse(a, symbolize_names: true)
     puts a
+    
+    l = RestClient.get "http://#{host}/data_points/#{datapoint_id}/download_result_file?filename=#{datapoint_id}.log"
+    expect(l).to eq('hack to inspect oscli output')
+
     expect(a[:data_point][:name]).to eq('Test Datapoint')
     expect(a[:data_point][:status_message]).to eq('completed normal')
     expect(a[:data_point][:status]).to eq('completed')
@@ -176,7 +180,6 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
     # pulling data point simulation log
     l = RestClient.get "http://#{host}/data_points/#{datapoint_id}/download_result_file?filename=#{datapoint_id}.log"
-    expect(l).to eq('hack to inspect oscli output')
     expect(l.include?('Oscli output:')).to eq(true)
 
     # Verify that the results exist
