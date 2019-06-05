@@ -38,7 +38,9 @@ class AdminController < ApplicationController
     require 'rubygems'
     @gems = Gem::Specification.all.map { |g| [g.name, g.version.to_s] }.sort
     Rails.logger.debug "oscli version command: #{Utility::Oss.oscli_cmd} openstudio_version"
-    version = `unset BUNDLE_GEMFILE && unset GEM_PATH && unset GEM_HOME && unset RUBYLIB && #{Utility::Oss.oscli_cmd} openstudio_version`
+    # for now, don't explicitly unset for windows.  if proves necessary, we will use set VAR1= && set VAR2= && call echo %^oscli_cmd% syntax
+    unset_vars = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? '' : 'unset '+Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join(' && unset && ')
+    version = `#{unset_vars}#{Utility::Oss.oscli_cmd} openstudio_version`
     Rails.logger.debug "oscli version output: #{version}"
     @os_cli = version ? version.strip : 'Unknown'
   end
