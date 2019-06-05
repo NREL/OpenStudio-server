@@ -1,5 +1,22 @@
 module Utility
   class Oss
+    # this list should match the env vars unset in the extension gem runner: 
+    # https://github.com/NREL/openstudio-extension-gem/blob/develop/lib/openstudio/extension/runner.rb#L155
+    ENV_VARS_TO_UNSET_FOR_OSCLI = [
+      'BUNDLE_GEMFILE',
+      'BUNDLE_PATH',
+      'RUBYLIB',
+      'RUBYOPT',
+      'BUNDLE_BIN_PATH',
+      'BUNDLER_VERSION',
+      'BUNDLER_ORIG_PATH',
+      'BUNDLER_ORIG_MANPATH',
+      'GEM_PATH',
+      'GEM_HOME',
+      'BUNDLE_GEMFILE',
+      'BUNDLE_PATH',
+      'BUNDLE_WITHOUT'
+    ]
     # return command to run openstudio cli on current platform
     def self.oscli_cmd(logger = Rails.logger)
       # determine if an explicit oscli path has been set via the meta-cli option, warn if not
