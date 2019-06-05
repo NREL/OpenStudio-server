@@ -4,15 +4,21 @@ OpenStudio Server
 Version 2.8.1
 -------------
 
-Date Range 4/13/19 - 5/24/19
+Date Range 4/13/19 - 6/5/19
 
 * Update AWS Gem
+* Added support for pre-releases: both using pre-release versions of OpenStudio and publishing pre-release builds of OpenStudio Server
+* Updated handling of environment variables for OpenStudio CLI
 
-Accepted Pull Requests: 4
+Accepted Pull Requests: 8
 - Fixed [#472]( https://github.com/NREL/OpenStudio-server/pull/472 ), add rstan and field to R
+- Fixed [#473]( https://github.com/NREL/OpenStudio-server/pull/473 ), set up CI to work w/pre-release OpenStudio packages by adding OPENSTUDIO_VERSION_EXT.
 - Fixed [#482]( https://github.com/NREL/OpenStudio-server/pull/482 ), Worker Init/Final Log on Datapoint
 - Fixed [#484]( https://github.com/NREL/OpenStudio-server/pull/484 ), Copyrights and Set Gem Version Update
 - Fixed [#485]( https://github.com/NREL/OpenStudio-server/pull/485 ), rubocop-rspec 1.32.0
+- Fixed [#487]( https://github.com/NREL/OpenStudio-server/pull/487 ), Prepare 2.8.1
+- Fixed [#488]( https://github.com/NREL/OpenStudio-server/pull/488 ), fix redis to 4.1.0 since 4.1.2 needs ruby 2.3.0
+- Fixed [#492]( https://github.com/NREL/OpenStudio-server/pull/492 ), 2.8.1-rc1
 
 Version 2.8.0
 -------------
