@@ -4,7 +4,7 @@ environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 2.8.1
   OPENSTUDIO_VERSION_SHA: 6914d4f590
-  OPENSTUDIO_VERSION_EXT: -rc2
+  OPENSTUDIO_VERSION_EXT:
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
 
   
