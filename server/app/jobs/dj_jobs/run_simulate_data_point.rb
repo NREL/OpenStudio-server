@@ -195,21 +195,7 @@ module DjJobs
             cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow '#{osw_path}' --debug"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
-            oscli_env_unset = { 
-              'BUNDLE_GEMFILE' => nil, 
-              'BUNDLE_PATH' => nil, 
-              'RUBYLIB' => nil, 
-              'RUBYOPT' => nil, 
-              'BUNDLE_BIN_PATH' => nil, 
-              'BUNDLER_VERSION' => nil,
-              'BUNDLER_ORIG_PATH' => nil,
-              'BUNDLER_ORIG_MANPATH' => nil, 
-              'GEM_PATH' => nil,
-              'GEM_HOME' => nil,
-              'BUNDLE_GEMFILE' => nil,
-              'BUNDLE_PATH' => nil,
-              'BUNDLE_WITHOUT' => nil
-            }
+            oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
             pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
 
             # timeout the process if it doesn't return in 4 hours
