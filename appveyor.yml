@@ -1,32 +1,32 @@
-version: 1.0.{build}-{branch}
+# version: 1.0.{build}-{branch}
 
-environment:
-  USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 2.8.1
-  OPENSTUDIO_VERSION_SHA: 6914d4f590
-  OPENSTUDIO_VERSION_EXT:
-  OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+# environment:
+#   USE_TESTING_TIMEOUTS: "true"
+#   OPENSTUDIO_VERSION: 2.8.1
+#   OPENSTUDIO_VERSION_SHA: 6914d4f590
+#   OPENSTUDIO_VERSION_EXT:
+#   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
 
   
-  matrix:
-    - RUBY_VERSION: "224-x64"
+#   matrix:
+#     - RUBY_VERSION: "224-x64"
 
-clone_folder: C:\projects\openstudio-server
+# clone_folder: C:\projects\openstudio-server
 
-install:
-  - C:\projects\openstudio-server\ci\appveyor\setup.cmd
+# install:
+#   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
-build: off
+# build: off
 
-before_test:
-  - cmd: ruby -v
-  - cmd: gem -v
-  - cmd: bundle -v
-  - cmd: mongod.exe --version
+# before_test:
+#   - cmd: ruby -v
+#   - cmd: gem -v
+#   - cmd: bundle -v
+#   - cmd: mongod.exe --version
 
-test_script:
-  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
-  - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
+# test_script:
+#   - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
+#   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 
-on_failure:
-  - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+# on_failure:
+#   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
