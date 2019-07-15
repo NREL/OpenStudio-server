@@ -30,7 +30,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libbz2-dev \
         libcurl4-openssl-dev \
         libdbus-glib-1-2 \
-        libgdbm3 \
+        libgdbm5 \
         libgdbm-dev \
         libglib2.0-dev \
         libglu1 \
@@ -46,7 +46,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
         libsm-dev \
         mongodb-org-tools \
         procps \
-        realpath \
         tar \
         unzip \
         wget \
@@ -55,10 +54,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 &
     && rm -rf /var/lib/apt/lists/*
 
 # Install passenger (this also installs nginx)
-ENV PASSENGER_VERSION 5.0.25
-# Install Rack. Silly workaround for not having ruby 2.2.2. Rack 1.6.4 is the
-# latest for Ruby <= 2.0
-RUN gem install rack -v=1.6.4
+ENV PASSENGER_VERSION 6.0.2
+
 RUN gem install passenger -v $PASSENGER_VERSION
 RUN passenger-install-nginx-module
 
@@ -74,6 +71,7 @@ ENV PERL_EXE_PATH /usr/bin
 # Specify a couple arguments here, after running the majority of the installation above
 ARG rails_env=docker
 ARG bundle_args="--without development test"
+ENV OS_BUNDLER_VERSION=1.17.1
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env
