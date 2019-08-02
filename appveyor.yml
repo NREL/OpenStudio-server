@@ -3,8 +3,8 @@ version: 1.0.{build}-{branch}
 environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 2.8.1
-  # OPENSTUDIO_VERSION_SHA: 6914d4f590
-  # OPENSTUDIO_VERSION_EXT:
+  OPENSTUDIO_VERSION_SHA: 5f1c403208
+  OPENSTUDIO_VERSION_EXT:
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
 
 clone_folder: C:\projects\openstudio-server
@@ -13,7 +13,7 @@ install:
 # use pre-installed ruby version
   - set PATH=C:\Ruby25\bin;C:\Mongodb\bin;%PATH%
   - bundle install
-  # - C:\projects\openstudio-server\ci\appveyor\setup.cmd
+  - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
 build: off
 
