@@ -11,7 +11,7 @@ clone_folder: C:\projects\openstudio-server
 
 install:
 # use pre-installed ruby version
-  - set PATH=C:\Ruby25\bin;%PATH%
+  - set PATH=C:\Ruby25\bin;C:\Mongodb\bin;%PATH%
   - bundle install
   # - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
@@ -21,7 +21,7 @@ before_test:
   - cmd: ruby -v
   - cmd: gem -v
   - cmd: bundle -v
-  # - cmd: mongod.exe --version
+  - cmd: mongod.exe --version
 
 test_script:
   # - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
