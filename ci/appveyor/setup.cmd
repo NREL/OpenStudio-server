@@ -16,8 +16,8 @@ REM curl -SLO https://rubygems.org/downloads/rubygems-update-2.7.8.gem
 REM C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\gem install --local C:\rubygems-update-2.7.8.gem
 REM C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\update_rubygems --no-ri --no-rdoc
 REM C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\gem uninstall rubygems-update -x -v 2.7.8
-C:\Ruby25\bin\ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
-cd c:\projects\openstudio-server
-REM C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\bundle install
-echo List out the test Directory
-dir C:\projects\openstudio-server\spec\files\
+REM C:\Ruby25\bin\ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
+REM cd c:\projects\openstudio-server
+REM REM C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\bundle install
+REM echo List out the test Directory
+REM dir C:\projects\openstudio-server\spec\files\
