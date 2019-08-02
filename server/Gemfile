@@ -14,7 +14,7 @@ gem 'colored'
 
 # data modules
 gem 'jbuilder'
-gem 'nokogiri', '~> 1.6'
+gem 'nokogiri'
 gem 'rubyzip', '~> 1.2'
 gem 'tzinfo-data'
 
@@ -33,7 +33,7 @@ gem 'net-sftp'
 gem 'net-ssh'
 
 # other useful gems
-gem 'parallel', '= 1.12.1'
+gem 'parallel'
 gem 'sys-filesystem'
 
 # web ui
