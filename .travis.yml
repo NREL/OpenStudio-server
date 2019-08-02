@@ -83,7 +83,7 @@ jobs:
         - BUILD_TYPE=docker
       before_script:
         #- export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
-        - export OPENSTUDIO_TAG=develop3
+        - export OPENSTUDIO_TAG=3-prerelease-rc2-2.8.1
         - docker images --all
         - docker --version
         - docker-compose --version
