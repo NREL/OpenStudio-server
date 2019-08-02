@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-ruby '2.5.1'
+ruby '~>2.5.1'
 
 # unclear if this will actually force this version of rubygems to be used
 # if not, run the following command to change system gem version:
