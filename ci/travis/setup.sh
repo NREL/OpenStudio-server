@@ -26,13 +26,11 @@ else
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop3/OpenStudio3-prerelease-rc2.5f1c403208-2.8.1-Darwin.dmg
         hdiutil attach OpenStudio3-prerelease-rc2.5f1c403208-2.8.1-Darwin.dmg
-        cd /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin/
-        
-
         sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         sudo /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin/OpenStudio-2.8.1.5f1c403208-Darwin.app/Contents/MacOS/OpenStudio-2.8.1.5f1c403208-Darwin --script ci/travis/install-mac.qs
+        hdiutil detach /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin -force
         # tree ${HOME}/openstudio/Ruby
     # elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         # echo "Setting up Ubuntu for unit tests and Rubocop"
