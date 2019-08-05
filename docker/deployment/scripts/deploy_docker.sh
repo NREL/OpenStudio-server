@@ -4,7 +4,7 @@ IMAGETAG=skip
 if [ "${TRAVIS_BRANCH}" == "develop" ]; then
     IMAGETAG=develop
 elif [ "${TRAVIS_BRANCH}" == "develop3" ]; then
-    IMAGETAG=3-prerelease-rc2-2.8.1
+    IMAGETAG=skip
 elif [ "${TRAVIS_BRANCH}" == "nrcan-master" ]; then
     # NRCAN is still using pre 2.4.1 version of Server. This will break when they upgrade.
     IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION")-nrcan"
