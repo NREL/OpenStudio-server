@@ -23,8 +23,8 @@ before_test:
   - cmd: mongod.exe --version
 
 test_script:
-  # - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
-  # - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
+  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
+  - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 on_finish:
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
