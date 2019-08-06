@@ -12,7 +12,6 @@ clone_folder: C:\projects\openstudio-server
 install:
 # use pre-installed ruby version
   - set PATH=C:\Ruby25\bin;C:\Mongodb\bin;%PATH%
-  - bundle install
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
 build: off
