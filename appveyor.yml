@@ -6,6 +6,8 @@ environment:
   OPENSTUDIO_VERSION_SHA: 5f1c403208
   OPENSTUDIO_VERSION_EXT:
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+  RUBY_VERSION=25-64x
+  BUNDLER_VERSION=1.17.1
 
 clone_folder: C:\projects\openstudio-server
 
@@ -24,9 +26,10 @@ before_test:
   - cmd: mongod.exe --version
 
 test_script:
-  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
+  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
 on_finish:
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-on_failure:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_failure:
+  #- cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
