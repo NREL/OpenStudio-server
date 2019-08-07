@@ -32,7 +32,7 @@ else
         sudo /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin/OpenStudio-2.8.1.5f1c403208-Darwin.app/Contents/MacOS/OpenStudio-2.8.1.5f1c403208-Darwin --script ci/travis/install-mac.qs
         hdiutil detach /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin -force
         echo "verifying os installation"
-        $HOME/openstudio/bin/openstudio openstudio_version
+        unset BUNDLE_GEMFILE && $HOME/openstudio/bin/openstudio openstudio_version
         # tree ${HOME}/openstudio/Ruby
     # elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         # echo "Setting up Ubuntu for unit tests and Rubocop"
