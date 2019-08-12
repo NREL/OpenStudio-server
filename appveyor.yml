@@ -7,14 +7,14 @@ environment:
   OPENSTUDIO_VERSION_EXT:
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
   RUBY_VERSION: 25-64x
-  BUNDLER_VERSION: 1.17.1
+  #BUNDLER_VERSION: 1.17.1
 
 clone_folder: C:\projects\openstudio-server
 
 install:
 # use pre-installed ruby version
   - set PATH=C:\Ruby25-x64\bin;C:\Mongodb\bin;%PATH%
-  - bundle install
+  # - bundle install
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
 build: off
