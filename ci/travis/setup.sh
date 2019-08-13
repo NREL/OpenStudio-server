@@ -31,8 +31,10 @@ else
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         sudo /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin/OpenStudio-2.8.1.5f1c403208-Darwin.app/Contents/MacOS/OpenStudio-2.8.1.5f1c403208-Darwin --script ci/travis/install-mac.qs
         hdiutil detach /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin -force
+        export PATH="$HOME/openstudio/bin:$PATH"
         echo "verifying os installation"
-        unset BUNDLE_GEMFILE && $HOME/openstudio/bin/openstudio openstudio_version
+        unset BUNDLE_GEMFILE && openstudio openstudio_version
+        
         # tree ${HOME}/openstudio/Ruby
     # elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         # echo "Setting up Ubuntu for unit tests and Rubocop"
@@ -43,9 +45,9 @@ else
         # # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         # sudo ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
     fi
-
+    ruby -v
     ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
-
+    bundle -v
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
 fi
