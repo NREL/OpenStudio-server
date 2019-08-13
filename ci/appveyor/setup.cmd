@@ -13,7 +13,7 @@ openstudio openstudio_version
 REM If you change RUBYLIB here, make sure to change it in integration-test.ps1 and unit-test.cmd too
 set RUBYLIB=C:\projects\openstudio\Ruby
 ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
-REM cd c:\projects\openstudio-server
-REM REM C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\bundle install
+cd c:\projects\openstudio-server
+C:\Ruby%RUBY_VERSION%\bin\ruby C:\Ruby%RUBY_VERSION%\bin\bundle install
 REM echo List out the test Directory
 REM dir C:\projects\openstudio-server\spec\files\
