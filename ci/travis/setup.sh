@@ -11,12 +11,16 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
     # install pipeviewer
     sudo apt-get update
     sudo apt-get install -y pv
+    
 else
+    export PATH="$TRAVIS_BUILD_DIR/gems/bin:$PATH"
+    export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
+    export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
         # AP: do we need mongo install here ? seems to be handled by service defined in travis yml.
         # NL: Services are not handled in osx
-        brew install pv tree
+        brew install pv tree ruby@2.5
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
@@ -45,14 +49,11 @@ else
         # # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         # sudo ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
     fi
-    # note that rvm overrides cd function and overrides a bunch of env vars 
+   
     cd ${TRAVIS_BUILD_DIR}/server
-    export PATH="$TRAVIS_BUILD_DIR/gems/bin:$PATH"
-    export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
-    export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     ruby -v
     #ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
-    bundle -v
+    # bundle -v
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
     

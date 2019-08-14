@@ -1,6 +1,4 @@
-language: ruby
-
-rvm: 2.5.1
+language: minimal
 
 env:
   global:
