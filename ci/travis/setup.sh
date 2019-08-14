@@ -45,11 +45,15 @@ else
         # # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         # sudo ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
     fi
-    #remove last 3 lines of bash_profile, which contain the rvm "magic" - among other things, this overwrites key env variables PATH, GEM_HOME, GEM_PATH, ... as well as stomping on any Ruby-related commands that you think you're running.
-    sed '$d' /Users/travis/.bash_profile | sed '$d' | sed '$d' > /Users/travis/.bash_profile
+    # note that rvm overrides cd function and overrides a bunch of env vars 
+    cd ${TRAVIS_BUILD_DIR}/server
+    export PATH="$TRAVIS_BUILD_DIR/gems/bin:$PATH"
+    export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
+    export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     ruby -v
     #ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
+    
 fi
