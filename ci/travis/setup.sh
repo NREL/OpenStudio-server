@@ -13,7 +13,7 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
     sudo apt-get install -y pv
     
 else
-    export PATH="$TRAVIS_BUILD_DIR/gems/bin:$PATH"
+    export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/opt/ruby@2.5/bin:$PATH"
     export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
     export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
@@ -36,6 +36,7 @@ else
         sudo /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin/OpenStudio-2.8.1.5f1c403208-Darwin.app/Contents/MacOS/OpenStudio-2.8.1.5f1c403208-Darwin --script ci/travis/install-mac.qs
         hdiutil detach /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin -force
         export PATH="$HOME/openstudio/bin:$PATH"
+        export RUBYLIB="$HOME/openstudio/Ruby"
         echo "verifying os installation"
         unset BUNDLE_GEMFILE && openstudio openstudio_version
         
@@ -52,8 +53,8 @@ else
    
     cd ${TRAVIS_BUILD_DIR}/server
     ruby -v
-    #ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
-    # bundle -v
+    ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
+    bundle -v
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
     
