@@ -5,6 +5,7 @@ if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
     # Dir containing openstudio
     export RUBYLIB="${HOME}/openstudio/Ruby"
     export OPENSTUDIO_TEST_EXE="${HOME}/openstudio/bin/openstudio"
+    # re-export PATH, even though it's set in setup.sh. 
     export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/opt/ruby@2.5/bin:$HOME/openstudio/bin:$PATH"
     mongo_dir="/usr/local/bin"
 elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
@@ -40,6 +41,8 @@ else
         #    use same environment as PAT
         # AP do we need this or is this handled by the openstudio_meta build + start_server and stop_server commands?
         export RAILS_ENV=local
+
+        bundle install
         #    explicitly set directory.  Probably unnecessary
         cd ./
         echo "Beginning integration tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
