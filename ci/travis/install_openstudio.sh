@@ -31,9 +31,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     rm -rf /var/lib/apt/lists/* 
     locale-gen en_US en_US.UTF-8 
     dpkg-reconfigure locales
-    export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby
-    export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}/EnergyPlus/energyplus
-    export PATH=/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}
+
 else
     echo "Must pass in the OpenStudio version, and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
     exit 9

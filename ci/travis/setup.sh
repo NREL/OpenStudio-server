@@ -38,8 +38,6 @@ else
         export RUBYLIB="$HOME/openstudio/Ruby"
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
         export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
-        echo "verifying os installation"
-        unset BUNDLE_GEMFILE && openstudio openstudio_version
 
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
@@ -49,9 +47,15 @@ else
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         sudo ./ci/travis/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
+        export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby
+        export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}/EnergyPlus/energyplus
+        export PATH=/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
         export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     fi
+    echo "verifying os installation"
+    unset BUNDLE_GEMFILE && openstudio openstudio_version
+
     cd ${TRAVIS_BUILD_DIR}/server
     printenv
     ruby -v
