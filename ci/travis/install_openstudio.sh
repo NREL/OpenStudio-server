@@ -18,19 +18,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     OPENSTUDIO_DOWNLOAD_URL=$OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     # copying this from the docker-openstudio dockerfile
-    apt-get update && apt-get install -y \
-        curl \
-        vim \
-        gdebi-core \
-        ruby2.5 \
-        ruby-dev \ 
-        libffi-dev \ 
-        build-essential \
-        zlib1g-dev \
-        vim \ 
-        git \
-	    locales \
-        sudo \
+    apt-get update && apt-get install -y curl vim gdebi-core ruby2.5 ruby-dev libffi-dev build-essential zlib1g-dev vim git locales sudo
     export OPENSTUDIO_DOWNLOAD_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop3/$OPENSTUDIO_DOWNLOAD_FILENAME 
 
     echo "OpenStudio Package Download URL is ${OPENSTUDIO_DOWNLOAD_URL}" 
@@ -45,7 +33,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     dpkg-reconfigure locales
     export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby
     export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}/EnergyPlus/energyplus
-    export PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}
+    export PATH=/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}
 else
     echo "Must pass in the OpenStudio version, and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
     exit 9
