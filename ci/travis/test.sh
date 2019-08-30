@@ -18,7 +18,6 @@ elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
     export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     export RUBYLIB="/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby:/usr/Ruby"
     export OPENSTUDIO_TEST_EXE="/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin/openstudio"
-
     mongo_dir="/usr/bin"
 fi
 
