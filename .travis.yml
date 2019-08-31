@@ -8,6 +8,8 @@ addons:
   artifacts: 
     debug: true
     workding_dir: export
+    paths:
+    - ./export
 
 env:
   global:
