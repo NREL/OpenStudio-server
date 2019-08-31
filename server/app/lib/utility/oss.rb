@@ -13,8 +13,6 @@ module Utility
       'BUNDLER_ORIG_MANPATH',
       'GEM_PATH',
       'GEM_HOME',
-      'BUNDLE_GEMFILE',
-      'BUNDLE_PATH',
       'BUNDLE_WITHOUT'
     ]
     # return command to run openstudio cli on current platform

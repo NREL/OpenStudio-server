@@ -1,4 +1,4 @@
-$env:Path = "C:\Ruby$env:RUBY_VERSION\bin;C:\Mongodb\bin;$env:Path"
+$env:Path = "C:\Ruby25-x64\bin;C:\Mongodb\bin;$env:Path"
 $env:RUBYLIB = "C:\projects\openstudio\Ruby"
 $env:OPENSTUDIO_TEST_EXE = "C:\projects\openstudio\bin\openstudio.exe"
 Write-Host "RUBYLIB is: $env:RUBYLIB ; the PATH is: $env:Path ; the OPENSTUDIO_TEST_EXE is: $env:OPENSTUDIO_TEST_EXE"

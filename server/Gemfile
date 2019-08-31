@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-ruby '2.5.1'
+ruby '~>2.5.1'
 
 # unclear if this will actually force this version of rubygems to be used
 # if not, run the following command to change system gem version:
@@ -14,7 +14,7 @@ gem 'colored'
 
 # data modules
 gem 'jbuilder'
-gem 'nokogiri', '~> 1.6'
+gem 'nokogiri', '~> 1.8.2'
 gem 'rubyzip', '~> 1.2'
 gem 'tzinfo-data'
 
@@ -33,7 +33,7 @@ gem 'net-sftp'
 gem 'net-ssh'
 
 # other useful gems
-gem 'parallel', '= 1.12.1'
+gem 'parallel'
 gem 'sys-filesystem'
 
 # web ui
@@ -67,10 +67,7 @@ gem 'openstudio-workflow', '= 1.3.3'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '~> 1.0'
-# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
-# gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
-
+gem 'openstudio-analysis', '= 1.0.2'
 ## End commonly updated gems
 
 gem 'openstudio-aws', '0.7.0'
@@ -79,13 +76,6 @@ gem 'openstudio-aws', '0.7.0'
 gem 'libxml-ruby'
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
-# 2.17.5 doesn't install ubuntu 18.04 / ruby 2.5.1
-# gem 'oj', '=2.17.5' # Next release (2.18.0) doesn't install on Windows
-
-gem 'os'
-# prior note: rest-client 2.0.0 breaks the multipart posting of the zip files.
-# gem 'rest-client', '1.8.0' 
-# however, lots of "key not found: :ciphers errors => need rest client ~> 2.0"
 gem 'rest-client', '~>2.0.1' 
 gem 'nio4r', '~>2.3.1' # 2.4.0 breaks w/ruby 2.2.4
 
@@ -115,6 +105,7 @@ group :development, :test do
   gem 'meta_request'
 
   gem 'capybara'
+  gem 'puma' #used by capybara
   gem 'public_suffix', '=3.0.3'
   gem 'coveralls', require: false
   gem 'rspec', '~> 3.4'
@@ -123,7 +114,7 @@ group :development, :test do
   gem 'ruby-prof', '~> 0.15'
   gem 'selenium-webdriver', '3.141.0'
 
-  gem 'psych', '3.0.3'
+  gem 'psych', '~> 3.1.0'
   gem 'rubocop', '0.64.0'
   gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
   gem 'rubocop-rspec', '1.32.0'

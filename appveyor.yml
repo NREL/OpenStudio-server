@@ -1,32 +1,34 @@
-# version: 1.0.{build}-{branch}
+version: 1.0.{build}-{branch}
 
-# environment:
-#   USE_TESTING_TIMEOUTS: "true"
-#   OPENSTUDIO_VERSION: 2.8.1
-#   OPENSTUDIO_VERSION_SHA: 6914d4f590
-#   OPENSTUDIO_VERSION_EXT:
-#   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+environment:
+  USE_TESTING_TIMEOUTS: "true"
+  OPENSTUDIO_VERSION: 2.8.1
+  OPENSTUDIO_VERSION_SHA: 5f1c403208
+  OPENSTUDIO_VERSION_EXT:
+  OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+  RUBY_VERSION: 25-64x
+  #BUNDLER_VERSION: 1.17.1
 
-  
-#   matrix:
-#     - RUBY_VERSION: "224-x64"
+clone_folder: C:\projects\openstudio-server
 
-# clone_folder: C:\projects\openstudio-server
+install:
+# set PATH pre-installed ruby version
+  - set PATH=C:\Ruby25-x64\bin;C:\Mongodb\bin;%PATH%
+  - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
-# install:
-#   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
+build: off
 
-# build: off
+before_test:
+  - cmd: ruby -v
+  - cmd: gem -v
+  - cmd: bundle -v
+  - cmd: mongod.exe --version
 
-# before_test:
-#   - cmd: ruby -v
-#   - cmd: gem -v
-#   - cmd: bundle -v
-#   - cmd: mongod.exe --version
-
-# test_script:
-#   - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
-#   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
-
-# on_failure:
-#   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+test_script:
+  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
+  - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
+on_finish:
+  - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_failure:
+  #- cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
