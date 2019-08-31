@@ -5,7 +5,9 @@ rvm: 2.2.4
 #default paths uploaded to S3 are found via git ls-files -o 
 # see https://docs.travis-ci.com/user/uploading-artifacts/
 addons:
-  artifacts: true
+  artifacts: 
+    debug: true
+    workding_dir: export
 
 env:
   global:
