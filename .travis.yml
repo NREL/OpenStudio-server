@@ -1,6 +1,6 @@
-language: ruby
+language: minimal
 
-rvm: 2.2.4
+# rvm: 2.2.4
 
 #default paths uploaded to S3 are found via git ls-files -o 
 # see https://docs.travis-ci.com/user/uploading-artifacts/
@@ -9,7 +9,7 @@ addons:
     debug: true
     workding_dir: export
     paths:
-    - ./export
+    - ./export/*
 
 env:
   global:

@@ -14,9 +14,13 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
 else
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-        # AP: do we need mongo install here ? seems to be handled by service defined in travis yml.
-        # NL: Services are not handled in osx
-        brew install pv tree
+        brew install pv tree ruby-build
+        # install portable ruby - required for build that will eventually be published
+        # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
+        export CONFIGURE_OPTS="--enable-load-relative"
+        ruby-build 2.0.0-p648 $HOME/ruby2.2.4
+        # note that travis has rvm script installed that overwrites PATH liberally
+        export PATH=$HOME/ruby2.2.4/bin:$PATH 
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
