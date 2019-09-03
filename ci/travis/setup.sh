@@ -18,7 +18,7 @@ else
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         export CONFIGURE_OPTS="--enable-load-relative"
-        ruby-build 2.0.0-p648 $HOME/ruby2.2.4
+        ruby-build 2.2.4 $HOME/ruby2.2.4
         # note that travis has rvm script installed that overwrites PATH liberally
         export PATH=$HOME/ruby2.2.4/bin:$PATH 
 
