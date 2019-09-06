@@ -74,7 +74,7 @@ gem 'openstudio-analysis', '= 1.0.1'
 
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.7.0'
+gem 'openstudio-aws', '0.7.1'
 # gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
 
 gem 'libxml-ruby'
