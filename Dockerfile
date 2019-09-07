@@ -10,9 +10,9 @@ MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Install required libaries.
 #   realpath - needed for wait-for-it
-RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
-    echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | \
-    sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list && \
+RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv D68FA50FEA312927 && \
+    echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | \
+    sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list && \
     apt-get update \
 	&& apt-get install -y --no-install-recommends \
         apt-transport-https \
