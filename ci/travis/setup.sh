@@ -18,10 +18,8 @@ else
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         export CONFIGURE_OPTS="--enable-load-relative"
-        ruby-build 2.2.4 $HOME/ruby2.2.4
-        # note that travis has rvm script installed that overwrites PATH liberally
         export PATH=$HOME/ruby2.2.4/bin:$PATH 
-
+        ruby-build 2.2.4 $HOME/ruby2.2.4
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
         tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
@@ -49,4 +47,6 @@ else
 
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
+    #empty dir for export
+    mkdir "#{TRAVIS_BUILD_DIR}/export"
 fi
