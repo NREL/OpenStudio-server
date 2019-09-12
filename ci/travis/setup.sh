@@ -53,6 +53,5 @@ else
 
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
-    #empty dir for export
-    mkdir "${TRAVIS_BUILD_DIR}/export"
+
 fi
