@@ -18,8 +18,12 @@ else
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         export CONFIGURE_OPTS="--enable-load-relative"
-        export PATH=$HOME/ruby2.2.4/bin:$PATH 
-        ruby-build 2.2.4 $HOME/ruby2.2.4
+        export PATH="$TRAVIS_BUILD_DIR/gems/bin:$HOME/ruby2.2.4/bin:$HOME/openstudio/bin:$PATH"
+        # override rvm defaults
+        export GEM_HOME=
+        export GEM_PATH=
+        # --verbose flag keeps travis from timing out for this 
+        ruby-build --verbose 2.2.4 $HOME/ruby2.2.4
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
         tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
@@ -33,6 +37,8 @@ else
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         sudo ./OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin.app/Contents/MacOS/OpenStudio-$OPENSTUDIO_VERSION.$OPENSTUDIO_VERSION_SHA-Darwin --script ci/travis/install-mac.qs
         # tree ${HOME}/openstudio/Ruby
+        # must be set for gems (esp openstudio-workflow) to find openstudio when install_gems runs install_gems
+        export RUBYLIB="$HOME/openstudio/Ruby"
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
