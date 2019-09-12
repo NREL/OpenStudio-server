@@ -2,12 +2,12 @@ language: minimal
 
 #default paths uploaded to S3 are found via git ls-files -o 
 # see https://docs.travis-ci.com/user/uploading-artifacts/
-addons:
-  artifacts: 
-    debug: true
-    workding_dir: export
-    paths:
-    - ./export/*
+# addons:
+#   artifacts: 
+#     debug: true
+#     workding_dir: export
+#     paths:
+#     - ./export/*
 
 env:
   global:
