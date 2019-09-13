@@ -104,7 +104,6 @@ jobs:
       if: branch = travis_build_artifacts
       os: xcode9.2
       sudo: required
-      dist: xenial
       env:
         - BUILD_TYPE=export
       before_script:
