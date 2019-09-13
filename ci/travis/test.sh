@@ -41,8 +41,7 @@ else
         #    use same environment as PAT
         # AP do we need this or is this handled by the openstudio_meta build + start_server and stop_server commands?
         export RAILS_ENV=local
-        #    explicitly set directory.  Probably unnecessary
-        cd ./
+        bundle install
         echo "Beginning integration tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
         bundle exec rspec; (( exit_status = exit_status || $? ))
         exit $exit_status
