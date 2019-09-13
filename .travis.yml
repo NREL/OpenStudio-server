@@ -1,13 +1,7 @@
-language: minimal
-
-#default paths uploaded to S3 are found via git ls-files -o 
-# see https://docs.travis-ci.com/user/uploading-artifacts/
-# addons:
-#   artifacts: 
-#     debug: true
-#     workding_dir: export
-#     paths:
-#     - ./export/*
+# ruby/rvm only currently used for native linux tests.  Once those are updated w/custom ruby build, update to language:minimal
+# (but note that rvm will still be installed)
+language: ruby
+rvm: 2.2.4
 
 env:
   global:
@@ -35,16 +29,16 @@ services:
 
 jobs:
   include:
-    # - stage: test
-    #   os: linux
-    #   sudo: required
-    #   dist: xenial
-    #   env: BUILD_TYPE=test
-    # - stage: test
-    #   os: linux
-    #   sudo: required
-    #   dist: xenial
-    #   env: BUILD_TYPE=integration
+    - stage: test
+      os: linux
+      sudo: required
+      dist: xenial
+      env: BUILD_TYPE=test
+    - stage: test
+      os: linux
+      sudo: required
+      dist: xenial
+      env: BUILD_TYPE=integration
     - stage: test
       os: osx
       osx_image: xcode9.2
