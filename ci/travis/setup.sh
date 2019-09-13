@@ -55,6 +55,12 @@ else
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         sudo ./docker/deployment/scripts/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
+        export PATH="${HOME}/.rbenv/versions/2.2.4/bin"
+        export GEM_HOME=
+        export GEM_PATH=
+        # Dir containing openstudio
+        export RUBYLIB="/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby:/usr/Ruby"
+        export OPENSTUDIO_TEST_EXE="/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin/openstudio"
     fi
 
     # todo don't run this for "export" builds
