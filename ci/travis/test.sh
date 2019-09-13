@@ -10,7 +10,7 @@ if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
     export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
 elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
-    export PATH="${HOME}/.rbenv/versions/2.2.4/bin"
+    export PATH="${HOME}/.rbenv/versions/2.2.4/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}"
     export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
     export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     # Dir containing openstudio
