@@ -13,5 +13,6 @@ export ARTIFACTS_PATHS="$(ls /Users/travis/build/NREL/export/*.tar.gz | tr "\n" 
 export ARTIFACTS_MAX_SIZE=2147483648 
 # supposedly installed by default but not available
 curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
+# TODO don't recreate entire path to file within the AWS bucket.
 artifacts upload
 

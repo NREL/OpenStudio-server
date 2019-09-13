@@ -26,24 +26,24 @@ services:
 
 jobs:
   include:
-    # - stage: test
-    #   os: linux
-    #   sudo: required
-    #   dist: xenial
-    #   env: BUILD_TYPE=test
+    - stage: test
+      os: linux
+      sudo: required
+      dist: xenial
+      env: BUILD_TYPE=test
     # - stage: test
     #   os: linux
     #   sudo: required
     #   dist: xenial
     #   env: BUILD_TYPE=integration
-    - stage: test
-      os: osx
-      osx_image: xcode9.2
-      env: BUILD_TYPE=test
-    - stage: test
-      os: osx
-      osx_image: xcode9.2
-      env: BUILD_TYPE=integration
+    # - stage: test
+    #   os: osx
+    #   osx_image: xcode9.2
+    #   env: BUILD_TYPE=test
+    # - stage: test
+    #   os: osx
+    #   osx_image: xcode9.2
+    #   env: BUILD_TYPE=integration
     # - stage: test
     #   os: linux
     #   sudo: required
