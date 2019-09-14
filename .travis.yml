@@ -98,7 +98,7 @@ jobs:
         - BUILD_TYPE=export
       before_script:
       script: ./ci/travis/export_build-osx.sh
-      - stage: publish
+    - stage: publish
       # publish native build for linux to s3
       # Include your branch name below to publish a custom build to S3.
       if: branch = travis_build_artifacts
