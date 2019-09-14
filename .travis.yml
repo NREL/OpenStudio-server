@@ -90,7 +90,7 @@ jobs:
     - stage: publish
       # publish native build for osx to s3
       # Include your branch name below to publish a custom build to S3.
-      if: branch = travis_build_artifacts
+      if: branch = master OR branch = develop
       os: osx
       osx_image: xcode9.2
       sudo: required
@@ -101,7 +101,7 @@ jobs:
     - stage: publish
       # publish native build for linux to s3
       # Include your branch name below to publish a custom build to S3.
-      if: branch = travis_build_artifacts
+      if: branch = master OR branch = develop
       os: linux
       dist: xenial
       sudo: required
