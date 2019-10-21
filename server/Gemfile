@@ -64,7 +64,8 @@ gem 'roo', '~>2.7.1'
 
 # gem 'openstudio-workflow', '= 1.3.0'
 # gem 'openstudio-workflow', '= 1.3.3'
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: '95eda48'
+#gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: '2f742cbd'
+gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'fmu'
 #gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem-fmu'
 
 gem 'openstudio-analysis', '= 1.0.2'
