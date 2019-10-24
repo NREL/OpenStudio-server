@@ -59,8 +59,6 @@ install_and_verify('conf.design')
 install_and_verify('combinat')
 install_and_verify('DoE.base')
 install_and_verify('sensitivity')
-install_and_verify('rstan')
-install_and_verify('fields')
 
 # R Serve
 install_and_verify('Rserve', configure.args=c('PKG_CPPFLAGS=-DNODAEMON'), repos=c('http://rforge.net'))
