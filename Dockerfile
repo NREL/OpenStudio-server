@@ -102,8 +102,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         python-nose \
         python-numpy \
         python-pip \
-        python-pip3 \
         python-scipy \
+        python3-pip \
         procps \
         subversion \
         sudo \
