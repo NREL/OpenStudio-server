@@ -102,6 +102,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         python-nose \
         python-numpy \
         python-pip \
+        python-pip3 \
         python-scipy \
         procps \
         subversion \
@@ -159,6 +160,12 @@ RUN export uid=1000 gid=1000 && \
     chown ${uid}:${gid} -R /home/developer
 
 ENV DISPLAY :0.0
+#FMPy and dependencies (based on python3)
+RUN pip3 install PyQt5
+RUN pip3 install PyQtGraph
+RUN pip3 install matplotlib
+RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
+
 # Avoid warning that Matplotlib is building the font cache using fc-list. This may take a moment.
 # This needs to be towards the end of the script as the command writes data to
 # /home/developer/.cache
