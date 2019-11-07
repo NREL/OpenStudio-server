@@ -192,7 +192,7 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow '#{osw_path}' --debug"
+            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow '#{osw_path}'"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
             oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
