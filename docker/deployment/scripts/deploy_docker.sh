@@ -25,14 +25,17 @@ elif [ "${TRAVIS_BRANCH}" == "memfix-pw" ]; then
 #    # Retrieve the version number from rails
     echo "building branch ${TRAVIS_BRANCH}"
     IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
+    # hard code this for branch memfix-pw only
+    IMAGETAG=2.8.1-2
     echo "Image tag is ${IMAGETAG}"
+
 #    # avoid accidental publishing of master versions from custom branch by confirming the imagetag includes an extension w/ expected format
-    if ! [[ "${IMAGETAG}" =~ ^.*\-{1}[a-z]+[0-9]+ ]]; then
-        echo "skipping image"
-        IMAGETAG=skip
-        echo "Image tag is ${IMAGETAG}"
-    fi
-    echo "Image tag is ${IMAGETAG}"
+#    if ! [[ "${IMAGETAG}" =~ ^.*\-{1}+[0-9]+ ]]; then
+#        echo "skipping image"
+#        IMAGETAG=skip
+#        echo "Image tag is ${IMAGETAG}"
+#    fi
+#    echo "Image tag is ${IMAGETAG}"
 fi
 
 if [ "${IMAGETAG}" != "skip" ] && [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then
