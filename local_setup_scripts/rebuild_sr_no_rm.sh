@@ -6,11 +6,11 @@ docker volume rm osdata || true
 docker volume rm dbdata || true
 
 while [ $(docker ps -q | wc -l) != 1 ]; do sleep 5; done
-docker image rm 127.0.0.1:5000/openstudio-server -f
+#docker image rm 127.0.0.1:5000/openstudio-server -f
 docker build . -t="127.0.0.1:5000/openstudio-server"
 docker push 127.0.0.1:5000/openstudio-server
 cd /home/ubuntu/Projects/OpenStudio-Server/docker/R/
-docker image rm 127.0.0.1:5000/openstudio-rserve -f
+#docker image rm 127.0.0.1:5000/openstudio-rserve -f
 docker build . -t="127.0.0.1:5000/openstudio-rserve"
 docker push 127.0.0.1:5000/openstudio-rserve
 docker pull mongo:3.4.10

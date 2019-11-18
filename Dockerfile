@@ -132,6 +132,8 @@ RUN cd $SRC_DIR && \
     cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Metis && \
     ./get.Metis && \
     cd $SRC_DIR/Ipopt-3.12.4 && \
+    mkdir /usr/local/Ipopt-3.12.4 && \
+    mkdir /usr/local/JModelica && \
     ./configure --prefix=/usr/local/Ipopt-3.12.4 && \
     make install && \
     cd $SRC_DIR && \
@@ -164,7 +166,8 @@ ENV DISPLAY :0.0
 RUN pip3 install PyQt5
 RUN pip3 install PyQtGraph
 RUN pip3 install matplotlib
-RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
+#RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
+RUN pip3 install FMPy
 
 # Avoid warning that Matplotlib is building the font cache using fc-list. This may take a moment.
 # This needs to be towards the end of the script as the command writes data to
