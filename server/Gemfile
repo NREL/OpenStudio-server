@@ -78,6 +78,7 @@ gem 'msgpack', '~> 1.0'
 gem 'multi_json'
 gem 'rest-client', '~>2.0.1' 
 gem 'nio4r', '~>2.3.1' # 2.4.0 breaks w/ruby 2.2.4
+gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
 
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
 gem 'rubyXL', '~> 3.3.29'
