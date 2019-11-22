@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.0.0-rc1
+ARG OPENSTUDIO_VERSION=3.0.0-pre1
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -187,10 +187,14 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Radiance env vars. RUBYLIB is set in the base openstudio container
 ENV OPENSTUDIO_SERVER 'true'
-ARG OPENSTUDIO_VERSION=3.0.0-rc1
+ARG OPENSTUDIO_VERSION
 ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 #make energyplus avail through PATH for EnergyPlusToFMU
 ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
+#get EPMacro for EnergyPlusToFMU
+RUN cd /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus && \
+    wget - http://github.com/NREL/EnergyPlus/tree/develop/bin/EPMacro/Linux/EPMacro && \
+    chmod +x EPMacro
 ENV PERL_EXE_PATH /usr/bin
 
 # Specify a couple arguments here, after running the majority of the installation above
