@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3-prerelease-rc2-2.8.1
+ARG OPENSTUDIO_VERSION=3.0.0-pre1-rc1
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -167,7 +167,8 @@ RUN pip3 install PyQt5
 RUN pip3 install PyQtGraph
 RUN pip3 install matplotlib
 #RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
-RUN pip3 install FMPy
+RUN pip3 install -e git+https://github.com/brianlball/FMPy.git@stop_time#egg=FMPy
+#RUN pip3 install FMPy
 
 # Avoid warning that Matplotlib is building the font cache using fc-list. This may take a moment.
 # This needs to be towards the end of the script as the command writes data to
