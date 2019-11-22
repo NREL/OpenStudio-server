@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.0.0-pre1-rc1
+ARG OPENSTUDIO_VERSION=3.0.0-rc1
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -167,7 +167,7 @@ RUN pip3 install PyQt5
 RUN pip3 install PyQtGraph
 RUN pip3 install matplotlib
 #RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
-RUN pip3 install -e git+https://github.com/brianlball/FMPy.git@stop_time#egg=FMPy --src /usr/local/lib/python3.6
+RUN pip3 install -e git+https://github.com/brianlball/FMPy.git@stop_time#egg=FMPy --src /usr/local/lib/python3.6/dist-packages
 #RUN pip3 install FMPy
 
 # Avoid warning that Matplotlib is building the font cache using fc-list. This may take a moment.
@@ -187,8 +187,10 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Radiance env vars. RUBYLIB is set in the base openstudio container
 ENV OPENSTUDIO_SERVER 'true'
-ENV OS_RAYPATH /usr/local/openstudio-${OPENSTUDIO_VERSION}/Radiance
-ENV PATH="/usr/local/openstudio-${OPENSTUDIO_VERSION}/EnergyPlus:${PATH}"
+ARG OPENSTUDIO_VERSION=3.0.0-rc1
+ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
+#make energyplus avail through PATH for EnergyPlusToFMU
+ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
 ENV PERL_EXE_PATH /usr/bin
 
 # Specify a couple arguments here, after running the majority of the installation above
