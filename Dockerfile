@@ -188,6 +188,7 @@ ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 # Radiance env vars. RUBYLIB is set in the base openstudio container
 ENV OPENSTUDIO_SERVER 'true'
 ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
+ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
 ENV PERL_EXE_PATH /usr/bin
 
 # Specify a couple arguments here, after running the majority of the installation above
