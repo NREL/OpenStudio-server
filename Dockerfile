@@ -193,7 +193,7 @@ ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
 #get EPMacro for EnergyPlusToFMU
 RUN cd /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus && \
-    wget http://github.com/NREL/EnergyPlus/tree/develop/bin/EPMacro/Linux/EPMacro && \
+    curl -LJO http://github.com/NREL/EnergyPlus/raw/develop/bin/EPMacro/Linux/EPMacro && \
     chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
 ENV PERL_EXE_PATH /usr/bin
 
