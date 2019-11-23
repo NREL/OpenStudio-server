@@ -191,10 +191,7 @@ ARG OPENSTUDIO_VERSION
 ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 #make energyplus avail through PATH for EnergyPlusToFMU
 ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
-#get EPMacro for EnergyPlusToFMU
-#RUN cd /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus && \
-#    curl -LJO http://github.com/NREL/EnergyPlus/raw/develop/bin/EPMacro/Linux/EPMacro && \
-#    chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
+#get EPMacro and ReadVarsESO for EnergyPlusToFMU
 COPY /docker/bin/EPMacro /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
 COPY /docker/bin/ReadVarsESO /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/PostProcess/ReadVarsESO
 RUN chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
