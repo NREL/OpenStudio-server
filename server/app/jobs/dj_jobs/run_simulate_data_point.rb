@@ -351,7 +351,7 @@ module DjJobs
         @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
 
         # wait until receipt file appears then return or error
-        zip_download_timeout = 3600
+        zip_download_timeout = 28800    #change from 1hr to 8hrs
         begin
           Timeout.timeout(zip_download_timeout) do
             loop do
@@ -377,7 +377,7 @@ module DjJobs
           @sim_logger.info "Downloading analysis zip from #{download_url}"
           sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
           begin
-            Timeout.timeout(3600) do
+            Timeout.timeout(28800) do  #change from 1hr to 8hrs
               zip_download_count += 1
               File.open(download_file, 'wb') do |saved_file|
                 # the following "open" is provided by open-uri
@@ -398,7 +398,7 @@ module DjJobs
           extract_max_count = 3
           @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
           begin
-            Timeout.timeout(3600) do
+            Timeout.timeout(28800) do  #change from 1hr to 8hrs
               extract_count += 1
               OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
             end
@@ -414,7 +414,7 @@ module DjJobs
           analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
           @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
           begin
-            Timeout.timeout(3600) do
+            Timeout.timeout(28800) do  #change from 1hr to 8hrs
               json_download_count += 1
               a = RestClient.get analysis_json_url
               raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
@@ -493,7 +493,7 @@ module DjJobs
       display_name ||= File.basename(filename, '.*')
       @sim_logger.info "Saving report #{filename} to #{data_point_url}"
       begin
-        Timeout.timeout(3600) do
+        Timeout.timeout(28800) do  #change from 1hr to 8hrs
           upload_file_attempt += 1
           if content_type
             res = RestClient.post(data_point_url,

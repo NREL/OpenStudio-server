@@ -26,7 +26,7 @@ elif [ "${TRAVIS_BRANCH}" == "memfix-pw" ]; then
     echo "building branch ${TRAVIS_BRANCH}"
     IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
     # hard code this for branch memfix-pw only
-    IMAGETAG=2.8.1-2
+    IMAGETAG=2.8.1-3
     echo "Image tag is ${IMAGETAG}"
 
 #    # avoid accidental publishing of master versions from custom branch by confirming the imagetag includes an extension w/ expected format
