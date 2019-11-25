@@ -265,8 +265,8 @@ module DjJobs
             results = JSON.parse(File.read(results_file), symbolize_names: true)
             @data_point.update(results: results)
           else
-            run_result = :errored
-            @sim_logger.error "Could not find results #{results_file}"
+            #run_result = :errored
+            @sim_logger.warn "Could not find results #{results_file}"
           end
 
           @sim_logger.info 'Saving files/reports back to the server'
