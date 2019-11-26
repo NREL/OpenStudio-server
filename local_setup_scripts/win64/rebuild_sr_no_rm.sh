@@ -1,15 +1,15 @@
 #!/usr/bin/env bash -e
-cd ..
-docker stack rm osserver || true
+cd /C/Projects/OS-Server-fmu
+docker stack rm osserver -f || true
 
-docker volume rm osdata || true
-docker volume rm dbdata || true
+docker volume rm osdata -f || true
+docker volume rm dbdata -f || true
 
 while [ $(docker ps -q | wc -l) != 1 ]; do sleep 5; done
 #docker image rm 127.0.0.1:5000/openstudio-server -f
 docker build . -t="127.0.0.1:5000/openstudio-server"
 docker push 127.0.0.1:5000/openstudio-server
-cd ./docker/R/
+cd /C/Projects/OS-Server-fmu/docker/R
 #docker image rm 127.0.0.1:5000/openstudio-rserve -f
 docker build . -t="127.0.0.1:5000/openstudio-rserve"
 docker push 127.0.0.1:5000/openstudio-rserve
@@ -20,7 +20,7 @@ docker push 127.0.0.1:5000/mongo
 docker pull redis:4.0.6
 docker tag redis:4.0.6 127.0.0.1:5000/redis
 docker push 127.0.0.1:5000/redis
-cd ../../local_setup_scripts
+cd /C/Projects/OS-Server-fmu/local_setup_scripts/win64
 docker stack deploy osserver --compose-file=docker-compose.yml
 while ( nc -zv 127.0.0.1 80 3>&1 1>&2- 2>&3- ) | awk -F ":" '$3 != " Connection refused" {exit 1}'; do sleep 5; done
 docker service scale osserver_worker=1

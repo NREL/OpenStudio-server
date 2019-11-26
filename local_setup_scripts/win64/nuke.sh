@@ -36,7 +36,7 @@ docker push 127.0.0.1:5000/mongo
 docker push 127.0.0.1:5000/redis
 
 echo "deploy"
-docker stack deploy osserver --compose-file=docker-compose.yml &
+docker stack deploy osserver --compose-file=//c//Projects//OS-Server-fmu//local_setup_scripts//win64//docker-compose.yml &
 wait $!
 while ( nc -zv 127.0.0.1 80 3>&1 1>&2- 2>&3- ) | awk -F ":" '$3 != " Connection refused" {exit 1}'; do sleep 5; done
 docker service scale osserver_worker=1
