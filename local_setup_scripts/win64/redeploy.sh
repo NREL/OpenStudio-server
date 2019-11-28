@@ -1,6 +1,6 @@
 #!/usr/bin/env bash -e
 cd /C/Projects/OS-Server-fmu/
-docker stack rm osserver -f || true
+docker stack rm osserver || true
 while [ $(docker ps -q | wc -l) != 1 ]; do sleep 5; done
 sleep 10
 echo 'docker volume rm osdata and dbdata'

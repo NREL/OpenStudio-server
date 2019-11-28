@@ -1,6 +1,6 @@
 #!/usr/bin/env bash -e
 cd /C/Projects/OS-Server-fmu
-docker stack rm osserver -f || true
+docker stack rm osserver || true
 
 docker volume rm osdata -f || true
 docker volume rm dbdata -f || true
