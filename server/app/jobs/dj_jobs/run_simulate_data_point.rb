@@ -185,15 +185,16 @@ module DjJobs
       @sim_logger.info "Directory is #{simulation_dir}"
       run_log_file = File.join(run_dir, 'run.log')
       @sim_logger.info "Opening run.log file '#{run_log_file}'"
-	    @data_point.analysis.cli_debug == true ? (cli_debug = "--debug") : (cli_debug = "")
-      @data_point.analysis.cli_verbose == true ? (cli_verbose = "--verbose") : (cli_verbose = "")
+      #TODO add check for valid option or ""
+	    #@data_point.analysis.cli_debug == true ? (cli_debug = "--debug") : (cli_debug = "")
+      #@data_point.analysis.cli_verbose == true ? (cli_verbose = "--verbose") : (cli_verbose = "")
       # Fail gracefully if the datapoint errors out by returning the zip and out.osw
       begin
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{cli_verbose} run --workflow '#{osw_path}' #{cli_debug}"
+            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
             oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]

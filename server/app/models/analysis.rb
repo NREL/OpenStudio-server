@@ -49,8 +49,8 @@ class Analysis
   field :description, type: String
   field :run_flag, type: Boolean, default: false
   field :exit_on_guideline_14, type: Integer, default: 0
-  field :cli_debug, type: Boolean, default: true
-  field :cli_verbose, type: Boolean, default: true
+  field :cli_debug, type: String, default: "--debug"
+  field :cli_verbose, type: String, default: "--verbose"
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
