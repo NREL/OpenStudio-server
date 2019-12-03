@@ -132,6 +132,7 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
                                           secret_access_key: ::ENV['AWS_SECRET_KEY'],
                                           region: ::ENV['AWS_DEFAULT_REGION'] },
+                           region: ::ENV['AWS_DEFAULT_REGION'],
                            save_directory: cluster_folder }
       aws = OpenStudio::Aws::Aws.new(aws_init_options)
       aws.load_instance_info_from_file(File.join(cluster_folder, "#{aws_instance_options[:cluster_name]}.json"))
@@ -145,6 +146,7 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       ami_version = aws_instance_options[:openstudio_server_version][0] == '2' ? 3 : 2
       aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
                                           secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] },
+                           region: ::ENV['AWS_DEFAULT_REGION'],
                            ami_lookup_version: ami_version,
                            openstudio_server_version: aws_instance_options[:openstudio_server_version],
                            save_directory: cluster_folder }

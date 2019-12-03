@@ -66,7 +66,7 @@ echo $(which openstudio)
 # echo $(openstudio openstudio_version)
 for x in $(printenv RUBYLIB | tr ":" "\n")
 do
-  if [[ $x =~ .*[Oo]pen[Ss]tudio-[0-9]*\.[0-9]*\.[0-9]*/Ruby ]]; then
+  if [[ $x =~ .*[Oo]pen[Ss]tudio-[0-9]*\.[0-9]*\.[0-9]*(-rc[0-9]*)?/Ruby ]]; then
     GEMFILE_DIR=$x
     continue
   fi
