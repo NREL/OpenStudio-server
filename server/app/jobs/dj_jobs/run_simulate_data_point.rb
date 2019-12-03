@@ -185,9 +185,15 @@ module DjJobs
       @sim_logger.info "Directory is #{simulation_dir}"
       run_log_file = File.join(run_dir, 'run.log')
       @sim_logger.info "Opening run.log file '#{run_log_file}'"
-      #TODO add check for valid option or ""
-	    #@data_point.analysis.cli_debug == true ? (cli_debug = "--debug") : (cli_debug = "")
-      #@data_point.analysis.cli_verbose == true ? (cli_verbose = "--verbose") : (cli_verbose = "")
+      #add check for valid CLI option or ""
+	    unless ["","--debug"].include?(@data_point.analysis.cli_debug)
+        @sim_logger.warn "CLI_Debug option: #{@data_point.analysis.cli_debug} is not valid.  Using --debug instead."
+        @data_point.analysis.cli_debug = "--debug"
+      end
+      unless ["","--verbose"].include?(@data_point.analysis.cli_verbose)
+        @sim_logger.warn "CLI_Verbose option: #{@data_point.analysis.cli_verbose} is not valid.  Using --verbose instead."
+        @data_point.analysis.cli_verbose = "--verbose"
+      end
       # Fail gracefully if the datapoint errors out by returning the zip and out.osw
       begin
         # Make sure to pass in preserve_run_dir
