@@ -185,14 +185,22 @@ module DjJobs
       @sim_logger.info "Directory is #{simulation_dir}"
       run_log_file = File.join(run_dir, 'run.log')
       @sim_logger.info "Opening run.log file '#{run_log_file}'"
-
+      # add check for valid CLI option or ""
+      unless ['', '--debug'].include?(@data_point.analysis.cli_debug)
+        @sim_logger.warn "CLI_Debug option: #{@data_point.analysis.cli_debug} is not valid.  Using --debug instead."
+        @data_point.analysis.cli_debug = '--debug'
+      end
+      unless ['', '--verbose'].include?(@data_point.analysis.cli_verbose)
+        @sim_logger.warn "CLI_Verbose option: #{@data_point.analysis.cli_verbose} is not valid.  Using --verbose instead."
+        @data_point.analysis.cli_verbose = '--verbose'
+      end
       # Fail gracefully if the datapoint errors out by returning the zip and out.osw
       begin
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} --verbose run --workflow '#{osw_path}' --debug"
+            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
             oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
