@@ -186,7 +186,7 @@ module DjJobs
       run_log_file = File.join(run_dir, 'run.log')
       @sim_logger.info "Opening run.log file '#{run_log_file}'"
       #add check for valid CLI option or ""
-	    unless ["","--debug"].include?(@data_point.analysis.cli_debug)
+      unless ["","--debug"].include?(@data_point.analysis.cli_debug)
         @sim_logger.warn "CLI_Debug option: #{@data_point.analysis.cli_debug} is not valid.  Using --debug instead."
         @data_point.analysis.cli_debug = "--debug"
       end
