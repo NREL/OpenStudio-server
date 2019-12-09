@@ -691,6 +691,11 @@
       "file_type": "EPW",
       "path": "./weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw"
     },
+    "cli_debug": "bad value",
+    "cli_verbose": "bad value2",
+	"initialize_worker_timeout": -1,
+	"upload_results_timeout": -100,
+	"run_workflow_timeout": -2,
     "file_format_version": 1
   }
 }
