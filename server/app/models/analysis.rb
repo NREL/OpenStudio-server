@@ -49,8 +49,11 @@ class Analysis
   field :description, type: String
   field :run_flag, type: Boolean, default: false
   field :exit_on_guideline_14, type: Integer, default: 0
-  field :cli_debug, type: String, default: '--debug' # set default to --debug so CI tests pass
-  field :cli_verbose, type: String, default: '--verbose' # set default to --verbose to CI tests pass
+  field :cli_debug, type: String, default: '--debug'  # set default to --debug so CI tests pass
+  field :cli_verbose, type: String, default: '--verbose'  # set default to --verbose to CI tests pass
+  field :initialize_worker_timeout, type: Integer, default: 28800 # set default to 8 hrs
+  field :upload_results_timeout, type: Integer, default: 28800 # set default to 8 hrs
+  field :run_workflow_timeout, type: Integer, default: 28800  # set default to 8 hrs
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
@@ -396,7 +399,7 @@ class Analysis
     logger.info 'Running analysis initialization scripts'
     logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
     begin
-      Timeout.timeout(300) do
+      Timeout.timeout(3600) do  #change to 1hr for large models
         extract_count += 1
         OpenStudio::Workflow.extract_archive(seed_zip.path, shared_directory_path)
       end
