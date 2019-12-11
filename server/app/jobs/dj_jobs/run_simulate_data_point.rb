@@ -186,11 +186,11 @@ module DjJobs
       run_log_file = File.join(run_dir, 'run.log')
       @sim_logger.info "Opening run.log file '#{run_log_file}'"
       # add check for valid CLI option or ""
-      unless ['','--debug'].include?(@data_point.analysis.cli_debug)
+      unless ['', '--debug'].include?(@data_point.analysis.cli_debug)
         @sim_logger.warn "CLI_Debug option: #{@data_point.analysis.cli_debug} is not valid.  Using --debug instead."
         @data_point.analysis.cli_debug = '--debug'
       end
-      unless ['','--verbose'].include?(@data_point.analysis.cli_verbose)
+      unless ['', '--verbose'].include?(@data_point.analysis.cli_verbose)
         @sim_logger.warn "CLI_Verbose option: #{@data_point.analysis.cli_verbose} is not valid.  Using --verbose instead."
         @data_point.analysis.cli_verbose = '--verbose'
       end
@@ -205,9 +205,12 @@ module DjJobs
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
             oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
             pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
-
-            # timeout the process if it doesn't return in 8 hours
-            Timeout.timeout(28800) do
+            # add check for a valid timeout value
+            unless @data_point.analysis.run_workflow_timeout.positive?
+              @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
+              @@data_point.analysis.run_workflow_timeout = 28800
+            end
+            Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
               Process.wait(pid)
             end
 
@@ -353,15 +356,18 @@ module DjJobs
         @sim_logger.info 'receipt_file already exists, moving on'
         return true
       end
-
+      # add check for a valid timeout value
+      unless @data_point.analysis.initialize_worker_timeout.positive?
+        @sim_logger.warn "initialize_worker_timeout option: #{@data_point.analysis.initialize_worker_timeout} is not valid.  Using 28800s instead."
+        @@data_point.analysis.initialize_worker_timeout = 28800
+      end
       # This block makes this code threadsafe for non-docker deployments, i.e. desktop usage
       if File.exist? write_lock_file
         @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
 
         # wait until receipt file appears then return or error
-        zip_download_timeout = 3600
         begin
-          Timeout.timeout(zip_download_timeout) do
+          Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
             loop do
               break if File.exist? receipt_file
 
@@ -373,7 +379,7 @@ module DjJobs
           @sim_logger.info 'receipt_file appeared, moving on'
           return true
         rescue ::Timeout::Error
-          @sim_logger.error "Required analysis objects were not retrieved after #{zip_download_timeout} seconds."
+          @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds."
         end
       else
         # Try to download the analysis zip, but first lock simultanious threads
@@ -385,7 +391,7 @@ module DjJobs
           @sim_logger.info "Downloading analysis zip from #{download_url}"
           sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
           begin
-            Timeout.timeout(3600) do
+            Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               zip_download_count += 1
               File.open(download_file, 'wb') do |saved_file|
                 # the following "open" is provided by open-uri
@@ -406,7 +412,7 @@ module DjJobs
           extract_max_count = 3
           @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
           begin
-            Timeout.timeout(3600) do
+            Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               extract_count += 1
               OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
             end
@@ -422,7 +428,7 @@ module DjJobs
           analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
           @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
           begin
-            Timeout.timeout(3600) do
+            Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               json_download_count += 1
               a = RestClient.get analysis_json_url
               raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
@@ -500,8 +506,13 @@ module DjJobs
       upload_file_max_attempt = 4
       display_name ||= File.basename(filename, '.*')
       @sim_logger.info "Saving report #{filename} to #{data_point_url}"
+      # add check for a valid timeout value
+      unless @data_point.analysis.upload_results_timeout.positive?
+        @sim_logger.warn "upload_results_timeout option: #{@data_point.analysis.upload_results_timeout} is not valid.  Using 28800s instead."
+        @@data_point.analysis.upload_results_timeout = 28800
+      end
       begin
-        Timeout.timeout(3600) do
+        Timeout.timeout(@data_point.analysis.upload_results_timeout) do
           upload_file_attempt += 1
           if content_type
             res = RestClient.post(data_point_url,
