@@ -4,14 +4,14 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.0.0-pre1
+ARG OPENSTUDIO_VERSION
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 #install JModelica
 # Revision numbers from svn
-ENV REV_JMODELICA 12903
-ENV REV_ASSIMULO 873
+ENV REV_JMODELICA 14023
+ENV REV_ASSIMULO 898
 ENV SRC_DIR /usr/local/src
 
 # Define the environmental variables needed by JModelica
