@@ -4,8 +4,8 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION
-FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
+ARG OPENSTUDIO_VERSION=3.0.0-rc1-pycall
+FROM tijcolem/openstudio-$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 #install JModelica
@@ -120,36 +120,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
 RUN ln -s /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-oracle
 RUN pip install --upgrade jcc==3.5
 
-# Get Install Ipopt and JModelica, and delete source code with is more than 1GB large
-RUN cd $SRC_DIR && \
-    wget wget -O - http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz | tar xzf - && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Blas && \
-    ./get.Blas && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Lapack && \
-    ./get.Lapack && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Mumps && \
-    ./get.Mumps && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Metis && \
-    ./get.Metis && \
-    cd $SRC_DIR/Ipopt-3.12.4 && \
-    mkdir /usr/local/Ipopt-3.12.4 && \
-    mkdir /usr/local/JModelica && \
-    ./configure --prefix=/usr/local/Ipopt-3.12.4 && \
-    make install && \
-    cd $SRC_DIR && \
-    svn export -q -r $REV_JMODELICA https://svn.jmodelica.org/trunk JModelica && \
-    cd $SRC_DIR/JModelica/external && \
-    rm -rf $SRC_DIR/JModelica/external/Assimulo && \
-    svn export -q -r $REV_ASSIMULO https://svn.jmodelica.org/assimulo/trunk Assimulo && \
-    cd $SRC_DIR/JModelica && \
-    grep -rl 'solver_object.output' . | xargs sed -i 's/solver_object.output/solver_object.getOutput/' && \
-    rm -rf build && \
-    mkdir build && \
-    cd $SRC_DIR/JModelica/build && \
-    ../configure --with-ipopt=/usr/local/Ipopt-3.12.4 --prefix=/usr/local/JModelica && \
-    make install && \
-    make casadi_interface && \
-    rm -rf $SRC_DIR
+# Get Install Ipopt and JModelica, and delete source code with is more than 1GB 
 
 # Replace 1000 with your user / group id
 RUN export uid=1000 gid=1000 && \
@@ -191,11 +162,17 @@ ARG OPENSTUDIO_VERSION
 ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 #make energyplus avail through PATH for EnergyPlusToFMU
 ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
+#hard code becasue of hacked OS version
+ENV PATH="/usr/local/openstudio-3.0.0-pre1/EnergyPlus/:${PATH}"
 #get EPMacro and ReadVarsESO for EnergyPlusToFMU
 COPY /docker/bin/EPMacro /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
+COPY /docker/bin/EPMacro /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
 COPY /docker/bin/ReadVarsESO /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/PostProcess/ReadVarsESO
+COPY /docker/bin/ReadVarsESO /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
 RUN chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
+RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
 RUN chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/PostProcess/ReadVarsESO
+RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
 
 ENV PERL_EXE_PATH /usr/bin
 
