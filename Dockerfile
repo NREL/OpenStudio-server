@@ -134,7 +134,7 @@ RUN export uid=1000 gid=1000 && \
 
 ENV DISPLAY :0.0
 #FMPy and dependencies (based on python3)
-RUN pip3 install PyQt5
+RUN pip3 install 'PyQt5==5.14.0'
 RUN pip3 install PyQtGraph
 RUN pip3 install matplotlib
 #RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
