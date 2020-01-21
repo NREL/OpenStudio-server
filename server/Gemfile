@@ -101,8 +101,9 @@ end
 
 # The only resque only is :docker, :docker-dev, :production
 group :development, :docker, :'docker-dev', :'docker-test', :production, :test do
+  gem 'redis-namespace', '=1.6.0'
   gem 'redis', '=4.1.0' 
-  gem 'resque', '~> 1.27'
+  gem 'resque', '=1.27.4'
   gem 'resque-web', require: 'resque_web'
 end
 
