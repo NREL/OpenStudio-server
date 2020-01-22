@@ -18,9 +18,9 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install redis-server || true
   - sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
-  - sudo mv redis.conf /etc/redis
+  - sudo mv redis.conf /etc/redis/redis.conf
+  - cat /etc/redis/redis.conf
   - sudo service redis-server start
-  - echo PING | nc localhost 6379
   - ./ci/travis/setup.sh
 before_script:
   - sudo Xvfb :99 -ac -screen 0 1024x768x8 &
