@@ -45,7 +45,8 @@ else
         sudo apt-get update
         # per travis docs, mongodb and redis should already be installed and started from services key in bionic, but this isn't working.  explicitly install.
         #sudo apt-get install -y pv tree ruby2.5 mongodb redis-server
-        sudo apt-get install -y pv tree ruby2.5
+        sudo apt-get install -y pv tree mongodb redis-server
+        #sudo apt-get install -y pv tree ruby2.5
         #sudo systemctl start mongodb
         #sudo systemctl start redis-server
 
