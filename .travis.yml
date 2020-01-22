@@ -24,8 +24,8 @@ after_failure: ./ci/travis/print_logs.sh
 # Services for linux -- all instances
 services:
   # counter to documentation, these aren't starting for bionic
-  # - mongodb
-  # - redis-server
+  - mongodb
+  - redis-server
   - docker
 
 jobs:

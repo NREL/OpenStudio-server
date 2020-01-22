@@ -44,9 +44,10 @@ else
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update
         # per travis docs, mongodb and redis should already be installed and started from services key in bionic, but this isn't working.  explicitly install.
-        sudo apt-get install -y pv tree ruby2.5 mongodb redis-server
-        sudo systemctl start mongodb
-        sudo systemctl start redis-server
+        #sudo apt-get install -y pv tree ruby2.5 mongodb redis-server
+        sudo apt-get install -y pv tree ruby2.5
+        #sudo systemctl start mongodb
+        #sudo systemctl start redis-server
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
