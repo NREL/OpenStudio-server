@@ -15,14 +15,6 @@ env:
 # Set the default scripts that are used for the majority of the tests in the matrix
 # redis-server now wants to bind to ipv6 ::1.  This changes this behavior. 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install redis-server || true
-  - sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
-  - sudo mv redis.conf /etc/redis/redis.conf
-  - cat /etc/redis/redis.conf
-  - sudo systemctl status redis-server.service
-  - sudo systemctl stop redis-server.service
-  - sudo systemctl start redis-server.service
   - ./ci/travis/setup.sh
 before_script:
   - sudo Xvfb :99 -ac -screen 0 1024x768x8 &

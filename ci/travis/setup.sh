@@ -45,10 +45,15 @@ else
         sudo apt-get update
         # per travis docs, mongodb and redis should already be installed and started from services key in bionic, but this isn't working.  explicitly install.
         #sudo apt-get install -y pv tree ruby2.5 mongodb redis-server
-        sudo apt-get install -y pv tree mongodb redis-server
-        #sudo apt-get install -y pv tree ruby2.5
-        #sudo systemctl start mongodb
-        #sudo systemctl start redis-server
+        sudo apt-get install redis-server || true
+        sudo systemctl stop redis-server.service
+        sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
+        sudo mv redis.conf /etc/redis/redis.conf
+        cat /etc/redis/redis.conf
+        sudo systemctl start redis-server.service || true
+        sudo systemctl status redis-server.service
+        sudo apt-get install -y pv tree mongodb ruby2.5
+        sudo systemctl start mongodb
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
