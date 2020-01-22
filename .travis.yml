@@ -20,7 +20,9 @@ before_install:
   - sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
   - sudo mv redis.conf /etc/redis/redis.conf
   - cat /etc/redis/redis.conf
-  - sudo service redis-server start
+  - sudo systemctl status redis-server.service
+  - sudo systemctl stop redis-server.service
+  - sudo systemctl start redis-server.service
   - ./ci/travis/setup.sh
 before_script:
   - sudo Xvfb :99 -ac -screen 0 1024x768x8 &
