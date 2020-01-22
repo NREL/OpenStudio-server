@@ -11,7 +11,7 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
     # install pipeviewer
     sudo apt-get update
     sudo apt-get install -y pv
-    
+
 else
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 
@@ -26,14 +26,14 @@ else
         cp mongodb-osx-x86_64-3.4.18/bin/* /usr/local/bin/
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
-        curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop3/OpenStudio3-prerelease-rc2.5f1c403208-2.8.1-Darwin.dmg
-        hdiutil attach OpenStudio3-prerelease-rc2.5f1c403208-2.8.1-Darwin.dmg
+        curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/OpenStudio-3.0.0-beta%2Bc1e87e9d3b-Darwin.dmg
+        hdiutil attach OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin.dmg
         sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-        sudo /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin/OpenStudio-2.8.1.5f1c403208-Darwin.app/Contents/MacOS/OpenStudio-2.8.1.5f1c403208-Darwin --script ci/travis/install-mac.qs
-        hdiutil detach /Volumes/OpenStudio-2.8.1.5f1c403208-Darwin -force
-        
+        sudo /Volumes/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin.dmg/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin.app/Contents/MacOS/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin --script ci/travis/install-mac.qs
+        hdiutil detach /Volumes/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin -force
+
         export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/opt/ruby@2.5/bin:$HOME/openstudio/bin:$PATH"
         export RUBYLIB="$HOME/openstudio/Ruby"
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
@@ -47,7 +47,7 @@ else
         sudo apt-get install -y pv tree ruby2.5 mongodb redis-server
         sudo systemctl start mongodb
         sudo systemctl start redis-server
-        
+
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         sudo ./ci/travis/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
@@ -67,5 +67,5 @@ else
     bundle -v
     # create dir for output files which will be generated in case of failure
     mkdir "${TRAVIS_BUILD_DIR}/spec/unit-test"
-    
+
 fi

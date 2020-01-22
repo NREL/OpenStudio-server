@@ -1,7 +1,7 @@
 set PATH=C:\Program Files\Git\mingw64\bin;C:\projects\openstudio\bin;%PATH%
-echo Downloading and Installing OpenStudio (develop3 branch, %OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%.%OPENSTUDIO_VERSION_SHA%)
-REM install  develop3 build
-curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop3/OpenStudio-2.8.1.5f1c403208-Windows.exe
+echo Downloading and Installing OpenStudio (develop branch, %OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%.%OPENSTUDIO_VERSION_SHA%)
+REM install  develop build
+curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/OpenStudio-3.0.0-beta%2Bc1e87e9d3b-Windows.exe
 OpenStudio-%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%.%OPENSTUDIO_VERSION_SHA%-Windows.exe --script ci/appveyor/install-windows.qs
 move C:\openstudio C:\projects\openstudio
 dir C:\projects\openstudio
