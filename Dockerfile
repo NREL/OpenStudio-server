@@ -4,8 +4,8 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.0.0-rc1-pycall
-FROM tijcolem/openstudio-$OPENSTUDIO_VERSION as base
+ARG OPENSTUDIO_VERSION=3.0.0-beta
+FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 #install JModelica
@@ -163,16 +163,16 @@ ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 #make energyplus avail through PATH for EnergyPlusToFMU
 ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
 #hard code becasue of hacked OS version
-ENV PATH="/usr/local/openstudio-3.0.0-pre1/EnergyPlus/:${PATH}"
+#ENV PATH="/usr/local/openstudio-3.0.0-pre1/EnergyPlus/:${PATH}"
 #get EPMacro and ReadVarsESO for EnergyPlusToFMU
 COPY /docker/bin/EPMacro /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
-COPY /docker/bin/EPMacro /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
+#COPY /docker/bin/EPMacro /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
 COPY /docker/bin/ReadVarsESO /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/PostProcess/ReadVarsESO
-COPY /docker/bin/ReadVarsESO /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
+#COPY /docker/bin/ReadVarsESO /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
 RUN chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
-RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
+#RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
 RUN chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/PostProcess/ReadVarsESO
-RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
+#RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
 
 ENV PERL_EXE_PATH /usr/bin
 

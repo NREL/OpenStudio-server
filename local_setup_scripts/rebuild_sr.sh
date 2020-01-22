@@ -22,6 +22,6 @@ docker push 127.0.0.1:5000/redis
 cd /home/ubuntu/
 docker stack deploy osserver --compose-file=/home/ubuntu/docker-compose.yml
 while ( nc -zv 127.0.0.1 80 3>&1 1>&2- 2>&3- ) | awk -F ":" '$3 != " Connection refused" {exit 1}'; do sleep 5; done
-docker service scale osserver_worker=42
+docker service scale osserver_worker=1
 echo 'osserver stack rebuilt and redeployed'
 
