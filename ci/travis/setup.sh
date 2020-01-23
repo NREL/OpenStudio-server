@@ -45,12 +45,12 @@ else
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update
         # per travis docs, mongodb and redis should already be installed and started from services key in bionic, but this isn't working.  explicitly install.
-        #sudo apt-get install -y pv tree ruby2.5 mongodb redis-server
+        # the latest version of redis-server now binds to ipv6 which is not supported on travis (disabled). redis-server will fail to start due to the this so below
+        # is a work around to install it, configure to it only binds to ipv4.
         sudo apt-get install redis-server || true
         sudo systemctl stop redis-server.service
         sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
         sudo mv redis.conf /etc/redis/redis.conf
-        cat /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
         sudo apt-get install -y pv tree mongodb ruby2.5
