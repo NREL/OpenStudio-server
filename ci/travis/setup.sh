@@ -58,9 +58,9 @@ else
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         sudo ./ci/travis/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
-        export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Ruby
-        export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}/EnergyPlus/energyplus
-        export PATH=/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}
+        export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/Ruby
+        export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus
+        export PATH=/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
         export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     fi
