@@ -11,6 +11,12 @@ cd c:\projects\openstudio-server
 ruby -v
 openstudio openstudio_version
 
+REM add some debugs
+dir C:\
+dir C:\Ruby25-x64
+C:/Ruby25-x64/bin/ruby.exe -v 
+C:/Ruby25-x64/bin/gem install --no-env-shebang bundler -v 1.17.1 
+
 REM If you change RUBYLIB here, make sure to change it in integration-test.ps1 and unit-test.cmd too
 set RUBYLIB=C:\projects\openstudio\Ruby
 ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
