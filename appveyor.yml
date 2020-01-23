@@ -6,7 +6,7 @@ environment:
   OPENSTUDIO_VERSION_SHA: c1e87e9d3b
   OPENSTUDIO_VERSION_EXT: -beta
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
-  RUBY_VERSION: 25-64x
+  RUBY_VERSION: 25-x64
   #BUNDLER_VERSION: 1.17.1
 
 clone_folder: C:\projects\openstudio-server
