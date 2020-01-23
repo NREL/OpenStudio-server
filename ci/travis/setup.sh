@@ -32,7 +32,7 @@ else
         sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-        sudo /Volumes/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin.dmg/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin.app/Contents/MacOS/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin --script ci/travis/install-mac.qs
+        sudo /Volumes/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin.app/Contents/MacOS/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin --script ci/travis/install-mac.qs
         hdiutil detach /Volumes/OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin -force
 
         export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/opt/ruby@2.5/bin:$HOME/openstudio/bin:$PATH"
