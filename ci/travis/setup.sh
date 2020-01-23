@@ -27,7 +27,8 @@ else
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/OpenStudio-3.0.0-beta%2Bc1e87e9d3b-Darwin.dmg
-        hdiutil attach OpenStudio-3.0.0-beta+c1e87e9d3b-Darwin.dmg
+        # OSX downloads with %2B. These are unsafe chars in url strings
+        hdiutil attach OpenStudio-3.0.0-beta%2Bc1e87e9d3b-Darwin.dmg
         sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
