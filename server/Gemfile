@@ -18,10 +18,6 @@ gem 'nokogiri', '~> 1.8.2'
 gem 'rubyzip', '~> 1.2'
 gem 'tzinfo-data'
 
-
-gem 'ffi', '1.12.1'
-gem 'git', '1.2.9.1'
-
 # database modules
 gem 'mongoid', '~> 6.3.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
 gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
@@ -58,9 +54,10 @@ gem 'sass-rails'
 gem 'sprockets-rails'
 gem 'uglifier'
 
-#install sassc 2.
-gem 'sassc', '>= 2.0'
-gem 'roo'
+# don't try to install sassc 2.
+gem 'sassc', '~>1.12.1'
+# don't try to install roo 2.8.0 (requires Ruby >= 2.3.0)
+gem 'roo', '~>2.7.1'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
