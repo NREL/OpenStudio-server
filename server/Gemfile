@@ -60,7 +60,7 @@ gem 'uglifier'
 
 #install sassc 2.
 gem 'sassc', '>= 2.0'
-gem 'roo', 
+gem 'roo'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
