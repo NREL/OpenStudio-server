@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-IMAGETAG=skip
+# Only for this branch.  Do not merge branch as is
+IMAGETAG="3.0.0-beta"
 if [ "${TRAVIS_BRANCH}" == "develop" ]; then
     IMAGETAG=develop
 elif [ "${TRAVIS_BRANCH}" == "develop3" ]; then
