@@ -46,8 +46,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         libsm-dev \
         mongodb-org-tools \
         procps \
-        python \
         python-numpy \
+        python3-numpy \
         tar \
         unzip \
         wget \
