@@ -62,12 +62,3 @@ Critical scripts are in the appveyor folder. Both powershell and command prompt 
 also required for both commit and PR before merges can take place on develop. AppVeyor is exclusively used for Windows 
 testing. There are times when the integration test must be retried up to three times before success - the reason for 
 this is not clearly understood, however the retry mechanic is implemented and working successfully. 
-
-### Circle
-
-Circle 2.0 presents significant challenges for the docker-deployment use case. As such, the project is still using the 
-1.0 circle framework. This has significant limitations. It would be nice to migrate this use case to Travis if at all
-possible. Circle 1.0 only supports commit tests. This test must be green before merging to develop. The circle testing 
-scripts live implicitly in the [docker-compose testing template](https://github.com/NREL/OpenStudio-server/blob/develop/docker-compose.test.yml) 
-in the repo root and in [run-server-tests.sh](https://github.com/NREL/OpenStudio-server/blob/develop/docker/server/run-server-tests.sh) 
-in the /docker/server folder.
