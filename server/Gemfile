@@ -35,7 +35,6 @@ gem 'net-ssh'
 # other useful gems
 gem 'parallel'
 gem 'sys-filesystem'
-gem 'aws-sdk', '3.0.1'
 
 # web ui
 # gem 'will_paginate'
