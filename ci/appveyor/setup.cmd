@@ -1,4 +1,6 @@
 set PATH=C:\Program Files\Git\mingw64\bin;C:\projects\openstudio\bin;%PATH%
+REM set GEM_HOME=C:\projects\openstudio-server\gems
+REM set GEM_PATH=C:\projects\openstudio-server\gems;C:\projects\openstudio-server\gems\gems\bundler\gems
 echo Downloading and Installing OpenStudio (develop branch, %OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%.%OPENSTUDIO_VERSION_SHA%)
 REM install  develop build
 curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/OpenStudio-3.0.0-beta%%2Bc1e87e9d3b-Windows.exe
