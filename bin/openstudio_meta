@@ -773,6 +773,8 @@ class RunAnalysis
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
+    $logger.debug "sub_argv = #{sub_argv} in RunAnalysis execute"
+    $logger.debug "Environment is: #{::ENV.inspect}"
     $logger.debug 'Requiring gems for RunAnalysis'
     $logger.debug 'Requiring zip gem'
     require 'zip'
