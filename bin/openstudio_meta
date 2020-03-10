@@ -776,10 +776,10 @@ class RunAnalysis
     $logger.debug "sub_argv = #{sub_argv} in RunAnalysis execute"
     $logger.debug "Environment is: #{::ENV.inspect}"
     $logger.debug 'Requiring gems for RunAnalysis'
-    $logger.debug 'Requiring zip gem'
-    require 'zip'
     $logger.debug 'Requiring os-analysis gem'
     require 'openstudio-analysis'
+    $logger.debug 'Requiring zip gem'
+    require 'zip'
     $logger.debug 'Requiring os-aws gem'
     require 'openstudio-aws'
     $logger.debug 'Successfully required all gems for RunAnalysis'
