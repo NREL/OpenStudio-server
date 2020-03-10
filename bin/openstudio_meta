@@ -93,6 +93,7 @@ def parse_options(opts = nil, argv = nil)
   opts ||= ::OptionParser.new
 
   opts.on('--ruby-lib-path PATH', 'Additional Ruby path, to locate openstudio') do |path|
+    $logger.debug "overwriting RUBYLIB from #{ENV['RUBYLIB']} to #{path}"
     ENV['RUBYLIB'] = path
   end
 
@@ -775,7 +776,7 @@ class RunAnalysis
   #
   def execute(sub_argv)
     $logger.debug "sub_argv = #{sub_argv} in RunAnalysis execute"
-    $logger.debug "Environment is: #{::ENV.inspect}"
+    # $logger.debug "Environment is: #{::ENV.inspect}"
     $logger.debug 'Requiring gems for RunAnalysis'
     $logger.debug 'Requiring zip gem'
     require 'zip'
