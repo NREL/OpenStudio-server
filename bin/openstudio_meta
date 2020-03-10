@@ -93,7 +93,6 @@ def parse_options(opts = nil, argv = nil)
   opts ||= ::OptionParser.new
 
   opts.on('--ruby-lib-path PATH', 'Additional Ruby path, to locate openstudio') do |path|
-    $logger.debug "overwriting RUBYLIB from #{ENV['RUBYLIB']} to #{path}"
     ENV['RUBYLIB'] = path
   end
 
