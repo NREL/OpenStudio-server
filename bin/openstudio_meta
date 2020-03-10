@@ -42,7 +42,7 @@ $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
 ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
-$logger.warn "RUBYLIB inside openstudio_meta: #{ENV['RUBYLIB']}"
+
 $ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTABLE_EXTS'].split[0]}"
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
