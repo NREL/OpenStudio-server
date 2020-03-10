@@ -775,14 +775,14 @@ class RunAnalysis
   def execute(sub_argv)
     $logger.debug "sub_argv = #{sub_argv} in RunAnalysis execute"
     $logger.debug "Environment is: #{::ENV.inspect}"
-    $logger.debug 'Requiring gems for RunAnalysis'
-    $logger.debug 'Requiring os-analysis gem'
-    require 'openstudio-analysis'
-    $logger.debug 'Requiring zip gem'
-    require 'zip'
-    $logger.debug 'Requiring os-aws gem'
-    require 'openstudio-aws'
-    $logger.debug 'Successfully required all gems for RunAnalysis'
+    # $logger.debug 'Requiring gems for RunAnalysis'
+    # $logger.debug 'Requiring os-analysis gem'
+    # require 'openstudio-analysis'
+    # $logger.debug 'Requiring zip gem'
+    # require 'zip'
+    # $logger.debug 'Requiring os-aws gem'
+    # require 'openstudio-aws'
+    # $logger.debug 'Successfully required all gems for RunAnalysis'
     options = {
         debug: false,
         dencity: false,
@@ -1079,6 +1079,14 @@ require 'timeout'
 $logger.debug 'Requiring json'
 require 'json'
 $logger.debug 'Required initial gems successfully'
+$logger.debug 'Requiring gems for RunAnalysis'
+$logger.debug 'Requiring os-analysis gem'
+require 'openstudio-analysis'
+$logger.debug 'Requiring zip gem'
+require 'zip'
+$logger.debug 'Requiring os-aws gem'
+require 'openstudio-aws'
+$logger.debug 'Successfully required all gems for RunAnalysis'
 
 # Execute the CLI interface, and exit with the proper error code
 $logger.info "Executing argv: #{$argv}"
