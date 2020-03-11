@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=develop3
+ARG OPENSTUDIO_VERSION=3.0.0-beta
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -46,6 +46,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         libsm-dev \
         mongodb-org-tools \
         procps \
+        python-numpy \
+        python3-numpy \
         tar \
         unzip \
         wget \

@@ -6,13 +6,14 @@ language: minimal
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=2.8.1 OPENSTUDIO_VERSION_SHA=5f1c403208 OPENSTUDIO_VERSION_EXT=
+    - OPENSTUDIO_VERSION=3.0.0 OPENSTUDIO_VERSION_SHA=c1e87e9d3b OPENSTUDIO_VERSION_EXT=-beta
     - DOCKER_COMPOSE_VERSION=1.21.1
 
 # gemfile:
   # - server/Gemfile
 
 # Set the default scripts that are used for the majority of the tests in the matrix
+# redis-server now wants to bind to ipv6 ::1.  This changes this behavior. 
 before_install:
   - ./ci/travis/setup.sh
 before_script:
@@ -27,6 +28,9 @@ services:
   # - mongodb
   # - redis-server
   - docker
+
+rvm:
+  - 2.5
 
 jobs:
   include:
@@ -86,7 +90,7 @@ jobs:
       # This change must be made in combination with a modification to
       # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
       # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
-      if: branch = develop3
+      if: branch = master OR branch = develop3 OR branch = os_3.0.0-beta
       os: linux
       sudo: required
       dist: bionic

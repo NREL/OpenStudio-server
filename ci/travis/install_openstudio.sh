@@ -10,26 +10,26 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # OPENSTUDIO_VERSION_EXT may be empty
     #OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-$OPENSTUDIO_VERSION$OPENSTUDIO_VERSION_EXT.$OPENSTUDIO_SHA-Linux.deb
     # Dev3 hardcoding:
-    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio3-prerelease-rc2.5f1c403208-2.8.1-Linux.deb
-    
+    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-3.0.0-beta%2Bc1e87e9d3b-Linux.deb
+
     echo "Installing OpenStudio ${OPENSTUDIO_DOWNLOAD_FILENAME}"
 
-    OPENSTUDIO_DOWNLOAD_BASE_URL=https://s3.amazonaws.com/openstudio-builds/$OPENSTUDIO_VERSION
+    OPENSTUDIO_DOWNLOAD_BASE_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/
     OPENSTUDIO_DOWNLOAD_URL=$OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     # copying this from the docker-openstudio dockerfile
     apt-get update && apt-get install -y curl vim gdebi-core ruby2.5 ruby-dev libffi-dev build-essential zlib1g-dev vim git locales sudo
-    export OPENSTUDIO_DOWNLOAD_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop3/$OPENSTUDIO_DOWNLOAD_FILENAME 
+    export OPENSTUDIO_DOWNLOAD_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/$OPENSTUDIO_DOWNLOAD_FILENAME
 
-    echo "OpenStudio Package Download URL is ${OPENSTUDIO_DOWNLOAD_URL}" 
-    curl -SLO $OPENSTUDIO_DOWNLOAD_URL 
+    echo "OpenStudio Package Download URL is ${OPENSTUDIO_DOWNLOAD_URL}"
+    curl -SLO $OPENSTUDIO_DOWNLOAD_URL
     # Verify that the download was successful (not access denied XML from s3)
-    grep -v -q "<Code>AccessDenied</Code>" ${OPENSTUDIO_DOWNLOAD_FILENAME} 
-    gdebi -n $OPENSTUDIO_DOWNLOAD_FILENAME 
+    grep -v -q "<Code>AccessDenied</Code>" ${OPENSTUDIO_DOWNLOAD_FILENAME}
+    gdebi -n $OPENSTUDIO_DOWNLOAD_FILENAME
     # cleanup
-    rm -f $OPENSTUDIO_DOWNLOAD_FILENAME 
-    rm -rf /var/lib/apt/lists/* 
-    locale-gen en_US en_US.UTF-8 
+    rm -f $OPENSTUDIO_DOWNLOAD_FILENAME
+    rm -rf /var/lib/apt/lists/*
+    locale-gen en_US en_US.UTF-8
     dpkg-reconfigure locales
 
 else

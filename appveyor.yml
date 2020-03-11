@@ -2,11 +2,11 @@ version: 1.0.{build}-{branch}
 
 environment:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 2.8.1
-  OPENSTUDIO_VERSION_SHA: 5f1c403208
-  OPENSTUDIO_VERSION_EXT:
+  OPENSTUDIO_VERSION: 3.0.0
+  OPENSTUDIO_VERSION_SHA: c1e87e9d3b
+  OPENSTUDIO_VERSION_EXT: -beta
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
-  RUBY_VERSION: 25-64x
+  RUBY_VERSION: 25-x64
   #BUNDLER_VERSION: 1.17.1
 
 clone_folder: C:\projects\openstudio-server
@@ -29,6 +29,6 @@ test_script:
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 on_finish:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
   #- cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
