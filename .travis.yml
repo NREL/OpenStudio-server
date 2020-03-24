@@ -6,7 +6,7 @@ language: minimal
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=3.0.0 OPENSTUDIO_VERSION_SHA=c1e87e9d3b OPENSTUDIO_VERSION_EXT=-beta
+    - OPENSTUDIO_VERSION=3.0.0 OPENSTUDIO_VERSION_SHA=7e86eb3b12 OPENSTUDIO_VERSION_EXT=-rc1
     - DOCKER_COMPOSE_VERSION=1.21.1
 
 # gemfile:
@@ -63,7 +63,7 @@ jobs:
       before_script:
         # remove the .git in the .dockerignore so coverage can be reported correctly to coveralls
         #- export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
-        - export OPENSTUDIO_TAG=develop3
+        - export OPENSTUDIO_TAG=develop
         - sed -i -E "s/.git//g" .dockerignore
         - docker volume create --name=osdata
         - docker images --all
@@ -90,7 +90,7 @@ jobs:
       # This change must be made in combination with a modification to
       # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
       # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
-      if: branch = master OR branch = develop3 OR branch = os_3.0.0-beta
+      if: branch = master OR branch = develop
       os: linux
       sudo: required
       dist: bionic
@@ -98,7 +98,7 @@ jobs:
         - BUILD_TYPE=docker
       before_script:
         #- export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
-        - export OPENSTUDIO_TAG=develop3
+        - export OPENSTUDIO_TAG=develop
         - docker images --all
         - docker --version
         - docker-compose --version
