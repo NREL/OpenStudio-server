@@ -8,6 +8,10 @@ environment:
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
   RUBY_VERSION: 25-x64
   BUNDLER_VERSION: 2.1.0
+  APPVEYOR_RDP_PASSWORD: 
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
