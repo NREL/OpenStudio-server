@@ -12,6 +12,9 @@ gem 'rake', '~> 12.3'
 # added for support of the project rakefile
 gem 'colored'
 
+# rest client
+gem 'faraday', '0.15.4'
+
 # data modules
 gem 'jbuilder'
 gem 'nokogiri', '~> 1.8.2'
@@ -58,20 +61,24 @@ gem 'uglifier'
 gem 'sassc', '~>1.12.1'
 # don't try to install roo 2.8.0 (requires Ruby >= 2.3.0)
 gem 'roo', '~>2.7.1'
+gem 'minitar', '=0.8'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
 # gem 'openstudio-workflow', '= 1.3.0'
-# gem 'openstudio-workflow', '= 1.3.3'
-#gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: '2f742cbd'
-gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', branch: 'fmu'
-#gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem-fmu'
+gem 'openstudio-workflow', '= 1.3.3'
+# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
+# gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
+
+gem 'openstudio-analysis', '= 1.0.1' 
+# gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
+# gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
 gem 'openstudio-analysis', '= 1.0.2'
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.7.0'
+gem 'openstudio-aws', '0.7.1'
 # gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
 
 gem 'libxml-ruby'
