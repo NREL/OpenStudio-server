@@ -8,7 +8,7 @@ ruby '2.2.4'
 
 gem 'rails', '5.1.4'
 gem 'rake', '~> 12.3'
-
+gem 'rack', '2.0.7'
 # added for support of the project rakefile
 gem 'colored'
 
@@ -22,6 +22,7 @@ gem 'rubyzip', '~> 1.2'
 gem 'tzinfo-data'
 
 # database modules
+gem 'mongo', '2.10.2'
 gem 'mongoid', '~> 6.3.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
 gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
 gem 'paperclip', '~> 4.3.7'
