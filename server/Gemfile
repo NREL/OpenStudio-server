@@ -7,72 +7,72 @@ ruby '2.2.4'
 # gem 'rubygems-update', '2.7.8'
 
 gem 'rails', '5.1.4'
-gem 'rake', '~> 12.3'
+gem 'rake', '12.3.3'
 gem 'rack', '2.0.7'
 # added for support of the project rakefile
-gem 'colored'
+gem 'colored', '1.2'
 
 # rest client
 gem 'faraday', '0.15.4'
 
 # data modules
-gem 'jbuilder'
-gem 'nokogiri', '~> 1.6'
-gem 'rubyzip', '~> 1.2'
-gem 'tzinfo-data'
+gem 'jbuilder', '2.9.1'
+gem 'nokogiri', '1.6.8.1'
+gem 'rubyzip', '1.3.0'
+gem 'tzinfo-data', '1.2019.3'
 
 # database modules
 gem 'mongo', '2.10.2'
-gem 'mongoid', '~> 6.3.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
-gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
-gem 'paperclip', '~> 4.3.7'
+gem 'mongoid', '6.3.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
+gem 'mongoid-paperclip', '0.0.11', require: 'mongoid_paperclip'
+gem 'paperclip', '4.3.7'
 
 # R
-gem 'rserve-simpler'
+gem 'rserve-simpler', '0.0.6'
 
 # net-*
-gem 'net-http-persistent', '< 3.0.0'
-gem 'net-scp'
-gem 'net-sftp'
-gem 'net-ssh'
+gem 'net-http-persistent', '2.9.4'
+gem 'net-scp', '2.0.0'
+gem 'net-sftp', '2.1.2'
+gem 'net-ssh', '4.2.0'
 
 # other useful gems
-gem 'parallel', '= 1.12.1'
-gem 'sys-filesystem'
+gem 'parallel', '1.12.1'
+gem 'sys-filesystem', '1.3.1'
 
 # web ui
 # gem 'will_paginate'
-gem 'jquery-rails'
-gem 'kaminari'
-gem 'kaminari-mongoid'
+gem 'jquery-rails', '4.3.5'
+gem 'kaminari', '1.1.1'
+gem 'kaminari-mongoid', '1.0.1'
 
 # job queuing
-gem 'daemons'
+gem 'daemons', '1.3.1'
 
 # Gems used only for assets and not required
 # in production environments by default.
-gem 'bootstrap-sass'
-gem 'coffee-rails'
-gem 'sass'
-gem 'sass-rails'
-gem 'sprockets-rails'
-gem 'uglifier'
+gem 'bootstrap-sass', '3.3.7'
+gem 'coffee-rails', '4.2.2'
+gem 'sass', '3.7.4'
+gem 'sass-rails', '5.0.7'
+gem 'sprockets-rails', '3.2.1'
+gem 'uglifier', '4.2.0'
 
 # don't try to install sassc 2.
-gem 'sassc', '~>1.12.1'
+gem 'sassc', '1.12.1'
 # don't try to install roo 2.8.0 (requires Ruby >= 2.3.0)
-gem 'roo', '~>2.7.1'
-gem 'minitar', '=0.8'
+gem 'roo', '2.7.1'
+gem 'minitar', '0.8'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
 # gem 'openstudio-workflow', '= 1.3.0'
-gem 'openstudio-workflow', '= 1.3.3'
+gem 'openstudio-workflow', '1.3.3'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '= 1.0.1' 
+gem 'openstudio-analysis', '1.0.1'
 # gem 'openstudio-analysis', github: 'NREL/openstudio-analysis-gem', branch: 'develop'
 # gem 'openstudio-analysis', path: '../../openstudio-analysis-gem'
 
@@ -81,48 +81,48 @@ gem 'openstudio-analysis', '= 1.0.1'
 gem 'openstudio-aws', '0.7.1'
 # gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
 
-gem 'libxml-ruby'
-gem 'msgpack', '~> 1.0'
-gem 'multi_json'
-gem 'oj', '=2.17.5' # Next release (2.18.0) doesn't install on Windows
-gem 'os'
+gem 'libxml-ruby', '3.1.0'
+gem 'msgpack', '1.3.1'
+gem 'multi_json', '1.14.1'
+gem 'oj', '2.17.5' # Next release (2.18.0) doesn't install on Windows
+gem 'os', '1.0.1'
 gem 'rest-client', '1.8.0' # rest-client 2.0.0 breaks the multipart posting of the zip files.
-gem 'nio4r', '~>2.3.1' # 2.4.0 breaks w/ruby 2.2.4
+gem 'nio4r', '2.3.1' # 2.4.0 breaks w/ruby 2.2.4
 gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
 
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
-gem 'rubyXL', '~> 3.3.29'
+gem 'rubyXL', '3.3.33'
 
 # linux based js runtime libraries
 if RUBY_PLATFORM =~ /linux/
-  gem 'execjs'
-  gem 'libv8'
-  gem 'therubyracer'
+  gem 'execjs', '2.7.0'
+  gem 'libv8', '3.16.14.19'
+  gem 'therubyracer', '0.12.3'
 end
 
 # The only resque only is :docker, :docker-dev, :production
 group :development, :docker, :'docker-dev', :'docker-test', :production, :test do
-  gem 'redis-namespace', '=1.6.0'
-  gem 'redis', '=4.1.0' 
-  gem 'resque', '=1.27.4'
-  gem 'resque-web', require: 'resque_web'
+  gem 'redis-namespace', '1.6.0'
+  gem 'redis', '4.1.0'
+  gem 'resque', '1.27.4'
+  gem 'resque-web', '0.0.12', require: 'resque_web'
 end
 
 group :development, :'docker-test', :test, :local, :'local-test' do
-  gem 'delayed_job_mongoid'
+  gem 'delayed_job_mongoid', '2.3.1'
 end
 
 group :development, :test do
-  gem 'better_errors'
-  gem 'meta_request'
+  gem 'better_errors', '2.5.1'
+  gem 'meta_request', '0.7.2'
 
-  gem 'capybara'
-  gem 'public_suffix', '=3.0.3'
+  gem 'capybara', '2.18.0'
+  gem 'public_suffix', '3.0.3'
   gem 'coveralls', require: false
-  gem 'rspec', '~> 3.4'
-  gem 'rspec-rails'
-  gem 'rspec-retry'
-  gem 'ruby-prof', '~> 0.15'
+  gem 'rspec', '3.9.0'
+  gem 'rspec-rails', '3.9.0'
+  gem 'rspec-retry', '0.6.2'
+  gem 'ruby-prof', '0.18.0'
   gem 'selenium-webdriver', '3.141.0'
 
   gem 'psych', '3.0.3'
@@ -130,8 +130,8 @@ group :development, :test do
   gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
   gem 'rubocop-rspec', '1.32.0'
 
-  gem 'ci_reporter'
+  gem 'ci_reporter', '2.0.0'
   gem 'factory_bot_rails', '4.11.1' # 5.0.2 require ruby 2.3
-  gem 'mongoid-rspec'
+  gem 'mongoid-rspec', '4.0.1'
   gem 'rspec-html-matchers', '0.8.1'
 end
