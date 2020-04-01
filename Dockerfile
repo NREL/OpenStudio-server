@@ -23,19 +23,19 @@ ENV SRC_DIR /usr/local/src
 # - MODELICAPATH containing a sequence of paths representing directories
 #   where Modelica libraries are located, separated by colons.
 
-ENV JMODELICA_HOME /usr/local/JModelica
-ENV IPOPT_HOME /usr/local/Ipopt-3.12.4
-ENV SUNDIALS_HOME $JMODELICA_HOME/ThirdParty/Sundials
-ENV CASADI_LIB_HOME $JMODELICA_HOME/ThirdParty/CasADi/lib
-ENV CASADI_INTERFACE_HOME $JMODELICA_HOME/lib/casadi_interface
-ENV PYTHONPATH $JMODELICA_HOME/Python/:
-ENV LD_LIBRARY_PATH $IPOPT_HOME/lib/:\
-$JMODELICA_HOME/ThirdParty/Sundials/lib:\
-$JMODELICA_HOME/ThirdParty/CasADi/lib
-ENV MODELICAPATH $JMODELICA_HOME/ThirdParty/MSL:/home/developer/modelica
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-ENV JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
-ENV SEPARATE_PROCESS_JVM /usr/lib/jvm/java-8-openjdk-amd64/
+#ENV JMODELICA_HOME /usr/local/JModelica
+#ENV IPOPT_HOME /usr/local/Ipopt-3.12.4
+#ENV SUNDIALS_HOME $JMODELICA_HOME/ThirdParty/Sundials
+#ENV CASADI_LIB_HOME $JMODELICA_HOME/ThirdParty/CasADi/lib
+#ENV CASADI_INTERFACE_HOME $JMODELICA_HOME/lib/casadi_interface
+#ENV PYTHONPATH $JMODELICA_HOME/Python/:
+#ENV LD_LIBRARY_PATH $IPOPT_HOME/lib/:\
+#$JMODELICA_HOME/ThirdParty/Sundials/lib:\
+#$JMODELICA_HOME/ThirdParty/CasADi/lib
+#ENV MODELICAPATH $JMODELICA_HOME/ThirdParty/MSL:/home/developer/modelica
+#ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+#ENV JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
+#ENV SEPARATE_PROCESS_JVM /usr/lib/jvm/java-8-openjdk-amd64/
 
 # Avoid warnings
 # debconf: unable to initialize frontend: Dialog
@@ -116,50 +116,56 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
     && rm -rf /var/lib/apt/lists/*
 
 # Install jcc-3.0 to avoid error in python -c "import jcc"
-#RUN pip install --upgrade pip
-RUN ln -s /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-oracle
-RUN pip install --upgrade jcc==3.5
+##RUN pip install --upgrade pip
+#RUN ln -s /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-oracle
+#RUN pip install --upgrade jcc==3.5
 
 # Get Install Ipopt and JModelica, and delete source code with is more than 1GB large
-RUN cd $SRC_DIR && \
-    wget wget -O - http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz | tar xzf - && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Blas && \
-    ./get.Blas && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Lapack && \
-    ./get.Lapack && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Mumps && \
-    ./get.Mumps && \
-    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Metis && \
-    ./get.Metis && \
-    cd $SRC_DIR/Ipopt-3.12.4 && \
-    mkdir /usr/local/Ipopt-3.12.4 && \
-    mkdir /usr/local/JModelica && \
-    ./configure --prefix=/usr/local/Ipopt-3.12.4 && \
-    make install
-RUN  mkdir $SRC_DIR/JModelica && \
-    cd $SRC_DIR/JModelica && \
-    wget https://github.com/NREL/JModelica/raw/zip/JModelica.org-2.14.zip && \
-    bsdtar --strip-components=1 -xvf JModelica.org-2.14.zip >/dev/null && \
-    cd $SRC_DIR/JModelica && \
-    find . -type f \( -name "configure" -o -name "depcomp" -o -name "install-sh" -o -name "missing" -o -name "mkinstalldirs" -o -name "PrintPath" -o -name "zlib2ansi" -o -name "get_cuter" -o -name "jflex" -o -name "Makefile" -o -name "ar-lib" -o -name "compile" -o -name "test-driver" -o -name "*.csh" -o -name "*.dll" -o -name "*.exe" -o -name "*.in" -o -name "*.sh" -o -name "*.guess" -o -name "*.sub" -o -name "*.py" -o -name "*.pxd" -o -name "*.pyx" -o -name "*.pxi" -o -name "*.com" \) | xargs chmod 755 && \
-    grep -rl 'solver_object.output' . | xargs sed -i 's/solver_object.output/solver_object.getOutput/' && \
-    rm -rf build && \
-    mkdir build && \
-    cd $SRC_DIR/JModelica/build && \
-    ../configure --with-ipopt=/usr/local/Ipopt-3.12.4 --prefix=/usr/local/JModelica && \
-    make install && \
-    make casadi_interface && \
-    rm -rf $SRC_DIR
+#RUN cd $SRC_DIR && \
+#    wget wget -O - http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz | tar xzf - && \
+#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Blas && \
+#    ./get.Blas && \
+#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Lapack && \
+#    ./get.Lapack && \
+#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Mumps && \
+#    ./get.Mumps && \
+#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Metis && \
+#    ./get.Metis && \
+#    cd $SRC_DIR/Ipopt-3.12.4 && \
+#    mkdir /usr/local/Ipopt-3.12.4 && \
+#    mkdir /usr/local/JModelica && \
+#    ./configure --prefix=/usr/local/Ipopt-3.12.4 && \
+#    make install
+#RUN  mkdir $SRC_DIR/JModelica && \
+#    cd $SRC_DIR/JModelica && \
+#    wget https://github.com/NREL/JModelica/raw/zip/JModelica.org-2.14.zip && \
+#    bsdtar --strip-components=1 -xvf JModelica.org-2.14.zip >/dev/null && \
+#    cd $SRC_DIR/JModelica && \
+#    find . -type f \( -name "configure" -o -name "depcomp" -o -name "install-sh" -o -name "missing" -o -name "mkinstalldirs" -o -name "PrintPath" -o -name "zlib2ansi" -o -name "get_cuter" -o -name "jflex" -o -name "Makefile" -o -name "ar-lib" -o -name "compile" -o -name "test-driver" -o -name "*.csh" -o -name "*.dll" -o -name "*.exe" -o -name "*.in" -o -name "*.sh" -o -name "*.guess" -o -name "*.sub" -o -name "*.py" -o -name "*.pxd" -o -name "*.pyx" -o -name "*.pxi" -o -name "*.com" \) | xargs chmod 755 && \
+#    grep -rl 'solver_object.output' . | xargs sed -i 's/solver_object.output/solver_object.getOutput/' && \
+#    rm -rf build && \
+#    mkdir build && \
+#    cd $SRC_DIR/JModelica/build && \
+#    ../configure --with-ipopt=/usr/local/Ipopt-3.12.4 --prefix=/usr/local/JModelica && \
+#    make install && \
+#    make casadi_interface && \
+#    rm -rf $SRC_DIR
 
 # Replace 1000 with your user / group id
-RUN export uid=1000 gid=1000 && \
-    mkdir -p /home/developer && \
-    mkdir -p /etc/sudoers.d && \
-    echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
-    echo "developer:x:${uid}:" >> /etc/group && \
-    echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
-    chmod 0440 /etc/sudoers.d/developer && \
-    chown ${uid}:${gid} -R /home/developer
+#RUN export uid=1000 gid=1000 && \
+#    mkdir -p /home/developer && \
+#    mkdir -p /etc/sudoers.d && \
+#    echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
+#    echo "developer:x:${uid}:" >> /etc/group && \
+#    echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
+#    chmod 0440 /etc/sudoers.d/developer && \
+#    chown ${uid}:${gid} -R /home/developer
+
+#install SPAWN
+RUN mkdir /usr/local/spawn && \
+cd /usr/local/spawn/ && \
+wget https://spawn.s3.amazonaws.com/latest/Spawn-latest-Linux.tar.gz && \
+bsdtar --strip-components=1 -xvf Spawn-latest-Linux.tar.gz
 
 ENV DISPLAY :0.0
 #FMPy and dependencies (based on python3)
