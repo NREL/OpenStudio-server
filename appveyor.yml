@@ -25,7 +25,7 @@ build: off
 before_test:
   - cmd: ruby -v
   - cmd: gem -v
-#  - cmd: bundle -v
+  - cmd: bundle -v
   - cmd: mongod.exe --version
 
 test_script:
