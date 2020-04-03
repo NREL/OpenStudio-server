@@ -18,21 +18,21 @@ clone_folder: C:\projects\openstudio-server
 install:
 # set PATH pre-installed ruby version
   - set PATH=C:\Ruby25-x64\bin;C:\Mongodb\bin;%PATH%
-  - C:\projects\openstudio-server\ci\appveyor\setup.cmd
+#  - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
 build: off
 
 before_test:
   - cmd: ruby -v
   - cmd: gem -v
-  - cmd: bundle -v
+#  - cmd: bundle -v
   - cmd: mongod.exe --version
 
 test_script:
-  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
-  - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
+#  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
+#  - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 on_finish:
-  - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#  - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
   #- cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
