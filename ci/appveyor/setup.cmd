@@ -4,7 +4,7 @@ set GEM_PATH=C:\projects\openstudio-server\gems;C:\projects\openstudio-server\ge
 echo Downloading and Installing OpenStudio (develop branch, %OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%.%OPENSTUDIO_VERSION_SHA%)
 REM install  develop build
 curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/3.0.0/OpenStudio-3.0.0-rc2%%2Bc1a45f4753-Windows.exe
-OpenStudio-3.0.0-rc1%%2Bc1a45f4753-Windows.exe --script ci/appveyor/install-windows.qs
+OpenStudio-3.0.0-rc2%%2Bc1a45f4753-Windows.exe --script ci/appveyor/install-windows.qs
 move C:\openstudio C:\projects\openstudio
 dir C:\projects\openstudio
 dir C:\projects\openstudio\Ruby
