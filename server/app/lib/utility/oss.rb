@@ -12,8 +12,8 @@ module Utility
       'BUNDLER_ORIG_PATH',
       'BUNDLER_ORIG_MANPATH',
       'GEM_PATH',
-      'GEM_HOME',
-      'BUNDLE_WITHOUT'
+      'GEM_HOME'
+   #   'BUNDLE_WITHOUT' # This now needs to be set BUNDLE_WITHOUT=native_ext 
     ]
     # return command to run openstudio cli on current platform
     def self.oscli_cmd(logger = Rails.logger)
