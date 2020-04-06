@@ -248,6 +248,10 @@ module DjJobs
             if process_log
               @sim_logger.info "Oscli output: #{File.read(process_log)}"
             end
+            python_log = File.join(simulation_dir, 'oscli_python.log')
+            if python_log
+              @sim_logger.info "PYTHON output: #{File.read(python_log)}"
+            end            
           end
         end
         if run_result == :errored
@@ -276,8 +280,10 @@ module DjJobs
             results = JSON.parse(File.read(results_file), symbolize_names: true)
             @data_point.update(results: results)
           else
-            run_result = :errored
-            @sim_logger.error "Could not find results #{results_file}"
+            #run_result = :errored
+            #@sim_logger.error "Could not find results #{results_file}"
+            #make warning until development complete 
+            @sim_logger.warn "Could not find results #{results_file}"
           end
 
           @sim_logger.info 'Saving files/reports back to the server'
