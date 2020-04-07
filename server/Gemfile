@@ -114,7 +114,7 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'rspec-retry'
   gem 'ruby-prof', '~> 0.15'
-  gem 'selenium-webdriver', '3.141.7'
+  gem 'selenium-webdriver', '3.142.7'
 
   gem 'psych', '~> 3.1.0'
   gem 'rubocop', '0.64.0'
