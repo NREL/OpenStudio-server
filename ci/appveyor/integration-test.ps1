@@ -6,7 +6,7 @@ $env:GEM_PATH = "C:\projects\openstudio-server\gems;C:\projects\openstudio-serve
 
 Write-Host "RUBYLIB is: $env:RUBYLIB ; the PATH is: $env:Path ; the OPENSTUDIO_TEST_EXE is: $env:OPENSTUDIO_TEST_EXE"
 $iteration = 0
-:retry While ($iteration -lt 3)
+:retry While ($iteration -lt 1)
     {
     Write-Host "Attempting to run rspec test; attempt $iteration"
     $tests = Start-Process -PassThru -WorkingDirectory "C:\projects\openstudio-server" -FilePath "bundle" -ArgumentList "exec rspec -e 'analysis'" -RedirectStandardOutput "C:\projects\openstudio-server\spec\files\logs\win-stdout.log" -RedirectStandardError "C:\projects\openstudio-server\spec\files\logs\win-stderr.log"
