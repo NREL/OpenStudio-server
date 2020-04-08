@@ -414,7 +414,10 @@ module DjJobs
           begin
             Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               extract_count += 1
-              OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+	      # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+	      # This is local function for workaround until that is resolved
+              #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+              extract_archive(download_file, analysis_dir)
             end
           rescue StandardError => e
             retry if extract_count < extract_max_count
@@ -498,6 +501,25 @@ module DjJobs
         Resque.logger
       else
         raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+      end
+    end
+
+    # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+    # This is local function for workaround until that is resolved
+    #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+    def extract_archive(archive_filename, destination, overwrite = true)
+      Zip::File.open(archive_filename) do |zf|
+        zf.each do |f|
+          f_path = File.join(destination, f.name)
+          FileUtils.mkdir_p(File.dirname(f_path))
+
+          if File.exist?(f_path) && overwrite
+            FileUtils.rm_rf(f_path)
+            zf.extract(f, f_path)
+          elsif !File.exist? f_path
+            zf.extract(f, f_path)
+          end
+        end
       end
     end
 
