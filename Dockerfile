@@ -124,7 +124,7 @@ make install
 #install Assimulo
 #sudo apt-get install libblas-dev liblapack-dev
 RUN mkdir /usr/local/src/Assimulo && \
-	cd usr/local/src/Assimulo && \
+	cd /usr/local/src/Assimulo && \
 	wget https://github.com/modelon-community/Assimulo/archive/Assimulo-3.2.tar.gz && \
 	bsdtar --strip-components=1 -xvf Assimulo-3.2.tar.gz && \
 	#python3 setup.py install --sundials-home=/usr/local/sundials --lapack-home=/usr/lib/x86_64-linux-gnu/lapack --blas-home=/usr/lib/x86_64-linux-gnu/blas
