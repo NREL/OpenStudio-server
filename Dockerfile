@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.0.0-beta
+ARG OPENSTUDIO_VERSION=3.0.0-rc2
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -73,7 +73,7 @@ ENV PERL_EXE_PATH /usr/bin
 # Specify a couple arguments here, after running the majority of the installation above
 ARG rails_env=docker
 ARG bundle_args="--without development test"
-ENV OS_BUNDLER_VERSION=1.17.1
+ENV OS_BUNDLER_VERSION=2.1.0
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env
