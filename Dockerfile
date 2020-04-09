@@ -1,41 +1,12 @@
 # AUTHOR:           Nicholas Long
 # DESCRIPTION:      OpenStudio Server Docker Container
 # TO_BUILD_AND_RUN: docker-compose up
-# NOTES:            Currently this is one big dockerfile and non-optimal.
+# Mod for Spawn     Brian Ball
 
 #may include suffix
 ARG OPENSTUDIO_VERSION
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
-
-ENV SRC_DIR /usr/local/src
-
-# Define the environmental variables needed by JModelica
-# JModelica.org supports the following environment variables:
-#
-# - JMODELICA_HOME containing the path to the JModelica.org installation
-#   directory (again, without spaces or ~ in the path).
-# - PYTHONPATH containing the path to the directory $JMODELICA_HOME/Python.
-# - JAVA_HOME containing the path to a Java JRE or SDK installation.
-# - IPOPT_HOME containing the path to an Ipopt installation directory.
-# - LD_LIBRARY_PATH containing the path to the $IPOPT_HOME/lib directory
-#   (Linux only.)
-# - MODELICAPATH containing a sequence of paths representing directories
-#   where Modelica libraries are located, separated by colons.
-
-#ENV JMODELICA_HOME /usr/local/JModelica
-#ENV IPOPT_HOME /usr/local/Ipopt-3.12.4
-#ENV SUNDIALS_HOME $JMODELICA_HOME/ThirdParty/Sundials
-#ENV CASADI_LIB_HOME $JMODELICA_HOME/ThirdParty/CasADi/lib
-#ENV CASADI_INTERFACE_HOME $JMODELICA_HOME/lib/casadi_interface
-#ENV PYTHONPATH $JMODELICA_HOME/Python/:
-#ENV LD_LIBRARY_PATH $IPOPT_HOME/lib/:\
-#$JMODELICA_HOME/ThirdParty/Sundials/lib:\
-#$JMODELICA_HOME/ThirdParty/CasADi/lib
-#ENV MODELICAPATH $JMODELICA_HOME/ThirdParty/MSL:/home/developer/modelica
-#ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-#ENV JCC_JDK=/usr/lib/jvm/java-8-openjdk-amd64
-#ENV SEPARATE_PROCESS_JVM /usr/lib/jvm/java-8-openjdk-amd64/
 
 # Avoid warnings
 # debconf: unable to initialize frontend: Dialog
@@ -70,6 +41,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         gfortran \
         g++ \
         libarchive-tools \
+		libblas-dev \
+		liblapack-dev \
         libbz2-dev \
         libboost-dev \
         libcurl4-openssl-dev \
@@ -115,52 +88,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install jcc-3.0 to avoid error in python -c "import jcc"
-##RUN pip install --upgrade pip
-#RUN ln -s /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-8-oracle
-#RUN pip install --upgrade jcc==3.5
-
-# Get Install Ipopt and JModelica, and delete source code with is more than 1GB large
-#RUN cd $SRC_DIR && \
-#    wget wget -O - http://www.coin-or.org/download/source/Ipopt/Ipopt-3.12.4.tgz | tar xzf - && \
-#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Blas && \
-#    ./get.Blas && \
-#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Lapack && \
-#    ./get.Lapack && \
-#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Mumps && \
-#    ./get.Mumps && \
-#    cd $SRC_DIR/Ipopt-3.12.4/ThirdParty/Metis && \
-#    ./get.Metis && \
-#    cd $SRC_DIR/Ipopt-3.12.4 && \
-#    mkdir /usr/local/Ipopt-3.12.4 && \
-#    mkdir /usr/local/JModelica && \
-#    ./configure --prefix=/usr/local/Ipopt-3.12.4 && \
-#    make install
-#RUN  mkdir $SRC_DIR/JModelica && \
-#    cd $SRC_DIR/JModelica && \
-#    wget https://github.com/NREL/JModelica/raw/zip/JModelica.org-2.14.zip && \
-#    bsdtar --strip-components=1 -xvf JModelica.org-2.14.zip >/dev/null && \
-#    cd $SRC_DIR/JModelica && \
-#    find . -type f \( -name "configure" -o -name "depcomp" -o -name "install-sh" -o -name "missing" -o -name "mkinstalldirs" -o -name "PrintPath" -o -name "zlib2ansi" -o -name "get_cuter" -o -name "jflex" -o -name "Makefile" -o -name "ar-lib" -o -name "compile" -o -name "test-driver" -o -name "*.csh" -o -name "*.dll" -o -name "*.exe" -o -name "*.in" -o -name "*.sh" -o -name "*.guess" -o -name "*.sub" -o -name "*.py" -o -name "*.pxd" -o -name "*.pyx" -o -name "*.pxi" -o -name "*.com" \) | xargs chmod 755 && \
-#    grep -rl 'solver_object.output' . | xargs sed -i 's/solver_object.output/solver_object.getOutput/' && \
-#    rm -rf build && \
-#    mkdir build && \
-#    cd $SRC_DIR/JModelica/build && \
-#    ../configure --with-ipopt=/usr/local/Ipopt-3.12.4 --prefix=/usr/local/JModelica && \
-#    make install && \
-#    make casadi_interface && \
-#    rm -rf $SRC_DIR
-
-# Replace 1000 with your user / group id
-#RUN export uid=1000 gid=1000 && \
-#    mkdir -p /home/developer && \
-#    mkdir -p /etc/sudoers.d && \
-#    echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
-#    echo "developer:x:${uid}:" >> /etc/group && \
-#    echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
-#    chmod 0440 /etc/sudoers.d/developer && \
-#    chown ${uid}:${gid} -R /home/developer
-
 #install SPAWN
 RUN mkdir /usr/local/spawn && \
 cd /usr/local/spawn/ && \
@@ -176,6 +103,51 @@ RUN pip3 install matplotlib
 ADD https://api.github.com/repos/brianlball/FMPy/git/refs/heads/run_dir version.json
 RUN pip3 install -e git+https://github.com/brianlball/FMPy.git@run_dir#egg=FMPy --src /usr/local/lib/python3.6/dist-packages
 #RUN pip3 install FMPy
+
+#install PyFMI dependencies
+RUN pip3 install numpy && \
+    pip3 install scipy && \
+	pip3 install lxml && \
+	pip3 install cython
+
+#install sundials
+RUN mkdir /usr/local/src/sundials && \
+cd /usr/local/src/sundials && \
+wget https://github.com/LLNL/sundials/archive/v4.1.0.tar.gz && \
+bsdtar --strip-components=1 -xvf v4.1.0.tar.gz && \
+mkdir build && \
+cd build && \
+#cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/sundials && \
+cmake -DLAPACK_ENABLE=ON ../. && \
+make install
+
+#install Assimulo
+#sudo apt-get install libblas-dev liblapack-dev
+RUN mkdir /usr/local/src/Assimulo && \
+	cd usr/local/src/Assimulo && \
+	wget https://github.com/modelon-community/Assimulo/archive/Assimulo-3.2.tar.gz && \
+	bsdtar --strip-components=1 -xvf Assimulo-3.2.tar.gz && \
+	#python3 setup.py install --sundials-home=/usr/local/sundials --lapack-home=/usr/lib/x86_64-linux-gnu/lapack --blas-home=/usr/lib/x86_64-linux-gnu/blas
+	python3 setup.py install --sundials-home=/usr/local --lapack-home=/usr/lib/x86_64-linux-gnu/lapack --blas-home=/usr/lib/x86_64-linux-gnu/blas
+	RUN export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+#install FMI library
+RUN mkdir /usr/local/src/fmi && \
+	cd /usr/local/src/fmi && \
+	wget https://github.com/modelon-community/fmi-library/archive/2.2.tar.gz && \
+	bsdtar --strip-components=1 -xvf 2.2.tar.gz && \
+	mkdir build-fmi && \
+	cd build-fmi && \
+	cmake -DFMILIB_INSTALL_PREFIX=/usr/local/fmi ../. && \
+	make install test
+RUN export LD_LIBRARY_PATH=/usr/local/fmi:$LD_LIBRARY_PATH
+
+#install PyFMI
+RUN mkdir /usr/local/src/pyfmi && \
+	cd /usr/local/src/pyfmi && \
+	wget https://github.com/modelon-community/PyFMI/archive/PyFMI-2.5.7.tar.gz && \
+	bsdtar --strip-components=1 -xvf PyFMI-2.5.7.tar.gz && \
+	python3 setup.py install --fmil-home=/usr/local/fmi/
 
 # Avoid warning that Matplotlib is building the font cache using fc-list. This may take a moment.
 # This needs to be towards the end of the script as the command writes data to
@@ -198,17 +170,11 @@ ARG OPENSTUDIO_VERSION
 ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
 #make energyplus avail through PATH for EnergyPlusToFMU
 ENV PATH="/usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus:${PATH}"
-#hard code becasue of hacked OS version
-#ENV PATH="/usr/local/openstudio-3.0.0-pre1/EnergyPlus/:${PATH}"
 #get EPMacro and ReadVarsESO for EnergyPlusToFMU
 COPY /docker/bin/EPMacro /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
-#COPY /docker/bin/EPMacro /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
 COPY /docker/bin/ReadVarsESO /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/PostProcess/ReadVarsESO
-#COPY /docker/bin/ReadVarsESO /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
 RUN chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/EPMacro
-#RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/EPMacro
 RUN chmod +x /usr/local/openstudio-$OPENSTUDIO_VERSION/EnergyPlus/PostProcess/ReadVarsESO
-#RUN chmod +x /usr/local/openstudio-3.0.0-pre1/EnergyPlus/PostProcess/ReadVarsESO
 
 ENV PERL_EXE_PATH /usr/bin
 
@@ -244,9 +210,10 @@ ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 RUN rm Gemfile.lock
 RUN bundle install --jobs=3 --retry=3
 
+#lets not do this...
 # Configure IPVS keepalive
-ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
-RUN sudo sysctl --system
+#ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
+#RUN sudo sysctl --system
 
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.
@@ -256,16 +223,16 @@ COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
 COPY /docker/server/start-web-background.sh /usr/local/bin/start-web-background
 COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
-COPY /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
-COPY /docker/server/memfix.rb /usr/local/lib/memfix.rb
+#COPY /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
+#COPY /docker/server/memfix.rb /usr/local/lib/memfix.rb
 RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
 RUN chmod 755 /usr/local/bin/rails-entrypoint
 RUN chmod 755 /usr/local/bin/start-web-background
 RUN chmod 755 /usr/local/bin/start-workers
-RUN chmod +x /usr/local/lib/memfix-controller.rb
-RUN chmod +x /usr/local/lib/memfix.rb
+#RUN chmod +x /usr/local/lib/memfix-controller.rb
+#RUN chmod +x /usr/local/lib/memfix.rb
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
