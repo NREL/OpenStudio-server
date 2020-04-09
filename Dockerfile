@@ -20,7 +20,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
     sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list && \
     apt-get update \
     && apt-get install -y \
-        ant \
         apt-transport-https \
         autoconf \
         bison \
@@ -30,12 +29,10 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         ca-certificates \
         cmake \
         curl \
-        cython \
         default-jdk \
         dos2unix \
         emacs \
         imagemagick \
-        ipython \
         gdebi-core \
         git \
         gfortran \
@@ -64,8 +61,6 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         libsm-dev \
         less \
         mongodb-org-tools \
-        openjdk-8-jdk \
-        pkg-config \
         procps \
         python-dev \
         python-jpype \
@@ -75,10 +70,14 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         python-numpy \
         python-pip \
         python-scipy \
+        python3-dev \
+        python3-jpype \
+        python3-lxml \
+        python3-nose \
         python3-numpy \
         python3-pip \
+        python3-scipy \
         procps \
-        subversion \
         sudo \
         swig \
         tar \
@@ -87,73 +86,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         zip \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
-
-#install SPAWN
-RUN mkdir /usr/local/spawn && \
-cd /usr/local/spawn/ && \
-wget https://spawn.s3.amazonaws.com/latest/Spawn-latest-Linux.tar.gz && \
-bsdtar --strip-components=1 -xvf Spawn-latest-Linux.tar.gz
-
-ENV DISPLAY :0.0
-#FMPy and dependencies (based on python3)
-RUN pip3 install 'PyQt5==5.14.0'
-RUN pip3 install PyQtGraph
-RUN pip3 install matplotlib
-#RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
-ADD https://api.github.com/repos/brianlball/FMPy/git/refs/heads/run_dir version.json
-RUN pip3 install -e git+https://github.com/brianlball/FMPy.git@run_dir#egg=FMPy --src /usr/local/lib/python3.6/dist-packages
-#RUN pip3 install FMPy
-
-#install PyFMI dependencies
-RUN pip3 install numpy && \
-    pip3 install scipy && \
-	pip3 install lxml && \
-	pip3 install cython
-
-#install sundials
-RUN mkdir /usr/local/src/sundials && \
-cd /usr/local/src/sundials && \
-wget https://github.com/LLNL/sundials/archive/v4.1.0.tar.gz && \
-bsdtar --strip-components=1 -xvf v4.1.0.tar.gz && \
-mkdir build && \
-cd build && \
-#cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/sundials && \
-cmake -DLAPACK_ENABLE=ON ../. && \
-make install
-
-#install Assimulo
-#sudo apt-get install libblas-dev liblapack-dev
-RUN mkdir /usr/local/src/Assimulo && \
-	cd /usr/local/src/Assimulo && \
-	wget https://github.com/modelon-community/Assimulo/archive/Assimulo-3.2.tar.gz && \
-	bsdtar --strip-components=1 -xvf Assimulo-3.2.tar.gz && \
-	#python3 setup.py install --sundials-home=/usr/local/sundials --lapack-home=/usr/lib/x86_64-linux-gnu/lapack --blas-home=/usr/lib/x86_64-linux-gnu/blas
-	python3 setup.py install --sundials-home=/usr/local --lapack-home=/usr/lib/x86_64-linux-gnu/lapack --blas-home=/usr/lib/x86_64-linux-gnu/blas
-	RUN export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-
-#install FMI library
-RUN mkdir /usr/local/src/fmi && \
-	cd /usr/local/src/fmi && \
-	wget https://github.com/modelon-community/fmi-library/archive/2.2.tar.gz && \
-	bsdtar --strip-components=1 -xvf 2.2.tar.gz && \
-	mkdir build-fmi && \
-	cd build-fmi && \
-	cmake -DFMILIB_INSTALL_PREFIX=/usr/local/fmi ../. && \
-	make install test
-RUN export LD_LIBRARY_PATH=/usr/local/fmi:$LD_LIBRARY_PATH
-
-#install PyFMI
-RUN mkdir /usr/local/src/pyfmi && \
-	cd /usr/local/src/pyfmi && \
-	wget https://github.com/modelon-community/PyFMI/archive/PyFMI-2.5.7.tar.gz && \
-	bsdtar --strip-components=1 -xvf PyFMI-2.5.7.tar.gz && \
-	python3 setup.py install --fmil-home=/usr/local/fmi/
-
-# Avoid warning that Matplotlib is building the font cache using fc-list. This may take a moment.
-# This needs to be towards the end of the script as the command writes data to
-# /home/developer/.cache
-RUN python -c "import matplotlib.pyplot"
-    
+   
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION 6.0.2
 
@@ -236,6 +169,72 @@ RUN chmod 755 /usr/local/bin/start-workers
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
+
+#install SPAWN
+RUN mkdir /usr/local/spawn && \
+cd /usr/local/spawn/ && \
+wget https://spawn.s3.amazonaws.com/latest/Spawn-latest-Linux.tar.gz && \
+bsdtar --strip-components=1 -xvf Spawn-latest-Linux.tar.gz
+
+#FMPy and dependencies (based on python3)
+RUN pip3 install 'PyQt5==5.14.0'
+RUN pip3 install PyQtGraph
+RUN pip3 install matplotlib
+#RUN pip3 install -e git+https://github.com/CATIA-Systems/FMPy@v0.2.14#egg=FMPy
+ADD https://api.github.com/repos/brianlball/FMPy/git/refs/heads/run_dir version.json
+RUN pip3 install -e git+https://github.com/brianlball/FMPy.git@run_dir#egg=FMPy --src /usr/local/lib/python3.6/dist-packages
+#RUN pip3 install FMPy
+
+#install PyFMI dependencies
+RUN pip3 install numpy && \
+    pip3 install scipy && \
+	pip3 install lxml && \
+	pip3 install cython
+
+#install sundials
+RUN mkdir /usr/local/src/sundials && \
+cd /usr/local/src/sundials && \
+wget https://github.com/LLNL/sundials/archive/v4.1.0.tar.gz && \
+bsdtar --strip-components=1 -xvf v4.1.0.tar.gz && \
+mkdir build && \
+cd build && \
+#cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/sundials && \
+cmake -DLAPACK_ENABLE=ON ../. && \
+make install
+
+#install Assimulo
+#sudo apt-get install libblas-dev liblapack-dev
+RUN mkdir /usr/local/src/Assimulo && \
+	cd /usr/local/src/Assimulo && \
+	wget https://github.com/modelon-community/Assimulo/archive/Assimulo-3.2.tar.gz && \
+	bsdtar --strip-components=1 -xvf Assimulo-3.2.tar.gz && \
+	#python3 setup.py install --sundials-home=/usr/local/sundials --lapack-home=/usr/lib/x86_64-linux-gnu/lapack --blas-home=/usr/lib/x86_64-linux-gnu/blas
+	python3 setup.py install --sundials-home=/usr/local --lapack-home=/usr/lib/x86_64-linux-gnu/lapack --blas-home=/usr/lib/x86_64-linux-gnu/blas
+	RUN export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+#install FMI library
+RUN mkdir /usr/local/src/fmi && \
+	cd /usr/local/src/fmi && \
+	wget https://github.com/modelon-community/fmi-library/archive/2.2.tar.gz && \
+	bsdtar --strip-components=1 -xvf 2.2.tar.gz && \
+	mkdir build-fmi && \
+	cd build-fmi && \
+	cmake -DFMILIB_INSTALL_PREFIX=/usr/local/fmi ../. && \
+	make install test
+RUN export LD_LIBRARY_PATH=/usr/local/fmi:$LD_LIBRARY_PATH
+
+#install PyFMI
+RUN mkdir /usr/local/src/pyfmi && \
+	cd /usr/local/src/pyfmi && \
+	wget https://github.com/modelon-community/PyFMI/archive/PyFMI-2.5.7.tar.gz && \
+	bsdtar --strip-components=1 -xvf PyFMI-2.5.7.tar.gz && \
+	python3 setup.py install --fmil-home=/usr/local/fmi/
+
+ENV DISPLAY :0.0
+# Avoid warning that Matplotlib is building the font cache using fc-list. This may take a moment.
+# This needs to be towards the end of the script as the command writes data to
+# /home/developer/.cache
+RUN python -c "import matplotlib.pyplot"
 
 ENTRYPOINT ["rails-entrypoint"]
 
