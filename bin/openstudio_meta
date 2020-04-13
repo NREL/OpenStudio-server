@@ -43,6 +43,12 @@ $logger.level = ::Logger::WARN
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
 ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
 
+# Set GEM_HOME and GEM_PATH vs using ENV for ruby 2.5.x
+Gem.paths = {
+    'GEM_HOME' => File.absolute_path(File.join(__FILE__, './../../gems/')),
+    'GEM_PATH' =>  File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
+}
+
 $ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTABLE_EXTS'].split[0]}"
 
 # This is the save puts to use to catch EPIPE. Uses `puts` on the given IO object and safely ignores any Errno::EPIPE
