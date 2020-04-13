@@ -5,7 +5,7 @@
 
 #may include suffix
 ARG OPENSTUDIO_VERSION
-FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
+FROM docker-openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Avoid warnings

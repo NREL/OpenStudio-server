@@ -7,7 +7,7 @@ RUBY_DOWNLOAD_SHA256=$2
 
 # Predefined versions
 RUBYGEMS_VERSION=2.6.6
-BUNDLER_VERSION=1.16.1
+BUNDLER_VERSION=2.1.0
 
 if [ ! -z ${RUBY_VERSION} ] && [ ! -z ${RUBY_DOWNLOAD_SHA256} ]; then
     RUBY_MAJOR=${RUBY_VERSION%.*} # strips the last dot.value off the version
