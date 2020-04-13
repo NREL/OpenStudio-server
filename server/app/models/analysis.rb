@@ -390,6 +390,27 @@ class Analysis
   # specific usecase is to run analysis initialization and finalization scripts.
   # currently only used with Resque, as it's called by ResqueJobs::InitializeAnalysis job
   # runs on web node
+
+   # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+   # This is local function for workaround until that is resolved
+   #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+  def extract_archive(archive_filename, destination, overwrite = true)
+    Zip::File.open(archive_filename) do |zf|
+      zf.each do |f|
+        f_path = File.join(destination, f.name)
+        FileUtils.mkdir_p(File.dirname(f_path))
+
+        if File.exist?(f_path) && overwrite
+          FileUtils.rm_rf(f_path)
+          zf.extract(f, f_path)
+        elsif !File.exist? f_path
+          zf.extract(f, f_path)
+        end
+      end
+    end
+  end
+
+
   def run_initialization
     #   unpack seed zip file into osdata
     #   run initialize.sh if present
@@ -401,7 +422,10 @@ class Analysis
     begin
       Timeout.timeout(3600) do  #change to 1hr for large models
         extract_count += 1
-        OpenStudio::Workflow.extract_archive(seed_zip.path, shared_directory_path)
+	# The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+        # This is local function for workaround until that is resolved
+        #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+	extract_archive(seed_zip.path, shared_directory_path)
       end
     rescue StandardError => e
       retry if extract_count < extract_max_count
