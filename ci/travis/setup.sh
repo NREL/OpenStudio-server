@@ -26,14 +26,14 @@ else
         cp mongodb-osx-x86_64-3.4.18/bin/* /usr/local/bin/
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
-        curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/3.0.0/OpenStudio-3.0.0-rc2%2Bc1a45f4753-Darwin.dmg
+        curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/3.0.0/OpenStudio-3.0.0-rc3%2B949b904134-Darwin.dmg
         # OSX downloads with %2B. These are unsafe chars in url strings
-        hdiutil attach OpenStudio-3.0.0-rc2%2Bc1a45f4753-Darwin.dmg
+        hdiutil attach OpenStudio-3.0.0-rc3%2B949b904134-Darwin.dmg
         sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/travis/install-mac.qs
         rm -rf $HOME/openstudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-        sudo /Volumes/OpenStudio-3.0.0-rc2+c1a45f4753-Darwin/OpenStudio-3.0.0-rc2+c1a45f4753-Darwin.app/Contents/MacOS/OpenStudio-3.0.0-rc2+c1a45f4753-Darwin --script ci/travis/install-mac.qs
-        hdiutil detach /Volumes/OpenStudio-3.0.0-rc2+c1a45f4753 -force
+        sudo /Volumes/OpenStudio-3.0.0-rc3+949b904134-Darwin/OpenStudio-3.0.0-rc3+949b904134-Darwin.app/Contents/MacOS/OpenStudio-3.0.0-rc3+949b904134-Darwin --script ci/travis/install-mac.qs
+        hdiutil detach /Volumes/OpenStudio-3.0.0-rc3+949b904134 -force
 
         export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/opt/ruby@2.5/bin:$HOME/openstudio/bin:$PATH"
         export RUBYLIB="$HOME/openstudio/Ruby"
