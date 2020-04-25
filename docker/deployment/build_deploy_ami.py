@@ -231,9 +231,9 @@ if override_dockerhub_repo is not None:
     cmd_call = cmd_call.replace('docker run nrel', 'docker run {}'.format(override_dockerhub_repo))
 if verbose:
     print('openstudio-server OpenStudio version command is: {}'.format(cmd_call))
-stdout_arr = run_cmd(cmd_call, 'OpenStudio version retrieval').split('\n')[-2].split('.')
-os_version = stdout_arr[0] + '.' + stdout_arr[1] + '.' + stdout_arr[2]
-os_sha = stdout_arr[3]
+stdout_arr = run_cmd(cmd_call, 'OpenStudio version retrieval').split('\n')[-2].split('+')
+os_version = stdout_arr[0]
+os_sha = stdout_arr[1]
 if verbose:
     print('OpenStudio version retrieved is {}, with SHA {}'.format(os_version, os_sha))
 
