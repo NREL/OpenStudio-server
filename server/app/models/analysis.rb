@@ -395,15 +395,15 @@ class Analysis
    # This is local function for workaround until that is resolved
    #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
   def extract_archive(archive_filename, destination, overwrite = true)
+    ::Zip.sort_entries = true
     Zip::File.open(archive_filename) do |zf|
       zf.each do |f|
+        logger.info "Extracting #{f.name}"
         f_path = File.join(destination, f.name)
         FileUtils.mkdir_p(File.dirname(f_path))
-
-        if File.exist?(f_path) && overwrite
-          FileUtils.rm_rf(f_path)
-          zf.extract(f, f_path)
-        elsif !File.exist? f_path
+        if File.exist?(f_path)
+          logger.info "SKIPPED: #{f.name}, already existed."
+        else
           zf.extract(f, f_path)
         end
       end
