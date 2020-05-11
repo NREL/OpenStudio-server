@@ -68,7 +68,6 @@ gem 'openstudio-workflow', '= 2.0.0'
 # gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
 gem 'openstudio-analysis', '= 1.0.2'
-#gem 'openstudio-analysis', github: 'NREL/OpenStudio-analysis-gem', ref: 'b9ab977f3c45664588b8fe8d3cc49277af454d98'
 ## End commonly updated gems
 
 gem 'openstudio-aws', '0.7.0'
