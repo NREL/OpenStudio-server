@@ -15,7 +15,7 @@ gem 'colored'
 # data modules
 gem 'jbuilder'
 gem 'nokogiri', '~> 1.8.2'
-gem 'rubyzip', '~> 1.2'
+gem 'rubyzip', '~> 2.3.0'
 gem 'tzinfo-data'
 
 # database modules
@@ -56,22 +56,19 @@ gem 'uglifier'
 
 # don't try to install sassc 2.
 gem 'sassc', '~>1.12.1'
-# don't try to install roo 2.8.0 (requires Ruby >= 2.3.0)
-gem 'roo', '~>2.7.1'
+gem 'roo', '~>2.8.3'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
-# gem 'openstudio-workflow', '= 1.3.0'
 gem 'openstudio-workflow', '= 2.0.0'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
-# gem 'openstudio-workflow', path: '../../OpenStudio-workflow-gem'
 
-gem 'openstudio-analysis', '= 1.0.2'
+gem 'openstudio-analysis', '= 1.0.3'
+
 ## End commonly updated gems
 
 gem 'openstudio-aws', '0.7.1'
-# gem 'openstudio-aws', github: 'NREL/openstudio-aws-gem', branch: 'develop'
 
 gem 'libxml-ruby'
 gem 'msgpack', '~> 1.0'
@@ -114,7 +111,7 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'rspec-retry'
   gem 'ruby-prof', '~> 0.15'
-  gem 'selenium-webdriver', '3.141.0'
+  gem 'selenium-webdriver'
 
   gem 'psych', '~> 3.1.0'
   gem 'rubocop', '0.64.0'

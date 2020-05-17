@@ -1,10 +1,13 @@
 set PATH=C:\Program Files\Git\mingw64\bin;C:\projects\openstudio\bin;%PATH%
 set GEM_HOME=C:\projects\openstudio-server\gems
 set GEM_PATH=C:\projects\openstudio-server\gems;C:\projects\openstudio-server\gems\gems\bundler\gems
-echo Downloading and Installing OpenStudio (develop branch, %OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%.%OPENSTUDIO_VERSION_SHA%)
-REM install  develop build
-curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/3.0.0/OpenStudio-3.0.0-rc2%%2Bc1a45f4753-Windows.exe
-OpenStudio-3.0.0-rc2%%2Bc1a45f4753-Windows.exe --script ci/appveyor/install-windows.qs
+echo Downloading and Installing OpenStudio (develop branch, %OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%+%OPENSTUDIO_VERSION_SHA%)
+REM install develop build
+set OS_INSTALL_NAME=OpenStudio-%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%%%2B%OPENSTUDIO_VERSION_SHA%-Windows.exe
+echo Install name is %OS_INSTALL_NAME%
+curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/%OPENSTUDIO_VERSION%/%OS_INSTALL_NAME%
+dir .
+%OS_INSTALL_NAME% --script ci/appveyor/install-windows.qs
 move C:\openstudio C:\projects\openstudio
 dir C:\projects\openstudio
 dir C:\projects\openstudio\Ruby

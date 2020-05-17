@@ -38,8 +38,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         gfortran \
         g++ \
         libarchive-tools \
-		libblas-dev \
-		liblapack-dev \
+	libblas-dev \
+	liblapack-dev \
         libbz2-dev \
         libboost-dev \
         libcurl4-openssl-dev \
@@ -188,8 +188,8 @@ RUN pip3 install -e git+https://github.com/brianlball/FMPy.git@run_dir#egg=FMPy 
 #install PyFMI dependencies
 RUN pip3 install numpy && \
     pip3 install scipy && \
-	pip3 install lxml && \
-	pip3 install cython
+    pip3 install lxml && \
+    pip3 install cython
 
 #install sundials
 RUN mkdir /usr/local/src/sundials && \
