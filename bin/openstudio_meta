@@ -415,6 +415,8 @@ class InstallGems
       platform = 'win32'
       if /darwin/.match(RUBY_PLATFORM)
         platform = 'darwin'
+      elsif /linux/.match(RUBY_PLATFORM)
+        platform = 'linux'
       end
 
       ::Dir.chdir(options[:export_dir])
