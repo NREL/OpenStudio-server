@@ -70,7 +70,8 @@ gem 'openstudio-analysis', '= 1.0.3'
 
 gem 'openstudio-aws', '0.7.1'
 
-gem 'libxml-ruby'
+#libxml 3.2.0 failing on windows
+gem 'libxml-ruby', '3.1.0'
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
 gem 'rest-client', '~>2.0.1' 
