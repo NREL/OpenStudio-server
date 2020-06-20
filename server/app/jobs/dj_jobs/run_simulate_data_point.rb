@@ -284,21 +284,35 @@ module DjJobs
 
           # Post the reports back to the server
           uploads_successful = []
-
-          Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
-
+          if @data_point.analysis.download_reports
+            @sim_logger.info "downloading reports/*.{html,json,csv}"
+            Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
+          else
+            @sim_logger.info "NOT downloading /reports/*.{html,json,csv} since download_reports value is: #{@data_point.analysis.download_reports}"
+          end
           report_file = "#{run_dir}/objectives.json"
           uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
-
-          report_file = "#{simulation_dir}/out.osw"
-          uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
-
-          report_file = "#{simulation_dir}/in.osm"
-          uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
-
-          report_file = "#{run_dir}/data_point.zip"
-          uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
-
+          if @data_point.analysis.download_osw
+            @sim_logger.info "downloading out.OSW"
+            report_file = "#{simulation_dir}/out.osw"
+            uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading out.OSW since download_osw value is: #{@data_point.analysis.download_osw}"
+          end
+          if @data_point.analysis.download_osm
+            @sim_logger.info "downloading in.OSM"
+            report_file = "#{simulation_dir}/in.osm"
+            uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading in.OSM since download_osm value is: #{@data_point.analysis.download_osm}"
+          end
+          if @data_point.analysis.download_zip
+            @sim_logger.info "downloading datapoint.ZIP"
+            report_file = "#{run_dir}/data_point.zip"
+            uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading datapoint.zip since download_zip value is: #{@data_point.analysis.download_zip}"
+          end
           run_result = :errored unless uploads_successful.all?
         end
 
