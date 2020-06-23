@@ -3,7 +3,7 @@ version: 1.0.{build}-{branch}
 environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.0.1
-  OPENSTUDIO_VERSION_SHA: 7de76c9b4e
+  OPENSTUDIO_VERSION_SHA: a30f69b118
   OPENSTUDIO_VERSION_EXT: "-rc2"
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
   RUBY_VERSION: 25-x64
