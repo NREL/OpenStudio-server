@@ -1,7 +1,9 @@
 {
   "variables": {
     "aws_access_key": "{{ env `AWS_ACCESS_KEY` }}",
-    "aws_secret_key": "{{ env `AWS_SECRET_KEY` }}"
+    "aws_secret_key": "{{ env `AWS_SECRET_KEY` }}",
+    "aws_vpc_id": "{{env `AWS_VPC_ID`}}",
+    "aws_subnet_id": "{{env `AWS_SUBNET_ID`}}"
   },
   "builders": [
     {
@@ -10,6 +12,8 @@
       "ami_virtualization_type": "hvm",
       "access_key": "{{ user `aws_access_key` }}",
       "secret_key": "{{ user `aws_secret_key` }}",
+      "vpc_id": "{{user `aws_vpc_id`}}",
+      "subnet_id": "{{user `aws_subnet_id`}}",
       "region": "us-east-1",
       "ami_name": "OpenStudio-Server-Docker-{{ user `version` }}{{ user `ami_version_extension` }}",
       "ami_description": "This AMI serves as the base image used for deploying the OpenStudio Server on AWS using Docker. The base OpenStudio Server image from DockerHub on this AMI is {{ user `version` }}.",
