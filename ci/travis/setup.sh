@@ -13,6 +13,7 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
     sudo apt-get install -y pv
 
 else
+    rvm implode # rvm PATH rewriting interferes with portable Ruby.
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
