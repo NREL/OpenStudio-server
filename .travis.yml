@@ -27,9 +27,6 @@ services:
   # - redis-server
   - docker
 
-rvm:
-  - 2.5
-
 jobs:
   include:
     - stage: test
