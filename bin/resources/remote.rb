@@ -143,7 +143,7 @@ def find_or_create_target(target_type, aws_instance_options, project_dir)
       $logger.info "Creating cluster for #{aws_instance_options[:user_id]}"
 
       # Don't use the old API (Version 1)
-      ami_version = aws_instance_options[:openstudio_server_version][0] == '2' ? 3 : 2
+      ami_version = aws_instance_options[:openstudio_server_version][0] == '2' ? 3 : 3
       aws_init_options = { credentials: { access_key_id: ::ENV['AWS_ACCESS_KEY'],
                                           secret_access_key: ::ENV['AWS_SECRET_KEY'], region: ::ENV['AWS_DEFAULT_REGION'] },
                            region: ::ENV['AWS_DEFAULT_REGION'],

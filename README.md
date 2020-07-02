@@ -164,7 +164,7 @@ chmod -R 777 gems # Modify privileges on the installed gems
 
 ## Questions?
 
-Please contact @bball, or @nllong with any question regarding this project. Thanks for you interest!
+Please contact @tcoleman, @bball, or @nllong with any question regarding this project. Thanks for you interest!
 
 [coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=dockerize
 [coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server

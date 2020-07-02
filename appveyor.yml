@@ -2,18 +2,22 @@ version: 1.0.{build}-{branch}
 
 environment:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 2.9.1
-  OPENSTUDIO_VERSION_SHA: 3472e8b799
-  OPENSTUDIO_VERSION_EXT:
+  OPENSTUDIO_VERSION: 3.0.1
+  OPENSTUDIO_VERSION_SHA: 09b7c8a554
+  OPENSTUDIO_VERSION_EXT: ""
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+  RUBY_VERSION: 25-x64
+  BUNDLER_VERSION: 2.1.0
+  BUNDLE_WITHOUT: native_ext
 
-  
-  matrix:
-    - RUBY_VERSION: "224-x64"
+  #init:
+        #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
 install:
+# set PATH pre-installed ruby version
+  - set PATH=C:\Ruby25-x64\bin;C:\Mongodb\bin;%PATH%
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
 build: off
@@ -27,6 +31,8 @@ before_test:
 test_script:
   - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
-
+on_finish:
+  - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
+    #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd

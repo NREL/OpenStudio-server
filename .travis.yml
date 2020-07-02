@@ -3,13 +3,15 @@ language: generic
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=2.9.1 OPENSTUDIO_VERSION_SHA=3472e8b799 OPENSTUDIO_VERSION_EXT=
+    - OPENSTUDIO_VERSION=3.0.1 OPENSTUDIO_VERSION_SHA=09b7c8a554 OPENSTUDIO_VERSION_EXT=""
     - DOCKER_COMPOSE_VERSION=1.21.1
+    - BUNDLE_WITHOUT=native_ext
 
-gemfile:
-  - server/Gemfile
+# gemfile:
+  # - server/Gemfile
 
 # Set the default scripts that are used for the majority of the tests in the matrix
+# redis-server now wants to bind to ipv6 ::1.  This changes this behavior. 
 before_install:
   - ./ci/travis/setup.sh
 before_script:
@@ -20,21 +22,25 @@ after_failure: ./ci/travis/print_logs.sh
 
 # Services for linux -- all instances
 services:
-  - mongodb
-  - redis-server
+  # counter to documentation, these aren't starting for bionic
+  # - mongodb
+  # - redis-server
   - docker
+
+rvm:
+  - 2.5
 
 jobs:
   include:
     - stage: test
       os: linux
       sudo: required
-      dist: xenial
+      dist: bionic
       env: BUILD_TYPE=test
     - stage: test
       os: linux
       sudo: required
-      dist: xenial
+      dist: bionic
       env: BUILD_TYPE=integration
     - stage: test
       os: osx
@@ -47,14 +53,15 @@ jobs:
     - stage: test
       os: linux
       sudo: required
-      dist: xenial
+      dist: bionic
       env:
         - CI=true
         - OS_SERVER_NUMBER_OF_WORKERS=4
         - BUILD_TYPE=docker
       before_script:
         # remove the .git in the .dockerignore so coverage can be reported correctly to coveralls
-        - export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
+        #- export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
+        - export OPENSTUDIO_TAG=develop
         - sed -i -E "s/.git//g" .dockerignore
         - docker volume create --name=osdata
         - docker images --all
@@ -72,14 +79,15 @@ jobs:
       # This change must be made in combination with a modification to
       # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
       # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
-      if: branch = master OR branch = nrcan-master OR branch = develop
+      if: branch = master OR branch = develop
       os: linux
       sudo: required
-      dist: xenial
+      dist: bionic
       env:
         - BUILD_TYPE=docker
       before_script:
-        - export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
+        #- export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
+        - export OPENSTUDIO_TAG=develop
         - docker images --all
         - docker --version
         - docker-compose --version

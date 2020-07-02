@@ -37,10 +37,17 @@
 
 Signal.trap('INT') {abort}
 require 'logger'
+
 $logger = ::Logger.new(STDOUT)
 $logger.level = ::Logger::WARN
 ENV['GEM_HOME'] = File.absolute_path(File.join(__FILE__, './../../gems/'))
 ENV['GEM_PATH'] = File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
+
+# Set GEM_HOME and GEM_PATH vs using ENV for ruby 2.5.x
+Gem.paths = {
+    'GEM_HOME' => File.absolute_path(File.join(__FILE__, './../../gems/')),
+    'GEM_PATH' =>  File.absolute_path(File.join(__FILE__, './../../gems/')).to_s + File::PATH_SEPARATOR + File.absolute_path(File.join(__FILE__, './../../gems/bundler/gems')).to_s
+}
 
 $ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTABLE_EXTS'].split[0]}"
 
@@ -344,7 +351,7 @@ class InstallGems
     rake_bin = File.absolute_path('./../gems/bin/rake/')
     sys_cmds = []
 
-    sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 1.17.1"
+    sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 2.1.0"
     if /darwin/.match(RUBY_PLATFORM)
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-include=/usr/include"
     end
@@ -357,7 +364,7 @@ class InstallGems
     sys_cmds << 'echo "Calling assets:precompile"'
     sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
     sys_call = sys_cmds.join(' && ')
-    puts "Enviroment variables: #{::ENV.inspect}" if options[:debug]
+    puts "Environment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
     unless system(sys_call)
       $logger.error "System call '#{sys_call}' failed"
@@ -408,6 +415,8 @@ class InstallGems
       platform = 'win32'
       if /darwin/.match(RUBY_PLATFORM)
         platform = 'darwin'
+      elsif /linux/.match(RUBY_PLATFORM)
+        platform = 'linux'
       end
 
       ::Dir.chdir(options[:export_dir])
@@ -773,6 +782,8 @@ class RunAnalysis
   # @return [Fixnum] Return status
   #
   def execute(sub_argv)
+    $logger.debug "sub_argv = #{sub_argv} in RunAnalysis execute"
+    # $logger.debug "Environment is: #{::ENV.inspect}"
     $logger.debug 'Requiring gems for RunAnalysis'
     $logger.debug 'Requiring zip gem'
     require 'zip'

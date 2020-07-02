@@ -26,7 +26,7 @@ sleep 10
 echo "tag"
 docker tag nrel/openstudio-server:$1 127.0.0.1:5000/openstudio-server
 docker tag nrel/openstudio-rserve:$1 127.0.0.1:5000/openstudio-rserve
-docker tag mongo:latest 127.0.0.1:5000/mongo
+docker tag mongo:3.4.10 127.0.0.1:5000/mongo
 docker tag redis:4.0.6 127.0.0.1:5000/redis
 sleep 3
 echo "push"
@@ -36,7 +36,7 @@ docker push 127.0.0.1:5000/mongo
 docker push 127.0.0.1:5000/redis
 
 echo "deploy"
-docker stack deploy osserver --compose-file=/home/ubuntu/docker-compose.yml &
+docker stack deploy osserver --compose-file=docker-compose.yml &
 wait $!
 while ( nc -zv 127.0.0.1 80 3>&1 1>&2- 2>&3- ) | awk -F ":" '$3 != " Connection refused" {exit 1}'; do sleep 5; done
 docker service scale osserver_worker=42

@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 
-IMAGETAG=skip
 if [ "${TRAVIS_BRANCH}" == "develop" ]; then
     IMAGETAG=develop
+elif [ "${TRAVIS_BRANCH}" == "2.9.X-LTS" ]; then
+    IMAGETAG="2.9.X-LTS"
 elif [ "${TRAVIS_BRANCH}" == "nrcan-master" ]; then
     # NRCAN is still using pre 2.4.1 version of Server. This will break when they upgrade.
     IMAGETAG="$(ruby -e "load 'server/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION")-nrcan"
 elif [ "${TRAVIS_BRANCH}" == "master" ]; then
     # Retrieve the version number from rails
     IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
-#elif [ "${TRAVIS_BRANCH}" == "my-branch" ]; then
-#    Retrieve the version number from rails
 #    IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
 ##   avoid accidental publishing of master versions from custom branch by confirming the imagetag includes an extension w/ expected format
 #    if ! [[ "${IMAGETAG}" =~ ^.*\-{1}[a-z]+[0-9]+ ]]; then

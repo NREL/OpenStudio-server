@@ -284,21 +284,35 @@ module DjJobs
 
           # Post the reports back to the server
           uploads_successful = []
-
-          Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
-
+          if @data_point.analysis.download_reports
+            @sim_logger.info "downloading reports/*.{html,json,csv}"
+            Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
+          else
+            @sim_logger.info "NOT downloading /reports/*.{html,json,csv} since download_reports value is: #{@data_point.analysis.download_reports}"
+          end
           report_file = "#{run_dir}/objectives.json"
           uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
-
-          report_file = "#{simulation_dir}/out.osw"
-          uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
-
-          report_file = "#{simulation_dir}/in.osm"
-          uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
-
-          report_file = "#{run_dir}/data_point.zip"
-          uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
-
+          if @data_point.analysis.download_osw
+            @sim_logger.info "downloading out.OSW"
+            report_file = "#{simulation_dir}/out.osw"
+            uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading out.OSW since download_osw value is: #{@data_point.analysis.download_osw}"
+          end
+          if @data_point.analysis.download_osm
+            @sim_logger.info "downloading in.OSM"
+            report_file = "#{simulation_dir}/in.osm"
+            uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading in.OSM since download_osm value is: #{@data_point.analysis.download_osm}"
+          end
+          if @data_point.analysis.download_zip
+            @sim_logger.info "downloading datapoint.ZIP"
+            report_file = "#{run_dir}/data_point.zip"
+            uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading datapoint.zip since download_zip value is: #{@data_point.analysis.download_zip}"
+          end
           run_result = :errored unless uploads_successful.all?
         end
 
@@ -414,7 +428,10 @@ module DjJobs
           begin
             Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               extract_count += 1
-              OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+	      # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+	      # This is local function for workaround until that is resolved
+              #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+              extract_archive(download_file, analysis_dir)
             end
           rescue StandardError => e
             retry if extract_count < extract_max_count
@@ -498,6 +515,25 @@ module DjJobs
         Resque.logger
       else
         raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+      end
+    end
+
+    # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+    # This is local function for workaround until that is resolved
+    #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+    def extract_archive(archive_filename, destination, overwrite = true)
+      ::Zip.sort_entries = true
+      Zip::File.open(archive_filename) do |zf|
+        zf.each do |f|
+          @sim_logger.info "Zip: Extracting #{f.name}"
+          f_path = File.join(destination, f.name)
+          FileUtils.mkdir_p(File.dirname(f_path))
+          if File.exist?(f_path)
+            @sim_logger.warn "SKIPPED: #{f.name}, already existed."
+          else
+            zf.extract(f, f_path)
+          end
+        end
       end
     end
 

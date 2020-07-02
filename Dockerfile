@@ -4,15 +4,15 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION
+ARG OPENSTUDIO_VERSION=3.0.1
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Install required libaries.
 #   realpath - needed for wait-for-it
-RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv D68FA50FEA312927 && \
-    echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | \
-    sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list && \
+RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
+    echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | \
+    sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list && \
     apt-get update \
 	&& apt-get install -y --no-install-recommends \
         apt-transport-https \
@@ -30,7 +30,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv D68FA50FEA
         libbz2-dev \
         libcurl4-openssl-dev \
         libdbus-glib-1-2 \
-        libgdbm3 \
+        libgdbm5 \
         libgdbm-dev \
         libglib2.0-dev \
         libglu1 \
@@ -46,7 +46,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv D68FA50FEA
         libsm-dev \
         mongodb-org-tools \
         procps \
-        realpath \
+        python-numpy \
+        python3-numpy \
         tar \
         unzip \
         wget \
@@ -55,10 +56,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv D68FA50FEA
     && rm -rf /var/lib/apt/lists/*
 
 # Install passenger (this also installs nginx)
-ENV PASSENGER_VERSION 5.0.25
-# Install Rack. Silly workaround for not having ruby 2.2.2. Rack 1.6.4 is the
-# latest for Ruby <= 2.0
-RUN gem install rack -v=1.6.4
+ENV PASSENGER_VERSION 6.0.2
+
 RUN gem install passenger -v $PASSENGER_VERSION
 RUN passenger-install-nginx-module
 
@@ -74,6 +73,7 @@ ENV PERL_EXE_PATH /usr/bin
 # Specify a couple arguments here, after running the majority of the installation above
 ARG rails_env=docker
 ARG bundle_args="--without development test"
+ENV OS_BUNDLER_VERSION=2.1.0
 
 # Set the rails env var
 ENV RAILS_ENV $rails_env

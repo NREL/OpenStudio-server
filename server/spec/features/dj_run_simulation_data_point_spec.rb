@@ -212,9 +212,11 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
     thread_count = 500
     arr = Array.new(thread_count)
-    puts arr.inspect
     Parallel.each(0..thread_count, in_threads: thread_count) do |index|
-      arr[index] = 0 if File.exist? receipt_file
+      if File.exist? receipt_file
+        arr[index] = 0 
+        next
+      end
 
       # TODO: Break this code out into its own class and test it there
       if File.exist? write_lock_file
@@ -237,7 +239,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     end
 
     puts arr.inspect
-    expect(arr.sum).to be < 5
+    expect(arr.sum).to be < 15
   end
 
   it 'sorts worker jobs correctly' do
