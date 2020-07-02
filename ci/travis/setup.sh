@@ -13,7 +13,7 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
     sudo apt-get install -y pv
 
 else
-    rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
+    sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
@@ -25,7 +25,6 @@ else
         tar xvzf ruby-2.5.5-darwin.tar.gz
         cp ruby/bin/* /usr/local/bin/
         rm -rf ruby
-        which ruby
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
@@ -68,10 +67,9 @@ else
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
-        tar xvzf ruby-2.5.5-darwin.tar.gz
+        tar xvzf ruby-2.5.5-linux.tar.gz
         cp ruby/bin/* /usr/local/bin/
         rm -rf ruby
-        which ruby
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
@@ -87,6 +85,7 @@ else
 
     cd ${TRAVIS_BUILD_DIR}/server
     printenv
+    which ruby
     ruby -v
     ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
