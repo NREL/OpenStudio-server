@@ -12,9 +12,6 @@ gem 'rake', '~> 12.3'
 # added for support of the project rakefile
 gem 'colored'
 
-# rest client
-gem 'faraday', '0.15.4'
-
 # data modules
 gem 'jbuilder'
 gem 'nokogiri', '~> 1.10.8'
