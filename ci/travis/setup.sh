@@ -16,16 +16,16 @@ else
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-        brew install pv tree ruby-build
+        brew install pv tree
+        
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
-        export CONFIGURE_OPTS="--enable-load-relative"
-        export PATH="$TRAVIS_BUILD_DIR/gems/bin:$HOME/ruby2.2.4/bin:$HOME/openstudio/bin:$PATH"
-        # override rvm defaults
-        export GEM_HOME=
-        export GEM_PATH=
-        # --verbose flag keeps travis from timing out for this 
-        ruby-build --verbose 2.2.4 $HOME/ruby2.2.4
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-darwin.tar.gz
+        tar xvzf ruby-2.5.5-darwin.tar.gz
+        cp ruby/bin/* /usr/local/bin/
+        rm -rf ruby
+        which ruby
+
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
         tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
@@ -63,6 +63,14 @@ else
         sudo systemctl status redis-server.service
         sudo apt-get install -y pv tree mongodb ruby2.5
         sudo systemctl start mongodb
+
+        # install portable ruby - required for build that will eventually be published
+        # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
+        tar xvzf ruby-2.5.5-darwin.tar.gz
+        cp ruby/bin/* /usr/local/bin/
+        rm -rf ruby
+        which ruby
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir

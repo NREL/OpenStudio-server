@@ -1,5 +1,4 @@
-# path to portable ruby installed in setup.shß
-export PATH="${HOME}/.rbenv/versions/2.2.4/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}"
+export PATH="/usr/local/openstudio-${OPENSTUDIO_VERSION}/bin:${PATH}"
 export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
 export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
 # Dir containing openstudio

@@ -98,25 +98,27 @@ jobs:
     - stage: publish
       # publish native build for osx to s3
       # Include your branch name below to publish a custom build to S3.
-      if: branch = master OR branch = develop
+      # TODO published build name should distinguish master vs develop
+      if: branch = travis_build_artifacts #branch = master OR branch = develop
       os: osx
       osx_image: xcode9.2
       sudo: required
       env:
         - BUILD_TYPE=export
       before_script:
-      script: ./ci/travis/export_build-osx.sh
-    - stage: publish
-      # publish native build for linux to s3
-      # Include your branch name below to publish a custom build to S3.
-      if: branch = master OR branch = develop
-      os: linux
-      dist: xenial
-      sudo: required
-      env:
-        - BUILD_TYPE=export
-      before_script:
-      script: ./ci/travis/export_build-linux.sh
+      script: ./ci/travis/export_build_osx.sh
+    # - stage: publish
+    #   # publish native build for linux to s3
+    #   # Include your branch name below to publish a custom build to S3.
+    #   # TODO published build name should distinguish master vs develop
+    #   if: branch = travis_build_artifacts # branch = master OR branch = develop
+    #   os: linux
+    #   dist: bionic
+    #   sudo: required
+    #   env:
+    #     - BUILD_TYPE=export
+    #   before_script:
+    #   script: ./ci/travis/export_build_linux.sh
 
 notifications:
   slack:
