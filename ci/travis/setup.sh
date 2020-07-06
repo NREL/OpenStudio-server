@@ -22,8 +22,8 @@ else
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-darwin.tar.gz
-        tar xvzf ruby-2.5.5-darwin.tar.gz
-        mv ruby /usr/local/
+        tar xvzf ruby-2.5.5-darwin.tar.gz       
+        sudo mv ruby /usr/local/
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
