@@ -29,32 +29,32 @@ services:
 
 jobs:
   include:
-    - stage: test
-      os: linux
-      sudo: required
-      dist: bionic
-      env: BUILD_TYPE=test
-    - stage: test
-      os: linux
-      sudo: required
-      dist: bionic
-      env: BUILD_TYPE=integration
-    - stage: test
-      os: osx
-      osx_image: xcode9.4
-      env: BUILD_TYPE=test
+    # - stage: test
+    #   os: linux
+    #   sudo: required
+    #   dist: bionic
+    #   env: BUILD_TYPE=test
+    # - stage: test
+    #   os: linux
+    #   sudo: required
+    #   dist: bionic
+    #   env: BUILD_TYPE=integration
     - stage: test
       os: osx
       osx_image: xcode9.4
-      env: BUILD_TYPE=integration
+      env: BUILD_TYPE=test
     - stage: test
-      os: linux
-      sudo: required
-      dist: bionic
-      env:
-        - CI=true
-        - OS_SERVER_NUMBER_OF_WORKERS=4
-        - BUILD_TYPE=docker
+      os: osx
+      osx_image: xcode9.4
+      env: BUILD_TYPE=integration
+    # - stage: test
+    #   os: linux
+    #   sudo: required
+    #   dist: bionic
+    #   env:
+    #     - CI=true
+    #     - OS_SERVER_NUMBER_OF_WORKERS=4
+    #     - BUILD_TYPE=docker
       before_script:
         # remove the .git in the .dockerignore so coverage can be reported correctly to coveralls
         #- export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")

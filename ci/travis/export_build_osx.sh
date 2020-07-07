@@ -2,6 +2,7 @@
 mkdir /Users/travis/build/NREL/export
 
 # must be set for gems (esp openstudio-workflow) to find openstudio when install_gems runs install_gems
+export PATH="/usr/local/ruby:$PATH"
 export RUBYLIB="$HOME/openstudio/Ruby"
 export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
 export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
