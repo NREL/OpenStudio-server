@@ -98,7 +98,7 @@ jobs:
       # TODO published build name should distinguish master vs develop
       if: branch = travis_build_artifacts #branch = master OR branch = develop
       os: osx
-      osx_image: xcode9.2
+      osx_image: xcode9.4
       sudo: required
       env:
         - BUILD_TYPE=export
