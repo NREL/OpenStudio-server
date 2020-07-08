@@ -58,7 +58,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
           c1: 1.193147,
           c2: 1.193147,
           lambda: 0.9,
-          report: 10,
+          report: 1,
           norm_type: 'minkowski',
           p_power: 2,
           exit_on_guideline_14: 0,

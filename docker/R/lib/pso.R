@@ -188,3 +188,6 @@ if (!file.exists(bestresults_filename) && !is.null(results$par)) {
   convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"false",sep='', collapse=','),'}',sep='')
   write(convergenceflag, file=paste(analysis_dir,"/convergence_flag.json",sep=''))
 }
+print("stopping cluster in pso.R")
+stopCluster(cl)
+print("cluster stopped")
