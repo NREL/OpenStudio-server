@@ -59,7 +59,7 @@ end
 result = {}
 result[:status] = false
 begin
-  a = RestClient.get "#{options[:host]}/analyses/#{options[:analysis_id]}/status.json"
+  a = RestClient.get "#{options[:host]}/analyses/#{options[:analysis_id]}/status.json" , {accept: :json}
   # TODO: retries?
   raise 'Could not create datapoint' unless a.code == 200
 
