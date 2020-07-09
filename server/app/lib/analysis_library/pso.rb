@@ -276,7 +276,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       else
         raise 'could not start the cluster (most likely timed out)'
       end
-    rescue Exception => e
+    rescue StandardError, ScriptError, NoMemoryError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
       logger.error log_message
       @analysis.status_message = log_message

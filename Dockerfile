@@ -102,8 +102,6 @@ ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 RUN rm Gemfile.lock
 RUN bundle install --jobs=3 --retry=3
 
-# Configure IPVS keepalive
-#ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
 RUN sudo sysctl --system
 
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
@@ -114,16 +112,12 @@ COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
 COPY /docker/server/start-web-background.sh /usr/local/bin/start-web-background
 COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
-#COPY /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
-#COPY /docker/server/memfix.rb /usr/local/lib/memfix.rb
 RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
 RUN chmod +x /usr/local/bin/run-server-tests
 RUN chmod 755 /usr/local/bin/rails-entrypoint
 RUN chmod 755 /usr/local/bin/start-web-background
 RUN chmod 755 /usr/local/bin/start-workers
-#RUN chmod +x /usr/local/lib/memfix-controller.rb
-#RUN chmod +x /usr/local/lib/memfix.rb
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
