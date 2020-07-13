@@ -10,16 +10,6 @@ ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --export="/Users/tra
 
 oss_filename="OpenStudio-server-${OPENSTUDIO_VERSION_SHA}-darwin.tar.gz"
 
-ls /Users/travis/build/NREL/export
-
-sudo mkdir /${OPENSTUDIO_VERSION}
-
-sudo mv /Users/travis/build/NREL/export/${oss_filename}  /${OPENSTUDIO_VERSION}/
-export ARTIFACTS_PATHS="/${OPENSTUDIO_VERSION}/${oss_filename}"
-# set to 2GB instead of default of 1
-export ARTIFACTS_MAX_SIZE=2147483648 
-# supposedly installed by default but not available
-curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
-# TODO don't recreate entire path to file within the AWS bucket.
-artifacts upload
+pip3 install awscli --upgrade --user
+aws --version
 
