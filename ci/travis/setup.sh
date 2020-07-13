@@ -24,6 +24,7 @@ else
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-darwin.tar.gz
         tar xvzf ruby-2.5.5-darwin.tar.gz       
         sudo mv ruby /usr/local/
+        otool -L /usr/local/ruby/bin/ruby
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
@@ -60,7 +61,7 @@ else
         sudo mv redis.conf /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
-        sudo apt-get install -y pv tree mongodb ruby2.5
+        sudo apt-get install -y pv tree mongodb
         sudo systemctl start mongodb
 
         # install portable ruby - required for build that will eventually be published
@@ -68,6 +69,7 @@ else
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
         tar xvzf ruby-2.5.5-linux.tar.gz
         sudo mv ruby /usr/local/
+        ldd /usr/local/ruby/bin/ruby
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
