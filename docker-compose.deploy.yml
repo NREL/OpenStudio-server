@@ -49,6 +49,7 @@ services:
       - queue
       - web
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager
@@ -69,6 +70,7 @@ services:
       - db
       - rserve
     deploy:
+      endpoint_mode: dnsrr
       resources:
         reservations:
           cpus: "1"
@@ -82,6 +84,7 @@ services:
       - web-background
       - db
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager

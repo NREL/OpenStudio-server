@@ -1,8 +1,8 @@
 Package: NRELpso
 Type: Package
 Title: Particle Swarm Optimisation, with focus on Environmental Models
-Version: 0.3.13
-Date: 2014-04-11
+Version: 0.5-1
+Date: 2020-04-29
 Author: Mauricio Zambrano-Bigiarini [aut, cre], Rodrigo Rojas [ctb]
 Authors@R: c(person("Mauricio", "Zambrano-Bigiarini", email="mzb.devel@gmail.com", role=c("aut","cre")), person("Rodrigo", "Rojas", email="Rodrigo.RojasMujica@gmail.com", role=c("ctb")) )
 Maintainer: Mauricio Zambrano-Bigiarini <mzb.devel@gmail.com>
