@@ -78,9 +78,5 @@ RSpec.describe 'OSA Schema' do
     validate_osa('server/spec/files/test_model/test_model.json', @schema)
     validate_osa('spec/files/da_measures.json', @schema)
     validate_osa('spec/files/example_csv.json', @schema)
-
-    # fails -- but not used
-    # validate_osa('server/spec/files/simple_cont_example.json', @schema)
-    # validate_osa('server/spec/files/jsons/formulation.json', @schema)
   end
 end
