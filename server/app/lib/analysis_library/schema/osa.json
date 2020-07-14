@@ -1,0 +1,590 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"type": "object",
+	"properties": {
+		"analysis": {
+			"properties": {
+				"display_name": {
+					"description": "Name of the analysis.",
+					"type": "string"
+				},
+				"name": {
+					"description": "Machine readable name of the analysis (no spaces, random characters, etc).",
+					"type": "string"
+				},
+				"output_variables": {
+					"title": "output_variables",
+					"description": "List of the output variables that is expected. Objective functions will be flagged in the list.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"display_name": {
+								"description": "Display name of the output variable. This can be set to be whatever the user wants.",
+								"type": "string"
+							},
+							"display_name_short": {
+								"description": "A shorter version of the display name. This is user defined and helps with creating short names for plots.",
+								"type": "string"
+							},
+							"name": {
+								"description": "Machine friendly name of the output variable. This must match an output of the OpenStudio workflow (e.g., openstudio_results.electricity_ip)",
+								"type": "string"
+							},
+							"units": {
+								"description": "Units of the output variable. This is only used for display purposes.",
+								"type": "string"
+							},
+							"objective_function": {
+								"description": "Boolean to specify that the output variable is part of an objective function.",
+								"type": "boolean"
+							},
+							"objective_function_index": {
+								"description": "Index of the objective function. Zero-based.",
+								"type": [
+									"number",
+									"null"
+								],
+								"items": {
+									"type": "number"
+								}
+							},
+							"objective_function_target": {
+								"description": "Target value which the objective function is trying to achieve.",
+								"type": [
+									"number",
+									"null"
+								]
+							},
+							"scaling_factor": {
+								"description": "Value by which to scale this output variable.",
+								"type": [
+									"number",
+									"null"
+								]
+							},
+							"objective_function_group": {
+								"description": "If grouping objective functions, then the index which this output variable is grouped.",
+								"type": [
+									"number",
+									"null"
+								]
+							},
+							"metadata_id": {
+								"description": "Deprecated. Use to store a universal metadata ID for DEnCity.",
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"visualize": {
+								"description": "Boolean to specify that the output variable will be visible in OpenStudio Server's visualizations.",
+								"type": "boolean"
+							},
+							"export": {
+								"description": "Boolean to specify that the output variable will be exported to tabular data when using OpenStudio Server.",
+								"type": "boolean"
+							},
+							"variable_type": {
+								"description": "The data type of the variable.",
+								"type": "string",
+								"enum": [
+									"double",
+									"string"
+								]
+							}
+						},
+						"required": [
+							"display_name",
+							"name",
+							"objective_function",
+							"objective_function_index",
+							"objective_function_target",
+							"scaling_factor",
+							"objective_function_group",
+							"metadata_id",
+							"visualize",
+							"export"
+						],
+						"additionalProperties": false
+					}
+				},
+				"problem": {
+					"$ref": "#/definitions/problem_def"
+				},
+				"seed": {
+					"description": "Seed model definition.",
+					"type": "object",
+					"properties": {
+						"file_type": {
+							"type": "string"
+						},
+						"path": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"file_type",
+						"path"
+					],
+					"additionalProperties": false
+				},
+				"weather_file": {
+					"description": "Weather file to be used in the anlaysis.",
+					"type": "object",
+					"properties": {
+						"file_type": {
+							"type": "string"
+						},
+						"path": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"file_type",
+						"path"
+					],
+					"additionalProperties": false
+				},
+				"server_scripts": {
+					"description": "Analysis and worker initialization scripts.",
+					"type": "object",
+					"properties": {
+						"worker_initialization": {
+							"description": "Worker init script that runs on each worker before the analysis starts.",
+							"type": "string"
+						},
+						"worker_finalization": {
+							"description": "Worker finalization script that runs after each worker finishes running the batch of simulations for the analysis.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				},
+				"file_format_version": {
+					"description": "Version of the OSA. This is only 1 at the moment.",
+					"type": "number",
+					"enum": [
+						1
+					]
+				}
+			},
+			"required": [
+				"display_name",
+				"name",
+				"output_variables",
+				"problem",
+				"seed",
+				"weather_file",
+				"server_scripts",
+				"file_format_version"
+			],
+			"additionalProperties": false
+		}
+	},
+	"required": [
+		"analysis"
+	],
+	"additionalProperties": false,
+	"definitions": {
+		"algorithm_def": {
+			"title": "algorithm",
+			"description": "TODO: need to find all the algorithm options",
+			"type": "object",
+			"properties": {
+				"sample_method": {
+					"description": "The type of sampleing. If 'all_variables' then the sampling will occur across all the variables. If individual, then each variable is sampled individually.",
+					"type": "string",
+					"enum": [
+						"all_variables",
+						"individual_variables"
+					]
+				},
+				"number_of_samples": {
+					"description": "Number of samples.",
+					"type": "number"
+				},
+				"seed": {
+					"description": "Seed value for random number generators. If null then algorithm will choose random seed.",
+					"type": [
+						"number",
+						"null"
+					]
+				},
+				"failed_f_value": {
+					"description": "Value to set the return value if a simulation fails.",
+					"type": "number",
+					"default": 1000000000000000000
+				},
+				"debug_messages": {
+					"description": "0 - do not show debug messages. 1 - show debug messages. TODO: This should be converted to a boolean.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1,
+					"multipleOf": 1
+				},
+				"objective_functions": {
+					"description": "List of the objective functions",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"sample_method",
+				"number_of_samples",
+				"seed",
+				"failed_f_value",
+				"debug_messages"
+			],
+			"additionalProperties": false
+		},
+		"workflow_def": {
+			"description": "Definition of the workflow.",
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"display_name": {
+					"type": "string"
+				},
+				"measure_type": {
+					"type": "string",
+					"enum": [
+						"RubyMeasure",
+						"EnergyPlusMeasure",
+						"ReportingMeasure"
+					]
+				},
+				"measure_definition_class_name": {
+					"type": "string"
+				},
+				"measure_definition_directory": {
+					"type": "string"
+				},
+				"measure_definition_directory_local": {
+					"type": "string"
+				},
+				"measure_definition_display_name": {
+					"type": "string"
+				},
+				"measure_definition_name": {
+					"type": "string"
+				},
+				"measure_definition_name_xml": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"measure_definition_uuid": {
+					"type": "string"
+				},
+				"measure_definition_version_uuid": {
+					"type": "string"
+				},
+				"arguments": {
+					"description": "List of measure arguments that are not used as variables.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/argument_base_def"
+					}
+				},
+				"variables": {
+					"title": "variables",
+					"description": "List of variables for the problem.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"argument": {
+								"$ref": "#/definitions/argument_base_def"
+							},
+							"display_name": {
+								"description": "Display name of the variable. This is user-defined.",
+								"type": "string"
+							},
+							"display_name_short": {
+								"description": "A shorter display name for the variable. This is typically used for graphs and table exports.",
+								"type": "string"
+							},
+							"units": {
+								"type": "string"
+							},
+							"variable": {
+								"description": "Is the variable a variable? This should always be true.",
+								"type": "boolean"
+							},
+							"variable_type": {
+								"description": "The type of variable. Can be pivot or variable. If pivot, then the pivot variable is applied to all algorithm values.",
+								"type": "string",
+								"enum": [
+									"variable",
+									"pivot"
+								]
+							},
+							"minimum": {
+								"description": "The minimum value of the variable. This can be a string, double, or integer.",
+								"type": [
+									"string",
+									"number",
+									"boolean"
+								]
+							},
+							"maximum": {
+								"description": "The maximum value of the variable. This can be a string, double, or integer.",
+								"type": [
+									"string",
+									"number",
+									"boolean",
+									"null"
+								]
+							},
+							"static_value": {
+								"description": "The static value of the variable when it is not set by the algorithm. ",
+								"type": [
+									"string",
+									"number",
+									"boolean"
+								]
+							},
+							"uuid": {
+								"description": "UUID of the variable.",
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"version_uuid": {
+								"description": "UUID of the version of the variable.",
+								"type": [
+									"string",
+									"null"
+								]
+							},
+							"workflow_index": {
+								"description": "Integer index of the workflow step.",
+								"type": "number"
+							},
+							"uncertainty_description": {
+								"$ref": "#/definitions/uncertainty_def"
+							}
+						},
+						"required": [
+							"argument",
+							"display_name",
+							"display_name_short",
+							"variable",
+							"variable_type",
+							"minimum",
+							"maximum",
+							"static_value",
+							"workflow_index",
+							"uncertainty_description"
+						],
+						"additionalProperties": false
+					}
+				},
+				"uuid": {
+					"type": "string"
+				},
+				"version_uuid": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"taxonomy": {
+					"type": "string"
+				},
+				"workflow_index": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"name",
+				"display_name",
+				"measure_type",
+				"measure_definition_directory",
+				"measure_definition_directory_local",
+				"measure_definition_display_name",
+				"measure_definition_name",
+				"measure_definition_name_xml",
+				"measure_definition_uuid",
+				"measure_definition_version_uuid",
+				"variables",
+				"uuid",
+				"version_uuid",
+				"description",
+				"taxonomy",
+				"workflow_index"
+			],
+			"additionalProperties": false
+		},
+		"problem_def": {
+			"title": "problem",
+			"description": "Definition of the problem to analyze.",
+			"type": "object",
+			"properties": {
+				"algorithm": {
+					"$ref": "#/definitions/algorithm_def"
+				},
+				"name": {
+					"description": "Name of the problem being analyzed. This does not appear to be used.",
+					"type": "string"
+				},
+				"workflow": {
+					"title": "workflow",
+					"description": "The steps the problem will follow.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/workflow_def"
+					}
+				},
+				"analysis_type": {
+					"description": "The type of analysis to run.",
+					"type": "string",
+					"enum": [
+						"single_run",
+						"lhs",
+						"TODO: ADD IN THE REMAINING"
+					]
+				}
+			},
+			"required": [
+				"algorithm",
+				"workflow",
+				"analysis_type"
+			],
+			"additionalProperties": false
+		},
+		"argument_base_def": {
+			"description": "Details of the argument that is \"tagged\" as a variable for the problem. The argument is the measure argument.",
+			"type": "object",
+			"properties": {
+				"display_name": {
+					"description": "Dispany name of the measure argument. This is user-defined.",
+					"type": "string"
+				},
+				"display_name_short": {
+					"description": "A shorter display name for an argument. This field is typically used for graphs and table exports.",
+					"type": "string"
+				},
+				"name": {
+					"description": "The machine name of the measure argument. This is typically the snake case field defined in the measure.xml.",
+					"type": "string"
+				},
+				"value_type": {
+					"description": "The variable type of the value that is being  set.",
+					"type": "string",
+					"enum": [
+						"double",
+						"string",
+						"boolean",
+						"integer"
+					]
+				},
+				"value": {
+					"description": "The value to set the measure argument. Note that if the argument is within a variable, then the value is not used.",
+					"type": [
+						"string",
+						"number",
+						"boolean",
+						"null"
+					]
+				},
+				"default_value": {
+					"description": "The default value for the argument. This is typically used in user interfaces.",
+					"type": [
+						"string",
+						"number",
+						"boolean",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"display_name",
+				"name",
+				"value_type"
+			],
+			"additionalProperties": false
+		},
+		"uncertainty_def": {
+			"description": "Container for holding the uncertainty description.",
+			"type": "object",
+			"properties": {
+				"type": {
+					"description": "Type of uncertainty description.",
+					"type": "string",
+					"enum": [
+						"uniform",
+						"discrete"
+					]
+				},
+				"attributes": {
+					"description": "Attributes of the uncertainty.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"description": "Name of the uncertainty attribute such as lower bound, mean, standard deviation, etc.",
+								"type": "string",
+								"enum": [
+									"lower_bounds",
+									"upper_bounds",
+									"modes",
+									"delta_x",
+									"stddev",
+									"discrete"
+								]
+							},
+							"value": {
+								"description": "Value of the uncertainty attribute (name).",
+								"type": [
+									"string",
+									"number",
+									"boolean"
+								]
+							},
+							"values_and_weights": {
+								"description": "If the variable is discrete, then the list of values and weights for each option.",
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"value": {
+											"description": "Value of the discrete variable.",
+											"type": [
+												"string",
+												"number",
+												"boolean"
+											]
+										},
+										"weight": {
+											"description": "Weight of the discrete value when being sampled.",
+											"type": "number"
+										}
+									},
+									"required": [
+										"value",
+										"weight"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"required": [
+							"name"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"additionalProperties": false
+		}
+	}
+}
