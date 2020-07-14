@@ -1,5 +1,5 @@
 #!/bin/bash -e
-cd ../..
+cd ..
 docker stack rm osserver || true
 
 docker volume rm -f osdata || true
@@ -7,7 +7,7 @@ docker volume rm -f dbdata || true
 
 while [ $(docker ps -q | wc -l) != 1 ]; do sleep 5; done
 #docker image rm 127.0.0.1:5000/openstudio-server -f
-docker build . -t="127.0.0.1:5000/openstudio-server" --build-arg OPENSTUDIO_VERSION=3.0.1
+docker build . -t="127.0.0.1:5000/openstudio-server" --build-arg OPENSTUDIO_VERSION=3.0.0-beta
 docker push 127.0.0.1:5000/openstudio-server
 cd docker/R
 #docker image rm 127.0.0.1:5000/openstudio-rserve -f
@@ -16,6 +16,7 @@ docker push 127.0.0.1:5000/openstudio-rserve
 docker pull mongo:3.4.10
 docker tag mongo:3.4.10 127.0.0.1:5000/mongo
 docker push 127.0.0.1:5000/mongo
+#docker image rm mongo || true
 docker pull redis:4.0.6
 docker tag redis:4.0.6 127.0.0.1:5000/redis
 docker push 127.0.0.1:5000/redis

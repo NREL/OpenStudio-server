@@ -21,7 +21,7 @@ docker pull redis:4.0.6
 echo "create registry"
 docker volume create --name=regdata
 docker swarm init
-docker service create --name registry --publish 5000:5000 --mount type=volume,source=regdata,destination=//c//Projects//OS-Server-UrbanOpt//local_setup_scripts registry:2.6
+docker service create --name registry --publish 5000:5000 --mount type=volume,source=regdata,destination=//c//Projects//OS-Server-develop//local_setup_scripts registry:2.6
 sleep 10
 echo "tag"
 docker tag nrel/openstudio-server:$1 127.0.0.1:5000/openstudio-server
