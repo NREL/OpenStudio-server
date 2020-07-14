@@ -142,9 +142,10 @@ print(paste("topology:", topology))
 print(paste("c1:", c1))
 print(paste("c2:", c2))
 print(paste("lambda:", lambda))
+print(paste("report:", report))
 
 results <- NULL
-try(results <- NRELpso(cl=cl, fn=f, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda)), silent=FALSE)
+try(results <- NRELpso(cl=cl, fn=f, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda, REPORT=report)), silent=FALSE)
 #print(paste("scp command:",scp))
 #print(paste("scp command:",scp2))
 #system(scp,intern=TRUE)
@@ -187,3 +188,6 @@ if (!file.exists(bestresults_filename) && !is.null(results$par)) {
   convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"false",sep='', collapse=','),'}',sep='')
   write(convergenceflag, file=paste(analysis_dir,"/convergence_flag.json",sep=''))
 }
+print("stopping cluster in pso.R")
+stopCluster(cl)
+print("cluster stopped")
