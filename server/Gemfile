@@ -7,7 +7,7 @@ ruby '~>2.5.1'
 # gem 'rubygems-update', '2.7.8'
 
 gem 'rails', '5.1.4'
-gem 'rake', '~> 12.3'
+gem 'rake', '~> 13.0'
 
 # added for support of the project rakefile
 gem 'colored'
@@ -64,7 +64,8 @@ gem 'roo', '~>2.8.3'
 gem 'openstudio-workflow', '= 2.0.0'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 
-gem 'openstudio-analysis', '= 1.0.4'
+# gem 'openstudio-analysis', '= 1.0.4'
+gem 'openstudio-analysis', '= 1.0.4', github: 'NREL/OpenStudio-analysis-gem', ref: 'e67ef80e6376f463628d019bac0a5247fe57f960'
 
 ## End commonly updated gems
 
@@ -80,6 +81,9 @@ gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
 
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
 gem 'rubyXL', '~> 3.3.29'
+
+gem 'urbanopt-cli', '0.3.1'
+gem 'urbanopt-reopt', '0.3.0'
 
 # linux based js runtime libraries
 if RUBY_PLATFORM =~ /linux/
@@ -115,9 +119,9 @@ group :development, :test do
   gem 'selenium-webdriver'
 
   gem 'psych', '~> 3.1.0'
-  gem 'rubocop', '0.64.0'
+  gem 'rubocop', '0.54.0'
   gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
-  gem 'rubocop-rspec', '1.32.0'
+  gem 'rubocop-rspec'
 
   gem 'ci_reporter'
   gem 'factory_bot_rails', '4.11.1' # 5.0.2 require ruby 2.3
