@@ -87,6 +87,8 @@ else
     printenv
     which ruby
     ruby -v
+    # test openssl
+    ruby ci/cipher.rb
     ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
     # create dir for output files which will be generated in case of failure
