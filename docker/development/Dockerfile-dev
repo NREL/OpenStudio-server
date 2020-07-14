@@ -73,10 +73,6 @@ ENV PERL_EXE_PATH /usr/bin
 ENV RAILS_ENV $rails_env
 ENV GECKODRIVER_VERSION v0.15.0
 
-# Configure IPVS keepalive
-ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
-RUN sudo sysctl --system
-
 ### ADD Gemfile to cache the installation of Gems. If you change the Gemfile, then you will need to rebuild
 ### your docker containers
 ADD /bin /opt/openstudio/bin

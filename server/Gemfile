@@ -65,7 +65,7 @@ gem 'openstudio-workflow', '= 2.0.0'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 
 # gem 'openstudio-analysis', '= 1.0.4'
-gem 'openstudio-analysis', '= 1.0.4', github: 'NREL/OpenStudio-analysis-gem', ref: 'e67ef80e6376f463628d019bac0a5247fe57f960'
+gem 'openstudio-analysis', '= 1.0.4', github: 'NREL/OpenStudio-analysis-gem', ref: 'c3d7d16d08de21418e4f11188af02763a366d8ac'
 
 ## End commonly updated gems
 

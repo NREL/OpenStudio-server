@@ -102,8 +102,6 @@ ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 RUN rm Gemfile.lock
 RUN bundle install --jobs=3 --retry=3
 
-RUN sudo sysctl --system
-
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.
 COPY /docker/server/wait-for-it.sh /usr/local/bin/wait-for-it
