@@ -42,8 +42,7 @@
 							"objective_function_index": {
 								"description": "Index of the objective function. Zero-based.",
 								"type": [
-									"number",
-									"null"
+									"number", "null"
 								],
 								"items": {
 									"type": "number"
@@ -52,29 +51,25 @@
 							"objective_function_target": {
 								"description": "Target value which the objective function is trying to achieve.",
 								"type": [
-									"number",
-									"null"
+									"number", "null"
 								]
 							},
 							"scaling_factor": {
 								"description": "Value by which to scale this output variable.",
 								"type": [
-									"number",
-									"null"
+									"number", "null"
 								]
 							},
 							"objective_function_group": {
 								"description": "If grouping objective functions, then the index which this output variable is grouped.",
 								"type": [
-									"number",
-									"null"
+									"number", "null"
 								]
 							},
 							"metadata_id": {
 								"description": "Deprecated. Use to store a universal metadata ID for DEnCity.",
 								"type": [
-									"string",
-									"null"
+									"string", "null"
 								]
 							},
 							"visualize": {
@@ -89,22 +84,12 @@
 								"description": "The data type of the variable.",
 								"type": "string",
 								"enum": [
-									"double",
-									"string"
+									"double", "string"
 								]
 							}
 						},
 						"required": [
-							"display_name",
-							"name",
-							"objective_function",
-							"objective_function_index",
-							"objective_function_target",
-							"scaling_factor",
-							"objective_function_group",
-							"metadata_id",
-							"visualize",
-							"export"
+							"display_name", "name", "objective_function", "objective_function_index", "objective_function_target", "scaling_factor", "objective_function_group", "metadata_id", "visualize", "export"
 						],
 						"additionalProperties": false
 					}
@@ -127,8 +112,7 @@
 						}
 					},
 					"required": [
-						"file_type",
-						"path"
+						"file_type", "path"
 					],
 					"additionalProperties": false
 				},
@@ -177,13 +161,7 @@
 				}
 			},
 			"required": [
-				"display_name",
-				"name",
-				"output_variables",
-				"problem",
-				"seed",
-				"weather_file",
-				"file_format_version"
+				"display_name", "name", "output_variables", "problem", "seed", "weather_file", "file_format_version"
 			],
 			"additionalProperties": false
 		}
@@ -201,15 +179,10 @@
 				"analysis_type": {
 					"description": "The type of analysis to run.",
 					"type": [
-						"string",
-						"null"
+						"string", "null"
 					],
 					"enum": [
-						"single_run",
-						"lhs",
-						"nsga_nrel",
-						"TODO: ADD IN THE REMAINING",
-						null
+						"single_run", "lhs", "nsga_nrel", "TODO: ADD IN THE REMAINING", null
 					]
 				},
 				"algorithm": {
@@ -268,27 +241,21 @@
 										}
 									},
 									"required": [
-										"measure_name",
-										"workflow_index",
-										"name",
-										"description"
+										"measure_name", "workflow_index", "name", "description"
 									],
 									"additionalProperties": false
 								}
 							}
 						},
 						"required": [
-							"name",
-							"options"
+							"name", "options"
 						],
 						"additionalProperties": false
 					}
 				}
 			},
 			"required": [
-				"analysis_type",
-				"algorithm",
-				"workflow"
+				"analysis_type", "algorithm", "workflow"
 			],
 			"additionalProperties": false
 		},
@@ -301,8 +268,7 @@
 					"description": "The type of sampleing. If 'all_variables' then the sampling will occur across all the variables. If individual, then each variable is sampled individually.",
 					"type": "string",
 					"enum": [
-						"all_variables",
-						"individual_variables"
+						"all_variables", "individual_variables"
 					]
 				},
 				"number_of_samples": {
@@ -312,8 +278,7 @@
 				"seed": {
 					"description": "Seed value for random number generators. If null then algorithm will choose random seed.",
 					"type": [
-						"number",
-						"null"
+						"number", "null"
 					]
 				},
 				"debug_messages": {
@@ -338,8 +303,7 @@
 				"exit_on_guideline_14": {
 					"type": "number",
 					"enum": [
-						0,
-						1
+						0, 1
 					]
 				},
 				"generations": {
@@ -388,9 +352,7 @@
 					"description": "Type of measure to be run.",
 					"type": "string",
 					"enum": [
-						"RubyMeasure",
-						"EnergyPlusMeasure",
-						"ReportingMeasure"
+						"RubyMeasure", "EnergyPlusMeasure", "ReportingMeasure"
 					]
 				},
 				"measure_definition_class_name": {
@@ -416,8 +378,7 @@
 				"measure_definition_name_xml": {
 					"description": "The measure name as defined in the measure.xml. TODO: this should be deprecated.",
 					"type": [
-						"string",
-						"null"
+						"string", "null"
 					]
 				},
 				"measure_definition_uuid": {
@@ -453,18 +414,7 @@
 				}
 			},
 			"required": [
-				"name",
-				"display_name",
-				"measure_type",
-				"measure_definition_directory",
-				"measure_definition_directory_local",
-				"measure_definition_display_name",
-				"measure_definition_name",
-				"measure_definition_name_xml",
-				"measure_definition_uuid",
-				"measure_definition_version_uuid",
-				"variables",
-				"workflow_index"
+				"name", "display_name", "measure_type", "measure_definition_directory", "measure_definition_directory_local", "measure_definition_display_name", "measure_definition_name", "measure_definition_name_xml", "measure_definition_uuid", "measure_definition_version_uuid", "variables", "workflow_index"
 			],
 			"additionalProperties": false
 		},
@@ -488,36 +438,24 @@
 					"description": "The variable type of the value that is being  set.",
 					"type": "string",
 					"enum": [
-						"double",
-						"string",
-						"boolean",
-						"bool",
-						"integer"
+						"double", "string", "boolean", "bool", "integer"
 					]
 				},
 				"value": {
 					"description": "The value to set the measure argument. Note that if the argument is within a variable, then the value is not used.",
 					"type": [
-						"string",
-						"number",
-						"boolean",
-						"null"
+						"string", "number", "boolean", "null"
 					]
 				},
 				"default_value": {
 					"description": "The default value for the argument. This is typically used in user interfaces.",
 					"type": [
-						"string",
-						"number",
-						"boolean",
-						"null"
+						"string", "number", "boolean", "null"
 					]
 				}
 			},
 			"required": [
-				"display_name",
-				"name",
-				"value_type"
+				"display_name", "name", "value_type"
 			],
 			"additionalProperties": false
 		},
@@ -529,11 +467,7 @@
 					"description": "Type of uncertainty description.",
 					"type": "string",
 					"enum": [
-						"uniform",
-						"discrete",
-						"triangle",
-						"lognormal",
-						"normal"
+						"uniform", "discrete", "triangle", "lognormal", "normal"
 					]
 				},
 				"attributes": {
@@ -546,21 +480,13 @@
 								"description": "Name of the uncertainty attribute such as lower bound, mean, standard deviation, etc.",
 								"type": "string",
 								"enum": [
-									"lower_bounds",
-									"upper_bounds",
-									"modes",
-									"delta_x",
-									"stddev",
-									"discrete"
+									"lower_bounds", "upper_bounds", "modes", "delta_x", "stddev", "discrete"
 								]
 							},
 							"value": {
 								"description": "Value of the uncertainty attribute (name).",
 								"type": [
-									"string",
-									"number",
-									"boolean",
-									"null"
+									"string", "number", "boolean", "null"
 								]
 							},
 							"values_and_weights": {
@@ -572,9 +498,7 @@
 										"value": {
 											"description": "Value of the discrete variable.",
 											"type": [
-												"string",
-												"number",
-												"boolean"
+												"string", "number", "boolean"
 											]
 										},
 										"weight": {
@@ -583,8 +507,7 @@
 										}
 									},
 									"required": [
-										"value",
-										"weight"
+										"value", "weight"
 									],
 									"additionalProperties": false
 								}
@@ -619,8 +542,7 @@
 					},
 					"units": {
 						"type": [
-							"string",
-							"null"
+							"string", "null"
 						]
 					},
 					"variable": {
@@ -631,59 +553,46 @@
 						"description": "The type of variable. Can be pivot or variable. If pivot, then the pivot variable is applied to all algorithm values.",
 						"type": "string",
 						"enum": [
-							"variable",
-							"pivot"
+							"variable", "pivot"
 						]
 					},
 					"minimum": {
 						"description": "The minimum value of the variable. This can be a string, double, or integer.",
 						"type": [
-							"string",
-							"number",
-							"boolean"
+							"string", "number", "boolean"
 						]
 					},
 					"maximum": {
 						"description": "The maximum value of the variable. This can be a string, double, or integer.",
 						"type": [
-							"string",
-							"number",
-							"boolean",
-							"null"
+							"string", "number", "boolean", "null"
 						]
 					},
 					"relation_to_output": {
 						"description": "The minimum value of the variable. This can be a string, double, or integer.",
 						"type": [
-							"string",
-							"null"
+							"string", "null"
 						],
 						"enum": [
-							"positive",
-							"negative",
-							null
+							"positive", "negative", null
 						]
 					},
 					"static_value": {
 						"description": "The static value of the variable when it is not set by the algorithm. ",
 						"type": [
-							"string",
-							"number",
-							"boolean"
+							"string", "number", "boolean"
 						]
 					},
 					"uuid": {
 						"description": "UUID of the variable.",
 						"type": [
-							"string",
-							"null"
+							"string", "null"
 						]
 					},
 					"version_uuid": {
 						"description": "UUID of the version of the variable.",
 						"type": [
-							"string",
-							"null"
+							"string", "null"
 						]
 					},
 					"workflow_index": {
@@ -695,16 +604,7 @@
 					}
 				},
 				"required": [
-					"argument",
-					"display_name",
-					"display_name_short",
-					"variable",
-					"variable_type",
-					"minimum",
-					"maximum",
-					"static_value",
-					"workflow_index",
-					"uncertainty_description"
+					"argument", "display_name", "display_name_short", "variable", "variable_type", "minimum", "maximum", "static_value", "workflow_index", "uncertainty_description"
 				],
 				"additionalProperties": false
 			}
@@ -716,8 +616,7 @@
 				"file_type": {
 					"type": "string",
 					"enum": [
-						"OSW",
-						"OSM"
+						"OSW", "OSM"
 					]
 				},
 				"path": {
@@ -725,8 +624,7 @@
 				}
 			},
 			"required": [
-				"file_type",
-				"path"
+				"file_type", "path"
 			],
 			"additionalProperties": false
 		}
