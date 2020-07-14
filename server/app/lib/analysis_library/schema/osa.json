@@ -113,21 +113,7 @@
 					"$ref": "#/definitions/problem_def"
 				},
 				"seed": {
-					"description": "Seed model definition.",
-					"type": "object",
-					"properties": {
-						"file_type": {
-							"type": "string"
-						},
-						"path": {
-							"type": "string"
-						}
-					},
-					"required": [
-						"file_type",
-						"path"
-					],
-					"additionalProperties": false
+					"$ref": "#/definitions/seed_file_def"
 				},
 				"weather_file": {
 					"description": "Weather file to be used in the anlaysis.",
@@ -167,6 +153,27 @@
 					"enum": [
 						1
 					]
+				},
+				"uuid": {
+					"type": "string"
+				},
+				"version_uuid": {
+					"type": "string"
+				},
+				"cli_debug": {
+					"type": "string"
+				},
+				"cli_verbose": {
+					"type": "string"
+				},
+				"initialize_worker_timeout": {
+					"type": "number"
+				},
+				"run_workflow_timeout": {
+					"type": "number"
+				},
+				"upload_results_timeout": {
+					"type": "number"
 				}
 			},
 			"required": [
@@ -176,7 +183,6 @@
 				"problem",
 				"seed",
 				"weather_file",
-				"server_scripts",
 				"file_format_version"
 			],
 			"additionalProperties": false
@@ -187,6 +193,105 @@
 	],
 	"additionalProperties": false,
 	"definitions": {
+		"problem_def": {
+			"title": "problem",
+			"description": "Definition of the problem to analyze.",
+			"type": "object",
+			"properties": {
+				"analysis_type": {
+					"description": "The type of analysis to run.",
+					"type": [
+						"string",
+						"null"
+					],
+					"enum": [
+						"single_run",
+						"lhs",
+						"nsga_nrel",
+						"TODO: ADD IN THE REMAINING",
+						null
+					]
+				},
+				"algorithm": {
+					"$ref": "#/definitions/algorithm_def"
+				},
+				"name": {
+					"description": "Name of the problem being analyzed. This does not appear to be used.",
+					"type": "string"
+				},
+				"workflow": {
+					"title": "workflow",
+					"description": "The steps the problem will follow.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/workflow_def"
+					}
+				},
+				"design_alternatives": {
+					"description": "If running design alternative based workflows (from PAT local), then use this workflow definition.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"description": "Name of the design alternative (this is seen by the user).",
+								"type": "string"
+							},
+							"description": {
+								"description": "Description of the design alternative set by the user.",
+								"type": "string"
+							},
+							"seed": {
+								"$ref": "#/definitions/seed_file_def"
+							},
+							"options": {
+								"description": "Options for the design alternative.",
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"measure_name": {
+											"description": "Name of the measure as defined in the measure.rb file.",
+											"type": "string"
+										},
+										"workflow_index": {
+											"description": "Index of the option.",
+											"type": "number"
+										},
+										"name": {
+											"description": "Name of alternative option. This is user-defined.",
+											"type": "string"
+										},
+										"description": {
+											"description": "Description of alternative option. This is user-defined.",
+											"type": "string"
+										}
+									},
+									"required": [
+										"measure_name",
+										"workflow_index",
+										"name",
+										"description"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"required": [
+							"name",
+							"options"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"analysis_type",
+				"algorithm",
+				"workflow"
+			],
+			"additionalProperties": false
+		},
 		"algorithm_def": {
 			"title": "algorithm",
 			"description": "TODO: need to find all the algorithm options",
@@ -211,11 +316,6 @@
 						"null"
 					]
 				},
-				"failed_f_value": {
-					"description": "Value to set the return value if a simulation fails.",
-					"type": "number",
-					"default": 1000000000000000000
-				},
 				"debug_messages": {
 					"description": "0 - do not show debug messages. 1 - show debug messages. TODO: This should be converted to a boolean.",
 					"type": "number",
@@ -223,21 +323,53 @@
 					"maximum": 1,
 					"multipleOf": 1
 				},
+				"failed_f_value": {
+					"description": "Value to set the return value if a simulation fails.",
+					"type": "number",
+					"default": 1000000000000000000
+				},
 				"objective_functions": {
 					"description": "List of the objective functions",
 					"type": "array",
 					"items": {
 						"type": "string"
 					}
+				},
+				"exit_on_guideline_14": {
+					"type": "number",
+					"enum": [
+						0,
+						1
+					]
+				},
+				"generations": {
+					"type": "number"
+				},
+				"cprob": {
+					"type": "number"
+				},
+				"xoverdistidx": {
+					"type": "number"
+				},
+				"mudistidx": {
+					"type": "number"
+				},
+				"mprob": {
+					"type": "number"
+				},
+				"toursize": {
+					"type": "number"
+				},
+				"normtype": {
+					"type": "string",
+					"enum": [
+						"minkowski"
+					]
+				},
+				"ppower": {
+					"type": "number"
 				}
 			},
-			"required": [
-				"sample_method",
-				"number_of_samples",
-				"seed",
-				"failed_f_value",
-				"debug_messages"
-			],
 			"additionalProperties": false
 		},
 		"workflow_def": {
@@ -245,12 +377,15 @@
 			"type": "object",
 			"properties": {
 				"name": {
+					"description": "Name of the workflow step. This is commonly the measure name.",
 					"type": "string"
 				},
 				"display_name": {
+					"description": "Display name for the workflow step.",
 					"type": "string"
 				},
 				"measure_type": {
+					"description": "Type of measure to be run.",
 					"type": "string",
 					"enum": [
 						"RubyMeasure",
@@ -259,21 +394,27 @@
 					]
 				},
 				"measure_definition_class_name": {
+					"description": "The class name as defined in the measure.rb file.",
 					"type": "string"
 				},
 				"measure_definition_directory": {
+					"description": "Relative directory to the measure.rb file.",
 					"type": "string"
 				},
 				"measure_definition_directory_local": {
+					"description": "Full path to the measure directory.",
 					"type": "string"
 				},
 				"measure_definition_display_name": {
+					"description": "The display name of the measure as defined in the measure.rb.",
 					"type": "string"
 				},
 				"measure_definition_name": {
+					"description": "The measure name (method) of the measure as defined in the measure.rb.",
 					"type": "string"
 				},
 				"measure_definition_name_xml": {
+					"description": "The measure name as defined in the measure.xml. TODO: this should be deprecated.",
 					"type": [
 						"string",
 						"null"
@@ -293,99 +434,7 @@
 					}
 				},
 				"variables": {
-					"title": "variables",
-					"description": "List of variables for the problem.",
-					"type": "array",
-					"items": {
-						"type": "object",
-						"properties": {
-							"argument": {
-								"$ref": "#/definitions/argument_base_def"
-							},
-							"display_name": {
-								"description": "Display name of the variable. This is user-defined.",
-								"type": "string"
-							},
-							"display_name_short": {
-								"description": "A shorter display name for the variable. This is typically used for graphs and table exports.",
-								"type": "string"
-							},
-							"units": {
-								"type": "string"
-							},
-							"variable": {
-								"description": "Is the variable a variable? This should always be true.",
-								"type": "boolean"
-							},
-							"variable_type": {
-								"description": "The type of variable. Can be pivot or variable. If pivot, then the pivot variable is applied to all algorithm values.",
-								"type": "string",
-								"enum": [
-									"variable",
-									"pivot"
-								]
-							},
-							"minimum": {
-								"description": "The minimum value of the variable. This can be a string, double, or integer.",
-								"type": [
-									"string",
-									"number",
-									"boolean"
-								]
-							},
-							"maximum": {
-								"description": "The maximum value of the variable. This can be a string, double, or integer.",
-								"type": [
-									"string",
-									"number",
-									"boolean",
-									"null"
-								]
-							},
-							"static_value": {
-								"description": "The static value of the variable when it is not set by the algorithm. ",
-								"type": [
-									"string",
-									"number",
-									"boolean"
-								]
-							},
-							"uuid": {
-								"description": "UUID of the variable.",
-								"type": [
-									"string",
-									"null"
-								]
-							},
-							"version_uuid": {
-								"description": "UUID of the version of the variable.",
-								"type": [
-									"string",
-									"null"
-								]
-							},
-							"workflow_index": {
-								"description": "Integer index of the workflow step.",
-								"type": "number"
-							},
-							"uncertainty_description": {
-								"$ref": "#/definitions/uncertainty_def"
-							}
-						},
-						"required": [
-							"argument",
-							"display_name",
-							"display_name_short",
-							"variable",
-							"variable_type",
-							"minimum",
-							"maximum",
-							"static_value",
-							"workflow_index",
-							"uncertainty_description"
-						],
-						"additionalProperties": false
-					}
+					"$ref": "#/definitions/variable_def"
 				},
 				"uuid": {
 					"type": "string"
@@ -415,48 +464,7 @@
 				"measure_definition_uuid",
 				"measure_definition_version_uuid",
 				"variables",
-				"uuid",
-				"version_uuid",
-				"description",
-				"taxonomy",
 				"workflow_index"
-			],
-			"additionalProperties": false
-		},
-		"problem_def": {
-			"title": "problem",
-			"description": "Definition of the problem to analyze.",
-			"type": "object",
-			"properties": {
-				"algorithm": {
-					"$ref": "#/definitions/algorithm_def"
-				},
-				"name": {
-					"description": "Name of the problem being analyzed. This does not appear to be used.",
-					"type": "string"
-				},
-				"workflow": {
-					"title": "workflow",
-					"description": "The steps the problem will follow.",
-					"type": "array",
-					"items": {
-						"$ref": "#/definitions/workflow_def"
-					}
-				},
-				"analysis_type": {
-					"description": "The type of analysis to run.",
-					"type": "string",
-					"enum": [
-						"single_run",
-						"lhs",
-						"TODO: ADD IN THE REMAINING"
-					]
-				}
-			},
-			"required": [
-				"algorithm",
-				"workflow",
-				"analysis_type"
 			],
 			"additionalProperties": false
 		},
@@ -483,6 +491,7 @@
 						"double",
 						"string",
 						"boolean",
+						"bool",
 						"integer"
 					]
 				},
@@ -521,7 +530,10 @@
 					"type": "string",
 					"enum": [
 						"uniform",
-						"discrete"
+						"discrete",
+						"triangle",
+						"lognormal",
+						"normal"
 					]
 				},
 				"attributes": {
@@ -547,7 +559,8 @@
 								"type": [
 									"string",
 									"number",
-									"boolean"
+									"boolean",
+									"null"
 								]
 							},
 							"values_and_weights": {
@@ -584,6 +597,137 @@
 					}
 				}
 			},
+			"additionalProperties": false
+		},
+		"variable_def": {
+			"title": "variables",
+			"description": "List of variables for the problem.",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"argument": {
+						"$ref": "#/definitions/argument_base_def"
+					},
+					"display_name": {
+						"description": "Display name of the variable. This is user-defined.",
+						"type": "string"
+					},
+					"display_name_short": {
+						"description": "A shorter display name for the variable. This is typically used for graphs and table exports.",
+						"type": "string"
+					},
+					"units": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"variable": {
+						"description": "Is the variable a variable? This should always be true.",
+						"type": "boolean"
+					},
+					"variable_type": {
+						"description": "The type of variable. Can be pivot or variable. If pivot, then the pivot variable is applied to all algorithm values.",
+						"type": "string",
+						"enum": [
+							"variable",
+							"pivot"
+						]
+					},
+					"minimum": {
+						"description": "The minimum value of the variable. This can be a string, double, or integer.",
+						"type": [
+							"string",
+							"number",
+							"boolean"
+						]
+					},
+					"maximum": {
+						"description": "The maximum value of the variable. This can be a string, double, or integer.",
+						"type": [
+							"string",
+							"number",
+							"boolean",
+							"null"
+						]
+					},
+					"relation_to_output": {
+						"description": "The minimum value of the variable. This can be a string, double, or integer.",
+						"type": [
+							"string",
+							"null"
+						],
+						"enum": [
+							"positive",
+							"negative",
+							null
+						]
+					},
+					"static_value": {
+						"description": "The static value of the variable when it is not set by the algorithm. ",
+						"type": [
+							"string",
+							"number",
+							"boolean"
+						]
+					},
+					"uuid": {
+						"description": "UUID of the variable.",
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"version_uuid": {
+						"description": "UUID of the version of the variable.",
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"workflow_index": {
+						"description": "Integer index of the workflow step.",
+						"type": "number"
+					},
+					"uncertainty_description": {
+						"$ref": "#/definitions/uncertainty_def"
+					}
+				},
+				"required": [
+					"argument",
+					"display_name",
+					"display_name_short",
+					"variable",
+					"variable_type",
+					"minimum",
+					"maximum",
+					"static_value",
+					"workflow_index",
+					"uncertainty_description"
+				],
+				"additionalProperties": false
+			}
+		},
+		"seed_file_def": {
+			"description": "Seed model definition.",
+			"type": "object",
+			"properties": {
+				"file_type": {
+					"type": "string",
+					"enum": [
+						"OSW",
+						"OSM"
+					]
+				},
+				"path": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"file_type",
+				"path"
+			],
 			"additionalProperties": false
 		}
 	}
