@@ -145,8 +145,24 @@ if (debug_messages == 1) {
 if (check_boundary == 1) {
   print("check bounds")
   boundary_check <- logical(ncol(vars))
+  if (debug_messages == 1) {
+      print(paste("nrow(vars):",nrow(vars)))
+      print(paste("ncol(vars):",ncol(vars)))
+      print(paste("boundary_check:",boundary_check))
+      print(paste("logical(ncol(vars):",logical(ncol(vars))))
+  }
   for (i in 1:ncol(vars)){
-    boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+    if (is.nan(m$X[,i])) {
+      print(paste("m$X[,i] is NaN:",m$X[,i]))
+      print(paste("i:",i))
+    }
+    else {
+      boundary_check[i] <- all((signif(m$X[,i],4) <= maxes[i]) && (signif(m$X[,i],4) >= mins[i]))
+      if (debug_messages == 1) {
+        print(paste("i:",i))
+        print(paste("boundary_check[i]:",boundary_check[i]))
+      }
+    }
   }
   if(!all(boundary_check)){
     print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')

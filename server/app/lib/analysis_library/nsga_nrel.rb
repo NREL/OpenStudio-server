@@ -140,6 +140,14 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
 
+      #check for create_and_run_datapoint_filename overide
+      logger.info("@analysis.create_and_run_datapoint_filename: #{@analysis.create_and_run_datapoint_filename}")
+      logger.info("@options[:create_and_run_datapoint_filename]: #{@options[:create_and_run_datapoint_filename]}")
+      if @analysis.create_and_run_datapoint_filename != ''
+        @options[:create_and_run_datapoint_filename] = @analysis.create_and_run_datapoint_filename
+        logger.info("CHANGING @options[:create_and_run_datapoint_filename] to: #{@options[:create_and_run_datapoint_filename]}")
+      end
+      
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
       # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
       if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
@@ -151,7 +159,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       end
       @analysis.save!
       logger.info("exit_on_guideline_14: #{@analysis.exit_on_guideline_14}")
-
+      
       # check to make sure there are objective functions
       if @analysis.output_variables.count { |v| v['objective_function'] == true }.zero?
         raise 'No objective functions defined'

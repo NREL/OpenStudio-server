@@ -50,8 +50,8 @@ create_and_run_datapoint <- function(x){
     stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
   }
 
-  print('Not UrbanOpt')
-  
+  print('UrbanOpt')
+
   # convert the vector to comma separated values
   force(x)
   w <- paste(x, collapse=",") 

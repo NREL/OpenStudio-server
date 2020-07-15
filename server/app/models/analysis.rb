@@ -69,6 +69,8 @@ class Analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
   field :analysis_logs, type: Hash, default: {} # store the logs from the analysis init and finalize
+  
+  field :create_and_run_datapoint_filename, type: String, default: ''
 
   # Temp location for these vas
   field :samples, type: Integer
