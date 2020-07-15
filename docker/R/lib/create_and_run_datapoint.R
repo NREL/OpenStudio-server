@@ -59,6 +59,7 @@ create_and_run_datapoint <- function(x){
   }
   counter <- 1
   repeat{
+    Sys.sleep(5)
     # Call the system command to submit the simulation to the API / queue
     z <- system2("ruby",y, stdout = TRUE, stderr = TRUE)
     z <- z[length(z)]
