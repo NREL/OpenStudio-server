@@ -103,7 +103,7 @@ clusterExport(cl,"rails_ruby_bin_dir")
 clusterExport(cl,"rails_mongodb_name")
 clusterExport(cl,"rails_mongodb_ip")
 clusterExport(cl,"rails_run_filename")
-clusterExport(cl,"rails_create_dp_filename")
+clusterExport(cl,"create_and_run_datapoint_filename")
 clusterExport(cl,"rails_root_path")
 clusterExport(cl,"rails_host")
 clusterExport(cl,"r_scripts_path")
@@ -114,24 +114,13 @@ clusterExport(cl,"vardisplaynames")
 clusterEvalQ(cl,vardisplayfile(vardisplaynames))
 
 # Export functions for worker nodes
-source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoint_uniquegroups")
+#source the create_and_run_datapoint_filename to find the function create_and_run_datapoint
+source(paste(r_scripts_path, create_and_run_datapoint_filename,sep='/'))
+clusterExport(cl,"create_and_run_datapoint") #function is always called create_and_run_datapoint
 clusterExport(cl,"check_run_flag")
 
-#f <- function(x){
-#  tryCatch(create_and_run_datapoint(x),
-#            error=function(x){
-#              obj <- NULL
-#              for (i in 1:objDim) {
-#                obj[i] <- failed_f
-#              }
-#              print("create_and_run_datapoint failed")
-#              return(obj)
-#            }
-#          )
-#}
 f <- function(x){
-  try(create_and_run_datapoint_uniquegroups(x), silent=TRUE)
+  try(create_and_run_datapoint(x), silent=TRUE) #function is always called create_and_run_datapoint
 }
 clusterExport(cl,"f")
 

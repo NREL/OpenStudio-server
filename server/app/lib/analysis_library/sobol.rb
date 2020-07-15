@@ -41,7 +41,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
+      create_and_run_datapoint_filename: 'create_and_run_datapoint_uniquegroups.R',
       output_variables: [],
       problem: {
         algorithm: {
@@ -231,7 +231,7 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
             rails_mongodb_name = "#{AnalysisLibrary::Core.database_name}"
             rails_mongodb_ip = "#{master_ip}"
             rails_run_filename = "#{@options[:run_data_point_filename]}"
-            rails_create_dp_filename = "#{@options[:create_data_point_filename]}"
+            create_and_run_datapoint_filename = "#{@options[:create_and_run_datapoint_filename]}"
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"

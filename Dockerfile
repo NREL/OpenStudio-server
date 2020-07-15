@@ -129,25 +129,25 @@ EXPOSE 8080 9090
 
 # Multistage build includes test library. To build without testing run
 # docker build --target base -t some-tag .
-FROM base
-ENV GECKODRIVER_VERSION v0.21.0
-# Install vfb and firefox requirement if docker-test env
-RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" && \
-    apt-get update && \
-    apt-get install -y xvfb \
-        x11-xkb-utils \
-        xfonts-100dpi \
-        xfonts-75dpi \
-        xfonts-scalable \
-        xfonts-cyrillic \
-        firefox && \
-    rm -rf /var/lib/apt/lists/* && \
-    cd /usr/local/bin && \
-    wget http://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
-    tar -xvzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
-    rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
-    chmod +x geckodriver;
-
-# Test adding the git repo to the container for coveralls
-# The #TEST# will be removed in the travis test script to be run in the test container
-#TEST#COPY .git /opt/openstudio/.git
+#FROM base
+#ENV GECKODRIVER_VERSION v0.21.0
+## Install vfb and firefox requirement if docker-test env
+#RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" && \
+#    apt-get update && \
+#    apt-get install -y xvfb \
+#        x11-xkb-utils \
+#        xfonts-100dpi \
+#        xfonts-75dpi \
+#        xfonts-scalable \
+#        xfonts-cyrillic \
+#        firefox && \
+#    rm -rf /var/lib/apt/lists/* && \
+#    cd /usr/local/bin && \
+#    wget http://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+#    tar -xvzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+#    rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+#    chmod +x geckodriver;
+#
+## Test adding the git repo to the container for coveralls
+## The #TEST# will be removed in the travis test script to be run in the test container
+##TEST#COPY .git /opt/openstudio/.git
