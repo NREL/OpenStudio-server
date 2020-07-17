@@ -182,7 +182,7 @@
 						"string", "null"
 					],
 					"enum": [
-						"single_run", "lhs", "nsga_nrel", "TODO: ADD IN THE REMAINING", null
+						"baseline_perturbation", "diag", "doe", "fast99", "ga", "gaisl", "lhs", "morris", "nsga_nrel", "optim", "preflight", "pso", "repeat_run", "rgenoud", "single_run", "sobol", "spea_nrel", null
 					]
 				},
 				"algorithm": {
@@ -261,19 +261,477 @@
 		},
 		"algorithm_def": {
 			"title": "algorithm",
-			"description": "TODO: need to find all the algorithm options",
+			"description": "algorithm options",
 			"type": "object",
 			"properties": {
-				"sample_method": {
-					"description": "The type of sampleing. If 'all_variables' then the sampling will occur across all the variables. If individual, then each variable is sampled individually.",
+                "abstol": {
+                    "description": "PSO: Absolute convergence tolerance",
+					"type": "number",
+                    "default": 0.01,
+                    "minimum": 0
+				},
+                "balance": {
+                    "description": "RGenoud: balancing",
+					"type": "number",
+                    "default": 1,
+                    "enum": [
+						1
+					]
+				},
+                "boundary": {
+                    "description": "PSO: Options: invisible, damping, reflecting, absorbing2007, absorbing2011, default"
 					"type": "string",
+                    "default": "reflecting",
+                    "enum": [
+						"invisible", "damping", "reflecting", "absorbing2007", "absorbing2011", "default"
+					]
+				},
+                "boundaryenforcement": {
+                    "description": "RGenoud: Boundary Enforement",
+					"type": "number",
+                    "default": 2,
+                    "enum": [
+						2
+					]
+				},
+                "bfgs": {
+                    "description": "RGenoud: Use Bounded Gradient Search. Options: 1 or 0 (True or False)",
+					"type": "number",
+                    "default": 1,
+                    "enum": [
+						0, 1
+					]
+				},
+                "bfgsburnin": {
+                    "description": "RGenoud: The number of generations which are run before the BFGS is ﬁrst used",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 0
+				},
+                "c1": {
+                    "description": "PSO: Cognitive acceleration coefficient",
+					"type": "number",
+                    "default": 1.193147,
+				},
+                "c2": {
+                    "description": "PSO: Social acceleration coefficient",
+					"type": "number",
+                    "default": 1.193147,
+				},
+                "check_boundary": {
+                    "description": "Morris: Force variables to respect mins/maxes. Options: 1 or 0 (True or False)",
+					"type": "number",
+                    "default": 0,
+                    "enum": [
+						0, 1
+					]
+				},
+                "cidx": {
+                    "description": "SPEA2: Crossover Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+                    "default": 5
+				},
+                "conf": {
+                    "description": "Sobol: the confidence level for bootstrap confidence intervals",
+					"type": "number",
+                    "default": 0.95,
+                    "minimum": 0,
+                    "maximum": 1
+				},
+                "cprob": {
+                    "description": "NSGA2, SPEA2: Crossover probability [0,1]",
+					"type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+				},
+                "debug_messages": {
+					"description": "0 - do not show debug messages. 1 - show debug messages.",
+					"type": "number",
+					"enum": [
+						0, 1
+					]
+				},
+                "elitism": {
+					"description": "Ga, GaIsl: Number of best fitness individuals to survive at each generation",
+					"type": "number",
+					"default": 0.05,
+                    "minimum": 0
+				},
+                "epsilon_gradient": {
+					"description": "Ga, GaIsl, RGenoud: Epsilon in gradient calculation",
+					"type": "number",
+					"default": 0.001,
+                    "minimum": 0
+				},
+                "epsilongradient": {
+					"description": "Optim: Epsilon in gradient calculation",
+					"type": "number",
+					"default": 0.001,
+                    "minimum": 0
+				},
+                "experiment_type": {
+					"description": "DOE: Options: full_factorial",
+					"type": "string",
+					"default": "full_factorial",
+                    "enum": [
+						"full_factorial"
+					]
+				},
+                "experiment_type": {
+					"description": "Diag: Options: diagonal TODO: only one, conflicts with DOE",
+					"type": "string",
+					"default": "diagonal",
+                    "enum": [
+						"diagonal"
+					]
+				},
+                "exit_on_guideline_14": {
+                    "description": "Exit on Guideline 14: 0 (off), 1 (both electric and gas), 2 (just electric), 3 (just gas)",
+					"type": "number",
+                    "default": 0,
+					"enum": [
+						0, 1, 2, 3
+					]
+				},
+                "factr": {
+					"description": "Optim, RGenoud: Tolerance on delta_F",
+					"type": "number",
+					"default": 450360000000000,
+                    "minimum": 0
+				},
+				"failed_f_value": {
+					"description": "Value to set the return value if a simulation fails.",
+					"type": "number",
+					"default": 1000000000000000000
+				},
+                "generations": {
+                    "description": "NSGA2, RGenoud, SPEA2: Number of generations",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 0
+				},
+                "gradient_check": {
+                    "description": "RGenoud: Numerically check gradient",
+					"type": "number",
+                    "default": 0,
+                    "enum": [
+						0
+					]
+				},
+                "grid_jump": {
+                    "description": "Morris: Integer specifying the number of levels that are increased/decreased for computing the elementary effects",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 0
+				},
+                "lambda": {
+                    "description": "PSO: [0,1] a percentage to limit the maximum velocity (Vmax) for each dimension",
+					"type": "number",
+                    "default": 0.9,
+                    "minimum": 0,
+                    "maximum": 1
+				},
+                "levels": {
+                    "description": "Morris: Positive integer (if individual, total simulations is this times each variable). Must be at least 2",
+					"type": "number",
+                    "default": 4,
+                    "minimum": 1
+				},
+                "M": {
+                    "description": "fast99: integer specifying the interference parameter, i.e. the number of harmonics to sum in the Fourier series decomposition",
+					"type": "number",
+                    "default": 4,
+                    "minimum": 1
+				},
+                "maxFitness": {
+                    "description": "Ga, GaIsl: Upper bound on the fitness function after that the GA search is interrupted",
+					"type": "number",
+                    "default": 0.01,
+                    "minimum": 0,
+				},
+                "maxfn": {
+                    "description": "PSO: Maximum number of function evaluations",
+					"type": "number",
+                    "default": 100,
+                    "minimum": 1,
+				},
+                "maxit": {
+                    "description": "Optim, PSO: Maximum number of iterations",
+					"type": "number",
+                    "default": 20,
+                    "minimum": 1,
+				},
+                "maxiter": {
+                    "description": "Ga, GaIsl: Maximum number of iterations to run before the GA search is halted",
+					"type": "number",
+                    "default": 100,
+                    "minimum": 1,
+				},
+                "max_queued_jobs": {
+                    "description": "Integer specifying the maximum number of queued jobs",
+					"type": "number",
+                    "minimum": 1
+				},
+                "memory_matrix": {
+                    "description": "RGenoud: memory matrix",
+					"type": "number",
+                    "default": 1,
+                    "enum": [
+						1
+					]
+				},
+                "method": {
+                    "description": "PSO: ",
+					"type": "string",
+                    "default": "spso2011",
+                    "enum": [
+						"spso2007", "spso2011", "ipso", "fips", "wfips"
+					]
+				},
+                "method": {
+                    "description": "optim: TODO: This is fixed for optim and conflicts with PSO",
+					"type": "string",
+                    "default": "L-BFGS-B",
+                    "enum": [
+						"L-BFGS-B"
+					]
+				},
+                "midx": {
+                    "description": "SPEA2: Mutation Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+                    "default": 5
+				},
+                "mprob": {
+                    "description": "NSGA2, SPEA2: Mutation probability [0,1]",
+					"type": "number",
+                    "default": 0.8,
+                    "minimum": 0,
+                    "maximum": 1
+				},
+                "mu_dist_idx": {
+                    "description": "NSGA2: Mutation Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+                    "default": 10
+				},
+                "mudistidx": {
+					"type": "number"
+				},
+                "n": {
+                    "description": "fast99: Integer giving the sample size, i.e. the length of the discretization of the s-space",
+					"type": "number",
+                    "default": 66,
+                    "minimum": 1
+				},
+                "nboot": {
+                    "description": "Sobol: The number of bootstrap replicates",
+					"type": "number",
+                    "default": 0,
+				},
+                "norm_type": {
+                    "description": "fast99, Ga, GaIsl, Morris, optim, PSO, RGenoud, Sobol, SPEA2",
+					"type": "string",
+                    "default": "minkowski",
+					"enum": [
+						"minkowski", "maximum", "euclidean", "binary", "manhattan"
+					]
+				},
+                "normtype": {
+					"type": "string",
+					"enum": [
+						"minkowski", "maximum", "euclidean", "binary", "manhattan"
+					]
+				},
+                "npart": {
+					"description": "PSO: Number of particles in the swarm",
+					"type": "number",
+                    "default": 4,
+                    "minimum": 1
+				},
+                "number_of_runs": {
+					"description": "Number of runs.",
+					"type": "number",
+                    "minimum": 1
+				},
+                "number_of_samples": {
+					"description": "Number of samples.",
+					"type": "number",
+                    "minimum": 1
+				},
+                "numIslands": {
+					"description": "GaIsl: Integer value specifying the number of islands to be used in a ring topology in which each island is connected unidirectionally with another island",
+					"type": "number",
+                    "default": 4,
+                    "minimum": 0
+				},
+                "migrationRate": {
+					"description": "GaIsl: Value in range 0-1 providing the proportion of individuals that should migrate between the islands",
+					"type": "number",
+                    "default": 0.1,
+                    "minimum": 0,
+                    "maximum": 1
+				},
+                "migrationInterval": {
+					"description": "GaIsl: Integer value specifying the number of iterations at which exchange of individuals takes place",
+					"type": "number",
+                    "default": 10,
+                    "minimum": 0
+				},
+                "objective_functions": {
+					"description": "List of the objective functions",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+                "order": {
+                    "description": "Sobol: the maximum order in the ANOVA decomposition (all indices up to this order will be computed)",
+					"type": "number",
+                    "default": 1,
+				},
+                "pgtol": {
+                    "description": "Optim, RGenoud: Tolerance on the projected gradient",
+					"type": "number",
+                    "default": 0.1,
+                    "minimum": 0
+				},
+                "popsize": {
+                    "description": "RGenoud: Size of initial population",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 1
+				},
+                "popSize": {
+                    "description": "Ga, GaIsl: Size of initial population TODO: similar to RGenoud",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 1
+				},
+                "pcrossover": {
+                    "description": "Ga, GaIsl: Probability of crossover between pairs of chromosomes. Typically a large value",
+					"type": "number",
+                    "default": 0.8,
+                    "minimum": 0,
+                    "maximum": 1
+				},
+                "pmutation": {
+                    "description": "Ga, GaIsl: Probability of mutation in a parent chromosome. Usually a small probability",
+					"type": "number",
+                    "default": 0.1
+                    "minimum": 0,
+                    "maximum": 1
+				},
+                "p_power": {
+                    "description": "fast99, Ga, GaIsl, Morris, NSGA2, Optim, PSO, RGenoud, Sobol, SPEA2: Lp norm power (must be non-negative)",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 0
+				},
+                "ppower": {
+					"type": "number"
+				},
+                "print_level": {
+                    "description": "RGenoud: Options: 0 (minimal printing), 1 (normal), 2 (detailed), and 3 (debug)",         
+					"type": "number",
+                    "default": 2,
+                    "enum": [
+						0, 1, 2, 3
+					]
+				},
+                "r": {
+                    "description": "Morris: Integer giving the number of repetitions of the design",
+					"type": "number",
+                    "default": 10,
+                    "minimum": 2
+				},
+                "r2": {
+                    "description": "Morris: Integer giving the size of the (bigger) population in which is extracted the design, for the space-filling improvement by (Campolongo et al. 2007).  r2 > r",
+					"type": "number",
+                    "default": 20,
+                    "minimum": 2
+				},
+                "r_genoud_debug_flag": {
+					"description": "RGenoud: debug flag Options: 1 or 0 (True or False)",
+					"type": "string",
+                    "default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+                "random_seed": {
+                    "description": "Sobol first seed for random number generator.",
+					"type": "number"
+				},
+                "random_seed2": {
+                    "description": "Sobol second seed for random number generator.",
+					"type": "number"
+				},
+                "report": {
+                    "description": "PSO: report",
+					"type": "number",
+                    "default": 1,
+                    "enum": [
+						1
+					]
+				},
+                "reltol": {
+                    "description": "PSO: Relative convergence tolerance",
+					"type": "number",
+                    "default": 0.01,
+                    "minimum": 0
+				},
+                "run": {
+                    "description": "Ga, GaIsl: Number of consecutive generations without any improvement in the best fitness value before the GA is stopped",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 0
+				},
+                "run_all_samples_for_pivots": {
+					"description": "preflight: Run all Samples for Pivots Options: true or false.",
+					"type": "string",
+                    "default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+                "run_baseline": {
+                    "description": "Diag: Run Baseline Options: 1 or 0 (True or False)",
+					"type": "number",
+                    "default": 1,
+                    "enum": [
+						0, 1
+					]
+				},
+                "run_max": {
+					"description": "preflight: run max Options: true or false.",
+					"type": "string",
+                    "default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+                "run_min": {
+					"description": "preflight: run min Options: true or false.",
+					"type": "string",
+                    "default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+                "run_mode": {
+					"description": "preflight: run mode Options: true or false.",
+					"type": "string",
+                    "default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+				"sample_method": {
+					"description": "The type of sampling. If 'all_variables' then the sampling will occur across all the variables. If individual, then each variable is sampled individually.",
+					"type": "string",
+                    "default": "individual_variables",
 					"enum": [
 						"all_variables", "individual_variables"
 					]
-				},
-				"number_of_samples": {
-					"description": "Number of samples.",
-					"type": "number"
 				},
 				"seed": {
 					"description": "Seed value for random number generators. If null then algorithm will choose random seed.",
@@ -281,56 +739,72 @@
 						"number", "null"
 					]
 				},
-				"debug_messages": {
-					"description": "0 - do not show debug messages. 1 - show debug messages. TODO: This should be converted to a boolean.",
+                "solution_tolerance": {
+                    "description": "RGenoud: Numbers within solutionTolerance are considered equal",
 					"type": "number",
-					"minimum": 0,
-					"maximum": 1,
-					"multipleOf": 1
+                    "default": 0.01,
+                    "minimum": 0
 				},
-				"failed_f_value": {
-					"description": "Value to set the return value if a simulation fails.",
-					"type": "number",
-					"default": 1000000000000000000
-				},
-				"objective_functions": {
-					"description": "List of the objective functions",
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				},
-				"exit_on_guideline_14": {
-					"type": "number",
-					"enum": [
-						0, 1
+                "topology": {
+                    "description": "PSO: Options: gbest, lbest, vonneumann, random"
+					"type": "string",
+                    "default": "random",
+                    "enum": [
+						"gbest", "lbest", "vonneumann", "random"
 					]
 				},
-				"generations": {
+                "tournament_size": {
+                    "description": "NSGA2, SPEA2: Tournament Size",
+					"type": "number",
+                    "default": 2
+				},
+                "toursize": {
 					"type": "number"
 				},
-				"cprob": {
-					"type": "number"
+                "type": {
+                    "description": "Sobol: method",
+					"type": "string",
+                    "default": "sobol",
+                    "enum": [
+						"sobol", "sobol2002", "sobol2007", "jansen", "mara", "martinez"
+					]
+				},
+                "type": {
+                    "description": "Morris: Options: oat (One at a Time) TODO: only one and conflicts with sobol",
+					"type": "string",
+                    "default": "oat",
+                    "enum": [
+						"oat"
+					]
+				},
+                "vini": {
+                    "description": "PSO: Options: zero, lhs2011, random2011, lhs2007, random2007, default"
+					"type": "string",
+                    "default": "lhs2011",
+                    "enum": [
+						"zero", "lhs2011", "random2011", "lhs2007", "random2007", "default"
+					]
+				},
+				"wait_generations": {
+                    "description": "RGenoud: If no improvement in waitGenerations of generations, then exit",
+					"type": "number",
+                    "default": 2,
+                    "minimum": 0
+				},
+				"xini": {
+                    "description": "PSO: Options: lhs, random"
+					"type": "string",
+                    "default": "lhs",
+                    "enum": [
+						"lhs", "random"
+					]
+				},
+                "xover_dist_idx": {
+                    "description": "NSGA2: Crossover Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+                    "default": 5
 				},
 				"xoverdistidx": {
-					"type": "number"
-				},
-				"mudistidx": {
-					"type": "number"
-				},
-				"mprob": {
-					"type": "number"
-				},
-				"toursize": {
-					"type": "number"
-				},
-				"normtype": {
-					"type": "string",
-					"enum": [
-						"minkowski"
-					]
-				},
-				"ppower": {
 					"type": "number"
 				}
 			},
