@@ -199,13 +199,26 @@ module DjJobs
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
-          begin          
-            cmd = "uo --help"
+          begin 
+            #copy over files
+            FileUtils.mkdir_p "#{simulation_dir}/urbanopt"
+            FileUtils.cp_r "#{analysis_dir}/lib/urbanopt/.", "#{simulation_dir}/urbanopt"
+            #bundle install
+            cmd = "cd #{simulation_dir}/urbanopt; bundle install --retry 10"
+            uo_bundle_log = File.join(simulation_dir, 'urbanopt_bundle.log')
+            @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
+            pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
+            Timeout.timeout(600) do   
+              Process.wait(pid)
+            end              
+            #run uo-cli            
+            cmd = "uo run --feature #{simulation_dir}/urbanopt/example_project.json --scenario #{simulation_dir}/urbanopt/highefficiency_scenario.csv"
             uo_process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
             @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
             pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])
-            Process.wait(pid)
-            
+            Timeout.timeout(28800) do 
+              Process.wait(pid)
+            end
             cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
@@ -251,6 +264,9 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
+            if uo_bundle_log
+              @sim_logger.info "UrbanOpt bundle output: #{File.read(uo_bundle_log)}"
+            end
             if uo_process_log
               @sim_logger.info "UrbanOpt output: #{File.read(uo_process_log)}"
             end
