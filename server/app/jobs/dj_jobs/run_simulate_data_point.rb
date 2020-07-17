@@ -201,9 +201,9 @@ module DjJobs
         File.open(run_log_file, 'a') do |run_log|
           begin          
             cmd = "uo --help"
-            process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
-            @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{process_log}"
-            pid = Process.spawn(cmd, [:err, :out] => [process_log, 'w'])
+            uo_process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
+            @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
+            pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])
             Process.wait(pid)
             
             cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
@@ -251,6 +251,9 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
+            if uo_process_log
+              @sim_logger.info "UrbanOpt output: #{File.read(uo_process_log)}"
+            end
             if process_log
               @sim_logger.info "Oscli output: #{File.read(process_log)}"
             end
