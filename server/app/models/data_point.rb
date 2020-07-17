@@ -93,6 +93,7 @@ class DataPoint
 
   # Submit the simulation to run in the background task queue
   def submit_simulation
+    logger.info "URBANOPT submit_simulation: #{self.urbanopt}"
     if Rails.application.config.job_manager == :delayed_job
       job = DjJobs::RunSimulateDataPoint.new(id)
       self.job_id = job.delay(queue: 'simulations').perform.id

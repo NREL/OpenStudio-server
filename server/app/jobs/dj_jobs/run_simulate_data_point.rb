@@ -199,7 +199,13 @@ module DjJobs
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
-          begin
+          begin          
+            cmd = "uo --help"
+            process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
+            @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{process_log}"
+            pid = Process.spawn(cmd, [:err, :out] => [process_log, 'w'])
+            Process.wait(pid)
+            
             cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
             @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
