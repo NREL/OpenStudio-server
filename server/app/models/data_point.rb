@@ -60,6 +60,8 @@ class DataPoint
   # Run location information
   field :ip_address, type: String
   field :internal_ip_address, type: String
+  
+  field :urbanopt, type: Boolean, default: false # This enables running the urbanopt workflow
 
   # Relationships
   belongs_to :analysis, index: true

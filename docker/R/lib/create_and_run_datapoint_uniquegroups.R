@@ -50,12 +50,18 @@ create_and_run_datapoint <- function(x){
     stop(options("show.error.messages"=FALSE),"run flag set to FALSE")
   }
 
-  print('Not UrbanOpt')
-  
+  if (urbanopt == TRUE) {
+    print('UrbanOpt')
+    uo_flag = ' --UO'
+  } else {
+    print('Not UrbanOpt')
+    uo_flag = ''
+  }
+
   # convert the vector to comma separated values
   force(x)
   w <- paste(x, collapse=",") 
-  y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
+  y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit', uo_flag, sep='')
   if(debug_messages == 1){
     print(paste('run command: ruby ', y))
   }

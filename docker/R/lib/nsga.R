@@ -45,6 +45,13 @@ print(paste("ppower:",ppower))
 print(paste("min:",mins))
 print(paste("max:",maxes))
 print(paste("failed_f:",failed_f))
+print(paste("urbanopt:",urbanopt))
+if (urbanopt == "true") {
+  urbanopt <- TRUE
+} else {
+  urbanopt <- FALSE
+}
+print(paste("urbanopt:",urbanopt))
 
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
@@ -52,6 +59,7 @@ clusterExport(cl,"ppower")
 clusterExport(cl,"uniquegroups")
 clusterExport(cl,"failed_f")
 clusterExport(cl,"debug_messages")
+clusterExport(cl,"urbanopt")
 
 for (i in 1:ncol(vars)){
   vars[,i] <- sort(vars[,i])
@@ -98,7 +106,6 @@ clusterExport(cl,"rails_ruby_bin_dir")
 clusterExport(cl,"rails_mongodb_name")
 clusterExport(cl,"rails_mongodb_ip")
 clusterExport(cl,"rails_run_filename")
-clusterExport(cl,"create_and_run_datapoint_filename")
 clusterExport(cl,"rails_root_path")
 clusterExport(cl,"rails_host")
 clusterExport(cl,"r_scripts_path")
@@ -106,8 +113,8 @@ clusterExport(cl,"rails_exit_guideline_14")
 clusterEvalQ(cl,varfile(varnames))
 
 # Export functions for worker nodes
-#source the create_and_run_datapoint_filename to find the function create_and_run_datapoint
-source(paste(r_scripts_path, create_and_run_datapoint_filename,sep='/'))  
+#source the create_and_run_datapoint_uniquegroups.R to find the function create_and_run_datapoint
+source(paste(r_scripts_path, 'create_and_run_datapoint_uniquegroups.R', sep='/'))  
 clusterExport(cl,"create_and_run_datapoint") #function is always called create_and_run_datapoint
 clusterExport(cl,"check_run_flag")
 clusterExport(cl,"check_guideline14")

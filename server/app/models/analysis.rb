@@ -70,7 +70,7 @@ class Analysis
   field :os_metadata # don't define type, keep this flexible
   field :analysis_logs, type: Hash, default: {} # store the logs from the analysis init and finalize
   
-  field :create_and_run_datapoint_filename, type: String, default: ''
+  field :urbanopt, type: Boolean, default: false
 
   # Temp location for these vas
   field :samples, type: Integer

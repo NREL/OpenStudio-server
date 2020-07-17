@@ -40,7 +40,7 @@ require 'optparse'
 require 'rest-client'
 require 'json'
 
-options = { submit_simulation: false, sleep_time: 5 }
+options = { submit_simulation: false, sleep_time: 5, urbanopt: false }
 o = OptionParser.new do |opts|
   opts.banner = 'Usage: ruby api_create_datapoint -h <http://url.org> -a <analysis_id> -v <variables>'
   opts.on('-h', '--host URL', String) { |a| options[:host] = a }
@@ -48,6 +48,7 @@ o = OptionParser.new do |opts|
   opts.on('-v', '--variables vars', Array) { |a| options[:variables] = a }
   opts.on('-s', '--sleep vars', Integer) { |a| options[:sleep_time] = a }
   opts.on('--submit') { |_a| options[:submit_simulation] = true }
+  opts.on('--UO') { |_a| options[:urbanopt] = true }
 end
 args = o.order!(ARGV) {}
 o.parse!(args)
@@ -70,7 +71,8 @@ begin
   data_point_data = {
     data_point: {
       name: "API Generated #{Time.now}",
-      ordered_variable_values: options[:variables]
+      ordered_variable_values: options[:variables],
+      urbanopt: options[:urbanopt]
     }
   }
 
