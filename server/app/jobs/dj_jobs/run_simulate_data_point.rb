@@ -264,10 +264,9 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
-            uo_log("urbanopt_simulation")
-            #if uo_process_log
-            #  @sim_logger.info "UrbanOpt output: #{File.read(uo_process_log)}"
-            #end
+            if uo_process_log
+              @sim_logger.info "UrbanOpt output: #{File.read(uo_process_log)}"
+            end
             if process_log
               @sim_logger.info "Oscli output: #{File.read(process_log)}"
             end
@@ -540,7 +539,7 @@ module DjJobs
 
     #add UrbanOpt bundle log to sim log
     def uo_log(file_name)
-      uo_log = File.join(analysis_dir, '#{file_name}.log')
+      uo_log = File.join(analysis_dir, "#{file_name}.log")
       if uo_log
         @sim_logger.info "UrbanOpt #{file_name}.log output: #{File.read(uo_log)}"
       end
