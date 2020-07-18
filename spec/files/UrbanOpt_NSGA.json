@@ -2049,7 +2049,7 @@
       "path": "./weather/SRRL_2013AMY_60min.epw"
     },
     "file_format_version": 1,
-    "cli_debug": "",
+    "cli_debug": "--debug",
     "cli_verbose": "",
     "run_workflow_timeout": 28800,
     "upload_results_timeout": 28800,
