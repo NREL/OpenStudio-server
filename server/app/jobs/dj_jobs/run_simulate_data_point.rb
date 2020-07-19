@@ -199,25 +199,36 @@ module DjJobs
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
-          begin 
-            #copy over files
-            FileUtils.mkdir_p "#{simulation_dir}/urbanopt"
-            FileUtils.cp_r "#{analysis_dir}/lib/urbanopt/.", "#{simulation_dir}/urbanopt"
-            #bundle install
-           # cmd = "cd #{simulation_dir}/urbanopt; bundle install --retry 10"
-           # uo_bundle_log = File.join(simulation_dir, 'urbanopt_bundle.log')
-           # @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
-           # pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
-           # Timeout.timeout(600) do   
-           #   Process.wait(pid)
-           # end              
-            #run uo-cli            
-            cmd = "uo run --feature #{simulation_dir}/urbanopt/example_project.json --scenario #{simulation_dir}/urbanopt/highefficiency_scenario.csv"
-            uo_process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
-            @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
-            pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])
-            Timeout.timeout(28800) do 
-              Process.wait(pid)
+          begin
+            if @data_point.analysis.urbanopt
+              #copy over files
+              FileUtils.mkdir_p "#{simulation_dir}/urbanopt"
+              FileUtils.cp_r "#{analysis_dir}/lib/urbanopt/.", "#{simulation_dir}/urbanopt"
+              FileUtils.mkdir_p "#{simulation_dir}/urbanopt/.bundle/install/ruby"
+              FileUtils.cp_r "#{simulation_dir}/urbanopt/ruby/.", "#{simulation_dir}/urbanopt/.bundle/install/ruby"
+              #FileUtils.rm_rf "#{simulation_dir}/urbanopt/ruby/"
+              first = "BUNDLE_PATH: \"#{analysis_dir}/lib/urbanopt/\""
+              second = "BUNDLE_PATH: \"#{simulation_dir}/urbanopt/.bundle/install/\""
+              config_file = "#{simulation_dir}/urbanopt/.bundle/config"
+              @sim_logger.info ".bundle/config: #{File.read(config_file)}"
+              File.write("#{simulation_dir}/urbanopt/.bundle/config",File.open("#{simulation_dir}/urbanopt/.bundle/config",&:read).gsub(first,second))
+              @sim_logger.info ".bundle/config: #{File.read(config_file)}"
+              #bundle install
+              # cmd = "cd #{simulation_dir}/urbanopt; bundle install --retry 10"
+              # uo_bundle_log = File.join(simulation_dir, 'urbanopt_bundle.log')
+              # @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
+              # pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
+              # Timeout.timeout(600) do   
+              #   Process.wait(pid)
+              # end              
+              #run uo-cli            
+              cmd = "uo run --feature #{simulation_dir}/urbanopt/example_project.json --scenario #{simulation_dir}/urbanopt/highefficiency_scenario.csv"
+              uo_process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
+              @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
+              pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])
+              Timeout.timeout(28800) do 
+                Process.wait(pid)
+              end
             end
             cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
             process_log = File.join(simulation_dir, 'oscli_simulation.log')
@@ -391,7 +402,7 @@ module DjJobs
       if File.exist? receipt_file
         @sim_logger.info 'receipt_file already exists, moving on'
         if @data_point.analysis.cli_debug == '--debug' || @data_point.analysis.cli_verbose = '--verbose'
-          uo_log("urbanopt_bundle")
+          uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
         end
         return true
       end
@@ -417,7 +428,7 @@ module DjJobs
 
           @sim_logger.info 'receipt_file appeared, moving on'
           if @data_point.analysis.cli_debug == '--debug' || @data_point.analysis.cli_verbose = '--verbose'
-            uo_log("urbanopt_bundle")
+            uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
           end
           return true
         rescue ::Timeout::Error
@@ -489,24 +500,26 @@ module DjJobs
           end
 
           # Check for UO and bundle
-          #bundle install
-          bundle_count = 0
-          bundle_max_count = 10
-          begin
-            cmd = "cd #{analysis_dir}/lib/urbanopt; bundle install --path=#{analysis_dir}/lib/urbanopt/ --gemfile=#{analysis_dir}/lib/urbanopt/Gemfile --retry 10"
-            uo_bundle_log = File.join(analysis_dir, 'urbanopt_bundle.log')
-            @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
-            pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
-            Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
-              bundle_count += 1
-              Process.wait(pid)
+          if @data_point.analysis.urbanopt
+            #bundle install
+            bundle_count = 0
+            bundle_max_count = 10
+            begin
+              cmd = "cd #{analysis_dir}/lib/urbanopt; bundle install --path=#{analysis_dir}/lib/urbanopt/ --gemfile=#{analysis_dir}/lib/urbanopt/Gemfile --retry 10"
+              uo_bundle_log = File.join(analysis_dir, 'urbanopt_bundle.log')
+              @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
+              pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
+              Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
+                bundle_count += 1
+                Process.wait(pid)
+              end
+            rescue StandardError => e
+              sleep Random.new.rand(1.0..10.0)
+              retry if bundle_count < bundle_max_count
+              raise "Could not bundle UrbanOpt after #{bundle_max_count} attempts. Failed with message #{e.message}."
+            ensure
+              uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
             end
-          rescue StandardError => e
-            sleep Random.new.rand(1.0..10.0)
-            retry if bundle_count < bundle_max_count
-            raise "Could not bundle UrbanOpt after #{bundle_max_count} attempts. Failed with message #{e.message}."
-          ensure
-            uo_log("urbanopt_bundle")
           end
           # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
           File.open(receipt_file, 'w') { |f| f << Time.now }
