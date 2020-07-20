@@ -92,30 +92,30 @@ jobs:
     #     - docker-compose build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web
     #     - docker-compose build rserve
     #   script: ./docker/deployment/scripts/deploy_docker.sh
-    # - stage: publish
-    #   # publish native build for osx to s3
-    #   # Include your branch name below to publish a custom build to S3.
-    #   # TODO published build name should distinguish master vs develop
-    #   if: branch = travis_build_artifacts #branch = master OR branch = develop
-    #   os: osx
-    #   osx_image: xcode9.4
-    #   sudo: required
-    #   env:
-    #     - BUILD_TYPE=export
-    #   before_script:
-    #   script: ./ci/travis/export_build_osx.sh
     - stage: publish
-      # publish native build for linux to s3
+      # publish native build for osx to s3
       # Include your branch name below to publish a custom build to S3.
       # TODO published build name should distinguish master vs develop
-      if: branch = travis_build_artifacts # branch = master OR branch = develop
-      os: linux
-      dist: bionic
+      if: branch = travis_build_artifacts #branch = master OR branch = develop
+      os: osx
+      osx_image: xcode9.4
       sudo: required
       env:
         - BUILD_TYPE=export
       before_script:
-      script: ./ci/travis/export_build_linux.sh
+      script: ./ci/travis/export_build_osx.sh
+    # - stage: publish
+    #   # publish native build for linux to s3
+    #   # Include your branch name below to publish a custom build to S3.
+    #   # TODO published build name should distinguish master vs develop
+    #   if: branch = travis_build_artifacts # branch = master OR branch = develop
+    #   os: linux
+    #   dist: bionic
+    #   sudo: required
+    #   env:
+    #     - BUILD_TYPE=export
+    #   before_script:
+    #   script: ./ci/travis/export_build_linux.sh
 
 notifications:
   slack:
