@@ -19,4 +19,4 @@ export ARTIFACTS_MAX_SIZE=2147483648
 curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
 # TODO don't recreate entire path to file within the AWS bucket.
 artifacts upload
-
+exit $?
