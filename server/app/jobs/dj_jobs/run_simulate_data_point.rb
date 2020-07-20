@@ -281,6 +281,14 @@ module DjJobs
             if process_log
               @sim_logger.info "Oscli output: #{File.read(process_log)}"
             end
+            docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
+            if File.exist? docker_log
+               @sim_logger.info "docker.log output: #{File.read(docker_log)}"
+            end
+            resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
+            if File.exist? resque_log
+               @sim_logger.info "resque.log output: #{File.read(resque_log)}"
+            end
           end
         end
         if run_result == :errored

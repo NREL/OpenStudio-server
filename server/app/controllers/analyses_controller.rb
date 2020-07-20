@@ -399,6 +399,16 @@ class AnalysesController < ApplicationController
       @rserve_log = File.read(rserve_file)
     end
 
+    docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
+    if File.exist? docker_log
+      @docker_log = File.read(docker_log)
+    end
+    
+    resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
+    if File.exist? resque_log
+      @resque_log = File.read(resque_log)
+    end
+            
     initialize_log_path = "#{@analysis.shared_directory_path}/scripts/analysis/intialize.log"
     @initialize_log = (File.exist? initialize_log_path) ? File.read(initialize_log_path) : nil
 
