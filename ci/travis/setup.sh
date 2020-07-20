@@ -25,11 +25,13 @@ else
         tar xvzf ruby-2.5.5-darwin.tar.gz       
         sudo mv ruby /usr/local/
         otool -L /usr/local/ruby/bin/ruby
+        rm ruby-2.5.5-darwin.tar.gz
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
         tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
         cp mongodb-osx-x86_64-3.4.18/bin/* /usr/local/bin/
+        rm mongodb-osx-ssl-x86_64-3.4.18.tgz
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin
@@ -42,7 +44,7 @@ else
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
         hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
-
+        rm ${OS_NAME}.dmg
         export PATH="/usr/local/ruby/bin:$TRAVIS_BUILD_DIR/gems/bin:$HOME/openstudio/bin:$PATH"
         export RUBYLIB="$HOME/openstudio/Ruby"
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
@@ -70,6 +72,7 @@ else
         tar xvzf ruby-2.5.5-linux.tar.gz
         sudo mv ruby /usr/local/
         ldd /usr/local/ruby/bin/ruby
+        rm ruby-2.5.5-linux.tar.gz
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir

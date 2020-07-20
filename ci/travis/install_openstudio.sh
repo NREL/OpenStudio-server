@@ -27,7 +27,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     rm -rf /var/lib/apt/lists/*
     locale-gen en_US en_US.UTF-8
     dpkg-reconfigure locales
-
+    rm $OPENSTUDIO_DOWNLOAD_FILENAME
 else
     echo "Must pass in the OpenStudio version, and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
     exit 9
