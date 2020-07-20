@@ -31,8 +31,8 @@ else
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
         tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
         cp mongodb-osx-x86_64-3.4.18/bin/* /usr/local/bin/
-        rm mongodb-osx-ssl-x86_64-3.4.18.tgz
-
+        rm -r mongodb-osx*
+        
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin
         export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
