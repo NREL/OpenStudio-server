@@ -277,7 +277,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      logger.info 'Executing rgenound.rb ensure block'
+      logger.info 'Executing nsga_nrel.rb ensure block'
       begin
         cluster.stop if cluster
       rescue StandardError, ScriptError, NoMemoryError => e
