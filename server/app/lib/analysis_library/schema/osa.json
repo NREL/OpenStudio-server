@@ -279,7 +279,7 @@
 					]
 				},
                 "boundary": {
-                    "description": "PSO: Options: invisible, damping, reflecting, absorbing2007, absorbing2011, default"
+                    "description": "PSO: Options: invisible, damping, reflecting, absorbing2007, absorbing2011, default",
 					"type": "string",
                     "default": "reflecting",
                     "enum": [
@@ -311,12 +311,12 @@
                 "c1": {
                     "description": "PSO: Cognitive acceleration coefficient",
 					"type": "number",
-                    "default": 1.193147,
+                    "default": 1.193147
 				},
                 "c2": {
                     "description": "PSO: Social acceleration coefficient",
 					"type": "number",
-                    "default": 1.193147,
+                    "default": 1.193147
 				},
                 "check_boundary": {
                     "description": "Morris: Force variables to respect mins/maxes. Options: 1 or 0 (True or False)",
@@ -447,25 +447,25 @@
                     "description": "Ga, GaIsl: Upper bound on the fitness function after that the GA search is interrupted",
 					"type": "number",
                     "default": 0.01,
-                    "minimum": 0,
+                    "minimum": 0
 				},
                 "maxfn": {
                     "description": "PSO: Maximum number of function evaluations",
 					"type": "number",
                     "default": 100,
-                    "minimum": 1,
+                    "minimum": 1
 				},
                 "maxit": {
                     "description": "Optim, PSO: Maximum number of iterations",
 					"type": "number",
                     "default": 20,
-                    "minimum": 1,
+                    "minimum": 1
 				},
                 "maxiter": {
                     "description": "Ga, GaIsl: Maximum number of iterations to run before the GA search is halted",
 					"type": "number",
                     "default": 100,
-                    "minimum": 1,
+                    "minimum": 1
 				},
                 "max_queued_jobs": {
                     "description": "Integer specifying the maximum number of queued jobs",
@@ -525,7 +525,7 @@
                 "nboot": {
                     "description": "Sobol: The number of bootstrap replicates",
 					"type": "number",
-                    "default": 0,
+                    "default": 0
 				},
                 "norm_type": {
                     "description": "fast99, Ga, GaIsl, Morris, optim, PSO, RGenoud, Sobol, SPEA2",
@@ -586,7 +586,7 @@
                 "order": {
                     "description": "Sobol: the maximum order in the ANOVA decomposition (all indices up to this order will be computed)",
 					"type": "number",
-                    "default": 1,
+                    "default": 1
 				},
                 "pgtol": {
                     "description": "Optim, RGenoud: Tolerance on the projected gradient",
@@ -616,7 +616,7 @@
                 "pmutation": {
                     "description": "Ga, GaIsl: Probability of mutation in a parent chromosome. Usually a small probability",
 					"type": "number",
-                    "default": 0.1
+                    "default": 0.1,
                     "minimum": 0,
                     "maximum": 1
 				},
@@ -746,7 +746,7 @@
                     "minimum": 0
 				},
                 "topology": {
-                    "description": "PSO: Options: gbest, lbest, vonneumann, random"
+                    "description": "PSO: Options: gbest, lbest, vonneumann, random",
 					"type": "string",
                     "default": "random",
                     "enum": [
@@ -778,7 +778,7 @@
 					]
 				},
                 "vini": {
-                    "description": "PSO: Options: zero, lhs2011, random2011, lhs2007, random2007, default"
+                    "description": "PSO: Options: zero, lhs2011, random2011, lhs2007, random2007, default",
 					"type": "string",
                     "default": "lhs2011",
                     "enum": [
@@ -792,7 +792,7 @@
                     "minimum": 0
 				},
 				"xini": {
-                    "description": "PSO: Options: lhs, random"
+                    "description": "PSO: Options: lhs, random",
 					"type": "string",
                     "default": "lhs",
                     "enum": [
