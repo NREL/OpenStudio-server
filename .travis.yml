@@ -29,11 +29,11 @@ services:
 
 jobs:
   include:
-    - stage: test
-      os: linux
-      sudo: required
-      dist: bionic
-      env: BUILD_TYPE=test
+    # - stage: test
+    #   os: linux
+    #   sudo: required
+    #   dist: bionic
+    #   env: BUILD_TYPE=test
     # - stage: test
     #   os: linux
     #   sudo: required
@@ -94,8 +94,6 @@ jobs:
     #   script: ./docker/deployment/scripts/deploy_docker.sh
     # - stage: publish
     #   # publish native build for osx to s3
-    #   # Include your branch name below to publish a custom build to S3.
-    #   # TODO published build name should distinguish master vs develop
     #   if: branch = travis_build_artifacts #branch = master OR branch = develop
     #   os: osx
     #   osx_image: xcode9.4
@@ -104,18 +102,16 @@ jobs:
     #     - BUILD_TYPE=export
     #   before_script:
     #   script: ./ci/travis/export_build_osx.sh
-    # - stage: publish
-    #   # publish native build for linux to s3
-    #   # Include your branch name below to publish a custom build to S3.
-    #   # TODO published build name should distinguish master vs develop
-    #   if: branch = travis_build_artifacts # branch = master OR branch = develop
-    #   os: linux
-    #   dist: bionic
-    #   sudo: required
-    #   env:
-    #     - BUILD_TYPE=export
-    #   before_script:
-    #   script: ./ci/travis/export_build_linux.sh
+    - stage: publish
+      # publish native build for linux to s3
+      if: branch = travis_build_artifacts # branch = master OR branch = develop
+      os: linux
+      dist: bionic
+      sudo: required
+      env:
+        - BUILD_TYPE=export
+      before_script:
+      script: ./ci/travis/export_build_linux.sh
 
 notifications:
   slack:
