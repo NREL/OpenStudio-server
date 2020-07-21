@@ -12,7 +12,7 @@ mongo_dir="/usr/bin"
 oss_filename="OpenStudio-server-$(git -C "${TRAVIS_BUILD_DIR}" rev-parse --short=10 HEAD)-linux.tar.gz"
 ls -al /home/travis/build/NREL/export/
 #mv build package to root of travis build for artifact upload.
-mv /Users/travis/build/NREL/export/$oss_filename .
+mv /home/travis/build/NREL/export/$oss_filename .
 ls -al
 
 export ARTIFACTS_PATHS=$oss_filename
@@ -22,4 +22,5 @@ export ARTIFACTS_MAX_SIZE=2147483648
 curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
 # TODO don't recreate entire path to file within the AWS bucket.
 artifacts upload
+exit $?
 
