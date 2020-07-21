@@ -147,7 +147,7 @@ class DataPointsController < ApplicationController
       selected_variables = Variable.variables(dp_params[:analysis_id])
 
       selected_variables.each do |v|
-        logger.info "v.inspect: #{v.to_json}"
+        logger.info "variable: #{v.to_json}"
       end
 
       variable_values = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
