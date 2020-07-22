@@ -44,7 +44,7 @@ else
 
         # set the ulimit to be higher
         ulimit -a
-        ulimit -n 2048
+        ulimit -n 4096
         ulimit -a
 
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
