@@ -11,5 +11,5 @@ Security/YAMLLoad:
   Enabled: false
 
 inherit_from:
-  - http://s3.amazonaws.com/openstudio-resources/styles/rubocop.yml
+  - http://s3.amazonaws.com/openstudio-resources/styles/rubocop_v3.yml
   - http://s3.amazonaws.com/openstudio-resources/styles/rubocop-rails.yml

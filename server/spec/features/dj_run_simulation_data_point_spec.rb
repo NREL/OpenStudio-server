@@ -47,12 +47,11 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
   before do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    begin
-      Project.destroy_all
-      Delayed::Job.destroy_all
-    rescue Errno::EACCES => e
-      puts "Cannot unlink files, will try and continue"
-    end
+
+    Project.destroy_all
+    Delayed::Job.destroy_all
+  rescue Errno::EACCES => e
+    puts 'Cannot unlink files, will try and continue'
 
     # I am no longer using this factory for this purpose. It doesn't
     # link up everything, so just post the test using the Analysis Gem.
@@ -163,7 +162,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     a = RestClient.get "http://#{host}/data_points/#{datapoint_id}.json"
     a = JSON.parse(a, symbolize_names: true)
     puts a
-    
+
     # l = RestClient.get "http://#{host}/data_points/#{datapoint_id}/download_result_file?filename=#{datapoint_id}.log"
     # expect(l).to eq('hack to inspect oscli output')
 
@@ -214,7 +213,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     arr = Array.new(thread_count)
     Parallel.each(0..thread_count, in_threads: thread_count) do |index|
       if File.exist? receipt_file
-        arr[index] = 0 
+        arr[index] = 0
         next
       end
 
@@ -254,11 +253,11 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 end
 
 RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: true do
-  before :each do
+  before do
     begin
       Project.destroy_all
     rescue Errno::EACCES => e
-      puts "Cannot unlink files, will try and continue"
+      puts 'Cannot unlink files, will try and continue'
     end
     FactoryBot.create(:project_with_analyses).analyses
 
@@ -281,10 +280,10 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: tru
     # verify that a log file was created
 
     log_file = "#{job.send :analysis_dir}/data_point_#{@data_point.id}/worker_init_test.log"
-    expect(File.exist? log_file).to eq true
+    expect(File.exist?(log_file)).to eq true
     if File.exist? log_file
-      file_contents =  File.read(log_file)
-      expect(file_contents.include? 'argument number 1')
+      file_contents = File.read(log_file)
+      expect(file_contents.include?('argument number 1'))
     end
 
     # verify that the init log is attached to the datapoint

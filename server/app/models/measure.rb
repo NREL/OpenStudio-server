@@ -136,39 +136,34 @@ class Measure
     end
 
     # Pull out the arugments that are in the measure
-    if os_json['arguments']
-      # logger.info("#{k.inspect} #{v.inspect}")
-      os_json['arguments'].each do |arg|
-        # Create a variable definition (i.e. a variable) for each argument regardless
-        # whether or not it is used
-        new_var = Variable.create_and_assign_to_measure(analysis_id, measure, arg)
-        # logger.info("New variable is #{new_var}")
-        measure.variables << new_var unless measure.variables.include?(new_var)
+    os_json['arguments']&.each do |arg|
+      # Create a variable definition (i.e. a variable) for each argument regardless
+      # whether or not it is used
+      new_var = Variable.create_and_assign_to_measure(analysis_id, measure, arg)
+      # logger.info("New variable is #{new_var}")
+      measure.variables << new_var unless measure.variables.include?(new_var)
 
-        if pat_json
-          # The measure.values field is just a list of all the set values for the
-          # measure groups which really isn't needed for LHS nor optimization.
-          if arg['value'] && arg['argument_index']
-            # let the system know that the variable was selected for "manipulation"
-            # logger.info("letting the system know that it can use this variable #{new_var.inspect}")
-            # new_var.perturbable = true
-            # new_var.save!
+      if pat_json
+        # The measure.values field is just a list of all the set values for the
+        # measure groups which really isn't needed for LHS nor optimization.
+        if arg['value'] && arg['argument_index']
+          # let the system know that the variable was selected for "manipulation"
+          # logger.info("letting the system know that it can use this variable #{new_var.inspect}")
+          # new_var.perturbable = true
+          # new_var.save!
 
-            # logger.info("adding #{arg['value']}")
-            measure.values << [arg['argument_index'], arg['value']]
-          end
+          # logger.info("adding #{arg['value']}")
+          measure.values << [arg['argument_index'], arg['value']]
         end
       end
     end
 
-    if os_json['variables']
-      os_json['variables'].each do |json_var|
-        logger.info "JSON had a variable named '#{json_var['display_name']}'"
-        new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
+    os_json['variables']&.each do |json_var|
+      logger.info "JSON had a variable named '#{json_var['display_name']}'"
+      new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
 
-        if new_var.save!
-          measure.variables << new_var unless measure.variables.include?(new_var)
-        end
+      if new_var.save!
+        measure.variables << new_var unless measure.variables.include?(new_var)
       end
     end
 

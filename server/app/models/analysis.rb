@@ -49,16 +49,16 @@ class Analysis
   field :description, type: String
   field :run_flag, type: Boolean, default: false
   field :exit_on_guideline_14, type: Integer, default: 0
-  field :cli_debug, type: String, default: '--debug'  # set default to --debug so CI tests pass
-  field :cli_verbose, type: String, default: '--verbose'  # set default to --verbose to CI tests pass
+  field :cli_debug, type: String, default: '--debug' # set default to --debug so CI tests pass
+  field :cli_verbose, type: String, default: '--verbose' # set default to --verbose to CI tests pass
   field :initialize_worker_timeout, type: Integer, default: 28800 # set default to 8 hrs
   field :upload_results_timeout, type: Integer, default: 28800 # set default to 8 hrs
-  field :run_workflow_timeout, type: Integer, default: 28800  # set default to 8 hrs
+  field :run_workflow_timeout, type: Integer, default: 28800 # set default to 8 hrs
   field :download_zip, type: Boolean, default: true
   field :download_osm, type: Boolean, default: true
   field :download_osw, type: Boolean, default: true
   field :download_reports, type: Boolean, default: true
-  
+
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
   # move the results into the jobs array
@@ -219,11 +219,9 @@ class Analysis
     end
 
     # pull out the output variables
-    if output_variables
-      output_variables.each do |variable|
-        logger.info "Saving off output variables: #{variable}"
-        var = Variable.create_output_variable(id, variable)
-      end
+    output_variables&.each do |variable|
+      logger.info "Saving off output variables: #{variable}"
+      var = Variable.create_output_variable(id, variable)
     end
 
     save!
@@ -357,7 +355,7 @@ class Analysis
 
   def analysis_type
     j = jobs.order_by(:index.asc).last
-    if j && j.analysis_type
+    if j&.analysis_type
       return j.analysis_type
     else
       return 'unknown'
@@ -395,9 +393,9 @@ class Analysis
   # currently only used with Resque, as it's called by ResqueJobs::InitializeAnalysis job
   # runs on web node
 
-   # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
-   # This is local function for workaround until that is resolved
-   #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+  # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+  # This is local function for workaround until that is resolved
+  # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
   def extract_archive(archive_filename, destination, overwrite = true)
     ::Zip.sort_entries = true
     Zip::File.open(archive_filename) do |zf|
@@ -414,7 +412,6 @@ class Analysis
     end
   end
 
-
   def run_initialization
     #   unpack seed zip file into osdata
     #   run initialize.sh if present
@@ -424,12 +421,12 @@ class Analysis
     logger.info 'Running analysis initialization scripts'
     logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
     begin
-      Timeout.timeout(3600) do  #change to 1hr for large models
+      Timeout.timeout(3600) do # change to 1hr for large models
         extract_count += 1
-	# The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+        # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
         # This is local function for workaround until that is resolved
-        #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-	extract_archive(seed_zip.path, shared_directory_path)
+        # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+        extract_archive(seed_zip.path, shared_directory_path)
       end
     rescue StandardError => e
       retry if extract_count < extract_max_count

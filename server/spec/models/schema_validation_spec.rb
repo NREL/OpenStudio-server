@@ -44,7 +44,7 @@ def get_osa(relative_path)
   File.open(osa_path) do |f|
     osa = JSON.parse(f.read, symbolize_names: true)
   end
-  expect(osa).to_not be_nil
+  expect(osa).not_to be_nil
 
   osa
 end
@@ -66,20 +66,20 @@ RSpec.describe 'OSA Schema' do
     File.open(schema_path) do |f|
       @schema = JSON.parse(f.read, symbolize_names: true)
     end
-    expect(@schema).to_not be_nil
+    expect(@schema).not_to be_nil
   end
 
-  it 'should be a valid osa file' do
+  it 'is a valid osa file' do
     # Make sure to use the copy of the spec/files/example_csv.json and da_measures.json as some
     # of the tests run in Docker and the /spec folder is not mounted, only the /server is mounted.
     [
-        'server/spec/files/batch_datapoints/example_csv.json',
-        'server/spec/files/batch_datapoints/example_csv_with_scripts.json',
-        'server/spec/files/batch_datapoints/the_project.json',
-        'server/spec/files/jsons/sweep_smalloffice.json',
-        'server/spec/files/jsons/copy_of_root_da_measures.json',
-        'server/spec/files/jsons/copy_of_root_example_csv.json',
-        'server/spec/files/test_model/test_model.json',
+      'server/spec/files/batch_datapoints/example_csv.json',
+      'server/spec/files/batch_datapoints/example_csv_with_scripts.json',
+      'server/spec/files/batch_datapoints/the_project.json',
+      'server/spec/files/jsons/sweep_smalloffice.json',
+      'server/spec/files/jsons/copy_of_root_da_measures.json',
+      'server/spec/files/jsons/copy_of_root_example_csv.json',
+      'server/spec/files/test_model/test_model.json'
     ].each { |f| validate_osa(f, @schema) }
   end
 end

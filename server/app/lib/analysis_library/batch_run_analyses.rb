@@ -168,7 +168,7 @@ class AnalysisLibrary::BatchRunAnalyses < AnalysisLibrary::Base
       @analysis.save!
     ensure
       # ensure that the cluster is stopped
-      cluster.stop if cluster
+      cluster&.stop
     end
 
     analyses.each do |analysis|

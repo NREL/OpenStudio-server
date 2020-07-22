@@ -242,7 +242,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       # ensure that the cluster is stopped
       logger.info 'Executing rgenound.rb ensure block'
       begin
-        cluster.stop if cluster
+        cluster&.stop
       rescue StandardError, ScriptError, NoMemoryError => e
         logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
       end

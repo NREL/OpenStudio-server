@@ -163,7 +163,7 @@ class DataPoint
     if Rails.application.config.job_manager == :delayed_job
       if job_id
         dj = Delayed::Job.where(id: job_id).first
-        dj.destroy if dj
+        dj&.destroy
       end
     elsif Rails.application.config.job_manager == :resque
       if job_id
