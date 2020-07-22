@@ -226,7 +226,7 @@ module DjJobs
               @sim_logger.info "@data_point.analysis.variables: #{@data_point.analysis.variables.to_json}"
               @data_point.analysis.variables.each do |var|
                 @sim_logger.info "var: #{var.to_json}"
-                @sim_logger.info ""
+                @sim_logger.info ">  "
                 
               end
               #@sim_logger.info "t_result: #{t_result}"

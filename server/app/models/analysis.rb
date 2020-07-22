@@ -71,6 +71,7 @@ class Analysis
   field :analysis_logs, type: Hash, default: {} # store the logs from the analysis init and finalize
   
   field :urbanopt, type: Boolean, default: false
+  field :urbanopt_variables, type: Array, default: []
 
   # Temp location for these vas
   field :samples, type: Integer
@@ -194,6 +195,7 @@ class Analysis
     if self['problem'] && self['problem']['workflow']
       logger.info('found a problem and workflow')
       self['problem']['workflow'].each do |wf|
+        logger.info("wf: #{wf.to_json}")
         # Currently the PAT format has measures and I plan on ignoring them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
         # individual measures
@@ -225,6 +227,34 @@ class Analysis
       output_variables.each do |variable|
         logger.info "Saving off output variables: #{variable}"
         var = Variable.create_output_variable(id, variable)
+      end
+    end
+
+    save!
+  end
+
+  # Method that pulls out the urbanopt variables from the uploaded problem/analysis JSON.
+  def pull_out_urbanopt_variables
+    pat_json = false
+    # get the measures first
+    logger.info('pull_out_urbanopt_variables')
+    # note the measures first
+    if self['urbanopt_variables']
+      logger.info('found urbanopt_variables')
+      self['urbanopt_variables'].each do |wf|
+
+        #new_measure = Measure.create_from_os_json(id, wf, pat_json)
+          #new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
+        var = Variable.where(analysis_id: self.id, uuid: self.uuid).first
+        if var
+          raise "UrbanOpt Variable already exists for '#{var.name}' : '#{var.uuid}'"
+        else
+          logger.info("Adding a new UrbanOpt variable/argument named: '#{self.display_name}' with UUID '#{self.uuid}'")
+          var = Variable.find_or_create_by(analysis_id: self.id, uuid: self.uuid)
+          logger.info("Created Var: #{var.to_json}")
+          var.save!
+        end
+
       end
     end
 

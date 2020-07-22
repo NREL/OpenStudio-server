@@ -167,6 +167,11 @@ class AnalysesController < ApplicationController
     # back together when it goes to run
     logger.info('pulling out os variables')
     @analysis.pull_out_os_variables
+    
+    if @analysis.urbanopt
+        logger.info('pulling out urbanopt variables')
+        @analysis.pull_out_urbanopt_variables
+    end
 
     respond_to do |format|
       if @analysis.save!

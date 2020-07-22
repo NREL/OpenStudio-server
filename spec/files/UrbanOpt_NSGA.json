@@ -36,137 +36,6 @@
     "problem": {
       "workflow": [
         {
-          "name": "reduce_lighting_loads_by_percentage",
-          "display_name": "Reduce Lighting Loads by Percentage",
-          "measure_type": "RubyMeasure",
-          "measure_definition_class_name": "ReduceLightingLoadsByPercentage",
-          "measure_definition_directory": "./measures/ReduceLightingLoadsByPercentage",
-          "measure_definition_directory_local": "C:\\Projects\\OS-PAT-export\\sample_projects\\SEB_calibration_NSGA_2013\\measures\\ReduceLightingLoadsByPercentage",
-          "measure_definition_display_name": "Reduce Lighting Loads by Percentage",
-          "measure_definition_name": "reduce_lighting_loads_by_percentage",
-          "measure_definition_name_xml": null,
-          "measure_definition_uuid": "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-          "measure_definition_version_uuid": "28227a92-7dc9-447c-a7b0-2aca5b0dcace",
-          "uuid": "d37b7ed5-887a-4d1f-b304-259462eadbe9",
-          "version_uuid": "28227a92-7dc9-447c-a7b0-2aca5b0dcace",
-          "description": "The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.",
-          "taxonomy": "Electric Lighting.Lighting Equipment",
-          "arguments": [
-            {
-              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
-              "display_name_short": "space_type",
-              "name": "space_type",
-              "value_type": "string",
-              "default_value": "*Entire Building*",
-              "value": "*Entire Building*"
-            },
-            {
-              "display_name": "Increase in Material and Installation Cost for Lighting per Floor Area (%).",
-              "display_name_short": "material_and_installation_cost",
-              "name": "material_and_installation_cost",
-              "value_type": "double",
-              "default_value": 0,
-              "value": 0
-            },
-            {
-              "display_name": "Increase in Demolition Costs for Lighting per Floor Area (%).",
-              "display_name_short": "demolition_cost",
-              "name": "demolition_cost",
-              "value_type": "double",
-              "default_value": 0,
-              "value": 0
-            },
-            {
-              "display_name": "Years Until Costs Start (whole years).",
-              "display_name_short": "years_until_costs_start",
-              "name": "years_until_costs_start",
-              "value_type": "integer",
-              "default_value": 0,
-              "value": 0
-            },
-            {
-              "display_name": "Demolition Costs Occur During Initial Construction?",
-              "display_name_short": "demo_cost_initial_const",
-              "name": "demo_cost_initial_const",
-              "value_type": "boolean",
-              "default_value": false,
-              "value": true
-            },
-            {
-              "display_name": "Expected Life (whole years).",
-              "display_name_short": "expected_life",
-              "name": "expected_life",
-              "value_type": "integer",
-              "default_value": 15,
-              "value": 15
-            },
-            {
-              "display_name": "Increase O & M Costs for Lighting per Floor Area (%).",
-              "display_name_short": "om_cost",
-              "name": "om_cost",
-              "value_type": "double",
-              "default_value": 0,
-              "value": 0
-            },
-            {
-              "display_name": "O & M Frequency (whole years).",
-              "display_name_short": "om_frequency",
-              "name": "om_frequency",
-              "value_type": "integer",
-              "default_value": 1,
-              "value": 1
-            }
-          ],
-          "variables": [
-                      {
-              "argument": {
-                  "display_name": "Lighting Power Reduction (%).",
-                  "display_name_short": "lighting_power_reduction_percent",
-                  "name": "lighting_power_reduction_percent",
-                  "value_type": "double",
-                  "default_value": 30,
-                  "value": 0
-                },
-              "display_name": "Lighting Power Reduction (%).",
-              "display_name_short": "lighting_power_reduction_percent",
-              "variable_type": "variable",
-              "minimum": -80,
-              "maximum": 80,
-              "static_value": 0,
-              "uuid": "",
-              "version_uuid": "",
-              "variable": true,
-              "uncertainty_description": {
-                "type": "uniform",
-                "attributes": [
-                  {
-                    "name": "lower_bounds",
-                    "value": -80
-                  },
-                  {
-                    "name": "upper_bounds",
-                    "value": 80
-                  },
-                  {
-                    "name": "modes",
-                    "value": 30
-                  },
-                  {
-                    "name": "delta_x",
-                    "value": 30
-                  },
-                  {
-                    "name": "stddev",
-                    "value": 26.6667
-                  }
-                ]
-              },
-              "workflow_index": 0
-            }
-          ],
-          "workflow_index": 0
-        },
-        {
           "name": "reduce_electric_equipment_loads_by_percentage",
           "display_name": "Reduce Electric Equipment Loads by Percentage",
           "measure_type": "RubyMeasure",
@@ -523,6 +392,45 @@
     "run_workflow_timeout": 28800,
     "upload_results_timeout": 28800,
     "initialize_worker_timeout": 28800,
-    "server_scripts": {}
+    "server_scripts": {},
+    "urbanopt_variables": [
+        {
+            "name": "lighting_power_reduction_percent",
+            "display_name": "Lighting Power Reduction (%).",
+            "display_name_short": "lighting_power_reduction_percent",
+            "variable_type": "variable",
+            "minimum": -80,
+            "maximum": 80,
+            "static_value": 0,
+            "uuid": "",
+            "version_uuid": "",
+            "variable": true,
+            "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                    {
+                        "name": "lower_bounds",
+                        "value": -80
+                    },
+                    {
+                        "name": "upper_bounds",
+                        "value": 80
+                    },
+                    {
+                        "name": "modes",
+                        "value": 30
+                    },
+                    {
+                        "name": "delta_x",
+                        "value": 30
+                    },
+                    {
+                        "name": "stddev",
+                        "value": 26.6667
+                    }
+                ]
+            }
+        }
+    ]
   }
 }
