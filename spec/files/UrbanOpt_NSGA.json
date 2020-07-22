@@ -1,7 +1,7 @@
 {
   "analysis": {
-    "display_name": "SEB_calibration_NSGA_2013",
-    "name": "SEB_calibration_NSGA_2013",
+    "display_name": "UrbanOpt_NSGA",
+    "name": "UrbanOpt_NSGA",
     "urbanopt": true,
     "output_variables": [
       {

@@ -220,7 +220,20 @@ module DjJobs
               # pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
               # Timeout.timeout(600) do   
               #   Process.wait(pid)
-              # end              
+              # end      
+
+              @sim_logger.info "@data_point: #{@data_point.to_json}"
+              @sim_logger.info "@data_point.analysis.variables: #{@data_point.analysis.variables.to_json}"
+              @data_point.analysis.variables.each do |var|
+                @sim_logger.info "var: #{var.to_json}"
+                @sim_logger.info ""
+                
+              end
+              #@sim_logger.info "t_result: #{t_result}"
+              osw = {}
+              osw = JSON.parse(File.read(osw_path), symbolize_names: true) if File.exist? osw_path
+              
+             
               #run uo-cli            
               cmd = "uo run --feature #{simulation_dir}/urbanopt/example_project.json --scenario #{simulation_dir}/urbanopt/highefficiency_scenario.csv"
               uo_process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
