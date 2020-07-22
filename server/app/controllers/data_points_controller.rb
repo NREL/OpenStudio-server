@@ -160,17 +160,21 @@ class DataPointsController < ApplicationController
             uuid = selected_variables[index].uuid
 
             # Type cast the values as they are probably strings
-            case selected_variables[index].value_type.downcase
-              when 'double'
-                variable_values[uuid] = value.to_f
-              when 'string'
-                variable_values[uuid] = value.to_s
-              when 'integer', 'int'
-                variable_values[uuid] = value.to_i
-              when 'bool', 'boolean'
-                variable_values[uuid] = value.casecmp('true').zero? ? true : false
-              else
-                raise "Unknown DataType for variable #{selected_variables[index].name} of #{selected_variables[index].value_type}"
+            if selected_variables[index].value_type  #non-OS variables might not have this set
+              case selected_variables[index].value_type.downcase
+                when 'double'
+                  variable_values[uuid] = value.to_f
+                when 'string'
+                  variable_values[uuid] = value.to_s
+                when 'integer', 'int'
+                  variable_values[uuid] = value.to_i
+                when 'bool', 'boolean'
+                  variable_values[uuid] = value.casecmp('true').zero? ? true : false
+                else
+                  raise "Unknown DataType for variable #{selected_variables[index].name} of #{selected_variables[index].value_type}"
+              end
+            else
+              raise "Unknown value_type for variable #{selected_variables[index].name} with uuid: #{selected_variables[index].uuid}"
             end
           else
             raise 'Could not find variable in database'
