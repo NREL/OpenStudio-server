@@ -36,12 +36,11 @@
 require 'rails_helper'
 require 'json-schema'
 
-def get_osa(path)
+def get_osa(relative_path)
   osa = nil
-  osa_path = File.expand_path("../../../#{path}", __dir__)
-  puts osa_path
+  osa_path = File.expand_path("../../../#{relative_path}", __dir__)
 
-  expect(File.exist?(osa_path)).to be true
+  expect(File.exist?(osa_path)).to eq(true), "Could not find OSA file #{osa_path}"
   File.open(osa_path) do |f|
     osa = JSON.parse(f.read, symbolize_names: true)
   end
@@ -71,12 +70,16 @@ RSpec.describe 'OSA Schema' do
   end
 
   it 'should be a valid osa file' do
-    validate_osa('server/spec/files/batch_datapoints/example_csv.json', @schema)
-    validate_osa('server/spec/files/batch_datapoints/example_csv_with_scripts.json', @schema)
-    validate_osa('server/spec/files/batch_datapoints/the_project.json', @schema)
-    validate_osa('server/spec/files/jsons/sweep_smalloffice.json', @schema)
-    validate_osa('server/spec/files/test_model/test_model.json', @schema)
-    validate_osa('spec/files/da_measures.json', @schema)
-    validate_osa('spec/files/example_csv.json', @schema)
+    # Make sure to use the copy of the spec/files/example_csv.json and da_measures.json as some
+    # of the tests run in Docker and the /spec folder is not mounted, only the /server is mounted.
+    [
+        'server/spec/files/batch_datapoints/example_csv.json',
+        'server/spec/files/batch_datapoints/example_csv_with_scripts.json',
+        'server/spec/files/batch_datapoints/the_project.json',
+        'server/spec/files/jsons/sweep_smalloffice.json',
+        'server/spec/files/jsons/copy_of_root_da_measures.json',
+        'server/spec/files/jsons/copy_of_root_example_csv.json',
+        'server/spec/files/test_model/test_model.json',
+    ].each { |f| validate_osa(f, @schema) }
   end
 end
