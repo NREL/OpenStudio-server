@@ -245,9 +245,8 @@ class Analysis
 
         #new_measure = Measure.create_from_os_json(id, wf, pat_json)
           #new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
-        uo_var['uuid'] = nil
+        uo_var['uuid'] = nil if !UUID.validate(uo_var['uuid'])
         var = Variable.where(analysis_id: self.id, uuid: uo_var['uuid']).first
-        logger.info("Variable.where(analysis_id: self.id, uuid: uo_var['uuid']).first: #{var.to_json}")
         if var
           raise "UrbanOpt Variable already exists for '#{var.name}' : '#{var.uuid}'"
         else
