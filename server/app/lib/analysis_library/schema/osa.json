@@ -1,0 +1,1082 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"type": "object",
+	"properties": {
+		"analysis": {
+			"properties": {
+				"display_name": {
+					"description": "Name of the analysis.",
+					"type": "string"
+				},
+				"name": {
+					"description": "Machine readable name of the analysis (no spaces, random characters, etc).",
+					"type": "string"
+				},
+				"output_variables": {
+					"title": "output_variables",
+					"description": "List of the output variables that is expected. Objective functions will be flagged in the list.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"display_name": {
+								"description": "Display name of the output variable. This can be set to be whatever the user wants.",
+								"type": "string"
+							},
+							"display_name_short": {
+								"description": "A shorter version of the display name. This is user defined and helps with creating short names for plots.",
+								"type": "string"
+							},
+							"name": {
+								"description": "Machine friendly name of the output variable. This must match an output of the OpenStudio workflow (e.g., openstudio_results.electricity_ip)",
+								"type": "string"
+							},
+							"units": {
+								"description": "Units of the output variable. This is only used for display purposes.",
+								"type": "string"
+							},
+							"objective_function": {
+								"description": "Boolean to specify that the output variable is part of an objective function.",
+								"type": "boolean"
+							},
+							"objective_function_index": {
+								"description": "Index of the objective function. Zero-based.",
+								"type": [
+									"number", "null"
+								],
+								"items": {
+									"type": "number"
+								}
+							},
+							"objective_function_target": {
+								"description": "Target value which the objective function is trying to achieve.",
+								"type": [
+									"number", "null"
+								]
+							},
+							"scaling_factor": {
+								"description": "Value by which to scale this output variable.",
+								"type": [
+									"number", "null"
+								]
+							},
+							"objective_function_group": {
+								"description": "If grouping objective functions, then the index which this output variable is grouped.",
+								"type": [
+									"number", "null"
+								]
+							},
+							"metadata_id": {
+								"description": "Deprecated. Use to store a universal metadata ID for DEnCity.",
+								"type": [
+									"string", "null"
+								]
+							},
+							"visualize": {
+								"description": "Boolean to specify that the output variable will be visible in OpenStudio Server's visualizations.",
+								"type": "boolean"
+							},
+							"export": {
+								"description": "Boolean to specify that the output variable will be exported to tabular data when using OpenStudio Server.",
+								"type": "boolean"
+							},
+							"variable_type": {
+								"description": "The data type of the variable.",
+								"type": "string",
+								"enum": [
+									"double", "string"
+								]
+							}
+						},
+						"required": [
+							"display_name", "name", "objective_function", "objective_function_index", "objective_function_target", "scaling_factor", "objective_function_group", "metadata_id", "visualize", "export"
+						],
+						"additionalProperties": false
+					}
+				},
+				"problem": {
+					"$ref": "#/definitions/problem_def"
+				},
+				"seed": {
+					"$ref": "#/definitions/seed_file_def"
+				},
+				"weather_file": {
+					"description": "Weather file to be used in the anlaysis.",
+					"type": "object",
+					"properties": {
+						"file_type": {
+							"type": "string"
+						},
+						"path": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"file_type", "path"
+					],
+					"additionalProperties": false
+				},
+				"server_scripts": {
+					"description": "Analysis and worker initialization scripts.",
+					"type": "object",
+					"properties": {
+						"worker_initialization": {
+							"description": "Worker init script that runs on each worker before the analysis starts.",
+							"type": "string"
+						},
+						"worker_finalization": {
+							"description": "Worker finalization script that runs after each worker finishes running the batch of simulations for the analysis.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				},
+				"file_format_version": {
+					"description": "Version of the OSA. This is only 1 at the moment.",
+					"type": "number",
+					"enum": [
+						1
+					]
+				},
+				"uuid": {
+					"type": "string"
+				},
+				"version_uuid": {
+					"type": "string"
+				},
+				"cli_debug": {
+					"type": "string"
+				},
+				"cli_verbose": {
+					"type": "string"
+				},
+				"initialize_worker_timeout": {
+					"type": "number"
+				},
+				"run_workflow_timeout": {
+					"type": "number"
+				},
+				"upload_results_timeout": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"display_name", "name", "output_variables", "problem", "seed", "weather_file", "file_format_version"
+			],
+			"additionalProperties": false
+		}
+	},
+	"required": [
+		"analysis"
+	],
+	"additionalProperties": false,
+	"definitions": {
+		"problem_def": {
+			"title": "problem",
+			"description": "Definition of the problem to analyze.",
+			"type": "object",
+			"properties": {
+				"analysis_type": {
+					"description": "The type of analysis to run.",
+					"type": [
+						"string", "null"
+					],
+					"enum": [
+						"baseline_perturbation", "diag", "doe", "fast99", "ga", "gaisl", "lhs", "morris", "nsga_nrel", "optim", "preflight", "pso", "repeat_run", "rgenoud", "single_run", "sobol", "spea_nrel", null
+					]
+				},
+				"algorithm": {
+					"$ref": "#/definitions/algorithm_def"
+				},
+				"name": {
+					"description": "Name of the problem being analyzed. This does not appear to be used.",
+					"type": "string"
+				},
+				"workflow": {
+					"title": "workflow",
+					"description": "The steps the problem will follow.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/workflow_def"
+					}
+				},
+				"design_alternatives": {
+					"description": "If running design alternative based workflows (from PAT local), then use this workflow definition.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"description": "Name of the design alternative (this is seen by the user).",
+								"type": "string"
+							},
+							"description": {
+								"description": "Description of the design alternative set by the user.",
+								"type": "string"
+							},
+							"seed": {
+								"$ref": "#/definitions/seed_file_def"
+							},
+							"options": {
+								"description": "Options for the design alternative.",
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"measure_name": {
+											"description": "Name of the measure as defined in the measure.rb file.",
+											"type": "string"
+										},
+										"workflow_index": {
+											"description": "Index of the option.",
+											"type": "number"
+										},
+										"name": {
+											"description": "Name of alternative option. This is user-defined.",
+											"type": "string"
+										},
+										"description": {
+											"description": "Description of alternative option. This is user-defined.",
+											"type": "string"
+										}
+									},
+									"required": [
+										"measure_name", "workflow_index", "name", "description"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"required": [
+							"name", "options"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"required": [
+				"analysis_type", "algorithm", "workflow"
+			],
+			"additionalProperties": false
+		},
+		"algorithm_def": {
+			"title": "algorithm",
+			"description": "algorithm options",
+			"type": "object",
+			"properties": {
+				"abstol": {
+					"description": "PSO: Absolute convergence tolerance",
+					"type": "number",
+					"default": 0.01,
+					"minimum": 0
+				},
+				"balance": {
+					"description": "RGenoud: balancing",
+					"type": "number",
+					"default": 1,
+					"enum": [
+						1
+					]
+				},
+				"boundary": {
+					"description": "PSO: Options: invisible, damping, reflecting, absorbing2007, absorbing2011, default",
+					"type": "string",
+					"default": "reflecting",
+					"enum": [
+						"invisible", "damping", "reflecting", "absorbing2007", "absorbing2011", "default"
+					]
+				},
+				"boundaryenforcement": {
+					"description": "RGenoud: Boundary Enforement",
+					"type": "number",
+					"default": 2,
+					"enum": [
+						2
+					]
+				},
+				"bfgs": {
+					"description": "RGenoud: Use Bounded Gradient Search. Options: 1 or 0 (True or False)",
+					"type": "number",
+					"default": 1,
+					"enum": [
+						0, 1
+					]
+				},
+				"bfgsburnin": {
+					"description": "RGenoud: The number of generations which are run before the BFGS is ﬁrst used",
+					"type": "number",
+					"default": 2,
+					"minimum": 0
+				},
+				"c1": {
+					"description": "PSO: Cognitive acceleration coefficient",
+					"type": "number",
+					"default": 1.193147
+				},
+				"c2": {
+					"description": "PSO: Social acceleration coefficient",
+					"type": "number",
+					"default": 1.193147
+				},
+				"check_boundary": {
+					"description": "Morris: Force variables to respect mins/maxes. Options: 1 or 0 (True or False)",
+					"type": "number",
+					"default": 0,
+					"enum": [
+						0, 1
+					]
+				},
+				"cidx": {
+					"description": "SPEA2: Crossover Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+					"default": 5
+				},
+				"conf": {
+					"description": "Sobol: the confidence level for bootstrap confidence intervals",
+					"type": "number",
+					"default": 0.95,
+					"minimum": 0,
+					"maximum": 1
+				},
+				"cprob": {
+					"description": "NSGA2, SPEA2: Crossover probability [0,1]",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
+				},
+				"debug_messages": {
+					"description": "0 - do not show debug messages. 1 - show debug messages.",
+					"type": "number",
+					"enum": [
+						0, 1
+					]
+				},
+				"elitism": {
+					"description": "Ga, GaIsl: Number of best fitness individuals to survive at each generation",
+					"type": "number",
+					"default": 0.05,
+					"minimum": 0
+				},
+				"epsilon_gradient": {
+					"description": "Ga, GaIsl, RGenoud: Epsilon in gradient calculation",
+					"type": "number",
+					"default": 0.001,
+					"minimum": 0
+				},
+				"epsilongradient": {
+					"description": "Optim: Epsilon in gradient calculation",
+					"type": "number",
+					"default": 0.001,
+					"minimum": 0
+				},
+				"experiment_type": {
+					"description": "DOE: Options: full_factorial; Diag: Options: diagonal TODO: only one, conflicts with DOE", 
+					"type": "string",
+					"default": "full_factorial",
+					"enum": [
+						"full_factorial", "diagonal"
+					]
+				},
+				"exit_on_guideline_14": {
+					"description": "Exit on Guideline 14: 0 (off), 1 (both electric and gas), 2 (just electric), 3 (just gas)",
+					"type": "number",
+					"default": 0,
+					"enum": [
+						0, 1, 2, 3
+					]
+				},
+				"factr": {
+					"description": "Optim, RGenoud: Tolerance on delta_F",
+					"type": "number",
+					"default": 450360000000000,
+					"minimum": 0
+				},
+				"failed_f_value": {
+					"description": "Value to set the return value if a simulation fails.",
+					"type": "number",
+					"default": 1000000000000000000
+				},
+				"generations": {
+					"description": "NSGA2, RGenoud, SPEA2: Number of generations",
+					"type": "number",
+					"default": 2,
+					"minimum": 0
+				},
+				"gradient_check": {
+					"description": "RGenoud: Numerically check gradient",
+					"type": "number",
+					"default": 0,
+					"enum": [
+						0
+					]
+				},
+				"grid_jump": {
+					"description": "Morris: Integer specifying the number of levels that are increased/decreased for computing the elementary effects",
+					"type": "number",
+					"default": 2,
+					"minimum": 0
+				},
+				"lambda": {
+					"description": "PSO: [0,1] a percentage to limit the maximum velocity (Vmax) for each dimension",
+					"type": "number",
+					"default": 0.9,
+					"minimum": 0,
+					"maximum": 1
+				},
+				"levels": {
+					"description": "Morris: Positive integer (if individual, total simulations is this times each variable). Must be at least 2",
+					"type": "number",
+					"default": 4,
+					"minimum": 1
+				},
+				"M": {
+					"description": "fast99: integer specifying the interference parameter, i.e. the number of harmonics to sum in the Fourier series decomposition",
+					"type": "number",
+					"default": 4,
+					"minimum": 1
+				},
+				"maxFitness": {
+					"description": "Ga, GaIsl: Upper bound on the fitness function after that the GA search is interrupted",
+					"type": "number",
+					"default": 0.01,
+					"minimum": 0
+				},
+				"maxfn": {
+					"description": "PSO: Maximum number of function evaluations",
+					"type": "number",
+					"default": 100,
+					"minimum": 1
+				},
+				"maxit": {
+					"description": "Optim, PSO: Maximum number of iterations",
+					"type": "number",
+					"default": 20,
+					"minimum": 1
+				},
+				"maxiter": {
+					"description": "Ga, GaIsl: Maximum number of iterations to run before the GA search is halted",
+					"type": "number",
+					"default": 100,
+					"minimum": 1
+				},
+				"max_queued_jobs": {
+					"description": "Integer specifying the maximum number of queued jobs",
+					"type": "number",
+					"minimum": 1
+				},
+				"memory_matrix": {
+					"description": "RGenoud: memory matrix",
+					"type": "number",
+					"default": 1,
+					"enum": [
+						1
+					]
+				},
+				"method": {
+					"description": "PSO: TODO; optim: TODO: This is fixed for optim and conflicts with PSO ",
+					"type": "string",
+					"default": "spso2011",
+					"enum": [
+						"spso2007", "spso2011", "ipso", "fips", "wfips", "L-BFGS-B"
+					]
+				},
+				"midx": {
+					"description": "SPEA2: Mutation Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+					"default": 5
+				},
+				"mprob": {
+					"description": "NSGA2, SPEA2: Mutation probability [0,1]",
+					"type": "number",
+					"default": 0.8,
+					"minimum": 0,
+					"maximum": 1
+				},
+				"mu_dist_idx": {
+					"description": "NSGA2: Mutation Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+					"default": 10
+				},
+				"mudistidx": {
+					"type": "number"
+				},
+				"n": {
+					"description": "fast99: Integer giving the sample size, i.e. the length of the discretization of the s-space",
+					"type": "number",
+					"default": 66,
+					"minimum": 1
+				},
+				"nboot": {
+					"description": "Sobol: The number of bootstrap replicates",
+					"type": "number",
+					"default": 0
+				},
+				"norm_type": {
+					"description": "fast99, Ga, GaIsl, Morris, optim, PSO, RGenoud, Sobol, SPEA2",
+					"type": "string",
+					"default": "minkowski",
+					"enum": [
+						"minkowski", "maximum", "euclidean", "binary", "manhattan"
+					]
+				},
+				"normtype": {
+					"type": "string",
+					"enum": [
+						"minkowski", "maximum", "euclidean", "binary", "manhattan"
+					]
+				},
+				"npart": {
+					"description": "PSO: Number of particles in the swarm",
+					"type": "number",
+					"default": 4,
+					"minimum": 1
+				},
+				"number_of_runs": {
+					"description": "Number of runs.",
+					"type": "number",
+					"minimum": 1
+				},
+				"number_of_samples": {
+					"description": "Number of samples.",
+					"type": "number",
+					"minimum": 1
+				},
+				"numIslands": {
+					"description": "GaIsl: Integer value specifying the number of islands to be used in a ring topology in which each island is connected unidirectionally with another island",
+					"type": "number",
+					"default": 4,
+					"minimum": 0
+				},
+				"migrationRate": {
+					"description": "GaIsl: Value in range 0-1 providing the proportion of individuals that should migrate between the islands",
+					"type": "number",
+					"default": 0.1,
+					"minimum": 0,
+					"maximum": 1
+				},
+				"migrationInterval": {
+					"description": "GaIsl: Integer value specifying the number of iterations at which exchange of individuals takes place",
+					"type": "number",
+					"default": 10,
+					"minimum": 0
+				},
+				"objective_functions": {
+					"description": "List of the objective functions",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"order": {
+					"description": "Sobol: the maximum order in the ANOVA decomposition (all indices up to this order will be computed)",
+					"type": "number",
+					"default": 1
+				},
+				"pgtol": {
+					"description": "Optim, RGenoud: Tolerance on the projected gradient",
+					"type": "number",
+					"default": 0.1,
+					"minimum": 0
+				},
+				"popsize": {
+					"description": "RGenoud: Size of initial population",
+					"type": "number",
+					"default": 2,
+					"minimum": 1
+				},
+				"popSize": {
+					"description": "Ga, GaIsl: Size of initial population TODO: similar to RGenoud",
+					"type": "number",
+					"default": 2,
+					"minimum": 1
+				},
+				"pcrossover": {
+					"description": "Ga, GaIsl: Probability of crossover between pairs of chromosomes. Typically a large value",
+					"type": "number",
+					"default": 0.8,
+					"minimum": 0,
+					"maximum": 1
+				},
+				"pmutation": {
+					"description": "Ga, GaIsl: Probability of mutation in a parent chromosome. Usually a small probability",
+					"type": "number",
+					"default": 0.1,
+					"minimum": 0,
+					"maximum": 1
+				},
+				"p_power": {
+					"description": "fast99, Ga, GaIsl, Morris, NSGA2, Optim, PSO, RGenoud, Sobol, SPEA2: Lp norm power (must be non-negative)",
+					"type": "number",
+					"default": 2,
+					"minimum": 0
+				},
+				"ppower": {
+					"type": "number"
+				},
+				"print_level": {
+					"description": "RGenoud: Options: 0 (minimal printing), 1 (normal), 2 (detailed), and 3 (debug)",
+					"type": "number",
+					"default": 2,
+					"enum": [
+						0, 1, 2, 3
+					]
+				},
+				"r": {
+					"description": "Morris: Integer giving the number of repetitions of the design",
+					"type": "number",
+					"default": 10,
+					"minimum": 2
+				},
+				"r2": {
+					"description": "Morris: Integer giving the size of the (bigger) population in which is extracted the design, for the space-filling improvement by (Campolongo et al. 2007).  r2 > r",
+					"type": "number",
+					"default": 20,
+					"minimum": 2
+				},
+				"r_genoud_debug_flag": {
+					"description": "RGenoud: debug flag Options: 1 or 0 (True or False)",
+					"type": "string",
+					"default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+				"random_seed": {
+					"description": "Sobol first seed for random number generator.",
+					"type": "number"
+				},
+				"random_seed2": {
+					"description": "Sobol second seed for random number generator.",
+					"type": "number"
+				},
+				"report": {
+					"description": "PSO: report",
+					"type": "number",
+					"default": 1,
+					"enum": [
+						1
+					]
+				},
+				"reltol": {
+					"description": "PSO: Relative convergence tolerance",
+					"type": "number",
+					"default": 0.01,
+					"minimum": 0
+				},
+				"run": {
+					"description": "Ga, GaIsl: Number of consecutive generations without any improvement in the best fitness value before the GA is stopped",
+					"type": "number",
+					"default": 2,
+					"minimum": 0
+				},
+				"run_all_samples_for_pivots": {
+					"description": "preflight: Run all Samples for Pivots Options: true or false.",
+					"type": "string",
+					"default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+				"run_baseline": {
+					"description": "Diag: Run Baseline Options: 1 or 0 (True or False)",
+					"type": "number",
+					"default": 1,
+					"enum": [
+						0, 1
+					]
+				},
+				"run_max": {
+					"description": "preflight: run max Options: true or false.",
+					"type": "string",
+					"default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+				"run_min": {
+					"description": "preflight: run min Options: true or false.",
+					"type": "string",
+					"default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+				"run_mode": {
+					"description": "preflight: run mode Options: true or false.",
+					"type": "string",
+					"default": "true",
+					"enum": [
+						"true", "false"
+					]
+				},
+				"sample_method": {
+					"description": "The type of sampling. If 'all_variables' then the sampling will occur across all the variables. If individual, then each variable is sampled individually.",
+					"type": "string",
+					"default": "individual_variables",
+					"enum": [
+						"all_variables", "individual_variables"
+					]
+				},
+				"seed": {
+					"description": "Seed value for random number generators. If null then algorithm will choose random seed.",
+					"type": [
+						"number", "null"
+					]
+				},
+				"solution_tolerance": {
+					"description": "RGenoud: Numbers within solutionTolerance are considered equal",
+					"type": "number",
+					"default": 0.01,
+					"minimum": 0
+				},
+				"topology": {
+					"description": "PSO: Options: gbest, lbest, vonneumann, random",
+					"type": "string",
+					"default": "random",
+					"enum": [
+						"gbest", "lbest", "vonneumann", "random"
+					]
+				},
+				"tournament_size": {
+					"description": "NSGA2, SPEA2: Tournament Size",
+					"type": "number",
+					"default": 2
+				},
+				"toursize": {
+					"type": "number"
+				},
+				"type": {
+					"description": "Sobol: method; Morris: Options: oat (One at a Time) TODO: only one and conflicts with sobol",
+					"type": "string",
+					"default": "sobol",
+					"enum": [
+						"sobol", "sobol2002", "sobol2007", "jansen", "mara", "martinez", "oat"
+					]
+				},
+				"vini": {
+					"description": "PSO: Options: zero, lhs2011, random2011, lhs2007, random2007, default",
+					"type": "string",
+					"default": "lhs2011",
+					"enum": [
+						"zero", "lhs2011", "random2011", "lhs2007", "random2007", "default"
+					]
+				},
+				"wait_generations": {
+					"description": "RGenoud: If no improvement in waitGenerations of generations, then exit",
+					"type": "number",
+					"default": 2,
+					"minimum": 0
+				},
+				"xini": {
+					"description": "PSO: Options: lhs, random",
+					"type": "string",
+					"default": "lhs",
+					"enum": [
+						"lhs", "random"
+					]
+				},
+				"xover_dist_idx": {
+					"description": "NSGA2: Crossover Distribution Index (large values give higher probabilities of offspring close to parent)",
+					"type": "number",
+					"default": 5
+				},
+				"xoverdistidx": {
+					"type": "number"
+				}
+			},
+			"additionalProperties": false
+		},
+		"workflow_def": {
+			"description": "Definition of the workflow.",
+			"type": "object",
+			"properties": {
+				"name": {
+					"description": "Name of the workflow step. This is commonly the measure name.",
+					"type": "string"
+				},
+				"display_name": {
+					"description": "Display name for the workflow step.",
+					"type": "string"
+				},
+				"measure_type": {
+					"description": "Type of measure to be run.",
+					"type": "string",
+					"enum": [
+						"RubyMeasure", "EnergyPlusMeasure", "ReportingMeasure"
+					]
+				},
+				"measure_definition_class_name": {
+					"description": "The class name as defined in the measure.rb file.",
+					"type": "string"
+				},
+				"measure_definition_directory": {
+					"description": "Relative directory to the measure.rb file.",
+					"type": "string"
+				},
+				"measure_definition_directory_local": {
+					"description": "Full path to the measure directory.",
+					"type": "string"
+				},
+				"measure_definition_display_name": {
+					"description": "The display name of the measure as defined in the measure.rb.",
+					"type": "string"
+				},
+				"measure_definition_name": {
+					"description": "The measure name (method) of the measure as defined in the measure.rb.",
+					"type": "string"
+				},
+				"measure_definition_name_xml": {
+					"description": "The measure name as defined in the measure.xml. TODO: this should be deprecated.",
+					"type": [
+						"string", "null"
+					]
+				},
+				"measure_definition_uuid": {
+					"type": "string"
+				},
+				"measure_definition_version_uuid": {
+					"type": "string"
+				},
+				"arguments": {
+					"description": "List of measure arguments that are not used as variables.",
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/argument_base_def"
+					}
+				},
+				"variables": {
+					"$ref": "#/definitions/variable_def"
+				},
+				"uuid": {
+					"type": "string"
+				},
+				"version_uuid": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"taxonomy": {
+					"type": "string"
+				},
+				"workflow_index": {
+					"type": "number"
+				}
+			},
+			"required": [
+				"name", "display_name", "measure_type", "measure_definition_directory", "measure_definition_directory_local", "measure_definition_display_name", "measure_definition_name", "measure_definition_name_xml", "measure_definition_uuid", "measure_definition_version_uuid", "variables", "workflow_index"
+			],
+			"additionalProperties": false
+		},
+		"argument_base_def": {
+			"description": "Details of the argument that is \"tagged\" as a variable for the problem. The argument is the measure argument.",
+			"type": "object",
+			"properties": {
+				"display_name": {
+					"description": "Dispany name of the measure argument. This is user-defined.",
+					"type": "string"
+				},
+				"display_name_short": {
+					"description": "A shorter display name for an argument. This field is typically used for graphs and table exports.",
+					"type": "string"
+				},
+				"name": {
+					"description": "The machine name of the measure argument. This is typically the snake case field defined in the measure.xml.",
+					"type": "string"
+				},
+				"value_type": {
+					"description": "The variable type of the value that is being  set.",
+					"type": "string",
+					"enum": [
+						"double", "string", "boolean", "bool", "integer"
+					]
+				},
+				"value": {
+					"description": "The value to set the measure argument. Note that if the argument is within a variable, then the value is not used.",
+					"type": [
+						"string", "number", "boolean", "null"
+					]
+				},
+				"default_value": {
+					"description": "The default value for the argument. This is typically used in user interfaces.",
+					"type": [
+						"string", "number", "boolean", "null"
+					]
+				}
+			},
+			"required": [
+				"display_name", "name", "value_type"
+			],
+			"additionalProperties": false
+		},
+		"uncertainty_def": {
+			"description": "Container for holding the uncertainty description.",
+			"type": "object",
+			"properties": {
+				"type": {
+					"description": "Type of uncertainty description.",
+					"type": "string",
+					"enum": [
+						"uniform", "discrete", "triangle", "lognormal", "normal"
+					]
+				},
+				"attributes": {
+					"description": "Attributes of the uncertainty.",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"description": "Name of the uncertainty attribute such as lower bound, mean, standard deviation, etc.",
+								"type": "string",
+								"enum": [
+									"lower_bounds", "upper_bounds", "modes", "delta_x", "stddev", "discrete"
+								]
+							},
+							"value": {
+								"description": "Value of the uncertainty attribute (name).",
+								"type": [
+									"string", "number", "boolean", "null"
+								]
+							},
+							"values_and_weights": {
+								"description": "If the variable is discrete, then the list of values and weights for each option.",
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"value": {
+											"description": "Value of the discrete variable.",
+											"type": [
+												"string", "number", "boolean"
+											]
+										},
+										"weight": {
+											"description": "Weight of the discrete value when being sampled.",
+											"type": "number"
+										}
+									},
+									"required": [
+										"value", "weight"
+									],
+									"additionalProperties": false
+								}
+							}
+						},
+						"required": [
+							"name"
+						],
+						"additionalProperties": false
+					}
+				}
+			},
+			"additionalProperties": false
+		},
+		"variable_def": {
+			"title": "variables",
+			"description": "List of variables for the problem.",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"argument": {
+						"$ref": "#/definitions/argument_base_def"
+					},
+					"display_name": {
+						"description": "Display name of the variable. This is user-defined.",
+						"type": "string"
+					},
+					"display_name_short": {
+						"description": "A shorter display name for the variable. This is typically used for graphs and table exports.",
+						"type": "string"
+					},
+					"units": {
+						"type": [
+							"string", "null"
+						]
+					},
+					"variable": {
+						"description": "Is the variable a variable? This should always be true.",
+						"type": "boolean"
+					},
+					"variable_type": {
+						"description": "The type of variable. Can be pivot or variable. If pivot, then the pivot variable is applied to all algorithm values.",
+						"type": "string",
+						"enum": [
+							"variable", "pivot"
+						]
+					},
+					"minimum": {
+						"description": "The minimum value of the variable. This can be a string, double, or integer.",
+						"type": [
+							"string", "number", "boolean"
+						]
+					},
+					"maximum": {
+						"description": "The maximum value of the variable. This can be a string, double, or integer.",
+						"type": [
+							"string", "number", "boolean", "null"
+						]
+					},
+					"relation_to_output": {
+						"description": "The minimum value of the variable. This can be a string, double, or integer.",
+						"type": [
+							"string", "null"
+						],
+						"enum": [
+							"positive", "negative", null
+						]
+					},
+					"static_value": {
+						"description": "The static value of the variable when it is not set by the algorithm. ",
+						"type": [
+							"string", "number", "boolean"
+						]
+					},
+					"uuid": {
+						"description": "UUID of the variable.",
+						"type": [
+							"string", "null"
+						]
+					},
+					"version_uuid": {
+						"description": "UUID of the version of the variable.",
+						"type": [
+							"string", "null"
+						]
+					},
+					"workflow_index": {
+						"description": "Integer index of the workflow step.",
+						"type": "number"
+					},
+					"uncertainty_description": {
+						"$ref": "#/definitions/uncertainty_def"
+					}
+				},
+				"required": [
+					"argument", "display_name", "display_name_short", "variable", "variable_type", "minimum", "maximum", "static_value", "workflow_index", "uncertainty_description"
+				],
+				"additionalProperties": false
+			}
+		},
+		"seed_file_def": {
+			"description": "Seed model definition.",
+			"type": "object",
+			"properties": {
+				"file_type": {
+					"type": "string",
+					"enum": [
+						"OSW", "OSM"
+					]
+				},
+				"path": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"file_type", "path"
+			],
+			"additionalProperties": false
+		}
+	}
+}
