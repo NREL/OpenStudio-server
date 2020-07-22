@@ -241,17 +241,51 @@ class Analysis
     # note the measures first
     if self['urbanopt_variables']
       logger.info('found urbanopt_variables')
-      self['urbanopt_variables'].each do |wf|
+      self['urbanopt_variables'].each do |uo_var|
 
         #new_measure = Measure.create_from_os_json(id, wf, pat_json)
           #new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
-        var = Variable.where(analysis_id: self.id, uuid: self.uuid).first
+        uo_var['uuid'] = nil
+        var = Variable.where(analysis_id: self.id, uuid: uo_var['uuid']).first
+        logger.info("Variable.where(analysis_id: self.id, uuid: uo_var['uuid']).first: #{var.to_json}")
         if var
           raise "UrbanOpt Variable already exists for '#{var.name}' : '#{var.uuid}'"
         else
-          logger.info("Adding a new UrbanOpt variable/argument named: '#{self.display_name}' with UUID '#{self.uuid}'")
-          var = Variable.find_or_create_by(analysis_id: self.id, uuid: self.uuid)
+          logger.info("Adding a new UrbanOpt variable/argument named: '#{uo_var['name']}' with UUID '#{uo_var['uuid']}'")
+          var = Variable.find_or_create_by(analysis_id: self.id, uuid: uo_var['uuid'])
           logger.info("Created Var: #{var.to_json}")
+          exclude_fields = ['uuid', 'type', 'argument', 'uncertainty_description']
+          uo_var.each do |k, v|
+            var[k] = v unless exclude_fields.include? k
+            
+            var.perturbable = v if k == 'variable'
+            if var.perturbable
+              var.export = true
+              var.visualize = true
+            end
+            # if the variable has an uncertainty description, then it needs to be flagged
+            # as a perturbable (or pivot) variable
+            if k == 'uncertainty_description'
+              # need to flatten this
+              var['uncertainty_type'] = v['type'] if v['type']
+              if v['attributes']
+                v['attributes'].each do |attribute|
+                  # grab the name of the attribute to append the
+                  # other characteristics
+                  attribute['name'] ? att_name = attribute['name'] : att_name = nil
+                  next unless att_name
+
+                  attribute.each do |k2, v2|
+                    exclude_fields_2 = ['uuid', 'version_uuid']
+                    var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
+                  end
+                end
+              end
+            end
+      
+          end
+
+          logger.info("Updated Var: #{var.to_json}")
           var.save!
         end
 
