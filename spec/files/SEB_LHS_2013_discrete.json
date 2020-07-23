@@ -1,0 +1,1021 @@
+{
+  "analysis": {
+    "display_name": "SEB_LHS_2013_discrete",
+    "name": "SEB_LHS_2013_discrete",
+    "output_variables": [
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_ip",
+        "display_name_short": "electricity_ip",
+        "metadata_id": null,
+        "name": "OpenStudioResults.electricity_ip",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_ip",
+        "display_name_short": "natural_gas_ip",
+        "metadata_id": null,
+        "name": "OpenStudioResults.natural_gas_ip",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "eui",
+        "display_name_short": "eui",
+        "metadata_id": null,
+        "name": "OpenStudioResults.eui",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "kWh",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_consumption_actual",
+        "display_name_short": "electricity_consumption_actual",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.electricity_consumption_actual",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "kWh",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_consumption_modeled",
+        "display_name_short": "electricity_consumption_modeled",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.electricity_consumption_modeled",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "%",
+        "objective_function": true,
+        "objective_function_index": 0,
+        "objective_function_target": 0,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_consumption_cvrmse",
+        "display_name_short": "electricity_consumption_cvrmse",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.electricity_consumption_cvrmse",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "%",
+        "objective_function": true,
+        "objective_function_index": 1,
+        "objective_function_target": 0,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_consumption_nmbe",
+        "display_name_short": "electricity_consumption_nmbe",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.electricity_consumption_nmbe",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "%",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_rmse",
+        "display_name_short": "electricity_rmse",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.electricity_rmse",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "therms",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_consumption_actual",
+        "display_name_short": "natural_gas_consumption_actual",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.natural_gas_consumption_actual",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "therms",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_consumption_modeled",
+        "display_name_short": "natural_gas_consumption_modeled",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.natural_gas_consumption_modeled",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "%",
+        "objective_function": true,
+        "objective_function_index": 2,
+        "objective_function_target": 0,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_consumption_cvrmse",
+        "display_name_short": "natural_gas_consumption_cvrmse",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.natural_gas_consumption_cvrmse",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "%",
+        "objective_function": true,
+        "objective_function_index": 3,
+        "objective_function_target": 0,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_consumption_nmbe",
+        "display_name_short": "natural_gas_consumption_nmbe",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.natural_gas_consumption_nmbe",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "units": "%",
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_rmse",
+        "display_name_short": "natural_gas_rmse",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.natural_gas_rmse",
+        "visualize": false,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_cvrmse_within_limit",
+        "display_name_short": "electricity_cvrmse_within_limit",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.electricity_cvrmse_within_limit",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_nmbe_within_limit",
+        "display_name_short": "electricity_nmbe_within_limit",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.electricity_nmbe_within_limit",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_cvrmse_within_limit",
+        "display_name_short": "natural_gas_cvrmse_within_limit",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.natural_gas_cvrmse_within_limit",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "natural_gas_nmbe_within_limit",
+        "display_name_short": "natural_gas_nmbe_within_limit",
+        "metadata_id": null,
+        "name": "CalibrationReportsEnhanced20.natural_gas_nmbe_within_limit",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      }
+    ],
+    "problem": {
+      "workflow": [
+        {
+          "name": "add_monthly_json_utility_data",
+          "display_name": "AddMonthlyJSONUtilityData",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AddMonthlyJSONUtilityData",
+          "measure_definition_directory": "./measures/AddMonthlyJSONUtilityData",
+          "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_LHS_2013_discrete/measures/AddMonthlyJSONUtilityData",
+          "measure_definition_display_name": "AddMonthlyJSONUtilityData",
+          "measure_definition_name": "add_monthly_json_utility_data",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "6da969e0-4256-49bf-9607-26504cc3d423",
+          "measure_definition_version_uuid": "cb687d6c-6ee1-4488-800b-8bdce34214ce",
+          "uuid": "6da969e0-4256-49bf-9607-26504cc3d423",
+          "version_uuid": "cb687d6c-6ee1-4488-800b-8bdce34214ce",
+          "description": "Reads in json format and adds utility data",
+          "taxonomy": "Economics.Life Cycle Cost Analysis",
+          "arguments": [
+            {
+              "display_name": "Path to JSON",
+              "display_name_short": "json",
+              "name": "json",
+              "value_type": "string",
+              "default_value": "../../../lib/calibration_data/electric.json",
+              "value": "../../../lib/calibration_data/electric.json"
+            },
+            {
+              "display_name": "Variable name",
+              "display_name_short": "variable_name",
+              "name": "variable_name",
+              "value_type": "string",
+              "default_value": "Electric Bill",
+              "value": "Electric Bill"
+            },
+            {
+              "display_name": "Fuel Type",
+              "display_name_short": "fuel_type",
+              "name": "fuel_type",
+              "value_type": "string",
+              "default_value": "Electricity",
+              "value": "Electricity"
+            },
+            {
+              "display_name": "Consumption Unit",
+              "display_name_short": "consumption_unit",
+              "name": "consumption_unit",
+              "value_type": "string",
+              "default_value": "kWh",
+              "value": "kWh"
+            },
+            {
+              "display_name": "data key name",
+              "display_name_short": "data_key_name",
+              "name": "data_key_name",
+              "value_type": "string",
+              "default_value": "tot_kwh",
+              "value": "tot_kwh"
+            },
+            {
+              "display_name": "Start date",
+              "display_name_short": "start_date",
+              "name": "start_date",
+              "value_type": "string",
+              "default_value": "2013-01-1",
+              "value": "2013-01-1"
+            },
+            {
+              "display_name": "End date",
+              "display_name_short": "end_date",
+              "name": "end_date",
+              "value_type": "string",
+              "default_value": "2013-12-31",
+              "value": "2013-12-31"
+            },
+            {
+              "display_name": "remove existing Utility Bill data",
+              "display_name_short": "remove_existing_data",
+              "name": "remove_existing_data",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Set RunPeriod in model",
+              "display_name_short": "set_runperiod",
+              "name": "set_runperiod",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 0
+        },
+        {
+          "name": "reduce_electric_equipment_loads_by_percentage_diag",
+          "display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ReduceElectricEquipmentLoadsByPercentageDiag",
+          "measure_definition_directory": "./measures/ReduceElectricEquipmentLoadsByPercentageDiag",
+          "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_LHS_2013_discrete/measures/ReduceElectricEquipmentLoadsByPercentageDiag",
+          "measure_definition_display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_definition_name": "reduce_electric_equipment_loads_by_percentage_diag",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "428bba5b-84c3-4c4c-a94d-88a5f59f51ee",
+          "measure_definition_version_uuid": "d79b6424-5611-4f01-a3f4-2468f95bcb50",
+          "uuid": "428bba5b-84c3-4c4c-a94d-88a5f59f51ee",
+          "version_uuid": "d79b6424-5611-4f01-a3f4-2468f95bcb50",
+          "description": "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
+          "taxonomy": "Equipment.Electric Equipment",
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "display_name_short": "space_type",
+              "name": "space_type",
+              "value_type": "string",
+              "default_value": "*Entire Building*",
+              "value": "*Entire Building*"
+            },
+            {
+              "display_name": "Electric Equipment Power Reduction (%).",
+              "display_name_short": "elecequip_power_reduction_percent",
+              "name": "elecequip_power_reduction_percent",
+              "value_type": "double",
+              "default_value": 30,
+              "value": 0
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Electric Equipment per Floor Area (%).",
+              "display_name_short": "material_and_installation_cost",
+              "name": "material_and_installation_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 15,
+              "value": 15
+            },
+            {
+              "display_name": "Increase O & M Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Run Measure",
+                "display_name_short": "run_measure",
+                "name": "run_measure",
+                "value_type": "integer",
+                "default_value": 1,
+                "value": 1
+              },
+              "display_name": "Run Measure",
+              "display_name_short": "run_measure",
+              "variable_type": "variable",
+              "minimum": 1,
+              "maximum": 1,
+              "static_value": 1,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 0,
+                        "weight": 0.5
+                      },
+                      {
+                        "value": 1,
+                        "weight": 0.5
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "modes",
+                    "value": 1
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 1
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 1
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 1
+        },
+        {
+          "name": "set_gas_burner_efficiency_diag",
+          "display_name": "Set Gas Burner Efficiency",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetGasBurnerEfficiencyDiag",
+          "measure_definition_directory": "./measures/SetGasBurnerEfficiencyDiag",
+          "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_LHS_2013_discrete/measures/SetGasBurnerEfficiencyDiag",
+          "measure_definition_display_name": "Set Gas Burner Efficiency",
+          "measure_definition_name": "set_gas_burner_efficiency_diag",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "28c79510-5001-4582-bf93-d34d223f19ca",
+          "measure_definition_version_uuid": "e7069360-caee-44aa-a190-04a7ec3c3761",
+          "uuid": "28c79510-5001-4582-bf93-d34d223f19ca",
+          "version_uuid": "e7069360-caee-44aa-a190-04a7ec3c3761",
+          "description": "This measure will find Coil Heating Gas units in the model and will alter the burner efficiency to a specified value. It can be run on a single or all air loops in the model.",
+          "taxonomy": "HVAC.Heating",
+          "arguments": [
+            {
+              "display_name": "Choose an Air Loop with a two speed DX Cooling Unit to Alter.",
+              "display_name_short": "object",
+              "name": "object",
+              "value_type": "string",
+              "default_value": "*All Air Loops*",
+              "value": "*All Air Loops*"
+            },
+            {
+              "display_name": "Burner Efficiency (fractional)",
+              "display_name_short": "eff",
+              "name": "eff",
+              "value_type": "double",
+              "default_value": 0.95,
+              "value": 0.8
+            },
+            {
+              "display_name": "Remove Baseline Costs From Effected Cooling Coil DX Two Speed Units?",
+              "display_name_short": "remove_costs",
+              "name": "remove_costs",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": false
+            },
+            {
+              "display_name": "Material and Installation Costs per Cooling Coil DX Two Speed Unit ($).",
+              "display_name_short": "material_cost",
+              "name": "material_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs per Cooling Coil DX Two Speed Unit ($).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 20,
+              "value": 15
+            },
+            {
+              "display_name": "O & M Costs per Cooling Coil DX Two Speed Unit ($).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Run Measure",
+                "display_name_short": "run_measure",
+                "name": "run_measure",
+                "value_type": "integer",
+                "default_value": 1,
+                "value": 1
+              },
+              "display_name": "Run Measure",
+              "display_name_short": "run_measure",
+              "variable_type": "variable",
+              "minimum": 1,
+              "maximum": 1,
+              "static_value": 1,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 0,
+                        "weight": 0.5
+                      },
+                      {
+                        "value": 1,
+                        "weight": 0.5
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "modes",
+                    "value": 1
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 1
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 1
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 2
+        },
+        {
+          "name": "change_electric_baseboard_diag",
+          "display_name": "Change Electric Baseboard",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ChangeElectricBaseboardDiag",
+          "measure_definition_directory": "./measures/ChangeElectricBaseboardDiag",
+          "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_LHS_2013_discrete/measures/ChangeElectricBaseboardDiag",
+          "measure_definition_display_name": "Change Electric Baseboard",
+          "measure_definition_name": "change_electric_baseboard_diag",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "325cd385-bbaf-4f4f-adb2-8eb928c2de9d",
+          "measure_definition_version_uuid": "1835d0eb-f2d2-49d9-a828-558a919b9841",
+          "uuid": "325cd385-bbaf-4f4f-adb2-8eb928c2de9d",
+          "version_uuid": "1835d0eb-f2d2-49d9-a828-558a919b9841",
+          "description": "Change Electric Baseboard",
+          "taxonomy": "Envelope.Form",
+          "arguments": [
+            {
+              "display_name": "efficiency",
+              "display_name_short": "base_eff",
+              "name": "base_eff",
+              "value_type": "double",
+              "default_value": 1,
+              "value": 1
+            },
+            {
+              "display_name": "Nominal Capacity (W)",
+              "display_name_short": "nom_cap",
+              "name": "nom_cap",
+              "value_type": "double",
+              "default_value": 1500,
+              "value": 1450
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Run Measure",
+                "display_name_short": "run_measure",
+                "name": "run_measure",
+                "value_type": "integer",
+                "default_value": 1,
+                "value": 1
+              },
+              "display_name": "Run Measure",
+              "display_name_short": "run_measure",
+              "variable_type": "variable",
+              "minimum": 1,
+              "maximum": 1,
+              "static_value": 1,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 0,
+                        "weight": 0.5
+                      },
+                      {
+                        "value": 1,
+                        "weight": 0.5
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "modes",
+                    "value": 1
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 1
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 1
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 3
+        },
+        {
+          "name": "openstudio_results",
+          "display_name": "OpenStudio Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "OpenStudioResults",
+          "measure_definition_directory": "./measures/f8e23017-894d-4bdf-977f-37e3961e6f42",
+          "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_LHS_2013_discrete/measures/f8e23017-894d-4bdf-977f-37e3961e6f42",
+          "measure_definition_display_name": "OpenStudio Results",
+          "measure_definition_name": "openstudio_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "measure_definition_version_uuid": "96d48c9c-dd58-4ace-b2b0-0a2b36fd603d",
+          "uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "version_uuid": "96d48c9c-dd58-4ace-b2b0-0a2b36fd603d",
+          "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Model Summary",
+              "display_name_short": "building_summary_section",
+              "name": "building_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Annual Overview",
+              "display_name_short": "annual_overview_section",
+              "name": "annual_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Monthly Overview",
+              "display_name_short": "monthly_overview_section",
+              "name": "monthly_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Utility Bills/Rates",
+              "display_name_short": "utility_bills_rates_section",
+              "name": "utility_bills_rates_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Envelope",
+              "display_name_short": "envelope_section_section",
+              "name": "envelope_section_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Breakdown",
+              "display_name_short": "space_type_breakdown_section",
+              "name": "space_type_breakdown_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Summary",
+              "display_name_short": "space_type_details_section",
+              "name": "space_type_details_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Interior Lighting Summary",
+              "display_name_short": "interior_lighting_section",
+              "name": "interior_lighting_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plug Loads Summary",
+              "display_name_short": "plug_loads_section",
+              "name": "plug_loads_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Exterior Lighting",
+              "display_name_short": "exterior_light_section",
+              "name": "exterior_light_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Water Use Equipment",
+              "display_name_short": "water_use_section",
+              "name": "water_use_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "HVAC Load Profiles",
+              "display_name_short": "hvac_load_profile",
+              "name": "hvac_load_profile",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Conditions",
+              "display_name_short": "zone_condition_section",
+              "name": "zone_condition_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Overview",
+              "display_name_short": "zone_summary_section",
+              "name": "zone_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Equipment Detail",
+              "display_name_short": "zone_equipment_detail_section",
+              "name": "zone_equipment_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Air Loops Detail",
+              "display_name_short": "air_loops_detail_section",
+              "name": "air_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plant Loops Detail",
+              "display_name_short": "plant_loops_detail_section",
+              "name": "plant_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Outdoor Air",
+              "display_name_short": "outdoor_air_section",
+              "name": "outdoor_air_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Cash Flow",
+              "display_name_short": "cost_summary_section",
+              "name": "cost_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Site and Source Summary",
+              "display_name_short": "source_energy_section",
+              "name": "source_energy_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Schedule Overview",
+              "display_name_short": "schedules_overview_section",
+              "name": "schedules_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 4
+        },
+        {
+          "name": "calibration_reports_enhanced_20",
+          "display_name": "Calibration Reports Enhanced",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "CalibrationReportsEnhanced20",
+          "measure_definition_directory": "./measures/CalibrationReportsEnhanced20",
+          "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_LHS_2013_discrete/measures/CalibrationReportsEnhanced20",
+          "measure_definition_display_name": "Calibration Reports Enhanced",
+          "measure_definition_name": "calibration_reports_enhanced_20",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "e6642d40-7366-4647-8724-53a37991d668",
+          "measure_definition_version_uuid": "ceb75240-70f0-4129-9caa-1195bbb0f07d",
+          "uuid": "e6642d40-7366-4647-8724-53a37991d668",
+          "version_uuid": "ceb75240-70f0-4129-9caa-1195bbb0f07d",
+          "description": "This measure is intended for calibibration of modeled results against user entered utility bill.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Electric NMBE limit (%)",
+              "display_name_short": "electric_nmbe_limit",
+              "name": "electric_nmbe_limit",
+              "value_type": "double",
+              "default_value": 5,
+              "value": 5
+            },
+            {
+              "display_name": "Electric CVRMSE limit (%)",
+              "display_name_short": "electric_cvrmse_limit",
+              "name": "electric_cvrmse_limit",
+              "value_type": "double",
+              "default_value": 15,
+              "value": 15
+            },
+            {
+              "display_name": "Gas NMBE limit (%)",
+              "display_name_short": "gas_nmbe_limit",
+              "name": "gas_nmbe_limit",
+              "value_type": "double",
+              "default_value": 5,
+              "value": 5
+            },
+            {
+              "display_name": "Gas CVRMSE limit (%)",
+              "display_name_short": "gas_cvrmse_limit",
+              "name": "gas_cvrmse_limit",
+              "value_type": "double",
+              "default_value": 15,
+              "value": 15
+            }
+          ],
+          "variables": [],
+          "workflow_index": 5
+        }
+      ],
+      "algorithm": {
+        "sample_method": "individual_variables",
+        "number_of_samples": 3,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 1,
+        "objective_functions": []
+      },
+      "analysis_type": "lhs"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seeds/SEB4_baseboard.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/SRRL_2013AMY_60min.epw"
+    },
+    "file_format_version": 1,
+    "server_scripts": {}
+  }
+}
