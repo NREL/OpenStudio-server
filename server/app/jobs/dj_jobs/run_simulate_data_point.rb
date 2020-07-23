@@ -213,6 +213,7 @@ module DjJobs
               @sim_logger.info ".bundle/config: #{File.read(config_file)}"
               File.write("#{simulation_dir}/urbanopt/.bundle/config",File.open("#{simulation_dir}/urbanopt/.bundle/config",&:read).gsub(first,second))
               @sim_logger.info ".bundle/config: #{File.read(config_file)}"
+              #moved to initialize_worker
               #bundle install
               # cmd = "cd #{simulation_dir}/urbanopt; bundle install --retry 10"
               # uo_bundle_log = File.join(simulation_dir, 'urbanopt_bundle.log')
@@ -222,17 +223,35 @@ module DjJobs
               #   Process.wait(pid)
               # end      
 
-              @sim_logger.info "@data_point: #{@data_point.to_json}"
-              @sim_logger.info "@data_point.analysis.variables: #{@data_point.analysis.variables.to_json}"
-              @data_point.analysis.variables.each do |var|
-                @sim_logger.info "var: #{var.to_json}"
-                @sim_logger.info ">  "
-                
+              variable_values_names = {}
+              @data_point['set_variable_values'].each_with_index do |(k, v), i|
+                var = Variable.find(k)
+                if var
+                  @sim_logger.info "k: #{k}"
+                  @sim_logger.info "v: #{v}"
+                  @sim_logger.info "var.name: #{var.name}"
+                  variable_values_names[var.name] = v
+                  @sim_logger.info "variable_values_names: #{variable_values_names}"
+                end
               end
-              #@sim_logger.info "t_result: #{t_result}"
-              osw = {}
-              osw = JSON.parse(File.read(osw_path), symbolize_names: true) if File.exist? osw_path
+              variable_names = variable_values_names.keys
               
+              #this assumes a variable is in a mapper file once.  just for prototyping.
+              mapper = File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read)
+              mapper.each_line { |line|
+                #@sim_logger.info "line: #{line}"
+                variable_names.each do |variable_name|
+                  #@sim_logger.info "variable_name: #{variable_name}"
+                  #@sim_logger.info "line.include? variable_name: #{line.include? variable_name}"
+                  if line.include? variable_name
+                    variable_value = variable_values_names["#{variable_name}"]
+                    @sim_logger.info "variable_value: #{variable_value}"
+                    rpl_str = "        OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', '#{variable_name}', #{variable_value})"
+                    @sim_logger.info "rpl_str: #{rpl_str}"
+                    File.write("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read).gsub(line,rpl_str))
+                  end
+                end
+              }
              
               #run uo-cli            
               cmd = "uo run --feature #{simulation_dir}/urbanopt/example_project.json --scenario #{simulation_dir}/urbanopt/highefficiency_scenario.csv"
