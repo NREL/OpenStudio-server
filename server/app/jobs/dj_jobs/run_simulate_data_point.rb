@@ -256,9 +256,9 @@ module DjJobs
                   if line.include? variable_name
                     variable_value = variable_values_names["#{variable_name}"]
                     @sim_logger.info "variable_value: #{variable_value}"
-                    rpl_str = "        OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', '#{variable_name}', #{variable_value})"
-                    @sim_logger.info "rpl_str: #{rpl_str}"
-                    File.write("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read).gsub(line,rpl_str))
+                    #This does a gsub regex on "'variable_name', xxx)" and replaces with "'variable_name', variable_value)" and then writes file
+                    keyword = ["'#{variable_name}'"]
+                    File.write("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read).gsub(/(?:#{ Regexp.union(keyword).source }),\s\d+/, "'#{variable_name}', #{variable_value}"))
                   end
                 end
               }
