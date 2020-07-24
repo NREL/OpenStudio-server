@@ -1,0 +1,143 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>reduce_lighting_loads_by_percentage</name>
+  <uid>d37b7ed5-887a-4d1f-b304-259462eadbe9</uid>
+  <version_id>28227a92-7dc9-447c-a7b0-2aca5b0dcace</version_id>
+  <version_modified>20170320T192150Z</version_modified>
+  <xml_checksum>293730A7</xml_checksum>
+  <class_name>ReduceLightingLoadsByPercentage</class_name>
+  <display_name>Reduce Lighting Loads by Percentage</display_name>
+  <description>The lighting system in this building uses more power per area than is required with the latest lighting technologies.  Replace the lighting system with a newer, more efficient lighting technology.  Newer technologies provide the same amount of light but use less energy in the process.</description>
+  <modeler_description>This measure supports models which have a mixture of lighting assigned to spaces and space types.  The lighting may be specified as individual luminaires, lighting equipment level, lighting power per area, or lighting power per person.&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;
+Loop through all lights and luminaires in the specified space type or the entire building. Clone the definition if it is shared by other lights, rename and adjust the power based on the specified percentage. Link the new definition to the existing lights or luminaire instance.  Adjust the power for lighting equipment assigned to a particular space but only if that space is part of the selected space type by  looping through the objects first in space types and then in spaces, but again only for spaces that are in the specified space type (unless the entire building has been chosen).  Material and installation cost increases will be applied to all costs related to both the definition and instance of the lighting object.  If this measure includes baseline costs, then the material and installation costs of the lighting objects in the baseline model will be summed together and added as a capital cost on the building object.</modeler_description>
+  <arguments>
+    <argument>
+      <name>space_type</name>
+      <display_name>Apply the Measure to a Specific Space Type or to the Entire Model.</display_name>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>*Entire Building*</default_value>
+      <choices>
+        <choice>
+          <value>{74ce33e6-6eaa-4ccb-a76e-54c427be63aa}</value>
+          <display_name>*Entire Building*</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>lighting_power_reduction_percent</name>
+      <display_name>Lighting Power Reduction (%).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>30</default_value>
+    </argument>
+    <argument>
+      <name>material_and_installation_cost</name>
+      <display_name>Increase in Material and Installation Cost for Lighting per Floor Area (%).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>demolition_cost</name>
+      <display_name>Increase in Demolition Costs for Lighting per Floor Area (%).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>years_until_costs_start</name>
+      <display_name>Years Until Costs Start (whole years).</display_name>
+      <type>Integer</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>demo_cost_initial_const</name>
+      <display_name>Demolition Costs Occur During Initial Construction?</display_name>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>expected_life</name>
+      <display_name>Expected Life (whole years).</display_name>
+      <type>Integer</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>15</default_value>
+    </argument>
+    <argument>
+      <name>om_cost</name>
+      <display_name>Increase O &amp; M Costs for Lighting per Floor Area (%).</display_name>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0</default_value>
+    </argument>
+    <argument>
+      <name>om_frequency</name>
+      <display_name>O &amp; M Frequency (whole years).</display_name>
+      <type>Integer</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+  </arguments>
+  <outputs/>
+  <provenances/>
+  <tags>
+    <tag>Electric Lighting.Lighting Equipment</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ModelMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Function</name>
+      <value>Measure</value>
+      <datatype>string</datatype>
+    </attribute>
+    <attribute>
+      <name>Requires EnergyPlus Results</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>0.11.3</identifier>
+        <min_compatible>0.11.3</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>495BCFA4</checksum>
+    </file>
+  </files>
+</measure>

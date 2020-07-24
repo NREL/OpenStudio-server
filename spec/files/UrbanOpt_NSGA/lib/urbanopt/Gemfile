@@ -1,0 +1,52 @@
+
+source 'http://rubygems.org'
+
+ruby '~> 2.5.0'
+
+# Local gems are useful when developing and integrating the various dependencies.
+# To favor the use of local gems, set the following environment variable:
+#   Mac: export FAVOR_LOCAL_GEMS=1
+#   Windows: set FAVOR_LOCAL_GEMS=1
+# Note that if allow_local is true, but the gem is not found locally, then it will
+# checkout the latest version (develop) from github.
+allow_local = ENV['FAVOR_LOCAL_GEMS']
+
+# Uncomment the extension, core gems if you need to test local development versions. Otherwise
+# these are included in the model articulation and urbanopt gems
+#
+ if allow_local && File.exist?('../OpenStudio-extension-gem')
+   gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
+ else
+   gem 'openstudio-extension', github: 'NREL/openstudio-extension-gem', branch: 'uo_debug'
+ end
+
+ if allow_local && File.exist?('../urbanopt-core-gem')
+   gem 'urbanopt-core', path: '../urbanopt-core-gem'
+ else
+   gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'uo_debug'
+ end
+#
+
+if allow_local && File.exist?('../openstudio-common-measures-gem')
+  gem 'openstudio-common-measures', path: '../openstudio-common-measures-gem'
+else
+  gem 'openstudio-common-measures', github: 'NREL/openstudio-common-measures-gem', branch: 'develop'
+end
+
+if allow_local && File.exist?('../openstudio-model-articulation-gem')
+  gem 'openstudio-model-articulation', path: '../openstudio-model-articulation-gem'
+else
+  gem 'openstudio-model-articulation', github: 'NREL/openstudio-model-articulation-gem', branch: 'uo_debug'
+end
+
+if allow_local && File.exist?('../urbanopt-scenario-gem')
+  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
+else
+  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'uo_debug'
+end
+
+if allow_local && File.exist?('../urbanopt-geojson-gem')
+  gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
+else
+  gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'uo_debug'
+end

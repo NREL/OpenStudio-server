@@ -10,11 +10,11 @@
         "objective_function_target": 0,
         "objective_function_group": 1,
         "scaling_factor": null,
-        "display_name": "electricity_ip",
-        "display_name_short": "electricity_ip",
+        "display_name": "electricity",
+        "display_name_short": "electricity",
         "metadata_id": null,
-        "name": "openstudio_results.electricity_ip",
-        "visualize": false,
+        "name": "urban_opt_report.electricity",
+        "visualize": true,
         "export": true,
         "variable_type": "double"
       },
@@ -24,11 +24,11 @@
         "objective_function_target": 0,
         "objective_function_group": 2,
         "scaling_factor": null,
-        "display_name": "natural_gas_ip",
-        "display_name_short": "natural_gas_ip",
+        "display_name": "natural_gas",
+        "display_name_short": "natural_gas",
         "metadata_id": null,
-        "name": "openstudio_results.natural_gas_ip",
-        "visualize": false,
+        "name": "urban_opt_report_2.natural_gas",
+        "visualize": true,
         "export": true,
         "variable_type": "double"
       }
@@ -164,7 +164,7 @@
               "workflow_index": 0
             }
           ],
-          "workflow_index": 1
+          "workflow_index": 0
         },
         {
           "name": "openstudio_results",
@@ -353,6 +353,96 @@
             }
           ],
           "variables": [],
+          "workflow_index": 1
+        },
+        {
+          "name": "urban_opt_report",
+          "display_name": "UrbanOpt Report",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "UrbanOptReport",
+          "measure_definition_directory": "./measures/urban_opt_report",
+          "measure_definition_directory_local": "",
+          "measure_definition_display_name": "UrbanOptReport",
+          "measure_definition_name": "urban_opt_report",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "measure_definition_version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "description": "UrbanOpt Report",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "scenario_name",
+              "display_name_short": "scenario_name",
+              "name": "scenario_name",
+              "value_type": "string",
+              "default_value": "highefficiency_scenario",
+              "value": "highefficiency_scenario"
+            },
+            {
+              "display_name": "feature_id",
+              "display_name_short": "feature_id",
+              "name": "feature_id",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            },
+            {
+              "display_name": "output_name",
+              "display_name_short": "output_name",
+              "name": "output_name",
+              "value_type": "string",
+              "default_value": "electricity",
+              "value": "electricity"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 2
+        },
+        {
+          "name": "urban_opt_report_2",
+          "display_name": "UrbanOpt Report 2",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "UrbanOptReport",
+          "measure_definition_directory": "./measures/urban_opt_report",
+          "measure_definition_directory_local": "",
+          "measure_definition_display_name": "UrbanOptReport",
+          "measure_definition_name": "urban_opt_report",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "measure_definition_version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "description": "UrbanOpt Report",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "scenario_name",
+              "display_name_short": "scenario_name",
+              "name": "scenario_name",
+              "value_type": "string",
+              "default_value": "highefficiency_scenario",
+              "value": "highefficiency_scenario"
+            },
+            {
+              "display_name": "feature_id",
+              "display_name_short": "feature_id",
+              "name": "feature_id",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            },
+            {
+              "display_name": "output_name",
+              "display_name_short": "output_name",
+              "name": "output_name",
+              "value_type": "string",
+              "default_value": "natural_gas",
+              "value": "natural_gas"
+            }
+          ],
+          "variables": [],
           "workflow_index": 3
         }
       ],
@@ -372,8 +462,8 @@
         "debug_messages": 1,
         "max_queued_jobs": 32,
         "objective_functions": [
-            "openstudio_results.electricity_ip",
-            "openstudio_results.natural_gas_ip"
+            "urban_opt_report.electricity",
+            "urban_opt_report_2.natural_gas"
         ]
       },
       "analysis_type": "nsga_nrel"
@@ -387,8 +477,8 @@
       "path": "./weather/SRRL_2013AMY_60min.epw"
     },
     "file_format_version": 1,
-    "cli_debug": "",
-    "cli_verbose": "",
+    "cli_debug": "--debug",
+    "cli_verbose": "--verbose",
     "run_workflow_timeout": 28800,
     "upload_results_timeout": 28800,
     "initialize_worker_timeout": 28800,
