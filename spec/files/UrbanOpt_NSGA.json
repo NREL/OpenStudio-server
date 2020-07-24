@@ -205,7 +205,7 @@
             }
         },
         {
-            "name": "reduce_electric_equipment_loads_by_percentage",
+            "name": "elecequip_power_reduction_percent",
             "display_name": "Reduce Electric Equipment Loads by Percentage",
             "display_name_short": "reduce_electric_equipment_loads_by_percentage",
             "variable_type": "variable",
