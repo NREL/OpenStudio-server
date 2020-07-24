@@ -83,13 +83,13 @@ gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
 gem 'rubyXL', '~> 3.3.29'
 
-gem 'urbanopt-cli', github: 'urbanopt/urbanopt-cli', branch: 'uo_debug'
-gem 'urbanopt-geojson', github: 'urbanopt/urbanopt-geojson-gem', branch: 'uo_debug'
-gem 'urbanopt-scenario', github: 'urbanopt/urbanopt-scenario-gem', branch: 'uo_debug'
-gem 'openstudio-model-articulation', github: 'NREL/openstudio-model-articulation-gem', branch: 'uo_debug'
-gem 'openstudio-extension', github: 'NREL/openstudio-extension-gem', branch: 'uo_debug'
-gem 'urbanopt-core', github: 'urbanopt/urbanopt-core-gem', branch: 'uo_debug'
-#gem 'urbanopt-cli', '0.3.1'
+#gem 'urbanopt-cli', github: 'urbanopt/urbanopt-cli', branch: 'uo_debug'
+#gem 'urbanopt-geojson', github: 'urbanopt/urbanopt-geojson-gem', branch: 'uo_debug'
+#gem 'urbanopt-scenario', github: 'urbanopt/urbanopt-scenario-gem', branch: 'uo_debug'
+#gem 'openstudio-model-articulation', github: 'NREL/openstudio-model-articulation-gem', branch: 'uo_debug'
+#gem 'openstudio-extension', github: 'NREL/openstudio-extension-gem', branch: 'uo_debug'
+#gem 'urbanopt-core', github: 'urbanopt/urbanopt-core-gem', branch: 'uo_debug'
+gem 'urbanopt-cli', '0.3.1'
 gem 'urbanopt-reopt', '0.3.0'
 
 # linux based js runtime libraries
