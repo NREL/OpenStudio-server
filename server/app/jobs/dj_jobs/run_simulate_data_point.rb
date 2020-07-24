@@ -218,7 +218,9 @@ module DjJobs
               bundle_count = 0
               bundle_max_count = 10
               begin
-                cmd = "cd #{simulation_dir}/urbanopt; bundle install --retry 10"
+                #bundle install 
+                cmd = "cd #{simulation_dir}/urbanopt; bundle install --path=#{simulation_dir}/urbanopt/.bundle/install --gemfile=#{simulation_dir}/urbanopt/Gemfile --retry 10"
+                #cmd = "cd #{simulation_dir}/urbanopt; bundle install --retry 10"
                 uo_bundle_log = File.join(simulation_dir, 'urbanopt_bundle.log')
                 @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
                 pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
