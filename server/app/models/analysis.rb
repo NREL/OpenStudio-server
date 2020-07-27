@@ -195,7 +195,6 @@ class Analysis
     if self['problem'] && self['problem']['workflow']
       logger.info('found a problem and workflow')
       self['problem']['workflow'].each do |wf|
-        logger.info("wf: #{wf.to_json}")
         # Currently the PAT format has measures and I plan on ignoring them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
         # individual measures
@@ -242,21 +241,17 @@ class Analysis
     if self['urbanopt_variables']
       logger.info('found urbanopt_variables')
       self['urbanopt_variables'].each do |uo_var|
-
-        #new_measure = Measure.create_from_os_json(id, wf, pat_json)
-          #new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
         uo_var['uuid'] = nil if !UUID.validate(uo_var['uuid'])
         var = Variable.where(analysis_id: self.id, uuid: uo_var['uuid']).first
         if var
           raise "UrbanOpt Variable already exists for '#{var.name}' : '#{var.uuid}'"
         else
-          logger.info("Adding a new UrbanOpt variable/argument named: '#{uo_var['name']}' with UUID '#{uo_var['uuid']}'")
+          logger.info("Adding a new UrbanOpt variable/argument named: '#{uo_var['name']}' with UUID '#{uo_var['uuid']}'") if self.cli_debug == '--debug'
           var = Variable.find_or_create_by(analysis_id: self.id, uuid: uo_var['uuid'])
-          logger.info("Created Var: #{var.to_json}")
+          logger.info("Created Var: #{var.to_json}") if self.cli_debug == '--debug'
           exclude_fields = ['uuid', 'type', 'argument', 'uncertainty_description']
           uo_var.each do |k, v|
             var[k] = v unless exclude_fields.include? k
-            
             var.perturbable = v if k == 'variable'
             if var.perturbable
               var.export = true
@@ -284,7 +279,7 @@ class Analysis
       
           end
 
-          logger.info("Updated Var: #{var.to_json}")
+          logger.info("Updated Var: #{var.to_json}") if self.cli_debug == '--debug'
           var.save!
         end
 

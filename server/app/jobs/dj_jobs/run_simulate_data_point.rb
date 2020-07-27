@@ -224,7 +224,7 @@ module DjJobs
                 #bundle install 
                 cmd = "cd #{simulation_dir}/urbanopt; bundle install --path=#{simulation_dir}/urbanopt/.bundle/install --gemfile=#{simulation_dir}/urbanopt/Gemfile --retry 10"
                 uo_bundle_log = File.join(simulation_dir, 'urbanopt_bundle.log')
-                @sim_logger.info "Installing CLI bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
+                @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
                 pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
                 Timeout.timeout(600) do
                   bundle_count += 1              
@@ -478,10 +478,6 @@ module DjJobs
       # Check if the receipt file exists, if so, then just return out of this method immediately
       if File.exist? receipt_file
         @sim_logger.info 'receipt_file already exists, moving on'
-        #not doing this if bundle is done in datapoints
-        #if @data_point.analysis.cli_debug == '--debug' || @data_point.analysis.cli_verbose = '--verbose'
-        #  uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
-        #end
         return true
       end
       # add check for a valid timeout value
@@ -505,9 +501,6 @@ module DjJobs
           end
 
           @sim_logger.info 'receipt_file appeared, moving on'
-          if @data_point.analysis.cli_debug == '--debug' || @data_point.analysis.cli_verbose = '--verbose'
-            uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
-          end
           return true
         rescue ::Timeout::Error
           @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds."
