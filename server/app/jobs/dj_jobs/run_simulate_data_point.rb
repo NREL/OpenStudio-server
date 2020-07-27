@@ -148,13 +148,11 @@ module DjJobs
         raise "RestClient.get url failed with error #{e.message}"
       end
       raise 'Datapoint JSON could not be downloaded' unless r.code == 200
-
       # Parse to JSON to save it again with nice formatting
       File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
 
       # copy over required file to the run directory
       FileUtils.cp "#{analysis_dir}/analysis.json", "#{simulation_dir}/analysis.json"
-
       osw_path = "#{simulation_dir}/data_point.osw"
       # PAT puts seeds in "seeds" folder (not "seed")
       osw_options = {
@@ -170,17 +168,22 @@ module DjJobs
       if @data_point.weather_file
         osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
       end
+@sim_logger.info "Here 5"
       t = OpenStudio::Analysis::Translator::Workflow.new(
         "#{simulation_dir}/analysis.json",
         osw_options
       )
+@sim_logger.info "Here 6"
       t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
       if t_result
+        if @data_point.analysis.urbanopt
+          t_result[:urbanopt] = true
+        end
         File.open(osw_path, 'w') { |f| f << JSON.pretty_generate(t_result) }
       else
         raise 'Could not translate OSA, OSD into OSW'
       end
-
+@sim_logger.info "Here 8"
       @sim_logger.info 'Creating Workflow Manager instance'
       @sim_logger.info "Directory is #{simulation_dir}"
       run_log_file = File.join(run_dir, 'run.log')
@@ -220,14 +223,13 @@ module DjJobs
               begin
                 #bundle install 
                 cmd = "cd #{simulation_dir}/urbanopt; bundle install --path=#{simulation_dir}/urbanopt/.bundle/install --gemfile=#{simulation_dir}/urbanopt/Gemfile --retry 10"
-                #cmd = "cd #{simulation_dir}/urbanopt; bundle install --retry 10"
                 uo_bundle_log = File.join(simulation_dir, 'urbanopt_bundle.log')
-                @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
+                @sim_logger.info "Installing CLI bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
                 pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
                 Timeout.timeout(600) do
                   bundle_count += 1              
                   Process.wait(pid)
-                end      
+                end              
               rescue StandardError => e
                 sleep Random.new.rand(1.0..10.0)
               retry if bundle_count < bundle_max_count
@@ -273,24 +275,47 @@ module DjJobs
               Timeout.timeout(28800) do 
                 Process.wait(pid)
               end
-            end
-            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
-            process_log = File.join(simulation_dir, 'oscli_simulation.log')
-            @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
-            oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
-            pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
-            # add check for a valid timeout value
-            unless @data_point.analysis.run_workflow_timeout.positive?
-              @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-              @@data_point.analysis.run_workflow_timeout = 28800
-            end
-            Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
-              Process.wait(pid)
-            end
+              
+              if $?.exitstatus != 0
+                raise "UrbanOpt returned error code #{$?.exitstatus}"
+              end
+              #Run OSSCLI --postprocess_only to run reporting measures             
+              cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --postprocess_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+              process_log = File.join(simulation_dir, 'oscli_postprocess_only.log')
+              @sim_logger.info "Running postprocess_only workflow using cmd #{cmd} and writing log to #{process_log}"
+              oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
+              pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
+              # add check for a valid timeout value
+              unless @data_point.analysis.run_workflow_timeout.positive?
+                @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
+                @@data_point.analysis.run_workflow_timeout = 28800
+              end
+              Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
+                Process.wait(pid)
+              end
+              
+              if $?.exitstatus != 0
+                raise "Oscli postprocess_only returned error code #{$?.exitstatus}"
+              end
+            else  #OS CLI workflow
+              cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+              process_log = File.join(simulation_dir, 'oscli_simulation.log')
+              @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
+              oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
+              pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
+              # add check for a valid timeout value
+              unless @data_point.analysis.run_workflow_timeout.positive?
+                @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
+                @@data_point.analysis.run_workflow_timeout = 28800
+              end
+              Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
+                Process.wait(pid)
+              end
 
-            if $?.exitstatus != 0
-              raise "Oscli returned error code #{$?.exitstatus}"
-            end
+              if $?.exitstatus != 0
+                raise "Oscli returned error code #{$?.exitstatus}"
+              end
+            end  
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             # openstudio process actually runs in a child of pid.  to prevent orphaned processes on timeout, we
@@ -361,8 +386,8 @@ module DjJobs
             results = JSON.parse(File.read(results_file), symbolize_names: true)
             @data_point.update(results: results)
           else
-            run_result = :errored
-            @sim_logger.error "Could not find results #{results_file}"
+            #run_result = :errored
+            @sim_logger.warn "Could not find results #{results_file}" #BLB this an error or warning?
           end
 
           @sim_logger.info 'Saving files/reports back to the server'

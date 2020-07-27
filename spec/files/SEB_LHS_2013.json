@@ -2019,6 +2019,7 @@
         "sample_method": "individual_variables",
         "number_of_samples": "2",
         "failed_f_value": 1000000000000000000,
+        "seed": 1973,
         "debug_messages": 0,
         "objective_functions": [
           "calibration_reports_enhanced_20.electricity_consumption_cvrmse",
