@@ -53,7 +53,7 @@ RSpec.describe 'RunBatchDatapoints', type: :feature, depends_resque: true do
       Project.destroy_all
       Delayed::Job.destroy_all
     rescue Errno::EACCES => e
-      puts "Cannot unlink files, will try and continue"
+      puts 'Cannot unlink files, will try and continue'
     end
 
     Resque.workers.each(&:unregister_worker)

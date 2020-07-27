@@ -159,7 +159,7 @@ module AnalysisLibrary
 
       # verify that the objective_functions are unique
       if analysis.problem && analysis.problem['algorithm'] && analysis.problem['algorithm']['objective_functions']
-        analysis.problem['algorithm']['objective_functions'].uniq! if analysis.problem['algorithm']['objective_functions']
+        analysis.problem['algorithm']['objective_functions']&.uniq!
       end
 
       # some algorithm specific data to be stored in the database

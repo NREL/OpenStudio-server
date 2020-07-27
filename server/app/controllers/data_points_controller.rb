@@ -355,7 +355,7 @@ class DataPointsController < ApplicationController
       h = @data_point.result_files.where(display_name: dp_params[:filename]).first
     end
 
-    if h && h.attachment && File.exist?(h.attachment.path)
+    if h&.attachment && File.exist?(h.attachment.path)
       if /darwin/.match(RUBY_PLATFORM) || /linux/.match(RUBY_PLATFORM)
         file_data = File.read(h.attachment.path)
       else
@@ -374,7 +374,7 @@ class DataPointsController < ApplicationController
     @data_point = DataPoint.find(params[:id])
 
     file = @data_point.result_files.where(attachment_file_name: params[:filename]).first
-    if file && file.attachment && File.exist?(file.attachment.path)
+    if file&.attachment && File.exist?(file.attachment.path)
       if /darwin/.match(RUBY_PLATFORM) || /linux/.match(RUBY_PLATFORM)
         file_data = File.read(file.attachment.path)
       else
@@ -401,28 +401,24 @@ class DataPointsController < ApplicationController
       # instructions for building the inputs
       measure_instances = []
       if @data_point.analysis['problem']
-        if @data_point.analysis['problem']['workflow']
-          @data_point.analysis['problem']['workflow'].each_with_index do |wf, _index|
-            m_instance = {}
-            m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
-            m_instance['id'] = wf['measure_definition_uuid']
-            m_instance['version_id'] = wf['measure_definition_version_uuid']
+        @data_point.analysis['problem']['workflow']&.each_with_index do |wf, _index|
+          m_instance = {}
+          m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
+          m_instance['id'] = wf['measure_definition_uuid']
+          m_instance['version_id'] = wf['measure_definition_version_uuid']
 
-            if wf['arguments']
-              m_instance['arguments'] = {}
-              if wf['variables']
-                wf['variables'].each do |var|
-                  m_instance['arguments'][var['argument']['name']] = @data_point.set_variable_values[var['uuid']]
-                end
-              end
-
-              wf['arguments'].each do |arg|
-                m_instance['arguments'][arg['name']] = arg['value']
-              end
+          if wf['arguments']
+            m_instance['arguments'] = {}
+            wf['variables']&.each do |var|
+              m_instance['arguments'][var['argument']['name']] = @data_point.set_variable_values[var['uuid']]
             end
 
-            measure_instances << m_instance
+            wf['arguments'].each do |arg|
+              m_instance['arguments'][arg['name']] = arg['value']
+            end
           end
+
+          measure_instances << m_instance
         end
       end
 

@@ -346,7 +346,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     file = @analysis.result_files.where(attachment_file_name: params[:filename]).first
-    if file && file.attachment && File.exist?(file.attachment.path)
+    if file&.attachment && File.exist?(file.attachment.path)
       file_data = File.read(file.attachment.path)
       disposition = ['application/json', 'text/plain', 'text/html'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
       send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
@@ -780,54 +780,48 @@ class AnalysesController < ApplicationController
           @provenance['analysis_information'] = @analysis['problem']['algorithm']
         end
 
-        if @analysis['problem']['workflow']
-          @analysis['problem']['workflow'].each do |wf|
-            new_wfi = {}
-            new_wfi['id'] = wf['measure_definition_uuid']
-            new_wfi['version_id'] = wf['measure_definition_version_uuid']
+        @analysis['problem']['workflow']&.each do |wf|
+          new_wfi = {}
+          new_wfi['id'] = wf['measure_definition_uuid']
+          new_wfi['version_id'] = wf['measure_definition_version_uuid']
 
-            # Eventually all of this could be pulled directly from BCL
-            new_wfi['name'] = wf['measure_definition_class_name']
-            new_wfi['display_name'] = wf['measure_definition_display_name']
-            new_wfi['type'] = wf['measure_type']
-            new_wfi['modeler_description'] = wf['modeler_description']
-            new_wfi['description'] = wf['description']
+          # Eventually all of this could be pulled directly from BCL
+          new_wfi['name'] = wf['measure_definition_class_name']
+          new_wfi['display_name'] = wf['measure_definition_display_name']
+          new_wfi['type'] = wf['measure_type']
+          new_wfi['modeler_description'] = wf['modeler_description']
+          new_wfi['description'] = wf['description']
 
-            new_wfi['arguments'] = []
-            if wf['arguments']
-              wf['arguments'].each do |arg|
-                wfi_arg = {}
-                wfi_arg['display_name'] = arg['display_name']
-                wfi_arg['display_name_short'] = arg['display_name_short']
-                wfi_arg['name'] = arg['name']
-                wfi_arg['data_type'] = arg['value_type']
-                wfi_arg['default_value'] = nil
-                wfi_arg['description'] = ''
-                wfi_arg['display_units'] = '' # should be haystack compatible unit strings
-                wfi_arg['units'] = '' # should be haystack compatible unit strings
+          new_wfi['arguments'] = []
+          wf['arguments']&.each do |arg|
+            wfi_arg = {}
+            wfi_arg['display_name'] = arg['display_name']
+            wfi_arg['display_name_short'] = arg['display_name_short']
+            wfi_arg['name'] = arg['name']
+            wfi_arg['data_type'] = arg['value_type']
+            wfi_arg['default_value'] = nil
+            wfi_arg['description'] = ''
+            wfi_arg['display_units'] = '' # should be haystack compatible unit strings
+            wfi_arg['units'] = '' # should be haystack compatible unit strings
 
-                new_wfi['arguments'] << wfi_arg
-              end
-            end
-
-            if wf['variables']
-              wf['variables'].each do |arg|
-                wfi_var = {}
-                wfi_var['display_name'] = arg['argument']['display_name']
-                wfi_var['display_name_short'] = arg['argument']['display_name_short']
-                wfi_var['name'] = arg['argument']['name']
-                wfi_var['default_value'] = nil
-                wfi_var['data_type'] = arg['argument']['value_type']
-                wfi_var['description'] = ''
-                wfi_var['display_units'] = arg['units']
-                wfi_var['units'] = '' # should be haystack compatible unit strings
-
-                new_wfi['arguments'] << wfi_var
-              end
-            end
-
-            @measure_metadata << new_wfi
+            new_wfi['arguments'] << wfi_arg
           end
+
+          wf['variables']&.each do |arg|
+            wfi_var = {}
+            wfi_var['display_name'] = arg['argument']['display_name']
+            wfi_var['display_name_short'] = arg['argument']['display_name_short']
+            wfi_var['name'] = arg['argument']['name']
+            wfi_var['default_value'] = nil
+            wfi_var['data_type'] = arg['argument']['value_type']
+            wfi_var['description'] = ''
+            wfi_var['display_units'] = arg['units']
+            wfi_var['units'] = '' # should be haystack compatible unit strings
+
+            new_wfi['arguments'] << wfi_var
+          end
+
+          @measure_metadata << new_wfi
         end
       end
     end

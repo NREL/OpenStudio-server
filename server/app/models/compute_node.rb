@@ -202,7 +202,7 @@ class ComputeNode
     # Timeout After 8hrs / 28800 seconds
     retries = 0
     begin
-      Timeout.timeout(28800) do #change to 8hrs for large files
+      Timeout.timeout(28800) do # change to 8hrs for large files
         logger.info 'Checking if the remote file exists'
         session.exec!("if [ -e '#{remote_file}' ]; then echo -n 'true'; else echo -n 'false'; fi") do |_channel, _stream, data|
           # logger.info("Check remote file data is #{data}")

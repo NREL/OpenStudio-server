@@ -165,7 +165,7 @@ class Variable
 
   # Create the OS argument/variable
   def self.create_and_assign_to_measure(analysis_id, measure, os_json)
-    raise 'Measure ID was not defined' unless measure && measure.id
+    raise 'Measure ID was not defined' unless measure&.id
 
     var = Variable.where(analysis_id: analysis_id, measure_id: measure.id, uuid: os_json['uuid']).first
     if var
@@ -208,17 +208,15 @@ class Variable
       if k == 'uncertainty_description'
         # need to flatten this
         var['uncertainty_type'] = v['type'] if v['type']
-        if v['attributes']
-          v['attributes'].each do |attribute|
-            # grab the name of the attribute to append the
-            # other characteristics
-            attribute['name'] ? att_name = attribute['name'] : att_name = nil
-            next unless att_name
+        v['attributes']&.each do |attribute|
+          # grab the name of the attribute to append the
+          # other characteristics
+          attribute['name'] ? att_name = attribute['name'] : att_name = nil
+          next unless att_name
 
-            attribute.each do |k2, v2|
-              exclude_fields_2 = ['uuid', 'version_uuid']
-              var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
-            end
+          attribute.each do |k2, v2|
+            exclude_fields_2 = ['uuid', 'version_uuid']
+            var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
           end
         end
       end
@@ -310,7 +308,7 @@ class Variable
         m = Measure.find(v['measure_id'])
         v['measure_name'] = m.name
         v['measure_display_name'] = m.display_name
-      elsif v['name'] && v['name'].include?('.')
+      elsif v['name']&.include?('.')
         tmp_name = v['name'].split('.')[0]
         # Test if this is a measure, if so grab that information
         m = Measure.where(name: tmp_name).first
