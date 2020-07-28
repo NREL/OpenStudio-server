@@ -168,12 +168,10 @@ module DjJobs
       if @data_point.weather_file
         osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
       end
-@sim_logger.info "Here 5"
       t = OpenStudio::Analysis::Translator::Workflow.new(
         "#{simulation_dir}/analysis.json",
         osw_options
       )
-@sim_logger.info "Here 6"
       t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
       if t_result
         if @data_point.analysis.urbanopt
@@ -183,7 +181,6 @@ module DjJobs
       else
         raise 'Could not translate OSA, OSD into OSW'
       end
-@sim_logger.info "Here 8"
       @sim_logger.info 'Creating Workflow Manager instance'
       @sim_logger.info "Directory is #{simulation_dir}"
       run_log_file = File.join(run_dir, 'run.log')
@@ -241,25 +238,18 @@ module DjJobs
               @data_point['set_variable_values'].each_with_index do |(k, v), i|
                 var = Variable.find(k)
                 if var
-                  @sim_logger.info "k: #{k}"
-                  @sim_logger.info "v: #{v}"
-                  @sim_logger.info "var.name: #{var.name}"
                   variable_values_names[var.name] = v
-                  @sim_logger.info "variable_values_names: #{variable_values_names}"
+                  @sim_logger.info "variable_values_names: #{variable_values_names} with value: #{v}"
                 end
               end
               variable_names = variable_values_names.keys
               
-              #this assumes a variable is in a mapper file once.  just for prototyping.
               mapper = File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read)
               mapper.each_line { |line|
-                #@sim_logger.info "line: #{line}"
                 variable_names.each do |variable_name|
-                  #@sim_logger.info "variable_name: #{variable_name}"
-                  #@sim_logger.info "line.include? variable_name: #{line.include? variable_name}"
                   if line.include? variable_name
                     variable_value = variable_values_names["#{variable_name}"]
-                    @sim_logger.info "variable_value: #{variable_value}"
+                    @sim_logger.info "found variable name: #{variable_name} with variable value: #{variable_value}"
                     #This does a gsub regex on "'variable_name', xxx)" and replaces with "'variable_name', variable_value)" and then writes file
                     keyword = ["'#{variable_name}'"]
                     File.write("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read).gsub(/(?:#{ Regexp.union(keyword).source }),\s\d+/, "'#{variable_name}', #{variable_value}"))
@@ -279,7 +269,7 @@ module DjJobs
               if $?.exitstatus != 0
                 raise "UrbanOpt returned error code #{$?.exitstatus}"
               end
-              #Run OSSCLI --postprocess_only to run reporting measures             
+              #Run OSSCLI --postprocess_only to run reporting measures in UrbanOpt workflow            
               cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --postprocess_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
               process_log = File.join(simulation_dir, 'oscli_postprocess_only.log')
               @sim_logger.info "Running postprocess_only workflow using cmd #{cmd} and writing log to #{process_log}"
@@ -386,8 +376,8 @@ module DjJobs
             results = JSON.parse(File.read(results_file), symbolize_names: true)
             @data_point.update(results: results)
           else
-            #run_result = :errored
-            @sim_logger.warn "Could not find results #{results_file}" #BLB this an error or warning?
+            #run_result = :errored  #This should not be an error for workflows with no measures
+            @sim_logger.warn "Could not find results #{results_file}"
           end
 
           @sim_logger.info 'Saving files/reports back to the server'
@@ -622,7 +612,7 @@ module DjJobs
       end
     end
 
-    #add UrbanOpt bundle log to sim log
+    #add UrbanOpt log to sim log
     def uo_log(file_name)
       uo_log = File.join(simulation_dir, "#{file_name}.log")
       if File.exist? uo_log
