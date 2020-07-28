@@ -41,7 +41,6 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
-      urbanopt: false,
       output_variables: [],
       problem: {
         algorithm: {
@@ -139,14 +138,6 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
       ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
-
-      #check for urbanopt overide
-      logger.info("@analysis.urbanopt: #{@analysis.urbanopt}")
-      logger.info("@options[:urbanopt]: #{@options[:urbanopt]}")
-      if @analysis.urbanopt == true
-        @options[:urbanopt] = @analysis.urbanopt
-        logger.info("CHANGING @options[:urbanopt] to: #{@options[:urbanopt]}")
-      end
       
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
       # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
@@ -254,7 +245,6 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
               rails_mongodb_name = "#{AnalysisLibrary::Core.database_name}"
               rails_mongodb_ip = "#{master_ip}"
               rails_run_filename = "#{@options[:run_data_point_filename]}"
-              urbanopt = "#{@options[:urbanopt]}"
               rails_root_path = "#{Rails.root}"
               rails_host = "#{APP_CONFIG['os_server_host_url']}"
               r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"

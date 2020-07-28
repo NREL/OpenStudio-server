@@ -45,13 +45,6 @@ print(paste("ppower:",ppower))
 print(paste("min:",mins))
 print(paste("max:",maxes))
 print(paste("failed_f:",failed_f))
-print(paste("urbanopt:",urbanopt))
-if (urbanopt == "true") {
-  urbanopt <- TRUE
-} else {
-  urbanopt <- FALSE
-}
-print(paste("urbanopt:",urbanopt))
 
 clusterExport(cl,"objDim")
 clusterExport(cl,"normtype")
@@ -59,7 +52,6 @@ clusterExport(cl,"ppower")
 clusterExport(cl,"uniquegroups")
 clusterExport(cl,"failed_f")
 clusterExport(cl,"debug_messages")
-clusterExport(cl,"urbanopt")
 
 for (i in 1:ncol(vars)){
   vars[,i] <- sort(vars[,i])

@@ -1000,7 +1000,7 @@
       ],
       "algorithm": {
         "sample_method": "individual_variables",
-        "number_of_samples": 3,
+        "number_of_samples": 1,
         "failed_f_value": 1000000000000000000,
         "seed": 1973,
         "debug_messages": 1,

@@ -41,7 +41,6 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
-      urbanopt: false,
       output_variables: [],
       problem: {
         algorithm: {
@@ -128,13 +127,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       ug.each do |var|
         obj_names << var['display_name_short']
       end
-      #check for urbanopt overide
-      logger.info("@analysis.urbanopt: #{@analysis.urbanopt}")
-      logger.info("@options[:urbanopt]: #{@options[:urbanopt]}")
-      if @analysis.urbanopt == true
-        @options[:urbanopt] = @analysis.urbanopt
-        logger.info("CHANGING @options[:urbanopt] to: #{@options[:urbanopt]}")
-      end
+
       logger.info "Objective function names #{obj_names}"
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
@@ -220,7 +213,6 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
             rails_mongodb_name = "#{AnalysisLibrary::Core.database_name}"
             rails_mongodb_ip = "#{master_ip}"
             rails_run_filename = "#{@options[:run_data_point_filename]}"
-            urbanopt = "#{@options[:urbanopt]}"
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"

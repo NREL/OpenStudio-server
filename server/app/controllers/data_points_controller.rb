@@ -135,8 +135,6 @@ class DataPointsController < ApplicationController
 
     dp_params = data_point_params
     dp_params[:analysis_id] = params[:analysis_id]
-
-    logger.info "URBANOPT: #{dp_params[:urbanopt]}"
     
     # If the create method receives a list of ordered variable values, then
     # look up the variables by the r_index, and assign the set_variable_values
