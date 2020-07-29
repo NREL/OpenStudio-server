@@ -257,9 +257,9 @@ module DjJobs
                       if line.include? variable_name
                         variable_value = v
                         @sim_logger.info "found variable name: #{variable_name} with variable value: #{variable_value}"
-                        #This does a gsub regex on "'variable_name', xxx)" and replaces with "'variable_name', variable_value)" and then writes file
-                        keyword = ["'#{variable_name}'"]
-                        File.write("#{mapper_file}",File.open("#{mapper_file}",&:read).gsub(/(?:#{ Regexp.union(keyword).source }),\s\d+/, "'#{variable_name}', #{variable_value}"))
+                        #This does a gsub regex on "'uo_measure', 'variable_name', xx.xx)" and replaces with "'uo_measure', 'variable_name', variable_value)" and then writes file
+                        keyword = ["'#{var[:uo_measure]}', '#{variable_name}'"]
+                        File.write("#{mapper_file}",File.open("#{mapper_file}",&:read).gsub(/(?:#{ Regexp.union(keyword).source }),\s\d+(?:\.\d*)?/, "'#{var[:uo_measure]}', '#{variable_name}', #{variable_value}"))
                       end
                     #end
                   }
