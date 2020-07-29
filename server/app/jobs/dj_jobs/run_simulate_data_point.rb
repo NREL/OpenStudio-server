@@ -234,31 +234,50 @@ module DjJobs
               ensure
                 uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
               end
-              variable_values_names = {}
+              
+              variables = {}
               @data_point['set_variable_values'].each_with_index do |(k, v), i|
                 var = Variable.find(k)
                 if var
-                  variable_values_names[var.name] = v
-                  @sim_logger.info "variable_values_names: #{variable_values_names} with value: #{v}"
-                end
-              end
-              variable_names = variable_values_names.keys
-              
-              mapper = File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read)
-              mapper.each_line { |line|
-                variable_names.each do |variable_name|
-                  if line.include? variable_name
-                    variable_value = variable_values_names["#{variable_name}"]
-                    @sim_logger.info "found variable name: #{variable_name} with variable value: #{variable_value}"
-                    #This does a gsub regex on "'variable_name', xxx)" and replaces with "'variable_name', variable_value)" and then writes file
-                    keyword = ["'#{variable_name}'"]
-                    File.write("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",File.open("#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb",&:read).gsub(/(?:#{ Regexp.union(keyword).source }),\s\d+/, "'#{variable_name}', #{variable_value}"))
+                  @sim_logger.info "var: #{var.to_json}"
+                  variables.merge!(var[:uo_measure] => { :name=>var[:name], :value=>v, :mapper=>var[:mapper] })
+                  @sim_logger.info "variables: #{variables.to_json}"
+                               
+                  #check if mapper file exist
+                  mapper_file = "#{simulation_dir}/urbanopt/mappers/#{var[:mapper]}.rb"
+                  #mapper_file = "#{simulation_dir}/urbanopt/mappers/HighEfficiency.rb"
+                  if !File.exist?(mapper_file)
+                    raise "mapper_file does not exist: #{mapper_file}"
                   end
-                end
-              }
-             
+                  mapper = File.open("#{mapper_file}",&:read)
+                  mapper.each_line { |line|
+                    #variable_names.each do |variable_name|
+                    variable_name = var[:name]
+                    #@sim_logger.info "variable_name: #{variable_name}"
+                      if line.include? variable_name
+                        variable_value = v
+                        @sim_logger.info "found variable name: #{variable_name} with variable value: #{variable_value}"
+                        #This does a gsub regex on "'variable_name', xxx)" and replaces with "'variable_name', variable_value)" and then writes file
+                        keyword = ["'#{variable_name}'"]
+                        File.write("#{mapper_file}",File.open("#{mapper_file}",&:read).gsub(/(?:#{ Regexp.union(keyword).source }),\s\d+/, "'#{variable_name}', #{variable_value}"))
+                      end
+                    #end
+                  }
+                  
+                end #if var
+              end #@data_point do
+              
+              #check if feature_file and scenario_file exist
+              feature_file = "#{simulation_dir}/urbanopt/#{@data_point.analysis.feature_file}.json"
+              if !File.exist?(feature_file)
+                raise "feature_file does not exist: #{feature_file}"
+              end
+              scenario_file = "#{simulation_dir}/urbanopt/#{@data_point.analysis.scenario_file}.csv"
+              if !File.exist?(scenario_file)
+                raise "scenario_file does not exist: #{scenario_file}"
+              end
               #run uo-cli            
-              cmd = "uo run --feature #{simulation_dir}/urbanopt/example_project.json --scenario #{simulation_dir}/urbanopt/highefficiency_scenario.csv"
+              cmd = "uo run --feature #{feature_file} --scenario #{scenario_file}"
               uo_process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
               @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
               pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])

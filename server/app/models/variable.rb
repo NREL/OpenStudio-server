@@ -72,6 +72,9 @@ class Variable
   field :relation_to_output, type: String, default: 'standard' # or can be inverse
   field :static_value, default: nil # don't type this because it can take on anything (other than hashes and arrays)
 
+  field :mapper, type: String # UrbanOpt Mapper name
+  field :uo_measure, type: String # UrbanOpt Measure name
+    
   # Relationships
   belongs_to :analysis, index: true
   belongs_to :measure, optional: true

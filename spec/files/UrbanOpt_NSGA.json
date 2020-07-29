@@ -157,9 +157,13 @@
     "server_scripts": {
       "worker_initialization": "./scripts/worker_initialization/initialize.sh"
     },
+    "feature_file": "example_project",
+    "scenario_file": "highefficiency_scenario",
     "urbanopt_variables": [
         {
             "name": "lighting_power_reduction_percent",
+            "mapper": "HighEfficiency",
+            "uo_measure": "ReduceLightingLoadsByPercentage",
             "display_name": "Lighting Power Reduction (%).",
             "display_name_short": "lighting_power_reduction_percent",
             "variable_type": "variable",
@@ -200,6 +204,8 @@
         },
         {
             "name": "elecequip_power_reduction_percent",
+            "mapper": "HighEfficiency",
+            "uo_measure": "ReduceElectricEquipmentLoadsByPercentage",
             "display_name": "Reduce Electric Equipment Loads by Percentage",
             "display_name_short": "reduce_electric_equipment_loads_by_percentage",
             "variable_type": "variable",

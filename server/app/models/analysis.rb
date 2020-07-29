@@ -70,8 +70,10 @@ class Analysis
   field :os_metadata # don't define type, keep this flexible
   field :analysis_logs, type: Hash, default: {} # store the logs from the analysis init and finalize
   
-  field :urbanopt, type: Boolean, default: false
-  field :urbanopt_variables, type: Array, default: []
+  field :urbanopt, type: Boolean, default: false # is UrbanOpt run?
+  field :urbanopt_variables, type: Array, default: [] #array of UrbanOpt variables
+  field :feature_file, type: String, default: '' # name of UrbanOpt Feature_file.json file
+  field :scenario_file, type: String, default: '' # name of UrbanOpt Scenario.csv file
 
   # Temp location for these vas
   field :samples, type: Integer
