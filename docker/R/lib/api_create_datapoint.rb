@@ -70,7 +70,7 @@ begin
   data_point_data = {
     data_point: {
       name: "API Generated #{Time.now}",
-      ordered_variable_values: options[:variables],
+      ordered_variable_values: options[:variables]
     }
   }
 
