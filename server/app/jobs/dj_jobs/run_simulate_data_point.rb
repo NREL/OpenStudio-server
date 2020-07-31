@@ -37,6 +37,7 @@
 
 module DjJobs
   class RunSimulateDataPoint
+    include DjJobs::WorkflowGem
     require 'date'
     require 'json'
 
@@ -110,9 +111,9 @@ module DjJobs
         end
         upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
         @data_point.set_error_flag
-        @data_point.set_complete_state if @data_point
+        @data_point&.set_complete_state if @data_point
         @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
-        @sim_logger.close if @sim_logger
+        @sim_logger&.close if @sim_logger
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         return false
@@ -278,7 +279,20 @@ module DjJobs
               end
               #run uo-cli            
               cmd = "uo run --feature #{feature_file} --scenario #{scenario_file}"
-              uo_process_log = File.join(simulation_dir, 'urbanopt_simulation.log')
+              uo_simulation_log = File.join(simulation_dir, 'urbanopt_simulation.log')
+              @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_simulation_log}"
+              pid = Process.spawn(cmd, [:err, :out] => [uo_simulation_log, 'w'])
+              Timeout.timeout(28800) do 
+                Process.wait(pid)
+              end
+              
+              if $?.exitstatus != 0
+                raise "UrbanOpt run returned error code #{$?.exitstatus}"
+              end
+              
+              #run uo-cli process           
+              cmd = "uo process --default --feature #{feature_file} --scenario #{scenario_file}"
+              uo_process_log = File.join(simulation_dir, 'urbanopt_process.log')
               @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
               pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])
               Timeout.timeout(28800) do 
@@ -286,26 +300,58 @@ module DjJobs
               end
               
               if $?.exitstatus != 0
-                raise "UrbanOpt returned error code #{$?.exitstatus}"
+                raise "UrbanOpt process returned error code #{$?.exitstatus}"
               end
-              #Run OSSCLI --postprocess_only to run reporting measures in UrbanOpt workflow            
-              cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --postprocess_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
-              process_log = File.join(simulation_dir, 'oscli_postprocess_only.log')
-              @sim_logger.info "Running postprocess_only workflow using cmd #{cmd} and writing log to #{process_log}"
-              oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
-              pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
-              # add check for a valid timeout value
-              unless @data_point.analysis.run_workflow_timeout.positive?
-                @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-                @@data_point.analysis.run_workflow_timeout = 28800
+              #Run OSSCLI --postprocess_only to run reporting measures in UrbanOpt workflow if ReportingMeasure's are present in workflow
+              @sim_logger.info "@data_point.analysis.problem['workflow'].empty?: #{@data_point.analysis.problem['workflow'].empty?}"
+              @sim_logger.info "@data_point.analysis.problem['workflow']: #{@data_point.analysis.problem['workflow']}"
+              @sim_logger.info "@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'ReportingMeasure'}: #{@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'ReportingMeasure'}}"
+              if !@data_point.analysis.problem['workflow'].empty? && @data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'ReportingMeasure'}            
+                cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --postprocess_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+                process_log = File.join(simulation_dir, 'oscli_postprocess_only.log')
+                @sim_logger.info "Running postprocess_only workflow using cmd #{cmd} and writing log to #{process_log}"
+                oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
+                pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
+                # add check for a valid timeout value
+                unless @data_point.analysis.run_workflow_timeout.positive?
+                  @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
+                  @@data_point.analysis.run_workflow_timeout = 28800
+                end
+                Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
+                  Process.wait(pid)
+                end
+
+                if $?.exitstatus != 0
+                  raise "Oscli postprocess_only returned error code #{$?.exitstatus}"
+                end
               end
-              Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
-                Process.wait(pid)
-              end
-              
-              if $?.exitstatus != 0
-                raise "Oscli postprocess_only returned error code #{$?.exitstatus}"
-              end
+              #TODO make out.osw with UO run status (for UO only workflow)
+                out_osw = { completed_status: 'Success',
+                            osa_id: @data_point.analysis.id,
+                            osd_id: @data_point.id,
+                            name: @data_point.name,
+                            completed_at: ::DateTime.now.iso8601,
+                            started_at: ::DateTime.now.iso8601,
+                            steps: [
+                              arguments: {},
+                              description: '',
+                              name: 'RunUrbanOpt',
+                              result: {
+                                completed_at: ::DateTime.now.iso8601,
+                                started_at: ::DateTime.now.iso8601,
+                                stderr: "Please see the delayed_jobs.log and / or #{@data_point.id}.log file for any errors.",
+                                stdout: '',
+                                step_errors: @intialize_worker_errs,
+                                step_files: [],
+                                step_info: [],
+                                step_result: 'Success',
+                                step_warnings: []
+                              }
+                            ] }
+                report_file = "#{simulation_dir}/out.osw"
+                File.open(report_file, 'wb') do |f|
+                  f.puts ::JSON.pretty_generate(out_osw)
+                end
             else  #OS CLI workflow
               cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
               process_log = File.join(simulation_dir, 'oscli_simulation.log')
@@ -347,12 +393,15 @@ module DjJobs
             run_result = :errored
           rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
             log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
-            @sim_logger.error log_message if @sim_logger
+            @sim_logger&.error log_message if @sim_logger
             run_result = :errored
           rescue Exception => e
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
+            if uo_simulation_log
+              @sim_logger.info "UrbanOpt output: #{File.read(uo_simulation_log)}"
+            end
             if uo_process_log
               @sim_logger.info "UrbanOpt output: #{File.read(uo_process_log)}"
             end
@@ -445,6 +494,7 @@ module DjJobs
         if run_result != :errored
           if File.exist? "#{simulation_dir}/out.osw"
             status = JSON.parse(File.read("#{simulation_dir}/out.osw"), symbolize_names: true)[:completed_status]
+            @sim_logger.info "status: #{status}"
           else
             raise "Could not find out.osw file at #{simulation_dir}/out.osw"
           end
@@ -462,13 +512,14 @@ module DjJobs
         end
       rescue ScriptError, NoMemoryError, StandardError => e
         log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-        @sim_logger.error log_message if @sim_logger
+        @sim_logger&.error log_message if @sim_logger
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
       ensure
         @sim_logger.info "Finished #{__FILE__}" if @sim_logger
-        @sim_logger.close if @sim_logger
-        @data_point.set_complete_state if @data_point
+        @sim_logger&.info "@data_point: #{@data_point.to_json}"
+        @sim_logger&.close if @sim_logger
+        @data_point&.set_complete_state if @data_point
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         true
