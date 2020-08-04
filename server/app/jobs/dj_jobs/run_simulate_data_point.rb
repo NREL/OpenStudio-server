@@ -327,7 +327,6 @@ module DjJobs
               end
               #TODO make out.osw with UO run status (for UO only workflow)
                 out_osw = { completed_status: 'Success',
-                            status: 'completed',
                             current_step: 0,
                             osa_id: @data_point.analysis.id,
                             osd_id: @data_point.id,
@@ -342,22 +341,22 @@ module DjJobs
                   File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(out_osw.to_json)) }
                 end
                 
-                oj = {
-                     "objective_function_1": 24.125,
-                     "objective_function_target_1": 0,
-                     "objective_function_group_1": 1.0,
-                     "objective_function_2": 266.425,
-                     "objective_function_target_2": 0,
-                     "objective_function_group_2": 2.0
-                 }
-                report_file = "#{simulation_dir}/objectives.json"
-                if !File.exist? report_file
-                  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(oj.to_json)) }
-                end
-                report_file = "#{simulation_dir}/data_point.zip"
-                if !File.exist? report_file
-                  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(out_osw.to_json)) }
-                end
+                #oj = {
+                #     "objective_function_1": 24.125,
+                #     "objective_function_target_1": 0,
+                #     "objective_function_group_1": 1.0,
+                #     "objective_function_2": 266.425,
+                #     "objective_function_target_2": 0,
+                #     "objective_function_group_2": 2.0
+                # }
+                #report_file = "#{simulation_dir}/objectives.json"
+                #if !File.exist? report_file
+                #  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(oj.to_json)) }
+                #end
+                #report_file = "#{simulation_dir}/data_point.zip"
+                #if !File.exist? report_file
+                #  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(out_osw.to_json)) }
+                #end
                 
                 
             else  #OS CLI workflow
