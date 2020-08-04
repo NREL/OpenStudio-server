@@ -34,7 +34,7 @@
       }
     ],
     "problem": {
-      "workflow": [ ],
+      "workflow": [],
       "algorithm": {
         "number_of_samples": 2,
         "generations": 1,

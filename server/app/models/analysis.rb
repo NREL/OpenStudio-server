@@ -116,6 +116,7 @@ class Analysis
 
   # FIXME: analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
   def start(no_delay, analysis_type = 'batch_run', options = {})
+    logger.info "analysis.start enter"
     defaults = { skip_init: false }
     options = defaults.merge(options)
 
@@ -151,11 +152,13 @@ class Analysis
       save!
       reload
     end
+    logger.info "analysis.start leave"
   end
 
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
+    logger.info "analysis.run_analysis enter"
     defaults = {}
     options = defaults.merge(options)
 
@@ -164,7 +167,7 @@ class Analysis
     logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
     start(no_delay, analysis_type, options)
-
+    logger.info "analysis.run_analysis leave"
     [true]
   end
 
@@ -361,6 +364,7 @@ class Analysis
 
   # Return the last job's status for the analysis
   def status
+    logger.info "analysis.status enter"
     j = jobs_status
     if j
       begin
@@ -388,6 +392,7 @@ class Analysis
   # update the job status to indicate that postprocessing is complete.
   # used from finalize method which is only called for environments using resque
   def complete_postprocessing!
+    logger.info "analysis.complete_postprocessing enter"
     raise 'Post-processing should only happen in environments that use Resque for job management.' unless Rails.application.config.job_manager == :resque
 
     job = jobs.order_by(:index.asc).last
@@ -395,6 +400,7 @@ class Analysis
 
     job.status = 'post-processing finished'
     job.save!
+    logger.info "analysis.complete_postprocessing leave"
   rescue Exception => e
     logger.error e
   end

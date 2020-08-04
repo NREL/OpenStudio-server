@@ -63,6 +63,7 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
+    logger.info "analyses_contoller.show enter"
     # for pagination
     per_page = 50
 
@@ -135,6 +136,7 @@ class AnalysesController < ApplicationController
       format.json { render json: { analysis: @analysis } }
       format.js
     end
+    logger.info "analyses_contoller.show leave"
   end
 
   # GET /analyses/new
@@ -187,6 +189,7 @@ class AnalysesController < ApplicationController
   # PUT /analyses/1
   # PUT /analyses/1.json
   def update
+    logger.info "analyses_contoller.update enter"
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
@@ -198,6 +201,7 @@ class AnalysesController < ApplicationController
         format.json { render json: @analysis.errors, status: :unprocessable_entity }
       end
     end
+    logger.info "analyses_contoller.update leave"
   end
 
   # DELETE /analyses/1
@@ -231,6 +235,7 @@ class AnalysesController < ApplicationController
   # and will only return a JSON response based on whether or not the analysis has been
   # queued into Delayed Jobs
   def action
+    logger.info "analyses_contoller.action enter"
     @analysis = Analysis.find(params[:id])
     logger.info("action #{params.inspect}")
     @analysis_type = params[:analysis_type].nil? ? 'batch_run' : params[:analysis_type]
@@ -283,6 +288,7 @@ class AnalysesController < ApplicationController
         end
       end
     end
+    logger.info "analyses_contoller.action leave"
   end
 
   # version this in order to allow for analyses/status.json to return all the analyses with the status
@@ -290,6 +296,7 @@ class AnalysesController < ApplicationController
   # @param :jobs [String] Constraint on the datapoint completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
+    logger.info "analyses_contoller.status enter"
     analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline_14]
     data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :name]
 
@@ -344,6 +351,7 @@ class AnalysesController < ApplicationController
         end
       end
     end
+    logger.info "analyses_contoller.status leave"
   end
 
   # GET /analyses/1/download_result_file

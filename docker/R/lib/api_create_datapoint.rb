@@ -107,8 +107,14 @@ begin
 
                 # load in the objective functions by accessing the objectives file
                 # that were uploaded when the datapoint completed
+               begin 
                 a = RestClient.post "#{options[:host]}/data_points/#{datapoint_id}/download_report.json", data_point: { filename: 'objectives' }
-                a = JSON.parse(a, symbolize_names: true)
+               rescue => e
+                puts "error #{e.message}"
+                break  #at this point, simulation completed normal, but objectives failed, so dont try again.  break and be done with it.
+               end
+               
+               a = JSON.parse(a, symbolize_names: true)
                 # JSON will be form of:
                 # {
                 #     "objective_function_1": 24.125,
