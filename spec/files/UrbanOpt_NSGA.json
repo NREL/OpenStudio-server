@@ -13,7 +13,10 @@
         "display_name": "electricity",
         "display_name_short": "electricity",
         "metadata_id": null,
-        "name": "urban_opt_report.electricity",
+        "report": "feature_reports",
+        "report_id": 1,
+        "reporting_periods": 0,
+        "var_name": "electricity",
         "visualize": true,
         "export": true,
         "variable_type": "double"
@@ -27,7 +30,10 @@
         "display_name": "natural_gas",
         "display_name_short": "natural_gas",
         "metadata_id": null,
-        "name": "urban_opt_report_2.natural_gas",
+        "report": "feature_reports",
+        "report_id": 1,
+        "reporting_periods": 0,
+        "var_name": "natural_gas",
         "visualize": true,
         "export": true,
         "variable_type": "double"

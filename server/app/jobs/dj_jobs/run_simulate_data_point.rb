@@ -237,11 +237,11 @@ module DjJobs
               end
               
               variables = {}
-              @data_point['set_variable_values'].each_with_index do |(k, v), i|
+              @data_point['set_variable_values'].each_with_index do |(k, v), i|  #loop over all variables
                 var = Variable.find(k)
                 if var
                   @sim_logger.info "var: #{var.to_json}"
-                  variables.merge!(var[:uo_measure] => { :name=>var[:name], :value=>v, :mapper=>var[:mapper] })
+                  variables.merge!(var[:uo_measure] => { :name=>var[:name], :value=>v, :mapper=>var[:mapper] })  #dont actuall use variable just yet
                   @sim_logger.info "variables: #{variables.to_json}"
                                
                   #check if mapper file exist
@@ -250,7 +250,7 @@ module DjJobs
                   if !File.exist?(mapper_file)
                     raise "mapper_file does not exist: #{mapper_file}"
                   end
-                  mapper = File.open("#{mapper_file}",&:read)
+                  mapper = File.open("#{mapper_file}",&:read) #loop over each line in the mapper and look for the variable and replace value
                   mapper.each_line { |line|
                     #variable_names.each do |variable_name|
                     variable_name = var[:name]
