@@ -325,6 +325,143 @@ module DjJobs
                   raise "Oscli postprocess_only returned error code #{$?.exitstatus}"
                 end
               end
+              ##from workflow-gem run_extract_inputs_and_outputs()
+              #results = {}
+              ## Inputs are in the measure_attributes.json file
+              #if File.exist? "#{run_dir}/measure_attributes.json"
+              #  h = JSON.parse(File.read("#{run_dir}/measure_attributes.json"), symbolize_names: true)
+              #  h = rename_hash_keys(h, logger)
+              #  results.merge! h
+              #end
+
+              results = {}
+              objective_functions = {}
+              @sim_logger.info 'Iterating over Output Variables for UrbanOpt'
+              # UO output looks like:
+                #feature_reports: [
+                #    {
+                #    id: "1",
+                #        reporting_periods: [
+                #          natural_gas: 74195446.43594739,
+                #          end_uses: {}
+                #        ]
+                #    },
+                #]
+                #uo_results[:feature_reports][0][:reporting_periods][0][:natural_gas]
+                #
+              # Save the objective functions
+                if @data_point.analysis.output_variables
+                  @data_point.analysis.output_variables.each do |variable|
+                    uo_result = {}
+                    report_index = nil
+                    if variable[:objective_function]
+                      @sim_logger.info "found variable[:objective_function]: #{variable[:objective_function]}"
+                      if variable[:report] == 'feature_reports'
+                        @sim_logger.info "found variable[:report]: #{variable[:report]}"
+                        if variable[:report_id] && variable[:reporting_periods] && variable[:var_name]
+                          @sim_logger.info "found variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
+                          #get feature_reports results
+                          uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/default_scenario_report.json"
+                          if File.exist? uo_results_file
+                            uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
+                            report_index = uo_result[variable[:report].to_sym].index {|h| h[:id] == variable[:report_id].to_s } if uo_result[variable[:report].to_sym]
+                            if report_index && !uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]].nil? #feature_reports index and reporting_periods exist
+                              if  uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]].has_key?(variable[:var_name].to_sym) #reporting_periods has var_name?
+                                results[variable[:name]] = uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                              end
+                            end
+                          else
+                            @sim_logger.warn "Could not find results #{uo_results_file}"
+                          end
+                        else
+                          @sim_logger.error "MISSING output variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
+                        end
+                      elsif variable[:report] == 'scenario_report'
+                        @sim_logger.info "found variable[:report]: #{variable[:report]}"
+                        if variable[:reporting_periods] && variable[:var_name]
+                          @sim_logger.info "found variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
+                          #get feature_reports results
+                          uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/default_scenario_report.json"
+                          if File.exist? uo_results_file
+                            uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
+                            if !uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].nil? #reporting_periods exist
+                              if  uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].has_key?(variable[:var_name].to_sym) #reporting_periods has var_name?
+                                results[variable[:name]] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                              end
+                            end
+                          else
+                            @sim_logger.warn "Could not find results #{uo_results_file}"
+                          end
+                        else
+                          @sim_logger.error "MISSING output variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
+                        end
+                      else
+                        @sim_logger.error "output variable '#{variable[:name]}' :report is not scenario_report or feature_reports.  :report = '#{variable[:report]}'."
+                      end
+
+                      
+                      @sim_logger.info "Looking in output variable #{variable[:name]} for objective function [#{variable[:report]}][#{variable[:report_id]}]{#{variable[:reporting_periods]}}[#{variable[:var_name]}]"
+
+                      # look for the objective function key and make sure that it is not nil. False is an okay obj function.
+                      if !results[variable[:name]].nil?
+                        objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name]]
+                        if variable[:objective_function_target]
+                          @sim_logger.info "Found objective function target for #{variable[:name]}"
+                          objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f
+                        end
+                        if variable[:scaling_factor]
+                          @sim_logger.info "Found scaling factor for #{variable[:name]}"
+                          objective_functions["scaling_factor_#{variable[:objective_function_index] + 1}"] = variable[:scaling_factor].to_f
+                        end
+                        if variable[:objective_function_group]
+                          @sim_logger.info "Found objective function group for #{variable[:name]}"
+                          objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_group].to_f
+                        end
+                      else
+                        @sim_logger.warn "No results for objective function #{variable[:name]}"
+                        objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = Float::MAX
+                        objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = nil
+                        objective_functions["scaling_factor_#{variable[:objective_function_index] + 1}"] = nil
+                        objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = nil
+                      end
+                    end
+                  end
+                end
+                #report_file = "#{simulation_dir}/objectives.json"
+                #if !File.exist? report_file
+                #  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(oj.to_json)) }
+                #end
+                @sim_logger.info 'Saving the objectives to file'
+                File.open("#{run_dir}/objectives.json", 'w') do |f|
+                  f << JSON.pretty_generate(objective_functions)
+                  # make sure data is written to the disk one way or the other
+                  begin
+                    f.fsync
+                  rescue StandardError
+                    f.flush
+                  end
+                end
+                @sim_logger.info 'Saving the result hash to file'
+                File.open("#{run_dir}/results.json", 'w') do |f|
+                  f << JSON.pretty_generate(results)
+                  # make sure data is written to the disk one way or the other
+                  begin
+                    f.fsync
+                  rescue StandardError
+                    f.flush
+                  end
+                end
+                @sim_logger.info 'Saving the result hash to measure_attributes.json file'
+                File.open("#{run_dir}/measure_attributes.json", 'w') do |f|
+                  f << JSON.pretty_generate(results)
+                  # make sure data is written to the disk one way or the other
+                  begin
+                    f.fsync
+                  rescue StandardError
+                    f.flush
+                  end
+                end
+              
               #TODO make out.osw with UO run status (for UO only workflow)
                 out_osw = { completed_status: 'Success',
                             current_step: 0,
@@ -340,25 +477,13 @@ module DjJobs
                 if !File.exist? report_file
                   File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(out_osw.to_json)) }
                 end
-                
-                #oj = {
-                #     "objective_function_1": 24.125,
-                #     "objective_function_target_1": 0,
-                #     "objective_function_group_1": 1.0,
-                #     "objective_function_2": 266.425,
-                #     "objective_function_target_2": 0,
-                #     "objective_function_group_2": 2.0
-                # }
-                #report_file = "#{simulation_dir}/objectives.json"
-                #if !File.exist? report_file
-                #  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(oj.to_json)) }
-                #end
+
                 #report_file = "#{simulation_dir}/data_point.zip"
                 #if !File.exist? report_file
                 #  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(out_osw.to_json)) }
                 #end
                 
-                
+            #end UrbanOpt workflow    
             else  #OS CLI workflow
               cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
               process_log = File.join(simulation_dir, 'oscli_simulation.log')
