@@ -126,7 +126,7 @@ class Variable
   # Create an output variable from the Analysis JSON
   def self.create_output_variable(analysis_id, json)
     logger.info("Adding a new output variable named: '#{json['name']}'")
-    json['name'] = SecureRandom.uuid if json['name'].nil? || json['name'].empty?      #if name if blank for UrbanOpt Output, make it a uuid so its unique
+    json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}" if json['name'].nil? || json['name'].empty?      #if name if blank for UrbanOpt Output, make it a uuid.var_name so its unique (similar to measure.variable)
     var = Variable.where(analysis_id: analysis_id, name: json['name']).first
     if var
       logger.error "Variable already exists for '#{var.name}'"  #this is a duplicate variable name and will overwrite the old variable.  this should be an error

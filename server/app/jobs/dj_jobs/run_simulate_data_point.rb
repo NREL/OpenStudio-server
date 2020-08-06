@@ -324,7 +324,7 @@ module DjJobs
                 if $?.exitstatus != 0
                   raise "Oscli postprocess_only returned error code #{$?.exitstatus}"
                 end
-              end
+              else  #no reporting measures so hand make outputs
               ##from workflow-gem run_extract_inputs_and_outputs()
               #results = {}
               ## Inputs are in the measure_attributes.json file
@@ -367,7 +367,7 @@ module DjJobs
                             report_index = uo_result[variable[:report].to_sym].index {|h| h[:id] == variable[:report_id].to_s } if uo_result[variable[:report].to_sym]
                             if report_index && !uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]].nil? #feature_reports index and reporting_periods exist
                               if  uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]].has_key?(variable[:var_name].to_sym) #reporting_periods has var_name?
-                                results[variable[:name]] = uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                                results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
                               end
                             end
                           else
@@ -386,7 +386,7 @@ module DjJobs
                             uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                             if !uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].nil? #reporting_periods exist
                               if  uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].has_key?(variable[:var_name].to_sym) #reporting_periods has var_name?
-                                results[variable[:name]] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                                results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
                               end
                             end
                           else
@@ -403,8 +403,10 @@ module DjJobs
                       @sim_logger.info "Looking in output variable #{variable[:name]} for objective function [#{variable[:report]}][#{variable[:report_id]}]{#{variable[:reporting_periods]}}[#{variable[:var_name]}]"
 
                       # look for the objective function key and make sure that it is not nil. False is an okay obj function.
-                      if !results[variable[:name]].nil?
-                        objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name]]
+                      #if !results["#{variable[:name]}.#{variable[:var_name]}"].nil?
+                      if !results[variable[:name].split(".")[0]].nil? && !variable[:var_name].nil?
+                        #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results["#{variable[:name]}.#{variable[:var_name]}"]
+                        objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]
                         if variable[:objective_function_target]
                           @sim_logger.info "Found objective function target for #{variable[:name]}"
                           objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f
@@ -482,7 +484,7 @@ module DjJobs
                 #if !File.exist? report_file
                 #  File.open(report_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(out_osw.to_json)) }
                 #end
-                
+              end #end UO cli --postprocess_only  
             #end UrbanOpt workflow    
             else  #OS CLI workflow
               cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
