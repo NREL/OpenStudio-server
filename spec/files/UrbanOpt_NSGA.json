@@ -52,7 +52,7 @@
         "norm_type": "minkowski",
         "p_power": 2,
         "exit_on_guideline_14": 0,
-        "seed": null,
+        "seed": 1973,
         "failed_f_value": 1000000000000000000,
         "debug_messages": 1,
         "max_queued_jobs": 32,
