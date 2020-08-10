@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -247,7 +247,7 @@ module AnalysisLibrary::R
       logger.info "Creating image for #{variable.name} with samples #{samples}"
       save_file_name = nil
       if samples && samples.count > 0
-        save_file_name = Dir::Tmpname.create(['r_samples_plot', '.png'], "#{APP_CONFIG['server_asset_path']}/R"){}
+        save_file_name = Dir::Tmpname.create(['r_samples_plot', '.png'], "#{APP_CONFIG['server_asset_path']}/R") {}
         logger.info("R image filename is #{save_file_name}")
         # If running on Docker, then use type='cairo' to create PNG (since it is headless and cairo is installed)
         # png_type = Rails.env =~ /docker/ ? ', type="cairo"' : ''

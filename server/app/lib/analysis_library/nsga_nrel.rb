@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -266,7 +266,7 @@ class AnalysisLibrary::NsgaNrel < AnalysisLibrary::Base
       # ensure that the cluster is stopped
       logger.info 'Executing nsga_nrel.rb ensure block'
       begin
-        cluster.stop if cluster
+        cluster&.stop
       rescue StandardError, ScriptError, NoMemoryError => e
         logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
       end

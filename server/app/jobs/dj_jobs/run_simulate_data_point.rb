@@ -111,9 +111,9 @@ module DjJobs
         end
         upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
         @data_point.set_error_flag
-        @data_point.set_complete_state if @data_point
+        @data_point&.set_complete_state
         @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
-        @sim_logger.close if @sim_logger
+        @sim_logger&.close
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         return false
@@ -246,7 +246,7 @@ module DjJobs
             run_result = :errored
           rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
             log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
-            @sim_logger.error log_message if @sim_logger
+            @sim_logger&.error log_message
             run_result = :errored
           rescue Exception => e
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
@@ -306,7 +306,7 @@ module DjJobs
           # Post the reports back to the server
           uploads_successful = []
           if @data_point.analysis.download_reports
-            @sim_logger.info "downloading reports/*.{html,json,csv}"
+            @sim_logger.info 'downloading reports/*.{html,json,csv}'
             Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
           else
             @sim_logger.info "NOT downloading /reports/*.{html,json,csv} since download_reports value is: #{@data_point.analysis.download_reports}"
@@ -314,21 +314,21 @@ module DjJobs
           report_file = "#{run_dir}/objectives.json"
           uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
           if @data_point.analysis.download_osw
-            @sim_logger.info "downloading out.OSW"
+            @sim_logger.info 'downloading out.OSW'
             report_file = "#{simulation_dir}/out.osw"
             uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
           else
             @sim_logger.info "NOT downloading out.OSW since download_osw value is: #{@data_point.analysis.download_osw}"
           end
           if @data_point.analysis.download_osm
-            @sim_logger.info "downloading in.OSM"
+            @sim_logger.info 'downloading in.OSM'
             report_file = "#{simulation_dir}/in.osm"
             uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
           else
             @sim_logger.info "NOT downloading in.OSM since download_osm value is: #{@data_point.analysis.download_osm}"
           end
           if @data_point.analysis.download_zip
-            @sim_logger.info "downloading datapoint.ZIP"
+            @sim_logger.info 'downloading datapoint.ZIP'
             report_file = "#{run_dir}/data_point.zip"
             uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
           else
@@ -368,14 +368,14 @@ module DjJobs
         end
       rescue ScriptError, NoMemoryError, StandardError => e
         log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-        @sim_logger.error log_message if @sim_logger
+        @sim_logger&.error log_message
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
       ensure
-        @sim_logger.info "Finished #{__FILE__}" if @sim_logger
-        @data_point.set_complete_state if @data_point
+        @sim_logger&.info "Finished #{__FILE__}"
+        @data_point&.set_complete_state
         @sim_logger.info "@data_point: #{@data_point.to_json}"
-        @sim_logger.close if @sim_logger
+        @sim_logger&.close
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         true

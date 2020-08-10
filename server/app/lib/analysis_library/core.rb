@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -159,7 +159,7 @@ module AnalysisLibrary
 
       # verify that the objective_functions are unique
       if analysis.problem && analysis.problem['algorithm'] && analysis.problem['algorithm']['objective_functions']
-        analysis.problem['algorithm']['objective_functions'].uniq! if analysis.problem['algorithm']['objective_functions']
+        analysis.problem['algorithm']['objective_functions']&.uniq!
       end
 
       # some algorithm specific data to be stored in the database
