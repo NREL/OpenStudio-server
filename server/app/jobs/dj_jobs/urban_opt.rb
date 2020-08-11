@@ -158,14 +158,31 @@ module DjJobs
                     report_index = uo_result[variable[:report].to_sym].index {|h| h[:id] == variable[:report_id].to_s } if uo_result[variable[:report].to_sym]
                     if report_index && !uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]].nil? #feature_reports index and reporting_periods exist
                       if  uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]].has_key?(variable[:var_name].to_sym) #reporting_periods has var_name?
-                        results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                      #check for end_uses
+                        if variable[:var_name] == "end_uses" #check end_uses and category exist
+                          if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
+                            if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
+                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}" => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                            else
+                              raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
+                            end
+                          else
+                            raise "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
+                          end
+                        else  #not end_uses
+                          results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                        end
+                      else
+                        raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reporting period: #{variable[:reporting_periods]}."
                       end
+                    else
+                      raise "Could not find output reporting period: #{variable[:reporting_periods]}."
                     end
                   else
-                    @sim_logger.warn "Could not find results #{uo_results_file}"
+                    raise "Could not find results #{uo_results_file}"
                   end
                 else
-                  @sim_logger.error "MISSING output variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
+                  raise "MISSING output variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                 end
               elsif variable[:report] == 'scenario_report'
                 @sim_logger.info "found variable[:report]: #{variable[:report]}"
@@ -177,27 +194,47 @@ module DjJobs
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                     if !uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].nil? #reporting_periods exist
                       if uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].has_key?(variable[:var_name].to_sym) #reporting_periods has var_name?
-                        results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                      #check for end_uses
+                        if variable[:var_name] == "end_uses"
+                          if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
+                            if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
+                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}" => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                            else
+                              raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
+                            end
+                          else
+                            raise "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
+                          end
+                        else #not end_uses
+                          results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                        end
+                      else
+                        raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reporting period: #{variable[:reporting_periods]}."  
                       end
+                    else
+                      raise "Could not find output reporting period: #{variable[:reporting_periods]}."
                     end
                   else
-                    @sim_logger.warn "Could not find results #{uo_results_file}"
+                    raise "Could not find results #{uo_results_file}"
                   end
                 else
-                  @sim_logger.error "MISSING output variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
+                  raise "MISSING output variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                 end
               else
-                @sim_logger.error "output variable '#{variable[:name]}' :report is not scenario_report or feature_reports.  :report = '#{variable[:report]}'."
+                raise "output variable '#{variable[:name]}' :report is not scenario_report or feature_reports.  :report = '#{variable[:report]}'."
               end
 
 
               @sim_logger.info "Looking in output variable #{variable[:name]} for objective function [#{variable[:report]}][#{variable[:report_id]}]{#{variable[:reporting_periods]}}[#{variable[:var_name]}]"
 
               # look for the objective function key and make sure that it is not nil. False is an okay obj function.
+              ### check if "#{variable[:end_use]}_#{variable[:end_use_category]}" == variable[:name] somewhere??  -BLB
               #if !results["#{variable[:name]}.#{variable[:var_name]}"].nil?
-              if !results[variable[:name].split(".")[0]].nil? && !variable[:var_name].nil?
+              #if !results[variable[:name].split(".")[0]].nil? && !variable[:var_name].nil?
+              if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[1]].nil?
                 #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results["#{variable[:name]}.#{variable[:var_name]}"]
-                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]
+                #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]  #no end_uses
+                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1]]  #end_uses_end_use_category
                 if variable[:objective_function_target]
                   @sim_logger.info "Found objective function target for #{variable[:name]}"
                   objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f

@@ -78,6 +78,8 @@ class Variable
   field :report_id, type: String, default: ''             # UrbanOpt output report :id
   field :reporting_periods, type: Integer, default: 0     # UrbanOpt output reporting_periods array index
   field :var_name, type: String, default: ''              # UrbanOpt output name, ex natural_gas
+  field :end_use, type: String, default: ''               # UrbanOpt output end_uses, ex electricity, natural_gas, district_cooling, etc
+  field :end_use_category, type: String, default: ''      # UrbanOpt output end_use category, ex heating, cooling, fans, etc
     
   # Relationships
   belongs_to :analysis, index: true
@@ -126,7 +128,17 @@ class Variable
   # Create an output variable from the Analysis JSON
   def self.create_output_variable(analysis_id, json)
     logger.info("Adding a new output variable named: '#{json['name']}'")
-    json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}" if json['name'].nil? || json['name'].empty?      #if name if blank for UrbanOpt Output, make it a uuid.var_name so its unique (similar to measure.variable)
+    if json['name'].nil? || json['name'].empty?      #if name if blank for UrbanOpt Output, make it a uuid.var_name so its unique (similar to measure.variable)
+      if json['var_name'] == 'end_uses'              #if var_name is end_uses then name is uuid.end_use_end_use_category
+        if json['end_use'] && json['end_use_category']
+          json['name'] = "#{SecureRandom.uuid}.#{json['end_use']}_#{json['end_use_category']}"
+        else
+          raise "var_name == end_uses but end_use and end_use_category are missing. check OSA output_variables"
+        end
+      else
+        json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}"    
+      end
+    end
     var = Variable.where(analysis_id: analysis_id, name: json['name']).first
     if var
       logger.error "Variable already exists for '#{var.name}'"  #this is a duplicate variable name and will overwrite the old variable.  this should be an error
@@ -172,6 +184,8 @@ class Variable
     var['report_id'] = json['report_id'] if json['report_id']
     var['reporting_periods'] = json['reporting_periods'] if json['reporting_periods']
     var['var_name'] = json['var_name'] if json['var_name']
+    var['end_use'] = json['end_use'] if json['end_use']
+    var['end_use_category'] = json['end_use_category'] if json['end_use_category']
     
     var.save!
     logger.info("output variable: '#{var.to_json}'")
