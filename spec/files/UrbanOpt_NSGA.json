@@ -70,7 +70,7 @@
         "report_id": 1,
         "reporting_periods": 0,
         "var_name": "end_uses",
-        "end_use": "electricity",
+        "end_use": "electricity2",
         "end_use_category": "fans",
         "visualize": true,
         "export": true,

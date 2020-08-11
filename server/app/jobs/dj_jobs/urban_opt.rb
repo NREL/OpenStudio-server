@@ -162,7 +162,7 @@ module DjJobs
                         if variable[:var_name] == "end_uses" #check end_uses and category exist
                           if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
                             if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
-                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}" => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
                             else
                               raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
                             end
@@ -228,13 +228,11 @@ module DjJobs
               @sim_logger.info "Looking in output variable #{variable[:name]} for objective function [#{variable[:report]}][#{variable[:report_id]}]{#{variable[:reporting_periods]}}[#{variable[:var_name]}]"
 
               # look for the objective function key and make sure that it is not nil. False is an okay obj function.
-              ### check if "#{variable[:end_use]}_#{variable[:end_use_category]}" == variable[:name] somewhere??  -BLB
-              #if !results["#{variable[:name]}.#{variable[:var_name]}"].nil?
-              #if !results[variable[:name].split(".")[0]].nil? && !variable[:var_name].nil?
-              if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[1]].nil?
-                #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results["#{variable[:name]}.#{variable[:var_name]}"]
+              # check if "#{variable[:end_use]}_#{variable[:end_use_category]}" == variable[:name] somewhere??  -BLB
+              # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity=>39869197.34679705, :applicable=>true},:'uuid'...}
+              if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
                 #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]  #no end_uses
-                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1]]  #end_uses_end_use_category
+                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym]  #end_uses_end_use_category
                 if variable[:objective_function_target]
                   @sim_logger.info "Found objective function target for #{variable[:name]}"
                   objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f
@@ -248,7 +246,9 @@ module DjJobs
                   objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_group].to_f
                 end
               else
-                @sim_logger.warn "No results for objective function #{variable[:name]}"
+                #make raise an option to continue with failures??
+                raise "No results for objective function #{variable[:name]}"
+                @sim_logger.error "No results for objective function #{variable[:name]} in #{__FILE__} at #{__LINE__}"
                 objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = Float::MAX
                 objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = nil
                 objective_functions["scaling_factor_#{variable[:objective_function_index] + 1}"] = nil
