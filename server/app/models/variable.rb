@@ -74,8 +74,8 @@ class Variable
 
   field :mapper, type: String # UrbanOpt Mapper name
   field :uo_measure, type: String # UrbanOpt Measure name
-  field :report, type: String, default: 'scenario_report' # UrbanOpt output report name either: scenario_report/feature_reports
-  field :report_id, type: String, default: ''             # UrbanOpt output report :id
+  field :report, type: String, default: 'scenario_report' # UrbanOpt output report name. either: scenario_report/feature_reports
+  field :report_id, type: String, default: ''             # UrbanOpt output report :id. either scenario id name or feature report id number
   field :reporting_periods, type: Integer, default: 0     # UrbanOpt output reporting_periods array index
   field :var_name, type: String, default: ''              # UrbanOpt output name, ex natural_gas
   field :end_use, type: String, default: ''               # UrbanOpt output end_uses, ex electricity, natural_gas, district_cooling, etc

@@ -198,7 +198,7 @@ module DjJobs
                         if variable[:var_name] == "end_uses"
                           if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
                             if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
-                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}" => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
                             else
                               raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
                             end
