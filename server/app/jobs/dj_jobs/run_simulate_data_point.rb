@@ -204,7 +204,7 @@ module DjJobs
             if @data_point.analysis.urbanopt
               uo_simulation_log = File.join(simulation_dir, 'urbanopt_simulation.log')
               uo_process_log = File.join(simulation_dir, 'urbanopt_process.log')
-              run_urbanopt(uo_simulation_log, uo_process_log)   
+              run_urbanopt(uo_simulation_log, uo_process_log)
             else  #OS CLI workflow
               cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
               process_log = File.join(simulation_dir, 'oscli_simulation.log')
