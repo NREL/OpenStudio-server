@@ -97,12 +97,12 @@ RUN bundle exec rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
+# Add in /spec for testing 
+#ADD /spec /opt/openstudio/spec
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
 RUN bundle install --jobs=3 --retry=3
-
-RUN sudo sysctl --system
 
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.
