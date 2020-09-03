@@ -50,7 +50,7 @@ require 'json'
 
 # Set obvious paths for start-local & run-analysis invocation
 ruby_cmd = 'ruby'
-meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
+meta_cli = File.absolute_path('/NREL/OpenStudio-server/bin/openstudio_meta')
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 #host = '127.0.0.1'
 
