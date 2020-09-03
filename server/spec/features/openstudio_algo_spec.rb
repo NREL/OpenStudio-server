@@ -44,22 +44,21 @@
 #
 #################################################################################
 
+require 'rails_helper'
 require 'rest-client'
 require 'json'
-
-class OpenStudioAlgo
-end
 
 # Set obvious paths for start-local & run-analysis invocation
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
-host = '127.0.0.1'
+#host = '127.0.0.1'
 
 # the actual tests
-describe OpenStudioAlgo do
+RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
   before :all do
-  #start server
+    @previous_job_manager = Rails.application.config.job_manager
+    Rails.application.config.job_manager = :resque
   
   #gem install
     command = "#{ruby_cmd} #{meta_cli} install_gems"
@@ -67,8 +66,34 @@ describe OpenStudioAlgo do
     run_analysis = system(command)
     expect(run_analysis).to be true
   end
+  
+  after :all do
+    Rails.application.config.job_manager = @previous_job_manager
+  end
 
-  it 'run cli_test with bad -z arg', :cli_error do
+  before do
+    # Look at DatabaseCleaner gem in the future to deal with this.
+    begin
+      Project.destroy_all
+      Delayed::Job.destroy_all
+    rescue Errno::EACCES => e
+      puts 'Cannot unlink files, will try and continue'
+    end
+
+    Resque.workers.each(&:unregister_worker)
+    Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
+
+    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+    puts "App host is: http://#{host}"
+
+    # TODO: Make this a helper of some sort
+    options = { hostname: "http://#{host}" }
+    # TODO: Convert this over to the openstudio_meta
+    #@api = OpenStudio::Analysis::ServerApi.new(options)
+    APP_CONFIG['os_server_host_url'] = options[:hostname]
+  end
+
+  it 'run cli_test with bad -z arg', :cli_error, js: true do
     #setup expected results
     # run an analysis
     # test_zip.zip is ../test_zip/test_zip.zip from test.json location and not /test_zip/test_zip.zip
@@ -79,7 +104,7 @@ describe OpenStudioAlgo do
    
   end #cli_error
   
-  it 'run cli_test with -z arg', :cli_test do
+  it 'run cli_test with -z arg', :cli_test, js: true do
     #setup expected results
     nsga_nrel = [
     {:electricity_consumption_cvrmse => 21.8917,
@@ -216,7 +241,7 @@ describe OpenStudioAlgo do
     end    
   end #cli_test
   
-  it 'run nsga_nrel analysis', :nsga_nrel do
+  it 'run nsga_nrel analysis', :nsga_nrel, js: true do
     #setup expected results
     nsga_nrel = [
     {:electricity_consumption_cvrmse => 21.8917,
@@ -353,7 +378,7 @@ describe OpenStudioAlgo do
     end    
   end #nsga_nrel
 
-  it 'run nsga_nrel_z analysis', :nsga_nrel_z do
+  it 'run nsga_nrel_z analysis', :nsga_nrel_z, js: true do
     #setup expected results
     nsga_nrel = [
     {:electricity_consumption_cvrmse => 21.8917,
@@ -490,7 +515,7 @@ describe OpenStudioAlgo do
     end    
   end #nsga_nrel_z
   
-  it 'run spea_nrel analysis', :spea_nrel do
+  it 'run spea_nrel analysis', :spea_nrel, js: true do
     #setup expected results
     spea_nrel = [
     {:electricity_consumption_cvrmse => 81.1799,
@@ -619,7 +644,7 @@ describe OpenStudioAlgo do
     end    
   end #spea_nrel
   
-  it 'run pso analysis', :pso do
+  it 'run pso analysis', :pso, js: true do
     #setup expected results
     pso = [
     {:electricity_consumption_cvrmse => 8.5655,
@@ -748,7 +773,7 @@ describe OpenStudioAlgo do
     end    
   end #pso
   
-  it 'run rgenoud analysis', :rgenoud do
+  it 'run rgenoud analysis', :rgenoud, js: true do
     #setup expected results
     rgenoud = [
     {:electricity_consumption_cvrmse => 31.1268,
@@ -877,7 +902,7 @@ describe OpenStudioAlgo do
     end    
   end #rgenoud
 
-  it 'run sobol analysis', :sobol do
+  it 'run sobol analysis', :sobol, js: true do
     #setup expected results
     sobol = [
     {:electricity_consumption_cvrmse => 42.9103,
@@ -1010,7 +1035,7 @@ describe OpenStudioAlgo do
     end    
   end #sobol
 
-  it 'run lhs analysis', :lhs do
+  it 'run lhs analysis', :lhs, js: true do
     #setup expected results
     lhs = [
     {:electricity_consumption_cvrmse => 26.8357,
@@ -1143,7 +1168,7 @@ describe OpenStudioAlgo do
     end    
   end #lhs
 
-  it 'run lhs_discrete analysis', :lhs_discrete do
+  it 'run lhs_discrete analysis', :lhs_discrete, js: true do
     #setup expected results
     lhs = [
     {:electricity_consumption_cvrmse => 37.0121,
@@ -1281,7 +1306,7 @@ describe OpenStudioAlgo do
     end    
   end #lhs_discrete
   
-  it 'run morris analysis', :morris do
+  it 'run morris analysis', :morris, js: true do
     #setup expected results
     morris = [
     {:electricity_consumption_cvrmse => 24.4905,
@@ -1414,8 +1439,5 @@ describe OpenStudioAlgo do
     end    
   end #morris
   
-  #after :all do
-    # stop the server
-  #end
 end
 
