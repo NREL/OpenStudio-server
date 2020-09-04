@@ -54,7 +54,8 @@ meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 #host = '127.0.0.1'
 cmd = 'docker ps'
-puts "docker ps: #{system(cmd)}"
+out = system(cmd)
+puts "docker ps: #{out}"
 
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
@@ -148,7 +149,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -164,6 +165,13 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
+            jobs = a[:analysis][:jobs]
+            puts "jobs: #{jobs.to_s}"
+            
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}.json"
+            a = JSON.parse(a, symbolize_names: true)
+            status_message = a[:analysis][:status_message]
+            puts "status_message: #{status_message}"
 
             # get all data points in this analysis
             a = RestClient.get "http://#{@host}/data_points.json"
@@ -285,7 +293,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -422,7 +430,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -551,7 +559,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -680,7 +688,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -809,7 +817,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -942,7 +950,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -1071,7 +1079,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     sleep 10
     begin
       ::Timeout.timeout(timeout_seconds) do
@@ -1208,7 +1216,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     sleep 10
     
     begin
@@ -1346,7 +1354,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 120
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
