@@ -50,14 +50,10 @@ require 'json'
 
 # Set obvious paths for start-local & run-analysis invocation
 ruby_cmd = 'ruby'
-meta_cli = File.absolute_path('../bin/openstudio_meta')
+meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 #host = '127.0.0.1'
-puts "Dir.pwd:  #{Dir.pwd}"
-files = Dir.glob("*")
-puts "files: #{files}"
-puts "ENV:"
-ENV
+
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
   before :all do
@@ -65,10 +61,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     Rails.application.config.job_manager = :resque
   
   #gem install
-    command = "#{ruby_cmd} #{meta_cli} install_gems"
-    puts command
-    run_analysis = system(command)
-    expect(run_analysis).to be true
+    #command = "#{ruby_cmd} #{meta_cli} install_gems"
+    #puts command
+    #run_analysis = system(command)
+    #expect(run_analysis).to be true
   end
   
   after :all do
