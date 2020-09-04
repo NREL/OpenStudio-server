@@ -52,38 +52,38 @@ require 'json'
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
-host = '127.0.0.1'
+#host = '127.0.0.1'
 
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature do
-  #before :all do
-    #@previous_job_manager = Rails.application.config.job_manager
-    #Rails.application.config.job_manager = :resque
+  before :all do
+    @previous_job_manager = Rails.application.config.job_manager
+    Rails.application.config.job_manager = :delayed_job
   
   #gem install
     #command = "#{ruby_cmd} #{meta_cli} install_gems"
     #puts command
     #run_analysis = system(command)
     #expect(run_analysis).to be true
-  #end
+  end
   
-  #after :all do
-    #Rails.application.config.job_manager = @previous_job_manager
-  #end
+  after :all do
+    Rails.application.config.job_manager = @previous_job_manager
+  end
 
   before do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    #begin
-    #  Project.destroy_all
-    #  Delayed::Job.destroy_all
-    #rescue Errno::EACCES => e
-    #  puts 'Cannot unlink files, will try and continue'
-    #end
+    begin
+      Project.destroy_all
+      Delayed::Job.destroy_all
+    rescue Errno::EACCES => e
+      puts 'Cannot unlink files, will try and continue'
+    end
 
     #Resque.workers.each(&:unregister_worker)
     #Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
 
-    #host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     puts "App host is: http://#{host}"
 
     # TODO: Make this a helper of some sort
