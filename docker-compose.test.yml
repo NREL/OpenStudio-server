@@ -30,6 +30,41 @@ services:
       - ./reports:/opt/openstudio/reports
       - osdata:/mnt/openstudio
     command: /usr/local/bin/run-server-tests
+  web-background:
+    image: nrel/openstudio-server:latest
+    build:
+      context: .
+      args:
+        rails_env: docker-test
+        bundle_args: ''
+    environment:
+      - CI
+      - COVERALLS_REPO_TOKEN
+      - TRAVIS=true
+      - TRAVIS_JOB_ID
+      - TRAVIS_BRANCH
+      - TRAVIS_PULL_REQUEST
+    links:
+      - db
+      - web
+      - queue
+    volumes:
+      - osdata:/mnt/openstudio
+    command: /usr/local/bin/start-web-background
+  worker:
+    image: nrel/openstudio-server:latest
+    environment:
+      - QUEUES=simulations
+      - COUNT=1
+    volumes:
+      - /mnt/openstudio
+    depends_on:
+      - web
+      - web-background
+      - db
+      - queue
+      - rserve
+    command: /usr/local/bin/start-workers  
   rserve:
     image: nrel/openstudio-rserve:latest
     build: ./docker/R
