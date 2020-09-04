@@ -55,7 +55,7 @@ project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 #host = '127.0.0.1'
 cmd = 'docker ps'
 out = system(cmd)
-puts "docker ps: #{out}"
+puts "docker ps: #{out.to_s}"
 
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
@@ -171,7 +171,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = RestClient.get "http://#{@host}/analyses/#{analysis_id}.json"
             a = JSON.parse(a, symbolize_names: true)
             status_message = a[:analysis][:status_message]
-            puts "status_message: #{status_message}"
+            puts "status_message: #{status_message.to_s}"
 
             # get all data points in this analysis
             a = RestClient.get "http://#{@host}/data_points.json"
