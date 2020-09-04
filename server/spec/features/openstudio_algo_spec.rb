@@ -55,10 +55,10 @@ project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 #host = '127.0.0.1'
 
 # the actual tests
-RSpec.describe 'RunAlgorithms', type: :feature do
+RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
   before :all do
     @previous_job_manager = Rails.application.config.job_manager
-    Rails.application.config.job_manager = :delayed_job
+    Rails.application.config.job_manager = :resque
   
   #gem install
     #command = "#{ruby_cmd} #{meta_cli} install_gems"
@@ -80,14 +80,14 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       puts 'Cannot unlink files, will try and continue'
     end
 
-    #Resque.workers.each(&:unregister_worker)
-    #Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
+    Resque.workers.each(&:unregister_worker)
+    Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
 
-    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-    puts "App host is: http://#{host}"
+    @host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+    puts "App host is: http://#{@host}"
 
     # TODO: Make this a helper of some sort
-    options = { hostname: "http://#{host}" }
+    options = { hostname: "http://#{@host}" }
     # TODO: Convert this over to the openstudio_meta
     #@api = OpenStudio::Analysis::ServerApi.new(options)
     APP_CONFIG['os_server_host_url'] = options[:hostname]
@@ -97,7 +97,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     #setup expected results
     # run an analysis
     # test_zip.zip is ../test_zip/test_zip.zip from test.json location and not /test_zip/test_zip.zip
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/test_dir/test.json' 'http://#{host}' -z '/test_zip/test_zip.zip' -a nsga_nrel"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/test_dir/test.json' 'http://#{@host}' -z '/test_zip/test_zip.zip' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be false
@@ -133,12 +133,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
     # run an analysis
     # test_zip.zip is ../test_zip/test_zip.zip from test.json location
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/test_dir/test.json' 'http://#{host}' -z '../test_zip/test_zip.zip' -a nsga_nrel"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/test_dir/test.json' 'http://#{@host}' -z '../test_zip/test_zip.zip' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -154,7 +154,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('nsga_nrel')
@@ -164,7 +164,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -178,7 +178,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -204,7 +204,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -217,7 +217,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(4)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -270,12 +270,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_NSGA_2013.json' 'http://#{host}' -a nsga_nrel"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_NSGA_2013.json' 'http://#{@host}' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -291,7 +291,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('nsga_nrel')
@@ -301,7 +301,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -315,7 +315,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -341,7 +341,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -354,7 +354,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(4)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -407,12 +407,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_NSGA_2013.json' 'http://#{host}' -z 'SEB_calibration_NSGA_2013' -a nsga_nrel"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_NSGA_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -428,7 +428,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('nsga_nrel')
@@ -438,7 +438,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -452,7 +452,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -478,7 +478,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -491,7 +491,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(4)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -536,12 +536,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_SPEA_2013.json' 'http://#{host}' -z 'SEB_calibration_NSGA_2013' -a spea_nrel"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_SPEA_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a spea_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -557,7 +557,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('spea_nrel')
@@ -567,7 +567,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -581,7 +581,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -607,7 +607,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -620,7 +620,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(2)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -665,12 +665,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_PSO_2013.json' 'http://#{host}' -z 'SEB_calibration_NSGA_2013' -a pso"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_PSO_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a pso"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -686,7 +686,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('pso')
@@ -696,7 +696,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -710,7 +710,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -736,7 +736,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -749,7 +749,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(2)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -794,12 +794,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_Rgenoud_2013.json' 'http://#{host}' -z 'SEB_calibration_NSGA_2013' -a rgenoud"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_Rgenoud_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a rgenoud"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -815,7 +815,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('rgenoud')
@@ -825,7 +825,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -839,7 +839,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -865,7 +865,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -878,7 +878,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(2)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -927,12 +927,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_Sobol_2013.json' 'http://#{host}' -z 'SEB_calibration_NSGA_2013' -a sobol"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_Sobol_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a sobol"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -948,7 +948,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('sobol')
@@ -958,7 +958,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -972,7 +972,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -998,7 +998,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -1011,7 +1011,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(3)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -1056,12 +1056,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_LHS_2013.json' 'http://#{host}' -z 'SEB_calibration_NSGA_2013' -a lhs"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_LHS_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a lhs"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -1078,7 +1078,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('batch_run')
@@ -1091,7 +1091,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -1105,7 +1105,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -1131,7 +1131,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -1144,7 +1144,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(2)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -1193,12 +1193,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_LHS_2013_discrete.json' 'http://#{host}' -a lhs"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_LHS_2013_discrete.json' 'http://#{@host}' -a lhs"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -1216,7 +1216,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('batch_run')
@@ -1229,7 +1229,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -1243,7 +1243,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -1269,7 +1269,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -1282,7 +1282,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(3)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
@@ -1331,12 +1331,12 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_Morris_2013.json' 'http://#{host}' -z 'SEB_calibration_NSGA_2013' -a morris"
+    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_Morris_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a morris"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
 
-    a = RestClient.get "http://#{host}/analyses.json"
+    a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     a = a.sort { |x, y| x[:created_at] <=> y[:created_at] }.reverse
     expect(a).not_to be_empty
@@ -1352,7 +1352,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
           get_count = 0
           get_count_max = 50
           begin
-            a = RestClient.get "http://#{host}/analyses/#{analysis_id}/status.json"
+            a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('morris')
@@ -1362,7 +1362,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
 
             # get all data points in this analysis
-            a = RestClient.get "http://#{host}/data_points.json"
+            a = RestClient.get "http://#{@host}/data_points.json"
             a = JSON.parse(a, symbolize_names: true)
             data_points = []
             a.each do |data_point|
@@ -1376,7 +1376,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
             
-              a = RestClient.get "http://#{host}/data_points/#{data_point_id}.json"
+              a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
             
@@ -1402,7 +1402,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
     get_count_max = 50
     begin
       # confirm that datapoints ran successfully
-      dps = RestClient.get "http://#{host}/data_points.json"
+      dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
     
@@ -1415,7 +1415,7 @@ RSpec.describe 'RunAlgorithms', type: :feature do
       expect(data_points.size).to eq(3)
     
       data_points.each do |data_point|
-        dp = RestClient.get "http://#{host}/data_points/#{data_point[:_id]}.json"
+        dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
       
