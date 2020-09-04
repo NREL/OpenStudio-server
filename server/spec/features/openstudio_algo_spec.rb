@@ -52,39 +52,36 @@ require 'json'
 ruby_cmd = 'ruby'
 meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
-#host = '127.0.0.1'
-cmd = 'docker ps'
-out = system(cmd)
-puts "docker ps: #{out.to_s}"
+# host = '127.0.0.1'
 
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
-  #before :all do
+  # before :all do
   #  @previous_job_manager = Rails.application.config.job_manager
   #  Rails.application.config.job_manager = :resque
-  
-    #gem install
-    #command = "#{ruby_cmd} #{meta_cli} install_gems"
-    #puts command
-    #run_analysis = system(command)
-    #expect(run_analysis).to be true
-  #end
-  
-  #after :all do
+
+  # gem install
+  # command = "#{ruby_cmd} #{meta_cli} install_gems"
+  # puts command
+  # run_analysis = system(command)
+  # expect(run_analysis).to be true
+  # end
+
+  # after :all do
   #  Rails.application.config.job_manager = @previous_job_manager
-  #end
+  # end
 
   before do
     # Look at DatabaseCleaner gem in the future to deal with this.
-    #begin
+    # begin
     #  Project.destroy_all
     #  Delayed::Job.destroy_all
-    #rescue Errno::EACCES => e
+    # rescue Errno::EACCES => e
     #  puts 'Cannot unlink files, will try and continue'
-    #end
+    # end
 
-    #Resque.workers.each(&:unregister_worker)
-    #Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
+    # Resque.workers.each(&:unregister_worker)
+    # Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
 
     @host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     puts "App host is: http://#{@host}"
@@ -92,47 +89,46 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     # TODO: Make this a helper of some sort
     options = { hostname: "http://#{@host}" }
     # TODO: Convert this over to the openstudio_meta
-    #@api = OpenStudio::Analysis::ServerApi.new(options)
+    # @api = OpenStudio::Analysis::ServerApi.new(options)
     APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
   it 'run cli_test with bad -z arg', :cli_error, js: true do
-    #setup expected results
+    # setup expected results
     # run an analysis
     # test_zip.zip is ../test_zip/test_zip.zip from test.json location and not /test_zip/test_zip.zip
     command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/test_dir/test.json' 'http://#{@host}' -z '/test_zip/test_zip.zip' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be false
-   
-  end #cli_error
-  
+  end # cli_error
+
   it 'run cli_test with -z arg', :cli_test, js: true do
-    #setup expected results
+    # setup expected results
     nsga_nrel = [
-    {:electricity_consumption_cvrmse => 21.8917,
-     :electricity_consumption_nmbe => 21.2198,
-     :natural_gas_consumption_cvrmse => 74.0377,
-     :natural_gas_consumption_nmbe => 48.7487},
-    {:electricity_consumption_cvrmse => 81.1799,
-     :electricity_consumption_nmbe => -84.0936,
-     :natural_gas_consumption_cvrmse => 44.4995,
-     :natural_gas_consumption_nmbe => 22.6094},
-    {:electricity_consumption_cvrmse => 27.5972,
-     :electricity_consumption_nmbe => 27.0657,
-     :natural_gas_consumption_cvrmse => 76.8553,
-     :natural_gas_consumption_nmbe => 51.0137},
-    {:electricity_consumption_cvrmse => 23.7873,
-     :electricity_consumption_nmbe => 23.2828,
-     :natural_gas_consumption_cvrmse => 81.4910,
-     :natural_gas_consumption_nmbe => 55.1189}
+      { electricity_consumption_cvrmse: 21.8917,
+        electricity_consumption_nmbe: 21.2198,
+        natural_gas_consumption_cvrmse: 74.0377,
+        natural_gas_consumption_nmbe: 48.7487 },
+      { electricity_consumption_cvrmse: 81.1799,
+        electricity_consumption_nmbe: -84.0936,
+        natural_gas_consumption_cvrmse: 44.4995,
+        natural_gas_consumption_nmbe: 22.6094 },
+      { electricity_consumption_cvrmse: 27.5972,
+        electricity_consumption_nmbe: 27.0657,
+        natural_gas_consumption_cvrmse: 76.8553,
+        natural_gas_consumption_nmbe: 51.0137 },
+      { electricity_consumption_cvrmse: 23.7873,
+        electricity_consumption_nmbe: 23.2828,
+        natural_gas_consumption_cvrmse: 81.4910,
+        natural_gas_consumption_nmbe: 55.1189 }
     ]
-    #setup bad results
+    # setup bad results
     nsga_nrel_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
     # run an analysis
     # test_zip.zip is ../test_zip/test_zip.zip from test.json location
@@ -161,17 +157,17 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('nsga_nrel')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
             jobs = a[:analysis][:jobs]
-            puts "jobs: #{jobs.to_s}"
-            
+            puts "jobs: #{jobs}"
+
             a = RestClient.get "http://#{@host}/analyses/#{analysis_id}.json"
             a = JSON.parse(a, symbolize_names: true)
             status_message = a[:analysis][:status_message]
-            puts "status_message: #{status_message.to_s}"
+            puts "status_message: #{status_message}"
 
             # get all data points in this analysis
             a = RestClient.get "http://#{@host}/data_points.json"
@@ -187,11 +183,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -217,7 +213,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -225,18 +221,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(4)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = nsga_nrel.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -248,35 +244,35 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #cli_test
-  
+    end
+  end # cli_test
+
   it 'run nsga_nrel analysis', :nsga_nrel, js: true do
-    #setup expected results
+    # setup expected results
     nsga_nrel = [
-    {:electricity_consumption_cvrmse => 21.8917,
-     :electricity_consumption_nmbe => 21.2198,
-     :natural_gas_consumption_cvrmse => 74.0377,
-     :natural_gas_consumption_nmbe => 48.7487},
-    {:electricity_consumption_cvrmse => 81.1799,
-     :electricity_consumption_nmbe => -84.0936,
-     :natural_gas_consumption_cvrmse => 44.4995,
-     :natural_gas_consumption_nmbe => 22.6094},
-    {:electricity_consumption_cvrmse => 27.5972,
-     :electricity_consumption_nmbe => 27.0657,
-     :natural_gas_consumption_cvrmse => 76.8553,
-     :natural_gas_consumption_nmbe => 51.0137},
-    {:electricity_consumption_cvrmse => 23.7873,
-     :electricity_consumption_nmbe => 23.2828,
-     :natural_gas_consumption_cvrmse => 81.4910,
-     :natural_gas_consumption_nmbe => 55.1189}
+      { electricity_consumption_cvrmse: 21.8917,
+        electricity_consumption_nmbe: 21.2198,
+        natural_gas_consumption_cvrmse: 74.0377,
+        natural_gas_consumption_nmbe: 48.7487 },
+      { electricity_consumption_cvrmse: 81.1799,
+        electricity_consumption_nmbe: -84.0936,
+        natural_gas_consumption_cvrmse: 44.4995,
+        natural_gas_consumption_nmbe: 22.6094 },
+      { electricity_consumption_cvrmse: 27.5972,
+        electricity_consumption_nmbe: 27.0657,
+        natural_gas_consumption_cvrmse: 76.8553,
+        natural_gas_consumption_nmbe: 51.0137 },
+      { electricity_consumption_cvrmse: 23.7873,
+        electricity_consumption_nmbe: 23.2828,
+        natural_gas_consumption_cvrmse: 81.4910,
+        natural_gas_consumption_nmbe: 55.1189 }
     ]
-    #setup bad results
+    # setup bad results
     nsga_nrel_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -305,7 +301,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('nsga_nrel')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -324,11 +320,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -354,7 +350,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -362,18 +358,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(4)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = nsga_nrel.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -385,35 +381,35 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #nsga_nrel
+    end
+  end # nsga_nrel
 
   it 'run nsga_nrel_z analysis', :nsga_nrel_z, js: true do
-    #setup expected results
+    # setup expected results
     nsga_nrel = [
-    {:electricity_consumption_cvrmse => 21.8917,
-     :electricity_consumption_nmbe => 21.2198,
-     :natural_gas_consumption_cvrmse => 74.0377,
-     :natural_gas_consumption_nmbe => 48.7487},
-    {:electricity_consumption_cvrmse => 81.1799,
-     :electricity_consumption_nmbe => -84.0936,
-     :natural_gas_consumption_cvrmse => 44.4995,
-     :natural_gas_consumption_nmbe => 22.6094},
-    {:electricity_consumption_cvrmse => 27.5972,
-     :electricity_consumption_nmbe => 27.0657,
-     :natural_gas_consumption_cvrmse => 76.8553,
-     :natural_gas_consumption_nmbe => 51.0137},
-    {:electricity_consumption_cvrmse => 23.7873,
-     :electricity_consumption_nmbe => 23.2828,
-     :natural_gas_consumption_cvrmse => 81.4910,
-     :natural_gas_consumption_nmbe => 55.1189}
+      { electricity_consumption_cvrmse: 21.8917,
+        electricity_consumption_nmbe: 21.2198,
+        natural_gas_consumption_cvrmse: 74.0377,
+        natural_gas_consumption_nmbe: 48.7487 },
+      { electricity_consumption_cvrmse: 81.1799,
+        electricity_consumption_nmbe: -84.0936,
+        natural_gas_consumption_cvrmse: 44.4995,
+        natural_gas_consumption_nmbe: 22.6094 },
+      { electricity_consumption_cvrmse: 27.5972,
+        electricity_consumption_nmbe: 27.0657,
+        natural_gas_consumption_cvrmse: 76.8553,
+        natural_gas_consumption_nmbe: 51.0137 },
+      { electricity_consumption_cvrmse: 23.7873,
+        electricity_consumption_nmbe: 23.2828,
+        natural_gas_consumption_cvrmse: 81.4910,
+        natural_gas_consumption_nmbe: 55.1189 }
     ]
-    #setup bad results
+    # setup bad results
     nsga_nrel_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -442,7 +438,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('nsga_nrel')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -461,11 +457,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -491,7 +487,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -499,18 +495,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(4)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = nsga_nrel.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -522,27 +518,27 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #nsga_nrel_z
-  
+    end
+  end # nsga_nrel_z
+
   it 'run spea_nrel analysis', :spea_nrel, js: true do
-    #setup expected results
+    # setup expected results
     spea_nrel = [
-    {:electricity_consumption_cvrmse => 81.1799,
-     :electricity_consumption_nmbe => -84.0936,
-     :natural_gas_consumption_cvrmse => 44.4995,
-     :natural_gas_consumption_nmbe => 22.6094},
-    {:electricity_consumption_cvrmse => 21.8917,
-     :electricity_consumption_nmbe => 21.2198,
-     :natural_gas_consumption_cvrmse => 74.0377,
-     :natural_gas_consumption_nmbe => 48.7487}
+      { electricity_consumption_cvrmse: 81.1799,
+        electricity_consumption_nmbe: -84.0936,
+        natural_gas_consumption_cvrmse: 44.4995,
+        natural_gas_consumption_nmbe: 22.6094 },
+      { electricity_consumption_cvrmse: 21.8917,
+        electricity_consumption_nmbe: 21.2198,
+        natural_gas_consumption_cvrmse: 74.0377,
+        natural_gas_consumption_nmbe: 48.7487 }
     ]
-    #setup bad results
+    # setup bad results
     spea_nrel_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -571,7 +567,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('spea_nrel')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -590,11 +586,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -620,7 +616,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -628,18 +624,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(2)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = spea_nrel.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -651,27 +647,27 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #spea_nrel
-  
+    end
+  end # spea_nrel
+
   it 'run pso analysis', :pso, js: true do
-    #setup expected results
+    # setup expected results
     pso = [
-    {:electricity_consumption_cvrmse => 8.5655,
-     :electricity_consumption_nmbe => 5.9796,
-     :natural_gas_consumption_cvrmse => 65.1321,
-     :natural_gas_consumption_nmbe => -50.6434},
-     {:electricity_consumption_cvrmse => 41.6907,
-      :electricity_consumption_nmbe => -42.5526,
-      :natural_gas_consumption_cvrmse => 108.0013,
-      :natural_gas_consumption_nmbe => 77.2449}
+      { electricity_consumption_cvrmse: 8.5655,
+        electricity_consumption_nmbe: 5.9796,
+        natural_gas_consumption_cvrmse: 65.1321,
+        natural_gas_consumption_nmbe: -50.6434 },
+      { electricity_consumption_cvrmse: 41.6907,
+        electricity_consumption_nmbe: -42.5526,
+        natural_gas_consumption_cvrmse: 108.0013,
+        natural_gas_consumption_nmbe: 77.2449 }
     ]
-    #setup bad results
+    # setup bad results
     pso_bad = [
-    {:electricity_consumption_cvrmse => 0,
-     :electricity_consumption_nmbe => 0,
-     :natural_gas_consumption_cvrmse => 0,
-     :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -700,7 +696,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('pso')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -719,11 +715,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -749,7 +745,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -757,18 +753,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(2)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = pso.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -780,27 +776,27 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #pso
-  
+    end
+  end # pso
+
   it 'run rgenoud analysis', :rgenoud, js: true do
-    #setup expected results
+    # setup expected results
     rgenoud = [
-    {:electricity_consumption_cvrmse => 31.1268,
-     :electricity_consumption_nmbe => -31.6654,
-     :natural_gas_consumption_cvrmse => 29.6280,
-     :natural_gas_consumption_nmbe => -10.4302},
-    {:electricity_consumption_cvrmse => 58.2150,
-     :electricity_consumption_nmbe => -59.7658,
-     :natural_gas_consumption_cvrmse => 157.5567,
-     :natural_gas_consumption_nmbe => -129.7941}
+      { electricity_consumption_cvrmse: 31.1268,
+        electricity_consumption_nmbe: -31.6654,
+        natural_gas_consumption_cvrmse: 29.6280,
+        natural_gas_consumption_nmbe: -10.4302 },
+      { electricity_consumption_cvrmse: 58.2150,
+        electricity_consumption_nmbe: -59.7658,
+        natural_gas_consumption_cvrmse: 157.5567,
+        natural_gas_consumption_nmbe: -129.7941 }
     ]
-    #setup bad results
+    # setup bad results
     rgenoud_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -829,7 +825,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('rgenoud')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -848,11 +844,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -878,7 +874,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -886,18 +882,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(2)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = rgenoud.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -909,31 +905,31 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #rgenoud
+    end
+  end # rgenoud
 
   it 'run sobol analysis', :sobol, js: true do
-    #setup expected results
+    # setup expected results
     sobol = [
-    {:electricity_consumption_cvrmse => 42.9103,
-     :electricity_consumption_nmbe => -44.0163,
-     :natural_gas_consumption_cvrmse => 28.8360,
-     :natural_gas_consumption_nmbe => -0.0566},
-    {:electricity_consumption_cvrmse => 16.6939,
-     :electricity_consumption_nmbe => 14.0761,
-     :natural_gas_consumption_cvrmse => 113.9346,
-     :natural_gas_consumption_nmbe => -94.2536},
-     {:electricity_consumption_cvrmse => 20.9054,
-     :electricity_consumption_nmbe => 19.2165,
-     :natural_gas_consumption_cvrmse => 58.8637,
-     :natural_gas_consumption_nmbe => -47.3409}
+      { electricity_consumption_cvrmse: 42.9103,
+        electricity_consumption_nmbe: -44.0163,
+        natural_gas_consumption_cvrmse: 28.8360,
+        natural_gas_consumption_nmbe: -0.0566 },
+      { electricity_consumption_cvrmse: 16.6939,
+        electricity_consumption_nmbe: 14.0761,
+        natural_gas_consumption_cvrmse: 113.9346,
+        natural_gas_consumption_nmbe: -94.2536 },
+      { electricity_consumption_cvrmse: 20.9054,
+        electricity_consumption_nmbe: 19.2165,
+        natural_gas_consumption_cvrmse: 58.8637,
+        natural_gas_consumption_nmbe: -47.3409 }
     ]
-    #setup bad results
+    # setup bad results
     sobol_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -962,7 +958,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('sobol')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -981,11 +977,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -1011,7 +1007,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -1019,18 +1015,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(3)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = sobol.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -1042,27 +1038,27 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #sobol
+    end
+  end # sobol
 
   it 'run lhs analysis', :lhs, js: true do
-    #setup expected results
+    # setup expected results
     lhs = [
-    {:electricity_consumption_cvrmse => 26.8357,
-     :electricity_consumption_nmbe => 26.5679,
-     :natural_gas_consumption_cvrmse => 112.0244,
-     :natural_gas_consumption_nmbe => 79.8094},
-    {:electricity_consumption_cvrmse => 90.0408,
-     :electricity_consumption_nmbe => -93.2786,
-     :natural_gas_consumption_cvrmse => 40.2817,
-     :natural_gas_consumption_nmbe => -21.1406}
+      { electricity_consumption_cvrmse: 26.8357,
+        electricity_consumption_nmbe: 26.5679,
+        natural_gas_consumption_cvrmse: 112.0244,
+        natural_gas_consumption_nmbe: 79.8094 },
+      { electricity_consumption_cvrmse: 90.0408,
+        electricity_consumption_nmbe: -93.2786,
+        natural_gas_consumption_cvrmse: 40.2817,
+        natural_gas_consumption_nmbe: -21.1406 }
     ]
-    #setup bad results
+    # setup bad results
     lhs_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -1092,10 +1088,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('batch_run')
-            
-            #analysis_type = a[:analysis][:jobs][0][:analysis_type]
-            #expect(analysis_type).to eq('lhs')
-          
+
+            # analysis_type = a[:analysis][:jobs][0][:analysis_type]
+            # expect(analysis_type).to eq('lhs')
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -1114,11 +1110,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -1144,7 +1140,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -1152,18 +1148,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(2)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = lhs.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -1175,31 +1171,31 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #lhs
+    end
+  end # lhs
 
   it 'run lhs_discrete analysis', :lhs_discrete, js: true do
-    #setup expected results
+    # setup expected results
     lhs = [
-    {:electricity_consumption_cvrmse => 37.0121,
-     :electricity_consumption_nmbe => -37.8209,
-     :natural_gas_consumption_cvrmse => 202.5293,
-     :natural_gas_consumption_nmbe => -163.6007},
-    {:electricity_consumption_cvrmse => 36.6346,
-     :electricity_consumption_nmbe => -37.4445,
-     :natural_gas_consumption_cvrmse => 202.5468,
-     :natural_gas_consumption_nmbe => -163.6121},
-    {:electricity_consumption_cvrmse => 36.6346,
-     :electricity_consumption_nmbe => -37.4445,
-     :natural_gas_consumption_cvrmse => 147.6364,
-     :natural_gas_consumption_nmbe => -120.4101}
+      { electricity_consumption_cvrmse: 37.0121,
+        electricity_consumption_nmbe: -37.8209,
+        natural_gas_consumption_cvrmse: 202.5293,
+        natural_gas_consumption_nmbe: -163.6007 },
+      { electricity_consumption_cvrmse: 36.6346,
+        electricity_consumption_nmbe: -37.4445,
+        natural_gas_consumption_cvrmse: 202.5468,
+        natural_gas_consumption_nmbe: -163.6121 },
+      { electricity_consumption_cvrmse: 36.6346,
+        electricity_consumption_nmbe: -37.4445,
+        natural_gas_consumption_cvrmse: 147.6364,
+        natural_gas_consumption_nmbe: -120.4101 }
     ]
-    #setup bad results
+    # setup bad results
     lhs_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -1218,7 +1214,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
     status = 'queued'
     timeout_seconds = 120
     sleep 10
-    
+
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -1230,10 +1226,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('batch_run')
-            
-            #analysis_type = a[:analysis][:jobs][0][:analysis_type]
-            #expect(analysis_type).to eq('lhs')
-          
+
+            # analysis_type = a[:analysis][:jobs][0][:analysis_type]
+            # expect(analysis_type).to eq('lhs')
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -1252,11 +1248,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -1282,7 +1278,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -1290,18 +1286,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(3)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = lhs.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -1313,31 +1309,31 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #lhs_discrete
-  
+    end
+  end # lhs_discrete
+
   it 'run morris analysis', :morris, js: true do
-    #setup expected results
+    # setup expected results
     morris = [
-    {:electricity_consumption_cvrmse => 24.4905,
-     :electricity_consumption_nmbe => 23.1731,
-     :natural_gas_consumption_cvrmse => 133.9203,
-     :natural_gas_consumption_nmbe => -111.3358},
-    {:electricity_consumption_cvrmse => 86.3250,
-     :electricity_consumption_nmbe => -89.7282,
-     :natural_gas_consumption_cvrmse => 40.6764,
-     :natural_gas_consumption_nmbe => -23.7675},
-     {:electricity_consumption_cvrmse => 88.8407,
-     :electricity_consumption_nmbe => -92.3903,
-     :natural_gas_consumption_cvrmse =>	81.0866,
-     :natural_gas_consumption_nmbe => -62.2454}
+      { electricity_consumption_cvrmse: 24.4905,
+        electricity_consumption_nmbe: 23.1731,
+        natural_gas_consumption_cvrmse: 133.9203,
+        natural_gas_consumption_nmbe: -111.3358 },
+      { electricity_consumption_cvrmse: 86.3250,
+        electricity_consumption_nmbe: -89.7282,
+        natural_gas_consumption_cvrmse: 40.6764,
+        natural_gas_consumption_nmbe: -23.7675 },
+      { electricity_consumption_cvrmse: 88.8407,
+        electricity_consumption_nmbe: -92.3903,
+        natural_gas_consumption_cvrmse: 81.0866,
+        natural_gas_consumption_nmbe: -62.2454 }
     ]
-    #setup bad results
+    # setup bad results
     morris_bad = [
-     {:electricity_consumption_cvrmse => 0,
-      :electricity_consumption_nmbe => 0,
-      :natural_gas_consumption_cvrmse => 0,
-      :natural_gas_consumption_nmbe => 0}
+      { electricity_consumption_cvrmse: 0,
+        electricity_consumption_nmbe: 0,
+        natural_gas_consumption_cvrmse: 0,
+        natural_gas_consumption_nmbe: 0 }
     ]
 
     # run an analysis
@@ -1366,7 +1362,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
             expect(analysis_type).to eq('morris')
-          
+
             status = a[:analysis][:status]
             expect(status).not_to be_nil
             puts "Accessed pages for analysis: #{analysis_id}, analysis_type: #{analysis_type}, status: #{status}"
@@ -1385,11 +1381,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
               # get the datapoint pages
               data_point_id = data_point[:_id]
               expect(data_point_id).not_to be_nil
-            
+
               a = RestClient.get "http://#{@host}/data_points/#{data_point_id}.json"
               a = JSON.parse(a, symbolize_names: true)
               expect(a).not_to be_nil
-            
+
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
@@ -1415,7 +1411,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       dps = RestClient.get "http://#{@host}/data_points.json"
       dps = JSON.parse(dps, symbolize_names: true)
       expect(dps).not_to be_nil
-    
+
       data_points = []
       dps.each do |data_point|
         if data_point[:analysis_id] == analysis_id
@@ -1423,18 +1419,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
         end
       end
       expect(data_points.size).to eq(3)
-    
+
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-      
+
         results = dp[:data_point][:results][:calibration_reports_enhanced_20]
         expect(results).not_to be_nil
-        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe ,:natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
+        sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-      
+
         compare = morris.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -1446,8 +1442,6 @@ RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
       puts "rescue: #{e} get_count: #{get_count}"
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
-    end    
-  end #morris
-  
+    end
+  end # morris
 end
-
