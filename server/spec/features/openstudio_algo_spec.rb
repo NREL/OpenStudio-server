@@ -55,7 +55,7 @@ project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 # host = '127.0.0.1'
 
 # the actual tests
-RSpec.describe 'RunAlgorithms', type: :feature, depends_resque: true do
+RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   # before :all do
   #  @previous_job_manager = Rails.application.config.job_manager
   #  Rails.application.config.job_manager = :resque
