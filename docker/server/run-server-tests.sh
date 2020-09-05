@@ -20,18 +20,20 @@ echo "Waiting for Redis to start"
 # Always create new indexes in case the models have changed
 cd /opt/openstudio/server && bundle exec rake db:mongoid:create_indexes
 
-# The memfix-controller seems to have causes some issues with NRCan, need to revisit.
-# https://github.com/NREL/OpenStudio-server/issues/348
-#ruby /usr/local/lib/memfix-controller.rb start
-
 # AP hack for now to ensure both resque and nginx/rails are running on web.
 # Note that this will only run the analysis background queue as it is set in the docker-compose env file.
 bundle exec rake environment resque:work &
 
 /opt/nginx/sbin/nginx &
 
-# Always create new indexes in case the models have changed
-cd /opt/openstudio/server && bundle exec rspec --tag algo; (( exit_status = exit_status || $? ))
-cd /opt/openstudio/server && bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
+echo "Start the web service"
+#cd /opt/openstudio/server && bundle exec rake db:mongoid:create_indexes
+#bundle exec rake environment resque:work &
+#/opt/nginx/sbin/nginx -d
+#/usr/local/bin/wait-for-it --strict -t 0 web:80
+
+#cd /opt/openstudio/server && bundle exec rspec; (( exit_status = exit_status || $? ))
+cd /opt/openstudio/server && bundle exec rspec spec/features/openstudio_algo_spec.rb:641; (( exit_status = exit_status || $? ))
+#cd /opt/openstudio/server && bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
 
 exit $exit_status

@@ -72,6 +72,7 @@ jobs:
         - docker-compose --version
         - docker-compose -f docker-compose.test.yml pull
         - docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+        - docker-compose -f docker-compose.test.yml run worker
       script:
         - docker-compose -f docker-compose.test.yml run web && docker-compose stop
       after_script:

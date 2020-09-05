@@ -50,8 +50,12 @@ require 'json'
 
 # Set obvious paths for start-local & run-analysis invocation
 ruby_cmd = 'ruby'
-meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
+# meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
+# # For testing locally
+meta_cli = File.absolute_path('../bin/openstudio_meta')
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+puts "Project folder is: #{project}"
+puts "docker ps: #{system('docker ps')}"
 # host = '127.0.0.1'
 
 # the actual tests
@@ -71,25 +75,17 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   #  Rails.application.config.job_manager = @previous_job_manager
   # end
 
-  before do
-    # Look at DatabaseCleaner gem in the future to deal with this.
-    # begin
-    #  Project.destroy_all
-    #  Delayed::Job.destroy_all
-    # rescue Errno::EACCES => e
-    #  puts 'Cannot unlink files, will try and continue'
-    # end
-
-    # Resque.workers.each(&:unregister_worker)
-    # Resque.queues.each { |q| Resque.redis.del "queue:#{q}" }
-
-    @host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
+  before :all do
+    @host = "localhost:8080"
+    # @host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
     puts "App host is: http://#{@host}"
 
     # TODO: Make this a helper of some sort
     options = { hostname: "http://#{@host}" }
     # TODO: Convert this over to the openstudio_meta
     # @api = OpenStudio::Analysis::ServerApi.new(options)
+    # You are still going to want the ServerApi to grab results. You can replace a bunch of the
+    # RestClient calls below.
     APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 

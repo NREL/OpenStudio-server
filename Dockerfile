@@ -108,13 +108,12 @@ RUN bundle install --jobs=3 --retry=3
 # started before starting the main process.
 COPY /docker/server/wait-for-it.sh /usr/local/bin/wait-for-it
 COPY /docker/server/start-server.sh /usr/local/bin/start-server
-COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+
 COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
 COPY /docker/server/start-web-background.sh /usr/local/bin/start-web-background
 COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
 RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
-RUN chmod +x /usr/local/bin/run-server-tests
 RUN chmod 755 /usr/local/bin/rails-entrypoint
 RUN chmod 755 /usr/local/bin/start-web-background
 RUN chmod 755 /usr/local/bin/start-workers
@@ -149,6 +148,9 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
     tar -xvzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
     rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
     chmod +x geckodriver;
+
+COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+RUN chmod +x /usr/local/bin/run-server-tests
 
 # Test adding the git repo to the container for coveralls
 # The #TEST# will be removed in the travis test script to be run in the test container
