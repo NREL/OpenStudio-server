@@ -15,7 +15,7 @@ services:
     build:
       context: .
       args:
-        rails_env: docker-test
+        rails_env: docker
         bundle_args: ''
     environment:
       - CI
@@ -41,6 +41,11 @@ services:
     command: /usr/local/bin/start-server
   web-background:
     image: nrel/openstudio-server:latest
+    build:
+      context: .
+      args:
+        rails_env: docker
+        bundle_args: ''
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=background,analyses
@@ -55,9 +60,8 @@ services:
     image: nrel/openstudio-server:latest
     build:
       context: .
-      target: base
       args:
-        rails_env: docker-test
+        rails_env: docker
         bundle_args: ''
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1

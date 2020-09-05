@@ -49,38 +49,31 @@ require 'rest-client'
 require 'json'
 
 # Set obvious paths for start-local & run-analysis invocation
-ruby_cmd = 'ruby'
-# meta_cli = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
-# # For testing locally
-meta_cli = File.absolute_path('../bin/openstudio_meta')
-project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
-puts "Project folder is: #{project}"
-puts "docker ps: #{system('docker ps')}"
-# host = '127.0.0.1'
+RUBY_CMD = 'ruby'
+
+# Docker tests have these hard coded paths
+META_CLI = File.absolute_path('/opt/openstudio/bin/openstudio_meta')
+PROJECT = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+HOST = '127.0.0.1'
+
+# For testing locally
+#META_CLI = File.absolute_path('../bin/openstudio_meta')
+#PROJECT = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+#HOST = 'localhost:8080'
+
+puts "Project folder is: #{PROJECT}"
+puts "META_CLI is: #{META_CLI}"
+puts "App host is: http://#{HOST}"
+puts "Docker ps: #{system('docker ps')}"
 
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
-  # before :all do
-  #  @previous_job_manager = Rails.application.config.job_manager
-  #  Rails.application.config.job_manager = :resque
-
-  # gem install
-  # command = "#{ruby_cmd} #{meta_cli} install_gems"
-  # puts command
-  # run_analysis = system(command)
-  # expect(run_analysis).to be true
-  # end
-
-  # after :all do
-  #  Rails.application.config.job_manager = @previous_job_manager
-  # end
-
   before :all do
-    @host = "localhost:8080"
-    # @host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-    puts "App host is: http://#{@host}"
+    @host = HOST
+    @project = PROJECT
+    @meta_cli = META_CLI
+    @ruby_cmd = RUBY_CMD
 
-    # TODO: Make this a helper of some sort
     options = { hostname: "http://#{@host}" }
     # TODO: Convert this over to the openstudio_meta
     # @api = OpenStudio::Analysis::ServerApi.new(options)
@@ -93,7 +86,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     # setup expected results
     # run an analysis
     # test_zip.zip is ../test_zip/test_zip.zip from test.json location and not /test_zip/test_zip.zip
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/test_dir/test.json' 'http://#{@host}' -z '/test_zip/test_zip.zip' -a nsga_nrel"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/test_dir/test.json' 'http://#{@host}' -z '/test_zip/test_zip.zip' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be false
@@ -128,7 +121,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
     # run an analysis
     # test_zip.zip is ../test_zip/test_zip.zip from test.json location
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/test_dir/test.json' 'http://#{@host}' -z '../test_zip/test_zip.zip' -a nsga_nrel"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/test_dir/test.json' 'http://#{@host}' -z '../test_zip/test_zip.zip' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -272,7 +265,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_NSGA_2013.json' 'http://#{@host}' -a nsga_nrel"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_calibration_NSGA_2013.json' 'http://#{@host}' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -409,7 +402,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_NSGA_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a nsga_nrel"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_calibration_NSGA_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a nsga_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -538,7 +531,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_SPEA_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a spea_nrel"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_calibration_SPEA_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a spea_nrel"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -667,7 +660,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_PSO_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a pso"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_calibration_PSO_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a pso"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -796,7 +789,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_calibration_Rgenoud_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a rgenoud"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_calibration_Rgenoud_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a rgenoud"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -929,7 +922,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_Sobol_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a sobol"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_Sobol_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a sobol"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -1058,7 +1051,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_LHS_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a lhs"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_LHS_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a lhs"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -1195,7 +1188,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_LHS_2013_discrete.json' 'http://#{@host}' -a lhs"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_LHS_2013_discrete.json' 'http://#{@host}' -a lhs"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -1333,7 +1326,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{ruby_cmd} #{meta_cli} run_analysis --debug --verbose '#{project}/SEB_Morris_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a morris"
+    command = "#{@ruby_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/SEB_Morris_2013.json' 'http://#{@host}' -z 'SEB_calibration_NSGA_2013' -a morris"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
