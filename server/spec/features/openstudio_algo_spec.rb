@@ -64,7 +64,8 @@ HOST = '127.0.0.1'
 puts "Project folder is: #{PROJECT}"
 puts "META_CLI is: #{META_CLI}"
 puts "App host is: http://#{HOST}"
-puts "Docker ps: #{system('docker-compose ps')}"
+docker_ps = system('docker-compose ps')
+puts "Docker ps: #{docker_ps.to_s}"
 
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
