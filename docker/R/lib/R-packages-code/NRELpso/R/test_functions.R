@@ -1,5 +1,5 @@
 # Part of the hydroPSO package, http://www.rforge.net/hydroPSO/
-# Copyright 2008-2012 Mauricio Zambrano-Bigiarini & Rodrigo Rojas
+# Copyright 2008-2018 Mauricio Zambrano-Bigiarini & Rodrigo Rojas
 # Distributed under GPL 2 or later
 
 # All these function were started on 2008, with updates on:                    #
@@ -15,7 +15,7 @@ sinc <- function(x) {
 } # 'sinc' END
 
 
-# MZB, RR, 21-Jun-2011,  14-Nov-2011 ; 21-Nov-2012
+# MZB, RR, 21-Jun-2011,  14-Nov-2011 ; 21-Nov-2012 ; 10-Jun-2018
 # Rosenbrock function: f(1,..,1)=0. Minimization. In [-30, 30]^n. AcceptableError < 100
 # Properties : Unimodal, Non-separable 
 # Description: The Rosenbrock function is non-convex, unimodal and non-separable. 
@@ -23,7 +23,7 @@ sinc <- function(x) {
 #              The global minimum is inside a long, narrow, parabolic shaped flat valley. 
 #              To find the valley is trivial. To converge to the global minimum, however, is difficult. 
 #              It only has one optimum located at the point \preformatted{o =(1,...,1)}. 
-#              It is a quadratic function, and its search range is [−30, 30] for each variable. 
+#              It is a quadratic function, and its search range is [-30, 30] for each variable. 
 # Ref: http://en.wikipedia.org/wiki/Rosenbrock_function, http://www.it.lut.fi/ip/evo/functions/node5.html
 rosenbrock <- function(x) {  
   n <- length(x)
@@ -31,7 +31,7 @@ rosenbrock <- function(x) {
 } # 'rosenbrock' END
 
 
-# MZB, RR, 21-Jun-2011; 21-Nov-2012
+# MZB, RR, 21-Jun-2011; 21-Nov-2012 ; 10-Jun-2018
 # Sphere function: f(0,..,0)=0. Minimization. In [-100, 100]^n. AcceptableError < 0.01
 # Properties : Unimodal, additively separable
 # Description: The Sphere test function is one of the most simple test functions 
@@ -39,7 +39,7 @@ rosenbrock <- function(x) {
 #              test function can be scaled up to any number of variables. 
 #              It belongs to a family of functions called quadratic functions and 
 #              only has one optimum in the point o = (0,...,0). The search range 
-#              commonly used for the Sphere function is [−100, 100] for each decision variable.
+#              commonly used for the Sphere function is [-100, 100] for each decision variable.
 # Reference  : http://www.it.lut.fi/ip/evo/functions/node2.html
 sphere <- function(x) {
   return(sum(x^2))  

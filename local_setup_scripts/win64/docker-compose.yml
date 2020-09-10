@@ -51,6 +51,7 @@ services:
       - web
       - queue
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager
@@ -68,6 +69,8 @@ services:
       - db
       - queue
       - rserve
+    deploy:
+      endpoint_mode: dnsrr
     command: /usr/local/bin/start-workers
   rserve:
     image: 127.0.0.1:5000/openstudio-rserve
@@ -78,6 +81,7 @@ services:
       - web-background
       - db
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager

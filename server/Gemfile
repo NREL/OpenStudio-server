@@ -55,8 +55,8 @@ gem 'sprockets-rails'
 gem 'uglifier'
 
 # don't try to install sassc 2.
-gem 'sassc', '~>1.12.1'
 gem 'roo', '~>2.8.3'
+gem 'sassc', '~>1.12.1'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
@@ -70,13 +70,13 @@ gem 'openstudio-analysis', '= 1.0.4'
 
 gem 'openstudio-aws', '0.7.1'
 
-#libxml 3.2.0 failing on windows
+# libxml 3.2.0 failing on windows
+gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
 gem 'libxml-ruby', '3.1.0'
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
-gem 'rest-client', '~>2.0.1' 
 gem 'nio4r', '~>2.3.1' # 2.4.0 breaks w/ruby 2.2.4
-gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
+gem 'rest-client', '~>2.0.1'
 
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
 gem 'rubyXL', '~> 3.3.29'
@@ -90,8 +90,8 @@ end
 
 # The only resque only is :docker, :docker-dev, :production
 group :development, :docker, :'docker-dev', :'docker-test', :production, :test do
+  gem 'redis', '=4.1.0'
   gem 'redis-namespace', '=1.6.0'
-  gem 'redis', '=4.1.0' 
   gem 'resque', '=1.27.4'
   gem 'resque-web', require: 'resque_web'
 end
@@ -105,9 +105,9 @@ group :development, :test do
   gem 'meta_request'
 
   gem 'capybara'
-  gem 'puma' #used by capybara
-  gem 'public_suffix', '=3.0.3'
   gem 'coveralls', require: false
+  gem 'public_suffix', '=3.0.3'
+  gem 'puma' # used by capybara
   gem 'rspec', '~> 3.4'
   gem 'rspec-rails'
   gem 'rspec-retry'
@@ -123,4 +123,6 @@ group :development, :test do
   gem 'factory_bot_rails', '4.11.1' # 5.0.2 require ruby 2.3
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
+
+  gem 'json-schema', '2.8.0'
 end

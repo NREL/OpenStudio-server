@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -110,9 +110,9 @@ module DjJobs
         end
         upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
         @data_point.set_error_flag
-        @data_point.set_complete_state if @data_point
+        @data_point&.set_complete_state
         @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
-        @sim_logger.close if @sim_logger
+        @sim_logger&.close
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         return false
@@ -199,55 +199,53 @@ module DjJobs
         # Make sure to pass in preserve_run_dir
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
+          cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+          process_log = File.join(simulation_dir, 'oscli_simulation.log')
+          @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
+          oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect { |x| [x, nil] }]
+          pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
+          # add check for a valid timeout value
+          unless @data_point.analysis.run_workflow_timeout.positive?
+            @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
+            @@data_point.analysis.run_workflow_timeout = 28800
+          end
+          Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
+            Process.wait(pid)
+          end
+
+          if $?.exitstatus != 0
+            raise "Oscli returned error code #{$?.exitstatus}"
+          end
+        rescue Timeout::Error
+          @sim_logger.error "Killing process for #{osw_path} due to timeout."
+          # openstudio process actually runs in a child of pid.  to prevent orphaned processes on timeout, we
+          # need to identify the child and kill it as well.
+          # exception handing and a lot of logging in case we discover cases with >1 child process or other behavior
+          # that is not currently handled.
           begin
-            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
-            process_log = File.join(simulation_dir, 'oscli_simulation.log')
-            @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
-            oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
-            pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
-            # add check for a valid timeout value
-            unless @data_point.analysis.run_workflow_timeout.positive?
-              @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-              @@data_point.analysis.run_workflow_timeout = 28800
+            @sim_logger.info "looking up any children of timed out process #{pid}"
+            child_pid = `ps -o pid= --ppid "#{pid}"`.to_i
+            if child_pid > 0
+              @sim_logger.info "killing child #{child_pid} of timed out process #{pid}"
+              Process.kill('KILL', child_pid)
             end
-            Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
-              Process.wait(pid)
-            end
-
-            if $?.exitstatus != 0
-              raise "Oscli returned error code #{$?.exitstatus}"
-            end
-          rescue Timeout::Error
-            @sim_logger.error "Killing process for #{osw_path} due to timeout."
-            # openstudio process actually runs in a child of pid.  to prevent orphaned processes on timeout, we
-            # need to identify the child and kill it as well.
-            # exception handing and a lot of logging in case we discover cases with >1 child process or other behavior
-            # that is not currently handled.
-            begin
-              @sim_logger.info "looking up any children of timed out process #{pid}"
-              child_pid = `ps -o pid= --ppid "#{pid}"`.to_i
-              if child_pid > 0
-                @sim_logger.info "killing child #{child_pid} of timed out process #{pid}"
-                Process.kill('KILL', child_pid)
-              end
-              @sim_logger.info "killing timed out process #{pid}"
-              Process.kill('KILL', pid)
-            rescue Exception => e
-              @sim_logger.error "Error killing process #{pid}: #{e}"
-            end
-
-            run_result = :errored
-          rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
-            log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
-            @sim_logger.error log_message if @sim_logger
-            run_result = :errored
+            @sim_logger.info "killing timed out process #{pid}"
+            Process.kill('KILL', pid)
           rescue Exception => e
-            @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
-            run_result = :errored
-          ensure
-            if process_log
-              @sim_logger.info "Oscli output: #{File.read(process_log)}"
-            end
+            @sim_logger.error "Error killing process #{pid}: #{e}"
+          end
+
+          run_result = :errored
+        rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
+          log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
+          @sim_logger&.error log_message
+          run_result = :errored
+        rescue Exception => e
+          @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
+          run_result = :errored
+        ensure
+          if process_log
+            @sim_logger.info "Oscli output: #{File.read(process_log)}"
           end
         end
         if run_result == :errored
@@ -285,7 +283,7 @@ module DjJobs
           # Post the reports back to the server
           uploads_successful = []
           if @data_point.analysis.download_reports
-            @sim_logger.info "downloading reports/*.{html,json,csv}"
+            @sim_logger.info 'downloading reports/*.{html,json,csv}'
             Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
           else
             @sim_logger.info "NOT downloading /reports/*.{html,json,csv} since download_reports value is: #{@data_point.analysis.download_reports}"
@@ -293,21 +291,21 @@ module DjJobs
           report_file = "#{run_dir}/objectives.json"
           uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
           if @data_point.analysis.download_osw
-            @sim_logger.info "downloading out.OSW"
+            @sim_logger.info 'downloading out.OSW'
             report_file = "#{simulation_dir}/out.osw"
             uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
           else
             @sim_logger.info "NOT downloading out.OSW since download_osw value is: #{@data_point.analysis.download_osw}"
           end
           if @data_point.analysis.download_osm
-            @sim_logger.info "downloading in.OSM"
+            @sim_logger.info 'downloading in.OSM'
             report_file = "#{simulation_dir}/in.osm"
             uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
           else
             @sim_logger.info "NOT downloading in.OSM since download_osm value is: #{@data_point.analysis.download_osm}"
           end
           if @data_point.analysis.download_zip
-            @sim_logger.info "downloading datapoint.ZIP"
+            @sim_logger.info 'downloading datapoint.ZIP'
             report_file = "#{run_dir}/data_point.zip"
             uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
           else
@@ -343,13 +341,13 @@ module DjJobs
         end
       rescue ScriptError, NoMemoryError, StandardError => e
         log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-        @sim_logger.error log_message if @sim_logger
+        @sim_logger&.error log_message
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
       ensure
-        @sim_logger.info "Finished #{__FILE__}" if @sim_logger
-        @sim_logger.close if @sim_logger
-        @data_point.set_complete_state if @data_point
+        @sim_logger&.info "Finished #{__FILE__}"
+        @sim_logger&.close
+        @data_point&.set_complete_state
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         true
@@ -428,9 +426,9 @@ module DjJobs
           begin
             Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               extract_count += 1
-	      # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
-	      # This is local function for workaround until that is resolved
-              #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+              # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+              # This is local function for workaround until that is resolved
+              # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
               extract_archive(download_file, analysis_dir)
             end
           rescue StandardError => e
@@ -520,7 +518,7 @@ module DjJobs
 
     # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
     # This is local function for workaround until that is resolved
-    #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+    # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
     def extract_archive(archive_filename, destination, overwrite = true)
       ::Zip.sort_entries = true
       Zip::File.open(archive_filename) do |zf|

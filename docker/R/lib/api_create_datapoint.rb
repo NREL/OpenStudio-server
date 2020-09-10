@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -38,6 +38,7 @@
 
 require 'optparse'
 require 'rest-client'
+require 'json'
 
 options = { submit_simulation: false, sleep_time: 5 }
 o = OptionParser.new do |opts|
@@ -73,7 +74,7 @@ begin
     }
   }
 
-  a = RestClient.post "#{options[:host]}/analyses/#{options[:analysis_id]}/data_points.json", data_point_data
+  a = RestClient.post "#{options[:host]}/analyses/#{options[:analysis_id]}/data_points.json", data_point_data.to_json , {content_type: :json, accept: :json}
   raise 'Could not create datapoint' unless a.code == 201
 
   a = JSON.parse(a, symbolize_names: true)

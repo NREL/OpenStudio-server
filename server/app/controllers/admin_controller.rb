@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -39,9 +39,9 @@ class AdminController < ApplicationController
     @gems = Gem::Specification.all.map { |g| [g.name, g.version.to_s] }.sort
     Rails.logger.debug "oscli version command: #{Utility::Oss.oscli_cmd} openstudio_version"
     # syntax to explicitly unset a bunch of env vars is very different for windows
-    unset_vars = (Gem.win_platform? || ENV['OS'] == 'Windows_NT') ? 'set '+ Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join('= && set '): 'unset '+Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join(' && unset ')
+    unset_vars = Gem.win_platform? || ENV['OS'] == 'Windows_NT' ? 'set ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join('= && set ') : 'unset ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join(' && unset ')
     oscli_cmd = "#{Utility::Oss.oscli_cmd} openstudio_version"
-    oscli_cmd = "call #{oscli_cmd}" if (Gem.win_platform? || ENV['OS'] == 'Windows_NT')
+    oscli_cmd = "call #{oscli_cmd}" if Gem.win_platform? || ENV['OS'] == 'Windows_NT'
     version = `#{unset_vars} && #{oscli_cmd}`
     Rails.logger.debug "oscli version output: #{version}"
     @os_cli = version ? version.strip : 'Unknown'

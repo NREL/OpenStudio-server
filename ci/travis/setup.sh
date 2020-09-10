@@ -50,6 +50,11 @@ else
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
         export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
 
+        # set the ulimit to be higher
+        ulimit -a
+        ulimit -n 4096
+        ulimit -a
+
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
