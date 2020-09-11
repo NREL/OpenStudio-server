@@ -68,7 +68,7 @@ else
         sudo mv redis.conf /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
-        sudo apt-get install -y pv tree mongodb libgdbm-dev
+        sudo apt-get install -y pv tree mongodb libqdbm14
         sudo systemctl start mongodb
 
         # install portable ruby - required for build that will eventually be published
