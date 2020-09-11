@@ -17,7 +17,7 @@ else
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-        brew install pv tree libxml2
+        brew install pv tree
         
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
@@ -54,6 +54,7 @@ else
         ulimit -a
         ulimit -n 4096
         ulimit -a
+        bundle config --global build.libxml-ruby --with-xml2-config="$(brew --prefix libxml2)/bin/xml2-config"
 
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
