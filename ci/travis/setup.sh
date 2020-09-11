@@ -17,7 +17,7 @@ else
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-        brew install pv tree
+        brew install pv tree libxml2
         
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
