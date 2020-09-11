@@ -86,6 +86,8 @@ if RUBY_PLATFORM =~ /linux/
   gem 'execjs'
   gem 'libv8'
   gem 'therubyracer'
+elsif RUBY_PLATFORM =~ /darwin/
+  gem 'execjs', github: 'NREL/execjs'
 end
 
 # The only resque only is :docker, :docker-dev, :production
