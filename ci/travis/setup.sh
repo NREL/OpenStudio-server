@@ -68,16 +68,16 @@ else
         sudo mv redis.conf /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
-        sudo apt-get install -y pv tree mongodb ruby2.5
+        sudo apt-get install -y pv tree mongodb
         sudo systemctl start mongodb
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
-        # curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
-        # tar xvzf ruby-2.5.5-linux.tar.gz
-        # sudo mv ruby /usr/local/
-        # ldd /usr/local/ruby/bin/ruby
-        # rm ruby-2.5.5-linux.tar.gz
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
+        tar xvzf ruby-2.5.5-linux.tar.gz
+        sudo mv ruby /usr/local/
+        ldd /usr/local/ruby/bin/ruby
+        rm ruby-2.5.5-linux.tar.gz
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
