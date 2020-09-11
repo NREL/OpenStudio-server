@@ -96,7 +96,7 @@ else
     which ruby
     ruby -v
     # test openssl
-    ruby ${TRAVIS_BUILD_DIR}/ci/travis/cipher.rb
+    # ruby ${TRAVIS_BUILD_DIR}/ci/travis/cipher.rb
     ruby ${TRAVIS_BUILD_DIR}/ci/travis/verify_openstudio.rb
     
     ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems

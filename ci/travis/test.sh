@@ -33,6 +33,9 @@ else
     if [ "${BUILD_TYPE}" == "test" ];then
         ulimit -a
         echo "starting unit tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
+        # Threadsafe test requires higher ulimit to avoid EMFILE error
+        ulimit -n
+        ulimit -n 1024
         ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" "${TRAVIS_BUILD_DIR}/spec/unit-test"
         exit_status=$?
         if [ $exit_status == 0 ];then
