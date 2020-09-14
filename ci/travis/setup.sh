@@ -54,9 +54,7 @@ else
         ulimit -a
         ulimit -n 4096
         ulimit -a
-        
-        brew link -f libxml2
-        
+
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
