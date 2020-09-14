@@ -45,10 +45,12 @@ else
         sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
         hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
         rm ${OS_NAME}.dmg
-        export PATH="/usr/local/ruby/bin:$TRAVIS_BUILD_DIR/gems/bin:$HOME/openstudio/bin:$PATH"
+        export PATH="/usr/local/ruby/bin:$TRAVIS_BUILD_DIR/gems/bin:$HOME/openstudio/bin:/usr/local/opt/libxml2/bin:$PATH"
         export RUBYLIB="$HOME/openstudio/Ruby"
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
         export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
+        export LDFLAGS="-L/usr/local/opt/libxml2/lib"
+        export CPPFLAGS="-I/usr/local/opt/libxml2/include"
 
         # set the ulimit to be higher
         ulimit -a
