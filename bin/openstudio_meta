@@ -353,8 +353,8 @@ class InstallGems
 
     sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 2.1.0"
     if /darwin/.match(RUBY_PLATFORM)
-      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-include=/usr/include"
-      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-config=/usr/include"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-config=/usr/bin/xml2-config"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config
     end
     if options[:test_dev_build]
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
