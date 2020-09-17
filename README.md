@@ -92,17 +92,16 @@ docker volume rm osdata
 docker volume create --name=osdata
 export RAILS_ENV=docker-test
 sed -i -E "s/.git//g" .dockerignore
-docker-compose -f docker-compose.test.yml build
-docker-compose -f docker-compose.test.yml run -d rserve
-docker-compose -f docker-compose.test.yml run -d web-background
-docker-compose -f docker-compose.test.yml run -d db
+docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=develop
 docker-compose -f docker-compose.test.yml run web
 
-# Or condensed
-sed -i -E "s/.git//g" .dockerignore
-docker-compose rm -f && docker-compose -f docker-compose.test.yml build && docker volume rm osdata && docker volume create --name=osdata && docker-compose -f docker-compose.test.yml up
+# in another terminal (or detach previous commands)
+docker-compose -f docker-compose.test.yml run worker
+
 git checkout -- Dockerfile .dockerignore
 ```
+
+
 
 ### Docker Deployment:
 
