@@ -1,4 +1,4 @@
-language: generic
+language: minimal
 
 env:
   global:
@@ -6,9 +6,6 @@ env:
     - OPENSTUDIO_VERSION=3.0.1 OPENSTUDIO_VERSION_SHA=09b7c8a554 OPENSTUDIO_VERSION_EXT=""
     - DOCKER_COMPOSE_VERSION=1.21.1
     - BUNDLE_WITHOUT=native_ext
-
-# gemfile:
-  # - server/Gemfile
 
 # Set the default scripts that are used for the majority of the tests in the matrix
 # redis-server now wants to bind to ipv6 ::1.  This changes this behavior. 
@@ -22,9 +19,6 @@ after_failure: ./ci/travis/print_logs.sh
 
 # Services for linux -- all instances
 services:
-  # counter to documentation, these aren't starting for bionic
-  # - mongodb
-  # - redis-server
   - docker
 
 jobs:
@@ -89,7 +83,7 @@ jobs:
       after_script:
         # Reset the git checkout to remove the test-based data in the containers and rebuild
         - git checkout -- .dockerignore && git checkout -- Dockerfile
-        
+
     - stage: publish
       # Include your branch name below to publish a custom image.
       # This change must be made in combination with a modification to
@@ -112,8 +106,7 @@ jobs:
         - docker-compose build rserve
       script: ./docker/deployment/scripts/deploy_docker.sh
     - stage: publish
-      # publish native build for osx to s3
-      if: branch = travis_build_artifacts #branch = master OR branch = develop
+      if: branch = master OR branch = develop
       os: osx
       osx_image: xcode10.2
       sudo: required
@@ -122,8 +115,7 @@ jobs:
       before_script:
       script: ./ci/travis/export_build_osx.sh
     - stage: publish
-      # publish native build for linux to s3
-      if: branch = travis_build_artifacts # branch = master OR branch = develop
+      if: branch = master OR branch = develop
       os: linux
       dist: bionic
       sudo: required
