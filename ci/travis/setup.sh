@@ -13,18 +13,26 @@ if [ "${BUILD_TYPE}" == "docker" ]; then
     sudo apt-get install -y pv
 
 else
+    sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
     if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 
         brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
-        # AP: do we need mongo install here ? seems to be handled by service defined in travis yml.
-        # NL: Services are not handled in osx
-        brew install pv tree ruby@2.5
+        brew install pv tree
+        
+        # install portable ruby - required for build that will eventually be published
+        # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-darwin.tar.gz
+        tar xvzf ruby-2.5.5-darwin.tar.gz       
+        sudo mv ruby /usr/local/
+        otool -L /usr/local/ruby/bin/ruby
+        rm ruby-2.5.5-darwin.tar.gz
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
         tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
         cp mongodb-osx-x86_64-3.4.18/bin/* /usr/local/bin/
-
+        rm -r mongodb-osx*
+        
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin
         export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
@@ -36,8 +44,8 @@ else
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
         hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
-
-        export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/opt/ruby@2.5/bin:$HOME/openstudio/bin:$PATH"
+        rm ${OS_NAME}.dmg
+        export PATH="/usr/local/ruby/bin:$TRAVIS_BUILD_DIR/gems/bin:$HOME/openstudio/bin:$PATH"
         export RUBYLIB="$HOME/openstudio/Ruby"
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
         export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
@@ -60,15 +68,23 @@ else
         sudo mv redis.conf /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
-        sudo apt-get install -y pv tree mongodb ruby2.5
+        sudo apt-get install -y pv tree mongodb libqdbm14
         sudo systemctl start mongodb
+
+        # install portable ruby - required for build that will eventually be published
+        # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
+        tar xvzf ruby-2.5.5-linux.tar.gz
+        sudo mv ruby /usr/local/
+        ldd /usr/local/ruby/bin/ruby
+        rm ruby-2.5.5-linux.tar.gz
 
         mkdir -p reports/rspec
         # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
         sudo ./ci/travis/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
         export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/Ruby
         export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus
-        export PATH=/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
+        export PATH=/usr/local/ruby/bin:/usr/local/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
         export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
         export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     fi
@@ -77,7 +93,12 @@ else
 
     cd ${TRAVIS_BUILD_DIR}/server
     printenv
+    which ruby
     ruby -v
+    # test openssl
+    # ruby ${TRAVIS_BUILD_DIR}/ci/travis/cipher.rb
+    ruby ${TRAVIS_BUILD_DIR}/ci/travis/verify_openstudio.rb
+    
     ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
     # create dir for output files which will be generated in case of failure
