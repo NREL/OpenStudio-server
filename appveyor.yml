@@ -6,12 +6,12 @@ environment:
   OPENSTUDIO_VERSION_SHA: 09b7c8a554
   OPENSTUDIO_VERSION_EXT: ""
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
-  RUBY_VERSION: 25-x64
-  BUNDLER_VERSION: 2.1.0
-  BUNDLE_WITHOUT: native_ext
+  # RUBY_VERSION: 25-x64
+  # BUNDLER_VERSION: 2.1.0
+  # BUNDLE_WITHOUT: native_ext
 
-  #init:
-        #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  init:
+         - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
@@ -33,6 +33,6 @@ test_script:
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
 on_finish:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-    #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+     - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
