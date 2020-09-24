@@ -11,6 +11,9 @@ dir .
 move C:\openstudio C:\projects\openstudio
 dir C:\projects\openstudio
 dir C:\projects\openstudio\Ruby
+REM install portable ruby
+curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-win32.tar.gz
+tar -xvzf ruby-2.5.5-win32.tar.gz
 
 cd c:\projects\openstudio-server
 ruby -v
