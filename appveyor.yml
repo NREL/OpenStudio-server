@@ -7,8 +7,12 @@ environment:
   OPENSTUDIO_VERSION_EXT: ""
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
 
-  init:
-    # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+artifacts:
+  - path: ci/appveyor/config.yml #relative to root of repo
+    name: artifact_test.yml
+
+init:
+  # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
