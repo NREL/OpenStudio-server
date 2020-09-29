@@ -7,7 +7,7 @@ ruby '~>2.5.1'
 # gem 'rubygems-update', '2.7.8'
 
 gem 'rails', '5.1.4'
-gem 'rake', '~> 12.3'
+gem 'rake', '~> 13.0'
 
 # added for support of the project rakefile
 gem 'colored'
@@ -64,7 +64,7 @@ gem 'sassc', '~>1.12.1'
 gem 'openstudio-workflow', '= 2.0.0'
 # gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
 
-gem 'openstudio-analysis', '= 1.0.4'
+gem 'openstudio-analysis', '= 1.0.6'
 
 ## End commonly updated gems
 
@@ -117,9 +117,9 @@ group :development, :test do
   gem 'selenium-webdriver'
 
   gem 'psych', '~> 3.1.0'
-  gem 'rubocop', '0.64.0'
+  gem 'rubocop', '0.54.0'
   gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
-  gem 'rubocop-rspec', '1.32.0'
+  gem 'rubocop-rspec', '1.26.0'
 
   gem 'ci_reporter'
   gem 'factory_bot_rails', '4.11.1' # 5.0.2 require ruby 2.3
