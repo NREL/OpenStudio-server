@@ -1777,7 +1777,7 @@
           "display_name": "OpenStudio Results",
           "measure_type": "ReportingMeasure",
           "measure_definition_class_name": "OpenStudioResults",
-          "measure_definition_directory": "./measures/f8e23017-894d-4bdf-977f-37e3961e6f42",
+          "measure_definition_directory": "./measures/5d24f032-e2e4-407f-a20d-9f76e15d4ac1",
           "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_calibration_SPEA_2013/measures/f8e23017-894d-4bdf-977f-37e3961e6f42",
           "measure_definition_display_name": "OpenStudio Results",
           "measure_definition_name": "openstudio_results",
