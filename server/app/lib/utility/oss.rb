@@ -41,7 +41,7 @@ module Utility
     def self.oscli_bundle
       bundle = Rails.application.config.os_gemfile_path.present? ? ' --bundle '\
       "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-      "#{File.join Rails.application.config.os_gemfile_path, 'gems'} " : ''
+      "#{File.join Rails.application.config.os_gemfile_path, 'gems'} --bundle_without native_ext" : ''
     end
 
     # Set some env_vars from the running env var list, ignore the rest
