@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,59 +34,52 @@
 # *******************************************************************************
 
 require 'rails_helper'
+require 'json-schema'
 
-RSpec.describe 'Run SPEA', broken: true do
+def get_osa(relative_path)
+  osa = nil
+  osa_path = File.expand_path("../../../#{relative_path}", __dir__)
+
+  expect(File.exist?(osa_path)).to eq(true), "Could not find OSA file #{osa_path}"
+  File.open(osa_path) do |f|
+    osa = JSON.parse(f.read, symbolize_names: true)
+  end
+  expect(osa).not_to be_nil
+
+  osa
+end
+
+def validate_osa(path, schema)
+  osa = get_osa(path)
+
+  puts "**** Checking validity of OSA: #{path} *****"
+
+  errors = JSON::Validator.fully_validate(schema, osa)
+  expect(errors.empty?).to eq(true), "OSA '#{path}' is not valid, #{errors}"
+end
+
+RSpec.describe 'OSA Schema' do
   before :all do
-    Delayed::Job.destroy_all
+    @schema = nil
+    schema_path = File.expand_path('../../app/lib/analysis_library/schema/osa.json', __dir__)
+    expect(File.exist?(schema_path)).to be true
+    File.open(schema_path) do |f|
+      @schema = JSON.parse(f.read, symbolize_names: true)
+    end
+    expect(@schema).not_to be_nil
   end
 
-  it 'Runs the analysis', js: true do
-    host = "#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-    puts "http://#{host}"
-    APP_CONFIG['os_server_host_url'] = "http://#{host}"
-    expect(host).to match /\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:\d{2,5}/
-
-    h = JSON.parse(File.read('spec/files/test_model/test_model.json'), symbolize_names: true)
-
-    workdir = 'spec/files/test_model/tmp_spea'
-    FileUtils.mkdir_p workdir unless Dir.exist? workdir
-
-    formulation = OpenStudio::Analysis.load(h)
-    formulation.analysis_type = 'spea_nrel'
-    formulation.algorithm.set_attribute('generations', 1)
-    formulation.algorithm.set_attribute('exit_on_guideline_14', 1)
-
-    formulation.save "#{workdir}/test_model.json"
-
-    expect(Delayed::Job.count).to eq(0)
-    options = { hostname: "http://#{host}" }
-    api = OpenStudio::Analysis::ServerApi.new(options)
-    analysis_id = api.run("#{workdir}/test_model.json",
-                          'spec/files/test_model/test_model.zip',
-                          formulation.analysis_type)
-
-    expect(Delayed::Job.count).to eq(1)
-    # Use threads to emulate the multiple queues
-    threads = []
-    threads << Thread.new(1) do # analysis queue
-      expect(Delayed::Worker.new.run(Delayed::Job.first)).to eq true
-    end
-    threads << Thread.new(2) do # worker/simulations queue
-      loop do
-        j = Delayed::Job.where(queue: 'simulations').first
-        if j
-          expect(Delayed::Worker.new.run(j)).to eq true
-          # tell the analysis to stop after one simulation. This does
-          # not do an extensive test of the algorithm, just ensures that
-          # a single simulation is able to be created and run.
-          api.kill_analysis(analysis_id)
-          break
-        end
-        sleep 1
-      end
-    end
-    threads.each(&:join)
-
-    expect(Delayed::Job.count).to eq(0)
+  it 'is a valid osa file' do
+    # Make sure to use the copy of the spec/files/example_csv.json and da_measures.json as some
+    # of the tests run in Docker and the /spec folder is not mounted, only the /server is mounted.
+    [
+      'server/spec/files/batch_datapoints/example_csv.json',
+      'server/spec/files/batch_datapoints/example_csv_with_scripts.json',
+      'server/spec/files/batch_datapoints/the_project.json',
+      'server/spec/files/jsons/sweep_smalloffice.json',
+      'server/spec/files/jsons/copy_of_root_da_measures.json',
+      'server/spec/files/jsons/copy_of_root_example_csv.json',
+      'server/spec/files/test_model/test_model.json'
+    ].each { |f| validate_osa(f, @schema) }
   end
 end

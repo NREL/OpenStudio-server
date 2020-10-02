@@ -1,0 +1,1478 @@
+{
+  "analysis": {
+    "display_name": "sweep smalloffice",
+    "name": "sweep smalloffice",
+    "output_variables": [
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "electricity_ip",
+        "display_name_short": "electricity_ip",
+        "metadata_id": null,
+        "name": "openstudio_results.electricity_ip",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "district_heating_ip",
+        "display_name_short": "district_heating_ip",
+        "metadata_id": null,
+        "name": "openstudio_results.district_heating_ip",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "district_cooling_ip",
+        "display_name_short": "district_cooling_ip",
+        "metadata_id": null,
+        "name": "openstudio_results.district_cooling_ip",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "total_site_eui",
+        "display_name_short": "total_site_eui",
+        "metadata_id": null,
+        "name": "openstudio_results.total_site_eui",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "eui",
+        "display_name_short": "eui",
+        "metadata_id": null,
+        "name": "openstudio_results.eui",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "annual_peak_electric_demand",
+        "display_name_short": "annual_peak_electric_demand",
+        "metadata_id": null,
+        "name": "openstudio_results.annual_peak_electric_demand",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "unmet_hours_during_occupied_cooling",
+        "display_name_short": "unmet_hours_during_occupied_cooling",
+        "metadata_id": null,
+        "name": "openstudio_results.unmet_hours_during_occupied_cooling",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": false,
+        "objective_function_index": null,
+        "objective_function_target": null,
+        "objective_function_group": null,
+        "scaling_factor": null,
+        "display_name": "unmet_hours_during_occupied_heating",
+        "display_name_short": "unmet_hours_during_occupied_heating",
+        "metadata_id": null,
+        "name": "openstudio_results.unmet_hours_during_occupied_heating",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      }
+    ],
+    "problem": {
+      "workflow": [
+        {
+          "name": "ambient_loop_prototype_building_by_location",
+          "display_name": "Ambient Loop Prototype Building By Location",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AmbientLoopPrototypeBuildingByLocation",
+          "measure_definition_directory": "./measures/ambient_loop_prototype_building_by_location",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/ambient_loop_prototype_building_by_location",
+          "measure_definition_display_name": "Ambient Loop Prototype Building By Location",
+          "measure_definition_name": "ambient_loop_prototype_building_by_location",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "eed65df5-3517-44d5-8ecd-35631aadcc24",
+          "measure_definition_version_uuid": "bce99553-beb5-4dec-8943-eb563cd2443d",
+          "uuid": "eed65df5-3517-44d5-8ecd-35631aadcc24",
+          "version_uuid": "bce99553-beb5-4dec-8943-eb563cd2443d",
+          "description": "Change the building location",
+          "taxonomy": "Whole Building.Space Types",
+          "arguments": [
+            {
+              "display_name": "Building Type",
+              "display_name_short": "building_type",
+              "name": "building_type",
+              "value_type": "string",
+              "default_value": "SmallOffice",
+              "value": "SmallOffice"
+            },
+            {
+              "display_name": "Template",
+              "display_name_short": "template",
+              "name": "template",
+              "value_type": "string",
+              "default_value": "90.1-2010",
+              "value": "90.1-2010"
+            },
+            {
+              "display_name": "Weather File Name",
+              "display_name_short": "weather_file_name",
+              "name": "weather_file_name",
+              "value_type": "string",
+              "default_value": "USA_CO_Golden-NREL.724666_TMY3.epw",
+              "value": "USA_CO_Golden-NREL.724666_TMY3.epw"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 0
+        },
+        {
+          "name": "ambient_loop_add_ets_system",
+          "display_name": "Ambient Loop Add ETS System",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AmbientLoopAddEtsSystem",
+          "measure_definition_directory": "./measures/ambient_loop_add_ets_system",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/ambient_loop_add_ets_system",
+          "measure_definition_display_name": "Ambient Loop Add ETS System",
+          "measure_definition_name": "ambient_loop_add_ets_system",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "ef83af59-3005-4d3e-9477-6de226168580",
+          "measure_definition_version_uuid": "733aedca-4edf-471b-82a0-fa8de0a5265b",
+          "uuid": "ef83af59-3005-4d3e-9477-6de226168580",
+          "version_uuid": "733aedca-4edf-471b-82a0-fa8de0a5265b",
+          "description": "Apply an ETS system to a model",
+          "taxonomy": "Whole Building.Space Types",
+          "arguments": [],
+          "variables": [],
+          "workflow_index": 1
+        },
+        {
+          "name": "ambient_loop_temperature_setpoint",
+          "display_name": "Ambient Loop Temperature Setpoint",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "AmbientLoopTemperatureSetpoint",
+          "measure_definition_directory": "./measures/ambient_loop_temperature_setpoint",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/ambient_loop_temperature_setpoint",
+          "measure_definition_display_name": "Ambient Loop Temperature Setpoint",
+          "measure_definition_name": "ambient_loop_temperature_setpoint",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "b7cf0cbd-f752-4e43-9c9c-62705a3b7613",
+          "measure_definition_version_uuid": "db323978-64d0-419f-8e71-4df40b83b226",
+          "uuid": "b7cf0cbd-f752-4e43-9c9c-62705a3b7613",
+          "version_uuid": "db323978-64d0-419f-8e71-4df40b83b226",
+          "description": "Set the temperature of the ambient loop to a specific value.",
+          "taxonomy": "HVAC.Heating",
+          "arguments": [],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Ambient Loop Temperature",
+                "display_name_short": "setpoint_temperature",
+                "name": "setpoint_temperature",
+                "value_type": "double",
+                "default_value": 20,
+                "value": 20
+              },
+              "display_name": "Ambient Loop Temperature",
+              "display_name_short": "setpoint_temperature",
+              "variable_type": "variable",
+              "units": "Degrees Celsius",
+              "minimum": 15,
+              "maximum": 25,
+              "static_value": 20,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 15
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 25
+                  },
+                  {
+                    "name": "modes",
+                    "value": 0
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 0
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+                "display_name": "Delta Design Loop Temperature",
+                "display_name_short": "design_delta",
+                "name": "design_delta",
+                "value_type": "double",
+                "default_value": 5.55,
+                "value": 5.55
+              },
+              "display_name": "Delta Design Loop Temperature",
+              "display_name_short": "design_delta",
+              "variable_type": "variable",
+              "units": "Delta Temperature",
+              "minimum": 1,
+              "maximum": 7,
+              "static_value": 5.55,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 1
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 7
+                  },
+                  {
+                    "name": "modes",
+                    "value": 5.55
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 5.55
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 5.55
+                  }
+                ]
+              },
+              "workflow_index": 1
+            }
+          ],
+          "workflow_index": 2
+        },
+        {
+          "name": "hot_water_loop_design_temperature",
+          "display_name": "Hot Water Loop Design Temperature",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "HotWaterLoopDesignTemperature",
+          "measure_definition_directory": "./measures/hot_water_loop_design_temperature",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/hot_water_loop_design_temperature",
+          "measure_definition_display_name": "Hot Water Loop Design Temperature",
+          "measure_definition_name": "hot_water_loop_design_temperature",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "c4674445-7dad-4ba9-8b06-11028fd76904",
+          "measure_definition_version_uuid": "b1c318f6-c194-4914-9031-1642fecc8000",
+          "uuid": "c4674445-7dad-4ba9-8b06-11028fd76904",
+          "version_uuid": "b1c318f6-c194-4914-9031-1642fecc8000",
+          "description": "Set the design temperature of the Hot Water Loop to the specified value.",
+          "taxonomy": "HVAC.Heating",
+          "arguments": [
+            {
+              "display_name": "Hot Water Temperature",
+              "display_name_short": "hot_water_temperature",
+              "name": "hot_water_temperature",
+              "value_type": "double",
+              "default_value": 60,
+              "value": 60
+            }
+          ],
+          "variables": [],
+          "workflow_index": 3
+        },
+        {
+          "name": "remove_all_doors",
+          "display_name": "Remove All Doors",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "RemoveAllDoors",
+          "measure_definition_directory": "./measures/remove_all_doors",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/remove_all_doors",
+          "measure_definition_display_name": "Remove All Doors",
+          "measure_definition_name": "remove_all_doors",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "2248ab73-e210-4c44-85cc-d18c39fe50f5",
+          "measure_definition_version_uuid": "5976a0d7-95ea-47fc-bc1b-c10133d520e3",
+          "uuid": "2248ab73-e210-4c44-85cc-d18c39fe50f5",
+          "version_uuid": "5976a0d7-95ea-47fc-bc1b-c10133d520e3",
+          "description": "Removes all doors from building envelope.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [],
+          "variables": [],
+          "workflow_index": 4
+        },
+        {
+          "name": "set_window_to_wall_ratio",
+          "display_name": "Set Window to Wall Ratio",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetWindowToWallRatio",
+          "measure_definition_directory": "./measures/set_window_to_wall_ratio",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/set_window_to_wall_ratio",
+          "measure_definition_display_name": "Set Window to Wall Ratio",
+          "measure_definition_name": "set_window_to_wall_ratio",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "73ac3246-3170-4853-bed9-0ca14ea7981c",
+          "measure_definition_version_uuid": "68a81245-27ce-408c-9b30-59f84f44555d",
+          "uuid": "73ac3246-3170-4853-bed9-0ca14ea7981c",
+          "version_uuid": "68a81245-27ce-408c-9b30-59f84f44555d",
+          "description": "Set the window to wall ratio for all facades to a specific value.",
+          "taxonomy": "Envelope.Fenestration",
+          "arguments": [
+            {
+              "display_name": "Sill Height (in)",
+              "display_name_short": "sillHeight",
+              "name": "sillHeight",
+              "value_type": "double",
+              "default_value": 30,
+              "value": 30
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Window to Wall Ratio (fraction)",
+                "display_name_short": "wwr",
+                "name": "wwr",
+                "value_type": "double",
+                "default_value": 0.2,
+                "value": 0.2
+              },
+              "display_name": "Window to Wall Ratio (fraction)",
+              "display_name_short": "wwr",
+              "variable_type": "variable",
+              "minimum": 0.2,
+              "maximum": 0.8,
+              "static_value": 0.2,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.2
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 0.8
+                  },
+                  {
+                    "name": "modes",
+                    "value": 0.2
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 0.2
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 0
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 5
+        },
+        {
+          "name": "set_roof_insulation_r_value",
+          "display_name": "Set Roof Insulation R Value",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetRoofInsulationRValue",
+          "measure_definition_directory": "./measures/set_roof_insulation_r_value",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/set_roof_insulation_r_value",
+          "measure_definition_display_name": "Set Roof Insulation R Value",
+          "measure_definition_name": "set_roof_insulation_r_value",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "65b798f4-207f-4aed-987a-386c865d0ccd",
+          "measure_definition_version_uuid": "8fce54b6-4076-4a7a-9390-848187f0ff03",
+          "uuid": "65b798f4-207f-4aed-987a-386c865d0ccd",
+          "version_uuid": "8fce54b6-4076-4a7a-9390-848187f0ff03",
+          "description": "Set the R-Value of roof insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the roof.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Roof Insulation R-value (ft^2*h*R/Btu)",
+                "display_name_short": "roof_r",
+                "name": "roof_r",
+                "value_type": "double",
+                "default_value": 30,
+                "value": 30
+              },
+              "display_name": "Roof Insulation R-value (ft^2*h*R/Btu)",
+              "display_name_short": "roof_r",
+              "variable_type": "variable",
+              "minimum": 30,
+              "maximum": 80,
+              "static_value": 30,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 30
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 80
+                  },
+                  {
+                    "name": "modes",
+                    "value": 30
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 30
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 30
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 6
+        },
+        {
+          "name": "set_exterior_wall_insulation_r_value",
+          "display_name": "Set Exterior Wall Insulation R Value",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetExteriorWallInsulationRValue",
+          "measure_definition_directory": "./measures/set_exterior_wall_insulation_r_value",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/set_exterior_wall_insulation_r_value",
+          "measure_definition_display_name": "Set Exterior Wall Insulation R Value",
+          "measure_definition_name": "set_exterior_wall_insulation_r_value",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "3fdf9c39-d305-449b-a4b5-077166af5a67",
+          "measure_definition_version_uuid": "ad2ad825-b9ef-463c-aa25-fde1b5492e05",
+          "uuid": "3fdf9c39-d305-449b-a4b5-077166af5a67",
+          "version_uuid": "ad2ad825-b9ef-463c-aa25-fde1b5492e05",
+          "description": "Set the R-Value of exterior wall insulation to a specified value.  Higher R-Values provide better insulation, lowering heat loss and heat gain through the exterior walls.",
+          "taxonomy": "Envelope.Opaque",
+          "arguments": [],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Exterior Wall Insulation R-value (ft^2*h*R/Btu)",
+                "display_name_short": "wall_r",
+                "name": "wall_r",
+                "value_type": "double",
+                "default_value": 13,
+                "value": 13
+              },
+              "display_name": "Exterior Wall Insulation R-value (ft^2*h*R/Btu)",
+              "display_name_short": "wall_r",
+              "variable_type": "variable",
+              "minimum": 13,
+              "maximum": 60,
+              "static_value": 13,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 13
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 60
+                  },
+                  {
+                    "name": "modes",
+                    "value": 13
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 13
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 13
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 7
+        },
+        {
+          "name": "set_heat_pump_heating_coil_rated_cop",
+          "display_name": "Set Heat Pump Heating Coil Rated COP",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetHeatPumpHeatingCoilRatedCop",
+          "measure_definition_directory": "./measures/set_heat_pump_heating_coil_rated_cop",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/set_heat_pump_heating_coil_rated_cop",
+          "measure_definition_display_name": "Set Heat Pump Heating Coil Rated COP",
+          "measure_definition_name": "set_heat_pump_heating_coil_rated_cop",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "550419ad-c73a-4e5f-b7b0-ab3768584ce4",
+          "measure_definition_version_uuid": "f1b401f4-eea5-43b2-aa6e-5e9f56b3d527",
+          "uuid": "550419ad-c73a-4e5f-b7b0-ab3768584ce4",
+          "version_uuid": "f1b401f4-eea5-43b2-aa6e-5e9f56b3d527",
+          "description": "Set heat pump heating coil gross rated COP.",
+          "taxonomy": "HVAC.Cooling",
+          "arguments": [],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Cooling Coil Rated COP",
+                "display_name_short": "heat_cop",
+                "name": "heat_cop",
+                "value_type": "double",
+                "default_value": 3.74,
+                "value": 3.74
+              },
+              "display_name": "Cooling Coil Rated COP",
+              "display_name_short": "heat_cop",
+              "variable_type": "variable",
+              "minimum": 3.75,
+              "maximum": 5,
+              "static_value": 3.74,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 3.75
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 5
+                  },
+                  {
+                    "name": "modes",
+                    "value": 3.74
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 3.74
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 3.74
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 8
+        },
+        {
+          "name": "set_heat_pump_cooling_coil_rated_cop",
+          "display_name": "Set Heat Pump Cooling Coil Rated COP",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetHeatPumpCoolingCoilRatedCop",
+          "measure_definition_directory": "./measures/set_heat_pump_cooling_coil_rated_cop",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/set_heat_pump_cooling_coil_rated_cop",
+          "measure_definition_display_name": "Set Heat Pump Cooling Coil Rated COP",
+          "measure_definition_name": "set_heat_pump_cooling_coil_rated_cop",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "9d74eeb6-9557-4d83-a96a-c5b8bfa1b6d2",
+          "measure_definition_version_uuid": "e6c8a742-1e31-439e-8aaa-29726fd1c3ad",
+          "uuid": "9d74eeb6-9557-4d83-a96a-c5b8bfa1b6d2",
+          "version_uuid": "e6c8a742-1e31-439e-8aaa-29726fd1c3ad",
+          "description": "Set heat pump cooling coil gross rated COP.",
+          "taxonomy": "HVAC.Cooling",
+          "arguments": [],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Cooling Coil Rated COP",
+                "display_name_short": "cool_cop",
+                "name": "cool_cop",
+                "value_type": "double",
+                "default_value": 3.65,
+                "value": 3.65
+              },
+              "display_name": "Cooling Coil Rated COP",
+              "display_name_short": "cool_cop",
+              "variable_type": "variable",
+              "minimum": 3.65,
+              "maximum": 5,
+              "static_value": 3.65,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 3.65
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 5
+                  },
+                  {
+                    "name": "modes",
+                    "value": 3.65
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 3.65
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 3.65
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 9
+        },
+        {
+          "name": "internal_loads_multiplier",
+          "display_name": "Internal Loads Multiplier",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "InternalLoadsMultiplier",
+          "measure_definition_directory": "./measures/internal_loads_multiplier",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/internal_loads_multiplier",
+          "measure_definition_display_name": "Internal Loads Multiplier",
+          "measure_definition_name": "internal_loads_multiplier",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "8c10b18d-c66d-43dc-9ef5-b82dfed0edde",
+          "measure_definition_version_uuid": "8b9e078c-393a-44ad-a57b-c616827f0271",
+          "uuid": "8c10b18d-c66d-43dc-9ef5-b82dfed0edde",
+          "version_uuid": "8b9e078c-393a-44ad-a57b-c616827f0271",
+          "description": "Multipliers for LPD, EPD, and people densities.",
+          "taxonomy": "Whole Building.Space Types",
+          "arguments": [
+            {
+              "display_name": "People per floor area multipleir",
+              "display_name_short": "people_per_floor_area_multiplier",
+              "name": "people_per_floor_area_multiplier",
+              "value_type": "double",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "LPD Multiplier",
+                "display_name_short": "lpd_multiplier",
+                "name": "lpd_multiplier",
+                "value_type": "double",
+                "default_value": 1,
+                "value": 1
+              },
+              "display_name": "LPD Multiplier",
+              "display_name_short": "lpd_multiplier",
+              "variable_type": "variable",
+              "units": "W/ft^2",
+              "minimum": 0.33,
+              "maximum": 3,
+              "static_value": 1,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.33
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 3
+                  },
+                  {
+                    "name": "modes",
+                    "value": 1
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 1
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 1
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+                "display_name": "Electric Equipment Power Density Multiplier",
+                "display_name_short": "epd_multiplier",
+                "name": "epd_multiplier",
+                "value_type": "double",
+                "default_value": 1,
+                "value": 1
+              },
+              "display_name": "Electric Equipment Power Density Multiplier",
+              "display_name_short": "epd_multiplier",
+              "variable_type": "variable",
+              "units": "W/ft^2",
+              "minimum": 0.33,
+              "maximum": 3,
+              "static_value": 1,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 0.33
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 3
+                  },
+                  {
+                    "name": "modes",
+                    "value": 1
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 1
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 1
+                  }
+                ]
+              },
+              "workflow_index": 1
+            }
+          ],
+          "workflow_index": 10
+        },
+        {
+          "name": "shift_schedule_profile_time",
+          "display_name": "Shift Schedule Profile Time",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ShiftScheduleProfileTime",
+          "measure_definition_directory": "./measures/shift_schedule_profile_time",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/shift_schedule_profile_time",
+          "measure_definition_display_name": "Shift Schedule Profile Time",
+          "measure_definition_name": "shift_schedule_profile_time",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "1c642348-f074-4ad1-98ee-2208ddc89ac7",
+          "measure_definition_version_uuid": "26b0598a-8619-4a81-95d7-e4a753614b5e",
+          "uuid": "1c642348-f074-4ad1-98ee-2208ddc89ac7",
+          "version_uuid": "26b0598a-8619-4a81-95d7-e4a753614b5e",
+          "description": "Shift a single or all schedules in the building by the specified number of hours",
+          "taxonomy": "Whole Building.Whole Building Schedules",
+          "arguments": [
+            {
+              "display_name": "Choose a Schedule to Shift the Time For.",
+              "display_name_short": "schedule",
+              "name": "schedule",
+              "value_type": "string",
+              "default_value": "*All Ruleset Schedules*",
+              "value": "*All Ruleset Schedules*"
+            },
+            {
+              "display_name": "Distribution for Random Shift Value Generator.",
+              "display_name_short": "dist",
+              "name": "dist",
+              "value_type": "string",
+              "default_value": "Uniform",
+              "value": "Uniform"
+            },
+            {
+              "display_name": "Shift Schedule Profiles Forward Lower Limit (24hr, use decimal for sub hour).",
+              "display_name_short": "shift_ll",
+              "name": "shift_ll",
+              "value_type": "double",
+              "default_value": 0,
+              "value": -2
+            },
+            {
+              "display_name": "Shift Schedule Profiles Forward Upper Limit (24hr, use decimal for sub hour).",
+              "display_name_short": "shift_ul",
+              "name": "shift_ul",
+              "value_type": "double",
+              "default_value": 1,
+              "value": 2
+            },
+            {
+              "display_name": "Shift Schedule Profiles Peak for Triangular Distribution.",
+              "display_name_short": "shift_ct",
+              "name": "shift_ct",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            }
+          ],
+          "variables": [],
+          "workflow_index": 11
+        },
+        {
+          "name": "set_schedule_profile_start_end_times",
+          "display_name": "Set Schedule Profile Start End Times",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "SetScheduleProfileStartEndTimes",
+          "measure_definition_directory": "./measures/set_schedule_profile_start_end_times",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/set_schedule_profile_start_end_times",
+          "measure_definition_display_name": "Set Schedule Profile Start End Times",
+          "measure_definition_name": "set_schedule_profile_start_end_times",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "d7477df5-e482-44be-9be5-fe9875013229",
+          "measure_definition_version_uuid": "ade842ca-0fe8-43b6-9c85-6479491ca0b9",
+          "uuid": "d7477df5-e482-44be-9be5-fe9875013229",
+          "version_uuid": "ade842ca-0fe8-43b6-9c85-6479491ca0b9",
+          "description": "Expand or contract schedule profile by specifying new start and end times. The schedule profile shape is preserved.",
+          "taxonomy": "Whole Building.Whole Building Schedules",
+          "arguments": [
+            {
+              "display_name": "Schedule to Expand or Contract",
+              "display_name_short": "schedule",
+              "name": "schedule",
+              "value_type": "string",
+              "default_value": "*All Ruleset Schedules*",
+              "value": "*All Ruleset Schedules*"
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Schedule Start (hr)",
+                "display_name_short": "new_start",
+                "name": "new_start",
+                "value_type": "integer",
+                "default_value": 8,
+                "value": 8
+              },
+              "display_name": "Schedule Start (hr)",
+              "display_name_short": "new_start",
+              "variable_type": "variable",
+              "minimum": 8,
+              "maximum": 8,
+              "static_value": 8,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 5,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 6,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 7,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 8,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 9,
+                        "weight": 0.2
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 8
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 8
+                  },
+                  {
+                    "name": "modes",
+                    "value": 8
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 8
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 8
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+                "display_name": "Schedule End (hr)",
+                "display_name_short": "new_end",
+                "name": "new_end",
+                "value_type": "integer",
+                "default_value": 18,
+                "value": 18
+              },
+              "display_name": "Schedule End (hr)",
+              "display_name_short": "new_end",
+              "variable_type": "variable",
+              "minimum": 18,
+              "maximum": 18,
+              "static_value": 18,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "discrete",
+                "attributes": [
+                  {
+                    "name": "discrete",
+                    "values_and_weights": [
+                      {
+                        "value": 16,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 17,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 18,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 19,
+                        "weight": 0.2
+                      },
+                      {
+                        "value": 20,
+                        "weight": 0.2
+                      }
+                    ]
+                  },
+                  {
+                    "name": "lower_bounds",
+                    "value": 18
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 18
+                  },
+                  {
+                    "name": "modes",
+                    "value": 18
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 18
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 18
+                  }
+                ]
+              },
+              "workflow_index": 1
+            }
+          ],
+          "workflow_index": 12
+        },
+        {
+          "name": "openstudio_results",
+          "display_name": "OpenStudio Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "OpenStudioResults",
+          "measure_definition_directory": "./measures/openstudio_results",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/openstudio_results",
+          "measure_definition_display_name": "OpenStudio Results",
+          "measure_definition_name": "openstudio_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "measure_definition_version_uuid": "05ad855b-6ae3-431e-991b-80e5133a56f2",
+          "uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "version_uuid": "05ad855b-6ae3-431e-991b-80e5133a56f2",
+          "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Model Summary",
+              "display_name_short": "building_summary_section",
+              "name": "building_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Annual Overview",
+              "display_name_short": "annual_overview_section",
+              "name": "annual_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Monthly Overview",
+              "display_name_short": "monthly_overview_section",
+              "name": "monthly_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Utility Bills/Rates",
+              "display_name_short": "utility_bills_rates_section",
+              "name": "utility_bills_rates_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Envelope",
+              "display_name_short": "envelope_section_section",
+              "name": "envelope_section_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Breakdown",
+              "display_name_short": "space_type_breakdown_section",
+              "name": "space_type_breakdown_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Summary",
+              "display_name_short": "space_type_details_section",
+              "name": "space_type_details_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Interior Lighting Summary",
+              "display_name_short": "interior_lighting_section",
+              "name": "interior_lighting_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plug Loads Summary",
+              "display_name_short": "plug_loads_section",
+              "name": "plug_loads_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Exterior Lighting",
+              "display_name_short": "exterior_light_section",
+              "name": "exterior_light_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Water Use Equipment",
+              "display_name_short": "water_use_section",
+              "name": "water_use_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "HVAC Load Profiles",
+              "display_name_short": "hvac_load_profile",
+              "name": "hvac_load_profile",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Conditions",
+              "display_name_short": "zone_condition_section",
+              "name": "zone_condition_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Overview",
+              "display_name_short": "zone_summary_section",
+              "name": "zone_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Equipment Detail",
+              "display_name_short": "zone_equipment_detail_section",
+              "name": "zone_equipment_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Air Loops Detail",
+              "display_name_short": "air_loops_detail_section",
+              "name": "air_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plant Loops Detail",
+              "display_name_short": "plant_loops_detail_section",
+              "name": "plant_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Outdoor Air",
+              "display_name_short": "outdoor_air_section",
+              "name": "outdoor_air_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Cash Flow",
+              "display_name_short": "cost_summary_section",
+              "name": "cost_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Site and Source Summary",
+              "display_name_short": "source_energy_section",
+              "name": "source_energy_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Schedule Overview",
+              "display_name_short": "schedules_overview_section",
+              "name": "schedules_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 13
+        },
+        {
+          "name": "generic_qaqc",
+          "display_name": "Generic QAQC",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "GenericQAQC",
+          "measure_definition_directory": "./measures/generic_qaqc",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/generic_qaqc",
+          "measure_definition_display_name": "Generic QAQC",
+          "measure_definition_name": "generic_qaqc",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "d58d6b29-69ba-4915-b907-3c2c37ddb7c7",
+          "measure_definition_version_uuid": "c3a65f4b-fe7d-4349-960d-bb4b1fe3e0d1",
+          "uuid": "d58d6b29-69ba-4915-b907-3c2c37ddb7c7",
+          "version_uuid": "c3a65f4b-fe7d-4349-960d-bb4b1fe3e0d1",
+          "description": "This measure extracts key simulation results and performs basic model QAQC checks. Each category of checks provides a description of the source of the check. In some cases the target standards and tollerances are adjustable.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Target ASHRAE Standard",
+              "display_name_short": "template",
+              "name": "template",
+              "value_type": "string",
+              "default_value": "90.1-2013",
+              "value": "90.1-2013"
+            },
+            {
+              "display_name": "EUI Reasonableness (General)",
+              "display_name_short": "check_eui_reasonableness",
+              "name": "check_eui_reasonableness",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "EUI Reasonableness Tolerance",
+              "display_name_short": "check_eui_reasonableness_tol",
+              "name": "check_eui_reasonableness_tol",
+              "value_type": "double",
+              "default_value": 0.1,
+              "value": 0.1
+            },
+            {
+              "display_name": "End Use by Category (General)",
+              "display_name_short": "check_eui_by_end_use",
+              "name": "check_eui_by_end_use",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "End Use by Category Tolerance",
+              "display_name_short": "check_eui_by_end_use_tol",
+              "name": "check_eui_by_end_use_tol",
+              "value_type": "double",
+              "default_value": 0.25,
+              "value": 0.25
+            },
+            {
+              "display_name": "Mechanical System Part Load Efficiency (General)",
+              "display_name_short": "check_mech_sys_part_load_eff",
+              "name": "check_mech_sys_part_load_eff",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Mechanical System Part Load Efficiency Tolerance",
+              "display_name_short": "check_mech_sys_part_load_eff_tol",
+              "name": "check_mech_sys_part_load_eff_tol",
+              "value_type": "double",
+              "default_value": 0.05,
+              "value": 0.05
+            },
+            {
+              "display_name": "Mechanical System Capacity (General)",
+              "display_name_short": "check_mech_sys_capacity",
+              "name": "check_mech_sys_capacity",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Simultaneous Heating and Cooling (General)",
+              "display_name_short": "check_simultaneous_heating_and_cooling",
+              "name": "check_simultaneous_heating_and_cooling",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Simultaneous Heating and Cooling Max Tolerance",
+              "display_name_short": "check_simultaneous_heating_and_cooling_max_tol",
+              "name": "check_simultaneous_heating_and_cooling_max_tol",
+              "value_type": "double",
+              "default_value": 0.05,
+              "value": 0.05
+            },
+            {
+              "display_name": "Internal Loads (Baseline)",
+              "display_name_short": "check_internal_loads",
+              "name": "check_internal_loads",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Internal Loads Tolerance",
+              "display_name_short": "check_internal_loads_tol",
+              "name": "check_internal_loads_tol",
+              "value_type": "double",
+              "default_value": 0.1,
+              "value": 0.1
+            },
+            {
+              "display_name": "Schedules (Baseline)",
+              "display_name_short": "check_schedules",
+              "name": "check_schedules",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Schedules Tolerance",
+              "display_name_short": "check_schedules_tol",
+              "name": "check_schedules_tol",
+              "value_type": "double",
+              "default_value": 0.05,
+              "value": 0.05
+            },
+            {
+              "display_name": "Envelope R-Value (Baseline)",
+              "display_name_short": "check_envelope_conductance",
+              "name": "check_envelope_conductance",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Envelope R-Value Tolerance",
+              "display_name_short": "check_envelope_conductance_tol",
+              "name": "check_envelope_conductance_tol",
+              "value_type": "double",
+              "default_value": 0.1,
+              "value": 0.1
+            },
+            {
+              "display_name": "Domestic Hot Water (Baseline)",
+              "display_name_short": "check_domestic_hot_water",
+              "name": "check_domestic_hot_water",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Domestic Hot Water Tolerance",
+              "display_name_short": "check_domestic_hot_water_tol",
+              "name": "check_domestic_hot_water_tol",
+              "value_type": "double",
+              "default_value": 0.25,
+              "value": 0.25
+            },
+            {
+              "display_name": "Mechanical System Efficiency (Baseline)",
+              "display_name_short": "check_mech_sys_efficiency",
+              "name": "check_mech_sys_efficiency",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Mechanical System Efficiency Tolerance",
+              "display_name_short": "check_mech_sys_efficiency_tol",
+              "name": "check_mech_sys_efficiency_tol",
+              "value_type": "double",
+              "default_value": 0.1,
+              "value": 0.1
+            },
+            {
+              "display_name": "Mechanical System Type (Baseline)",
+              "display_name_short": "check_mech_sys_type",
+              "name": "check_mech_sys_type",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Supply and Zone Air Temperature (Baseline)",
+              "display_name_short": "check_supply_air_and_thermostat_temp_difference",
+              "name": "check_supply_air_and_thermostat_temp_difference",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Supply and Zone Air Temperature Tolerance",
+              "display_name_short": "check_supply_air_and_thermostat_temp_difference_tol",
+              "name": "check_supply_air_and_thermostat_temp_difference_tol",
+              "value_type": "double",
+              "default_value": 0.5,
+              "value": 0.5
+            }
+          ],
+          "variables": [],
+          "workflow_index": 14
+        },
+        {
+          "name": "ambient_loop_reports",
+          "display_name": "Ambient Loop Reports",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "AmbientLoopReports",
+          "measure_definition_directory": "./measures/ambient_loop_reports",
+          "measure_definition_directory_local": "/Users/nlong/working-simulations/pat-projects/ambient-loop-pat-projects/sweep_smalloffice_v2/measures/ambient_loop_reports",
+          "measure_definition_display_name": "Ambient Loop Reports",
+          "measure_definition_name": "ambient_loop_reports",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "9b470a52-d218-4b50-80dd-d229ce73438d",
+          "measure_definition_version_uuid": "7b5763ec-8502-477b-9941-21a4211cd7e7",
+          "uuid": "9b470a52-d218-4b50-80dd-d229ce73438d",
+          "version_uuid": "7b5763ec-8502-477b-9941-21a4211cd7e7",
+          "description": "Add report variables for post processing the ambient loop data.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [],
+          "variables": [],
+          "workflow_index": 15
+        }
+      ],
+      "algorithm": {
+        "sample_method": "all_variables",
+        "number_of_samples": 4,
+        "seed": null,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 0,
+        "objective_functions": []
+      },
+      "analysis_type": "lhs"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seeds/example_model.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/USA_CO_Golden-NREL.724666_TMY3.epw"
+    },
+    "file_format_version": 1,
+    "server_scripts": {
+      "worker_initialization": "./scripts/worker_initialization/initialize.sh"
+    }
+  }
+}

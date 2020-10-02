@@ -1,6 +1,6 @@
 <%
   # *******************************************************************************
-  # OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+  # OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
   # All rights reserved.
   # Redistribution and use in source and binary forms, with or without
   # modification, are permitted provided that the following conditions are met:
@@ -40,26 +40,28 @@
 <table class="table table-striped">
   <thead>
   <tr>
-    <th>Project</th>
+<!--    <th>Project</th>-->
     <th>Name</th>
     <th>Last Analysis Type</th>
     <th>Status</th>
     <th>Start Time (UTC)</th>
     <th>End Time (UTC)</th>
     <th>Duration </th>
+    <th>Datapoints<br> (Total | Success)</th>
     <th>View</th>
   <tr>
   </thead>
   <tbody>
   <% @analyses.each do |analysis| %>
     <tr>
-      <td><%= link_to(analysis.project.name, project_path(analysis.project)) %></td>
+<!--      <td><%#= link_to(analysis.project.name, project_path(analysis.project)) %></td>-->
       <td><%= link_to(analysis.display_name, analysis_path(analysis)) %></td>
       <td><%= analysis.analysis_type %></td>
       <td><%= analysis.status %></td>
       <td><%= analysis.start_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.start_time.nil? %></td>
       <td><%= analysis.end_time.strftime("%m-%d-%Y %H:%M:%S") unless analysis.end_time.nil? %></td>
       <td><%= distance_of_time_in_words(analysis.start_time, analysis.end_time) unless analysis.start_time.nil? || analysis.end_time.nil? %></td>
+      <td><%= analysis.data_points.count %> | <%= analysis.data_points.count(:status_message => 'completed normal') %> </td>
       <td><%= link_to 'JSON', analysis_path(analysis, :format => :json) %>
         | <%= link_to_if(!analysis.seed_zip.nil?, "Zip File", analysis.seed_zip.url(:original, false)) %> </td>
     </tr>

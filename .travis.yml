@@ -1,17 +1,11 @@
 language: minimal
 
-# addons:
-#   artifacts: true
-
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
-    - OPENSTUDIO_VERSION=3.0.1 OPENSTUDIO_VERSION_SHA=09b7c8a554 OPENSTUDIO_VERSION_EXT=""
+    - OPENSTUDIO_VERSION=3.1.0 OPENSTUDIO_VERSION_SHA=062e7a8260 OPENSTUDIO_VERSION_EXT="-rc1"
     - DOCKER_COMPOSE_VERSION=1.21.1
     - BUNDLE_WITHOUT=native_ext
-
-# gemfile:
-  # - server/Gemfile
 
 # Set the default scripts that are used for the majority of the tests in the matrix
 # redis-server now wants to bind to ipv6 ::1.  This changes this behavior. 
@@ -25,13 +19,7 @@ after_failure: ./ci/travis/print_logs.sh
 
 # Services for linux -- all instances
 services:
-  # counter to documentation, these aren't starting for bionic
-  # - mongodb
-  # - redis-server
   - docker
-
-rvm:
-  - 2.5
 
 jobs:
   include:
@@ -47,11 +35,19 @@ jobs:
       env: BUILD_TYPE=integration
     - stage: test
       os: osx
-      osx_image: xcode9.4
+      osx_image: xcode10.2
       env: BUILD_TYPE=test
     - stage: test
       os: osx
-      osx_image: xcode9.4
+      osx_image: xcode11.4
+      env: BUILD_TYPE=test
+    - stage: test
+      os: osx
+      osx_image: xcode10.2
+      env: BUILD_TYPE=integration
+    - stage: test
+      os: osx
+      osx_image: xcode11.4
       env: BUILD_TYPE=integration
     - stage: test
       os: linux
@@ -72,21 +68,15 @@ jobs:
         - docker-compose --version
         - docker-compose -f docker-compose.test.yml pull
         - docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+        - docker-compose -f docker-compose.test.yml up -d
       script:
-        - docker-compose -f docker-compose.test.yml run web && docker-compose stop
+        - docker-compose exec web /usr/local/bin/run-server-tests
+        - docker-compose stop
       after_script:
         # Reset the git checkout to remove the test-based data in the containers and rebuild
         - git checkout -- .dockerignore && git checkout -- Dockerfile
-    # - stage: Upload native OSX build
-    #   if: branch=local-builds
-    #   os: xcode9.4
-    #   sudo: required
-    #   env:
-    #     - BUILD_TYPE=publish
-    #   before_script:
-    #   script: ./ci/travis/export_build.sh
 
-    - stage: Deploy Docker Image
+    - stage: publish
       # Include your branch name below to publish a custom image.
       # This change must be made in combination with a modification to
       # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
@@ -107,6 +97,24 @@ jobs:
         - docker-compose build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web
         - docker-compose build rserve
       script: ./docker/deployment/scripts/deploy_docker.sh
+    - stage: publish
+      if: branch = master OR branch = develop
+      os: osx
+      osx_image: xcode10.2
+      sudo: required
+      env:
+        - BUILD_TYPE=export
+      before_script:
+      script: ./ci/travis/export_build_osx.sh
+    - stage: publish
+      if: branch = master OR branch = develop
+      os: linux
+      dist: bionic
+      sudo: required
+      env:
+        - BUILD_TYPE=export
+      before_script:
+      script: ./ci/travis/export_build_linux.sh
 
 notifications:
   slack:

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -85,8 +85,15 @@ rspec_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rspe
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
 ::ENV['OS_SERVER_LOG_PATH'] = File.join(output_dir, 'logs', 'rails.log')
 ::ENV['RAILS_ENV'] = 'local-test'
-sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
+
+#If this is a travis build and it's BUILD_TYPE=test we want to omit the openstudio_algo_spec.rb tests
+if ENV['BUILD_TYPE'] == 'test'
+  sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
+  "\"**/models/cluster_spec.rb\" --exclude-pattern \"**/features/openstudio_algo_spec.rb\""
+else
+  sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
   "\"**/models/cluster_spec.rb\""
+end 
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 puts "ENV for starting rspec: #{::ENV.inspect}" if options[:debug]
 # Execute the system call

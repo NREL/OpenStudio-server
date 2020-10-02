@@ -11,7 +11,7 @@ mkdir -p /mnt/coredumps/ && chmod 777 /mnt/coredumps/
 sleep 1
 
 echo 'Setting permissions on logs'
-chmod 775 /opt/openstudio/server/log
+chmod 777 /opt/openstudio/server/log
 chmod 666 /opt/openstudio/server/log/*.log
 sleep 1
 

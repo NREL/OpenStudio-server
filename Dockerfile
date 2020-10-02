@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.0.1
+ARG OPENSTUDIO_VERSION=3.1.0-rc1
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -97,24 +97,23 @@ RUN bundle exec rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
+# Add in /spec for testing 
+#ADD /spec /opt/openstudio/spec
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
 RUN bundle install --jobs=3 --retry=3
 
-RUN sudo sysctl --system
-
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.
 COPY /docker/server/wait-for-it.sh /usr/local/bin/wait-for-it
 COPY /docker/server/start-server.sh /usr/local/bin/start-server
-COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+
 COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
 COPY /docker/server/start-web-background.sh /usr/local/bin/start-web-background
 COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
 RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
-RUN chmod +x /usr/local/bin/run-server-tests
 RUN chmod 755 /usr/local/bin/rails-entrypoint
 RUN chmod 755 /usr/local/bin/start-web-background
 RUN chmod 755 /usr/local/bin/start-workers
@@ -149,6 +148,9 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
     tar -xvzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
     rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
     chmod +x geckodriver;
+
+COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+RUN chmod +x /usr/local/bin/run-server-tests
 
 # Test adding the git repo to the container for coveralls
 # The #TEST# will be removed in the travis test script to be run in the test container

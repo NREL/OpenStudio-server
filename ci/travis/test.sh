@@ -6,17 +6,17 @@ if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
     export RUBYLIB="${HOME}/openstudio/Ruby"
     export OPENSTUDIO_TEST_EXE="${HOME}/openstudio/bin/openstudio"
     # re-export PATH, even though it's set in setup.sh. 
-    export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/opt/ruby@2.5/bin:$HOME/openstudio/bin:$PATH"
+    export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/ruby/bin:$HOME/openstudio/bin:$PATH"
     export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
     export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
 elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
     # Dir containing openstudio
     export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus
-    export PATH=/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
+    export PATH=/usr/local/ruby/bin:/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
     export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
     export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
-    export RUBYLIB="/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/Ruby:/usr/Ruby"
+    export RUBYLIB="/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/Ruby"
     export OPENSTUDIO_TEST_EXE="/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin/openstudio"
     mongo_dir="/usr/bin"
 fi
@@ -31,7 +31,11 @@ else
     # run unit tests via openstudio_meta run_rspec command which attempts to reproduce the PAT local environment
     # prior to running tests, so we should not set enviroment variables here
     if [ "${BUILD_TYPE}" == "test" ];then
+        ulimit -a
         echo "starting unit tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
+        # Threadsafe test requires higher ulimit to avoid EMFILE error
+        ulimit -n
+        ulimit -n 1024
         ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" "${TRAVIS_BUILD_DIR}/spec/unit-test"
         exit_status=$?
         if [ $exit_status == 0 ];then
