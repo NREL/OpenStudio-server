@@ -100,6 +100,7 @@ def parse_options(opts = nil, argv = nil)
 
   opts.on('--ruby-lib-path PATH', 'Additional Ruby path, to locate openstudio') do |path|
     ENV['RUBYLIB'] = path
+    ENV['RUBY_DLL_PATH'] = path
   end
 
   require 'tmpdir'
