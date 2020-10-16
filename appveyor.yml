@@ -3,8 +3,8 @@ version: 1.0.{build}-{branch}
 environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.1.0
-  OPENSTUDIO_VERSION_SHA: dec0b9e069
-  OPENSTUDIO_VERSION_EXT: "-rc3"
+  OPENSTUDIO_VERSION_SHA: 2717588ec4
+  OPENSTUDIO_VERSION_EXT: "-rc4"
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
 
 artifacts:
