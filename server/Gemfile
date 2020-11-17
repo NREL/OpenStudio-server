@@ -92,6 +92,7 @@ gem 'urbanopt-scenario', github: 'urbanopt/urbanopt-scenario-gem', branch: 'uo_d
 #gem 'urbanopt-scenario', github: 'urbanopt/urbanopt-scenario-gem', branch: 'run_status'
 gem 'openstudio-model-articulation', github: 'NREL/openstudio-model-articulation-gem', branch: 'uo_debug'
 gem 'openstudio-extension', github: 'NREL/openstudio-extension-gem', branch: 'uo_debug'
+gem 'openstudio-common-measures', github: 'NREL/openstudio-common-measures-gem', branch: 'uo_debug'
 gem 'urbanopt-core', github: 'urbanopt/urbanopt-core-gem', branch: 'uo_debug'
 #gem 'urbanopt-cli', '0.3.1'
 gem 'urbanopt-reopt', '0.3.0'
