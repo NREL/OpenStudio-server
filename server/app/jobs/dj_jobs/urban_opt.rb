@@ -36,10 +36,40 @@ module DjJobs
         uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
       end
 
+      osw_path = "#{simulation_dir}/data_point.osw"
+      #Run OSSCLI --measures_only  to run openstudio measures in UrbanOpt workflow if measures's are present in workflow
+      @sim_logger.info "@data_point.analysis.problem['workflow'].empty?: #{@data_point.analysis.problem['workflow'].empty?}"
+      @sim_logger.info "@data_point.analysis.problem['workflow']: #{@data_point.analysis.problem['workflow']}"
+      @sim_logger.info "@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'RubyMeasure'}: #{@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'RubyMeasure'}}"
+      if !@data_point.analysis.problem['workflow'].empty? && @data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'RubyMeasure'}            
+        cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --measures_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+        process_log = File.join(simulation_dir, 'oscli_measures_only.log')
+        @sim_logger.info "Running measures_only workflow using cmd #{cmd} and writing log to #{process_log}"
+        oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
+        pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
+        # add check for a valid timeout value
+        unless @data_point.analysis.run_workflow_timeout.positive?
+          @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
+          @@data_point.analysis.run_workflow_timeout = 28800
+        end
+        Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
+          Process.wait(pid)
+        end
+
+        if $?.exitstatus != 0
+          raise "Oscli measures_only returned error code #{$?.exitstatus}"
+        end
+      end  #end of openstudio measures
+ 
+      #setup UO variables
       variables = {}
       @data_point['set_variable_values'].each_with_index do |(k, v), i|  #loop over all variables
         var = Variable.find(k)
         if var
+          if var[:uo_measure].nil? || var[:mapper].nil?
+            @sim_logger.info "variable: #{var[:name]} has no mapper or uo_measure so skipping."
+            next
+          end
           @sim_logger.info "var: #{var.to_json}"
           variables.merge!(var[:uo_measure] => { :name=>var[:name], :value=>v, :mapper=>var[:mapper] })  #dont actuall use variable just yet
           @sim_logger.info "variables: #{variables.to_json}"
