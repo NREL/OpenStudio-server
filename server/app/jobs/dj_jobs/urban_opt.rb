@@ -40,8 +40,8 @@ module DjJobs
       #Run OSSCLI --measures_only  to run openstudio measures in UrbanOpt workflow if measures's are present in workflow
       @sim_logger.info "@data_point.analysis.problem['workflow'].empty?: #{@data_point.analysis.problem['workflow'].empty?}"
       @sim_logger.info "@data_point.analysis.problem['workflow']: #{@data_point.analysis.problem['workflow']}"
-      @sim_logger.info "@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'RubyMeasure'}: #{@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'RubyMeasure'}}"
-      if !@data_point.analysis.problem['workflow'].empty? && @data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'RubyMeasure'}            
+      @sim_logger.info "@data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'RubyMeasure'}: #{@data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'RubyMeasure'}}"
+      if !@data_point.analysis.problem['workflow'].empty? && @data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'RubyMeasure'}            
         cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --measures_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
         process_log = File.join(simulation_dir, 'oscli_measures_only.log')
         @sim_logger.info "Running measures_only workflow using cmd #{cmd} and writing log to #{process_log}"
@@ -134,8 +134,8 @@ module DjJobs
       #Run OSSCLI --postprocess_only to run reporting measures in UrbanOpt workflow if ReportingMeasure's are present in workflow
       @sim_logger.info "@data_point.analysis.problem['workflow'].empty?: #{@data_point.analysis.problem['workflow'].empty?}"
       @sim_logger.info "@data_point.analysis.problem['workflow']: #{@data_point.analysis.problem['workflow']}"
-      @sim_logger.info "@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'ReportingMeasure'}: #{@data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'ReportingMeasure'}}"
-      if !@data_point.analysis.problem['workflow'].empty? && @data_point.analysis.problem['workflow'].all?{|h| h['measure_type'] == 'ReportingMeasure'}            
+      @sim_logger.info "@data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'ReportingMeasure'}: #{@data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'ReportingMeasure'}}"
+      if !@data_point.analysis.problem['workflow'].empty? && @data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'ReportingMeasure'}            
         cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --postprocess_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
         process_log = File.join(simulation_dir, 'oscli_postprocess_only.log')
         @sim_logger.info "Running postprocess_only workflow using cmd #{cmd} and writing log to #{process_log}"

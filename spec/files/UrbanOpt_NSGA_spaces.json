@@ -172,7 +172,7 @@
               "display_name_short": "mixed_type_2_percentage",
               "variable_type": "variable",
               "minimum": 0,
-              "maximum": 50,
+              "maximum": 30,
               "static_value": 33,
               "uuid": "",
               "version_uuid": "",
@@ -186,7 +186,7 @@
                   },
                   {
                     "name": "upper_bounds",
-                    "value": 50
+                    "value": 30
                   },
                   {
                     "name": "modes",
@@ -217,7 +217,7 @@
               "display_name_short": "mixed_type_3_percentage",
               "variable_type": "variable",
               "minimum": 0,
-              "maximum": 50,
+              "maximum": 20,
               "static_value": 33,
               "uuid": "",
               "version_uuid": "",
@@ -231,11 +231,11 @@
                   },
                   {
                     "name": "upper_bounds",
-                    "value": 50
+                    "value": 20
                   },
                   {
                     "name": "modes",
-                    "value": 25
+                    "value": 15
                   },
                   {
                     "name": "delta_x",
