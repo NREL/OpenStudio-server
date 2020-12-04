@@ -1,7 +1,7 @@
 {
   "analysis": {
-    "display_name": "UrbanOpt_NSGA",
-    "name": "UrbanOpt_NSGA",
+    "display_name": "UrbanOpt_NSGA_spaces",
+    "name": "UrbanOpt_NSGA_spaces",
     "urbanopt": true,
     "output_variables": [
       {

@@ -72,8 +72,9 @@ class Variable
   field :relation_to_output, type: String, default: 'standard' # or can be inverse
   field :static_value, default: nil # don't type this because it can take on anything (other than hashes and arrays)
 
-  field :mapper, type: String # UrbanOpt Mapper name
-  field :uo_measure, type: String # UrbanOpt Measure name
+  field :mapper, type: String                             # UrbanOpt Mapper name
+  field :uo_measure, type: String                         # UrbanOpt Measure name
+  field :uo_variable, type: Boolean, default: false       # UrbanOpt variable flag
   field :report, type: String, default: 'scenario_report' # UrbanOpt output report name. either: scenario_report/feature_reports
   field :report_id, type: String, default: ''             # UrbanOpt output report :id. either scenario id name or feature report id number
   field :reporting_periods, type: Integer, default: 0     # UrbanOpt output reporting_periods array index

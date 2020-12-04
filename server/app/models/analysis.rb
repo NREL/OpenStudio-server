@@ -259,6 +259,7 @@ class Analysis
             if var.perturbable
               var.export = true
               var.visualize = true
+              var.uo_variable = true #set this flag to true since its an urbanopt variable
             end
             # if the variable has an uncertainty description, then it needs to be flagged
             # as a perturbable (or pivot) variable

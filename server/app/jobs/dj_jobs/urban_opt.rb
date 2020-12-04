@@ -66,8 +66,10 @@ module DjJobs
       @data_point['set_variable_values'].each_with_index do |(k, v), i|  #loop over all variables
         var = Variable.find(k)
         if var
-          if var[:uo_measure].nil? || var[:mapper].nil?
-            @sim_logger.info "variable: #{var[:name]} has no mapper or uo_measure so skipping."
+          if !var[:uo_variable]
+          #if var[:uo_measure].nil? || var[:mapper].nil?
+            #@sim_logger.info "variable: #{var[:name]} has no mapper or uo_measure so skipping."
+            @sim_logger.info "variable: #{var[:name]} is not an UrbanOpt variable so skipping."
             next
           end
           @sim_logger.info "var: #{var.to_json}"
