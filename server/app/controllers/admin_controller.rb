@@ -81,7 +81,7 @@ class AdminController < ApplicationController
     if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
-      exec_str = "mongorestore -d #{Mongoid.default_client.database.name} -h #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
+      exec_str = "mongorestore --username  ENV['MONGO_USERNAME'] --password  ENV['MONGO_PASSWORD']  #{Mongoid.default_client.database.name} -h #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
       `#{exec_str}`
       if $?.exitstatus.zero?
         logger.info 'Restored mongo database'
