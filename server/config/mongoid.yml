@@ -6,6 +6,8 @@ development:
         # For some reason localhost isn't working for mongo anymore
         - 127.0.0.1:27017
       options:
+        user: <%= ENV['MONGO_USER'] %> 
+        password: <%= ENV['MONGO_PASSWORD'] %> 
   options:
     raise_not_found_error: false
     log_level: :info
@@ -16,6 +18,8 @@ docker:
       hosts:
         - db:27017
       options:
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
   options:
     raise_not_found_error: false
     log_level: :info
@@ -26,6 +30,8 @@ docker-dev:
       hosts:
         - db:27017
       options:
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
   options:
     raise_not_found_error: false
     log_level: :info
@@ -36,6 +42,8 @@ docker-test:
       hosts:
         - db:27017
       options:
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
   options:
     raise_not_found_error: false
     log_level: :info
@@ -46,6 +54,8 @@ production:
       hosts:
         - localhost:27017
       options:
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
   options:
     raise_not_found_error: false
     log_level: :info
@@ -57,6 +67,8 @@ local:
         # For some reason localhost isn't working for mongo anymore
         - 127.0.0.1:<%= ENV['OS_SERVER_MONGO_PORT'] %>
       options:
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
   options:
     raise_not_found_error: false
     log_level: :info
@@ -67,6 +79,8 @@ local-test:
       hosts:
         - localhost:<%= ENV['OS_SERVER_MONGO_PORT'] %>
       options:
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
   options:
     raise_not_found_error: false
     log_level: :info
@@ -81,3 +95,5 @@ test:
         read:
           mode: :primary
         max_pool_size: 1
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
