@@ -45,5 +45,7 @@ elsif ['development', 'test'].include? Rails.env
   Resque.redis = 'localhost:6379'
 else
   require 'resque'
-  Resque.redis = 'queue:6379'
+  uri = URI.parse(ENV['REDIS_URL'])
+  #Resque.redis = 'queue:6379'
+  Resque.redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
 end
