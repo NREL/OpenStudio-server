@@ -8,10 +8,14 @@ services:
       - "27017:27017"
     volumes:
       - dbdata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: openstudio
+      MONGO_INITDB_ROOT_PASSWORD: openstudio
   queue:
     image: redis:6.0.9
     ports:
       - "6379:6379"
+    command: "redis-server --requirepass openstudio"
   web:
     image: 127.0.0.1:5000/openstudio-server
     build:
@@ -22,6 +26,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=analysis_wrappers
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     depends_on:
       - db
       - queue
@@ -40,6 +47,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=background,analyses
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     depends_on:
       - db
       - queue
@@ -58,6 +68,9 @@ services:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=simulations
       - COUNT=1
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     depends_on:
       - web
       - db
