@@ -81,7 +81,7 @@ class AdminController < ApplicationController
     if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
-      exec_str = "mongorestore --username  ENV['MONGO_USERNAME'] --password  ENV['MONGO_PASSWORD']  #{Mongoid.default_client.database.name} -h #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
+      exec_str = "mongorestore --username  ENV['MONGO_USERNAME'] --password  ENV['MONGO_PASSWORD'] --authenticationDatabase admin  #{Mongoid.default_client.database.name} -h #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
       `#{exec_str}`
       if $?.exitstatus.zero?
         logger.info 'Restored mongo database'
@@ -101,7 +101,7 @@ class AdminController < ApplicationController
     dump_dir = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    exec_str = "mongodump --db #{Mongoid.default_client.database.name} --host #{Mongoid.default_client.cluster.addresses[0].seed} --out #{dump_dir}"
+    exec_str = "mongodump --username  ENV['MONGO_USERNAME'] --password  ENV['MONGO_PASSWORD'] --authenticationDatabase admin --db #{Mongoid.default_client.database.name} --host #{Mongoid.default_client.cluster.addresses[0].seed} --out #{dump_dir}"
     `#{exec_str}`
 
     if $?.exitstatus.zero?
