@@ -8,6 +8,9 @@ development:
       options:
         user: <%= ENV['MONGO_USER'] %> 
         password: <%= ENV['MONGO_PASSWORD'] %> 
+        roles:
+          - 'dbOwner'
+        auth_source: admin
   options:
     raise_not_found_error: false
     log_level: :info
@@ -20,9 +23,12 @@ docker:
       options:
         user: <%= ENV['MONGO_USER'] %>
         password: <%= ENV['MONGO_PASSWORD'] %>
+        roles:
+          - 'dbOwner'     
+        auth_source: admin
   options:
     raise_not_found_error: false
-    log_level: :info
+    log_level: :debug
 docker-dev:
   clients:
     default:
@@ -32,6 +38,9 @@ docker-dev:
       options:
         user: <%= ENV['MONGO_USER'] %>
         password: <%= ENV['MONGO_PASSWORD'] %>
+        roles:
+          - 'dbOwner'
+        auth_source: admin
   options:
     raise_not_found_error: false
     log_level: :info
@@ -44,6 +53,9 @@ docker-test:
       options:
         user: <%= ENV['MONGO_USER'] %>
         password: <%= ENV['MONGO_PASSWORD'] %>
+        roles:
+          - 'dbOwner'
+        auth_source: admin
   options:
     raise_not_found_error: false
     log_level: :info
@@ -56,6 +68,9 @@ production:
       options:
         user: <%= ENV['MONGO_USER'] %>
         password: <%= ENV['MONGO_PASSWORD'] %>
+        roles:
+          - 'dbOwner'
+        auth_source: admin
   options:
     raise_not_found_error: false
     log_level: :info
@@ -69,6 +84,9 @@ local:
       options:
         user: <%= ENV['MONGO_USER'] %>
         password: <%= ENV['MONGO_PASSWORD'] %>
+        roles:
+          - 'dbOwner'
+        auth_source: admin
   options:
     raise_not_found_error: false
     log_level: :info
@@ -81,6 +99,9 @@ local-test:
       options:
         user: <%= ENV['MONGO_USER'] %>
         password: <%= ENV['MONGO_PASSWORD'] %>
+        roles:
+          - 'dbOwner'
+        auth_source: admin
   options:
     raise_not_found_error: false
     log_level: :info
@@ -97,3 +118,6 @@ test:
         max_pool_size: 1
         user: <%= ENV['MONGO_USER'] %>
         password: <%= ENV['MONGO_PASSWORD'] %>
+        roles:
+          - 'dbOwner'
+        auth_source: admin
