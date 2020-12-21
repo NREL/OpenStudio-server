@@ -9,8 +9,8 @@ services:
     volumes:
       - dbdata:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: openstudio
-      MONGO_INITDB_ROOT_PASSWORD: openstudio
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
   queue:
     image: redis:6.0.9
     ports:
@@ -26,9 +26,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=analysis_wrappers
-      - REDIS_URL=redis://:openstudio@queue:6379
-      - MONGO_USER=openstudio
-      - MONGO_PASSWORD=openstudio
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       - db
       - queue
@@ -47,9 +47,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=background,analyses
-      - REDIS_URL=redis://:openstudio@queue:6379
-      - MONGO_USER=openstudio
-      - MONGO_PASSWORD=openstudio
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       - db
       - queue
@@ -68,9 +68,9 @@ services:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=simulations
       - COUNT=1
-      - REDIS_URL=redis://:openstudio@queue:6379
-      - MONGO_USER=openstudio
-      - MONGO_PASSWORD=openstudio
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       - web
       - db
@@ -82,6 +82,9 @@ services:
     build: ./docker/R
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
