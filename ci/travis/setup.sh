@@ -28,9 +28,9 @@ else
         rm ruby-2.5.5-darwin.tar.gz
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
-        curl -SLO https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.18.tgz
-        tar xvzf mongodb-osx-ssl-x86_64-3.4.18.tgz
-        cp mongodb-osx-x86_64-3.4.18/bin/* /usr/local/bin/
+        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-4.4.2.tgz
+        tar xvzf mongodb-macos-x86_64-4.4.2.tgz
+        cp mongodb-macos-x86_64-4.4.2.tgz/bin/* /usr/local/bin/
         rm -r mongodb-osx*
         
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
@@ -58,17 +58,24 @@ else
     elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
+        sudo apt-get update && sudo apt-get install -y wget gnupg software-properties-common build-essential
+        sudo wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+        echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse | tee /etc/apt/sources.list.d/mongodb-org-4.4.list"
         sudo apt-get update
+        sudo apt-get install -y pv tree mongodb libqdbm14
         # per travis docs, mongodb and redis should already be installed and started from services key in bionic, but this isn't working.  explicitly install.
         # the latest version of redis-server now binds to ipv6 which is not supported on travis (disabled). redis-server will fail to start due to the this so below
         # is a work around to install it, configure to it only binds to ipv4.
-        sudo apt-get install redis-server || true
-        sudo systemctl stop redis-server.service
-        sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
-        sudo mv redis.conf /etc/redis/redis.conf
+        wget https://download.redis.io/releases/redis-6.0.9.tar.gz
+        tar xzf redis-6.0.9.tar.gz && cd redis-6.0.9
+        make && sudo make install 
+        sudo cp utils/systemd-redis_server.service /etc/systemd/system/redis.service
+        #sudo apt-get install redis-server || true
+        #sudo systemctl stop redis-server.service
+        #sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
+        #sudo mv redis.conf /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
-        sudo apt-get install -y pv tree mongodb libqdbm14
         sudo systemctl start mongodb
 
         # install portable ruby - required for build that will eventually be published
