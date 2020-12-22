@@ -28,7 +28,7 @@ docker:
         auth_source: admin
   options:
     raise_not_found_error: false
-    log_level: :debug
+    log_level: :info
 docker-dev:
   clients:
     default:
