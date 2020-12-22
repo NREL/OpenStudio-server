@@ -19,7 +19,7 @@ services:
     image: redis:6.0.9
     ports:
       - "6379:6379"
-    command: "redis-server --requirepass openstudio"
+    command: "redis-server --requirepass ${REDIS_PASSWORD}"
   web:
     image: nrel/openstudio-server:latest
     ports:
