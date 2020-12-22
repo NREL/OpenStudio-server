@@ -30,7 +30,7 @@ else
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-4.4.2.tgz
         tar xvzf mongodb-macos-x86_64-4.4.2.tgz
-        cp mongodb-macos-x86_64-4.4.2.tgz/bin/* /usr/local/bin/
+        cp mongodb-macos-x86_64-4.4.2/bin/* /usr/local/bin/
         rm -r mongodb-osx*
         
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
@@ -70,6 +70,8 @@ else
         tar xzf redis-6.0.9.tar.gz && cd redis-6.0.9
         make && sudo make install 
         sudo cp utils/systemd-redis_server.service /etc/systemd/system/redis.service
+        cd $TRAVIS_BUILD_DIR
+        rm redis-6.0.9.tar.gz
         #sudo apt-get install redis-server || true
         #sudo systemctl stop redis-server.service
         #sudo sed -e 's/^bind.*/bind 127.0.0.1/' /etc/redis/redis.conf > redis.conf
