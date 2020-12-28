@@ -3,13 +3,17 @@
 version: '3.4'
 services:
   db:
-    image: mongo:3.4.10
+    image: mongo:4.4.2
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
   queue:
-    image: redis:4.0.6
+    image: redis:6.0.9
     ports:
       - "6379:6379"
+    command: "redis-server --requirepass ${REDIS_PASSWORD}"
   web:
     image: nrel/openstudio-server:latest
     build:
@@ -28,6 +32,9 @@ services:
       - MAX_REQUESTS=10
       - MAX_POOL=10
       - QUEUES=analysis_wrappers
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       - db
       - queue
@@ -49,6 +56,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=background,analyses
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       - db
       - queue
@@ -67,6 +77,9 @@ services:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=simulations
       - COUNT=1
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     depends_on:
       - web
       - db
@@ -78,6 +91,9 @@ services:
     build: ./docker/R
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:

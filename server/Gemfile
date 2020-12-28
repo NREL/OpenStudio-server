@@ -19,7 +19,7 @@ gem 'rubyzip', '~> 2.3.0'
 gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 6.3.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
+gem 'mongoid', '~> 7.2.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
 gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
 gem 'paperclip', '~> 4.3.7'
 
