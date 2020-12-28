@@ -1,6 +1,70 @@
 OpenStudio Server
 =================
 
+Version 3.1.0-1
+-------------
+
+* #[613](https://github.com/NREL/OpenStudio-server/pull/613/files) Update Mongo and Redis versions and allow for custom password for both Redis and Mongo when launching OpenStudio-server.  
+
+
+Version 3.1.0
+-------------
+
+Date Range 06/26/20 - 10/26/20
+
+* [#555](https://github.com/NREL/OpenStudio-server/pull/555) - Update Ruby gem envs in the openstudio_meta cli  
+* [#561](https://github.com/NREL/OpenStudio-server/pull/561) - Fixes [#560](https://github.com/NREL/OpenStudio-server/issues/560) - Fixes unzip method
+* [#563](https://github.com/NREL/OpenStudio-server/pull/563) - Add linux support for extracted gems. 
+* [#564](https://github.com/NREL/OpenStudio-server/pull/564) - Remove hardcoded openstudio version and sha
+* [#566](https://github.com/NREL/OpenStudio-server/pull/566) - Make tmpname deprecate
+* [#571](https://github.com/NREL/OpenStudio-server/pull/571) - Make downloading files back to server optional 
+* [#602](https://github.com/NREL/OpenStudio-server/pull/602) - Add algorithmic test suites
+* [#597](https://github.com/NREL/OpenStudio-server/pull/597) - Save the travis gem package artifacts
+* [#599](https://github.com/NREL/OpenStudio-server/pull/599) - Save the windows gem package artifacts
+* [#580](https://github.com/NREL/OpenStudio-server/issues/580) - add report capability to PSO 
+* [#579](https://github.com/NREL/OpenStudio-server/pull/579) - Update nokogiri
+* [#585](https://github.com/NREL/OpenStudio-server/pull/585) - Update docker-compose version
+* [#589](https://github.com/NREL/OpenStudio-server/pull/589) - Use most recent rubocop rules
+
+
+Version 3.0.1
+-------------
+Date Range 04/28/20 - 06/26/20
+
+* Updated OpenStudio SDK from v3.0.0 to v3.0.1
+* Fixed [#561](https://github.com/NREL/OpenStudio-server/issues/561) #561 Fix unzipping issue.
+
+
+Version 3.0.0
+-------------
+Date Range 12/9/19 - 04/27/20
+
+* Updated OpenStudio SDK from v2.9.1 to v3.0.0
+* Updated EnergyPlus from v9.2.0 to v9.3.0
+* Updated Ruby from 2.2.4 to Ruby 2.5.5
+* Fixed [#543](https://github.com/NREL/OpenStudio-server/issues/543) Increased the scp timeouts for larger data files.
+* Fixed [#537](https://github.com/NREL/OpenStudio-server/issues/537) Added timeout settings as user args
+
+
+Version 2.9.1
+-------------
+
+Date Range 10/11/19 - 12/9/2019
+
+* Fixed [#526](https://github.com/NREL/OpenStudio-server/issues/526) Adding checks for valid CLI options and adding debug flag as optional. 
+* Updating to bson 4.50 for MongoDB support
+
+
+Version 2.9.0
+-------------
+
+Date Range 6/5/19 - 10/11/19
+
+* [#483](https://github.com/NREL/OpenStudio-server/issues/483) Added support for develop3 (3.x OpenStudio releases) 
+* [#507](https://github.com/NREL/OpenStudio-server/issues/507) Update server/Gemfile to openstudio-analysis 1.0.2 once available develop3 
+* [#503](https://github.com/NREL/OpenStudio-server/issues/503) Updated local Linux/OSX testing for 3x
+
+
 Version 2.8.1
 -------------
 
