@@ -12,7 +12,10 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: "${AWS_MONGO_CORES}"
+          cpus: "1"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
   queue:
     image: 127.0.0.1:5000/redis
     ports:
@@ -24,6 +27,7 @@ services:
       resources:
         reservations:
           cpus: "1"
+    command: "redis-server --requirepass ${REDIS_PASSWORD}"
   web:
     image: 127.0.0.1:5000/openstudio-server
     ports:
@@ -31,10 +35,13 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${AWS_OS_SERVER_NUMBER_OF_WORKERS}
-      - MAX_REQUESTS=${AWS_MAX_REQUESTS}
-      - MAX_POOL=${AWS_MAX_POOL}
+      - OS_SERVER_NUMBER_OF_WORKERS=42
+      - MAX_REQUESTS=60
+      - MAX_POOL=16
       - QUEUES=analysis_wrappers
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -46,13 +53,16 @@ services:
           - node.role == manager
       resources:
         reservations:
-          cpus: "${AWS_WEB_CORES}"
+          cpus: "1"
     command: /usr/local/bin/start-server
   web-background:
     image: 127.0.0.1:5000/openstudio-server
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${AWS_OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=42
       - QUEUES=background,analyses
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -73,6 +83,9 @@ services:
     environment:
       - QUEUES=simulations
       - COUNT=1
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - /mnt/openstudio
     depends_on:
@@ -103,18 +116,10 @@ services:
       resources:
         reservations:
           cpus: "1"
-  notebook:
-    image: 127.0.0.1:5000/openstudio-jupyter
-    ports:
-      - "8888:8888"
-    volumes:
-      - osdata:/mnt/openstudio
-    depends_on:
-      - web
-      - web-background
-      - db
-      - queue
-      - rserve  
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
 volumes:
   osdata:
     external: true
