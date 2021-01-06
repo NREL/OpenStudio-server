@@ -11,8 +11,8 @@ services:
         constraints:
           - node.role == manager
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: openstudio
+      MONGO_INITDB_ROOT_PASSWORD: openstudio
   queue:
     image: 127.0.0.1:5000/redis
     ports:
@@ -21,7 +21,7 @@ services:
       placement:
         constraints:
           - node.role == manager
-    command: "redis-server --requirepass ${REDIS_PASSWORD}"
+    command: "redis-server --requirepass openstudio"
   web:
     image: 127.0.0.1:5000/openstudio-server
     ports:
@@ -33,9 +33,9 @@ services:
       - MAX_REQUESTS=10
       - MAX_POOL=10
       - QUEUES=analysis_wrappers
-      - REDIS_URL=${REDIS_URL}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -51,9 +51,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=background,analyses
-      - REDIS_URL=${REDIS_URL}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -71,9 +71,9 @@ services:
     environment:
       - QUEUES=simulations
       - COUNT=1
-      - REDIS_URL=${REDIS_URL}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=$openstudio
     volumes:
       - /mnt/openstudio
     depends_on:
@@ -99,9 +99,9 @@ services:
         constraints:
           - node.role == manager
     environment:
-      - REDIS_URL=${REDIS_URL}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
 volumes:
   osdata:
     external: true
