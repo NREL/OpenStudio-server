@@ -1,0 +1,40 @@
+name: openstudio-server
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - setup_github_actions
+#on:
+#  pull_request:
+#    branches: [ master, develop ]
+
+env:
+  USE_TESTING_TIMEOUTS: "true"
+  OPENSTUDIO_VERSION=3.1.0 
+  OPENSTUDIO_VERSION_SHA=e165090621 
+  OPENSTUDIO_VERSION_EXT=""
+  DOCKER_COMPOSE_VERSION=1.21.1
+  BUNDLE_WITHOUT=native_ext
+
+
+jobs:
+  linux-test:
+    runs-on: ubuntu-18.04
+    steps: 
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: setup
+      shell: bash 
+      run: ./ci/travis/setup.sh
+    - id: test
+      shell: bash 
+      run: ./ci/travis/test.sh
+
+#after_failure: ./ci/travis/print_logs.sh
+
+# Services for linux -- all instances
+#services:
+#  - docker
+
