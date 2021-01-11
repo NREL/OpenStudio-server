@@ -8,7 +8,7 @@ if [ "${ImageOS}" == "osx" ]; then
     # re-export PATH, even though it's set in setup.sh. 
     export PATH="$GITHUB_WORKSPACE/gems/bin:/usr/local/ruby/bin:$HOME/openstudio/bin:$PATH"
     export GEM_HOME="$GITHUB_WORKSPACE/gems"
-    export GEM_PATH="$GITHUB_WORKSPACE/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
+    export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
 elif [ "${ImageOS}" == "ubuntu18" ]; then
     # Dir containing openstudio
@@ -36,7 +36,7 @@ else
         # Threadsafe test requires higher ulimit to avoid EMFILE error
         ulimit -n
         ulimit -n 1024
-        ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" "${TRAVIS_BUILD_DIR}/spec/unit-test"
+        ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" "${GITHUB_WORKSPACE}/spec/unit-test"
         exit_status=$?
         if [ $exit_status == 0 ];then
             echo "Completed unit tests successfully"
@@ -51,7 +51,7 @@ else
         export RAILS_ENV=local
 
         #    explicitly set directory.  Probably unnecessary
-        cd $TRAVIS_BUILD_DIR
+        cd $GITHUB_WORKSPACE
         printenv
         bundle install
         echo "Beginning integration tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
