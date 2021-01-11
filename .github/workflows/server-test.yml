@@ -28,10 +28,11 @@ jobs:
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
-    - id: test
+    - name: test
       shell: bash 
       run: ./ci/github-actions/test.sh
-    - id: logs
+    - name: logs
+      if: ${{ failure() }}
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
 
