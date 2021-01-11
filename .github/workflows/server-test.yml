@@ -20,7 +20,7 @@ env:
 
 
 jobs:
-  linux-test:
+  test:
     runs-on: ubuntu-18.04
     steps: 
     - name: Check out repository
@@ -30,7 +30,7 @@ jobs:
       run: ./ci/github-actions/setup.sh
     - id: test
       shell: bash 
-      run: ./ci/github-actions/setup.sh
+      run: ./ci/github-actions/test.sh
 
 #after_failure: ./ci/travis/print_logs.sh
 
