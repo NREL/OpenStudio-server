@@ -73,7 +73,7 @@ services:
       - COUNT=1
       - REDIS_URL=redis://:openstudio@queue:6379
       - MONGO_USER=openstudio
-      - MONGO_PASSWORD=$openstudio
+      - MONGO_PASSWORD=openstudio
     volumes:
       - /mnt/openstudio
     depends_on:
