@@ -84,6 +84,8 @@ else
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
         tar xvzf ruby-2.5.5-linux.tar.gz
+        ls -l /usr/local/
+        sudo rm -rf /usr/local/ruby
         sudo mv ruby /usr/local/
         ldd /usr/local/ruby/bin/ruby
         rm ruby-2.5.5-linux.tar.gz
@@ -111,6 +113,8 @@ else
     ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
     # create dir for output files which will be generated in case of failure
-    mkdir "${GITHUB_WORKSPACE}/spec/unit-test"
+    if [ ! -d "${GITHUB_WORKSPACE}/spec/unit-test" ]; then
+      mkdir "${GITHUB_WORKSPACE}/spec/unit-test"
+    fi
 
 fi
