@@ -29,18 +29,18 @@ jobs:
       shell: bash 
       run: ./ci/github-actions/setup.sh
       env:
-        BUILD_TYPE=test
+        BUILD_TYPE: test
     - name: test
       shell: bash 
       run: ./ci/github-actions/test.sh
       env:
-        BUILD_TYPE=test
+        BUILD_TYPE: test
     - name: logs
       if: ${{ failure() }}
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
       env:
-        BUILD_TYPE=test
+        BUILD_TYPE: test
   integration:
     runs-on: ubuntu-18.04
     steps: 
@@ -50,18 +50,18 @@ jobs:
       shell: bash 
       run: ./ci/github-actions/setup.sh
       env:
-        BUILD_TYPE=integration
+        BUILD_TYPE: integration
     - name: test
       shell: bash 
       run: ./ci/github-actions/test.sh
       env:
-        BUILD_TYPE=integration
+        BUILD_TYPE: integration
     - name: logs
       if: ${{ failure() }}
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
       env:
-        BUILD_TYPE=integration
+        BUILD_TYPE: integration
 
 #after_failure: ./ci/travis/print_logs.sh
 
