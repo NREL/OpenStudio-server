@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 echo "Current directory is $(pwd)"
-# echo "tree: ${TRAVIS_BUILD_DIR}/spec"
-# tree "${TRAVIS_BUILD_DIR}/spec"
+# echo "tree: ${GITHUB_WORKSPACE}/spec"
+# tree "${GITHUB_WORKSPACE}/spec"
 echo "=== PRINTING ERROR LOG REPORTS ==="
 
 shopt -s nullglob
 
 echo "=== PRINTING spec/files/logs/* ==="
-for F in "${TRAVIS_BUILD_DIR}/spec/files/logs/"*
+for F in "${GITHUB_WORKSPACE}/spec/files/logs/"*
 do
     echo '======================================================'
     echo $F
@@ -19,7 +19,7 @@ do
 done
 
 echo "=== PRINTING /spec/unit-test/logs/*  ==="
-for F in "${TRAVIS_BUILD_DIR}/spec/unit-test/logs/"*
+for F in "${GITHUB_WORKSPACE}/spec/unit-test/logs/"*
 do
     echo '======================================================'
     echo $F
@@ -31,7 +31,7 @@ done
 
 
 echo "=== PRINTING /spec/unit-test/logs/rails.log/*  ==="
-for F in "${TRAVIS_BUILD_DIR}/spec/unit-test/logs/rails.log/"*
+for F in "${GITHUB_WORKSPACE}/spec/unit-test/logs/rails.log/"*
 do
     echo '======================================================'
     echo $F

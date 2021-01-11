@@ -31,6 +31,10 @@ jobs:
     - id: test
       shell: bash 
       run: ./ci/github-actions/test.sh
+    - id: logs
+      shell: bash 
+      run: ./ci/github-actions/print_logs.sh
+
 
 #after_failure: ./ci/travis/print_logs.sh
 
