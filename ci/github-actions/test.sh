@@ -30,7 +30,7 @@ else
 
     # run unit tests via openstudio_meta run_rspec command which attempts to reproduce the PAT local environment
     # prior to running tests, so we should not set enviroment variables here
-    if [ "${GITHUB_JOB}" == "test" ];then
+    if [ "${BUILD_TYPE}" == "test" ];then
         ulimit -a
         echo "starting unit tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
         # Threadsafe test requires higher ulimit to avoid EMFILE error
@@ -45,7 +45,7 @@ else
     #   rspec failed if we made it here:
         echo "Unit tests failed with status $exit_status"
         exit $exit_status
-    elif [ "${GITHUB_JOB}" == "integration" ]; then
+    elif [ "${BUILD_TYPE}" == "integration" ]; then
         #    run the analysis integration specs - everything in root directory
         #    use same environment as PAT
         export RAILS_ENV=local
