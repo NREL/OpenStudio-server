@@ -86,7 +86,8 @@ class AnalysisLibrary::SingleRun < AnalysisLibrary::Base
 
     i_var = 0
     selected_variables.each do |var|
-      logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
+      logger.info "var: #{var.to_s}"
+      #logger.info "sampling variable #{var.name} for measure #{var.measure.name}"  #var.measure no longer guarenteed with UrbanOpt variables
       variable_samples = nil
       # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
       if var.uncertainty_type == 'discrete'
@@ -98,8 +99,8 @@ class AnalysisLibrary::SingleRun < AnalysisLibrary::Base
       end
 
       # always add the data to the grouped hash even if it isn't used
-      grouped[var.measure.id.to_s] = {} unless grouped.key?(var.measure.id)
-      grouped[var.measure.id.to_s][var.id.to_s] = variable_samples
+      #grouped[var.measure.id.to_s] = {} unless grouped.key?(var.measure.id)
+      #grouped[var.measure.id.to_s][var.id.to_s] = variable_samples
 
       # save the samples to the
       samples[var.id.to_s] = variable_samples
