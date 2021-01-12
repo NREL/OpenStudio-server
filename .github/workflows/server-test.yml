@@ -65,6 +65,11 @@ jobs:
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
+    - name: setup
+      shell: bash 
+      run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: docker
     - name: docker
       shell: bash 
       run: |
@@ -81,10 +86,10 @@ jobs:
           docker-compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
       env: 
-        COMPOSE_INTERACTIVE_NO_CLI: 1
         CI: true
         OS_SERVER_NUMBER_OF_WORKERS: 4
         BUILD_TYPE: docker
+        # COMPOSE_INTERACTIVE_NO_CLI: 1
     - name: logs
       if: ${{ failure() }}
       shell: bash 
