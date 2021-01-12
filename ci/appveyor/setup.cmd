@@ -20,7 +20,7 @@ rm ruby-2.5.5-win32.tar.gz
 cd c:\projects\openstudio-server
 ruby -v
 openstudio openstudio_version
-
+git config --system core.longpaths true
 REM If you change RUBYLIB here, make sure to change it in integration-test.ps1 and unit-test.cmd too
 set RUBYLIB=C:\projects\openstudio\Ruby
 ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
