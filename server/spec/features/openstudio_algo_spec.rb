@@ -1699,7 +1699,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         end
         sim = results.slice(:electricity_kwh, :natural_gas_kwh)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.round(-5) }
 
         compare = single_run.include?(sim)
         expect(compare).to be true
@@ -1733,7 +1733,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
           if key.to_s.include?("target") || key.to_s.include?("group")
             obj_json[key] = value.to_i
           else
-            obj_json[key] = value.truncate(4)
+            obj_json[key] = value.round(-5)
           end
         end
         
