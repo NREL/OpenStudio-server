@@ -65,11 +65,11 @@ jobs:
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
-    - name: setup
-      shell: bash 
-      run: ./ci/github-actions/setup.sh
-      env:
-        BUILD_TYPE: docker
+    #- name: setup
+    #  shell: bash 
+    #  run: ./ci/github-actions/setup.sh
+    #  env:
+    #    BUILD_TYPE: docker
     - name: docker
       shell: bash 
       run: |
@@ -82,14 +82,14 @@ jobs:
           docker-compose -f docker-compose.test.yml pull
           docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
           docker-compose -f docker-compose.test.yml up -d
-          docker-compose exec web /usr/local/bin/run-server-tests
+          docker-compose exec -T web /usr/local/bin/run-server-tests
           docker-compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
       env: 
         CI: true
         OS_SERVER_NUMBER_OF_WORKERS: 4
         BUILD_TYPE: docker
-        # COMPOSE_INTERACTIVE_NO_CLI: 1
+        COMPOSE_INTERACTIVE_NO_CLI: 1
     - name: logs
       if: ${{ failure() }}
       shell: bash 
