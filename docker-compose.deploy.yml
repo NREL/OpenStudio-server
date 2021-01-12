@@ -1,9 +1,8 @@
 # Version used to deploy the latest version of the server from docker hub.
-
 version: '3.4'
 services:
   db:
-    image: mongo:3.4.10
+    image: mongo:4.4.2
     ports:
       - "27017:27017"
     deploy:
@@ -13,10 +12,14 @@ services:
       resources:
         reservations:
           cpus: "1"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
   queue:
-      image: redis:4.0.6
-      ports:
-        - "6379:6379"
+    image: redis:6.0.9
+    ports:
+      - "6379:6379"
+    command: "redis-server --requirepass ${REDIS_PASSWORD}"
   web:
     image: nrel/openstudio-server:latest
     ports:
@@ -25,6 +28,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=analysis_wrappers
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -42,6 +48,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=background,analyses
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -62,6 +71,9 @@ services:
     environment:
       - QUEUES=simulations
       - COUNT=1
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
     volumes:
       - /mnt/openstudio
     depends_on:
@@ -91,6 +103,10 @@ services:
       resources:
         reservations:
           cpus: "1"
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
 volumes:
   osdata:
     external: true

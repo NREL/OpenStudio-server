@@ -10,11 +10,13 @@ MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Install required libaries.
 #   realpath - needed for wait-for-it
-RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
-    echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | \
-    sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list && \
-    apt-get update \
-	&& apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y wget gnupg \
+    && wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
+#RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
+    && echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse" | \
+    tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
         apt-transport-https \
         autoconf \
         bison \
@@ -44,7 +46,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         libyaml-dev \
         libice-dev \
         libsm-dev \
-        mongodb-org-tools \
+        mongodb-database-tools \
         procps \
         python-numpy \
         python3-numpy \
@@ -79,7 +81,7 @@ ENV OS_BUNDLER_VERSION=2.1.0
 ENV RAILS_ENV $rails_env
 
 # extension gem testing
-ENV FAVOR_LOCAL_GEMS 1
+#ENV FAVOR_LOCAL_GEMS 1
 
 #### OpenStudio Server Code
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
