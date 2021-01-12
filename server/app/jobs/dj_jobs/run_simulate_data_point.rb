@@ -169,10 +169,12 @@ module DjJobs
       if @data_point.weather_file
         osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
       end
+      @sim_logger.info 'Calling OpenStudio-Analysis-Gem new instance'
       t = OpenStudio::Analysis::Translator::Workflow.new(
         "#{simulation_dir}/analysis.json",
         osw_options
       )
+      @sim_logger.info 'Calling OpenStudio-Analysis-Gem process_datapoint'
       t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
       if t_result
         if @data_point.analysis.urbanopt
