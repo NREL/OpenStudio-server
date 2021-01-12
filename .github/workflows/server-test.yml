@@ -80,6 +80,11 @@ jobs:
           docker-compose exec web /usr/local/bin/run-server-tests
           docker-compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
+      env: 
+        COMPOSE_INTERACTIVE_NO_CLI: 1
+        CI: true
+        OS_SERVER_NUMBER_OF_WORKERS: 4
+        BUILD_TYPE: docker
     - name: logs
       if: ${{ failure() }}
       shell: bash 
