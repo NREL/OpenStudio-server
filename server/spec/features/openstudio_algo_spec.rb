@@ -1564,16 +1564,12 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     # setup expected results
     single_run = [
       { electricity_kwh: 19294572.2222,
-        natural_gas_kwh: 21731513.8888,
-        electricity_kwh_fans: 455055.5555,
-        electricity_kwh_fans: 610758.3333 }
+        natural_gas_kwh: 21731513.8888 }
     ]
     # setup bad results
     single_run_bad = [
       { electricity_kwh: 0,
-        natural_gas_kwh: 0,
-        electricity_kwh_fans: 0,
-        electricity_kwh_fans: 0 }
+        natural_gas_kwh: 0}
     ]
 
     # run an analysis
@@ -1690,7 +1686,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         expect(results.size).to eq(4)
         sim_result = {}
-        key_array = [ "electricity_kwh", "natural_gas_kwh", "electricity_kwh_fans", "electricity_kwh_fans" ]
+        key_array = [ "electricity_kwh", "natural_gas_kwh" ]
         #loop through results to ignore the UUID as the first key, they change values as they take place of measure name which doesnt exist here.
         #get the key value pair for the objective function and not applicable:true
         results.each do |key, result|
@@ -1701,16 +1697,50 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
             end
           end  
         end
-        sim = results.slice(:electricity_kwh, :natural_gas_kwh, :electricity_kwh_fans, :electricity_kwh_fans)
+        sim = results.slice(:electricity_kwh, :natural_gas_kwh)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
 
         compare = single_run.include?(sim)
         expect(compare).to be true
-        puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
+        puts "data_point[:#{data_point[:_id]}] results compare is: #{compare}"
 
         compare = single_run_bad.include?(sim)
         expect(compare).to be false
+        
+        objectives = [{  
+           objective_function_1: 19287658.3333,
+           objective_function_target_1: 0,
+           objective_function_group_1: 1,
+           objective_function_2: 21750497.2222,
+           objective_function_target_2: 0,
+           objective_function_group_2: 2,
+           objective_function_3: 454019.4444,
+           objective_function_target_3: 0,
+           objective_function_group_3: 3,
+           objective_function_4: 609722.2222,
+           objective_function_target_4: 0,
+           objective_function_group_4: 4
+        }]
+        #test the objectives.json 
+        objectives_json = RestClient.get "http://#{@host}/data_points/#{data_point_id}/download_result_file?filename=objectives.json"
+        objectives_json = JSON.parse(objectives_json, symbolize_names: true)
+        expect(objectives_json).not_to be_nil
+        
+        #format the json for comparison
+        obj_json = {}
+        objectives_json.each do |key, value| 
+          if key.to_s.include?("target") || key.to_s.include?("group")
+            obj_json[key] = value.to_i
+          else
+            obj_json[key] = value.truncate(4)
+          end
+        end
+        
+        compare = objectives.include?(obj_json)
+        expect(compare).to be true
+        puts "data_point[:#{data_point[:_id]}] objective.json compare is: #{compare}"
+        
       end
     rescue RestClient::ExceptionWithResponse => e
       puts "rescue: #{e} get_count: #{get_count}"
