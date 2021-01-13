@@ -13,10 +13,10 @@ if [ "${ImageOS}" == "ubuntu18" ] && [ "${BUILD_TYPE}" == "docker" ]; then
     sudo apt-get install -y pv
 
 else
-    sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
-    if [ "${ImageOS}" == "osx" ]; then
+    # sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
+    if [ "${ImageOS}" == "macos1015" ]; then
 
-        brew update > /Users/travis/build/NREL/OpenStudio-server/spec/files/logs/brew-update.log
+        brew update > $GITHUB_WORKSPACE/OpenStudio-server/spec/files/logs/brew-update.log
         brew install pv tree
         
         # install portable ruby - required for build that will eventually be published
