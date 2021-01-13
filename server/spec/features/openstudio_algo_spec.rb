@@ -135,7 +135,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -279,7 +279,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -416,7 +416,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -545,7 +545,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -674,7 +674,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -803,7 +803,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -936,7 +936,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -1065,7 +1065,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     sleep 10
     begin
       ::Timeout.timeout(timeout_seconds) do
@@ -1202,7 +1202,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     sleep 10
 
     begin
@@ -1340,7 +1340,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -1465,7 +1465,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 360
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -1586,7 +1586,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 240
+    timeout_seconds = 480
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
