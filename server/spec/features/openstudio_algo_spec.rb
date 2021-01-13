@@ -1476,7 +1476,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
             a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
-            expect(analysis_type).to eq('single_run')
+            expect(analysis_type).to eq('batch_run')
 
             status = a[:analysis][:status]
             expect(status).not_to be_nil
@@ -1597,7 +1597,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
             a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/status.json"
             a = JSON.parse(a, symbolize_names: true)
             analysis_type = a[:analysis][:analysis_type]
-            expect(analysis_type).to eq('single_run')
+            expect(analysis_type).to eq('batch_run')
 
             status = a[:analysis][:status]
             expect(status).not_to be_nil
