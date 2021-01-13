@@ -16,7 +16,7 @@ else
     # sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
     if [ "${ImageOS}" == "macos1015" ]; then
 
-        brew update > $GITHUB_WORKSPACE/OpenStudio-server/spec/files/logs/brew-update.log
+        brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree
         
         # install portable ruby - required for build that will eventually be published
@@ -30,23 +30,24 @@ else
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-4.4.2.tgz
         tar xvzf mongodb-macos-x86_64-4.4.2.tgz
-        cp mongodb-macos-x86_64-4.4.2/bin/* /usr/local/bin/
+        sudo cp mongodb-macos-x86_64-4.4.2/bin/* /usr/local/bin/
         rm -r mongodb-osx*
         
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin
         export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
-        curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}/${OS_NAME}.dmg
+        curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}/${OS_NAME}.tar.gz
         # OSX downloads with %2B but installs with + sign. These are the encoded chars in url strings.
-        hdiutil attach ${OS_NAME}.dmg
-        sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
-        rm -rf $HOME/openstudio
+        #hdiutil attach ${OS_NAME}.dmg
+        #sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
+        rm -rf $HOME/$OS_NAME_WITH_PLUS=OpenStudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-        sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
-        hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
+        #sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
+        #hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
+        tar -xvzf $OS_NAME_WITH_PLUS.tar.gz -C $HOME
         rm ${OS_NAME}.dmg
-        export PATH="/usr/local/ruby/bin:$GITHUB_WORKSPACE/gems/bin:$HOME/openstudio/bin:$PATH"
-        export RUBYLIB="$HOME/openstudio/Ruby"
+        export PATH="/usr/local/ruby/bin:$GITHUB_WORKSPACE/gems/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
+        export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
         export GEM_HOME="$GITHUB_WORKSPACE/gems"
         export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
 
