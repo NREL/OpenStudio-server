@@ -1438,10 +1438,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run single_run analysis', :single_run, js: true do
     # setup expected results
     single_run = [
-      { electricity_consumption_cvrmse: 33.8626,
-        electricity_consumption_nmbe: -34.4867,
-        natural_gas_consumption_cvrmse: 158.9735,
-        natural_gas_consumption_nmbe: -127.9486 }
+      { electricity_consumption_cvrmse: 34.1625,
+        electricity_consumption_nmbe: -34.8359,
+        natural_gas_consumption_cvrmse: 156.1840,
+        natural_gas_consumption_nmbe: -125.5732 }
     ]
     # setup bad results
     single_run_bad = [
@@ -1698,7 +1698,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
           end  
         end
         sim = results.slice(:electricity_kwh, :natural_gas_kwh)
-        expect(sim.size).to eq(4)
+        expect(sim.size).to eq(1)
         sim = sim.transform_values { |x| x.round(-5) }
 
         compare = single_run.include?(sim)
