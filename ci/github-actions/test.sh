@@ -3,10 +3,11 @@
 # platform-specific config here (also in setup.sh):
 if [ "${ImageOS}" == "macos1015" ]; then
     # Dir containing openstudio
-    export RUBYLIB="${HOME}/openstudio/Ruby"
-    export OPENSTUDIO_TEST_EXE="${HOME}/openstudio/bin/openstudio"
+    export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
+    export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
+    export OPENSTUDIO_TEST_EXE="$HOME/$OS_NAME_WITH_PLUS/bin/openstudio"
     # re-export PATH, even though it's set in setup.sh. 
-    export PATH="$GITHUB_WORKSPACE/gems/bin:/usr/local/ruby/bin:$HOME/openstudio/bin:$PATH"
+    export PATH="$GITHUB_WORKSPACE/gems/bin:/usr/local/ruby/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
     export GEM_HOME="$GITHUB_WORKSPACE/gems"
     export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
