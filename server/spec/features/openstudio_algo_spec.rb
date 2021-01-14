@@ -1424,7 +1424,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
           end  
         end
         sim = results.slice(:electricity_kwh, :natural_gas_kwh)
-        expect(sim.size).to eq(1)
+        expect(sim.size).to eq(2)
         sim = sim.transform_values { |x| x.round(-5) }
 
         compare = single_run.include?(sim)
