@@ -17,12 +17,12 @@ else
     if [ "${ImageOS}" == "macos1015" ]; then
 
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
-        brew install pv tree
+        brew install pv tree coreutils
         
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-darwin.tar.gz
-        tar xvzf ruby-2.5.5-darwin.tar.gz       
+        tar xzf ruby-2.5.5-darwin.tar.gz       
         sudo mv ruby /usr/local/
         otool -L /usr/local/ruby/bin/ruby
         rm ruby-2.5.5-darwin.tar.gz
@@ -44,10 +44,11 @@ else
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         #sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
         #hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
-        tar -xvzf $OS_NAME_WITH_PLUS.tar.gz -C $HOME
+        tar xvzf $OS_NAME_WITH_PLUS.tar.gz -C $HOME
         rm ${OS_NAME}.dmg
         export PATH="/usr/local/ruby/bin:$GITHUB_WORKSPACE/gems/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
         export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
+        ls -l $RUBYLIB
         export GEM_HOME="$GITHUB_WORKSPACE/gems"
         export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
 
