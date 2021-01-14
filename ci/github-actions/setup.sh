@@ -40,12 +40,13 @@ else
         # OSX downloads with %2B but installs with + sign. These are the encoded chars in url strings.
         #hdiutil attach ${OS_NAME}.dmg
         #sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
-        rm -rf $HOME/$OS_NAME_WITH_PLUS=OpenStudio
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
         #sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
         #hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
+        ls -l
         tar xvzf $OS_NAME_WITH_PLUS.tar.gz -C $HOME
-        rm ${OS_NAME}.dmg
+        ls -l $HOME
+        rm -rf $OS_NAME_WITH_PLUS.tar.gz
         export PATH="/usr/local/ruby/bin:$GITHUB_WORKSPACE/gems/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
         export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
         ls -l $RUBYLIB
