@@ -57,15 +57,18 @@ PROJECT = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 HOST = '127.0.0.1'
 
 # For testing locally
-#META_CLI = File.absolute_path('../bin/openstudio_meta')
-#PROJECT = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+#META_CLI = File.absolute_path('C:\ParametricAnalysisTool-3.1.0\pat\OpenStudio-server\bin\openstudio_meta')
+#PROJECT = File.absolute_path(File.join(File.dirname(__FILE__), '../../files/'))
 #HOST = 'localhost:8080'
+##require 'rspec'
+##include RSpec::Matchers
+#RUBY_CMD = 'C:\ParametricAnalysisTool-3.1.0\pat\ruby\bin\ruby.exe'
 
 puts "Project folder is: #{PROJECT}"
 puts "META_CLI is: #{META_CLI}"
 puts "App host is: http://#{HOST}"
-docker_ps = system('docker-compose ps')
-puts "Docker ps: #{docker_ps.to_s}"
+#docker_ps = system('docker-compose ps')
+#puts "Docker ps: #{docker_ps.to_s}"
 
 # the actual tests
 RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
@@ -1292,6 +1295,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_kwh: 19294572.2222,
         natural_gas_kwh: 21731513.8888 }
     ]
+    single_run_round = [
+      { electricity_kwh: 19300000,
+        natural_gas_kwh: 21800000 }
+    ]
     # setup bad results
     single_run_bad = [
       { electricity_kwh: 0,
@@ -1386,7 +1393,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
         dp = JSON.parse(dp, symbolize_names: true)
         expect(dp[:data_point][:status_message]).to eq('completed normal')
-
+        data_point_id = data_point[:_id]
         results = dp[:data_point][:results]
         
        # results for UrbanOpt test is of the form: 
@@ -1423,11 +1430,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
             end
           end  
         end
-        sim = results.slice(:electricity_kwh, :natural_gas_kwh)
+        sim = sim_result.slice(:electricity_kwh, :natural_gas_kwh)
         expect(sim.size).to eq(2)
         sim = sim.transform_values { |x| x.round(-5) }
 
-        compare = single_run.include?(sim)
+        compare = single_run_round.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] results compare is: #{compare}"
 
@@ -1448,6 +1455,22 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
            objective_function_target_4: 0,
            objective_function_group_4: 4
         }]
+        
+        objectives_round = [{  
+           objective_function_1: 19300000,
+           objective_function_target_1: 0,
+           objective_function_group_1: 1,
+           objective_function_2: 21800000,
+           objective_function_target_2: 0,
+           objective_function_group_2: 2,
+           objective_function_3: 500000,
+           objective_function_target_3: 0,
+           objective_function_group_3: 3,
+           objective_function_4: 600000,
+           objective_function_target_4: 0,
+           objective_function_group_4: 4
+        }]
+        
         #test the objectives.json 
         objectives_json = RestClient.get "http://#{@host}/data_points/#{data_point_id}/download_result_file?filename=objectives.json"
         objectives_json = JSON.parse(objectives_json, symbolize_names: true)
@@ -1463,7 +1486,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
           end
         end
         
-        compare = objectives.include?(obj_json)
+        compare = objectives_round.include?(obj_json)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] objective.json compare is: #{compare}"
         
