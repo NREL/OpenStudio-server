@@ -92,7 +92,7 @@ jobs:
       run: ./ci/github-actions/export_build_osx.sh
     - name: upload gem package
       if: ${{ success() }} 
-    - uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v2
       with:
         name: openstudio-server-gems
         path: build/NREL/export/*.tar.gz
