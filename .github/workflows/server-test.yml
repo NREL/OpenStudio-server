@@ -86,6 +86,26 @@ jobs:
       run: ./ci/github-actions/print_logs.sh
       env:
         BUILD_TYPE: test
+  integration-macos:
+    runs-on: macos-10.15
+    steps: 
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: setup
+      shell: bash 
+      run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: integration
+    - name: test
+      shell: bash 
+      run: ./ci/github-actions/test.sh
+      env:
+        BUILD_TYPE: integration
+    - name: logs
+      if: ${{ failure() }}
+      shell: bash 
+      run: ./ci/github-actions/print_logs.sh
+
  #   - name: docker
  #     shell: bash 
  #     run: |
