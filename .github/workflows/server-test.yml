@@ -65,7 +65,7 @@ jobs:
 #    steps: 
 #    - name: Check out repository
 #      uses: actions/checkout@v2
-  test-macos:
+  macos-test:
     runs-on: macos-10.15
     steps: 
     - name: Check out repository
@@ -73,38 +73,32 @@ jobs:
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
-      env:
-        BUILD_TYPE: test
-    - name: test
+    - name: unit-test
       shell: bash 
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: test
-    - name: logs
-      if: ${{ failure() }}
-      shell: bash 
-      run: ./ci/github-actions/print_logs.sh
-      env:
-        BUILD_TYPE: test
-  integration-macos:
-    runs-on: macos-10.15
-    steps: 
-    - name: Check out repository
-      uses: actions/checkout@v2
-    - name: setup
-      shell: bash 
-      run: ./ci/github-actions/setup.sh
-      env:
-        BUILD_TYPE: integration
-    - name: test
+    - name: integration
       shell: bash 
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
     - name: logs
-      if: ${{ failure() }}
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
+    - name: build gem package
+      if: ${{ success() }}  
+      shell: bash 
+      run: ./ci/github-actions/export_build_osx.sh
+    - name: upload gem package
+      if: ${{ success() }} 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: openstudio-server-gems
+        path: build/NREL/export/*.tar.gz
+
+
+  
 
  #   - name: docker
  #     shell: bash 
@@ -131,5 +125,53 @@ jobs:
  #     shell: bash 
  #     run: ./ci/github-actions/print_logs.sh
  
+  publish-macos:
+    needs: [integration-macos, job2]
+    runs-on: macos-10.15
+    steps: 
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: setup
+      shell: bash 
+      run: ./ci/github-actions/setup.sh
 
 
+  - stage: publish
+      # Include your branch name below to publish a custom image.
+      # This change must be made in combination with a modification to
+      # deployment/scripts/deploy_docker.sh, as indicated in comments for that file.
+      # Full documentation at https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-Docker-images
+      if: branch = master OR branch = develop
+      os: linux
+      sudo: required
+      dist: bionic
+      env:
+        - BUILD_TYPE=docker
+      before_script:
+        #- export OPENSTUDIO_TAG=$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")
+        - export OPENSTUDIO_TAG=develop
+        - docker images --all
+        - docker --version
+        - docker-compose --version
+        - docker volume create --name=osdata
+        - docker-compose build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web
+        - docker-compose build rserve
+      script: ./docker/deployment/scripts/deploy_docker.sh
+    - stage: publish
+      if: branch = master OR branch = develop
+      os: osx
+      osx_image: xcode10.2
+      sudo: required
+      env:
+        - BUILD_TYPE=export
+      before_script:
+      script: ./ci/travis/export_build_osx.sh
+    - stage: publish
+      if: branch = master OR branch = develop
+      os: linux
+      dist: bionic
+      sudo: required
+      env:
+        - BUILD_TYPE=export
+      before_script:
+      script: ./ci/travis/export_build_linux.sh
