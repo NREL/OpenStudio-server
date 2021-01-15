@@ -14,4 +14,4 @@ oss_filename="OpenStudio-server-$(git -C "${GITHUB_WORKSPACE}" rev-parse --short
 # openstudio_meta will error. Then for sake of using relative dirs with GitHub upload-artifacts, cp the file to
 # the repo working directory. 
 /usr/local/ruby/bin/ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --export="${HOME}/build/NREL/export"
-cp $HOME/build/NREL/export/oss_filename $GITHUB_WORKSPACE/build/NREL/export/oss_filename
+cp $HOME/build/NREL/export/$oss_filename $GITHUB_WORKSPACE/build/NREL/export/$oss_filename 
