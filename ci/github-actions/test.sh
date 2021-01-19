@@ -53,7 +53,6 @@ else
 
         #    explicitly set directory.  Probably unnecessary
         cd $GITHUB_WORKSPACE
-        printenv
         bundle install
         echo "Beginning integration tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
         bundle exec rspec; (( exit_status = exit_status || $? ))

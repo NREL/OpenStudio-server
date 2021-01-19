@@ -41,7 +41,7 @@ else
         #hdiutil attach ${OS_NAME}.dmg
         #sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
         # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
-        #sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/travis/install-mac.qs
+        #sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/github-actions/install-mac.qs
         #hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
         ls -l
         tar xvzf $OS_NAME_WITH_PLUS.tar.gz -C $HOME
@@ -66,9 +66,7 @@ else
         echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse | tee /etc/apt/sources.list.d/mongodb-org-4.4.list"
         sudo apt-get update
         sudo apt-get install -y pv tree mongodb libqdbm14 libxml2-dev
-        # per travis docs, mongodb and redis should already be installed and started from services key in bionic, but this isn't working.  explicitly install.
-        # the latest version of redis-server now binds to ipv6 which is not supported on travis (disabled). redis-server will fail to start due to the this so below
-        # is a work around to install it, configure to it only binds to ipv4.
+        # explicitly install. the latest version of redis-server  
         wget https://download.redis.io/releases/redis-6.0.9.tar.gz
         tar xzf redis-6.0.9.tar.gz && cd redis-6.0.9
         make && sudo make install 
@@ -94,8 +92,7 @@ else
         rm ruby-2.5.5-linux.tar.gz
 
         mkdir -p reports/rspec
-        # AP: this appears to only be used for Travis/Linux so we should move it out of the docker/deployment/scripts dir
-        sudo ./ci/travis/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
+        sudo ./ci/github-actions/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
         export RUBYLIB=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/Ruby
         export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus
         export PATH=/usr/local/ruby/bin:/usr/local/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
@@ -106,12 +103,10 @@ else
     unset BUNDLE_GEMFILE && openstudio openstudio_version
 
     cd ${GITHUB_WORKSPACE}/server
-    printenv
     which ruby
     ruby -v
     # test openssl
-    # ruby ${TRAVIS_BUILD_DIR}/ci/travis/cipher.rb
-    ruby ${GITHUB_WORKSPACE}/ci/travis/verify_openstudio.rb
+    ruby ${GITHUB_WORKSPACE}/ci/github-actions/verify_openstudio.rb
     
     ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
