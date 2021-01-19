@@ -10,7 +10,7 @@ if [ "${ImageOS}" == "ubuntu18" ] && [ "${BUILD_TYPE}" == "docker" ]; then
     sudo mv docker-compose /usr/local/bin
     # install pipeviewer
     sudo apt-get update
-    sudo apt-get install -y pv
+    sudo apt-get install -y pv ruby
 
 else
     # sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.

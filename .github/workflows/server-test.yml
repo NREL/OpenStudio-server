@@ -20,51 +20,37 @@ env:
 
 
 jobs:
-#  test:
-#    runs-on: ubuntu-18.04
-#    steps: 
-#    - name: Check out repository
-#      uses: actions/checkout@v2
-#    - name: setup
-#      shell: bash 
-#      run: ./ci/github-actions/setup.sh
-#      env:
-#        BUILD_TYPE: test
-#    - name: test
-#      shell: bash 
-#      run: ./ci/github-actions/test.sh
-#      env:
-#        BUILD_TYPE: test
-#    - name: logs
-#      if: ${{ failure() }}
-#      shell: bash 
-#      run: ./ci/github-actions/print_logs.sh
-#      env:
-#       BUILD_TYPE: test
-#  integration:
-#    runs-on: ubuntu-18.04
-#    steps: 
-#    - name: Check out repository
-#      uses: actions/checkout@v2
-#    - name: setup
-#      shell: bash 
-#      run: ./ci/github-actions/setup.sh
-#      env:
-#        BUILD_TYPE: integration
-#    - name: test
-#      shell: bash 
-#      run: ./ci/github-actions/test.sh
-#      env:
-#        BUILD_TYPE: integration
-#    - name: logs
-#      if: ${{ failure() }}
-#      shell: bash 
-#      run: ./ci/github-actions/print_logs.sh
-#  docker:
-#   runs-on: ubuntu-18.04
-#    steps: 
-#    - name: Check out repository
-#      uses: actions/checkout@v2
+  linux-tes:
+    runs-on: ubuntu-18.04
+    steps: 
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: setup
+      shell: bash 
+      run: ./ci/github-actions/setup.sh
+    - name: unit-test
+      shell: bash 
+      run: ./ci/github-actions/test.sh
+      env:
+        BUILD_TYPE: test
+    - name: integration
+      shell: bash 
+      run: ./ci/github-actions/test.sh
+      env:
+        BUILD_TYPE: integration
+    - name: logs
+      shell: bash 
+      run: ./ci/github-actions/print_logs.sh
+    - name: build gem package
+      if: ${{ success() }}  
+      shell: bash 
+      run: ./ci/github-actions/export_build_osx.sh
+    - name: upload gem package
+      if: ${{ success() }} 
+      uses: actions/upload-artifact@v2
+      with:
+        name: openstudio-server-gems-linux
+        path: build/NREL/export/*.tar.gz
   macos-test:
     runs-on: macos-10.15
     steps: 
@@ -94,34 +80,46 @@ jobs:
       if: ${{ success() }} 
       uses: actions/upload-artifact@v2
       with:
-        name: openstudio-server-gems
+        name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
+  docker:
+    runs-on: ubuntu-18.04
+    steps: 
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: setup
+      shell: bash 
+      run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: docker
+    - name: docker
+      shell: bash 
+      run: |
+          export OPENSTUDIO_TAG=develop
+          sed -i -E "s/.git//g" .dockerignore
+          docker volume create --name=osdata
+          docker images --all
+          docker --version
+          docker-compose --version
+          docker-compose -f docker-compose.test.yml pull
+          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+          docker-compose -f docker-compose.test.yml up -d
+          docker-compose exec -T web /usr/local/bin/run-server-tests
+          docker-compose stop
+          git checkout -- .dockerignore && git checkout -- Dockerfile
+      env: 
+        CI: true
+        OS_SERVER_NUMBER_OF_WORKERS: 4
+        BUILD_TYPE: docker
+        COMPOSE_INTERACTIVE_NO_CLI: 1
+    - name: logs
+      shell: bash 
+      run: ./ci/github-actions/print_logs.sh
+    - name: docker-upload
+      shell: bash 
+      run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
+      env: 
+        CI: true
+        BUILD_TYPE: docker
+        
 
-
-  
-
- #   - name: docker
- #     shell: bash 
- #     run: |
- #         export OPENSTUDIO_TAG=develop
- #         sed -i -E "s/.git//g" .dockerignore
- #         docker volume create --name=osdata
- #         docker images --all
- #         docker --version
- #         docker-compose --version
- #         docker-compose -f docker-compose.test.yml pull
- #         docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
- #         docker-compose -f docker-compose.test.yml up -d
- #         docker-compose exec -T web /usr/local/bin/run-server-tests
- #         docker-compose stop
- #         git checkout -- .dockerignore && git checkout -- Dockerfile
- #     env: 
- #       CI: true
- #       OS_SERVER_NUMBER_OF_WORKERS: 4
- #       BUILD_TYPE: docker
- #       COMPOSE_INTERACTIVE_NO_CLI: 1
- #   - name: logs
- #     if: ${{ failure() }}
- #     shell: bash 
- #     run: ./ci/github-actions/print_logs.sh
- 
