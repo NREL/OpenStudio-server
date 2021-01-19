@@ -1,12 +1,12 @@
 name: openstudio-server
 
-on:
-  push:
-    branches:
-      - setup_github_actions
+on: [push, pull_request]
+
+# example of how to restrict to one branch and push event
 #on:
-#  pull_request:
-#    branches: [ master, develop ]
+#  push:
+#    branches:
+#      - test_branch
 
 env:
   USE_TESTING_TIMEOUTS: "true"
@@ -123,5 +123,7 @@ jobs:
       env: 
         CI: true
         BUILD_TYPE: docker
+        # On forked Pull Requests secrets will not be sent to the runner. See more info here: 
+        # https://docs.github.com/en/actions/reference/encrypted-secrets
         DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
