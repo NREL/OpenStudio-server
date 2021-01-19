@@ -65,7 +65,7 @@ else
         sudo wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
         echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse | tee /etc/apt/sources.list.d/mongodb-org-4.4.list"
         sudo apt-get update
-        sudo apt-get install -y pv tree mongodb libqdbm14
+        sudo apt-get install -y pv tree mongodb libqdbm14 libxml2-dev
         # per travis docs, mongodb and redis should already be installed and started from services key in bionic, but this isn't working.  explicitly install.
         # the latest version of redis-server now binds to ipv6 which is not supported on travis (disabled). redis-server will fail to start due to the this so below
         # is a work around to install it, configure to it only binds to ipv4.

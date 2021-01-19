@@ -20,7 +20,7 @@ env:
 
 
 jobs:
-  linux-tes:
+  linux-test:
     runs-on: ubuntu-18.04
     steps: 
     - name: Check out repository
@@ -44,7 +44,7 @@ jobs:
     - name: build gem package
       if: ${{ success() }}  
       shell: bash 
-      run: ./ci/github-actions/export_build_osx.sh
+      run: ./ci/github-actions/export_build_linux.sh
     - name: upload gem package
       if: ${{ success() }} 
       uses: actions/upload-artifact@v2
@@ -121,5 +121,5 @@ jobs:
       env: 
         CI: true
         BUILD_TYPE: docker
-        
-
+        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
