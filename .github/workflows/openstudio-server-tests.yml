@@ -1,8 +1,6 @@
 name: openstudio-server
 
 on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
   push:
     branches:
       - setup_github_actions
@@ -116,6 +114,10 @@ jobs:
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
     - name: docker-upload
+      if: | 
+        github.ref == 'refs/heads/master' || 
+        github.ref == 'refs/heads/develop' || 
+        github.ref == 'refs/heads/setup_github_actions' 
       shell: bash 
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 
