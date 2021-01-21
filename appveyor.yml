@@ -1,9 +1,5 @@
 version: 1.0.{build}-{branch}
 
-branches:
-  except:
-    - setup_github_actions
-
 environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.1.0

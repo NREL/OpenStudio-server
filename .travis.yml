@@ -1,10 +1,5 @@
 language: minimal
 
-# Remove this when done testing setup_github_actions branch
-branches:
-  except:
-  - setup_github_actions
-
 env:
   global:
     - USE_TESTING_TIMEOUTS: "true"
