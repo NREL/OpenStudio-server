@@ -1,28 +1,29 @@
 #!/usr/bin/env bash
 
 # platform-specific config here (also in setup.sh):
-if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+if [ "${ImageOS}" == "macos1015" ]; then
     # Dir containing openstudio
-    export RUBYLIB="${HOME}/openstudio/Ruby"
-    export OPENSTUDIO_TEST_EXE="${HOME}/openstudio/bin/openstudio"
+    export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
+    export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
+    export OPENSTUDIO_TEST_EXE="$HOME/$OS_NAME_WITH_PLUS/bin/openstudio"
     # re-export PATH, even though it's set in setup.sh. 
-    export PATH="$TRAVIS_BUILD_DIR/gems/bin:/usr/local/ruby/bin:$HOME/openstudio/bin:$PATH"
-    export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
-    export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
+    export PATH="$GITHUB_WORKSPACE/gems/bin:/usr/local/ruby/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
+    export GEM_HOME="$GITHUB_WORKSPACE/gems"
+    export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
-elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+elif [ "${ImageOS}" == "ubuntu18" ]; then
     # Dir containing openstudio
     export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus
     export PATH=/usr/local/ruby/bin:/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
-    export GEM_HOME="$TRAVIS_BUILD_DIR/gems"
-    export GEM_PATH="$TRAVIS_BUILD_DIR/gems:$TRAVIS_BUILD_DIR/gems/bundler/gems"
+    export GEM_HOME="$GITHUB_WORKSPACE/gems"
+    export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     export RUBYLIB="/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/Ruby"
     export OPENSTUDIO_TEST_EXE="/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin/openstudio"
     mongo_dir="/usr/bin"
 fi
 
 # Env variables set in setup.sh do not seem to be available in test.sh
-if [ "${BUILD_TYPE}" == "docker" ]; then
+if [ "${ImageOS}" == "docker" ]; then
     echo "Skipping tests for docker builds"
 else
     # Do not report coverage from these build, use the build from docker with no excluded tags
@@ -36,7 +37,7 @@ else
         # Threadsafe test requires higher ulimit to avoid EMFILE error
         ulimit -n
         ulimit -n 1024
-        ruby "${TRAVIS_BUILD_DIR}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" "${TRAVIS_BUILD_DIR}/spec/unit-test"
+        ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" run_rspec --debug --verbose --mongo-dir="$mongo_dir" --openstudio-exe="$OPENSTUDIO_TEST_EXE" "${GITHUB_WORKSPACE}/spec/unit-test"
         exit_status=$?
         if [ $exit_status == 0 ];then
             echo "Completed unit tests successfully"
@@ -51,8 +52,7 @@ else
         export RAILS_ENV=local
 
         #    explicitly set directory.  Probably unnecessary
-        cd $TRAVIS_BUILD_DIR
-        printenv
+        cd $GITHUB_WORKSPACE
         bundle install
         echo "Beginning integration tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
         bundle exec rspec; (( exit_status = exit_status || $? ))

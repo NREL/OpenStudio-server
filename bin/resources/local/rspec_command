@@ -86,7 +86,7 @@ rspec_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rspe
 ::ENV['OS_SERVER_LOG_PATH'] = File.join(output_dir, 'logs', 'rails.log')
 ::ENV['RAILS_ENV'] = 'local-test'
 
-#If this is a travis build and it's BUILD_TYPE=test we want to omit the openstudio_algo_spec.rb tests
+#If this is a CI build (travis, github actions, etc..) and the BUILD_TYPE=test omit the openstudio_algo_spec.rb tests
 if ENV['BUILD_TYPE'] == 'test'
   sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
   "\"**/models/cluster_spec.rb\" --exclude-pattern \"**/features/openstudio_algo_spec.rb\""
