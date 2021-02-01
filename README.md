@@ -61,7 +61,7 @@ To develop locally the following dependency stack is recommended.
 
 #### Run Docker Compose 
 
-```
+```bash
 docker-compose build
 ```
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully start them by 
@@ -70,7 +70,8 @@ where 4 is equal to the number of worker nodes you wish to run. For single node 
 than the total number of available cores minus 4.
 
 Resetting the containers can be accomplished by running:
-``` 
+
+```bash
 docker-compose rm -f
 docker volume rm osdata dbdata
 docker volume create --name=osdata
@@ -86,19 +87,21 @@ Congratulations! Visit `http://localhost:8080` to see the OpenStudio Server Mana
 
 #### Running the Docker CI testing locally
 
-```
+```bash
+export OPENSTUDIO_TAG=develop
+export RAILS_ENV=docker-test
+
 docker-compose rm -f
 docker volume rm osdata
-docker volume create --name=osdata
-export RAILS_ENV=docker-test
 sed -i -E "s/.git//g" .dockerignore
-docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=develop
-docker-compose -f docker-compose.test.yml run web
-
-# in another terminal (or detach previous commands)
-docker-compose -f docker-compose.test.yml run worker
-
-git checkout -- Dockerfile .dockerignore
+docker volume create --name=osdata
+docker-compose -f docker-compose.test.yml pull
+docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+docker-compose -f docker-compose.test.yml up -d
+docker-compose exec -T web /usr/local/bin/run-server-tests
+docker-compose stop
+git checkout -- .dockerignore && git checkout -- Dockerfile
+docker-compose rm -f
 ```
 
 
@@ -151,7 +154,7 @@ instillation provided in the OpenStudio installer package.
 
 ### OSX
 
-```
+```bash
 # Change directory to the install location of the Server
 cd /Applications/OpenStudio-X.Y.Z/ParametricAnalysisTool.app/Contents/Resources/OpenStudio-server 
 rm -rf /gems # Remove the pre-packaged gems
