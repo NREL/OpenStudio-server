@@ -6,7 +6,7 @@ Windows Build (Under Development): [![Build status][appveyor-img]][appveyor-url]
 
 The below documentation has not been recently reviewed. Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for current documentation.
 
-## Application Development and Deployment:
+## Application Development and Deployment
 
 There are primarily three ways to utilize and deploy this codebase.
  
@@ -20,7 +20,7 @@ orchestration engine which allows for multi-node clusters and provides significa
 customization and hardening of network and storage 
 fundamentals.
 
-### openstudio_meta:
+### openstudio_meta
 
 The [openstudio_meta](./bin/openstudio_meta) file is a ruby script which provides access to packaging and execution 
 commands which allow for this codebase to be embedded in applications deployed to computers without docker. Deployment 
@@ -40,7 +40,7 @@ Spreadsheet (the Spreadsheet) or the Parametric Assessment Tool (PAT). The Sprea
 submitting analyses to servers, and PAT makes complete use of the openstudio_meta features. For more details, please 
 refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).
 
-### Local Docker Development:
+### Local Docker Development
 
 To develop locally the following dependency stack is recommended. 
 
@@ -103,7 +103,7 @@ git checkout -- Dockerfile .dockerignore
 
 
 
-### Docker Deployment:
+### Docker Deployment
 
 To deploy the OpenStudio Server in a docker-based production environment one or more machines need to be running Docker 
 Server version 17.9.01. If using docker on a Linux machine it is recommended that significant storage be available to 
@@ -119,7 +119,7 @@ base AMI images, as well as the scripts used to provision the [server](https://g
 and [worker](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/worker_provision.sh) 
 nodes upon instantiation in a cluster.
 
-## Testing procedure:
+## Testing procedure
 
 The OpenStudio Server project uses several CI systems to test both local and cloud deployments across multiple 
 platforms. TravisCI is used to build and test local deployments of the server on OSX hardware for each commit, as well 
@@ -142,14 +142,14 @@ PR and push. All of these tests write verbose results and logs on failure, which
 of the bug and subsequent fixes. In the case of a failure of the CI infrastructure, please open an issue in the 
 repository regarding the failure. 
 
-## Commands to update gems used in PAT manually:
+## Commands to update gems used in PAT manually
 
 To test the impact of upgraded gems on PAT's functionality the currently recommended path is to manually remove and 
 recreate the cached set of gems, including compiled binary components. This process is platform specific. Currently 
 instructions are only available for OSX, due to complications compiling the binary component of gems with the ruby 
 instillation provided in the OpenStudio installer package.
 
-### OSX:
+### OSX
 
 ```
 # Change directory to the install location of the Server
@@ -163,7 +163,7 @@ chmod -R 777 gems # Modify privileges on the installed gems
 
 ## Questions?
 
-Please contact @tcoleman, @bball, or @nllong with any question regarding this project. Thanks for you interest!
+Please contact @tijcolem, @bball, or @nllong with any question regarding this project. Thanks for you interest!
 
 [coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=dockerize
 [coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
