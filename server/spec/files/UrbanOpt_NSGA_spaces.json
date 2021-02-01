@@ -1,0 +1,378 @@
+{
+  "analysis": {
+    "display_name": "UrbanOpt_NSGA_spaces",
+    "name": "UrbanOpt_NSGA_spaces",
+    "urbanopt": true,
+    "output_variables": [
+      {
+        "objective_function": true,
+        "objective_function_index": 0,
+        "objective_function_target": 0,
+        "objective_function_group": 1,
+        "scaling_factor": null,
+        "display_name": "electricity",
+        "display_name_short": "electricity",
+        "metadata_id": null,
+        "report": "feature_reports",
+        "report_id": "1",
+        "reporting_periods": 0,
+        "var_name": "electricity",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": true,
+        "objective_function_index": 1,
+        "objective_function_target": 0,
+        "objective_function_group": 2,
+        "scaling_factor": null,
+        "display_name": "natural_gas",
+        "display_name_short": "natural_gas",
+        "metadata_id": null,
+        "report": "feature_reports",
+        "report_id": "1",
+        "reporting_periods": 0,
+        "var_name": "natural_gas",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": true,
+        "objective_function_index": 2,
+        "objective_function_target": 0,
+        "objective_function_group": 3,
+        "scaling_factor": null,
+        "display_name": "electricity_fans",
+        "display_name_short": "electricity_fans",
+        "metadata_id": null,
+        "report": "feature_reports",
+        "report_id": "1",
+        "reporting_periods": 0,
+        "var_name": "end_uses",
+        "end_use": "electricity",
+        "end_use_category": "fans",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": true,
+        "objective_function_index": 3,
+        "objective_function_target": 0,
+        "objective_function_group": 4,
+        "scaling_factor": null,
+        "display_name": "electricity_fans",
+        "display_name_short": "electricity_fans",
+        "metadata_id": null,
+        "report": "scenario_report",
+        "report_id": "highefficiency_scenario",
+        "reporting_periods": 0,
+        "var_name": "end_uses",
+        "end_use": "electricity",
+        "end_use_category": "fans",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      }
+    ],
+    "problem": {
+      "workflow": [
+        {
+          "name": "urban_opt_spaces",
+          "display_name": "UrbanOpt Spaces",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "UrbanOptSpaces",
+          "measure_definition_directory": "./measures/urban_opt_spaces",
+          "measure_definition_directory_local": "C:\\Projects\\OS-PAT-export\\sample_projects\\SEB_calibration_NSGA_2013\\measures\\ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_display_name": "UrbanOptSpaces",
+          "measure_definition_name": "urban_opt_spaces",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "07a76483-233f-4be7-8f94-d1187bd3c34d",
+          "measure_definition_version_uuid": "00383259-b9c0-4425-996a-838af1101c3c",
+          "uuid": "07a76483-233f-4be7-8f94-d1187bd3c34d",
+          "version_uuid": "00383259-b9c0-4425-996a-838af1101c3c",
+          "description": "Change UrbanOpt Space percentages",
+          "taxonomy": "Whole Building.Space Types",
+          "arguments": [
+            {
+              "display_name": "Feature File name",
+              "display_name_short": "Feature File name",
+              "name": "feature_file_name",
+              "value_type": "string",
+              "default_value": "example_project",
+              "value": "example_project"
+            },
+            {
+              "display_name": "Feature ID",
+              "display_name_short": "Feature ID",
+              "name": "feature_id",
+              "value_type": "string",
+              "default_value": "1",
+              "value": "1"
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+              "display_name": "mixed_type_1_percentage",
+              "display_name_short": "mixed_type_1_percentage",
+              "name": "mixed_type_1_percentage",
+              "value_type": "double",
+              "default_value": 33,
+              "value": 0
+              },
+              "display_name": "mixed_type_1_percentage",
+              "display_name_short": "mixed_type_1_percentage",
+              "variable_type": "variable",
+              "minimum": 0,
+              "maximum": 50,
+              "static_value": 33,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 50
+                  },
+                  {
+                    "name": "modes",
+                    "value": 25
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 26.6667
+                  }
+                ]
+              },
+              "workflow_index": 0
+            },
+            {
+              "argument": {
+              "display_name": "mixed_type_2_percentage",
+              "display_name_short": "mixed_type_2_percentage",
+              "name": "mixed_type_2_percentage",
+              "value_type": "double",
+              "default_value": 33,
+              "value": 0
+              },
+              "display_name": "mixed_type_2_percentage",
+              "display_name_short": "mixed_type_2_percentage",
+              "variable_type": "variable",
+              "minimum": 0,
+              "maximum": 30,
+              "static_value": 33,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 30
+                  },
+                  {
+                    "name": "modes",
+                    "value": 25
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 26.6667
+                  }
+                ]
+              },
+              "workflow_index": 1
+            },
+            {
+              "argument": {
+              "display_name": "mixed_type_3_percentage",
+              "display_name_short": "mixed_type_3_percentage",
+              "name": "mixed_type_3_percentage",
+              "value_type": "double",
+              "default_value": 33,
+              "value": 0
+              },
+              "display_name": "mixed_type_3_percentage",
+              "display_name_short": "mixed_type_3_percentage",
+              "variable_type": "variable",
+              "minimum": 0,
+              "maximum": 20,
+              "static_value": 33,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": 0
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 20
+                  },
+                  {
+                    "name": "modes",
+                    "value": 15
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 0
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 26.6667
+                  }
+                ]
+              },
+              "workflow_index": 2
+            }
+          ],
+          "workflow_index": 0
+        }
+      ],
+      "algorithm": {
+        "number_of_samples": 2,
+        "generations": 1,
+        "tournament_size": 2,
+        "cprob": 0.85,
+        "xover_dist_idx": 5,
+        "mu_dist_idx": 5,
+        "mprob": 0.8,
+        "norm_type": "minkowski",
+        "p_power": 2,
+        "exit_on_guideline_14": 0,
+        "seed": 1973,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 1,
+        "max_queued_jobs": 32,
+        "objective_functions": [
+            "urban_opt_report.electricity",
+            "urban_opt_report_2.natural_gas",
+            "electricity_fans",
+            "electricity_fans2"
+        ]
+      },
+      "analysis_type": "nsga_nrel"
+    },
+    "file_format_version": 1,
+    "cli_debug": "--debug",
+    "cli_verbose": "--verbose",
+    "run_workflow_timeout": 28800,
+    "upload_results_timeout": 28800,
+    "initialize_worker_timeout": 28800,
+    "server_scripts": {
+      "worker_initialization": "./scripts/worker_initialization/initialize.sh"
+    },
+    "feature_file": "example_project",
+    "scenario_file": "highefficiency_scenario",
+    "urbanopt_variables": [
+        {
+            "name": "lighting_power_reduction_percent",
+            "mapper": "HighEfficiency",
+            "uo_measure": "ReduceLightingLoadsByPercentage",
+            "display_name": "Lighting Power Reduction (%).",
+            "display_name_short": "lighting_power_reduction_percent",
+            "variable_type": "variable",
+            "value_type": "double",
+            "default_value": 0,
+            "value": 0,
+            "minimum": -80,
+            "maximum": 80,
+            "static_value": 0,
+            "uuid": "",
+            "version_uuid": "",
+            "variable": true,
+            "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                    {
+                        "name": "lower_bounds",
+                        "value": -80
+                    },
+                    {
+                        "name": "upper_bounds",
+                        "value": 80
+                    },
+                    {
+                        "name": "modes",
+                        "value": 30
+                    },
+                    {
+                        "name": "delta_x",
+                        "value": 30
+                    },
+                    {
+                        "name": "stddev",
+                        "value": 26.6667
+                    }
+                ]
+            }
+        },
+        {
+            "name": "elecequip_power_reduction_percent",
+            "mapper": "HighEfficiency",
+            "uo_measure": "ReduceElectricEquipmentLoadsByPercentage",
+            "display_name": "Reduce Electric Equipment Loads by Percentage",
+            "display_name_short": "reduce_electric_equipment_loads_by_percentage",
+            "variable_type": "variable",
+            "value_type": "double",
+            "default_value": 0,
+            "value": 0,
+            "minimum": -80,
+            "maximum": 80,
+            "static_value": 0,
+            "uuid": "",
+            "version_uuid": "",
+            "variable": true,
+            "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                    {
+                        "name": "lower_bounds",
+                        "value": -80
+                    },
+                    {
+                        "name": "upper_bounds",
+                        "value": 80
+                    },
+                    {
+                        "name": "modes",
+                        "value": 30
+                    },
+                    {
+                        "name": "delta_x",
+                        "value": 30
+                    },
+                    {
+                        "name": "stddev",
+                        "value": 26.6667
+                    }
+                ]
+            }
+        }
+    ]
+  }
+}

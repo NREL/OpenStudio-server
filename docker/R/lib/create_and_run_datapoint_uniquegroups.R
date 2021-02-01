@@ -43,7 +43,7 @@
 #   rails_analysis_id
 #   ruby_command
 #   r_scripts_path
-create_and_run_datapoint_uniquegroups <- function(x){
+create_and_run_datapoint <- function(x){
   options(warn=-1)
   if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id, debug_messages)==FALSE){
     options(warn=0)
@@ -53,7 +53,7 @@ create_and_run_datapoint_uniquegroups <- function(x){
   # convert the vector to comma separated values
   force(x)
   w <- paste(x, collapse=",") 
-  y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
+  y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit', sep='')
   if(debug_messages == 1){
     print(paste('run command: ruby ', y))
   }

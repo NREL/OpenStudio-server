@@ -72,6 +72,16 @@ class Variable
   field :relation_to_output, type: String, default: 'standard' # or can be inverse
   field :static_value, default: nil # don't type this because it can take on anything (other than hashes and arrays)
 
+  field :mapper, type: String                             # UrbanOpt Mapper name
+  field :uo_measure, type: String                         # UrbanOpt Measure name
+  field :uo_variable, type: Boolean, default: false       # UrbanOpt variable flag
+  field :report, type: String, default: 'scenario_report' # UrbanOpt output report name. either: scenario_report/feature_reports
+  field :report_id, type: String, default: ''             # UrbanOpt output report :id. either scenario id name or feature report id number
+  field :reporting_periods, type: Integer, default: 0     # UrbanOpt output reporting_periods array index
+  field :var_name, type: String, default: ''              # UrbanOpt output name, ex natural_gas
+  field :end_use, type: String, default: ''               # UrbanOpt output end_uses, ex electricity, natural_gas, district_cooling, etc
+  field :end_use_category, type: String, default: ''      # UrbanOpt output end_use category, ex heating, cooling, fans, etc
+    
   # Relationships
   belongs_to :analysis, index: true
   belongs_to :measure, optional: true
@@ -118,9 +128,22 @@ class Variable
 
   # Create an output variable from the Analysis JSON
   def self.create_output_variable(analysis_id, json)
+    logger.info("Adding a new output variable named: '#{json['name']}'")
+    if json['name'].nil? || json['name'].empty?      #if name if blank for UrbanOpt Output, make it a uuid.var_name so its unique (similar to measure.variable)
+      if json['var_name'] == 'end_uses'              #if var_name is end_uses then name is uuid.end_use_end_use_category
+        if json['end_use'] && json['end_use_category']
+          json['name'] = "#{SecureRandom.uuid}.#{json['end_use']}_#{json['end_use_category']}"
+        else
+          raise "var_name == end_uses but end_use and end_use_category are missing. check OSA output_variables"
+        end
+      else
+        json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}"    
+      end
+    end
     var = Variable.where(analysis_id: analysis_id, name: json['name']).first
     if var
-      logger.warn "Variable already exists for '#{var.name}'"
+      logger.error "Variable already exists for '#{var.name}'"  #this is a duplicate variable name and will overwrite the old variable.  this should be an error
+      raise "Variable already exists for '#{var.name}' : '#{var.display_name}'"
     else
       logger.info "Adding a new output variable named: '#{json['name']}'"
       var = Variable.find_or_create_by(analysis_id: analysis_id, name: json['name'])
@@ -157,9 +180,16 @@ class Variable
     var['objective_function_target'] = json['objective_function_target'] if json['objective_function_target']
     var['scaling_factor'] = json['scaling_factor'] if json['scaling_factor']
     var['objective_function_group'] = json['objective_function_group'] if json['objective_function_group']
-
+    #set these for UrbanOpt 
+    var['report'] = json['report'] if json['report']
+    var['report_id'] = json['report_id'] if json['report_id']
+    var['reporting_periods'] = json['reporting_periods'] if json['reporting_periods']
+    var['var_name'] = json['var_name'] if json['var_name']
+    var['end_use'] = json['end_use'] if json['end_use']
+    var['end_use_category'] = json['end_use_category'] if json['end_use_category']
+    
     var.save!
-
+    logger.info("output variable: '#{var.to_json}'")
     var
   end
 

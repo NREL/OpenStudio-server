@@ -177,7 +177,11 @@ module AnalysisLibrary::R
 
       i_var = 0
       selected_variables.each do |var|
-        logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
+        if var.measure  #measure is optional for a variable
+          logger.info "sampling variable #{var.name} for measure #{var.measure.name}"
+        else
+          logger.info "sampling variable #{var.name}"
+        end
         variable_samples = nil
         var_names << var.name
         # TODO: would be nice to have a field that said whether or not the variable is to be discrete or continuous.
