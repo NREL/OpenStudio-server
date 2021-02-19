@@ -7,19 +7,19 @@ ruby '~>2.5.1'
 # gem 'rubygems-update', '2.7.8'
 
 gem 'rails', '5.1.4'
-gem 'rake', '~> 12.3'
+gem 'rake', '~> 13.0'
 
 # added for support of the project rakefile
 gem 'colored'
 
 # data modules
 gem 'jbuilder'
-gem 'nokogiri', '~> 1.8.2'
+gem 'nokogiri', '~> 1.10.8'
 gem 'rubyzip', '~> 2.3.0'
 gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 6.3.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
+gem 'mongoid', '~> 7.2.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
 gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
 gem 'paperclip', '~> 4.3.7'
 
@@ -55,27 +55,30 @@ gem 'sprockets-rails'
 gem 'uglifier'
 
 # don't try to install sassc 2.
-gem 'sassc', '~>1.12.1'
 gem 'roo', '~>2.8.3'
+gem 'sassc', '~>1.12.1'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
-gem 'openstudio-workflow', '= 2.0.0'
-# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
+gem 'openstudio-workflow', '= 2.1.1'
 
-gem 'openstudio-analysis', '= 1.0.3'
+gem 'openstudio-analysis', '= 1.1.0.pre.rc1'
+
+gem 'urbanopt-cli', '= 0.5.0'
+gem 'urbanopt-reporting', '= 0.3.2'
 
 ## End commonly updated gems
 
 gem 'openstudio-aws', '0.7.1'
 
-gem 'libxml-ruby'
+# libxml 3.2.0 failing on windows
+gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
+gem 'libxml-ruby', '3.1.0'
 gem 'msgpack', '~> 1.0'
 gem 'multi_json'
-gem 'rest-client', '~>2.0.1' 
 gem 'nio4r', '~>2.3.1' # 2.4.0 breaks w/ruby 2.2.4
-gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
+gem 'rest-client', '~>2.0.1'
 
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
 gem 'rubyXL', '~> 3.3.29'
@@ -85,12 +88,14 @@ if RUBY_PLATFORM =~ /linux/
   gem 'execjs'
   gem 'libv8'
   gem 'therubyracer'
+elsif RUBY_PLATFORM =~ /darwin/
+  gem 'execjs', github: 'NREL/execjs'
 end
 
 # The only resque only is :docker, :docker-dev, :production
 group :development, :docker, :'docker-dev', :'docker-test', :production, :test do
+  gem 'redis', '=4.1.0'
   gem 'redis-namespace', '=1.6.0'
-  gem 'redis', '=4.1.0' 
   gem 'resque', '=1.27.4'
   gem 'resque-web', require: 'resque_web'
 end
@@ -104,9 +109,9 @@ group :development, :test do
   gem 'meta_request'
 
   gem 'capybara'
-  gem 'puma' #used by capybara
-  gem 'public_suffix', '=3.0.3'
   gem 'coveralls', require: false
+  gem 'public_suffix', '=3.0.3'
+  gem 'puma' # used by capybara
   gem 'rspec', '~> 3.4'
   gem 'rspec-rails'
   gem 'rspec-retry'
@@ -114,12 +119,14 @@ group :development, :test do
   gem 'selenium-webdriver'
 
   gem 'psych', '~> 3.1.0'
-  gem 'rubocop', '0.64.0'
+  gem 'rubocop', '0.54.0'
   gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
-  gem 'rubocop-rspec', '1.32.0'
+  gem 'rubocop-rspec', '1.26.0'
 
   gem 'ci_reporter'
   gem 'factory_bot_rails', '4.11.1' # 5.0.2 require ruby 2.3
   gem 'mongoid-rspec'
   gem 'rspec-html-matchers', '0.8.1'
+
+  gem 'json-schema', '2.8.0'
 end

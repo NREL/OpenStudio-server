@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2018, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,6 +37,7 @@
 
 module DjJobs
   class RunSimulateDataPoint
+    include DjJobs::UrbanOpt
     require 'date'
     require 'json'
 
@@ -110,9 +111,9 @@ module DjJobs
         end
         upload_file(report_file, 'Report', nil, 'application/json') if File.exist?(report_file)
         @data_point.set_error_flag
-        @data_point.set_complete_state if @data_point
+        @data_point&.set_complete_state
         @sim_logger.error "Failed to initialize the worker. #{err_msg_3}"
-        @sim_logger.close if @sim_logger
+        @sim_logger&.close
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         return false
@@ -148,13 +149,11 @@ module DjJobs
         raise "RestClient.get url failed with error #{e.message}"
       end
       raise 'Datapoint JSON could not be downloaded' unless r.code == 200
-
       # Parse to JSON to save it again with nice formatting
       File.open("#{simulation_dir}/data_point.json", 'w') { |f| f << JSON.pretty_generate(JSON.parse(r)) }
 
       # copy over required file to the run directory
       FileUtils.cp "#{analysis_dir}/analysis.json", "#{simulation_dir}/analysis.json"
-
       osw_path = "#{simulation_dir}/data_point.osw"
       # PAT puts seeds in "seeds" folder (not "seed")
       osw_options = {
@@ -170,17 +169,21 @@ module DjJobs
       if @data_point.weather_file
         osw_options[:weather_file] = @data_point.weather_file unless @data_point.weather_file == ''
       end
+      @sim_logger.info 'Calling OpenStudio-Analysis-Gem new instance'
       t = OpenStudio::Analysis::Translator::Workflow.new(
         "#{simulation_dir}/analysis.json",
         osw_options
       )
+      @sim_logger.info 'Calling OpenStudio-Analysis-Gem process_datapoint'
       t_result = t.process_datapoint("#{simulation_dir}/data_point.json")
       if t_result
+        if @data_point.analysis.urbanopt
+          t_result[:urbanopt] = true
+        end
         File.open(osw_path, 'w') { |f| f << JSON.pretty_generate(t_result) }
       else
         raise 'Could not translate OSA, OSD into OSW'
       end
-
       @sim_logger.info 'Creating Workflow Manager instance'
       @sim_logger.info "Directory is #{simulation_dir}"
       run_log_file = File.join(run_dir, 'run.log')
@@ -200,23 +203,29 @@ module DjJobs
         run_result = nil
         File.open(run_log_file, 'a') do |run_log|
           begin
-            cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
-            process_log = File.join(simulation_dir, 'oscli_simulation.log')
-            @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
-            oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
-            pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
-            # add check for a valid timeout value
-            unless @data_point.analysis.run_workflow_timeout.positive?
-              @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-              @@data_point.analysis.run_workflow_timeout = 28800
-            end
-            Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
-              Process.wait(pid)
-            end
+            if @data_point.analysis.urbanopt
+              uo_simulation_log = File.join(simulation_dir, 'urbanopt_simulation.log')
+              uo_process_log = File.join(simulation_dir, 'urbanopt_process.log')
+              run_urbanopt(uo_simulation_log, uo_process_log)
+            else  #OS CLI workflow
+              cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+              process_log = File.join(simulation_dir, 'oscli_simulation.log')
+              @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
+              oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
+              pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
+              # add check for a valid timeout value
+              unless @data_point.analysis.run_workflow_timeout.positive?
+                @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
+                @@data_point.analysis.run_workflow_timeout = 28800
+              end
+              Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
+                Process.wait(pid)
+              end
 
-            if $?.exitstatus != 0
-              raise "Oscli returned error code #{$?.exitstatus}"
-            end
+              if $?.exitstatus != 0
+                raise "Oscli returned error code #{$?.exitstatus}"
+              end
+            end  
           rescue Timeout::Error
             @sim_logger.error "Killing process for #{osw_path} due to timeout."
             # openstudio process actually runs in a child of pid.  to prevent orphaned processes on timeout, we
@@ -239,12 +248,18 @@ module DjJobs
             run_result = :errored
           rescue ScriptError => e # This allows us to handle LoadErrors and SyntaxErrors in measures
             log_message = "The workflow failed with script error #{e.message} in #{e.backtrace.join("\n")}"
-            @sim_logger.error log_message if @sim_logger
+            @sim_logger&.error log_message
             run_result = :errored
           rescue Exception => e
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
+            if uo_simulation_log
+              @sim_logger.info "UrbanOpt simulation output: #{File.read(uo_simulation_log)}"
+            end
+            if uo_process_log
+              @sim_logger.info "UrbanOpt process output: #{File.read(uo_process_log)}"
+            end
             if process_log
               @sim_logger.info "Oscli output: #{File.read(process_log)}"
             end
@@ -252,6 +267,14 @@ module DjJobs
             if python_log
               @sim_logger.info "PYTHON output: #{File.read(python_log)}"
             end            
+            #docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
+            #if File.exist? docker_log
+            #   @sim_logger.info "docker.log output: #{File.read(docker_log)}"
+            #end
+            #resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
+            #if File.exist? resque_log
+            #   @sim_logger.info "resque.log output: #{File.read(resque_log)}"
+            #end
           end
         end
         if run_result == :errored
@@ -280,9 +303,6 @@ module DjJobs
             results = JSON.parse(File.read(results_file), symbolize_names: true)
             @data_point.update(results: results)
           else
-            #run_result = :errored
-            #@sim_logger.error "Could not find results #{results_file}"
-            #make warning until development complete 
             @sim_logger.warn "Could not find results #{results_file}"
           end
 
@@ -290,22 +310,39 @@ module DjJobs
 
           # Post the reports back to the server
           uploads_successful = []
-
-          Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
-
+          if @data_point.analysis.download_reports
+            @sim_logger.info 'downloading reports/*.{html,json,csv}'
+            Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
+          else
+            @sim_logger.info "NOT downloading /reports/*.{html,json,csv} since download_reports value is: #{@data_point.analysis.download_reports}"
+          end
           report_file = "#{run_dir}/objectives.json"
           uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
-
-          report_file = "#{simulation_dir}/out.osw"
-          uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
-
-          report_file = "#{simulation_dir}/in.osm"
-          uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
-
-          report_file = "#{run_dir}/data_point.zip"
-          uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
-
+          if @data_point.analysis.download_osw
+            @sim_logger.info 'downloading out.OSW'
+            report_file = "#{simulation_dir}/out.osw"
+            uploads_successful << upload_file(report_file, 'Report', 'Final OSW File', 'application/json') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading out.OSW since download_osw value is: #{@data_point.analysis.download_osw}"
+          end
+          if @data_point.analysis.download_osm
+            @sim_logger.info 'downloading in.OSM'
+            report_file = "#{simulation_dir}/in.osm"
+            uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading in.OSM since download_osm value is: #{@data_point.analysis.download_osm}"
+          end
+          if @data_point.analysis.download_zip
+            @sim_logger.info 'downloading datapoint.ZIP'
+            report_file = "#{run_dir}/data_point.zip"
+            uploads_successful << upload_file(report_file, 'Data Point', 'Zip File', 'application/zip') if File.exist?(report_file)
+          else
+            @sim_logger.info "NOT downloading datapoint.zip since download_zip value is: #{@data_point.analysis.download_zip}"
+          end
+          @sim_logger.info "run_result: #{run_result}"
           run_result = :errored unless uploads_successful.all?
+          @sim_logger.info "uploads_successful.all?: #{uploads_successful.all?}"
+          @sim_logger.info "run_result: #{run_result}"
         end
 
         # Run any data point finalization scripts - note this currently runs whether or not the datapoint errored out
@@ -318,6 +355,7 @@ module DjJobs
         if run_result != :errored
           if File.exist? "#{simulation_dir}/out.osw"
             status = JSON.parse(File.read("#{simulation_dir}/out.osw"), symbolize_names: true)[:completed_status]
+            @sim_logger.info "status: #{status}"
           else
             raise "Could not find out.osw file at #{simulation_dir}/out.osw"
           end
@@ -335,13 +373,14 @@ module DjJobs
         end
       rescue ScriptError, NoMemoryError, StandardError => e
         log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
-        @sim_logger.error log_message if @sim_logger
+        @sim_logger&.error log_message
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
       ensure
-        @sim_logger.info "Finished #{__FILE__}" if @sim_logger
-        @sim_logger.close if @sim_logger
-        @data_point.set_complete_state if @data_point
+        @sim_logger&.info "Finished #{__FILE__}"
+        @data_point&.set_complete_state
+        @sim_logger.info "@data_point: #{@data_point.to_json}"
+        @sim_logger&.close
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
         true
@@ -452,6 +491,29 @@ module DjJobs
             raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
           end
 
+          #moved back to datapoint
+          ## Check for UO and bundle
+          #if @data_point.analysis.urbanopt
+          #  #bundle install
+          #  bundle_count = 0
+          #  bundle_max_count = 10
+          #  begin
+          #    cmd = "cd #{analysis_dir}/lib/urbanopt; bundle install --path=#{analysis_dir}/lib/urbanopt/ --gemfile=#{analysis_dir}/lib/urbanopt/Gemfile --retry 10"
+          #    uo_bundle_log = File.join(analysis_dir, 'urbanopt_bundle.log')
+          #    @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
+          #    pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
+          #    Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
+          #      bundle_count += 1
+          #      Process.wait(pid)
+          #    end
+          #  rescue StandardError => e
+          #    sleep Random.new.rand(1.0..10.0)
+          #    retry if bundle_count < bundle_max_count
+          #    raise "Could not bundle UrbanOpt after #{bundle_max_count} attempts. Failed with message #{e.message}."
+          #  ensure
+          #    uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
+          #  end
+          #end
           # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
           File.open(receipt_file, 'w') { |f| f << Time.now }
         end
@@ -481,6 +543,15 @@ module DjJobs
       end
     end
 
+    #add UrbanOpt log to sim log
+    def uo_log(file_name)
+      uo_log = File.join(simulation_dir, "#{file_name}.log")
+      if File.exist? uo_log
+        @sim_logger.info "UrbanOpt #{file_name}.log output: #{File.read(uo_log)}"
+      else  
+        @sim_logger.error "UrbanOpt #{simulation_dir}/#{file_name}.log does not exist}"
+      end
+    end
     private
 
     def data_point_url

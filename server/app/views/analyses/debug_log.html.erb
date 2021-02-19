@@ -1,6 +1,6 @@
 <%
   # *******************************************************************************
-  # OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+  # OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
   # All rights reserved.
   # Redistribution and use in source and binary forms, with or without
   # modification, are permitted provided that the following conditions are met:
@@ -107,6 +107,32 @@
   <tbody>
   <tr>
     <td><%= @rserve_log.gsub("\n", "</br>").html_safe unless @rserve_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>docker_log Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @docker_log.gsub("\n", "</br>").html_safe unless @docker_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>resque_log Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @resque_log.gsub("\n", "</br>").html_safe unless @resque_log.nil? %></td>
   </tr>
   </tbody>
 </table>

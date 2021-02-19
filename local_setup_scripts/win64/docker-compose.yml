@@ -10,6 +10,9 @@ services:
       placement:
         constraints:
           - node.role == manager
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: openstudio
+      MONGO_INITDB_ROOT_PASSWORD: openstudio
   queue:
     image: 127.0.0.1:5000/redis
     ports:
@@ -18,6 +21,7 @@ services:
       placement:
         constraints:
           - node.role == manager
+    command: "redis-server --requirepass openstudio"
   web:
     image: 127.0.0.1:5000/openstudio-server
     ports:
@@ -29,6 +33,9 @@ services:
       - MAX_REQUESTS=10
       - MAX_POOL=10
       - QUEUES=analysis_wrappers
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -44,6 +51,9 @@ services:
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=background,analyses
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -51,6 +61,7 @@ services:
       - web
       - queue
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager
@@ -60,6 +71,9 @@ services:
     environment:
       - QUEUES=simulations
       - COUNT=1
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
     volumes:
       - /mnt/openstudio
     depends_on:
@@ -68,6 +82,8 @@ services:
       - db
       - queue
       - rserve
+    deploy:
+      endpoint_mode: dnsrr
     command: /usr/local/bin/start-workers
   rserve:
     image: 127.0.0.1:5000/openstudio-rserve
@@ -78,21 +94,14 @@ services:
       - web-background
       - db
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager
-  notebook:
-    image: 127.0.0.1:5000/openstudio-jupyter
-    ports:
-      - "8888:8888"
-    volumes:
-      - osdata:/mnt/openstudio
-    depends_on:
-      - web
-      - web-background
-      - db
-      - queue
-      - rserve  
+    environment:
+      - REDIS_URL=redis://:openstudio@queue:6379
+      - MONGO_USER=openstudio
+      - MONGO_PASSWORD=openstudio
 volumes:
   osdata:
     external: true

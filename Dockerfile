@@ -4,8 +4,8 @@
 # Mod for Spawn     Brian Ball
 
 #may include suffix
-ARG OPENSTUDIO_VERSION
-FROM docker-openstudio:$OPENSTUDIO_VERSION as base
+ARG OPENSTUDIO_VERSION=3.1.0
+FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Avoid warnings
@@ -15,11 +15,13 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 
 # Install required libaries.
 #   realpath - needed for wait-for-it
-RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
-    echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | \
-    sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list && \
-    apt-get update \
-    && apt-get install -y \
+RUN apt-get update && apt-get install -y wget gnupg \
+    && wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
+#RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
+    && echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse" | \
+    tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
         apt-transport-https \
         autoconf \
         bison \
@@ -38,8 +40,8 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         gfortran \
         g++ \
         libarchive-tools \
-	libblas-dev \
-	liblapack-dev \
+	    libblas-dev \
+	    liblapack-dev \
         libbz2-dev \
         libboost-dev \
         libcurl4-openssl-dev \
@@ -60,7 +62,7 @@ RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F37303
         libice-dev \
         libsm-dev \
         less \
-        mongodb-org-tools \
+        mongodb-database-tools \
         procps \
         python-dev \
         python-jpype \
@@ -119,6 +121,9 @@ ENV OS_BUNDLER_VERSION=2.1.0
 # Set the rails env var
 ENV RAILS_ENV $rails_env
 
+# extension gem testing
+#ENV FAVOR_LOCAL_GEMS 1
+
 #### OpenStudio Server Code
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 ADD /bin /opt/openstudio/bin
@@ -138,34 +143,27 @@ RUN bundle exec rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
+# Add in /spec for testing 
+#ADD /spec /opt/openstudio/spec
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
 RUN bundle install --jobs=3 --retry=3
 
-#lets not do this...
-# Configure IPVS keepalive
-#ADD /docker/server/ipvs-keepalive.conf /etc/sysctl.d/ipvs-keepalive.conf
-#RUN sudo sysctl --system
-
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.
 COPY /docker/server/wait-for-it.sh /usr/local/bin/wait-for-it
 COPY /docker/server/start-server.sh /usr/local/bin/start-server
-COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+
 COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
 COPY /docker/server/start-web-background.sh /usr/local/bin/start-web-background
 COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
-#COPY /docker/server/memfix-controller.rb /usr/local/lib/memfix-controller.rb
-#COPY /docker/server/memfix.rb /usr/local/lib/memfix.rb
+
 RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
-RUN chmod +x /usr/local/bin/run-server-tests
 RUN chmod 755 /usr/local/bin/rails-entrypoint
 RUN chmod 755 /usr/local/bin/start-web-background
 RUN chmod 755 /usr/local/bin/start-workers
-#RUN chmod +x /usr/local/lib/memfix-controller.rb
-#RUN chmod +x /usr/local/lib/memfix.rb
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
@@ -263,6 +261,9 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
     tar -xvzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
     rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
     chmod +x geckodriver;
+
+COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
+RUN chmod +x /usr/local/bin/run-server-tests
 
 # Test adding the git repo to the container for coveralls
 # The #TEST# will be removed in the travis test script to be run in the test container

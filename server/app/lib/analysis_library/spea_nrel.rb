@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -41,7 +41,6 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
     defaults = ActiveSupport::HashWithIndifferentAccess.new(
       skip_init: false,
       run_data_point_filename: 'run_openstudio_workflow.rb',
-      create_data_point_filename: 'create_data_point.rb',
       output_variables: [],
       problem: {
         algorithm: {
@@ -139,7 +138,7 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       objtrue = @analysis.output_variables.select { |v| v['objective_function'] == true }
       ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
-
+      
       # exit on guideline 14 is no longer true/false.  its 0,1,2,3
       # @analysis.exit_on_guideline_14 = @analysis.problem['algorithm']['exit_on_guideline_14'] == 1 ? true : false
       if [0, 1, 2, 3].include? @analysis.problem['algorithm']['exit_on_guideline_14']
@@ -243,10 +242,6 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
               rails_analysis_id = "#{@analysis.id}"
               rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
               rails_ruby_bin_dir = "#{APP_CONFIG['ruby_bin_dir']}"
-              rails_mongodb_name = "#{AnalysisLibrary::Core.database_name}"
-              rails_mongodb_ip = "#{master_ip}"
-              rails_run_filename = "#{@options[:run_data_point_filename]}"
-              rails_create_dp_filename = "#{@options[:create_data_point_filename]}"
               rails_root_path = "#{Rails.root}"
               rails_host = "#{APP_CONFIG['os_server_host_url']}"
               r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
@@ -272,7 +267,7 @@ class AnalysisLibrary::SpeaNrel < AnalysisLibrary::Base
       # ensure that the cluster is stopped
       logger.info 'Executing rgenound.rb ensure block'
       begin
-        cluster.stop if cluster
+        cluster&.stop
       rescue StandardError, ScriptError, NoMemoryError => e
         logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
       end

@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@
 #   rails_analysis_id
 #   ruby_command
 #   r_scripts_path
-create_and_run_datapoint_uniquegroups <- function(x){
+create_and_run_datapoint <- function(x){
   options(warn=-1)
   if (check_run_flag(r_scripts_path, rails_host, rails_analysis_id, debug_messages)==FALSE){
     options(warn=0)
@@ -53,12 +53,13 @@ create_and_run_datapoint_uniquegroups <- function(x){
   # convert the vector to comma separated values
   force(x)
   w <- paste(x, collapse=",") 
-  y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit',sep='')
+  y <- paste(r_scripts_path,'/api_create_datapoint.rb -h ',rails_host,' -a ',rails_analysis_id,' -v ',w,' --submit', sep='')
   if(debug_messages == 1){
     print(paste('run command: ruby ', y))
   }
   counter <- 1
   repeat{
+    Sys.sleep(5)
     # Call the system command to submit the simulation to the API / queue
     z <- system2("ruby",y, stdout = TRUE, stderr = TRUE)
     z <- z[length(z)]

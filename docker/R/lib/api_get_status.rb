@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@ end
 result = {}
 result[:status] = false
 begin
-  a = RestClient.get "#{options[:host]}/analyses/#{options[:analysis_id]}/status.json"
+  a = RestClient.get "#{options[:host]}/analyses/#{options[:analysis_id]}/status.json" , {accept: :json}
   # TODO: retries?
   raise 'Could not create datapoint' unless a.code == 200
 

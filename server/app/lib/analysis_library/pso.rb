@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -58,6 +58,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
           c1: 1.193147,
           c2: 1.193147,
           lambda: 0.9,
+          report: 1,
           norm_type: 'minkowski',
           p_power: 2,
           exit_on_guideline_14: 0,
@@ -247,6 +248,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
                    c1: @analysis.problem['algorithm']['c1'],
                    c2: @analysis.problem['algorithm']['c2'],
                    lambda: @analysis.problem['algorithm']['lambda'],
+                   report: @analysis.problem['algorithm']['report'],
                    xini: @analysis.problem['algorithm']['xini'],
                    vini: @analysis.problem['algorithm']['vini'],
                    boundary: @analysis.problem['algorithm']['boundary'],
@@ -258,10 +260,6 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
             rails_analysis_id = "#{@analysis.id}"
             rails_sim_root_path = "#{APP_CONFIG['sim_root_path']}"
             rails_ruby_bin_dir = "#{APP_CONFIG['ruby_bin_dir']}"
-            rails_mongodb_name = "#{AnalysisLibrary::Core.database_name}"
-            rails_mongodb_ip = "#{master_ip}"
-            rails_run_filename = "#{@options[:run_data_point_filename]}"
-            rails_create_dp_filename = "#{@options[:create_data_point_filename]}"
             rails_root_path = "#{Rails.root}"
             rails_host = "#{APP_CONFIG['os_server_host_url']}"
             r_scripts_path = "#{APP_CONFIG['r_scripts_path']}"
@@ -287,7 +285,7 @@ class AnalysisLibrary::Pso < AnalysisLibrary::Base
       # ensure that the cluster is stopped
       logger.info 'Executing rgenound.rb ensure block'
       begin
-        cluster.stop if cluster
+        cluster&.stop
       rescue StandardError, ScriptError, NoMemoryError => e
         logger.error "Error executing cluster.stop, #{e.message}, #{e.backtrace}"
       end

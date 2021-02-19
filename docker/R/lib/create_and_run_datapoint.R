@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -59,6 +59,7 @@ create_and_run_datapoint <- function(x){
   }
   counter <- 1
   repeat{
+    Sys.sleep(5)
     # Call the system command to submit the simulation to the API / queue
     z <- system2("ruby",y, stdout = TRUE, stderr = TRUE)
     z <- z[length(z)]

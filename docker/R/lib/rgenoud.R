@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -86,10 +86,6 @@ clusterExport(cl,"varnames")
 clusterExport(cl,"rails_analysis_id")
 clusterExport(cl,"rails_sim_root_path")
 clusterExport(cl,"rails_ruby_bin_dir")
-clusterExport(cl,"rails_mongodb_name")
-clusterExport(cl,"rails_mongodb_ip")
-clusterExport(cl,"rails_run_filename")
-clusterExport(cl,"rails_create_dp_filename")
 clusterExport(cl,"rails_root_path")
 clusterExport(cl,"rails_host")
 clusterExport(cl,"r_scripts_path")

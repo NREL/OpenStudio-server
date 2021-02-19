@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -45,5 +45,8 @@ elsif ['development', 'test'].include? Rails.env
   Resque.redis = 'localhost:6379'
 else
   require 'resque'
-  Resque.redis = 'queue:6379'
+  uri =  ENV.has_key?('REDIS_URL') ? ENV['REDIS_URL'] : 'queue:6379'
+  uri = URI.parse(uri)
+  #Resque.redis = 'queue:6379'
+  Resque.redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
 end

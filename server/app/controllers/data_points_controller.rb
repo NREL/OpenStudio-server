@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,17 +37,20 @@ class DataPointsController < ApplicationController
   # GET /data_points
   # GET /data_points.json
   def index
+    logger.info "data_points_contoller.index enter"
     @data_points = DataPoint.all
 
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @data_points }
     end
+    logger.info "data_points_contoller.index leave"
   end
 
   # GET /data_points/1
   # GET /data_points/1.json
   def show
+    logger.info "data_points_contoller.show enter"
     @data_point = DataPoint.find(params[:id])
     respond_to do |format|
       if @data_point
@@ -87,9 +90,11 @@ class DataPointsController < ApplicationController
         format.json { render json: { error: 'No Datapoint' }, status: :unprocessable_entity }
       end
     end
+    logger.info "data_points_contoller.show leave"
   end
 
   def status
+    logger.info "data_points_contoller.status enter"
     # The name :jobs is legacy based on how PAT queries the datapoints. Should we alias this to status?
     only_fields = [:status, :status_message, :analysis_id]
     dps = params[:status] ? DataPoint.where(status: params[:jobs]).only(only_fields) : DataPoint.all.only(only_fields)
@@ -110,17 +115,20 @@ class DataPointsController < ApplicationController
         }
       end
     end
+    logger.info "data_points_contoller.status leave"
   end
 
   # GET /data_points/new
   # GET /data_points/new.json
   def new
+    logger.info "data_points_contoller.new enter"
     @data_point = DataPoint.new
 
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @data_point }
     end
+    logger.info "data_points_contoller.new leave"
   end
 
   # GET /data_points/1/edit
@@ -131,11 +139,12 @@ class DataPointsController < ApplicationController
   # POST /data_points
   # POST /data_points.json
   def create
+    logger.info "data_points_contoller.create enter"
     error_message = nil
 
     dp_params = data_point_params
     dp_params[:analysis_id] = params[:analysis_id]
-
+    
     # If the create method receives a list of ordered variable values, then
     # look up the variables by the r_index, and assign the set_variable_values
     if dp_params[:ordered_variable_values]
@@ -145,7 +154,7 @@ class DataPointsController < ApplicationController
       selected_variables = Variable.variables(dp_params[:analysis_id])
 
       selected_variables.each do |v|
-        logger.info v.inspect
+        logger.info "variable: #{v.to_json}"
       end
 
       variable_values = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
@@ -158,17 +167,21 @@ class DataPointsController < ApplicationController
             uuid = selected_variables[index].uuid
 
             # Type cast the values as they are probably strings
-            case selected_variables[index].value_type.downcase
-              when 'double'
-                variable_values[uuid] = value.to_f
-              when 'string'
-                variable_values[uuid] = value.to_s
-              when 'integer', 'int'
-                variable_values[uuid] = value.to_i
-              when 'bool', 'boolean'
-                variable_values[uuid] = value.casecmp('true').zero? ? true : false
-              else
-                raise "Unknown DataType for variable #{selected_variables[index].name} of #{selected_variables[index].value_type}"
+            if selected_variables[index].value_type  #non-OS variables might not have this set
+              case selected_variables[index].value_type.downcase
+                when 'double'
+                  variable_values[uuid] = value.to_f
+                when 'string'
+                  variable_values[uuid] = value.to_s
+                when 'integer', 'int'
+                  variable_values[uuid] = value.to_i
+                when 'bool', 'boolean'
+                  variable_values[uuid] = value.casecmp('true').zero? ? true : false
+                else
+                  raise "Unknown DataType for variable #{selected_variables[index].name} of #{selected_variables[index].value_type}"
+              end
+            else
+              raise "Unknown value_type for variable #{selected_variables[index].name} with uuid: #{selected_variables[index].uuid}"
             end
           else
             raise 'Could not find variable in database'
@@ -205,6 +218,7 @@ class DataPointsController < ApplicationController
         end
       end
     end
+    logger.info "data_points_contoller.create leave"
   end
 
   # POST batch_upload.json
@@ -245,6 +259,7 @@ class DataPointsController < ApplicationController
 
   # PUT /data_points/1.json
   def run
+    logger.info "data_points_contoller.run enter"
     error = false
     error_message = nil
     @data_point = DataPoint.find(params[:id])
@@ -262,11 +277,13 @@ class DataPointsController < ApplicationController
         format.json { render json: error_message, status: :unprocessable_entity }
       end
     end
+    logger.info "data_points_contoller.run leave"
   end
 
   # PUT /data_points/1
   # PUT /data_points/1.json
   def update
+    logger.info "data_points_contoller.update enter"
     @data_point = DataPoint.find(params[:id])
 
     respond_to do |format|
@@ -278,6 +295,7 @@ class DataPointsController < ApplicationController
         format.json { render json: @data_point.errors, status: :unprocessable_entity }
       end
     end
+    logger.info "data_points_contoller.update leave"
   end
 
   # DELETE /data_points/1
@@ -297,6 +315,7 @@ class DataPointsController < ApplicationController
   # API only method
   # DELETE /data_points/1/result_files
   def result_files
+    logger.info "data_points_contoller.results_files enter"
     dp = DataPoint.find(params[:id])
     dp.result_files.destroy
     dp.save
@@ -306,11 +325,13 @@ class DataPointsController < ApplicationController
     respond_to do |format|
       format.json { head :no_content }
     end
+    logger.info "data_points_contoller.results_files leave"
   end
 
   # upload results file
   # POST /data_points/1/upload_file.json
   def upload_file
+    logger.info "data_points_contoller.upload_file enter"
     # expected params: datapoint_id, file: {display_name, type, data, attachment}
     error = false
     error_messages = []
@@ -343,10 +364,12 @@ class DataPointsController < ApplicationController
         format.json { render 'result_file', status: :created, location: data_point_url(@data_point) }
       end
     end
+    logger.info "data_points_contoller.upload_file leave"
   end
 
   # download a datapoint report of filename
   def download_report
+    logger.info "data_points_contoller.download_report enter"
     @data_point = DataPoint.find(params[:id])
 
     h = nil
@@ -355,7 +378,7 @@ class DataPointsController < ApplicationController
       h = @data_point.result_files.where(display_name: dp_params[:filename]).first
     end
 
-    if h && h.attachment && File.exist?(h.attachment.path)
+    if h&.attachment && File.exist?(h.attachment.path)
       if /darwin/.match(RUBY_PLATFORM) || /linux/.match(RUBY_PLATFORM)
         file_data = File.read(h.attachment.path)
       else
@@ -367,14 +390,16 @@ class DataPointsController < ApplicationController
         format.json { render json: { status: 'error', error_message: 'could not find report' }, status: :unprocessable_entity }
       end
     end
+    logger.info "data_points_contoller.download_report leave"
   end
 
   # GET /data_points/1/download_result_file
   def download_result_file
+    logger.info "data_points_contoller.download_result_file enter"
     @data_point = DataPoint.find(params[:id])
 
     file = @data_point.result_files.where(attachment_file_name: params[:filename]).first
-    if file && file.attachment && File.exist?(file.attachment.path)
+    if file&.attachment && File.exist?(file.attachment.path)
       if /darwin/.match(RUBY_PLATFORM) || /linux/.match(RUBY_PLATFORM)
         file_data = File.read(file.attachment.path)
       else
@@ -388,6 +413,7 @@ class DataPointsController < ApplicationController
         format.html { redirect_to @data_point, notice: "Result file '#{params[:filename]}' does not exist. It probably was deleted from the file system." }
       end
     end
+    logger.info "data_points_contoller.download_result_file leave"
   end
 
   def dencity
@@ -401,28 +427,24 @@ class DataPointsController < ApplicationController
       # instructions for building the inputs
       measure_instances = []
       if @data_point.analysis['problem']
-        if @data_point.analysis['problem']['workflow']
-          @data_point.analysis['problem']['workflow'].each_with_index do |wf, _index|
-            m_instance = {}
-            m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
-            m_instance['id'] = wf['measure_definition_uuid']
-            m_instance['version_id'] = wf['measure_definition_version_uuid']
+        @data_point.analysis['problem']['workflow']&.each_with_index do |wf, _index|
+          m_instance = {}
+          m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
+          m_instance['id'] = wf['measure_definition_uuid']
+          m_instance['version_id'] = wf['measure_definition_version_uuid']
 
-            if wf['arguments']
-              m_instance['arguments'] = {}
-              if wf['variables']
-                wf['variables'].each do |var|
-                  m_instance['arguments'][var['argument']['name']] = @data_point.set_variable_values[var['uuid']]
-                end
-              end
-
-              wf['arguments'].each do |arg|
-                m_instance['arguments'][arg['name']] = arg['value']
-              end
+          if wf['arguments']
+            m_instance['arguments'] = {}
+            wf['variables']&.each do |var|
+              m_instance['arguments'][var['argument']['name']] = @data_point.set_variable_values[var['uuid']]
             end
 
-            measure_instances << m_instance
+            wf['arguments'].each do |arg|
+              m_instance['arguments'][arg['name']] = arg['value']
+            end
           end
+
+          measure_instances << m_instance
         end
       end
 
@@ -465,6 +487,7 @@ class DataPointsController < ApplicationController
   private
 
   def data_point_params
+    logger.info "data_points_contoller.data_point_params enter"
     params.require(:data_point).permit!.to_h
   end
 end

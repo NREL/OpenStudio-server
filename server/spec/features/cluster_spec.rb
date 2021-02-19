@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -54,24 +54,6 @@ RSpec.describe AnalysisLibrary::R::Cluster, type: :feature do
   context 'create local cluster' do
     it 'creates an R session', depends_r: true do
       expect(@r).not_to be_nil
-    end
-
-    it 'configures the cluster with an analysis run_flag', js: true, broken: true do
-      expect(@analysis.id).not_to be_nil
-
-      cluster_class = AnalysisLibrary::R::Cluster.new(@r, @analysis.id)
-      expect(cluster_class).not_to be_nil
-
-      # Catch if we are running tests on docker, if so, then the host is web
-      # but the port is dynamically configured by Capybara. - Still not working tho, flagged as broken
-      if Rails.env.docker - test?
-        APP_CONFIG['os_server_host_url'] = "http://web:#{Capybara.current_session.server.port}"
-      else
-        APP_CONFIG['os_server_host_url'] = "http://#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
-      end
-
-      cf = cluster_class.configure
-      expect(cf).to eq true
     end
 
     it 'starts snow cluster', depends_r: true do

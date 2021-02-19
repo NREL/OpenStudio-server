@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -49,11 +49,15 @@ class Analysis
   field :description, type: String
   field :run_flag, type: Boolean, default: false
   field :exit_on_guideline_14, type: Integer, default: 0
-  field :cli_debug, type: String, default: '--debug'  # set default to --debug so CI tests pass
-  field :cli_verbose, type: String, default: '--verbose'  # set default to --verbose to CI tests pass
+  field :cli_debug, type: String, default: '--debug' # set default to --debug so CI tests pass
+  field :cli_verbose, type: String, default: '--verbose' # set default to --verbose to CI tests pass
   field :initialize_worker_timeout, type: Integer, default: 28800 # set default to 8 hrs
   field :upload_results_timeout, type: Integer, default: 28800 # set default to 8 hrs
-  field :run_workflow_timeout, type: Integer, default: 28800  # set default to 8 hrs
+  field :run_workflow_timeout, type: Integer, default: 28800 # set default to 8 hrs
+  field :download_zip, type: Boolean, default: true
+  field :download_osm, type: Boolean, default: true
+  field :download_osw, type: Boolean, default: true
+  field :download_reports, type: Boolean, default: true
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
@@ -65,6 +69,11 @@ class Analysis
   field :output_variables, type: Array, default: [] # list of variable that are needed for output including objective functions
   field :os_metadata # don't define type, keep this flexible
   field :analysis_logs, type: Hash, default: {} # store the logs from the analysis init and finalize
+  
+  field :urbanopt, type: Boolean, default: false # is UrbanOpt run?
+  field :urbanopt_variables, type: Array, default: [] #array of UrbanOpt variables
+  field :feature_file, type: String, default: '' # name of UrbanOpt Feature_file.json file
+  field :scenario_file, type: String, default: '' # name of UrbanOpt Scenario.csv file
 
   # Temp location for these vas
   field :samples, type: Integer
@@ -107,6 +116,7 @@ class Analysis
 
   # FIXME: analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
   def start(no_delay, analysis_type = 'batch_run', options = {})
+    logger.info "analysis.start enter"
     defaults = { skip_init: false }
     options = defaults.merge(options)
 
@@ -142,11 +152,13 @@ class Analysis
       save!
       reload
     end
+    logger.info "analysis.start leave"
   end
 
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
+    logger.info "analysis.run_analysis enter"
     defaults = {}
     options = defaults.merge(options)
 
@@ -155,7 +167,7 @@ class Analysis
     logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
     start(no_delay, analysis_type, options)
-
+    logger.info "analysis.run_analysis leave"
     [true]
   end
 
@@ -215,10 +227,66 @@ class Analysis
     end
 
     # pull out the output variables
-    if output_variables
-      output_variables.each do |variable|
-        logger.info "Saving off output variables: #{variable}"
-        var = Variable.create_output_variable(id, variable)
+    output_variables&.each do |variable|
+      logger.info "Saving off output variables: #{variable}"
+      var = Variable.create_output_variable(id, variable)
+    end
+
+    save!
+  end
+
+  # Method that pulls out the urbanopt variables from the uploaded problem/analysis JSON.
+  def pull_out_urbanopt_variables
+    pat_json = false
+    # get the measures first
+    logger.info('pull_out_urbanopt_variables')
+    # note the measures first
+    if self['urbanopt_variables']
+      logger.info('found urbanopt_variables')
+      self['urbanopt_variables'].each do |uo_var|
+        uo_var['uuid'] = nil if !UUID.validate(uo_var['uuid'])
+        var = Variable.where(analysis_id: self.id, uuid: uo_var['uuid']).first
+        if var
+          raise "UrbanOpt Variable already exists for '#{var.name}' : '#{var.uuid}'"
+        else
+          logger.info("Adding a new UrbanOpt variable/argument named: '#{uo_var['name']}' with UUID '#{uo_var['uuid']}'") if self.cli_debug == '--debug'
+          var = Variable.find_or_create_by(analysis_id: self.id, uuid: uo_var['uuid'])
+          logger.info("Created Var: #{var.to_json}") if self.cli_debug == '--debug'
+          exclude_fields = ['uuid', 'type', 'argument', 'uncertainty_description']
+          uo_var.each do |k, v|
+            var[k] = v unless exclude_fields.include? k
+            var.perturbable = v if k == 'variable'
+            if var.perturbable
+              var.export = true
+              var.visualize = true
+              var.uo_variable = true #set this flag to true since its an urbanopt variable
+            end
+            # if the variable has an uncertainty description, then it needs to be flagged
+            # as a perturbable (or pivot) variable
+            if k == 'uncertainty_description'
+              # need to flatten this
+              var['uncertainty_type'] = v['type'] if v['type']
+              if v['attributes']
+                v['attributes'].each do |attribute|
+                  # grab the name of the attribute to append the
+                  # other characteristics
+                  attribute['name'] ? att_name = attribute['name'] : att_name = nil
+                  next unless att_name
+
+                  attribute.each do |k2, v2|
+                    exclude_fields_2 = ['uuid', 'version_uuid']
+                    var["#{att_name}_#{k2}"] = v2 unless exclude_fields_2.include? k2
+                  end
+                end
+              end
+            end
+      
+          end
+
+          logger.info("Updated Var: #{var.to_json}") if self.cli_debug == '--debug'
+          var.save!
+        end
+
       end
     end
 
@@ -295,6 +363,7 @@ class Analysis
 
   # Return the last job's status for the analysis
   def status
+    logger.info "analysis.status enter"
     j = jobs_status
     if j
       begin
@@ -322,6 +391,7 @@ class Analysis
   # update the job status to indicate that postprocessing is complete.
   # used from finalize method which is only called for environments using resque
   def complete_postprocessing!
+    logger.info "analysis.complete_postprocessing enter"
     raise 'Post-processing should only happen in environments that use Resque for job management.' unless Rails.application.config.job_manager == :resque
 
     job = jobs.order_by(:index.asc).last
@@ -329,6 +399,7 @@ class Analysis
 
     job.status = 'post-processing finished'
     job.save!
+    logger.info "analysis.complete_postprocessing leave"
   rescue Exception => e
     logger.error e
   end
@@ -353,7 +424,7 @@ class Analysis
 
   def analysis_type
     j = jobs.order_by(:index.asc).last
-    if j && j.analysis_type
+    if j&.analysis_type
       return j.analysis_type
     else
       return 'unknown'
@@ -391,9 +462,9 @@ class Analysis
   # currently only used with Resque, as it's called by ResqueJobs::InitializeAnalysis job
   # runs on web node
 
-   # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
-   # This is local function for workaround until that is resolved
-   #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+  # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+  # This is local function for workaround until that is resolved
+  # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
   def extract_archive(archive_filename, destination, overwrite = true)
     ::Zip.sort_entries = true
     Zip::File.open(archive_filename) do |zf|
@@ -410,7 +481,6 @@ class Analysis
     end
   end
 
-
   def run_initialization
     #   unpack seed zip file into osdata
     #   run initialize.sh if present
@@ -420,12 +490,12 @@ class Analysis
     logger.info 'Running analysis initialization scripts'
     logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
     begin
-      Timeout.timeout(3600) do  #change to 1hr for large models
+      Timeout.timeout(3600) do # change to 1hr for large models
         extract_count += 1
-	# The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+        # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
         # This is local function for workaround until that is resolved
-        #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-	extract_archive(seed_zip.path, shared_directory_path)
+        # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+        extract_archive(seed_zip.path, shared_directory_path)
       end
     rescue StandardError => e
       retry if extract_count < extract_max_count

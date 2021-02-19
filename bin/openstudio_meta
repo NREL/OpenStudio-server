@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -100,6 +100,7 @@ def parse_options(opts = nil, argv = nil)
 
   opts.on('--ruby-lib-path PATH', 'Additional Ruby path, to locate openstudio') do |path|
     ENV['RUBYLIB'] = path
+    ENV['RUBY_DLL_PATH'] = path
   end
 
   require 'tmpdir'
@@ -353,7 +354,8 @@ class InstallGems
 
     sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 2.1.0"
     if /darwin/.match(RUBY_PLATFORM)
-      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-include=/usr/include"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-config=/usr/bin/xml2-config"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config"
     end
     if options[:test_dev_build]
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
@@ -795,6 +797,7 @@ class RunAnalysis
     options = {
         debug: false,
         dencity: false,
+        zip_file: nil,
         analysis_type: 'batch_datapoints'
     }
 
@@ -805,6 +808,7 @@ class RunAnalysis
       o.separator ''
 
       o.on('-a', '--analysis TYPE', 'Analysis type to run') {|a| options[:analysis_type] = a}
+      o.on('-z', '--zip NAME', 'relative path/name of project zip file from .json file') {|z| options[:zip_file] = z}
       o.on('-d', '--push_to_dencity', 'Push the analysis to DEnCity') {|_| options[:dencity] = true}
       o.on('--debug', 'Whatever makes debugging easy') {|_| options[:debug] = true}
     end
@@ -837,6 +841,16 @@ class RunAnalysis
     elsif ::File.extname(project_path).casecmp('.json').zero?
       temp_filepath = File.dirname(project_path) + '/' + File.basename(project_path).gsub('.json', '')
       analysis_type = options[:analysis_type]
+      if !options[:zip_file].nil?
+        temp_zipfilepath = File.expand_path(File.join(File.dirname(project_path), options[:zip_file])).gsub('.zip', '')
+        $logger.debug("temp_zipfilepath: #{temp_zipfilepath}")
+        $logger.debug("project_path: #{project_path}")
+        $logger.debug("options[:zip_file]: #{options[:zip_file]}")
+        if !::File.exist?(temp_zipfilepath + '.zip')
+          $logger.error "Zip file #{temp_zipfilepath}.zip does not exist"
+          exit 1
+        end
+      end
     else
       $logger.error "Did not recognize project file extension #{::File.extname(project_path)}"
       exit 1
@@ -851,7 +865,11 @@ class RunAnalysis
 
     # Submit the job
     formulation_file = temp_filepath + '.json'
-    analysis_zip_file = temp_filepath + '.zip'
+    if !options[:zip_file].nil?
+      analysis_zip_file = temp_zipfilepath + '.zip'
+    else
+      analysis_zip_file = temp_filepath + '.zip'
+    end
     batch_run_method = 'batch_run'
     run_options = {
         push_to_dencity: options[:dencity],

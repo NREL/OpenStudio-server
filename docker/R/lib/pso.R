@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -84,10 +84,6 @@ clusterExport(cl,"varnames")
 clusterExport(cl,"rails_analysis_id")
 clusterExport(cl,"rails_sim_root_path")
 clusterExport(cl,"rails_ruby_bin_dir")
-clusterExport(cl,"rails_mongodb_name")
-clusterExport(cl,"rails_mongodb_ip")
-clusterExport(cl,"rails_run_filename")
-clusterExport(cl,"rails_create_dp_filename")
 clusterExport(cl,"rails_root_path")
 clusterExport(cl,"rails_host")
 clusterExport(cl,"r_scripts_path")
@@ -142,9 +138,10 @@ print(paste("topology:", topology))
 print(paste("c1:", c1))
 print(paste("c2:", c2))
 print(paste("lambda:", lambda))
+print(paste("report:", report))
 
 results <- NULL
-try(results <- NRELpso(cl=cl, fn=f, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda)), silent=FALSE)
+try(results <- NRELpso(cl=cl, fn=f, lower=varMin, upper=varMax, method=method, control=list(write2disk=FALSE, parallel="true", npart=npart, maxit=maxit, maxfn=maxfn, abstol=abstol, reltol=reltol, Xini.type=xini, Vini.type=vini, boundary.wall=boundary, topology=topology, c1=c1, c2=c2, lambda=lambda, REPORT=report)), silent=FALSE)
 #print(paste("scp command:",scp))
 #print(paste("scp command:",scp2))
 #system(scp,intern=TRUE)
@@ -187,3 +184,6 @@ if (!file.exists(bestresults_filename) && !is.null(results$par)) {
   convergenceflag <- paste('{',paste('"',"exit_on_guideline_14",'"',': ',"false",sep='', collapse=','),'}',sep='')
   write(convergenceflag, file=paste(analysis_dir,"/convergence_flag.json",sep=''))
 }
+print("stopping cluster in pso.R")
+stopCluster(cl)
+print("cluster stopped")

@@ -1,0 +1,529 @@
+{
+  "analysis": {
+    "display_name": "UrbanOpt_NSGA",
+    "name": "UrbanOpt_NSGA",
+    "urbanopt": true,
+    "output_variables": [
+      {
+        "objective_function": true,
+        "objective_function_index": 0,
+        "objective_function_target": 0,
+        "objective_function_group": 1,
+        "scaling_factor": null,
+        "display_name": "electricity",
+        "display_name_short": "electricity",
+        "metadata_id": null,
+        "name": "urban_opt_report.electricity",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      },
+      {
+        "objective_function": true,
+        "objective_function_index": 1,
+        "objective_function_target": 0,
+        "objective_function_group": 2,
+        "scaling_factor": null,
+        "display_name": "natural_gas",
+        "display_name_short": "natural_gas",
+        "metadata_id": null,
+        "name": "urban_opt_report_2.natural_gas",
+        "visualize": true,
+        "export": true,
+        "variable_type": "double"
+      }
+    ],
+    "problem": {
+      "workflow": [
+        {
+          "name": "reduce_electric_equipment_loads_by_percentage",
+          "display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_directory": "./measures/ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_directory_local": "C:\\Projects\\OS-PAT-export\\sample_projects\\SEB_calibration_NSGA_2013\\measures\\ReduceElectricEquipmentLoadsByPercentage",
+          "measure_definition_display_name": "Reduce Electric Equipment Loads by Percentage",
+          "measure_definition_name": "reduce_electric_equipment_loads_by_percentage",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "b93f5c07-a1a8-4741-9d47-af00a2e7e288",
+          "measure_definition_version_uuid": "adc6a0d5-afe5-4bc9-a113-285e78c94d2a",
+          "uuid": "b93f5c07-a1a8-4741-9d47-af00a2e7e288",
+          "version_uuid": "adc6a0d5-afe5-4bc9-a113-285e78c94d2a",
+          "description": "Reduce electric equipment loads. This will affect equipment that have a, power, power per area (LPD), or power per person value. This can be applied to the entire building or a specific space type. A positive percentage represents an increase electric equipment power, while a negative percentage can be used for an increase in electric equipment power.",
+          "taxonomy": "Equipment.Electric Equipment",
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "display_name_short": "space_type",
+              "name": "space_type",
+              "value_type": "string",
+              "default_value": "*Entire Building*",
+              "value": "*Entire Building*"
+            },
+            {
+              "display_name": "Increase in Material and Installation Cost for Electric Equipment per Floor Area (%).",
+              "display_name_short": "material_and_installation_cost",
+              "name": "material_and_installation_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Increase in Demolition Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "demolition_cost",
+              "name": "demolition_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Years Until Costs Start (whole years).",
+              "display_name_short": "years_until_costs_start",
+              "name": "years_until_costs_start",
+              "value_type": "integer",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "Demolition Costs Occur During Initial Construction?",
+              "display_name_short": "demo_cost_initial_const",
+              "name": "demo_cost_initial_const",
+              "value_type": "boolean",
+              "default_value": false,
+              "value": false
+            },
+            {
+              "display_name": "Expected Life (whole years).",
+              "display_name_short": "expected_life",
+              "name": "expected_life",
+              "value_type": "integer",
+              "default_value": 15,
+              "value": 15
+            },
+            {
+              "display_name": "Increase O & M Costs for Electric Equipment per Floor Area (%).",
+              "display_name_short": "om_cost",
+              "name": "om_cost",
+              "value_type": "double",
+              "default_value": 0,
+              "value": 0
+            },
+            {
+              "display_name": "O & M Frequency (whole years).",
+              "display_name_short": "om_frequency",
+              "name": "om_frequency",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            }
+          ],
+          "variables": [
+            {
+              "argument": {
+                "display_name": "Electric Equipment Power Reduction (%).",
+                "display_name_short": "elecequip_power_reduction_percent",
+                "name": "elecequip_power_reduction_percent",
+                "value_type": "double",
+                "default_value": 30,
+                "value": 0
+              },
+              "display_name": "Electric Equipment Power Reduction (%).",
+              "display_name_short": "elecequip_power_reduction_percent",
+              "variable_type": "variable",
+              "minimum": -80,
+              "maximum": 80,
+              "static_value": 0,
+              "uuid": "",
+              "version_uuid": "",
+              "variable": true,
+              "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                  {
+                    "name": "lower_bounds",
+                    "value": -80
+                  },
+                  {
+                    "name": "upper_bounds",
+                    "value": 80
+                  },
+                  {
+                    "name": "modes",
+                    "value": 30
+                  },
+                  {
+                    "name": "delta_x",
+                    "value": 30
+                  },
+                  {
+                    "name": "stddev",
+                    "value": 26.6667
+                  }
+                ]
+              },
+              "workflow_index": 0
+            }
+          ],
+          "workflow_index": 0
+        },
+        {
+          "name": "openstudio_results",
+          "display_name": "OpenStudio Results",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "OpenStudioResults",
+          "measure_definition_directory": "./measures/f8e23017-894d-4bdf-977f-37e3961e6f42",
+          "measure_definition_directory_local": "/Users/lbrackne/Documents/OpenStudio/SEB/SEB_LHS_2013/measures/f8e23017-894d-4bdf-977f-37e3961e6f42",
+          "measure_definition_display_name": "OpenStudio Results",
+          "measure_definition_name": "openstudio_results",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "measure_definition_version_uuid": "96d48c9c-dd58-4ace-b2b0-0a2b36fd603d",
+          "uuid": "a25386cd-60e4-46bc-8b11-c755f379d916",
+          "version_uuid": "96d48c9c-dd58-4ace-b2b0-0a2b36fd603d",
+          "description": "This measure creates high level tables and charts pulling both from model inputs and EnergyPlus results. It has building level information as well as detail on space types, thermal zones, HVAC systems, envelope characteristics, and economics. Click the heading above a chart to view a table of the chart data.",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "Model Summary",
+              "display_name_short": "building_summary_section",
+              "name": "building_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Annual Overview",
+              "display_name_short": "annual_overview_section",
+              "name": "annual_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Monthly Overview",
+              "display_name_short": "monthly_overview_section",
+              "name": "monthly_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Utility Bills/Rates",
+              "display_name_short": "utility_bills_rates_section",
+              "name": "utility_bills_rates_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Envelope",
+              "display_name_short": "envelope_section_section",
+              "name": "envelope_section_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Breakdown",
+              "display_name_short": "space_type_breakdown_section",
+              "name": "space_type_breakdown_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Space Type Summary",
+              "display_name_short": "space_type_details_section",
+              "name": "space_type_details_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Interior Lighting Summary",
+              "display_name_short": "interior_lighting_section",
+              "name": "interior_lighting_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plug Loads Summary",
+              "display_name_short": "plug_loads_section",
+              "name": "plug_loads_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Exterior Lighting",
+              "display_name_short": "exterior_light_section",
+              "name": "exterior_light_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Water Use Equipment",
+              "display_name_short": "water_use_section",
+              "name": "water_use_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "HVAC Load Profiles",
+              "display_name_short": "hvac_load_profile",
+              "name": "hvac_load_profile",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Conditions",
+              "display_name_short": "zone_condition_section",
+              "name": "zone_condition_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Overview",
+              "display_name_short": "zone_summary_section",
+              "name": "zone_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Zone Equipment Detail",
+              "display_name_short": "zone_equipment_detail_section",
+              "name": "zone_equipment_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Air Loops Detail",
+              "display_name_short": "air_loops_detail_section",
+              "name": "air_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Plant Loops Detail",
+              "display_name_short": "plant_loops_detail_section",
+              "name": "plant_loops_detail_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Outdoor Air",
+              "display_name_short": "outdoor_air_section",
+              "name": "outdoor_air_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Cash Flow",
+              "display_name_short": "cost_summary_section",
+              "name": "cost_summary_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Site and Source Summary",
+              "display_name_short": "source_energy_section",
+              "name": "source_energy_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            },
+            {
+              "display_name": "Schedule Overview",
+              "display_name_short": "schedules_overview_section",
+              "name": "schedules_overview_section",
+              "value_type": "boolean",
+              "default_value": true,
+              "value": true
+            }
+          ],
+          "variables": [],
+          "workflow_index": 1
+        },
+        {
+          "name": "urban_opt_report",
+          "display_name": "UrbanOpt Report",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "UrbanOptReport",
+          "measure_definition_directory": "./measures/urban_opt_report",
+          "measure_definition_directory_local": "",
+          "measure_definition_display_name": "UrbanOptReport",
+          "measure_definition_name": "urban_opt_report",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "measure_definition_version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "description": "UrbanOpt Report",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "scenario_name",
+              "display_name_short": "scenario_name",
+              "name": "scenario_name",
+              "value_type": "string",
+              "default_value": "highefficiency_scenario",
+              "value": "highefficiency_scenario"
+            },
+            {
+              "display_name": "feature_id",
+              "display_name_short": "feature_id",
+              "name": "feature_id",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            },
+            {
+              "display_name": "output_name",
+              "display_name_short": "output_name",
+              "name": "output_name",
+              "value_type": "string",
+              "default_value": "electricity",
+              "value": "electricity"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 2
+        },
+        {
+          "name": "urban_opt_report_2",
+          "display_name": "UrbanOpt Report 2",
+          "measure_type": "ReportingMeasure",
+          "measure_definition_class_name": "UrbanOptReport",
+          "measure_definition_directory": "./measures/urban_opt_report",
+          "measure_definition_directory_local": "",
+          "measure_definition_display_name": "UrbanOptReport",
+          "measure_definition_name": "urban_opt_report",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "measure_definition_version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "uuid": "744899a6-9da8-4888-870b-40bca78f505b",
+          "version_uuid": "aa87fa65-ce1a-4717-8791-56471a32563c",
+          "description": "UrbanOpt Report",
+          "taxonomy": "Reporting.QAQC",
+          "arguments": [
+            {
+              "display_name": "scenario_name",
+              "display_name_short": "scenario_name",
+              "name": "scenario_name",
+              "value_type": "string",
+              "default_value": "highefficiency_scenario",
+              "value": "highefficiency_scenario"
+            },
+            {
+              "display_name": "feature_id",
+              "display_name_short": "feature_id",
+              "name": "feature_id",
+              "value_type": "integer",
+              "default_value": 1,
+              "value": 1
+            },
+            {
+              "display_name": "output_name",
+              "display_name_short": "output_name",
+              "name": "output_name",
+              "value_type": "string",
+              "default_value": "natural_gas",
+              "value": "natural_gas"
+            }
+          ],
+          "variables": [],
+          "workflow_index": 3
+        }
+      ],
+      "algorithm": {
+        "number_of_samples": 2,
+        "generations": 1,
+        "tournament_size": 2,
+        "cprob": 0.85,
+        "xover_dist_idx": 5,
+        "mu_dist_idx": 5,
+        "mprob": 0.8,
+        "norm_type": "minkowski",
+        "p_power": 2,
+        "exit_on_guideline_14": 0,
+        "seed": null,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 1,
+        "max_queued_jobs": 32,
+        "objective_functions": [
+            "urban_opt_report.electricity",
+            "urban_opt_report_2.natural_gas"
+        ]
+      },
+      "analysis_type": "nsga_nrel"
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seeds/SEB4_baseboard.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/SRRL_2013AMY_60min.epw"
+    },
+    "file_format_version": 1,
+    "cli_debug": "--debug",
+    "cli_verbose": "--verbose",
+    "run_workflow_timeout": 28800,
+    "upload_results_timeout": 28800,
+    "initialize_worker_timeout": 28800,
+    "server_scripts": {},
+    "urbanopt_variables": [
+        {
+            "name": "lighting_power_reduction_percent",
+            "display_name": "Lighting Power Reduction (%).",
+            "display_name_short": "lighting_power_reduction_percent",
+            "variable_type": "variable",
+            "value_type": "double",
+            "default_value": 0,
+            "value": 0,
+            "minimum": -80,
+            "maximum": 80,
+            "static_value": 0,
+            "uuid": "",
+            "version_uuid": "",
+            "variable": true,
+            "uncertainty_description": {
+                "type": "uniform",
+                "attributes": [
+                    {
+                        "name": "lower_bounds",
+                        "value": -80
+                    },
+                    {
+                        "name": "upper_bounds",
+                        "value": 80
+                    },
+                    {
+                        "name": "modes",
+                        "value": 30
+                    },
+                    {
+                        "name": "delta_x",
+                        "value": 30
+                    },
+                    {
+                        "name": "stddev",
+                        "value": 26.6667
+                    }
+                ]
+            }
+        }
+    ]
+  }
+}

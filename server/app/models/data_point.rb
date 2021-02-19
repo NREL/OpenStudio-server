@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -131,6 +131,7 @@ class DataPoint
   end
 
   def set_complete_state
+    logger.info "data_point.set_complete_state"
     self.run_end_time = Time.now
     self.status = :completed
 
@@ -163,7 +164,7 @@ class DataPoint
     if Rails.application.config.job_manager == :delayed_job
       if job_id
         dj = Delayed::Job.where(id: job_id).first
-        dj.destroy if dj
+        dj&.destroy
       end
     elsif Rails.application.config.job_manager == :resque
       if job_id

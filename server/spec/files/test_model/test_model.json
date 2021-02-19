@@ -322,7 +322,7 @@
     "problem": {
       "analysis_type": "nsga_nrel",
       "algorithm": {
-        "number_of_samples": "all_variables",
+        "number_of_samples": 50,
         "generations": 2,
         "cprob": 0.85,
         "xoverdistidx": 5,

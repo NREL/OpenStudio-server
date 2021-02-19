@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 services:
   db:
     image: localhost:5000/mongo
@@ -60,6 +60,7 @@ services:
       - web
       - queue
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager
@@ -81,6 +82,7 @@ services:
       - queue
       - rserve
     deploy:
+      endpoint_mode: dnsrr
       resources:
         reservations:
           cpus: "1"
@@ -94,6 +96,7 @@ services:
       - web-background
       - db
     deploy:
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.role == manager

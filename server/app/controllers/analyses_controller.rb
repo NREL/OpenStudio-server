@@ -1,5 +1,5 @@
 # *******************************************************************************
-# OpenStudio(R), Copyright (c) 2008-2019, Alliance for Sustainable Energy, LLC.
+# OpenStudio(R), Copyright (c) 2008-2020, Alliance for Sustainable Energy, LLC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -63,6 +63,7 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
+    logger.info "analyses_contoller.show enter"
     # for pagination
     per_page = 50
 
@@ -135,6 +136,7 @@ class AnalysesController < ApplicationController
       format.json { render json: { analysis: @analysis } }
       format.js
     end
+    logger.info "analyses_contoller.show leave"
   end
 
   # GET /analyses/new
@@ -167,6 +169,11 @@ class AnalysesController < ApplicationController
     # back together when it goes to run
     logger.info('pulling out os variables')
     @analysis.pull_out_os_variables
+    
+    if @analysis.urbanopt
+        logger.info('pulling out urbanopt variables')
+        @analysis.pull_out_urbanopt_variables
+    end
 
     respond_to do |format|
       if @analysis.save!
@@ -182,6 +189,7 @@ class AnalysesController < ApplicationController
   # PUT /analyses/1
   # PUT /analyses/1.json
   def update
+    logger.info "analyses_contoller.update enter"
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
@@ -193,6 +201,7 @@ class AnalysesController < ApplicationController
         format.json { render json: @analysis.errors, status: :unprocessable_entity }
       end
     end
+    logger.info "analyses_contoller.update leave"
   end
 
   # DELETE /analyses/1
@@ -226,6 +235,7 @@ class AnalysesController < ApplicationController
   # and will only return a JSON response based on whether or not the analysis has been
   # queued into Delayed Jobs
   def action
+    logger.info "analyses_contoller.action enter"
     @analysis = Analysis.find(params[:id])
     logger.info("action #{params.inspect}")
     @analysis_type = params[:analysis_type].nil? ? 'batch_run' : params[:analysis_type]
@@ -278,6 +288,7 @@ class AnalysesController < ApplicationController
         end
       end
     end
+    logger.info "analyses_contoller.action leave"
   end
 
   # version this in order to allow for analyses/status.json to return all the analyses with the status
@@ -285,6 +296,7 @@ class AnalysesController < ApplicationController
   # @param :jobs [String] Constraint on the datapoint completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
+    logger.info "analyses_contoller.status enter"
     analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline_14]
     data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :name]
 
@@ -339,6 +351,7 @@ class AnalysesController < ApplicationController
         end
       end
     end
+    logger.info "analyses_contoller.status leave"
   end
 
   # GET /analyses/1/download_result_file
@@ -346,7 +359,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     file = @analysis.result_files.where(attachment_file_name: params[:filename]).first
-    if file && file.attachment && File.exist?(file.attachment.path)
+    if file&.attachment && File.exist?(file.attachment.path)
       file_data = File.read(file.attachment.path)
       disposition = ['application/json', 'text/plain', 'text/html'].include?(file.attachment.content_type) ? 'inline' : 'attachment'
       send_data file_data, filename: File.basename(file.attachment.original_filename), type: file.attachment.content_type, disposition: disposition
@@ -399,6 +412,16 @@ class AnalysesController < ApplicationController
       @rserve_log = File.read(rserve_file)
     end
 
+    docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
+    if File.exist? docker_log
+      @docker_log = File.read(docker_log)
+    end
+    
+    resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
+    if File.exist? resque_log
+      @resque_log = File.read(resque_log)
+    end
+            
     initialize_log_path = "#{@analysis.shared_directory_path}/scripts/analysis/intialize.log"
     @initialize_log = (File.exist? initialize_log_path) ? File.read(initialize_log_path) : nil
 
@@ -780,54 +803,48 @@ class AnalysesController < ApplicationController
           @provenance['analysis_information'] = @analysis['problem']['algorithm']
         end
 
-        if @analysis['problem']['workflow']
-          @analysis['problem']['workflow'].each do |wf|
-            new_wfi = {}
-            new_wfi['id'] = wf['measure_definition_uuid']
-            new_wfi['version_id'] = wf['measure_definition_version_uuid']
+        @analysis['problem']['workflow']&.each do |wf|
+          new_wfi = {}
+          new_wfi['id'] = wf['measure_definition_uuid']
+          new_wfi['version_id'] = wf['measure_definition_version_uuid']
 
-            # Eventually all of this could be pulled directly from BCL
-            new_wfi['name'] = wf['measure_definition_class_name']
-            new_wfi['display_name'] = wf['measure_definition_display_name']
-            new_wfi['type'] = wf['measure_type']
-            new_wfi['modeler_description'] = wf['modeler_description']
-            new_wfi['description'] = wf['description']
+          # Eventually all of this could be pulled directly from BCL
+          new_wfi['name'] = wf['measure_definition_class_name']
+          new_wfi['display_name'] = wf['measure_definition_display_name']
+          new_wfi['type'] = wf['measure_type']
+          new_wfi['modeler_description'] = wf['modeler_description']
+          new_wfi['description'] = wf['description']
 
-            new_wfi['arguments'] = []
-            if wf['arguments']
-              wf['arguments'].each do |arg|
-                wfi_arg = {}
-                wfi_arg['display_name'] = arg['display_name']
-                wfi_arg['display_name_short'] = arg['display_name_short']
-                wfi_arg['name'] = arg['name']
-                wfi_arg['data_type'] = arg['value_type']
-                wfi_arg['default_value'] = nil
-                wfi_arg['description'] = ''
-                wfi_arg['display_units'] = '' # should be haystack compatible unit strings
-                wfi_arg['units'] = '' # should be haystack compatible unit strings
+          new_wfi['arguments'] = []
+          wf['arguments']&.each do |arg|
+            wfi_arg = {}
+            wfi_arg['display_name'] = arg['display_name']
+            wfi_arg['display_name_short'] = arg['display_name_short']
+            wfi_arg['name'] = arg['name']
+            wfi_arg['data_type'] = arg['value_type']
+            wfi_arg['default_value'] = nil
+            wfi_arg['description'] = ''
+            wfi_arg['display_units'] = '' # should be haystack compatible unit strings
+            wfi_arg['units'] = '' # should be haystack compatible unit strings
 
-                new_wfi['arguments'] << wfi_arg
-              end
-            end
-
-            if wf['variables']
-              wf['variables'].each do |arg|
-                wfi_var = {}
-                wfi_var['display_name'] = arg['argument']['display_name']
-                wfi_var['display_name_short'] = arg['argument']['display_name_short']
-                wfi_var['name'] = arg['argument']['name']
-                wfi_var['default_value'] = nil
-                wfi_var['data_type'] = arg['argument']['value_type']
-                wfi_var['description'] = ''
-                wfi_var['display_units'] = arg['units']
-                wfi_var['units'] = '' # should be haystack compatible unit strings
-
-                new_wfi['arguments'] << wfi_var
-              end
-            end
-
-            @measure_metadata << new_wfi
+            new_wfi['arguments'] << wfi_arg
           end
+
+          wf['variables']&.each do |arg|
+            wfi_var = {}
+            wfi_var['display_name'] = arg['argument']['display_name']
+            wfi_var['display_name_short'] = arg['argument']['display_name_short']
+            wfi_var['name'] = arg['argument']['name']
+            wfi_var['default_value'] = nil
+            wfi_var['data_type'] = arg['argument']['value_type']
+            wfi_var['description'] = ''
+            wfi_var['display_units'] = arg['units']
+            wfi_var['units'] = '' # should be haystack compatible unit strings
+
+            new_wfi['arguments'] << wfi_var
+          end
+
+          @measure_metadata << new_wfi
         end
       end
     end
