@@ -72,6 +72,7 @@ RUN apt-get update && apt-get install -y wget gnupg \
         python-numpy \
         python-pip \
         python-scipy \
+        python-tk \
         python3-dev \
         python3-jpype \
         python3-lxml \
@@ -80,6 +81,7 @@ RUN apt-get update && apt-get install -y wget gnupg \
         python3-pip \
         python3-scipy \
         python3-setuptools \
+        python3-tk \
         procps \
         sudo \
         swig \
