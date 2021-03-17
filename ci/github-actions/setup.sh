@@ -18,11 +18,11 @@ else
 
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree coreutils
-        
+
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-darwin.tar.gz
-        tar xzf ruby-2.5.5-darwin.tar.gz       
+        tar xzf ruby-2.5.5-darwin.tar.gz
         sudo mv ruby /usr/local/
         otool -L /usr/local/ruby/bin/ruby
         rm ruby-2.5.5-darwin.tar.gz
@@ -32,11 +32,12 @@ else
         tar xvzf mongodb-macos-x86_64-4.4.2.tgz
         sudo cp mongodb-macos-x86_64-4.4.2/bin/* /usr/local/bin/
         rm -r mongodb-macos*
-        
+
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin
         export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
-        curl -SL --insecure https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        #curl -SL --insecure https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        curl -SL --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
         # OSX downloads with %2B but installs with + sign. These are the encoded chars in url strings.
         #hdiutil attach ${OS_NAME}.dmg
         #sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
@@ -66,10 +67,10 @@ else
         echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse | tee /etc/apt/sources.list.d/mongodb-org-4.4.list"
         sudo apt-get update
         sudo apt-get install -y pv tree mongodb libqdbm14 libxml2-dev
-        # explicitly install. the latest version of redis-server  
+        # explicitly install. the latest version of redis-server
         wget https://download.redis.io/releases/redis-6.0.9.tar.gz
         tar xzf redis-6.0.9.tar.gz && cd redis-6.0.9
-        make && sudo make install 
+        make && sudo make install
         sudo cp utils/systemd-redis_server.service /etc/systemd/system/redis.service
         cd $GITHUB_WORKSPACE
         rm redis-6.0.9.tar.gz
@@ -107,7 +108,7 @@ else
     ruby -v
     # test openssl
     ruby ${GITHUB_WORKSPACE}/ci/github-actions/verify_openstudio.rb
-    
+
     ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
     # create dir for output files which will be generated in case of failure
