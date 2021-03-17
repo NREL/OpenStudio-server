@@ -21,11 +21,11 @@ else
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
-        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-darwin.tar.gz
-        tar xzf ruby-2.5.5-darwin.tar.gz
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.7.2-darwin.tar.gz
+        tar xzf ruby-2.7.2-darwin.tar.gz
         sudo mv ruby /usr/local/
         otool -L /usr/local/ruby/bin/ruby
-        rm ruby-2.5.5-darwin.tar.gz
+        rm ruby-2.7.2-darwin.tar.gz
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-4.4.2.tgz
@@ -84,13 +84,13 @@ else
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
-        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-linux.tar.gz
-        tar xvzf ruby-2.5.5-linux.tar.gz
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.7.2-linux.tar.gz
+        tar xvzf ruby-2.7.2-linux.tar.gz
         ls -l /usr/local/
         sudo rm -rf /usr/local/ruby
         sudo mv ruby /usr/local/
         ldd /usr/local/ruby/bin/ruby
-        rm ruby-2.5.5-linux.tar.gz
+        rm ruby-2.7.2-linux.tar.gz
 
         mkdir -p reports/rspec
         sudo ./ci/github-actions/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT

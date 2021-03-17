@@ -15,9 +15,9 @@ dir C:\projects\openstudio
 dir C:\projects\openstudio\Ruby
 rm %OS_INSTALL_NAME%
 REM install portable ruby
-curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.5.5-win32.tar.gz
-tar -xvzf ruby-2.5.5-win32.tar.gz -C C:\projects
-rm ruby-2.5.5-win32.tar.gz
+curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.7.2-win32.tar.gz
+tar -xvzf ruby-2.7.2-win32.tar.gz -C C:\projects
+rm ruby-2.7.2-win32.tar.gz
 cd c:\projects\openstudio-server
 ruby -v
 openstudio openstudio_version
