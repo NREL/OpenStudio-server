@@ -17,7 +17,7 @@ RUN R CMD INSTALL /opt/openstudio/R/lib/R-packages/NRELmoo*.tar.gz /opt/openstud
 ADD /lib /opt/openstudio/R/lib
 
 # Install Gems
-RUN gem install bundler -v2.1.0
+RUN gem install bundler -v2.1.4
 RUN cd /opt/openstudio/R/lib && bundle install --jobs=3 --retry=3
 
 ADD /start.R /start.R
