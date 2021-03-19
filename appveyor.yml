@@ -1,5 +1,7 @@
 version: 1.0.{build}-{branch}
 
+image: Visual Studio 2019
+
 environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.1.1
@@ -18,7 +20,7 @@ clone_folder: C:\projects\openstudio-server
 
 install:
 # set PATH pre-installed ruby version
-  - set PATH=C:\Ruby272-x64\bin;C:\Mongodb\bin;%PATH%
+  - set PATH=C:\Ruby27-x64\bin;C:\Mongodb\bin;%PATH%
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
 build: off
