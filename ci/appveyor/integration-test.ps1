@@ -1,4 +1,4 @@
-$env:Path = "C:\Ruby25-x64\bin;C:\Mongodb\bin;$env:Path"
+$env:Path = "C:\Ruby27-x64\bin;C:\Mongodb\bin;$env:Path"
 $env:RUBYLIB = "C:\projects\openstudio\Ruby"
 $env:OPENSTUDIO_TEST_EXE = "C:\projects\openstudio\bin\openstudio.exe"
 $env:GEM_HOME = "C:\projects\openstudio-server\gems"
