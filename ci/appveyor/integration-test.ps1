@@ -3,6 +3,8 @@ $env:RUBYLIB = "C:\projects\openstudio\Ruby"
 $env:OPENSTUDIO_TEST_EXE = "C:\projects\openstudio\bin\openstudio.exe"
 $env:GEM_HOME = "C:\projects\openstudio-server\gems"
 $env:GEM_PATH = "C:\projects\openstudio-server\gems;C:\projects\openstudio-server\gems\gems\bundler\gems"
+# Integration tests that run algo can only run on docker deployments. Setting BUILD_TYPE=test below skip algo tests. Only linux docker runs these tests  
+$env:BUILD_TYPE = "test"
 
 Write-Host "RUBYLIB is: $env:RUBYLIB ; the PATH is: $env:Path ; the OPENSTUDIO_TEST_EXE is: $env:OPENSTUDIO_TEST_EXE"
 $iteration = 0
