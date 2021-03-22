@@ -43,7 +43,12 @@ class AdminController < ApplicationController
     oscli_cmd = "#{Utility::Oss.oscli_cmd} openstudio_version"
     oscli_cmd = "call #{oscli_cmd}" if Gem.win_platform? || ENV['OS'] == 'Windows_NT'
     version = `#{unset_vars} && #{oscli_cmd}`
+    Rails.logger.debug "oscli version command unset_vars #{unset_vars} #{oscli_cmd}"
     Rails.logger.debug "oscli version output: #{version}"
+    
+    version_default_shell  = `#{oscli_cmd}`
+    Rails.logger.debug "oscli version output default shell: #{version_default_shell}"
+    
     @os_cli = version ? version.strip : 'Unknown'
   end
 
