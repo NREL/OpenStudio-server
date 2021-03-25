@@ -6,7 +6,7 @@ ruby '~>2.7.0'
 # gem update --system 2.7.8
 # gem 'rubygems-update', '2.7.8'
 
-gem 'rails', '5.1.4'
+gem 'rails' 
 gem 'rake', '~> 13.0'
 
 # added for support of the project rakefile
@@ -14,20 +14,20 @@ gem 'colored'
 
 # data modules
 gem 'jbuilder'
-gem 'nokogiri', '~> 1.10.8'
-gem 'rubyzip', '~> 2.3.0'
+gem 'nokogiri'
+gem 'rubyzip'
 gem 'tzinfo-data'
 
 # database modules
-gem 'mongoid', '~> 7.2.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
-gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
-gem 'paperclip', '~> 4.3.7'
+gem 'mongoid'
+gem 'mongoid-paperclip' 
+gem 'paperclip'
 
 # R
 gem 'rserve-simpler'
 
 # net-*
-gem 'net-http-persistent', '< 3.0.0'
+gem 'net-http-persistent'
 gem 'net-scp'
 gem 'net-sftp'
 gem 'net-ssh'
@@ -55,8 +55,8 @@ gem 'sprockets-rails'
 gem 'uglifier'
 
 # don't try to install sassc 2.
-gem 'roo', '~>2.8.3'
-gem 'sassc', '~>1.12.1'
+gem 'roo'
+gem 'sassc'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
@@ -71,18 +71,18 @@ gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => '2
 
 ## End commonly updated gems
 
-gem 'openstudio-aws', '0.7.1'
+gem 'openstudio-aws'
 
 # libxml 3.2.0 failing on windows
-gem 'bson', '4.5.0' # bson 4.6.0 requires ruby >= 2.3.0
-gem 'libxml-ruby', '3.1.0'
-gem 'msgpack', '~> 1.0'
+gem 'bson' # bson 4.6.0 requires ruby >= 2.3.0
+gem 'libxml-ruby'
+gem 'msgpack'
 gem 'multi_json'
-gem 'nio4r', '~>2.3.1' # 2.4.0 breaks w/ruby 2.2.4
-gem 'rest-client', '~>2.0.1'
+gem 'nio4r'
+gem 'rest-client'
 
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
-gem 'rubyXL', '~> 3.3.29'
+gem 'rubyXL'
 
 # linux based js runtime libraries
 if RUBY_PLATFORM =~ /linux/
@@ -95,9 +95,9 @@ end
 
 # The only resque only is :docker, :docker-dev, :production
 group :development, :docker, :'docker-dev', :'docker-test', :production, :test do
-  gem 'redis', '=4.1.0'
-  gem 'redis-namespace', '=1.6.0'
-  gem 'resque', '=1.27.4'
+  gem 'redis'
+  gem 'redis-namespace'
+  gem 'resque'
   gem 'resque-web', require: 'resque_web'
 end
 
@@ -111,23 +111,23 @@ group :development, :test do
 
   gem 'capybara'
   gem 'coveralls', require: false
-  gem 'public_suffix', '=3.0.3'
+  gem 'public_suffix'
   gem 'puma' # used by capybara
-  gem 'rspec', '~> 3.4'
+  gem 'rspec'
   gem 'rspec-rails'
   gem 'rspec-retry'
-  gem 'ruby-prof', '~> 0.15'
+  gem 'ruby-prof'
   gem 'selenium-webdriver'
 
-  gem 'psych', '~> 3.1.0'
-  gem 'rubocop', '0.54.0'
-  gem 'rubocop-checkstyle_formatter', '0.4.0', require: false
-  gem 'rubocop-rspec', '1.26.0'
+  gem 'psych'
+  gem 'rubocop'
+  gem 'rubocop-checkstyle_formatter'
+  gem 'rubocop-rspec'
 
   gem 'ci_reporter'
-  gem 'factory_bot_rails', '4.11.1' # 5.0.2 require ruby 2.3
+  gem 'factory_bot_rails'
   gem 'mongoid-rspec'
-  gem 'rspec-html-matchers', '0.8.1'
+  gem 'rspec-html-matchers'
 
-  gem 'json-schema', '2.8.0'
+  gem 'json-schema'
 end
