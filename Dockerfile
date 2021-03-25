@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y wget gnupg \
         apt-transport-https \
         autoconf \
         bison \
+        shared-mime-info \
         build-essential \
         bzip2 \
         ca-certificates \

@@ -31,6 +31,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -51,6 +52,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
@@ -74,6 +76,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     volumes:
       - /mnt/openstudio
     depends_on:
@@ -107,6 +110,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
 volumes:
   osdata:
     external: true
