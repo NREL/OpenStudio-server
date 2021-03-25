@@ -17,7 +17,7 @@ else
     if [ "${ImageOS}" == "macos1015" ]; then
 
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
-        brew install pv tree coreutils
+        brew install pv tree coreutils shared-mime-info
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
