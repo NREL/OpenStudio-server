@@ -20,8 +20,10 @@ gem 'tzinfo-data'
 
 # database modules
 gem 'mongoid', '7.2.1'
-gem 'mongoid-paperclip' 
-gem 'paperclip'
+#gem 'mongoid-paperclip' 
+#gem 'kt-paperclip', :github => 'ghiculescu/kt-paperclip', :ref => 'use-marcel'
+gem 'paperclip', :github => 'tijcolem/paperclip', :ref => 'fix/replace-mimemagic-with-marcel'
+#gem 'paperclip'
 
 # R
 gem 'rserve-simpler'
