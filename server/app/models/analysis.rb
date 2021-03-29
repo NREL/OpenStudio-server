@@ -36,7 +36,6 @@
 class Analysis
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mongoid::Paperclip
   include Mongoid::Attributes::Dynamic
 
   require 'delayed_job_mongoid'
@@ -78,9 +77,10 @@ class Analysis
   # Temp location for these vas
   field :samples, type: Integer
 
-  has_mongoid_attached_file :seed_zip,
-                            url: '/assets/analyses/:id/:style/:basename.:extension',
-                            path: "#{APP_CONFIG['server_asset_path']}/assets/analyses/:id/:style/:basename.:extension"
+  #TODO find replacement:
+  #has_mongoid_attached_file :seed_zip,
+  #                          url: '/assets/analyses/:id/:style/:basename.:extension',
+  #                          path: "#{APP_CONFIG['server_asset_path']}/assets/analyses/:id/:style/:basename.:extension"
 
   # Relationships
   belongs_to :project
@@ -104,7 +104,8 @@ class Analysis
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
-  validates_attachment_content_type :seed_zip, content_type: ['application/zip']
+  #TODO find replacement
+  #validates_attachment_content_type :seed_zip, content_type: ['application/zip']
 
   # Callbacks
   after_create :verify_uuid
