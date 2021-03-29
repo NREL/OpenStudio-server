@@ -21,7 +21,7 @@ gem 'tzinfo-data'
 # database modules
 gem 'mongoid', '7.2.1'
 #gem 'mongoid-paperclip' 
-gem 'mongoid-paperclip', :github => 'megatux/mongoid-paperclip', :ref => 'master'
+gem 'mongoid-paperclip', :github => 'tijcolem/mongoid-paperclip', :ref => 'master'
 gem 'kt-paperclip', :github => 'ghiculescu/kt-paperclip', :ref => 'use-marcel'
 #gem 'paperclip', :github => 'tijcolem/paperclip', :ref => 'fix/replace-mimemagic-with-marcel'
 #gem 'paperclip'
