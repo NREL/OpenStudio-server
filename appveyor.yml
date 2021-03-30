@@ -8,6 +8,7 @@ environment:
   OPENSTUDIO_VERSION_SHA: 83b05b54a0
   OPENSTUDIO_VERSION_EXT: "-alpha"
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+  BUILD_TYPE: "test"
 
 artifacts:
   - path: 'export/*.tar.gz' #relative to root of repo
