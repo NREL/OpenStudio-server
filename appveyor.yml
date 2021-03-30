@@ -9,7 +9,7 @@ environment:
   OPENSTUDIO_VERSION_EXT: "-alpha"
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
   BUILD_TYPE: "test"
-
+  SKIP_COVERALLS: "true"
 artifacts:
   - path: 'export/*.tar.gz' #relative to root of repo
     name: oss.tar.gz
