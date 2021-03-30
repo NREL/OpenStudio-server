@@ -78,7 +78,7 @@ gem 'openstudio-aws'
 
 # libxml 3.2.0 failing on windows
 gem 'bson' # bson 4.6.0 requires ruby >= 2.3.0
-gem 'libxml-ruby'
+#gem 'libxml-ruby'
 gem 'msgpack'
 gem 'multi_json'
 gem 'nio4r'
