@@ -35,6 +35,7 @@ services:
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SKIP_COVERALLS=true
     depends_on:
       - db
       - queue

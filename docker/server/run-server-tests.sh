@@ -22,6 +22,7 @@ done
 # Run only the algorithm specs. The other features/*_spec files should probably disappear and capybara/gecko
 # can be removed.
 cd /opt/openstudio/server && bundle exec rspec spec/features/openstudio_algo_spec.rb; (( exit_status = exit_status || $? ))
+cd /opt/openstudio/server && bundle exec rspec spec/features/openstudio_urbanopt_algo_spec.rb; (( exit_status = exit_status || $? ))
 #cd /opt/openstudio/server && bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
 
 exit $exit_status

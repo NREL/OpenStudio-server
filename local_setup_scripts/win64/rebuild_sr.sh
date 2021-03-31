@@ -9,7 +9,7 @@ docker image rm 127.0.0.1:5000/openstudio-server -f
 docker build . -t="127.0.0.1:5000/openstudio-server" --build-arg OPENSTUDIO_VERSION=3.1.0
 docker push 127.0.0.1:5000/openstudio-server
 cd docker/R
-docker image rm 127.0.0.1:5000/openstudio-rserve -f
+#docker image rm 127.0.0.1:5000/openstudio-rserve -f
 docker build . -t="127.0.0.1:5000/openstudio-rserve"
 docker push 127.0.0.1:5000/openstudio-rserve
 docker pull mongo:4.4.2
