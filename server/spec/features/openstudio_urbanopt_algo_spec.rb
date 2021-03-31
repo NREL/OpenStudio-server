@@ -105,7 +105,7 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/UrbanOpt_singlerun.json' 'http://#{@host}' -z 'UrbanOpt_NSGA' -a single_run"
+    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/URBANopt_singlerun.json' 'http://#{@host}' -z 'URBANopt_NSGA' -a single_run"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
