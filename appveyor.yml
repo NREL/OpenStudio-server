@@ -6,13 +6,14 @@ environment:
   OPENSTUDIO_VERSION_SHA: e165090621
   OPENSTUDIO_VERSION_EXT: ""
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+  BUILD_TYPE: "test" 
 
 artifacts:
   - path: 'export/*.tar.gz' #relative to root of repo
     name: oss.tar.gz
 
-# init:
-    # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#init:
+#     - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
@@ -35,6 +36,6 @@ test_script:
   - cmd: C:\projects\openstudio-server\ci\appveyor\build_package.cmd #artifact upload occurs before on_finish
 on_finish:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd

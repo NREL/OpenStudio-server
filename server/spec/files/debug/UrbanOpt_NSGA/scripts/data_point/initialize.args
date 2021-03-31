@@ -1,0 +1,8 @@
+[
+  "openstudio-workflow",
+  "NREL/openstudio-workflow-gem",
+  "develop",
+  "openstudio-extension",
+  "NREL/openstudio-extension-gem",
+  "develop"
+]

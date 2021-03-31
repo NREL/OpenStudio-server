@@ -20,8 +20,8 @@ gem 'tzinfo-data'
 
 # database modules
 gem 'mongoid', '~> 7.2.0' # mongoid 6.4.0 was released 3/12/18. breaks mongoid-paperclip.
-gem 'mongoid-paperclip', '~> 0.0.11', require: 'mongoid_paperclip'
-gem 'paperclip', '~> 4.3.7'
+gem 'mongoid-paperclip', :github => 'tijcolem/mongoid-paperclip', :ref => 'master'
+gem 'kt-paperclip', :github => 'ghiculescu/kt-paperclip', :ref => 'use-marcel'
 
 # R
 gem 'rserve-simpler'
@@ -61,10 +61,11 @@ gem 'sassc', '~>1.12.1'
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
-gem 'openstudio-workflow', '= 2.0.0'
-# gem 'openstudio-workflow', github: 'NREL/OpenStudio-workflow-gem', ref: 'c2ad7e012bc8a4b4de071a0cd752e84babdf1ee5'
+gem 'openstudio-workflow', '= 2.1.1'
 
-gem 'openstudio-analysis', '= 1.0.6'
+gem 'openstudio-analysis', '= 1.1.0.pre.rc1'
+
+gem 'urbanopt-cli', '= 0.5.1'
 
 ## End commonly updated gems
 

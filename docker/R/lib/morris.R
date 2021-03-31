@@ -97,10 +97,6 @@ clusterExport(cl,"varnames")
 clusterExport(cl,"rails_analysis_id")
 clusterExport(cl,"rails_sim_root_path")
 clusterExport(cl,"rails_ruby_bin_dir")
-clusterExport(cl,"rails_mongodb_name")
-clusterExport(cl,"rails_mongodb_ip")
-clusterExport(cl,"rails_run_filename")
-clusterExport(cl,"rails_create_dp_filename")
 clusterExport(cl,"rails_root_path")
 clusterExport(cl,"rails_host")
 clusterExport(cl,"r_scripts_path")
@@ -111,24 +107,13 @@ clusterExport(cl,"vardisplaynames")
 clusterEvalQ(cl,vardisplayfile(vardisplaynames))
 
 # Export functions for worker nodes
-source(paste(r_scripts_path,'create_and_run_datapoint_uniquegroups.R',sep='/'))
-clusterExport(cl,"create_and_run_datapoint_uniquegroups")
+#source the create_and_run_datapoint_uniquegroups.R to find the function create_and_run_datapoint
+source(paste(r_scripts_path, 'create_and_run_datapoint_uniquegroups.R', sep='/'))  
+clusterExport(cl,"create_and_run_datapoint") #function is always called create_and_run_datapoint
 clusterExport(cl,"check_run_flag")
 
-#f <- function(x){
-#  tryCatch(create_and_run_datapoint_uniquegroups(x),
-#            error=function(x){
-#              obj <- NULL
-#              for (i in 1:objDim) {
-#                obj[i] <- failed_f
-#              }
-#              print("create_and_run_datapoint_uniquegroups failed")
-#              return(obj)
-#            }
-#          )
-#}
 f <- function(x){
-  try(create_and_run_datapoint_uniquegroups(x), silent=TRUE)
+  try(create_and_run_datapoint(x), silent=TRUE) #function is always called create_and_run_datapoint
 }
 clusterExport(cl,"f")
 
@@ -156,8 +141,24 @@ if (debug_messages == 1) {
 if (check_boundary == 1) {
   print("check bounds")
   boundary_check <- logical(ncol(vars))
+  if (debug_messages == 1) {
+      print(paste("nrow(vars):",nrow(vars)))
+      print(paste("ncol(vars):",ncol(vars)))
+      print(paste("boundary_check:",boundary_check))
+      print(paste("logical(ncol(vars):",logical(ncol(vars))))
+  }
   for (i in 1:ncol(vars)){
-    boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+    if (is.nan(m$X[,i])) {
+      print(paste("m$X[,i] is NaN:",m$X[,i]))
+      print(paste("i:",i))
+    }
+    else {
+      boundary_check[i] <- all((signif(m$X[,i],4) <= maxes[i]) && (signif(m$X[,i],4) >= mins[i]))
+      if (debug_messages == 1) {
+        print(paste("i:",i))
+        print(paste("boundary_check[i]:",boundary_check[i]))
+      }
+    }
   }
   if(!all(boundary_check)){
     print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')

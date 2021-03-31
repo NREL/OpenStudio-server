@@ -80,6 +80,9 @@ ENV OS_BUNDLER_VERSION=2.1.0
 # Set the rails env var
 ENV RAILS_ENV $rails_env
 
+# extension gem testing
+#ENV FAVOR_LOCAL_GEMS 1
+
 #### OpenStudio Server Code
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 ADD /bin /opt/openstudio/bin

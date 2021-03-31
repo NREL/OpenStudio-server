@@ -114,6 +114,32 @@
 <table id="datapointtable" class="tablesorter table table-striped">
   <thead>
   <tr>
+    <th>docker_log Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @docker_log.gsub("\n", "</br>").html_safe unless @docker_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>resque_log Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @resque_log.gsub("\n", "</br>").html_safe unless @resque_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
     <th>Analysis Initialization Log: </th>
   </tr>
   </thead>

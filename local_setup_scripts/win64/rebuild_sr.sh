@@ -1,23 +1,22 @@
 #!/bin/bash -e
 cd ../..
 docker stack rm osserver || true
-
+while [ $(docker ps -q | wc -l) != 1 ]; do sleep 5; done
+sleep 5
 docker volume rm -f osdata || true
 docker volume rm -f dbdata || true
-
-while [ $(docker ps -q | wc -l) != 1 ]; do sleep 5; done
 docker image rm 127.0.0.1:5000/openstudio-server -f
-docker build . -t="127.0.0.1:5000/openstudio-server" --build-arg OPENSTUDIO_VERSION=3.0.1
+docker build . -t="127.0.0.1:5000/openstudio-server" --build-arg OPENSTUDIO_VERSION=3.1.0
 docker push 127.0.0.1:5000/openstudio-server
 cd docker/R
-docker image rm 127.0.0.1:5000/openstudio-rserve -f
+#docker image rm 127.0.0.1:5000/openstudio-rserve -f
 docker build . -t="127.0.0.1:5000/openstudio-rserve"
 docker push 127.0.0.1:5000/openstudio-rserve
-docker pull mongo:3.4.10
-docker tag mongo:3.4.10 127.0.0.1:5000/mongo
+docker pull mongo:4.4.2
+docker tag mongo:4.4.2 127.0.0.1:5000/mongo
 docker push 127.0.0.1:5000/mongo
-docker pull redis:4.0.6
-docker tag redis:4.0.6 127.0.0.1:5000/redis
+docker pull redis:6.0.9
+docker tag redis:6.0.9 127.0.0.1:5000/redis
 docker push 127.0.0.1:5000/redis
 cd ../../local_setup_scripts/win64
 docker stack deploy osserver --compose-file=docker-compose.yml
