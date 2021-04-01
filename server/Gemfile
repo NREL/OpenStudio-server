@@ -65,7 +65,7 @@ gem 'openstudio-workflow', '= 2.1.1'
 
 gem 'openstudio-analysis', '= 1.1.0.pre.rc1'
 
-gem 'urbanopt-cli', '= 0.5.1'
+gem 'urbanopt-cli', '= 0.5.2'
 
 ## End commonly updated gems
 
