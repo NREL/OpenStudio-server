@@ -118,7 +118,7 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 920
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
