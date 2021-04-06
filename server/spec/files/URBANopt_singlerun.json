@@ -1,7 +1,7 @@
 {
   "analysis": {
-    "display_name": "URBANopt_NSGA",
-    "name": "URBANopt_NSGA",
+    "display_name": "URBANopt_singlerun",
+    "name": "URBANopt_singlerun",
     "urbanopt": true,
     "output_variables": [
       {

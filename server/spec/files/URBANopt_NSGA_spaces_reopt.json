@@ -16,7 +16,7 @@
         "report": "feature_reports",
         "report_id": "1",
         "reporting_periods": 0,
-        "var_name": "electricity",
+        "var_name": "electricity_kwh",
         "visualize": true,
         "export": true,
         "variable_type": "double"
@@ -33,7 +33,7 @@
         "report": "feature_reports",
         "report_id": "1",
         "reporting_periods": 0,
-        "var_name": "natural_gas",
+        "var_name": "natural_gas_kwh",
         "visualize": true,
         "export": true,
         "variable_type": "double"
@@ -51,7 +51,7 @@
         "report_id": "1",
         "reporting_periods": 0,
         "var_name": "end_uses",
-        "end_use": "electricity",
+        "end_use": "electricity_kwh",
         "end_use_category": "fans",
         "visualize": true,
         "export": true,
@@ -70,7 +70,7 @@
         "report_id": "highefficiency_scenario",
         "reporting_periods": 0,
         "var_name": "end_uses",
-        "end_use": "electricity",
+        "end_use": "electricity_kwh",
         "end_use_category": "fans",
         "visualize": true,
         "export": true,
@@ -366,9 +366,6 @@
     "run_workflow_timeout": 28800,
     "upload_results_timeout": 28800,
     "initialize_worker_timeout": 28800,
-    "server_scripts": {
-      "worker_initialization": "./scripts/worker_initialization/initialize.sh"
-    },
     "feature_file": "example_project",
     "scenario_file": "highefficiency_scenario",
     "urbanopt_variables": [
