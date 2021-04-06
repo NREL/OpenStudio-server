@@ -66,8 +66,8 @@ gem 'sassc'
 
 gem 'openstudio-workflow', '= 2.2.0'
 
-gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => '270'
-#gem 'openstudio-analysis', '= 1.1.0.pre.rc1'
+#gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => '270'
+gem 'openstudio-analysis', '= 1.2.0'
 
 #gem 'urbanopt-cli', '= 0.5.0'
 #gem 'urbanopt-reporting', '= 0.3.2'
