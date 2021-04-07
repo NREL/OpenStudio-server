@@ -104,7 +104,24 @@ module DjJobs
       if !File.exist?(feature_file)
         raise "feature_file does not exist: #{feature_file}"
       end
+      scenario_file_override = "#{simulation_dir}/urbanopt/scenario_file_override.json"
       scenario_file = "#{simulation_dir}/urbanopt/#{@data_point.analysis.scenario_file}.csv"
+      #check if scenario_file_override exists
+      if File.exist?(scenario_file_override)
+        @sim_logger.info "found scenario_file_override.json file, parsing"
+        #parse file and look for scenario file
+        scenario_parse = JSON.parse(File.read(scenario_file_override), symbolize_names: true)
+        if scenario_parse['scenario_file'.to_sym]
+          if File.exist?("#{simulation_dir}/urbanopt/#{scenario_parse['scenario_file'.to_sym]}.csv")
+            @sim_logger.info "replacing scenario_file with #{simulation_dir}/urbanopt/#{scenario_parse['scenario_file'.to_sym]}.csv"
+            scenario_file = "#{simulation_dir}/urbanopt/#{scenario_parse['scenario_file'.to_sym]}.csv"
+            @sim_logger.info "updating analysis model @data_point.analysis.scenario_file: #{@data_point.analysis.scenario_file} to #{scenario_parse['scenario_file'.to_sym]}"
+            @data_point.analysis.scenario_file = scenario_parse['scenario_file'.to_sym]
+          end
+        else 
+          raise ":scenario_file does not exist in: #{scenario_file_override}"
+        end
+      end  
       if !File.exist?(scenario_file)
         raise "scenario_file does not exist: #{scenario_file}"
       end
@@ -184,7 +201,7 @@ module DjJobs
                 if variable[:report_id] && variable[:reporting_periods] && variable[:var_name]
                   @sim_logger.info "found variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                   #get feature_reports results
-                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/default_scenario_report.json"
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/default_scenario_report.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                     report_index = uo_result[variable[:report].to_sym].index {|h| h[:id] == variable[:report_id].to_s } if uo_result[variable[:report].to_sym]
@@ -232,7 +249,7 @@ module DjJobs
                 if variable[:reporting_periods] && variable[:var_name]
                   @sim_logger.info "found variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                   #get feature_reports results
-                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/default_scenario_report.json"
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/default_scenario_report.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                     if !uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].nil? #reporting_periods exist
@@ -341,9 +358,9 @@ module DjJobs
 
         #copy results to "#{simulation_dir}/urbanopt/run/reports/*"
         reports_dir = "#{simulation_dir}/reports/"
-        @sim_logger.info "copying #{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/*.{html,json,csv} to #{reports_dir}"
+        @sim_logger.info "copying #{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/*.{html,json,csv} to #{reports_dir}"
         FileUtils.mkdir_p reports_dir unless Dir.exist? reports_dir
-        Dir["#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/*.{html,json,csv}"].each { |file| FileUtils.cp(file, reports_dir) }
+        Dir["#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/*.{html,json,csv}"].each { |file| FileUtils.cp(file, reports_dir) }
         
         #zip reports
         @sim_logger.info "zipping up: #{simulation_dir}/urbanopt/run"
