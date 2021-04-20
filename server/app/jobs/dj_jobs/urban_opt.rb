@@ -267,7 +267,16 @@ module DjJobs
                             raise "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
                             @sim_logger.error "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
                           end
-                        else #not end_uses
+                      #check for comfort_result
+                        elsif variable[:var_name] == "comfort_result"
+                          if variable[:comfort_result_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:comfort_result_category].to_sym)
+                            results[variable[:name].split(".")[0]] = { "#{variable[:var_name]}_#{variable[:comfort_result_category]}".to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:comfort_result_category].to_sym], "applicable" => true }
+                          else
+                            raise "MISSING output variable[:comfort_result_category]:#{variable[:comfort_result_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                            @sim_logger.error "MISSING output variable[:comfort_result_category]:#{variable[:comfort_result_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                          end
+                      #not end_uses  
+                        else
                           results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
                         end
                       else

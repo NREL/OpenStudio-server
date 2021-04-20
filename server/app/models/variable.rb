@@ -81,6 +81,7 @@ class Variable
   field :var_name, type: String, default: ''              # UrbanOpt output name, ex natural_gas
   field :end_use, type: String, default: ''               # UrbanOpt output end_uses, ex electricity, natural_gas, district_cooling, etc
   field :end_use_category, type: String, default: ''      # UrbanOpt output end_use category, ex heating, cooling, fans, etc
+  field :comfort_result_category, type: String, default: '' # UrbanOpt output comfort_result_category, ex time_setpoint_not_met_during_occupied_cooling
     
   # Relationships
   belongs_to :analysis, index: true
@@ -136,6 +137,12 @@ class Variable
         else
           raise "var_name == end_uses but end_use and end_use_category are missing. check OSA output_variables"
         end
+      elsif json['var_name'] == 'comfort_result'              #if var_name is comfort_result then name is uuid.comfort_result_comfort_result_category
+        if json['comfort_result_category']
+          json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}_#{json['comfort_result_category']}"
+        else
+          raise "var_name == comfort_result but comfort_result and comfort_result_category are missing. check OSA output_variables"
+        end      
       else
         json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}"    
       end
