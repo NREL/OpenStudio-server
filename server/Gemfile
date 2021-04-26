@@ -19,6 +19,7 @@ gem 'rubyzip', '~> 2.3.0'
 gem 'tzinfo-data', '~>1.2021.1'
 
 # database modules
+
 gem 'mongoid', '7.2.1'
 #gem 'mongoid-paperclip' 
 # forked gem is neccessary as mongoid-paperclip relies on mimemagic which now requires freedesktop.org.xml at run time"
@@ -72,6 +73,7 @@ gem 'openstudio-analysis', '= 1.2.0'
 
 #gem 'urbanopt-cli', '= 0.5.0'
 #gem 'urbanopt-reporting', '= 0.3.2'
+
 
 ## End commonly updated gems
 

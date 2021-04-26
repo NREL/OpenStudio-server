@@ -70,7 +70,7 @@ jobs:
         BUILD_TYPE: integration
         SKIP_URBANOPT_ALGO: True # Set this when excluding urbanopt-cli gem from server. 
     - name: logs
-      if: ${{ failure() }} 
+      if: ${{ failure() }}  
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
     - name: build gem package
@@ -96,7 +96,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=develop
+          export OPENSTUDIO_TAG=3.1.0
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all
@@ -114,7 +114,7 @@ jobs:
         BUILD_TYPE: docker
         COMPOSE_INTERACTIVE_NO_CLI: 1
     - name: logs
-      if: ${{ failure() }} 
+      if: ${{ failure() }}  
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
     - name: docker-upload
