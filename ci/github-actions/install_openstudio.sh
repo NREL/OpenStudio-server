@@ -16,7 +16,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # copying this from the docker-openstudio dockerfile
     apt-get update && apt-get install -y curl vim gdebi-core libgmp-dev libffi-dev build-essential zlib1g-dev vim git locales sudo
     #export OPENSTUDIO_DOWNLOAD_URL=https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}/$OPENSTUDIO_DOWNLOAD_FILENAME
-    export OPENSTUDIO_DOWNLOAD_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/$OPENSTUDIO_DOWNLOAD_FILENAME
+    export OPENSTUDIO_DOWNLOAD_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/3_2_0_rc/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     echo "OpenStudio Package Download URL is ${OPENSTUDIO_DOWNLOAD_URL}"
     curl -SLO $OPENSTUDIO_DOWNLOAD_URL
