@@ -42,11 +42,13 @@ RSpec.describe 'Pages Exist', type: :feature do
     expect(page).to have_content 'OpenStudio Cloud Management Console'
   end
 
-  it 'Home and Status Page' do
-    get '/status.json'
+  describe 'GET /status.json' do
+    before { get "/status.json" }
 
-    expect(response).to be_success
-    expect(json['status']['awake']).not_to be_nil
+    it 'get status' do
+      expect(json).not_to be_empty
+      expect(json['status']['awake']).not_to be_nil
+    end
   end
 
   it 'Admin page' do

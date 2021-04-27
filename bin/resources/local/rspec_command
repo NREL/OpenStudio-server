@@ -90,7 +90,7 @@ rspec_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/rspe
 if ENV['BUILD_TYPE'] == 'test'
   sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
   "\"**/models/cluster_spec.rb,**/features/*_algo_spec.rb\""
-elsif ENV['SKIP_URBANOPT_ALGO'] == 'True'
+elsif ENV['SKIP_URBANOPT_ALGO'] == 'true'
   sys_call = " \"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" \"#{rspec_path}\" --tag ~depends_r --tag ~depends_gecko --tag ~depends_resque --exclude-pattern "\
   "\"**/models/cluster_spec.rb,**/features/openstudio_urbanopt_algo_spec.rb\" "
 else

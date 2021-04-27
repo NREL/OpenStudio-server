@@ -59,7 +59,7 @@ HOST = '127.0.0.1'
 
 # For testing locally
 #META_CLI = File.absolute_path('C:\ParametricAnalysisTool-3.1.0\pat\OpenStudio-server\bin\openstudio_meta')
-#PROJECT = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
+#PROJECT = File.absolute_path(File.join(File.dirname(__FILE__), '../../files/'))
 #HOST = 'localhost:8080'
 ##require 'rspec'
 ##include RSpec::Matchers
@@ -105,7 +105,7 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/URBANopt_singlerun.json' 'http://#{@host}' -z 'URBANopt_NSGA' -a single_run"
+    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/UrbanOpt_singlerun.json' 'http://#{@host}' -z 'UrbanOpt_NSGA' -a single_run"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
