@@ -138,8 +138,19 @@ module DjJobs
         raise "UrbanOpt run returned error code #{$?.exitstatus}"
       end
 
-      #run uo-cli process           
-      cmd = "uo process --default --feature #{feature_file} --scenario #{scenario_file}"
+      #run uo-cli process
+      @sim_logger.info "Run ReOpt is: #{@data_point.analysis.reopt}"
+      if @data_point.analysis.reopt
+        reopt_type = @data_point.analysis.reopt_type
+        @sim_logger.info "reopt_type is: #{reopt_type}"
+        if ['scenario', 'feature'].include?(reopt_type)      
+          cmd = "uo process --reopt-#{reopt_type} --feature #{feature_file} --scenario #{scenario_file}"
+        else
+          @sim_logger.error "reopt_type is not scenario or feature"
+        end
+      else
+        cmd = "uo process --default --feature #{feature_file} --scenario #{scenario_file}"
+      end      
       #uo_process_log = File.join(simulation_dir, 'urbanopt_process.log')
       @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
       pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])
