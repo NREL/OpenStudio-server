@@ -71,6 +71,7 @@ end
 # Set obvious paths for start-local & run-analysis invocation
 mongod_exe = which('mongod')
 ruby_cmd = 'ruby'
+bundle_cmd = 'bundle exec ruby'
 meta_cli = File.absolute_path(File.join(File.dirname(__FILE__), '../../bin/openstudio_meta'))
 project = File.absolute_path(File.join(File.dirname(__FILE__), '../files/'))
 server_rspec_test_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../unit-test/'))
@@ -103,6 +104,8 @@ num_workers = 2
 ::ENV.delete 'BUNDLE_GEMFILE'
 ::ENV.delete 'RUBYOPT'
 
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../server/Gemfile', __dir__)
+
 # the actual tests
 RSpec.describe OpenStudioMeta do
   before :all do
@@ -115,7 +118,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run simple analysis' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{bundle_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/example_csv.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -178,7 +181,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run a complicated design alternative analysis set' do
     # run an analysis
-    command = "#{ruby_cmd} \"#{meta_cli}\" run_analysis \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{bundle_cmd} \"#{meta_cli}\" run_analysis \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true
