@@ -62,7 +62,7 @@ gem 'sassc', '~>1.12.1'
 ## Commonly update gems for testing and development
 
 gem 'openstudio-workflow', '= 2.1.1'
-
+gem 'openstudio-standards', '= 0.2.12'
 gem 'openstudio-analysis', '= 1.1.0.pre.rc1'
 
 gem 'urbanopt-cli', '= 0.5.2'

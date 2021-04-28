@@ -146,7 +146,8 @@ module DjJobs
         if ['scenario', 'feature'].include?(reopt_type)      
           cmd = "uo process --reopt-#{reopt_type} --feature #{feature_file} --scenario #{scenario_file}"
         else
-          @sim_logger.error "reopt_type is not scenario or feature"
+          @sim_logger.error "reopt_type is not scenario or feature its: #{reopt_type}"
+          raise "reopt_type is not scenario or feature its: #{reopt_type}"
         end
       else
         cmd = "uo process --default --feature #{feature_file} --scenario #{scenario_file}"
@@ -205,6 +206,8 @@ module DjJobs
           @data_point.analysis.output_variables.each do |variable|
             uo_result = {}
             report_index = nil
+            reports_file = variable[:report_file].to_s
+            @sim_logger.info "reports_file: #{reports_file} :#{variable[:report_file]}"
             if variable[:objective_function]
               @sim_logger.info "found variable[:objective_function]: #{variable[:objective_function]}"
               if variable[:report] == 'feature_reports'
@@ -212,7 +215,7 @@ module DjJobs
                 if variable[:report_id] && variable[:reporting_periods] && variable[:var_name]
                   @sim_logger.info "found variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                   #get feature_reports results
-                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/default_scenario_report.json"
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                     report_index = uo_result[variable[:report].to_sym].index {|h| h[:id] == variable[:report_id].to_s } if uo_result[variable[:report].to_sym]
@@ -248,8 +251,8 @@ module DjJobs
                       @sim_logger.error "Could not find the index for report id: #{variable[:report_id]} for report: #{variable[:report]}."
                     end                    
                   else
-                    raise "Could not find results #{uo_results_file}"
-                    @sim_logger.error "Could not find results #{uo_results_file}"
+                    raise "Could not find results file: #{uo_results_file}"
+                    @sim_logger.error "Could not find results file: #{uo_results_file}"
                   end
                 else
                   raise "MISSING output variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
@@ -259,8 +262,8 @@ module DjJobs
                 @sim_logger.info "found variable[:report]: #{variable[:report]}"
                 if variable[:reporting_periods] && variable[:var_name]
                   @sim_logger.info "found variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
-                  #get feature_reports results
-                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/default_scenario_report.json"
+                  #get scenario_report results
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                     if !uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].nil? #reporting_periods exist
@@ -299,8 +302,8 @@ module DjJobs
                       @sim_logger.error "Could not find output reporting period: #{variable[:reporting_periods]}."
                     end
                   else
-                    raise "Could not find results #{uo_results_file}"
-                    @sim_logger.error "Could not find results #{uo_results_file}"
+                    raise "Could not find results file: #{uo_results_file}"
+                    @sim_logger.error "Could not find results file: #{uo_results_file}"
                   end
                 else
                   raise "MISSING output variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
