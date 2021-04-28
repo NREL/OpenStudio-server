@@ -204,10 +204,15 @@ module DjJobs
           # Save the objective functions
         if @data_point.analysis.output_variables
           @data_point.analysis.output_variables.each do |variable|
+            @sim_logger.info "VARIABLE: #{variable}"
             uo_result = {}
             report_index = nil
-            reports_file = variable[:report_file].to_s
+            reports_file = variable[:report_file]
             @sim_logger.info "reports_file: #{reports_file} :#{variable[:report_file]}"
+            if reports_file.nil? 
+              @sim_logger.error "reports_file is missing from output_variable: #{variable[:name]}."
+              raise "reports_file is missing from output_variable: #{variable[:name]}"
+            end
             if variable[:objective_function]
               @sim_logger.info "found variable[:objective_function]: #{variable[:objective_function]}"
               if variable[:report] == 'feature_reports'
