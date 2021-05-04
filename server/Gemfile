@@ -38,7 +38,7 @@ gem 'net-sftp', '~> 3.0.0'
 gem 'net-ssh', '~> 6.1.0'
 
 # other useful gems
-gem 'parallel', '~> 1.20.1'
+gem 'parallel', '~> 1.19.1'
 gem 'sys-filesystem', '~> 1.4.1'
 
 # web ui
