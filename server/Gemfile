@@ -117,7 +117,7 @@ group :development, :test do
   gem 'meta_request', '~> 0.7.2'
 
   gem 'capybara', '~> 3.35.3'
-  gem 'coveralls', '~>  0.7.1', require: false
+  gem 'coveralls', '0.7.1', require: false
   gem 'public_suffix', '~> 4.0.6'
   gem 'puma', '~> 5.2.2' # used by capybara
   gem 'rspec', '~> 3.10.0'
