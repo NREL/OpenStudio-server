@@ -38,7 +38,7 @@ gem 'net-sftp', '~> 3.0.0'
 gem 'net-ssh', '~> 6.1.0'
 
 # other useful gems
-gem 'parallel', '~> 1.20.1'
+gem 'parallel', '~> 1.19.1'
 gem 'sys-filesystem', '~> 1.4.1'
 
 # web ui
@@ -71,8 +71,8 @@ gem 'openstudio-workflow', '= 2.2.0'
 #gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => '270'
 gem 'openstudio-analysis', '= 1.2.0'
 
-#gem 'urbanopt-cli', '= 0.5.0'
-#gem 'urbanopt-reporting', '= 0.3.2'
+gem 'urbanopt-cli', '= 0.6.0'
+gem 'urbanopt-reporting', '= 0.4.0'
 
 
 ## End commonly updated gems
@@ -117,7 +117,7 @@ group :development, :test do
   gem 'meta_request', '~> 0.7.2'
 
   gem 'capybara', '~> 3.35.3'
-  gem 'coveralls', '~>  0.7.1', require: false
+  gem 'coveralls', '0.7.1', require: false
   gem 'public_suffix', '~> 4.0.6'
   gem 'puma', '~> 5.2.2' # used by capybara
   gem 'rspec', '~> 3.10.0'

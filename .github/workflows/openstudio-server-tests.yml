@@ -11,8 +11,8 @@ on: [push, pull_request]
 env:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.2.0 
-  OPENSTUDIO_VERSION_SHA: 2249bb4700
-  OPENSTUDIO_VERSION_EXT: "-rc1"
+  OPENSTUDIO_VERSION_SHA: e11f0a08b2
+  OPENSTUDIO_VERSION_EXT: ""
   DOCKER_COMPOSE_VERSION: 1.21.1
   BUNDLE_WITHOUT: native_ext
 
@@ -68,7 +68,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
-        SKIP_URBANOPT_ALGO: True # Set this when excluding urbanopt-cli gem from server. 
+        SKIP_URBANOPT_ALGO: false # Set this when excluding urbanopt-cli gem from server. 
     - name: logs
       if: ${{ failure() }}  
       shell: bash 
@@ -106,7 +106,7 @@ jobs:
           docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
           docker-compose -f docker-compose.test.yml up -d
           # set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
-          docker-compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
+          docker-compose exec -e SKIP_URBANOPT_ALGO=false -T web /usr/local/bin/run-server-tests
           docker-compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
       env: 
