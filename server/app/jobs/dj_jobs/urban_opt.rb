@@ -138,6 +138,27 @@ module DjJobs
         raise "UrbanOpt run returned error code #{$?.exitstatus}"
       end
 
+      #check run_status.json
+      run_status_json = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/run_status.json"
+      @sim_logger.info "run_status_json location: #{run_status_json}"
+      if File.exist?(run_status_json)
+        run_status_result = JSON.parse(File.read(run_status_json), symbolize_names: true)
+        if !run_status_result[:results].nil?
+          if run_status_result[:results].any?{|hash| hash[:status] == 'Failed'}
+            @sim_logger.error "run_status.json has failures: #{run_status_result}"
+            raise "run_status.json has failures: #{run_status_result}"
+          else
+            @sim_logger.info "run_status_json no Failed: #{run_status_result}"
+          end
+        else
+          @sim_logger.error "run_status.json does not have results: #{run_status_result}"
+          raise "run_status.json does not have results: #{run_status_result}"
+        end
+      else
+        @sim_logger.error "run_status.json does not exist at: #{run_status_json}"
+        raise "run_status.json does not exist at: #{run_status_json}"
+      end
+      
       #run uo-cli process
       @sim_logger.info "Run ReOpt is: #{@data_point.analysis.reopt}"
       if @data_point.analysis.reopt
@@ -202,6 +223,11 @@ module DjJobs
           #uo_results[:feature_reports][0][:reporting_periods][0][:natural_gas]
           #
           # Save the objective functions
+        analysis = Analysis.find(@data_point.analysis.id)  
+        objs = analysis.variables.where(objective_function: true)
+        @sim_logger.info "OBJECTIVEFUNCTIONS: #{objs}"
+        #if objs
+        #  objs.each do |variable|
         if @data_point.analysis.output_variables
           @data_point.analysis.output_variables.each do |variable|
             @sim_logger.info "VARIABLE: #{variable}"
