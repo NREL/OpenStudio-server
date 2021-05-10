@@ -85,9 +85,9 @@ gem 'rubyXL', '~> 3.3.29'
 
 # linux based js runtime libraries
 if RUBY_PLATFORM =~ /linux/
-  gem 'execjs'
+  gem 'execjs', '=2.7.0'
   gem 'libv8'
-  gem 'therubyracer'
+  gem 'therubyracer', '=0.12.3'
 elsif RUBY_PLATFORM =~ /darwin/
   gem 'execjs', github: 'NREL/execjs'
 end

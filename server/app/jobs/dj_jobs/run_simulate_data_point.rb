@@ -257,17 +257,17 @@ module DjJobs
             if File.exist? uo_simulation_log
               @sim_logger.info "UrbanOpt simulation output: #{File.read(uo_simulation_log)}"
             else
-               @sim_logger.warn "UrbanOpt simulation output: #{uo_simulation_log} does not exist"            
+              @sim_logger.warn "UrbanOpt simulation output: #{uo_simulation_log} does not exist"            
             end
             if File.exist? uo_process_log
               @sim_logger.info "UrbanOpt process output: #{File.read(uo_process_log)}"
             else
-               @sim_logger.warn "UrbanOpt process output: #{uo_process_log} does not exist"
+              @sim_logger.warn "UrbanOpt process output: #{uo_process_log} does not exist"
             end
             if File.exist? process_log
               @sim_logger.info "OSCLI output: #{File.read(process_log)}"
             else
-               @sim_logger.warn "OSCLI output: #{process_log} does not exist"
+              @sim_logger.warn "OSCLI output: #{process_log} does not exist"
             end
             #docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
             #if File.exist? docker_log
