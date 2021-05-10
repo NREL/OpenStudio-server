@@ -139,7 +139,7 @@ module DjJobs
       end
 
       #check run_status.json
-      run_status_json = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/run_status.json"
+      run_status_json = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/run_status.json"
       @sim_logger.info "run_status_json location: #{run_status_json}"
       if File.exist?(run_status_json)
         run_status_result = JSON.parse(File.read(run_status_json), symbolize_names: true)
