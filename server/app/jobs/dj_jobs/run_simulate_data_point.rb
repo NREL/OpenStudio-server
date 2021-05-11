@@ -254,17 +254,17 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
-            if File.exist? uo_simulation_log
+            if (!uo_simulation_log.nil? && File.exist?(uo_simulation_log))
               @sim_logger.info "UrbanOpt simulation output: #{File.read(uo_simulation_log)}"
             else
               @sim_logger.warn "UrbanOpt simulation output: #{uo_simulation_log} does not exist"            
             end
-            if File.exist? uo_process_log
+            if (!uo_process_log.nil? && File.exist?(uo_process_log))
               @sim_logger.info "UrbanOpt process output: #{File.read(uo_process_log)}"
             else
               @sim_logger.warn "UrbanOpt process output: #{uo_process_log} does not exist"
             end
-            if File.exist? process_log
+            if (!process_log.nil? && File.exist?(process_log))
               @sim_logger.info "OSCLI output: #{File.read(process_log)}"
             else
               @sim_logger.warn "OSCLI output: #{process_log} does not exist"
