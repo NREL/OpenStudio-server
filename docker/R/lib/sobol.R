@@ -155,6 +155,7 @@ for (i in 1:ncol(vars)){
 }
 if(!all(boundary_check)){
   print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')
+  print(paste("boundary_check:",boundary_check))
   stop(options("show.error.messages"=TRUE),"SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run")
 }
 print("bounds are satisfied, continuing...")
