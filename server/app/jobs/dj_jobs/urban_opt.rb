@@ -162,6 +162,26 @@ module DjJobs
       #run uo-cli process
       @sim_logger.info "Run ReOpt is: #{@data_point.analysis.reopt}"
       if @data_point.analysis.reopt
+        #check for API key
+        #check ENV GEM_DEVELOPER_KEY
+        if !ENV['GEM_DEVELOPER_KEY'].empty?
+          @sim_logger.info "GEM_DEVELOPER_KEY is not empty"
+        #check reopt_key.txt file
+        elsif File.exist?("#{simulation_dir}/urbanopt/reopt_key.json")
+          @sim_logger.info "reopt_key.json is found"
+          key_json = JSON.parse(File.read("#{simulation_dir}/urbanopt/reopt_key.json"), symbolize_names: true)
+          ENV['GEM_DEVELOPER_KEY'] = key_json[:GEM_DEVELOPER_KEY]
+          if !ENV['GEM_DEVELOPER_KEY'].empty?
+            @sim_logger.info "GEM_DEVELOPER_KEY is not empty after reading reopt_key.json"
+          else 
+            @sim_logger.error "GEM_DEVELOPER_KEY is empty after reading reopt_key.json"
+            raise "GEM_DEVELOPER_KEY is empty after reading reopt_key.json"
+          end
+        else
+          @sim_logger.error "reopt_key.json is NOT found and ENV not set"
+          raise "reopt_key.txt is NOT found and ENV not set"
+        end
+        
         reopt_type = @data_point.analysis.reopt_type
         @sim_logger.info "reopt_type is: #{reopt_type}"
         if ['scenario', 'feature'].include?(reopt_type)      
