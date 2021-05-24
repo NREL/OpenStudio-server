@@ -79,6 +79,7 @@ class Variable
   field :report, type: String, default: 'scenario_report' # UrbanOpt output report name. either: scenario_report/feature_reports
   field :report_id, type: String, default: ''             # UrbanOpt output report :id. either scenario id name or feature report id number
   field :reporting_periods, type: Integer, default: 0     # UrbanOpt output reporting_periods array index
+  field :reopt_category, type: String, default: ''     # UrbanOpt output reopt_category 
   field :var_name, type: String, default: ''              # UrbanOpt output name, ex natural_gas
   field :end_use, type: String, default: ''               # UrbanOpt output end_uses, ex electricity, natural_gas, district_cooling, etc
   field :end_use_category, type: String, default: ''      # UrbanOpt output end_use category, ex heating, cooling, fans, etc
@@ -193,6 +194,7 @@ class Variable
     var['report'] = json['report'] if json['report']
     var['report_id'] = json['report_id'] if json['report_id']
     var['reporting_periods'] = json['reporting_periods'] if json['reporting_periods']
+    var['reopt_category'] = json['reopt_category'] if json['reopt_category']
     var['var_name'] = json['var_name'] if json['var_name']
     var['end_use'] = json['end_use'] if json['end_use']
     var['end_use_category'] = json['end_use_category'] if json['end_use_category']
