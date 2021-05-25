@@ -382,7 +382,8 @@ module DjJobs
                           @sim_logger.error "Could not find output reopt_category: #{variable[:reopt_category]}."
                         end
                      else
-                       @sim_logger.error "REopt Error: #{uo_result}."  
+                       @sim_logger.error "REopt Error: #{uo_result}."
+                       results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => @data_point.analysis.problem.algorithm.failed_f_value, "applicable" => true }                       
                      end   
                   else
                     #raise "Could not find results file: #{uo_results_file}"
