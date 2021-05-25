@@ -369,17 +369,21 @@ module DjJobs
                   uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
-                    if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].nil? #reopt_category exist
-                      if uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].has_key?(variable[:var_name].to_sym) #reopt_category has var_name?
-                          results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym], "applicable" => true }
-                      else
-                        #raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
-                        @sim_logger.error "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
-                      end
-                    else
-                      #raise "Could not find output reopt_category: #{variable[:reopt_category]}."
-                      @sim_logger.error "Could not find output reopt_category: #{variable[:reopt_category]}."
-                    end
+                      if uo_result[:outputs][:Scenario][:Site]
+                        if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].nil? #reopt_category exist
+                          if uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].has_key?(variable[:var_name].to_sym) #reopt_category has var_name?
+                              results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym], "applicable" => true }
+                          else
+                            raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
+                            @sim_logger.error "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
+                          end
+                        else
+                          raise "Could not find output reopt_category: #{variable[:reopt_category]}."
+                          @sim_logger.error "Could not find output reopt_category: #{variable[:reopt_category]}."
+                        end
+                     else
+                       @sim_logger.error "REopt Error: #{uo_result}."  
+                     end   
                   else
                     #raise "Could not find results file: #{uo_results_file}"
                     @sim_logger.error "Could not find results file: #{uo_results_file}"
