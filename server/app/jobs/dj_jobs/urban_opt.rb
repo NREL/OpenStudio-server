@@ -164,7 +164,7 @@ module DjJobs
       if @data_point.analysis.reopt
         #check for API key
         #check ENV GEM_DEVELOPER_KEY
-        if !ENV['GEM_DEVELOPER_KEY'].empty?
+        if !ENV['GEM_DEVELOPER_KEY'].nil? && !ENV['GEM_DEVELOPER_KEY'].empty?
           @sim_logger.info "GEM_DEVELOPER_KEY is not empty"
         #check reopt_key.txt file
         elsif File.exist?("#{simulation_dir}/urbanopt/reopt_key.json")
