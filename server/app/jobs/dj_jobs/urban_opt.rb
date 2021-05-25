@@ -369,7 +369,7 @@ module DjJobs
                   uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
-                      if uo_result[:outputs][:Scenario][:Site]
+                      if uo_result[0].nil?  #this checks if reopt json is formatted correctly
                         if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].nil? #reopt_category exist
                           if uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].has_key?(variable[:var_name].to_sym) #reopt_category has var_name?
                               results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym], "applicable" => true }
