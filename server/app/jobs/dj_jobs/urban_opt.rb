@@ -366,7 +366,7 @@ module DjJobs
                 if variable[:reopt_category] && variable[:var_name]
                   @sim_logger.info "found variable[:reopt_category]:#{variable[:reopt_category]}, variable[:var_name]: #{variable[:var_name]}."
                   #get scenario_report results
-                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/reopt/scenario_report_#{@data_point.analysis.scenario_file.downcase}_reopt_run.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                       if uo_result[0].nil?  #this checks if reopt json is formatted correctly
