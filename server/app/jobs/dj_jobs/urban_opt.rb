@@ -368,11 +368,13 @@ module DjJobs
                   #get scenario_report results
                   uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/reopt/scenario_report_#{@data_point.analysis.scenario_file.downcase}_reopt_run.json"
                   if File.exist? uo_results_file
+                  @sim_logger.info "found REopt output json file"
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                       if uo_result[0].nil?  #this checks if reopt json is formatted correctly
                         if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].nil? #reopt_category exist
                           if uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].has_key?(variable[:var_name].to_sym) #reopt_category has var_name?
                               results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym], "applicable" => true }
+                              @sim_logger.info "setting results to: #{uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym]}"
                           else
                             raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
                             @sim_logger.error "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
@@ -428,11 +430,10 @@ module DjJobs
               else
                 #make raise an option to continue with failures??
                 #raise "No results for objective function #{variable[:name]}"
-                @sim_logger.error "No results for objective function #{variable[:name]} in #{__FILE__} at #{__LINE__}"
+                @sim_logger.error "No results for objective function #{variable[:name]}"
                 objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
-                objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = nil
-                objective_functions["scaling_factor_#{variable[:objective_function_index] + 1}"] = nil
-                objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = nil
+                objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f
+                objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_group].to_f
               end
             end
           end
