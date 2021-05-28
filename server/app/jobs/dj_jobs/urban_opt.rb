@@ -407,7 +407,12 @@ module DjJobs
               # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity=>39869197.34679705, :applicable=>true},:'uuid'...}
               if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
                 #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]  #no end_uses
-                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym]  #end_uses_end_use_category
+                if !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
+                  objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym]  #end_uses_end_use_category
+                else
+                  objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
+                  @sim_logger.error "No results for objective function #{variable[:name]} from REopt results.  results are NULL"
+                end                
                 if variable[:objective_function_target]
                   @sim_logger.info "Found objective function target for #{variable[:name]}"
                   objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f
@@ -424,7 +429,7 @@ module DjJobs
                 #make raise an option to continue with failures??
                 #raise "No results for objective function #{variable[:name]}"
                 @sim_logger.error "No results for objective function #{variable[:name]} in #{__FILE__} at #{__LINE__}"
-                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = Float::MAX
+                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
                 objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = nil
                 objective_functions["scaling_factor_#{variable[:objective_function_index] + 1}"] = nil
                 objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = nil
