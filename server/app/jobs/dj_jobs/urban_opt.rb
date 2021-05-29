@@ -409,7 +409,7 @@ module DjJobs
               # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity=>39869197.34679705, :applicable=>true},:'uuid'...}
               if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
                 #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]  #no end_uses
-                if !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
+                if !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].empty?
                   objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym]  #end_uses_end_use_category
                 else
                   objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
