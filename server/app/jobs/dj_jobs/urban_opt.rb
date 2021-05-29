@@ -373,8 +373,13 @@ module DjJobs
                       if uo_result[0].nil?  #this checks if reopt json is formatted correctly
                         if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].nil? #reopt_category exist
                           if uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].has_key?(variable[:var_name].to_sym) #reopt_category has var_name?
+                            if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym].nil?
                               results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym], "applicable" => true }
                               @sim_logger.info "setting results to: #{uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym]}"
+                            else
+                              results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => @data_point.analysis.problem['algorithm']['failed_f_value'], "applicable" => true }
+                              @sim_logger.error "setting results to FAILED_F_VALUE: #{@data_point.analysis.problem['algorithm']['failed_f_value']}"
+                            end                             
                           else
                             raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
                             @sim_logger.error "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
@@ -409,7 +414,7 @@ module DjJobs
               # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity=>39869197.34679705, :applicable=>true},:'uuid'...}
               if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
                 #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]  #no end_uses
-                if !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].empty?
+                if !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].present?
                   objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym]  #end_uses_end_use_category
                 else
                   objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
