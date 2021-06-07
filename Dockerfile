@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y wget gnupg \
         libice-dev \
         libsm-dev \
         mongodb-database-tools \
+        nodejs \
         procps \
         python-numpy \
         python3-numpy \
