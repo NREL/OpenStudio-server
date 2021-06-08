@@ -246,7 +246,6 @@ module DjJobs
           # Save the objective functions
         analysis = Analysis.find(@data_point.analysis.id)  
         objs = analysis.variables.where(objective_function: true)
-        @sim_logger.info "OBJECTIVEFUNCTIONS: #{objs}"
         #if objs
         #  objs.each do |variable|
         if @data_point.analysis.output_variables
@@ -278,7 +277,9 @@ module DjJobs
                           if variable[:var_name] == "end_uses" #check end_uses and category exist
                             if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
                               if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
-                                results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                                results[variable[:name].split(/\./)[0].to_sym] = {}
+                                results[variable[:name].split(/\./)[0].to_sym]["#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym] = uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym]
+                                results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                               else
                                 raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
                                 @sim_logger.error "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
@@ -288,7 +289,9 @@ module DjJobs
                               @sim_logger.error "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
                             end
                           else  #not end_uses
-                            results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                            results[variable[:name].split(/\./)[0].to_sym] = {}
+                            results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                            results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                           end
                         else
                           raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reporting period: #{variable[:reporting_periods]}."
@@ -324,7 +327,10 @@ module DjJobs
                         if variable[:var_name] == "end_uses"
                           if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
                             if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
-                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                              @sim_logger.info 'setting results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:end_use]}_#{variable[:end_use_category]}'
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym]["#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym]
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                             else
                               raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
                               @sim_logger.error "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
@@ -336,14 +342,19 @@ module DjJobs
                       #check for comfort_result
                         elsif variable[:var_name] == "comfort_result"
                           if variable[:comfort_result_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:comfort_result_category].to_sym)
-                            results[variable[:name].split(".")[0]] = { "#{variable[:var_name]}_#{variable[:comfort_result_category]}".to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:comfort_result_category].to_sym], "applicable" => true }
+                            @sim_logger.info 'setting comfort_results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:var_name]}_#{variable[:comfort_result_category]}'
+                            results[variable[:name].split(/\./)[0].to_sym] = {}
+                            results[variable[:name].split(/\./)[0].to_sym]["#{variable[:var_name]}_#{variable[:comfort_result_category]}".to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:comfort_result_category].to_sym]
+                            results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                           else
                             raise "MISSING output variable[:comfort_result_category]:#{variable[:comfort_result_category]}, when output variable[:var_name]:#{variable[:var_name]}"
                             @sim_logger.error "MISSING output variable[:comfort_result_category]:#{variable[:comfort_result_category]}, when output variable[:var_name]:#{variable[:var_name]}"
                           end
                       #not end_uses  
                         else
-                          results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                          results[variable[:name].split(/\./)[0].to_sym] = {}
+                          results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                          results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                         end
                       else
                         raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reporting period: #{variable[:reporting_periods]}."
@@ -374,10 +385,14 @@ module DjJobs
                         if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].nil? #reopt_category exist
                           if uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].has_key?(variable[:var_name].to_sym) #reopt_category has var_name?
                             if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym].nil?
-                              results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym], "applicable" => true }
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym]
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                               @sim_logger.info "setting results to: #{uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym]}"
                             else
-                              results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => @data_point.analysis.problem['algorithm']['failed_f_value'], "applicable" => true }
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = @data_point.analysis.problem['algorithm']['failed_f_value']
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                               @sim_logger.error "setting results to FAILED_F_VALUE: #{@data_point.analysis.problem['algorithm']['failed_f_value']}"
                             end                             
                           else
@@ -390,8 +405,10 @@ module DjJobs
                         end
                      else
                        @sim_logger.error "REopt Error: #{uo_result}."
-                       results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => @data_point.analysis.problem['algorithm']['failed_f_value'], "applicable" => true }                       
-                     end   
+                       results[variable[:name].split(/\./)[0].to_sym] = {}
+                       results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = @data_point.analysis.problem['algorithm']['failed_f_value']
+                       results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
+                     end
                   else
                     #raise "Could not find results file: #{uo_results_file}"
                     @sim_logger.error "Could not find results file: #{uo_results_file}"
@@ -410,15 +427,17 @@ module DjJobs
               @sim_logger.info "Looking in output variable #{variable[:name]} for objective function [#{variable[:report]}][#{variable[:report_id]}]{#{variable[:reporting_periods]}}[#{variable[:var_name]}]"
 
               # look for the objective function key and make sure that it is not nil. False is an okay obj function.
+              # this is similiar code to whats in workflow-gem but not called because of non-OS workflow.
               # check if "#{variable[:end_use]}_#{variable[:end_use_category]}" == variable[:name] somewhere??  -BLB
-              # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity=>39869197.34679705, :applicable=>true},:'uuid'...}
-              if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
-                #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]  #no end_uses
-                if !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].present?
-                  objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym]  #end_uses_end_use_category
+              # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity_kwh=>39869197.34679705, :applicable=>true},:'uuid'...}
+              if !variable[:name].split(/\./)[0].nil? && !variable[:name].split(/\./)[1].nil? && !results[variable[:name].split(/\./)[0].to_sym].nil? && !results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym].nil?
+                #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(/\./)[0]][variable[:var_name].to_sym]  #no end_uses
+                if results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym].present?
+                  @sim_logger.info "setting objective function #{variable[:name]} to: #{results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym]}"
+                  objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym]  #end_uses_end_use_category
                 else
                   objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
-                  @sim_logger.error "No results for objective function #{variable[:name]} from REopt results.  results are NULL"
+                  @sim_logger.error "No results for objective function #{variable[:name]}. results are NULL/not present.  most likely REopt error."
                 end                
                 if variable[:objective_function_target]
                   @sim_logger.info "Found objective function target for #{variable[:name]}"
