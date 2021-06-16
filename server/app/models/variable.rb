@@ -84,6 +84,7 @@ class Variable
   field :end_use, type: String, default: ''               # UrbanOpt output end_uses, ex electricity, natural_gas, district_cooling, etc
   field :end_use_category, type: String, default: ''      # UrbanOpt output end_use category, ex heating, cooling, fans, etc
   field :comfort_result_category, type: String, default: '' # UrbanOpt output comfort_result_category, ex time_setpoint_not_met_during_occupied_cooling
+  field :distributed_generation_category, type: String, default: '' # UrbanOpt output distributed_generation_category, ex total_solar_pv_kw
     
   # Relationships
   belongs_to :analysis, index: true
@@ -144,7 +145,13 @@ class Variable
           json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}_#{json['comfort_result_category']}"
         else
           raise "var_name == comfort_result but comfort_result and comfort_result_category are missing. check OSA output_variables"
-        end      
+        end
+      elsif json['var_name'] == 'distributed_generation'              #if var_name is distributed_generation then name is uuid.distributed_generation_distributed_generation_category
+        if json['distributed_generation_category']
+          json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}_#{json['distributed_generation_category']}"
+        else
+          raise "var_name == distributed_generation but distributed_generation and distributed_generation_category are missing. check OSA output_variables"
+        end        
       else
         json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}"    
       end
@@ -198,7 +205,8 @@ class Variable
     var['var_name'] = json['var_name'] if json['var_name']
     var['end_use'] = json['end_use'] if json['end_use']
     var['end_use_category'] = json['end_use_category'] if json['end_use_category']
-    
+    var['comfort_result_category'] = json['comfort_result_category'] if json['comfort_result_category']
+    var['distributed_generation_category'] = json['distributed_generation_category'] if json['distributed_generation_category']
     var.save!
     logger.info("output variable: '#{var.to_json}'")
     var

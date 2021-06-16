@@ -315,7 +315,7 @@ module DjJobs
                 end
               elsif variable[:report] == 'scenario_report'
                 @sim_logger.info "found variable[:report]: #{variable[:report]}"
-                if variable[:reporting_periods] && variable[:var_name]
+                if (variable[:reporting_periods] && variable[:var_name])
                   @sim_logger.info "found variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                   #get scenario_report results
                   uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
@@ -327,7 +327,7 @@ module DjJobs
                         if variable[:var_name] == "end_uses"
                           if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
                             if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
-                              @sim_logger.info 'setting results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:end_use]}_#{variable[:end_use_category]}'
+                              @sim_logger.info "setting results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:end_use]}_#{variable[:end_use_category]}"
                               results[variable[:name].split(/\./)[0].to_sym] = {}
                               results[variable[:name].split(/\./)[0].to_sym]["#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym]
                               results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
@@ -342,7 +342,7 @@ module DjJobs
                       #check for comfort_result
                         elsif variable[:var_name] == "comfort_result"
                           if variable[:comfort_result_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:comfort_result_category].to_sym)
-                            @sim_logger.info 'setting comfort_results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:var_name]}_#{variable[:comfort_result_category]}'
+                            @sim_logger.info "setting comfort_results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:var_name]}_#{variable[:comfort_result_category]}"
                             results[variable[:name].split(/\./)[0].to_sym] = {}
                             results[variable[:name].split(/\./)[0].to_sym]["#{variable[:var_name]}_#{variable[:comfort_result_category]}".to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:comfort_result_category].to_sym]
                             results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
@@ -364,6 +364,37 @@ module DjJobs
                       raise "Could not find output reporting period: #{variable[:reporting_periods]}."
                       @sim_logger.error "Could not find output reporting period: #{variable[:reporting_periods]}."
                     end
+                  else
+                    raise "Could not find results file: #{uo_results_file}"
+                    @sim_logger.error "Could not find results file: #{uo_results_file}"
+                  end
+                #no reporting_period  
+                elsif variable[:var_name]  #TODO add check on distributed_generation_category
+                  @sim_logger.info "found variable[:var_name]: #{variable[:var_name]} with NO REPORTING_PERIODS."
+                  #get scenario_report results
+                  #scenario_optimization.json
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
+                  if File.exist? uo_results_file
+                    uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
+
+                      if uo_result[variable[:report].to_sym].has_key?(variable[:var_name].to_sym) # has var_name?
+
+                            if variable[:distributed_generation_category] && uo_result[variable[:report].to_sym][variable[:var_name].to_sym].has_key?(variable[:distributed_generation_category].to_sym)
+                              @sim_logger.info "setting results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:var_name]}_#{variable[:distributed_generation_category]}"
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym]["#{variable[:var_name]}_#{variable[:distributed_generation_category]}".to_sym] = uo_result[variable[:report].to_sym][variable[:var_name].to_sym][variable[:distributed_generation_category].to_sym]
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
+                            else
+                              raise "MISSING output variable[:distributed_generation_category]:#{variable[:distributed_generation_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                              @sim_logger.error "MISSING output variable[:distributed_generation_category]:#{variable[:distributed_generation_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                            end
+
+
+                      else
+                        raise "Could not find output variable[:var_name]: #{variable[:var_name]}."
+                        @sim_logger.error "Could not find output variable[:var_name]: #{variable[:var_name]}."
+                      end
+                      
                   else
                     raise "Could not find results file: #{uo_results_file}"
                     @sim_logger.error "Could not find results file: #{uo_results_file}"
