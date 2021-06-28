@@ -265,9 +265,9 @@ module DjJobs
               @sim_logger.warn "UrbanOpt process output: #{uo_process_log} does not exist"
             end
             if (!process_log.nil? && File.exist?(process_log))
-              @sim_logger.info "OSCLI output: #{File.read(process_log)}"
+              @sim_logger.info "Oscli output: #{File.read(process_log)}"
             else
-              @sim_logger.warn "OSCLI output: #{process_log} does not exist"
+              @sim_logger.warn "Oscli output: #{process_log} does not exist"
             end
             #docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
             #if File.exist? docker_log
