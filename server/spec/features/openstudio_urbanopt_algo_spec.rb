@@ -256,10 +256,10 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
         }]
         
         objectives_round = [{  
-           objective_function_1: 19300000,
+           objective_function_1: 19000000,
            objective_function_target_1: 0,
            objective_function_group_1: 1,
-           objective_function_2: 21800000,
+           objective_function_2: 22000000,
            objective_function_target_2: 0,
            objective_function_group_2: 2,
            objective_function_3: 500000,
@@ -281,7 +281,11 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
           if key.to_s.include?("target") || key.to_s.include?("group")
             obj_json[key] = value.to_i
           else
-            obj_json[key] = value.round(-5)
+            if Math.log10(value) > 6
+              obj_json[key] = value.round(-6)
+            else
+              obj_json[key] = value.round(-5)
+            end            
           end
         end
         
