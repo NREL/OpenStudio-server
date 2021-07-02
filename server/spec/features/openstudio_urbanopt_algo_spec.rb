@@ -95,8 +95,8 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
         natural_gas_kwh: 21731513.8888 }
     ]
     single_run_round = [
-      { electricity_kwh: 19300000,
-        natural_gas_kwh: 21800000 }
+      { electricity_kwh: 19000000,
+        natural_gas_kwh: 22000000 }
     ]
     # setup bad results
     single_run_bad = [
@@ -118,7 +118,7 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
     analysis_id = analysis[:_id]
 
     status = 'queued'
-    timeout_seconds = 480
+    timeout_seconds = 920
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -231,7 +231,7 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
         end
         sim = sim_result.slice(:electricity_kwh, :natural_gas_kwh)
         expect(sim.size).to eq(2)
-        sim = sim.transform_values { |x| x.round(-5) }
+        sim = sim.transform_values { |x| x.round(-6) }
 
         compare = single_run_round.include?(sim)
         expect(compare).to be true
@@ -256,10 +256,10 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
         }]
         
         objectives_round = [{  
-           objective_function_1: 19300000,
+           objective_function_1: 19000000,
            objective_function_target_1: 0,
            objective_function_group_1: 1,
-           objective_function_2: 21800000,
+           objective_function_2: 22000000,
            objective_function_target_2: 0,
            objective_function_group_2: 2,
            objective_function_3: 500000,
@@ -281,7 +281,11 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
           if key.to_s.include?("target") || key.to_s.include?("group")
             obj_json[key] = value.to_i
           else
-            obj_json[key] = value.round(-5)
+            if Math.log10(value) > 6
+              obj_json[key] = value.round(-6)
+            else
+              obj_json[key] = value.round(-5)
+            end            
           end
         end
         
