@@ -75,12 +75,16 @@ class Variable
   field :mapper, type: String                             # UrbanOpt Mapper name
   field :uo_measure, type: String                         # UrbanOpt Measure name
   field :uo_variable, type: Boolean, default: false       # UrbanOpt variable flag
+  field :report_file, type: String, default: 'default_scenario_report' # UrbanOpt output report name. 
   field :report, type: String, default: 'scenario_report' # UrbanOpt output report name. either: scenario_report/feature_reports
   field :report_id, type: String, default: ''             # UrbanOpt output report :id. either scenario id name or feature report id number
   field :reporting_periods, type: Integer, default: 0     # UrbanOpt output reporting_periods array index
+  field :reopt_category, type: String, default: ''     # UrbanOpt output reopt_category 
   field :var_name, type: String, default: ''              # UrbanOpt output name, ex natural_gas
   field :end_use, type: String, default: ''               # UrbanOpt output end_uses, ex electricity, natural_gas, district_cooling, etc
   field :end_use_category, type: String, default: ''      # UrbanOpt output end_use category, ex heating, cooling, fans, etc
+  field :comfort_result_category, type: String, default: '' # UrbanOpt output comfort_result_category, ex time_setpoint_not_met_during_occupied_cooling
+  field :distributed_generation_category, type: String, default: '' # UrbanOpt output distributed_generation_category, ex total_solar_pv_kw
     
   # Relationships
   belongs_to :analysis, index: true
@@ -136,6 +140,18 @@ class Variable
         else
           raise "var_name == end_uses but end_use and end_use_category are missing. check OSA output_variables"
         end
+      elsif json['var_name'] == 'comfort_result'              #if var_name is comfort_result then name is uuid.comfort_result_comfort_result_category
+        if json['comfort_result_category']
+          json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}_#{json['comfort_result_category']}"
+        else
+          raise "var_name == comfort_result but comfort_result and comfort_result_category are missing. check OSA output_variables"
+        end
+      elsif json['var_name'] == 'distributed_generation'              #if var_name is distributed_generation then name is uuid.distributed_generation_distributed_generation_category
+        if json['distributed_generation_category']
+          json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}_#{json['distributed_generation_category']}"
+        else
+          raise "var_name == distributed_generation but distributed_generation and distributed_generation_category are missing. check OSA output_variables"
+        end        
       else
         json['name'] = "#{SecureRandom.uuid}.#{json['var_name']}"    
       end
@@ -180,14 +196,17 @@ class Variable
     var['objective_function_target'] = json['objective_function_target'] if json['objective_function_target']
     var['scaling_factor'] = json['scaling_factor'] if json['scaling_factor']
     var['objective_function_group'] = json['objective_function_group'] if json['objective_function_group']
-    #set these for UrbanOpt 
+    #set these for UrbanOpt
+    var.report_file = json['report_file'] if json['report_file']    
     var['report'] = json['report'] if json['report']
     var['report_id'] = json['report_id'] if json['report_id']
     var['reporting_periods'] = json['reporting_periods'] if json['reporting_periods']
+    var['reopt_category'] = json['reopt_category'] if json['reopt_category']
     var['var_name'] = json['var_name'] if json['var_name']
     var['end_use'] = json['end_use'] if json['end_use']
     var['end_use_category'] = json['end_use_category'] if json['end_use_category']
-    
+    var['comfort_result_category'] = json['comfort_result_category'] if json['comfort_result_category']
+    var['distributed_generation_category'] = json['distributed_generation_category'] if json['distributed_generation_category']
     var.save!
     logger.info("output variable: '#{var.to_json}'")
     var

@@ -156,7 +156,6 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
 
 COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/run-server-tests
-
 # Test adding the git repo to the container for coveralls
 # The #TEST# will be removed in the travis test script to be run in the test container
 #TEST#COPY .git /opt/openstudio/.git
