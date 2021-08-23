@@ -330,7 +330,7 @@ module DjJobs
           end
           if @data_point.analysis.download_osm
             @sim_logger.info 'downloading in.OSM'
-            report_file = "#{simulation_dir}/in.osm"
+            report_file = "#{run_dir}/in.osm"
             uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
           else
             @sim_logger.info "NOT downloading in.OSM since download_osm value is: #{@data_point.analysis.download_osm}"
