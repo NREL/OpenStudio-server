@@ -96,7 +96,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=3.3.0-alpha
+          export OPENSTUDIO_TAG=dev-3.3.0-alpha-d7017da0cd
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all
