@@ -101,6 +101,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run cli_test with -z arg', :cli_test, js: true do
     # setup expected results
     nsga_nrel = [
+      { electricity_consumption_cvrmse: 81.9164, 
+        electricity_consumption_nmbe: -84.8456, 
+        natural_gas_consumption_cvrmse: 42.5082, 
+        natural_gas_consumption_nmbe: 20.1261},
       { electricity_consumption_cvrmse: 82.2784,
         electricity_consumption_nmbe: -85.2081,
         natural_gas_consumption_cvrmse: 45.9709,
@@ -245,6 +249,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run spea_nrel analysis', :spea_nrel, js: true do
     # setup expected results
     spea_nrel = [
+      { electricity_consumption_cvrmse: 81.9164, 
+        electricity_consumption_nmbe: -84.8456, 
+        natural_gas_consumption_cvrmse: 42.5082, 
+        natural_gas_consumption_nmbe: 20.1261 },
       { electricity_consumption_cvrmse: 82.2784,
         electricity_consumption_nmbe: -85.2081,
         natural_gas_consumption_cvrmse: 45.9709,
@@ -374,6 +382,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run pso analysis', :pso, js: true do
     # setup expected results
     pso = [
+
+      { electricity_consumption_cvrmse: 42.9781, 
+        electricity_consumption_nmbe: -43.9098, 
+        natural_gas_consumption_cvrmse: 107.3213, 
+        natural_gas_consumption_nmbe: 76.7204 },
       { electricity_consumption_cvrmse: 8.2663,
         electricity_consumption_nmbe: 5.4441,
         natural_gas_consumption_cvrmse: 62.8722,
@@ -503,6 +516,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run rgenoud analysis', :rgenoud, js: true do
     # setup expected results
     rgenoud = [
+      { electricity_consumption_cvrmse: 59.2834, 
+        electricity_consumption_nmbe: -60.8204, 
+        natural_gas_consumption_cvrmse: 160.4416, 
+        natural_gas_consumption_nmbe: -131.9299 },
       { electricity_consumption_cvrmse: 31.5474,
         electricity_consumption_nmbe: -32.1146,
         natural_gas_consumption_cvrmse: 29.0854,
@@ -632,6 +649,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run sobol analysis', :sobol, js: true do
     # setup expected results
     sobol = [
+      { electricity_consumption_cvrmse: 20.2406, 
+        electricity_consumption_nmbe: 18.5516, 
+        natural_gas_consumption_cvrmse: 60.4654, 
+        natural_gas_consumption_nmbe: -48.584},
       { electricity_consumption_cvrmse: 16.3251,
         electricity_consumption_nmbe: 13.8002,
         natural_gas_consumption_cvrmse: 111.2924,
@@ -765,6 +786,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run lhs analysis', :lhs, js: true do
     # setup expected results
     lhs = [
+      { electricity_consumption_cvrmse: 25.985, 
+        electricity_consumption_nmbe: 25.6706, 
+        natural_gas_consumption_cvrmse: 112.2071, 
+        natural_gas_consumption_nmbe: 79.9222},
       { electricity_consumption_cvrmse: 25.6768,
         electricity_consumption_nmbe: 25.3392,
         natural_gas_consumption_cvrmse: 113.6430,
@@ -898,6 +923,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run lhs_discrete analysis', :lhs_discrete, js: true do
     # setup expected results
     lhs = [
+      { electricity_consumption_cvrmse: 37.6145, 
+        electricity_consumption_nmbe: -38.4922, 
+        natural_gas_consumption_cvrmse: 205.2724, 
+        natural_gas_consumption_nmbe: -165.6411},
       { electricity_consumption_cvrmse: 37.2908,
         electricity_consumption_nmbe: -38.1508,
         natural_gas_consumption_cvrmse: 199.5555,
@@ -1036,6 +1065,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run morris analysis', :morris, js: true do
     # setup expected results
     morris = [
+      { electricity_consumption_cvrmse: 89.4788, 
+        electricity_consumption_nmbe: -93.057, 
+        natural_gas_consumption_cvrmse: 83.4571, 
+        natural_gas_consumption_nmbe: -64.117 },
       { electricity_consumption_cvrmse: 87.3964,
         electricity_consumption_nmbe: -90.8389,
         natural_gas_consumption_cvrmse: 40.0277,
@@ -1169,6 +1202,10 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run single_run analysis', :single_run, js: true do
     # setup expected results
     single_run = [
+      { electricity_consumption_cvrmse: 34.4823, 
+        electricity_consumption_nmbe: -35.1756, 
+        natural_gas_consumption_cvrmse: 161.8161, 
+        natural_gas_consumption_nmbe: -130.0589},
       { electricity_consumption_cvrmse: 34.1625,
         electricity_consumption_nmbe: -34.8359,
         natural_gas_consumption_cvrmse: 156.1840,
