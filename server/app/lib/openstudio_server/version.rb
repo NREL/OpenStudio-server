@@ -34,9 +34,9 @@
 # *******************************************************************************
 
 module OpenstudioServer
-  VERSION = '3.2.1'.freeze
+  VERSION = '3.3.0'.freeze
   # format should be ^.*\-{1}[a-z]+[0-9]+
   # for example: -rc1, -beta6, -customusecase0
-  VERSION_EXT = ''.freeze # with preceding - or +
+  VERSION_EXT = '-rc1'.freeze # with preceding - or +
   OS_SHA = 'bdbdbc9da6'.freeze
 end
