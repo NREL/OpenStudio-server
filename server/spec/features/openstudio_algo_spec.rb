@@ -101,9 +101,21 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run cli_test with -z arg', :cli_test, js: true do
     # setup expected results
     nsga_nrel = [
-      { electricity_consumption_cvrmse: 21.0098, 
-        electricity_consumption_nmbe: 20.2345, 
-        natural_gas_consumption_cvrmse: 75.7722, 
+      { electricity_consumption_cvrmse: 26.7913,
+        electricity_consumption_nmbe: 26.2248,
+        natural_gas_consumption_cvrmse: 77.9983,
+        natural_gas_consumption_nmbe: 52.0805},
+      { electricity_consumption_cvrmse: 22.5502,
+        electricity_consumption_nmbe: 21.9411,
+        natural_gas_consumption_cvrmse: 82.5275,
+        natural_gas_consumption_nmbe: 56.044},
+      { electricity_consumption_cvrmse: 81.9164,
+        electricity_consumption_nmbe: -84.8456,
+        natural_gas_consumption_cvrmse: 42.5082,
+        natural_gas_consumption_nmbe: 20.1261},
+      { electricity_consumption_cvrmse: 21.0098,
+        electricity_consumption_nmbe: 20.2345,
+        natural_gas_consumption_cvrmse: 75.7722,
         natural_gas_consumption_nmbe: 50.3806},
       { electricity_consumption_cvrmse: 82.2784,
         electricity_consumption_nmbe: -85.2081,
@@ -252,9 +264,13 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run spea_nrel analysis', :spea_nrel, js: true do
     # setup expected results
     spea_nrel = [
-      { electricity_consumption_cvrmse: 81.9164, 
-        electricity_consumption_nmbe: -84.8456, 
-        natural_gas_consumption_cvrmse: 42.5082, 
+      { electricity_consumption_cvrmse: 21.0098,
+        electricity_consumption_nmbe: 20.2345,
+        natural_gas_consumption_cvrmse: 75.7722,
+        natural_gas_consumption_nmbe: 50.3806},
+      { electricity_consumption_cvrmse: 81.9164,
+        electricity_consumption_nmbe: -84.8456,
+        natural_gas_consumption_cvrmse: 42.5082,
         natural_gas_consumption_nmbe: 20.1261},
       { electricity_consumption_cvrmse: 82.2784,
         electricity_consumption_nmbe: -85.2081,
