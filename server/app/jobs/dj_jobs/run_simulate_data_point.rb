@@ -254,14 +254,20 @@ module DjJobs
             @sim_logger.error "Workflow #{osw_path} failed with error #{e}"
             run_result = :errored
           ensure
-            if uo_simulation_log
+            if (!uo_simulation_log.nil? && File.exist?(uo_simulation_log))
               @sim_logger.info "UrbanOpt simulation output: #{File.read(uo_simulation_log)}"
+            else
+              @sim_logger.warn "UrbanOpt simulation output: #{uo_simulation_log} does not exist"            
             end
-            if uo_process_log
+            if (!uo_process_log.nil? && File.exist?(uo_process_log))
               @sim_logger.info "UrbanOpt process output: #{File.read(uo_process_log)}"
+            else
+              @sim_logger.warn "UrbanOpt process output: #{uo_process_log} does not exist"
             end
-            if process_log
+            if (!process_log.nil? && File.exist?(process_log))
               @sim_logger.info "Oscli output: #{File.read(process_log)}"
+            else
+              @sim_logger.warn "OSCLI output: #{process_log} does not exist"
             end
             #docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
             #if File.exist? docker_log
@@ -324,7 +330,7 @@ module DjJobs
           end
           if @data_point.analysis.download_osm
             @sim_logger.info 'downloading in.OSM'
-            report_file = "#{simulation_dir}/in.osm"
+            report_file = "#{run_dir}/in.osm"
             uploads_successful << upload_file(report_file, 'OpenStudio Model', 'model', 'application/osm') if File.exist?(report_file)
           else
             @sim_logger.info "NOT downloading in.OSM since download_osm value is: #{@data_point.analysis.download_osm}"

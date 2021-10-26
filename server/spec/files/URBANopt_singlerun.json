@@ -1,7 +1,7 @@
 {
   "analysis": {
-    "display_name": "URBANopt_NSGA",
-    "name": "URBANopt_NSGA",
+    "display_name": "URBANopt_singlerun",
+    "name": "URBANopt_singlerun",
     "urbanopt": true,
     "output_variables": [
       {
@@ -13,6 +13,7 @@
         "display_name": "electricity",
         "display_name_short": "electricity",
         "metadata_id": null,
+        "report_file": "default_scenario_report",
         "report": "feature_reports",
         "report_id": "1",
         "reporting_periods": 0,
@@ -30,6 +31,7 @@
         "display_name": "natural_gas",
         "display_name_short": "natural_gas",
         "metadata_id": null,
+        "report_file": "default_scenario_report",
         "report": "feature_reports",
         "report_id": "1",
         "reporting_periods": 0,
@@ -47,6 +49,7 @@
         "display_name": "electricity_fans",
         "display_name_short": "electricity_fans",
         "metadata_id": null,
+        "report_file": "default_scenario_report",
         "report": "feature_reports",
         "report_id": "1",
         "reporting_periods": 0,
@@ -66,6 +69,7 @@
         "display_name": "electricity_fans",
         "display_name_short": "electricity_fans",
         "metadata_id": null,
+        "report_file": "default_scenario_report",
         "report": "scenario_report",
         "report_id": "highefficiency_scenario",
         "reporting_periods": 0,

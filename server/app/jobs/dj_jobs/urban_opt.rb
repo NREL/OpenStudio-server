@@ -104,7 +104,24 @@ module DjJobs
       if !File.exist?(feature_file)
         raise "feature_file does not exist: #{feature_file}"
       end
+      scenario_file_override = "#{simulation_dir}/urbanopt/scenario_file_override.json"
       scenario_file = "#{simulation_dir}/urbanopt/#{@data_point.analysis.scenario_file}.csv"
+      #check if scenario_file_override exists
+      if File.exist?(scenario_file_override)
+        @sim_logger.info "found scenario_file_override.json file, parsing"
+        #parse file and look for scenario file
+        scenario_parse = JSON.parse(File.read(scenario_file_override), symbolize_names: true)
+        if scenario_parse['scenario_file'.to_sym]
+          if File.exist?("#{simulation_dir}/urbanopt/#{scenario_parse['scenario_file'.to_sym]}.csv")
+            @sim_logger.info "replacing scenario_file with #{simulation_dir}/urbanopt/#{scenario_parse['scenario_file'.to_sym]}.csv"
+            scenario_file = "#{simulation_dir}/urbanopt/#{scenario_parse['scenario_file'.to_sym]}.csv"
+            @sim_logger.info "updating analysis model @data_point.analysis.scenario_file: #{@data_point.analysis.scenario_file} to #{scenario_parse['scenario_file'.to_sym]}"
+            @data_point.analysis.scenario_file = scenario_parse['scenario_file'.to_sym]
+          end
+        else 
+          raise ":scenario_file does not exist in: #{scenario_file_override}"
+        end
+      end  
       if !File.exist?(scenario_file)
         raise "scenario_file does not exist: #{scenario_file}"
       end
@@ -121,8 +138,61 @@ module DjJobs
         raise "UrbanOpt run returned error code #{$?.exitstatus}"
       end
 
-      #run uo-cli process           
-      cmd = "uo process --default --feature #{feature_file} --scenario #{scenario_file}"
+      #check run_status.json
+      run_status_json = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/run_status.json"
+      @sim_logger.info "run_status_json location: #{run_status_json}"
+      if File.exist?(run_status_json)
+        run_status_result = JSON.parse(File.read(run_status_json), symbolize_names: true)
+        if !run_status_result[:results].nil?
+          if run_status_result[:results].any?{|hash| hash[:status] == 'Failed'}
+            @sim_logger.error "run_status.json has failures: #{run_status_result}"
+            raise "run_status.json has failures: #{run_status_result}"
+          else
+            @sim_logger.info "run_status_json no Failed: #{run_status_result}"
+          end
+        else
+          @sim_logger.error "run_status.json does not have results: #{run_status_result}"
+          raise "run_status.json does not have results: #{run_status_result}"
+        end
+      else
+        @sim_logger.error "run_status.json does not exist at: #{run_status_json}"
+        raise "run_status.json does not exist at: #{run_status_json}"
+      end
+      
+      #run uo-cli process
+      @sim_logger.info "Run ReOpt is: #{@data_point.analysis.reopt}"
+      if @data_point.analysis.reopt
+        #check for API key
+        #check ENV GEM_DEVELOPER_KEY
+        if !ENV['GEM_DEVELOPER_KEY'].nil? && !ENV['GEM_DEVELOPER_KEY'].empty?
+          @sim_logger.info "GEM_DEVELOPER_KEY is not empty"
+        #check reopt_key.txt file
+        elsif File.exist?("#{simulation_dir}/urbanopt/reopt_key.json")
+          @sim_logger.info "reopt_key.json is found"
+          key_json = JSON.parse(File.read("#{simulation_dir}/urbanopt/reopt_key.json"), symbolize_names: true)
+          ENV['GEM_DEVELOPER_KEY'] = key_json[:GEM_DEVELOPER_KEY]
+          if !ENV['GEM_DEVELOPER_KEY'].empty?
+            @sim_logger.info "GEM_DEVELOPER_KEY is not empty after reading reopt_key.json"
+          else 
+            @sim_logger.error "GEM_DEVELOPER_KEY is empty after reading reopt_key.json"
+            raise "GEM_DEVELOPER_KEY is empty after reading reopt_key.json"
+          end
+        else
+          @sim_logger.error "reopt_key.json is NOT found and ENV not set"
+          raise "reopt_key.txt is NOT found and ENV not set"
+        end
+        
+        reopt_type = @data_point.analysis.reopt_type
+        @sim_logger.info "reopt_type is: #{reopt_type}"
+        if ['scenario', 'feature'].include?(reopt_type)      
+          cmd = "uo process --reopt-#{reopt_type} --feature #{feature_file} --scenario #{scenario_file}"
+        else
+          @sim_logger.error "reopt_type is not scenario or feature its: #{reopt_type}"
+          raise "reopt_type is not scenario or feature its: #{reopt_type}"
+        end
+      else
+        cmd = "uo process --default --feature #{feature_file} --scenario #{scenario_file}"
+      end      
       #uo_process_log = File.join(simulation_dir, 'urbanopt_process.log')
       @sim_logger.info "Running UrbanOpt workflow using cmd #{cmd} and writing log to #{uo_process_log}"
       pid = Process.spawn(cmd, [:err, :out] => [uo_process_log, 'w'])
@@ -131,7 +201,8 @@ module DjJobs
       end
 
       if $?.exitstatus != 0
-        raise "UrbanOpt process returned error code #{$?.exitstatus}"
+        #raise "UrbanOpt process returned error code #{$?.exitstatus}"
+        @sim_logger.error "UrbanOpt process returned error code #{$?.exitstatus}"
       end
       #Run OSSCLI --postprocess_only to run reporting measures in UrbanOpt workflow if ReportingMeasure's are present in workflow
       @sim_logger.info "@data_point.analysis.problem['workflow'].empty?: #{@data_point.analysis.problem['workflow'].empty?}"
@@ -173,10 +244,21 @@ module DjJobs
           #uo_results[:feature_reports][0][:reporting_periods][0][:natural_gas]
           #
           # Save the objective functions
+        analysis = Analysis.find(@data_point.analysis.id)  
+        objs = analysis.variables.where(objective_function: true)
+        #if objs
+        #  objs.each do |variable|
         if @data_point.analysis.output_variables
           @data_point.analysis.output_variables.each do |variable|
+            @sim_logger.info "VARIABLE: #{variable}"
             uo_result = {}
             report_index = nil
+            reports_file = variable[:report_file]
+            @sim_logger.info "reports_file: #{reports_file} :#{variable[:report_file]}"
+            if reports_file.nil? 
+              @sim_logger.error "reports_file is missing from output_variable: #{variable[:name]}."
+              raise "reports_file is missing from output_variable: #{variable[:name]}"
+            end
             if variable[:objective_function]
               @sim_logger.info "found variable[:objective_function]: #{variable[:objective_function]}"
               if variable[:report] == 'feature_reports'
@@ -184,7 +266,7 @@ module DjJobs
                 if variable[:report_id] && variable[:reporting_periods] && variable[:var_name]
                   @sim_logger.info "found variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                   #get feature_reports results
-                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/default_scenario_report.json"
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                     report_index = uo_result[variable[:report].to_sym].index {|h| h[:id] == variable[:report_id].to_s } if uo_result[variable[:report].to_sym]
@@ -195,7 +277,9 @@ module DjJobs
                           if variable[:var_name] == "end_uses" #check end_uses and category exist
                             if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
                               if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
-                                results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                                results[variable[:name].split(/\./)[0].to_sym] = {}
+                                results[variable[:name].split(/\./)[0].to_sym]["#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym] = uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym]
+                                results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                               else
                                 raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
                                 @sim_logger.error "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
@@ -205,7 +289,9 @@ module DjJobs
                               @sim_logger.error "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
                             end
                           else  #not end_uses
-                            results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                            results[variable[:name].split(/\./)[0].to_sym] = {}
+                            results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = uo_result[variable[:report].to_sym][report_index][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                            results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                           end
                         else
                           raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reporting period: #{variable[:reporting_periods]}."
@@ -220,8 +306,8 @@ module DjJobs
                       @sim_logger.error "Could not find the index for report id: #{variable[:report_id]} for report: #{variable[:report]}."
                     end                    
                   else
-                    raise "Could not find results #{uo_results_file}"
-                    @sim_logger.error "Could not find results #{uo_results_file}"
+                    raise "Could not find results file: #{uo_results_file}"
+                    @sim_logger.error "Could not find results file: #{uo_results_file}"
                   end
                 else
                   raise "MISSING output variable[:report_id]:#{variable[:report_id]}, variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
@@ -229,10 +315,10 @@ module DjJobs
                 end
               elsif variable[:report] == 'scenario_report'
                 @sim_logger.info "found variable[:report]: #{variable[:report]}"
-                if variable[:reporting_periods] && variable[:var_name]
+                if (variable[:reporting_periods] && variable[:var_name])
                   @sim_logger.info "found variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
-                  #get feature_reports results
-                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/default_scenario_report.json"
+                  #get scenario_report results
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
                   if File.exist? uo_results_file
                     uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
                     if !uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]].nil? #reporting_periods exist
@@ -241,7 +327,10 @@ module DjJobs
                         if variable[:var_name] == "end_uses"
                           if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:end_use].to_sym)
                             if variable[:end_use] && variable[:end_use_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym].has_key?(variable[:end_use_category].to_sym)
-                              results[variable[:name].split(".")[0]] = { "#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym], "applicable" => true }
+                              @sim_logger.info "setting results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:end_use]}_#{variable[:end_use_category]}"
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym]["#{variable[:end_use]}_#{variable[:end_use_category]}".to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:end_use].to_sym][variable[:end_use_category].to_sym]
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                             else
                               raise "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
                               @sim_logger.error "MISSING output variable[:end_use_category]:#{variable[:end_use_category]}, when output variable[:var_name]:#{variable[:var_name]}, output variable[:end_use]:#{variable[:end_use]}"
@@ -250,8 +339,22 @@ module DjJobs
                             raise "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
                             @sim_logger.error "MISSING output variable[:end_use]:#{variable[:end_use]}, when output variable[:var_name]:#{variable[:var_name]}"
                           end
-                        else #not end_uses
-                          results[variable[:name].split(".")[0]] = { variable[:var_name].to_sym => uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym], "applicable" => true }
+                      #check for comfort_result
+                        elsif variable[:var_name] == "comfort_result"
+                          if variable[:comfort_result_category] && uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym].has_key?(variable[:comfort_result_category].to_sym)
+                            @sim_logger.info "setting comfort_results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:var_name]}_#{variable[:comfort_result_category]}"
+                            results[variable[:name].split(/\./)[0].to_sym] = {}
+                            results[variable[:name].split(/\./)[0].to_sym]["#{variable[:var_name]}_#{variable[:comfort_result_category]}".to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym][variable[:comfort_result_category].to_sym]
+                            results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
+                          else
+                            raise "MISSING output variable[:comfort_result_category]:#{variable[:comfort_result_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                            @sim_logger.error "MISSING output variable[:comfort_result_category]:#{variable[:comfort_result_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                          end
+                      #not end_uses  
+                        else
+                          results[variable[:name].split(/\./)[0].to_sym] = {}
+                          results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = uo_result[variable[:report].to_sym][:reporting_periods][variable[:reporting_periods]][variable[:var_name].to_sym]
+                          results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
                         end
                       else
                         raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reporting period: #{variable[:reporting_periods]}."
@@ -262,27 +365,111 @@ module DjJobs
                       @sim_logger.error "Could not find output reporting period: #{variable[:reporting_periods]}."
                     end
                   else
-                    raise "Could not find results #{uo_results_file}"
-                    @sim_logger.error "Could not find results #{uo_results_file}"
+                    raise "Could not find results file: #{uo_results_file}"
+                    @sim_logger.error "Could not find results file: #{uo_results_file}"
+                  end
+                #no reporting_period  
+                elsif variable[:var_name]  #TODO add check on distributed_generation_category
+                  @sim_logger.info "found variable[:var_name]: #{variable[:var_name]} with NO REPORTING_PERIODS."
+                  #get scenario_report results
+                  #scenario_optimization.json
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/#{reports_file}.json"
+                  if File.exist? uo_results_file
+                    uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
+
+                      if uo_result[variable[:report].to_sym].has_key?(variable[:var_name].to_sym) # has var_name?
+
+                            if variable[:distributed_generation_category] && uo_result[variable[:report].to_sym][variable[:var_name].to_sym].has_key?(variable[:distributed_generation_category].to_sym)
+                              @sim_logger.info "setting results keys: #{variable[:name].split(/\./)[0]} AND: #{variable[:var_name]}_#{variable[:distributed_generation_category]}"
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym]["#{variable[:var_name]}_#{variable[:distributed_generation_category]}".to_sym] = uo_result[variable[:report].to_sym][variable[:var_name].to_sym][variable[:distributed_generation_category].to_sym]
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
+                            else
+                              raise "MISSING output variable[:distributed_generation_category]:#{variable[:distributed_generation_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                              @sim_logger.error "MISSING output variable[:distributed_generation_category]:#{variable[:distributed_generation_category]}, when output variable[:var_name]:#{variable[:var_name]}"
+                            end
+
+
+                      else
+                        raise "Could not find output variable[:var_name]: #{variable[:var_name]}."
+                        @sim_logger.error "Could not find output variable[:var_name]: #{variable[:var_name]}."
+                      end
+                      
+                  else
+                    raise "Could not find results file: #{uo_results_file}"
+                    @sim_logger.error "Could not find results file: #{uo_results_file}"
                   end
                 else
                   raise "MISSING output variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                   @sim_logger.error "MISSING output variable[:reporting_periods]:#{variable[:reporting_periods]}, variable[:var_name]: #{variable[:var_name]}."
                 end
+              elsif variable[:report] == 'reopt_report'
+                @sim_logger.info "found variable[:report]: #{variable[:report]}"
+                if variable[:reopt_category] && variable[:var_name]
+                  @sim_logger.info "found variable[:reopt_category]:#{variable[:reopt_category]}, variable[:var_name]: #{variable[:var_name]}."
+                  #get scenario_report results
+                  uo_results_file = "#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/reopt/scenario_report_#{@data_point.analysis.scenario_file.downcase}_reopt_run.json"
+                  if File.exist? uo_results_file
+                  @sim_logger.info "found REopt output json file"
+                    uo_result = JSON.parse(File.read(uo_results_file), symbolize_names: true)
+                      if uo_result[0].nil?  #this checks if reopt json is formatted correctly
+                        if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].nil? #reopt_category exist
+                          if uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym].has_key?(variable[:var_name].to_sym) #reopt_category has var_name?
+                            if !uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym].nil?
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym]
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
+                              @sim_logger.info "setting results to: #{uo_result[:outputs][:Scenario][:Site][variable[:reopt_category].to_sym][variable[:var_name].to_sym]}"
+                            else
+                              results[variable[:name].split(/\./)[0].to_sym] = {}
+                              results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = @data_point.analysis.problem['algorithm']['failed_f_value']
+                              results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
+                              @sim_logger.error "setting results to FAILED_F_VALUE: #{@data_point.analysis.problem['algorithm']['failed_f_value']}"
+                            end                             
+                          else
+                            raise "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
+                            @sim_logger.error "Could not find output variable[:var_name]: #{variable[:var_name]} in reopt_category: #{variable[:reopt_category]}."
+                          end
+                        else
+                          raise "Could not find output reopt_category: #{variable[:reopt_category]}."
+                          @sim_logger.error "Could not find output reopt_category: #{variable[:reopt_category]}."
+                        end
+                     else
+                       @sim_logger.error "REopt Error: #{uo_result}."
+                       results[variable[:name].split(/\./)[0].to_sym] = {}
+                       results[variable[:name].split(/\./)[0].to_sym][variable[:var_name].to_sym] = @data_point.analysis.problem['algorithm']['failed_f_value']
+                       results[variable[:name].split(/\./)[0].to_sym][:applicable] = true
+                     end
+                  else
+                    #raise "Could not find results file: #{uo_results_file}"
+                    @sim_logger.error "Could not find results file: #{uo_results_file}"
+                  end
+                else
+                  raise "MISSING output variable[:reopt_category]:#{variable[:reopt_category]}, variable[:var_name]: #{variable[:var_name]}."
+                  @sim_logger.error "MISSING output variable[:reopt_category]:#{variable[:reopt_category]}, variable[:var_name]: #{variable[:var_name]}."
+                end
+              #not feature_report, scenario_report or reopt_report                
               else
-                raise "output variable '#{variable[:name]}' :report is not scenario_report or feature_reports.  :report = '#{variable[:report]}'."
-                @sim_logger.error "output variable '#{variable[:name]}' :report is not scenario_report or feature_reports.  :report = '#{variable[:report]}'."
+                raise "output variable '#{variable[:name]}' :report is not scenario_report or feature_reports or reopt_report.  :report = '#{variable[:report]}'."
+                @sim_logger.error "output variable '#{variable[:name]}' :report is not scenario_report or feature_reports or reopt_report.  :report = '#{variable[:report]}'."
               end
 
 
               @sim_logger.info "Looking in output variable #{variable[:name]} for objective function [#{variable[:report]}][#{variable[:report_id]}]{#{variable[:reporting_periods]}}[#{variable[:var_name]}]"
 
               # look for the objective function key and make sure that it is not nil. False is an okay obj function.
+              # this is similiar code to whats in workflow-gem but not called because of non-OS workflow.
               # check if "#{variable[:end_use]}_#{variable[:end_use_category]}" == variable[:name] somewhere??  -BLB
-              # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity=>39869197.34679705, :applicable=>true},:'uuid'...}
-              if !results[variable[:name].split(".")[0]].nil? && !results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym].nil?
-                #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:var_name].to_sym]  #no end_uses
-                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(".")[0]][variable[:name].split(".")[1].to_sym]  #end_uses_end_use_category
+              # results = {:"ffce3f6b-023a-46ab-89f2-4f8c692719dd"=>{:electricity_kwh=>39869197.34679705, :applicable=>true},:'uuid'...}
+              if !variable[:name].split(/\./)[0].nil? && !variable[:name].split(/\./)[1].nil? && !results[variable[:name].split(/\./)[0].to_sym].nil? && !results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym].nil?
+                #objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(/\./)[0]][variable[:var_name].to_sym]  #no end_uses
+                if results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym].present?
+                  @sim_logger.info "setting objective function #{variable[:name]} to: #{results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym]}"
+                  objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = results[variable[:name].split(/\./)[0].to_sym][variable[:name].split(/\./)[1].to_sym]  #end_uses_end_use_category
+                else
+                  objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
+                  @sim_logger.error "No results for objective function #{variable[:name]}. results are NULL/not present.  most likely REopt error."
+                end                
                 if variable[:objective_function_target]
                   @sim_logger.info "Found objective function target for #{variable[:name]}"
                   objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f
@@ -297,12 +484,11 @@ module DjJobs
                 end
               else
                 #make raise an option to continue with failures??
-                raise "No results for objective function #{variable[:name]}"
-                @sim_logger.error "No results for objective function #{variable[:name]} in #{__FILE__} at #{__LINE__}"
-                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = Float::MAX
-                objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = nil
-                objective_functions["scaling_factor_#{variable[:objective_function_index] + 1}"] = nil
-                objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = nil
+                #raise "No results for objective function #{variable[:name]}"
+                @sim_logger.error "No results for objective function #{variable[:name]}"
+                objective_functions["objective_function_#{variable[:objective_function_index] + 1}"] = @data_point.analysis.problem['algorithm']['failed_f_value']
+                objective_functions["objective_function_target_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_target].to_f
+                objective_functions["objective_function_group_#{variable[:objective_function_index] + 1}"] = variable[:objective_function_group].to_f
               end
             end
           end
@@ -341,9 +527,9 @@ module DjJobs
 
         #copy results to "#{simulation_dir}/urbanopt/run/reports/*"
         reports_dir = "#{simulation_dir}/reports/"
-        @sim_logger.info "copying #{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/*.{html,json,csv} to #{reports_dir}"
+        @sim_logger.info "copying #{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/*.{html,json,csv} to #{reports_dir}"
         FileUtils.mkdir_p reports_dir unless Dir.exist? reports_dir
-        Dir["#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file}/*.{html,json,csv}"].each { |file| FileUtils.cp(file, reports_dir) }
+        Dir["#{simulation_dir}/urbanopt/run/#{@data_point.analysis.scenario_file.downcase}/*.{html,json,csv}"].each { |file| FileUtils.cp(file, reports_dir) }
         
         #zip reports
         @sim_logger.info "zipping up: #{simulation_dir}/urbanopt/run"

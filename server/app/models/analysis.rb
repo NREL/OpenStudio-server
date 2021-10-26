@@ -74,7 +74,9 @@ class Analysis
   field :urbanopt_variables, type: Array, default: [] #array of UrbanOpt variables
   field :feature_file, type: String, default: '' # name of UrbanOpt Feature_file.json file
   field :scenario_file, type: String, default: '' # name of UrbanOpt Scenario.csv file
-
+  field :reopt, type: Boolean, default: false # is ReOpt run?
+  field :reopt_type, type: String, default: '' # name of ReOpt run scenario or feature
+  
   # Temp location for these vas
   field :samples, type: Integer
 

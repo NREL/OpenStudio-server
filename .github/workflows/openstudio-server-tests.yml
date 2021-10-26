@@ -10,9 +10,9 @@ on: [push, pull_request]
 
 env:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 3.2.1 
-  OPENSTUDIO_VERSION_SHA: bdbdbc9da6
-  OPENSTUDIO_VERSION_EXT: ""
+  OPENSTUDIO_VERSION: 3.3.0 
+  OPENSTUDIO_VERSION_SHA: 45b36b8d4c
+  OPENSTUDIO_VERSION_EXT: "-rc2"
   DOCKER_COMPOSE_VERSION: 1.21.1
   BUNDLE_WITHOUT: native_ext
 
@@ -96,7 +96,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=3.2.1
+          export OPENSTUDIO_TAG=3.3.0-rc2
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all
@@ -118,12 +118,24 @@ jobs:
       if: ${{ failure() }}  
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
+    - name: Run docker vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        # the image should have been built and tagged in the previous steps
+        image-ref: 'nrel/openstudio-server:latest'
+        format: 'template'
+        template: '@/contrib/sarif.tpl'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+    - name: Upload container scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
     - name: docker-upload
       if: | 
         github.ref == 'refs/heads/master' || 
-        github.ref == 'refs/heads/develop' || 
-        github.ref == 'refs/heads/setup_github_actions' 
-      shell: bash 
+        github.ref == 'refs/heads/develop'
+      shell: bash
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 
         CI: true
