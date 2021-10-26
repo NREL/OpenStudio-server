@@ -7,7 +7,7 @@ REM install develop build
 set OS_INSTALL_NAME=OpenStudio-%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%%%2B%OPENSTUDIO_VERSION_SHA%-Windows.exe
 echo Install name is %OS_INSTALL_NAME%
 REM curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/%OPENSTUDIO_VERSION%/%OS_INSTALL_NAME%
-curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/3.2.1/%OS_INSTALL_NAME%
+curl -SLO --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/3.3.0-rc2/%OS_INSTALL_NAME%
 dir .
 REM Install OpenStudio
 %OS_INSTALL_NAME% --script ci/appveyor/install-windows.qs
