@@ -89,13 +89,13 @@ brew install geckodriver
 
 There are several layers of testing for OpenStudio Server and each uses a different software solution.
 
-* Unit/Functional Tests: Unit tests are run using TravisCI and AppVeyor. The functional tests use geckodriver and 
+* Unit/Functional Tests: Unit tests are run using GitHub Actions and AppVeyor. The functional tests use geckodriver and 
 selenium to test the frontend end.
 * Integration Tests: These tests verify that the version of OpenStudio works with the version of OpenStudio Server and
 the meta CLI. These are run as part of the Unit/Functional tests.
 * Docker Tests and Publishing Containers: The Docker tests are run before publishing the new containers. The tests and 
-publishing scripts are run on TravisCI. These are only run the develop and master branch.
-* Rubocop: These tests verify that the code meets the ruby / rails standard. These tests are currently run on travis.
+publishing scripts are run on GitHub Actions. These are only run the develop and master branch.
+* Rubocop: These tests verify that the code meets the ruby / rails standard. These tests are currently run on GitHub Actions.
  
 # TODOs
 

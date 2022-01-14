@@ -1,7 +1,7 @@
 # CI (continuous integration) testing regime
 
 This folder contains scripts specific to each CI to allow for automated testing and deployment of the project. 
-Two platforms are used for testing the server: TravisCI and AppVeyor. This document begins by describing the overall 
+Two platforms are used for testing the server: GitHub Actions and AppVeyor. This document begins by describing the overall 
 strategy of the various testing frameworks, followed by sections on each CI platform.
 
 ## Testing strategy
@@ -45,15 +45,14 @@ I don't know quite why we test on pure ubuntu, but we do, and if the tests break
 
 ## Testing platforms
 
-Tests are run on Travis, Circle, and AppVeyor. A few comments on each.
+Tests are run on GitHub Actions and AppVeyor. A few comments on each.
 
-### Travis
+### GitHub Actions
 
 This is currently the projects preferred testing platform. Build stages are not enabled yet, however they should be. We 
-test pure ubuntu and OSX on Travis. All scripts live in the travis folder. Green tests are required for both commits 
-and PRs, which is to say the commit SHA code has to pass, as well as the merge of the PR, before a PR can be merged 
-into develop. Worth noting that travis.org has a hard one hour time-limit for builds, so we can't test our docker-based 
-use case on travis until we speed up build time, or switch over to travis.com with its two hour build limit.
+test pure ubuntu and OSX on GitHub Actions. All scripts live in the `ci/github-actions` folder. Green tests are required 
+for both commits and PRs, which is to say the commit SHA code has to pass, as well as the merge of the PR, before a PR c
+an be merged into develop. 
 
 ### AppVeyor
 
@@ -62,12 +61,3 @@ Critical scripts are in the appveyor folder. Both powershell and command prompt 
 also required for both commit and PR before merges can take place on develop. AppVeyor is exclusively used for Windows 
 testing. There are times when the integration test must be retried up to three times before success - the reason for 
 this is not clearly understood, however the retry mechanic is implemented and working successfully. 
-
-### Circle
-
-Circle 2.0 presents significant challenges for the docker-deployment use case. As such, the project is still using the 
-1.0 circle framework. This has significant limitations. It would be nice to migrate this use case to Travis if at all
-possible. Circle 1.0 only supports commit tests. This test must be green before merging to develop. The circle testing 
-scripts live implicitly in the [docker-compose testing template](https://github.com/NREL/OpenStudio-server/blob/develop/docker-compose.test.yml) 
-in the repo root and in [run-server-tests.sh](https://github.com/NREL/OpenStudio-server/blob/develop/docker/server/run-server-tests.sh) 
-in the /docker/server folder.

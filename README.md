@@ -1,8 +1,9 @@
 # OpenStudio Server
 
-[![Build Status][travis-img]][travis-url] 
+[![Build Status][gh-img]][gh-url] 
 [![Coverage Status][coveralls-img]][coveralls-url]
-Windows Build (Under Development): [![Build status][appveyor-img]][appveyor-url]
+
+Windows Build (Under Development): [![Windows Build Status][appveyor-img]][appveyor-url]
 
 The below documentation has not been recently reviewed. Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for current documentation.
 
@@ -125,7 +126,7 @@ nodes upon instantiation in a cluster.
 ## Testing procedure
 
 The OpenStudio Server project uses several CI systems to test both local and cloud deployments across multiple 
-platforms. TravisCI is used to build and test local deployments of the server on OSX hardware for each commit, as well 
+platforms. GitHub Actions is used to build and test local deployments of the server on OSX hardware for each commit, as well 
 as to build and test docker containers for each commit. It is important to note that during the middle of the 
 day, these tests can take several hours to begin. Finally, AppVeyor is used to build and test local deployments against
 Windows. 
@@ -140,7 +141,7 @@ For cloud deployments, the two critical artifacts are the docker containers and 
 automated, and unlikely to be automated for several reason. The docker containers, however, are extensively tested using 
 the same rspec functionality as mentioned above. 
 
-For a pull request to be merged under regular order, all CI tests need to return green: TravisCI PR and push and AppVeyor 
+For a pull request to be merged under regular order, all CI tests need to return green: GitHub Actions and AppVeyor 
 PR and push. All of these tests write verbose results and logs on failure, which should allow for local reproduction 
 of the bug and subsequent fixes. In the case of a failure of the CI infrastructure, please open an issue in the 
 repository regarding the failure. 
@@ -168,10 +169,10 @@ chmod -R 777 gems # Modify privileges on the installed gems
 
 Please contact @tijcolem, @bball, or @nllong with any question regarding this project. Thanks for you interest!
 
-[coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=dockerize
+[coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=develop
 [coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
-[travis-img]: https://travis-ci.org/NREL/OpenStudio-server.svg?branch=dockerize-travis
-[travis-url]: https://travis-ci.org/NREL/OpenStudio-server
+[gh-img]: https://github.com/nrel/openstudio-server/actions/workflows/openstudio-server-tests.yml/badge.svg?branch=develop
+[gh-url]: https://github.com/nrel/openstudio-server/actions
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/j7hqgh2p7bae9xn8/branch/dockerize-appveyor?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/rHorsey/openstudio-server/branch/dockerize-appveyor
 
