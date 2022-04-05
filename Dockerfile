@@ -4,8 +4,9 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.3.0
-FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
+ARG OPENSTUDIO_VERSION=3.4.0-alpha
+#FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
+FROM nrel/openstudio:dev-3.4.0-alpha-fb6eeee610 as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Install required libaries.

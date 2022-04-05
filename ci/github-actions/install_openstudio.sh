@@ -10,7 +10,8 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # OPENSTUDIO_VERSION_EXT may be empty
     OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_SHA}-Ubuntu-18.04.deb
     echo "Installing OpenStudio ${OPENSTUDIO_DOWNLOAD_FILENAME}"
-    OPENSTUDIO_DOWNLOAD_BASE_URL=https://openstudio-builds.s3.amazonaws.com/3.3.0/
+    #OPENSTUDIO_DOWNLOAD_BASE_URL=https://openstudio-builds.s3.amazonaws.com/3.3.0/
+    OPENSTUDIO_DOWNLOAD_BASE_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/
     OPENSTUDIO_DOWNLOAD_URL=$OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     # copying this from the docker-openstudio dockerfile
