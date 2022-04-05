@@ -8,7 +8,7 @@ set OS_INSTALL_NAME=OpenStudio-%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%%%2B%
 echo Install name is %OS_INSTALL_NAME%
 REM curl -SLO --insecure https://openstudio-builds.s3.amazonaws.com/%OPENSTUDIO_VERSION%/%OS_INSTALL_NAME%
 REM curl -SLO --insecure  https://openstudio-builds.s3.amazonaws.com/3.3.0/%OS_INSTALL_NAME%
-curl -SLO --insecure  https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/signed/OpenStudio-3.4.0-alpha%2Bfb6eeee610-Windows.exe
+curl -SLO --insecure  https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/signed/%OS_INSTALL_NAME%
 dir .
 REM Install OpenStudio
 %OS_INSTALL_NAME% --script ci/appveyor/install-windows.qs
