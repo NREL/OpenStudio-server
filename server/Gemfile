@@ -125,7 +125,7 @@ group :development, :test do
   gem 'selenium-webdriver', '~> 3.142.7'
 
   gem 'psych', '~> 3.3.1'
-  gem 'rubocop', '~> 0.54.0'
+  gem 'rubocop', '~> 1.15.0'
   gem 'rubocop-checkstyle_formatter', '~> 0.4.0'
   gem 'rubocop-rspec', '~> 1.26.0'
 
