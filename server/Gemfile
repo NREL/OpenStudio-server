@@ -6,7 +6,7 @@ ruby '~>2.7.0'
 # gem update --system 2.7.8
 # gem 'rubygems-update', '2.7.8'
 
-gem 'rails', '6.1.3.2' 
+gem 'rails', '~> 6.1.3'
 gem 'rake', '~> 13.0'
 
 # added for support of the project rakefile
@@ -71,8 +71,8 @@ gem 'openstudio-workflow', '= 2.3.1'
 gem 'openstudio-analysis', '= 1.2.0'
 
 # Remove urbanopt cli gems for minor for releases as they use different versions of ext gems
-#gem 'urbanopt-cli', '= 0.6.0'
-#gem 'urbanopt-reopt', '= 0.6.0'
+gem 'urbanopt-cli', '= 0.7.1'
+gem 'urbanopt-reopt', '= 0.7.0'
 
 ## End commonly updated gems
 
@@ -117,7 +117,7 @@ group :development, :test do
   gem 'capybara', '~> 3.35.3'
   gem 'coveralls', '0.7.1', require: false
   gem 'public_suffix', '~> 4.0.6'
-  gem 'puma', '~> 5.4.0' # used by capybara
+  gem 'puma', '~> 5.6.0' # used by capybara
   gem 'rspec', '~> 3.10.0'
   gem 'rspec-rails', '~> 5.0.1'
   gem 'rspec-retry', '~> 0.6.2'
@@ -125,7 +125,7 @@ group :development, :test do
   gem 'selenium-webdriver', '~> 3.142.7'
 
   gem 'psych', '~> 3.3.1'
-  gem 'rubocop', '~> 0.54.0'
+  gem 'rubocop', '~> 1.15.0'
   gem 'rubocop-checkstyle_formatter', '~> 0.4.0'
   gem 'rubocop-rspec', '~> 1.26.0'
 
