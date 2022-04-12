@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.3.0
+ARG OPENSTUDIO_VERSION=3.4.0-rc1
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -159,5 +159,5 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
 COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/run-server-tests
 # Test adding the git repo to the container for coveralls
-# The #TEST# will be removed in the travis test script to be run in the test container
+# The #TEST# will be removed in the test script to be run in the test container
 #TEST#COPY .git /opt/openstudio/.git

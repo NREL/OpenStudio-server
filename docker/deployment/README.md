@@ -127,16 +127,16 @@ Packer command is: packer build -machine-readable -var-file=user_variables.json 
 
 ## Build process for official release
 
-This script should only ever be run after the successful completion of a build of the master branch of this repo on 
-[TravisCI](https://travis-ci.org/NREL/OpenStudio-server). This automatically pushes tested docker images to 
+This script should only ever be run after the successful completion of a build of the main branch of this repo on 
+[GitHub Actions](https://github.com/NREL/OpenStudio-server/actions). This automatically pushes tested docker images to 
 [DockerHub](http://hub.docker.com/r/nrel) for both the [OpenStudio Server](http://hub.docker.com/r/nrel/openstudio-server/tags/) 
 and [OpenStudio Rserve](http://hub.docker.com/r/nrel/openstudio-rserve/tags/) images. These two images are what is 
-provisioned within the AMI built, and as such have to be created as DockerHub artefacts beforehand. For the purposes of
-automation, however, a successful TravisCI build on the master branch is sufficient for executing the 
+provisioned within the AMI built, and as such have to be created as DockerHub artifacts beforehand. For the purposes of
+automation, however, a successful GitHub Action build on the main branch is sufficient for executing the 
 `build_deploy_ami.py` script.
 
 This script begins by collecting version information from the repository. This requires the cloned repository to have 
-the same SHA as the successful TravisCI build, i.e. latest master. This information, along with the AWS access and 
+the same SHA as the successful GitHub Action build, i.e. latest master. This information, along with the AWS access and 
 secret keys, is used to execute packer. Packer spins up a small (c3.xlarge) server from a base Ubuntu AMI. This server
 then is configured based off of the [packer JSON file](http://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/openstudio_server_docker_base.json). 
 The log file of this process is written to the output directory as `build.log` and should be persisted in case of a 
