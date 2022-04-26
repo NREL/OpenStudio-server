@@ -43,7 +43,8 @@ class AdminController < ApplicationController
     #unset_vars = Gem.win_platform? || ENV['OS'] == 'Windows_NT' ? 'set ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join('= && set ') : 'unset ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join(' && unset ')
     oscli_cmd = "#{Utility::Oss.oscli_cmd} openstudio_version"
     oscli_cmd = "call #{oscli_cmd}" if Gem.win_platform? || ENV['OS'] == 'Windows_NT'
-    version = `#{oscli_cmd}`
+    Rails.logger.debug "oscli_cmd: #{oscli_cmd}"
+    version = `#{oscli_cmd}`  #this will not work with --bundle args since user is 'nobody' and cannot create a tmpdir from $HOME
     Rails.logger.debug "oscli version output: #{version}"
     
     @os_cli = version ? version.strip : 'Unknown'

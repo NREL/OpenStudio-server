@@ -127,6 +127,7 @@ RUN chmod 755 /usr/local/bin/start-workers
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
+ENV OPENSTUDIO_EXE_PATH /usr/local/bin/openstudio
 
 ENTRYPOINT ["rails-entrypoint"]
 
