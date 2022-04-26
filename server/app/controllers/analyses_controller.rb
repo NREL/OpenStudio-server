@@ -1068,7 +1068,8 @@ class AnalysesController < ApplicationController
     # TODO: check these permissions and make them less open
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %{
-            temp <- tempfile('rdata', tmpdir="/tmp")
+            dir.create('/mnt/openstudio/tmp')
+            temp <- tempfile('rdata', tmpdir="/mnt/openstudio/tmp")
             save('#{data_frame_name}', file = temp)
             Sys.chmod(temp, mode = "0777", use_umask = TRUE)
          }
