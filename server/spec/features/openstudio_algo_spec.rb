@@ -550,7 +550,15 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 58.8571,
         electricity_consumption_nmbe: -60.3622,
         natural_gas_consumption_cvrmse: 154.6048,
-        natural_gas_consumption_nmbe: -127.2442 }
+        natural_gas_consumption_nmbe: -127.2442},
+      { electricity_consumption_cvrmse: 73.3836, 
+        electricity_consumption_nmbe: -76.0863, 
+        natural_gas_consumption_cvrmse: 47.7308, 
+        natural_gas_consumption_nmbe: -31.6531},
+      { electricity_consumption_cvrmse: 35.2998, 
+        electricity_consumption_nmbe: -35.9015, 
+        natural_gas_consumption_cvrmse: 49.7358, 
+        natural_gas_consumption_nmbe: 26.8043 }
     ]
     # setup bad results
     rgenoud_bad = [
@@ -655,9 +663,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
 
+        #puts('sim')
+        puts(sim)
         compare = rgenoud.include?(sim)
-        expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
+        expect(compare).to be true
 
         compare = rgenoud_bad.include?(sim)
         expect(compare).to be false
