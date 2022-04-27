@@ -571,12 +571,18 @@ class AnalysesController < ApplicationController
       @new_pareto.x_var = params[:x_var]
       @new_pareto.y_var = params[:y_var]
       @new_pareto.name = params[:name]
-      @new_pareto.data_points = params[:data_points]
+      logger.info("PARAMS: #{params}")
+      @new_pareto.data_points = params[:data_points].split(" ")
       if @new_pareto.save
+        logger.info("NEW_PARETO.save.true.errors: #{@new_pareto.errors.to_hash}")
         logger.info('--pareto is saved--')
         @pareto_saved = true
         flash[:notice] = 'Pareto saved!'
       else
+        logger.info("NEW_PARETO.save.false.errors: #{@new_pareto.errors.to_hash}")
+        logger.info("NEW_PARETO.save.false.errors.size: #{@new_pareto.errors.to_hash.size}")
+        logger.info("NEW_PARETO.save.false.errors.messages: #{@new_pareto.errors.messages}")
+        logger.info("NEW_PARETO.save.false.errors.full_messages: #{@new_pareto.errors.full_messages}")
         flash[:error] = "The pareto front could not be saved: #{@new_pareto.errors.full_messages}"
       end
     end
@@ -1068,7 +1074,8 @@ class AnalysesController < ApplicationController
     # TODO: check these permissions and make them less open
     r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
       %{
-            temp <- tempfile('rdata', tmpdir="/tmp")
+            dir.create('/mnt/openstudio/tmp')
+            temp <- tempfile('rdata', tmpdir="/mnt/openstudio/tmp")
             save('#{data_frame_name}', file = temp)
             Sys.chmod(temp, mode = "0777", use_umask = TRUE)
          }
