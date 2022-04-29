@@ -1076,13 +1076,13 @@ class AnalysesController < ApplicationController
         logger.info "finished data frame: #{Time.now - start_time}"
 
         if File.exist?(tmp_filename)
-          send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
+            send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
         else
-          raise 'could not create R dataframe'
+            raise 'could not create R dataframe'
         end
-     else 
-         raise 'out_hash is empty'
-     end   
+    else 
+        raise 'out_hash is empty'
+    end   
   end
 
   private
