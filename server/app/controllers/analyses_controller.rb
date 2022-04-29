@@ -632,8 +632,14 @@ class AnalysesController < ApplicationController
       # get datapoints (make array)
       @datapoint_ids = params[:dps].split(',')
     end
-    # TODO: what do you actually want returned here?
-    write_and_send_rdata(@analysis, @datapoint_ids)
+    respond_to do |format|
+      format.csv do
+        write_and_send_csv(@analysis, @datapoint_ids)
+      end
+      format.rdata do
+        write_and_send_rdata(@analysis, @datapoint_ids)
+      end
+    end   
   end
 
   # Scatter plot
