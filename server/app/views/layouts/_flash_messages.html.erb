@@ -37,7 +37,7 @@
 
 <% @css_class = '' %>
 <% flash.each do |key, value| %>
-    <% if key.to_s == 'error' %>
+    <% if key.to_s == 'error' || key.to_s == 'alert' %>
       <% @css_class = '_error' %>
       <% break %>
     <% end %>

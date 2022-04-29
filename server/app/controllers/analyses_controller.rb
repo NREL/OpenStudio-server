@@ -571,13 +571,13 @@ class AnalysesController < ApplicationController
       new_pareto.x_var = params[:x_var]
       new_pareto.y_var = params[:y_var]
       new_pareto.name = params[:name]
-      logger.info("PARAMS: #{params}")
+
       new_pareto.data_points = params[:data_points].split(" ")
       if new_pareto.save
         @pareto_saved = true
-        flash[:notice] = 'Pareto saved!'
+        flash.now.notice = 'Pareto saved!'
       else
-        flash[:error] = "The pareto front could not be saved: #{new_pareto.errors.full_messages}"
+        flash.now.alert = "The pareto front could not be saved: #{new_pareto.errors.full_messages}"
         new_pareto.destroy
       end
     end
