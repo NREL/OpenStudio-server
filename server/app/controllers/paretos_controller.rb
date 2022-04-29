@@ -68,9 +68,10 @@ class ParetosController < ApplicationController
   # PUT /paretos/1.json
   def update
     @pareto = Pareto.find(params[:id])
+    params = pareto_params
 
     respond_to do |format|
-      if @pareto.update_attributes(params[:pareto])
+      if @pareto.update_attributes(params)
         format.html { redirect_to @pareto, notice: 'Pareto was successfully updated.' }
         format.json { head :no_content }
       else
@@ -90,5 +91,11 @@ class ParetosController < ApplicationController
       format.html { redirect_to paretos_url }
       format.json { head :no_content }
     end
+  end
+
+  private
+
+  def pareto_params
+    params.require(:pareto).permit!.to_h
   end
 end

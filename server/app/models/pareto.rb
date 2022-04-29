@@ -54,5 +54,5 @@ class Pareto
   index(analysis_id: 1)
 
   # Validation
-  validates :name, uniqueness: { scope: :anlysis_id }
+  validates :name, uniqueness: { scope: :analysis_id }
 end
