@@ -216,5 +216,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     a = RestClient.get "http://#{@host}/projects.json"
     a = JSON.parse(a, symbolize_names: true)
     expect(a).to be_empty
-  end  
+  end 
+
+  it 'run check_admin_page', :check_admin_page, js: true do
+
+    a = RestClient.get "http://#{@host}/admin"
+    expect(a.body).not_to include "Error"
+  end   
 end
