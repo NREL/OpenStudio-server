@@ -47,6 +47,7 @@
 require 'rails_helper'
 require 'rest-client'
 require 'json'
+require 'csv'
 
 # Set obvious paths for start-local & run-analysis invocation
 RUBY_CMD = 'ruby'
@@ -98,6 +99,44 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(analysis_id).to eq("86a529c9-8429-41e8-bca5-52b2628c8ff9")
   end
 
+  it 'run download_results', :download_results, js: true do
+
+    a = RestClient.get "http://#{@host}/analyses.json"
+    a = JSON.parse(a, symbolize_names: true)
+    expect(a).not_to be_empty
+    analysis = a[0]
+    analysis_id = analysis[:_id]
+    expect(analysis_id).to eq("86a529c9-8429-41e8-bca5-52b2628c8ff9")
+
+    #download CSV metadata
+    a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/variables/download_variables.csv"
+    a = CSV.parse(a)
+    expect(a).not_to be_empty
+    expect(a[0][0]).to eq("display_name")
+    expect(a.size).to eq(131)
+
+    #download CSV results
+    a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_data.csv?export=true"
+    a = CSV.parse(a)
+    expect(a).not_to be_empty
+    expect(a[0][0]).to eq("name")
+    expect(a.size).to eq(5)
+
+    #download RData metadata
+    a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/variables/download_variables.rdata"
+    expect(a).not_to be_empty
+    expect(a.size).to be >(3500)
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.headers[:content_type]).to eq("application/rdata; header=present")
+
+    #download RData results
+    a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_data.rdata?export=true"
+    expect(a).not_to be_empty
+    expect(a.size).to be >(2000)
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.headers[:content_type]).to eq("application/rdata; header=present")
+  end
+  
   it 'run delete_project', :delete_project, js: true do
 
     a = RestClient.get "http://#{@host}/projects.json"
