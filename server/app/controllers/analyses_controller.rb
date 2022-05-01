@@ -78,7 +78,7 @@ class AnalysesController < ApplicationController
       unless params[:status].nil?
         @status = params[:status]
       end
-
+      
       # blanks should be saved as nil or it will crash
       @all_page = @status == 'all' ? params[:page] : params[:all_page]
       @all_page = @all_page == '' ? 1 : @all_page

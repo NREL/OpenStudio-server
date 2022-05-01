@@ -68,13 +68,20 @@
       <!--toggle obj function is there are more than 3-->
 
       <% class_var = "" %>
-      <% if @objective_functions.count > 3 %>
+      <% if @objective_functions.count > 1 %>
         <div class="button-container">
           <button class="btn btn-mini" id='<%= "toggle-button-#{status || ''}"%>'>Toggle Obj Functions</button>
           <% class_var = "obj-function-col-" + status %>
         </div>
+        <label for="significant_digits">Significant Digits:</label>
+        <input type="number" id="significant_digits" name="significant_digits" value="2"><button onclick="update_significant()">submits</button>
       <% end %>
-
+      <script type="text/javascript">
+         function update_significant(){
+            significant_digit = document.getElementById('significant_digits').value;
+            document.getElementById('significant_digits').innerHTML = significant_digit;
+         }
+      </script>
       <!--toggle view_all on ALL page -->
       <br/>
 
@@ -118,8 +125,8 @@
                 <!-- TODO: This is horrible. Can we use an ostruct? send the data from the contoller -->
                 <td class="<%= class_var %>">
                   <% if dp.results[ov['name'].split(".")[0]] && dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]] %>
-                    <% if dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ %>
-                      <%= dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].round(2) %>   
+                    <% if dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].class != String && !@analysis.significant_digits.nil? %>
+                      <%= dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].round(@analysis.significant_digits) %>   
                     <% else %>
                       <%= dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]] %>
                     <% end %>
