@@ -63,11 +63,17 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
-    logger.info "analyses_contoller.show enter"
+    logger.info "analyses_controller.show enter"
     # for pagination
     per_page = 50
 
     @analysis = Analysis.find(params[:id])
+
+    if params[:commit] && params[:commit] == 'Update'
+      # update # of significant digits
+      @analysis.significant_digits = params[:significant_digits].to_i
+      @analysis.save!
+    end
 
     if @analysis
 
@@ -136,7 +142,7 @@ class AnalysesController < ApplicationController
       format.json { render json: { analysis: @analysis } }
       format.js
     end
-    logger.info "analyses_contoller.show leave"
+    logger.info "analyses_controller.show leave"
   end
 
   # GET /analyses/new
