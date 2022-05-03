@@ -63,7 +63,7 @@ puts "META_CLI is: #{META_CLI}"
 puts "App host is: http://#{HOST}"
 
 # the actual tests
-RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
+RSpec.describe 'TestAPIs', type: :feature do
   before :all do
     @host = HOST
     @project = PROJECT
@@ -75,11 +75,40 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     #APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
-  it 'run restore_database', :restore_database, js: true do
+  it 'run api_tests', :api_tests do
 
+    sleep(1)
+    puts 'remove any existing projects'
+    a = RestClient.get "http://#{@host}/projects.json"
+    a = JSON.parse(a, symbolize_names: true)
+    a.each do |project|
+        sleep(1)
+        id = project[:_id]
+        puts "removing existing project id: #{id}"
+        begin
+            RestClient.delete "http://#{@host}/projects/#{id}"
+        rescue RestClient::ExceptionWithResponse => err
+            case err.http_code
+            when 301, 302, 307
+                puts '   redirecting after delete'
+            end
+        end
+    end
+    
+    sleep(1)
+    puts 'check there are no projects'
+    a = RestClient.get "http://#{@host}/projects.json"
+    a = JSON.parse(a, symbolize_names: true)
+    expect(a).to be_empty
+    
+    sleep(1)
+    puts 'check that there are no analyses'
     a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     expect(a).to be_empty
+    
+    sleep(1)
+    puts 'restore database'
     URL = "http://#{@host}/admin/restore_database"
     file = File.new("/opt/openstudio/server/spec/files/mongodump_1651085721.tar.gz", "rb")
         begin
@@ -87,28 +116,23 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         rescue RestClient::ExceptionWithResponse => err
             case err.http_code
             when 301, 302, 307
-                puts 'redirecting after restore'
+                puts '   redirecting after restore'
             end
         end
     file.close
+    
+    sleep(1)
+    puts 'check there is one expected analyses'
     a = RestClient.get "http://#{@host}/analyses.json"
     a = JSON.parse(a, symbolize_names: true)
     expect(a).not_to be_empty
-    analysis = a[0]
-    analysis_id = analysis[:_id]
-    expect(analysis_id).to eq("86a529c9-8429-41e8-bca5-52b2628c8ff9")
-  end
-
-  it 'run download_results', :download_results, js: true do
-
-    a = RestClient.get "http://#{@host}/analyses.json"
-    a = JSON.parse(a, symbolize_names: true)
-    expect(a).not_to be_empty
+    expect(a.size).to eq(1)
     analysis = a[0]
     analysis_id = analysis[:_id]
     expect(analysis_id).to eq("86a529c9-8429-41e8-bca5-52b2628c8ff9")
 
-    #download CSV metadata
+    sleep(1)
+    puts 'test download CSV metadata'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/variables/download_variables.csv"
     expect(a.size).to be >(30000)
     expect(a.headers[:status]).to eq("200 OK")
@@ -119,7 +143,8 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a[0][0]).to eq("display_name")
     expect(a.size).to eq(131)
 
-    #download CSV results
+    sleep(1)
+    puts 'test download CSV results'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_data.csv?export=true"
     expect(a.size).to be >(5400)
     expect(a.headers[:status]).to eq("200 OK")
@@ -130,7 +155,8 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a[0][0]).to eq("name")
     expect(a.size).to eq(5)
 
-    #download RData metadata
+    sleep(1)
+    puts 'test download RData metadata'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/variables/download_variables.rdata"
     expect(a).not_to be_empty
     expect(a.size).to be >(3500)
@@ -138,25 +164,17 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_metadata.RData")
 
-    #download RData results
+    sleep(1)
+    puts 'test download RData results'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_data.rdata?export=true"
     expect(a).not_to be_empty
     expect(a.size).to be >(2000)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
-  end
 
-  it 'run download_selected_datapoints', :download_selected_datapoints, js: true do
-
-    a = RestClient.get "http://#{@host}/analyses.json"
-    a = JSON.parse(a, symbolize_names: true)
-    expect(a).not_to be_empty
-    analysis = a[0]
-    analysis_id = analysis[:_id]
-    expect(analysis_id).to eq("86a529c9-8429-41e8-bca5-52b2628c8ff9")
-
-    #download selected parallel coordinate plot datapoints in CSV
+    sleep(1)
+    puts 'test download selected parallel coordinate plot datapoints in CSV'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.csv?dps=0c0f61a0-58d7-43ab-a757-de491e272c38,298429ea-82b2-4ec3-85cb-6cf83bfcddd8,068a2732-45c0-4097-b645-0342720712d2"
     expect(a).not_to be_empty
     expect(a.size).to be >(4000)
@@ -168,7 +186,8 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a[0][0]).to eq("name")
     expect(a.size).to eq(4)
 
-    #download selected pareto plot datapoints in CSV
+    sleep(1)
+    puts 'download selected pareto plot datapoints in CSV'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.csv?dps=0c0f61a0-58d7-43ab-a757-de491e272c38%2C511a2d68-555f-40be-8f4c-8559a98f51fc"
     expect(a).not_to be_empty
     expect(a.size).to be >(4000)
@@ -180,7 +199,8 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a[0][0]).to eq("name")
     expect(a.size).to eq(3)
 
-    #download selected parallel coordinate plot datapoints in RDATA
+    sleep(1)
+    puts 'download selected parallel coordinate plot datapoints in RDATA'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.rdata?dps=0c0f61a0-58d7-43ab-a757-de491e272c38,298429ea-82b2-4ec3-85cb-6cf83bfcddd8,068a2732-45c0-4097-b645-0342720712d2"
     expect(a).not_to be_empty
     expect(a.size).to be >(1800)
@@ -188,17 +208,17 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
 
-    #download selected pareto plot datapoints in RDATA
+    sleep(1)
+    puts 'download selected pareto plot datapoints in RDATA'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.rdata?dps=0c0f61a0-58d7-43ab-a757-de491e272c38%2C511a2d68-555f-40be-8f4c-8559a98f51fc"
     expect(a).not_to be_empty
     expect(a.size).to be >(1800)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
-  end
   
-  it 'run delete_project', :delete_project, js: true do
-
+    sleep(1)
+    puts 'delete project'
     a = RestClient.get "http://#{@host}/projects.json"
     a = JSON.parse(a, symbolize_names: true)
     expect(a).not_to be_empty
@@ -208,19 +228,18 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     begin
         RestClient.delete "http://#{@host}/projects/0a77cd57-359c-4e3c-b8e8-d49311de0719"
     rescue RestClient::ExceptionWithResponse => err
-            case err.http_code
-            when 301, 302, 307
-                puts 'redirecting after delete'
-            end
+        case err.http_code
+        when 301, 302, 307
+            puts '   redirecting after delete'
+        end
     end
     a = RestClient.get "http://#{@host}/projects.json"
     a = JSON.parse(a, symbolize_names: true)
     expect(a).to be_empty
-  end 
 
-  it 'run check_admin_page', :check_admin_page, js: true do
+    puts 'check admin page for error'
 
     a = RestClient.get "http://#{@host}/admin"
     expect(a.body).not_to include "Error"
-  end   
+  end    
 end
