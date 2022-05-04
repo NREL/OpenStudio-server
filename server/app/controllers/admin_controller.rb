@@ -43,7 +43,8 @@ class AdminController < ApplicationController
     #unset_vars = Gem.win_platform? || ENV['OS'] == 'Windows_NT' ? 'set ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join('= && set ') : 'unset ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join(' && unset ')
     oscli_cmd = "#{Utility::Oss.oscli_cmd} openstudio_version"
     oscli_cmd = "call #{oscli_cmd}" if Gem.win_platform? || ENV['OS'] == 'Windows_NT'
-    version = `#{oscli_cmd}`
+    Rails.logger.debug "oscli_cmd: #{oscli_cmd}"
+    version = `#{oscli_cmd}`  #this will not work with --bundle args since user is 'nobody' and cannot create a tmpdir from $HOME
     Rails.logger.debug "oscli version output: #{version}"
     
     @os_cli = version ? version.strip : 'Unknown'
@@ -83,7 +84,7 @@ class AdminController < ApplicationController
     if $?.exitstatus.zero?
       logger.info 'Successfully extracted uploaded database dump'
 
-      exec_str = "mongorestore --username  ENV['MONGO_USERNAME'] --password  ENV['MONGO_PASSWORD'] --authenticationDatabase admin  #{Mongoid.default_client.database.name} -h #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
+      exec_str = "mongorestore --username $MONGO_USER --password $MONGO_PASSWORD --authenticationDatabase admin --db #{Mongoid.default_client.database.name} --host #{Mongoid.default_client.cluster.addresses[0].seed} --drop #{extract_dir}/#{Mongoid.default_client.database.name}"
       `#{exec_str}`
       if $?.exitstatus.zero?
         logger.info 'Restored mongo database'
@@ -103,7 +104,7 @@ class AdminController < ApplicationController
     dump_dir = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}"
     FileUtils.mkdir_p(dump_dir)
 
-    exec_str = "mongodump --username  ENV['MONGO_USERNAME'] --password  ENV['MONGO_PASSWORD'] --authenticationDatabase admin --db #{Mongoid.default_client.database.name} --host #{Mongoid.default_client.cluster.addresses[0].seed} --out #{dump_dir}"
+    exec_str = "mongodump --username $MONGO_USER --password $MONGO_PASSWORD --authenticationDatabase admin --db #{Mongoid.default_client.database.name} --host #{Mongoid.default_client.cluster.addresses[0].seed} --out #{dump_dir}"
     `#{exec_str}`
 
     if $?.exitstatus.zero?

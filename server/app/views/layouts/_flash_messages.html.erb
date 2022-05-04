@@ -37,10 +37,15 @@
 
 <% @css_class = '' %>
 <% flash.each do |key, value| %>
-    <% if key.to_s == 'error' %>
-        <% @css_class = '_error' %>
-        <% break %>
+    <% if key.to_s == 'error' || key.to_s == 'alert' %>
+      <% @css_class = '_error' %>
+      <% break %>
     <% end %>
 <% end %>
 
-<div id="flash_messages<%= @css_class %>">
+<div id="flash_messages<%= @css_class %>"> 
+  <% flash.each do |key, value| %>
+    <%= value %><br/>
+  <% end %>
+</div>
+

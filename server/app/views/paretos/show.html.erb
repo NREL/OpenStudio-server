@@ -78,6 +78,7 @@
       </tbody>
     </table>
 
-    <%= link_to 'Download R Dataframe for these Datapoints', download_selected_datapoints_analysis_path(@analysis, dps: @dps), class: 'btn btn-info' %>
+    <%= link_to 'Download R Dataframe for these Datapoints', download_selected_datapoints_analysis_path(@analysis, dps: @dps, format: :rdata), class: 'btn btn-info' %>
+    <%= link_to 'Download CSV for these Datapoints', download_selected_datapoints_analysis_path(@analysis, dps: @dps, format: :csv), class: 'btn btn-info' %>
   </div>
 </div>

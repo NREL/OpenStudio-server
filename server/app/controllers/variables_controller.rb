@@ -128,8 +128,6 @@ class VariablesController < ApplicationController
     respond_to do |format|
       format.csv do
         write_and_send_input_variables_csv(analysis)
-        # redirect_to @analysis, notice: 'CSV not yet supported for downloading variables'
-        # write_and_send_csv(@analysis)
       end
       format.rdata do
         write_and_send_input_variables_rdata(analysis)
@@ -216,36 +214,29 @@ class VariablesController < ApplicationController
       h1.each { |k, v| h[k] = h[k] + [v] }
     end
 
-    logger.info out_hash
-
     download_filename = "#{analysis.name}_metadata.RData"
     data_frame_name = 'metadata'
 
-    logger.info("outhash is #{out_hash}")
-
     r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
                                                 APP_CONFIG['rserve_port'])
-    r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
-      %{
-            temp <- tempfile('rdata', tmpdir="/tmp")
-            save('#{data_frame_name}', file = temp)
-            Sys.chmod(temp, mode = "0777", use_umask = TRUE)
-         }
-    end
-    tmp_filename = r.converse('temp')
+    if !out_hash.empty?
+        r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
+          %{
+                dir.create('/mnt/openstudio/tmp')
+                temp <- tempfile('rdata', tmpdir="/mnt/openstudio/tmp")
+                save('#{data_frame_name}', file = temp)
+                Sys.chmod(temp, mode = "0777", use_umask = TRUE)
+             }
+        end
+        tmp_filename = r.converse('temp')
 
-    if File.exist?(tmp_filename)
-      send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
-    else
-      raise 'could not create R dataframe'
-    end
-
-    # Have R delete the file since it will have permissions to delete the file.
-    logger.info "Temp filename is #{tmp_filename}"
-    r_command = "file.remove('#{tmp_filename}')"
-    logger.info "R command is #{r_command}"
-    if File.exist? tmp_filename
-      r.converse(r_command)
-    end
+        if File.exist?(tmp_filename)
+            send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
+        else
+            raise 'could not create R dataframe'
+        end
+    else 
+        raise 'out_hash is empty'
+    end 
   end
 end

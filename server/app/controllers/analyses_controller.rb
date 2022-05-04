@@ -566,18 +566,19 @@ class AnalysesController < ApplicationController
       @pareto_data_points = params[:data_points]
 
       # save
-      @new_pareto = Pareto.new
-      @new_pareto.analysis = @analysis
-      @new_pareto.x_var = params[:x_var]
-      @new_pareto.y_var = params[:y_var]
-      @new_pareto.name = params[:name]
-      @new_pareto.data_points = params[:data_points]
-      if @new_pareto.save
-        logger.info('--pareto is saved--')
+      new_pareto = Pareto.new
+      new_pareto.analysis = @analysis
+      new_pareto.x_var = params[:x_var]
+      new_pareto.y_var = params[:y_var]
+      new_pareto.name = params[:name]
+
+      new_pareto.data_points = params[:data_points].split(" ")
+      if new_pareto.save
         @pareto_saved = true
-        flash[:notice] = 'Pareto saved!'
+        flash.now.notice = 'Pareto saved!'
       else
-        flash[:error] = "The pareto front could not be saved: #{@new_pareto.errors.full_messages}"
+        flash.now.alert = "The pareto front could not be saved: #{new_pareto.errors.full_messages}"
+        new_pareto.destroy
       end
     end
 
@@ -631,8 +632,14 @@ class AnalysesController < ApplicationController
       # get datapoints (make array)
       @datapoint_ids = params[:dps].split(',')
     end
-    # TODO: what do you actually want returned here?
-    write_and_send_rdata(@analysis, @datapoint_ids)
+    respond_to do |format|
+      format.csv do
+        write_and_send_csv(@analysis, @datapoint_ids)
+      end
+      format.rdata do
+        write_and_send_rdata(@analysis, @datapoint_ids)
+      end
+    end   
   end
 
   # Scatter plot
@@ -933,21 +940,18 @@ class AnalysesController < ApplicationController
     # Eventually use this where the timestamp is processed as part of the request to save time
     plot_data = if datapoint_id
                   if only_completed_normal
-                    DataPoint.where(
-                      analysis_id: analysis, status: 'completed', id: datapoint_id, status_message: 'completed normal'
-                    )
+                    DataPoint.where(analysis_id: analysis, status: 'completed', :id.in => datapoint_id, status_message: 'completed normal')
                   else
-                    DataPoint.where(analysis_id: analysis, id: datapoint_id)
+                    DataPoint.where(analysis_id: analysis, :id.in => datapoint_id)
                   end
                 else
                   if only_completed_normal
-                    DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal')
-                             .order_by(:created_at.asc)
+                    DataPoint.where(analysis_id: analysis, status: 'completed', status_message: 'completed normal').order_by(:created_at.asc)
                   else
                     DataPoint.where(analysis_id: analysis).order_by(:created_at.asc)
                   end
                 end
-
+    logger.info "PLOT_DATA.count: #{plot_data.count}"
     logger.info "finished fixing up data: #{Time.now - start_time}"
 
     start_time = Time.now
@@ -1029,7 +1033,6 @@ class AnalysesController < ApplicationController
   def write_and_send_rdata(analysis, datapoint_ids = nil)
     # get variables from the variables object now instead of using the "superset_of_input_variables"
     variables, data = get_analysis_data(analysis, datapoint_ids, false, export: true)
-
     static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
     names_of_vars = static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
 
@@ -1065,23 +1068,27 @@ class AnalysesController < ApplicationController
 
     start_time = Time.now
     logger.info 'starting creation of data frame'
-    # TODO: check these permissions and make them less open
-    r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
-      %{
-            dir.create('/mnt/openstudio/tmp')
-            temp <- tempfile('rdata', tmpdir="/mnt/openstudio/tmp")
-            save('#{data_frame_name}', file = temp)
-            Sys.chmod(temp, mode = "0777", use_umask = TRUE)
-         }
-    end
-    tmp_filename = r.converse('temp')
-    logger.info "finished data frame: #{Time.now - start_time}"
+    if !out_hash.empty?
+        # TODO: check these permissions and make them less open
+        r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
+          %{
+                dir.create('/mnt/openstudio/tmp')
+                temp <- tempfile('rdata', tmpdir="/mnt/openstudio/tmp")
+                save('#{data_frame_name}', file = temp)
+                Sys.chmod(temp, mode = "0777", use_umask = TRUE)
+             }
+        end
+        tmp_filename = r.converse('temp')
+        logger.info "finished data frame: #{Time.now - start_time}"
 
-    if File.exist?(tmp_filename)
-      send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
-    else
-      raise 'could not create R dataframe'
-    end
+        if File.exist?(tmp_filename)
+            send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'
+        else
+            raise 'could not create R dataframe'
+        end
+    else 
+        raise 'out_hash is empty'
+    end   
   end
 
   private
