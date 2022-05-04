@@ -38,7 +38,8 @@ class Pareto
   include Mongoid::Timestamps
 
   # Fields
-  field :_id, type: String, default: SecureRandom.uuid
+  field :uuid, type: String
+  field :_id, type: String, default: -> { uuid || SecureRandom.uuid }
   field :name, type: String
   field :x_var, type: String
   field :y_var, type: String
@@ -48,9 +49,10 @@ class Pareto
   belongs_to :analysis
 
   # Indexes
+  index({ uuid: 1 }, unique: true)
   index(id: 1)
   index(analysis_id: 1)
 
   # Validation
-  validates :name, uniqueness: { scope: :anlysis_id }
+  validates :name, uniqueness: { scope: :analysis_id }
 end

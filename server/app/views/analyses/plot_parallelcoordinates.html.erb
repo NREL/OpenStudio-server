@@ -485,8 +485,11 @@
 
         $("#partial-div").append(html);
         
-        $("#partial-div").append('<div class="pad-top-20"><a href="download_selected_datapoints?dps=' + selected_datapoints +
-          '" , class="btn btn-info">Download Selected Datapoints</a></div>');
+        $("#partial-div").append('<div class="pad-top-20"><a href="download_selected_datapoints.rdata?dps=' + selected_datapoints +
+          '" , class="btn btn-info">Download RDATA for Selected Datapoints</a></div>');
+
+        $("#partial-div").append('<div class="pad-top-20"><a href="download_selected_datapoints.csv?dps=' + selected_datapoints +
+          '" , class="btn btn-info">Download CSV for Selected Datapoints</a></div>');        
       }
 
 
