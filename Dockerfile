@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.4.0-rc2
+ARG OPENSTUDIO_VERSION=3.4.0
 FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
@@ -127,6 +127,7 @@ RUN chmod 755 /usr/local/bin/start-workers
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
+ENV OPENSTUDIO_EXE_PATH /usr/local/bin/openstudio
 
 ENTRYPOINT ["rails-entrypoint"]
 

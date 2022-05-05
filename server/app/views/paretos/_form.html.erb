@@ -38,12 +38,10 @@
 <%= form_for(@pareto) do |f| %>
   <% if @pareto.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@pareto.errors.count, "error") %> prohibited this pareto from being saved:</h2>
+      <h2><%= pluralize(@pareto.errors.to_hash.size, "error") %> prohibited this pareto from being saved:</h2>
 
       <ul>
-      <% @pareto.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
+        <li><%= @pareto.errors.full_messages %></li>
       </ul>
     </div>
   <% end %>
