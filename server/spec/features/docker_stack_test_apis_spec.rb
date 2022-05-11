@@ -142,12 +142,13 @@ RSpec.describe 'TestAPIs', type: :feature do
     a = CSV.parse(a)
     expect(a).not_to be_empty
     expect(a[0][0]).to eq("display_name")
-    expect(a.size).to eq(131)
+    expect(a.size).to eq(33)
 
     sleep(1)
     puts 'test download CSV results'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_data.csv?export=true"
-    expect(a.size).to be >(5400)
+    expect(a.size).to be >(4000)
+    expect(a.size).to be <(6000)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("text/csv; charset=iso-8859-1")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013.csv")
@@ -160,7 +161,8 @@ RSpec.describe 'TestAPIs', type: :feature do
     puts 'test download RData metadata'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/variables/download_variables.rdata"
     expect(a).not_to be_empty
-    expect(a.size).to be >(3500)
+    expect(a.size).to be >(1500)
+    expect(a.size).to be <(2500)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_metadata.RData")
@@ -169,7 +171,8 @@ RSpec.describe 'TestAPIs', type: :feature do
     puts 'test download RData results'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_data.rdata?export=true"
     expect(a).not_to be_empty
-    expect(a.size).to be >(2000)
+    expect(a.size).to be >(1500)
+    expect(a.size).to be <(2500)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
@@ -199,7 +202,8 @@ RSpec.describe 'TestAPIs', type: :feature do
     puts 'test download selected parallel coordinate plot datapoints in CSV'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.csv?dps=0c0f61a0-58d7-43ab-a757-de491e272c38,298429ea-82b2-4ec3-85cb-6cf83bfcddd8,068a2732-45c0-4097-b645-0342720712d2"
     expect(a).not_to be_empty
-    expect(a.size).to be >(4000)
+    expect(a.size).to be >(3500)
+    expect(a.size).to be <(4500)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("text/csv; charset=iso-8859-1")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013.csv")
@@ -212,7 +216,8 @@ RSpec.describe 'TestAPIs', type: :feature do
     puts 'download selected pareto plot datapoints in CSV'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.csv?dps=0c0f61a0-58d7-43ab-a757-de491e272c38%2C511a2d68-555f-40be-8f4c-8559a98f51fc"
     expect(a).not_to be_empty
-    expect(a.size).to be >(4000)
+    expect(a.size).to be >(2500)
+    expect(a.size).to be <(3500)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("text/csv; charset=iso-8859-1")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013.csv")
@@ -225,7 +230,8 @@ RSpec.describe 'TestAPIs', type: :feature do
     puts 'download selected parallel coordinate plot datapoints in RDATA'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.rdata?dps=0c0f61a0-58d7-43ab-a757-de491e272c38,298429ea-82b2-4ec3-85cb-6cf83bfcddd8,068a2732-45c0-4097-b645-0342720712d2"
     expect(a).not_to be_empty
-    expect(a.size).to be >(1800)
+    expect(a.size).to be >(1000)
+    expect(a.size).to be <(1500)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
@@ -234,7 +240,8 @@ RSpec.describe 'TestAPIs', type: :feature do
     puts 'download selected pareto plot datapoints in RDATA'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.rdata?dps=0c0f61a0-58d7-43ab-a757-de491e272c38%2C511a2d68-555f-40be-8f4c-8559a98f51fc"
     expect(a).not_to be_empty
-    expect(a.size).to be >(1800)
+    expect(a.size).to be >(1000)
+    expect(a.size).to be <(1500)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
