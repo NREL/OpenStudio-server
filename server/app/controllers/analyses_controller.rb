@@ -692,16 +692,18 @@ class AnalysesController < ApplicationController
   def analysis_data
     @analysis = Analysis.find(params[:id])
     datapoint_id = params[:datapoint_id] || nil
+    logger.debug "analyses_data params: #{params}"
     # other variables that can be specified
     options = {}
     options['visualize'] = params[:visualize] == 'true'
     options['export'] = params[:export] == 'true'
     options['pivot'] = params[:pivot] == 'true'
     options['perturbable'] = params[:perturbable] == 'true'
-
+    logger.debug "analyses_data options: #{options}"
     # get data
     @variables, @data = get_analysis_data(@analysis, datapoint_id, true, options)
-
+    logger.debug "analyses_data @variables: #{@variables}"
+    logger.debug "analyses_data @data: #{@data}"
     logger.info 'sending analysis data to view'
     respond_to do |format|
       format.json { render json: { variables: @variables, data: @data } }
@@ -891,8 +893,10 @@ class AnalysesController < ApplicationController
     options.each do |k, v|
       or_qry << { :"#{k}" => v } if v
     end
-    variables = Variable.where(analysis_id: analysis, :name.nin => ['', nil]).or(or_qry)
+    logger.debug "get_analysis_data or_qry: #{or_qry}"   
+    variables = Variable.where(analysis_id: analysis, :name.exists => true, :name.ne => '').any_of(or_qry)
                         .order_by([:pivot.desc, :perturbable.desc, :output.desc, :name.asc]).as_json(only: var_fields)
+    logger.debug "get_analysis_data variables: #{variables.to_a}"
 
     # Create a map from the _id to the variables machine name
     variable_name_map = Hash[variables.map { |v| [v['_id'], v['name'].tr('.', '|')] }]
@@ -1005,7 +1009,10 @@ class AnalysesController < ApplicationController
   # Get plot variables
   # Used by plot_parallelcoordinates
   def get_plot_variables(analysis)
-    variables = Variable.where(analysis_id: analysis).or(perturbable: true).or(pivot: true).or(visualize: true).order_by(:name.asc)
+    any_of_qry = [{ perturbable: true }, { pivot: true }, { visualize: true }]
+    variables = Variable.where(analysis_id: analysis).any_of(any_of_qry).order_by(:name.asc)
+    logger.debug "GET_PLOT_VARIABLES: #{variables.to_a}"
+    variables
   end
 
   def write_and_send_csv(analysis, datapoint_ids = nil)
