@@ -166,7 +166,8 @@
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   d3.json(encodeURI("analysis_data.json?visualize=true"), function (error, data) {
-
+    console.log("data['data']: ", data['data']);
+    console.log("data['variables']: ", data['variables']);
 
     // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
     var seriesNames = new Array();

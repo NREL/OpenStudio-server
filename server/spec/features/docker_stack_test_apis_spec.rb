@@ -134,7 +134,8 @@ RSpec.describe 'TestAPIs', type: :feature do
     sleep(1)
     puts 'test download CSV metadata'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/variables/download_variables.csv"
-    expect(a.size).to be >(30000)
+    expect(a.size).to be >(8000)
+    expect(a.size).to be <(10000)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("text/csv; charset=iso-8859-1")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_metadata.csv")
@@ -173,6 +174,27 @@ RSpec.describe 'TestAPIs', type: :feature do
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
 
+    sleep(1)
+    puts 'test analysis_data JSON'
+    a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/analysis_data.json"
+    expect(a).not_to be_empty
+    expect(a.size).to be >(22000)
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.headers[:content_type]).to eq("application/json; charset=utf-8")
+    a = JSON.parse(a, symbolize_names: true)
+    #should have 32 variables with any_of :export, :visualize, :pivot true
+    expect(a[:variables].size).to eq(32)
+    count = 0
+    a[:variables].each_with_index do |(key, value), i|
+        if value[:visualize] == true
+            count += 1
+        end
+    end
+    #only 23 variables with visualize true
+    expect(count).to eq(23)
+    #should be 4 datapoints
+    expect(a[:data].size).to eq(4)
+    
     sleep(1)
     puts 'test download selected parallel coordinate plot datapoints in CSV'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.csv?dps=0c0f61a0-58d7-43ab-a757-de491e272c38,298429ea-82b2-4ec3-85cb-6cf83bfcddd8,068a2732-45c0-4097-b645-0342720712d2"
