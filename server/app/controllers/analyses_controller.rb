@@ -961,11 +961,21 @@ class AnalysesController < ApplicationController
     }
 
     # Eventually use this where the timestamp is processed as part of the request to save time
+    logger.info "datapoint_id.size: #{datapoint_id.size}" if !datapoint_id.nil?
+    logger.info "datapoint_id.class: #{datapoint_id.class}"
     plot_data = if datapoint_id
                   if only_completed_normal
-                    DataPoint.where(analysis_id: analysis, status: 'completed', :id.in => datapoint_id, status_message: 'completed normal')
+                    if datapoint_id.class == Array
+                      DataPoint.where(analysis_id: analysis, status: 'completed', :id.in => datapoint_id, status_message: 'completed normal')
+                    else
+                      DataPoint.where(analysis_id: analysis, status: 'completed', :id => datapoint_id, status_message: 'completed normal')
+                    end
                   else
-                    DataPoint.where(analysis_id: analysis, :id.in => datapoint_id)
+                    if datapoint_id.class == Array
+                      DataPoint.where(analysis_id: analysis, :id.in => datapoint_id)
+                    else
+                      DataPoint.where(analysis_id: analysis, :id => datapoint_id)
+                    end
                   end
                 else
                   if only_completed_normal
