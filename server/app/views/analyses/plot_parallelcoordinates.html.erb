@@ -41,9 +41,22 @@
     pareto_points = <%= raw @pareto_data_points.to_json %>;
     pareto_names = <%= raw @pareto_names.to_json %>;
     include_all_data = <%= raw @include_all.to_json %>;
+    variable_display_name = <%= raw @analysis.variable_display_name_choice.to_json %>;
 <% end %>
 
 <%= form_tag("/analyses/#{@analysis.id}/plot_parallelcoordinates") do %>
+    <div class="well">
+    <h3>Display Name Type</h3>
+    <p class="p-chart">Select the display type for the variable names</p>
+    <table class="edittable">
+      <tr>
+        <td><%= label_tag("variable_display_name_choice", "Display Names") %></td>
+        <td><%= select_tag "variable_display_name_choice", options_for_select(["name", "display_name", "display_name_short"], params[:variable_display_name_choice]) %></td>
+      </tr>
+    </table>
+    <div class="submit-form"> <%= submit_tag "Change Display Name", class: 'btn btn-primary' %></div>
+    </div>
+
     <div id="chart-form">
       <div class="chart-text">
         <h3 class="inline">Variables</h3> | <p class="inline"> Select the variables to include in the chart</p>
@@ -68,7 +81,13 @@
                     <% checked_str = false %>
                 <% end %>
                 <%= check_box_tag "variables[]", var.name, checked_str, :id => "variables_#{index}" %>
-                <%= label_tag("variables_#{index}", var.display_name) %>
+                <% if @analysis.variable_display_name_choice == "display_name" %>
+                    <%= label_tag("variables_#{index}", var.display_name) %>
+                <% elsif @analysis.variable_display_name_choice == "display_name_short" %>
+                    <%= label_tag("variables_#{index}", var.display_name_short) %>
+                <% else %>
+                    <%= label_tag("variables_#{index}", var.name) %>
+                <% end %>                
               </p>
             <% end %>
               <%# if @pareto %><%#= hidden_field_tag("pareto", @pareto.id) %>
@@ -157,6 +176,7 @@
 
     console.log("pareto names: ", pareto_names);
     console.log("include all data: ", include_all_data);
+    console.log("variable_display_name: ", variable_display_name);
     d3.json("analysis_data.json?visualize=true", function (error, data) {
         //console.log(data['data']);
       console.log("data['data']: ", data['data']);
@@ -357,7 +377,8 @@
                 .attr("y", -9)
                 .attr("transform", "rotate(-45)")
                 .text(function (d) {
-                    return variables[d]['display_name_short'];
+                    //return variables[d]['display_name_short'];
+                    return variables[d][(variable_display_name.toString())];
                 });
 
         // Add and store a brush for each axis.

@@ -506,6 +506,12 @@ class AnalysesController < ApplicationController
       @include_all = true
     end
 
+    #change display name type
+    if params[:commit] && params[:commit] == 'Change Display Name'
+        @analysis.variable_display_name_choice = params[:variable_display_name_choice]
+        @analysis.save!
+    end
+
     # figure out actions
     # if params[:commit] && params[:commit] == 'All Data'
     # don't do pareto
