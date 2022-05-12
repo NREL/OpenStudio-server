@@ -527,6 +527,7 @@ class AnalysesController < ApplicationController
 
   # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
+    logger.debug "plot_xy_interactive params: #{params}"
     @analysis = Analysis.find(params[:id])
     @saved_paretos = @analysis.paretos
 
@@ -551,6 +552,12 @@ class AnalysesController < ApplicationController
       pareto = Pareto.find(params[:pareto])
       @pareto_data_points = pareto.data_points
       @variables = [pareto.x_var, pareto.y_var]
+    end
+
+    #change display name type
+    if params[:commit] && params[:commit] == 'Change Display Name'
+        @analysis.variable_display_name_choice = params[:variable_display_name_choice]
+        @analysis.save!
     end
 
     # calculate pareto or update chart?
