@@ -231,7 +231,7 @@ RSpec.describe 'TestAPIs', type: :feature do
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/download_selected_datapoints.rdata?dps=0c0f61a0-58d7-43ab-a757-de491e272c38,298429ea-82b2-4ec3-85cb-6cf83bfcddd8,068a2732-45c0-4097-b645-0342720712d2"
     expect(a).not_to be_empty
     expect(a.size).to be >(1000)
-    expect(a.size).to be <(1500)
+    expect(a.size).to be <(2000)
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/rdata; header=present")
     expect(a.headers[:content_disposition]).to include("SEB_calibration_NSGA_2013_results.RData")
