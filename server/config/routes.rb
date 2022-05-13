@@ -31,7 +31,6 @@ Rails.application.routes.draw do
         post :plot_parallelcoordinates
         get :plot_scatter
         get :plot_radar
-        get :plot_bar
         get :download_data
         get :download_analysis_zip
         get :download_result_file

@@ -689,17 +689,6 @@ class AnalysesController < ApplicationController
     end
   end
 
-  # Bar chart (single datapoint, must have objective functions)
-  # "% error"-like, but negative when actual is less than target and positive when it is more than target
-  def plot_bar
-    @analysis = Analysis.find(params[:id])
-    @datapoint = DataPoint.find(params[:datapoint_id])
-
-    respond_to do |format|
-      format.html # plot_bar.html.erb
-    end
-  end
-
   # This function provides all data (plot or export data, depending on what is specified) in
   # a JSON format that can be consumed by various users such as the bar plots, parallel plots, pairwise plots, etc.
   def analysis_data
