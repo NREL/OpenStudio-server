@@ -46,8 +46,8 @@
   <%= javascript_tag do %>
     variables = <%=raw @variables.to_json %>;
     pareto_points = <%= raw @pareto_data_points.to_json %>;
+    display_name_choice = <%= raw @analysis.variable_display_name_choice.to_json %>;
   <% end %>
-
   
   <div class="row">
     <div class="span8">
@@ -179,8 +179,8 @@
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   d3.json(encodeURI("analysis_data.json?visualize=true"), function (error, data) {
-    console.log("data['data']: ", data['data']);
-    console.log("data['variables']: ", data['variables']);
+    // console.log("data['data']: ", data['data']);
+    // console.log("data['variables']: ", data['variables']);
 
     // Compute the series names ("y1", "y2", etc.) from the loaded CSV.
     var seriesNames = new Array();
@@ -226,11 +226,47 @@
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.svg.axis().scale(x).orient("bottom"));
-   
+    // add the axis label
+    var x_label = '';
+    var y_label = '';
+    if (display_name_choice) {
+      x_label = data['variables'][variables[0]][display_name_choice];
+      y_label = data['variables'][variables[1]][display_name_choice];
+    } else {
+      x_label = variables[0];
+      y_label = variables[1];
+    }
+    
+    svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        // .attr("x", width)
+        // .attr("y", height + 20)
+        .text(x_label)
+        .style("font-size","130%")
+        .attr("transform", function(d) {
+          var the_x = width - 10;
+          var the_y = height + 32;
+          return "translate(" + the_x + "," + the_y + ")";
+        });
+       
     // Add the y-axis.
     svg.append("g")
         .attr("class", "y axis")
         .call(d3.svg.axis().scale(y).orient("left"));
+    // Add the y axis label
+    svg.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("y", 6)
+        .attr("dy", ".75em")
+        //.attr("transform", "rotate(-90)")
+        .text(y_label)
+        .style("font-size","130%")
+        .attr("transform", function(d) {
+          var the_y = 20;
+          return "translate(" + -50 + "," + the_y + ") rotate(-90)";
+  });
 
     // Add the points for all series!
     svg.selectAll(".series")
