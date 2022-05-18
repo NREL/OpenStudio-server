@@ -45,26 +45,31 @@
 <% end %>
 
 <%= form_tag("/analyses/#{@analysis.id}/plot_parallelcoordinates") do %>
-    <div class="well">
-    <h3>Display Name Type</h3>
-    <p class="p-chart">Select the display type for the variable names</p>
-    <table class="edittable">
-      <tr>
-        <td><%= label_tag("variable_display_name_choice", "Display Names") %></td>
-        <td><%= select_tag "variable_display_name_choice", options_for_select(["name", "display_name", "display_name_short"], params[:variable_display_name_choice]) %></td>
-      </tr>
-    </table>
-    <div class="submit-form"> <%= submit_tag "Change Display Name", class: 'btn btn-primary' %></div>
-    </div>
-
     <div id="chart-form">
       <div class="chart-text">
-        <h3 class="inline">Variables</h3> | <p class="inline"> Select the variables to include in the chart</p>
-        
-        <div class="pad-top-10 pad-bottom-10">
-          <button type="button" id="check_all" class="btn btn-primary">
-            Check / Uncheck All
-          </button>
+        <div class="row">
+          <div class="span6">
+            <h3 class="inline">Variables</h3> | <p class="inline"> Select the variables to include in the chart</p>
+            
+            <div class="pad-top-10 pad-bottom-10">
+              <button type="button" id="check_all" class="btn btn-primary">
+                Check / Uncheck All
+              </button>
+            </div>
+          </div>
+          <div class="span6">
+            <div class="pad-bottom-10">
+              <h3 class="inline">Display Name</h3> | <p class="inline">Select the display type for the variable names</p>
+            </div>
+            <div class="pad-bottom-20">
+              <div class="pull-left span3">
+                <%= select_tag "variable_display_name_choice", options_for_select(["name", "display_name", "display_name_short"], @analysis.variable_display_name_choice), {class: 'form-control'} %>
+              </div>
+              <div class="pull-right">
+                <%= submit_tag "Change Display Name", class: 'btn btn-primary' %>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="row-fluid">

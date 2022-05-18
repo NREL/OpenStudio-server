@@ -63,7 +63,7 @@
         <table class="edittable">
           <tr>
             <td><%= label_tag("variable_display_name_choice", "Display Names") %></td>
-            <td><%= select_tag "variable_display_name_choice", options_for_select(["name", "display_name", "display_name_short"], params[:variable_display_name_choice]) %></td>
+            <td><%= select_tag "variable_display_name_choice", options_for_select(["name", "display_name", "display_name_short"], @analysis.variable_display_name_choice) %></td>
           </tr>
         </table>
         <div class="submit-form"> <%= submit_tag "Change Display Name", class: 'btn btn-primary' %></div>
