@@ -506,6 +506,12 @@ class AnalysesController < ApplicationController
       @include_all = true
     end
 
+    #change display name type
+    if params[:commit] && params[:commit] == 'Change Display Name'
+        @analysis.variable_display_name_choice = params[:variable_display_name_choice]
+        @analysis.save!
+    end
+
     # figure out actions
     # if params[:commit] && params[:commit] == 'All Data'
     # don't do pareto
@@ -527,6 +533,7 @@ class AnalysesController < ApplicationController
 
   # Interactive XY plot: choose x and y variables
   def plot_xy_interactive
+    logger.debug "plot_xy_interactive params: #{params}"
     @analysis = Analysis.find(params[:id])
     @saved_paretos = @analysis.paretos
 
@@ -551,6 +558,12 @@ class AnalysesController < ApplicationController
       pareto = Pareto.find(params[:pareto])
       @pareto_data_points = pareto.data_points
       @variables = [pareto.x_var, pareto.y_var]
+    end
+
+    #change display name type
+    if params[:commit] && params[:commit] == 'Change Display Name'
+        @analysis.variable_display_name_choice = params[:variable_display_name_choice]
+        @analysis.save!
     end
 
     # calculate pareto or update chart?
@@ -673,17 +686,6 @@ class AnalysesController < ApplicationController
 
     respond_to do |format|
       format.html # plot_radar.html.erb
-    end
-  end
-
-  # Bar chart (single datapoint, must have objective functions)
-  # "% error"-like, but negative when actual is less than target and positive when it is more than target
-  def plot_bar
-    @analysis = Analysis.find(params[:id])
-    @datapoint = DataPoint.find(params[:datapoint_id])
-
-    respond_to do |format|
-      format.html # plot_bar.html.erb
     end
   end
 
@@ -948,11 +950,21 @@ class AnalysesController < ApplicationController
     }
 
     # Eventually use this where the timestamp is processed as part of the request to save time
+    logger.info "datapoint_id.size: #{datapoint_id.size}" if !datapoint_id.nil?
+    logger.info "datapoint_id.class: #{datapoint_id.class}"
     plot_data = if datapoint_id
                   if only_completed_normal
-                    DataPoint.where(analysis_id: analysis, status: 'completed', :id.in => datapoint_id, status_message: 'completed normal')
+                    if datapoint_id.class == Array
+                      DataPoint.where(analysis_id: analysis, status: 'completed', :id.in => datapoint_id, status_message: 'completed normal')
+                    else
+                      DataPoint.where(analysis_id: analysis, status: 'completed', :id => datapoint_id, status_message: 'completed normal')
+                    end
                   else
-                    DataPoint.where(analysis_id: analysis, :id.in => datapoint_id)
+                    if datapoint_id.class == Array
+                      DataPoint.where(analysis_id: analysis, :id.in => datapoint_id)
+                    else
+                      DataPoint.where(analysis_id: analysis, :id => datapoint_id)
+                    end
                   end
                 else
                   if only_completed_normal

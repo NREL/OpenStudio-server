@@ -58,16 +58,29 @@
     <div class="span5">
       <%= form_tag("/analyses/#{@analysis.id}/plot_xy_interactive") do  %>
       <div class="well">
+        <h3>Display Name Type</h3>
+        <p class="p-chart">Select the display type for the variable names</p>
+        <table class="edittable">
+          <tr>
+            <td><%= label_tag("variable_display_name_choice", "Display Names") %></td>
+            <td><%= select_tag "variable_display_name_choice", options_for_select(["name", "display_name", "display_name_short"], params[:variable_display_name_choice]) %></td>
+          </tr>
+        </table>
+        <div class="submit-form"> <%= submit_tag "Change Display Name", class: 'btn btn-primary' %></div>
+      </div>
+      
+      
+      <div class="well">
         <h3>Update Chart</h3>
         <p class="p-chart">Select x and y variables to update the chart</p>
         <table class="edittable">
           <tr>
             <td><%= label_tag("variables[x]", "X") %></td>
-            <td><%= select_tag "variables[x]", options_from_collection_for_select(@plotvars, :name, :name, @variables.first) %></td>
+            <td><%= select_tag "variables[x]", options_from_collection_for_select(@plotvars, :name, @analysis.variable_display_name_choice.to_sym, @variables.first) %></td>
           </tr>
           <tr>
             <td><%= label_tag("variables[y]", "Y") %></td>
-            <td><%= select_tag "variables[y]", options_from_collection_for_select(@plotvars, :name, :name, @variables.last) %></td>
+            <td><%= select_tag "variables[y]", options_from_collection_for_select(@plotvars, :name, @analysis.variable_display_name_choice.to_sym, @variables.last) %></td>
           </tr>
         </table>
         <div class="submit-form"> <%= submit_tag "Update Chart", class: 'btn btn-primary' %></div>

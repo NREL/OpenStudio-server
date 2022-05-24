@@ -58,6 +58,7 @@ class Analysis
   field :download_osm, type: Boolean, default: true
   field :download_osw, type: Boolean, default: true
   field :download_reports, type: Boolean, default: true
+  field :variable_display_name_choice, type: String, default: 'display_name'
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
