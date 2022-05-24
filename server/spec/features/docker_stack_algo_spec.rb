@@ -713,7 +713,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 53.9229,
         electricity_consumption_nmbe: -55.7412,
         natural_gas_consumption_cvrmse: 77.6149,
-        natural_gas_consumption_nmbe: -60.6473 }
+        natural_gas_consumption_nmbe: -60.6473 },
+      { electricity_consumption_cvrmse: 54.4375,
+        electricity_consumption_nmbe: -56.2842,
+        natural_gas_consumption_cvrmse: 81.5502,
+        natural_gas_consumption_nmbe: -63.9120 }
     ]
     # setup bad results
     sobol_bad = [
