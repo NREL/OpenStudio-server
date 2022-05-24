@@ -817,7 +817,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
-
+        puts "sim: #{sim}"
         compare = sobol.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
