@@ -148,7 +148,7 @@ if (check_boundary == 1) {
       print(paste("logical(ncol(vars):",logical(ncol(vars))))
   }
   for (i in 1:ncol(vars)){
-    if (is.nan(m$X[,i])) {
+    if (all(is.nan(m$X[,i]))) {
       print(paste("m$X[,i] is NaN:",m$X[,i]))
       print(paste("i:",i))
     }
