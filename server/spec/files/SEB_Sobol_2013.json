@@ -1408,7 +1408,7 @@
         }
       ],
       "algorithm": {
-        "number_of_samples": 1,
+        "number_of_samples": 2,
         "random_seed": 1979,
         "random_seed_2": 1973,
         "order": 1,

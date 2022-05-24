@@ -85,7 +85,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     # @api = OpenStudio::Analysis::ServerApi.new(options)
     # You are still going to want the ServerApi to grab results. You can replace a bunch of the
     # RestClient calls below.
-    APP_CONFIG['os_server_host_url'] = options[:hostname]
+    # APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
   it 'run cli_test with bad -z arg', :cli_error, js: true do
@@ -558,7 +558,15 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 35.2998, 
         electricity_consumption_nmbe: -35.9015, 
         natural_gas_consumption_cvrmse: 49.7358, 
-        natural_gas_consumption_nmbe: 26.8043 }
+        natural_gas_consumption_nmbe: 26.8043 },
+      { electricity_consumption_cvrmse: 73.7791, 
+        electricity_consumption_nmbe: -76.4808, 
+        natural_gas_consumption_cvrmse: 43.3461, 
+        natural_gas_consumption_nmbe: -26.9619},
+      { electricity_consumption_cvrmse: 34.8146, 
+        electricity_consumption_nmbe: -35.3778, 
+        natural_gas_consumption_cvrmse: 51.6641, 
+        natural_gas_consumption_nmbe: 28.9137 }
     ]
     # setup bad results
     rgenoud_bad = [
@@ -682,30 +690,30 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run sobol analysis', :sobol, js: true do
     # setup expected results
     sobol = [
-      { electricity_consumption_cvrmse: 43.6849,
-        electricity_consumption_nmbe: -44.8533,
-        natural_gas_consumption_cvrmse: 28.8513,
-        natural_gas_consumption_nmbe: -1.7651},
-      { electricity_consumption_cvrmse: 20.2406,
-        electricity_consumption_nmbe: 18.5516,
-        natural_gas_consumption_cvrmse: 60.4654,
-        natural_gas_consumption_nmbe: -48.584},
-      { electricity_consumption_cvrmse: 16.0515,
-        electricity_consumption_nmbe: 13.4244,
-        natural_gas_consumption_cvrmse: 115.6455,
-        natural_gas_consumption_nmbe: -95.4922},
-      { electricity_consumption_cvrmse: 16.3251,
-        electricity_consumption_nmbe: 13.8002,
-        natural_gas_consumption_cvrmse: 111.2924,
-        natural_gas_consumption_nmbe: -91.9566 },
-      { electricity_consumption_cvrmse: 43.9199,
-        electricity_consumption_nmbe: -45.0981,
-        natural_gas_consumption_cvrmse: 29.7425,
-        natural_gas_consumption_nmbe: 1.5043 },
-      { electricity_consumption_cvrmse: 20.5507,
-        electricity_consumption_nmbe: 18.9382,
-        natural_gas_consumption_cvrmse: 56.6481,
-        natural_gas_consumption_nmbe: -45.2277 }
+      { electricity_consumption_cvrmse: 16.9066,
+        electricity_consumption_nmbe: -15.1990,
+        natural_gas_consumption_cvrmse: 47.4622,
+        natural_gas_consumption_nmbe: 25.8192 },
+      { electricity_consumption_cvrmse: 56.1036,
+        electricity_consumption_nmbe: -58.0543,
+        natural_gas_consumption_cvrmse: 103.4928,
+        natural_gas_consumption_nmbe: -82.4251 },
+      { electricity_consumption_cvrmse: 23.5350,
+        electricity_consumption_nmbe: 22.3482,
+        natural_gas_consumption_cvrmse: 27.2462,
+        natural_gas_consumption_nmbe: 0.3627 },
+      { electricity_consumption_cvrmse: 18.2720,
+        electricity_consumption_nmbe: -16.9724,
+        natural_gas_consumption_cvrmse: 29.0535,
+        natural_gas_consumption_nmbe: -12.4869 },
+      { electricity_consumption_cvrmse: 54.1430,
+        electricity_consumption_nmbe: -55.9734,
+        natural_gas_consumption_cvrmse: 77.4309,
+        natural_gas_consumption_nmbe: -60.4797 },
+      { electricity_consumption_cvrmse: 53.9229,
+        electricity_consumption_nmbe: -55.7412,
+        natural_gas_consumption_cvrmse: 77.6149,
+        natural_gas_consumption_nmbe: -60.6473 }
     ]
     # setup bad results
     sobol_bad = [
@@ -797,7 +805,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
           data_points << data_point
         end
       end
-      expect(data_points.size).to eq(3)
+      expect(data_points.size).to eq(6)
 
       data_points.each do |data_point|
         dp = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}.json"
@@ -822,6 +830,13 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts "expect Sobol Algorithm results to be success"
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/download_algorithm_results_zip"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.headers[:content_type]).to eq("application/zip")
+    expect(a.size).to be >(30000)
+    expect(a.size).to be <(40000)
   end # sobol
 
   it 'run lhs analysis', :lhs, js: true do
@@ -1258,6 +1273,13 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts "expect Morris Algorithm results to be success"
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/download_algorithm_results_zip"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.headers[:content_type]).to eq("application/zip")
+    expect(a.size).to be >(170000)
+    expect(a.size).to be <(200000)
   end # morris
   
   it 'run single_run analysis', :single_run, js: true do
