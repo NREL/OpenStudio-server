@@ -6,7 +6,7 @@ sleep 5
 docker volume rm -f osdata || true
 docker volume rm -f dbdata || true
 docker image rm 127.0.0.1:5000/openstudio-server -f
-docker build . -t="127.0.0.1:5000/openstudio-server" --build-arg OPENSTUDIO_VERSION=3.2.0
+docker build . -t="127.0.0.1:5000/openstudio-server" --build-arg OPENSTUDIO_VERSION=3.4.0
 docker push 127.0.0.1:5000/openstudio-server
 cd docker/R
 #docker image rm 127.0.0.1:5000/openstudio-rserve -f

@@ -66,33 +66,45 @@
   <div class="row-fluid">
     <div class="table-pad">
       <!--toggle obj function is there are more than 3-->
-
-      <% class_var = "" %>
-      <% if @objective_functions.count > 3 %>
-        <div class="button-container">
-          <button class="btn btn-mini" id='<%= "toggle-button-#{status || ''}"%>'>Toggle Obj Functions</button>
-          <% class_var = "obj-function-col-" + status %>
+      <div>
+        <% class_var = "" %>
+        <% if @objective_functions.count > 1 %>
+        
+          <div class="span4">
+            <div class="button-container">
+              <button class="btn btn-mini" id='<%= "toggle-button-#{status || ''}"%>'>Toggle Obj Functions</button>
+              <% class_var = "obj-function-col-" + status %>
+            </div>
+          </div>
+          <div class="span6">
+            <div class="sig-fig">
+              <%= form_tag analysis_path(@analysis), :method => 'get' do %>
+                <%= label_tag significant_digits, "Obj Func Significant Digits" %>
+                <%= number_field_tag "significant_digits", significant_digits %>
+                <%= submit_tag "Update" %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        <div class="span2">
+          <!--toggle view_all on ALL page -->
+          <% if status == 'all' and @view_all == 0 %>
+            <div class="button-container">
+              <%= link_to("View All", analysis_path(:id => @analysis, :view_all => 1, :status => status,
+                                                    :all_page => all_page, :completed_page => completed_page,
+                                                    :started_page => started_page, :queued_page => queued_page,
+                                                    :na_page => na_page), :class => "btn btn-mini") %></button>
+            </div>
+          <% elsif status == 'all' and @view_all == 1 %>
+            <div class="button-container">
+              <%= link_to("Paginate", analysis_path(:id => @analysis.id, :status => status,
+                                                    :view_all => 0), :class => "btn btn-mini") %>
+            </div>
+          <% end %>
         </div>
-      <% end %>
+      </div>
 
-      <!--toggle view_all on ALL page -->
-      <br/>
-
-      <% if status == 'all' and @view_all == 0 %>
-        <div class="button-container">
-          <%= link_to("View All", analysis_path(:id => @analysis, :view_all => 1, :status => status,
-                                                :all_page => all_page, :completed_page => completed_page,
-                                                :started_page => started_page, :queued_page => queued_page,
-                                                :na_page => na_page), :class => "btn btn-mini") %></button>
-        </div>
-      <% elsif status == 'all' and @view_all == 1 %>
-        <div class="button-container">
-          <%= link_to("Paginate", analysis_path(:id => @analysis.id, :status => status,
-                                                :view_all => 0), :class => "btn btn-mini") %>
-        </div>
-      <% end %>
-
-      <table id="datapointtable_<%= status%>" class="tablesorter table table-striped">
+      <table id="datapointtable_<%= status%>" class="tablesorter table table-striped pad-top">
         <thead>
         <tr>
           <th>Name</th>
@@ -118,8 +130,8 @@
                 <!-- TODO: This is horrible. Can we use an ostruct? send the data from the contoller -->
                 <td class="<%= class_var %>">
                   <% if dp.results[ov['name'].split(".")[0]] && dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]] %>
-                    <% if dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ %>
-                      <%= dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].round(2) %>   
+                    <% if dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].class != String && !@analysis.significant_digits.nil? %>
+                      <%= dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]].round(@analysis.significant_digits) %>   
                     <% else %>
                       <%= dp.results[ov['name'].split(".")[0]][ov['name'].split(".")[1]] %>
                     <% end %>
@@ -135,7 +147,6 @@
                     | <%= link_to 'Zip File', download_result_file_data_point_path(dp, filename: h.attachment.original_filename) %>
                   <% end %>
                 <% if dp.status == 'completed' && @has_obj_targets %>
-                  | <%= link_to('Bar Chart', plot_bar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>
                   | <%= link_to('Radar Plot', plot_radar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>
                 <% end %>
               <td class="other-col"><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>

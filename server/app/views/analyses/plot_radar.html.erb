@@ -54,7 +54,7 @@
       var colorscale = d3.scale.category10();
 
       //Legend titles
-      var LegendOptions = ['Relative Error (%)'];
+      var LegendOptions = ['Absolute Error'];
 
       //Data
       var rawdata;
@@ -63,8 +63,7 @@
       var dp_values = {};
 
       d3.json("analysis_data.json?visualize=true&datapoint_id=" + datapoint_id ,  function (rawdata) {
-
-       //variables holds the axes names
+        //variables holds the axes names
         Object.keys(rawdata['variables']).forEach(function (d) {
 
           dp_values = {};
@@ -74,14 +73,13 @@
           {
 
             dp_values['axis'] = d;
-            dp_values['value'] = Math.abs(rawdata['data'][0][d] - rawdata['variables'][d]['objective_function_target']) / rawdata['variables'][d]['objective_function_target'];
+            dp_values['value'] = Math.abs(rawdata['data'][0][d] - rawdata['variables'][d]['objective_function_target']);
 
             // add to data array
             data.push(dp_values);
           }
 
         });
-
         // extra array needed for structure
         chartdata.push(data);
 
