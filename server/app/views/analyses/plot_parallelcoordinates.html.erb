@@ -157,9 +157,10 @@
 
     console.log("pareto names: ", pareto_names);
     console.log("include all data: ", include_all_data);
-
     d3.json("analysis_data.json?visualize=true", function (error, data) {
         //console.log(data['data']);
+      console.log("data['data']: ", data['data']);
+      console.log("data['variables']: ", data['variables']);
       var variables = data['variables']; 
       data = data['data'];
       if (Object.keys(pareto_points).length > 0 && !include_all_data) {
