@@ -78,6 +78,13 @@ RSpec.describe 'TestAPIs', type: :feature do
   it 'run api_tests', :api_tests do
 
     sleep(1)
+    puts 'access main GUI page'
+    a = RestClient.get "http://#{@host}"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "Error"
+    expect(a.body).to include "OpenStudio Cloud Management Console"
+    
+    sleep(1)
     puts 'remove any existing projects'
     a = RestClient.get "http://#{@host}/projects.json"
     a = JSON.parse(a, symbolize_names: true)
@@ -131,6 +138,34 @@ RSpec.describe 'TestAPIs', type: :feature do
     analysis_id = analysis[:_id]
     expect(analysis_id).to eq("86a529c9-8429-41e8-bca5-52b2628c8ff9")
 
+    sleep(1)
+    puts 'check the status.json'
+    a = RestClient.get "http://#{@host}/analyses/status.json"
+    expect(a.headers[:status]).to eq("200 OK")
+    a = JSON.parse(a, symbolize_names: true)
+    expect(a).not_to be_empty
+    expect(a.size).to eq(1)
+    expect(a[:analysis][:status]).to eq("completed")
+    expect(a[:analysis][:total_datapoints]).to eq(4)
+    
+    sleep(1)
+    puts 'check the default significant digits'
+    a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).to include "Obj Func Significant Digits"
+    expect(a.body).to include "20.235"
+    expect(a.body).to include "75.772"
+    expect(a.body).to include "50.381"
+    
+    sleep(1)
+    puts 'change the significant digits to 4'
+    a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9?significant_digits=4&commit=Update"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).to include "Obj Func Significant Digits"
+    expect(a.body).to include "20.2345"
+    expect(a.body).to include "75.7723"
+    expect(a.body).to include "50.3806"
+    
     sleep(1)
     puts 'test download CSV metadata'
     a = RestClient.get "http://#{@host}/analyses/86a529c9-8429-41e8-bca5-52b2628c8ff9/variables/download_variables.csv"
