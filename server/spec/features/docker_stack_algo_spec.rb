@@ -824,7 +824,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         puts "sim: #{sim}"
         #compare = sobol.include?(sim)
         #expect(compare).to be true
-        puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
+        #puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
 
         compare = sobol_bad.include?(sim)
         expect(compare).to be false
