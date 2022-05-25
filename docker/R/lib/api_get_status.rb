@@ -58,16 +58,20 @@ end
 
 result = {}
 result[:status] = false
+get_count = 0
 begin
+  get_count += 1
   a = RestClient.get "#{options[:host]}/analyses/#{options[:analysis_id]}/status.json" , {accept: :json}
-  # TODO: retries?
   raise 'Could not create datapoint' unless a.code == 200
-
+  puts "#{__FILE__} success! get_count: #{get_count}"
   a = JSON.parse(a, symbolize_names: true)
   result[:status] = true
   result[:result] = a[:analysis][:run_flag]
 rescue => e
+  sleep(2)
   puts "#{__FILE__} Error: #{e.message}:#{e.backtrace.join("\n")}"
+  puts "#{__FILE__} get_count: #{get_count}"
+  retry if get_count <= 10
   result[:status] = false
   result[:result] = true
 ensure
