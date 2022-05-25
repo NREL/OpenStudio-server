@@ -85,7 +85,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     # @api = OpenStudio::Analysis::ServerApi.new(options)
     # You are still going to want the ServerApi to grab results. You can replace a bunch of the
     # RestClient calls below.
-    APP_CONFIG['os_server_host_url'] = options[:hostname]
+    #APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
   it 'run cli_test with bad -z arg', :cli_error, js: true do
