@@ -690,34 +690,30 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run sobol analysis', :sobol, js: true do
     # setup expected results
     sobol = [
-      { electricity_consumption_cvrmse: 16.9066,
-        electricity_consumption_nmbe: -15.1990,
-        natural_gas_consumption_cvrmse: 47.4622,
-        natural_gas_consumption_nmbe: 25.8192 },
-      { electricity_consumption_cvrmse: 56.1036,
-        electricity_consumption_nmbe: -58.0543,
-        natural_gas_consumption_cvrmse: 103.4928,
-        natural_gas_consumption_nmbe: -82.4251 },
-      { electricity_consumption_cvrmse: 23.5350,
-        electricity_consumption_nmbe: 22.3482,
-        natural_gas_consumption_cvrmse: 27.2462,
-        natural_gas_consumption_nmbe: 0.3627 },
-      { electricity_consumption_cvrmse: 18.2720,
-        electricity_consumption_nmbe: -16.9724,
-        natural_gas_consumption_cvrmse: 29.0535,
-        natural_gas_consumption_nmbe: -12.4869 },
-      { electricity_consumption_cvrmse: 54.1430,
-        electricity_consumption_nmbe: -55.9734,
-        natural_gas_consumption_cvrmse: 77.4309,
-        natural_gas_consumption_nmbe: -60.4797 },
-      { electricity_consumption_cvrmse: 53.9229,
-        electricity_consumption_nmbe: -55.7412,
-        natural_gas_consumption_cvrmse: 77.6149,
-        natural_gas_consumption_nmbe: -60.6473 },
-      { electricity_consumption_cvrmse: 54.4375,
-        electricity_consumption_nmbe: -56.2842,
-        natural_gas_consumption_cvrmse: 81.5502,
-        natural_gas_consumption_nmbe: -63.9120 }
+      {  electricity_consumption_cvrmse: 56.3972,
+         electricity_consumption_nmbe: -58.3641,
+         natural_gas_consumption_cvrmse: 107.785,
+         natural_gas_consumption_nmbe: -85.9248},
+      {  electricity_consumption_cvrmse: 23.2232,
+         electricity_consumption_nmbe: 21.9797,
+         natural_gas_consumption_cvrmse: 26.5147,
+         natural_gas_consumption_nmbe: -2.6774},
+      {  electricity_consumption_cvrmse: 18.5716,
+         electricity_consumption_nmbe: -17.3172,
+         natural_gas_consumption_cvrmse: 30.8291,
+         natural_gas_consumption_nmbe: -15.6785},
+      {  electricity_consumption_cvrmse: 16.7369,
+         electricity_consumption_nmbe: -15.0017,
+         natural_gas_consumption_cvrmse: 44.2624,
+         natural_gas_consumption_nmbe: 22.8239},
+      {  electricity_consumption_cvrmse: 54.4375,
+         electricity_consumption_nmbe: -56.2842,
+         natural_gas_consumption_cvrmse: 81.5502,
+         natural_gas_consumption_nmbe: -63.912},
+      {  electricity_consumption_cvrmse: 54.2176,
+         electricity_consumption_nmbe: -56.0525,
+         natural_gas_consumption_cvrmse: 81.7387,
+         natural_gas_consumption_nmbe: -64.0836}
     ]
     # setup bad results
     sobol_bad = [
@@ -822,9 +818,9 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(sim.size).to eq(4)
         sim = sim.transform_values { |x| x.truncate(4) }
         puts "sim: #{sim}"
-        #compare = sobol.include?(sim)
-        #expect(compare).to be true
-        #puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
+        compare = sobol.include?(sim)
+        expect(compare).to be true
+        puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
 
         compare = sobol_bad.include?(sim)
         expect(compare).to be false
