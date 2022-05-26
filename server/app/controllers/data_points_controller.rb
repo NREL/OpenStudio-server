@@ -51,6 +51,9 @@ class DataPointsController < ApplicationController
   # GET /data_points/1.json
   def show
     logger.info "data_points_contoller.show enter"
+    logger.info "status remoteIP: #{request.remote_ip}"
+    logger.info "status IP: #{request.ip}"
+    logger.info "status request: #{request.to_s}"
     @data_point = DataPoint.find(params[:id])
     respond_to do |format|
       if @data_point
