@@ -17,11 +17,13 @@ services:
     image: 127.0.0.1:5000/redis
     ports:
       - "6379:6379"
+    volumes:
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
     deploy:
       placement:
         constraints:
           - node.role == manager
-    command: "redis-server --requirepass openstudio"
+    command: sh -c "mkdir /var/log/redis && touch /var/log/redis/redis-server.log && redis-server /usr/local/etc/redis/redis.conf --requirepass openstudio"
   web:
     image: 127.0.0.1:5000/openstudio-server
     ports:
