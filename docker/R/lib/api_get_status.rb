@@ -68,7 +68,7 @@ begin
   result[:status] = true
   result[:result] = a[:analysis][:run_flag]
 rescue => e
-  sleep(2)
+  sleep(10)
   puts "#{__FILE__} Error: #{e.message}:#{e.backtrace.join("\n")}"
   puts "#{__FILE__} get_count: #{get_count}"
   retry if get_count <= 10

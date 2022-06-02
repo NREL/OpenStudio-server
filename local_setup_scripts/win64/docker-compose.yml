@@ -32,8 +32,8 @@ services:
       - "443:443"
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
-      - MAX_REQUESTS=110
-      - MAX_POOL=110
+      - MAX_REQUESTS=1
+      - MAX_POOL=1
       - QUEUES=analysis_wrappers
       - REDIS_URL=redis://:openstudio@queue:6379
       - MONGO_USER=openstudio

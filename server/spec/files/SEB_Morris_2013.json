@@ -1318,6 +1318,8 @@
     "run_workflow_timeout": 28800,
     "upload_results_timeout": 28800,
     "initialize_worker_timeout": 28800,
+    "passenger_max_request_queue_size": 111,
+    "passenger_max_pool_size": 21,
     "server_scripts": {}
   }
 }

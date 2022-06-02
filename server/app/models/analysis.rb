@@ -59,6 +59,8 @@ class Analysis
   field :download_osw, type: Boolean, default: true
   field :download_reports, type: Boolean, default: true
   field :variable_display_name_choice, type: String, default: 'display_name'
+  field :passenger_max_request_queue_size, type: Integer, default: 110
+  field :passenger_max_pool_size, type: Integer, default: 16
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
@@ -169,12 +171,97 @@ class Analysis
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
     logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
-
+    
+    nginx_config
+    
     start(no_delay, analysis_type, options)
     logger.info "analysis.run_analysis leave"
     [true]
   end
 
+  def nginx_config 
+    logger.info("passenger_max_request_queue_size: #{self.passenger_max_request_queue_size}")
+    logger.info("passenger_max_pool_size: #{self.passenger_max_pool_size}")
+    if File.exist?("/opt/nginx/conf/nginx.conf")
+      nginx_file = File.open("/opt/nginx/conf/nginx.conf",&:read)
+      # update passenger_max_request_queue_size
+      if self.passenger_max_request_queue_size.is_a?(Integer) && self.passenger_max_request_queue_size >= 0
+        # check if "passenger_max_request_queue_size \d+;" is in config file?  
+        if nginx_file.match?(%r{passenger_max_request_queue_size \d+;})
+          File.write("/opt/nginx/conf/nginx.conf",nginx_file.gsub(%r{passenger_max_request_queue_size \d+;}, "passenger_max_request_queue_size #{self.passenger_max_request_queue_size};"))
+        else
+          logger.error("/opt/nginx/conf/nginx.conf does not have: passenger_max_request_queue_size")
+        end        
+      else
+        logger.error("passenger_max_request_queue_size invalid value: #{self.passenger_max_request_queue_size} ")      
+      end
+      # update passenger_max_pool_size
+      if self.passenger_max_pool_size.is_a?(Integer) && self.passenger_max_pool_size > 0
+        #reload nginx_file after update
+        nginx_file = File.open("/opt/nginx/conf/nginx.conf",&:read)
+        # check if "passenger_max_pool_size \d+;" is in config file?
+        if nginx_file.match?(%r{passenger_max_pool_size \d+;})
+          File.write("/opt/nginx/conf/nginx.conf",nginx_file.gsub(%r{passenger_max_pool_size \d+;}, "passenger_max_pool_size #{self.passenger_max_pool_size};"))
+        else
+          logger.error("/opt/nginx/conf/nginx.conf does not have: passenger_max_pool_size")
+        end
+      else
+        logger.error("passenger_max_pool_size invalid value: #{self.passenger_max_pool_size} ")
+      end
+    else
+      logger.error("/opt/nginx/conf/nginx.conf does not exist!")
+    end
+    whoami = `whoami`
+    logger.info("whoami: #{whoami}")
+    logger.info("test the nginx.conf file")
+    test_config = ""
+    test_config = `sudo /opt/nginx/sbin/nginx -t 2>&1`
+    logger.info("test_config: #{test_config}")
+    logger.info("test_config.include?('syntax is ok'): #{test_config.include?('syntax is ok')}")
+    logger.info("test_config.include?('test is successful'): #{test_config.include?('test is successful')}")
+    #check if the nginx.conf file is valid
+    if test_config.include?("syntax is ok") && test_config.include?("test is successful")
+      logger.info("get nginx processes")
+      nginx_pids = `ps aux|grep nginx`
+      logger.info("nginx_pids: #{nginx_pids}")
+      #select 'nginx: worker process' then regex to get PID number
+      nginx_worker_pids = ""
+      nginx_worker_pids = nginx_pids.split("\n").select{ |s| s =~ /nginx: worker process$/}.map {|e| e[%r{nginx \s*\d+\s}][%r{\d+}]} if !nginx_pids.nil?
+      logger.info("nginx_worker_pids: #{nginx_worker_pids}")
+      logger.error('original nginx_worker_pids is blank!') if nginx_worker_pids.blank?
+      
+      logger.info("reload the nginx.conf")
+      #this has no stdout, stderr
+      `sudo /opt/nginx/sbin/nginx -s reload`
+      sleep(3)
+      count = 0
+      count_max = 10
+      begin
+        count += 1
+        logger.info("count: #{count}")
+        logger.info("get nginx processes")
+        nginx_pids = `ps aux|grep nginx`
+        logger.info("nginx_pids: #{nginx_pids}")
+        raise 'nginx_pids is blank' if nginx_pids.blank?
+        nginx_worker_pids2 = ""
+        nginx_worker_pids2 = nginx_pids.split("\n").select{ |s| s =~ /nginx: worker process$/}.map {|e| e[%r{nginx \s*\d+\s}][%r{\d+}]} if !nginx_pids.nil?
+        logger.info("nginx_worker_pids2: #{nginx_worker_pids2}")
+        #check if any current nginx worker PIDs are in original array.
+        if nginx_worker_pids2.is_a?(Array) && !nginx_worker_pids2.any? {|pids| nginx_worker_pids.include?(pids)}
+          logger.info("reload nginx.conf success")
+        else
+          raise 'reload nginx.conf NOT success'
+        end
+      rescue => e
+        sleep(2)      
+        retry if count < count_max
+        logger.error("reload nginx.conf NOT success")
+      end          
+    else
+      logger.error("nginx.conf is not valid! not reloading it")
+    end
+  end
+  
   def stop_analysis
     logger.info('attempting to stop analysis')
 
