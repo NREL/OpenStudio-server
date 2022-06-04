@@ -72,7 +72,6 @@ RSpec.describe 'TestAPIs', type: :feature do
     @bundle_cmd = BUNDLE_CMD
 
     options = { hostname: "http://#{@host}" }
-    #APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
   it 'run api_tests', :api_tests do
