@@ -5,15 +5,15 @@
 
 #may include suffix
 ARG OPENSTUDIO_VERSION=3.4.0
-FROM nrel/openstudio:$OPENSTUDIO_VERSION as base
+FROM nrel/openstudio:dev-3.4.1-alpha as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
+ENV DEBIAN_FRONTEND=noninteractive
 # Install required libaries.
 #   realpath - needed for wait-for-it
 RUN apt-get update && apt-get install -y wget gnupg \
     && wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
-#RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
-    && echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse" | \
+    && echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | \
     tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -33,7 +33,6 @@ RUN apt-get update && apt-get install -y wget gnupg \
         libbz2-dev \
         libcurl4-openssl-dev \
         libdbus-glib-1-2 \
-        libgdbm5 \
         libgdbm-dev \
         libglib2.0-dev \
         libglu1 \

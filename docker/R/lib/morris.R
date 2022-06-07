@@ -151,7 +151,7 @@ if (check_boundary == 1) {
       print(paste("logical(ncol(vars):",logical(ncol(vars))))
   }
   for (i in 1:ncol(vars)){
-    if (is.nan(m$X[,i])) {
+    if (all(is.nan(m$X[,i]))) {
       print(paste("m$X[,i] is NaN:",m$X[,i]))
       print(paste("i:",i))
     }
@@ -239,7 +239,6 @@ if (nrow(result) > 0) {
       axis(1, at=mp, labels=vardisplaynames, las=2, cex.axis=0.9)
       #axis(2, las=1)
       dev.off()
-      
       #sorted
       print('barplot var_mu_star sorted')
       file_names_bar_sorted_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
