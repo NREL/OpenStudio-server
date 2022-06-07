@@ -648,18 +648,30 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run sobol analysis', :sobol, js: true do
     # setup expected results
     sobol = [
-      { electricity_consumption_cvrmse: 15.77732675,
-        electricity_consumption_nmbe: 13.06865651,
-        natural_gas_consumption_cvrmse: 116.4897672,
-        natural_gas_consumption_nmbe: -95.86215812},
-      { electricity_consumption_cvrmse: 19.95660527,
-        electricity_consumption_nmbe: 18.22546927,
-        natural_gas_consumption_cvrmse: 60.93096326,
-        natural_gas_consumption_nmbe: -48.77730643},
-      { electricity_consumption_cvrmse: 44.05337831,
-        electricity_consumption_nmbe: -45.26136676,
-        natural_gas_consumption_cvrmse: 28.76708408,
-        natural_gas_consumption_nmbe: -1.626128171}
+      { electricity_consumption_cvrmse: 54.76930032,
+        electricity_consumption_nmbe: -56.64433589,
+        natural_gas_consumption_cvrmse: 81.93351905,
+        natural_gas_consumption_nmbe: -63.94250223},
+      { electricity_consumption_cvrmse: 22.94209592,
+        electricity_consumption_nmbe: 21.67972075,
+        natural_gas_consumption_cvrmse: 26.192299,
+        natural_gas_consumption_nmbe: -2.685885302},
+      { electricity_consumption_cvrmse: 54.54753494,
+        electricity_consumption_nmbe: -56.41041953,
+        natural_gas_consumption_cvrmse: 82.12635415,
+        natural_gas_consumption_nmbe: -64.11401884},
+      { electricity_consumption_cvrmse: 17.03726982,
+        electricity_consumption_nmbe: -15.4255319,
+        natural_gas_consumption_cvrmse: 44.21297821,
+        natural_gas_consumption_nmbe: 22.98843441},
+      { electricity_consumption_cvrmse: 18.81466341,
+        electricity_consumption_nmbe: -17.63846503,
+        natural_gas_consumption_cvrmse: 30.78869741,
+        natural_gas_consumption_nmbe: -15.6663694},
+      { electricity_consumption_cvrmse: 56.75272836,
+        electricity_consumption_nmbe: -58.74745506,
+        natural_gas_consumption_cvrmse: 108.2431218,
+        natural_gas_consumption_nmbe:  -85.94476756}
     ] 
     
     # setup bad results
