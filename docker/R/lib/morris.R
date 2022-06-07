@@ -60,6 +60,9 @@ print(paste("vartypes:",vartypes))
 print(paste("varnames:",varnames))
 print(paste("vardisplaynames:",vardisplaynames))
 print(paste("objnames:",objnames))
+colnames(vars) <- varnames
+print(paste("vars:",vars))
+print(vars)
 
 # Setup a bunch of variables for the analysis based on passed variables
 # From Ruby
@@ -148,7 +151,7 @@ if (check_boundary == 1) {
       print(paste("logical(ncol(vars):",logical(ncol(vars))))
   }
   for (i in 1:ncol(vars)){
-    if (is.nan(m$X[,i])) {
+    if (all(is.nan(m$X[,i]))) {
       print(paste("m$X[,i] is NaN:",m$X[,i]))
       print(paste("i:",i))
     }
@@ -168,10 +171,12 @@ if (check_boundary == 1) {
 }
 try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
 if (debug_messages == 1) {
-  print(paste("nrow(results):",nrow(results)))
-  print(paste("ncol(results):",ncol(results)))
+  print(paste("length(results):",length(results)))
+  print(paste("lengths(results):",lengths(results)))
 }
-result <- as.data.frame(results)
+print(paste("results:",results))
+#result <- as.data.frame(results)
+result <- as.data.frame(results, row.name=objnames)
 if (debug_messages == 1) {
   print(paste("length(objnames):",length(objnames)))
   print(paste("nrow(result):",nrow(result)))
@@ -202,6 +207,8 @@ if (nrow(result) > 0) {
       var_mu_star[i] <- mean(abs(n$ee[,i]))
       var_sigma[i] <- sd(n$ee[,i])
     }
+    print(paste("var_mu_star:",var_mu_star))
+    print(paste("var_sigma:",var_sigma))
     answer <- paste('"',gsub(" ","_",objnames[j],fixed=TRUE),'":{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
     #answer <- paste('{',paste('"',gsub(".","|",varnames, fixed=TRUE),'":','{"var_mu": ',var_mu,',"var_mu_star": ',var_mu_star,',"var_sigma": ',var_sigma,'}',sep='', collapse=','),'}',sep='')
     if (j < nrow(result)) {
@@ -214,13 +221,17 @@ if (nrow(result) > 0) {
     file_names_R[j] <- paste(analysis_dir,"/m_",gsub(" ","_",objnames[j], fixed=TRUE),".RData",sep="")
     save(n, file=file_names_R[j])
     if (all(is.finite(var_mu_star))) {
-      file_names_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
-      png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-      plot(n)
-      #axis(1, las=2)
-      #axis(2, las=1)
-      dev.off()
-
+      if (all(!is.na(var_sigma))) {
+        print('plot(n)')
+        file_names_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_sigma_mu.png",sep="")
+        png(file_names_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
+        plot(n)
+        #axis(1, las=2)
+        #axis(2, las=1)
+        dev.off()
+       }
+       
+      print('barplot var_mu_star')
       file_names_bar_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar.png",sep="")
       png(file_names_bar_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
       op <- par(mar = c(14,4,4,2) + 0.1)
@@ -229,6 +240,7 @@ if (nrow(result) > 0) {
       #axis(2, las=1)
       dev.off()
       #sorted
+      print('barplot var_mu_star sorted')
       file_names_bar_sorted_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_bar_sorted.png",sep="")
       png(file_names_bar_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
       op <- par(mar = c(14,4,4,2) + 0.1)
@@ -236,7 +248,8 @@ if (nrow(result) > 0) {
       axis(1, at=mp, labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)
       #axis(2, las=1)
       dev.off()
-
+      
+      print('boxplot n$ee')
       file_names_box_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box.png",sep="")
       png(file_names_box_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
       bottommar <- max(strwidth(vardisplaynames[which.max(nchar(vardisplaynames))], "inch")+0.1, na.rm = TRUE)
@@ -245,15 +258,7 @@ if (nrow(result) > 0) {
       mp <- boxplot(n$ee, las=2, names=vardisplaynames, cex.axis=0.9, main="BoxPlot of Elementary Effects", ylab=paste("EE of",objnames[j]))
       axis(1, at=seq(1,length(vardisplaynames)), labels=vardisplaynames, las=2, cex.axis=0.9)
       dev.off()
-      
-      file_names_box_sorted_png[j] <- paste(analysis_dir,"/morris_",gsub(" ","_",objnames[j],fixed=TRUE),"_box_sorted.png",sep="")
-      png(file_names_box_sorted_png[j], width=8, height=8, units="in", pointsize=10, res=200, type="cairo")
-      bottommar <- max(strwidth(vardisplaynames[which.max(nchar(vardisplaynames))], "inch")+0.1, na.rm = TRUE)
-      leftmar <- max(strwidth(nchar(max(n$ee)), "inch")+0.25, na.rm = TRUE)
-      par(mai=c(bottommar,leftmar, 0.25,0.25))
-      mp <- boxplot(n$ee[,order(colMeans(abs(n$ee)))], las=2, names=vardisplaynames[order(var_mu_star)], cex.axis=0.9, main="BoxPlot of Elementary Effects", ylab=paste("EE of",objnames[j]))
-      axis(1, at=seq(1,length(vardisplaynames)), labels=vardisplaynames[order(var_mu_star)], las=2, cex.axis=0.9)
-      dev.off()
+
       file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,file_names_box_sorted_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
 
       #file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
