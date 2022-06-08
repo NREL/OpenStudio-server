@@ -11,7 +11,7 @@ if [ "${ImageOS}" == "macos1015" ]; then
     export GEM_HOME="$GITHUB_WORKSPACE/gems"
     export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
-elif [ "${ImageOS}" == "ubuntu18" ]; then
+elif [ "${ImageOS}" == "ubuntu20" ]; then
     # Dir containing openstudio
     export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus
     export PATH=/usr/local/ruby/bin:/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
