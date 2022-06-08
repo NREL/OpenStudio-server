@@ -36,6 +36,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
+        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server.
     - name: logs
       if: ${{ failure() }} 
       shell: bash 
