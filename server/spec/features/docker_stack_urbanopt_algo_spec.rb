@@ -37,9 +37,8 @@
 # To Run this test manually:
 #
 #   start a server stack with /spec added and ssh into the Web container
-#   >ruby /opt/openstudio/bin/openstudio_meta install_gems
-#   >cd /opt/openstudio/spec/
-#   >gem install rspec
+#   >cd /opt/openstudio/server/spec/
+#   >gem install rest-client rails_helper json rspec rspec-retry
 #   >rspec openstudio_algo_spec.rb
 #
 #################################################################################
@@ -85,19 +84,15 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
     # @api = OpenStudio::Analysis::ServerApi.new(options)
     # You are still going to want the ServerApi to grab results. You can replace a bunch of the
     # RestClient calls below.
-    APP_CONFIG['os_server_host_url'] = options[:hostname]
   end
 
   it 'run urbanopt_single_run analysis', :single_run, js: true do
     # setup expected results
     single_run = [
-      { electricity_kwh: 19294572.2222,
-        natural_gas_kwh: 21731513.8888 }
+      { electricity_kwh: 20983305.555555556,
+        natural_gas_kwh: 24483569.444444444 }
     ]
-    single_run_round = [
-      { electricity_kwh: 19000000,
-        natural_gas_kwh: 22000000 }
-    ]
+
     # setup bad results
     single_run_bad = [
       { electricity_kwh: 0,
@@ -105,7 +100,7 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/UrbanOpt_singlerun.json' 'http://#{@host}' -z 'UrbanOpt_NSGA' -a single_run"
+    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/URBANopt_071_sr.json' 'http://#{@host}' -z 'URBANopt_071' -a single_run"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -232,43 +227,32 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
         sim = sim_result.slice(:electricity_kwh, :natural_gas_kwh)
         expect(sim.size).to eq(2)
         sim = sim.transform_values { |x| x.round(-6) }
-
-        compare = single_run_round.include?(sim)
+        puts "single_run sim: #{sim}"
+        tmp = []
+        single_run.each do |x|
+          tmp << x.transform_values { |y| y.round(-6) }
+        end
+        compare = tmp.include?(sim)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] results compare is: #{compare}"
 
         compare = single_run_bad.include?(sim)
         expect(compare).to be false
         
-        objectives = [{  
-           objective_function_1: 19287658.3333,
-           objective_function_target_1: 0,
-           objective_function_group_1: 1,
-           objective_function_2: 21750497.2222,
-           objective_function_target_2: 0,
-           objective_function_group_2: 2,
-           objective_function_3: 454019.4444,
-           objective_function_target_3: 0,
-           objective_function_group_3: 3,
-           objective_function_4: 609722.2222,
-           objective_function_target_4: 0,
-           objective_function_group_4: 4
-        }]
-        
-        objectives_round = [{  
-           objective_function_1: 19000000,
-           objective_function_target_1: 0,
-           objective_function_group_1: 1,
-           objective_function_2: 22000000,
-           objective_function_target_2: 0,
-           objective_function_group_2: 2,
-           objective_function_3: 500000,
-           objective_function_target_3: 0,
-           objective_function_group_3: 3,
-           objective_function_4: 600000,
-           objective_function_target_4: 0,
-           objective_function_group_4: 4
-        }]
+        objectives = {  
+            objective_function_1: 20983305.555555556,
+            objective_function_target_1: 0,
+            objective_function_group_1: 1,
+            objective_function_2: 24483569.444444444,
+            objective_function_target_2: 0,
+            objective_function_group_2: 2,
+            objective_function_3: 1651205.5555555555,
+            objective_function_target_3: 0,
+            objective_function_group_3: 3,
+            objective_function_4: 1814133.3333333333,
+            objective_function_target_4: 0,
+            objective_function_group_4: 4
+        }
         
         #test the objectives.json 
         objectives_json = RestClient.get "http://#{@host}/data_points/#{data_point_id}/download_result_file?filename=objectives.json"
@@ -288,8 +272,22 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
             end            
           end
         end
-        
-        compare = objectives_round.include?(obj_json)
+        #round test objectives {} for the comparison since repeatability is an issue
+        cmp = []
+        tmp = {}
+        objectives.each do |key, value| 
+          if key.to_s.include?("target") || key.to_s.include?("group")
+            tmp[key] = value.to_i
+          else
+            if Math.log10(value) > 6
+              tmp[key] = value.round(-6)
+            else
+              tmp[key] = value.round(-5)
+            end            
+          end
+        end
+        cmp << tmp
+        compare = cmp.include?(obj_json)
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] objective.json compare is: #{compare}"
         
