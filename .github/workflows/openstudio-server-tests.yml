@@ -19,7 +19,7 @@ env:
 
 jobs:
   linux-test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
@@ -85,7 +85,7 @@ jobs:
         name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
   docker:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
