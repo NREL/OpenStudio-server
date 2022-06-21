@@ -1,0 +1,22 @@
+{
+  "analysis": {
+    "display_name": "UrbanOpt_single_run",
+    "name": "UrbanOpt_single_run",
+    "urbanopt": true,
+    "output_variables": [],
+    "problem": {
+      "workflow": [],
+      "algorithm": {},
+      "analysis_type": "single_run"
+    },
+    "file_format_version": 1,
+    "cli_debug": "--debug",
+    "cli_verbose": "--verbose",
+    "run_workflow_timeout": 28800,
+    "upload_results_timeout": 28800,
+    "initialize_worker_timeout": 28800,
+    "feature_file": "example_project",
+    "scenario_file": "highefficiency_scenario",
+    "urbanopt_variables": []
+  }
+}
