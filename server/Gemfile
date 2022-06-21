@@ -71,8 +71,8 @@ gem 'openstudio-workflow', '= 2.3.1'
 gem 'openstudio-analysis', '= 1.2.0'
 
 # Remove urbanopt cli gems for minor for releases as they use different versions of ext gems
-gem 'urbanopt-cli', '= 0.7.1'
-gem 'urbanopt-reopt', '= 0.7.0'
+gem 'urbanopt-cli', '= 0.8.0'
+#gem 'urbanopt-reopt', '= 0.8.0'
 
 ## End commonly updated gems
 

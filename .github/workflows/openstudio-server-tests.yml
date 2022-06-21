@@ -19,7 +19,7 @@ env:
 
 jobs:
   linux-test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
@@ -36,6 +36,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
+        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server.
     - name: logs
       if: ${{ failure() }} 
       shell: bash 
@@ -68,7 +69,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
-        SKIP_URBANOPT_ALGO: false # Set this when excluding urbanopt-cli gem from server. 
+        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server. 
     - name: logs
       if: ${{ failure() }}  
       shell: bash 
@@ -84,7 +85,7 @@ jobs:
         name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
   docker:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
@@ -106,8 +107,7 @@ jobs:
           docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
           docker-compose -f docker-compose.test.yml up -d
           # set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
-          # set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
-          docker-compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
+          docker-compose exec -e SKIP_URBANOPT_ALGO=false -T web /usr/local/bin/run-server-tests
           docker-compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
       env: 
