@@ -260,12 +260,12 @@ if (nrow(result) > 0) {
       dev.off()
 
       file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,file_names_box_sorted_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
-
       #file_zip <- c(file_names_jsons,file_names_R,file_names_bar_png,file_names_bar_sorted_png,file_names_png,file_names_box_png,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     } else {
       file_zip <- c(file_names_jsons,file_names_R,paste(analysis_dir,"/vardisplaynames.json",sep=''))
     }
     }# here
+    
     total_answer <- paste(total_answer,'}}')
     bestresults_filename <- paste(analysis_dir,'/best_result.json',sep='')
     print(bestresults_filename)
