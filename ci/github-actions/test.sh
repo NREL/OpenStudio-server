@@ -3,7 +3,7 @@
 # platform-specific config here (also in setup.sh):
 if [ "${ImageOS}" == "macos1015" ]; then
     # Dir containing openstudio
-    export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
+    export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
     export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
     export OPENSTUDIO_TEST_EXE="$HOME/$OS_NAME_WITH_PLUS/bin/openstudio"
     # re-export PATH, even though it's set in setup.sh. 
