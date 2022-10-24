@@ -6,7 +6,7 @@ environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.5.0
   OPENSTUDIO_VERSION_SHA: 0aa781eed9
-  OPENSTUDIO_VERSION_EXT: "rc1"
+  OPENSTUDIO_VERSION_EXT: "-rc1"
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
   BUILD_TYPE: "test"
   SKIP_COVERALLS: "true"
