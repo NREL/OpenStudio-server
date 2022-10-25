@@ -263,6 +263,8 @@ RSpec.describe OpenStudioMeta do
 
   after :all do
     # stop the server
+    # debuging tests. remove sleep command below
+    sleep(3600)
     command = "#{ruby_cmd} \"#{meta_cli}\" stop_local \"#{project}\""
     puts command
     stop_local = system(command)
