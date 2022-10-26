@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Default set IMAGETAG to skip. 
+# Default set IMAGETAG to skip.
 IMAGETAG="skip"
 
 if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
@@ -10,10 +10,10 @@ elif [ "${GITHUB_REF}" == "refs/heads/2.9.X-LTS" ]; then
 elif [ "${GITHUB_REF}" == "refs/heads/master" ]; then
     # Retrieve the version number from rails
     IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::VERSION+OpenstudioServer::VERSION_EXT")"
-# Uncomment and set branch name for custom builds. 
-# Currently setting this to setup_github_actions to test upload. 
-elif [ "${GITHUB_REF}" == "refs/heads/setup_github_actions" ]; then
-    IMAGETAG=experimental
+# Uncomment and set branch name for custom builds.
+# Currently setting this to setup_github_actions to test upload.
+elif [ "${GITHUB_REF}" == "refs/heads/3.4.1-alpha" ]; then
+    IMAGETAG=3.4.1-alpha
 fi
 
 if [ "${IMAGETAG}" != "skip" ]; then
