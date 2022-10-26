@@ -208,7 +208,7 @@ module DjJobs
               uo_process_log = File.join(simulation_dir, 'urbanopt_process.log')
               run_urbanopt(uo_simulation_log, uo_process_log)
             else  #OS CLI workflow
-              cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+              cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
               process_log = File.join(simulation_dir, 'oscli_simulation.log')
               @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
               oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
