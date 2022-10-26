@@ -10,16 +10,16 @@ on: [push, pull_request]
 
 env:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 3.4.0 
-  OPENSTUDIO_VERSION_SHA: 4bd816f785
-  OPENSTUDIO_VERSION_EXT: ""
+  OPENSTUDIO_VERSION: 3.5.0 
+  OPENSTUDIO_VERSION_SHA: 0aa781eed9
+  OPENSTUDIO_VERSION_EXT: "-rc1"
   DOCKER_COMPOSE_VERSION: 1.21.1
   BUNDLE_WITHOUT: native_ext
 
 
 jobs:
   linux-test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
@@ -36,6 +36,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
+        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server.
     - name: logs
       if: ${{ failure() }} 
       shell: bash 
@@ -68,7 +69,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
-        SKIP_URBANOPT_ALGO: false # Set this when excluding urbanopt-cli gem from server. 
+        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server. 
     - name: logs
       if: ${{ failure() }}  
       shell: bash 
@@ -84,7 +85,7 @@ jobs:
         name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
   docker:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
@@ -96,7 +97,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=3.4.0
+          export OPENSTUDIO_TAG=3.5.0-rc1
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all
@@ -105,7 +106,6 @@ jobs:
           docker-compose -f docker-compose.test.yml pull
           docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
           docker-compose -f docker-compose.test.yml up -d
-          # set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
           # set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
           docker-compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
           docker-compose stop

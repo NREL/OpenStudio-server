@@ -1,6 +1,33 @@
 OpenStudio Server
 =================
 
+Version 3.4.0
+-------------
+* pass in allow_disk_usage to mongoin https://github.com/NREL/OpenStudio-server/pull/642
+* Remove references to travis in documentation and fix badges in https://github.com/NREL/OpenStudio-server/pull/646
+* update rails for security patches in https://github.com/NREL/OpenStudio-server/pull/647
+* update rails for security patchesin https://github.com/NREL/OpenStudio-server/pull/647
+* show CLI version on admin page in https://github.com/NREL/OpenStudio-server/pull/655
+* Pareto by @brianlball in https://github.com/NREL/OpenStudio-server/pull/657
+* fix mongorestore and mongodump commands in https://github.com/NREL/OpenStudio-server/pull/656
+
+Version 3.3.0
+-------------
+* [#633](https://github.com/NREL/OpenStudio-server/pull/633) - Merge urbanopt/reopt
+* [#634](https://github.com/NREL/OpenStudio-server/pull/634) - Fix in.osm not downloadable
+* [#635](https://github.com/NREL/OpenStudio-server/pull/635) - Bump puma version for security
+* [#636](https://github.com/NREL/OpenStudio-server/pull/636) - Add docker container scanning using Trivy
+* [#641](https://github.com/NREL/OpenStudio-server/issues/641) - Fix mongo memory limitation for large sort ops 
+
+Version 3.2.0
+-------------
+ * [#627](https://github.com/NREL/OpenStudio-server/pull/627)  Update to OpenStudio SDK v3.2.0 and EnergyPlus 9.5
+ * [#615](https://github.com/NREL/OpenStudio-server/pull/615) Include optional UrbanOpt
+ to run UrbanOpt workflows
+ * [$625](https://github.com/NREL/OpenStudio-server/pull/625) Update rails to 6.1.3.1 and ruby to use 2.7.2 along with other core dependency gems.
+ * [#617](https://github.com/NREL/OpenStudio-server/pull/617) Move CI from Travis to GitHub actions
+ * [#613](https://github.com/NREL/OpenStudio-server/pull/613) Update mongo to 4.4.2 and redis 6.0.9 and allow for optional authetication of mongo and redis.
+
 Version 3.1.0-1
 -------------
 

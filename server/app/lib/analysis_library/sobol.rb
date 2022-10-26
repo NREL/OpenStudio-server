@@ -121,6 +121,10 @@ class AnalysisLibrary::Sobol < AnalysisLibrary::Base
       if @analysis.problem['algorithm']['number_of_samples'].nil? || (@analysis.problem['algorithm']['number_of_samples']).zero?
         raise 'Must have number of samples to discretize the parameter space'
       end
+      
+      if @analysis.problem['algorithm']['number_of_samples'] <= 1
+        raise 'Number of samples must be > 1'
+      end
 
       @analysis.problem['algorithm']['objective_functions'] = [] unless @analysis.problem['algorithm']['objective_functions']
       @analysis.save!

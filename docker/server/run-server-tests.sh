@@ -23,7 +23,8 @@ done
 # can be removed.
 cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_test_apis_spec.rb; (( exit_status = exit_status || $? ))
 cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_algo_spec.rb; (( exit_status = exit_status || $? ))
-if [ ! SKIP_URBANOPT_ALGO=true ]
+echo "SKIP_URBANOPT_ALGO: $SKIP_URBANOPT_ALGO"
+if ! $SKIP_URBANOPT_ALGO -eq true
 then
   cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_urbanopt_algo_spec.rb; (( exit_status = exit_status || $? ))
 fi

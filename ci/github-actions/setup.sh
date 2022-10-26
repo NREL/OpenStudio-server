@@ -2,7 +2,7 @@
 
 echo "The build architecture is ${ImageOS}"
 
-if [ "${ImageOS}" == "ubuntu18" ] && [ "${BUILD_TYPE}" == "docker" ]; then
+if [ "${ImageOS}" == "ubuntu20" ] && [ "${BUILD_TYPE}" == "docker" ]; then
     echo "Installing docker compose"
     sudo rm /usr/local/bin/docker-compose
     curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -34,10 +34,9 @@ else
         rm -r mongodb-macos*
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
-        export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin
-        export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin
-        curl -SL --insecure https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
-        #curl -SL --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/3.4.0-rc2/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
+        export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
+        curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v3.5.0-rc1/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
         # OSX downloads with %2B but installs with + sign. These are the encoded chars in url strings.
         #hdiutil attach ${OS_NAME}.dmg
         #sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
@@ -59,12 +58,12 @@ else
         ulimit -n 4096
         ulimit -a
 
-    elif [ "${ImageOS}" == "ubuntu18" ]; then
+    elif [ "${ImageOS}" == "ubuntu20" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update && sudo apt-get install -y wget gnupg software-properties-common build-essential
         sudo wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-        echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.4 multiverse | tee /etc/apt/sources.list.d/mongodb-org-4.4.list"
+        echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse | tee /etc/apt/sources.list.d/mongodb-org-4.4.list"
         sudo apt-get update
         sudo apt-get install -y pv tree mongodb libqdbm14 libxml2-dev
         # explicitly install. the latest version of redis-server

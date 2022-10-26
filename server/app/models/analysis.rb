@@ -58,6 +58,7 @@ class Analysis
   field :download_osm, type: Boolean, default: true
   field :download_osw, type: Boolean, default: true
   field :download_reports, type: Boolean, default: true
+  field :variable_display_name_choice, type: String, default: 'display_name'
 
   # Hash of the jobs to run for the analysis
   # field :jobs, type: Array, default: [] # very specific format
@@ -79,6 +80,7 @@ class Analysis
   
   # Temp location for these vas
   field :samples, type: Integer
+  field :significant_digits, type: Integer, default: 3
 
   has_mongoid_attached_file :seed_zip,
                             url: '/assets/analyses/:id/:style/:basename.:extension',
@@ -328,7 +330,7 @@ class Analysis
     # sort before sending back
     Hash[mappings.sort_by { |_, v| v }]
   end
-
+  
   # filter results on analysis show page (per status)
   def search(search, status, page_no = 1, view_all = 0)
     page_no = page_no.presence || 1

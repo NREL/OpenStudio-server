@@ -59,10 +59,17 @@ for (i in 1:ncol(vars)){
 for (i in 1:ncol(vars2)){
   vars2[,i] <- sort(vars2[,i])
 }
+
 print(paste("vartypes:",vartypes))
 print(paste("varnames:",varnames))
 print(paste("vardisplaynames:",vardisplaynames))
 print(paste("objnames:",objnames))
+colnames(vars) <- varnames
+print(paste("vars:",vars))
+print(vars)
+colnames(vars2) <- varnames
+print(paste("vars2:",vars2))
+print(vars2)
 
 # Setup a bunch of variables for the analysis based on passed variables
 # From Ruby
@@ -164,7 +171,10 @@ try(results <- clusterApplyLB(cl, m1, f),silent=FALSE)
 #print(paste("nrow(results):",nrow(results)))
 #print(paste("ncol(results):",ncol(results)))
 print(paste("results:",results))
-result <- as.data.frame(results)
+#result <- as.data.frame(results)
+result <- as.data.frame(results, row.name=objnames)
+print(paste("result:",result))
+print(result)
 if (debug_messages == 1) {
   print(paste("length(objnames):",length(objnames)))
   print(paste("nrow(result):",nrow(result)))
@@ -174,6 +184,8 @@ file_names_jsons <- c("")
 file_names_R <- c("")
 file_names_png <- c("")
 total_answer <- '{"Sobol_Indicies":{'
+#row of results is the objective functions
+#a col is each datapoint
 if (nrow(result) > 0) {
   for (j in 1:nrow(result)){
     #print(paste("result[j,]:",unlist(result[j,])))
