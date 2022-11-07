@@ -5,7 +5,7 @@
 
 #may include suffix
 ARG OPENSTUDIO_VERSION=3.5.0
-FROM nrel/openstudio:3.5.0-rc1 as base
+FROM nrel/openstudio:3.5.0-rc2 as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 ENV DEBIAN_FRONTEND=noninteractive
