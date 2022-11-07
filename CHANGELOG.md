@@ -1,5 +1,15 @@
 OpenStudio Server
 =================
+Version 3.5.0
+-------------
+* update mongoid queries in https://github.com/NREL/OpenStudio-server/pull/662
+* fix Radar plo in https://github.com/NREL/OpenStudio-server/pull/664
+* fix #539 and add significant digit toggle in https://github.com/NREL/OpenStudio-server/pull/658
+* update plots with display name choices in https://github.com/NREL/OpenStudio-server/pull/665
+* Ubuntu 20.04 in https://github.com/NREL/OpenStudio-server/pull/670
+* Sobol and morris fix  in https://github.com/NREL/OpenStudio-server/pull/668
+* Uo update in https://github.com/NREL/OpenStudio-server/pull/671
+* add URBANopt template OSA for single_run in https://github.com/NREL/OpenStudio-server/pull/672
 
 Version 3.4.0
 -------------
