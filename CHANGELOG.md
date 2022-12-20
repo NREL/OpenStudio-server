@@ -1,7 +1,13 @@
 OpenStudio Server
 =================
+ Version 3.5.1
+ -------------
+ * update urbanopt to 0.9.0
+ * update OpenStudio to 3.5.1
+
+
 Version 3.5.0
--------------
+------------- 
 * update mongoid queries in https://github.com/NREL/OpenStudio-server/pull/662
 * fix Radar plo in https://github.com/NREL/OpenStudio-server/pull/664
 * fix #539 and add significant digit toggle in https://github.com/NREL/OpenStudio-server/pull/658

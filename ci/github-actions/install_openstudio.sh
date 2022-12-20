@@ -8,14 +8,14 @@ OPENSTUDIO_VERSION_EXT=$3
 
 if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # OPENSTUDIO_VERSION_EXT may be empty
-    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_SHA}-Ubuntu-18.04.deb
+    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_SHA}-Ubuntu-20.04.deb
     echo "Installing OpenStudio ${OPENSTUDIO_DOWNLOAD_FILENAME}"
-    OPENSTUDIO_DOWNLOAD_BASE_URL=https://github.com/NREL/OpenStudio/releases/download/v3.5.0/
+    OPENSTUDIO_DOWNLOAD_BASE_URL=https://github.com/NREL/OpenStudio/releases/download/v3.5.1-rc2/
     OPENSTUDIO_DOWNLOAD_URL=$OPENSTUDIO_DOWNLOAD_BASE_URL/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     # copying this from the docker-openstudio dockerfile
     apt-get update && apt-get install -y curl vim gdebi-core libgmp-dev libffi-dev build-essential zlib1g-dev vim git locales sudo
-    export OPENSTUDIO_DOWNLOAD_URL=https://github.com/NREL/OpenStudio/releases/download/v3.5.0/$OPENSTUDIO_DOWNLOAD_FILENAME
+    export OPENSTUDIO_DOWNLOAD_URL=https://github.com/NREL/OpenStudio/releases/download/v3.5.1-rc2/$OPENSTUDIO_DOWNLOAD_FILENAME
 
     echo "OpenStudio Package Download URL is ${OPENSTUDIO_DOWNLOAD_URL}"
     curl -SLO $OPENSTUDIO_DOWNLOAD_URL
