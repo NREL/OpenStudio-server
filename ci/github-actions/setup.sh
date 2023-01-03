@@ -36,7 +36,7 @@ else
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
         export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}%2B${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
         export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
-        curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v3.5.1-rc2/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v3.5.1/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
         # OSX downloads with %2B but installs with + sign. These are the encoded chars in url strings.
         #hdiutil attach ${OS_NAME}.dmg
         #sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
