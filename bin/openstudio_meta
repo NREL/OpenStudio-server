@@ -349,20 +349,21 @@ class InstallGems
     # Execute the required bundler command
     ::Dir.chdir File.absolute_path(File.join(__FILE__, './../../server/'))
     bundler_bin = File.absolute_path('./../gems/bin/bundle')
+    bundler_bin_version = "2.1.4"
     rake_bin = File.absolute_path('./../gems/bin/rake/')
     sys_cmds = []
 
-    sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 2.1.4"
+    sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v #{bundler_bin_version}"
     if /darwin/.match(RUBY_PLATFORM)
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-config=/usr/bin/xml2-config"
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config"
     end
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} _#{bundler_bin_version}_ install --with default development test"
     else
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} _#{bundler_bin_version}_ install --without development test"
     end
-    sys_cmds << "#{$ruby_path} #{bundler_bin} update"
+    sys_cmds << "#{$ruby_path} #{bundler_bin} _#{bundler_bin_version}_ update"
     sys_cmds << 'echo "Calling assets:precompile"'
     sys_cmds << "#{$ruby_path} #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
     sys_call = sys_cmds.join(' && ')
