@@ -29,7 +29,7 @@ set RUBYLIB=C:\projects\openstudio\Ruby
 ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
 REM dying over next 2 lines w/ "system cannot find path specified" - maybe just ruby.exe?
 cd c:\projects\openstudio-server
-gem install -v %BUNDLE_VERSION%
+gem install bundler -v %BUNDLE_VERSION%
 which bundle
 bundle _%BUNDLE_VERSION%_ install
 REM echo List out the test Directory
