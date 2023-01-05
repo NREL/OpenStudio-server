@@ -38,11 +38,11 @@ class AdminController < ApplicationController
     require 'rubygems'
     @gems = Gem::Specification.all.map { |g| [g.name, g.version.to_s] }.sort
     #use split.first to remove the --bundle stuff, see why below
-    Rails.logger.debug "oscli version command: #{Utility::Oss.oscli_cmd(Rails.logger).split.first} openstudio_version"
+    Rails.logger.debug "oscli version command: #{Utility::Oss.oscli_cmd_no_bundle_args(Rails.logger)} openstudio_version"
     # syntax to explicitly unset a bunch of env vars is very different for windows
     # Use the default shell to query for OpenStudio version. Not neccessary to unset these. 
     #unset_vars = Gem.win_platform? || ENV['OS'] == 'Windows_NT' ? 'set ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join('= && set ') : 'unset ' + Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.join(' && unset ')
-    oscli_cmd = "#{Utility::Oss.oscli_cmd(Rails.logger).split.first} openstudio_version"
+    oscli_cmd = "#{Utility::Oss.oscli_cmd_no_bundle_args(Rails.logger)} openstudio_version"
     oscli_cmd = "call #{oscli_cmd}" if Gem.win_platform? || ENV['OS'] == 'Windows_NT'
     Rails.logger.debug "oscli_cmd: #{oscli_cmd}"
     version = `#{oscli_cmd}`  #this will not work with --bundle args since user is 'nobody' and cannot create a tmpdir from $HOME
