@@ -29,6 +29,7 @@ REM If you change RUBYLIB here, make sure to change it in integration-test.ps1 a
 set RUBYLIB=C:\projects\openstudio\Ruby
 
 REM newer versions of bundler cause problems (e.g. 2.3.4) so remove these and install supported version 
+gem uninstall --force bundler
 del C:\Ruby27-x64\lib\ruby\gems\2.7.0\specifications\bundler*
 gem install bundler -v %BUNDLE_VERSION%
 which bundle
