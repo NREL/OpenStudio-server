@@ -1,0 +1,60 @@
+{
+  "analysis": {
+    "display_name": "Test Model",
+    "name": "test_model",
+    "output_variables": [],
+    "problem": {
+      "analysis_type": "single_run",
+      "algorithm": {
+        "number_of_samples": 1,
+        "seed": 1973,
+        "failed_f_value": 1000000000000000000,
+        "debug_messages": 1,
+        "objective_functions": []
+      },
+      "workflow": [
+        {
+          "name": "test_scripts",
+          "display_name": "test_scripts",
+          "measure_type": "RubyMeasure",
+          "measure_definition_class_name": "TestScripts",
+          "measure_definition_directory": "./measures/test_scripts",
+          "measure_definition_directory_local": "test_scripts",
+          "measure_definition_display_name": "Test scripts",
+          "measure_definition_name": "test_scripts",
+          "measure_definition_name_xml": null,
+          "measure_definition_uuid": "763b63d3-0ee0-47fb-a908-1876ece75ede",
+          "measure_definition_version_uuid": "50fd007b-27f2-47cd-a011-994edde0ae68",
+          "arguments": [
+            {
+              "display_name": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "display_name_short": "Apply the Measure to a Specific Space Type or to the Entire Model.",
+              "name": "space_name",
+              "value_type": "string",
+              "default_value": "*Entire Building*",
+              "value": "*Entire Building*"
+            }
+          ],
+          "workflow_index": 0
+        }      
+      ]
+    },
+    "seed": {
+      "file_type": "OSM",
+      "path": "./seed/example_model.osm"
+    },
+    "weather_file": {
+      "file_type": "EPW",
+      "path": "./weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw"
+    },
+    "file_format_version": 1,
+    "cli_debug": "",
+    "cli_verbose": "",
+    "run_workflow_timeout": 28800,
+    "upload_results_timeout": 28800,
+    "initialize_worker_timeout": 28800,
+    "server_scripts": {
+      "worker_initialization": "./scripts/worker_initialization/initialize.sh"
+    }
+  }
+}
