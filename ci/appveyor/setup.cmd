@@ -17,23 +17,15 @@ move C:\openstudio C:\projects\openstudio
 dir C:\projects\openstudio
 REM dir C:\projects\openstudio\Ruby
 rm %OS_INSTALL_NAME%
-REM install portable ruby
-REM curl -SLO https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.7.2-msvc-win32.tar.gz
-REM tar -xvzf ruby-2.7.2-msvc-win32.tar.gz -C C:\projects
-REM rm ruby-2.7.2-msvc-win32.tar.gz
-REM cd c:\projects\openstudio-server
 ruby -v
 openstudio openstudio_version
 
 REM If you change RUBYLIB here, make sure to change it in integration-test.ps1 and unit-test.cmd too
 set RUBYLIB=C:\projects\openstudio\Ruby
 
-REM newer versions of bundler cause problems (e.g. 2.3.4) so remove these and install supported version 
-gem uninstall --force bundler
-del C:\Ruby27-x64\lib\ruby\gems\2.7.0\specifications\bundler*
-gem install bundler -v %BUNDLE_VERSION%
+call gem install bundler -v %BUNDLE_VERSION%
 which bundle
-bundle --version
+call bundle --version
 
 ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
 REM dying over next 2 lines w/ "system cannot find path specified" - maybe just ruby.exe?
