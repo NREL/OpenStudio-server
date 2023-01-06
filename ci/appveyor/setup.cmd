@@ -3,6 +3,12 @@ set PATH=C:\Ruby27-x64\bin;C:\Program Files\Git\mingw64\bin;C:\projects\openstud
 set BUNDLE_VERSION=2.1.4
 set GEM_HOME=C:\projects\openstudio-server\gems
 set GEM_PATH=C:\projects\openstudio-server\gems;C:\projects\openstudio-server\gems\gems\bundler\gems
+
+REM newer versions of bundler cause problems (e.g. 2.3.4) so remove these and install supported version 
+del C:\Ruby27-x64\lib\ruby\gems\2.7.0\specifications\default\bundler*
+gem install bundler -v %BUNDLE_VERSION%
+which bundle
+bundle --version
 echo Downloading and Installing OpenStudio (develop branch, %OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%+%OPENSTUDIO_VERSION_SHA%)
 REM install develop build
 set OS_INSTALL_NAME=OpenStudio-%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%%%2B%OPENSTUDIO_VERSION_SHA%-Windows.exe
@@ -29,8 +35,6 @@ set RUBYLIB=C:\projects\openstudio\Ruby
 ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
 REM dying over next 2 lines w/ "system cannot find path specified" - maybe just ruby.exe?
 cd c:\projects\openstudio-server
-gem install bundler -v %BUNDLE_VERSION%
-which bundle
-bundle _%BUNDLE_VERSION%_ install
+bundle install
 REM echo List out the test Directory
 REM dir C:\projects\openstudio-server\spec\files\
