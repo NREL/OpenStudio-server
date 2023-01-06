@@ -19,7 +19,6 @@ gem 'rubyzip', '~> 2.3.0'
 gem 'tzinfo-data', '~>1.2021.1'
 
 # database modules
-
 gem 'mongoid', '7.2.1'
 #gem 'mongoid-paperclip' 
 # forked gem is neccessary as mongoid-paperclip relies on mimemagic which now requires freedesktop.org.xml at run time"
@@ -58,7 +57,8 @@ gem 'sass', '~> 3.7.4'
 gem 'sass-rails', '~> 6.0.0'
 gem 'sprockets-rails', '~> 3.2.2'
 gem 'uglifier', '~> 4.2.0'
-
+# mail => 2.8.0 has startup failures with rails 6.1.x series
+gem 'mail', '= 2.7.1'
 # don't try to install sassc 2.
 gem 'roo', '~> 2.8.3'
 gem 'sassc', '~> 2.4.0'
@@ -71,8 +71,8 @@ gem 'openstudio-workflow', '= 2.3.1'
 gem 'openstudio-analysis', '= 1.2.0'
 
 # Remove urbanopt cli gems for minor for releases as they use different versions of ext gems
-#gem 'urbanopt-cli', '= 0.8.3'
-#gem 'urbanopt-reopt', '= 0.8.0'
+gem 'urbanopt-cli', '= 0.9.0'
+gem 'urbanopt-reopt', '= 0.9.0'
 
 ## End commonly updated gems
 

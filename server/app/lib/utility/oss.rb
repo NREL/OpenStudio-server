@@ -21,9 +21,11 @@ module Utility
 
       raise 'OPENSTUDIO_EXE_PATH not set' unless ENV['OPENSTUDIO_EXE_PATH']
       raise "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`" unless File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
-
+      logger.info "Found ENV['OPENSTUDIO_EXE_PATH']"
       # set cmd from ENV variable
-      cmd = ENV['OPENSTUDIO_EXE_PATH']
+      cmd = ENV['OPENSTUDIO_EXE_PATH'] + oscli_bundle
+      logger.info "Returning Oscli cmd: #{cmd}"
+      cmd
     rescue Exception => e
       logger.warn "Error finding Oscli: #{e}"
       cmd = Gem.win_platform? || ENV['OS'] == 'Windows_NT' ? 'openstudio.exe' : `which openstudio`.strip
@@ -32,8 +34,20 @@ module Utility
       else
         logger.error 'Unable to find Oscli.'
       end
-      logger.info "Returning Oscli cmd: #{cmd + oscli_bundle}"
+      logger.info "RESCUE: Returning Oscli cmd: #{cmd + oscli_bundle}"
       cmd + oscli_bundle
+    end
+    
+    def self.oscli_cmd_no_bundle_args(logger = Rails.logger)
+      # determine if an explicit oscli path has been set via the meta-cli option, warn if not
+
+      raise 'OPENSTUDIO_EXE_PATH not set' unless ENV['OPENSTUDIO_EXE_PATH']
+      raise "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`" unless File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
+      logger.info "Found ENV['OPENSTUDIO_EXE_PATH'] in oscli_cmd_no_bundle_args"
+      # set cmd from ENV variable
+      cmd = ENV['OPENSTUDIO_EXE_PATH']
+      logger.info "Returning Oscli cmd: #{cmd}"
+      cmd
     end
 
     # use bundle option only if we have a path to openstudio gemfile.
