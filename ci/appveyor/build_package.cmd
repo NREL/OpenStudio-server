@@ -6,12 +6,6 @@ set GEM_PATH=C:\projects\openstudio-server\gems;C:\projects\openstudio-server\ge
 set RUBYLIB=C:\projects\openstudio\Ruby
 set OPENSTUDIO_TEST_EXE=C:\projects\openstudio\bin\openstudio
 
-call gem install bundler -v %BUNDLE_VERSION%
-call bundle --version
-
-call gem install rake 
-call rake --version
-
 REM set mongo_dir??
 cd c:\
 mkdir export
