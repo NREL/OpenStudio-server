@@ -4,8 +4,8 @@ image: Visual Studio 2019
 
 environment:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 3.5.0
-  OPENSTUDIO_VERSION_SHA: 7b14ce1588
+  OPENSTUDIO_VERSION: 3.5.1
+  OPENSTUDIO_VERSION_SHA: 22e1db7be5
   OPENSTUDIO_VERSION_EXT: ""
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
   BUILD_TYPE: "test"
@@ -15,14 +15,15 @@ artifacts:
   - path: 'export/*.tar.gz' #relative to root of repo
     name: oss.tar.gz
 
-#init:
-  #  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+init:
+#    - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
 install:
 # set PATH pre-installed ruby version
   - set PATH=C:\Ruby27-x64\bin;C:\Mongodb\bin;%PATH%
+  - C:\projects\openstudio-server\ci\appveyor\setup_ruby.cmd
   - C:\projects\openstudio-server\ci\appveyor\setup.cmd
 
 build: off
@@ -39,6 +40,6 @@ test_script:
   - cmd: C:\projects\openstudio-server\ci\appveyor\build_package.cmd #artifact upload occurs before on_finish
 on_finish:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-    #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
