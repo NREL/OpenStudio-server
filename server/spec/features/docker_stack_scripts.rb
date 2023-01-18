@@ -72,7 +72,7 @@ puts "App host is: http://#{HOST}"
 #puts "Docker ps: #{docker_ps.to_s}"
 
 # the actual tests
-RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
+RSpec.describe 'RunScripts', type: :feature do
   before :all do
     @host = HOST
     @project = PROJECT
@@ -87,7 +87,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     # RestClient calls below.
   end
   
-  it 'run single_run analysis', :single_run, js: true do
+  it 'run v0_2_14', :v0_2_14 do
 
     # run an analysis
     command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/script_test/test_model.json' 'http://#{@host}' -z 'test_model' -a single_run"
@@ -104,6 +104,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
 
     status = 'queued'
     timeout_seconds = 360
+    data_point_id_ = ''
     begin
       ::Timeout.timeout(timeout_seconds) do
         while status != 'completed'
@@ -142,6 +143,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
               data_points_status = a[:data_point][:status]
               expect(data_points_status).not_to be_nil
               puts "Accessed pages for data_point #{data_point_id}, data_points_status = #{data_points_status}"
+              data_point_id_ = data_point_id
             end
           rescue RestClient::ExceptionWithResponse => e
             puts "rescue: #{e} get_count: #{get_count}"
@@ -157,5 +159,19 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     end
     expect(status).to eq('completed')
 
+    #get OSW
+    a = RestClient.get "http://#{@host}/data_points/#{data_point_id_}/download_result_file?filename=out.osw"
+
+    expect(a).not_to be_empty
+    expect(a.size).to be >(20000)
+    expect(a.size).to be <(30000)
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.headers[:content_type]).to eq("text/plain")
+    expect(a.headers[:content_disposition]).to include("out.osw")
+
+    b = JSON.parse(a, symbolize_names: true)
+    #check standards version to be 0.2.14
+    expect(b[:steps][0][:result][:step_info].include? "OpenstudioStandards::VERSION = 0.2.14").to be true
+     
   end # single_run
 end
