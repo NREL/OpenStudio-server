@@ -676,7 +676,6 @@ module DjJobs
     end
 
     def run_bundle_gems
-
       @sim_logger.info "Installing gems" 
       gemfile = "#{analysis_dir}/#{@data_point.analysis.gemfile}"
       if File.file? gemfile
