@@ -16,14 +16,14 @@ module Utility
       #   'BUNDLE_WITHOUT' # This now needs to be set BUNDLE_WITHOUT=native_ext
     ].freeze
     # return command to run openstudio cli on current platform
-    def self.oscli_cmd(logger = Rails.logger)
+    def self.oscli_cmd_bundle_args(logger = Rails.logger, gemfile, gempath)
       # determine if an explicit oscli path has been set via the meta-cli option, warn if not
 
       raise 'OPENSTUDIO_EXE_PATH not set' unless ENV['OPENSTUDIO_EXE_PATH']
       raise "Unable to find file specified in OPENSTUDIO_EXE_PATH: `#{ENV['OPENSTUDIO_EXE_PATH']}`" unless File.exist?(ENV['OPENSTUDIO_EXE_PATH'])
       logger.info "Found ENV['OPENSTUDIO_EXE_PATH']"
       # set cmd from ENV variable
-      cmd = ENV['OPENSTUDIO_EXE_PATH'] + oscli_bundle
+      cmd = ENV['OPENSTUDIO_EXE_PATH'] + oscli_bundle(gemfile, gempath)
       logger.info "Returning Oscli cmd: #{cmd}"
       cmd
     rescue Exception => e
@@ -34,7 +34,7 @@ module Utility
       else
         logger.error 'Unable to find Oscli.'
       end
-      logger.info "RESCUE: Returning Oscli cmd: #{cmd + oscli_bundle}"
+      logger.info "RESCUE: Returning Oscli cmd: #{cmd + oscli_bundle(gemfile, gempath)}"
       cmd + oscli_bundle
     end
     
@@ -52,10 +52,10 @@ module Utility
 
     # use bundle option only if we have a path to openstudio gemfile.
     # if BUNDLE_PATH is not set (ie Docker), we must add these options
-    def self.oscli_bundle
-      bundle = Rails.application.config.os_gemfile_path.present? ? ' --bundle '\
-      "#{File.join Rails.application.config.os_gemfile_path, 'Gemfile'} --bundle_path "\
-      "#{File.join Rails.application.config.os_gemfile_path, 'gems'} --bundle_without native_ext" : ''
+    def self.oscli_bundle(gemfile, gemdir)
+       bundle = ' --bundle '\
+      "#{gemfile} --bundle_path "\
+      "#{gemdir} --bundle_without native_ext"
     end
 
     # Set some env_vars from the running env var list, ignore the rest

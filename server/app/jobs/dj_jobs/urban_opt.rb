@@ -42,7 +42,7 @@ module DjJobs
       @sim_logger.info "@data_point.analysis.problem['workflow']: #{@data_point.analysis.problem['workflow']}"
       @sim_logger.info "@data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'RubyMeasure'}: #{@data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'RubyMeasure'}}"
       if !@data_point.analysis.problem['workflow'].empty? && @data_point.analysis.problem['workflow'].any?{|h| h['measure_type'] == 'RubyMeasure'}            
-        cmd = "#{Utility::Oss.oscli_cmd(@sim_logger)} #{@data_point.analysis.cli_verbose} run --measures_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
+        cmd = "#{Utility::Oss.oscli_cmd_no_bundle_args(@sim_logger)} #{@data_point.analysis.cli_verbose} run --measures_only --workflow '#{osw_path}' #{@data_point.analysis.cli_debug}"
         process_log = File.join(simulation_dir, 'oscli_measures_only.log')
         @sim_logger.info "Running measures_only workflow using cmd #{cmd} and writing log to #{process_log}"
         oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
