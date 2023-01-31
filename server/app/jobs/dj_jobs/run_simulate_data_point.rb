@@ -209,10 +209,10 @@ module DjJobs
               run_urbanopt(uo_simulation_log, uo_process_log)
             else  #OS CLI workflow
               @sim_logger.info "analysis is configured with #{@data_point.analysis.to_json}"
-              if @data_point.analysis.gemfile.empty?
-                cmd = "#{Utility::Oss.oscli_cmd_no_bundle_args(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
+              if @data_point.analysis.gemfile
+                cmd = "#{Utility::Oss.oscli_cmd_bundle_args(@sim_logger, analysis_dir)} #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
               else
-                cmd = "#{Utility::Oss.oscli_cmd_bundle_args(@sim_logger, "#{analysis_dir}/#{@data_point.analysis.gemfile}", "#{analysis_dir}/gems")} #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
+                cmd = "#{Utility::Oss.oscli_cmd_no_bundle_args(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
               end
               process_log = File.join(simulation_dir, 'oscli_simulation.log')
               @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
@@ -528,7 +528,7 @@ module DjJobs
 
         # Run the server data_point initialization script with defined arguments, if it exists.
         run_script_with_args 'initialize'
-        run_bundle_gems unless @data_point.analysis.gemfile.empty?
+        run_bundle_gems if @data_point.analysis.gemfile
       
       end
 
@@ -677,16 +677,15 @@ module DjJobs
 
     def run_bundle_gems
       @sim_logger.info "Installing gems" 
-      gemfile = "#{analysis_dir}/#{@data_point.analysis.gemfile}"
-      if File.file? gemfile
-        @sim_logger.info "Gemfile found at: #{gemfile}"
+      if File.file? "#{analysis_dir}/Gemfile"
+        @sim_logger.info "Gemfile found in: #{analysis_dir}"
       else
-        @sim_logger.info "Gemfile not found at #{gemfile}" 
+        @sim_logger.info "Gemfile not found at #{analysis_dir}" 
         return false
       end
 
       log_path = "#{analysis_dir}/bundle.log"
-      cmd = "bundle install --gemfile=#{gemfile} --path=#{analysis_dir}/gems"
+      cmd = "bundle install --gemfile=#{analysis_dir}/Gemfile --path=#{analysis_dir}/gems"
       oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
       @sim_logger.info "Bundle install command: #{cmd}"
       pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [log_path, 'w'])

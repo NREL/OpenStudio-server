@@ -163,8 +163,8 @@
 					"type": "boolean"
 				},
 				"gemfile": {
-					"description": "Relative path and name of the Gemfile",
-					"type": "string"
+					"description": "set to true to use Gemfile",
+					"type": "boolean"
 				},
 				"initialize_worker_timeout": {
 					"type": "number"
