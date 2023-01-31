@@ -57,7 +57,7 @@ class Analysis
   field :download_zip, type: Boolean, default: true
   field :download_osm, type: Boolean, default: true
   field :download_osw, type: Boolean, default: true
-  field :gemfile, type: String, default: '' 
+  field :gemfile, type: Boolean, default: false
   field :download_reports, type: Boolean, default: true
   field :variable_display_name_choice, type: String, default: 'display_name'
 
