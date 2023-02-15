@@ -67,7 +67,7 @@ gem 'sassc', '~> 2.4.0'
 ## Commonly update gems for testing and development
 
 gem 'openstudio-workflow', '= 2.3.1'
-gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => 'osw_to_osa'
+gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => 'develop'
 #gem 'openstudio-analysis', '= 1.2.0'
 
 # Remove urbanopt cli gems for minor for releases as they use different versions of ext gems
