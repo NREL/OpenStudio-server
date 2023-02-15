@@ -124,8 +124,9 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       ug = objtrue.uniq { |v| v['objective_function_group'] }
       logger.info "Number of objective function groups are #{ug.size}"
       obj_names = []
-      ug.each do |var|
-        obj_names << var['display_name_short']
+      ug.each do |var|        
+        raise "display_name not set for #{var['display_name']}" if var['display_name'].nil?
+        obj_names << var['display_name_short'] ? var['display_name_short'] || var['display_name']
       end
 
       logger.info "Objective function names #{obj_names}"
