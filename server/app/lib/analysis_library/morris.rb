@@ -126,7 +126,7 @@ class AnalysisLibrary::Morris < AnalysisLibrary::Base
       obj_names = []
       ug.each do |var|        
         raise "display_name not set for #{var['display_name']}" if var['display_name'].nil?
-        obj_names << var['display_name_short'] ? var['display_name_short'] || var['display_name']
+        obj_names << var['display_name_short'] ? var['display_name_short'] : var['display_name']
       end
 
       logger.info "Objective function names #{obj_names}"
