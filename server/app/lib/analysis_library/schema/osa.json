@@ -818,7 +818,7 @@
 					"description": "Type of measure to be run.",
 					"type": "string",
 					"enum": [
-						"RubyMeasure", "EnergyPlusMeasure", "ReportingMeasure"
+						"ModelMeasure", "RubyMeasure", "EnergyPlusMeasure", "ReportingMeasure"
 					]
 				},
 				"measure_definition_class_name": {
