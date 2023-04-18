@@ -1,0 +1,61 @@
+name: openstudio-server
+
+on: [push, pull_request]
+
+# example of how to restrict to one branch and push event
+#on:
+#  push:
+#    branches:
+#      - test_branch
+
+env:
+  USE_TESTING_TIMEOUTS: "true"
+  OPENSTUDIO_VERSION: 3.6.0 
+  OPENSTUDIO_VERSION_SHA: e8153aa081
+  OPENSTUDIO_VERSION_EXT: "-rc1"
+  DOCKER_COMPOSE_VERSION: 1.21.1
+  BUNDLE_WITHOUT: native_ext
+
+
+jobs:
+  docker-scan:
+    runs-on: ubuntu-20.04
+    steps: 
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: setup
+      shell: bash 
+      run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: docker
+    - name: docker
+      shell: bash 
+      run: |
+          export OPENSTUDIO_TAG=3.6.0-rc1
+          sed -i -E "s/.git//g" .dockerignore
+          docker volume create --name=osdata
+          docker images --all
+          docker --version
+          docker-compose --version
+          docker-compose -f docker-compose.test.yml pull
+          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+      env: 
+        CI: true
+        OS_SERVER_NUMBER_OF_WORKERS: 4
+        BUILD_TYPE: docker
+        COMPOSE_INTERACTIVE_NO_CLI: 1
+    - name: Run docker vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        # the image should have been built and tagged in the previous steps
+        image-ref: 'nrel/openstudio-server:latest'
+        format: 'template'
+        template: '@/contrib/sarif.tpl'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+        timeout: 15m0s
+        allow-failure: true
+    - name: Upload container scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
