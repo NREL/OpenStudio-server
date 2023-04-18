@@ -1,4 +1,4 @@
-name: openstudio-server
+name: docker security scan
 
 on: [push, pull_request]
 
