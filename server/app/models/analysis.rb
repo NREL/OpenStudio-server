@@ -57,6 +57,7 @@ class Analysis
   field :download_zip, type: Boolean, default: true
   field :download_osm, type: Boolean, default: true
   field :download_osw, type: Boolean, default: true
+  field :gemfile, type: Boolean, default: false
   field :download_reports, type: Boolean, default: true
   field :variable_display_name_choice, type: String, default: 'display_name'
 
@@ -505,7 +506,9 @@ class Analysis
       retry if extract_count < extract_max_count
       raise "Extraction of the seed.zip file failed #{extract_max_count} times with error #{e.message}"
     end
+     
     run_script_with_args 'initialize'
+    
   end
 
   # runs on web node

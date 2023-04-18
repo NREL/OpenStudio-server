@@ -150,6 +150,22 @@
 				"cli_verbose": {
 					"type": "string"
 				},
+				"download_reports": {
+					"type": "boolean"
+				},
+				"download_osw": {
+					"type": "boolean"
+				},
+				"download_osm": {
+					"type": "boolean"
+				},
+				"download_zip": {
+					"type": "boolean"
+				},
+				"gemfile": {
+					"description": "set to true to use Gemfile",
+					"type": "boolean"
+				},
 				"initialize_worker_timeout": {
 					"type": "number"
 				},
@@ -802,7 +818,7 @@
 					"description": "Type of measure to be run.",
 					"type": "string",
 					"enum": [
-						"RubyMeasure", "EnergyPlusMeasure", "ReportingMeasure"
+						"ModelMeasure", "RubyMeasure", "EnergyPlusMeasure", "ReportingMeasure"
 					]
 				},
 				"measure_definition_class_name": {
