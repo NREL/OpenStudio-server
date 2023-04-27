@@ -88,7 +88,7 @@ services:
     command: /usr/local/bin/start-workers  
   rserve:
     image: nrel/openstudio-rserve:latest
-    #build: ./docker/R
+    build: ./docker/R
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - REDIS_URL=${REDIS_URL}
