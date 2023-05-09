@@ -13,6 +13,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: openstudio
       MONGO_INITDB_ROOT_PASSWORD: openstudio
+    command: "mongod --setParameter internalQueryMaxAddToSetBytes=209715200 --setParameter internalQueryMaxBlockingSortMemoryUsageBytes=209715200"
   queue:
     image: 127.0.0.1:5000/redis
     ports:
