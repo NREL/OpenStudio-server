@@ -11,6 +11,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    command: "mongod --setParameter internalQueryMaxAddToSetBytes=${MONGO_MEM} --setParameter internalQueryMaxBlockingSortMemoryUsageBytes=${MONGO_MEM}"
   queue:
     image: redis:6.0.9
     ports:
