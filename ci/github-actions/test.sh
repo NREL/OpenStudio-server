@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # platform-specific config here (also in setup.sh):
-if [ "${ImageOS}" == "macos1015" ]; then
+if [ "${ImageOS}" == "macos11" ]; then
     # Dir containing openstudio
     export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
     export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
