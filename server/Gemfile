@@ -17,6 +17,7 @@ gem 'jbuilder', '~> 2.11.2'
 gem 'nokogiri', '~> 1.11.7'
 gem 'rubyzip', '~> 2.3.0'
 gem 'tzinfo-data', '~>1.2021.1'
+gem 'loofah',  '2.20.0'
 
 # database modules
 gem 'mongoid', '7.2.1'
