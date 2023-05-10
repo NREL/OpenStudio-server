@@ -11,8 +11,8 @@ on: [push, pull_request]
 env:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.6.0 
-  OPENSTUDIO_VERSION_SHA: 3ef5d2a64c
-  OPENSTUDIO_VERSION_EXT: "-rc3"
+  OPENSTUDIO_VERSION_SHA: 860f5de185
+  OPENSTUDIO_VERSION_EXT: ""
   DOCKER_COMPOSE_VERSION: 1.21.1
   BUNDLE_WITHOUT: native_ext
 
@@ -52,7 +52,7 @@ jobs:
         name: openstudio-server-gems-linux
         path: build/NREL/export/*.tar.gz
   macos-test:
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
@@ -97,7 +97,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=3.6.0-rc3
+          export OPENSTUDIO_TAG=3.6.0
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all
