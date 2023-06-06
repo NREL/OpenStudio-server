@@ -1,3 +1,8 @@
+# *******************************************************************************
+# OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+# See also https://openstudio.net/license
+# *******************************************************************************
+
 # Simple Role Syntax
 # ==================
 # Supports bulk-adding hosts to roles, the primary
