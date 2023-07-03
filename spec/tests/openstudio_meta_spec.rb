@@ -17,7 +17,7 @@ require 'json'
 
 # mongod must be in the path, if you are on Windows you can use the following
 if Gem.win_platform?
-  ENV['PATH'] = "C:/Program Files/MongoDB/Server/3.0/bin;#{ENV['PATH']}" # @todo it would be good to un-hard-code this
+  ENV['PATH'] = "C:/Program Files/MongoDB/Server/6.0/bin;#{ENV['PATH']}" # @todo it would be good to un-hard-code this
 end
 
 def which(cmd)
