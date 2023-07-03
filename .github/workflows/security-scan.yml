@@ -47,7 +47,6 @@ jobs:
     - name: Cleanup Docker resources and space
       shell: bash
       run: |
-          docker system prune -af
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf "/usr/local/share/boost"
