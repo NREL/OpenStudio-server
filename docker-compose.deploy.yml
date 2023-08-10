@@ -2,7 +2,7 @@
 version: '3.4'
 services:
   db:
-    image: mongo:4.4.2
+    image: mongo:6.0.7
     ports:
       - "27017:27017"
     deploy:

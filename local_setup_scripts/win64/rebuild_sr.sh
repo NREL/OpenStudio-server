@@ -12,8 +12,8 @@ cd docker/R
 #docker image rm 127.0.0.1:5000/openstudio-rserve -f
 docker build . -t="127.0.0.1:5000/openstudio-rserve"
 docker push 127.0.0.1:5000/openstudio-rserve
-docker pull mongo:4.4.2
-docker tag mongo:4.4.2 127.0.0.1:5000/mongo
+docker pull mongo:6.0.7
+docker tag mongo:6.0.7 127.0.0.1:5000/mongo
 docker push 127.0.0.1:5000/mongo
 docker pull redis:6.0.9
 docker tag redis:6.0.9 127.0.0.1:5000/redis
