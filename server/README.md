@@ -1,4 +1,4 @@
-# OpenStudio Rails Application
+# OpenStudio(R) Rails Application
 
 ## Algorithmic Development Dependencies
 

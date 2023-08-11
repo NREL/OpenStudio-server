@@ -1,4 +1,4 @@
-# OpenStudio Server
+# OpenStudio(R) Server
 
 [![Build Status][gh-img]][gh-url] 
 [![Coverage Status][coveralls-img]][coveralls-url]

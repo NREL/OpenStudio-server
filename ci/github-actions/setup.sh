@@ -28,9 +28,9 @@ else
         rm ruby-2.7.2-darwin.tar.gz
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
-        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-4.4.2.tgz
-        tar xvzf mongodb-macos-x86_64-4.4.2.tgz
-        sudo cp mongodb-macos-x86_64-4.4.2/bin/* /usr/local/bin/
+        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-6.0.7.tgz
+        tar xvzf mongodb-macos-x86_64-6.0.7.tgz
+        sudo cp mongodb-macos-x86_64-6.0.7/bin/* /usr/local/bin/
         rm -r mongodb-macos*
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
@@ -63,8 +63,8 @@ else
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update && sudo apt-get install -y wget gnupg software-properties-common build-essential
-        sudo wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-        echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse | tee /etc/apt/sources.list.d/mongodb-org-4.4.list"
+        sudo wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+        echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse | tee /etc/apt/sources.list.d/mongodb-org-6.0.list"
         sudo apt-get update
         sudo apt-get install -y pv tree mongodb libqdbm14 libxml2-dev
         # explicitly install. the latest version of redis-server

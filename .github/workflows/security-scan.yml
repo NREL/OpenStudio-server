@@ -37,13 +37,19 @@ jobs:
           docker images --all
           docker --version
           docker-compose --version
-          docker-compose -f docker-compose.test.yml pull
-          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web 
       env: 
         CI: true
         OS_SERVER_NUMBER_OF_WORKERS: 4
         BUILD_TYPE: docker
         COMPOSE_INTERACTIVE_NO_CLI: 1
+    - name: Cleanup Docker resources and space
+      shell: bash
+      run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
     - name: Run docker vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:

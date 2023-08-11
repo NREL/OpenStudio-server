@@ -1,9 +1,10 @@
 OpenStudio Server
 =================
- Version 3.5.1
- -------------
- * update urbanopt to 0.9.0
- * update OpenStudio to 3.5.1
+
+Version 3.5.1
+-------------
+* update urbanopt to 0.9.0
+* update OpenStudio to 3.5.1
 
 
 Version 3.5.0
