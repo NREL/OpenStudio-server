@@ -22,7 +22,7 @@ class Job
 
   belongs_to :analysis
 
-  index(id: 1)
+  #index(id: 1)
   index(created_at: 1)
   index(analysis_id: 1)
   index(analysis_id: 1, index: 1, analysis_type: 1)
