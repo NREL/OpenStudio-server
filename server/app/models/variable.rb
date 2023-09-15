@@ -76,6 +76,7 @@ class Variable
   # validates_attachment :seed_zip, content_type: { content_type: "application/zip" }
 
   # Callbacks
+  before_create :set_uuid_from_id
   after_create :verify_uuid
   before_destroy :destroy_preflight_images
 
@@ -382,6 +383,10 @@ class Variable
 
   protected
 
+  def set_uuid_from_id
+    self.uuid = id
+  end
+  
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!

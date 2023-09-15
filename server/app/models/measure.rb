@@ -31,6 +31,7 @@ class Measure
   index({ analysis_id: 1, name: 1 }, unique: true)
 
   # Callbacks
+  before_create :set_uuid_from_id
   after_create :verify_uuid
 
   # Parse Analysis JSON to pull out the measures and variables
@@ -145,6 +146,10 @@ class Measure
 
   protected
 
+  def set_uuid_from_id
+    self.uuid = id
+  end
+  
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!
