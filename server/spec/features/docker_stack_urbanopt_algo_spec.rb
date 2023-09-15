@@ -7,9 +7,10 @@
 # To Run this test manually:
 #
 #   start a server stack with /spec added and ssh into the Web container
-#   >cd /opt/openstudio/server/spec/
-#   >gem install rest-client rails_helper json rspec rspec-retry
-#   >rspec openstudio_algo_spec.rb
+#   you may need to ADD the spec folder in the Dockerfile
+#   >ruby /opt/openstudio/bin/openstudio_meta install_gems
+#   >bundle install --with development test
+#   >rspec spec/features/docker_stack_urbanopt_algo_spec.rb
 #
 #################################################################################
 
