@@ -21,6 +21,7 @@ class Project
   index(name: 1)
 
   # Callbacks
+  before_create :set_uuid_from_id
   after_create :verify_uuid
 
   def create_single_analysis(analysis_uuid, analysis_name, problem_uuid, problem_name)
@@ -36,6 +37,10 @@ class Project
 
   protected
 
+  def set_uuid_from_id
+    self.uuid = id
+  end
+  
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!
