@@ -7,10 +7,10 @@
 # To Run this test manually:
 #
 #   start a server stack with /spec added and ssh into the Web container
+#   you may need to ADD the spec folder in the Dockerfile
 #   >ruby /opt/openstudio/bin/openstudio_meta install_gems
-#   >cd /opt/openstudio/spec/
-#   >gem install rspec
-#   >rspec openstudio_algo_spec.rb
+#   >bundle install --with development test
+#   >rspec spec/features/docker_stack_algo_spec.rb
 #
 #################################################################################
 
@@ -213,6 +213,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # cli_test
 
   it 'run spea_nrel analysis', :spea_nrel, js: true do
@@ -346,6 +354,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # spea_nrel
 
   it 'run pso analysis', :pso, js: true do
@@ -479,6 +495,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # pso
 
   it 'run rgenoud analysis', :rgenoud, js: true do
@@ -613,6 +637,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # rgenoud
 
   it 'run sobol analysis', :sobol, js: true do
@@ -770,6 +802,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a.headers[:content_type]).to eq("application/zip")
     expect(a.size).to be >(30000)
     expect(a.size).to be <(40000)
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # sobol
 
   it 'run lhs analysis', :lhs, js: true do
@@ -908,6 +948,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # lhs
 
   it 'run lhs_discrete analysis', :lhs_discrete, js: true do
@@ -1051,6 +1099,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # lhs_discrete
 
   it 'run morris analysis', :morris, js: true do
@@ -1196,6 +1252,14 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a.headers[:content_type]).to eq("application/zip")
     expect(a.size).to be >(170000)
     expect(a.size).to be <(200000)
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # morris
   
   it 'run single_run analysis', :single_run, js: true do
@@ -1325,5 +1389,13 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # single_run
 end

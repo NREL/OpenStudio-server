@@ -7,9 +7,10 @@
 # To Run this test manually:
 #
 #   start a server stack with /spec added and ssh into the Web container
-#   >cd /opt/openstudio/server/spec/
-#   >gem install rest-client rails_helper json rspec rspec-retry
-#   >rspec openstudio_algo_spec.rb
+#   you may need to ADD the spec folder in the Dockerfile
+#   >ruby /opt/openstudio/bin/openstudio_meta install_gems
+#   >bundle install --with development test
+#   >rspec spec/features/docker_stack_urbanopt_algo_spec.rb
 #
 #################################################################################
 
@@ -267,5 +268,13 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
       sleep Random.new.rand(1.0..10.0)
       retry if get_count <= get_count_max
     end
+    
+    puts 'check logs for mongo index errors'
+    a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
+    expect(a.headers[:status]).to eq("200 OK")
+    expect(a.body).not_to include "OperationFailure"
+    expect(a.body).not_to include "FATAL"
+    expect(a.body).to include "Created indexes"
+    
   end # urbanopt_single_run
 end
