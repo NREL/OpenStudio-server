@@ -1383,11 +1383,25 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
 
         compare = single_run_bad.include?(sim)
         expect(compare).to be false
+        
+        a = RestClient.get "http://#{@host}/data_points/#{data_point[:_id]}/download_result_file?filename=calibration_reports_enhanced_20_report_xml_file.xml"
+        expect(a).not_to be_empty
+        #expect(a.size).to be >(1000)
+        #expect(a.size).to be <(2000)
+        expect(a.headers[:status]).to eq("200 OK")
+        expect(a.headers[:content_type]).to eq("application/xml")
+        expect(a.headers[:content_disposition]).to include("calibration_reports_enhanced_20_report_xml_file.xml")
       end
     rescue RestClient::ExceptionWithResponse => e
-      puts "rescue: #{e} get_count: #{get_count}"
-      sleep Random.new.rand(1.0..10.0)
-      retry if get_count <= get_count_max
+      if e.http_code == 422
+        # Handle the 422 Unprocessable Entity error here if .xml file not found
+        fail("Received a 422 error: calibration_reports_enhanced_20_report_xml_file.xml not avail for download")
+      else
+        puts "rescue: #{e} get_count: #{get_count}"
+        sleep Random.new.rand(1.0..10.0)
+        get_count = get_count + 1
+        retry if get_count <= get_count_max
+      end
     end
     
     puts 'check logs for mongo index errors'
