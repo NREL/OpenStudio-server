@@ -3,8 +3,6 @@
 [![Build Status][gh-img]][gh-url] 
 [![Coverage Status][coveralls-img]][coveralls-url]
 
-Windows Build (Under Development): [![Windows Build Status][appveyor-img]][appveyor-url]
-
 Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for additional documentation.
 
 ## Application Development and Deployment
