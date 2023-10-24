@@ -9,14 +9,11 @@ The below documentation has not been recently reviewed. Please refer to the [wik
 
 ## Application Development and Deployment
 
-There are primarily three ways to utilize and deploy this codebase.
+There are primarily two ways to utilize and deploy this codebase.
  
-* [openstudio_meta](./bin/openstudio_meta) CLI: Allows for the server to be deployed on a local 
-desktop without docker through a pre-compilation process of all required gem dependencies. Additionally, it allows for 
-cloud instances to be created and analyses run on them. 
-* [Docker Compose](https://docs.docker.com/compose/): This is the preferred environment for application development, as 
-it is allows for rapid iteration and does not encumber developers with deployment configuration details. 
-* [Docker Swarm](https://docs.docker.com/engine/swarm/): This is the recommended deployment pathway. Swarm is an 
+* [openstudio-server-helm](https://github.com/NREL/openstudio-server-helm) This helm chart installs a OpenStudio-server instance deployment on a AWS, Azure, or Google Kubernetes cluster using the Helm package manager. You can interface with the OpenStudio-server cluster using the Parametric Analysis Tool or the [openstudio_meta](./bin/openstudio_meta) CLI.
+   
+* [Docker Swarm](https://docs.docker.com/engine/swarm/): This is the recommended local deployment pathway. Swarm is an 
 orchestration engine which allows for multi-node clusters and provides significant benefits in the forms of 
 customization and hardening of network and storage 
 fundamentals.
@@ -25,9 +22,8 @@ fundamentals.
 
 The [openstudio_meta](./bin/openstudio_meta) file is a ruby script which provides access to packaging and execution 
 commands which allow for this codebase to be embedded in applications deployed to computers without docker. Deployment 
-requires that [MongoDB v3.2](https://www.mongodb.com/download-center#previous) and [Ruby v2.2](https://www.ruby-lang.org/en/news/2014/12/25/ruby-2-2-0-released/) 
-are additionally packaged. For an example of cross-platform deployment please see the OpenStudio build guide for the 
-[2.X releases](https://github.com/NREL/OpenStudio/wiki/Configuring-OpenStudio-Build-Environments) and the [CMake lists](https://github.com/NREL/OpenStudio/blob/develop/openstudiocore/CMakeLists.txt). 
+requires that [MongoDB 6.0.7](https://www.mongodb.com/download-center/community/releases/archive) and [Ruby v2.7](https://www.ruby-lang.org/en/downloads/) 
+are additionally packaged. 
 
 The openstudio_meta deployment relies on the `install_gems` command, which uses local system libraries to build all 
 required gem dependencies of the server. Additionally, the export flag allows for the resulting package to be 
@@ -35,11 +31,9 @@ automatically assembled and zipped for deployment. It is important to note that 
 it is critical to not specify the export path with home (`~`) substitution. Instead, pass a fully specified path to the 
 desired output directory. 
 
-Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping local and remote server, and 
-submitting analyses to both. Assembling the required files for the analysis is left to either the OpenStudio Analysis 
-Spreadsheet (the Spreadsheet) or the Parametric Assessment Tool (PAT). The Spreadsheet has a similar interface for 
-submitting analyses to servers, and PAT makes complete use of the openstudio_meta features. For more details, please 
-refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).
+Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the Parametric Assessment Tool (PAT) and 
+submitting analyses to it. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NREL/OpenStudio-analysis-gem) or the export OSA function in the Parametric Assessment Tool (PAT). For more details, please 
+refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).  For examples, please refer to [OSAF notebooks](https://github.com/NREL/docker-openstudio-jupyter/tree/master).
 
 ### Local Docker Development
 
