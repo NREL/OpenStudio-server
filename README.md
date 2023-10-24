@@ -3,20 +3,26 @@
 [![Build Status][gh-img]][gh-url] 
 [![Coverage Status][coveralls-img]][coveralls-url]
 
-Windows Build (Under Development): [![Windows Build Status][appveyor-img]][appveyor-url]
+Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for additional documentation.
 
-The below documentation has not been recently reviewed. Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for current documentation.
+<img src="https://github.com/NREL/OpenStudio-server/assets/2235296/fe91da7d-9e3f-4459-ac5d-579444e6125e" width=50% height=50%>
+<img src="https://github.com/NREL/OpenStudio-server/assets/2235296/c4a75731-72f7-42e6-afc7-d24b9e835a2e" width=50% height=50%>
+
+## About
+
+OpenStudio Server is a web application and distributed computing tool, which is the backbone of the OpenStudio Analysis Framework (OSAF).
+It is intended to make parametric analysis of building energy models accessible to architects, engineers, and designers via the [OpenStudio PAT](http://nrel.github.io/OpenStudio-user-documentation/reference/parametric_studies/) GUI or the [OpenStudio Analysis Gem](https://github.com/NREL/OpenStudio-analysis-gem). 
+OpenStudio Server analyses are defined by PAT projects or OSA's.  Each analysis may include many OpenStudio simulations, as determined by project configuration.
+
+Journal of Building Performance Simulation article: [An open source analysis framework for large-scale building energy modeling](https://www.tandfonline.com/doi/full/10.1080/19401493.2020.1778788)
 
 ## Application Development and Deployment
 
-There are primarily three ways to utilize and deploy this codebase.
+There are primarily two ways to utilize and deploy this codebase.
  
-* [openstudio_meta](./bin/openstudio_meta) CLI: Allows for the server to be deployed on a local 
-desktop without docker through a pre-compilation process of all required gem dependencies. Additionally, it allows for 
-cloud instances to be created and analyses run on them. 
-* [Docker Compose](https://docs.docker.com/compose/): This is the preferred environment for application development, as 
-it is allows for rapid iteration and does not encumber developers with deployment configuration details. 
-* [Docker Swarm](https://docs.docker.com/engine/swarm/): This is the recommended deployment pathway. Swarm is an 
+* [openstudio-server-helm](https://github.com/NREL/openstudio-server-helm) This helm chart installs a OpenStudio-server instance deployment on a AWS, Azure, or Google Kubernetes cluster using the Helm package manager. You can interface with the OpenStudio-server cluster using the Parametric Analysis Tool or the [openstudio_meta](./bin/openstudio_meta) CLI.
+   
+* [Docker Swarm](https://docs.docker.com/engine/swarm/): This is the recommended local deployment pathway. Swarm is an 
 orchestration engine which allows for multi-node clusters and provides significant benefits in the forms of 
 customization and hardening of network and storage 
 fundamentals.
@@ -25,9 +31,8 @@ fundamentals.
 
 The [openstudio_meta](./bin/openstudio_meta) file is a ruby script which provides access to packaging and execution 
 commands which allow for this codebase to be embedded in applications deployed to computers without docker. Deployment 
-requires that [MongoDB v3.2](https://www.mongodb.com/download-center#previous) and [Ruby v2.2](https://www.ruby-lang.org/en/news/2014/12/25/ruby-2-2-0-released/) 
-are additionally packaged. For an example of cross-platform deployment please see the OpenStudio build guide for the 
-[2.X releases](https://github.com/NREL/OpenStudio/wiki/Configuring-OpenStudio-Build-Environments) and the [CMake lists](https://github.com/NREL/OpenStudio/blob/develop/openstudiocore/CMakeLists.txt). 
+requires that [MongoDB 6.0.7](https://www.mongodb.com/download-center/community/releases/archive) and [Ruby v2.7](https://www.ruby-lang.org/en/downloads/) 
+are additionally packaged. 
 
 The openstudio_meta deployment relies on the `install_gems` command, which uses local system libraries to build all 
 required gem dependencies of the server. Additionally, the export flag allows for the resulting package to be 
@@ -35,32 +40,24 @@ automatically assembled and zipped for deployment. It is important to note that 
 it is critical to not specify the export path with home (`~`) substitution. Instead, pass a fully specified path to the 
 desired output directory. 
 
-Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping local and remote server, and 
-submitting analyses to both. Assembling the required files for the analysis is left to either the OpenStudio Analysis 
-Spreadsheet (the Spreadsheet) or the Parametric Assessment Tool (PAT). The Spreadsheet has a similar interface for 
-submitting analyses to servers, and PAT makes complete use of the openstudio_meta features. For more details, please 
-refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).
+Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the [Parametric Analysis Tool (PAT)](https://github.com/NREL/OpenStudio-PAT) and 
+submitting analyses to it. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NREL/OpenStudio-analysis-gem) or the export OSA function in PAT. For more details, please 
+refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).  For examples, please refer to [OSAF notebooks](https://github.com/NREL/docker-openstudio-jupyter/tree/master).
 
 ### Local Docker Development
 
 To develop locally the following dependency stack is recommended. 
 
-* Install Docker (Version 17.09.0 or greater is required)
+* Install Docker (Version 20.10.5 or greater is required)
     * OSX Users: [install Docker CE for Mac](https://docs.docker.com/docker-for-mac/install/). Please refer to [this guide](https://docs.docker.com/docker-for-mac/install/)
-    * Windows 10 Users: [Docker CE for Windows](https://docs.docker.com/docker-for-windows/install/). More information 
-    can be found in [this guide](https://docs.docker.com/docker-for-windows/).
-    * Pre Windows 10 Users: Use Docker Toolbox. You will need to install and configure dependencies, including [VirtualBox](https://docs.docker.com/toolbox/toolbox_install_windows/#next-steps). 
+    * Windows 10 Users: [Docker Desktop](https://www.docker.com/products/docker-desktop/).
     * Linux Users: Follow the instructions in the [appropriate guide](https://www.docker.com/community-edition)
     
     *Note: Although generally newer versions of docker will behave as expected, certain CLI interactions change between
     releases, leading to scripts breaking and default behaviours, particularly regarding persistence, changing. The 
     docker version installed and running can be found by typing `docker info` on the command line.*
     
-* Install Docker Compose (Version 1.17.0 or greater is required)
-    * Docker compose will be installed on Mac and Windows by default
-    * Linux Users: See instructions [here](https://docs.docker.com/compose/install/)
-
-#### Run Docker Compose 
+#### Docker Compose 
 
 ```bash
 docker-compose build
@@ -105,23 +102,13 @@ git checkout -- .dockerignore && git checkout -- Dockerfile
 docker-compose rm -f
 ```
 
-
-
-### Docker Deployment
+### Local Docker Swarm Deployment
 
 To deploy the OpenStudio Server in a docker-based production environment one or more machines need to be running Docker 
-Server version 17.9.01. If using docker on a Linux machine it is recommended that significant storage be available to 
-the `/var` folder. This is where Docker reads and writes all data to by default. In addition, advanced users may wish 
-to consider using specialized [storage drivers](https://docs.docker.com/engine/userguide/storagedriver/). Please refer 
-to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) page for additional details and 
-a [configuration and reset guide](). Deploying a production docker swarm system outside of AWS (where complications 
-are managed and support by NREL) can be a non-trivial problem that may require significant systems administration 
-experience. Those embarking on this process are encouraged to refer to the scripts used by Packer to configure 
-[Ubuntu](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/aws_system_init.sh) and 
-[docker](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/aws_osserver_init.sh) in the 
-base AMI images, as well as the scripts used to provision the [server](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/server_provision.sh) 
-and [worker](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/worker_provision.sh) 
-nodes upon instantiation in a cluster.
+Server version 20.10.05. If using docker on a Linux machine it is recommended that significant storage be available to 
+the `/var` folder. This is where Docker reads and writes all data to by default unless changed in the docker-compose.yml file. 
+There are scripts to help with docker swarm deployment [here](https://github.com/NREL/OpenStudio-server/tree/develop/local_setup_scripts).
+Make sure to change the defaults to be applicable to your hardware requirements.
 
 ## Testing procedure
 
