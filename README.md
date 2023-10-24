@@ -5,6 +5,12 @@
 
 Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for additional documentation.
 
+## About
+
+OpenStudio Server is a web application and distributed computing tool intended to make parametric analysis of building energy models accessible to architects, engineers, and designers via the [OpenStudio PAT](http://nrel.github.io/OpenStudio-user-documentation/reference/parametric_studies/) GUI and a web dashboard. OpenStudio Server analyses are defined by PAT projects or OSA's.  Each analysis may include many OpenStudio simulations, as determined by project configuration.
+
+Journal of Building Performance Simulation [An open source analysis framework for large-scale building energy modeling](https://www.tandfonline.com/doi/full/10.1080/19401493.2020.1778788)
+
 ## Application Development and Deployment
 
 There are primarily two ways to utilize and deploy this codebase.
