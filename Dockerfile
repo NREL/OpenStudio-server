@@ -4,8 +4,8 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.7.0-rc1
-FROM nrel/openstudio:3.7.0-rc1 as base
+ARG OPENSTUDIO_VERSION=3.7.0-rc3
+FROM nrel/openstudio:3.7.0-rc3 as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 ENV DEBIAN_FRONTEND=noninteractive
