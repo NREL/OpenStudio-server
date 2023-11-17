@@ -5,8 +5,8 @@ image: Visual Studio 2019
 environment:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.7.0
-  OPENSTUDIO_VERSION_SHA: 211bb633b0
-  OPENSTUDIO_VERSION_EXT: "-rc1"
+  OPENSTUDIO_VERSION_SHA: 37087fd612
+  OPENSTUDIO_VERSION_EXT: "-rc3"
   OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
   BUILD_TYPE: "test"
   SKIP_COVERALLS: "true"
