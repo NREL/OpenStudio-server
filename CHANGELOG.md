@@ -1,6 +1,15 @@
 OpenStudio Server
 =================
 
+Version 3.7.0
+-------------
+* update Analysis-gem to 1.3.5 in https://github.com/NREL/OpenStudio-server/pull/722
+* update Mongo to 6.0.9 in https://github.com/NREL/OpenStudio-server/pull/709
+* update Passenger to 6.0.18 in https://github.com/NREL/OpenStudio-server/pull/714
+* Fix indicies in Mongo Database in https://github.com/NREL/OpenStudio-server/pull/713
+* add XML and MAT files as valid downloadable Report Types https://github.com/NREL/OpenStudio-server/pull/720
+
+
 Version 3.5.1
 -------------
 * update urbanopt to 0.9.0
