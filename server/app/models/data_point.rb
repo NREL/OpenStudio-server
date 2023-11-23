@@ -50,7 +50,6 @@ class DataPoint
   index(analysis_id: 1, status: 1, status_message: 1, created_at: 1)
 
   # Callbacks
-  before_create :set_uuid_from_id
   after_create :verify_uuid
   before_destroy :destroy_background_job
 
@@ -126,10 +125,6 @@ class DataPoint
 
   protected
 
-  def set_uuid_from_id
-    self.uuid = id
-  end
-  
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!
