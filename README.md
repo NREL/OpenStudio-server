@@ -5,7 +5,7 @@
 
 Windows Build (Under Development): [![Windows Build Status][appveyor-img]][appveyor-url]
 
-Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for additional documentation.
+The below documentation has not been recently reviewed. Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for current documentation.
 
 ## Application Development and Deployment
 
