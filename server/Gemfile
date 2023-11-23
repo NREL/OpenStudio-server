@@ -20,8 +20,13 @@ gem 'tzinfo-data', '~>1.2021.1'
 gem 'loofah',  '2.20.0'
 
 # database modules
-gem 'mongoid', '7.5.4'
-gem 'mongoid-paperclip'
+gem 'mongoid', '7.4.3'
+#gem 'mongoid-paperclip' 
+# forked gem is neccessary as mongoid-paperclip relies on mimemagic which now requires freedesktop.org.xml at run time"
+gem 'mongoid-paperclip', :github => 'tijcolem/mongoid-paperclip', :ref => 'master' 
+# Once this PR is merged (https://github.com/kreeti/kt-paperclip/pull/54) and released change to gem version
+gem 'kt-paperclip', :github => 'tijcolem/kt-paperclip', :ref => 'use-marcel'
+#gem 'paperclip'
 
 # R
 gem 'rserve-simpler', '~> 0.0.6'
