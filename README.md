@@ -31,23 +31,29 @@ automatically assembled and zipped for deployment. It is important to note that 
 it is critical to not specify the export path with home (`~`) substitution. Instead, pass a fully specified path to the 
 desired output directory. 
 
-Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the [Parametric Analysis Tool (PAT)](https://github.com/NREL/OpenStudio-PAT) and 
-submitting analyses to it. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NREL/OpenStudio-analysis-gem) or the export OSA function in PAT. For more details, please 
+Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the Parametric Assessment Tool (PAT) and 
+submitting analyses to it. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NREL/OpenStudio-analysis-gem) or the export OSA function in the Parametric Assessment Tool (PAT). For more details, please 
 refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).  For examples, please refer to [OSAF notebooks](https://github.com/NREL/docker-openstudio-jupyter/tree/master).
 
 ### Local Docker Development
 
 To develop locally the following dependency stack is recommended. 
 
-* Install Docker (Version 20.10.5 or greater is required)
+* Install Docker (Version 17.09.0 or greater is required)
     * OSX Users: [install Docker CE for Mac](https://docs.docker.com/docker-for-mac/install/). Please refer to [this guide](https://docs.docker.com/docker-for-mac/install/)
-    * Windows 10 Users: [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+    * Windows 10 Users: [Docker CE for Windows](https://docs.docker.com/docker-for-windows/install/). More information 
+    can be found in [this guide](https://docs.docker.com/docker-for-windows/).
+    * Pre Windows 10 Users: Use Docker Toolbox. You will need to install and configure dependencies, including [VirtualBox](https://docs.docker.com/toolbox/toolbox_install_windows/#next-steps). 
     * Linux Users: Follow the instructions in the [appropriate guide](https://www.docker.com/community-edition)
     
     *Note: Although generally newer versions of docker will behave as expected, certain CLI interactions change between
     releases, leading to scripts breaking and default behaviours, particularly regarding persistence, changing. The 
     docker version installed and running can be found by typing `docker info` on the command line.*
     
+* Install Docker Compose (Version 1.17.0 or greater is required)
+    * Docker compose will be installed on Mac and Windows by default
+    * Linux Users: See instructions [here](https://docs.docker.com/compose/install/)
+
 #### Run Docker Compose 
 
 ```bash
@@ -95,13 +101,21 @@ docker-compose rm -f
 
 
 
-### Local Docker Deployment
+### Docker Deployment
 
 To deploy the OpenStudio Server in a docker-based production environment one or more machines need to be running Docker 
-Server version 20.10.05. If using docker on a Linux machine it is recommended that significant storage be available to 
-the `/var` folder. This is where Docker reads and writes all data to by default unless changed in the docker-compose.yml file. 
-There are scripts to help with docker swarm deployment [here](https://github.com/NREL/OpenStudio-server/tree/develop/local_setup_scripts).
-Make sure to change the defaults to be applicable to your hardware requirements.
+Server version 17.9.01. If using docker on a Linux machine it is recommended that significant storage be available to 
+the `/var` folder. This is where Docker reads and writes all data to by default. In addition, advanced users may wish 
+to consider using specialized [storage drivers](https://docs.docker.com/engine/userguide/storagedriver/). Please refer 
+to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) page for additional details and 
+a [configuration and reset guide](). Deploying a production docker swarm system outside of AWS (where complications 
+are managed and support by NREL) can be a non-trivial problem that may require significant systems administration 
+experience. Those embarking on this process are encouraged to refer to the scripts used by Packer to configure 
+[Ubuntu](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/aws_system_init.sh) and 
+[docker](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/aws_osserver_init.sh) in the 
+base AMI images, as well as the scripts used to provision the [server](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/server_provision.sh) 
+and [worker](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/worker_provision.sh) 
+nodes upon instantiation in a cluster.
 
 ## Testing procedure
 
