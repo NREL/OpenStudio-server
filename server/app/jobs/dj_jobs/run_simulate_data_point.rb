@@ -289,10 +289,10 @@ module DjJobs
           # Post the reports back to the server
           uploads_successful = []
           if @data_point.analysis.download_reports
-            @sim_logger.info 'downloading reports/*.{html,json,csv,xml,mat}'
-            Dir["#{simulation_dir}/reports/*.{html,json,csv,xml,mat}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
+            @sim_logger.info 'downloading reports/*.{html,json,csv}'
+            Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
           else
-            @sim_logger.info "NOT downloading /reports/*.{html,json,csv,xml,mat} since download_reports value is: #{@data_point.analysis.download_reports}"
+            @sim_logger.info "NOT downloading /reports/*.{html,json,csv} since download_reports value is: #{@data_point.analysis.download_reports}"
           end
           report_file = "#{run_dir}/objectives.json"
           uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)
