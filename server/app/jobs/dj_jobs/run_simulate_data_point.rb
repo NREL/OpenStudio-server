@@ -180,9 +180,9 @@ module DjJobs
             else  #OS CLI workflow
               @sim_logger.info "analysis is configured with #{@data_point.analysis.to_json}"
               if @data_point.analysis.gemfile
-                cmd = "#{Utility::Oss.oscli_cmd_bundle_args(@sim_logger, analysis_dir)} #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
+                cmd = "#{Utility::Oss.oscli_cmd_bundle_args(@sim_logger, analysis_dir)} classic #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
               else
-                cmd = "#{Utility::Oss.oscli_cmd_no_bundle_args(@sim_logger)} #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
+                cmd = "#{Utility::Oss.oscli_cmd_no_bundle_args(@sim_logger)} classic #{@data_point.analysis.cli_verbose} run --workflow #{osw_path} #{@data_point.analysis.cli_debug}"
               end
               process_log = File.join(simulation_dir, 'oscli_simulation.log')
               @sim_logger.info "Running workflow using cmd #{cmd} and writing log to #{process_log}"
@@ -289,10 +289,10 @@ module DjJobs
           # Post the reports back to the server
           uploads_successful = []
           if @data_point.analysis.download_reports
-            @sim_logger.info 'downloading reports/*.{html,json,csv}'
-            Dir["#{simulation_dir}/reports/*.{html,json,csv}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
+            @sim_logger.info 'downloading reports/*.{html,json,csv,xml,mat}'
+            Dir["#{simulation_dir}/reports/*.{html,json,csv,xml,mat}"].each { |rep| uploads_successful << upload_file(rep, 'Report') }
           else
-            @sim_logger.info "NOT downloading /reports/*.{html,json,csv} since download_reports value is: #{@data_point.analysis.download_reports}"
+            @sim_logger.info "NOT downloading /reports/*.{html,json,csv,xml,mat} since download_reports value is: #{@data_point.analysis.download_reports}"
           end
           report_file = "#{run_dir}/objectives.json"
           uploads_successful << upload_file(report_file, 'Report', 'objectives', 'application/json') if File.exist?(report_file)

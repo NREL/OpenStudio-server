@@ -4,8 +4,8 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.6.1
-FROM nrel/openstudio:3.6.1 as base
+ARG OPENSTUDIO_VERSION=3.7.0
+FROM nrel/openstudio:3.7.0 as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -59,7 +59,7 @@ RUN apt-get update && apt-get install -y wget gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 # Install passenger (this also installs nginx)
-ENV PASSENGER_VERSION 6.0.2
+ENV PASSENGER_VERSION 6.0.18
 
 RUN gem install passenger -v $PASSENGER_VERSION
 RUN passenger-install-nginx-module
@@ -104,7 +104,7 @@ RUN bundle exec rake assets:precompile
 # Bundle app source
 ADD /server /opt/openstudio/server
 # Add in /spec for testing 
-#ADD /spec /opt/openstudio/spec
+#ADD /server/spec /opt/openstudio/server/spec
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock

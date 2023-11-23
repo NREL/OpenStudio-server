@@ -71,7 +71,7 @@ class Analysis
 
   # Indexes
   index({ uuid: 1 }, unique: true)
-  index(id: 1)
+  #index(id: 1)
   index(name: 1)
   index(created_at: 1)
   index(updated_at: -1)
@@ -82,6 +82,7 @@ class Analysis
   validates_attachment_content_type :seed_zip, content_type: ['application/zip']
 
   # Callbacks
+  before_create :set_uuid_from_id
   after_create :verify_uuid
   before_destroy :queue_delete_files
 
@@ -510,6 +511,10 @@ class Analysis
     end
   end
 
+  def set_uuid_from_id
+    self.uuid = id
+  end
+  
   def verify_uuid
     self.uuid = id if uuid.nil?
     save!
