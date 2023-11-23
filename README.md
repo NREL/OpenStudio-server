@@ -57,7 +57,7 @@ To develop locally the following dependency stack is recommended.
     releases, leading to scripts breaking and default behaviours, particularly regarding persistence, changing. The 
     docker version installed and running can be found by typing `docker info` on the command line.*
     
-#### Docker Compose 
+#### Run Docker Compose 
 
 ```bash
 docker-compose build
@@ -102,7 +102,9 @@ git checkout -- .dockerignore && git checkout -- Dockerfile
 docker-compose rm -f
 ```
 
-### Local Docker Swarm Deployment
+
+
+### Local Docker Deployment
 
 To deploy the OpenStudio Server in a docker-based production environment one or more machines need to be running Docker 
 Server version 20.10.05. If using docker on a Linux machine it is recommended that significant storage be available to 
