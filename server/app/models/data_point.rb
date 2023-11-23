@@ -37,7 +37,7 @@ class DataPoint
 
   # Indexes
   index({ uuid: 1 }, unique: true)
-  #index(id: 1)
+  index(id: 1)
   index(name: 1)
   index(status: 1)
   index(analysis_id: 1, created_at: 1)

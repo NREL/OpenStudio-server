@@ -71,7 +71,7 @@ class Analysis
 
   # Indexes
   index({ uuid: 1 }, unique: true)
-  #index(id: 1)
+  index(id: 1)
   index(name: 1)
   index(created_at: 1)
   index(updated_at: -1)
