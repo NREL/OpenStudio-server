@@ -361,6 +361,8 @@ module DjJobs
         @sim_logger&.close
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
+        @sim_logger.info "deleting simulation directory: #{simulation_dir}"
+	FileUtils.rm_rf simulation_dir      
         true
       end
     end
