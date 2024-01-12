@@ -128,6 +128,10 @@ RUN chmod 755 /usr/local/bin/start-workers
 RUN chmod +x /opt/openstudio/server/bin/*
 ENV OPENSTUDIO_EXE_PATH /usr/local/bin/openstudio
 
+# Remove leftover install files from openstudio base container
+RUN rm /OpenStudio-*.deb
+RUN rm /ruby-2.7.2.tar.gz
+
 ENTRYPOINT ["rails-entrypoint"]
 
 CMD ["/usr/local/bin/start-server"]
