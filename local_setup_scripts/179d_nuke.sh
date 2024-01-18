@@ -15,8 +15,8 @@ rm -rf /media/data/dbdata/*
 
 echo "pull images"
 docker pull registry:2.6
-docker pull nrel/openstudio-server:3.6.1-5
-docker pull nrel/openstudio-rserve:3.6.1-5
+docker pull nrel/openstudio-server:3.6.1-4
+docker pull nrel/openstudio-rserve:3.6.1-4
 docker pull mongo:6.0.7
 docker pull redis:6.0.9
 
@@ -26,8 +26,8 @@ docker swarm init
 docker service create --name registry --publish 5000:5000 --mount type=volume,source=regdata,destination=/var/lib/registry registry:2.6
 sleep 10
 echo "tag"
-docker tag nrel/openstudio-server:3.6.1-5 127.0.0.1:5000/openstudio-server
-docker tag nrel/openstudio-rserve:3.6.1-5 127.0.0.1:5000/openstudio-rserve
+docker tag nrel/openstudio-server:3.6.1-4 127.0.0.1:5000/openstudio-server
+docker tag nrel/openstudio-rserve:3.6.1-4 127.0.0.1:5000/openstudio-rserve
 docker tag mongo:6.0.7 127.0.0.1:5000/mongo
 docker tag redis:6.0.9 127.0.0.1:5000/redis
 sleep 3
