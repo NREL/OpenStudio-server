@@ -1,0 +1,87 @@
+# Docker Compose creates multiple containers on a single machine.
+# run `docker-compose up` to create and run/link the containers
+version: '3.4'
+services:
+  db:
+    image: mongo:6.0.7
+    ports:
+      - "27017:27017"
+    volumes:
+      - dbdata:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    command: "mongod --setParameter internalQueryMaxAddToSetBytes=${MONGO_MEM} --setParameter internalQueryMaxBlockingSortMemoryUsageBytes=${MONGO_MEM}"
+  queue:
+    image: redis:6.0.9
+    ports:
+      - "6379:6379"
+    command: "redis-server --requirepass ${REDIS_PASSWORD}"
+  web:
+    image: nrel/openstudio-server:nlong
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUES=analysis_wrappers
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    depends_on:
+      - db
+      - queue
+    ports:
+      - "8080:80"
+    volumes:
+      - osdata:/mnt/openstudio
+    command: /usr/local/bin/start-server
+  web-background:
+    image: nrel/openstudio-server:nlong
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUES=background,analyses
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    depends_on:
+      - db
+      - queue
+      - web
+    volumes:
+      - osdata:/mnt/openstudio
+    command: /usr/local/bin/start-web-background
+  worker:
+    image: nrel/openstudio-server:nlong
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUES=simulations
+      - COUNT=1
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    depends_on:
+      - web
+      - db
+      - queue
+      - rserve
+    command: /usr/local/bin/start-workers
+  rserve:
+    image: nrel/openstudio-rserve:nlong
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    volumes:
+      - osdata:/mnt/openstudio
+    depends_on:
+      - web
+      - web-background
+      - db
+volumes:
+  osdata:
+    external: true
+  dbdata:
+    external: true
