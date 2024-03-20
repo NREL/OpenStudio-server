@@ -29,6 +29,7 @@ class Analysis
   field :download_osw, type: Boolean, default: true
   field :gemfile, type: Boolean, default: false
   field :download_reports, type: Boolean, default: true
+  field :delete_simulation_dir, type: Boolean, default: true # delete the simulation directory in the workers after everything is done
   field :variable_display_name_choice, type: String, default: 'display_name'
 
   # Hash of the jobs to run for the analysis
