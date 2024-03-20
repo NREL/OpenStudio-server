@@ -52,7 +52,7 @@ jobs:
         name: openstudio-server-gems-linux
         path: build/NREL/export/*.tar.gz
   macos-test:
-    runs-on: macos-11
+    runs-on: macos-13
     steps: 
     - name: Check out repository
       uses: actions/checkout@v2
