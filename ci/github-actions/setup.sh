@@ -16,6 +16,7 @@ else
     # sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
     if [ "${ImageOS}" == "macos11" ]; then
 
+        brew upgrade > $GITHUB_WORKSPACE/spec/files/logs/brew-upgrade.log
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree coreutils shared-mime-info
 
