@@ -355,12 +355,22 @@ module DjJobs
         @data_point.set_error_flag
         @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
       ensure
+        @sim_logger.info "cleaning up /tmp directory"
+        #remove xmlvalidation directories left in /tmp from OS
+        pattern = '/tmp/xmlvalidation*'
+        # Find and remove directories matching the pattern
+        Dir.glob(pattern).each do |dir|
+          if File.directory?(dir)
+            FileUtils.rm_rf(dir)
+          end
+        end
         @sim_logger&.info "Finished #{__FILE__}"
         @data_point&.set_complete_state
-        @sim_logger.info "@data_point: #{@data_point.to_json}"
         @sim_logger&.close
         report_file = "#{simulation_dir}/#{@data_point.id}.log"
         upload_file(report_file, 'Report', 'Datapoint Simulation Log', 'application/text') if File.exist?(report_file)
+        #delete the simulation directory (default is true)
+        FileUtils.rm_rf simulation_dir if @data_point.analysis.delete_simulation_dir
         true
       end
     end
