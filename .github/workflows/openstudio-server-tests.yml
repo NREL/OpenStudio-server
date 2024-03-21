@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
@@ -47,15 +47,15 @@ jobs:
       run: ./ci/github-actions/export_build_linux.sh
     - name: upload gem package
       if: ${{ success() }} 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: openstudio-server-gems-linux
         path: build/NREL/export/*.tar.gz
   macos-test:
-    runs-on: macos-11
+    runs-on: macos-13
     steps: 
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
@@ -80,7 +80,7 @@ jobs:
       run: ./ci/github-actions/export_build_osx.sh
     - name: upload gem package
       if: ${{ success() }} 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps: 
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
