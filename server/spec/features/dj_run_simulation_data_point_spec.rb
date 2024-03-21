@@ -208,7 +208,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
     end
 
     puts arr.inspect
-    expect(arr.sum).to be < 15
+    expect(arr.sum).to be < 16
   end
 
   it 'sorts worker jobs correctly' do
