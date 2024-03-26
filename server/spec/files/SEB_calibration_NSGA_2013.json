@@ -2053,6 +2053,7 @@
     "run_workflow_timeout": 28800,
     "upload_results_timeout": 28800,
     "initialize_worker_timeout": 28800,
-    "server_scripts": {}
+    "server_scripts": {},
+    "delete_simulation_dir": false
   }
 }
