@@ -157,7 +157,8 @@ module DjJobs
       @sim_logger.info 'Creating Workflow Manager instance'
       @sim_logger.info "Directory is #{simulation_dir}"
       run_log_file = File.join(run_dir, 'run.log')
-      @sim_logger.info "Opening run.log file '#{run_log_file}'"
+      run_log_file2 = File.join(simulation_dir, 'run2.log')
+      @sim_logger.info "Opening run2.log file '#{run_log_file2}'"
       # add check for valid CLI option or ""
       unless ['', '--debug'].include?(@data_point.analysis.cli_debug)
         @sim_logger.warn "CLI_Debug option: #{@data_point.analysis.cli_debug} is not valid.  Using --debug instead."
@@ -171,7 +172,7 @@ module DjJobs
       begin
         # Make sure to pass in preserve_run_dir
         run_result = nil
-        File.open(run_log_file, 'a') do |run_log|
+        File.open(run_log_file2, 'a') do |run_log|
           begin
             if @data_point.analysis.urbanopt
               uo_simulation_log = File.join(simulation_dir, 'urbanopt_simulation.log')

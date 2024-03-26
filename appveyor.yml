@@ -16,7 +16,7 @@ artifacts:
     name: oss.tar.gz
 
 init:
-    - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+    #- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 clone_folder: C:\projects\openstudio-server
 
@@ -35,11 +35,11 @@ before_test:
   - cmd: mongod.exe --version
 
 test_script:
-#  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
+  - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
   - cmd: C:\projects\openstudio-server\ci\appveyor\build_package.cmd #artifact upload occurs before on_finish
 on_finish:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 on_failure:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd

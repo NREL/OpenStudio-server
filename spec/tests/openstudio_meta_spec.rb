@@ -80,7 +80,7 @@ ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../server/Gemfile', __dir__)
 RSpec.describe OpenStudioMeta do
   before :all do
     # start the server
-    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --mongo-dir=\"#{File.dirname(mongod_exe)}\" --openstudio-exe-path=#{ENV['OPENSTUDIO_TEST_EXE']} --worker-number=#{num_workers} \"#{project}\""
+    command = "#{ruby_cmd} \"#{meta_cli}\" start_local --debug --verbose --mongo-dir=\"#{File.dirname(mongod_exe)}\" --openstudio-exe-path=#{ENV['OPENSTUDIO_TEST_EXE']} --worker-number=#{num_workers} \"#{project}\""
     puts command
     start_local = system(command)
     expect(start_local).to be true
@@ -151,7 +151,7 @@ RSpec.describe OpenStudioMeta do
 
   it 'run a complicated design alternative analysis set' do
     # run an analysis
-    command = "#{bundle_cmd} \"#{meta_cli}\" run_analysis \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
+    command = "#{bundle_cmd} \"#{meta_cli}\" run_analysis --debug --verbose \"#{project}/da_measures.json\" http://localhost:8080/ -a batch_datapoints"
     puts command
     run_analysis = system(command)
     expect(run_analysis).to be true

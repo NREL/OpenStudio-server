@@ -197,6 +197,7 @@
       "file_type":"EPW",
       "path":"./weather/USA_CO_Denver.Intl.AP.725650_TMY3.epw"
     },
-    "file_format_version":1
+    "file_format_version":1,
+    "delete_simulation_dir": false
   }
 }
