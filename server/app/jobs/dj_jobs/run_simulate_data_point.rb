@@ -43,7 +43,6 @@ module DjJobs
       @sim_logger.info "Server host is #{APP_CONFIG['os_server_host_url']}"
       @sim_logger.info "Analysis directory is #{analysis_dir}"
       @sim_logger.info "Simulation directory is #{simulation_dir}"
-      @sim_logger.info "Run datapoint type/file is #{@options[:run_workflow_method]}"
 
       # If worker initialization fails, communicate this information
       # to the user via the out.osw.
@@ -429,7 +428,7 @@ module DjJobs
               zip_download_count += 1
               File.open(download_file, 'wb') do |saved_file|
                 # the following "open" is provided by open-uri
-                open(download_url, 'rb') do |read_file|
+                URI.open(download_url, 'rb') do |read_file|
                   saved_file.write(read_file.read)
                 end
               end
