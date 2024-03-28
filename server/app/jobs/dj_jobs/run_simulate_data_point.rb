@@ -25,12 +25,12 @@ module DjJobs
       FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
       FileUtils.rm_rf run_dir if Dir.exist? run_dir
       FileUtils.mkdir_p run_dir unless Dir.exist? run_dir
-
-      # Logger for the simulate datapoint
-      @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
     end
 
     def perform
+      # Logger for the simulate datapoint; moved here so it would also work with delayed jobs https://github.com/NREL/OpenStudio-server/issues/737
+      @sim_logger = Logger.new("#{simulation_dir}/#{@data_point.id}.log")
+
       # Error if @datapoint doesn't exist
       if @data_point.nil?
         @sim_logger = 'Could not find datapoint; @datapoint was nil'
