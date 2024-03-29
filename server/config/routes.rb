@@ -30,6 +30,8 @@ Rails.application.routes.draw do
         get :page_data
         get :analysis_data
         get :debug_log
+        get :rserve_log
+        get :resque_log
         get :snow_log
         get :new_view
         get :plot_parallelcoordinates

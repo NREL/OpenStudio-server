@@ -382,20 +382,9 @@ class AnalysesController < ApplicationController
   def debug_log
     @analysis = Analysis.find(params[:id])
 
-    @rserve_log = nil
-    rserve_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'Rserve.log')
-    if File.exist? rserve_file
-      @rserve_log = File.read(rserve_file)
-    end
-
     docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
     if File.exist? docker_log
       @docker_log = File.read(docker_log)
-    end
-    
-    resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
-    if File.exist? resque_log
-      @resque_log = File.read(resque_log)
     end
             
     initialize_log_path = "#{@analysis.shared_directory_path}/scripts/analysis/intialize.log"
@@ -414,6 +403,43 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def rserve_log
+    @analysis = Analysis.find(params[:id])
+
+    @rserve_log = nil
+    rserve_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'Rserve.log')
+    if File.exist? rserve_file
+      @rserve_log = File.read(rserve_file)
+    end
+
+    exclude_fields = [:_id, :user, :password]
+    @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
+
+    respond_to do |format|
+      format.html # rserve_log.html.erb
+      format.json { render json: log_message }
+    end
+  end
+
+  def resque_log
+    @analysis = Analysis.find(params[:id])
+    
+    resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
+    if File.exist? resque_log
+      @resque_log = File.read(resque_log)
+    end
+
+    exclude_fields = [:_id, :user, :password]
+    @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
+
+    respond_to do |format|
+      format.html # resque_log.html.erb
+      format.json { render json: log_message }
+    end
+  end
+  
   def snow_log
     @analysis = Analysis.find(params[:id])
 

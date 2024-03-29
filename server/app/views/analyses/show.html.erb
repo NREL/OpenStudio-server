@@ -57,9 +57,13 @@
               </tr>
               <tr>
                 <th>View</th>
-                <td><%= link_to 'JSON', analysis_path(@analysis, :format => :json) %>  |
-                  <%= link_to "Log", debug_log_analysis_path(@analysis) %>  |
-                  <%= link_to "SNOW Cluster", snow_log_analysis_path(@analysis) %> </td>
+                <td>
+                  <%= link_to 'OSA JSON', analysis_path(@analysis, :format => :json) %>  |
+                  <%= link_to "Rserve Log", rserve_log_analysis_path(@analysis) %>  |
+                  <%= link_to "Docker Log", debug_log_analysis_path(@analysis) %>  |
+                  <%= link_to "Resque Log", resque_log_analysis_path(@analysis) %>  |
+                  <%= link_to "SNOW Cluster", snow_log_analysis_path(@analysis) %>
+                </td>
               </tr>
             </table>
           </div>
