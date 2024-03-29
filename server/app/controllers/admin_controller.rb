@@ -61,7 +61,7 @@ class AdminController < ApplicationController
         logger.info 'Restored mongo database'
         success = true
       else
-        logger.info "Could not restore database with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
+        logger.error "Could not restore database with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
       end
     end
 
@@ -82,13 +82,13 @@ class AdminController < ApplicationController
       output_file = "#{APP_CONFIG['rails_tmp_path']}/#{file_prefix}_#{time_stamp}.tar.gz"
       `tar czf #{output_file} -C #{dump_dir} #{Mongoid.default_client.database.name}`
       unless $?.exitstatus.zero?
-        logger.info "Could not create archive from mongodump; erred with exit status of #{$?.exitstatus}"
+        logger.error "Could not create archive from mongodump; erred with exit status of #{$?.exitstatus}"
         return success
       end
       send_data File.open(output_file).read, filename: File.basename(output_file), type: 'application/targz; header=present', disposition: 'attachment'
       success = true
     else
-      logger.info "Could not create mongodump with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
+      logger.error "Could not create mongodump with command `#{exec_str}`; erred with exit status of #{$?.exitstatus}"
     end
 
     success

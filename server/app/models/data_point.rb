@@ -102,7 +102,7 @@ class DataPoint
   end
 
   def set_complete_state
-    logger.info "data_point.set_complete_state"
+    logger.debug "data_point.set_complete_state"
     self.run_end_time = Time.now
     self.status = :completed
 

@@ -86,7 +86,7 @@ class Measure
       raise "Measure already exists for analysis #{analysis_id} of #{measure.name}"
     else
       measure = Measure.find_or_create_by(analysis_id: analysis_id, name: os_json['name'])
-      logger.info("Creating new measure for analysis #{analysis_id} with name '#{measure.name}'")
+      logger.debug("Creating new measure for analysis #{analysis_id} with name '#{measure.name}'")
     end
 
     logger.info("Adding/updating measure #{measure.name} for analysis #{analysis_id}")
@@ -95,13 +95,13 @@ class Measure
       exclude_fields = ['arguments', 'variables']
 
       # check for null measures
-      # logger.info("trying to add #{k} : #{v}")
+      # logger.debug("trying to add #{k} : #{v}")
       measure[k] = v unless exclude_fields.include? k
 
       # logger.info(k)
       if k['measure_type'] && v == 'NullMeasure'
         # this is a null measure--but has no name
-        logger.info('Null measure found')
+        logger.warn('Null measure found')
         measure.name = 'NullMeasure'
       end
     end
@@ -130,7 +130,7 @@ class Measure
     end
 
     os_json['variables']&.each do |json_var|
-      logger.info "JSON had a variable named '#{json_var['display_name']}'"
+      logger.debug "JSON had a variable named '#{json_var['display_name']}'"
       new_var = Variable.create_and_assign_to_measure(analysis_id, measure, json_var)
 
       if new_var.save!
