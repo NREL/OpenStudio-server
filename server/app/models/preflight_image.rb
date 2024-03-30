@@ -28,7 +28,7 @@ class PreflightImage
     pfi = PreflightImage.new(variable_id: var_id, image_type: image_type)
 
     if File.exist?(filename)
-      logger.info("adding preflight file #{filename}")
+      logger.debug("adding preflight file #{filename}")
       file = File.open(filename, 'rb')
       pfi.image = file
       file.close

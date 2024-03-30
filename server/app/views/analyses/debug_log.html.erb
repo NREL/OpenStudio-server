@@ -5,49 +5,8 @@
   # *******************************************************************************
 %>
 
-<h1>Debug Log</h1>
+<h1>Docker Log</h1>
 
-<h2>Server Configuration</h2>
-<% if @server %>
-    <table id="datapointtable" class="tablesorter table table-striped">
-      <thead>
-      <tr>
-        <th>Field</th>
-        <th>Value</th>
-      </tr>
-      </thead>
-      <tbody>
-      <% @server.each do |k, v| %>
-          <tr>
-            <td><%= k %></td>
-            <td><%= v %></td>
-          </tr>
-      <% end %>
-      </tbody>
-    </table>
-<% end %>
-
-<h2>Worker Configuration</h2>
-<% @workers.each do |worker| %>
-    <table id="datapointtable" class="tablesorter table table-striped">
-      <thead>
-      <tr>
-        <th>Field</th>
-        <th>Value</th>
-      </tr>
-      </thead>
-      <tbody>
-      <% worker.each do |k, v| %>
-          <tr>
-            <td><%= k %></td>
-            <td><%= v %></td>
-          </tr>
-      <% end %>
-      </tbody>
-    </table>
-<% end %>
-
-<h2>Logs</h2>
 <script>
     $(document).ready(function () {
                 $("#datapointtable").tablesorter();
@@ -55,31 +14,6 @@
     );
 
 </script>
-<table id="datapointtable" class="tablesorter table table-striped">
-  <thead>
-  <tr>
-    <th>Analysis Status Message(s)</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td><%= @analysis.status_message if @analysis.status_message %></td>
-  </tr>
-  </tbody>
-</table>
-
-<table id="datapointtable" class="tablesorter table table-striped">
-  <thead>
-  <tr>
-    <th>RServe Messages</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td><%= @rserve_log.gsub("\n", "</br>").html_safe unless @rserve_log.nil? %></td>
-  </tr>
-  </tbody>
-</table>
 
 <table id="datapointtable" class="tablesorter table table-striped">
   <thead>
@@ -90,19 +24,6 @@
   <tbody>
   <tr>
     <td><%= @docker_log.gsub("\n", "</br>").html_safe unless @docker_log.nil? %></td>
-  </tr>
-  </tbody>
-</table>
-
-<table id="datapointtable" class="tablesorter table table-striped">
-  <thead>
-  <tr>
-    <th>resque_log Messages</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td><%= @resque_log.gsub("\n", "</br>").html_safe unless @resque_log.nil? %></td>
   </tr>
   </tbody>
 </table>

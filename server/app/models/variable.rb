@@ -85,9 +85,9 @@ class Variable
     if var
       logger.warn("Variable already exists for #{var.name} : #{var.uuid}")
     else
-      logger.info "create new variable for os_json['uuid']"
+      logger.debug "create new variable for os_json['uuid']"
       var = Variable.find_or_create_by(analysis_id: analysis_id, uuid: os_json['uuid'])
-      logger.info var.inspect
+      logger.debug var.inspect
     end
 
     exclude_fields = ['uuid', 'type']
@@ -103,7 +103,7 @@ class Variable
 
   # Create an output variable from the Analysis JSON
   def self.create_output_variable(analysis_id, json)
-    logger.info("Adding a new output variable named: '#{json['name']}'")
+    logger.debug("Adding a new output variable named: '#{json['name']}'")
     if json['name'].nil? || json['name'].empty?      #if name if blank for UrbanOpt Output, make it a uuid.var_name so its unique (similar to measure.variable)
       if json['var_name'] == 'end_uses'              #if var_name is end_uses then name is uuid.end_use_end_use_category
         if json['end_use'] && json['end_use_category']
@@ -129,7 +129,7 @@ class Variable
     end
     var = Variable.where(analysis_id: analysis_id, name: json['name']).first
     if var
-      logger.error "Variable already exists for '#{var.name}'"  #this is a duplicate variable name and will overwrite the old variable.  this should be an error
+      logger.error "Variable already exists for '#{var.name}'.  This will overwrite old variable; rename"  #this is a duplicate variable name and will overwrite the old variable.  this should be an error
       raise "Variable already exists for '#{var.name}' : '#{var.display_name}'"
     else
       logger.info "Adding a new output variable named: '#{json['name']}'"
@@ -179,7 +179,7 @@ class Variable
     var['comfort_result_category'] = json['comfort_result_category'] if json['comfort_result_category']
     var['distributed_generation_category'] = json['distributed_generation_category'] if json['distributed_generation_category']
     var.save!
-    logger.info("output variable: '#{var.to_json}'")
+    logger.debug("output variable: '#{var.to_json}'")
     var
   end
 
@@ -250,7 +250,7 @@ class Variable
       var.name = "#{measure.name}.#{os_json['argument']['name']}"
     else
       # Just register a note when this is a static argument
-      logger.info "Static variable argument: '#{measure.name}.#{var.name}'"
+      logger.debug "Static variable argument: '#{measure.name}.#{var.name}'"
       # var.name = "#{measure.name}.#{var.name}"
       # var.name_with_measure = "#{measure.name}.#{var.name}"
     end
@@ -270,7 +270,6 @@ class Variable
 
     pivot_hash = {}
     pivot_variables.each do |var|
-      logger.info "Adding variable '#{var.name}' to pivot list"
       logger.info "Adding variable '#{var.name}' to pivot list"
       if var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence'
         logger.info("creating integer sequence for pivot variable by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
@@ -365,10 +364,9 @@ class Variable
   end
 
   def map_discrete_hash_to_array
-    logger.info "Discrete values and weights are #{discrete_values_and_weights}"
-    logger.info "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
+    logger.debug "received map discrete values with #{discrete_values_and_weights} with size #{discrete_values_and_weights.size}"
     ave_weight = (1.0 / discrete_values_and_weights.size)
-    logger.info "average weight is #{ave_weight}"
+    logger.debug "average weight is #{ave_weight}"
     discrete_values_and_weights.each_index do |i|
       unless discrete_values_and_weights[i].key? 'weight'
         discrete_values_and_weights[i]['weight'] = ave_weight
@@ -376,7 +374,7 @@ class Variable
     end
     values = discrete_values_and_weights.map { |k| k['value'] }
     weights = discrete_values_and_weights.map { |k| k['weight'] }
-    logger.info "Set values and weights to  #{values} with size #{weights}"
+    logger.debug "Set values and weights to  #{values} with size #{weights}"
 
     [values, weights]
   end

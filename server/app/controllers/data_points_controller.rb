@@ -7,20 +7,20 @@ class DataPointsController < ApplicationController
   # GET /data_points
   # GET /data_points.json
   def index
-    logger.info "data_points_contoller.index enter"
+    logger.debug "data_points_contoller.index enter"
     @data_points = DataPoint.all
 
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @data_points }
     end
-    logger.info "data_points_contoller.index leave"
+    logger.debug "data_points_contoller.index leave"
   end
 
   # GET /data_points/1
   # GET /data_points/1.json
   def show
-    logger.info "data_points_contoller.show enter"
+    logger.debug "data_points_contoller.show enter"
     @data_point = DataPoint.find(params[:id])
     respond_to do |format|
       if @data_point
@@ -28,7 +28,7 @@ class DataPointsController < ApplicationController
           exclude_fields = [:_id, :output, :password, :values]
           @table_data = @data_point.as_json(except: exclude_fields)
 
-          logger.info('Cleaning up the log files')
+          logger.debug('Cleaning up the log files')
           if @table_data['sdp_log_file']
             @table_data['sdp_log_file'] = @table_data['sdp_log_file'].join('</br>').html_safe
           end
@@ -60,11 +60,11 @@ class DataPointsController < ApplicationController
         format.json { render json: { error: 'No Datapoint' }, status: :unprocessable_entity }
       end
     end
-    logger.info "data_points_contoller.show leave"
+    logger.debug "data_points_contoller.show leave"
   end
 
   def status
-    logger.info "data_points_contoller.status enter"
+    logger.debug "data_points_contoller.status enter"
     # The name :jobs is legacy based on how PAT queries the datapoints. Should we alias this to status?
     only_fields = [:status, :status_message, :analysis_id]
     dps = params[:status] ? DataPoint.where(status: params[:jobs]).only(only_fields) : DataPoint.all.only(only_fields)
@@ -85,20 +85,20 @@ class DataPointsController < ApplicationController
         }
       end
     end
-    logger.info "data_points_contoller.status leave"
+    logger.debug "data_points_contoller.status leave"
   end
 
   # GET /data_points/new
   # GET /data_points/new.json
   def new
-    logger.info "data_points_contoller.new enter"
+    logger.debug "data_points_contoller.new enter"
     @data_point = DataPoint.new
 
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @data_point }
     end
-    logger.info "data_points_contoller.new leave"
+    logger.debug "data_points_contoller.new leave"
   end
 
   # GET /data_points/1/edit
@@ -109,7 +109,7 @@ class DataPointsController < ApplicationController
   # POST /data_points
   # POST /data_points.json
   def create
-    logger.info "data_points_contoller.create enter"
+    logger.debug "data_points_contoller.create enter"
     error_message = nil
 
     dp_params = data_point_params
@@ -118,13 +118,13 @@ class DataPointsController < ApplicationController
     # If the create method receives a list of ordered variable values, then
     # look up the variables by the r_index, and assign the set_variable_values
     if dp_params[:ordered_variable_values]
-      logger.info 'Mapping ordered variables to actual variables'
+      logger.debug 'Mapping ordered variables to actual variables'
 
       # grab the selected variables
       selected_variables = Variable.variables(dp_params[:analysis_id])
 
       selected_variables.each do |v|
-        logger.info "variable: #{v.to_json}"
+        logger.debug "variable: #{v.to_json}"
       end
 
       variable_values = {} # {variable_uuid_1: value1, variable_uuid_2: value2}
@@ -132,7 +132,7 @@ class DataPointsController < ApplicationController
       # are equal
       if selected_variables.size == dp_params[:ordered_variable_values].size
         dp_params[:ordered_variable_values].each_with_index do |value, index|
-          logger.info "Adding new variable value for #{selected_variables[index].name} of value #{value}"
+          logger.debug "Adding new variable value for #{selected_variables[index].name} of value #{value}"
           if selected_variables[index]
             uuid = selected_variables[index].uuid
 
@@ -170,7 +170,7 @@ class DataPointsController < ApplicationController
     end
 
     if error_message.nil?
-      logger.info "Creating datapoint with params: #{dp_params}"
+      logger.debug "Creating datapoint with params: #{dp_params}"
       @data_point = DataPoint.new(dp_params)
     end
 
@@ -188,7 +188,7 @@ class DataPointsController < ApplicationController
         end
       end
     end
-    logger.info "data_points_contoller.create leave"
+    logger.debug "data_points_contoller.create leave"
   end
 
   # POST batch_upload.json
@@ -202,7 +202,7 @@ class DataPointsController < ApplicationController
     error_message = ''
     if params[:data_points]
       uploaded_dps = params[:data_points].count
-      logger.info "received #{uploaded_dps} points"
+      logger.debug "received #{uploaded_dps} points"
       params[:data_points].each do |dp|
         # This is the old format that can be deprecated when OpenStudio V1.1.3 is released
         dp[:analysis_id] = analysis_id # need to add in the analysis id to each datapoint
@@ -218,7 +218,7 @@ class DataPointsController < ApplicationController
     end
 
     respond_to do |format|
-      logger.info("error flag was set to #{error}")
+      logger.debug("error flag was set to #{error}")
       if !error
         format.json { render json: "Created #{saved_dps} datapoints from #{uploaded_dps} uploaded.", status: :created, location: @data_point }
       else
@@ -229,7 +229,7 @@ class DataPointsController < ApplicationController
 
   # PUT /data_points/1.json
   def run
-    logger.info "data_points_contoller.run enter"
+    logger.debug "data_points_contoller.run enter"
     error = false
     error_message = nil
     @data_point = DataPoint.find(params[:id])
@@ -240,20 +240,20 @@ class DataPointsController < ApplicationController
     end
 
     respond_to do |format|
-      logger.info("error flag was set to #{error}")
+      logger.debug("error flag was set to #{error}")
       if !error
         format.json { render json: @data_point }
       else
         format.json { render json: error_message, status: :unprocessable_entity }
       end
     end
-    logger.info "data_points_contoller.run leave"
+    logger.debug "data_points_contoller.run leave"
   end
 
   # PUT /data_points/1
   # PUT /data_points/1.json
   def update
-    logger.info "data_points_contoller.update enter"
+    logger.debug "data_points_contoller.update enter"
     @data_point = DataPoint.find(params[:id])
 
     respond_to do |format|
@@ -265,7 +265,7 @@ class DataPointsController < ApplicationController
         format.json { render json: @data_point.errors, status: :unprocessable_entity }
       end
     end
-    logger.info "data_points_contoller.update leave"
+    logger.debug "data_points_contoller.update leave"
   end
 
   # DELETE /data_points/1
@@ -285,7 +285,7 @@ class DataPointsController < ApplicationController
   # API only method
   # DELETE /data_points/1/result_files
   def result_files
-    logger.info "data_points_contoller.results_files enter"
+    logger.debug "data_points_contoller.results_files enter"
     dp = DataPoint.find(params[:id])
     dp.result_files.destroy
     dp.save
@@ -295,18 +295,18 @@ class DataPointsController < ApplicationController
     respond_to do |format|
       format.json { head :no_content }
     end
-    logger.info "data_points_contoller.results_files leave"
+    logger.debug "data_points_contoller.results_files leave"
   end
 
   # upload results file
   # POST /data_points/1/upload_file.json
   def upload_file
-    logger.info "data_points_contoller.upload_file enter"
+    logger.debug "data_points_contoller.upload_file enter"
     # expected params: datapoint_id, file: {display_name, type, data, attachment}
     error = false
     error_messages = []
     datapoint_id = params[:id]
-    logger.info('Attaching results file to datapoint')
+    logger.debug('Attaching results file to datapoint')
 
     @data_point = DataPoint.find(datapoint_id)
     if params[:file] && params[:file][:attachment]
@@ -334,12 +334,12 @@ class DataPointsController < ApplicationController
         format.json { render 'result_file', status: :created, location: data_point_url(@data_point) }
       end
     end
-    logger.info "data_points_contoller.upload_file leave"
+    logger.debug "data_points_contoller.upload_file leave"
   end
 
   # download a datapoint report of filename
   def download_report
-    logger.info "data_points_contoller.download_report enter"
+    logger.debug "data_points_contoller.download_report enter"
     @data_point = DataPoint.find(params[:id])
 
     h = nil
@@ -360,12 +360,12 @@ class DataPointsController < ApplicationController
         format.json { render json: { status: 'error', error_message: 'could not find report' }, status: :unprocessable_entity }
       end
     end
-    logger.info "data_points_contoller.download_report leave"
+    logger.debug "data_points_contoller.download_report leave"
   end
 
   # GET /data_points/1/download_result_file
   def download_result_file
-    logger.info "data_points_contoller.download_result_file enter"
+    logger.debug "data_points_contoller.download_result_file enter"
     @data_point = DataPoint.find(params[:id])
 
     file = @data_point.result_files.where(attachment_file_name: params[:filename]).first
@@ -383,7 +383,7 @@ class DataPointsController < ApplicationController
         format.html { redirect_to @data_point, notice: "Result file '#{params[:filename]}' does not exist. It probably was deleted from the file system." }
       end
     end
-    logger.info "data_points_contoller.download_result_file leave"
+    logger.debug "data_points_contoller.download_result_file leave"
   end
 
   def dencity
@@ -430,7 +430,7 @@ class DataPointsController < ApplicationController
       dencity[:structure] = {}
       vars.each do |v|
         a, b = v['name'].split('.')
-        logger.info "#{v[:metadata_id]} had #{a} and #{b}"
+        logger.debug "#{v[:metadata_id]} had #{a} and #{b}"
 
         if dencity[:structure][v['metadata_id']].present?
           logger.error "DEnCity variable '#{v['metadata_id']} is already defined in output as #{a}:#{b}"
@@ -457,7 +457,7 @@ class DataPointsController < ApplicationController
   private
 
   def data_point_params
-    logger.info "data_points_contoller.data_point_params enter"
+    logger.debug "data_points_contoller.data_point_params enter"
     params.require(:data_point).permit!.to_h
   end
 end

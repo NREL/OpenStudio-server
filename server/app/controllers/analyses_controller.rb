@@ -33,7 +33,7 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.json
   def show
-    logger.info "analyses_controller.show enter"
+    logger.debug "analyses_controller.show enter"
     # for pagination
     per_page = 50
 
@@ -99,7 +99,8 @@ class AnalysesController < ApplicationController
       @objective_functions = @analysis.variables.where(objective_function: true).order_by(:objective_function.asc, :sample.asc)
     end
 
-    logger.info("All: #{@all_sims}, Completed: #{@completed_sims}, Started: #{@started_sims}, Queued: #{@queued_sims}, N/A: #{@na_sims}")
+    #the below just shows mongoid::criteria objects, not actual datapoints
+    #logger.info("All: #{@all_sims}, Completed: #{@completed_sims}, Started: #{@started_sims}, Queued: #{@queued_sims}, N/A: #{@na_sims}")
 
     # TODO: find out if there are algorithm specific files to download
     @algorithm_results = false
@@ -112,7 +113,7 @@ class AnalysesController < ApplicationController
       format.json { render json: { analysis: @analysis } }
       format.js
     end
-    logger.info "analyses_controller.show leave"
+    logger.debug "analyses_controller.show leave"
   end
 
   # GET /analyses/new
@@ -134,6 +135,7 @@ class AnalysesController < ApplicationController
   # POST /analyses
   # POST /analyses.json
   def create
+    logger.info('create analyses')
     project_id = params[:project_id]
     params = analysis_params
     params[:project_id] = project_id
@@ -143,11 +145,11 @@ class AnalysesController < ApplicationController
 
     # Need to pull out the variables that are in this analysis so that we can stitch the problem
     # back together when it goes to run
-    logger.info('pulling out os variables')
+    logger.debug('pulling out os variables')
     @analysis.pull_out_os_variables
     
     if @analysis.urbanopt
-        logger.info('pulling out urbanopt variables')
+        logger.debug('pulling out urbanopt variables')
         @analysis.pull_out_urbanopt_variables
     end
 
@@ -165,7 +167,7 @@ class AnalysesController < ApplicationController
   # PUT /analyses/1
   # PUT /analyses/1.json
   def update
-    logger.info "analyses_contoller.update enter"
+    logger.debug "analyses_contoller.update enter"
     @analysis = Analysis.find(params[:id])
 
     respond_to do |format|
@@ -177,7 +179,7 @@ class AnalysesController < ApplicationController
         format.json { render json: @analysis.errors, status: :unprocessable_entity }
       end
     end
-    logger.info "analyses_contoller.update leave"
+    logger.debug "analyses_contoller.update leave"
   end
 
   # DELETE /analyses/1
@@ -211,16 +213,16 @@ class AnalysesController < ApplicationController
   # and will only return a JSON response based on whether or not the analysis has been
   # queued into Delayed Jobs
   def action
-    logger.info "analyses_contoller.action enter"
+    logger.debug "analyses_contoller.action enter"
     @analysis = Analysis.find(params[:id])
-    logger.info("action #{params.inspect}")
+    logger.debug("action #{params.inspect}")
     @analysis_type = params[:analysis_type].nil? ? 'batch_run' : params[:analysis_type]
 
     # params is now an object. Call to_h to get all the permitted parameters, and in this case, all of the params.
     options = params.permit!.to_h
     options[:run_data_point_filename] = params[:run_data_point_filename] if params[:run_data_point_filename]
 
-    logger.info("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
+    logger.debug("After parsing JSON arguments and default values, analysis will run with the following options #{options}")
 
     if params[:analysis_action] == 'start'
       no_delay = params[:without_delay].to_s == 'true'
@@ -264,7 +266,7 @@ class AnalysesController < ApplicationController
         end
       end
     end
-    logger.info "analyses_contoller.action leave"
+    logger.debug "analyses_contoller.action leave"
   end
 
   # version this in order to allow for analyses/status.json to return all the analyses with the status
@@ -272,7 +274,7 @@ class AnalysesController < ApplicationController
   # @param :jobs [String] Constraint on the datapoint completion (e.g. started, queued, completed)
   # @param :version [String] Data are returned in an array in version 2. Defaults to version undefined/1
   def status
-    logger.info "analyses_contoller.status enter"
+    logger.debug "analyses_contoller.status enter"
     analysis_only_fields = [:status, :analysis_type, :jobs, :run_flag, :exit_on_guideline_14]
     data_point_only_fields = [:status, :analysis_type, :analysis_id, :status_message, :name]
 
@@ -282,7 +284,7 @@ class AnalysesController < ApplicationController
     logger.info 'Version 2 of analyses/status'
     @analyses = params[:id] ? Analysis.where(id: params[:id]).only(analysis_only_fields) : Analysis.all.only(analysis_only_fields)
 
-    logger.info "there are #{@analyses.size} analyses"
+    logger.debug "there are #{@analyses.size} analyses"
 
     respond_to do |format|
       format.json do
@@ -327,7 +329,7 @@ class AnalysesController < ApplicationController
         end
       end
     end
-    logger.info "analyses_contoller.status leave"
+    logger.debug "analyses_contoller.status leave"
   end
 
   # GET /analyses/1/download_result_file
@@ -382,20 +384,9 @@ class AnalysesController < ApplicationController
   def debug_log
     @analysis = Analysis.find(params[:id])
 
-    @rserve_log = nil
-    rserve_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'Rserve.log')
-    if File.exist? rserve_file
-      @rserve_log = File.read(rserve_file)
-    end
-
     docker_log = File.join(APP_CONFIG['rails_log_path'], 'docker.log')
     if File.exist? docker_log
       @docker_log = File.read(docker_log)
-    end
-    
-    resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
-    if File.exist? resque_log
-      @resque_log = File.read(resque_log)
     end
             
     initialize_log_path = "#{@analysis.shared_directory_path}/scripts/analysis/intialize.log"
@@ -414,6 +405,43 @@ class AnalysesController < ApplicationController
     end
   end
 
+  def rserve_log
+    @analysis = Analysis.find(params[:id])
+
+    @rserve_log = nil
+    rserve_file = File.join(APP_CONFIG['os_server_project_path'], 'log', 'Rserve.log')
+    if File.exist? rserve_file
+      @rserve_log = File.read(rserve_file)
+    end
+
+    exclude_fields = [:_id, :user, :password]
+    @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
+
+    respond_to do |format|
+      format.html # rserve_log.html.erb
+      format.json { render json: log_message }
+    end
+  end
+
+  def resque_log
+    @analysis = Analysis.find(params[:id])
+    
+    resque_log = File.join(APP_CONFIG['rails_log_path'], 'resque.log')
+    if File.exist? resque_log
+      @resque_log = File.read(resque_log)
+    end
+
+    exclude_fields = [:_id, :user, :password]
+    @server = ComputeNode.where(node_type: 'server').first.as_json(expect: exclude_fields)
+    @workers = ComputeNode.where(node_type: 'worker').map { |n| n.as_json(except: exclude_fields) }
+
+    respond_to do |format|
+      format.html # resque_log.html.erb
+      format.json { render json: log_message }
+    end
+  end
+  
   def snow_log
     @analysis = Analysis.find(params[:id])
 
@@ -471,7 +499,7 @@ class AnalysesController < ApplicationController
     end
 
     # include all data?
-    logger.info("all_data param: #{params[:all_data]}")
+    logger.debug("all_data param: #{params[:all_data]}")
     if (!params[:all_data].nil? && params[:all_data]) == 'true' || @pareto_series.empty?
       @include_all = true
     end
@@ -604,7 +632,7 @@ class AnalysesController < ApplicationController
     end
 
     # DEBUG
-    # logger.info("Unique Pareto Indexes: #{no_dup_indexes.inspect}")
+    # logger.debug("Unique Pareto Indexes: #{no_dup_indexes.inspect}")
 
     # pick final points & return
     pareto_points = []
@@ -616,7 +644,7 @@ class AnalysesController < ApplicationController
 
   def download_selected_datapoints
     @analysis = Analysis.find(params[:id])
-    logger.info("DPS: #{params[:dps]}")
+    logger.debug("DPS: #{params[:dps]}")
     if params[:dps]
       # get datapoints (make array)
       @datapoint_ids = params[:dps].split(',')
@@ -746,7 +774,7 @@ class AnalysesController < ApplicationController
         Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
           # Put files in here
           paths.each do |fi|
-            logger.info(fi)
+            logger.debug(fi)
             # Two arguments:
             # - The name of the file as it will appear in the archive
             # - The original file, including the path to find it
@@ -776,7 +804,7 @@ class AnalysesController < ApplicationController
 
       a = @analysis.as_json
       a.each do |k, _v|
-        logger.info k
+        logger.debug k
       end
       @provenance = a.select { |key, _| prov_fields.include? key }
 
@@ -920,8 +948,8 @@ class AnalysesController < ApplicationController
     }
 
     # Eventually use this where the timestamp is processed as part of the request to save time
-    logger.info "datapoint_id.size: #{datapoint_id.size}" if !datapoint_id.nil?
-    logger.info "datapoint_id.class: #{datapoint_id.class}"
+    logger.debug "datapoint_id.size: #{datapoint_id.size}" if !datapoint_id.nil?
+    logger.debug "datapoint_id.class: #{datapoint_id.class}"
     plot_data = if datapoint_id
                   if only_completed_normal
                     if datapoint_id.class == Array
@@ -943,34 +971,34 @@ class AnalysesController < ApplicationController
                     DataPoint.where(analysis_id: analysis).order_by(:created_at.asc)
                   end
                 end
-    logger.info "PLOT_DATA.count: #{plot_data.count}"
-    logger.info "finished fixing up data: #{Time.now - start_time}"
+    logger.debug "PLOT_DATA.count: #{plot_data.count}"
+    logger.debug "finished fixing up data: #{Time.now - start_time}"
 
     start_time = Time.now
-    logger.info 'mapping variables'
+    logger.debug 'mapping variables'
     variables.map! { |v| { :"#{v['name']}".to_sym => v } }
 
     variables = variables.reduce({}, :merge)
-    logger.info "finished mapping variables: #{Time.now - start_time}"
+    logger.debug "finished mapping variables: #{Time.now - start_time}"
 
     start_time = Time.now
-    logger.info 'Start map/reduce'
+    logger.debug 'Start map/reduce'
     # Remove all the old items first
     Mongoid.default_client.database.collection(:"datapoints_mr_#{analysis.id}").drop
     plot_data = plot_data.map_reduce(map, reduce).out(replace: "datapoints_mr_#{analysis.id}")
     # just call the first one so that is flushes the results to the database
     plot_data.first
-    logger.info "Finished map/reduce: #{Time.now - start_time}"
+    logger.debug "Finished map/reduce: #{Time.now - start_time}"
 
     # Go query the map reduce results again. For some reason the results of the map/reduce is
     # limited to only the first 100 documents.
     start_time = Time.now
-    logger.info 'Start as_json'
+    logger.debug 'Start as_json'
     plot_data = Mongoid.default_client.database.collection(:"datapoints_mr_#{analysis.id}").find.as_json
-    logger.info "Finished as_json: #{Time.now - start_time}"
+    logger.debug "Finished as_json: #{Time.now - start_time}"
 
     start_time = Time.now
-    logger.info 'Start collapse'
+    logger.debug 'Start collapse'
     plot_data.each_with_index do |pd, i|
       pd.merge!(pd.delete('value'))
 
@@ -981,7 +1009,7 @@ class AnalysesController < ApplicationController
       #   mapped back out.
       plot_data[i] = Hash[pd.map { |k, v| [k.tr('|', '.'), v] }]
     end
-    logger.info "finished merge: #{Time.now - start_time}"
+    logger.debug "finished merge: #{Time.now - start_time}"
 
     # plot_data.merge(plot_data.delete('value'))
 
@@ -1004,7 +1032,7 @@ class AnalysesController < ApplicationController
     variables, data = get_analysis_data(analysis, datapoint_ids, false, export: true)
     static_fields = ['name', '_id', 'run_start_time', 'run_end_time', 'status', 'status_message']
 
-    logger.info variables
+    logger.debug variables
     filename = "#{analysis.name}.csv"
     csv_string = CSV.generate do |csv|
       csv << static_fields + variables.map { |_k, v| v['output'] ? v['name'] : v['name'] }
@@ -1042,7 +1070,7 @@ class AnalysesController < ApplicationController
         h[v] = h[v] + [add_this_value]
       end
     end
-    logger.info "finished conversion: #{Time.now - start_time}"
+    logger.debug "finished conversion: #{Time.now - start_time}"
 
     # If the data are guaranteed to exist in the same column structure for each datapoint AND the
     # length of each column is the same (especially no nils), then you can use the method below
@@ -1062,7 +1090,7 @@ class AnalysesController < ApplicationController
                                                 APP_CONFIG['rserve_port'])
 
     start_time = Time.now
-    logger.info 'starting creation of data frame'
+    logger.debug 'starting creation of data frame'
     if !out_hash.empty?
         # TODO: check these permissions and make them less open
         r.command(data_frame_name.to_sym => out_hash.to_dataframe) do
@@ -1074,7 +1102,7 @@ class AnalysesController < ApplicationController
              }
         end
         tmp_filename = r.converse('temp')
-        logger.info "finished data frame: #{Time.now - start_time}"
+        logger.debug "finished data frame: #{Time.now - start_time}"
 
         if File.exist?(tmp_filename)
             send_data File.open(tmp_filename).read, filename: download_filename, type: 'application/rdata; header=present', disposition: 'attachment'

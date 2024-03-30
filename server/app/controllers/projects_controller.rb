@@ -9,7 +9,7 @@ class ProjectsController < ApplicationController
   def index
     @projects = Project.all
 
-    logger.info(@projects.to_json(include: :analyses))
+    logger.debug(@projects.to_json(include: :analyses))
 
     respond_to do |format|
       format.html # index.html.erb

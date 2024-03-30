@@ -1,0 +1,29 @@
+<%
+  # *******************************************************************************
+  # OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
+  # See also https://openstudio.net/license
+  # *******************************************************************************
+%>
+
+<h1>Resque Log</h1>
+
+<script>
+    $(document).ready(function () {
+                $("#datapointtable").tablesorter();
+            }
+    );
+
+</script>
+
+<table id="datapointtable" class="tablesorter table table-striped">
+  <thead>
+  <tr>
+    <th>resque_log Messages</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><%= @resque_log.gsub("\n", "</br>").html_safe unless @resque_log.nil? %></td>
+  </tr>
+  </tbody>
+</table>
