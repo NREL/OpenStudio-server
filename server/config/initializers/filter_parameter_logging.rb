@@ -4,7 +4,6 @@
 # *******************************************************************************
 
 # Be sure to restart your server when you modify this file.
-Rails.logger.info "Setting up parameter filtering"
 # Configure sensitive parameters which will be filtered from the log file.
 #Rails.application.config.filter_parameters += [:password, /\Aanalysis(?!\_)/]
 Rails.application.config.filter_parameters += [:password, /\Aanalysis(?!\_)/, :file]
