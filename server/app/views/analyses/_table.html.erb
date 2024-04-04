@@ -119,7 +119,9 @@
                 <% if dp.status == 'completed' && @has_obj_targets %>
                   | <%= link_to('Radar Plot', plot_radar_analysis_path(:id => @analysis.id, :datapoint_id => dp.id)) %>
                 <% end %>
-              <td class="other-col"><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+              <td class="other-col"><%= link_to 'Destroy', dp, method: :delete, data: {confirm: 'Are you sure?'} %>
+                | <%= link_to 'Requeue', requeue_data_point_path(dp), method: :post, data: { confirm: 'Are you sure you want to requeue this DataPoint?' } %>
+              </td>
             </tr>
         <% end %>
         </tbody>
