@@ -83,6 +83,7 @@ Rails.application.routes.draw do
           put :run
           post :upload_file
           delete :result_files
+          post :requeue
         end
 
         collection do
