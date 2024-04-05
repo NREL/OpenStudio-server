@@ -1,0 +1,60 @@
+require 'redis'
+require 'json'
+require 'net/http'
+
+# Configuration
+redis_host = "queue"
+redis_port = 6379
+current_hostname = `hostname`.strip
+puts "REQUEUE: entry"
+redis = Redis.new(host: redis_host, port: redis_port)
+
+def requeue_datapoint(job_args)
+  uri = URI("http://web:80/data_points/#{job_args}/requeue")
+  response = Net::HTTP.get_response(uri)
+  puts "REQUEUE: Requeued datapoint with UUID #{job_args}. Response: #{response.code} #{response.message}"
+rescue => e
+  puts "REQUEUE: Failed to requeue datapoint with UUID #{job_args}. Error: #{e.message}"
+end
+
+puts "REQUEUE: getting workers"
+workers = redis.smembers("resque:workers")
+puts "REQUEUE: looping workers"
+workers.each do |worker|
+  puts "RESQUEUE: found workers: #{workers}"
+  # Focus on workers processing jobs in the "simulations" queue on the current node
+  next unless worker.include?(current_hostname) && worker.include?("simulations")
+  puts "RESQUEUE: getting worker: #{worker} for #{current_hostname} in queue: simulations"
+  working_on = redis.get("resque:worker:#{worker}")
+  puts "RESQUEUE: working_on: #{working_on}"
+  if working_on
+    puts "RESQUEUE: found local worker"
+    job_data = JSON.parse(working_on)
+    puts "RESQUEUE: job_data: #{job_data}"
+    job_class = job_data["payload"]["class"] rescue "Unknown Class"
+    job_args = job_data["payload"]["args"].to_s rescue "Unknown Args"
+
+    puts "REQUEUE: Worker #{worker} on this node is processing a job of class #{job_class} with args #{job_args}"
+
+    # Make the API call to requeue the datapoint
+    requeue_datapoint(job_args)
+  end
+  
+  # Extract PID from worker identifier
+  pid = worker.split(":")[1]
+  puts "REQUEUE: PID: #{pid}"
+  # Send TERM signal to gracefully shutdown the worker
+
+  begin
+    puts "REQUEUE: Sending TERM signal to worker with PID #{pid}."
+    $stdout.flush
+    Process.kill('TERM', pid.to_i)
+    puts "REQUEUE: Sent TERM signal to worker with PID #{pid}."
+    puts "REQUEUE: test sleeping"
+    $stdout.flush
+    sleep 10000
+  rescue => e
+    $stdout.flush
+    puts "REQUEUE: Failed to send TERM signal to worker with PID #{pid}. Error: #{e.message}"
+  end
+end
