@@ -48,7 +48,7 @@ workers.each do |worker|
   # Extract PID from worker identifier
   pid = worker.split(":")[1]
   puts "REQUEUE: PID: #{pid}"
-  # Send TERM signal to gracefully shutdown the worker
+  # Send KILL signal to gracefully shutdown the worker
 
   begin
     puts "REQUEUE: Sending KILL signal to worker with PID #{pid}."
@@ -63,6 +63,6 @@ workers.each do |worker|
     sleep 10000
   rescue => e
     $stdout.flush
-    puts "REQUEUE: Failed to send TERM signal to worker with PID #{pid}. Error: #{e.message}"
+    puts "REQUEUE: Failed to send KILL signal to worker with PID #{pid}. Error: #{e.message}"
   end
 end
