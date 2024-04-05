@@ -11,7 +11,11 @@ redis = Redis.new(host: redis_host, port: redis_port)
 
 def requeue_datapoint(job_args)
   uri = URI("http://web:80/data_points/#{job_args}/requeue")
-  response = Net::HTTP.get_response(uri)
+  puts "REQUEUE: URI #{uri}"
+  request = Net::HTTP::Post.new(uri)
+  response = Net::HTTP.start(uri.hostname, uri.port) do |http|
+    http.request(request)
+  end
   puts "REQUEUE: Requeued datapoint with UUID #{job_args}. Response: #{response.code} #{response.message}"
 rescue => e
   puts "REQUEUE: Failed to requeue datapoint with UUID #{job_args}. Error: #{e.message}"
@@ -32,11 +36,12 @@ workers.each do |worker|
     job_data = JSON.parse(working_on)
     puts "RESQUEUE: job_data: #{job_data}"
     job_class = job_data["payload"]["class"] rescue "Unknown Class"
-    job_args = job_data["payload"]["args"].to_s rescue "Unknown Args"
+    job_args = job_data["payload"]["args"][0] rescue nil
 
     puts "REQUEUE: Worker #{worker} on this node is processing a job of class #{job_class} with args #{job_args}"
 
     # Make the API call to requeue the datapoint
+    puts "REQUEUE: calling requeue_datapoint"
     requeue_datapoint(job_args)
   end
   
@@ -48,8 +53,9 @@ workers.each do |worker|
   begin
     puts "REQUEUE: Sending TERM signal to worker with PID #{pid}."
     $stdout.flush
-    Process.kill('TERM', pid.to_i)
-    puts "REQUEUE: Sent TERM signal to worker with PID #{pid}."
+    #this marks the worker as failed in the resque database
+    #Process.kill('TERM', pid.to_i)
+    #puts "REQUEUE: Sent TERM signal to worker with PID #{pid}."
     puts "REQUEUE: test sleeping"
     $stdout.flush
     sleep 10000
