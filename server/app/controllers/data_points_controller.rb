@@ -316,12 +316,16 @@ class DataPointsController < ApplicationController
     worker_id = nil
     if worker
       worker_id = worker.to_s # worker_id in "hostname:pid:queues" format
-      Rails.logger.debug "Worker processing the job: #{worker_id}"
+      Rails.logger.warn "Worker processing the job: #{worker_id}"
       # Optional: Perform actions like signaling the worker if needed
     else
-      Rails.logger.debug "No worker found processing the job."
+      Rails.logger.warn "No worker found processing the job."
     end
-  
+    
+    #try to dequeue
+    #Rails.logger.warn "DEQUEUEING #{@data_point.job_id}"
+    #jobs_dequeued = Resque.dequeue(ResqueJobs::RunSimulateDataPoint, @data_point.job_id)
+    #Rails.logger.warn "DEQUEUED #{jobs_dequeued} jobs"
     #this marks the job as failed
     #Resque.remove_worker(worker_id) if worker_id
 

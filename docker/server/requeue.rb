@@ -51,11 +51,13 @@ workers.each do |worker|
   # Send TERM signal to gracefully shutdown the worker
 
   begin
-    puts "REQUEUE: Sending TERM signal to worker with PID #{pid}."
+    puts "REQUEUE: Sending KILL signal to worker with PID #{pid}."
     $stdout.flush
     #this marks the worker as failed in the resque database
     #Process.kill('TERM', pid.to_i)
     #puts "REQUEUE: Sent TERM signal to worker with PID #{pid}."
+    Process.kill('QUIT', pid.to_i)
+    puts "REQUEUE: Sent QUIT signal to worker with PID #{pid}."
     puts "REQUEUE: test sleeping"
     $stdout.flush
     sleep 10000
