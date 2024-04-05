@@ -93,26 +93,26 @@ class Analysis
 
   # FIXME: analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
   def start(no_delay, analysis_type = 'batch_run', options = {})
-    logger.debug "analysis.start enter"
+    Rails.logger.debug "analysis.start enter"
     defaults = { skip_init: false }
     options = defaults.merge(options)
 
-    logger.info "Calling start on #{analysis_type} with options #{options}"
+    Rails.logger.info "Calling start on #{analysis_type} with options #{options}"
 
     unless options[:skip_init]
-      logger.info("Queuing up analysis #{uuid}")
+      Rails.logger.info("Queuing up analysis #{uuid}")
       save!
     end
 
     if no_delay
-      logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
+      Rails.logger.info("Running in foreground analysis for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
       save!
       reload
       abr = "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options)
       abr.perform
     else
-      logger.info("Running in background analysis queue for #{uuid} with #{analysis_type}")
+      Rails.logger.info("Running in background analysis queue for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
       if Rails.application.config.job_manager == :delayed_job
         job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
@@ -128,27 +128,27 @@ class Analysis
       save!
       reload
     end
-    logger.debug "analysis.start leave"
+    Rails.logger.debug "analysis.start leave"
   end
 
   # Options take the form of?
   # Run the analysis
   def run_analysis(no_delay = false, analysis_type = 'batch_run', options = {})
-    logger.debug "analysis.run_analysis enter"
+    Rails.logger.debug "analysis.run_analysis enter"
     defaults = {}
     options = defaults.merge(options)
 
     # check if there is already an analysis in the queue (this needs to move to the analysis class)
     # there is no reason why more than one analyses can be queued at the same time.
-    logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
+    Rails.logger.info("called run_analysis analysis of type #{analysis_type} with options: #{options}")
 
     start(no_delay, analysis_type, options)
-    logger.debug "analysis.run_analysis leave"
+    Rails.logger.debug "analysis.run_analysis leave"
     [true]
   end
 
   def stop_analysis
-    logger.info('attempting to stop analysis')
+    Rails.logger.info('attempting to stop analysis')
 
     self.run_flag = false
 
@@ -171,10 +171,10 @@ class Analysis
   def pull_out_os_variables
     pat_json = false
     # get the measures first
-    logger.info('pulling out openstudio measures')
+    Rails.logger.info('pulling out openstudio measures')
     # note the measures first
     if self['problem'] && self['problem']['workflow']
-      logger.info('found a problem and workflow')
+      Rails.logger.info('found a problem and workflow')
       self['problem']['workflow'].each do |wf|
         # Currently the PAT format has measures and I plan on ignoring them for now
         # this will eventually need to be cleaned up, but the workflow is the order of applying the
@@ -194,7 +194,7 @@ class Analysis
     end
 
     if pat_json
-      logger.error('Appears to be a PAT JSON formatted file, pulling variables out of metadata for now')
+      Rails.logger.error('Appears to be a PAT JSON formatted file, pulling variables out of metadata for now')
       if os_metadata && os_metadata['variables']
         os_metadata['variables'].each do |variable|
           var = Variable.create_from_os_json(id, variable)
@@ -204,7 +204,7 @@ class Analysis
 
     # pull out the output variables
     output_variables&.each do |variable|
-      logger.debug "Saving off output variables: #{variable}"
+      Rails.logger.debug "Saving off output variables: #{variable}"
       var = Variable.create_output_variable(id, variable)
     end
 
@@ -215,19 +215,19 @@ class Analysis
   def pull_out_urbanopt_variables
     pat_json = false
     # get the measures first
-    logger.info('pull_out_urbanopt_variables')
+    Rails.logger.info('pull_out_urbanopt_variables')
     # note the measures first
     if self['urbanopt_variables']
-      logger.info('found urbanopt_variables')
+      Rails.logger.info('found urbanopt_variables')
       self['urbanopt_variables'].each do |uo_var|
         uo_var['uuid'] = nil if !UUID.validate(uo_var['uuid'])
         var = Variable.where(analysis_id: self.id, uuid: uo_var['uuid']).first
         if var
           raise "UrbanOpt Variable already exists for '#{var.name}' : '#{var.uuid}'"
         else
-          logger.info("Adding a new UrbanOpt variable/argument named: '#{uo_var['name']}' with UUID '#{uo_var['uuid']}'") if self.cli_debug == '--debug'
+          Rails.logger.info("Adding a new UrbanOpt variable/argument named: '#{uo_var['name']}' with UUID '#{uo_var['uuid']}'") if self.cli_debug == '--debug'
           var = Variable.find_or_create_by(analysis_id: self.id, uuid: uo_var['uuid'])
-          logger.info("Created Var: #{var.to_json}") if self.cli_debug == '--debug'
+          Rails.logger.info("Created Var: #{var.to_json}") if self.cli_debug == '--debug'
           exclude_fields = ['uuid', 'type', 'argument', 'uncertainty_description']
           uo_var.each do |k, v|
             var[k] = v unless exclude_fields.include? k
@@ -259,7 +259,7 @@ class Analysis
       
           end
 
-          logger.info("Updated Var: #{var.to_json}") if self.cli_debug == '--debug'
+          Rails.logger.info("Updated Var: #{var.to_json}") if self.cli_debug == '--debug'
           var.save!
         end
 
@@ -297,7 +297,7 @@ class Analysis
       v = Variable.where(uuid: var['_id']).only(:name).first
       mappings[var['_id']] = v.name.tr(' ', '_') if v
     end
-    logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
+    Rails.logger.info "Mappings created in #{Time.now - start}" # with the values of: #{mappings}"
 
     # sort before sending back
     Hash[mappings.sort_by { |_, v| v }]
@@ -306,7 +306,7 @@ class Analysis
   # filter results on analysis show page (per status)
   def search(search, status, page_no = 1, view_all = 0)
     page_no = page_no.presence || 1
-    logger.debug("search: #{search}, status: #{status}, page: #{page_no}, view_all: #{view_all}")
+    Rails.logger.debug("search: #{search}, status: #{status}, page: #{page_no}, view_all: #{view_all}")
 
     if search
       if status == 'all'
@@ -339,7 +339,7 @@ class Analysis
 
   # Return the last job's status for the analysis
   def status
-    logger.debug "analysis.status enter"
+    Rails.logger.debug "analysis.status enter"
     j = jobs_status
     if j
       begin
@@ -367,7 +367,7 @@ class Analysis
   # update the job status to indicate that postprocessing is complete.
   # used from finalize method which is only called for environments using resque
   def complete_postprocessing!
-    logger.debug "analysis.complete_postprocessing enter"
+    Rails.logger.debug "analysis.complete_postprocessing enter"
     raise 'Post-processing should only happen in environments that use Resque for job management.' unless Rails.application.config.job_manager == :resque
 
     job = jobs.order_by(:index.asc).last
@@ -375,9 +375,9 @@ class Analysis
 
     job.status = 'post-processing finished'
     job.save!
-    logger.debug "analysis.complete_postprocessing leave"
+    Rails.logger.debug "analysis.complete_postprocessing leave"
   rescue Exception => e
-    logger.error e
+    Rails.logger.error e
   end
 
   # Return the last job's status message
@@ -445,11 +445,11 @@ class Analysis
     ::Zip.sort_entries = true
     Zip::File.open(archive_filename) do |zf|
       zf.each do |f|
-        logger.debug "Extracting #{f.name}"
+        Rails.logger.debug "Extracting #{f.name}"
         f_path = File.join(destination, f.name)
         FileUtils.mkdir_p(File.dirname(f_path))
         if File.exist?(f_path)
-          logger.debug "SKIPPED: #{f.name}, already existed."
+          Rails.logger.debug "SKIPPED: #{f.name}, already existed."
         else
           zf.extract(f, f_path)
         end
@@ -463,8 +463,8 @@ class Analysis
     # Extract the zip
     extract_count = 0
     extract_max_count = 3
-    logger.info 'Running analysis initialization scripts'
-    logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
+    Rails.logger.info 'Running analysis initialization scripts'
+    Rails.logger.info "Extracting seed zip #{seed_zip.path} to #{shared_directory_path}"
     begin
       Timeout.timeout(3600) do # change to 1hr for large models
         extract_count += 1
@@ -484,7 +484,7 @@ class Analysis
 
   # runs on web node
   def run_finalization
-    logger.info 'Running analysis finalization scripts'
+    Rails.logger.info 'Running analysis finalization scripts'
     run_script_with_args 'finalize'
     # update status to reflect that finalization has run
     complete_postprocessing!
@@ -507,7 +507,7 @@ class Analysis
         raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
       end
     else
-      logger.error 'Will not delete analysis directory because it does not conform to pattern'
+      Rails.logger.error 'Will not delete analysis directory because it does not conform to pattern'
     end
   end
 
@@ -528,14 +528,14 @@ class Analysis
     # if you change this path, also change it in analyses controller debug_log action
     log_path = "#{dir_path}/#{script_name}.log"
 
-    logger.info "Checking for presence of args file at #{args_path}"
+    Rails.logger.info "Checking for presence of args file at #{args_path}"
     args = nil
     if File.file? args_path
       args = Utility::Oss.load_args args_path
-      logger.info " args loaded from file #{args_path}: #{args}"
+      Rails.logger.info " args loaded from file #{args_path}: #{args}"
     end
 
-    logger.info "Checking for presence of script file at #{script_path}"
+    Rails.logger.info "Checking for presence of script file at #{script_path}"
     if File.file? script_path
       # TODO: how long do we want to set timeout?
       # SCRIPT_PATH - path to where the scripts were extracted

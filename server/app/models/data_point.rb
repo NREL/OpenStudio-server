@@ -62,6 +62,7 @@ class DataPoint
 
   # Submit the simulation to run in the background task queue
   def submit_simulation
+    Rails.logger.debug "data_point.submit_simulation"
     if Rails.application.config.job_manager == :delayed_job
       job = DjJobs::RunSimulateDataPoint.new(id)
       self.job_id = job.delay(queue: 'simulations').perform.id
@@ -76,12 +77,14 @@ class DataPoint
   end
 
   def set_start_state
+    Rails.logger.debug "data_point.set_start_state"
     self.run_start_time = Time.now
     self.status = :started
     save!
   end
 
   def set_success_flag
+    Rails.logger.debug "data_point.set_success_flag"
     self.status_message = 'completed normal'
     save!
   end
@@ -92,17 +95,19 @@ class DataPoint
   end
 
   def set_cancel_flag
+    Rails.logger.debug "data_point.set_cancel_flag"
     self.status_message = 'datapoint canceled'
     save!
   end
 
   def set_error_flag
+    Rails.logger.debug "data_point.set_error_flag"
     self.status_message = 'datapoint failure'
     save!
   end
 
   def set_complete_state
-    logger.debug "data_point.set_complete_state"
+    Rails.logger.debug "data_point.set_complete_state"
     self.run_end_time = Time.now
     self.status = :completed
 
@@ -110,6 +115,7 @@ class DataPoint
   end
 
   def set_canceled_state
+    Rails.logger.debug "set_canceled_state"
     destroy_background_job # destroy queued job
     self.run_start_time ||= Time.now
     self.run_end_time = Time.now
@@ -119,6 +125,7 @@ class DataPoint
   end
 
   def set_queued_state
+    Rails.logger.debug "data_point.set_queued_state"
     self.status = :queued
     self.run_queue_time = Time.now
     save!
@@ -136,6 +143,7 @@ class DataPoint
   end
 
   def destroy_background_job
+    Rails.logger.debug "data_point.destroy_background_job"
     if Rails.application.config.job_manager == :delayed_job
       if job_id
         dj = Delayed::Job.where(id: job_id).first
