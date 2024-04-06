@@ -90,6 +90,7 @@ class DataPoint
   end
 
   def set_invalid_flag
+    Rails.logger.debug "data_point.set_invalid_flag"
     self.status_message = 'invalid workflow'
     save!
   end
@@ -115,7 +116,7 @@ class DataPoint
   end
 
   def set_canceled_state
-    Rails.logger.debug "set_canceled_state"
+    Rails.logger.debug "data_point.set_canceled_state"
     destroy_background_job # destroy queued job
     self.run_start_time ||= Time.now
     self.run_end_time = Time.now
@@ -129,6 +130,21 @@ class DataPoint
     self.status = :queued
     self.run_queue_time = Time.now
     save!
+  end
+
+  def get_statuses
+    { status: self.status, status_message: self.status_message }
+  end
+  
+  def add_to_rails_log(msg = "Default log message")
+    Rails.logger.debug "data_point.add_to_rails_log"
+    # Ensure the message is a string to prevent errors
+    if msg.is_a?(String)
+      Rails.logger.warn msg
+    else
+      # Log a warning if the provided message is not a string
+      Rails.logger.warn "Attempted to log a message that was not a string: #{msg.inspect}"
+    end
   end
 
   protected
