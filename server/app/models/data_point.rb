@@ -133,6 +133,7 @@ class DataPoint
   end
 
   def get_statuses
+    Rails.logger.debug "data_point.get_statuses"
     { status: self.status, status_message: self.status_message }
   end
   

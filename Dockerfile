@@ -120,6 +120,7 @@ COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
 COPY /docker/server/requeue.rb /opt/openstudio/server/bin/requeue.rb
 COPY /docker/server/aws_imdsv2_polling.sh /opt/openstudio/server/bin/aws_imdsv2_polling
 COPY /docker/server/aws_imdsv2_testing.sh /opt/openstudio/server/bin/aws_imdsv2_testing
+COPY /docker/server/aws_imdsv2_mock.sh /opt/openstudio/server/bin/aws_imdsv2_mock
 
 RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
@@ -129,6 +130,7 @@ RUN chmod 755 /usr/local/bin/start-workers
 RUN chmod 755 /opt/openstudio/server/bin/requeue.rb
 RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2_polling
 RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2_testing
+RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2_mock
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*

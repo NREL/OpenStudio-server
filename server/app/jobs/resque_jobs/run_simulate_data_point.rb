@@ -22,7 +22,8 @@ module ResqueJobs
       # In that case, we should skip re-running that DP because it was both completed and completed normal already.
       # If its a requeued failed job, then that should still get re-run
       if !(statuses[:status] == 'completed' && statuses[:status_message] == 'completed normal')
-        d.add_to_rails_log("RUNNING DJ: #{statuses[:status]} and #{statuses[:status_message]}")
+        msg = "RUNNING DJ: #{statuses[:status]} and #{statuses[:status_message]}"
+        d.add_to_rails_log(msg)
         job = DjJobs::RunSimulateDataPoint.new(data_point_id, options)
         job.perform
       else

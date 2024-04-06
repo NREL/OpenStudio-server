@@ -23,9 +23,10 @@ end
 
 puts "REQUEUE: getting workers"
 workers = redis.smembers("resque:workers")
-puts "REQUEUE: looping workers"
+puts "RESQUEUE: found workers: #{workers}"
+
 workers.each do |worker|
-  puts "RESQUEUE: found workers: #{workers}"
+  puts "REQUEUE: looping workers"
   # Focus on workers processing jobs in the "simulations" queue on the current node
   next unless worker.include?(current_hostname) && worker.include?("simulations")
   puts "RESQUEUE: getting worker: #{worker} for #{current_hostname} in queue: simulations"
