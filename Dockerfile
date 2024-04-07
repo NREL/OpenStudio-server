@@ -118,9 +118,7 @@ COPY /docker/server/rails-entrypoint.sh /usr/local/bin/rails-entrypoint
 COPY /docker/server/start-web-background.sh /usr/local/bin/start-web-background
 COPY /docker/server/start-workers.sh /usr/local/bin/start-workers
 COPY /docker/server/requeue.rb /opt/openstudio/server/bin/requeue.rb
-COPY /docker/server/aws_imdsv2_polling.sh /opt/openstudio/server/bin/aws_imdsv2_polling
-COPY /docker/server/aws_imdsv2_testing.sh /opt/openstudio/server/bin/aws_imdsv2_testing
-COPY /docker/server/aws_imdsv2_mock.sh /opt/openstudio/server/bin/aws_imdsv2_mock
+COPY /docker/server/aws_imdsv2.sh /opt/openstudio/server/bin/aws_imdsv2
 
 RUN chmod 755 /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/start-server
@@ -128,9 +126,7 @@ RUN chmod 755 /usr/local/bin/rails-entrypoint
 RUN chmod 755 /usr/local/bin/start-web-background
 RUN chmod 755 /usr/local/bin/start-workers
 RUN chmod 755 /opt/openstudio/server/bin/requeue.rb
-RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2_polling
-RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2_testing
-RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2_mock
+RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
