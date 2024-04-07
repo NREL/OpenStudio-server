@@ -1,7 +1,7 @@
 #!/bin/bash
 # Metadata service URL variable
-METADATA_URL="localhost:1338"
-#METADATA_URL="169.254.169.254"
+#METADATA_URL="localhost:1338"
+METADATA_URL="169.254.169.254"
 
 # Obtain an initial authentication token with a proper TTL
 TOKEN=$(curl -s -X PUT "http://${METADATA_URL}/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" || echo "error")

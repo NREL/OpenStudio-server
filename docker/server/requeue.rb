@@ -6,7 +6,6 @@ require 'net/http'
 redis_host = "queue"
 redis_port = 6379
 current_hostname = `hostname`.strip
-puts "REQUEUE: entry"
 redis = Redis.new(host: redis_host, port: redis_port)
 
 def requeue_datapoint(job_args)
@@ -26,7 +25,6 @@ workers = redis.smembers("resque:workers")
 puts "RESQUEUE: found workers: #{workers}"
 
 workers.each do |worker|
-  puts "REQUEUE: looping workers"
   # Focus on workers processing jobs in the "simulations" queue on the current node
   next unless worker.include?(current_hostname) && worker.include?("simulations")
   puts "RESQUEUE: getting worker: #{worker} for #{current_hostname} in queue: simulations"
@@ -59,11 +57,9 @@ workers.each do |worker|
     #puts "REQUEUE: Sent TERM signal to worker with PID #{pid}."
     Process.kill('QUIT', pid.to_i)
     puts "REQUEUE: Sent QUIT signal to worker with PID #{pid}."
-    puts "REQUEUE: test sleeping"
     $stdout.flush
-    sleep 10000
   rescue => e
-    $stdout.flush
     puts "REQUEUE: Failed to send KILL signal to worker with PID #{pid}. Error: #{e.message}"
+    $stdout.flush
   end
 end
