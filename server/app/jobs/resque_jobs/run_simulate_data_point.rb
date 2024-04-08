@@ -14,8 +14,22 @@ module ResqueJobs
     end
 
     def self.perform(data_point_id, options = {})
-      job = DjJobs::RunSimulateDataPoint.new(data_point_id, options)
-      job.perform
+      d = DataPoint.find(data_point_id)
+      statuses = d.get_statuses
+      # A DP can be requeued when a worker is getting shutdown as a spot instance.
+      # When that happens the status gets changed from ':started' to ':queued' but the resque job is still processing on the worker until it is killed.
+      # There is a case where that worker completes a successful job, before the requeued DP starts.
+      # In that case, we should skip re-running that DP because it was both completed and completed normal already.
+      # If its a requeued failed job, then that should still get re-run
+      if !(statuses[:status] == 'completed' && statuses[:status_message] == 'completed normal')
+        msg = "RUNNING DJ: #{statuses[:status]} and #{statuses[:status_message]}"
+        d.add_to_rails_log(msg)
+        job = DjJobs::RunSimulateDataPoint.new(data_point_id, options)
+        job.perform
+      else
+        msg = "SKIPPING #{data_point_id} since it is #{statuses[:status]} and #{statuses[:status_message]}"
+        d.add_to_rails_log(msg)
+      end      
     end
   end
 end

@@ -29,6 +29,7 @@ class Job
 
   # Create a new job
   def self.new_job(analysis_id, analysis_type, index, initial_options)
+    Rails.logger.info "job.new_job"
     aj = Job.find_or_create_by(analysis_id: analysis_id, analysis_type: analysis_type, index: index)
 
     aj.status = 'queued'

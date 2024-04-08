@@ -304,24 +304,28 @@ class DataPointsController < ApplicationController
     analysis_id = @data_point.analysis
     Rails.logger.debug "data_points_contoller.id: #{@data_point.id}"
     Rails.logger.debug "data_points_contoller.job_id: #{@data_point.job_id}"
-    # Destroy the existing job in Resque queue
+    # Destroy the existing job in Resque queue; this is tied to a worker_host:PID:uuid
     Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPoint', @data_point.job_id)
 
     # Enqueue a new job
     Resque.enqueue(ResqueJobs::RunSimulateDataPoint, @data_point.job_id)
 
     # Attempt to find the worker processing this job
-    worker = find_resque_worker_by_job_id(@data_point.job_id)
+    #worker = find_resque_worker_by_job_id(@data_point.job_id)
 
-    worker_id = nil
-    if worker
-      worker_id = worker.to_s # worker_id in "hostname:pid:queues" format
-      Rails.logger.debug "Worker processing the job: #{worker_id}"
-      # Optional: Perform actions like signaling the worker if needed
-    else
-      Rails.logger.debug "No worker found processing the job."
-    end
-  
+    #worker_id = nil
+    #if worker
+    #  worker_id = worker.to_s # worker_id in "hostname:pid:queues" format
+    #  Rails.logger.warn "Worker processing the job: #{worker_id}"
+    #  # Optional: Perform actions like signaling the worker if needed
+    #else
+    #  Rails.logger.warn "No worker found processing the job."
+    #end
+    
+    #try to dequeue
+    #Rails.logger.warn "DEQUEUEING #{@data_point.job_id}"
+    #jobs_dequeued = Resque.dequeue(ResqueJobs::RunSimulateDataPoint, @data_point.job_id)
+    #Rails.logger.warn "DEQUEUED #{jobs_dequeued} jobs"
     #this marks the job as failed
     #Resque.remove_worker(worker_id) if worker_id
 

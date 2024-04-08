@@ -18,8 +18,11 @@ docker push 127.0.0.1:5000/mongo
 docker pull redis:6.0.9
 docker tag redis:6.0.9 127.0.0.1:5000/redis
 docker push 127.0.0.1:5000/redis
+docker pull public.ecr.aws/aws-ec2/amazon-ec2-metadata-mock:v1.11.2
+docker tag public.ecr.aws/aws-ec2/amazon-ec2-metadata-mock:v1.11.2 127.0.0.1:5000/amazon-ec2-metadata-mock
+docker push 127.0.0.1:5000/amazon-ec2-metadata-mock
 cd ../../local_setup_scripts/win64
-docker stack deploy osserver --compose-file=docker-compose.yml
+docker stack deploy osserver --compose-file=docker-compose-mock.yml
 while ( nc -zv 127.0.0.1 80 3>&1 1>&2- 2>&3- ) | awk -F ":" '$3 != " Connection refused" {exit 1}'; do sleep 5; done
 #docker service update --restart-condition none osserver_worker
 docker service scale osserver_worker=2
