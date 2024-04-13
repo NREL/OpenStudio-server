@@ -40,13 +40,13 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
         ids << dp.id if dp.submit_simulation
       end
     end
-
-    logger.info "Background job ids are: #{ids}"
+    # This can be a very long list, so put in .debug
+    logger.debug "Background job ids are: #{ids}"
 
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
     until @analysis.data_points.where(:_id.in => ids, :status.ne => 'completed').count == 0
-      logger.info 'waiting'
+      logger.info "waiting for batch_run to complete: #{@analysis_id}"
       sleep 5
     end
   rescue StandardError => e
