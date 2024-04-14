@@ -30,15 +30,32 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
+    # Wait loop to ensure all queuing is complete for any analysis
+    queuing_keys = Resque.redis.keys("analysis:*:queuing")
+    while queuing_keys.any?
+      queuing_analyses = queuing_keys.map { |key| key.split(':').second }
+      logger.info "#{@analysis_id} is Waiting for the following analyses to finish queuing: #{queuing_analyses.join(', ')}"
+      sleep 5
+      queuing_keys = Resque.redis.keys("analysis:*:queuing")
+    end
+    
     ids = []
     if @options[:data_points].empty?
       logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
 
+      # Set Redis flag to indicate queuing is starting
+      logger.info "Setting Redis queuing flag for #{@analysis_id}"
+      Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
+      
       # queue up the simulations
       @analysis.data_points.where(status: 'na').each do |dp|
         logger.info "Adding #{dp.uuid} to simulations queue"
         ids << dp.id if dp.submit_simulation
       end
+
+      # Delete Redis flag after queuing is done
+      logger.info "Deleting Redis queuing flag for #{@analysis_id}"
+      Resque.redis.del("analysis:#{@analysis_id}:queuing")      
     end
     # This can be a very long list, so put in .debug
     logger.debug "Background job ids are: #{ids}"
@@ -46,7 +63,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     # Watch the delayed jobs to see when all the datapoints are completed.
     # I would really prefer making a chord or callback for this.
     until @analysis.data_points.where(:_id.in => ids, :status.ne => 'completed').count == 0
-      logger.info "waiting for batch_run to complete: #{@analysis_id}"
+      logger.info "waiting for this batch_run simulations to complete: #{@analysis_id}"
       sleep 5
     end
   rescue StandardError => e

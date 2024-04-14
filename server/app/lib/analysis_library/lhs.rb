@@ -60,7 +60,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
       end
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
-      logger.info "pivot_array: #{pivot_array}"
+      logger.debug "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"
@@ -76,14 +76,14 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
         samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
         if @analysis.problem['algorithm']['sample_method'] == 'all_variables'
           # Do the work to mash up the samples and pivot variables before creating the datapoints
-          logger.info "Samples are #{samples}"
+          logger.debug "Samples are #{samples}"
           samples = hash_of_array_to_array_of_hash(samples)
-          logger.info "Flipping samples around yields #{samples}"
+          logger.debug "Flipping samples around yields #{samples}"
         elsif @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
           # Do the work to mash up the samples and pivot variables before creating the datapoints
-          logger.info "Samples are #{samples}"
+          logger.debug "Samples are #{samples}"
           samples = hash_of_array_to_array_of_hash_non_combined(samples, selected_variables)
-          logger.info "Non-combined samples yields #{samples}"
+          logger.debug "Non-combined samples yields #{samples}"
         end
       else
         raise 'no sampling method defined (all_variables or individual_variables)'
@@ -91,7 +91,7 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
 
       logger.info 'Fixing Pivot dimension'
       samples = add_pivots(samples, pivot_array)
-      logger.info "Finished adding the pivots resulting in #{samples}"
+      logger.debug "Finished adding the pivots resulting in #{samples}"
 
       # Add the datapoints to the database
       isample = 0
