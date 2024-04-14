@@ -61,7 +61,7 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
       end
 
       pivot_array = Variable.pivot_array(@analysis.id, @r)
-      Rails.logger.info "pivot_array: #{pivot_array}"
+      Rails.logger.debug "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perform DOE"
@@ -79,9 +79,9 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
         samples, var_types = doe.full_factorial(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
 
         # Do the work to mash up the samples and pivot variables before creating the datapoints
-        logger.info "Samples are #{samples}"
+        logger.debug "Samples are #{samples}"
         samples = hash_of_array_to_array_of_hash(samples)
-        logger.info "Flipping samples around yields #{samples}"
+        logger.debug "Flipping samples around yields #{samples}"
 
       else
         raise 'no experiment type defined (full_factorial)'
@@ -89,7 +89,7 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
 
       logger.info 'Fixing Pivot dimension'
       samples = add_pivots(samples, pivot_array)
-      logger.info "Finished adding the pivots resulting in #{samples}"
+      logger.debug "Finished adding the pivots resulting in #{samples}"
 
       # Add the datapoints to the database
       isample = 0
@@ -101,8 +101,8 @@ class AnalysisLibrary::Doe < AnalysisLibrary::Base
         dp.save!
 
         logger.info("Generated datapoint #{dp.name} for analysis #{@analysis.name}")
-        logger.info("UUID #{dp.uuid}")
-        logger.info("variable values: #{dp.set_variable_values}")
+        logger.debug("UUID #{dp.uuid}")
+        logger.debug("variable values: #{dp.set_variable_values}")
       end
     rescue StandardError => e
       log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"

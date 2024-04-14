@@ -3,7 +3,6 @@
 # See also https://openstudio.net/license
 # *******************************************************************************
 
-require 'json' # Require JSON for serialization
 # Runs on background node.  Wraps older DJ code to work w/Resque
 module ResqueJobs
   class RunAnalysis
