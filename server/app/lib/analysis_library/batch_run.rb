@@ -30,32 +30,38 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
-    # Wait loop to ensure all queuing is complete for any analysis
-    queuing_keys = Resque.redis.keys("analysis:*:queuing")
-    while queuing_keys.any?
-      queuing_analyses = queuing_keys.map { |key| key.split(':').second }
-      logger.info "#{@analysis_id} is Waiting for the following analyses to finish queuing: #{queuing_analyses.join(', ')}"
-      sleep 5
-      queuing_keys = Resque.redis.keys("analysis:*:queuing")
+    if Rails.application.config.job_manager == :resque
+     # Wait loop to ensure all queuing is complete for any analysis
+     queuing_keys = Resque.redis.keys("analysis:*:queuing")
+      while queuing_keys.any?
+        queuing_analyses = queuing_keys.map { |key| key.split(':').second }
+        logger.info "#{@analysis_id} is Waiting for the following analyses to finish queuing: #{queuing_analyses.join(', ')}"
+        sleep 5
+        queuing_keys = Resque.redis.keys("analysis:*:queuing")
+      end
     end
-    
+
     ids = []
     if @options[:data_points].empty?
       logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
-
-      # Set Redis flag to indicate queuing is starting
-      logger.info "Setting Redis queuing flag for #{@analysis_id}"
-      Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
       
+      if Rails.application.config.job_manager == :resque
+        # Set Redis flag to indicate queuing is starting
+        logger.info "Setting Redis queuing flag for #{@analysis_id}"
+        Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
+      end
+
       # queue up the simulations
       @analysis.data_points.where(status: 'na').each do |dp|
         logger.info "Adding #{dp.uuid} to simulations queue"
         ids << dp.id if dp.submit_simulation
       end
-
-      # Delete Redis flag after queuing is done
-      logger.info "Deleting Redis queuing flag for #{@analysis_id}"
-      Resque.redis.del("analysis:#{@analysis_id}:queuing")      
+      
+      if Rails.application.config.job_manager == :resque
+        # Delete Redis flag after queuing is done
+        logger.info "Deleting Redis queuing flag for #{@analysis_id}"
+        Resque.redis.del("analysis:#{@analysis_id}:queuing")
+      end        
     end
     # This can be a very long list, so put in .debug
     logger.debug "Background job ids are: #{ids}"
