@@ -106,7 +106,8 @@ group :development, :docker, :'docker-dev', :'docker-test', :production, :test d
   gem 'redis', '~> 4.2.5'
   gem 'redis-namespace', '~> 1.8.1'
   gem 'resque', '~> 2.6.0'
-  gem 'resque-web', '~> 0.0.12', require: 'resque_web'
+  #gem 'resque-web', '~> 0.0.12', require: 'resque_web'
+  gem 'resque-web', git: 'https://github.com/diei/resque-web.git', ref: '0972517d6e42eeb096555a17346937d6df100d82', require: 'resque_web'
 end
 
 group :development, :'docker-test', :test, :local, :'local-test' do

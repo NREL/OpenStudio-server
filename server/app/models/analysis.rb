@@ -77,6 +77,8 @@ class Analysis
   index(created_at: 1)
   index(updated_at: -1)
   index(project_id: 1)
+  index(status: 1)
+  index({ status: 1, updated_at: -1 })
 
   # Validations
   # validates_format_of :uuid, :with => /[^0-]+/
