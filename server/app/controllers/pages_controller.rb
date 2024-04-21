@@ -27,7 +27,7 @@ class PagesController < ApplicationController
     # data for dashboard header
     @projects = Project.all
     # sort works because the states are queued, started, completed, na. started is the last in the list...
-    @analyses = Analysis.all.order_by(:updated_at.asc)
+    #@analyses = Analysis.all.order_by(:updated_at.asc)
     failed_runs = DataPoint.where(status_message: 'datapoint failure').count
     total_runs = DataPoint.all.count
     completed_cnt = DataPoint.where(status: 'completed').count
@@ -50,7 +50,34 @@ class PagesController < ApplicationController
     
     # Finding the current analysis
     #candidates = Analysis.includes(:jobs).order_by(:updated_at.asc)
-    @current = @analyses.detect { |analysis| analysis.jobs.any? { |job| job.status == 'started' } }
+    #@current = @analyses.detect { |analysis| analysis.jobs.any? { |job| job.status == 'started' } }
+    
+    # Step 1: Fetch all analyses ordered by updated_at descending (newest first)
+    all_analyses = Analysis.includes(:jobs).order_by(updated_at: :desc)
+
+    # Step 2: Select the first two 'started' analyses
+    #started_analyses = all_analyses.select { |analysis| analysis.jobs.any? { |job| job.status == 'started' } }.first(2)
+    # Step 2: Efficiently select the first two 'started' analyses, leveraging Ruby for fine-tuned sorting
+    started_analyses = all_analyses.select { |analysis| analysis.jobs.any? { |job| job.status == 'started' }
+    }.sort_by { |analysis|
+      # This finds the earliest start time among the started jobs for sorting
+      analysis.jobs.select { |job| job.status == 'started' }.min_by(&:created_at).created_at
+    }.first(2)
+
+    # Step 3: Set @current and prepare @analyses
+    if started_analyses.any?
+      # Assume @current is the most recently updated
+      @current = started_analyses.first
+      # Ensure @analyses includes other analyses without changing the original order too much
+      # Remove @current from all_analyses and prepend the second 'started' analysis if it exists
+      all_analyses -= started_analyses
+      all_analyses.prepend(started_analyses.second) if started_analyses.length > 1
+    else
+      # Fallback if no 'started' analyses found
+      @current = all_analyses.first
+    end
+
+    @analyses = all_analyses
     # If no 'started' analysis is currently running, optionally set @current to the most recently updated analysis
     @current ||= @analyses.first
     
