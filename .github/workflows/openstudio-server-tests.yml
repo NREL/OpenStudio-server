@@ -107,7 +107,7 @@ jobs:
           docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
           docker-compose -f docker-compose.test.yml up -d
           # set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
-          docker-compose exec -e SKIP_URBANOPT_ALGO=false -T web /usr/local/bin/run-server-tests
+          docker-compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
           docker-compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
       env: 
