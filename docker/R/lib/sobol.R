@@ -128,7 +128,8 @@ if (debug_messages == 1) {
 print("check bounds")
 boundary_check <- logical(ncol(vars))
 for (i in 1:ncol(vars)){
-  boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+  #boundary_check[i] <- all((m$X[,i] <= maxes[i]) && (m$X[,i] >= mins[i]))
+  boundary_check[i] <- all(m$X[, i] <= maxes[i]) && all(m$X[, i] >= mins[i])
 }
 if(!all(boundary_check)){
   print('SOLUTION SPACE OUT OF BOUNDS, CHECK Grid Jump and Level Values and/or re-run')
