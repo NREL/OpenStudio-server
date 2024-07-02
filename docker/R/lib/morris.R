@@ -126,7 +126,8 @@ if (check_boundary == 1) {
       print(paste("i:",i))
     }
     else {
-      boundary_check[i] <- all((signif(m$X[,i],4) <= maxes[i]) && (signif(m$X[,i],4) >= mins[i]))
+     #boundary_check[i] <- all((signif(m$X[,i],4) <= maxes[i]) && (signif(m$X[,i],4) >= mins[i]))
+      boundary_check[i] <- all(signif(m$X[,i],4) <= maxes[i]) && all(signif(m$X[,i],4) >= mins[i])
       if (debug_messages == 1) {
         print(paste("i:",i))
         print(paste("boundary_check[i]:",boundary_check[i]))
