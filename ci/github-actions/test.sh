@@ -53,6 +53,20 @@ else
 
         #    explicitly set directory.  Probably unnecessary
         cd $GITHUB_WORKSPACE
+
+        # Debugging information
+        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+        echo "PATH: $PATH"
+        echo "RUBYLIB: $RUBYLIB"
+        echo "OPENSTUDIO_TEST_EXE: $OPENSTUDIO_TEST_EXE"
+        echo "RUBY_VERSION: $(ruby -v)"
+        echo "RUBY_PATH: $(which ruby)"
+        echo "BUNDLE_EXEC_PATH: $(which bundle)"
+        echo "BUNDLE_EXEC_RUBY_PATH: $(head -n 1 $(which bundle) | cut -d ' ' -f 2)"
+        # Fix the shebang line in the bundle script
+        BUNDLE_PATH=$(which bundle)
+        RUBY_PATH=$(which ruby)
+        
         bundle install
         echo "Beginning integration tests. RUBYLIB=$RUBYLIB ; OPENSTUDIO_TEST_EXE=$OPENSTUDIO_TEST_EXE"
         bundle exec rspec; (( exit_status = exit_status || $? ))
