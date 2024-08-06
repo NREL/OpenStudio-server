@@ -2,8 +2,9 @@
 # OpenStudio(R), Copyright (c) Alliance for Sustainable Energy, LLC.
 # See also https://openstudio.net/license
 # *******************************************************************************
-
+require 'resque'
 require 'resque/tasks'
+require 'resque/failure/base'
 require 'resque/failure/redis'
 
 task 'resque:setup' => :environment
