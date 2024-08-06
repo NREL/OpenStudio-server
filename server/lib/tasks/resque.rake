@@ -4,6 +4,7 @@
 # *******************************************************************************
 require 'resque'
 require 'resque/tasks'
+require 'resque-retry'
 require 'resque/failure/base'
 require 'resque/failure/redis'
 
