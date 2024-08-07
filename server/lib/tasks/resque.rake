@@ -10,8 +10,8 @@ require 'resque/failure/redis'
 
 task 'resque:setup' => :environment
 
-Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
-Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
+#Resque::Failure::MultipleWithRetrySuppression.classes = [Resque::Failure::Redis]
+#Resque::Failure.backend = Resque::Failure::MultipleWithRetrySuppression
 
 namespace :resque do
   task :setup do

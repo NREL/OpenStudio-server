@@ -10,6 +10,8 @@ elsif Rails.env.production?
   require 'resque'
   uri = URI.parse(ENV['REDIS_URL'])
   Resque.redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
+  # Set a custom prune interval (in seconds)
+  Resque.prune_interval = 120  # Set the interval to 121 seconds
 elsif ['development', 'test'].include? Rails.env
   require 'resque'
   Resque.redis = 'localhost:6379'

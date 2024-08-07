@@ -30,7 +30,7 @@ module ResqueJobs
       else
         msg = "SKIPPING #{data_point_id} since it is #{statuses[:status]} and #{statuses[:status_message]}"
         d.add_to_rails_log(msg)
-      end
+      end 
     rescue Resque::TermException
       # Log the termination and re-enqueue attempt
       d.add_to_rails_log("Worker received TERM signal: Re-enqueueing DataPoint ID #{data_point_id}")
