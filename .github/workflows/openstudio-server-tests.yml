@@ -20,7 +20,9 @@ env:
 jobs:
   linux-test:
     runs-on: ubuntu-20.04
-    steps: 
+    steps:
+    - name: Delete huge unnecessary tools folder
+      run: rm -rf /opt/hostedtoolcache    
     - name: Check out repository
       uses: actions/checkout@v2
     - name: setup
@@ -86,7 +88,9 @@ jobs:
         path: build/NREL/export/*.tar.gz
   docker:
     runs-on: ubuntu-20.04
-    steps: 
+    steps:
+    - name: Delete huge unnecessary tools folder
+      run: rm -rf /opt/hostedtoolcache    
     - name: Check out repository
       uses: actions/checkout@v2
     - name: setup
