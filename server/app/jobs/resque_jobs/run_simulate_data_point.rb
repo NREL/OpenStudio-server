@@ -24,22 +24,22 @@ module ResqueJobs
       # If its a requeued failed job, then that should still get re-run
       if !(statuses[:status] == 'completed' && statuses[:status_message] == 'completed normal')
         msg = "RUNNING DJ: #{statuses[:status]} and #{statuses[:status_message]}"
-        d.add_to_rails_log(msg)
+        Resque.logger(msg)
         job = DjJobs::RunSimulateDataPoint.new(data_point_id, options)
         job.perform
       else
         msg = "SKIPPING #{data_point_id} since it is #{statuses[:status]} and #{statuses[:status_message]}"
-        d.add_to_rails_log(msg)
+        Resque.logger(msg)
       end 
     rescue Errno::ENOSPC, Resque::DirtyExit, Resque::TermException, Resque::PruneDeadWorkerDirtyExit => e
       # Log the termination and re-enqueue attempt
       d.add_to_rails_log("Worker Caught Exception: #{e.inspect}: Re-enqueueing DataPoint ID #{data_point_id}")
       Resque.enqueue(self, data_point_id, options)
-      d.add_to_rails_log("DataPoint #{data_point_id} re-enqueued.")
+      Resque.logger("DataPoint #{data_point_id} re-enqueued.")
     rescue => e
       d.add_to_rails_log("Worker Caught Unhandled Exception: #{e.message}: Re-enqueueing DataPoint ID #{data_point_id}")
       Resque.enqueue(self, data_point_id, options)
-      d.add_to_rails_log("Unhandled exception, re-enqueued DataPoint.")
+      Resque.logger("Unhandled exception, re-enqueued DataPoint.")
     end
   end
 end
