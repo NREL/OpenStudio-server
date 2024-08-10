@@ -98,6 +98,7 @@ Rails.application.routes.draw do
     collection do
       get :backup_database
       post :restore_database
+      post :prune_resque_workers
     end
   end
 

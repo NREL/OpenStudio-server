@@ -299,7 +299,7 @@ class DataPointsController < ApplicationController
   end
 
   def requeue
-    Rails.logger.warn "data_points_contoller.REQUEUE"
+    Rails.logger.warn "data_points_contoller.REQUEUEing #{@data_point.id}"
     @data_point = DataPoint.find(params[:id])
     analysis_id = @data_point.analysis
     Rails.logger.debug "data_points_contoller.id: #{@data_point.id}"
