@@ -84,6 +84,7 @@ Rails.application.routes.draw do
           post :upload_file
           delete :result_files
           post :requeue
+          post :requeue_started
         end
 
         collection do
@@ -98,6 +99,7 @@ Rails.application.routes.draw do
     collection do
       get :backup_database
       post :restore_database
+      post :prune_resque_workers
     end
   end
 

@@ -14,6 +14,10 @@
     <!-- TODO: How to test if this exists when on Windows -->
     <%= link_to 'View Resque Dashboard', resque_web_path, class: "btn btn-mini btn-primary" %>
   </div>
+  <div class="span3 pad-bottom-20">
+    <!-- Link to prune dead Resque workers -->
+    <%= link_to 'Prune Dead Resque Workers', prune_resque_workers_admin_index_path, method: :post, class: "btn btn-mini btn-danger", data: { confirm: 'Are you sure you want to prune dead Resque workers?' } %>
+  </div>
 </div>
 <% end %>
 

@@ -21,6 +21,20 @@ class AdminController < ApplicationController
     @os_cli = version ? version.strip : 'Unknown'
   end
 
+  def prune_resque_workers
+    Rails.logger.warn "Pruning Dead Resque Workers"
+
+    # Enqueue a new job
+    worker = Resque::Worker.new()
+    worker.prune_dead_workers
+    worker.shutdown    
+
+    respond_to do |format|
+      format.html { redirect_to admin_index_path, notice: 'Resque Workers Pruned.' }
+      format.json { head :no_content }
+    end
+  end
+
   def backup_database
     logger.info params
     write_and_send_data

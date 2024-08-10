@@ -71,6 +71,11 @@
                                                     :view_all => 0), :class => "btn btn-mini") %>
             </div>
           <% end %>
+          <div class="button-container">
+            <%= link_to("Requeue Started", requeue_started_data_point_path(@analysis), method: :post,
+                                           class: "btn btn-mini btn-warning",
+                                           data: { confirm: 'Are you sure you want to requeue all simulations without a completed normal Status Message?' }) %>
+          </div>
         </div>
       </div>
 
