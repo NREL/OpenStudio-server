@@ -299,9 +299,9 @@ class DataPointsController < ApplicationController
   end
 
   def requeue
-    Rails.logger.warn "data_points_contoller.REQUEUEing #{@data_point.id}"
     @data_point = DataPoint.find(params[:id])
     analysis_id = @data_point.analysis
+    Rails.logger.warn "data_points_contoller.REQUEUEing #{@data_point.id}"
     Rails.logger.debug "data_points_contoller.id: #{@data_point.id}"
     Rails.logger.debug "data_points_contoller.job_id: #{@data_point.job_id}"
     # Destroy the existing job in Resque queue; this is tied to a worker_host:PID:uuid
@@ -335,6 +335,22 @@ class DataPointsController < ApplicationController
     end
   end
 
+  def requeue_started
+    @analysis = Analysis.find(params[:id])
+    Rails.logger.warn "Requeueing all NOT completed normal simulations for analysis #{@analysis.id}"
+    data_points_to_requeue = @analysis.data_points.where.not(status_message: 'completed normal')
+
+    data_points_to_requeue.each do |dp|
+      Rails.logger.warn "Requeueing DataPoint #{dp.id}"
+      Resque.enqueue(ResqueJobs::RunSimulateDataPoint, dp.job_id)
+    end
+
+    respond_to do |format|
+      format.html { redirect_to analysis_path(@analysis), notice: 'Simulations were successfully requeued.' }
+      format.json { head :no_content }
+    end
+  end
+
   def find_resque_worker_by_job_id(job_id)
     Rails.logger.debug "data_points_contoller.find_resque_worker_by_job_id"
     Resque.workers.each do |worker|
@@ -352,7 +368,6 @@ class DataPointsController < ApplicationController
     end
     nil # Return nil if no worker is found processing the job_id
   end
-
   
   # upload results file
   # POST /data_points/1/upload_file.json
