@@ -33,7 +33,7 @@ module ResqueJobs
         d.add_to_rails_log(msg)
         puts msg
       end 
-    rescue Errno::ENOSPC, Resque::DirtyExit, Resque::TermException, Resque::PruneDeadWorkerDirtyExit => e
+    rescue SignalException, Errno::ENOSPC, Resque::DirtyExit, Resque::TermException, Resque::PruneDeadWorkerDirtyExit => e
       # Log the termination and re-enqueue attempt
       d.add_to_rails_log("Worker Caught Exception: #{e.inspect}: Re-enqueueing DataPoint ID #{data_point_id}")
       Resque.enqueue(self, data_point_id, options)
