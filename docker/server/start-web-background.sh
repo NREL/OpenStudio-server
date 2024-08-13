@@ -8,4 +8,4 @@ echo "Waiting for Redis to start"
 
 #cd /opt/openstudio/server && bundle exec rake environment resque:work
 echo "Startup two resque workers"
-cd /opt/openstudio/server && COUNT=2 bundle exec rake environment resque:workers
+cd /opt/openstudio/server && COUNT=6 bundle exec rake environment resque:workers
