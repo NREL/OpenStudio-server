@@ -16,7 +16,7 @@ services:
     image: redis:6.0.9
     ports:
       - "6379:6379"
-    command: "redis-server --requirepass ${REDIS_PASSWORD}"
+    command: "redis-server --requirepass ${REDIS_PASSWORD} --maxclients 40000"
   web:
     image: 127.0.0.1:5000/openstudio-server
     build:
