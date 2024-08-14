@@ -72,7 +72,7 @@ services:
   worker:
     image: 127.0.0.1:5000/openstudio-server
     environment:
-      - QUEUES=simulations
+      - QUEUES=requeued,simulations
       - COUNT=1
       - REDIS_URL=redis://:openstudio@queue:6379
       - MONGO_USER=openstudio

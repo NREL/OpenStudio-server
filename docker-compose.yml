@@ -69,7 +69,7 @@ services:
         rails_env: docker
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
-      - QUEUES=simulations
+      - QUEUES=requeued,simulations
       - COUNT=1
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}

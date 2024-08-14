@@ -305,10 +305,11 @@ class DataPointsController < ApplicationController
     Rails.logger.debug "data_points_contoller.id: #{@data_point.id}"
     Rails.logger.debug "data_points_contoller.job_id: #{@data_point.job_id}"
     # Destroy the existing job in Resque queue; this is tied to a worker_host:PID:uuid
+    Resque::Job.destroy(:requeue, 'ResqueJobs::RunSimulateDataPoint', @data_point.job_id)
     Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPoint', @data_point.job_id)
 
     # Enqueue a new job
-    Resque.enqueue(ResqueJobs::RunSimulateDataPoint, @data_point.job_id)
+    Resque.enqueue_to(:requeued, ResqueJobs::RunSimulateDataPoint, @data_point.job_id)
 
     # Attempt to find the worker processing this job
     #worker = find_resque_worker_by_job_id(@data_point.job_id)
@@ -342,7 +343,7 @@ class DataPointsController < ApplicationController
 
     data_points_to_requeue.each do |dp|
       Rails.logger.warn "Requeueing DataPoint #{dp.id}"
-      Resque.enqueue(ResqueJobs::RunSimulateDataPoint, dp.job_id)
+      Resque.enqueue_to(:requeued, ResqueJobs::RunSimulateDataPoint, dp.job_id)
     end
 
     respond_to do |format|
