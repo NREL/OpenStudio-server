@@ -36,11 +36,11 @@ module ResqueJobs
     rescue SignalException, Errno::ENOSPC, Resque::DirtyExit, Resque::TermException, Resque::PruneDeadWorkerDirtyExit => e
       # Log the termination and re-enqueue attempt
       d.add_to_rails_log("Worker Caught Exception: #{e.inspect}: Re-enqueueing DataPoint ID #{data_point_id}")
-      Resque.enqueue(self, data_point_id, options)
+      Resque.enqueue_to(:requeued, self, data_point_id, options)
       puts "DataPoint #{data_point_id} re-enqueued."
     rescue => e
       d.add_to_rails_log("Worker Caught Unhandled Exception: #{e.message}: Re-enqueueing DataPoint ID #{data_point_id}")
-      Resque.enqueue(self, data_point_id, options)
+      Resque.enqueue_to(:requeued, self, data_point_id, options)
       puts "Unhandled exception, re-enqueued DataPoint."
     end
   end
