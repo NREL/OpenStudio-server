@@ -18,6 +18,10 @@
     <!-- Link to prune dead Resque workers -->
     <%= link_to 'Prune Dead Resque Workers', prune_resque_workers_admin_index_path, method: :post, class: "btn btn-mini btn-danger", data: { confirm: 'Are you sure you want to prune dead Resque workers?' } %>
   </div>
+  <div class="span3 pad-bottom-20">
+    <!-- Link to requeue failed Resque workers -->
+    <%= link_to 'Requeue Failed Resque Workers', requeue_failed_admin_index_path, method: :post, class: "btn btn-mini btn-danger", data: { confirm: 'Are you sure you want to requeue failed Resque workers?' } %>
+  </div>
 </div>
 <% end %>
 
