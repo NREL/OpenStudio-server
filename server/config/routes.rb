@@ -100,6 +100,7 @@ Rails.application.routes.draw do
       get :backup_database
       post :restore_database
       post :prune_resque_workers
+      post :requeue_failed
     end
   end
 
