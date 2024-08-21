@@ -198,11 +198,33 @@ class AnalysesController < ApplicationController
   # stop analysis button action
   def stop
     @analysis = Analysis.find(params[:id])
+    if @analysis.nil?
+      logger.error "Analysis with ID #{params[:id]} not found."
+      redirect_to analyses_path, alert: 'Analysis not found.' and return
+    end
     res = @analysis.stop_analysis
 
     respond_to do |format|
       if res[0]
         format.html { redirect_to @analysis, notice: 'Analysis flag changed to stop. Will wait until the last submitted run finishes before killing.' }
+      else
+        format.html { redirect_to @analysis, notice: 'Analysis flag did NOT change.' }
+      end
+    end
+  end
+  
+    # stop analysis button action
+  def soft_stop
+    @analysis = Analysis.find(params[:id])
+    if @analysis.nil?
+      logger.error "Analysis with ID #{params[:id]} not found."
+      redirect_to analyses_path, alert: 'Analysis not found.' and return
+    end
+    res = @analysis.soft_stop_analysis
+
+    respond_to do |format|
+      if res[0]
+        format.html { redirect_to @analysis, notice: 'Analysis flag changed to stop. Will NOT wait until the last submitted run finishes before killing.' }
       else
         format.html { redirect_to @analysis, notice: 'Analysis flag did NOT change.' }
       end

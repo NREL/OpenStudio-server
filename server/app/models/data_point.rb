@@ -125,6 +125,16 @@ class DataPoint
     self.status_message = 'datapoint canceled'
     save!
   end
+  
+  def set_soft_canceled_state
+    Rails.logger.debug "data_point.set_soft_canceled_state"
+    #destroy_background_job # destroy queued job
+    self.run_start_time ||= Time.now
+    self.run_end_time = Time.now
+    self.status = :completed
+    self.status_message = 'datapoint canceled'
+    save!
+  end
 
   def set_queued_state
     Rails.logger.debug "data_point.set_queued_state"

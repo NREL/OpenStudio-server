@@ -169,6 +169,26 @@ class Analysis
     [save!, errors]
   end
 
+  def soft_stop_analysis
+    Rails.logger.info('attempting to stop analysis')
+
+    self.run_flag = false
+
+    jobs.each do |j|
+      unless j.status == 'completed'
+        j.status = 'completed'
+        j.end_time = Time.new
+        j.status_message = 'datapoint canceled'
+        j.save!
+      end
+    end
+
+    # Remove all the queued background jobs for this analysis
+    data_points.where(status: 'queued').each(&:set_soft_canceled_state)
+
+    [save!, errors]
+  end
+  
   # Method that pulls out the variables from the uploaded problem/analysis JSON.
   def pull_out_os_variables
     pat_json = false

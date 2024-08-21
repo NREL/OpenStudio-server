@@ -36,7 +36,8 @@
                 <td><%= @analysis.status %>
                   <% if @analysis.status == 'started' %>
                     | <%= link_to("Stop Analysis", stop_analysis_path(@analysis)) %>
-                      <% end %>
+                    | <%= link_to "Soft Stop", soft_stop_analysis_path(@analysis) %>
+                  <% end %>
                 </td>
               </tr>
               <tr>
