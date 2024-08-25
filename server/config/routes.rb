@@ -26,6 +26,7 @@ Rails.application.routes.draw do
         post :action
         post :upload
         get :stop
+        get :soft_stop
         get :status
         get :page_data
         get :analysis_data

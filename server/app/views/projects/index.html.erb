@@ -20,6 +20,7 @@
       <% logger.warn("WTH - returns '#{project.analyses.first}'") %>
       <% if project.analyses.first.status == 'started' %>
         <td><%= link_to 'Stop', stop_analysis_path(project.analyses.first), data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to 'Soft Stop', soft_stop_analysis_path(project.analyses.first), data: { confirm: 'Are you sure?' } %></td>
       <% else %>
         <td><%= link_to 'Delete', project, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       <% end %>

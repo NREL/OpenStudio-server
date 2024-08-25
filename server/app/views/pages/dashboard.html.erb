@@ -70,6 +70,7 @@
                 <div class="button-container">
                   <% if @current.status == 'started' %>
                       <td><%= link_to 'Stop Analysis', stop_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                      <td><%= link_to 'Soft Stop Analysis', soft_stop_analysis_path(@current), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
                   <% else %>
                       <td><%= link_to 'Delete Project', project_path(@current.project), method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %></td>
                   <% end %>
@@ -125,6 +126,7 @@
               <div class="button-container">
                 <% if res.status == 'started' %>
                     <td><%= link_to 'Stop Analysis', stop_analysis_path(res.project), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
+                    <td><%= link_to 'Soft Stop Analysis', soft_stop_analysis_path(res.project), data: { confirm: 'Are you sure?' }, class: "btn btn-mini" %></td>
                 <% else %>
                     <td><%= link_to 'Delete Project', project_path(res.project), method: :delete, data: {confirm: 'Are you sure?'}, class: "btn btn-mini" %></td>
                 <% end %>
