@@ -4,8 +4,8 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=3.8.0
-FROM nrel/openstudio:3.8.0 as base
+ARG OPENSTUDIO_VERSION=3.9.0
+FROM nrel/openstudio:dev-3.9.0-rc1 as base
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -49,7 +49,6 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
         mongodb-database-tools \
         nodejs \
         procps \
-        python-numpy \
         python3-numpy \
         tar \
         unzip \

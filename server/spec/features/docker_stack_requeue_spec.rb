@@ -99,8 +99,8 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
             natural_gas_consumption_nmbe: 70.79385513
            },
            {
-            electricity_consumption_cvrmse: 55.38824215,
-            electricity_consumption_nmbe: -57.11056651,
+            electricity_consumption_cvrmse: 55.38893763588019,
+            electricity_consumption_nmbe: -57.11056265094546,
             natural_gas_consumption_cvrmse: 43.52243818,
             natural_gas_consumption_nmbe: 22.80778241
            },
@@ -235,6 +235,7 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
           tmp << x.transform_values { |y| y.truncate(4) }
         end
         compare = tmp.include?(sim)
+        puts "data_point[:#{data_point[:_id]}] sim is: #{sim}"
         expect(compare).to be true
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
 
