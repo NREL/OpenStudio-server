@@ -10,9 +10,9 @@ on: [push, pull_request]
 
 env:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 3.8.0
-  OPENSTUDIO_VERSION_SHA: f953b6fcaf
-  OPENSTUDIO_VERSION_EXT: ""
+  OPENSTUDIO_VERSION: 3.9.0
+  OPENSTUDIO_VERSION_SHA: cc1e0bbd6d
+  OPENSTUDIO_VERSION_EXT: "-rc2"
   DOCKER_COMPOSE_VERSION: 1.21.1
   BUNDLE_WITHOUT: native_ext
 
@@ -31,7 +31,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=3.8.0
+          export OPENSTUDIO_TAG=3.9.0
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all
