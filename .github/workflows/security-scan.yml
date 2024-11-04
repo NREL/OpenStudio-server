@@ -60,7 +60,8 @@ jobs:
         output: 'trivy-results.sarif'
         severity: 'CRITICAL,HIGH'
         timeout: 15m0s
-        allow-failure: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload container scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v1
       with:
