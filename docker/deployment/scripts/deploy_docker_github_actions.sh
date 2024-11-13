@@ -14,8 +14,8 @@ elif [ "${GITHUB_REF}" == "refs/heads/master" ]; then
 # Currently setting this to setup_github_actions to test upload. 
 elif [ "${GITHUB_REF}" == "refs/heads/setup_github_actions" ]; then
     IMAGETAG=experimental
-elif [ "${GITHUB_REF}" == "refs/heads/3.9.0-rc1" ]; then
-     IMAGETAG="3.9.0-rc2"
+elif [ "${GITHUB_REF}" == "refs/heads/3.9.0-rc3" ]; then
+     IMAGETAG="3.9.0-rc3"
 fi
 
 if [ "${IMAGETAG}" != "skip" ]; then
