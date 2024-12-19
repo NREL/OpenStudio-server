@@ -22,7 +22,8 @@ module ResqueJobs
       # There is a case where that worker completes a successful job, before the requeued DP starts.
       # In that case, we should skip re-running that DP because it was both completed and completed normal already.
       # If its a requeued failed job, then that should still get re-run
-      if !(statuses[:status] == 'completed' && statuses[:status_message] == 'completed normal')
+      if !(statuses[:status_message] == 'completed normal')  #relax requirement to just completed normal
+      #if !(statuses[:status] == 'completed' && statuses[:status_message] == 'completed normal')
         msg = "RUNNING DJ: #{statuses[:status]} and #{statuses[:status_message]}"
         d.add_to_rails_log(msg)
         puts msg
