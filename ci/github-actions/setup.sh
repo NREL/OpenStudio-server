@@ -66,7 +66,7 @@ else
         sudo wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
         echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse | tee /etc/apt/sources.list.d/mongodb-org-6.0.list"
         sudo apt-get update
-        sudo apt-get install -y pv tree mongodb libqdbm14 libxml2-dev
+        sudo apt-get install -y pv tree mongodb-org libqdbm14 libxml2-dev
         # explicitly install. the latest version of redis-server
         wget https://download.redis.io/releases/redis-6.0.9.tar.gz
         tar xzf redis-6.0.9.tar.gz && cd redis-6.0.9
@@ -80,7 +80,7 @@ else
         #sudo mv redis.conf /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
-        sudo systemctl start mongodb
+        sudo systemctl start mongod
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
