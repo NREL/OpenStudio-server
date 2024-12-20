@@ -23,6 +23,11 @@ else
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.7.2-darwin.tar.gz
         tar xzf ruby-2.7.2-darwin.tar.gz
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract Ruby 2.7.2 archive"
+         exit $exit_status_tar
+        fi
         sudo mv ruby /usr/local/
         otool -L /usr/local/ruby/bin/ruby
         rm ruby-2.7.2-darwin.tar.gz
@@ -30,6 +35,11 @@ else
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-6.0.7.tgz
         tar xvzf mongodb-macos-x86_64-6.0.7.tgz
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract Mongo 6.0.7 archive"
+         exit $exit_status_tar
+        fi
         sudo cp mongodb-macos-x86_64-6.0.7/bin/* /usr/local/bin/
         rm -r mongodb-macos*
 
@@ -46,6 +56,11 @@ else
         #hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
         ls -l
         tar xvzf $OS_NAME_WITH_PLUS.tar.gz -C $HOME
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract OpenStudio archive"
+         exit $exit_status_tar
+        fi
         ls -l $HOME
         rm -rf $OS_NAME_WITH_PLUS.tar.gz
         export PATH="/usr/local/ruby/bin:$GITHUB_WORKSPACE/gems/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
@@ -66,10 +81,21 @@ else
         sudo wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
         echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse | tee /etc/apt/sources.list.d/mongodb-org-6.0.list"
         sudo apt-get update
-        sudo apt-get install -y pv tree mongodb libqdbm14 libxml2-dev
+        sudo apt-get install -y pv tree mongodb-org libqdbm14 libxml2-dev
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to apt-get install"
+         exit $exit_status_tar
+        fi        
         # explicitly install. the latest version of redis-server
         wget https://download.redis.io/releases/redis-6.0.9.tar.gz
-        tar xzf redis-6.0.9.tar.gz && cd redis-6.0.9
+        tar xzf redis-6.0.9.tar.gz
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract Redis 6.0.9 archive"
+         exit $exit_status_tar
+        fi
+        cd redis-6.0.9
         make && sudo make install
         sudo cp utils/systemd-redis_server.service /etc/systemd/system/redis.service
         cd $GITHUB_WORKSPACE
@@ -80,12 +106,17 @@ else
         #sudo mv redis.conf /etc/redis/redis.conf
         sudo systemctl start redis-server.service || true
         sudo systemctl status redis-server.service
-        sudo systemctl start mongodb
+        sudo systemctl start mongod
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-2.7.2-linux.tar.gz
         tar xvzf ruby-2.7.2-linux.tar.gz
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract Ruby 2.7.2 archive"
+         exit $exit_status_tar
+        fi
         ls -l /usr/local/
         sudo rm -rf /usr/local/ruby
         sudo mv ruby /usr/local/
@@ -110,6 +141,11 @@ else
     ruby ${GITHUB_WORKSPACE}/ci/github-actions/verify_openstudio.rb
 
     ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
+    exit_status_tar=$?
+    if [ $exit_status_tar -ne 0 ]; then
+     echo "Error: Failed to openstudio_meta install_gems"
+     exit $exit_status_tar
+    fi
     bundle -v
     # create dir for output files which will be generated in case of failure
     if [ ! -d "${GITHUB_WORKSPACE}/spec/unit-test" ]; then

@@ -29,6 +29,8 @@ gem 'mongoid-paperclip'
 #gem 'kt-paperclip', :github => 'tijcolem/kt-paperclip', :ref => 'use-marcel'
 #gem 'paperclip'
 
+gem 'zeitwerk', '~> 2.6.18'
+
 # R
 gem 'rserve-simpler', '~> 0.0.6'
 

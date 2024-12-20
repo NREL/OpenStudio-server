@@ -24,7 +24,7 @@ jobs:
     - name: Delete huge unnecessary tools folder
       run: rm -rf /opt/hostedtoolcache    
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
@@ -49,7 +49,7 @@ jobs:
       run: ./ci/github-actions/export_build_linux.sh
     - name: upload gem package
       if: ${{ success() }} 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: openstudio-server-gems-linux
         path: build/NREL/export/*.tar.gz
@@ -57,7 +57,7 @@ jobs:
     runs-on: macos-13
     steps: 
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
@@ -82,7 +82,7 @@ jobs:
       run: ./ci/github-actions/export_build_osx.sh
     - name: upload gem package
       if: ${{ success() }} 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
@@ -92,7 +92,7 @@ jobs:
     - name: Delete huge unnecessary tools folder
       run: rm -rf /opt/hostedtoolcache    
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
