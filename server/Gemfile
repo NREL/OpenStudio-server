@@ -69,6 +69,7 @@ gem 'date', '~> 3.3.4'
 # don't try to install sassc 2.
 gem 'roo', '~> 2.8.3'
 gem 'sassc', '~> 2.4.0'
+gem 'concurrent-ruby', '1.3.4'
 
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
@@ -108,7 +109,7 @@ if RUBY_PLATFORM =~ /linux/
 elsif RUBY_PLATFORM =~ /darwin/
   gem 'execjs', github: 'NREL/execjs'
 end
-
+gem 'resque-web', git: 'https://github.com/diei/resque-web.git', ref: '0972517d6e42eeb096555a17346937d6df100d82', require: 'resque_web'
 # The only resque only is :docker, :docker-dev, :production
 group :development, :docker, :'docker-dev', :'docker-test', :production, :test do
   gem 'redis', '~> 4.2.5'
