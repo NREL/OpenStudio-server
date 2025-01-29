@@ -1,7 +1,8 @@
 version: '3.4'
 services:
   db:
-    image: 127.0.0.1:5000/mongo
+    platform: linux/arm64
+    image: mongo:6.0.7
     ports:
       - "27017:27017"
     volumes:
@@ -15,7 +16,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: openstudio
     command: "mongod --setParameter internalQueryMaxAddToSetBytes=209715200 --setParameter internalQueryMaxBlockingSortMemoryUsageBytes=209715200"
   queue:
-    image: 127.0.0.1:5000/redis
+    platform: linux/arm64
+    image: redis:6.0.9
     ports:
       - "6379:6379"
     deploy:
@@ -24,7 +26,8 @@ services:
           - node.role == manager
     command: "redis-server --requirepass openstudio --maxclients 40000"
   web:
-    image: 127.0.0.1:5000/openstudio-server
+    platform: linux/amd64
+    image: nrel/openstudio-server:3.9.0-rc3
     ports:
       - "8080:80"
       - "80:80"
@@ -49,7 +52,8 @@ services:
           - node.role == manager
     command: /usr/local/bin/start-server
   web-background:
-    image: 127.0.0.1:5000/openstudio-server
+    platform: linux/amd64
+    image: nrel/openstudio-server:3.9.0-rc3
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=background,analyses
@@ -70,7 +74,8 @@ services:
           - node.role == manager
     command: /usr/local/bin/start-web-background
   worker:
-    image: 127.0.0.1:5000/openstudio-server
+    platform: linux/amd64
+    image: nrel/openstudio-server:3.9.0-rc3
     environment:
       - QUEUES=requeued,simulations
       - COUNT=1
@@ -90,7 +95,8 @@ services:
       endpoint_mode: dnsrr
     command: /usr/local/bin/start-workers
   rserve:
-    image: 127.0.0.1:5000/openstudio-rserve
+    platform: linux/amd64
+    image: nrel/openstudio-rserve:3.9.0-rc3
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
