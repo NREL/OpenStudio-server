@@ -126,8 +126,8 @@ jobs:
     - name: docker-upload
       if: | 
         github.ref == 'refs/heads/master' || 
-        github.ref == 'refs/heads/develop'
-#        github.ref == 'refs/heads/arm-hack'
+        github.ref == 'refs/heads/develop' ||
+        github.ref == 'refs/heads/3.9.0'
       shell: bash
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 
