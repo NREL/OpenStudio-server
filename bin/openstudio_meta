@@ -744,6 +744,14 @@ class StopRemote
   end
 end
 
+def which_cmd(cmd)
+  if RUBY_PLATFORM =~ /mingw|mswin/
+    `where #{cmd}`.strip
+  else
+    `which #{cmd}`.strip
+  end
+end
+
 # Class to submit an analysis to a OS Server instance, defined by URL
 class RunAnalysis
   require_relative 'resources/remote.rb'
@@ -762,7 +770,7 @@ class RunAnalysis
   def execute(sub_argv)
     $logger.debug "sub_argv = #{sub_argv} in RunAnalysis execute"
     $logger.debug "RunAnalysis Environment is: #{::ENV.inspect}"
-    
+
     # Print environment variables for debugging
     puts "BLB Environment variables during run_analysis:"
     puts "PATH: #{ENV['PATH']}"
@@ -772,9 +780,9 @@ class RunAnalysis
     puts "OPENSTUDIO_TEST_EXE: #{ENV['OPENSTUDIO_TEST_EXE']}"
 # Method to print paths and contents of the bundle script
 def print_paths_and_bundle_script
-  bundle_path = `which bundle`.strip
-  bundler_path = `which bundler`.strip
-  ruby_path = `which ruby`.strip
+  bundle_path = which_cmd("bundle")
+  bundler_path = which_cmd("bundler")
+  ruby_path = which_cmd("ruby")
 
   puts "BUNDLE_PATH: #{bundle_path}"
   puts "BUNDLER_PATH: #{bundler_path}"
@@ -794,7 +802,7 @@ end
 
 # Call the method to print the paths and bundle script content
 print_paths_and_bundle_script
-    
+
     $logger.debug 'Requiring gems for RunAnalysis'
     $logger.debug 'Requiring zip gem'
     require 'zip'
