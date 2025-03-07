@@ -11,8 +11,8 @@ on: [push, pull_request]
 env:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.9.0
-  OPENSTUDIO_VERSION_SHA: cc1e0bbd6d
-  OPENSTUDIO_VERSION_EXT: "-rc2"
+  OPENSTUDIO_VERSION_SHA: c77fbb9569
+  OPENSTUDIO_VERSION_EXT: ""
   DOCKER_COMPOSE_VERSION: 1.21.1
   BUNDLE_WITHOUT: native_ext
 
@@ -127,7 +127,7 @@ jobs:
       if: | 
         github.ref == 'refs/heads/master' || 
         github.ref == 'refs/heads/develop'
-      #  github.ref == 'refs/heads/3.9.0'
+#        github.ref == 'refs/heads/arm-hack'
       shell: bash
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 
