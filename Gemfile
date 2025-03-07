@@ -7,7 +7,7 @@ gem 'rake', '~> 13.0'
 
 group :development, :test do
   gem 'rest-client', '~> 2.1.0'
-  gem 'ffi', '1.17.0'
+  gem 'ffi', '1.17.1'
   gem 'rspec', '~> 3.13'
   gem 'public_suffix', '5.0.5'
 end
