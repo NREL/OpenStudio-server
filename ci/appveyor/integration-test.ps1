@@ -56,7 +56,7 @@ $iteration = 0
                     Write-Host "Deleting file $_.FullName after successful integration test completion"
                     Remove-Item -path $_.FullName
                     }
-                taskkill /T /F /PID $tests.ID
+                #taskkill /T /F /PID $tests.ID
                 Exit 0
                 }
            }

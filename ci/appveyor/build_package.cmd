@@ -7,6 +7,8 @@ set RUBYLIB=C:\projects\openstudio\Ruby
 set OPENSTUDIO_TEST_EXE=C:\projects\openstudio\bin\openstudio
 
 REM set mongo_dir??
+echo kill any hanging ruby.exe processes
+taskkill /IM ruby.exe /F
 cd c:\
 mkdir export
 echo openstudio_meta install_gems --export
