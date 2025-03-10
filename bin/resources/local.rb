@@ -334,7 +334,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
         success = system(cmd)
         unless success
           $logger.error "dj_worker_#{ind} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
-          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + ind + '.log')}`."
+          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + ind.to_s + '.log')}`."
           kill_processes(state_file)
           exit 1
         end
