@@ -6,6 +6,29 @@ $env:GEM_PATH = "C:\projects\openstudio-server\gems;C:\projects\openstudio-serve
 # Integration tests that run algo can only run on docker deployments. Setting BUILD_TYPE=test below skip algo tests. Only linux docker runs these tests  
 
 Write-Host "RUBYLIB is: $env:RUBYLIB ; the PATH is: $env:Path ; the OPENSTUDIO_TEST_EXE is: $env:OPENSTUDIO_TEST_EXE"
+
+Function Stop-ProcessTree {
+    Param (
+        [Parameter(Mandatory=$true)]
+        [int]$PID
+    )
+
+    # Get all child processes of the process we want to stop
+    $processes = Get-WmiObject Win32_Process -Filter "ParentProcessId = $PID"
+
+    # Recursively call this function for each child process
+    foreach ($process in $processes) {
+        Stop-ProcessTree -PID $process.ProcessId
+    }
+
+    # Stop the main process after all its children have been stopped
+    $process = Get-Process -Id $PID -ErrorAction SilentlyContinue
+    if ($process) {
+        Write-Host "Stopping process $PID"
+        Stop-Process -Id $PID -Force
+    }
+}
+
 $iteration = 0
 :retry While ($iteration -lt 3)
     {
@@ -39,7 +62,7 @@ $iteration = 0
         start-sleep -seconds 1
         }
     Write-Host "Process has not completed after 300 seconds. Invoking timeout"
-    taskkill /T /F /PID $tests.ID
+    Stop-ProcessTree -PID $tests.Id
     Exit 1
     }
 Write-Host "After 3 attempts assuming broken"
