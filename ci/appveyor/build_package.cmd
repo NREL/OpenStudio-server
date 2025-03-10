@@ -9,8 +9,6 @@ set OPENSTUDIO_TEST_EXE=C:\projects\openstudio\bin\openstudio
 REM set mongo_dir??
 cd c:\
 mkdir export
-echo removing any hanging CMDs
-taskkill /IM cmd.exe /F /T
 echo openstudio_meta install_gems --export
 ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --export="C:\export" --debug
 mv C:\export C:\projects\openstudio-server\export
