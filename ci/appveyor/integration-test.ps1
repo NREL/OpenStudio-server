@@ -56,13 +56,14 @@ $iteration = 0
                     Write-Host "Deleting file $_.FullName after successful integration test completion"
                     Remove-Item -path $_.FullName
                     }
+                taskkill /T /F /PID $tests.ID
                 Exit 0
                 }
            }
         start-sleep -seconds 1
         }
     Write-Host "Process has not completed after 300 seconds. Invoking timeout"
-    Stop-ProcessTree -PID $tests.Id
+    taskkill /T /F /PID $tests.ID
     Exit 1
     }
 Write-Host "After 3 attempts assuming broken"
