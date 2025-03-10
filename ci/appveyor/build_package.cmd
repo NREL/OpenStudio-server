@@ -9,10 +9,9 @@ set OPENSTUDIO_TEST_EXE=C:\projects\openstudio\bin\openstudio
 REM set mongo_dir??
 cd c:\
 mkdir export
-echo removing conflicting json gem version 2.7.2
-echo rmdir /S /Q C:\projects\openstudio-server\gems\gems\json-2.7.2
-echo rmdir /S /Q C:\projects\openstudio-server\gems\extensions\x64-mingw-ucrt\3.2.0\json-2.7.2
+echo removing conflicting gem directory
+rmdir /S /Q C:\projects\openstudio-server\gems
 echo openstudio_meta install_gems --export
-echo ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --export="C:\export" --debug
-echo mv C:\export C:\projects\openstudio-server\export
-echo dir C:\projects\openstudio-server\export
+ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --export="C:\export" --debug
+mv C:\export C:\projects\openstudio-server\export
+dir C:\projects\openstudio-server\export
