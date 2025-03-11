@@ -10,7 +10,15 @@ REM set mongo_dir??
 echo kill any hanging ruby.exe processes
 taskkill /IM ruby.exe /F
 echo timeout 60s
-timeout /t 60
+echo Downloading Handle...
+curl -L -o handle.zip https://download.sysinternals.com/files/Handle.zip
+tar -xf handle.zip -C %TEMP%
+echo Checking for file locks...
+%TEMP%\handle.exe C:\projects\openstudio-server\gems\gems\json-2.10.1 > %TEMP%\handle_output.txt
+type %TEMP%\handle_output.txt
+echo generator.so
+%TEMP%\handle.exe C:\projects\openstudio-server\gems\gems\json-2.10.1\lib\json\ext\generator.so > %TEMP%\handle_output2.txt
+type %TEMP%\handle_output2.txt
 cd c:\
 mkdir export
 echo openstudio_meta install_gems --export
