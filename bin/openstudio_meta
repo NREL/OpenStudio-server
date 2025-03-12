@@ -334,7 +334,7 @@ class InstallGems
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config"
     end
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --with default development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --jobs=1 --with default development test"
     else
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --without development test"
     end
