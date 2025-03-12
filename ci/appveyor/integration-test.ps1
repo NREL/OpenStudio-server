@@ -30,7 +30,7 @@ Function Stop-ProcessTree {
 }
 
 $iteration = 0
-:retry While ($iteration -lt 3)
+:retry While ($iteration -lt 1)
     {
     Write-Host "Attempting to run rspec test; attempt $iteration"
     $tests = Start-Process -PassThru -WorkingDirectory "C:\projects\openstudio-server" -FilePath "bundle" -ArgumentList "exec rspec -e 'analysis'" -RedirectStandardOutput "C:\projects\openstudio-server\spec\files\logs\win-stdout.log" -RedirectStandardError "C:\projects\openstudio-server\spec\files\logs\win-stderr.log"
