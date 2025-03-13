@@ -22,6 +22,6 @@ REM type %TEMP%\handle_output2.txt
 cd c:\
 mkdir export
 echo openstudio_meta install_gems --export
-ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --export="C:\export" --debug
+ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --use_cached_gems --export="C:\export" --debug
 mv C:\export C:\projects\openstudio-server\export
 dir C:\projects\openstudio-server\export
