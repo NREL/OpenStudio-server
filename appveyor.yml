@@ -41,7 +41,7 @@ before_test:
 test_script:
   - ps: C:\projects\openstudio-server\ci\appveyor\integration-test.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\unit-test.cmd
-  - cmd: C:\projects\openstudio-server\ci\appveyor\gem-lock-kill.ps1
+  - ps: C:\projects\openstudio-server\ci\appveyor\gem-lock-kill.ps1
   - cmd: C:\projects\openstudio-server\ci\appveyor\build_package.cmd #artifact upload occurs before on_finish
 on_finish:
   - cmd: echo FINISHED TEST_SCRIPTS
