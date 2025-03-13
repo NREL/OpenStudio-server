@@ -9,6 +9,6 @@ if %ERRORLEVEL% neq 0 (
     exit 1
 ) else (
     echo Unit tests passed.  Killing hanging ruby.exe
-    taskkill /IM ruby.exe /F
+    taskkill /IM ruby.exe /F /T
     exit 0
 )
