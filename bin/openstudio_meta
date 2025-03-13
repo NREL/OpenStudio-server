@@ -344,9 +344,25 @@ class InstallGems
     sys_call = sys_cmds.join(' && ')
     puts "Environment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
-    unless system(sys_call)
-      $logger.error "System call '#{sys_call}' failed"
-      exit 1
+    
+    max_attempts = 3
+    attempt = 0
+
+    begin
+      attempt += 1
+      puts "Attempt #{attempt} of #{max_attempts}" if options[:debug]
+      unless system(sys_call)
+        raise "System call failed on attempt #{attempt}"
+      end
+    rescue => e
+      if attempt < max_attempts
+        $logger.warn "Attempt #{attempt} failed: #{e.message}. Retrying in 2 seconds..."
+        sleep 2
+        retry
+      else
+        $logger.error "System call '#{sys_call}' failed after #{max_attempts} attempts."
+        exit 1
+      end
     end
 
     # copy all files to staging location
