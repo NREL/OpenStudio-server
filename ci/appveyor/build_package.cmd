@@ -7,18 +7,9 @@ set RUBYLIB=C:\projects\openstudio\Ruby
 set OPENSTUDIO_TEST_EXE=C:\projects\openstudio\bin\openstudio
 
 REM set mongo_dir??
-echo kill any hanging ruby.exe processes
-taskkill /IM ruby.exe /F
-echo timeout 60s
-echo Downloading Handle...
-curl -L -o handle.zip https://download.sysinternals.com/files/Handle.zip
-tar -xf handle.zip -C %TEMP%
-echo Checking for file locks...
-REM %TEMP%\handle.exe C:\projects\openstudio-server\gems\gems\json-2.10.1 > %TEMP%\handle_output.txt
-REM type %TEMP%\handle_output.txt
-REM echo generator.so
-REM %TEMP%\handle.exe C:\projects\openstudio-server\gems\gems\json-2.10.1\lib\json\ext\generator.so > %TEMP%\handle_output2.txt
-REM type %TEMP%\handle_output2.txt
+echo rmdir gem Dirs
+rmdir /S /Q C:\projects\openstudio-server\gems\gems\json-2.10.2
+rmdir /S /Q C:\projects\openstudio-server\gems\extensions\x64-mingw-ucrt\3.2.0\json-2.10.2
 cd c:\
 mkdir export
 echo openstudio_meta install_gems --export
