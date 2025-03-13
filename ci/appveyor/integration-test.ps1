@@ -52,10 +52,11 @@ $iteration = 0
                 {
                 Write-Host "Process completed successfully"
                 Get-ChildItem "C:\projects\openstudio-server\spec\files\logs" -Filter *.log |
-                #Foreach-Object {
+                Foreach-Object {
+                     Write-Host "NOT deleting local server logs"
                 #    Write-Host "Deleting file $_.FullName after successful integration test completion"
                 #    Remove-Item -path $_.FullName
-                #    }
+                    }
                 #taskkill /T /F /PID $tests.ID
                 Exit 0
                 }
