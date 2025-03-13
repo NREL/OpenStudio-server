@@ -364,7 +364,7 @@ def kill_pid(pid, name, windows = false)
     # Check if a process with this PID exists
     pid_exists = system('tasklist /FI' + ' "PID eq ' + pid.to_s + '" 2>NUL | find /I /N "' + pid.to_s + '">NUL')
     if pid_exists
-      system_return = system('taskkill', '/pid', pid.to_s, '/f')
+      system_return = system('taskkill', '/pid', pid.to_s, '/f', '/T')
       unless system_return
         $logger.error "Failed to kill process with PID `#{pid}`"
         return false
@@ -376,7 +376,7 @@ def kill_pid(pid, name, windows = false)
   else
     begin
       ::Timeout.timeout (5) do
-        ::Process.kill('SIGINT', pid)
+        ::Process.kill('SIGINT', pid)  #use -pid to get children
         ::Process.wait(pid)
       end
     rescue Errno::ESRCH, Errno::ECHILD
