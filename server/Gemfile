@@ -49,7 +49,16 @@ gem 'kaminari-mongoid', '~> 1.0.2'
 #assets:precompile js
 gem 'jquery-rails', '~> 4.4.0'
 gem 'twitter-bootstrap-rails', '~> 5.0.0'
-
+# Gems used only for assets and not required
+# in production environments by default.
+gem 'sassc-embedded'
+gem 'sassc', '~> 2.4.0'
+gem 'bootstrap-sass', '~> 3.4.1'
+gem 'coffee-rails', '~> 5.0.0'
+gem 'sass', '~> 3.7.4'
+gem 'sass-rails', '~> 6.0.0'
+gem 'sprockets-rails', '~> 3.2.2'
+      
 # job queuing
 gem 'daemons', '~> 1.3.1'
 
@@ -113,15 +122,6 @@ unless Gem.win_platform?
       #gem 'resque-web', '~> 0.0.12', require: 'resque_web'
       #gem 'resque-web', git: 'https://github.com/diei/resque-web.git', ref: '0972517d6e42eeb096555a17346937d6df100d82', require: 'resque_web'
       gem 'resque-web', git: 'https://github.com/brianlball/resque-web.git', ref: '0972517d6e42eeb096555a17346937d6df100d82', require: 'resque_web'
-      
-      # Gems used only for assets and not required
-      # in production environments by default.
-      gem 'sassc', '~> 2.4.0'
-      gem 'bootstrap-sass', '~> 3.4.1'
-      gem 'coffee-rails', '~> 5.0.0'
-      gem 'sass', '~> 3.7.4'
-      gem 'sass-rails', '~> 6.0.0'
-      gem 'sprockets-rails', '~> 3.2.2'
     end
 end
 group :development, :'docker-test', :test, :local, :'local-test' do
