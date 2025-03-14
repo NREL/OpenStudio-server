@@ -339,10 +339,10 @@ class InstallGems
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --without development test"
     end
     sys_cmds << "#{$ruby_path} #{bundler_bin} update"
-    unless Gem.win_platform?
+    #unless Gem.win_platform?
       sys_cmds << 'echo "Calling assets:precompile"'
       sys_cmds << "#{$ruby_path} #{bundler_bin} exec #{rake_bin} assets:precompile" # DLM: consider deleting /server/public/assets each time
-    end
+    #end
     sys_call = sys_cmds.join(' && ')
     puts "Environment variables: #{::ENV.inspect}" if options[:debug]
     puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
