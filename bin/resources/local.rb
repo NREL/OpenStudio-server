@@ -65,8 +65,17 @@ def find_windows_pids(pid_json_path, recursion_limit = 6)
   pid_array += pid_hash[:dj_pids] if pid_hash[:dj_pids]
   pid_array << pid_hash[:rails_pid] if pid_hash[:rails_pid]
   pid_list = pid_array.clone
-  pid_str = `WMIC PROCESS get Caption,ProcessId,ParentProcessId`.split("\n\n")
-  pid_str.shift
+  if Gem.win_platform?
+    # Use PowerShell instead of deprecated WMIC
+    pid_str = `powershell -command "Get-Process | Select-Object ProcessName,Id,ParentProcessId | Format-Table -AutoSize | Out-String -Width 4096"`.split("\n")
+    # Remove header lines (column names and separator)
+    3.times { pid_str.shift }
+    # Remove empty lines
+    pid_str.reject! { |line| line.strip.empty? }
+  else
+    # For non-Windows platforms, use a different approach if needed
+    pid_str = []
+  end
   fully_recursed = false
   recursion_level = 0
   until fully_recursed
@@ -355,7 +364,7 @@ def kill_pid(pid, name, windows = false)
     # Check if a process with this PID exists
     pid_exists = system('tasklist /FI' + ' "PID eq ' + pid.to_s + '" 2>NUL | find /I /N "' + pid.to_s + '">NUL')
     if pid_exists
-      system_return = system('taskkill', '/pid', pid.to_s, '/f')
+      system_return = system('taskkill', '/pid', pid.to_s, '/f', '/T')
       unless system_return
         $logger.error "Failed to kill process with PID `#{pid}`"
         return false
@@ -367,7 +376,7 @@ def kill_pid(pid, name, windows = false)
   else
     begin
       ::Timeout.timeout (5) do
-        ::Process.kill('SIGINT', pid)
+        ::Process.kill('SIGINT', pid)  #use -pid to get children
         ::Process.wait(pid)
       end
     rescue Errno::ESRCH, Errno::ECHILD
