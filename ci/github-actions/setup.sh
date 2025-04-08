@@ -124,6 +124,7 @@ else
         fi
         ls -l /usr/local/
         sudo rm -rf /usr/local/ruby
+        sudo rm -rf /usr/bin/ruby
         sudo mv ruby /usr/local/
         ldd /usr/local/ruby/bin/ruby
         rm ruby-2.7.2-linux.tar.gz
