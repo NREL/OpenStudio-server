@@ -2,7 +2,7 @@
 
 echo "The build architecture is ${ImageOS}"
 
-if [ "${ImageOS}" == "ubuntu20" ] && [ "${BUILD_TYPE}" == "docker" ]; then
+if [ "${ImageOS}" == "ubuntu22" ] && [ "${BUILD_TYPE}" == "docker" ]; then
     echo "Installing docker compose"
     sudo rm /usr/local/bin/docker-compose
     curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -74,14 +74,19 @@ else
         ulimit -n 4096
         ulimit -a
 
-    elif [ "${ImageOS}" == "ubuntu20" ]; then
+    elif [ "${ImageOS}" == "ubuntu22" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update && sudo apt-get install -y wget gnupg software-properties-common build-essential
-        sudo wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-        echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse | tee /etc/apt/sources.list.d/mongodb-org-6.0.list"
+        #sudo wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+        #echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse | tee /etc/apt/sources.list.d/mongodb-org-6.0.list"
+        # Import MongoDB public GPG key
+        sudo wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-org-6.0-archive-keyring.gpg
+        # Add MongoDB to the sources list
+        echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-6.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+ 
         sudo apt-get update
-        sudo apt-get install -y pv tree mongodb-org libqdbm14 libxml2-dev
+        sudo apt-get install -y pv tree mongodb-org libqdbm14 libxml2-dev libtinfo5
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
          echo "Error: Failed to apt-get install"
@@ -119,6 +124,7 @@ else
         fi
         ls -l /usr/local/
         sudo rm -rf /usr/local/ruby
+        sudo rm -rf /usr/bin/ruby
         sudo mv ruby /usr/local/
         ldd /usr/local/ruby/bin/ruby
         rm ruby-2.7.2-linux.tar.gz
