@@ -53,6 +53,7 @@ gem 'twitter-bootstrap-rails', '~> 5.0.0'
 # in production environments by default.
 gem 'sassc-embedded'
 gem 'sassc', '~> 2.4.0'
+gem 'ffi', '1.17.1'
 gem 'bootstrap-sass', '~> 3.4.1'
 gem 'coffee-rails', '~> 5.0.0'
 gem 'sass', '~> 3.7.4'
