@@ -110,12 +110,12 @@ ENV RAILS_ENV $rails_env
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 ADD /bin /opt/openstudio/bin
 ADD /server/Gemfile /opt/openstudio/server/Gemfile
-ADD /server/Gemfile_32 /opt/openstudio/server/Gemfile_32
+ADD /server/Gemfile_32 /opt/openstudio/server/Gemfile_337
 WORKDIR /opt/openstudio/server
 #3.2.2
-RUN bundle _${OS_BUNDLER_VERSION}_ install --gemfile=/opt/openstudio/server/Gemfile_32 --jobs=3 --retry=3 $bundle_args
+RUN bundle _${OS_BUNDLER_VERSION}_ install --jobs=3 --retry=3 $bundle_args
 #3.3.7
-RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ install --jobs=3 --retry=3 $bundle_args
+RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ install --gemfile=/opt/openstudio/server/Gemfile_337 --jobs=3 --retry=3 $bundle_args
 
 # Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
 # have to be recompiled everytime
@@ -134,7 +134,7 @@ ADD /server /opt/openstudio/server
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
-RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ install --jobs=3 --retry=3
+RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ install --gemfile=/opt/openstudio/server/Gemfile_337 --jobs=3 --retry=3
 
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.

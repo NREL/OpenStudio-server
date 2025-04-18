@@ -22,13 +22,13 @@ done
 # Run only the algorithm specs. The other features/*_spec files should probably disappear and capybara/gecko
 # can be removed.
 #cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_custom_gems.rb; (( exit_status = exit_status || $? ))
-cd /opt/openstudio/server && /usr/local/ruby-3.3.7/bin/bundle exec rspec spec/features/docker_stack_test_apis_spec.rb; (( exit_status = exit_status || $? ))
-cd /opt/openstudio/server && /usr/local/ruby-3.3.7/bin/bundle exec rspec spec/features/docker_stack_algo_spec.rb; (( exit_status = exit_status || $? ))
-cd /opt/openstudio/server && /usr/local/ruby-3.3.7/bin/bundle exec rspec spec/features/docker_stack_requeue_spec.rb; (( exit_status = exit_status || $? ))
+cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_test_apis_spec.rb; (( exit_status = exit_status || $? ))
+cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_algo_spec.rb; (( exit_status = exit_status || $? ))
+cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_requeue_spec.rb; (( exit_status = exit_status || $? ))
 echo "SKIP_URBANOPT_ALGO: $SKIP_URBANOPT_ALGO"
 if ! $SKIP_URBANOPT_ALGO -eq true
 then
-  cd /opt/openstudio/server && /usr/local/ruby-3.3.7/bin/bundle exec rspec spec/features/docker_stack_urbanopt_algo_spec.rb; (( exit_status = exit_status || $? ))
+  cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_urbanopt_algo_spec.rb; (( exit_status = exit_status || $? ))
 fi
 #cd /opt/openstudio/server && bundle exec rake rubocop:run; (( exit_status = exit_status || $? ))
 

@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-ruby '>=3.2.0'
+ruby '~>3.2.0'
 
 # unclear if this will actually force this version of rubygems to be used
 # if not, run the following command to change system gem version:
@@ -78,11 +78,11 @@ gem 'roo', '~> 2.8.3'
 # For workers - and other dependencies for measures
 ## Commonly update gems for testing and development
 
-#gem 'openstudio-workflow', '= 2.4.0'
-gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :ref => 'ruby_337'
-gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => 'ruby_337'
-#gem 'openstudio-analysis', '= 1.4.0'
-gem 'bcl', :github => 'NREL/bcl-gem', :ref => 'ruby_337'
+gem 'openstudio-workflow', '= 2.4.0'
+#gem 'openstudio-workflow', :github => 'NREL/OpenStudio-workflow-gem', :ref => 'ruby_322'
+#gem 'openstudio-analysis', :github => 'NREL/OpenStudio-analysis-gem', :ref => 'ruby_322'
+gem 'openstudio-analysis', '= 1.4.0'
+#gem 'bcl', :github => 'NREL/bcl-gem', :ref => 'develop'
 #gem 'openstudio_measure_tester', :github => 'NREL/OpenStudio-measure-tester-gem', :ref => 'develop'
 
 # Remove urbanopt cli gems for minor for releases as they use different versions of ext gems
