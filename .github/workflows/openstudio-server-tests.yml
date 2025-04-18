@@ -28,6 +28,8 @@ jobs:
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: test
     - name: unit-test
       shell: bash 
       run: ./ci/github-actions/test.sh
@@ -61,6 +63,8 @@ jobs:
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: test
     - name: unit-test
       shell: bash 
       run: ./ci/github-actions/test.sh
