@@ -137,7 +137,7 @@ else
     # test openssl
     ruby ${GITHUB_WORKSPACE}/ci/github-actions/verify_openstudio.rb
 
-    ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
+    ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems --gemfile=/opt/openstudio/server/Gemfile_32
     bundle -v
     # create dir for output files which will be generated in case of failure
     if [ ! -d "${GITHUB_WORKSPACE}/spec/unit-test" ]; then
