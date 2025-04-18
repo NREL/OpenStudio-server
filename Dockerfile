@@ -110,7 +110,7 @@ ENV RAILS_ENV $rails_env
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 ADD /bin /opt/openstudio/bin
 ADD /server/Gemfile /opt/openstudio/server/Gemfile
-ADD /server/Gemfile_32 /opt/openstudio/server/Gemfile_337
+ADD /server/Gemfile_337 /opt/openstudio/server/Gemfile_337
 WORKDIR /opt/openstudio/server
 #3.2.2
 RUN bundle _${OS_BUNDLER_VERSION}_ install --jobs=3 --retry=3 $bundle_args
