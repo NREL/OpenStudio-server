@@ -135,7 +135,7 @@ ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
 RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ install --gemfile=/opt/openstudio/server/Gemfile_337 --jobs=3 --retry=3
-
+RUN bundle install --jobs=3 --retry=3
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.
 COPY /docker/server/wait-for-it.sh /usr/local/bin/wait-for-it
