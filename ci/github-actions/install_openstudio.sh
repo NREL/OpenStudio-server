@@ -17,7 +17,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
 
     # copying this from the docker-openstudio dockerfile
     apt-get update && apt-get install -y curl vim gdebi-core libgmp-dev libffi-dev build-essential zlib1g-dev vim git locales sudo
-    export $OPENSTUDIO_DOWNLOAD_URL
+    export OPENSTUDIO_DOWNLOAD_URL
 
     echo "OpenStudio Package Download URL is ${OPENSTUDIO_DOWNLOAD_URL}"
     curl -SLO $OPENSTUDIO_DOWNLOAD_URL
@@ -29,7 +29,7 @@ if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     rm -rf /var/lib/apt/lists/*
     locale-gen en_US en_US.UTF-8
     dpkg-reconfigure locales
-    rm $OPENSTUDIO_DOWNLOAD_FILENAME
+    rm -f $OPENSTUDIO_DOWNLOAD_FILENAME
 else
     echo "Must pass in the OpenStudio version, and sha to be installed (e.g. install_openstudio.sh 2.4.0 f58a3e1808)"
     exit 9
