@@ -57,11 +57,34 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# —————————————————————————————————————————————
+# Compile & install Ruby 3.3.7 for Rails (leaving OpenStudio’s Ruby untouched)
+# —————————————————————————————————————————————
+ARG RUBY_33_VERSION=3.3.7
+ARG BUNDLER_VERSION=2.4.10
+
+# Build & install Ruby 3.3.7 into its own tree
+RUN curl -SLO https://cache.ruby-lang.org/pub/ruby/3.3/ruby-${RUBY_33_VERSION}.tar.gz \
+ && tar -xzf ruby-${RUBY_33_VERSION}.tar.gz \
+ && cd ruby-${RUBY_33_VERSION} \
+ && ./configure --prefix=/usr/local/ruby-${RUBY_33_VERSION} \
+ && make -j"$(nproc)" \
+ && make install \
+ && cd .. \
+ && rm -rf ruby-${RUBY_33_VERSION} ruby-${RUBY_33_VERSION}.tar.gz
+
+# Install Bundler under 3.3.7 for your Rails app
+RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/gem install bundler -v ${BUNDLER_VERSION}
+
+
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION 6.0.18
 
-RUN gem install passenger -v $PASSENGER_VERSION
-RUN passenger-install-nginx-module
+#RUN gem install passenger -v $PASSENGER_VERSION
+#RUN passenger-install-nginx-module
+# Install the passenger gem into Ruby 3.3.7
+RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/gem install passenger -v $PASSENGER_VERSION \
+    && /usr/local/ruby-${RUBY_33_VERSION}/bin/passenger-install-nginx-module --auto
 
 # Configure the nginx server
 RUN mkdir /var/log/nginx
@@ -87,8 +110,12 @@ ENV RAILS_ENV $rails_env
 # First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
 ADD /bin /opt/openstudio/bin
 ADD /server/Gemfile /opt/openstudio/server/Gemfile
+ADD /server/Gemfile_32 /opt/openstudio/server/Gemfile_32
 WORKDIR /opt/openstudio/server
-RUN bundle _${OS_BUNDLER_VERSION}_ install --jobs=3 --retry=3 $bundle_args
+#3.2.2
+RUN bundle _${OS_BUNDLER_VERSION}_ install --gemfile=/opt/openstudio/server/Gemfile_32 --jobs=3 --retry=3 $bundle_args
+#3.3.7
+RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ install --jobs=3 --retry=3 $bundle_args
 
 # Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
 # have to be recompiled everytime
@@ -98,7 +125,7 @@ ADD /server/app/assets/ /opt/openstudio/server/app/assets/
 
 # Now call precompile
 RUN mkdir /opt/openstudio/server/log
-RUN bundle exec rake assets:precompile
+RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ exec rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
@@ -107,7 +134,7 @@ ADD /server /opt/openstudio/server
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
-RUN bundle install --jobs=3 --retry=3
+RUN /usr/local/ruby-${RUBY_33_VERSION}/bin/bundle _${BUNDLER_VERSION}_ install --jobs=3 --retry=3
 
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# ensure Rails uses Ruby 3.3.7 from our custom prefix:
+export PATH="/usr/local/ruby-3.3.7/bin:$PATH"
+
 echo 'Provisioning data volume osdata'
 sleep 1
 mkdir -p /mnt/openstudio/server/analyses && chmod 777 /mnt/openstudio/server/analyses

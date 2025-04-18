@@ -1,5 +1,5 @@
 source 'http://rubygems.org'
-ruby '~>3.2.0'
+ruby '~>3.3.0'
 
 gem 'colored', '~> 1.2'
 gem 'git', '~> 1.12.0'
