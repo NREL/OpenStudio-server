@@ -1,5 +1,5 @@
 #!/bin/bash -x
-
+set -euo pipefail
 echo "The build architecture is ${ImageOS}"
 
 if [ "${ImageOS}" == "ubuntu22" ] && [ "${BUILD_TYPE}" == "docker" ]; then
