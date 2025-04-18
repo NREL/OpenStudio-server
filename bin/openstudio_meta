@@ -328,15 +328,15 @@ class InstallGems
     rake_bin = File.absolute_path('./../gems/bin/rake/')
     sys_cmds = []
 
-    sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --no-env-shebang bundler -v 2.4.10"
+    sys_cmds << "#{$ruby_path} #{RbConfig::CONFIG['prefix']}/bin/gem install --gemfile=/opt/openstudio/server/Gemfile_32 --no-env-shebang bundler -v 2.4.10"
     if /darwin/.match(RUBY_PLATFORM)
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-config=/usr/bin/xml2-config"
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config"
     end
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --with default development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --gemfile=/opt/openstudio/server/Gemfile_32 --retry=3 --jobs=1 --with default development test"
     else
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --without development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --gemfile=/opt/openstudio/server/Gemfile_32 --retry=3 --jobs=1 --without development test"
     end
     sys_cmds << "#{$ruby_path} #{bundler_bin} update"
     #unless Gem.win_platform?
