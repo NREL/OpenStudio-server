@@ -39,6 +39,14 @@ REM Setup MSYS2 and MinGW toolchain
 echo Setting up MSYS2 and MinGW toolchain
 call ridk install 2 3
 
+REM Pin GCC back to 14.2.0 so racc’s extension compiles cleanly
+echo Pinning GCC to 14.2.0…
+pacman -S --noconfirm ^
+  mingw-w64-ucrt-x86_64-gcc=14.2.0-3 ^
+  mingw-w64-ucrt-x86_64-gcc-libs=14.2.0-3 ^
+  mingw-w64-i686-gcc=14.2.0-3 ^
+  mingw-w64-i686-gcc-libs=14.2.0-3
+
 REM Uninstall any existing Bundler
 echo Uninstalling existing versions of Bundler
 call gem uninstall -aIx bundler
