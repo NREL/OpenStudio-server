@@ -40,13 +40,17 @@ echo Setting up MSYS2 and MinGW toolchain
 call ridk install 2 3
 
 REM ─── Downgrade UCRT64 GCC from 15 to 14 for racc native‐extensions ───
-ridk exec pacman --noconfirm -R mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gcc-libs
+rem   use -Rdd to ignore deps so pacman doesn’t block on gettext/mpfr/etc.
+ridk exec pacman --noconfirm -Rdd mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gcc-libs
+
 echo Downloading GCC 14 packages…
 curl -L -o gcc14.pkg.tar.zst ^
   https://repo.msys2.org/mingw/ucrt64/x86_64/mingw-w64-ucrt-x86_64-gcc-14.3.0-1-any.pkg.tar.zst
 curl -L -o gcc14-libs.pkg.tar.zst ^
   https://repo.msys2.org/mingw/ucrt64/x86_64/mingw-w64-ucrt-x86_64-gcc-libs-14.3.0-1-any.pkg.tar.zst
-ridk exec pacman --noconfirm -U gcc14-libs.pkg.tar.zst gcc14.pkg.tar.zst
+  
+REM   reinstall the 14.x toolchain, overwriting any files if needed
+ridk exec pacman --noconfirm -U --overwrite '*' gcc14-libs.pkg.tar.zst gcc14.pkg.tar.zst
 
 REM Upgrade everything *but* gcc, so we never bump past 14.2.0
 echo Upgrading MSYS2 (but ignoring gcc)...
