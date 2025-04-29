@@ -56,20 +56,20 @@ REM Uninstall any existing Bundler
 echo Uninstalling existing versions of Bundler
 call gem uninstall -aIx bundler
 
-REM Install specified version of Bundler
-echo Installing Bundler %BUNDLE_VERSION%
-call gem install bundler -v %BUNDLE_VERSION%
+echo Installing Bundler inside MSYS2/RIDK environment…
+ridk exec gem install bundler -v %BUNDLE_VERSION% --no-document
 if %ERRORLEVEL% neq 0 (
-    echo Failed to install Bundler %BUNDLE_VERSION%
-    exit /b %ERRORLEVEL%
+  echo ERROR: ridk exec gem install bundler failed
+  exit /b %ERRORLEVEL%
 )
 
-REM Verify Bundler installation
-call bundle --version
+echo Verifying Bundler via ridk exec…
+ridk exec bundle --version
 if %ERRORLEVEL% neq 0 (
-    echo Bundler was not installed correctly.
-    exit /b %ERRORLEVEL%
+  echo ERROR: bundler still not found inside MSYS2 environment
+  exit /b %ERRORLEVEL%
 )
+
 
 REM Set RUBYLIB environment variable
 set RUBYLIB=C:\projects\openstudio\Ruby
