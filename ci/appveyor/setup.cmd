@@ -39,23 +39,18 @@ REM Setup MSYS2 and MinGW toolchain
 echo Setting up MSYS2 and MinGW toolchain
 call ridk install 2 3
 
-REM ─── Downgrade UCRT64 GCC from 15 to 14 for racc native‐extensions ───
-rem   use -Rdd to ignore deps so pacman doesn’t block on gettext/mpfr/etc.
-ridk exec pacman --noconfirm -Rdd mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gcc-libs
+echo Downloading GCC-14.2.0 packages…
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst.sig
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst.sig
 
-echo Downloading GCC 14 packages…
-curl -L -o gcc14.pkg.tar.zst ^
-  https://repo.msys2.org/mingw/ucrt64/x86_64/mingw-w64-ucrt-x86_64-gcc-14.3.0-1-any.pkg.tar.zst
-curl -L -o gcc14-libs.pkg.tar.zst ^
-  https://repo.msys2.org/mingw/ucrt64/x86_64/mingw-w64-ucrt-x86_64-gcc-libs-14.3.0-1-any.pkg.tar.zst
-  
-REM   reinstall the 14.x toolchain, overwriting any files if needed
-ridk exec pacman --noconfirm -U --overwrite '*' gcc14-libs.pkg.tar.zst gcc14.pkg.tar.zst
-
-REM Upgrade everything *but* gcc, so we never bump past 14.2.0
-echo Upgrading MSYS2 (but ignoring gcc)...
-call ridk exec bash -lc "pacman -Syu --needed --noconfirm --ignore mingw-w64-ucrt-x86_64-gcc*,mingw-w64-i686-gcc*"
-
+echo Installing GCC-libs 14.2.0…
+call ridk exec pacman.exe -Udd --noconfirm --noprogressbar mingw-w64-ucrt-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst
+echo Installing GCC 14.2.0…
+call ridk exec pacman.exe -Udd --noconfirm --noprogressbar mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst
+echo Verifying that gcc is now 14.2.0:
+ridk exec gcc --version
 
 REM Uninstall any existing Bundler
 echo Uninstalling existing versions of Bundler
