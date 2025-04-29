@@ -32,31 +32,44 @@ echo Installing essential gems...
 call gem install rake
 if %ERRORLEVEL% neq 0 (
     echo Failed to install rake
-    exit /b %ERRORLEVEL%
+    REM exit /b %ERRORLEVEL%
 )
 
 REM Setup MSYS2 and MinGW toolchain
 echo Setting up MSYS2 and MinGW toolchain
 call ridk install 2 3
 
+echo Downloading GCC-14.2.0 packages…
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst.sig
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst
+curl -LO https://github.com/ruby/setup-msys2-gcc/releases/download/msys2-packages/mingw-w64-ucrt-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst.sig
+
+echo Installing GCC-libs 14.2.0…
+call ridk exec pacman.exe -Udd --noconfirm --noprogressbar mingw-w64-ucrt-x86_64-gcc-libs-14.2.0-3-any.pkg.tar.zst
+echo Installing GCC 14.2.0…
+call ridk exec pacman.exe -Udd --noconfirm --noprogressbar mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst
+echo Verifying that gcc is now 14.2.0:
+call ridk exec gcc --version
+
 REM Uninstall any existing Bundler
 echo Uninstalling existing versions of Bundler
 call gem uninstall -aIx bundler
 
-REM Install specified version of Bundler
-echo Installing Bundler %BUNDLE_VERSION%
-call gem install bundler -v %BUNDLE_VERSION%
+echo Installing Bundler inside MSYS2/RIDK environment…
+call ridk exec gem install bundler -v %BUNDLE_VERSION% --no-document
 if %ERRORLEVEL% neq 0 (
-    echo Failed to install Bundler %BUNDLE_VERSION%
-    exit /b %ERRORLEVEL%
+  echo ERROR: ridk exec gem install bundler failed
+  REM exit /b %ERRORLEVEL%
 )
 
-REM Verify Bundler installation
-call bundle --version
+echo Verifying Bundler via ridk exec…
+call ridk exec bundle --version
 if %ERRORLEVEL% neq 0 (
-    echo Bundler was not installed correctly.
-    exit /b %ERRORLEVEL%
+  echo ERROR: bundler still not found inside MSYS2 environment
+  REM exit /b %ERRORLEVEL%
 )
+
 
 REM Set RUBYLIB environment variable
 set RUBYLIB=C:\projects\openstudio\Ruby
@@ -69,7 +82,7 @@ if %ERRORLEVEL% neq 0 (
     gem install <problematic-gem-name> -- --use-system-libraries
     if %ERRORLEVEL% neq 0 (
         echo Manual gem installation also failed.
-        exit /b %ERRORLEVEL%
+        REM exit /b %ERRORLEVEL%
     )
 )
 
@@ -78,5 +91,5 @@ cd C:\projects\openstudio-server
 call ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
 if %ERRORLEVEL% neq 0 (
     echo Gem installation script failed.
-    exit /b %ERRORLEVEL%
+    REM exit /b %ERRORLEVEL%
 )

@@ -60,8 +60,8 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
   it 'run urbanopt_single_run analysis', :single_run, js: true do
     # setup expected results
     single_run = [
-      { electricity_kwh: 20983305.555555556,
-        natural_gas_kwh: 24483569.444444444 }
+      { electricity_kwh: 21400236.111111112,
+        natural_gas_kwh: 25130472.22222222 }
     ]
 
     # setup bad results
@@ -71,7 +71,7 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
     ]
 
     # run an analysis
-    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/URBANopt_092_sr.json' 'http://#{@host}' -z 'URBANopt_092' -a single_run"
+    command = "#{@bundle_cmd} #{@meta_cli} run_analysis --debug --verbose '#{@project}/URBANopt_101_sr.json' 'http://#{@host}' -z 'URBANopt_101' -a single_run"
     puts "run command: #{command}"
     run_analysis = system(command)
     expect(run_analysis).to be true
@@ -211,16 +211,16 @@ RSpec.describe 'RunUrbanOptAlgorithms', type: :feature, algo: true do
         expect(compare).to be false
         
         objectives = {  
-            objective_function_1: 20983305.555555556,
+            objective_function_1: 21400236.111111112,
             objective_function_target_1: 0,
             objective_function_group_1: 1,
-            objective_function_2: 24483569.444444444,
+            objective_function_2: 25130472.22222222,
             objective_function_target_2: 0,
             objective_function_group_2: 2,
-            objective_function_3: 1651205.5555555555,
+            objective_function_3: 1802269.4444444445,
             objective_function_target_3: 0,
             objective_function_group_3: 3,
-            objective_function_4: 1814133.3333333333,
+            objective_function_4: 2009375,
             objective_function_target_4: 0,
             objective_function_group_4: 4
         }
