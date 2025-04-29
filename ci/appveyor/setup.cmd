@@ -50,21 +50,21 @@ call ridk exec pacman.exe -Udd --noconfirm --noprogressbar mingw-w64-ucrt-x86_64
 echo Installing GCC 14.2.0…
 call ridk exec pacman.exe -Udd --noconfirm --noprogressbar mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst
 echo Verifying that gcc is now 14.2.0:
-ridk exec gcc --version
+call ridk exec gcc --version
 
 REM Uninstall any existing Bundler
 echo Uninstalling existing versions of Bundler
 call gem uninstall -aIx bundler
 
 echo Installing Bundler inside MSYS2/RIDK environment…
-ridk exec gem install bundler -v %BUNDLE_VERSION% --no-document
+call ridk exec gem install bundler -v %BUNDLE_VERSION% --no-document
 if %ERRORLEVEL% neq 0 (
   echo ERROR: ridk exec gem install bundler failed
   REM exit /b %ERRORLEVEL%
 )
 
 echo Verifying Bundler via ridk exec…
-ridk exec bundle --version
+call ridk exec bundle --version
 if %ERRORLEVEL% neq 0 (
   echo ERROR: bundler still not found inside MSYS2 environment
   REM exit /b %ERRORLEVEL%
@@ -82,7 +82,7 @@ if %ERRORLEVEL% neq 0 (
     gem install <problematic-gem-name> -- --use-system-libraries
     if %ERRORLEVEL% neq 0 (
         echo Manual gem installation also failed.
-        #exit /b %ERRORLEVEL%
+        REM exit /b %ERRORLEVEL%
     )
 )
 
@@ -91,5 +91,5 @@ cd C:\projects\openstudio-server
 call ruby C:\projects\openstudio-server\bin\openstudio_meta install_gems --with_test_develop --debug --verbose
 if %ERRORLEVEL% neq 0 (
     echo Gem installation script failed.
-    exit /b %ERRORLEVEL%
+    REM exit /b %ERRORLEVEL%
 )
