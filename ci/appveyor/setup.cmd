@@ -32,7 +32,7 @@ echo Installing essential gems...
 call gem install rake
 if %ERRORLEVEL% neq 0 (
     echo Failed to install rake
-    #exit /b %ERRORLEVEL%
+    REM exit /b %ERRORLEVEL%
 )
 
 REM Setup MSYS2 and MinGW toolchain
@@ -60,14 +60,14 @@ echo Installing Bundler inside MSYS2/RIDK environment…
 ridk exec gem install bundler -v %BUNDLE_VERSION% --no-document
 if %ERRORLEVEL% neq 0 (
   echo ERROR: ridk exec gem install bundler failed
-  #exit /b %ERRORLEVEL%
+  REM exit /b %ERRORLEVEL%
 )
 
 echo Verifying Bundler via ridk exec…
 ridk exec bundle --version
 if %ERRORLEVEL% neq 0 (
   echo ERROR: bundler still not found inside MSYS2 environment
-  #exit /b %ERRORLEVEL%
+  REM exit /b %ERRORLEVEL%
 )
 
 
