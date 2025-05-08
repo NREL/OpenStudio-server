@@ -12,7 +12,8 @@ module Utility
       'BUNDLER_ORIG_PATH',
       'BUNDLER_ORIG_MANPATH',
       'GEM_PATH',
-      'GEM_HOME'
+      'GEM_HOME',
+      'BUNDLER_SETUP'
       #   'BUNDLE_WITHOUT' # This now needs to be set BUNDLE_WITHOUT=native_ext
     ].freeze
     # return command to run openstudio cli on current platform

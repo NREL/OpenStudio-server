@@ -695,17 +695,26 @@ module DjJobs
 
       log_path = "#{analysis_dir}/bundle.log"
       # set ENVs to nil
-      oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
+      #oscli_env_unset = Hash[Utility::Oss::ENV_VARS_TO_UNSET_FOR_OSCLI.collect{|x| [x,nil]}]
+      install_env = {
+          "BUNDLE_GEMFILE" => "#{analysis_dir}/Gemfile",
+          "BUNDLE_PATH"    => "#{analysis_dir}/gems",
+          "RUBYOPT"        => nil,
+          "BUNDLER_SETUP"  => nil
+        }
       @sim_logger.info "Bundle config setup"
       create_config_file
       @sim_logger.info "Bundle config command complete"
-      @sim_logger.info "oscli_env_unset: #{oscli_env_unset}"      
-      cmd = "pwd && printenv && GEM_HOME=#{analysis_dir}/gems bundle install"
+
+      @sim_logger.info "install_env: #{install_env}"      
+      cmd = "bundle _#{Bundler::VERSION}_ install --gemfile=#{analysis_dir}/Gemfile --path=#{analysis_dir}/gems"
       @sim_logger.info "Bundle install command: #{cmd}"
-      pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [log_path, 'w'])
+      pid = Process.spawn(install_env, cmd, [:err, :out] => [log_path, 'w'], chdir: analysis_dir)
+      #pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [log_path, 'w'], chdir: analysis_dir)
       Process.wait pid
       @sim_logger.info "gem installation complete"
       @sim_logger.info "bundle.log output: #{File.read(log_path).lines}"
+
       @sim_logger.info "replace Bundle config w orig"      
       replace_config_file
       @sim_logger.info "replace Bundle config w orig complete" 
