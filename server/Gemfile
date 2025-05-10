@@ -68,10 +68,10 @@ gem 'uglifier', '~> 4.2.1'
 gem 'mail', '= 2.7.1'
 # https://stackoverflow.com/questions/70500220/rails-7-ruby-3-1-loaderror-cannot-load-such-file-net-smtp
 # these 4 gems are needed until mail > 2.8.0 can be used
-gem 'net-smtp', '~> 0.5.0'
+gem 'net-smtp', '~> 0.3.4'
 gem 'net-pop', '~> 0.1.2'
-gem 'net-imap', '~> 0.4.10'
-gem 'date', '~> 3.3.4'
+gem 'net-imap', '~> 0.3.9'
+gem 'date', '3.3.3'
 # don't try to install sassc 2.
 gem 'roo', '~> 2.8.3'
 
