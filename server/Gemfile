@@ -16,7 +16,7 @@ gem 'colored', '~> 1.2'
 
 # data modules
 gem 'jbuilder', '~> 2.11.5'
-gem 'nokogiri', '~> 1.15.7'
+gem 'nokogiri', '~> 1.18.8'
 gem 'rubyzip', '~> 2.3.0'
 gem 'tzinfo-data', '~> 1.2021.5'
 gem 'loofah', '~> 2.20.0'
