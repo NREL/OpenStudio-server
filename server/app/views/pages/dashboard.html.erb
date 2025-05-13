@@ -7,8 +7,8 @@
 
 <!-- vars for javascript -->
 <%= javascript_tag do %>
-    statuses = <%= raw @js_res.to_json %>;
-    total = <%= raw @total.to_json %>;
+    const statuses = <%= raw @js_res.to_json %>;
+    const total = <%= raw @total.to_json %>;
 <% end %>
 
 <div class="row-fluid gray-header">
@@ -47,7 +47,18 @@
               <% unless @current.start_time.nil? %><%= @current.start_time.strftime("%m/%d/%Y %H:%M:%S") %>
               <% end %>
             </p>
-            <p><% unless @current.end_time.nil? %>End: <%= @current.end_time.strftime("%m/%d/%Y %H:%M:%S") %><% end %></p>
+            <p>
+              <% if not @current.end_time.nil? %>
+                End: <%= @current.end_time.strftime("%m/%d/%Y %H:%M:%S") %>
+              <% elsif @percent_complete > 10 %>
+                <% etf = Time.at((Time.now-@current.start_time)/(@percent_complete/100.0)) %>
+                Estimated time to completion (H:M): <%= etf.strftime("%H:%M") %>
+                </p><p>Current time: <%= Time.now.strftime("%m/%d/%Y %H:%M:%S") %>
+              <% else %>
+                Estimated time to completion (H:M): ...calculating...
+                </p><p>Current time: <%= Time.now.strftime("%m/%d/%Y %H:%M:%S") %>
+              <% end %>
+            </p>
             <p><% unless @current.end_time.nil? || @current.start_time.nil? %>Duration:  <%= distance_of_time_in_words(@current.start_time, @current.end_time) %> <% end %></p>
             <p>Status: <span class="label <% if @current.status == 'completed' %>label-success<% end %>"><%=@current.status %></span></p>
             <p><span class="badge badge-info"><%= @current.data_points.count %></span> Datapoints</p>
@@ -141,11 +152,14 @@
 
   <script type="text/javascript">
       function make_pie_chart(data, cnt) {
-          var w = 230,                        //width
-                  h = 230,                            //height
-                  r = 110,                            //radius
-                  radius = 115,                          //to center on svg
-                  color = d3.scale.category20();     //builtin range of colors
+          var w = 230,                //width
+              h = 230,                //height
+              r = 110,                //radius
+          radius = 115,               //to center on svg
+          defaultColor = "#333333",   //default color for values not in domain
+          color = d3.scale.ordinal()     //builtin range of colors
+          .domain(["completed normal", "completed datapoint failure", "started", "queued", "na"]) //all possible labels
+          .range (["#449d44",          "#d9534f",                     "#ec971f", "#428bca", "#5bc0de"]); //colors
 
           var vis = d3.select("#pie")
                   .append("svg:svg")              //create the SVG element inside the <body>
@@ -171,7 +185,7 @@
 
           arcs.append("svg:path")
                   .attr("fill", function (d, i) {
-                      return color(i);
+                      return color(d.data.label) || defaultColor;
                   }) //set the color for each slice to be chosen from the color function defined above
                   .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
 
@@ -190,7 +204,7 @@
                   .attr("width", w)
                   .attr("height", 100)
                   .selectAll("g")
-                  .data(color.domain().slice())
+                  .data(data)
                   .enter().append("g")
                   .attr("transform", function (d, i) {
                       return "translate(10," + (i * 20 + 20) + ")";
@@ -199,14 +213,16 @@
           legend.append("rect")
                   .attr("width", 18)
                   .attr("height", 18)
-                  .style("fill", color);
+          .style("fill", function (d) {
+                     return color(d.label);
+                    });
 
           legend.append("text")
                   .attr("x", 24)
                   .attr("y", 9)
                   .attr("dy", ".35em")
-                  .text(function (d, i) {
-                      return data[i].label + " (" + data[i].value + ")";
+                  .text(function (d) {
+                      return d.label + " (" + d.value + ")";
                   });
 
           var total = d3.select("#pie").append("svg")
