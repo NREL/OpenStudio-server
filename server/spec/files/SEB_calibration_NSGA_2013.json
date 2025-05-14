@@ -2016,8 +2016,8 @@
         }
       ],
       "algorithm": {
-        "number_of_samples": 2,
-        "generations": 1,
+        "number_of_samples": 4,
+        "generations": 10,
         "tournament_size": 2,
         "cprob": 0.85,
         "xover_dist_idx": 5,
