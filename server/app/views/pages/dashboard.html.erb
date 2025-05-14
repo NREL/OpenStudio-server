@@ -50,9 +50,14 @@
             <p>
               <% if not @current.end_time.nil? %>
                 End: <%= @current.end_time.strftime("%m/%d/%Y %H:%M:%S") %>
-              <% elsif @percent_complete > 10 %>
-                <% etf = Time.at((Time.now-@current.start_time)/(@percent_complete/100.0)) %>
-                Estimated time to completion (H:M): <%= etf.strftime("%H:%M") %>
+              <% elsif @current.start_time.present? && @percent_complete.to_f > 0 %>
+                <%#— guard against any divide-by-zero or nil —%>
+                <% begin %>
+                  <% etf = Time.at((Time.now - @current.start_time) / (@percent_complete / 100.0)) %>
+                  Estimated time to completion (H:M): <%= etf.strftime("%H:%M") %>
+                <% rescue StandardError %>
+                  Estimated time to completion (H:M):…calculating…
+                <% end %>
                 </p><p>Current time: <%= Time.now.strftime("%m/%d/%Y %H:%M:%S") %>
               <% else %>
                 Estimated time to completion (H:M): ...calculating...
