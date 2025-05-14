@@ -119,8 +119,15 @@ def kill_processes(pid_json)
         # Check if a process with this PID exists before attempting to kill
         pid_exists = system('tasklist /FI' + ' "PID eq ' + pid.to_s + '" 2>NUL | find /I /N "' + pid.to_s + '">NUL')
         if pid_exists
-          system_return = system('taskkill', '/pid', pid.to_s, '/f', '/t')
-          raise StandardError unless system_return
+          output = `taskkill /pid #{pid} /f /T 2>&1`
+          if $?.success?
+            $logger.debug "Killed process with PID `#{pid}`"
+          elsif output.include?('There is no running instance of the task')
+            $logger.warn  "PID #{pid} was already gone, skipping"
+          else
+            $logger.error "Failed to kill PID `#{pid}`: #{output.strip}"
+            return false
+          end
         else
           $logger.warn "No process with PID #{pid} exists, did not attempt to kill"
           next
@@ -364,11 +371,15 @@ def kill_pid(pid, name, windows = false)
     # Check if a process with this PID exists
     pid_exists = system('tasklist /FI' + ' "PID eq ' + pid.to_s + '" 2>NUL | find /I /N "' + pid.to_s + '">NUL')
     if pid_exists
-      system_return = system('taskkill', '/pid', pid.to_s, '/f', '/T')
-      unless system_return
-        $logger.error "Failed to kill process with PID `#{pid}`"
-        return false
-      end
+        output = `taskkill /pid #{pid} /f /T 2>&1`
+        if $?.success?
+          $logger.debug "Killed #{name} process with PID `#{pid}`"
+        elsif output.include?('There is no running instance of the task')
+          $logger.warn  "PID #{pid} was already gone, skipping"
+        else
+          $logger.error "Failed to kill #{name} PID `#{pid}`: #{output.strip}"
+          return false
+        end
     else
       $logger.warn "No process with PID #{pid} exists, did not attempt to kill"
     end
