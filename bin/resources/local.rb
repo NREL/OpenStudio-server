@@ -270,7 +270,12 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     rails_command += ' --debug'
     dj_server_command += ' --debug'
     [mongod_command, rails_command, dj_server_command].each { |cmd| $logger.debug "Command for local CLI: #{cmd}" }
-    dj_worker_commands.each { |cmd| cmd += ' --debug'; $logger.debug "Command for local CLI: #{cmd}" }
+    # Append --debug to each worker command in-place so they really do get the debug flag
+    dj_worker_commands.map! do |cmd|
+      cmd_with_debug = "#{cmd} --debug"
+      $logger.debug "Command for local CLI: #{cmd_with_debug}"
+      cmd_with_debug
+    end
   end
 
   mongod_timeout = ::ENV['USE_TESTING_TIMEOUTS'] == 'true' ? 60 : 15
