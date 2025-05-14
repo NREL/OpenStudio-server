@@ -39,7 +39,7 @@ state_file = argv.shift
 project_dir = argv.shift
 inputs_empty = log_dir.nil? | invocation_dir.nil? | db_dir.nil? | state_file.nil? | project_dir.nil?
 if inputs_empty
-  puts 'LOG_DIR, INVOCATION_DIR, DB_DIR, STATE_FILE, and PROJECT_DIR are all required for execution'
+  STDERR.puts 'LOG_DIR, INVOCATION_DIR, DB_DIR, STATE_FILE, and PROJECT_DIR are all required for execution'
   exit(1)
 end
 error_msg = ''
@@ -49,7 +49,7 @@ error_msg << "The DB_DIR provided, `#{db_dir}`, is not absolute. " unless Pathna
 error_msg << "The STATE_FILE projvided, `#{state_file}`, is not absolute. " unless Pathname.new(state_file).absolute?
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, is not absolute. " unless Pathname.new(project_dir).absolute?
 unless error_msg.empty?
-  puts error_msg
+  STDERR.puts error_msg
   exit 2
 end
 error_msg << "The LOG_DIR provided, `#{log_dir}`, does not exist on the file system. " unless Dir.exist? log_dir
@@ -57,7 +57,7 @@ error_msg << "The INVOCATION_DIR provided, `#{invocation_dir}`, does not exist o
 error_msg << "The DB_DIR provided, `#{db_dir}`, does not exist on the file system. " unless Dir.exist? db_dir
 error_msg << "The PROJECT_DIR provided, `#{project_dir}`, does not exist on the file system. " unless Dir.exist? project_dir
 unless error_msg.empty?
-  puts error_msg
+  STDERR.puts error_msg
   exit 3
 end
 
