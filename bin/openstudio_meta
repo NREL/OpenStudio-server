@@ -20,7 +20,7 @@ Gem.paths = {
 }
 
 # Debugging: Print Ruby configuration values
-puts "BLB RbConfig::CONFIG['prefix']: #{RbConfig::CONFIG['prefix']}"
+puts "RbConfig::CONFIG['prefix']: #{RbConfig::CONFIG['prefix']}"
 puts "RbConfig::CONFIG['EXECUTABLE_EXTS']: #{RbConfig::CONFIG['EXECUTABLE_EXTS']}"
 
 $ruby_path = "#{RbConfig::CONFIG['prefix']}/bin/ruby#{RbConfig::CONFIG['EXECUTABLE_EXTS'].split[0]}"
@@ -774,7 +774,7 @@ end
 class RunAnalysis
   require_relative 'resources/remote.rb'
   BATCH_RUN_METHODS = %w(lhs preflight single_run repeat_run doe diag baseline_perturbation batch_datapoints).freeze
-  puts "BLB RunAnalysis Environment is: #{::ENV.inspect}"
+  #puts "BLB RunAnalysis Environment is: #{::ENV.inspect}"
   # Provides text for the main help functionality
   def self.synopsis
     'Runs an analysis on an OS Server instance'
@@ -790,11 +790,12 @@ class RunAnalysis
     $logger.debug "RunAnalysis Environment is: #{::ENV.inspect}"
 
     # Print environment variables for debugging
-    puts "BLB Environment variables during run_analysis:"
+    puts "Environment variables during run_analysis:"
     puts "PATH: #{ENV['PATH']}"
     puts "GEM_HOME: #{ENV['GEM_HOME']}"
     puts "GEM_PATH: #{ENV['GEM_PATH']}"
     puts "RUBYLIB: #{ENV['RUBYLIB']}"
+    puts "BUNDLER_SETUP: #{ENV['BUNDLER_SETUP']}"
     puts "OPENSTUDIO_TEST_EXE: #{ENV['OPENSTUDIO_TEST_EXE']}"
 # Method to print paths and contents of the bundle script
 def print_paths_and_bundle_script

@@ -63,7 +63,18 @@ bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bun
 ::ENV['RAILS_ENV'] = 'local'
 sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i worker_#{worker_number} "\
   "--queue=simulations run --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
-puts "ENV for starting rails: #{::ENV.inspect}" if options[:debug]
+if options[:debug]
+  # only log the Rails-relevant ENV vars, not everything
+  rails_env_vars = %w[
+    OS_SERVER_MONGO_PORT
+    OS_SERVER_DATABASE_NAME
+    OS_SERVER_LOG_PATH
+    OS_SERVER_HOST_URL
+    RAILS_ENV
+  ]
+  filtered = rails_env_vars.each_with_object({}) { |k,h| h[k] = ENV[k] if ENV.key?(k) }
+  puts "DJ worker ENV (filtered): #{filtered.inspect}"
+end
 puts "System call will be: '#{sys_call}' in directory '#{Dir.pwd}'" if options[:debug]
 
 # Execute the system call
