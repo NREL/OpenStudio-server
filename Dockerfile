@@ -103,7 +103,7 @@ RUN bundle exec rake assets:precompile
 # Bundle app source
 ADD /server /opt/openstudio/server
 # Add in /spec for testing 
-ADD /server/spec /opt/openstudio/server/spec
+#ADD /server/spec /opt/openstudio/server/spec
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 # Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
 RUN rm Gemfile.lock
