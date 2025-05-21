@@ -10,6 +10,8 @@ require File.expand_path('boot', __dir__)
 require 'action_controller/railtie'
 require 'action_mailer/railtie'
 require 'sprockets/railtie'
+require 'mongoid'
+require 'mongoid/railtie'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -22,7 +24,7 @@ module OpenstudioServer
     # -- all .rb files in that directory are automatically loaded.
 
     # Custom directories with classes and modules you want to be autoloadable.
-    config.autoload_paths << Rails.root.join('lib')
+    config.eager_load_paths << Rails.root.join('lib')
 
     # Enable escaping HTML in JSON.
     config.active_support.escape_html_entities_in_json = true
