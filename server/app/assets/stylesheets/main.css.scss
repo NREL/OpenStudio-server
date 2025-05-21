@@ -5,8 +5,8 @@ $border-blue: #4BB7E9;
 $button-grey: #6b6b6b;
 $white: #ffffff;
 
-@import "bootstrap";
-@import "bootstrap-responsive";
+@use "bootstrap";
+@use "bootstrap-responsive";
 
 // google fonts
 // font-family: 'PT Sans', sans-serif;
