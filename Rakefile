@@ -15,7 +15,7 @@ require 'colored'
 require_relative 'server/app/lib/openstudio_server/version'
 
 # VERSION_APPEND = Openstudioserver::VERSION_EXT
-OPENSTUDIO_SERVER_VERSION = OpenstudioServer::VERSION + OpenstudioServer::VERSION_EXT
+OPENSTUDIO_SERVER_VERSION = OpenstudioServer::Version + OpenstudioServer::VERSION_EXT
 
 desc 'build and release the server (via AMIs) using jenkins'
 task :release do
