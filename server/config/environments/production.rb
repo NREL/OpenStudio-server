@@ -29,7 +29,7 @@ Rails.application.configure do
   config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
 
   # Compress JavaScripts and CSS.
-  #config.assets.js_compressor = :uglifier  #BLB
+  #config.assets.js_compressor = :uglifier  #BLB uses sprockets and uglifier gem
   
   # Compress CSS using a preprocessor.
   # config.assets.css_compressor = :sass
