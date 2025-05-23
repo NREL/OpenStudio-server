@@ -8,12 +8,12 @@ require 'rails_helper'
 # Make sure to not make this a feature, otherwise the spec_helper will try to run the jobs in the foreground
 RSpec.describe 'RunSingle', type: :feature do
   before :all do
-    @previous_job_manager = Rails.application.config.job_manager
-    Rails.application.config.job_manager = :delayed_job
+    @previous_job_manager = Rails.application.config.x.job_manager
+    Rails.application.config.x.job_manager = :delayed_job
   end
 
   after :all do
-    Rails.application.config.job_manager = @previous_job_manager
+    Rails.application.config.x.job_manager = @previous_job_manager
   end
 
   before do

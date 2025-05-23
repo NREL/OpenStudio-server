@@ -116,14 +116,14 @@ class Analysis
     else
       Rails.logger.info("Running in background analysis queue for #{uuid} with #{analysis_type}")
       aj = jobs.new_job(id, analysis_type, jobs.length, options)
-      if Rails.application.config.job_manager == :delayed_job
+      if Rails.application.config.x.job_manager == :delayed_job
         job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
         aj.delayed_job_id = job.id
-      elsif Rails.application.config.job_manager == :resque
+      elsif Rails.application.config.x.job_manager == :resque
         Resque.enqueue(ResqueJobs::InitializeAnalysis, analysis_type, id, aj.id, options)
         aj.delayed_job_id = nil
       else
-        raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+        raise 'Rails.application.config.x.job_manager must be set to :resque or :delayed_job'
       end
       aj.save!
 
@@ -368,7 +368,7 @@ class Analysis
         s = j.last[:status]
         # in environments using Resque, we allow finalization script to run ('post-processing') and do not consider analysis "completed"
         # until after finalization script step completes ('post-processing completed').
-        if Rails.application.config.job_manager == :resque
+        if Rails.application.config.x.job_manager == :resque
           if s == 'completed'
             return 'post-processing'
           #   job status is updated to post-processing completed
@@ -390,7 +390,7 @@ class Analysis
   # used from finalize method which is only called for environments using resque
   def complete_postprocessing!
     Rails.logger.debug "analysis.complete_postprocessing enter"
-    raise 'Post-processing should only happen in environments that use Resque for job management.' unless Rails.application.config.job_manager == :resque
+    raise 'Post-processing should only happen in environments that use Resque for job management.' unless Rails.application.config.x.job_manager == :resque
 
     job = jobs.order_by(:index.asc).last
     raise "Attempt to complete postprocessing for job with status '#{job.status}'.  Only permitted for status 'completed'." unless job.status == 'completed'
@@ -519,14 +519,14 @@ class Analysis
     analysis_dir = "#{APP_CONFIG['sim_root_path']}/analysis_#{id}"
 
     if analysis_dir =~ %r{^.*/analysis_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$}
-      if Rails.application.config.job_manager == :delayed_job
+      if Rails.application.config.x.job_manager == :delayed_job
         Delayed::Job.enqueue DjJobs::DeleteAnalysis.new(analysis_dir)
-      elsif Rails.application.config.job_manager == :resque
+      elsif Rails.application.config.x.job_manager == :resque
         Resque.enqueue(ResqueJobs::DeleteAnalysis, analysis_dir)
         # AP: does this double delete indicate that we are duplicating the unzip??
         Resque.enqueue(ResqueJobs::DeleteAnalysis, shared_directory_path)
       else
-        raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+        raise 'Rails.application.config.x.job_manager must be set to :resque or :delayed_job'
       end
     else
       Rails.logger.error 'Will not delete analysis directory because it does not conform to pattern'

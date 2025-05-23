@@ -9,12 +9,12 @@ require 'rails_helper'
 # make sure that this is not set to foreground, similar reason.
 RSpec.describe 'RunBatchDatapoints', type: :feature, depends_resque: true do
   before :all do
-    @previous_job_manager = Rails.application.config.job_manager
-    Rails.application.config.job_manager = :resque
+    @previous_job_manager = Rails.application.config.x.job_manager
+    Rails.application.config.x.job_manager = :resque
   end
 
   after :all do
-    Rails.application.config.job_manager = @previous_job_manager
+    Rails.application.config.x.job_manager = @previous_job_manager
   end
 
   before do

@@ -7,7 +7,7 @@ Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
   # Custom config var for job management - delayed_job or resque
-  config.job_manager = :delayed_job
+  config.x.job_manager = :delayed_job
 
   config.cache_classes = true
 
