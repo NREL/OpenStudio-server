@@ -110,8 +110,8 @@ Rails.application.routes.draw do
 
   root to: 'pages#dashboard'
   unless Gem.win_platform?
-    # Always provide this for debugging, at least to start with. Redact the link in case of production runs
     require 'resque_web'
     mount ResqueWeb::Engine => '/resque'
+    #mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 end
