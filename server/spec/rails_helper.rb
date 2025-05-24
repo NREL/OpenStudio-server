@@ -14,6 +14,7 @@ require 'rspec/rails'
 require 'capybara/rspec'
 require 'capybara/rails'
 require 'webrick'
+require 'rack/handler/webrick'  # now this path will exist
 
 Capybara.server = :webrick
 
