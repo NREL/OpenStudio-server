@@ -13,10 +13,6 @@ require 'rspec/rails'
 
 require 'capybara/rspec'
 require 'capybara/rails'
-require 'webrick'
-require 'rack/handler/webrick'  # now this path will exist
-
-Capybara.server = :webrick
 
 # Capybara.app_host = 'http://localhost:3000'
 # Capybara.server_host = 'localhost'
