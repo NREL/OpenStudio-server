@@ -13,6 +13,9 @@ require 'rspec/rails'
 
 require 'capybara/rspec'
 require 'capybara/rails'
+require 'webrick'
+
+Capybara.server = :webrick
 
 # Capybara.app_host = 'http://localhost:3000'
 # Capybara.server_host = 'localhost'
