@@ -4,9 +4,9 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 #may include suffix
-ARG OPENSTUDIO_VERSION=develop
-FROM nrel/openstudio:develop as base
-MAINTAINER Nicholas Long nicholas.long@nrel.gov
+ARG OPENSTUDIO_VERSION=3.10-alpha
+FROM nrel/openstudio:3.10-alpha as base
+ARG OPENSTUDIO_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Install required libaries.
