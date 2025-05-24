@@ -63,7 +63,7 @@ else
     elif [ "${BUILD_TYPE}" == "integration" ]; then
         # run the analysis integration specs - everything in root directory
         # use same environment as PAT
-        export RAILS_ENV=local
+        export RAILS_ENV=local-server
 
         # explicitly set directory.  Probably unnecessary
         cd $GITHUB_WORKSPACE

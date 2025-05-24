@@ -127,7 +127,7 @@ unless Gem.win_platform?
       #gem 'mission_control-jobs'
     end
 end
-group :development, :'docker-test', :test, :local, :'local-test' do
+group :development, :'docker-test', :test, :'local-server', :'local-test' do
   gem 'delayed_job_mongoid', '~> 3'
 end
 

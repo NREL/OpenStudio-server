@@ -4,7 +4,7 @@
 # *******************************************************************************
 
 namespace :rubocop do
-  if Rails.env != 'production' && Rails.env != 'docker' && Rails.env != 'local'
+  if Rails.env != 'production' && Rails.env != 'docker' && Rails.env != 'local-server'
     require 'rubocop/rake_task'
 
     desc 'Run Rubocop on the server directory'

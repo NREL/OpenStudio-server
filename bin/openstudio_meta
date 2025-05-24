@@ -87,7 +87,7 @@ def parse_options(opts = nil, argv = nil)
     ENV['OS_SERVER_LOG_PATH'] = path
   end
 
-  ENV['RAILS_ENV'] = 'local'
+  ENV['RAILS_ENV'] = 'local-server'
   opts.on('--rails-env [ENV]', 'Rails Environment') do |env|
     ENV['RAILS_ENV'] = env
   end
