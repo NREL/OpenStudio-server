@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
     && rm -rf /var/lib/apt/lists/*
 
 # Install passenger (this also installs nginx)
-ENV PASSENGER_VERSION=6.0.18
+ENV PASSENGER_VERSION=6.0.27
 
 RUN gem install passenger -v ${PASSENGER_VERSION}
 RUN passenger-install-nginx-module
