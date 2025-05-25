@@ -112,6 +112,7 @@ Rails.application.routes.draw do
   unless Gem.win_platform?
     require 'resque_web'
     mount ResqueWeb::Engine => '/resque'
+    #require 'mission_control/jobs'
     #mount MissionControl::Jobs::Engine, at: "/jobs"
   end
 end

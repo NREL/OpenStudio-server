@@ -4,7 +4,7 @@ require "rails"
 # Pick the frameworks you want:
 require "active_model/railtie"
 require "active_job/railtie"
-# require "active_record/railtie"
+#require "active_record/railtie" #mission_control-jobs
 # require "active_storage/engine"
 require "action_controller/railtie"
 require "action_mailer/railtie"
@@ -31,6 +31,9 @@ module OpenstudioServer
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    #config.mission_control.jobs.http_basic_auth_enabled = false  #mission_control-jobs
+    #config.mission_control.jobs.adapters = [ :resque ]           #mission_control-jobs
+    
     # Don't generate system test files.
     config.generators.system_tests = nil
   end
