@@ -387,7 +387,6 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     end
 
     $logger.debug "delayed_job.worker_#{ind} is up!"
-end
   end
 
   find_windows_pids(state_file) if Gem.win_platform?
