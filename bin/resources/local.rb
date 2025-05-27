@@ -362,31 +362,31 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   $logger.debug 'delayed_job.server is up!'
 
   dj_worker_commands.each_with_index do |cmd, ind|
+    worker_id = ind + 1
     begin
       ::Timeout.timeout(60) do
         success = system(cmd)
         unless success
-          $logger.error "dj_worker_#{ind} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
-          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + ind + '.log')}`."
+          $logger.error "dj_worker_#{worker_id} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
+          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + worker_id + '.log')}`."
           kill_processes(state_file)
           exit 1
         end
       end
     rescue ::Timeout::Error
-      $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
-                                                                                       'dj_worker_' + ind.to_s + '.log')}`."
+      $logger.error "dj_worker_#{worker_id} failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'dj_worker_' + worker_id.to_s + '.log')}`."
       kill_processes(state_file)
       exit 1
     end
     # wait for that worker to actually come up
     worker_log = File.join(project_directory, 'logs', 'delayed_job.log')
-    pattern    = /\[Worker\(delayed_job\.worker_#{ind}\b.*\] Starting job worker/
-    unless wait_for_log_pattern(worker_log, pattern, 15)
-      $logger.error "Timed out waiting for delayed_job.worker_#{ind} to start. See #{worker_log}"
+    pattern    = /\[Worker\(delayed_job\.worker_#{worker_id}\b.*\] Starting job worker/
+    unless wait_for_log_pattern(worker_log, pattern, 60)
+      $logger.error "Timed out waiting for delayed_job.worker_#{worker_id} to start. See #{worker_log}"
       kill_processes(state_file); exit 1
     end
 
-    $logger.debug "delayed_job.worker_#{ind} is up!"
+    $logger.debug "delayed_job.worker_#{worker_id} is up!"
   end
 
   find_windows_pids(state_file) if Gem.win_platform?
