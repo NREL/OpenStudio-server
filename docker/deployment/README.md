@@ -115,7 +115,7 @@ $ export AWS_SECRET_ACCESS_KEY=!1qa@2ws#3ed$4rf%5tg^6yh&7uj*8ik(9ol)0p;
 
 $ python build_deploy_ami.py -o /Path/to/log/artifact/ -n "Official automated release of OpenStudio Server 2.4.1 by NREL" -v
 
-OSS version retrieval command is: ruby -r /Path/to/openstudio-server/server/lib/openstudio_server/version.rb -e "puts OpenstudioServer::VERSION"
+OSS version retrieval command is: ruby -r /Path/to/openstudio-server/server/lib/openstudio_server/version.rb -e "puts OpenstudioServer::Version"
 OSS version retrieved is 2.4.1
 
 OSS version extension retrieval command is: ruby -r /Path/to/openstudio-server/server/lib/openstudio_server/version.rb -e "puts OpenstudioServer::VERSION_EXT"

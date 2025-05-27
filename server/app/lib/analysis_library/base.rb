@@ -19,12 +19,12 @@ module AnalysisLibrary
     # Return the logger for the worker
     def logger
       # Ternaries handle loggers with running without delayed_jobs or resque (without_delay)
-      if Rails.application.config.job_manager == :delayed_job
+      if Rails.application.config.x.job_manager == :delayed_job
         Delayed::Worker.logger || Logger.new(STDOUT)
-      elsif Rails.application.config.job_manager == :resque
+      elsif Rails.application.config.x.job_manager == :resque
         Resque.logger || Logger.new(STDOUT)
       else
-        raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+        raise 'Rails.application.config.x.job_manager must be set to :resque or :delayed_job'
       end
     end
 

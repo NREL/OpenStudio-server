@@ -7,12 +7,12 @@ require 'rails_helper'
 
 RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
   before :all do
-    @previous_job_manager = Rails.application.config.job_manager
-    Rails.application.config.job_manager = :delayed_job
+    @previous_job_manager = Rails.application.config.x.job_manager
+    Rails.application.config.x.job_manager = :delayed_job
   end
 
   after :all do
-    Rails.application.config.job_manager = @previous_job_manager
+    Rails.application.config.x.job_manager = @previous_job_manager
   end
 
   before do

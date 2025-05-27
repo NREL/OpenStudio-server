@@ -5,8 +5,8 @@
 
 #may include suffix
 ARG OPENSTUDIO_VERSION=3.9.0
-FROM nrel/openstudio:3.9.0 as base
-MAINTAINER Nicholas Long nicholas.long@nrel.gov
+FROM nrel/openstudio:3.9.0 AS base
+ARG OPENSTUDIO_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Install required libaries.
@@ -58,9 +58,9 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
     && rm -rf /var/lib/apt/lists/*
 
 # Install passenger (this also installs nginx)
-ENV PASSENGER_VERSION 6.0.18
+ENV PASSENGER_VERSION=6.0.27
 
-RUN gem install passenger -v $PASSENGER_VERSION
+RUN gem install passenger -v ${PASSENGER_VERSION}
 RUN passenger-install-nginx-module
 
 # Configure the nginx server
@@ -68,9 +68,9 @@ RUN mkdir /var/log/nginx
 ADD /docker/server/nginx.conf /opt/nginx/conf/nginx.conf
 
 # Radiance env vars. RUBYLIB is set in the base openstudio container
-ENV OPENSTUDIO_SERVER 'true'
-ENV OS_RAYPATH /usr/local/openstudio-$OPENSTUDIO_VERSION/Radiance
-ENV PERL_EXE_PATH /usr/bin
+ENV OPENSTUDIO_SERVER='true'
+ENV OS_RAYPATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}/Radiance
+ENV PERL_EXE_PATH=/usr/bin
 
 # Specify a couple arguments here, after running the majority of the installation above
 ARG rails_env=docker
@@ -78,7 +78,7 @@ ARG bundle_args="--without development test"
 ENV OS_BUNDLER_VERSION=2.4.10
 
 # Set the rails env var
-ENV RAILS_ENV $rails_env
+ENV RAILS_ENV=${rails_env}
 
 # extension gem testing
 #ENV FAVOR_LOCAL_GEMS 1
@@ -88,7 +88,7 @@ ENV RAILS_ENV $rails_env
 ADD /bin /opt/openstudio/bin
 ADD /server/Gemfile /opt/openstudio/server/Gemfile
 WORKDIR /opt/openstudio/server
-RUN bundle _${OS_BUNDLER_VERSION}_ install --jobs=3 --retry=3 $bundle_args
+RUN bundle _${OS_BUNDLER_VERSION}_ install --jobs=3 --retry=3 ${bundle_args}
 
 # Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
 # have to be recompiled everytime
@@ -129,7 +129,7 @@ RUN chmod 755 /opt/openstudio/server/bin/aws_imdsv2
 
 # set the permissions for windows users
 RUN chmod +x /opt/openstudio/server/bin/*
-ENV OPENSTUDIO_EXE_PATH /usr/local/bin/openstudio
+ENV OPENSTUDIO_EXE_PATH=/usr/local/bin/openstudio
 
 # Remove leftover install files from openstudio base container
 #RUN rm /OpenStudio-*.deb
@@ -145,7 +145,7 @@ EXPOSE 8080 9090
 # Multistage build includes test library. To build without testing run
 # docker build --target base -t some-tag .
 FROM base
-ENV GECKODRIVER_VERSION v0.21.0
+ENV GECKODRIVER_VERSION=v0.21.0
 # Install vfb and firefox requirement if docker-test env
 RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" && \
     apt-get update && \
@@ -158,9 +158,9 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
         firefox && \
     rm -rf /var/lib/apt/lists/* && \
     cd /usr/local/bin && \
-    wget http://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
-    tar -xvzf geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
-    rm geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+    wget http://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz && \
+    tar -xvzf geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz && \
+    rm geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz && \
     chmod +x geckodriver;
 
 COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests

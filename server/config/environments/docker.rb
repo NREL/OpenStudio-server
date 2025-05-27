@@ -6,6 +6,10 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Use the real ENV["SECRET_KEY_BASE"] if present,
+  # otherwise generate a random one so that `rake assets:precompile` won't blow up.
+  config.secret_key_base = ENV["SECRET_KEY_BASE"].presence || SecureRandom.hex(64)
+  
   # Code is not reloaded between requests.
   config.cache_classes = true
 
@@ -31,6 +35,7 @@ Rails.application.configure do
 
   # Compress JavaScripts and CSS.
   config.assets.js_compressor = :uglifier
+  #config.assets.js_compressor = :terser  #mission_control-jobs
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.

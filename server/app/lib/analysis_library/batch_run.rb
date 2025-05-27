@@ -30,7 +30,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
-    if Rails.application.config.job_manager == :resque
+    if Rails.application.config.x.job_manager == :resque
      # Wait loop to ensure all queuing is complete for any analysis
      queuing_keys = Resque.redis.keys("analysis:*:queuing")
       while queuing_keys.any?
@@ -45,7 +45,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
     if @options[:data_points].empty?
       logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
       
-      if Rails.application.config.job_manager == :resque
+      if Rails.application.config.x.job_manager == :resque
         # Set Redis flag to indicate queuing is starting
         logger.info "Setting Redis queuing flag for #{@analysis_id}"
         Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
@@ -57,7 +57,7 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
         ids << dp.id if dp.submit_simulation
       end
       
-      if Rails.application.config.job_manager == :resque
+      if Rails.application.config.x.job_manager == :resque
         # Delete Redis flag after queuing is done
         logger.info "Deleting Redis queuing flag for #{@analysis_id}"
         Resque.redis.del("analysis:#{@analysis_id}:queuing")

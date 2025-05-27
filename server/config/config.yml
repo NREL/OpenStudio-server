@@ -43,7 +43,7 @@ production:
   <<: *defaults
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
 
-local:
+local-server:
   <<: *defaults
   os_server_host_url: <%= ENV['OS_SERVER_HOST_URL'] %>
   os_server_project_path: <%= ENV['OS_SERVER_PROJECT_PATH'] %>

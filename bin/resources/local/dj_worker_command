@@ -60,7 +60,7 @@ bundle_path = File.absolute_path(File.join(__FILE__, './../../../../gems/bin/bun
 ::ENV['OS_SERVER_DATABASE_NAME'] = 'os_local'
 ::ENV['OS_SERVER_LOG_PATH'] = log_dir
 ::ENV['OS_SERVER_HOST_URL'] = 'http://localhost:' + rails_port
-::ENV['RAILS_ENV'] = 'local'
+::ENV['RAILS_ENV'] = 'local-server'
 sys_call = "\"#{ruby_exe}\" \"#{bundle_path}\" exec \"#{ruby_exe}\" bin/delayed_job -i worker_#{worker_number} "\
   "--queue=simulations run --log-dir=\"#{log_dir}\" --pid-dir=\"#{project_dir}\""
 if options[:debug]

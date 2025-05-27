@@ -18,7 +18,7 @@ module DjJobs
 
       # this is also run from resque job, which leverages perform code below.
       # only queue data_point on initialize for delayed_jobs
-      @data_point.set_queued_state if Rails.application.config.job_manager == :delayed_job
+      @data_point.set_queued_state if Rails.application.config.x.job_manager == :delayed_job
 
       # Create the analysis, simulation, and run directory
       FileUtils.mkdir_p analysis_dir unless Dir.exist? analysis_dir
@@ -564,12 +564,12 @@ module DjJobs
 
     # Return the logger for delayed jobs which is typically rails_root/log/delayed_job.log
     def logger
-      if Rails.application.config.job_manager == :delayed_job
+      if Rails.application.config.x.job_manager == :delayed_job
         Delayed::Worker.logger
-      elsif Rails.application.config.job_manager == :resque
+      elsif Rails.application.config.x.job_manager == :resque
         Resque.logger
       else
-        raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+        raise 'Rails.application.config.x.job_manager must be set to :resque or :delayed_job'
       end
     end
 
