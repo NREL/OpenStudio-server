@@ -523,6 +523,16 @@ class StartLocal
       FileUtils.mkdir_p "#{project_dir}/logs" unless Dir.exist? "#{project_dir}/logs"
     end
 
+    # ─────── log rotation ───────
+    logs_dir = File.join(project_dir, 'logs')
+    dj_log   = File.join(logs_dir, 'delayed_job.log')
+    if File.exist?(dj_log)
+      ts = Time.now.strftime('%Y%m%d%H%M%S')
+      FileUtils.mv(dj_log, "#{dj_log}.#{ts}")
+      $logger.debug "Rotated existing delayed_job.log to delayed_job.log.#{ts}"
+      puts "Rotated existing delayed_job.log to delayed_job.log.#{ts}"
+    end
+
     if options[:energyplus_exe_path] && ::File.exist?(options[:energyplus_exe_path])
       ::ENV['ENERGYPLUS_EXE_PATH'] = options[:energyplus_exe_path]
     end
