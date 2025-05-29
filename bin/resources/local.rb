@@ -35,6 +35,21 @@ def is_port_open?(port)
   false
 end
 
+# Blocks until `regex` appears in the given log file, or times out.
+# Returns true if seen, false if timeout.
+def wait_for_log_pattern(log_path, regex, timeout_secs = 15)
+  deadline = Time.now + timeout_secs
+  until Time.now > deadline
+    if File.exist?(log_path)
+      File.foreach(log_path) do |line|
+        return true if line =~ regex
+      end
+    end
+    sleep 0.1
+  end
+  false
+end
+
 # Find the first available port within range
 #
 # @param starting [Integer] port to start search from
@@ -324,7 +339,7 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
   $logger.debug 'RAILS STARTED'
 
   begin
-    ::Timeout.timeout(15) do
+    ::Timeout.timeout(60) do
       success = system(dj_server_command)
       unless success
         $logger.error "dj_server returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
@@ -338,27 +353,40 @@ def start_local_server(project_directory, mongo_directory, ruby_path, worker_num
     kill_processes(state_file)
     exit 1
   end
-  $logger.debug 'DELAYED JOBS SERVER MAY HAVE BEEN STARTED'
+  # now wait until the server process actually forks and prints “Starting job worker”
+  server_log = File.join(project_directory, 'logs', 'delayed_job.log')
+  unless wait_for_log_pattern(server_log, /\[Worker\(delayed_job\.server\b.*\] Starting job worker/, 30)
+    $logger.error "Timed out waiting for delayed_job.server to start. See #{server_log}"
+    kill_processes(state_file); exit 1
+  end
+  $logger.debug 'delayed_job.server is up!'
 
   dj_worker_commands.each_with_index do |cmd, ind|
+    worker_id = ind + 1
     begin
-      ::Timeout.timeout(15) do
+      ::Timeout.timeout(60) do
         success = system(cmd)
         unless success
-          $logger.error "dj_worker_#{ind} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
-          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + ind + '.log')}`."
+          $logger.error "dj_worker_#{worker_id} returned non-zero status code `#{$?.exitstatus}`. Please refer to "\
+          "`#{::File.join(project_directory, 'logs', 'dj_worker_' + worker_id + '.log')}`."
           kill_processes(state_file)
           exit 1
         end
       end
     rescue ::Timeout::Error
-      $logger.error "dj_worker_#{ind} failed to launch. Please refer to `#{::File.join(project_directory, 'logs',
-                                                                                       'dj_worker_' + ind.to_s + '.log')}`."
+      $logger.error "dj_worker_#{worker_id} failed to launch. Please refer to `#{::File.join(project_directory, 'logs', 'dj_worker_' + worker_id.to_s + '.log')}`."
       kill_processes(state_file)
       exit 1
     end
-    $logger.debug "DELAYED JOBS WORKER #{ind} MAY HAVE BEEN STARTED"
-    sleep 20 # TODO: Figure out how to determine if dj instance is initialized.
+    # wait for that worker to actually come up
+    worker_log = File.join(project_directory, 'logs', 'delayed_job.log')
+    pattern    = /\[Worker\(delayed_job\.worker_#{worker_id}\b.*\] Starting job worker/
+    unless wait_for_log_pattern(worker_log, pattern, 60)
+      $logger.error "Timed out waiting for delayed_job.worker_#{worker_id} to start. See #{worker_log}"
+      kill_processes(state_file); exit 1
+    end
+
+    $logger.debug "delayed_job.worker_#{worker_id} is up!"
   end
 
   find_windows_pids(state_file) if Gem.win_platform?
