@@ -15,7 +15,7 @@ elif [ "${GITHUB_REF}" == "refs/heads/master" ]; then
 elif [ "${GITHUB_REF}" == "refs/heads/setup_github_actions" ]; then
     IMAGETAG=experimental
 elif [ "${GITHUB_REF}" == "refs/heads/custom_gems" ]; then
-     IMAGETAG="3.10.0-alpha"
+     IMAGETAG="3.10.0-rc1"
 fi
 
 if [ "${IMAGETAG}" != "skip" ]; then
