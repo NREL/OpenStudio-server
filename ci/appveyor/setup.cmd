@@ -18,9 +18,15 @@ if %ERRORLEVEL% neq 0 (
   exit /b 1
 )
 dir .
+echo Show that the file is present in the working directory
+dir "%CD%\%OS_INSTALL_NAME%"
+
+REM  “Unblock” the file so Windows does not refuse to execute it
+REM powershell -Command "Unblock-File -Path '%CD%\%OS_INSTALL_NAME%'"
 
 REM Execute the OpenStudio installer
 %OS_INSTALL_NAME% --script ci/appveyor/install-windows.qs
+
 move C:\openstudio C:\projects\openstudio
 dir C:\projects\openstudio
 
@@ -30,6 +36,11 @@ del %OS_INSTALL_NAME%
 REM Show Ruby version and OpenStudio version
 ruby -v
 openstudio openstudio_version
+if %ERRORLEVEL% neq 0 (
+  echo.
+  echo ERROR: “openstudio openstudio_version” failed. Perhaps OpenStudio wasn’t installed correctly?
+  exit /b 1
+)
 
 REM Install essential Ruby gems needed for the environment setup
 echo Installing essential gems...
