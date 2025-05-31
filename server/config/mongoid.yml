@@ -74,7 +74,7 @@ production:
   options:
     raise_not_found_error: false
     log_level: :info
-local:
+local-server:
   clients:
     default:
       database: <%= ENV['OS_SERVER_DATABASE_NAME'] %>

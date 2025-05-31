@@ -35,7 +35,7 @@ class AnalysesController < ApplicationController
   def show
     logger.debug "analyses_controller.show enter"
     # for pagination
-    per_page = 50
+    per_page = 200
 
     @analysis = Analysis.find(params[:id])
 

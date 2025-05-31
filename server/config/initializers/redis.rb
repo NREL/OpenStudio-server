@@ -5,7 +5,7 @@
 
 # Skip this if in a local deployment, otherwise configure the Redis connection
 if Rails.env =~ /local/
-  # don't do anything, local uses delayed_jobs
+  # don't do anything, local-server uses delayed_jobs
 elsif Rails.env.production?
   require 'resque'
   uri = URI.parse(ENV['REDIS_URL'])

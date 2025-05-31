@@ -54,6 +54,10 @@ class DataPoint
   before_create :set_uuid_from_id
   after_create :verify_uuid
   before_destroy :destroy_background_job
+  # remember which ResultFile IDs to clean up
+  before_destroy :cache_result_file_ids
+  # after the DP and its embedded ResultFiles are gone, delete their dirs
+  after_destroy  :cleanup_result_file_assets
 
   # Before destroy make sure the delayed job ID is also destroyed
 
@@ -64,14 +68,14 @@ class DataPoint
   # Submit the simulation to run in the background task queue
   def submit_simulation
     Rails.logger.debug "data_point.submit_simulation"
-    if Rails.application.config.job_manager == :delayed_job
+    if Rails.application.config.x.job_manager == :delayed_job
       job = DjJobs::RunSimulateDataPoint.new(id)
       self.job_id = job.delay(queue: 'simulations').perform.id
-    elsif Rails.application.config.job_manager == :resque
+    elsif Rails.application.config.x.job_manager == :resque
       Resque.enqueue(ResqueJobs::RunSimulateDataPoint, id)
       self.job_id = id
     else
-      raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+      raise 'Rails.application.config.x.job_manager must be set to :resque or :delayed_job'
     end
 
     save!
@@ -171,20 +175,44 @@ class DataPoint
     save!
   end
 
+  def cache_result_file_ids
+    # grab the Mongoid _id of each embedded ResultFile
+    @rf_ids = result_files.map(&:_id).map(&:to_s)
+  end
+
+  def cleanup_result_file_assets
+    @rf_ids.each do |rf_id|
+      dir = File.join(
+        APP_CONFIG['server_asset_path'], # e.g. /mnt/openstudio/server
+        'assets',
+        'data_points',
+        rf_id                           # each ResultFile’s document id
+      )
+      if Dir.exist?(dir)
+        FileUtils.rm_rf(dir)
+        Rails.logger.info "Removed assets for ResultFile #{rf_id}"
+      else
+        Rails.logger.warn "No assets dir found for ResultFile #{rf_id}"
+      end
+    end
+  rescue => e
+    Rails.logger.error "Error cleaning up result_file assets: #{e.message}"
+  end
+
   def destroy_background_job
     Rails.logger.debug "data_point.destroy_background_job"
-    if Rails.application.config.job_manager == :delayed_job
+    if Rails.application.config.x.job_manager == :delayed_job
       if job_id
         dj = Delayed::Job.where(id: job_id).first
         dj&.destroy
       end
-    elsif Rails.application.config.job_manager == :resque
+    elsif Rails.application.config.x.job_manager == :resque
       if job_id
         Resque::Job.destroy(:simulations, 'ResqueJobs::RunSimulateDataPoint', job_id)
         Resque::Job.destroy(:requeued, 'ResqueJobs::RunSimulateDataPoint', job_id)
       end
     else
-      raise 'Rails.application.config.job_manager must be set to :resque or :delayed_job'
+      raise 'Rails.application.config.x.job_manager must be set to :resque or :delayed_job'
     end
   end
 end

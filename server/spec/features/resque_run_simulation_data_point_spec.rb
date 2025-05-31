@@ -7,12 +7,12 @@ require 'rails_helper'
 
 RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: true, depends_resque: true do
   before :all do
-    @previous_job_manager = Rails.application.config.job_manager
-    Rails.application.config.job_manager = :resque
+    @previous_job_manager = Rails.application.config.x.job_manager
+    Rails.application.config.x.job_manager = :resque
   end
 
   after :all do
-    Rails.application.config.job_manager = @previous_job_manager
+    Rails.application.config.x.job_manager = @previous_job_manager
   end
 
   before do

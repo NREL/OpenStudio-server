@@ -85,25 +85,33 @@ class PagesController < ApplicationController
     unless @current.nil?
       # aggregate results of current analysis
       aggregated_results = DataPoint.collection.aggregate(
-        [{ '$match' => { 'analysis_id' => @current.id } }, { '$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status' }, count: { '$sum' => 1 } } }], :allow_disk_use => true
+        [{ '$match' => { 'analysis_id' => @current.id } }, { '$group' => { '_id' => { 'analysis_id' => '$analysis_id', 'status' => '$status', 'status_message' => '$status_message' }, count: { '$sum' => 1 } } }, { '$sort' => { '_id.status' => 1 } }], :allow_disk_use => true
       )
     end
     # for js
     cnt = 0
+    complete = 0
     @js_res = []
     @total = 0
+    @percent_complete = 0
 
     unless @current.nil?
       aggregated_results.each do |res|
         # this is the format D3 wants the data in
         rec = {}
-        rec['label'] = res['_id']['status']
+        rec['label'] = res['_id']['status'] + ' ' + res['_id']['status_message']
+        rec['label'].gsub!('completed completed', 'completed')
+        rec['label'] = rec['label'].rstrip
         rec['value'] = res['count']
-        cnt += res['count'].to_i
         @js_res << rec
+        if res['_id']['status'] == 'completed' 
+          complete += res['count'].to_i
+        end
+        cnt += res['count'].to_i
       end
 
       @total = cnt
+      @percent_complete = 100.0 * complete / cnt
     end
   end
 end
