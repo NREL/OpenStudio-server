@@ -22,7 +22,7 @@ echo Show that the file is present in the working directory
 dir "%CD%\%OS_INSTALL_NAME%"
 
 REM  “Unblock” the file so Windows does not refuse to execute it
-REM powershell -Command "Unblock-File -Path '%CD%\%OS_INSTALL_NAME%'"
+powershell -Command "Unblock-File -Path '%CD%\%OS_INSTALL_NAME%'"
 
 REM Execute the OpenStudio installer
 REM %OS_INSTALL_NAME% --script ci/appveyor/install-windows.qs
