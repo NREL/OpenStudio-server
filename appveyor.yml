@@ -46,7 +46,7 @@ test_script:
 on_finish:
   - cmd: echo FINISHED TEST_SCRIPTS
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
-  #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-  #- ps: Write-Host "Build finished. Keeping RDP session alive."; Start-Sleep -Seconds 3600
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: Write-Host "Build finished. Keeping RDP session alive."; Start-Sleep -Seconds 3600
 on_failure:
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
