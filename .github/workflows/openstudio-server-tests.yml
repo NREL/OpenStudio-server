@@ -11,8 +11,8 @@ on: [push, pull_request]
 env:
   USE_TESTING_TIMEOUTS: "true"
   OPENSTUDIO_VERSION: 3.10.0
-  OPENSTUDIO_VERSION_SHA: 106e75c73c
-  OPENSTUDIO_VERSION_EXT: "-rc1"
+  OPENSTUDIO_VERSION_SHA: bed06c1a5d
+  OPENSTUDIO_VERSION_EXT: "-rc4"
   DOCKER_COMPOSE_VERSION: 1.21.1
   BUNDLE_WITHOUT: native_ext
 
@@ -40,7 +40,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
-        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server.
+        SKIP_URBANOPT_ALGO: false # Set this when excluding urbanopt-cli gem from server.
     - name: logs
       if: ${{ failure() }} 
       shell: bash 
@@ -75,7 +75,7 @@ jobs:
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
-        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server. 
+        SKIP_URBANOPT_ALGO: false # Set this when excluding urbanopt-cli gem from server. 
     - name: logs
       if: ${{ failure() }}  
       shell: bash 
@@ -105,7 +105,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=3.10.0-rc1
+          export OPENSTUDIO_TAG=3.10.0-rc4
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all
