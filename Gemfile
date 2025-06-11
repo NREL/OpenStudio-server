@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 ruby '~>3.2.0'
 
 gem 'colored', '~> 1.2'
-gem 'git', '~> 1.13'
+gem 'git', '~> 1.13.2'
 gem 'rake', '~> 13.2.1'
 gem 'ffi', '1.17.1'
 gem 'addressable', '~> 2.8'
