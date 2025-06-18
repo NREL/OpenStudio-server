@@ -169,8 +169,8 @@ RSpec.describe 'RunScripts', type: :feature do
     expect(a.headers[:content_disposition]).to include("out.osw")
 
     b = JSON.parse(a, symbolize_names: true)
-    puts "check standards version to be 0.6.3"
-    expect(b[:steps][0][:result][:step_info].include? "OpenstudioStandards::VERSION = 0.6.3").to be true
+    puts "check standards version to be 0.8.2"
+    expect(b[:steps][0][:result][:step_info].include? "OpenstudioStandards::VERSION = 0.8.2").to be true
   end # single_run
   
   it 'run missing_gemfile', :missing_gemfile do
