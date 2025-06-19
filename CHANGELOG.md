@@ -1,6 +1,39 @@
 OpenStudio Server
 =================
 
+Version 3.10.0
+-------------
+* Custom Gems working again https://github.com/NREL/OpenStudio-server/pull/818
+* remove URBANopt until 3.10.1 bc of gem conflicts
+* webpage fix https://github.com/NREL/OpenStudio-server/pull/819
+* remove various ENVs from logs https://github.com/NREL/OpenStudio-server/pull/823
+* upgrade from Rails 6 to Rails 7, Mongoid 8.1, Puma 6.6 and remove webrick https://github.com/NREL/OpenStudio-server/pull/825
+* Local Server startup enhancements for PAT https://github.com/NREL/OpenStudio-server/pull/827
+
+  
+Version 3.9.0-rc3
+-------------
+* 3.9.0 was pulled and several RCs were tried to fix various issues.  This was the last RC before we ran out of funding for the release cycle.
+* Custom Gems have not worked since Ruby 3 upgrade (3.8.0)
+* error handling and requeue for failed resque jobs https://github.com/NREL/OpenStudio-server/pull/776
+* appveyor issues https://github.com/NREL/OpenStudio-server/pull/772/files
+* requeue enhancements, soft stop, requeue API, high priority :requeued queue  https://github.com/NREL/OpenStudio-server/pull/790
+* add webrick after Ruby 3 upgrade https://github.com/NREL/OpenStudio-server/pull/793
+* many, many fixes for PAT https://github.com/NREL/OpenStudio-server/pull/806
+* URBANopt 1.0.1 https://github.com/NREL/OpenStudio-server/pull/813
+
+Version 3.8.0
+-------------
+* Delete Sim directory when datapoint is done. https://github.com/NREL/OpenStudio-server/pull/731
+* remove openstudio classic https://github.com/NREL/OpenStudio-server/pull/739
+* breakout log files https://github.com/NREL/OpenStudio-server/pull/744
+* resque web missing assets https://github.com/NREL/OpenStudio-server/pull/749
+* Add AWS spot instance polling scripts and requeue methods https://github.com/NREL/OpenStudio-server/pull/751
+* Run multiple analyses at a time https://github.com/NREL/OpenStudio-server/pull/755
+* fix R package versions https://github.com/NREL/OpenStudio-server/pull/761
+* Web pages updates https://github.com/NREL/OpenStudio-server/pull/768
+* remove sleep in baseline perturbation https://github.com/NREL/OpenStudio-server/pull/767
+
 Version 3.7.0
 -------------
 * update Analysis-gem to 1.3.5 in https://github.com/NREL/OpenStudio-server/pull/722
