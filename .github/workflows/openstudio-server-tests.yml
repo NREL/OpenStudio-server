@@ -56,7 +56,15 @@ jobs:
         name: openstudio-server-gems-linux
         path: build/NREL/export/*.tar.gz
   macos-test:
-    runs-on: macos-13
+    # run once on Intel (macos-13) and once on ARM64 (macos-14)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            artifact: openstudio-server-gems-darwin
+          - os: macos-14
+            artifact: openstudio-server-gems-arm64
     steps: 
     - name: Check out repository
       uses: actions/checkout@v4
@@ -84,11 +92,11 @@ jobs:
       if: ${{ success() }}  
       shell: bash 
       run: ./ci/github-actions/export_build_osx.sh
-    - name: upload gem package
-      if: ${{ success() }} 
+    - name: Upload gem package
+      if: ${{ success() }}
       uses: actions/upload-artifact@v4
       with:
-        name: openstudio-server-gems-darwin
+        name: ${{ matrix.artifact }}
         path: build/NREL/export/*.tar.gz
   docker:
     runs-on: ubuntu-22.04
