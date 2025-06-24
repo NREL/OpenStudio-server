@@ -577,7 +577,7 @@ module DjJobs
       # use openstudio unzipfile method 
       @sim_logger.info "Zip: Extracting #{archive_filename} to #{destination}"
       zf = OpenStudio::UnzipFile.new(archive_filename)
-      f.extractAllFiles(destination) 
+      zf.extractAllFiles(destination) 
     end
 
     def upload_file(filename, type, display_name = nil, content_type = nil)

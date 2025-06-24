@@ -464,7 +464,7 @@ class Analysis
     # use openstudio unzipfile method 
     Rails.logger.debug "Extracting #{archive_filename} to {destination}"
     zf = OpenStudio::UnzipFile.new(archive_filename)
-    f.extractAllFiles(destination) 
+    zf.extractAllFiles(destination) 
   end
 
   def run_initialization
