@@ -460,38 +460,11 @@ class Analysis
   # currently only used with Resque, as it's called by ResqueJobs::InitializeAnalysis job
   # runs on web node
   
-  def to_long_path(path)
-    return path unless Gem.win_platform?
-    abs = File.expand_path(path).gsub('/', '\\')
-    return abs if abs.start_with?('\\\\?\\')
-    if abs.start_with?('\\\\')         # UNC path
-      # strip leading \\ and prefix UNC\
-      "\\\\?\\UNC\\#{abs[2..-1]}"
-    else                                # Drive-letter path
-      "\\\\?\\#{abs}"
-    end
-  end
-  
-  # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
-  # This is local function for workaround until that is resolved
-  # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-  def extract_archive(archive_filename, destination, overwrite = true)
-    # bump both the archive and the output base into “long path” land
-    long_archive = to_long_path(archive_filename)
-    long_dest    = to_long_path(destination)
-    ::Zip.sort_entries = true
-    Zip::File.open(long_archive) do |zf|
-      zf.each do |f|
-        Rails.logger.debug "Extracting #{f.name}"
-        f_path = File.join(long_dest, f.name)
-        FileUtils.mkdir_p(File.dirname(f_path))
-        if File.exist?(f_path)
-          Rails.logger.debug "SKIPPED: #{f.name}, already existed."
-        else
-          zf.extract(f, f_path)
-        end
-      end
-    end
+  def extract_archive(archive_filename, destination, overwrite: true)
+    # use openstudio unzipfile method 
+    Rails.logger.debug "Extracting #{archive_filename} to {destination}"
+    zf = OpenStudio::UnzipFile.new(archive_filename)
+    f.extractAllFiles(destination) 
   end
 
   def run_initialization
