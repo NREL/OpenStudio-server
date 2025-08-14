@@ -110,7 +110,7 @@ else
          echo "Error: Failed to extract Mongo 6.0.8 archive"
          exit $exit_status_tar
         fi
-        sudo cp mongodb-macos-arm64-6.0.8/bin/* /usr/local/bin/
+        sudo cp mongodb-macos-aarch64-6.0.8/bin/* /usr/local/bin/
         rm -r mongodb-macos*
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
