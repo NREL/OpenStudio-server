@@ -11,6 +11,17 @@ if [ "${ImageOS}" == "macos13" ]; then
     export GEM_HOME="$GITHUB_WORKSPACE/gems"
     export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
+
+elif [ "${ImageOS}" == "macos14" ]; then
+    # Dir containing openstudio
+    export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-arm64
+    export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
+    export OPENSTUDIO_TEST_EXE="$HOME/$OS_NAME_WITH_PLUS/bin/openstudio"
+    # re-export PATH, even though it's set in setup.sh. 
+    export PATH="$GITHUB_WORKSPACE/gems/bin:/usr/local/ruby/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
+    export GEM_HOME="$GITHUB_WORKSPACE/gems"
+    export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
+    mongo_dir="/usr/local/bin"
 elif [ "${ImageOS}" == "ubuntu22" ]; then
     # Dir containing openstudio
     export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus

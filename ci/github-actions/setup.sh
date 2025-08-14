@@ -83,6 +83,76 @@ else
         ulimit -n 4096
         ulimit -a
 
+    #macos14 is arm tag in actions
+    elif [ "${ImageOS}" == "macos14" ]; then
+
+        brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
+        brew install pv tree coreutils shared-mime-info
+
+        # install portable ruby - required for build that will eventually be published
+        # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-darwin-arm64.tar.gz
+        tar xzf ruby-3.2.2-darwin-arm64.tar.gz
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract Ruby 3.2.2 archive"
+         exit $exit_status_tar
+        fi
+        sudo mv ruby /usr/local/
+        otool -L /usr/local/ruby/bin/ruby
+        rm ruby-3.2.2-darwin-arm64.tar.gz
+
+        # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
+        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-arm64-6.0.8.tgz
+        tar xvzf mongodb-macos-arm64-6.0.8.tgz
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract Mongo 6.0.8 archive"
+         exit $exit_status_tar
+        fi
+        sudo cp mongodb-macos-arm64-6.0.8/bin/* /usr/local/bin/
+        rm -r mongodb-macos*
+
+        # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
+        export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-arm64
+        export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-arm64
+        #curl -SL --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        #curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v3.8.0/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        #curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        URL="https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/${OS_NAME}.tar.gz"
+        FILENAME="${OS_NAME_WITH_PLUS}.tar.gz"
+
+        echo "→ Downloading OpenStudio tarball from: ${URL}"
+        if ! curl -fsSL --insecure "${URL}" -o "${FILENAME}"; then
+          echo "ERROR: Failed to download '${FILENAME}' from '${URL}'" >&2
+          exit 1
+        fi
+        # OSX downloads with %2B but installs with + sign. These are the encoded chars in url strings.
+        #hdiutil attach ${OS_NAME}.dmg
+        #sed -i -e "s|REPLACEME|$HOME/openstudio|" ci/github-actions/install-mac.qs
+        # Will install into $HOME/openstudio and RUBYLIB will be $HOME/openstudio/Ruby
+        #sudo /Volumes/${OS_NAME_WITH_PLUS}/${OS_NAME_WITH_PLUS}.app/Contents/MacOS/${OS_NAME_WITH_PLUS} --script ci/github-actions/install-mac.qs
+        #hdiutil detach /Volumes/${OS_NAME_WITH_PLUS} -force
+        ls -l
+        tar xvzf $OS_NAME_WITH_PLUS.tar.gz -C $HOME
+        exit_status_tar=$?
+        if [ $exit_status_tar -ne 0 ]; then
+         echo "Error: Failed to extract OpenStudio archive"
+         exit $exit_status_tar
+        fi
+        ls -l $HOME
+        rm -rf $OS_NAME_WITH_PLUS.tar.gz
+        export PATH="/usr/local/ruby/bin:$GITHUB_WORKSPACE/gems/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
+        export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
+        ls -l $RUBYLIB
+        export GEM_HOME="$GITHUB_WORKSPACE/gems"
+        export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
+
+        # set the ulimit to be higher
+        ulimit -a
+        ulimit -n 4096
+        ulimit -a
+
     elif [ "${ImageOS}" == "ubuntu22" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
