@@ -332,6 +332,7 @@ class InstallGems
     if /darwin/.match(RUBY_PLATFORM)
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.nokogiri --use-system-libraries --with-xml2-lib=/usr/lib --with-xml2-config=/usr/bin/xml2-config"
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config build.bigdecimal --use-system-libraries --with-opt-dir=/opt/homebrew/opt/gmp --with-gmp-lib=/opt/homebrew/opt/gmp"
     end
     if options[:test_dev_build]
       sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --with default development test"
