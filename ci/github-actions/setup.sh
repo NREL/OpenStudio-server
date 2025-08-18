@@ -87,7 +87,7 @@ else
     elif [ "${ImageOS}" == "macos14" ]; then
 
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
-        brew install pv tree coreutils shared-mime-info
+        brew install pv tree coreutils shared-mime-info gmp
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
