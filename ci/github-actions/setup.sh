@@ -86,6 +86,7 @@ else
     #macos15 is arm tag in actions
     elif [ "${ImageOS}" == "macos15" ]; then
 
+        ls /Applications/
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree coreutils shared-mime-info gmp
 
