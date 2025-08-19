@@ -83,8 +83,8 @@ else
         ulimit -n 4096
         ulimit -a
 
-    #macos15 is arm tag in actions
-    elif [ "${ImageOS}" == "macos15" ]; then
+    #macos14 is arm tag in actions
+    elif [ "${ImageOS}" == "macos14" ]; then
 
         ls /Applications/
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log

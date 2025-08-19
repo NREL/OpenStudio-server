@@ -15,7 +15,7 @@ if [ "${ImageOS}" == "macos13" ]; then
   # the repo working directory. 
   /usr/local/ruby/bin/ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --export="${HOME}/build/NREL/export"
   cp $HOME/build/NREL/export/$oss_filename $GITHUB_WORKSPACE/build/NREL/export/$oss_filename 
-else [ "${ImageOS}" == "macos15" ]; then
+else [ "${ImageOS}" == "macos14" ]; then
   export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-arm64
   export PATH="$GITHUB_WORKSPACE/gems/bin:/usr/local/ruby/bin:$HOME/$OS_NAME_WITH_PLUS/bin:$PATH"
   export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"

@@ -63,7 +63,7 @@ jobs:
         include:
           - os: macos-13
             artifact: openstudio-server-gems-darwin
-          - os: macos-15
+          - os: macos-14
             artifact: openstudio-server-gems-arm64
            # MACOSX_DEPLOYMENT_TARGET: 10.15
            # SDKROOT: /Applications/Xcode_11.7.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk

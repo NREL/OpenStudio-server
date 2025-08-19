@@ -12,7 +12,7 @@ if [ "${ImageOS}" == "macos13" ]; then
     export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
 
-elif [ "${ImageOS}" == "macos15" ]; then
+elif [ "${ImageOS}" == "macos14" ]; then
     # Dir containing openstudio
     export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-arm64
     export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
