@@ -11,6 +11,8 @@ gem 'rails', '~> 7.1'
 #gem 'webrick', '= 1.8.2' #removed bc of comflicts with Rails 7.1+ 
 gem 'puma', '~> 6.6'
 
+gem 'bigdecimal', '3.1.9'
+
 gem 'rake', '~> 13.2.1'
 
 # added for support of the project rakefile
