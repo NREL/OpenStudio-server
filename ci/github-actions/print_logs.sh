@@ -40,3 +40,12 @@ do
     cat $F | pv -q -L 3k
     echo
 done
+
+LOG="/Users/runner/work/OpenStudio-server/OpenStudio-server/gems/extensions/arm64-darwin-23/3.2.0-static/bigdecimal-4.0.1/mkmf.log"
+if [ -f "$LOG" ]; then
+  echo "===== bigdecimal mkmf.log ====="
+  cat "$LOG"
+  echo "===== end mkmf.log ====="
+else
+  echo "mkmf.log not found at $LOG"
+fi
