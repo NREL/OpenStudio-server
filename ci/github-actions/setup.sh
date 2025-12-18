@@ -14,7 +14,7 @@ if [ "${ImageOS}" == "ubuntu22" ] && [ "${BUILD_TYPE}" == "docker" ]; then
 
 else
     # sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
-    if [ "${ImageOS}" == "macos13" ]; then
+    if [ "${ImageOS}" == "macos15" ]; then
 
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree coreutils shared-mime-info
