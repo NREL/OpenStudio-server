@@ -2,6 +2,11 @@
 set -euo pipefail
 echo "The build architecture is ${ImageOS}"
 
+# macOS 15 runner setup (arm64 host). We support both:
+#  - INTEL=true  => x86_64 portable Ruby (Rosetta) + x86_64 Homebrew (/usr/local)
+#  - INTEL=false => arm64 portable Ruby (native)  + arm64 Homebrew (/opt/homebrew)
+INTEL="${INTEL:-false}"
+  
 if [ "${ImageOS}" == "ubuntu22" ] && [ "${BUILD_TYPE}" == "docker" ]; then
     echo "Installing docker compose"
     sudo rm -f /usr/local/bin/docker-compose
@@ -19,33 +24,55 @@ else
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree coreutils shared-mime-info
 
+        if [[ "${INTEL}" == "true" ]]; then
+          echo "macos15 INTEL=true => x86_64 dependencies"
+          OS_ARCH_SUFFIX="Darwin-x86_64"
+          MONGO_ARCH="x86_64"
+          RUBY_ARCH_TARBALL="ruby-3.2.2-darwin.tar.gz"
+        else
+          echo "macos15 INTEL=false => arm64 dependencies"
+          OS_ARCH_SUFFIX="Darwin-arm64"
+          MONGO_ARCH="arm64"
+          RUBY_ARCH_TARBALL="ruby-3.2.2-darwin-arm64.tar.gz"
+        fi
+  
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
-        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-darwin.tar.gz
-        tar xzf ruby-3.2.2-darwin.tar.gz
+        # --- install portable ruby (arch-specific) ---
+        # NOTE: you need these tarballs available in S3. If you only have ruby-3.2.2-darwin.tar.gz today,
+        #       you’ll need to publish per-arch names (recommended) or keep a conditional mapping.
+        curl -SLO --insecure "https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/${RUBY_ARCH_TARBALL}"
+        tar xzf "${RUBY_ARCH_TARBALL}"
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
-         echo "Error: Failed to extract Ruby 3.2.2 archive"
-         exit $exit_status_tar
+          echo "Error: Failed to extract Ruby 3.2.2 archive"
+          exit $exit_status_tar
         fi
+        sudo rm -rf /usr/local/ruby
         sudo mv ruby /usr/local/
         otool -L /usr/local/ruby/bin/ruby
-        rm ruby-3.2.2-darwin.tar.gz
+        rm "${RUBY_ARCH_TARBALL}"
 
-        # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
-        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-6.0.7.tgz
-        tar xvzf mongodb-macos-x86_64-6.0.7.tgz
+        # --- Install mongodb from a download (arch-specific) ---
+        MONGO_TARBALL="mongodb-macos-${MONGO_ARCH}-6.0.7.tgz"
+        curl -SLO "https://fastdl.mongodb.org/osx/${MONGO_TARBALL}"
+        tar xvzf "${MONGO_TARBALL}"
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
-         echo "Error: Failed to extract Mongo 6.0.7 archive"
-         exit $exit_status_tar
+          echo "Error: Failed to extract Mongo 6.0.7 archive"
+          exit $exit_status_tar
         fi
-        sudo cp mongodb-macos-x86_64-6.0.7/bin/* /usr/local/bin/
-        rm -r mongodb-macos*
+
+        # The extracted folder name usually matches the tarball stem.
+        # Using a glob keeps it simple across arch.
+        sudo cp mongodb-macos-*/bin/* /usr/local/bin/
+        rm -rf mongodb-macos*
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
-        export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
-        export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
+        export OS_NAME="OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-${OS_ARCH_SUFFIX}"
+        export OS_NAME_WITH_PLUS="$OS_NAME"
+        #export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
+        #export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
         #curl -SL --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
         #curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v3.8.0/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
         #curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz

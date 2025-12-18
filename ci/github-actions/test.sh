@@ -3,7 +3,15 @@
 # platform-specific config here (also in setup.sh):
 if [ "${ImageOS}" == "macos15" ]; then
     # Dir containing openstudio
-    export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
+    if [[ "${INTEL}" == "true" ]]; then
+      echo "macos15 INTEL=true => x86_64 dependencies"
+      OS_ARCH_SUFFIX="Darwin-x86_64"
+    else
+      echo "macos15 INTEL=false => arm64 dependencies"
+      OS_ARCH_SUFFIX="Darwin-arm64"
+    fi
+    export OS_NAME_WITH_PLUS="OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-${OS_ARCH_SUFFIX}"
+    #export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
     export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
     export OPENSTUDIO_TEST_EXE="$HOME/$OS_NAME_WITH_PLUS/bin/openstudio"
     # re-export PATH, even though it's set in setup.sh. 

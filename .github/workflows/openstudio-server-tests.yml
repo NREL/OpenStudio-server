@@ -56,7 +56,7 @@ jobs:
         name: openstudio-server-gems-linux
         path: build/NREL/export/*.tar.gz
   macos-test:
-    runs-on: macos-15-intel
+    runs-on: macos-15
     steps: 
     - name: Check out repository
       uses: actions/checkout@v4
@@ -65,16 +65,19 @@ jobs:
       run: ./ci/github-actions/setup.sh
       env:
         BUILD_TYPE: test
+        INTEL: false
     - name: unit-test
       shell: bash 
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: test
+        INTEL: false
     - name: integration
       shell: bash 
       run: ./ci/github-actions/test.sh
       env:
         BUILD_TYPE: integration
+        INTEL: false
         SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server. 
     - name: logs
       if: ${{ failure() }}  
@@ -84,12 +87,54 @@ jobs:
       if: ${{ success() }}  
       shell: bash 
       run: ./ci/github-actions/export_build_osx.sh
+      env:
+        INTEL: false      
     - name: upload gem package
       if: ${{ success() }} 
       uses: actions/upload-artifact@v4
       with:
-        name: openstudio-server-gems-darwin
+        name: openstudio-server-gems-darwin-arm64
         path: build/NREL/export/*.tar.gz
+  macos-intel-test:
+    runs-on: macos-15-intel
+    steps: 
+    - name: Check out repository
+      uses: actions/checkout@v4
+    - name: setup
+      shell: bash 
+      run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: test
+        INTEL: true
+    - name: unit-test
+      shell: bash 
+      run: ./ci/github-actions/test.sh
+      env:
+        BUILD_TYPE: test
+        INTEL: true
+    - name: integration
+      shell: bash 
+      run: ./ci/github-actions/test.sh
+      env:
+        BUILD_TYPE: integration
+        INTEL: true
+        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server. 
+    - name: logs
+      if: ${{ failure() }}  
+      shell: bash 
+      run: ./ci/github-actions/print_logs.sh
+    - name: build gem package
+      if: ${{ success() }}  
+      shell: bash 
+      run: ./ci/github-actions/export_build_osx.sh
+      env:
+        INTEL: true       
+    - name: upload gem package
+      if: ${{ success() }} 
+      uses: actions/upload-artifact@v4
+      with:
+        name: openstudio-server-gems-darwin-x64
+        path: build/NREL/export/*.tar.gz      
   docker:
     runs-on: ubuntu-22.04
     steps:
