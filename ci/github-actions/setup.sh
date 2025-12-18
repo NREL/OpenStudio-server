@@ -189,19 +189,6 @@ else
     # test openssl
     ruby ${GITHUB_WORKSPACE}/ci/github-actions/verify_openstudio.rb
 
-    if [[ "${ImageOS}" == "macos15" && "${INTEL}" == "false" ]]; then
-      brew list gmp >/dev/null 2>&1 || brew install gmp
-      BREW_PREFIX="$(brew --prefix)"
-      GMP_PREFIX="$(brew --prefix gmp 2>/dev/null || echo "${BREW_PREFIX}")"
-
-      export CPPFLAGS="-I${BREW_PREFIX}/include ${CPPFLAGS:-}"
-      export LDFLAGS="-L${BREW_PREFIX}/lib ${LDFLAGS:-}"
-      export PKG_CONFIG_PATH="${BREW_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
-
-      # (optional but helpful) force this one gem’s build to use gmp prefix
-      export BUNDLE_BUILD__BIGDECIMAL="--with-opt-dir=${GMP_PREFIX}"
-    fi
-
     ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
     # create dir for output files which will be generated in case of failure
