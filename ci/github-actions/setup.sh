@@ -2,6 +2,41 @@
 set -euo pipefail
 echo "The build architecture is ${ImageOS}"
 
+echo "================ TOOLCHAIN DIAGNOSTICS (BEGIN) ================"
+
+echo "ImageOS=${ImageOS}"
+echo "INTEL=${INTEL}"
+echo "RUNNER_ARCH=${RUNNER_ARCH:-<unset>}"
+echo "uname -m: $(uname -m)"
+echo
+
+echo "--- xcode-select ---"
+xcode-select -p || echo "xcode-select -p FAILED"
+
+echo "--- available Xcodes ---"
+ls -d /Applications/Xcode*.app 2>/dev/null || echo "No Xcode apps found in /Applications"
+
+echo "--- DEVELOPER_DIR ---"
+echo "DEVELOPER_DIR=${DEVELOPER_DIR:-<unset>}"
+
+echo "--- clang ---"
+clang --version || echo "clang not found or failed"
+
+echo "--- xcrun sdk path ---"
+xcrun --sdk macosx --show-sdk-path || echo "xcrun failed"
+
+echo "--- cc ---"
+which cc || echo "cc not found"
+cc --version || echo "cc failed"
+
+echo "--- make ---"
+which make || echo "make not found"
+make --version || echo "make failed"
+
+echo "================ TOOLCHAIN DIAGNOSTICS (END) =================="
+echo
+
+
 # macOS 15 runner setup (arm64 host). We support both:
 #  - INTEL=true  => x86_64 portable Ruby (Rosetta) + x86_64 Homebrew (/usr/local)
 #  - INTEL=false => arm64 portable Ruby (native)  + arm64 Homebrew (/opt/homebrew)
