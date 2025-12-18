@@ -21,23 +21,6 @@ else
     # sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
     if [ "${ImageOS}" == "macos15" ]; then
 
-        # ---- Make sure Xcode toolchain is actually usable for building native gems ----
-        echo "---- Xcode sanity ----"
-        sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer || true
-        sudo xcodebuild -license accept || true
-        sudo xcodebuild -runFirstLaunch || true
-
-        export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
-        export CC=clang
-        export CXX=clang++
-        # Pin this to something reasonable for Ruby 3.2 on GH runners
-        export MACOSX_DEPLOYMENT_TARGET=14.0
-
-        echo "SDKROOT=$SDKROOT"
-        echo "MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET"
-        echo "CC=$(which $CC) ; $CC --version | head -n 1"
-
-
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree coreutils shared-mime-info
 
