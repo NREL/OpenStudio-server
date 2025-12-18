@@ -57,6 +57,8 @@ jobs:
         path: build/NREL/export/*.tar.gz
   macos-test:
     runs-on: macos-15
+    env:
+      OPENSTUDIO_VERSION_SHA: ce46db07de
     steps: 
     - name: Check out repository
       uses: actions/checkout@v4
