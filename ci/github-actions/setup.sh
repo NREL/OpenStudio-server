@@ -33,14 +33,14 @@ else
         rm ruby-3.2.2-darwin.tar.gz
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
-        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-6.0.7.tgz
-        tar xvzf mongodb-macos-x86_64-6.0.7.tgz
+        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-8.0.12.tgz
+        tar xvzf mongodb-macos-x86_64-8.0.12.tgz
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
-         echo "Error: Failed to extract Mongo 6.0.7 archive"
+         echo "Error: Failed to extract Mongo 8.0.12 archive"
          exit $exit_status_tar
         fi
-        sudo cp mongodb-macos-x86_64-6.0.7/bin/* /usr/local/bin/
+        sudo cp mongodb-macos-x86_64-8.0.12/bin/* /usr/local/bin/
         rm -r mongodb-macos*
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
