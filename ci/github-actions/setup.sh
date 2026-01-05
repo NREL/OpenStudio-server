@@ -2,7 +2,7 @@
 set -euo pipefail
 echo "The build architecture is ${ImageOS}"
 
-if [ "${ImageOS}" == "ubuntu22" ] && [ "${BUILD_TYPE}" == "docker" ]; then
+if [ "${ImageOS}" == "ubuntu24" ] && [ "${BUILD_TYPE}" == "docker" ]; then
     echo "Installing docker compose"
     sudo rm -f /usr/local/bin/docker-compose
     curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -83,7 +83,7 @@ else
         ulimit -n 4096
         ulimit -a
 
-    elif [ "${ImageOS}" == "ubuntu22" ]; then
+    elif [ "${ImageOS}" == "ubuntu24" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update && sudo apt-get install -y wget gnupg software-properties-common build-essential
