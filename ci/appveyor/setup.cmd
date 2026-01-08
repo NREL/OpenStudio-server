@@ -1,4 +1,6 @@
 @echo off
+REM Path to this script's directory
+set "SCRIPT_DIR=%~dp0"
 REM Set initial PATH with Git, Ruby binaries, and DevKit
 set PATH=C:\Ruby32-x64\bin;C:\DevKit\bin;C:\Program Files\Git\mingw64\bin;C:\projects\openstudio\bin;%PATH%
 
@@ -20,14 +22,19 @@ if %ERRORLEVEL% neq 0 (
 dir .
 
 REM  “Unblock” the file so Windows does not refuse to execute it
-powershell -Command "Unblock-File -Path '%OS_INSTALL_NAME%'"
+powershell -Command "Unblock-File -Path '%CD%\%OS_INSTALL_NAME%'"
 
-REM Execute the OpenStudio installer
+REM echo Execute the OpenStudio installer
 REM %OS_INSTALL_NAME% --script ci/appveyor/install-windows.qs
 REM  3) Run the OpenStudio installer in “quiet” mode, pointing to our QScript
-echo Launching installer…
+REM echo Launching installer…
 REM  Use “.\” to ensure we’re running the downloaded EXE in the current directory
-start "" /wait "%OS_INSTALL_NAME%" --script ci/appveyor/install-windows.qs
+REM start "" /wait "%OS_INSTALL_NAME%" --script ci/appveyor/install-windows.qs
+REM Add logging so we can see if the QScript runs
+"%OS_INSTALL_NAME%" ^
+  --script "%SCRIPT_DIR%install-windows.qs" ^
+  --verbose ^
+  --log "%TEMP%\openstudio-installer.log"
 if %ERRORLEVEL% neq 0 (
   echo.
   echo ERROR: OpenStudio installer "%OS_INSTALL_NAME%" returned error code %ERRORLEVEL%. Aborting.

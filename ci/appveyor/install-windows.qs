@@ -1,46 +1,49 @@
-function Controller () {
-  // silent install is not an option until QtIFW v3.0.1
-  // gui.setSilent(true);
+function Controller() {
+    console.log("Controller created");
+    // gui.setSilent(true); // cannot use until QtIFW v3.0.1, keep commented
 }
 
 Controller.prototype.IntroductionPageCallback = function () {
-  gui.clickButton(buttons.NextButton);
+    console.log("IntroductionPageCallback");
+    gui.clickButton(buttons.NextButton);
 }
 
 Controller.prototype.ComponentSelectionPageCallback = function () {
-  var widget = gui.currentPageWidget();
-
-  // to install a subset of components, uncomment the code below and edit as neccesary
-  //widget.deselectAll();
-  //widget.selectComponent('SketchUpPlugin');
-  //widget.selectComponent('CLI');
-  //widget.selectComponent('RubyAPI');
-  //widget.selectComponent('CSharpAPI');
-  //widget.selectComponent('PAT');
-  //widget.selectComponent('OpenStudioApp');
-  //widget.selectComponent('DView');
-  //widget.selectComponent('EnergyPlus');
-  //widget.selectComponent('Radiance');
-  //widget.selectComponent('Resources');
-
-  gui.clickButton(buttons.NextButton);
+    console.log("ComponentSelectionPageCallback");
+    var widget = gui.currentPageWidget();
+    if (widget) {
+        console.log("ComponentSelectionPage widget OK");
+        // If you want defaults, do nothing else.
+        // Example if you ever want to tweak:
+        // widget.deselectAll();
+        // widget.selectComponent("CLI");
+    }
+    gui.clickButton(buttons.NextButton);
 }
 
 Controller.prototype.TargetDirectoryPageCallback = function () {
-  // set install directory if needed
-  var widget = gui.currentPageWidget();
-  widget.TargetDirectoryLineEdit.setText("c:\\openstudio")
-  gui.clickButton(buttons.NextButton);
+    console.log("TargetDirectoryPageCallback");
+    var widget = gui.currentPageWidget();
+    if (widget && widget.TargetDirectoryLineEdit) {
+        widget.TargetDirectoryLineEdit.setText("c:\\openstudio");
+        console.log("Set target directory to c:\\openstudio");
+    } else {
+        console.log("TargetDirectoryLineEdit not found on this page");
+    }
+    gui.clickButton(buttons.NextButton);
 }
 
 Controller.prototype.StartMenuDirectoryPageCallback = function () {
-  gui.clickButton(buttons.NextButton);
+    console.log("StartMenuDirectoryPageCallback");
+    gui.clickButton(buttons.NextButton);
 }
 
 Controller.prototype.ReadyForInstallationPageCallback = function () {
-  gui.clickButton(buttons.NextButton);
+    console.log("ReadyForInstallationPageCallback");
+    gui.clickButton(buttons.NextButton);
 }
 
 Controller.prototype.FinishedPageCallback = function () {
-  gui.clickButton(buttons.FinishButton);
+    console.log("FinishedPageCallback");
+    gui.clickButton(buttons.FinishButton);
 }
