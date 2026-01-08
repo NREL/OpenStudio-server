@@ -5,7 +5,7 @@
 
 #may include suffix
 ARG OPENSTUDIO_VERSION=3.11.0-rc3
-FROM nrel/openstudio:dev-3.11.0-rc3 AS base
+FROM nrel/openstudio:3.11.0-rc3 AS base
 ARG OPENSTUDIO_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
