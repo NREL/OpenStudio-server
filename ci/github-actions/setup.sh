@@ -144,6 +144,13 @@ else
     # test openssl
     ruby ${GITHUB_WORKSPACE}/ci/github-actions/verify_openstudio.rb
 
+    #DEBUG shared libraries in packaged ruby
+    ruby -v
+    echo "=== RBCONFIG SNAPSHOT ==="
+    ruby -rrbconfig -e 'p RbConfig::CONFIG.values_at("ruby_version","arch","LIBRUBYARG_SHARED","LIBRUBYARG_STATIC","LIBRUBY_SO","LIBRUBY_A","libdir","rubylibdir","archdir")'
+    echo "=== /usr/local/ruby/lib ==="
+    ls -la /usr/local/ruby/lib || true
+
     ruby "${GITHUB_WORKSPACE}/bin/openstudio_meta" install_gems --with_test_develop --debug --verbose --use_cached_gems
     bundle -v
     # create dir for output files which will be generated in case of failure
