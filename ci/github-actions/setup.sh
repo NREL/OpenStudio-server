@@ -93,7 +93,7 @@ else
         echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
 
         sudo apt-get update
-        sudo apt-get install -y pv tree mongodb-org libqdbm14 libxml2-dev
+        sudo apt-get install -y pv tree mongodb-org libqdbm14 libxml2-dev libgmp-dev 
         # explicitly install. the latest version of redis-server
         #wget https://download.redis.io/releases/redis-6.0.9.tar.gz
         #tar xzf redis-6.0.9.tar.gz && cd redis-6.0.9
