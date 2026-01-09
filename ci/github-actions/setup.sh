@@ -113,7 +113,7 @@ else
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
         #curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-linux.tar.gz
         curl -SLO --insecure https://openstudio-resources.s3.us-east-1.amazonaws.com/pat-dependencies3/ruby-3.2.2-ubuntu24.04-x86_64.tar.gz                             
-        tar xvzf ruby-3.2.2-linux.tar.gz
+        tar xvzf ruby-3.2.2-ubuntu24.04-x86_64.tar.gz 
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
          echo "Error: Failed to extract Ruby 3.2.2 archive"
@@ -123,7 +123,7 @@ else
         sudo rm -rf /usr/local/ruby
         sudo mv ruby /usr/local/
         ldd /usr/local/ruby/bin/ruby
-        rm ruby-3.2.2-linux.tar.gz
+        rm ruby-3.2.2-ubuntu24.04-x86_64.tar.gz 
 
         mkdir -p reports/rspec
         sudo ./ci/github-actions/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT
