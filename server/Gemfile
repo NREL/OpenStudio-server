@@ -8,6 +8,7 @@ ruby '~>3.2.0'
 
 gem 'concurrent-ruby', '1.3.4'  #https://stackoverflow.com/questions/79360526/uninitialized-constant-activesupportloggerthreadsafelevellogger-nameerror rails 7.1 fixes
 gem 'rails', '~> 7.1'
+gem 'bigdecimal', '~> 3'
 #gem 'webrick', '= 1.8.2' #removed bc of comflicts with Rails 7.1+ 
 gem 'puma', '~> 6.6'
 
