@@ -111,7 +111,8 @@ else
 
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
-        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-linux.tar.gz
+        #curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-linux.tar.gz
+        curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-ubuntu24.04-x86_64.tar.gz
         tar xvzf ruby-3.2.2-linux.tar.gz
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
