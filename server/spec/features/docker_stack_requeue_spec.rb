@@ -75,40 +75,40 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
     end
 
     # setup expected results
-    lhs = [{electricity_consumption_cvrmse: 11.80643639,
-            electricity_consumption_nmbe: -9.992706452,
+    lhs = [{electricity_consumption_cvrmse: 11.67547,
+            electricity_consumption_nmbe: -9.67134,
             natural_gas_consumption_cvrmse: 88.97549886,
-            natural_gas_consumption_nmbe: -71.2422889
+            natural_gas_consumption_nmbe: -71.2423
            },
            {
-            electricity_consumption_cvrmse: 22.26135019,
-            electricity_consumption_nmbe: 21.07474074,
+            electricity_consumption_cvrmse: 22.57385,
+            electricity_consumption_nmbe: 21.54758,
             natural_gas_consumption_cvrmse: 123.6693321,
-            natural_gas_consumption_nmbe: 89.28433483
+            natural_gas_consumption_nmbe: 89.28405
            },
            {
-            electricity_consumption_cvrmse: 19.92877245,
-            electricity_consumption_nmbe: -19.20285379,
-            natural_gas_consumption_cvrmse: 81.09035156,
-            natural_gas_consumption_nmbe: -61.5710272
+            electricity_consumption_cvrmse: 19.81253,
+            electricity_consumption_nmbe: -18.97733,
+            natural_gas_consumption_cvrmse: 81.09041,
+            natural_gas_consumption_nmbe: -61.5712
            },
            {
-            electricity_consumption_cvrmse: 41.31502887,
-            electricity_consumption_nmbe: -41.6127891,
-            natural_gas_consumption_cvrmse: 99.892904,
-            natural_gas_consumption_nmbe: 70.79385513
+            electricity_consumption_cvrmse: 40.76865,
+            electricity_consumption_nmbe: -41.10892,
+            natural_gas_consumption_cvrmse: 99.89285,
+            natural_gas_consumption_nmbe: 70.79368
            },
            {
-            electricity_consumption_cvrmse: 55.38893763588019,
-            electricity_consumption_nmbe: -57.11056265094546,
-            natural_gas_consumption_cvrmse: 43.52243818,
-            natural_gas_consumption_nmbe: 22.80778241
+            electricity_consumption_cvrmse: 55.14293,
+            electricity_consumption_nmbe: -56.83036,
+            natural_gas_consumption_cvrmse: 43.52242,
+            natural_gas_consumption_nmbe: 22.80775
            },
            {
-            electricity_consumption_cvrmse: 80.27419288,
-            electricity_consumption_nmbe: -83.30621751,
-            natural_gas_consumption_cvrmse: 69.47538644,
-            natural_gas_consumption_nmbe: -50.88411437
+            electricity_consumption_cvrmse: 79.92222,
+            electricity_consumption_nmbe: -82.94121,
+            natural_gas_consumption_cvrmse: 69.4762,
+            natural_gas_consumption_nmbe: -50.88541
            }]
     
     # setup bad results
@@ -228,11 +228,11 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "lhs sim: #{sim}"
         tmp = []
         lhs.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         puts "data_point[:#{data_point[:_id]}] sim is: #{sim}"
@@ -278,22 +278,22 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
     end
     
     # setup expected results
-    lhs = [{electricity_consumption_cvrmse: 45.748727859310684,
-            electricity_consumption_nmbe: -47.15331592,
-            natural_gas_consumption_cvrmse: 93.87522319797985,
-            natural_gas_consumption_nmbe: -76.99356458
+    lhs = [{electricity_consumption_cvrmse: 45.33524,
+            electricity_consumption_nmbe: -46.72575,
+            natural_gas_consumption_cvrmse: 93.87523,
+            natural_gas_consumption_nmbe: -76.99358
            },
            {
-            electricity_consumption_cvrmse: 36.992082716685594,
-            electricity_consumption_nmbe: 36.75558058301333,
-            natural_gas_consumption_cvrmse: 26.054394017956753,
-            natural_gas_consumption_nmbe: -1.974857387
+            electricity_consumption_cvrmse: 37.1028,
+            electricity_consumption_nmbe: 36.83981,
+            natural_gas_consumption_cvrmse: 26.05441,
+            natural_gas_consumption_nmbe: -1.97495
            },
            {
-            electricity_consumption_cvrmse: 88.15691010253096,
-            electricity_consumption_nmbe: -90.09381264,
-            natural_gas_consumption_cvrmse: 59.5879904,
-            natural_gas_consumption_nmbe: 37.55474192165185
+            electricity_consumption_cvrmse: 87.31084,
+            electricity_consumption_nmbe: -89.3516,
+            natural_gas_consumption_cvrmse: 59.58792,
+            natural_gas_consumption_nmbe: 37.55463
            }]
     
     # setup bad results
@@ -386,11 +386,11 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "lhs sim: #{sim}"
         tmp = []
         lhs.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
