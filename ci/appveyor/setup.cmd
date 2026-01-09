@@ -34,7 +34,7 @@ REM Add logging so we can see if the QScript runs
 "%OS_INSTALL_NAME%" ^
   --script "%SCRIPT_DIR%install-windows.qs" ^
   --verbose ^
-  --log "%TEMP%\openstudio-installer.log"
+  --log "%SCRIPT_DIR%\openstudio-installer.log"
 if %ERRORLEVEL% neq 0 (
   echo.
   echo ERROR: OpenStudio installer "%OS_INSTALL_NAME%" returned error code %ERRORLEVEL%. Aborting.

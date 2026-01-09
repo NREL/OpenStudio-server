@@ -45,6 +45,13 @@ test_script:
   - cmd: C:\projects\openstudio-server\ci\appveyor\build_package.cmd #artifact upload occurs before on_finish
 on_finish:
   - cmd: echo FINISHED TEST_SCRIPTS
+  - cmd: echo ===== OpenStudio installer log =====
+  - cmd: if exist "C:\projects\openstudio-server\ci\appveyor\openstudio-installer.log" (
+            type "C:\projects\openstudio-server\ci\appveyor\openstudio-installer.log"
+         ) else (
+            echo No installer log found at C:\projects\openstudio-server\ci\appveyor\openstudio-installer.log
+         )
+  - cmd: echo ===== Other logs =====
   - cmd: C:\projects\openstudio-server\ci\appveyor\print_logs.cmd
   #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   #- ps: Write-Host "Build finished. Keeping RDP session alive."; Start-Sleep -Seconds 3600
