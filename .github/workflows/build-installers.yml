@@ -2,17 +2,29 @@ name: Build Installers
 
 on:
   workflow_dispatch:
+    inputs:
+      openstudio_version:
+        description: 'OpenStudio Version (e.g. 3.11.0)'
+        required: true
+        default: '3.11.0'
+      openstudio_version_sha:
+        description: 'OpenStudio Version SHA (e.g. 241b8abb4d)'
+        required: true
+        default: '241b8abb4d'
+      openstudio_version_ext:
+        description: 'OpenStudio Version Extension (e.g. -rc1)'
+        required: false
+        default: ''
   push:
     branches:
       - master
       - develop
-      - '3.11.0'
   pull_request:
 
 env:
-  OPENSTUDIO_VERSION: 3.11.0
-  OPENSTUDIO_VERSION_SHA: 241b8abb4d
-  OPENSTUDIO_VERSION_EXT: ""
+  OPENSTUDIO_VERSION: ${{ inputs.openstudio_version || '3.11.0' }}
+  OPENSTUDIO_VERSION_SHA: ${{ inputs.openstudio_version_sha || '241b8abb4d' }}
+  OPENSTUDIO_VERSION_EXT: ${{ inputs.openstudio_version_ext || '' }}
 
 jobs:
   build-linux:
