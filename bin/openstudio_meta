@@ -334,9 +334,11 @@ class InstallGems
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config"
     end
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --with default development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config set --local with 'default development test'"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1"
     else
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --without development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config set --local without 'development test'"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1"
     end
     sys_cmds << "#{$ruby_path} #{bundler_bin} update"
     #unless Gem.win_platform?
