@@ -1,0 +1,124 @@
+name: Build Installers
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - develop
+      - '3.11.0'
+  pull_request:
+
+env:
+  OPENSTUDIO_VERSION: 3.11.0
+  OPENSTUDIO_VERSION_SHA: 241b8abb4d
+  OPENSTUDIO_VERSION_EXT: ""
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete huge unnecessary tools folder
+        run: rm -rf /opt/hostedtoolcache
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Setup
+        shell: bash
+        run: ./ci/github-actions/setup.sh
+        env:
+          BUILD_TYPE: build
+      - name: Build Gem Package
+        shell: bash
+        run: ./ci/github-actions/export_build_linux.sh
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openstudio-server-gems-linux
+          path: build/NREL/export/*.tar.gz
+
+  build-macos:
+    runs-on: macos-15-intel # Matching the test workflow
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Setup
+        shell: bash
+        run: ./ci/github-actions/setup.sh
+        env:
+          BUILD_TYPE: build
+      - name: Build Gem Package
+        shell: bash
+        run: ./ci/github-actions/export_build_osx.sh
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openstudio-server-gems-darwin
+          path: build/NREL/export/*.tar.gz
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.2'
+          bundler-cache: false # We manage gems manually via openstudio_meta
+
+      - name: Download and Install OpenStudio
+        shell: powershell
+        run: |
+          $Version = "${{ env.OPENSTUDIO_VERSION }}"
+          $Ext = "${{ env.OPENSTUDIO_VERSION_EXT }}"
+          $Sha = "${{ env.OPENSTUDIO_VERSION_SHA }}"
+          $InstallerName = "OpenStudio-$Version$Ext+$Sha-Windows.exe"
+          $Url = "https://github.com/NREL/OpenStudio/releases/download/v$Version$Ext/$InstallerName"
+          
+          Write-Host "Downloading $Url..."
+          Invoke-WebRequest -Uri $Url -OutFile $InstallerName
+          
+          Write-Host "Installing OpenStudio..."
+          Start-Process -FilePath ".\$InstallerName" -ArgumentList "/S /D=C:\projects\openstudio" -Wait
+          
+          # Verify
+          $env:Path = "C:\projects\openstudio\bin;$env:Path"
+          openstudio openstudio_version
+
+      - name: Setup MSYS2 and Dependencies
+        shell: cmd
+        run: |
+          ridk install 2 3
+          
+          REM Mimic setup.cmd gcc installation if needed, but standard ruby setup usually suffices.
+          REM Checking gcc version
+          gcc --version
+
+      - name: Build Gem Package
+        shell: cmd
+        env:
+          BUNDLE_VERSION: 2.4.10
+          GEM_HOME: C:\projects\openstudio-server\gems
+          GEM_PATH: C:\projects\openstudio-server\gems;C:\projects\openstudio-server\gems\bundler\gems
+          RUBYLIB: C:\projects\openstudio\Ruby
+          OPENSTUDIO_TEST_EXE: C:\projects\openstudio\bin\openstudio.exe
+        run: |
+          REM Create export directory
+          mkdir C:\export
+          
+          REM Install Bundler
+          gem install bundler -v %BUNDLE_VERSION% --no-document
+          
+          REM Run Build
+          ruby bin\openstudio_meta install_gems --export="C:\export" --debug
+          
+          REM Move export to workspace for upload
+          mkdir build\NREL
+          move C:\export build\NREL\export
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openstudio-server-gems-win32
+          path: build/NREL/export/*.tar.gz
