@@ -1,6 +1,18 @@
 OpenStudio Server
 =================
 
+Version 3.11.0
+-------------
+* Bumped OpenStudio Server version to 3.11.0.
+* Updated CI and build infrastructure to support newer platforms:
+* Migrated Ubuntu CI from 22.04 to 24.04.
+* Updated macOS runner and version checks to support macOS 15.
+* Updated MongoDB version used in CI to 8.x.
+* Updated container tags and packaging logic for modern OS targets.
+* Updated packaged Ruby and dependency handling for Ubuntu 24.04.
+* Adjusted test expectations in docker_stack_requeue_spec.rb to reflect updated behavior.
+* Cleaned up legacy Windows install and packaging logic.
+
 Version 3.10.0
 -------------
 * Custom Gems working again https://github.com/NREL/OpenStudio-server/pull/818
@@ -11,7 +23,7 @@ Version 3.10.0
 * Local Server startup enhancements for PAT https://github.com/NREL/OpenStudio-server/pull/827
 
   
-Version 3.9.0-rc3
+Version 3.9.0
 -------------
 * 3.9.0 was pulled and several RCs were tried to fix various issues.  This was the last RC before we ran out of funding for the release cycle.
 * Custom Gems have not worked since Ruby 3 upgrade (3.8.0)

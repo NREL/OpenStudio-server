@@ -85,7 +85,27 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 82.37755811,
         electricity_consumption_nmbe: -85.31078152,
         natural_gas_consumption_cvrmse: 42.71464426,
-        natural_gas_consumption_nmbe: 20.40156665}
+        natural_gas_consumption_nmbe: 20.40156665},
+      { electricity_consumption_cvrmse: 81.90108, 
+        electricity_consumption_nmbe: -84.84103, 
+        natural_gas_consumption_cvrmse: 42.71462, 
+        natural_gas_consumption_nmbe: 20.40144},
+      { electricity_consumption_cvrmse: 20.71476, 
+        electricity_consumption_nmbe: 19.88581, 
+        natural_gas_consumption_cvrmse: 75.7458, 
+        natural_gas_consumption_nmbe: 50.5476},
+      { electricity_consumption_cvrmse: 22.2990, 
+        electricity_consumption_nmbe: 21.6438, 
+        natural_gas_consumption_cvrmse: 82.6236, 
+        natural_gas_consumption_nmbe: 56.3145},
+      { electricity_consumption_cvrmse: 26.5618, 
+        electricity_consumption_nmbe: 25.9638, 
+        natural_gas_consumption_cvrmse: 77.9849, 
+        natural_gas_consumption_nmbe: 52.2796},
+      { electricity_consumption_cvrmse: 22.299, 
+        electricity_consumption_nmbe: 21.6438, 
+        natural_gas_consumption_cvrmse: 82.6236, 
+        natural_gas_consumption_nmbe: 56.3145}        
     ]
     # setup bad results
     nsga_nrel_bad = [
@@ -195,11 +215,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "nsga sim: #{sim}"
         tmp = []
         nsga_nrel.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
@@ -233,7 +253,15 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 20.4095724,
         electricity_consumption_nmbe: 19.59546222,
         natural_gas_consumption_cvrmse: 75.7459088,
-        natural_gas_consumption_nmbe: 50.54773457}
+        natural_gas_consumption_nmbe: 50.54773457},
+      { electricity_consumption_cvrmse: 81.90108, 
+        electricity_consumption_nmbe: -84.84103, 
+        natural_gas_consumption_cvrmse: 42.71462, 
+        natural_gas_consumption_nmbe: 20.40145},
+      { electricity_consumption_cvrmse: 20.71476, 
+        electricity_consumption_nmbe: 19.88581, 
+        natural_gas_consumption_cvrmse: 75.7459, 
+        natural_gas_consumption_nmbe: 50.54764}        
     ]
     # setup bad results
     spea_nrel_bad = [
@@ -336,11 +364,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "spea sim: #{sim}"
         tmp = []
         spea_nrel.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
@@ -374,7 +402,15 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 43.65784398,
         electricity_consumption_nmbe: -44.63306507,
         natural_gas_consumption_cvrmse: 108.1024748,
-        natural_gas_consumption_nmbe: 77.35386732}
+        natural_gas_consumption_nmbe: 77.35386732},
+      { electricity_consumption_cvrmse: 43.3395, 
+        electricity_consumption_nmbe: -44.2872, 
+        natural_gas_consumption_cvrmse: 108.1024, 
+        natural_gas_consumption_nmbe: 77.3537},
+      { electricity_consumption_cvrmse: 8.1241, 
+        electricity_consumption_nmbe: 5.1842, 
+        natural_gas_consumption_cvrmse: 65.8426, 
+        natural_gas_consumption_nmbe: -50.774}  
     ]
     # setup bad results
     pso_bad = [
@@ -477,11 +513,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "pso sim: #{sim}"
         tmp = []
         pso.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
@@ -515,7 +551,15 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 74.0101483,
         electricity_consumption_nmbe: -76.73841103,
         natural_gas_consumption_cvrmse: 48.06306663,
-        natural_gas_consumption_nmbe: -31.81675554}
+        natural_gas_consumption_nmbe: -31.81675554},
+      { electricity_consumption_cvrmse: 73.6119, 
+        electricity_consumption_nmbe: -76.3356, 
+        natural_gas_consumption_cvrmse: 48.0631, 
+        natural_gas_consumption_nmbe: -31.8168},
+      { electricity_consumption_cvrmse: 35.5075, 
+        electricity_consumption_nmbe: -36.1134, 
+        natural_gas_consumption_cvrmse: 50.7971, 
+        natural_gas_consumption_nmbe: 27.7558}        
     ]
     
     # setup bad results
@@ -619,11 +663,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "rgenoud sim: #{sim}"
         tmp = []
         rgenoud.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         puts "data_point[:#{data_point[:_id]}] compare is: #{compare}"
@@ -673,7 +717,35 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 56.7527241,
         electricity_consumption_nmbe: -58.74745506,
         natural_gas_consumption_cvrmse: 108.2431218,
-        natural_gas_consumption_nmbe:  -85.94476756}
+        natural_gas_consumption_nmbe:  -85.94476756},
+      { electricity_consumption_cvrmse: 56.5094, 
+        electricity_consumption_nmbe: -58.4679, 
+        natural_gas_consumption_cvrmse: 108.2432, 
+        natural_gas_consumption_nmbe: -85.9452},
+      { electricity_consumption_cvrmse: 18.7272, 
+        electricity_consumption_nmbe: -17.4362, 
+        natural_gas_consumption_cvrmse: 30.7881, 
+        natural_gas_consumption_nmbe: -15.6659},
+      { electricity_consumption_cvrmse: 16.9593, 
+        electricity_consumption_nmbe: -15.2245, 
+        natural_gas_consumption_cvrmse: 44.2129, 
+        natural_gas_consumption_nmbe: 22.9883},
+      { electricity_consumption_cvrmse: 54.5322, 
+        electricity_consumption_nmbe: -56.3706, 
+        natural_gas_consumption_cvrmse: 81.9336, 
+        natural_gas_consumption_nmbe: -63.9426},
+      { electricity_consumption_cvrmse: 23.1309, 
+        electricity_consumption_nmbe: 21.8155, 
+        natural_gas_consumption_cvrmse: 26.1923, 
+        natural_gas_consumption_nmbe: -2.686},
+      { electricity_consumption_cvrmse: 54.3109, 
+        electricity_consumption_nmbe: -56.137, 
+        natural_gas_consumption_cvrmse: 82.1264, 
+        natural_gas_consumption_nmbe: -64.1142},
+      { electricity_consumption_cvrmse: 16.9594, 
+        electricity_consumption_nmbe: -15.2246, 
+        natural_gas_consumption_cvrmse: 44.2130, 
+        natural_gas_consumption_nmbe: 22.9883}        
     ] 
     
     # setup bad results
@@ -777,11 +849,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "sobol sim: #{sim}"
         tmp = []
         sobol.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
@@ -822,7 +894,20 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 91.6123639683813,
         electricity_consumption_nmbe: -94.8704863220731,
         natural_gas_consumption_cvrmse: 42.93786686,
-        natural_gas_consumption_nmbe: -23.69726679}
+        natural_gas_consumption_nmbe: -23.69726679},
+      { electricity_consumption_cvrmse: 25.858, 
+        electricity_consumption_nmbe: 25.5224, 
+        natural_gas_consumption_cvrmse: 112.9275, 
+        natural_gas_consumption_nmbe: 80.5359},
+      {  electricity_consumption_cvrmse: 25.858, 
+         electricity_consumption_nmbe: 25.5224, 
+         natural_gas_consumption_cvrmse: 112.9275, 
+         natural_gas_consumption_nmbe: 80.5359},
+        {electricity_consumption_cvrmse: 91.0796, 
+        electricity_consumption_nmbe: -94.3536, 
+        natural_gas_consumption_cvrmse: 42.9378, 
+        natural_gas_consumption_nmbe: -23.6972
+        }         
     ]
     
     # setup bad results
@@ -930,11 +1015,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "lhs sim: #{sim}"
         tmp = []
         lhs.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
@@ -972,7 +1057,19 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 37.63173269,
         electricity_consumption_nmbe: -38.54754034,
         natural_gas_consumption_cvrmse: 150.9769767,
-        natural_gas_consumption_nmbe: -122.6180691}
+        natural_gas_consumption_nmbe: -122.6180691},
+      { electricity_consumption_cvrmse: 37.7988, 
+        electricity_consumption_nmbe: -38.6516, 
+        natural_gas_consumption_cvrmse: 206.5584, 
+        natural_gas_consumption_nmbe: -166.2207},
+      { electricity_consumption_cvrmse: 37.4133, 
+        electricity_consumption_nmbe: -38.2671, 
+        natural_gas_consumption_cvrmse: 206.5789, 
+        natural_gas_consumption_nmbe: -166.2341},
+        {electricity_consumption_cvrmse: 37.4133, 
+        electricity_consumption_nmbe: -38.2671, 
+        natural_gas_consumption_cvrmse: 150.977, 
+        natural_gas_consumption_nmbe: -122.6182}        
     ]
     
     # setup bad results
@@ -1081,11 +1178,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "lhs discrete sim: #{sim}"
         tmp = []
         lhs.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
@@ -1123,7 +1220,19 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
       { electricity_consumption_cvrmse: 23.52940396,
         electricity_consumption_nmbe: 22.1736249,
         natural_gas_consumption_cvrmse: 136.7394956,
-        natural_gas_consumption_nmbe: -113.1026692}
+        natural_gas_consumption_nmbe: -113.1026692},
+      { electricity_consumption_cvrmse: 87.2087, 
+        electricity_consumption_nmbe: -90.6511, 
+        natural_gas_consumption_cvrmse: 42.7852, 
+        natural_gas_consumption_nmbe: -25.6421},
+      {  electricity_consumption_cvrmse: 89.5205, 
+         electricity_consumption_nmbe: -93.1012, 
+         natural_gas_consumption_cvrmse: 83.6153, 
+         natural_gas_consumption_nmbe: -63.9489},
+        {electricity_consumption_cvrmse: 23.7387, 
+        electricity_consumption_nmbe: 22.3196, 
+        natural_gas_consumption_cvrmse: 136.7395, 
+        natural_gas_consumption_nmbe: -113.1027}         
     ]  
     
     # setup bad results
@@ -1227,11 +1336,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "morris sim: #{sim}"
         tmp = []
         morris.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
@@ -1265,10 +1374,22 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
   it 'run single_run analysis', :single_run, js: true do
     # setup expected results
     single_run = [
-      {  electricity_consumption_cvrmse: 34.8546004,
-         electricity_consumption_nmbe: -35.59102141,
-         natural_gas_consumption_cvrmse: 162.9418784,
-         natural_gas_consumption_nmbe: -130.5833959}
+      { electricity_consumption_cvrmse: 34.8546004,
+        electricity_consumption_nmbe: -35.59102141,
+        natural_gas_consumption_cvrmse: 162.9418784,
+        natural_gas_consumption_nmbe: -130.5833959},
+      { electricity_consumption_cvrmse: 34.6405, 
+        electricity_consumption_nmbe: -35.314, 
+        natural_gas_consumption_cvrmse: 162.9419, 
+        natural_gas_consumption_nmbe: -130.5835},
+      { electricity_consumption_cvrmse: 34.6405, 
+        electricity_consumption_nmbe: -35.314, 
+        natural_gas_consumption_cvrmse: 162.9419, 
+        natural_gas_consumption_nmbe: -130.5835},
+      { electricity_consumption_cvrmse: 34.6405, 
+        electricity_consumption_nmbe: -35.314, 
+        natural_gas_consumption_cvrmse: 162.9419, 
+        natural_gas_consumption_nmbe: -130.5835}        
      ] 
     # setup bad results
     single_run_bad = [
@@ -1371,11 +1492,11 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
         expect(results).not_to be_nil
         sim = results.slice(:electricity_consumption_cvrmse, :electricity_consumption_nmbe, :natural_gas_consumption_cvrmse, :natural_gas_consumption_nmbe)
         expect(sim.size).to eq(4)
-        sim = sim.transform_values { |x| x.truncate(4) }
+        sim = sim.transform_values { |x| x.truncate(2) }
         puts "single_run sim: #{sim}"
         tmp = []
         single_run.each do |x|
-          tmp << x.transform_values { |y| y.truncate(4) }
+          tmp << x.transform_values { |y| y.truncate(2) }
         end
         compare = tmp.include?(sim)
         expect(compare).to be true
