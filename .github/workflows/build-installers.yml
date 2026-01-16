@@ -67,6 +67,25 @@ jobs:
           name: openstudio-server-gems-darwin
           path: build/NREL/export/*.tar.gz
 
+  build-macos-arm:
+    runs-on: macos-15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Setup
+        shell: bash
+        run: ./ci/github-actions/setup.sh
+        env:
+          BUILD_TYPE: build
+      - name: Build Gem Package
+        shell: bash
+        run: ./ci/github-actions/export_build_osx.sh
+      - name: Upload macOS ARM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openstudio-server-gems-darwin-arm
+          path: build/NREL/export/*.tar.gz
+
   build-windows:
     runs-on: windows-latest
     steps:
