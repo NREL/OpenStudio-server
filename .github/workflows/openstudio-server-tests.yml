@@ -131,7 +131,7 @@ jobs:
       if: | 
         github.ref == 'refs/heads/master' || 
         github.ref == 'refs/heads/develop' ||
-        github.ref == 'refs/heads/custom_gems'
+        github.ref == 'refs/heads/3.10.0-pandas'
       shell: bash
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 

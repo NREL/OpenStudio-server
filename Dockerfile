@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
         nodejs \
         procps \
         python3-numpy \
+        python3-pandas \
         tar \
         unzip \
         wget \
