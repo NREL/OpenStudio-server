@@ -108,7 +108,7 @@ ADD /server/app/assets/ /opt/openstudio/server/app/assets/
 
 # Now call precompile
 RUN mkdir /opt/openstudio/server/log
-RUN bundle exec rake assets:precompile --trace
+RUN bundle exec rake assets:precompile
 
 # Bundle app source
 ADD /server /opt/openstudio/server
