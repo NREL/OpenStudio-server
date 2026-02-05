@@ -108,12 +108,9 @@ ADD /bin /opt/openstudio/bin
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 
 # 4. Create log directory and Precompile Assets
-# We pass OS_SERVER_HOST_URL here just to satisfy the Ruby initializer during build
+# Added SECRET_KEY_BASE and RAILS_ENV to prevent "Abort" crashes
 RUN mkdir -p /opt/openstudio/server/log && \
-    SECRET_KEY_BASE=dummy_key_for_build \
-    RAILS_ENV=production \
-    OS_SERVER_HOST_URL=localhost \
-    bundle exec rake assets:precompile --trace
+    SECRET_KEY_BASE=dummy_key_for_build RAILS_ENV=production bundle exec rake assets:precompile --trace
 
 # 5. Final bundle check
 RUN rm -f Gemfile.lock && bundle install --jobs=3 --retry=3
