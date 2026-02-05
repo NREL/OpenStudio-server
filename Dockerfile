@@ -108,11 +108,12 @@ ADD /bin /opt/openstudio/bin
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
 
 # 4. Create log directory and Precompile Assets
-# We pass OS_SERVER_HOST_URL here just to satisfy the Ruby initializer during build
+# Adding dummy vars for Host and Redis to satisfy initializers during asset compilation
 RUN mkdir -p /opt/openstudio/server/log && \
     SECRET_KEY_BASE=dummy_key_for_build \
     RAILS_ENV=production \
     OS_SERVER_HOST_URL=localhost \
+    REDIS_URL=redis://localhost:6379/0 \
     bundle exec rake assets:precompile --trace
 
 # 5. Final bundle check
