@@ -62,8 +62,8 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
 RUN pip3 install --no-cache-dir --upgrade pip
 
 RUN pip3 install --no-cache-dir \
-    numpy==2.3.3 \
-    pandas==2.2.3 \
+    numpy==2.2.6 \
+    pandas==2.3.3 \
     scikit-learn==1.7.2 \
     xgboost==3.1.3
 
