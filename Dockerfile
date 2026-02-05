@@ -94,30 +94,26 @@ ENV RAILS_ENV=${rails_env}
 #ENV FAVOR_LOCAL_GEMS 1
 
 #### OpenStudio Server Code
-# First upload the Gemfile* so that it can cache the Gems -- do this first because it is slow
-ADD /bin /opt/openstudio/bin
-ADD /server/Gemfile /opt/openstudio/server/Gemfile
+# 1. Setup workspace
 WORKDIR /opt/openstudio/server
+
+# 2. Add Gemfiles and install Ruby dependencies first (for caching)
+ADD /server/Gemfile /opt/openstudio/server/Gemfile
 RUN bundle _${OS_BUNDLER_VERSION}_ install --jobs=3 --retry=3 ${bundle_args}
 
-# Add the app assets and precompile assets. Do it this way so that when the app changes the assets don't
-# have to be recompiled everytime
-ADD /server/Rakefile /opt/openstudio/server/Rakefile
-ADD /server/config/ /opt/openstudio/server/config/
-ADD /server/app/assets/ /opt/openstudio/server/app/assets/
-
-# Now call precompile
-RUN mkdir /opt/openstudio/server/log
-RUN bundle exec rake assets:precompile --trace
-
-# Bundle app source
+# 3. NOW ADD THE ENTIRE SERVER CODE 
+# (This ensures rake has everything it needs to precompile)
 ADD /server /opt/openstudio/server
-# Add in /spec for testing 
-#ADD /server/spec /opt/openstudio/server/spec
+ADD /bin /opt/openstudio/bin
 ADD .rubocop.yml /opt/openstudio/.rubocop.yml
-# Run bundle again, because if the user has a local Gemfile.lock it will have been overriden
-RUN rm Gemfile.lock
-RUN bundle install --jobs=3 --retry=3
+
+# 4. Create log directory and Precompile Assets
+# Added SECRET_KEY_BASE and RAILS_ENV to prevent "Abort" crashes
+RUN mkdir -p /opt/openstudio/server/log && \
+    SECRET_KEY_BASE=dummy_key_for_build RAILS_ENV=production bundle exec rake assets:precompile --trace
+
+# 5. Final bundle check
+RUN rm -f Gemfile.lock && bundle install --jobs=3 --retry=3
 
 # Add in scripts for running server. This includes the wait-for-it scripts to ensure other processes (mongo, redis) have
 # started before starting the main process.
