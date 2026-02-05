@@ -49,14 +49,23 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
         mongodb-database-tools \
         nodejs \
         procps \
-        python3-numpy \
-        python3-pandas \
+        python3-pip \
+        python3-dev \
+        python3-setuptools \
         tar \
         unzip \
         wget \
         zip \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir --upgrade pip
+
+RUN pip3 install --no-cache-dir \
+    numpy==2.3.3 \
+    pandas==2.2.3 \
+    scikit-learn==1.7.2 \
+    xgboost==3.1.3
 
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION=6.0.27
