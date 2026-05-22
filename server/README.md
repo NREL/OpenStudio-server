@@ -105,3 +105,32 @@ publishing scripts are run on GitHub Actions. These are only run the develop and
 * Write tests for each analysis (expand existing SPEA test)
 * Add CLI path to config.yml
 * Add tests for embedded files on analysis model. Test result of R code that pushed to analysis model (i.e. best_point.json)
+
+## API Endpoints
+
+### Batch File Upload
+
+**POST** `/data_points/:id/batch_upload_files.json`
+
+Uploads a collection of OSA zip files for a given DataPoint. The request expects a JSON payload with the following structure:
+
+```json
+{
+  "files": [
+    {"filename": "batch1.osa", "content": "<Base64-encoded zip file>"},
+    {"filename": "batch2.osa", "content": "<Base64-encoded zip file>"}
+  ]
+}
+```
+
+Each file is base‑64 encoded to avoid multipart handling complications. The endpoint creates a `ResultFile` for each entry, attaches it to the `DataPoint`, and returns a JSON response summarising success and any errors:
+
+```json
+{
+  "data_point_id": 42,
+  "uploaded": ["batch1.osa", "batch2.osa"],
+  "failed": []
+}
+```
+
+Errors for individual files are reported in the `failed` array with an accompanying message. This batch endpoint enables clients to submit many OSA files in a single HTTP call, improving throughput and simplifying client‑side logic.

@@ -410,7 +410,41 @@ class DataPointsController < ApplicationController
     end
     Rails.logger.debug "data_points_controller.upload_file leave"
   end
+  # POST batch_upload_files.json
+  # Accepts multiple OSA zip files and attaches each to the datapoint using existing upload logic.
+  def batch_upload_files
+    Rails.logger.debug 'data_points_controller.batch_upload_files enter'
+    datapoint_id = params[:id]
+    files = params[:files] || []
+    saved = 0
+    error_messages = []
 
+    @data_point = DataPoint.find(datapoint_id)
+
+    files.each do |f|
+      begin
+        rf = ResultFile.new(
+          display_name: f[:display_name],
+          type: f[:type]
+        )
+        rf.attachment = f[:attachment]
+        @data_point.result_files << rf
+        @data_point.save!
+        saved += 1
+      rescue => e
+        error_messages << "Failed to save file #{f[:display_name]}: #{e.message}"
+      end
+    end
+
+    respond_to do |format|
+      if error_messages.empty?
+        format.json { render json: { saved: saved, total: files.size }, status: :created, location: data_point_url(@data_point) }
+      else
+        format.json { render json: { error: error_messages }, status: :unprocessable_entity }
+      end
+    end
+    Rails.logger.debug 'data_points_controller.batch_upload_files leave'
+  end
   # download a datapoint report of filename
   def download_report
     Rails.logger.debug "data_points_controller.download_report enter"
