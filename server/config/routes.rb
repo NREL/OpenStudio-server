@@ -53,6 +53,7 @@ Rails.application.routes.draw do
 
       collection do
         get :status
+        post :batch_create
       end
 
       resources :measures, only: [:show, :index], shallow: true
@@ -83,6 +84,7 @@ Rails.application.routes.draw do
           # TODO: Review the end points
           put :run
           post :upload_file
+          post :batch_upload_files
           delete :result_files
           post :requeue
           post :requeue_started

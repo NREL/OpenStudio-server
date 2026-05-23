@@ -403,6 +403,120 @@ class AnalysesController < ApplicationController
     end
   end
 
+  # POST /projects/:project_id/analyses/batch_create.json
+  def batch_create
+    require 'tmpdir'
+    @project = Project.find(params[:project_id])
+    if @project.nil?
+      render json: { error: 'Project not found' }, status: :not_found
+      return
+    end
+
+    uploaded_file = params[:file]
+    if uploaded_file.nil?
+      render json: { error: 'Missing zip file' }, status: :unprocessable_entity
+      return
+    end
+
+    created_analyses = []
+    errors = []
+
+    # Create a temporary directory to unpack the combined zip
+    Dir.mktmpdir do |temp_dir|
+      # Save the uploaded file to temp_dir
+      temp_zip_path = File.join(temp_dir, 'bulk_upload.zip')
+      File.open(temp_zip_path, 'wb') { |f| f.write(uploaded_file.read) }
+
+      # Extract the combined zip file to find the individual OSA zip files
+      begin
+        Zip::File.open(temp_zip_path) do |zip_file|
+          zip_file.each do |entry|
+            next if entry.directory?
+            next unless entry.name.end_with?('.zip')
+
+            # Extract the inner zip file
+            inner_zip_path = File.join(temp_dir, entry.name)
+            entry.extract(inner_zip_path)
+
+            # Now, extract the analysis.json file from the inner zip file to read the formulation
+            inner_temp_dir = File.join(temp_dir, "inner_#{File.basename(entry.name, '.zip')}")
+            Dir.mkdir(inner_temp_dir)
+            
+            analysis_json_path = File.join(inner_temp_dir, 'analysis.json')
+            Zip::File.open(inner_zip_path) do |inner_zip|
+              json_entry = inner_zip.find_entry('analysis.json')
+              if json_entry
+                json_entry.extract(analysis_json_path)
+              else
+                raise "analysis.json not found in #{entry.name}"
+              end
+            end
+
+            # Parse formulation json
+            formulation_json = JSON.parse(File.read(analysis_json_path), symbolize_names: true)
+            analysis_attrs = formulation_json[:analysis]
+            raise "Invalid formulation in #{entry.name}" if analysis_attrs.nil?
+
+            # Prepare the attributes
+            analysis_attrs[:project_id] = @project.id
+            analysis_attrs[:uuid] = SecureRandom.uuid unless analysis_attrs[:uuid]
+
+            # Create a new Analysis
+            analysis = Analysis.new(analysis_attrs)
+            
+            # Attach the inner zip as seed_zip. Paperclip expects a File or UploadedFile
+            # Using ActionDispatch::Http::UploadedFile is safer to ensure filename/type are set
+            file_to_upload = File.open(inner_zip_path)
+            uploaded_file = ActionDispatch::Http::UploadedFile.new(
+              tempfile: file_to_upload,
+              filename: entry.name,
+              type: 'application/zip'
+            )
+            analysis.seed_zip = uploaded_file
+
+            if analysis.save!
+              # Pull out variables
+              analysis.pull_out_os_variables
+              if analysis.urbanopt
+                analysis.pull_out_urbanopt_variables
+              end
+              analysis.save!
+
+              # Start the analysis
+              analysis_type = analysis_attrs[:problem] && analysis_attrs[:problem][:analysis_type]
+              analysis_type ||= 'batch_run'
+
+              # Merging with any default options
+              options = {
+                'simulate_data_point_filename' => 'simulate_data_point.rb',
+                'run_data_point_filename' => 'run_openstudio_workflow_monthly.rb'
+              }
+              analysis.run_analysis(false, analysis_type, options)
+
+              # If it's a batch method, call run_analysis again with 'batch_run'
+              batch_run_methods = ['lhs', 'preflight', 'single_run', 'repeat_run', 'doe', 'diag', 'baseline_perturbation', 'batch_datapoints']
+              if batch_run_methods.include?(analysis_type)
+                analysis.run_analysis(false, 'batch_run', options)
+              end
+
+              created_analyses << { id: analysis.id.to_s, name: analysis.name }
+            else
+              errors << "Failed to save analysis from #{entry.name}: #{analysis.errors.full_messages.join(', ')}"
+            end
+          end
+        end
+      rescue => e
+        errors << "Error processing bulk zip: #{e.message}"
+      end
+    end
+
+    if errors.empty?
+      render json: { created: created_analyses, status: 'success' }, status: :created
+    else
+      render json: { created: created_analyses, errors: errors }, status: :unprocessable_entity
+    end
+  end
+
   def debug_log
     @analysis = Analysis.find(params[:id])
 
