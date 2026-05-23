@@ -41,8 +41,8 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       end
     end
 
-      ids = []
-      if @options[:data_points].empty?
+    ids = []
+    if @options[:data_points].empty?
         logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
         
         if Rails.application.config.x.job_manager == :resque
