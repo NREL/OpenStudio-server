@@ -37,7 +37,14 @@ FileUtils.mkdir_p APP_CONFIG['rails_log_path'] unless Dir.exist? APP_CONFIG['rai
 FileUtils.mkdir_p APP_CONFIG['rails_tmp_path'] unless Dir.exist? APP_CONFIG['rails_tmp_path']
 
 # update the loggers
-Rails.logger = ActiveSupport::TaggedLogging.new(Logger.new("#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"))
+Rails.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new("#{APP_CONFIG['rails_log_path']}/#{Rails.env}.log"))
+unless Rails.logger.respond_to?(:broadcast_to)
+  Rails.logger.singleton_class.class_eval do
+    def broadcast_to(*args)
+      # dummy method for rails 7 compatibility
+    end
+  end
+end
 
 if Rails.application.config.x.job_manager == :resque
   Resque.logger = Logger.new(File.join(APP_CONFIG['rails_log_path'], 'resque.log'))

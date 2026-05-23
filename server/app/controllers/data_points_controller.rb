@@ -423,16 +423,27 @@ class DataPointsController < ApplicationController
 
     files.each do |f|
       begin
+        attachment_data = f['attachment']
+        if attachment_data.is_a?(String)
+          require 'base64'
+          decoded_data = Base64.decode64(attachment_data)
+          io = StringIO.new(decoded_data)
+          io.class.class_eval { attr_accessor :original_filename, :content_type }
+          io.original_filename = f['display_name']
+          io.content_type = f['type'] || 'application/octet-stream'
+          attachment_data = io
+        end
+
         rf = ResultFile.new(
-          display_name: f[:display_name],
-          type: f[:type]
+          display_name: f['display_name'],
+          type: f['type']
         )
-        rf.attachment = f[:attachment]
+        rf.attachment = attachment_data
         @data_point.result_files << rf
         @data_point.save!
         saved += 1
       rescue => e
-        error_messages << "Failed to save file #{f[:display_name]}: #{e.message}"
+        error_messages << "Failed to save file #{f['display_name']}: #{e.message}"
       end
     end
 

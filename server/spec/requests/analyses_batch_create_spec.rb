@@ -19,11 +19,30 @@ RSpec.describe 'Analyses Batch Create API', type: :request do
       Dir.mktmpdir do |dir|
         # 1. Create a dummy formulation JSON
         formulation = {
-          analysis: {
-            name: 'Bulk Analysis A',
-            uuid: SecureRandom.uuid,
-            problem: {
-              analysis_type: 'lhs'
+          'analysis' => {
+            'name' => 'Bulk Analysis A',
+            'uuid' => SecureRandom.uuid,
+            'problem' => {
+              'analysis_type' => 'lhs',
+              'workflow' => [
+                {
+                  'name' => 'dummy_measure',
+                  'arguments' => [
+                    {
+                      'name' => 'dummy_arg',
+                      'value' => 123,
+                      'uuid' => SecureRandom.uuid
+                    }
+                  ],
+                  'variables' => [
+                    {
+                      'name' => 'dummy_var',
+                      'uuid' => SecureRandom.uuid,
+                      'display_name' => 'Dummy Variable'
+                    }
+                  ]
+                }
+              ]
             }
           }
         }
@@ -60,6 +79,10 @@ RSpec.describe 'Analyses Batch Create API', type: :request do
         expect(analysis).not_to be_nil
         expect(analysis.project.id).to eq(project.id)
         expect(analysis.seed_zip).to be_present
+
+        # 6. Check that measures and variables were extracted
+        expect(analysis.measures.count).to eq(1)
+        expect(analysis.variables.count).to eq(2) # 1 argument + 1 variable
       end
     end
   end

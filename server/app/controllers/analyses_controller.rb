@@ -453,13 +453,13 @@ class AnalysesController < ApplicationController
             end
 
             # Parse formulation json
-            formulation_json = JSON.parse(File.read(analysis_json_path), symbolize_names: true)
-            analysis_attrs = formulation_json[:analysis]
+            formulation_json = JSON.parse(File.read(analysis_json_path))
+            analysis_attrs = formulation_json['analysis']
             raise "Invalid formulation in #{entry.name}" if analysis_attrs.nil?
 
             # Prepare the attributes
-            analysis_attrs[:project_id] = @project.id
-            analysis_attrs[:uuid] = SecureRandom.uuid unless analysis_attrs[:uuid]
+            analysis_attrs['project_id'] = @project.id
+            analysis_attrs['uuid'] = SecureRandom.uuid unless analysis_attrs['uuid']
 
             # Create a new Analysis
             analysis = Analysis.new(analysis_attrs)
@@ -483,7 +483,7 @@ class AnalysesController < ApplicationController
               analysis.save!
 
               # Start the analysis
-              analysis_type = analysis_attrs[:problem] && analysis_attrs[:problem][:analysis_type]
+              analysis_type = analysis_attrs['problem'] && analysis_attrs['problem']['analysis_type']
               analysis_type ||= 'batch_run'
 
               # Merging with any default options
