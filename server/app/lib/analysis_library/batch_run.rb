@@ -60,12 +60,16 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
         data_points.each_with_index do |dp, index|
           logger.info "Adding #{dp.uuid} to simulations queue (#{index + 1}/#{total_count})"
           begin
-            if dp.submit_simulation
+            submission_result = dp.submit_simulation
+            if submission_result
               ids << dp.id
               # Sleep between submissions to avoid overwhelming Rserve (except for the last item)
               if index < total_count - 1
                 sleep 5.0  # 5 second delay between submissions
               end
+            else
+              logger.error "Datapoint #{dp.uuid} submit_simulation returned falsey value: #{submission_result.inspect}"
+              # Continue with the next datapoint instead of stopping the entire batch
             end
           rescue => e
             logger.error "Failed to submit simulation for datapoint #{dp.uuid}: #{e.message}"
