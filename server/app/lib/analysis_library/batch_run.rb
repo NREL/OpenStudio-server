@@ -41,28 +41,39 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
       end
     end
 
-    ids = []
-    if @options[:data_points].empty?
-      logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
-      
-      if Rails.application.config.x.job_manager == :resque
-        # Set Redis flag to indicate queuing is starting
-        logger.info "Setting Redis queuing flag for #{@analysis_id}"
-        Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
-      end
+     ids = []
+     if @options[:data_points].empty?
+       logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
+       
+       if Rails.application.config.x.job_manager == :resque
+         # Set Redis flag to indicate queuing is starting
+         logger.info "Setting Redis queuing flag for #{@analysis_id}"
+         Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
+       end
 
-      # queue up the simulations
-      @analysis.data_points.where(status: 'na').each do |dp|
-        logger.info "Adding #{dp.uuid} to simulations queue"
-        ids << dp.id if dp.submit_simulation
-      end
-      
-      if Rails.application.config.x.job_manager == :resque
-        # Delete Redis flag after queuing is done
-        logger.info "Deleting Redis queuing flag for #{@analysis_id}"
-        Resque.redis.del("analysis:#{@analysis_id}:queuing")
-      end        
-    end
+       # queue up the simulations with throttling to avoid overloading Rserve
+       # Submit one analysis at a time with a delay between submissions
+       data_points = @analysis.data_points.where(status: 'na')
+       total_count = data_points.count
+       logger.info "Queuing #{total_count} simulations with throttling"
+       
+       data_points.each_with_index do |dp, index|
+         logger.info "Adding #{dp.uuid} to simulations queue (#{index + 1}/#{total_count})"
+         if dp.submit_simulation
+           ids << dp.id
+           # Sleep between submissions to avoid overwhelming Rserve (except for the last item)
+           if index < total_count - 1
+             sleep 5.0  # 5 second delay between submissions
+           end
+         end
+       end
+       
+       if Rails.application.config.x.job_manager == :resque
+         # Delete Redis flag after queuing is done
+         logger.info "Deleting Redis queuing flag for #{@analysis_id}"
+         Resque.redis.del("analysis:#{@analysis_id}:queuing")
+       end        
+     end
     # This can be a very long list, so put in .debug
     logger.debug "Background job ids are: #{ids}"
 
