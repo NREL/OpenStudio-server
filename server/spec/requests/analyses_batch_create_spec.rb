@@ -11,6 +11,10 @@ RSpec.describe 'Analyses Batch Create API', type: :request do
   let!(:project) { FactoryBot.create(:project) }
 
   describe 'POST /projects/:project_id/analyses/batch_create.json' do
+    before :each do
+      Analysis.destroy_all
+    end
+
     it 'creates analyses and starts them from a combined zip' do
       Dir.mktmpdir do |dir|
         # 1. Create a dummy formulation JSON

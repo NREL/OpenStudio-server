@@ -120,7 +120,7 @@ class Analysis
         job = Delayed::Job.enqueue "AnalysisLibrary::#{analysis_type.camelize}".constantize.new(id, aj.id, options), queue: 'analyses'
         aj.delayed_job_id = job.id
       elsif Rails.application.config.x.job_manager == :resque
-        Resque.enqueue(ResqueJobs::InitializeAnalysis, analysis_type, id, aj.id, options)
+        Resque.enqueue(ResqueJobs::InitializeAnalysis, analysis_type, id, aj.id.to_s, options)
         aj.delayed_job_id = nil
       else
         raise 'Rails.application.config.x.job_manager must be set to :resque or :delayed_job'

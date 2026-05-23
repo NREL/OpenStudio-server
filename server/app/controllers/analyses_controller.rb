@@ -489,13 +489,15 @@ class AnalysesController < ApplicationController
               # Merging with any default options
               options = {
                 'simulate_data_point_filename' => 'simulate_data_point.rb',
-                'run_data_point_filename' => 'run_openstudio_workflow_monthly.rb'
+                'run_data_point_filename' => 'run_openstudio_workflow_monthly.rb',
+                'analysis_type' => analysis_type
               }
               analysis.run_analysis(false, analysis_type, options)
 
               # If it's a batch method, call run_analysis again with 'batch_run'
               batch_run_methods = ['lhs', 'preflight', 'single_run', 'repeat_run', 'doe', 'diag', 'baseline_perturbation', 'batch_datapoints']
               if batch_run_methods.include?(analysis_type)
+                options['analysis_type'] = 'batch_run'
                 analysis.run_analysis(false, 'batch_run', options)
               end
 
