@@ -51,22 +51,28 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
          Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
        end
 
-       # queue up the simulations with throttling to avoid overloading Rserve
-       # Submit one analysis at a time with a delay between submissions
-       data_points = @analysis.data_points.where(status: 'na')
-       total_count = data_points.count
-       logger.info "Queuing #{total_count} simulations with throttling"
-       
-       data_points.each_with_index do |dp, index|
-         logger.info "Adding #{dp.uuid} to simulations queue (#{index + 1}/#{total_count})"
-         if dp.submit_simulation
-           ids << dp.id
-           # Sleep between submissions to avoid overwhelming Rserve (except for the last item)
-           if index < total_count - 1
-             sleep 5.0  # 5 second delay between submissions
-           end
-         end
-       end
+    # queue up the simulations with throttling to avoid overloading Rserve
+    # Submit one analysis at a time with a delay between submissions
+    data_points = @analysis.data_points.where(status: 'na')
+    total_count = data_points.count
+    logger.info "Queuing #{total_count} simulations with throttling"
+    
+    data_points.each_with_index do |dp, index|
+      logger.info "Adding #{dp.uuid} to simulations queue (#{index + 1}/#{total_count})"
+      begin
+        if dp.submit_simulation
+          ids << dp.id
+          # Sleep between submissions to avoid overwhelming Rserve (except for the last item)
+          if index < total_count - 1
+            sleep 5.0  # 5 second delay between submissions
+          end
+        end
+      rescue => e
+        logger.error "Failed to submit simulation for datapoint #{dp.uuid}: #{e.message}"
+        logger.error e.backtrace.join("\n")
+        # Continue with the next datapoint instead of stopping the entire batch
+      end
+    end
        
        if Rails.application.config.x.job_manager == :resque
          # Delete Redis flag after queuing is done
