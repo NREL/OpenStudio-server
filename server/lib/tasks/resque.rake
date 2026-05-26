@@ -9,7 +9,7 @@ unless Gem.win_platform?
     namespace :resque do
       task :setup do
         require 'resque'
-        ENV['QUEUE'] = ''
+        ENV['QUEUE'] ||= '*'
         Resque.redis = Rails.env.development? ? 'localhost:6379' : 'queue:6379'
       end
     end

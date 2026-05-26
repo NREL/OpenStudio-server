@@ -25,3 +25,6 @@ worker-data
 
 # ignore files with ~ at end
 *~
+
+.env
+.antigravitycli

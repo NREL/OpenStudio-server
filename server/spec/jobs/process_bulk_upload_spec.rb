@@ -7,20 +7,20 @@ require 'rails_helper'
 require 'zip'
 require 'tmpdir'
 
-RSpec.describe 'Analyses Batch Create API', type: :request do
+RSpec.describe 'ProcessBulkUpload Jobs', type: :job do
   let!(:project) { FactoryBot.create(:project) }
 
-  describe 'POST /projects/:project_id/analyses/batch_create.json' do
+  describe 'DjJobs::ProcessBulkUpload' do
     before :each do
       Analysis.destroy_all
     end
 
-    it 'creates analyses and starts them from a combined zip' do
+    it 'processes combined zip file, creates analysis, pulls out variables, starts analysis and cleans up zip file' do
       Dir.mktmpdir do |dir|
         # 1. Create a dummy formulation JSON
         formulation = {
           'analysis' => {
-            'name' => 'Bulk Analysis A',
+            'name' => 'Job Bulk Analysis A',
             'uuid' => SecureRandom.uuid,
             'problem' => {
               'analysis_type' => 'lhs',
@@ -30,7 +30,7 @@ RSpec.describe 'Analyses Batch Create API', type: :request do
                   'arguments' => [
                     {
                       'name' => 'dummy_arg',
-                      'value' => 123,
+                      'value' => 456,
                       'uuid' => SecureRandom.uuid
                     }
                   ],
@@ -61,30 +61,40 @@ RSpec.describe 'Analyses Batch Create API', type: :request do
           zip.add('inner.zip', inner_zip_path)
         end
 
-        # 4. Perform the post request
-        uploaded_file = Rack::Test::UploadedFile.new(combined_zip_path, 'application/zip')
-        
-        # Mock analysis start to avoid delayed job queues in test
+        # Copy combined zip to a persistent test path because perform will delete it
+        test_zip_path = File.join(dir, 'test_combined.zip')
+        FileUtils.cp(combined_zip_path, test_zip_path)
+
+        # Mock run_analysis
         allow_any_instance_of(Analysis).to receive(:run_analysis).and_return(true)
 
-        run_background_jobs_immediately do
-          post "/projects/#{project.id}/analyses/batch_create.json", params: { file: uploaded_file }
-        end
+        # Instantiating and performing the DelayedJob
+        job = DjJobs::ProcessBulkUpload.new(test_zip_path, project.id.to_s)
+        job.perform
 
-        expect(response).to have_http_status(:created)
-        json = JSON.parse(response.body)
-        expect(json['status']).to eq('success')
-
-        # 5. Check if the Analysis was saved
-        analysis = Analysis.where(name: 'Bulk Analysis A').first
+        # 4. Check if the Analysis was saved
+        analysis = Analysis.where(name: 'Job Bulk Analysis A').first
         expect(analysis).not_to be_nil
         expect(analysis.project.id).to eq(project.id)
         expect(analysis.seed_zip).to be_present
 
-        # 6. Check that measures and variables were extracted
+        # 5. Check that measures and variables were extracted
         expect(analysis.measures.count).to eq(1)
         expect(analysis.variables.count).to eq(2) # 1 argument + 1 variable
+
+        # 6. Verify combined zip was deleted
+        expect(File.exist?(test_zip_path)).to be_falsey
       end
+    end
+  end
+
+  describe 'ResqueJobs::ProcessBulkUpload' do
+    it 'delegates to DjJobs::ProcessBulkUpload' do
+      double_dj_job = double(DjJobs::ProcessBulkUpload)
+      expect(DjJobs::ProcessBulkUpload).to receive(:new).with('/dummy/path.zip', 'proj-123').and_return(double_dj_job)
+      expect(double_dj_job).to receive(:perform)
+
+      ResqueJobs::ProcessBulkUpload.perform('/dummy/path.zip', 'proj-123')
     end
   end
 end

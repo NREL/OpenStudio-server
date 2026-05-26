@@ -16,47 +16,47 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
     && echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-6.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-        mongodb-org \
-        apt-transport-https \
-        autoconf \
-        bison \
-        shared-mime-info \
-        build-essential \
-        bzip2 \
-        ca-certificates \
-        curl \
-        default-jdk \
-        dos2unix \
-        imagemagick \
-        gdebi-core \
-        git \
-        libbz2-dev \
-        libcurl4-openssl-dev \
-        libdbus-glib-1-2 \
-        libgdbm-dev \
-        libglib2.0-dev \
-        libglu1 \
-        libgsl0-dev \
-        libncurses-dev \
-        libreadline-dev \
-        libxml2-dev \
-        libxslt-dev \
-        libffi-dev \
-        libssl-dev \
-        libyaml-dev \
-        libice-dev \
-        libsm-dev \
-        mongodb-database-tools \
-        nodejs \
-        procps \
-        python3-pip \
-        python3-dev \
-        python3-setuptools \
-        tar \
-        unzip \
-        wget \
-        zip \
-        zlib1g-dev \
+    mongodb-org \
+    apt-transport-https \
+    autoconf \
+    bison \
+    shared-mime-info \
+    build-essential \
+    bzip2 \
+    ca-certificates \
+    curl \
+    default-jdk \
+    dos2unix \
+    imagemagick \
+    gdebi-core \
+    git \
+    libbz2-dev \
+    libcurl4-openssl-dev \
+    libdbus-glib-1-2 \
+    libgdbm-dev \
+    libglib2.0-dev \
+    libglu1 \
+    libgsl0-dev \
+    libncurses-dev \
+    libreadline-dev \
+    libxml2-dev \
+    libxslt-dev \
+    libffi-dev \
+    libssl-dev \
+    libyaml-dev \
+    libice-dev \
+    libsm-dev \
+    mongodb-database-tools \
+    nodejs \
+    procps \
+    python3-pip \
+    python3-dev \
+    python3-setuptools \
+    tar \
+    unzip \
+    wget \
+    zip \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir --upgrade pip
@@ -160,12 +160,12 @@ ENV GECKODRIVER_VERSION=v0.21.0
 RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" && \
     apt-get update && \
     apt-get install -y xvfb \
-        x11-xkb-utils \
-        xfonts-100dpi \
-        xfonts-75dpi \
-        xfonts-scalable \
-        xfonts-cyrillic \
-        firefox && \
+    x11-xkb-utils \
+    xfonts-100dpi \
+    xfonts-75dpi \
+    xfonts-scalable \
+    xfonts-cyrillic \
+    firefox && \
     rm -rf /var/lib/apt/lists/* && \
     cd /usr/local/bin && \
     wget http://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz && \
@@ -178,3 +178,5 @@ RUN chmod +x /usr/local/bin/run-server-tests
 # Test adding the git repo to the container for coveralls
 # The #TEST# will be removed in the test script to be run in the test container
 #TEST#COPY .git /opt/openstudio/.git
+
+RUN mkdir -p /mnt/openstudio/server/bulk_uploads && chown 1000:1000 /mnt/openstudio/server/bulk_uploads

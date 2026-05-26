@@ -428,7 +428,9 @@ class DataPointsController < ApplicationController
           require 'base64'
           decoded_data = Base64.decode64(attachment_data)
           io = StringIO.new(decoded_data)
-          io.class.class_eval { attr_accessor :original_filename, :content_type }
+          class << io
+            attr_accessor :original_filename, :content_type
+          end
           io.original_filename = f['display_name']
           io.content_type = f['type'] || 'application/octet-stream'
           attachment_data = io
