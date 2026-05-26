@@ -1,114 +1,108 @@
+# Docker Compose creates multiple containers on a single machine.
+# run `docker-compose up` to create and run/link the containers
 version: '3.4'
 services:
   db:
-    image: 127.0.0.1:5000/mongo
+    image: mongo:6.0.7
     ports:
       - "27017:27017"
     volumes:
       - dbdata:/data/db
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
     environment:
-      MONGO_INITDB_ROOT_USERNAME: openstudio
-      MONGO_INITDB_ROOT_PASSWORD: openstudio
-    command: "mongod --setParameter internalQueryMaxAddToSetBytes=209715200 --setParameter internalQueryMaxBlockingSortMemoryUsageBytes=209715200"
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    command: "mongod --setParameter internalQueryMaxAddToSetBytes=${MONGO_MEM} --setParameter internalQueryMaxBlockingSortMemoryUsageBytes=${MONGO_MEM}"
   queue:
-    image: 127.0.0.1:5000/redis
+    image: redis:6.0.9
     ports:
       - "6379:6379"
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-    command: "redis-server --requirepass openstudio --maxclients 40000"
-  web:
-    image: 127.0.0.1:5000/openstudio-server
-    ports:
-      - "8080:80"
-      - "80:80"
-      - "443:443"
-    environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=1
-      - MAX_REQUESTS=10
-      - MAX_POOL=10
-      - QUEUES=analysis_wrappers
-      - REDIS_URL=redis://:openstudio@queue:6379
-      - MONGO_USER=openstudio
-      - MONGO_PASSWORD=openstudio
-      - SECRET_KEY_BASE=c4ab6d293e4bf52ee92e8dda6e16dc9b5448d0c5f7908ee40c66736d515f3c29142d905b283d73e5e9cef6b13cd8e38be6fd3b5e25d00f35b259923a86c7c473
+    command: "redis-server --requirepass ${REDIS_PASSWORD} --maxclients 40000"
+  init_bulk_dir:
+    image: busybox
+    command: sh -c "mkdir -p /mnt/openstudio/server/bulk_uploads && chown 1000:1000 /mnt/openstudio/server/bulk_uploads"
     volumes:
       - osdata:/mnt/openstudio
+    restart: "no"
+  web:
+    image: 127.0.0.1:5000/openstudio-server
+    build:
+      context: .
+      target: base
+      args:
+        rails_env: docker
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUES=analysis_wrappers
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     depends_on:
       - db
       - queue
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
+      - init_bulk_dir
+    ports:
+      - "8080:80"
+    volumes:
+      - osdata:/mnt/openstudio
     command: /usr/local/bin/start-server
   web-background:
     image: 127.0.0.1:5000/openstudio-server
+    build:
+      context: .
+      target: base
+      args:
+        rails_env: docker
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=1
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=background,analyses
-      - REDIS_URL=redis://:openstudio@queue:6379
-      - MONGO_USER=openstudio
-      - MONGO_PASSWORD=openstudio
-      - SECRET_KEY_BASE=c4ab6d293e4bf52ee92e8dda6e16dc9b5448d0c5f7908ee40c66736d515f3c29142d905b283d73e5e9cef6b13cd8e38be6fd3b5e25d00f35b259923a86c7c473
-    volumes:
-      - osdata:/mnt/openstudio
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     depends_on:
       - db
-      - web
       - queue
-    deploy:
-      endpoint_mode: dnsrr
-      placement:
-        constraints:
-          - node.role == manager
+      - web
+    volumes:
+      - osdata:/mnt/openstudio
     command: /usr/local/bin/start-web-background
   worker:
     image: 127.0.0.1:5000/openstudio-server
+    build:
+      context: .
+      target: base
+      args:
+        rails_env: docker
     environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
       - QUEUES=requeued,simulations
       - COUNT=1
-      - REDIS_URL=redis://:openstudio@queue:6379
-      - MONGO_USER=openstudio
-      - MONGO_PASSWORD=openstudio
-      - SECRET_KEY_BASE=c4ab6d293e4bf52ee92e8dda6e16dc9b5448d0c5f7908ee40c66736d515f3c29142d905b283d73e5e9cef6b13cd8e38be6fd3b5e25d00f35b259923a86c7c473
-    volumes:
-      - /mnt/openstudio
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     depends_on:
       - web
-      - web-background
       - db
       - queue
       - rserve
-    deploy:
-      endpoint_mode: dnsrr
     command: /usr/local/bin/start-workers
   rserve:
     image: 127.0.0.1:5000/openstudio-rserve
+    build: ./docker/R
+    environment:
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - REDIS_URL=${REDIS_URL}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     volumes:
       - osdata:/mnt/openstudio
     depends_on:
       - web
       - web-background
       - db
-    deploy:
-      endpoint_mode: dnsrr
-      placement:
-        constraints:
-          - node.role == manager
-    environment:
-      - REDIS_URL=redis://:openstudio@queue:6379
-      - MONGO_USER=openstudio
-      - MONGO_PASSWORD=openstudio
-      - SECRET_KEY_BASE=c4ab6d293e4bf52ee92e8dda6e16dc9b5448d0c5f7908ee40c66736d515f3c29142d905b283d73e5e9cef6b13cd8e38be6fd3b5e25d00f35b259923a86c7c473
 volumes:
   osdata:
-    external: true
   dbdata:
-    external: true

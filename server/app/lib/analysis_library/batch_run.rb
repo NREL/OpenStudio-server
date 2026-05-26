@@ -43,47 +43,47 @@ class AnalysisLibrary::BatchRun < AnalysisLibrary::Base
 
     ids = []
     if @options[:data_points].empty?
-        logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
-        
-        if Rails.application.config.x.job_manager == :resque
-          # Set Redis flag to indicate queuing is starting
-          logger.info "Setting Redis queuing flag for #{@analysis_id}"
-          Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
-        end
+      logger.info 'No datapoints were passed into the options, therefore checking which datapoints to run'
+      
+      if Rails.application.config.x.job_manager == :resque
+        # Set Redis flag to indicate queuing is starting
+        logger.info "Setting Redis queuing flag for #{@analysis_id}"
+        Resque.redis.set("analysis:#{@analysis_id}:queuing", true)
+      end
 
-        # queue up the simulations with throttling to avoid overloading Rserve
-        # Submit one analysis at a time with a delay between submissions
-        data_points = @analysis.data_points.where(status: 'na')
-        total_count = data_points.count
-        logger.info "Queuing #{total_count} simulations with throttling"
-        
-        data_points.each_with_index do |dp, index|
-          logger.info "Adding #{dp.uuid} to simulations queue (#{index + 1}/#{total_count})"
-          begin
-            submission_result = dp.submit_simulation
-            if submission_result
-              ids << dp.id
-              # Sleep between submissions to avoid overwhelming Rserve (except for the last item)
-              if index < total_count - 1
-                sleep 5.0  # 5 second delay between submissions
-              end
-            else
-              logger.error "Datapoint #{dp.uuid} submit_simulation returned falsey value: #{submission_result.inspect}"
-              # Continue with the next datapoint instead of stopping the entire batch
+      # queue up the simulations with throttling to avoid overloading Rserve
+      # Submit one analysis at a time with a delay between submissions
+      data_points = @analysis.data_points.where(status: 'na')
+      total_count = data_points.count
+      logger.info "Queuing #{total_count} simulations with throttling"
+      
+      data_points.each_with_index do |dp, index|
+        logger.info "Adding #{dp.uuid} to simulations queue (#{index + 1}/#{total_count})"
+        begin
+          submission_result = dp.submit_simulation
+          if submission_result
+            ids << dp.id
+            # Sleep between submissions to avoid overwhelming Rserve (except for the last item)
+            if index < total_count - 1
+              sleep 5.0  # 5 second delay between submissions
             end
-          rescue => e
-            logger.error "Failed to submit simulation for datapoint #{dp.uuid}: #{e.message}"
-            logger.error e.backtrace.join("\n")
+          else
+            logger.error "Datapoint #{dp.uuid} submit_simulation returned falsey value: #{submission_result.inspect}"
             # Continue with the next datapoint instead of stopping the entire batch
           end
+        rescue => e
+          logger.error "Failed to submit simulation for datapoint #{dp.uuid}: #{e.message}"
+          logger.error e.backtrace.join("\n")
+          # Continue with the next datapoint instead of stopping the entire batch
         end
-        
-        if Rails.application.config.x.job_manager == :resque
-          # Delete Redis flag after queuing is done
-          logger.info "Deleting Redis queuing flag for #{@analysis_id}"
-          Resque.redis.del("analysis:#{@analysis_id}:queuing")
-        end        
-      else
+      end
+      
+      if Rails.application.config.x.job_manager == :resque
+        # Delete Redis flag after queuing is done
+        logger.info "Deleting Redis queuing flag for #{@analysis_id}"
+        Resque.redis.del("analysis:#{@analysis_id}:queuing")
+      end        
+    else
         logger.info "Using provided data_points options: #{@options[:data_points].size} datapoints"
         ids = @options[:data_points]
       end

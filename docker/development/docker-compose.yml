@@ -6,6 +6,10 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
+  queue:
+    image: redis:latest
+    ports:
+      - "6379:6379"
   web:
     build:
       context: ../../
@@ -13,13 +17,17 @@ services:
       args:
         rails_env: docker-dev
     image: nrel/openstudio-server:latest
+    env_file:
+      - ../../.env
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
     links:
       - db
       - rserve
+      - queue
     ports:
       - "8080:3000"
+    mem_limit: 12g
     volumes:
       - osdata:/mnt/openstudio
       - ../..:/opt/openstudio/
@@ -30,16 +38,20 @@ services:
       args:
         rails_env: docker-dev
     image: nrel/openstudio-server:latest
+    env_file:
+      - ../../.env
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUE=analyses,background,analysis_wrappers
     links:
       - db
       - rserve
+      - queue
     volumes:
       - osdata:/mnt/openstudio
       - ../..:/opt/openstudio/
     # TODO: This is not using the wait-for-it script, not sure if we still want this file.
-    command: ../server/bin/delayed_job -i server --queues=analyses,background run
+    command: bundle exec rake resque:work
   worker:
     build:
       context: ../../
@@ -47,15 +59,19 @@ services:
       args:
         rails_env: docker-dev
     image: nrel/openstudio-server:latest
+    env_file:
+      - ../../.env
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - QUEUE=simulations
     links:
       - web
       - db
       - rserve
+      - queue
     volumes:
       - ../..:/opt/openstudio/
-    command: ../server/bin/delayed_job -i worker --queue=simulations run
+    command: bundle exec rake resque:work
   rserve:
     build: ../../docker/R
     image: nrel/openstudio-rserve:latest

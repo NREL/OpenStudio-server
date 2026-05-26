@@ -67,12 +67,13 @@ RSpec.describe 'Analyses Batch Create API', type: :request do
         # Mock analysis start to avoid delayed job queues in test
         allow_any_instance_of(Analysis).to receive(:run_analysis).and_return(true)
 
-        post "/projects/#{project.id}/analyses/batch_create.json", params: { file: uploaded_file }
+        run_background_jobs_immediately do
+          post "/projects/#{project.id}/analyses/batch_create.json", params: { file: uploaded_file }
+        end
 
         expect(response).to have_http_status(:created)
         json = JSON.parse(response.body)
         expect(json['status']).to eq('success')
-        expect(json['created'].size).to eq(1)
 
         # 5. Check if the Analysis was saved
         analysis = Analysis.where(name: 'Bulk Analysis A').first

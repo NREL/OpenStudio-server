@@ -17,6 +17,14 @@ services:
     ports:
       - "6379:6379"
     command: "redis-server --requirepass ${REDIS_PASSWORD} --maxclients 40000"
+  init_bulk_dir:
+    image: busybox
+    command: >
+      sh -c "mkdir -p /mnt/openstudio/server/bulk_uploads &&  
+             chown 1000:1000 /mnt/openstudio/server/bulk_uploads"                            
+    volumes:
+      - osdata:/mnt/openstudio
+    restart: "no"
   web:
     image: nrel/openstudio-server:latest
     build:
@@ -40,12 +48,6 @@ services:
     volumes:
       - osdata:/mnt/openstudio
     command: /usr/local/bin/start-server
-  init_bulk_dir:
-    image: busybox
-    command: sh -c "mkdir -p /mnt/openstudio/server/bulk_uploads && chown 1000:1000 /mnt/openstudio/server/bulk_uploads"
-    volumes:
-      - osdata:/mnt/openstudio
-    restart: "no"
   web-background:
     image: nrel/openstudio-server:latest
     build:
