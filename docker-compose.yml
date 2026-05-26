@@ -34,11 +34,18 @@ services:
     depends_on:
       - db
       - queue
+      - init_bulk_dir
     ports:
       - "8080:80"
     volumes:
       - osdata:/mnt/openstudio
     command: /usr/local/bin/start-server
+  init_bulk_dir:
+    image: busybox
+    command: sh -c "mkdir -p /mnt/openstudio/server/bulk_uploads && chown 1000:1000 /mnt/openstudio/server/bulk_uploads"
+    volumes:
+      - osdata:/mnt/openstudio
+    restart: "no"
   web-background:
     image: nrel/openstudio-server:latest
     build:
