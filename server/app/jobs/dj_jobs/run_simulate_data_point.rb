@@ -259,7 +259,7 @@ module DjJobs
           if File.exist?(run_log_file)
             @sim_logger.info "Setting sdp_log_file to #{run_log_file} which exists? #{File.exist?(run_log_file)}"
             @data_point.sdp_log_file = inline_log_lines(run_log_file)
-          elsif File.exist?(process_log)
+          elsif process_log && File.exist?(process_log)
             @sim_logger.info "Setting sdp_log_file to #{process_log} which exists? #{File.exist?(process_log)}"
             @data_point.sdp_log_file = inline_log_lines(process_log)
           end
