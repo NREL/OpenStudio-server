@@ -632,7 +632,7 @@ module DjJobs
     end
 
     def inline_log_lines(log_path)
-      return [] unless File.exist?(log_path)
+      return [] if log_path.nil? || !File.exist?(log_path)
 
       log_size = File.size(log_path)
       lines = []
