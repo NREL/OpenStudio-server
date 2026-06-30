@@ -9,9 +9,9 @@ echo "Calling $0 with arguments: $@"
 if [[ (-z $1) || (-z $2) || (-z $3) ]]; then
     echo "Expecting script to have 3 parameters:"
     echo "  1: Name of the exiting gem to replace, e.g. openstudio-standards"
-    echo "  2: Argument of the new gem GitHub repo, e.g. NREL/openstudio-standards"
+    echo "  2: Argument of the new gem GitHub repo, e.g. NatLabRockies/openstudio-standards"
     echo "  3: Name of the GitHub branch to install, e.g. master"
-    echo "  -- example use: ./set_standards_version.sh /usr/local/openstudio-2.7.1/Ruby openstudio-standards NREL/openstudio-standards master"
+    echo "  -- example use: ./set_standards_version.sh /usr/local/openstudio-2.7.1/Ruby openstudio-standards NatLabRockies/openstudio-standards master"
     exit 1
 fi
 
@@ -21,7 +21,7 @@ function replace_gem_in_files (){
   # Args:
     # 1. filepath: path to the location of where the new Gemfile will exist, typically /var/oscli
     # 2. gem_name: name of the gem to replace in the Gemfile, e.g., openstudio-standards
-    # 3. gem_repo: name of the new gem that will from github to install, e.g., NREL/openstudio-standards
+    # 3. gem_repo: name of the new gem that will from github to install, e.g., NatLabRockies/openstudio-standards
     # 4. branch: name of the new gem's branch to checkout, e.g., develop
   # Example:
     # Replace  "gem 'openstudio-standards', '= 0.1.15'" with "gem 'openstudio-standards', path: '/var/oscli/clones/openstudio-standards'"

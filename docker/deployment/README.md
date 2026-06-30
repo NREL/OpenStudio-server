@@ -92,7 +92,7 @@ optional arguments:
   --ami_extension AMI_EXTENSION
                         Overwrite the AMI version extension
   --dockerhub_repo DOCKERHUB_REPO
-                        Release from a non-NREL DockerHub repository
+                        Release from a non-NLR DockerHub repository
   --write_json          Write AMI JSON specification to file instead of S3
   --disable_public      Do not make the AMI public
   --enable_custom_build
@@ -102,7 +102,7 @@ optional arguments:
 For official release use, the only flags used are `-v` to enable verbose outputs (useful in the logs should things go 
 awry), `-o` to allow for the log of the `packer` build process to be stored as an artefact in case of automation 
 failure, and `-n` to provide provenance information to consumers of the AMI. Currently, the preferred text in notes is 
-`Official automated release of OpenStudio Server X.Y.Z by NREL`. To use other flags, the `--enable_custom_build` flag 
+`Official automated release of OpenStudio Server X.Y.Z by NLR`. To use other flags, the `--enable_custom_build` flag 
 must additionally be passed, to signal the users recognition that they are not following the standard release process 
 for AMIs.
 
@@ -113,7 +113,7 @@ $ export AWS_ACCESS_KEY_ID=ABCDEFABCDEFABCDEF
 
 $ export AWS_SECRET_ACCESS_KEY=!1qa@2ws#3ed$4rf%5tg^6yh&7uj*8ik(9ol)0p;
 
-$ python build_deploy_ami.py -o /Path/to/log/artifact/ -n "Official automated release of OpenStudio Server 2.4.1 by NREL" -v
+$ python build_deploy_ami.py -o /Path/to/log/artifact/ -n "Official automated release of OpenStudio Server 2.4.1 by NLR" -v
 
 OSS version retrieval command is: ruby -r /Path/to/openstudio-server/server/lib/openstudio_server/version.rb -e "puts OpenstudioServer::Version"
 OSS version retrieved is 2.4.1
@@ -153,10 +153,10 @@ amis.json file is updated on S3.
 
 The first step in building a one-off AMI is ensuring that the `openstudio-server` and `openstudio-rserve` containers 
 that should be deployed are publicly available on a [DockerHub](http://hub.docker.com) repository. This repository does
-not [need to be the official NREL repository](http://hub.docker.com/r/hhorsey/openstudio-server/tags/) however it does
+not [need to be the official NLR repository](http://hub.docker.com/r/hhorsey/openstudio-server/tags/) however it does
 need to be available publicly. For this example, we will use the `2.3.0-test1` tag from `hhorsey`'s 
 [openstudio-server](http://hub.docker.com/r/hhorsey/openstudio-server/tags/) and [openstudio-rserve](http://hub.docker.com/r/hhorsey/openstudio-rserve/tags/) 
-DockerHub repositories. In addition, we assume that the account creating this build is not the official NREL AMI release
+DockerHub repositories. In addition, we assume that the account creating this build is not the official NLR AMI release
 account, and as such cannot alter the amis.json file persisted to S3. Instead, the JSON document specifying the AMI will 
 be persisted as `amis_extension.json`. The command for this situation would be as follows.
 
