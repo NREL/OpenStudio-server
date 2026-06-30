@@ -11,6 +11,9 @@ module DjJobs
     require 'date'
     require 'json'
 
+    MAX_INLINE_SDP_LOG_BYTES = 5_000_000
+    MAX_INLINE_SDP_LOG_LINES = 5_000
+
     def initialize(data_point_id, options = {})
       @data_point = DataPoint.find(data_point_id)
       @options = options
@@ -255,10 +258,10 @@ module DjJobs
           #set sdp_log_file to run/run.log if it exists, else try and set to oscli_simulation.log
           if File.exist?(run_log_file)
             @sim_logger.info "Setting sdp_log_file to #{run_log_file} which exists? #{File.exist?(run_log_file)}"
-            @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
+            @data_point.sdp_log_file = inline_log_lines(run_log_file)
           elsif File.exist?(process_log)
             @sim_logger.info "Setting sdp_log_file to #{process_log} which exists? #{File.exist?(process_log)}"
-            @data_point.sdp_log_file = File.read(process_log).lines if File.exist? process_log
+            @data_point.sdp_log_file = inline_log_lines(process_log)
           end
           report_file = "#{simulation_dir}/out.osw"
           @sim_logger.info "Uploading #{report_file} which exists? #{File.exist?(report_file)}"
@@ -271,7 +274,7 @@ module DjJobs
           # Save the /run/run.log to the sdp_log_file. This does not update while running, rather
           # it is saved at the very end of the simulation.
           if File.exist? run_log_file
-            @data_point.sdp_log_file = File.read(run_log_file).lines
+            @data_point.sdp_log_file = inline_log_lines(run_log_file)
           end
 
           # Save the results to the database - I was PUTing these to the server,
@@ -355,7 +358,7 @@ module DjJobs
         log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
         @sim_logger&.error log_message
         @data_point.set_error_flag
-        @data_point.sdp_log_file = File.read(run_log_file).lines if File.exist? run_log_file
+        @data_point.sdp_log_file = inline_log_lines(run_log_file)
       ensure
         @sim_logger.info "cleaning up /tmp directory"
         #remove xmlvalidation directories left in /tmp from OS
@@ -626,6 +629,32 @@ module DjJobs
         @sim_logger&.error "Could not save report #{display_name} with message: #{e.message} in #{e.backtrace.join("\n")}"
         return false
       end
+    end
+
+    def inline_log_lines(log_path)
+      return [] unless File.exist?(log_path)
+
+      log_size = File.size(log_path)
+      lines = []
+
+      File.open(log_path, 'rb') do |file|
+        if log_size > MAX_INLINE_SDP_LOG_BYTES
+          file.seek(-MAX_INLINE_SDP_LOG_BYTES, IO::SEEK_END)
+          file.gets
+        end
+
+        lines = file.readlines.last(MAX_INLINE_SDP_LOG_LINES)
+      end
+
+      if log_size > MAX_INLINE_SDP_LOG_BYTES
+        omitted_bytes = log_size - MAX_INLINE_SDP_LOG_BYTES
+        lines.unshift("[OpenStudio Server truncated the inline datapoint log by #{omitted_bytes} bytes. Download the Datapoint Simulation Log result file for the full output.]\n")
+      end
+
+      lines
+    rescue StandardError => e
+      @sim_logger&.warn "Could not read inline datapoint log #{log_path}: #{e.message}"
+      []
     end
 
     def run_script_with_args(script_name)
