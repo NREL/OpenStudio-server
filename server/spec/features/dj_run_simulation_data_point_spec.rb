@@ -4,6 +4,7 @@
 # *******************************************************************************
 
 require 'rails_helper'
+require 'tempfile'
 
 RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
   before :all do
@@ -229,6 +230,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: tru
     rescue Errno::EACCES => e
       puts 'Cannot unlink files, will try and continue'
     end
+
     FactoryBot.create(:project_with_analyses).analyses
 
     @project = Project.first
@@ -260,5 +262,37 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: tru
     # For some reason the worker_logs aren't working within the testing framework. They work in
     # actual deployment. # TODO: Figure out why worker_logs don't show up for tests
     puts @data_point.worker_logs.inspect
+  end
+end
+
+RSpec.describe DjJobs::RunSimulateDataPoint do
+  subject(:job) { described_class.allocate }
+
+  describe '#inline_log_lines' do
+    it 'adds a truncation note for oversized log files' do
+      Tempfile.create('large-sdp-log') do |file|
+        file.write('x' * (described_class::MAX_INLINE_SDP_LOG_BYTES + 100))
+        file.write("\nretained-line\n")
+        file.flush
+
+        lines = job.send(:inline_log_lines, file.path)
+
+        expect(lines.first).to include('OpenStudio Server truncated the inline datapoint log')
+        expect(lines.first).to include("last #{described_class::MAX_INLINE_SDP_LOG_BYTES} bytes")
+      end
+    end
+
+    it 'adds a truncation note for logs over the line cap' do
+      Tempfile.create('many-lines-sdp-log') do |file|
+        (described_class::MAX_INLINE_SDP_LOG_LINES + 1).times { |i| file.puts("line #{i}") }
+        file.flush
+
+        lines = job.send(:inline_log_lines, file.path)
+
+        expect(lines.length).to eq(described_class::MAX_INLINE_SDP_LOG_LINES + 1)
+        expect(lines.first).to include('OpenStudio Server truncated the inline datapoint log')
+        expect(lines.first).to include("#{described_class::MAX_INLINE_SDP_LOG_LINES} lines")
+      end
+    end
   end
 end
