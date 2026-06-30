@@ -63,7 +63,7 @@ To develop locally the following dependency stack is recommended.
 docker-compose build
 ```
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully start them by 
-running `docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=4 docker-compose up` 
+running `docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=4 docker-compose up --scale worker=4`
 where 4 is equal to the number of worker nodes you wish to run. For single node servers this should not be greater 
 than the total number of available cores minus 4.
 
@@ -74,11 +74,10 @@ docker-compose rm -f
 docker volume rm osdata dbdata
 docker volume create --name=osdata
 docker volume create --name=dbdata
-OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up
-docker-compose service scale worker=N
+OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up -d --scale worker=N
 
 # Or one line
-docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up && docker-compose service scale worker=N
+docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up -d --scale worker=N
 ```
 
 Congratulations! Visit `http://localhost:8080` to see the OpenStudio Server Management Console.
