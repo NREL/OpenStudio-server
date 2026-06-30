@@ -19,7 +19,7 @@ This package provide functions for box-constrained multiobjective optimization u
 \author{
 Ching-Shih (Vince) Tsou <cstsou@mail.ntcb.edu.tw>
 
-Maintainer: Brian Ball <Brian.Ball@nrel.gov>
+Maintainer: Brian Ball <Brian.Ball@nlr.gov>
 }
 \references{
 Deb, K., Pratap, A., Agarwal, S., and Meyarivan, T. (2002), " A fast and elitist multiobjective genetic algorithm: NSGA-II", IEEE Transactions on Evolutionary Computation, 6(2), 182-197.

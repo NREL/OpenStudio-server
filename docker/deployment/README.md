@@ -1,6 +1,6 @@
 # Automation scripts for CI
 
-OpenStudio Server AMI build and publishing is handled by an internal CI server.   The workflow for publishing release and one-off AMIs is documented in the [wiki](https://github.com/NREL/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-AMIs).
+OpenStudio Server AMI build and publishing is handled by an internal CI server.   The workflow for publishing release and one-off AMIs is documented in the [wiki](https://github.com/NatLabRockies/OpenStudio-server/wiki/Contributor-Docs:-Building-and-Publishing-AMIs).
 
 Additional details related to the specifics of the AMI publishing script are provided below.
 
@@ -8,7 +8,7 @@ Additional details related to the specifics of the AMI publishing script are pro
 
 To execute the AMI automation script `build_deploy_ami.py` in this folder several software dependencies are required. 
 Please note that this script was written for execution on Ubuntu 17.04. First, docker version 17.09.01-ce is required. 
-Notes for installing this are available on [the wiki](http://github.com/NREL/OpenStudio-server/wiki/User-OpenStudio-Server-Deployment). 
+Notes for installing this are available on [the wiki](http://github.com/NatLabRockies/OpenStudio-server/wiki/User-OpenStudio-Server-Deployment). 
 Next, [packer](http://www.packer.io/) version 1.1.3 or later is required. Finally, python version Python 3.6.3 or 
 later is required, as well as the python extension pip. To ensure that docker, packer, and python are available, 
 please run the following in a bourne-again shell.
@@ -128,7 +128,7 @@ Packer command is: packer build -machine-readable -var-file=user_variables.json 
 ## Build process for official release
 
 This script should only ever be run after the successful completion of a build of the main branch of this repo on 
-[GitHub Actions](https://github.com/NREL/OpenStudio-server/actions). This automatically pushes tested docker images to 
+[GitHub Actions](https://github.com/NatLabRockies/OpenStudio-server/actions). This automatically pushes tested docker images to 
 [DockerHub](http://hub.docker.com/r/nrel) for both the [OpenStudio Server](http://hub.docker.com/r/nrel/openstudio-server/tags/) 
 and [OpenStudio Rserve](http://hub.docker.com/r/nrel/openstudio-rserve/tags/) images. These two images are what is 
 provisioned within the AMI built, and as such have to be created as DockerHub artifacts beforehand. For the purposes of
@@ -138,7 +138,7 @@ automation, however, a successful GitHub Action build on the main branch is suff
 This script begins by collecting version information from the repository. This requires the cloned repository to have 
 the same SHA as the successful GitHub Action build, i.e. latest master. This information, along with the AWS access and 
 secret keys, is used to execute packer. Packer spins up a small (c3.xlarge) server from a base Ubuntu AMI. This server
-then is configured based off of the [packer JSON file](http://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/openstudio_server_docker_base.json). 
+then is configured based off of the [packer JSON file](http://github.com/NatLabRockies/OpenStudio-server/blob/develop/docker/deployment/openstudio_server_docker_base.json). 
 The log file of this process is written to the output directory as `build.log` and should be persisted in case of a 
 failure. Upon successful completion of this command, the configured server will be persisted as an AMI before being
 terminated. 

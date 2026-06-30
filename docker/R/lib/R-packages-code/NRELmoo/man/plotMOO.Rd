@@ -23,7 +23,7 @@ compPlotObjectivesGIF(obj1, obj2, objDim)
 }
 
 \author{
-Brian Ball \email{brian.ball@nrel.gov}
+Brian Ball \email{brian.ball@nlr.gov}
 }
 \references{ http://www.r-bloggers.com/generate-uuids-in-r/
 }

@@ -76,7 +76,7 @@ class AdjustTheromstatSetpointsByDegrees < OpenStudio::Ruleset::ModelUserScript
     end
 
     # Add a superfluous require for openstudio-standards.
-    # https://github.com/NREL/OpenStudio-measures/blob/4bcbaa183d327cd1fd765c4b45e4c22a1381c537/nrel_published/create_baseline_building/measure.rb
+    # https://github.com/NatLabRockies/OpenStudio-measures/blob/4bcbaa183d327cd1fd765c4b45e4c22a1381c537/nrel_published/create_baseline_building/measure.rb
     require 'openstudio-standards'
     std = Standard.build('90.1-2013')
     if std

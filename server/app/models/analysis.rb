@@ -460,7 +460,7 @@ class Analysis
   # currently only used with Resque, as it's called by ResqueJobs::InitializeAnalysis job
   # runs on web node
 
-  # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+  # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NatLabRockies/OpenStudio/issues/3942
   # This is local function for workaround until that is resolved
   # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
   def extract_archive(archive_filename, destination, overwrite = true)
@@ -490,7 +490,7 @@ class Analysis
     begin
       Timeout.timeout(3600) do # change to 1hr for large models
         extract_count += 1
-        # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+        # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NatLabRockies/OpenStudio/issues/3942
         # This is local function for workaround until that is resolved
         # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
         extract_archive(seed_zip.path, shared_directory_path)

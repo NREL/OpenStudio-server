@@ -20,7 +20,7 @@ This package provide functions for box-constrained multiobjective optimization u
 \author{
 Ching-Shih (Vince) Tsou <cstsou@mail.ntcb.edu.tw>
 
-Maintainer: Brian Ball <Brian.Ball@nrel.gov>
+Maintainer: Brian Ball <Brian.Ball@nlr.gov>
 }
 \references{
 Zitzler, E., Laumanns, M., Thiele, L., SPEA2: Improving the strength pareto 

@@ -11,7 +11,7 @@ information is provided, at which point the issue will be re-opened and
 addressed.
 
 For more information about issues, please refer to
-https://github.com/NREL/OpenStudio/wiki/Issue-Prioritization
+https://github.com/NatLabRockies/OpenStudio/wiki/Issue-Prioritization
 
 
 ---------------------------------------------------
@@ -20,7 +20,7 @@ SUPPORT GUIDELINES
 
 This issue list is for both feature requests and bug reports.
 The contribution policy can be found at
-https://github.com/NREL/openstudio-server/blob/develop/CONTRIBUTING.md
+https://github.com/NatLabRockies/openstudio-server/blob/develop/CONTRIBUTING.md
 General support can be found at Unmet Hours -
 https://unmethours.com/questions/
 

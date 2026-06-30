@@ -4,7 +4,7 @@
 
 ARG DOCKER_PLATFORM=linux/amd64
 FROM --platform=${DOCKER_PLATFORM} nrel/openstudio-r:4.4.0
-MAINTAINER Nicholas Long nicholas.long@nrel.gov
+LABEL maintainer="Nicholas Long <nicholas.long@nlr.gov>"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libuv1-dev \

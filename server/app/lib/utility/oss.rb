@@ -1,7 +1,7 @@
 module Utility
   class Oss
     # this list should match the env vars unset in the extension gem runner:
-    # https://github.com/NREL/openstudio-extension-gem/blob/develop/lib/openstudio/extension/runner.rb#L155
+    # https://github.com/NatLabRockies/openstudio-extension-gem/blob/develop/lib/openstudio/extension/runner.rb#L155
     ENV_VARS_TO_UNSET_FOR_OSCLI = [
       'BUNDLE_GEMFILE',
       'BUNDLE_PATH',
