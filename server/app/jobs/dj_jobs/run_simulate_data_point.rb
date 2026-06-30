@@ -636,6 +636,7 @@ module DjJobs
 
       log_size = File.size(log_path)
       lines = []
+      truncated_by_lines = false
 
       File.open(log_path, 'rb') do |file|
         if log_size > MAX_INLINE_SDP_LOG_BYTES
@@ -643,12 +644,20 @@ module DjJobs
           file.gets
         end
 
-        lines = file.readlines.last(MAX_INLINE_SDP_LOG_LINES)
+        all_lines = file.readlines
+        truncated_by_lines = all_lines.length > MAX_INLINE_SDP_LOG_LINES
+        lines = all_lines.last(MAX_INLINE_SDP_LOG_LINES).map do |line|
+          line.encode('UTF-8', invalid: :replace, undef: :replace, replace: "\uFFFD")
+        end
       end
 
-      if log_size > MAX_INLINE_SDP_LOG_BYTES
-        omitted_bytes = log_size - MAX_INLINE_SDP_LOG_BYTES
-        lines.unshift("[OpenStudio Server truncated the inline datapoint log by #{omitted_bytes} bytes. Download the Datapoint Simulation Log result file for the full output.]\n")
+      truncated_by_bytes = log_size > MAX_INLINE_SDP_LOG_BYTES
+      if truncated_by_bytes || truncated_by_lines
+        note = "[OpenStudio Server truncated the inline datapoint log"
+        note += " to the last #{MAX_INLINE_SDP_LOG_BYTES} bytes" if truncated_by_bytes
+        note += " and #{MAX_INLINE_SDP_LOG_LINES} lines" if truncated_by_lines
+        note += ". Download the Datapoint Simulation Log result file for the full output.]\n"
+        lines.unshift(note)
       end
 
       lines
