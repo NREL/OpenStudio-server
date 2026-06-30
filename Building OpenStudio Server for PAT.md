@@ -2,7 +2,7 @@ Instruction for building 64 bit Windows 7, 64 bit Windows 8, 64 bit Windows 10, 
 
 Making OpenStudio Server Zip
 
-Clone OpenStudio-server (git@github.com:NREL/OpenStudio-server.git)
+Clone OpenStudio-server (git@github.com:NatLabRockies/OpenStudio-server.git)
 
 Checkout branch “dockerize-pat”
 

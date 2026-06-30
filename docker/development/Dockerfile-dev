@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 FROM nrel/openstudio:2.5.2
-MAINTAINER Nicholas Long nicholas.long@nrel.gov
+LABEL maintainer="Nicholas Long <nicholas.long@nlr.gov>"
 ARG rails_env=docker-dev
 
 # Install required libaries

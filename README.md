@@ -3,15 +3,15 @@
 [![Build Status][gh-img]][gh-url] 
 [![Coverage Status][coveralls-img]][coveralls-url]
 
-Please refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki) for additional documentation.
+Please refer to the [wiki](https://github.com/NatLabRockies/OpenStudio-server/wiki) for additional documentation.
 
-<img src="https://github.com/NREL/OpenStudio-server/assets/2235296/fe91da7d-9e3f-4459-ac5d-579444e6125e" width=50% height=50%>
-<img src="https://github.com/NREL/OpenStudio-server/assets/2235296/c4a75731-72f7-42e6-afc7-d24b9e835a2e" width=50% height=50%>
+<img src="https://github.com/NatLabRockies/OpenStudio-server/assets/2235296/fe91da7d-9e3f-4459-ac5d-579444e6125e" width=50% height=50%>
+<img src="https://github.com/NatLabRockies/OpenStudio-server/assets/2235296/c4a75731-72f7-42e6-afc7-d24b9e835a2e" width=50% height=50%>
 
 ## About
 
 OpenStudio Server is a web application and distributed computing tool, which is the backbone of the OpenStudio Analysis Framework (OSAF).
-It is intended to make parametric analysis of building energy models accessible to architects, engineers, and designers via the [OpenStudio PAT](http://nrel.github.io/OpenStudio-user-documentation/reference/parametric_studies/) GUI or the [OpenStudio Analysis Gem](https://github.com/NREL/OpenStudio-analysis-gem). 
+It is intended to make parametric analysis of building energy models accessible to architects, engineers, and designers via the [OpenStudio PAT](http://natlabrockies.github.io/OpenStudio-user-documentation/reference/parametric_studies/) GUI or the [OpenStudio Analysis Gem](https://github.com/NatLabRockies/OpenStudio-analysis-gem). 
 OpenStudio Server analyses are defined by PAT projects or OSA's.  Each analysis may include many OpenStudio simulations, as determined by project configuration.
 
 Journal of Building Performance Simulation article: [An open source analysis framework for large-scale building energy modeling](https://www.tandfonline.com/doi/full/10.1080/19401493.2020.1778788)
@@ -20,7 +20,7 @@ Journal of Building Performance Simulation article: [An open source analysis fra
 
 There are primarily two ways to utilize and deploy this codebase.
  
-* [openstudio-server-helm](https://github.com/NREL/openstudio-server-helm) This helm chart installs a OpenStudio-server instance deployment on a AWS, Azure, or Google Kubernetes cluster using the Helm package manager. You can interface with the OpenStudio-server cluster using the Parametric Analysis Tool or the [openstudio_meta](./bin/openstudio_meta) CLI.
+* [openstudio-server-helm](https://github.com/NatLabRockies/openstudio-server-helm) This helm chart installs a OpenStudio-server instance deployment on a AWS, Azure, or Google Kubernetes cluster using the Helm package manager. You can interface with the OpenStudio-server cluster using the Parametric Analysis Tool or the [openstudio_meta](./bin/openstudio_meta) CLI.
    
 * [Docker Swarm](https://docs.docker.com/engine/swarm/): This is the recommended local deployment pathway. Swarm is an 
 orchestration engine which allows for multi-node clusters and provides significant benefits in the forms of 
@@ -40,9 +40,9 @@ automatically assembled and zipped for deployment. It is important to note that 
 it is critical to not specify the export path with home (`~`) substitution. Instead, pass a fully specified path to the 
 desired output directory. 
 
-Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the [Parametric Analysis Tool (PAT)](https://github.com/NREL/OpenStudio-PAT) and 
-submitting analyses to it. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NREL/OpenStudio-analysis-gem) or the export OSA function in PAT. For more details, please 
-refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).  For examples, please refer to [OSAF notebooks](https://github.com/NREL/docker-openstudio-jupyter/tree/master).
+Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the [Parametric Analysis Tool (PAT)](https://github.com/NatLabRockies/OpenStudio-PAT) and 
+submitting analyses to it. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NatLabRockies/OpenStudio-analysis-gem) or the export OSA function in PAT. For more details, please 
+refer to the [wiki](https://github.com/NatLabRockies/OpenStudio-server/wiki/CLI).  For examples, please refer to [OSAF notebooks](https://github.com/NatLabRockies/docker-openstudio-jupyter/tree/master).
 
 ### Local Docker Development
 
@@ -57,13 +57,14 @@ To develop locally the following dependency stack is recommended.
     releases, leading to scripts breaking and default behaviours, particularly regarding persistence, changing. The 
     docker version installed and running can be found by typing `docker info` on the command line.*
     
-#### Docker Compose 
+#### Docker Compose
 
 ```bash
 docker-compose build
 ```
+
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully start them by 
-running `docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=4 docker-compose up` 
+running `docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=4 docker-compose up --scale worker=4`
 where 4 is equal to the number of worker nodes you wish to run. For single node servers this should not be greater 
 than the total number of available cores minus 4.
 
@@ -74,11 +75,10 @@ docker-compose rm -f
 docker volume rm osdata dbdata
 docker volume create --name=osdata
 docker volume create --name=dbdata
-OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up
-docker-compose service scale worker=N
+OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up -d --scale worker=N
 
 # Or one line
-docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up && docker-compose service scale worker=N
+docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up -d --scale worker=N
 ```
 
 Congratulations! Visit `http://localhost:8080` to see the OpenStudio Server Management Console.
@@ -107,7 +107,7 @@ docker-compose rm -f
 To deploy the OpenStudio Server in a docker-based production environment one or more machines need to be running Docker 
 Server version 20.10.05. If using docker on a Linux machine it is recommended that significant storage be available to 
 the `/var` folder. This is where Docker reads and writes all data to by default unless changed in the docker-compose.yml file. 
-There are scripts to help with docker swarm deployment [here](https://github.com/NREL/OpenStudio-server/tree/develop/local_setup_scripts).
+There are scripts to help with docker swarm deployment [here](https://github.com/NatLabRockies/OpenStudio-server/tree/develop/local_setup_scripts).
 Make sure to change the defaults to be applicable to your hardware requirements.
 
 ## Testing procedure
@@ -156,10 +156,10 @@ chmod -R 777 gems # Modify privileges on the installed gems
 
 Please contact @tijcolem, @bball, or @nllong with any question regarding this project. Thanks for you interest!
 
-[coveralls-img]: https://coveralls.io/repos/github/NREL/OpenStudio-server/badge.svg?branch=develop
-[coveralls-url]: https://coveralls.io/github/NREL/OpenStudio-server
-[gh-img]: https://github.com/nrel/openstudio-server/actions/workflows/openstudio-server-tests.yml/badge.svg?branch=develop
-[gh-url]: https://github.com/nrel/openstudio-server/actions
+[coveralls-img]: https://coveralls.io/repos/github/NatLabRockies/OpenStudio-server/badge.svg?branch=develop
+[coveralls-url]: https://coveralls.io/github/NatLabRockies/OpenStudio-server
+[gh-img]: https://github.com/NatLabRockies/openstudio-server/actions/workflows/openstudio-server-tests.yml/badge.svg?branch=develop
+[gh-url]: https://github.com/NatLabRockies/openstudio-server/actions
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/j7hqgh2p7bae9xn8/branch/dockerize-appveyor?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/rHorsey/openstudio-server/branch/dockerize-appveyor
 

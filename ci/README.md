@@ -15,7 +15,7 @@ case. Finally, we test on vanilla ubuntu, because why not.
 ### PAT local server use case
 
 To test the PAT use case requires us to first create the library of gems shipped with the PAT application. To do this, 
-we run [openstudio_meta's](https://github.com/NREL/OpenStudio-server/blob/develop/bin/openstudio_meta) `install_gems` 
+we run [openstudio_meta's](https://github.com/NatLabRockies/OpenStudio-server/blob/develop/bin/openstudio_meta) `install_gems` 
 command to build the package of gems and pre-compile all assets. Included is the `--with_test_develop` flag, to ensure 
 rspec and other testing libraries are included. We next need to test the packages in two contexts. The first is 
 integration tests. These focus on exercising the package in the same end-to-end manner as in deployment. This is done 
@@ -36,7 +36,7 @@ statistics. If the images fail to build, and the end of the build log talks abou
 or http(s), try rebuilding the commit. After obtaining new test images the docker-compose.test.yml file is used, with 
 the `docker-compose` CLI, to turn on the server and then to run the unit tests on the deployed docker containers. If 
 the test is being run against the develop or master branch, then a final deploy step is implemented to build non-test 
-images and push them to [DockerHub](https://github.com/NREL/OpenStudio-server/blob/develop/docker/deployment/scripts/deploy_docker.sh). 
+images and push them to [DockerHub](https://github.com/NatLabRockies/OpenStudio-server/blob/develop/docker/deployment/scripts/deploy_docker.sh). 
 Released tags are created from master, and new latest images from develop.
 
 ### Pure ubuntu

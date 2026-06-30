@@ -19,7 +19,7 @@ vectorgrad(func, x, method="one", eps=1e-4, cl=NULL, debug=FALSE, lb=NULL, ub=NU
   numerical gradient of f.
 }
 \author{
-Brian Ball \email{brian.ball@nrel.gov}
+Brian Ball \email{brian.ball@nlr.gov}
 }
 \references{ http://www.r-bloggers.com/generate-uuids-in-r/
 }

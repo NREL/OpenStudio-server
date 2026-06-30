@@ -39,7 +39,7 @@ options[:end_date] = Time.parse(options[:end_date].to_s)
 puts options
 
 ### Repository options
-repo_owner = 'NREL'
+repo_owner = 'NatLabRockies'
 repo = 'OpenStudio-server'
 
 github = Github.new

@@ -12,9 +12,9 @@ set OS_INSTALL_NAME=OpenStudio-%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%+%OPE
 echo Install name is %OS_INSTALL_NAME%
 
 REM Download and Install OpenStudio
-curl -fSLO --insecure https://github.com/NREL/OpenStudio/releases/download/v%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%/%OS_INSTALL_NAME%
+curl -fSLO --insecure https://github.com/NatLabRockies/OpenStudio/releases/download/v%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%/%OS_INSTALL_NAME%
 if %ERRORLEVEL% neq 0 (
-  echo ERROR: Failed to download "%OS_INSTALL_NAME%" from "https://github.com/NREL/OpenStudio/releases/download/v%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%/%OS_INSTALL_NAME%"
+  echo ERROR: Failed to download "%OS_INSTALL_NAME%" from "https://github.com/NatLabRockies/OpenStudio/releases/download/v%OPENSTUDIO_VERSION%%OPENSTUDIO_VERSION_EXT%/%OS_INSTALL_NAME%"
   exit /b 1
 )
 dir .

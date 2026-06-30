@@ -1,5 +1,4 @@
 # Version used to deploy the latest version of the server from docker hub.
-version: '3.4'
 services:
   db:
     image: mongo:8.0.12
@@ -27,7 +26,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
       - QUEUES=analysis_wrappers
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
@@ -48,7 +47,7 @@ services:
   web-background:
     image: nrel/openstudio-server:latest
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
       - QUEUES=background,analyses
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}

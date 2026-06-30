@@ -4,7 +4,7 @@ Title: Parallel Elitist Non-dominated Sorting Genetic Algorithm based on R
 Version: 1.2.23
 Date: 2013-11-21
 Author: Ching-Shih (Vince) Tsou <cstsou@mail.ntcb.edu.tw>
-Maintainer: Brian Ball <Brian.Ball@nrel.gov>
+Maintainer: Brian Ball <Brian.Ball@nlr.gov>
 Description: This package provide functions for box-constrained
         multiobjective optimization using the elitist non-dominated
         sorting genetic algorithm - NSGA-II. Fast non-dominated

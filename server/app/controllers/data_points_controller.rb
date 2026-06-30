@@ -473,7 +473,7 @@ class DataPointsController < ApplicationController
       if @data_point.analysis['problem']
         @data_point.analysis['problem']['workflow']&.each_with_index do |wf, _index|
           m_instance = {}
-          m_instance['uri'] = 'https://bcl.nrel.gov or file:///local'
+          m_instance['uri'] = 'https://bcl.nlr.gov or file:///local'
           m_instance['id'] = wf['measure_definition_uuid']
           m_instance['version_id'] = wf['measure_definition_version_uuid']
 

@@ -30,7 +30,7 @@ module DjJobs
     end
 
     def perform
-      # Logger for the simulate datapoint; create or append so it would also work with delayed jobs https://github.com/NREL/OpenStudio-server/issues/737
+      # Logger for the simulate datapoint; create or append so it would also work with delayed jobs https://github.com/NatLabRockies/OpenStudio-server/issues/737
       @sim_logger = Logger.new(File.open("#{simulation_dir}/#{@data_point.id}.log", File::WRONLY | File::APPEND | File::CREAT))
 
 
@@ -449,7 +449,7 @@ module DjJobs
           begin
             Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               extract_count += 1
-	      # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+	      # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NatLabRockies/OpenStudio/issues/3942
 	      # This is local function for workaround until that is resolved
               #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
               extract_archive(download_file, analysis_dir)
@@ -573,7 +573,7 @@ module DjJobs
       end
     end
 
-    # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NREL/OpenStudio/issues/3942
+    # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NatLabRockies/OpenStudio/issues/3942
     # This is local function for workaround until that is resolved
     #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
     def extract_archive(archive_filename, destination, overwrite = true)

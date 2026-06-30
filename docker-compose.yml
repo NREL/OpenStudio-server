@@ -1,6 +1,5 @@
 # Docker Compose creates multiple containers on a single machine.
 # run `docker-compose up` to create and run/link the containers
-version: '3.4'
 services:
   db:
     image: mongo:8.0.12
@@ -19,13 +18,14 @@ services:
     command: "redis-server --requirepass ${REDIS_PASSWORD} --maxclients 40000"
   web:
     image: nrel/openstudio-server:latest
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
     build:
       context: .
       target: base
       args:
         rails_env: docker
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
       - QUEUES=analysis_wrappers
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
@@ -41,13 +41,14 @@ services:
     command: /usr/local/bin/start-server
   web-background:
     image: nrel/openstudio-server:latest
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
     build:
       context: .
       target: base
       args:
         rails_env: docker
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
       - QUEUES=background,analyses
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
@@ -62,13 +63,14 @@ services:
     command: /usr/local/bin/start-web-background
   worker:
     image: nrel/openstudio-server:latest
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
     build:
       context: .
       target: base
       args:
         rails_env: docker
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
       - QUEUES=requeued,simulations
       - COUNT=1
       - REDIS_URL=${REDIS_URL}
@@ -83,9 +85,10 @@ services:
     command: /usr/local/bin/start-workers
   rserve:
     image: nrel/openstudio-rserve:latest
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
     build: ./docker/R
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
       - REDIS_URL=${REDIS_URL}
       - MONGO_USER=${MONGO_USER}
       - MONGO_PASSWORD=${MONGO_PASSWORD}

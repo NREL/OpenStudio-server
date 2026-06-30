@@ -12,7 +12,7 @@ uuid(uppercase=FALSE)
   Version 4 UUID.
 }
 \author{
-Brian Ball \email{brian.ball@nrel.gov}
+Brian Ball \email{brian.ball@nlr.gov}
 }
 \references{ http://www.r-bloggers.com/generate-uuids-in-r/
 }

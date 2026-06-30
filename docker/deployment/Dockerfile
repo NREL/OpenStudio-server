@@ -1,5 +1,5 @@
 FROM golang:alpine
-MAINTAINER "Nicholas Long<nicholas.long@nrel.gov>"
+LABEL maintainer="Nicholas Long <nicholas.long@nlr.gov>"
 
 # This dockerfile is used to build the AMIs. This includes docker, packer, and python.
 # To build the AMI run the following:

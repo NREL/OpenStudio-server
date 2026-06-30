@@ -20,7 +20,7 @@ else
         brew install pv tree coreutils shared-mime-info
 
         # install portable ruby - required for build that will eventually be published
-        # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
+        # see https://github.com/NatLabRockies/OpenStudio-PAT/wiki/Pat-Build-Notes
         curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-darwin.tar.gz
         tar xzf ruby-3.2.2-darwin.tar.gz
         exit_status_tar=$?
@@ -47,9 +47,9 @@ else
         export OS_NAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
         export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
         #curl -SL --insecure https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
-        #curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v3.8.0/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
-        #curl -SL --insecure https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
-        URL="https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/${OS_NAME}.tar.gz"
+        #curl -SL --insecure https://github.com/NatLabRockies/OpenStudio/releases/download/v3.8.0/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        #curl -SL --insecure https://github.com/NatLabRockies/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/${OS_NAME}.tar.gz -o $OS_NAME_WITH_PLUS.tar.gz
+        URL="https://github.com/NatLabRockies/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/${OS_NAME}.tar.gz"
         FILENAME="${OS_NAME_WITH_PLUS}.tar.gz"
 
         echo "→ Downloading OpenStudio tarball from: ${URL}"
@@ -110,7 +110,7 @@ else
         sudo systemctl start mongod
 
         # install portable ruby - required for build that will eventually be published
-        # see https://github.com/NREL/OpenStudio-PAT/wiki/Pat-Build-Notes
+        # see https://github.com/NatLabRockies/OpenStudio-PAT/wiki/Pat-Build-Notes
         #curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-linux.tar.gz
         curl -SLO --insecure https://openstudio-resources.s3.us-east-1.amazonaws.com/pat-dependencies3/ruby-3.2.2-ubuntu24.04-x86_64.tar.gz                             
         tar xvzf ruby-3.2.2-ubuntu24.04-x86_64.tar.gz 

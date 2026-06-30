@@ -1,6 +1,5 @@
 # Docker Compose creates multiple containers on a single machine.
 # run `docker-compose up` to create and run/link the containers
-version: '2'
 services:
   db:
     image: mongo:latest
@@ -14,7 +13,7 @@ services:
         rails_env: docker-dev
     image: nrel/openstudio-server:latest
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
     links:
       - db
       - rserve
@@ -31,7 +30,7 @@ services:
         rails_env: docker-dev
     image: nrel/openstudio-server:latest
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
     links:
       - db
       - rserve
@@ -48,7 +47,7 @@ services:
         rails_env: docker-dev
     image: nrel/openstudio-server:latest
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
     links:
       - web
       - db
@@ -60,7 +59,7 @@ services:
     build: ../../docker/R
     image: nrel/openstudio-rserve:latest
     environment:
-      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS}
+      - OS_SERVER_NUMBER_OF_WORKERS=${OS_SERVER_NUMBER_OF_WORKERS:-1}
     volumes:
       - osdata:/mnt/openstudio
 volumes:
