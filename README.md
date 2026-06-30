@@ -57,11 +57,12 @@ To develop locally the following dependency stack is recommended.
     releases, leading to scripts breaking and default behaviours, particularly regarding persistence, changing. The 
     docker version installed and running can be found by typing `docker info` on the command line.*
     
-#### Docker Compose 
+#### Docker Compose
 
 ```bash
 docker-compose build
 ```
+
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully start them by 
 running `docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=4 docker-compose up --scale worker=4`
 where 4 is equal to the number of worker nodes you wish to run. For single node servers this should not be greater 
