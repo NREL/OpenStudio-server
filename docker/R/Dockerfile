@@ -2,8 +2,13 @@
 # DESCRIPTION:      OpenStudio Server R Container
 # TO_BUILD_AND_RUN: docker-compose up
 
-FROM nrel/openstudio-r:4.4.0
+ARG DOCKER_PLATFORM=linux/amd64
+FROM --platform=${DOCKER_PLATFORM} nrel/openstudio-r:4.4.0
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libuv1-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Add in the additional R packages
 ADD /install_packages.R install_packages.R
@@ -31,5 +36,3 @@ ENTRYPOINT ["rserve-entrypoint"]
 CMD Rscript start.R 2>&1 | tee /mnt/openstudio/log/Rserve.log
 
 EXPOSE 6311
-
-

@@ -3,16 +3,19 @@
 # TO_BUILD_AND_RUN: docker-compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
-#may include suffix
+# may include suffix
 ARG OPENSTUDIO_VERSION=3.11.0
-FROM nrel/openstudio:3.11.0 AS base
+ARG DOCKER_PLATFORM=linux/amd64
+FROM --platform=${DOCKER_PLATFORM} nrel/openstudio:${OPENSTUDIO_VERSION} AS base
 ARG OPENSTUDIO_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Install required libaries.
 #   realpath - needed for wait-for-it
-RUN apt-get update && apt-get install -y wget gnupg lsb-release \
-    && wget -qO - https://www.mongodb.org/static/pgp/server-8.0.asc | gpg --dearmor | tee /usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg \
+RUN apt-get update && apt-get install -y --no-install-recommends gnupg lsb-release \
+    && curl -fsSLk https://pgp.mongodb.com/server-8.0.asc -o /tmp/mongodb-server-8.0.asc \
+    && gpg --batch --show-keys --with-colons /tmp/mongodb-server-8.0.asc | grep -q '^fpr:::::::::4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05:' \
+    && gpg --batch --yes --dearmor -o /usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg /tmp/mongodb-server-8.0.asc \
     && echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/8.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-8.0.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -23,7 +26,6 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
         shared-mime-info \
         build-essential \
         bzip2 \
-        ca-certificates \
         curl \
         default-jdk \
         dos2unix \
@@ -55,13 +57,24 @@ RUN apt-get update && apt-get install -y wget gnupg lsb-release \
         wget \
         zip \
         zlib1g-dev \
+    && rm -f /tmp/mongodb-server-8.0.asc \
     && rm -rf /var/lib/apt/lists/*
 
 # Install passenger (this also installs nginx)
 ENV PASSENGER_VERSION=6.0.27
+ENV NGINX_VERSION=1.26.3
 
 RUN gem install passenger -v ${PASSENGER_VERSION}
-RUN passenger-install-nginx-module
+RUN curl -fsSLk https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz -o /tmp/nginx.tar.gz \
+    && echo "69ee2b237744036e61d24b836668aad3040dda461fe6f570f1787eab570c75aa  /tmp/nginx.tar.gz" | sha256sum -c - \
+    && tar -xzf /tmp/nginx.tar.gz -C /tmp \
+    && passenger-install-nginx-module \
+        --auto \
+        --prefix=/opt/nginx \
+        --nginx-source-dir=/tmp/nginx-${NGINX_VERSION} \
+        --languages ruby,nodejs \
+        --extra-configure-flags=none \
+    && rm -rf /tmp/nginx.tar.gz /tmp/nginx-${NGINX_VERSION}
 
 # Configure the nginx server
 RUN mkdir /var/log/nginx
