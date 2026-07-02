@@ -121,19 +121,19 @@ module ExternalBatch
       end
     end
 
-    # Mirrors data_points_controller#upload_file
+    # Mirrors data_points_controller#upload_file. Builds the embedded ResultFile
+    # in memory only — everything persists together in ingest_data_point's final
+    # dp.save!, so an ingest killed mid-pass can't leave partial attachments. The
+    # guard also skips files a previous interrupted pass already persisted.
     def attach(dp, path, type, display_name = nil)
       return unless File.exist?(path)
 
       display_name ||= File.basename(path, '.*')
-      file = File.open(path, 'rb')
-      begin
-        rf = ResultFile.new(display_name: display_name, type: type)
+      return if dp.result_files.any? { |rf| rf.display_name == display_name && rf.type == type }
+
+      File.open(path, 'rb') do |file|
+        rf = dp.result_files.build(display_name: display_name, type: type)
         rf.attachment = file
-        dp.result_files << rf
-        dp.save!
-      ensure
-        file.close
       end
     end
 

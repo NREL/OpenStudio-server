@@ -181,6 +181,28 @@ RSpec.describe 'ExternalBatch', type: :model do
       expect(dp.status_message).to eq 'datapoint failure'
     end
 
+    it 'does not duplicate result files when re-ingesting after an interrupted pass' do
+      analysis, dp = barebones_analysis_with_dp
+      dir = bake_result(analysis, dp)
+
+      # simulate a prior ingest killed mid-pass: one ResultFile was persisted
+      # but the dp never reached status completed, so it gets ingested again
+      File.open(File.join(dir, 'out.osw'), 'rb') do |f|
+        rf = ResultFile.new(display_name: 'Final OSW File', type: 'Report')
+        rf.attachment = f
+        dp.result_files << rf
+        dp.save!
+      end
+
+      expect(ExternalBatch::Ingester.new(analysis).ingest_new_results).to eq 1
+
+      dp.reload
+      expect(dp.status).to eq 'completed'
+      names = dp.result_files.map(&:display_name)
+      expect(names.count('Final OSW File')).to eq(1), "re-ingest must not duplicate attachments, got #{names.inspect}"
+      expect(names).to include('objectives', 'Zip File', 'eplustbl')
+    end
+
     it 'skips result dirs without status.json and is idempotent' do
       analysis, dp = barebones_analysis_with_dp
       partial = File.join(ExternalBatch.results_dir(analysis.id), dp.id.to_s)
