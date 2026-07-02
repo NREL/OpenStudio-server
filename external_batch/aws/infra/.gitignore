@@ -1,0 +1,6 @@
+# Terraform state contains account IDs/ARNs — never commit
+terraform.tfstate
+terraform.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+*.tfvars
