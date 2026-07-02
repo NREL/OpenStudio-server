@@ -176,3 +176,32 @@ RSpec.describe AnalysisLibrary::Sampling::Lhs, type: :model do
     end
   end
 end
+
+# Per-analysis problem.algorithm.sampling_backend override resolution
+RSpec.describe AnalysisLibrary::Lhs, type: :model do
+  def backend_for(algorithm)
+    project = Project.create(name: 'backend resolution test')
+    analysis = project.analyses.create(name: 'backend resolution', problem: { 'algorithm' => algorithm })
+    lhs = AnalysisLibrary::Lhs.new(analysis.id, 'unused-job-id')
+    lhs.instance_variable_set(:@analysis, analysis)
+    lhs.send(:sampling_backend)
+  end
+
+  it 'accepts string and symbol overrides regardless of case' do
+    expect(backend_for('sampling_backend' => 'ruby')).to eq :ruby
+    expect(backend_for('sampling_backend' => 'RSERVE')).to eq :rserve
+    expect(backend_for('sampling_backend' => :ruby)).to eq :ruby
+  end
+
+  it 'rejects unknown or non-string overrides with a clear error' do
+    expect { backend_for('sampling_backend' => 'bogus') }
+      .to raise_error(/sampling_backend 'bogus'.*rserve, ruby/)
+    expect { backend_for('sampling_backend' => 123) }
+      .to raise_error(/sampling_backend '123'.*rserve, ruby/)
+  end
+
+  it 'falls back to the configured default when no override is given' do
+    # local-test environment configures the pure-Ruby backend
+    expect(backend_for({})).to eq :ruby
+  end
+end

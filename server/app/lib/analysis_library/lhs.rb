@@ -42,17 +42,19 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
-    backend = sampling_backend
-    seed = @analysis.problem['algorithm']['seed']
-    seed = nil unless seed.is_a? Numeric
-
-    if backend == :rserve
-      # Create an instance for R
-      @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
-                                                   APP_CONFIG['rserve_port'])
-    end
-
     begin
+      # inside the rescue so a bad sampling_backend override in the OSA marks
+      # the analysis errored instead of crashing the delayed job
+      backend = sampling_backend
+      seed = @analysis.problem['algorithm']['seed']
+      seed = nil unless seed.is_a? Numeric
+
+      if backend == :rserve
+        # Create an instance for R
+        @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                     APP_CONFIG['rserve_port'])
+      end
+
       logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
       logger.info "Sampling backend for #{self.class.name} is #{backend}"
       # TODO: can we move the mkdir_p to the initialize task
@@ -141,12 +143,21 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
 
   private
 
+  VALID_SAMPLING_BACKENDS = [:rserve, :ruby].freeze
+
   # Sampling backend: :rserve (default; docker deployments) or :ruby (no Rserve
   # required; default for start_local deployments via config/environments).
   # Can be forced per-analysis with problem.algorithm.sampling_backend in the OSA.
   def sampling_backend
     override = (@analysis.problem || {}).dig('algorithm', 'sampling_backend')
-    return override.to_sym if override.present?
+    if override.present?
+      backend = override.to_s.strip.downcase.to_sym
+      unless VALID_SAMPLING_BACKENDS.include?(backend)
+        raise "Invalid problem.algorithm.sampling_backend '#{override}': valid values are #{VALID_SAMPLING_BACKENDS.join(', ')}"
+      end
+
+      return backend
+    end
 
     configured = Rails.application.config.x.sampling_backend
     configured.present? ? configured.to_sym : :rserve
