@@ -122,9 +122,8 @@ are invisible in the wrong region.
    mean a chunk completed.
 5. **CloudWatch → Log groups → /aws/batch/job**: all container logs, kept after
    jobs finish.
-6. **Billing → Cost Explorer** (search "Billing"): EC2 + S3 charges show within
-   a day. A small smoke run is cents. Set up a **Budget alert** (Billing →
-   Budgets → e.g. $10/month) on any personal account — best practice.
+6. **Billing** — see the dedicated section below; note the Batch GUI itself
+   never shows dollars.
 
 ## 6. Stuck/failing? (in likelihood order)
 
@@ -140,7 +139,65 @@ are invisible in the wrong region.
 - Corporate proxy TLS errors from the CLI: add `ca_bundle = <corp cert path>`
   under `[default]` in `~/.aws/config`.
 
-## 7. Cleanup
+## 7. Billing alerts and seeing what a run cost
+
+**Set up a budget alert first thing on any personal account.** In the console:
+top-right search → **Billing and Cost Management** → left menu **Budgets** →
+**Create budget** → "Use a template" → **Monthly cost budget** → amount (e.g.
+$10) → your email → create. You'll get email at 85%/100% actual and when the
+month's *forecast* exceeds the amount. Basic email budgets are free. Same thing
+from the CLI:
+
+```bash
+aws budgets create-budget --account-id <ACCOUNT> \
+  --budget '{"BudgetName":"osaf-batch-monthly","BudgetLimit":{"Amount":"10","Unit":"USD"},"TimeUnit":"MONTHLY","BudgetType":"COST"}' \
+  --notifications-with-subscribers '[
+    {"Notification":{"NotificationType":"ACTUAL","ComparisonOperator":"GREATER_THAN","Threshold":80,"ThresholdType":"PERCENTAGE"},"Subscribers":[{"SubscriptionType":"EMAIL","Address":"<YOUR_EMAIL>"}]},
+    {"Notification":{"NotificationType":"FORECASTED","ComparisonOperator":"GREATER_THAN","Threshold":100,"ThresholdType":"PERCENTAGE"},"Subscribers":[{"SubscriptionType":"EMAIL","Address":"<YOUR_EMAIL>"}]}]'
+```
+
+**Can you see cost in the Batch GUI? No.** AWS Batch itself is free and its
+console shows no dollars — you pay for the EC2 instances, S3, and ECR
+underneath. Where to look instead:
+
+- **Cost Explorer** (Billing → Cost Explorer → "Launch"): group by **Service**
+  — batch runs appear as "EC2 – Instances" (the big one), "EC2 – Other"
+  (EBS/data transfer), S3, and ECR. Filter by region to isolate the batch
+  region. Data lags ~24 h, so don't expect today's run to show until tomorrow.
+- **Rough per-run math from the Batch GUI**: Batch → Jobs → your job → child
+  jobs show start/stop times. runtime × instance on-demand price (an
+  m5d.xlarge is ~$0.23/h) ≈ compute cost. A 10-minute 3-sim smoke run ≈ 4
+  cents.
+- **Free Tier page** (Billing → Free Tier) shows usage against free-tier
+  limits on new accounts.
+- Optional, for exact attribution when the account is shared: add tags to the
+  compute environment's instances (`tags` under `compute_resources` in
+  `infra/main.tf`), activate them under Billing → **Cost allocation tags**
+  (takes ~24 h), then filter Cost Explorer by tag. Not wired in by default —
+  changing compute-environment tags forces its replacement.
+
+## 8. The official smoke test (verify your setup end-to-end)
+
+Once steps 0–3 are done, one command proves the whole pipeline against YOUR
+account — it runs the same SEB calibration LHS project the docker-stack CI
+uses and asserts the calibration results match the CI golden values
+(spec/features/aws_batch_smoke_spec.rb; needs a local mongod, same harness as
+any local spec run):
+
+```bash
+export AWS_BATCH_SMOKE_BUCKET=osaf-batch-<ACCOUNT>
+export AWS_BATCH_SMOKE_JOB_QUEUE=osaf-batch-queue
+export AWS_BATCH_SMOKE_JOB_DEFINITION=osaf-batch-runner
+export AWS_BATCH_SMOKE_REGION=us-east-1
+cd server && RAILS_ENV=local-test bundle exec rspec spec/features/aws_batch_smoke_spec.rb
+```
+
+Unset, the spec skips — so it never runs in CI by accident. Expect ~10–15
+minutes (fleet scale-from-zero + three real EnergyPlus calibration runs) and
+well under a dollar. The mocked twin of this pipeline
+(spec/models/external_batch_aws_spec.rb) runs in normal CI with no AWS at all.
+
+## 9. Cleanup
 
 - Between runs: nothing to do — the compute environment scales to zero
   (you pay only S3 storage; `runs/` auto-expires after 30 days).
