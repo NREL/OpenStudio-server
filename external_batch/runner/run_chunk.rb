@@ -86,6 +86,12 @@ def log(msg)
   $stdout.flush
 end
 
+# POSIX: run children in their own process group so a timeout can kill the
+# whole tree (shell, OSCLI, EnergyPlus). Windows uses taskkill /T instead.
+def spawn_pgroup_opts
+  Gem.win_platform? ? {} : { pgroup: true }
+end
+
 # Replicates the dp-level script hooks from DjJobs::RunSimulateDataPoint#run_script_with_args.
 # POSIX-only; on Windows (mock executor) scripts are skipped with a warning.
 def run_data_point_script(analysis_dir, analysis_id, dp_id, script_name, results_dp_dir, runner_log)
@@ -111,15 +117,11 @@ def run_data_point_script(analysis_dir, analysis_id, dp_id, script_name, results
 
   log_path = File.join(results_dp_dir, "#{script_name}.log")
   env = { 'SCRIPT_ANALYSIS_ID' => analysis_id, 'SCRIPT_DATA_POINT_ID' => dp_id }
-  pid = Process.spawn(env, script_path, *args.map(&:to_s), [:out, :err] => [log_path, 'w'])
+  pid = Process.spawn(env, script_path, *args.map(&:to_s), [:out, :err] => [log_path, 'w'], **spawn_pgroup_opts)
   Timeout.timeout(4 * 3600) { Process.wait(pid) }
   runner_log.puts "#{script_name}.sh exited with #{$?.exitstatus}"
 rescue Timeout::Error
-  begin
-    Process.kill('KILL', pid) if pid
-  rescue StandardError
-    nil
-  end
+  kill_process_tree(pid, runner_log) if pid
   runner_log.puts "#{script_name}.sh killed after 4h timeout"
 rescue StandardError => e
   runner_log.puts "#{script_name}.sh failed: #{e.message}"
@@ -182,7 +184,7 @@ def run_data_point(dp_id, analysis_dir, results_root, manifest, openstudio_cmd)
     timeout_s = 28_800 unless timeout_s.positive?
 
     begin
-      pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'])
+      pid = Process.spawn(oscli_env_unset, cmd, [:err, :out] => [process_log, 'w'], **spawn_pgroup_opts)
       Timeout.timeout(timeout_s) { Process.wait(pid) }
       exit_status = $?.exitstatus
       runner_log.puts "OSCLI exited with #{exit_status}"
