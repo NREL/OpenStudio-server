@@ -70,10 +70,16 @@ module ExternalBatch
       zip_path = @analysis.seed_zip&.path
       raise "Analysis #{@analysis.id} has no seed zip attached" if zip_path.nil? || !File.exist?(zip_path)
 
+      base_dir = File.expand_path(analysis_pkg_dir)
       ::Zip.sort_entries = true
       ::Zip::File.open(zip_path) do |zf|
         zf.each do |f|
-          f_path = File.join(analysis_pkg_dir, f.name)
+          f_path = File.expand_path(File.join(base_dir, f.name))
+          # Zip Slip guard: a crafted entry name ("../..") must not escape the package
+          unless f_path == base_dir || f_path.start_with?(base_dir + File::SEPARATOR)
+            raise "Seed zip entry '#{f.name}' would extract outside the package directory"
+          end
+
           FileUtils.mkdir_p(File.dirname(f_path))
           zf.extract(f, f_path) unless File.exist?(f_path)
         end

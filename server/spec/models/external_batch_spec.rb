@@ -92,6 +92,24 @@ RSpec.describe 'ExternalBatch', type: :model do
       end
     end
 
+    it 'refuses seed zip entries that escape the package directory (zip slip)' do
+      analysis, dps = create_fixture_analysis(num_dps: 1)
+
+      evil_zip = File.join(@batch_root, 'evil.zip')
+      ::Zip::File.open(evil_zip, ::Zip::File::CREATE) do |zf|
+        zf.get_output_stream('../../escaped.txt') { |f| f.write 'pwned' }
+      end
+      # close the handle explicitly or tmpdir cleanup fails on Windows (EACCES)
+      File.open(evil_zip) do |zip_io|
+        analysis.seed_zip = zip_io
+        analysis.save!
+      end
+
+      expect { ExternalBatch::Packager.new(analysis, dps).package! }
+        .to raise_error(/outside the package directory/)
+      expect(File.exist?(File.join(ExternalBatch.batch_dir(analysis.id), 'escaped.txt'))).to be false
+    end
+
     it 'refuses urbanopt and gemfile analyses and empty datapoint lists' do
       analysis, dps = create_fixture_analysis(num_dps: 1)
 
