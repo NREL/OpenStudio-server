@@ -18,6 +18,7 @@
 # <batch_dir> is <external_batch_root>/analysis_<id> (contains package/ and results/).
 
 require 'json'
+require 'fileutils'
 require 'optparse'
 require 'rbconfig'
 
@@ -46,6 +47,9 @@ abort "No manifest.json at #{manifest_path}" unless File.exist?(manifest_path)
 manifest = JSON.parse(File.read(manifest_path))
 num_chunks = manifest['chunks'].size
 parallel = [options[:parallel], 1].max
+
+# a synced/remote copy of the batch dir may not have results/ yet (S3 has no empty dirs)
+FileUtils.mkdir_p results_dir
 
 puts "Executing #{num_chunks} chunk(s) for analysis #{manifest['analysis_id']} (#{manifest['data_point_count']} datapoints, parallel=#{parallel})"
 

@@ -55,6 +55,9 @@ Chunk size: `OS_SERVER_EXTERNAL_BATCH_DPS_PER_CHUNK` (default 50).
 | `runner/run_chunk.rb` | executor | plain Ruby + OpenStudio CLI only |
 | `local_executor.rb` | anywhere (mock/dev/CI) | plain Ruby |
 | `templates/kestrel_array.sbatch` | Kestrel login node | Apptainer image |
+| `aws/Dockerfile` + `aws/task_wrapper.sh` | AWS Batch container | ECR image |
+| `aws/submit_batch.rb` + `aws/sync_results.rb` | your workstation / server host | AWS CLI creds |
+| `aws/infra/main.tf` | one-time `terraform apply` | AWS account |
 
 ## Contracts (schema_version 1)
 
@@ -81,12 +84,12 @@ marked errored and the analysis completes.
   SLURM array job where each task runs `run_chunk.rb` inside the image
   (`SLURM_ARRAY_TASK_ID` selects the chunk). See `templates/kestrel_array.sbatch`.
   Stage the package on node-local disk (`--tmp`); never run E+ on Lustre.
-- **AWS Batch**: array job on the `nrel/openstudio` image; job definition
-  command runs `run_chunk.rb` (`AWS_BATCH_JOB_ARRAY_INDEX` selects the chunk),
-  with the package synced from S3 in a wrapper script and results synced back.
-  Transport to/from the server host is `aws s3 sync` of the batch dir (the
-  ingester just watches the local results dir, so sync down on the server side
-  can run in a loop or cron).
+- **AWS Batch**: fully scripted — see `aws/README.md`. One-time
+  `terraform apply` (bucket, ECR, Batch queue/compute env/job definition,
+  scoped IAM) + image push; per run `aws/submit_batch.rb` (package → S3, submit
+  array job) and `aws/sync_results.rb` (mirror results down for the ingest
+  loop). Containers authenticate via an IAM task role — no keys in images or
+  jobs.
 
 ## Limitations (v1)
 

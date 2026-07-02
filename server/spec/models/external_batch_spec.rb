@@ -12,6 +12,8 @@ require 'rbconfig'
 # subprocesses against a stub OpenStudio CLI, so the whole contract is covered
 # without EnergyPlus.
 RSpec.describe 'ExternalBatch', type: :model do
+  include ExternalBatchHelpers
+
   around do |example|
     Dir.mktmpdir do |tmp|
       @batch_root = tmp
@@ -31,26 +33,6 @@ RSpec.describe 'ExternalBatch', type: :model do
     rescue Errno::EACCES
       puts 'Cannot unlink files, will try and continue'
     end
-  end
-
-  # Seeds Mongo the same way the API upload path does (analyses_controller#create + #upload)
-  def create_fixture_analysis(num_dps: 3)
-    project = Project.create(name: 'external batch spec')
-    hash = JSON.parse(File.read(Rails.root.join('spec', 'files', 'batch_datapoints', 'example_csv.json')))
-    analysis = project.analyses.new(hash['analysis'])
-    analysis.save!
-    analysis.pull_out_os_variables
-    analysis.seed_zip = File.new(Rails.root.join('spec', 'files', 'batch_datapoints', 'example_csv.zip'))
-    analysis.save!
-
-    variables = Variable.where(analysis_id: analysis.id, perturbable: true).order_by(:name.asc).to_a
-    expect(variables).not_to be_empty
-
-    data_points = (1..num_dps).map do |i|
-      svv = variables.map { |v| [v.id.to_s, 1 + (i % 2)] }.to_h
-      analysis.data_points.create!(name: "external batch dp #{i}", set_variable_values: svv)
-    end
-    [analysis, data_points]
   end
 
   def bake_result(analysis, dp, completed_status: 'Success')
@@ -237,39 +219,12 @@ RSpec.describe 'ExternalBatch', type: :model do
   end
 
   describe 'full pipeline: package -> local executor (stub CLI) -> ingest' do
-    def write_stub_cli
-      stub_path = File.join(@batch_root, 'fake_openstudio.rb')
-      File.write(stub_path, <<~RUBY)
-        # Stub of `openstudio run --workflow <osw>`: writes the artifact set the
-        # runner collects, without running EnergyPlus.
-        require 'json'
-        require 'fileutils'
-
-        i = ARGV.index('--workflow')
-        abort 'no --workflow given' unless i
-        osw = ARGV[i + 1]
-        dp_dir = File.dirname(osw)
-        run_dir = File.join(dp_dir, 'run')
-        FileUtils.mkdir_p run_dir
-        FileUtils.mkdir_p File.join(dp_dir, 'reports')
-
-        File.write(File.join(dp_dir, 'out.osw'), JSON.generate(completed_status: 'Success', steps: []))
-        File.write(File.join(run_dir, 'run.log'), "stub run\\n")
-        File.write(File.join(run_dir, 'measure_attributes.json'), JSON.generate(stub_measure: { ran: true }))
-        File.write(File.join(run_dir, 'objectives.json'), '{}')
-        File.write(File.join(run_dir, 'data_point.zip'), 'PK stub')
-        File.write(File.join(run_dir, 'in.osm'), 'OS:Version,;')
-        File.write(File.join(dp_dir, 'reports', 'stub_report.html'), '<html></html>')
-      RUBY
-      stub_path
-    end
-
     it 'completes every datapoint through the real runner and executor' do
       analysis, dps = create_fixture_analysis(num_dps: 2)
       ExternalBatch::Packager.new(analysis, dps, dps_per_chunk: 1).package!
       dps.each(&:set_queued_state)
 
-      stub_cli = write_stub_cli
+      stub_cli = write_stub_openstudio(@batch_root)
       executor = File.expand_path('../external_batch/local_executor.rb', Rails.root)
       openstudio_cmd = "\"#{RbConfig.ruby}\" \"#{stub_cli}\""
 
