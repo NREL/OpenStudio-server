@@ -95,6 +95,15 @@ module ExternalBatch
       end
     end
 
+    # One Variable query for the whole package instead of one per
+    # set_variable_values entry per datapoint (N+1 on large analyses)
+    def variable_lookup
+      @variable_lookup ||= begin
+        ids = @data_points.flat_map { |dp| (dp.set_variable_values || {}).keys }.uniq
+        Variable.where(:_id.in => ids).index_by { |v| v.id.to_s }
+      end
+    end
+
     # Same document the worker downloads from GET /data_points/:id.json
     # (see data_points_controller#show json format)
     def data_point_json(dp)
@@ -102,7 +111,7 @@ module ExternalBatch
       h['set_variable_values_names'] = {}
       h['set_variable_values_display_names'] = {}
       (h['set_variable_values'] || {}).each do |k, v|
-        var = Variable.where(_id: k).first
+        var = variable_lookup[k.to_s]
         next unless var
 
         h['set_variable_values_names'][var.name] = v

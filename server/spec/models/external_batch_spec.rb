@@ -92,6 +92,23 @@ RSpec.describe 'ExternalBatch', type: :model do
       end
     end
 
+    it 'resolves variable names with one query for the whole package, not per datapoint entry' do
+      analysis, dps = create_fixture_analysis(num_dps: 3)
+      variables = Variable.where(analysis_id: analysis.id, perturbable: true).to_a
+
+      expect(Variable).to receive(:where).once.and_call_original
+      pkg = ExternalBatch::Packager.new(analysis, dps).package!
+
+      dp = dps.first
+      dp_json = JSON.parse(File.read(File.join(pkg, "analysis_#{analysis.id}", "data_point_#{dp.id}", 'data_point.json')))
+      names = dp_json['data_point']['set_variable_values_names']
+      expect(names.keys.sort).to eq variables.map(&:name).sort
+      variables.each do |v|
+        expect(names[v.name]).to eq(dp.set_variable_values[v.id.to_s]),
+                                 "expected set_variable_values_names['#{v.name}'] to carry dp value"
+      end
+    end
+
     it 'refuses seed zip entries that escape the package directory (zip slip)' do
       analysis, dps = create_fixture_analysis(num_dps: 1)
 
