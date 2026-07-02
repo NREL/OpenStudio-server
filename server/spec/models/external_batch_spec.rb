@@ -17,7 +17,9 @@ RSpec.describe 'ExternalBatch', type: :model do
   around do |example|
     Dir.mktmpdir do |tmp|
       @batch_root = tmp
-      ENV['OS_SERVER_EXTERNAL_BATCH_ROOT'] = tmp
+      # use native separators (backslashes on Windows) so the glob-safety
+      # normalization in ExternalBatch.root_dir stays covered
+      ENV['OS_SERVER_EXTERNAL_BATCH_ROOT'] = tmp.gsub('/', File::ALT_SEPARATOR || '/')
       begin
         example.run
       ensure

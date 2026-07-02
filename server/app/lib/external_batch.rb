@@ -14,7 +14,10 @@ module ExternalBatch
   SCHEMA_VERSION = 1
 
   def self.root_dir
-    ENV['OS_SERVER_EXTERNAL_BATCH_ROOT'].presence || File.join(APP_CONFIG['sim_root_path'], 'external_batch')
+    root = ENV['OS_SERVER_EXTERNAL_BATCH_ROOT'].presence || File.join(APP_CONFIG['sim_root_path'], 'external_batch')
+    # expand_path normalizes Windows backslashes, which would otherwise act as
+    # escape characters in the ingester's Dir[] globs
+    File.expand_path(root)
   end
 
   def self.batch_dir(analysis_id)
