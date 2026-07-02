@@ -131,9 +131,14 @@ def kill_process_tree(pid, runner_log)
   if Gem.win_platform?
     system("taskkill /pid #{pid} /f /T >NUL 2>&1")
   else
-    child_pid = `ps -o pid= --ppid "#{pid}"`.to_i
-    Process.kill('KILL', child_pid) if child_pid > 0
-    Process.kill('KILL', pid)
+    # children run in their own process group (spawn_pgroup_opts), so signaling
+    # the group takes out the whole tree — grandchildren included — without
+    # relying on `ps`, which minimal images may not have
+    begin
+      Process.kill('KILL', -pid)
+    rescue Errno::ESRCH, Errno::EPERM
+      Process.kill('KILL', pid)
+    end
   end
 rescue StandardError => e
   runner_log.puts "Error killing process #{pid}: #{e.message}"

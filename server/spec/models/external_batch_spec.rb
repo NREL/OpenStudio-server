@@ -277,6 +277,50 @@ RSpec.describe 'ExternalBatch', type: :model do
     end
   end
 
+  describe 'runner timeout kill' do
+    it 'kills the whole workflow process tree on run_workflow_timeout, grandchildren included' do
+      skip 'POSIX-only: relies on process groups; Windows uses taskkill /T' if Gem.win_platform?
+
+      pkg = File.join(@batch_root, 'pkg')
+      results = File.join(@batch_root, 'results')
+      dp_dir = File.join(pkg, 'analysis_tt', 'data_point_dp1')
+      FileUtils.mkdir_p dp_dir
+      FileUtils.mkdir_p results
+      File.write(File.join(dp_dir, 'data_point.osw'), '{}')
+      File.write(File.join(pkg, 'manifest.json'), JSON.generate(
+                                                    schema_version: 1, analysis_id: 'tt', chunks: [['dp1']],
+                                                    run_workflow_timeout: 2, cli_verbose: '', cli_debug: '',
+                                                    download_reports: false, download_osw: false,
+                                                    download_osm: false, download_zip: false
+                                                  ))
+
+      # stub CLI spawns a heartbeating grandchild (stands in for EnergyPlus),
+      # then blocks past the 2s workflow timeout
+      heartbeat = File.join(@batch_root, 'heartbeat')
+      stub_cli = File.join(@batch_root, 'stub_cli.rb')
+      File.write(stub_cli, <<~RUBY)
+        require 'rbconfig'
+        Process.spawn(RbConfig.ruby, '-e', 'loop { File.write(#{heartbeat.inspect}, Time.now.to_f.to_s); sleep 0.2 }')
+        sleep 600
+      RUBY
+
+      runner = File.expand_path('../external_batch/runner/run_chunk.rb', Rails.root)
+      ok = system(RbConfig.ruby, runner,
+                  '--package', pkg, '--results', results, '--chunk', '0',
+                  '--openstudio', "\"#{RbConfig.ruby}\" \"#{stub_cli}\"")
+      expect(ok).to be true
+
+      status = JSON.parse(File.read(File.join(results, 'dp1', 'status.json')))
+      expect(status['completed_status']).to eq 'Fail'
+      expect(status['exit_status']).to be_nil
+
+      expect(File.exist?(heartbeat)).to be(true), 'stub CLI never spawned its grandchild'
+      mtime_before = File.mtime(heartbeat)
+      sleep 1.5
+      expect(File.mtime(heartbeat)).to eq(mtime_before), 'grandchild survived the timeout kill'
+    end
+  end
+
   describe 'full pipeline: package -> local executor (stub CLI) -> ingest' do
     it 'completes every datapoint through the real runner and executor' do
       analysis, dps = create_fixture_analysis(num_dps: 2)
