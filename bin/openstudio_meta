@@ -158,6 +158,7 @@ class CLI
       start_remote: [proc {::StartRemote}, {primary: true, working: true}],
       stop_local: [proc {::StopLocal}, {primary: true, working: true}],
       stop_remote: [proc {::StopRemote}, {primary: true, working: true}],
+      create_analysis: [proc {::CreateAnalysis}, {primary: true, working: true}],
       run_analysis: [proc {::RunAnalysis}, {primary: true, working: true}],
       run_rspec: [proc {::RunRspec}, {primary: true, working: true}],
       run_codecov: [proc {::RunCoverage}, {primary: false, working: false}]
@@ -334,9 +335,15 @@ class InstallGems
       sys_cmds << "#{$ruby_path} #{bundler_bin} config build.libxml-ruby --use-system-libraries --with-xml2-config=/usr/bin/xml2-config"
     end
     if options[:test_dev_build]
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --with default development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config unset without || true"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config unset with || true"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config set with 'default development test'"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1"
     else
-      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1 --without development test"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config unset with || true"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config unset without || true"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} config set without 'development test'"
+      sys_cmds << "#{$ruby_path} #{bundler_bin} install --retry=3 --jobs=1"
     end
     sys_cmds << "#{$ruby_path} #{bundler_bin} update"
     #unless Gem.win_platform?
@@ -780,6 +787,187 @@ def which_cmd(cmd)
   end
 end
 
+class CreateAnalysis
+  require_relative 'resources/remote.rb'
+  BATCH_RUN_METHODS = %w(lhs preflight single_run repeat_run doe diag baseline_perturbation batch_datapoints).freeze
+
+  def self.synopsis
+    'Submits an analysis and soft-stops after initialization'
+  end
+
+  def stop_analysis_after_initialization(server_dns, analysis_id)
+    stop_urls = [
+      "#{server_dns}/analyses/#{analysis_id}/soft_stop",
+      "#{server_dns}/analyses/#{analysis_id}/stop"
+    ]
+
+    last_error = nil
+    stop_urls.each_with_index do |stop_url, index|
+      begin
+        response = RestClient.get(stop_url)
+        if index.positive?
+          $logger.warn "Soft-stop endpoint unavailable, fell back to #{stop_url}"
+        end
+        return response
+      rescue RestClient::ExceptionWithResponse => e
+        last_error = e
+        response_code = e.response&.code
+        next if [404, 405].include?(response_code)
+
+        raise
+      end
+    end
+
+    raise last_error if last_error
+    nil
+  end
+
+  def format_server_error(error)
+    response = error.response
+    return error.message unless response
+
+    response_body = response.body.to_s.strip
+    return "HTTP #{response.code}" if response_body.empty?
+
+    "HTTP #{response.code}: #{response_body}"
+  rescue StandardError
+    error.message
+  end
+
+  def execute(sub_argv)
+    $logger.debug "sub_argv = #{sub_argv} in CreateAnalysis execute"
+    require 'rest-client'
+
+    options = {
+        debug: false,
+        zip_file: nil,
+        analysis_type: 'batch_datapoints'
+    }
+
+    opts = ::OptionParser.new do |o|
+      o.banner = 'Usage: openstudio_meta create_analysis [options] project server_dns'
+      o.separator ''
+      o.separator 'Options:'
+      o.separator ''
+
+      o.on('-a', '--analysis TYPE', 'Analysis type to create') {|a| options[:analysis_type] = a}
+      o.on('-z', '--zip NAME', 'relative path/name of project zip file from .json file') {|z| options[:zip_file] = z}
+      o.on('--debug', 'Whatever makes debugging easy') {|_| options[:debug] = true}
+    end
+
+    argv = parse_options(opts, sub_argv)
+    return 1 unless argv
+    project_path = argv.shift.to_s
+    server_dns = argv.shift.to_s
+    unless argv == []
+      $logger.error 'Extra arguments passed to the create_analysis command. Please refer to the help documentation.'
+      return 1
+    end
+    server_dns = ENV['OS_SERVER_HOST_URL'] if server_dns.empty?
+
+    project_path = project_path.tr('\\', '/')
+    temp_dir = ::File.join(File.dirname(project_path), '.temp')
+    ::Dir.mkdir temp_dir unless ::File.exist?(temp_dir)
+    temp_filepath = temp_dir + '/analysis'
+    temp_zipfilepath = nil
+    formulation_file = nil
+    analysis_zip_file = nil
+    analysis_type = options[:analysis_type]
+
+    if ::File.extname(project_path).casecmp('.xlsx').zero?
+      analysis_type = process_excel_project(project_path, temp_filepath)
+      formulation_file = temp_filepath + '.json'
+      analysis_zip_file = temp_filepath + '.zip'
+    elsif ::File.extname(project_path).casecmp('.csv').zero?
+      analysis_type = process_csv_project(project_path, temp_filepath)
+      formulation_file = temp_filepath + '.json'
+      analysis_zip_file = temp_filepath + '.zip'
+    elsif ::File.extname(project_path).casecmp('.json').zero?
+      temp_filepath = File.dirname(project_path) + '/' + File.basename(project_path).gsub('.json', '')
+      analysis_type = options[:analysis_type]
+      formulation_file = temp_filepath + '.json'
+      unless options[:zip_file].nil?
+        temp_zipfilepath = File.expand_path(File.join(File.dirname(project_path), options[:zip_file])).gsub('.zip', '')
+        unless ::File.exist?(temp_zipfilepath + '.zip')
+          $logger.error "Zip file #{temp_zipfilepath}.zip does not exist"
+          return 1
+        end
+        analysis_zip_file = temp_zipfilepath + '.zip'
+      end
+      analysis_zip_file ||= temp_filepath + '.zip'
+    else
+      $logger.error "Did not recognize project file extension #{::File.extname(project_path)}"
+      return 1
+    end
+
+    unless ::File.exist?(formulation_file)
+      $logger.error "Formulation file #{formulation_file} does not exist"
+      return 1
+    end
+    unless ::File.exist?(analysis_zip_file)
+      $logger.error "Zip file #{analysis_zip_file} does not exist"
+      return 1
+    end
+
+    begin
+      status_response = RestClient.get("#{server_dns}/status.json")
+      status_json = JSON.parse(status_response.body, symbolize_names: true)
+      unless status_json.dig(:status, :awake)
+        $logger.error "ERROR: Server at #{server_dns} is not responding"
+        return 1
+      end
+
+      project_response = RestClient.post(
+        "#{server_dns}/projects.json",
+        { project: { name: File.basename(File.dirname(project_path)).to_s } }.to_json,
+        content_type: :json,
+        accept: :json
+      )
+      project_id = JSON.parse(project_response.body)['_id']
+      unless project_id
+        $logger.error 'Could not create project on server'
+        return 1
+      end
+
+      formulation_json = JSON.parse(File.read(formulation_file))
+      formulation_json['analysis']['name'] = File.basename(project_path, File.extname(project_path))
+      analysis_response = RestClient.post(
+        "#{server_dns}/projects/#{project_id}/analyses.json",
+        formulation_json.to_json,
+        content_type: :json,
+        accept: :json
+      )
+      analysis_id = JSON.parse(analysis_response.body)['_id']
+      unless analysis_id
+        $logger.error 'Could not create analysis on server'
+        return 1
+      end
+
+      upload_response = RestClient.post(
+        "#{server_dns}/analyses/#{analysis_id}/upload.json",
+        { file: File.new(analysis_zip_file, 'rb') }
+      )
+      unless upload_response.code == 201
+        $logger.error "Could not upload analysis zip for #{analysis_id}"
+        return 1
+      end
+
+      response = stop_analysis_after_initialization(server_dns, analysis_id)
+      puts "Stopped analysis initialization for #{analysis_id} (#{response.code})"
+      puts "Analysis ID: #{analysis_id}"
+      puts "Server: #{server_dns}"
+      puts "Formulation path: #{formulation_file}"
+      puts "Zip path: #{analysis_zip_file}"
+      puts "Analysis type: #{analysis_type}"
+    rescue RestClient::ExceptionWithResponse => e
+      $logger.error "Server request failed: #{format_server_error(e)}"
+      return 1
+    end
+
+    0
+  end
+end
+
 # Class to submit an analysis to a OS Server instance, defined by URL
 class RunAnalysis
   require_relative 'resources/remote.rb'
@@ -1155,4 +1343,4 @@ $logger.debug 'Required initial gems successfully'
 
 # Execute the CLI interface, and exit with the proper error code
 $logger.info "Executing argv: #{$argv}"
-::CLI.new($argv).execute
+exit(::CLI.new($argv).execute)

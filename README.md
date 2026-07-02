@@ -40,8 +40,8 @@ automatically assembled and zipped for deployment. It is important to note that 
 it is critical to not specify the export path with home (`~`) substitution. Instead, pass a fully specified path to the 
 desired output directory. 
 
-Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the [Parametric Analysis Tool (PAT)](https://github.com/NREL/OpenStudio-PAT) and 
-submitting analyses to it. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NREL/OpenStudio-analysis-gem) or the export OSA function in PAT. For more details, please 
+Once compiled or unpacked, the openstudio_meta file can be used for starting and stopping the local server for the [Parametric Analysis Tool (PAT)](https://github.com/NREL/OpenStudio-PAT), submitting analyses with `create_analysis` and soft-stopping them after initialization, and 
+submitting analyses with `run_analysis`. Assembling the required files for the analysis is done with the [Analysis-gem](https://github.com/NREL/OpenStudio-analysis-gem) or the export OSA function in PAT. For more details, please 
 refer to the [wiki](https://github.com/NREL/OpenStudio-server/wiki/CLI).  For examples, please refer to [OSAF notebooks](https://github.com/NREL/docker-openstudio-jupyter/tree/master).
 
 ### Local Docker Development
@@ -162,4 +162,3 @@ Please contact @tijcolem, @bball, or @nllong with any question regarding this pr
 [gh-url]: https://github.com/nrel/openstudio-server/actions
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/j7hqgh2p7bae9xn8/branch/dockerize-appveyor?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/rHorsey/openstudio-server/branch/dockerize-appveyor
-

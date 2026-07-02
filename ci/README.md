@@ -19,7 +19,7 @@ we run [openstudio_meta's](https://github.com/NREL/OpenStudio-server/blob/develo
 command to build the package of gems and pre-compile all assets. Included is the `--with_test_develop` flag, to ensure 
 rspec and other testing libraries are included. We next need to test the packages in two contexts. The first is 
 integration tests. These focus on exercising the package in the same end-to-end manner as in deployment. This is done 
-using the `start_local`, `run_analysis`, and `stop_local` commands. Secondly, unit tests are run using the rspec 
+using the `start_local`, `create_analysis` (submit and soft-stop after initialization), `run_analysis` (submission/run), and `stop_local` commands. Secondly, unit tests are run using the rspec 
 framework within the same gem package. This ensures individual methods and features are tested to ensure compliance 
 with expectations. Currently, the same gem package is used for both of these tests, even though the gems provided 
 through the `--with_test_develop` flag are only needed in the unit test. It would be preferable to instead run the unit 

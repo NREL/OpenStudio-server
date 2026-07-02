@@ -3,6 +3,13 @@
 # TO_BUILD_AND_RUN: docker-compose up
 
 FROM nrel/openstudio-r:4.4.0
+
+# PATCH: Install system dependencies for R packages (shiny, sass, bslib require NodeJS)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        nodejs \
+        npm \
+    && rm -rf /var/lib/apt/lists/*
 MAINTAINER Nicholas Long nicholas.long@nrel.gov
 
 # Add in the additional R packages
