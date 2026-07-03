@@ -5,39 +5,41 @@
 # See also https://openstudio.net/license
 # *******************************************************************************
 
-# Control-plane helper: pushes a packaged batch dir to Nomad-accessible location
-# and submits one Nomad job (one task group per chunk or using Nomad's features).
-# Plain Ruby driving the Nomad CLI or API.
+# Control-plane helper: pushes a packaged batch dir to a shared location (NFS or S3)
+# and submits a Nomad job (one task per chunk). Plain Ruby driving the Nomad CLI —
+# credentials come from the standard Nomad CLI chain (env vars, etc.).
 # Data never flows through this script; only the manifest is read locally.
 #
 # Usage:
-#   ruby submit_nomad.rb BATCH_DIR --nomad-addr ADDRESS --namespace NAME --job-template TEMPLATE
+#   ruby submit_nomad.rb BATCH_DIR --nomad-addr http://nomad:4646 --job-template external_batch/nomad/templates/job_array.hcl --package-location /nfs/batch
+#   ruby submit_nomad.rb BATCH_DIR --nomad-addr http://nomad:4646 --job-template external_batch/nomad/templates/job_array.hcl --package-location s3://my-bucket/batch
 #
-# After submitting, run sync_results equivalent (printed at the end) so the server's
-# ExternalBatchRun ingest loop sees the results as they land.
+# After submitting, the server's ingest loop can see the results as they land
+# (if using shared filesystem) or a separate sync process is needed (if using S3).
 
 require 'json'
 require 'optparse'
 require 'fileutils'
+require 'tempfile'
 
 options = {
   nomad_addr: nil,
-  namespace: 'default',
-  job_name: nil,
-  job_template: nil,
-  package_location: nil,  # Could be S3, NFS path, etc.
   nomad_cmd: 'nomad',
+  job_template: nil,
+  package_location: nil,
+  job_name: nil,
+  namespace: 'default',
   dry_run: false
 }
 
 opt_parser = OptionParser.new do |o|
   o.banner = 'Usage: ruby submit_nomad.rb BATCH_DIR [options]'
-  o.on('--nomad-addr ADDRESS', 'Nomad address (http://host:port)') { |v| options[:nomad_addr] = v }
-  o.on('--namespace NAME', 'Nomad namespace') { |v| options[:namespace] = v }
-  o.on('--job-name NAME', 'Job name (default osaf-nomad-analysis-<id>)') { |v| options[:job_name] = v }
-  o.on('--job-template TEMPLATE', 'Path to Nomad job template (HCL file)') { |v| options[:job_template] = v }
-  o.on('--package-location LOCATION', 'Where to upload package (NFS path, S3 URI, etc.)') { |v| options[:package_location] = v }
+  o.on('--nomad-addr ADDRESS', 'Nomad server address (e.g., http://localhost:4646)') { |v| options[:nomad_addr] = v }
   o.on('--nomad-cmd CMD', 'Nomad CLI command (default `nomad`; stub for tests)') { |v| options[:nomad_cmd] = v }
+  o.on('--job-template PATH', 'Path to Nomad job template file (required)') { |v| options[:job_template] = v }
+  o.on('--package-location LOCATION', 'Base location for packages and results (NFS path or S3 URI)') { |v| options[:package_location] = v }
+  o.on('--job-name NAME', 'Job name (default osaf-nomad-analysis-<id>)') { |v| options[:job_name] = v }
+  o.on('--namespace NAMESPACE', 'Nomad namespace (default: "default")') { |v| options[:namespace] = v }
   o.on('--dry-run', 'Print the commands without executing them') { options[:dry_run] = true }
 end
 
@@ -53,79 +55,82 @@ manifest = JSON.parse(File.read(manifest_path))
 analysis_id = manifest['analysis_id']
 num_chunks = manifest['chunks'].size
 
-abort '--nomad-addr and --job-template are required' if options[:nomad_addr].nil? || options[:job_template].nil?
-abort '--package-location is required' if options[:package_location].nil?
+abort '--job-template and --package-location are required' if options[:job_template].nil? || options[:package_location].nil?
+abort "Job template file not found: #{options[:job_template]}" unless File.exist?(options[:job_template])
 
-# Construct package location URI
-package_uri = options[:package_location]
-package_uri = "#{package_uri}/analysis_#{analysis_id}" unless package_uri.end_with?("/analysis_#{analysis_id}")
-
-nomad_addr_arg = options[:nomad_addr] ? " -address=#{options[:nomad_addr]}" : ''
-namespace_arg = options[:namespace] ? " -namespace=#{options[:namespace]}" : ''
-job_name = options[:job_name] || "osaf-nomad-analysis-#{analysis_id}"
-
-def run!(cmd, dry_run)
-  puts "+ #{cmd}"
-  return if dry_run
-
-  system(cmd) || abort("Command failed: #{cmd}")
-end
-
-# 1. Push the package to Nomad-accessible location
-# This could be NFS sync, S3 upload, etc. depending on package_location scheme
-case options[:package_location]
-when %r{^s3://}
-  # Upload to S3
-  run!("#{options[:nomad_cmd]} --version", options[:dry_run])  # Just to show we're checking
-  # In practice, we'd use aws s3 sync or similar
-  puts "Would sync package to #{package_uri}/package"
-  # run!("aws s3 sync --only-show-errors --delete \"#{File.join(batch_dir, 'package')}\" \"#{package_uri}/package\"", options[:dry_run])
-when %r{^/}
-  # NFS or local path - just ensure directory exists
-  FileUtils.mkdir_p("#{package_uri}/package")
-  puts "Ensuring package directory exists: #{package_uri}/package"
-  # In practice, we'd rsync or copy
-  # run!("rsync -a \"#{File.join(batch_dir, 'package')}/\" \"#{package_uri}/package/\"", options[:dry_run])
+# Determine package and results URIs based on package_location
+package_location = options[:package_location]
+if package_location.match?(/^s3:\/\//)
+  package_type = 's3'
+  package_uri = "#{package_location.chomp('/')}/analysis_#{analysis_id}/package"
+  results_uri = "#{package_location.chomp('/')}/analysis_#{analysis_id}/results"
 else
-  # Generic case - assume it's handled externally
-  puts "Using package location: #{package_uri}"
+  package_type = 'nfsmount'
+  package_uri = File.join(package_location, "analysis_#{analysis_id}", "package")
+  results_uri = File.join(package_location, "analysis_#{analysis_id}", "results")
 end
 
-# 2. Render the job template with our parameters and submit to Nomad
-rendered_template = File.join(batch_dir, "job.nomad.hcl")
-template_content = File.read(options[:job_template])
+# Ensure the package is available at the package_uri
+if package_type == 's3'
+  # Sync the package directory to S3
+  sync_cmd = "aws s3 sync --only-show-errors --delete \"#{File.join(batch_dir, 'package')}\" \"#{package_uri}\""
+  puts "+ #{sync_cmd}"
+  unless options[:dry_run]
+    system(sync_cmd) || abort("Command failed: #{sync_cmd}")
+  end
+elsif package_type == 'nfsmount'
+  # Ensure the destination directory exists and copy the package
+  FileUtils.mkdir_p(File.dirname(package_uri))
+  copy_cmd = "cp -r \"#{File.join(batch_dir, 'package')}\" \"#{package_uri}\""
+  puts "+ #{copy_cmd}"
+  unless options[:dry_run]
+    FileUtils.rm_rf(package_uri) if File.exist?(package_uri)
+    FileUtils.cp_r(File.join(batch_dir, 'package'), package_uri)
+  end
+else
+  abort "Unsupported package type: #{package_type}"
+end
 
-# Replace placeholders in template
-rendered_content = template_content
+# Read the job template and replace placeholders
+template_content = File.read(options[:job_template])
+job_name = options[:job_name] || "osaf-nomad-analysis-#{analysis_id}"
+rendered_job = template_content
   .gsub('{{ANALYSIS_ID}}', analysis_id)
   .gsub('{{NUM_CHUNKS}}', num_chunks.to_s)
   .gsub('{{JOB_NAME}}', job_name)
   .gsub('{{NAMESPACE}}', options[:namespace])
   .gsub('{{PACKAGE_URI}}', package_uri)
-  .gsub('{{RESULTS_URI}}', "#{package_uri}/results")
+  .gsub('{{RESULTS_URI}}', results_uri)
 
-File.write(rendered_template, rendered_content)
+# Write the rendered job to a temporary file
+temp_job_file = Tempfile.new(['nomad_job', '.hcl'])
+begin
+  temp_job_file.write(rendered_job)
+  temp_job_file.flush
 
-nomad_job_run_cmd = "#{options[:nomad_cmd]} job run#{nomad_addr_arg}#{namespace_arg} \"#{rendered_template}\""
-puts "+ #{nomad_job_run_cmd}"
-
-unless options[:dry_run]
-  job_id = `#{nomad_job_run_cmd}`.strip
-  # Nomad job run returns the job ID and evaluation info, we want just the job ID
-  # Actual parsing would depend on Nomad CLI output format
-  if $?.success? && !job_id.empty?
-    # Extract job ID from output (this is simplified - real implementation would parse properly)
-    job_id_lines = job_id.split("\n")
-    actual_job_id = job_id_lines.grep(/^[a-f0-9]{8,}-/).first || job_id_lines.first
-    puts "Submitted job for analysis #{analysis_id}: jobId=#{actual_job_id}"
-    
-    puts
-    puts 'Next, mirror the results down for the server ingest loop:'
-    puts "  # You would need a result sync mechanism appropriate for your storage backend"
-    puts "  # For example, if using NFS, results are already available at #{package_uri}/results"
-    puts "  # If using S3, you might need periodic sync like:"
-    puts "  # aws s3 sync --only-show-errors #{package_uri}/results #{File.join(batch_dir, 'results')}"
-  else
-    abort "nomad job run failed: #{job_id}"
+  # Run nomad job run with JSON output to get the job ID
+  nomad_addr_arg = options[:nomad_addr] ? " -address=#{options[:nomad_addr]}" : ''
+  run_cmd = "#{options[:nomad_cmd]}#{nomad_addr_arg} job run -output=json #{temp_job_file.path}"
+  puts "+ #{run_cmd}"
+  unless options[:dry_run]
+    output = `#{run_cmd}`
+    abort "nomad job run failed: #{$?.exitstatus}" unless $?.success?
+    begin
+      json_output = JSON.parse(output)
+      job_id = json_output['job']['ID']
+      abort 'Failed to parse job ID from Nomad response' unless job_id
+      puts "Submitted #{num_chunks} chunk(s) for analysis #{analysis_id}: jobID=#{job_id}"
+    rescue JSON::ParserError => e
+      abort "Failed to parse Nomad job run output as JSON: #{e.message}\nOutput: #{output}"
+    end
   end
+ensure
+  temp_job_file.close
+  temp_job_file.unlink
 end
+
+puts
+puts 'Results will be available at:'
+puts "  #{results_uri}"
+puts
+puts 'If using S3, ensure results are synced back to the server\'s results directory.'
