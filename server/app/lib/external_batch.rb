@@ -14,7 +14,20 @@ module ExternalBatch
   SCHEMA_VERSION = 1
 
   def self.root_dir
-    root = ENV['OS_SERVER_EXTERNAL_BATCH_ROOT'].presence || File.join(APP_CONFIG['sim_root_path'], 'external_batch')
+    # Handle potential nil from ENV and provide fallback
+    env_root = ENV['OS_SERVER_EXTERNAL_BATCH_ROOT']
+    if env_root.nil? || env_root.empty?
+      # Handle potential undefined APP_CONFIG
+      if defined?(APP_CONFIG) && APP_CONFIG
+        sim_root_path = APP_CONFIG['sim_root_path']
+      else
+        # Fallback to a reasonable default if APP_CONFIG is not available
+        sim_root_path = Dir.tmpdir  # Use system temp directory as fallback
+      end
+      root = File.join(sim_root_path, 'external_batch')
+    else
+      root = env_root
+    end
     # expand_path normalizes Windows backslashes, which would otherwise act as
     # escape characters in the ingester's Dir[] globs
     File.expand_path(root)

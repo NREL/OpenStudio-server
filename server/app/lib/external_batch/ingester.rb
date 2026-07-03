@@ -9,6 +9,7 @@
 # results from measure_attributes.json, sdp_log_file from run.log (truncated),
 # result files (out.osw, reports, in.osm, data_point.zip, logs), status flags
 # from the completed status, and start/end times from status.json.
+require_relative '../external_batch'
 module ExternalBatch
   class Ingester
     # keep in sync with DjJobs::RunSimulateDataPoint

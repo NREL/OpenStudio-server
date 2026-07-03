@@ -104,7 +104,7 @@ Analysis completes when all datapoints terminal
 The `ExternalBatch::Packager` class creates the executable package.
 
 ### Steps
-1. **Validation**: Rejects UrbanOpt analyses and analyses with custom gemfiles; verifies datapoints exist
+1. **Validation**: Verifies datapoints exist (UrbanOpt and custom gemfile analyses are now supported)
 2. **Directory Setup**: Creates `package/` and `results/` directories; creates `package/analysis_<id>/`
 3. **Analysis Extraction**: Extracts analysis seed zip to `package/analysis_<id>/` preserving directory structure
 4. **Metadata Writing**: Writes analysis.json and data_point.json; pre-translates OSWs

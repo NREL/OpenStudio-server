@@ -18,6 +18,7 @@
 #         analysis.json
 #         data_point.json
 #         data_point.osw
+require_relative '../external_batch'
 module ExternalBatch
   class Packager
     DEFAULT_DPS_PER_CHUNK = 50
@@ -40,10 +41,8 @@ module ExternalBatch
 
     # Builds the package from scratch (idempotent: an existing package is replaced,
     # the results directory is left alone). Returns the package directory.
-    def package!
-      raise 'UrbanOpt analyses are not supported by external batch execution' if @analysis.urbanopt
-      raise 'Analyses with a custom gemfile are not supported by external batch execution' if @analysis.gemfile
-      raise 'No datapoints to package' if @data_points.empty?
+     def package!
+       raise 'No datapoints to package' if @data_points.empty?
 
       FileUtils.rm_rf package_dir
       FileUtils.mkdir_p analysis_pkg_dir
@@ -152,23 +151,25 @@ module ExternalBatch
       @logger.info "Packaged datapoint #{dp.id}"
     end
 
-    def write_manifest
-      manifest = {
-        schema_version: ExternalBatch::SCHEMA_VERSION,
-        analysis_id: @analysis.id.to_s,
-        analysis_name: @analysis.name,
-        created_at: Time.now.iso8601,
-        data_point_count: @data_points.size,
-        chunks: chunks,
-        run_workflow_timeout: @analysis.run_workflow_timeout,
-        cli_verbose: @analysis.cli_verbose,
-        cli_debug: @analysis.cli_debug,
-        download_reports: @analysis.download_reports,
-        download_osw: @analysis.download_osw,
-        download_osm: @analysis.download_osm,
-        download_zip: @analysis.download_zip
-      }
-      File.open(ExternalBatch.manifest_path(@analysis.id), 'w') { |f| f << JSON.pretty_generate(manifest) }
-    end
+     def write_manifest
+       manifest = {
+         schema_version: ExternalBatch::SCHEMA_VERSION,
+         analysis_id: @analysis.id.to_s,
+         analysis_name: @analysis.name,
+         created_at: (Time.now.respond_to?(:iso8601) ? Time.now.iso8601 : Time.now.strftime("%Y-%m-%dT%H:%M:%SZ")),
+         data_point_count: @data_points.size,
+         chunks: chunks,
+         run_workflow_timeout: @analysis.run_workflow_timeout,
+         cli_verbose: @analysis.cli_verbose,
+         cli_debug: @analysis.cli_debug,
+         download_reports: @analysis.download_reports,
+         download_osw: @analysis.download_osw,
+         download_osm: @analysis.download_osm,
+         download_zip: @analysis.download_zip,
+         urbanopt: @analysis.urbanopt,
+         gemfile: @analysis.gemfile
+       }
+       File.open(ExternalBatch.manifest_path(@analysis.id), 'w') { |f| f << JSON.pretty_generate(manifest) }
+     end
   end
 end
