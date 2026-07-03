@@ -9,6 +9,9 @@ Rails.application.configure do
   # Custom config var for job management - delayed_job or resque
   config.x.job_manager = :delayed_job
 
+  # start_local deployments have no Rserve; sample in pure Ruby
+  config.x.sampling_backend = (ENV['OS_SERVER_SAMPLING_BACKEND'] || 'ruby').to_sym
+
   config.cache_classes = true
 
   # Configure static asset server for local with Cache-Control for performance

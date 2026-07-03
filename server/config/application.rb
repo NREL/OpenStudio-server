@@ -23,6 +23,9 @@ module OpenstudioServer
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
     config.x.job_manager = :resque
+    # Sampling backend for algorithms that support it (currently lhs):
+    # :rserve (R via Rserve) or :ruby (pure Ruby, no Rserve required).
+    config.x.sampling_backend = (ENV['OS_SERVER_SAMPLING_BACKEND'] || 'rserve').to_sym
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

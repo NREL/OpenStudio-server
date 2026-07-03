@@ -265,7 +265,9 @@ class Variable
   end
 
   # start with a hash and then create the hash_of_arrays
-  def self.pivot_array(analysis_id, r_session)
+  # r_session is optional: when nil (e.g. Ruby sampling backend on start_local
+  # deployments), integer sequences are generated in Ruby instead of R.
+  def self.pivot_array(analysis_id, r_session = nil)
     pivot_variables = Variable.pivots(analysis_id)
 
     pivot_hash = {}
@@ -273,16 +275,22 @@ class Variable
       logger.info "Adding variable '#{var.name}' to pivot list"
       if var.uncertainty_type == 'integer_sequence_uncertain' || var.uncertainty_type == 'integer_sequence'
         logger.info("creating integer sequence for pivot variable by seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value})")
-        @r = r_session
-        @r.command(varlow: var.lower_bounds_value) do
-          %{
-            values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
-            weights <- rep(1/length(values),length(values))
-          }
+        if r_session.nil?
+          values = AnalysisLibrary::Sampling::Distributions.seq(var.lower_bounds_value, var.upper_bounds_value, var.modes_value)
+          values = values.map(&:to_i)
+          weights = Array.new(values.size, 1.0 / values.size)
+        else
+          @r = r_session
+          @r.command(varlow: var.lower_bounds_value) do
+            %{
+              values <- as.array(seq(from=#{var.lower_bounds_value}, to=#{var.upper_bounds_value}, by=#{var.modes_value}))
+              weights <- rep(1/length(values),length(values))
+            }
+          end
+          values = @r.converse 'values'
+          values = values.map(&:to_i)
+          weights = @r.converse 'weights'
         end
-        values = @r.converse 'values'
-        values = values.map(&:to_i)
-        weights = @r.converse 'weights'
       else
         logger.info "Mapping pivot #{var.name} with #{var.map_discrete_hash_to_array}"
         values, weights = var.map_discrete_hash_to_array # weights are ignored in pivots

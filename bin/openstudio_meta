@@ -844,7 +844,8 @@ print_paths_and_bundle_script
         debug: false,
         dencity: false,
         zip_file: nil,
-        analysis_type: 'batch_datapoints'
+        analysis_type: 'batch_datapoints',
+        batch_run_method: 'batch_run'
     }
 
     opts = ::OptionParser.new do |o|
@@ -856,6 +857,7 @@ print_paths_and_bundle_script
       o.on('-a', '--analysis TYPE', 'Analysis type to run') {|a| options[:analysis_type] = a}
       o.on('-z', '--zip NAME', 'relative path/name of project zip file from .json file') {|z| options[:zip_file] = z}
       o.on('-d', '--push_to_dencity', 'Push the analysis to DEnCity') {|_| options[:dencity] = true}
+      o.on('-b', '--batch-run-method METHOD', 'Datapoint execution method: batch_run (local workers, default) or external_batch_run (external executor)') {|b| options[:batch_run_method] = b}
       o.on('--debug', 'Whatever makes debugging easy') {|_| options[:debug] = true}
     end
 
@@ -916,10 +918,9 @@ print_paths_and_bundle_script
     else
       analysis_zip_file = temp_filepath + '.zip'
     end
-    batch_run_method = 'batch_run'
     run_options = {
         push_to_dencity: options[:dencity],
-        batch_run_method: batch_run_method
+        batch_run_method: options[:batch_run_method]
     }
     server_api.run(formulation_file, analysis_zip_file, analysis_type, run_options)
   end

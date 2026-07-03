@@ -42,35 +42,53 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
     # reload the object (which is required) because the subdocuments (jobs) may have changed
     @analysis.reload
 
-    # Create an instance for R
-    @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
-                                                 APP_CONFIG['rserve_port'])
-
     begin
-      logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
-      logger.info "Setting up R for #{self.class.name}"
-      # TODO: can we move the mkdir_p to the initialize task
-      FileUtils.mkdir_p APP_CONFIG['sim_root_path'] unless Dir.exist? APP_CONFIG['sim_root_path']
-      @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
+      # inside the rescue so a bad sampling_backend override in the OSA marks
+      # the analysis errored instead of crashing the delayed job
+      backend = sampling_backend
+      seed = @analysis.problem['algorithm']['seed']
+      seed = nil unless seed.is_a? Numeric
 
-      # make this a core method
-      if !@analysis.problem['algorithm']['seed'].nil? && (@analysis.problem['algorithm']['seed'].is_a? Numeric)
-        logger.info "Setting R base random seed to #{@analysis.problem['algorithm']['seed']}"
-        @r.converse("set.seed(#{@analysis.problem['algorithm']['seed']})")
+      if backend == :rserve
+        # Create an instance for R
+        @r = AnalysisLibrary::Core.initialize_rserve(APP_CONFIG['rserve_hostname'],
+                                                     APP_CONFIG['rserve_port'])
       end
 
-      pivot_array = Variable.pivot_array(@analysis.id, @r)
+      logger.info "Initializing analysis for #{@analysis.name} with UUID of #{@analysis.uuid}"
+      logger.info "Sampling backend for #{self.class.name} is #{backend}"
+      # TODO: can we move the mkdir_p to the initialize task
+      FileUtils.mkdir_p APP_CONFIG['sim_root_path'] unless Dir.exist? APP_CONFIG['sim_root_path']
+
+      if backend == :rserve
+        @r.converse("setwd('#{APP_CONFIG['sim_root_path']}')")
+
+        # make this a core method
+        unless seed.nil?
+          logger.info "Setting R base random seed to #{seed}"
+          @r.converse("set.seed(#{seed})")
+        end
+
+        pivot_array = Variable.pivot_array(@analysis.id, @r)
+      else
+        logger.info "Setting Ruby sampler random seed to #{seed}" unless seed.nil?
+        pivot_array = Variable.pivot_array(@analysis.id)
+      end
       logger.debug "pivot_array: #{pivot_array}"
 
       selected_variables = Variable.variables(@analysis.id)
       logger.info "Found #{selected_variables.count} variables to perturb"
 
       # generate the probabilities for all variables as column vectors
-      @r.converse("print('starting lhs')")
       samples = nil
       var_types = nil
       logger.info 'Starting sampling'
-      lhs = AnalysisLibrary::R::Lhs.new(@r)
+      if backend == :rserve
+        @r.converse("print('starting lhs')")
+        lhs = AnalysisLibrary::R::Lhs.new(@r)
+      else
+        lhs = AnalysisLibrary::Sampling::Lhs.new(seed)
+      end
       if @analysis.problem['algorithm']['sample_method'] == 'all_variables' ||
          @analysis.problem['algorithm']['sample_method'] == 'individual_variables'
         samples, var_types = lhs.sample_all_variables(selected_variables, @analysis.problem['algorithm']['number_of_samples'])
@@ -121,5 +139,27 @@ class AnalysisLibrary::Lhs < AnalysisLibrary::Base
 
       logger.info "Finished running analysis '#{self.class.name}'"
     end
+  end
+
+  private
+
+  VALID_SAMPLING_BACKENDS = [:rserve, :ruby].freeze
+
+  # Sampling backend: :rserve (default; docker deployments) or :ruby (no Rserve
+  # required; default for start_local deployments via config/environments).
+  # Can be forced per-analysis with problem.algorithm.sampling_backend in the OSA.
+  def sampling_backend
+    override = (@analysis.problem || {}).dig('algorithm', 'sampling_backend')
+    if override.present?
+      backend = override.to_s.strip.downcase.to_sym
+      unless VALID_SAMPLING_BACKENDS.include?(backend)
+        raise "Invalid problem.algorithm.sampling_backend '#{override}': valid values are #{VALID_SAMPLING_BACKENDS.join(', ')}"
+      end
+
+      return backend
+    end
+
+    configured = Rails.application.config.x.sampling_backend
+    configured.present? ? configured.to_sym : :rserve
   end
 end
