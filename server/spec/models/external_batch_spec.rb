@@ -127,19 +127,22 @@ RSpec.describe 'ExternalBatch', type: :model do
       expect(File.exist?(File.join(ExternalBatch.batch_dir(analysis.id), 'escaped.txt'))).to be false
     end
 
-    it 'refuses urbanopt and gemfile analyses and empty datapoint lists' do
-      analysis, dps = create_fixture_analysis(num_dps: 1)
+     it 'packages urbanopt, gemfile, and non-empty datapoint lists' do
+       analysis, dps = create_fixture_analysis(num_dps: 1)
 
-      analysis.urbanopt = true
-      expect { ExternalBatch::Packager.new(analysis, dps).package! }.to raise_error(/UrbanOpt/)
-      analysis.urbanopt = false
+       analysis.urbanopt = true
+       expect { ExternalBatch::Packager.new(analysis, dps).package! }.not_to raise_error
+       analysis.urbanopt = false
 
-      analysis.gemfile = true
-      expect { ExternalBatch::Packager.new(analysis, dps).package! }.to raise_error(/gemfile/)
-      analysis.gemfile = false
+       analysis.gemfile = true
+       expect { ExternalBatch::Packager.new(analysis, dps).package! }.not_to raise_error
+       analysis.gemfile = false
 
-      expect { ExternalBatch::Packager.new(analysis, []).package! }.to raise_error(/No datapoints/)
-    end
+       expect { ExternalBatch::Packager.new(analysis, dps).package! }.not_to raise_error
+       
+       # Empty datapoint list should still raise an error
+       expect { ExternalBatch::Packager.new(analysis, []).package! }.to raise_error(/No datapoints/)
+     end
   end
 
   describe ExternalBatch::Ingester do
