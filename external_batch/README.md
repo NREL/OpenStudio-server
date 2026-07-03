@@ -50,13 +50,6 @@ Chunk size: `OS_SERVER_EXTERNAL_BATCH_DPS_PER_CHUNK` (default 50).
 For detailed technical information about the architecture, extension points,
 and implementation details, see [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md).
 
-**Enhanced with:**
-- Visual aids for packaging workflow, ingestion pipeline, and executor selection
-- Getting started section for new developers
-- Versioning information (applies to OpenStudio Server 3.11.0+)
-- FAQ section covering common issues
-- Expanded code examples for key implementation tasks
-
 ## Pieces
 
 | file | runs where | needs |

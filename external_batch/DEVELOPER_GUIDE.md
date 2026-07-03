@@ -22,7 +22,7 @@ This document provides detailed technical information about the external batch e
 New to external batch development? This section will help you set up a test environment and run a basic execution.
 
 ### Prerequisites
-- Ruby 2.5+ (matching the server version)
+- Ruby 3.2 (the server Gemfile pins `~>3.2.0`; the runner itself is plain stdlib Ruby)
 - OpenStudio CLI installed and accessible in PATH
 - OpenStudio Server 3.11.0+ (this documentation applies to v3.11.0 and later)
 - Git
@@ -35,7 +35,7 @@ New to external batch development? This section will help you set up a test envi
 5. Verify results in server UI or API endpoints
 
 ### Common First-Time Tasks
-- Run unit tests: `rspec spec/models/external_batch_*_spec.rb`
+- Run the specs: `cd server && RAILS_ENV=local-test bundle exec rspec spec/models/external_batch_spec.rb spec/models/external_batch_aws_spec.rb` (needs a local mongod on 27017, same harness as any local spec run)
 - Check packaging: Examine `package/` directory after `external_batch_run` job completes
 - Test ingestion: Manually create `status.json` in results/ and watch ingester process it
 - Modify chunk size: Set `OS_SERVER_EXTERNAL_BATCH_DPS_PER_CHUNK` environment variable
@@ -43,10 +43,8 @@ New to external batch development? This section will help you set up a test envi
 ## Versioning Information
 
 This documentation applies to **OpenStudio Server version 3.11.0 and later**.
-- External batch feature introduced: OpenStudio Server 3.8.0
-- Current documentation version: Based on OpenStudio Server 3.11.0
-- Minimum version for all features documented here: 3.11.0
-- Schema version: 1 (no changes as of 3.11.0 - all executors targeting schema version 1 remain compatible)
+- External batch feature introduced: OpenStudio Server 3.11.0 (first release of this feature)
+- Package/results contract: `schema_version` 1 (`ExternalBatch::SCHEMA_VERSION`); the runner refuses to process a manifest with a different schema_version
 
 ## Architecture Overview
 
@@ -113,20 +111,23 @@ The `ExternalBatch::Packager` class creates the executable package.
 5. **Manifest Creation**: Creates manifest.json with schema version, analysis ID, timestamp, datapoint count, chunks, workflow timeout, CLI flags, and download flags
 
 ### Package Structure
+`package/` and `results/` are siblings under the batch directory
+(`ExternalBatch.batch_dir`, i.e. `<external_batch_root>/analysis_<id>/`):
 ```
-package/
-├── manifest.json
-├── analysis_<id>/
-│   ├── analysis.json
-│   ├── measures/ (from seed zip)
-│   ├── seeds/ (from seed zip)
-│   ├── weather/ (from seed zip)
-│   ├── scripts/ (from seed zip)
-│   ├── lib/ (from seed zip)
-│   └── data_point_<dp_id>/
+<external_batch_root>/analysis_<id>/
+├── package/
+│   ├── manifest.json
+│   └── analysis_<id>/
 │       ├── analysis.json
-│       ├── data_point.json
-│       └── data_point.osw (pre-translated)
+│       ├── measures/ (from seed zip)
+│       ├── seeds/ (from seed zip)
+│       ├── weather/ (from seed zip)
+│       ├── scripts/ (from seed zip)
+│       ├── lib/ (from seed zip)
+│       └── data_point_<dp_id>/
+│           ├── analysis.json
+│           ├── data_point.json
+│           └── data_point.osw (pre-translated)
 └── results/ (empty initially, populated by executor)
 ```
 
@@ -167,12 +168,14 @@ The `ExternalBatch::Ingester` class handles processing results from executors.
 ```
 
 ### File Attachment Rules
-Result files attached based on manifest download flags:
-- `out.osw`: Always attached if `completed_status` == "Fail" OR `download_osw` == true
-- `in.osm`: Attached if `download_osm` == true
-- `data_point.zip`: Attached if `completed_status` == "Fail" OR `download_zip` == true
-- `reports/*`: Attached if `download_reports` == true
-- Log files: Always attached when available
+The ingester attaches every file it finds in `results/<dp_id>/` — the
+download-flag conditionals live in the **runner** (`run_chunk.rb`), which
+decides what to ship:
+- `out.osw`: Shipped if `completed_status` == "Fail" OR `download_osw` == true
+- `in.osm`: Shipped if `download_osm` == true
+- `data_point.zip`: Shipped if `completed_status` == "Fail" OR `download_zip` == true
+- `reports/*`: Shipped if `download_reports` == true
+- Log files: Always shipped when available
 
 ### Chunk Completion Tracking
 - Each chunk writes `results/chunk_<i>.done` when finished
@@ -187,7 +190,7 @@ Result files attached based on manifest download flags:
 - `--package`: Path to package directory (containing manifest.json)
 - `--results`: Path to results directory (where output should be written)
 - `--chunk`: Chunk index to process (optional, resolved from environment)
-- `--openstudio`: Path to OpenStudio CLI (optional, defaults to `openstudio`)
+- `--openstudio`: Path to OpenStudio CLI (optional, defaults to `OPENSTUDIO_EXE_PATH` env or `openstudio`)
 
 ### Chunk Index Resolution
 Runner determines chunk to process in this order:
@@ -252,7 +255,7 @@ Make results directory available to server's ingester loop.
 
 ### Key Considerations
 - **Chunk Parallelism**: Respect `--parallel` concept; each chunk independently executable
-- **Environment Consistency**: Use same Ruby interpreter as server; ensure OpenStudio CLI compatibility
+- **Environment Consistency**: The runner is plain stdlib Ruby (no gems), so any modern Ruby works; what must match is the OpenStudio CLI version the OSWs were pre-translated for
 - **Failure Handling**: Executor failures shouldn't prevent chunk completion marking
 - **Security**: Principle of least privilege; only needs read access to package, write access to results
 
@@ -267,18 +270,14 @@ Make results directory available to server's ingester loop.
 
 ## Testing Strategy
 
-### Unit Tests
-- Located in `spec/models/external_batch_*_spec.rb`
-- Test Packager, Ingester, and ExternalBatchRun classes in isolation
-- Use mocks to avoid external dependencies
-- Run as part of standard CI
-
-### Integration Tests
-- **Local Executor**: `spec/models/external_batch_local_spec.rb`
-  - Tests end-to-end with local_executor.rb and run_chunk.rb
-  - Uses real Ruby and mocked OpenStudio CLI
+### Model/Integration Specs
+- **Core pipeline**: `spec/models/external_batch_spec.rb`
+  - Covers Packager, Ingester, ExternalBatchRun, and the runner end-to-end
+    against a real Mongo — drives `run_chunk.rb` with a stub OpenStudio CLI
+  - Nothing in the classes under test is mocked
+  - Runs in standard CI
 - **AWS Batch**: `spec/models/external_batch_aws_spec.rb`
-  - Mocks AWS CLI calls
+  - Mocks only the AWS CLI boundary
   - Tests submission and synchronization logic
   - Runs in standard CI (no actual AWS)
 
@@ -291,7 +290,7 @@ Make results directory available to server's ingester loop.
   - Validates results match expected golden values
 
 ### Testing Best Practices
-1. Mock external dependencies (filesystem, OpenStudio CLI, AWS CLI, etc.)
+1. Mock only the true external boundary (OpenStudio CLI, AWS CLI); run everything else real — filesystem, Mongo, the runner script itself
 2. Focus on contracts (test packages and results follow expected format)
 3. Verify error handling (test system responses to failures)
 4. Validate data flow (ensure data moves analysis → package → execution → results → datapoint)
@@ -437,27 +436,6 @@ Analysis Submission
     Polling   Complete
 ```
 
-### Executor Selection Flowchart
-```
-Start
-  ↓
-[Need to run external batch?]
-  ↓          ↓
-  No        Yes
-  ↓          ↓
-Use local  [What's your environment?]
-  workers    ↓          ↓          ↓
-        [HPC/SLURM] [AWS Cloud] [Local/Dev]
-           ↓          ↓          ↓
-        Kestrel    AWS Batch   Local Executor
-           ↓          ↓          ↓
-    (Apptainer)  (Docker)   (Ruby subprocesses)
-           ↓          ↓          ↓
-    Best for HPC  Best for AWS  Best for testing,
-           ↓          ↓          ↓
-    batch systems  batch systems  CI, and small runs
-```
-
 ## FAQ
 
 ### Why are my datapoints stuck in queued status?
@@ -513,7 +491,8 @@ Follow these steps:
 No, the external batch feature does not currently support UrbanOpt analyses. The packager will reject them with an error. Use the standard OpenStudio Server workers for UrbanOpt analyses.
 
 ### How do datapoint initialize/finalize scripts work?
-These are shell scripts located in `analysis/scripts/data_point/`:
+These are shell scripts located in `<package>/analysis_<id>/scripts/data_point/`
+(extracted from the seed zip):
 - `initialize.sh`: Runs before the simulation (POSIX only)
 - `finalize.sh`: Runs after the simulation (POSIX only)
 - On Windows executors, these are skipped with a warning in the logs
@@ -526,9 +505,12 @@ The ingester uses a two-phase completion detection:
 2. Chunks are marked complete when `chunk_<i>.done` appears
 If an executor crashes:
 - Completed datapoints in that chunk will still be processed
-- The ingester will wait for the chunk done marker
-- After a timeout (configurable), missing datapoints will be marked as errored
-- Consider implementing executor checkpointing for long-running chunks
+- Missing datapoints are marked errored only after ALL `chunk_<i>.done` markers
+  exist — there is no timeout; a chunk that died without its done marker keeps
+  the analysis waiting
+- Re-submit just the dead chunk (`run_chunk.rb --chunk N`, or the executor's
+  equivalent) — safe because results land atomically (`status.json` written
+  last) and the ingester skips already-attached files
 
 ### How does the system handle mixed success/failure datapoints?
 Each datapoint is processed independently:
