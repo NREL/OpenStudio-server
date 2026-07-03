@@ -94,13 +94,13 @@ end
 # Read the job template and replace placeholders
 template_content = File.read(options[:job_template])
 job_name = options[:job_name] || "osaf-nomad-analysis-#{analysis_id}"
-rendered_job = template_content
-  .gsub('{{ANALYSIS_ID}}', analysis_id)
-  .gsub('{{NUM_CHUNKS}}', num_chunks.to_s)
-  .gsub('{{JOB_NAME}}', job_name)
-  .gsub('{{NAMESPACE}}', options[:namespace])
-  .gsub('{{PACKAGE_URI}}', package_uri)
-  .gsub('{{RESULTS_URI}}', results_uri)
+   rendered_job = template_content
+   .gsub('{{ANALYSIS_ID}}', analysis_id.to_s)
+   .gsub('{{NUM_CHUNKS}}', num_chunks.to_s)
+   .gsub('{{JOB_NAME}}', job_name)
+   .gsub('{{NAMESPACE}}', options[:namespace])
+   .gsub('{{PACKAGE_URI}}', package_uri)
+   .gsub('{{RESULTS_URI}}', results_uri)
 
 # Write the rendered job to a temporary file
 temp_job_file = Tempfile.new(['nomad_job', '.hcl'])
