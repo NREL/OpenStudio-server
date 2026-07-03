@@ -9,13 +9,21 @@ module ResqueJobs
 
     # Perform set up before running an analysis
     # this is enqueued in Analysis#start.
-    # todo error handling
-    # todo handle cleanup if this fails
     def self.perform(analysis_type, analysis_id, job_id, options = {})
       # TODO: error handling and logging around looking up analysis and detecting start/complete
       analysis = Analysis.find(analysis_id)
       # this will handle unzipping to osdata volume and running any initialization scripts
       analysis.run_initialization
+    rescue StandardError => e
+      # Mark the analysis failed so it reaches a terminal state visible to clients instead
+      # of sitting in 'queued' forever, then re-raise so Resque records the failed job (issue #841).
+      Rails.logger.error "InitializeAnalysis failed for analysis #{analysis_id}: #{e.message}"
+      begin
+        analysis&.fail_job!("Analysis initialization failed: #{e.message}")
+      rescue StandardError => mark_error
+        Rails.logger.error "Could not mark analysis #{analysis_id} as failed: #{mark_error.message}"
+      end
+      raise e
     end
 
     # after_perform hooks only called if job completes successfully

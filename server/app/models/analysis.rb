@@ -93,6 +93,45 @@ class Analysis
     ['na', 'init', 'queued', 'started', 'post-processing', 'completed']
   end
 
+  # Validate that a file is a structurally sound ZIP whose entries inflate cleanly with
+  # matching CRCs. Returns nil if valid, otherwise a String describing the problem.
+  # Called at upload time so corrupt seed zips are rejected with a 422 instead of
+  # failing later in ResqueJobs::InitializeAnalysis and stranding the analysis (issue #841).
+  def self.seed_zip_error(file_path)
+    # Zip::File.new instead of the Zip::File.open block form: open's implicit close
+    # calls commit, which can REWRITE the archive being validated. new reads the
+    # central directory and releases the file handle, keeping validation read-only.
+    zf = ::Zip::File.new(file_path)
+    zf.each do |entry|
+      next unless entry.file?
+
+      crc = ::Zlib.crc32
+      entry.get_input_stream do |io|
+        while (chunk = io.read(1_048_576))
+          crc = ::Zlib.crc32(chunk, crc)
+        end
+      end
+      return "seed zip entry '#{entry.name}' is corrupt (CRC mismatch)" unless crc == entry.crc
+    end
+    nil
+  rescue ::Zip::Error, ::Zlib::Error => e
+    "seed zip is not a valid ZIP archive: #{e.message}"
+  end
+
+  # Mark the analysis's most recent job as failed so the analysis reaches a terminal,
+  # API-visible state instead of sitting in 'queued'/'started' forever when
+  # initialization fails (issue #841).
+  def fail_job!(message)
+    self.status_message = message
+    save!
+    job = jobs.order_by(:index.asc).last
+    return unless job
+
+    job.status = 'failed'
+    job.status_message = message
+    job.save!
+  end
+
   # FIXME: analysis_type is somewhat ambiguous here, as it's argument to this method and also a class method name
   def start(no_delay, analysis_type = 'batch_run', options = {})
     Rails.logger.debug "analysis.start enter"
@@ -495,6 +534,11 @@ class Analysis
         # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
         extract_archive(seed_zip.path, shared_directory_path)
       end
+    rescue ::Zip::Error, ::Zlib::Error => e
+      # A corrupt zip is a deterministic failure - retrying cannot succeed (issue #841).
+      # Remove any partially extracted files so a later re-run does not skip-and-reuse them.
+      FileUtils.rm_rf(shared_directory_path)
+      raise "Seed zip for analysis #{id} is corrupt and cannot be extracted: #{e.message}"
     rescue StandardError => e
       retry if extract_count < extract_max_count
       raise "Extraction of the seed.zip file failed #{extract_max_count} times with error #{e.message}"

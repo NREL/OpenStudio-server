@@ -140,6 +140,19 @@ class AnalysesController < ApplicationController
     params = analysis_params
     params[:project_id] = project_id
 
+    # Reject corrupt seed zips at creation time with a 422 instead of letting them fail
+    # later in ResqueJobs::InitializeAnalysis and strand the analysis (issue #841)
+    if params[:seed_zip].respond_to?(:path)
+      zip_error = Analysis.seed_zip_error(params[:seed_zip].path)
+      if zip_error
+        respond_to do |format|
+          format.html { render action: 'new', status: :unprocessable_entity }
+          format.json { render json: { status: 'error', error_message: zip_error }, status: :unprocessable_entity }
+        end
+        return
+      end
+    end
+
     @analysis = Analysis.new(params)
     @analysis.save! # Make sure to save it before processing it further. Rails 5 upgrade issue.
 
@@ -391,6 +404,15 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find(params[:id])
 
     if @analysis
+      # Reject corrupt seed zips at upload time with a 422 instead of letting them fail
+      # later in ResqueJobs::InitializeAnalysis and strand the analysis (issue #841)
+      if params[:file].respond_to?(:path)
+        zip_error = Analysis.seed_zip_error(params[:file].path)
+        if zip_error
+          render json: { status: 'error', error_message: zip_error }, status: :unprocessable_entity
+          return
+        end
+      end
       @analysis.seed_zip = params[:file]
     end
 
