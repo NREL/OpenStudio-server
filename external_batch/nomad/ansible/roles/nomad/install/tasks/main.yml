@@ -1,0 +1,88 @@
+---
+# =============================================================================
+# Nomad binary installation (common to server and clients)
+# =============================================================================
+
+- name: Stat the local Nomad zip
+  local_action: stat path="{{ local_nomad_zip }}"
+  register: local_zip
+  become: false
+
+- name: Fail if Nomad zip not found locally
+  ansible.builtin.fail:
+    msg: >
+      Nomad zip not found at {{ local_nomad_zip }}.
+      Download it from https://releases.hashicorp.com/nomad/{{ nomad_version }}/ and
+      set local_nomad_zip in inventory.yml.
+  when: not local_zip.stat.exists
+
+- name: Create Nomad directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /opt/nomad/data
+    - /etc/nomad.d
+
+- name: Copy Nomad zip to remote
+  ansible.builtin.copy:
+    src: "{{ local_nomad_zip }}"
+    dest: "/tmp/nomad_{{ nomad_version }}_linux_amd64.zip"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Extract Nomad binary
+  ansible.builtin.unarchive:
+    src: "/tmp/nomad_{{ nomad_version }}_linux_amd64.zip"
+    dest: /usr/local/bin
+    remote_src: true
+    include:
+      - nomad
+  notify: restart nomad
+
+- name: Set Nomad binary permissions
+  ansible.builtin.file:
+    path: /usr/local/bin/nomad
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install Nomad systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/nomad.service
+    content: |
+      [Unit]
+      Description=Nomad
+      Documentation=https://nomadproject.io/docs/
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      ExecReload=/bin/kill -HUP $MAINPID
+      ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d
+      KillMode=process
+      KillSignal=SIGINT
+      LimitNOFILE=infinity
+      LimitNPROC=infinity
+      Restart=on-failure
+      RestartSec=2
+      StartLimitBurst=3
+      StartLimitIntervalSec=10
+      TasksMax=infinity
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nomad
+
+- name: Enable Nomad systemd service
+  ansible.builtin.systemd:
+    name: nomad
+    enabled: true
+    daemon_reload: true

@@ -1,0 +1,70 @@
+---
+# =============================================================================
+# OpenStudio CLI installation + runner script deployment
+# (runs on every nomad-client)
+# =============================================================================
+
+# ── 1. Install OpenStudio CLI ────────────────────────────────────────────
+
+- name: Stat the local OpenStudio tarball
+  local_action: stat path="{{ local_openstudio_tarball }}"
+  register: local_tarball
+  become: false
+
+- name: Fail if OpenStudio tarball not found locally
+  ansible.builtin.fail:
+    msg: >
+      OpenStudio tarball not found at {{ local_openstudio_tarball }}.
+      Download it from https://openstudio-builds.s3.amazonaws.com/ and
+      set local_openstudio_tarball in inventory.yml.
+  when: not local_tarball.stat.exists
+
+- name: Copy OpenStudio tarball to remote
+  ansible.builtin.copy:
+    src: "{{ local_openstudio_tarball }}"
+    dest: "/tmp/openstudio-{{ openstudio_version }}.tar.gz"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Extract OpenStudio tarball
+  ansible.builtin.unarchive:
+    src: "/tmp/openstudio-{{ openstudio_version }}.tar.gz"
+    dest: /opt
+    remote_src: true
+    creates: "/opt/openstudio-{{ openstudio_version }}/bin/openstudio"
+
+- name: Create OpenStudio symlink
+  ansible.builtin.file:
+    src: "/opt/openstudio-{{ openstudio_version }}/bin/openstudio"
+    dest: /usr/local/bin/openstudio
+    state: link
+    owner: root
+    group: root
+
+- name: Verify OpenStudio CLI
+  ansible.builtin.command: openstudio --version
+  register: os_version
+  changed_when: false
+  failed_when: "'{{ openstudio_version }}' not in os_version.stdout"
+
+# ── 2. Deploy runner scripts ─────────────────────────────────────────────
+# The runner scripts live in the OpenStudio-server repo on the Ansible
+# controller (your Mac).  role_path resolves to the role's directory, from
+# which we navigate up to external_batch/ using relative path traversal.
+
+- name: Deploy run_chunk.rb
+  ansible.builtin.copy:
+    src: "{{ role_path }}/../../../../runner/run_chunk.rb"
+    dest: /usr/local/bin/run_chunk.rb
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy task_wrapper.sh
+  ansible.builtin.copy:
+    src: "{{ role_path }}/../../../../nomad/task_wrapper.sh"
+    dest: /usr/local/bin/task_wrapper.sh
+    owner: root
+    group: root
+    mode: "0755"

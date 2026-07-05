@@ -25,3 +25,6 @@ worker-data
 
 # ignore files with ~ at end
 *~
+
+# Environment-specific config (copy from .env.example)
+.env

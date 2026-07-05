@@ -1,0 +1,43 @@
+---
+# =============================================================================
+# Nomad Server Playbook
+# =============================================================================
+# Provisions the nomad-server VM with:
+#   - Common base packages and /etc/hosts
+#   - NFS server (nfs-kernel-server + export)
+#   - Nomad binary + systemd service
+#   - Nomad server configuration (single-node cluster)
+#
+# Usage:
+#   ansible-playbook playbooks/nomad-server.yml
+# =============================================================================
+
+- name: Provision Nomad Server
+  hosts: nomad_server
+  become: true
+
+  pre_tasks:
+    - name: Ensure we are on the right host
+      ansible.builtin.assert:
+        that:
+          - inventory_hostname == 'nomad-server'
+        fail_msg: "This playbook should only target nomad-server"
+
+  roles:
+    - role: common
+      tags: [common, always]
+    - role: nfs/server
+      tags: [nfs, nfs-server]
+    - role: nomad/install
+      tags: [nomad, nomad-install]
+    - role: nomad/server
+      tags: [nomad, nomad-server]
+
+  post_tasks:
+    - name: Display Nomad server status
+      ansible.builtin.command: nomad server members
+      register: final_status
+      changed_when: false
+    - name: Show server members
+      ansible.builtin.debug:
+        var: final_status.stdout_lines

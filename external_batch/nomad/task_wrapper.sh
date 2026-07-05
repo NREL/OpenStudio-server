@@ -44,8 +44,12 @@ if [[ -z "${RESULTS_URI:-}" ]]; then
 fi
 
 if [[ -z "${CHUNK_INDEX:-}" ]]; then
-    log "ERROR: --chunk-index is required"
-    exit 1
+    CHUNK_INDEX="${NOMAD_ALLOC_INDEX:-}"
+    if [[ -z "${CHUNK_INDEX:-}" ]]; then
+        log "ERROR: --chunk-index is required and NOMAD_ALLOC_INDEX is not set"
+        exit 1
+    fi
+    log "Using NOMAD_ALLOC_INDEX as chunk index: $CHUNK_INDEX"
 fi
 
 # Set defaults for optional values
@@ -73,7 +77,7 @@ unset BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYOPT RUBYLIB
 # Ensure OpenStudio CLI is in PATH (assuming it's installed and available)
 
 # Set up directories
-LOCAL_WORK_DIR="/nomad/task"
+LOCAL_WORK_DIR="/tmp/nomad/task"
 PACKAGE_DIR="$LOCAL_WORK_DIR/package"
 RESULTS_DIR="$LOCAL_WORK_DIR/results"
 mkdir -p "$PACKAGE_DIR" "$RESULTS_DIR"
@@ -141,15 +145,21 @@ fi
 
 # Determine chunk index from Nomad environment (already provided as argument)
 log "Processing chunk index: $CHUNK_INDEX"
-
-# Change to repository root and execute the chunk runner with explicit arguments
-cd "$REPO_DIR"
-log "Running chunk runner: ruby external_batch/runner/run_chunk.rb --package $PACKAGE_DIR --results $RESULTS_DIR --chunk $CHUNK_INDEX --openstudio $OPENSTUDIO_CMD"
-if ! ruby external_batch/runner/run_chunk.rb --package "$PACKAGE_DIR" --results "$RESULTS_DIR" --chunk "$CHUNK_INDEX" --openstudio "$OPENSTUDIO_CMD"; then
-    log "ERROR: Chunk execution failed for chunk index $CHUNK_INDEX"
+log "Running run_chunk.rb for chunk $CHUNK_INDEX"
+RUN_CHUNK="/usr/local/bin/run_chunk.rb"
+if [[ ! -f "$RUN_CHUNK" ]]; then
+    log "ERROR: $RUN_CHUNK not found"
     exit 3
 fi
-
+ruby "$RUN_CHUNK" \
+    --package "$PACKAGE_DIR" \
+    --results "$RESULTS_DIR" \
+    --chunk "$CHUNK_INDEX" \
+    --openstudio "$OPENSTUDIO_CMD"
+RUN_EXIT=$?
+if [[ $RUN_EXIT -ne 0 ]]; then
+    log "WARNING: run_chunk.rb exited with code $RUN_EXIT"
+fi
 # Handle result transfer based on results type
 if [[ "$RESULTS_TYPE" == "s3" ]]; then
     log "Syncing results to S3: $RESULTS_DIR -> $RESULTS_FINAL_DIR"

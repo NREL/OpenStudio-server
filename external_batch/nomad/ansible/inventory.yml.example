@@ -1,0 +1,61 @@
+---
+# =============================================================================
+# Nomad External Batch — Ansible Inventory Example
+# =============================================================================
+# Copy this file to inventory.yml and fill in your VM IPs and variables.
+#
+# Usage:
+#   cp inventory.yml.example inventory.yml
+#   # edit inventory.yml with your IPs and paths
+#   ansible-playbook playbooks/site.yml
+# =============================================================================
+
+all:
+  children:
+    # ── Nomad Server ──────────────────────────────────────────────────────
+    nomad_server:
+      hosts:
+        nomad-server:
+          ansible_host: <NOMAD_SERVER_FLOATING_IP>
+
+    # ── Nomad Clients ─────────────────────────────────────────────────────
+    # Add or remove entries to match your cluster size.
+    nomad_clients:
+      hosts:
+        nomad-client-1:
+          ansible_host: <NOMAD_CLIENT_1_FLOATING_IP>
+        nomad-client-2:
+          ansible_host: <NOMAD_CLIENT_2_FLOATING_IP>
+        # nomad-client-3:
+        #   ansible_host: <NOMAD_CLIENT_3_FLOATING_IP>
+        # ...
+
+  vars:
+    # ── Network ───────────────────────────────────────────────────────────
+    # Internal (fixed) IPs for the VPC subnet.
+    vpc_cidr: "10.0.0.0/16"
+    nomad_server_internal_ip: "<NOMAD_SERVER_INTERNAL_IP>"
+
+    # Internal IPs of every client (for /etc/hosts on all nodes).
+    nomad_client_internal_ips:
+      nomad-client-1: "<NOMAD_CLIENT_1_INTERNAL_IP>"
+      nomad-client-2: "<NOMAD_CLIENT_2_INTERNAL_IP>"
+
+    # ── Nomad ─────────────────────────────────────────────────────────────
+    nomad_version: "1.5.3"
+    # Path to a local copy of the Nomad zip binary (downloaded on your Mac).
+    # The playbook copies this to each VM since DNS may be blocked on
+    # OpenStack instances.
+    # Download from: https://releases.hashicorp.com/nomad/
+    local_nomad_zip: "/tmp/nomad_1.5.3_linux_amd64.zip"
+
+    # ── OpenStudio ────────────────────────────────────────────────────────
+    openstudio_version: "3.10.0"
+    # Path to a local copy of the OpenStudio Linux tarball (downloaded on
+    # your Mac from the OpenStudio builds S3 bucket). The playbook copies
+    # this to each client and installs it.
+    # Download from: https://openstudio-builds.s3.amazonaws.com/
+    local_openstudio_tarball: "/tmp/OpenStudio-3.10.0-xxx-Ubuntu-22.04-x86_64.tar.gz"
+
+    # ── NFS ───────────────────────────────────────────────────────────────
+    nfs_export_path: "/nfs/opensstudio/batch"
