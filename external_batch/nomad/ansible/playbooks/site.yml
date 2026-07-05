@@ -1,0 +1,26 @@
+---
+# =============================================================================
+# Nomad External Batch — Full Site Provisioning
+# =============================================================================
+# Provisions the entire Nomad cluster from scratch:
+#   1. nomad-server (NFS + Nomad controller)
+#   2. All nomad-clients (NFS mount + Nomad agent + OpenStudio + runner scripts)
+#
+# Prerequisites:
+#   - Three or more OpenStack VMs already created
+#   - inventory.yml configured with IPs and local binary paths
+#   - Nomad zip and OpenStudio tarball downloaded on the controller
+#
+# Usage:
+#   ansible-playbook playbooks/site.yml
+#
+# For first-time provisioning, you may want to run server first, then clients:
+#   ansible-playbook playbooks/nomad-server.yml
+#   ansible-playbook playbooks/nomad-clients.yml
+# =============================================================================
+
+- name: Provision Nomad Server
+  ansible.builtin.import_playbook: nomad-server.yml
+
+- name: Provision Nomad Clients
+  ansible.builtin.import_playbook: nomad-clients.yml

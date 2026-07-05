@@ -21,9 +21,9 @@ The Nomad executor follows the same patterns as existing executors (AWS Batch, L
 
 2. **Submission**: `submit_nomad.rb`:
    - Uploads the package to a Nomad-accessible location (NFS, S3, etc.)
-   - Renders a Nomad job template with analysis-specific parameters
-   - Submits the job using `nomad job run`
-   - Returns the Nomad job ID for tracking
+    - Renders a Nomad job template with analysis-specific parameters
+    - Submits the job via the Nomad HTTP API (2-step: `POST /v1/jobs/parse` for HCL→JSON, then `POST /v1/jobs` with the parsed JSON)
+    - Returns the Nomad job ID for tracking
 
 3. **Execution**: Nomad runs the `task_wrapper.sh` script:
    - Downloads the package from the shared location
@@ -42,7 +42,7 @@ The Nomad executor follows the same patterns as existing executors (AWS Batch, L
 ### Prerequisites
 
 - Nomad cluster (v0.10+ recommended)
-- Nomad CLI installed and configured
+- Nomad CLI installed and configured (optional — the submission script uses the HTTP API, but the CLI is useful for debugging)
 - Package location accessible to both submission host and Nomad clients (NFS, S3, etc.)
 - Docker container or static binary with OpenStudio CLI and Ruby (for task_wrapper.sh)
 
@@ -98,8 +98,9 @@ Optional arguments:
 - `--namespace` - Nomad namespace (default: "default")
 - `--job-name` - Custom job name (default: osaf-nomad-analysis-<id>)
 - `--package-location` - Where to store/retrieve packages (NFS path, S3 URI, etc.)
-- `--nomad-cmd` - Nomad CLI command (default: "nomad")
-- `--dry-run` - Print commands without executing
+- `--ssh-host` - SSH host for rsync bridge (e.g., `ubuntu@<NOMAD_SERVER_FLOATING_IP>`); overrides `OS_SERVER_NOMAD_SSH_HOST` env var
+- `--ssh-key` - SSH key path for rsync (default: /config/ssh/id_rsync)
+- `--dry-run` - Print the commands without executing them
 
 ### Task Wrapper (`task_wrapper.sh`)
 
@@ -172,7 +173,7 @@ The resource requirements in the job template should be tuned based on:
 
 ## Testing
 
-See `DEVELOPER_GUIDE.md` for testing strategies. For Nomad executor:
+See `../DEVELOPER_GUIDE.md` for testing strategies. For Nomad executor:
 - Unit tests would mock Nomad CLI calls
 - Integration tests would require a Nomad dev environment
 - Smoke tests would need access to a Nomad cluster

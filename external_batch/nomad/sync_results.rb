@@ -31,7 +31,9 @@ options = {
   results_uri: nil,
   interval: 30,
   aws_cmd: 'aws',
-  once: false
+  once: false,
+  ssh_host: nil,
+  ssh_key: nil
 }
 
 opt_parser = OptionParser.new do |o|
@@ -40,6 +42,8 @@ opt_parser = OptionParser.new do |o|
   o.on('--interval SECONDS', Integer, 'Seconds between syncs (default 30)') { |v| options[:interval] = v }
   o.on('--aws-cmd CMD', 'AWS CLI command (default `aws`; stub for tests)') { |v| options[:aws_cmd] = v }
   o.on('--once', 'Sync once and exit (no completion wait)') { options[:once] = true }
+  o.on('--ssh-host HOST', 'SSH host for rsync (e.g., ubuntu@<NOMAD_SERVER_FLOATING_IP>)') { |v| options[:ssh_host] = v }
+  o.on('--ssh-key PATH', 'SSH key path for rsync') { |v| options[:ssh_key] = v }
 end
 
 opt_parser.parse!
@@ -55,14 +59,16 @@ num_chunks = JSON.parse(File.read(manifest_path))['chunks'].size
 results_dir = File.join(batch_dir, 'results')
 FileUtils.mkdir_p(results_dir)
 
-# Determine if we're dealing with S3 or local filesystem
+# Determine if we're dealing with S3 or local/SSH filesystem
 is_s3 = options[:results_uri].start_with?('s3://')
 
 sync_cmd = if is_s3
   "#{options[:aws_cmd]} s3 sync --only-show-errors \"#{options[:results_uri]}\" \"#{results_dir}\""
+elsif options[:ssh_host]
+  ssh_key_arg = options[:ssh_key] ? "-i #{options[:ssh_key]}" : ''
+  "rsync -avz -e \"ssh #{ssh_key_arg} -o StrictHostKeyChecking=no\" \"#{options[:ssh_host]}:#{options[:results_uri]}/\" \"#{results_dir}/\""
 else
-  # For NFS/local filesystem, use rsync or cp
-  # Using rsync for efficiency, especially when results are already mostly synced
+  # For NFS/local filesystem, use rsync
   "rsync -a --quiet \"#{options[:results_uri]}/\" \"#{results_dir}/\""
 end
 

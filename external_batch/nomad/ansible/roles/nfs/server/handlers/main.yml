@@ -1,0 +1,3 @@
+---
+- name: exportfs
+  ansible.builtin.command: exportfs -ra

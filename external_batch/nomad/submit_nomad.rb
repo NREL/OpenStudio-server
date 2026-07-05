@@ -18,28 +18,32 @@
 # (if using shared filesystem) or a separate sync process is needed (if using S3).
 
 require 'json'
+require 'net/http'
 require 'optparse'
 require 'fileutils'
 require 'tempfile'
+require 'uri'
 
 options = {
-  nomad_addr: nil,
-  nomad_cmd: 'nomad',
+  nomad_addr: 'http://localhost:4646',
   job_template: nil,
   package_location: nil,
   job_name: nil,
   namespace: 'default',
+  ssh_host: nil,
+  ssh_key: nil,
   dry_run: false
 }
 
 opt_parser = OptionParser.new do |o|
   o.banner = 'Usage: ruby submit_nomad.rb BATCH_DIR [options]'
-  o.on('--nomad-addr ADDRESS', 'Nomad server address (e.g., http://localhost:4646)') { |v| options[:nomad_addr] = v }
-  o.on('--nomad-cmd CMD', 'Nomad CLI command (default `nomad`; stub for tests)') { |v| options[:nomad_cmd] = v }
+  o.on('--nomad-addr ADDRESS', "Nomad server address (default: #{options[:nomad_addr]})") { |v| options[:nomad_addr] = v }
   o.on('--job-template PATH', 'Path to Nomad job template file (required)') { |v| options[:job_template] = v }
   o.on('--package-location LOCATION', 'Base location for packages and results (NFS path or S3 URI)') { |v| options[:package_location] = v }
   o.on('--job-name NAME', 'Job name (default osaf-nomad-analysis-<id>)') { |v| options[:job_name] = v }
   o.on('--namespace NAMESPACE', 'Nomad namespace (default: "default")') { |v| options[:namespace] = v }
+  o.on('--ssh-host HOST', 'SSH host for rsync (e.g., ubuntu@<NOMAD_SERVER_FLOATING_IP>)') { |v| options[:ssh_host] = v }
+  o.on('--ssh-key PATH', 'SSH key path for rsync (default: /config/ssh/id_rsync)') { |v| options[:ssh_key] = v }
   o.on('--dry-run', 'Print the commands without executing them') { options[:dry_run] = true }
 end
 
@@ -55,9 +59,6 @@ manifest = JSON.parse(File.read(manifest_path))
 analysis_id = manifest['analysis_id']
 num_chunks = manifest['chunks'].size
 
-abort '--job-template and --package-location are required' if options[:job_template].nil? || options[:package_location].nil?
-abort "Job template file not found: #{options[:job_template]}" unless File.exist?(options[:job_template])
-
 # Determine package and results URIs based on package_location
 package_location = options[:package_location]
 if package_location.match?(/^s3:\/\//)
@@ -70,63 +71,95 @@ else
   results_uri = File.join(package_location, "analysis_#{analysis_id}", "results")
 end
 
-# Ensure the package is available at the package_uri
-if package_type == 's3'
-  # Sync the package directory to S3
-  sync_cmd = "aws s3 sync --only-show-errors --delete \"#{File.join(batch_dir, 'package')}\" \"#{package_uri}\""
-  puts "+ #{sync_cmd}"
-  unless options[:dry_run]
-    system(sync_cmd) || abort("Command failed: #{sync_cmd}")
+  # Ensure the package is available at the package_uri
+  source_package = File.join(batch_dir, 'package')
+  if package_type == 's3'
+    # Sync the package directory to S3
+    sync_cmd = "aws s3 sync --only-show-errors --delete \"#{source_package}\" \"#{package_uri}\""
+    puts "+ #{sync_cmd}"
+    unless options[:dry_run]
+      system(sync_cmd) || abort("Command failed: #{sync_cmd}")
+    end
+  elsif package_type == 'nfsmount'
+    if options[:ssh_host]
+      remote_dir = package_uri
+      ssh_key_arg = options[:ssh_key] ? "-i #{options[:ssh_key]}" : ''
+      copy_cmd = "rsync -avz --delete -e \"ssh #{ssh_key_arg} -o StrictHostKeyChecking=no\" \"#{source_package}/\" \"#{options[:ssh_host]}:#{remote_dir}/\""
+      puts "+ #{copy_cmd}"
+      unless options[:dry_run]
+        system(copy_cmd) || abort("rsync to NFS via SSH failed: #{copy_cmd}")
+        puts "Package synced to #{options[:ssh_host]}:#{remote_dir}/"
+      end
+    else
+      unless File.expand_path(source_package) == File.expand_path(package_uri)
+        FileUtils.mkdir_p(File.dirname(package_uri))
+        copy_cmd = "cp -r \"#{source_package}\" \"#{package_uri}\""
+        puts "+ #{copy_cmd}"
+        unless options[:dry_run]
+          FileUtils.rm_rf(package_uri) if File.exist?(package_uri)
+          FileUtils.cp_r(source_package, package_uri)
+        end
+      end
+    end
+  else
+    abort "Unsupported package type: #{package_type}"
   end
-elsif package_type == 'nfsmount'
-  # Ensure the destination directory exists and copy the package
-  FileUtils.mkdir_p(File.dirname(package_uri))
-  copy_cmd = "cp -r \"#{File.join(batch_dir, 'package')}\" \"#{package_uri}\""
-  puts "+ #{copy_cmd}"
-  unless options[:dry_run]
-    FileUtils.rm_rf(package_uri) if File.exist?(package_uri)
-    FileUtils.cp_r(File.join(batch_dir, 'package'), package_uri)
-  end
-else
-  abort "Unsupported package type: #{package_type}"
-end
 
 # Read the job template and replace placeholders
 template_content = File.read(options[:job_template])
 job_name = options[:job_name] || "osaf-nomad-analysis-#{analysis_id}"
-   rendered_job = template_content
-   .gsub('{{ANALYSIS_ID}}', analysis_id.to_s)
-   .gsub('{{NUM_CHUNKS}}', num_chunks.to_s)
-   .gsub('{{JOB_NAME}}', job_name)
-   .gsub('{{NAMESPACE}}', options[:namespace])
-   .gsub('{{PACKAGE_URI}}', package_uri)
-   .gsub('{{RESULTS_URI}}', results_uri)
+rendered_job = template_content
+  .gsub('{{ANALYSIS_ID}}', analysis_id.to_s)
+  .gsub('{{NUM_CHUNKS}}', num_chunks.to_s)
+  .gsub('{{JOB_NAME}}', job_name)
+  .gsub('{{NAMESPACE}}', options[:namespace])
+  .gsub('{{PACKAGE_URI}}', package_uri)
+  .gsub('{{RESULTS_URI}}', results_uri)
 
-# Write the rendered job to a temporary file
-temp_job_file = Tempfile.new(['nomad_job', '.hcl'])
-begin
-  temp_job_file.write(rendered_job)
-  temp_job_file.flush
-
-  # Run nomad job run with JSON output to get the job ID
-  nomad_addr_arg = options[:nomad_addr] ? " -address=#{options[:nomad_addr]}" : ''
-  run_cmd = "#{options[:nomad_cmd]}#{nomad_addr_arg} job run -output=json #{temp_job_file.path}"
-  puts "+ #{run_cmd}"
-  unless options[:dry_run]
-    output = `#{run_cmd}`
-    abort "nomad job run failed: #{$?.exitstatus}" unless $?.success?
-    begin
-      json_output = JSON.parse(output)
-      job_id = json_output['job']['ID']
-      abort 'Failed to parse job ID from Nomad response' unless job_id
-      puts "Submitted #{num_chunks} chunk(s) for analysis #{analysis_id}: jobID=#{job_id}"
-    rescue JSON::ParserError => e
-      abort "Failed to parse Nomad job run output as JSON: #{e.message}\nOutput: #{output}"
-    end
-  end
-ensure
-  temp_job_file.close
-  temp_job_file.unlink
+# Submit job via Nomad HTTP API
+unless options[:dry_run]
+  nomad_addr = options[:nomad_addr] || 'http://localhost:4646'
+  uri = URI.parse("#{nomad_addr.chomp('/')}/v1/jobs")
+  
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.open_timeout = 10
+  http.read_timeout = 30
+  
+  # Step 1: Parse HCL to JSON via /v1/jobs/parse (Nomad v1.5.x doesn't support JobHCL directly on /v1/jobs)
+  parse_uri = URI.parse("#{nomad_addr.chomp('/')}/v1/jobs/parse")
+  parse_payload = JSON.generate({ JobHCL: rendered_job })
+  
+  parse_request = Net::HTTP::Post.new(parse_uri.request_uri)
+  parse_request.body = parse_payload
+  parse_request['Content-Type'] = 'application/json'
+  
+  puts "* POST #{parse_uri} (parse HCL template)"
+  parse_response = http.request(parse_request)
+  
+  abort "Nomad parse error: #{parse_response.code} #{parse_response.message}\n#{parse_response.body}" unless parse_response.code.to_i == 200
+  
+  job_json = JSON.parse(parse_response.body)
+  
+  # Step 2: Submit parsed JSON job to /v1/jobs
+  submit_payload = JSON.generate({ Job: job_json })
+  
+  request = Net::HTTP::Post.new(uri.request_uri)
+  request.body = submit_payload
+  request['Content-Type'] = 'application/json'
+  
+  puts "+ POST #{uri} (job: #{job_name}, #{num_chunks} chunk(s))"
+  response = http.request(request)
+  
+  abort "Nomad API error: #{response.code} #{response.message}\n#{response.body}" unless response.code.to_i == 200
+  
+  result = JSON.parse(response.body)
+  job_id = job_json['ID'] || job_json['Name'] || result['EvalID']
+  abort 'Failed to determine job ID from Nomad response' unless job_id
+  
+  puts "Submitted #{num_chunks} chunk(s) for analysis #{analysis_id}: jobID=#{job_id} evalID=#{result['EvalID']}"
+else
+  puts "+ POST (dry-run) #{options[:nomad_addr] || 'http://localhost:4646'}/v1/jobs"
+  puts "  Job: #{job_name}, #{num_chunks} chunk(s)"
 end
 
 puts

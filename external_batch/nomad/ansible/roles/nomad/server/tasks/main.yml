@@ -1,0 +1,51 @@
+---
+# =============================================================================
+# Nomad Server configuration (runs on nomad-server only)
+# =============================================================================
+
+- name: Deploy Nomad server configuration
+  ansible.builtin.copy:
+    dest: /etc/nomad.d/nomad.hcl
+    content: |
+      data_dir  = "/opt/nomad/data"
+
+      server {
+        enabled          = true
+        bootstrap_expect = 1
+      }
+
+      client {
+        enabled = false
+      }
+
+      plugin "raw_exec" {
+        config {
+          enabled = true
+        }
+      }
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nomad
+
+- name: Start Nomad server
+  ansible.builtin.systemd:
+    name: nomad
+    state: started
+    enabled: true
+
+- name: Wait for Nomad server to become ready
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:4646/v1/status/leader"
+    method: GET
+    status_code: 200
+  register: leader_check
+  retries: 10
+  delay: 2
+  until: leader_check.status == 200
+
+- name: Verify Nomad server members
+  ansible.builtin.command: nomad server members
+  register: members
+  changed_when: false
+  failed_when: "'alive' not in members.stdout"

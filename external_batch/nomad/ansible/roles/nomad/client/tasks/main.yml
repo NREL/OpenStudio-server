@@ -1,0 +1,44 @@
+---
+# =============================================================================
+# Nomad Client configuration (runs on every nomad-client)
+# =============================================================================
+
+- name: Deploy Nomad client configuration
+  ansible.builtin.copy:
+    dest: /etc/nomad.d/nomad.hcl
+    content: |
+      data_dir  = "/opt/nomad/data"
+
+      server {
+        enabled = false
+      }
+
+      client {
+        enabled    = true
+        servers    = ["nomad-server:4646"]
+        network_interface = "eth0"
+      }
+
+      plugin "raw_exec" {
+        config {
+          enabled = true
+        }
+      }
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nomad
+
+- name: Start Nomad client
+  ansible.builtin.systemd:
+    name: nomad
+    state: started
+    enabled: true
+
+- name: Wait for Nomad client to join cluster
+  ansible.builtin.command: nomad node status
+  register: node_status
+  changed_when: false
+  retries: 10
+  delay: 3
+  until: node_status.rc == 0
