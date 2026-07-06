@@ -20,6 +20,12 @@ RSpec.describe 'Analyses seed zip upload', type: :request do
   end
 
   after :all do
+    # Destroy factory data so paperclip deletes the uploaded seed zips and prunes the
+    # emptied assets/analyses directory. In the docker CI job this spec runs as root
+    # inside the web container while the live app runs as an unprivileged user - a
+    # leftover root-owned assets/analyses dir makes every later upload fail with
+    # EACCES, and leftover projects break docker_stack_test_apis_spec assertions.
+    Project.destroy_all
     FileUtils.rm_rf(@tmp_dir)
   end
 
