@@ -95,6 +95,27 @@ RSpec.describe Analysis, type: :model do
       path = build_crc_corrupt_zip(File.join(@tmp_dir, 'crc_corrupt.zip'))
       expect(Analysis.seed_zip_error(path)).to match(/entry 'data\/seed\.txt' is corrupt \(CRC mismatch\)/)
     end
+
+    it 'rejects an archive that inflates past the size cap' do
+      # Validates: validation must not inflate unbounded data in the request path - a
+      # zip bomb would otherwise pin a web worker (PR #844 review)
+      stub_const('Analysis::SEED_ZIP_MAX_INFLATED_BYTES', 10)
+      path = build_valid_zip(File.join(@tmp_dir, 'inflates_past_cap.zip'))
+      expect(Analysis.seed_zip_error(path)).to eq 'seed zip inflates to more than 10 bytes'
+    end
+
+    it 'rejects an archive with more file entries than the cap' do
+      # Validates: entry-count cap bounds validation work in the request path (PR #844 review)
+      stub_const('Analysis::SEED_ZIP_MAX_ENTRIES', 1)
+      path = File.join(@tmp_dir, 'too_many_entries.zip')
+      Zip::OutputStream.open(path) do |zos|
+        zos.put_next_entry('a.txt')
+        zos.write 'a'
+        zos.put_next_entry('b.txt')
+        zos.write 'b'
+      end
+      expect(Analysis.seed_zip_error(path)).to eq 'seed zip contains more than 1 file entries'
+    end
   end
 
   describe '#run_initialization with a corrupt seed zip' do

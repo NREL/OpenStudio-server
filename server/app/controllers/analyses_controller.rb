@@ -146,7 +146,9 @@ class AnalysesController < ApplicationController
       zip_error = Analysis.seed_zip_error(params[:seed_zip].path)
       if zip_error
         respond_to do |format|
-          format.html { render action: 'new', status: :unprocessable_entity }
+          # no new.html.erb view exists (analyses are created via the JSON API), so
+          # render plain text rather than a missing template
+          format.html { render plain: zip_error, status: :unprocessable_entity }
           format.json { render json: { status: 'error', error_message: zip_error }, status: :unprocessable_entity }
         end
         return

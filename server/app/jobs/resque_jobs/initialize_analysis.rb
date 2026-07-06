@@ -23,7 +23,7 @@ module ResqueJobs
       rescue StandardError => mark_error
         Rails.logger.error "Could not mark analysis #{analysis_id} as failed: #{mark_error.message}"
       end
-      raise e
+      raise
     end
 
     # after_perform hooks only called if job completes successfully

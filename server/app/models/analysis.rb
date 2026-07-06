@@ -93,6 +93,12 @@ class Analysis
     ['na', 'init', 'queued', 'started', 'post-processing', 'completed']
   end
 
+  # Caps for upload-time zip validation. Far above any real seed zip, but fatal to a
+  # zip bomb that would otherwise pin a web worker inflating unbounded data in the
+  # request path.
+  SEED_ZIP_MAX_INFLATED_BYTES = 10 * 1024 * 1024 * 1024 # 10 GB
+  SEED_ZIP_MAX_ENTRIES = 100_000
+
   # Validate that a file is a structurally sound ZIP whose entries inflate cleanly with
   # matching CRCs. Returns nil if valid, otherwise a String describing the problem.
   # Called at upload time so corrupt seed zips are rejected with a 422 instead of
@@ -101,13 +107,21 @@ class Analysis
     # Zip::File.new instead of the Zip::File.open block form: open's implicit close
     # calls commit, which can REWRITE the archive being validated. new reads the
     # central directory and releases the file handle, keeping validation read-only.
+    entries = 0
+    inflated_bytes = 0
     zf = ::Zip::File.new(file_path)
     zf.each do |entry|
       next unless entry.file?
 
+      entries += 1
+      return "seed zip contains more than #{SEED_ZIP_MAX_ENTRIES} file entries" if entries > SEED_ZIP_MAX_ENTRIES
+
       crc = ::Zlib.crc32
       entry.get_input_stream do |io|
         while (chunk = io.read(1_048_576))
+          inflated_bytes += chunk.bytesize
+          return "seed zip inflates to more than #{SEED_ZIP_MAX_INFLATED_BYTES} bytes" if inflated_bytes > SEED_ZIP_MAX_INFLATED_BYTES
+
           crc = ::Zlib.crc32(chunk, crc)
         end
       end
