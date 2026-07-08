@@ -199,7 +199,7 @@ module DjJobs
             # check for a valid timeout value
             unless @data_point.analysis.run_workflow_timeout.positive?
               @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-              @@data_point.analysis.run_workflow_timeout = 28800
+              @data_point.analysis.run_workflow_timeout = 28800
             end
             Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
               Process.wait(pid)
@@ -401,27 +401,45 @@ module DjJobs
       # add check for a valid timeout value
       unless @data_point.analysis.initialize_worker_timeout.positive?
         @sim_logger.warn "initialize_worker_timeout option: #{@data_point.analysis.initialize_worker_timeout} is not valid.  Using 28800s instead."
-        @@data_point.analysis.initialize_worker_timeout = 28800
+        @data_point.analysis.initialize_worker_timeout = 28800
       end
       # This block makes this code threadsafe for non-docker deployments, i.e. desktop usage
       if File.exist? write_lock_file
         @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
 
-        # wait until receipt file appears then return or error
+        # Wait until receipt file appears, then return or error. Also bail out early if the
+        # lock file itself disappears without a receipt ever showing up: that means the
+        # original holder died (crashed, OOM-killed, evicted, hit a deterministic failure
+        # like a corrupt seed zip) partway through without completing initialization.
+        # Waiting the full initialize_worker_timeout (default 8h) for a receipt that will
+        # never come just wastes a worker slot for no reason.
+        lock_holder_gone = false
         begin
           Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
             loop do
               break if File.exist? receipt_file
 
+              unless File.exist? write_lock_file
+                lock_holder_gone = true
+                break
+              end
+
               @sim_logger.info 'waiting for receipt file to appear'
               sleep 3
             end
           end
+        rescue ::Timeout::Error
+          @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; clearing the stale lock so a future worker does not wait on it."
+          FileUtils.rm_f write_lock_file
+          return false
+        end
 
+        if File.exist? receipt_file
           @sim_logger.info 'receipt_file appeared, moving on'
           return true
-        rescue ::Timeout::Error
-          @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds."
+        else
+          @sim_logger.error 'write_lock_file was removed by its holder without a receipt_file appearing; the original holder failed to initialize. Failing this attempt so it can be retried.' if lock_holder_gone
+          return false
         end
       else
         # Try to download the analysis zip, but first lock simultanious threads
@@ -461,6 +479,11 @@ module DjJobs
               #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
               extract_archive(download_file, analysis_dir)
             end
+          rescue ::Zip::Error, ::Zlib::Error => e
+            # A corrupt zip is a deterministic failure - retrying cannot succeed (issue #841).
+            # Remove any partially extracted files so a later attempt does not skip-and-reuse them.
+            FileUtils.rm_rf(analysis_dir)
+            raise "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: #{e.message}"
           rescue StandardError => e
             retry if extract_count < extract_max_count
             raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
@@ -537,8 +560,15 @@ module DjJobs
         lock_file << Time.now
 
         yield
+      rescue StandardError
+        # The protected block failed before a receipt file could be written. Delete the lock
+        # file (not just release the flock) so a future attempt does not see a stale lock and
+        # wait up to initialize_worker_timeout (default 8h) for a receipt that will never come.
+        FileUtils.rm_f lock_file_path
+        raise
       ensure
         lock_file.flock(File::LOCK_UN)
+        lock_file.close
       end
     end
 
@@ -610,7 +640,7 @@ module DjJobs
       # add check for a valid timeout value
       unless @data_point.analysis.upload_results_timeout.positive?
         @sim_logger.warn "upload_results_timeout option: #{@data_point.analysis.upload_results_timeout} is not valid.  Using 28800s instead."
-        @@data_point.analysis.upload_results_timeout = 28800
+        @data_point.analysis.upload_results_timeout = 28800
       end
       begin
         Timeout.timeout(@data_point.analysis.upload_results_timeout) do
