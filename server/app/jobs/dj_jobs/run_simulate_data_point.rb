@@ -420,6 +420,7 @@ module DjJobs
         # Waiting the full initialize_worker_timeout (default 8h) for a receipt that will
         # never come just wastes a worker slot for no reason.
         lock_holder_gone = false
+        abandoned_probes = 0
         begin
           Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
             loop do
@@ -430,13 +431,40 @@ module DjJobs
                 break
               end
 
+              # flock is released by the OS when its holder dies, even on SIGKILL/OOM -
+              # deaths write_lock's own rescue cleanup never sees. A lock file whose flock
+              # is acquirable is abandoned; detect that here instead of waiting out the
+              # full initialize_worker_timeout. Require two consecutive positive probes
+              # (a poll interval apart) so a holder's open->flock startup gap can never
+              # read as abandonment.
+              if lock_abandoned?(write_lock_file)
+                abandoned_probes += 1
+                if abandoned_probes >= 2
+                  @sim_logger.error 'write_lock_file exists but its flock is not held; the original holder died without cleaning up. Clearing the abandoned lock and failing this attempt so it can be retried.'
+                  FileUtils.rm_f write_lock_file
+                  lock_holder_gone = true
+                  break
+                end
+              else
+                abandoned_probes = 0
+              end
+
               @sim_logger.info 'waiting for receipt file to appear'
               sleep 3
             end
           end
         rescue ::Timeout::Error
-          @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; clearing the stale lock so a future worker does not wait on it."
-          FileUtils.rm_f write_lock_file
+          # Only clear the lock if nothing is actually holding it: a holder that is alive
+          # but slow (each of its download/extract steps gets its own
+          # initialize_worker_timeout, so it can legitimately outlive this single wait)
+          # still owns the file, and deleting it would let a third worker re-create the
+          # lock on a new inode and initialize the same analysis_dir concurrently.
+          if lock_abandoned?(write_lock_file)
+            @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the lock is not held; clearing the stale lock so a future worker does not wait on it."
+            FileUtils.rm_f write_lock_file
+          else
+            @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; the lock holder is still alive, leaving its lock in place."
+          end
           return false
         end
 
@@ -578,6 +606,24 @@ module DjJobs
     end
 
     # Simple method to write a lock file in order for competing threads to wait before continuing.
+    # True when the lock file exists but no process holds its flock - i.e. the
+    # holder died (SIGKILL/OOM/eviction) without running write_lock's cleanup.
+    # The probe takes and immediately releases the flock; a live holder keeps
+    # LOCK_EX for its whole critical section, so LOCK_NB fails against it.
+    def lock_abandoned?(lock_file_path)
+      File.open(lock_file_path, 'r') do |f|
+        if f.flock(File::LOCK_EX | File::LOCK_NB)
+          f.flock(File::LOCK_UN)
+          true
+        else
+          false
+        end
+      end
+    rescue Errno::ENOENT
+      # Deleted between our existence check and the open: holder is gone.
+      true
+    end
+
     def write_lock(lock_file_path)
       lock_file = File.open(lock_file_path, 'a')
       begin

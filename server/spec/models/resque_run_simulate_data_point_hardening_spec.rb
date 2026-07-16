@@ -37,8 +37,15 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :model do
   end
 
   describe '.perform' do
-    context 'when the owning analysis has run_flag == false (stopped/quarantined by ops)' do
-      before { analysis.update!(run_flag: false) }
+    context 'when the owning analysis was started and then stopped (run_flag == false with a start time)' do
+      before do
+        # A stopped analysis was necessarily started first: starting creates its Job
+        # records (Analysis#start_time reads them), stop_analysis then flips run_flag.
+        # run_flag alone is NOT a stop marker - it also defaults to false on analyses
+        # nobody has started yet (see the regression context below).
+        Job.new(analysis_id: analysis.id, index: 0, start_time: Time.now.utc, status: 'started').save!
+        analysis.update!(run_flag: false)
+      end
 
       %w[started queued na].each do |status|
         it "skips dispatching a fresh worker for a stale '#{status}' datapoint " \
@@ -63,6 +70,22 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :model do
         set_data_point_status(status: 'completed', status_message: 'datapoint failure')
 
         expect(DjJobs::RunSimulateDataPoint).not_to receive(:new)
+
+        described_class.perform(data_point.id)
+      end
+    end
+
+    context 'when the owning analysis was never started (run_flag still default false, no jobs)' do
+      it 'still dispatches a worker: a datapoint submitted directly against a fresh analysis must run' do
+        # Regression: run_flag defaults to false, so guarding on run_flag alone skipped
+        # every datapoint submitted via batch upload + submit_simulation before the
+        # analysis was started - caught by resque_run_simulation_data_point_spec.rb
+        # ('runs a datapoint') in the docker CI job.
+        set_data_point_status(status: 'na')
+
+        expect(analysis.start_time).to be_nil
+        worker = instance_double(DjJobs::RunSimulateDataPoint, perform: true)
+        expect(DjJobs::RunSimulateDataPoint).to receive(:new).with(data_point.id, {}).and_return(worker)
 
         described_class.perform(data_point.id)
       end
