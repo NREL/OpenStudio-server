@@ -15,15 +15,18 @@ module BackgroundJobs
   # can delete the shared analysis directory out from under whichever spec is
   # running by then. Force the deletion inline so cleanup finishes before the
   # hook returns.
+  # Guard both constants: the PAT-local CI env (openstudio_meta run_rspec)
+  # loads delayed_job but not Resque, and Windows dev setups load neither
+  # (both gems are linux-only in the Gemfile).
   def destroy_projects_inline
-    delay_jobs = Delayed::Worker.delay_jobs
-    inline = Resque.inline
-    Delayed::Worker.delay_jobs = false
-    Resque.inline = true
+    delay_jobs = defined?(Delayed::Worker) ? Delayed::Worker.delay_jobs : nil
+    inline = defined?(Resque) ? Resque.inline : nil
+    Delayed::Worker.delay_jobs = false if defined?(Delayed::Worker)
+    Resque.inline = true if defined?(Resque)
     Project.destroy_all
   ensure
-    Delayed::Worker.delay_jobs = delay_jobs
-    Resque.inline = inline
+    Delayed::Worker.delay_jobs = delay_jobs if defined?(Delayed::Worker)
+    Resque.inline = inline if defined?(Resque)
   end
 
   def run_background_jobs_immediately
