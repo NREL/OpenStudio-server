@@ -196,3 +196,29 @@ RSpec.describe OsHttp::Client do
     osm&.unlink
   end
 end
+
+RSpec.describe OsHttp do
+  after :each do
+    OsHttp.instance_variable_set(:@client, nil)
+    OsHttp.instance_variable_set(:@client_base_url, nil)
+  end
+
+  it 'rebuilds the singleton client when os_server_host_url changes' do
+    # Validates: the run_simulation feature specs repoint
+    # APP_CONFIG['os_server_host_url'] at a per-process Capybara server after
+    # boot; the memoized client must follow, as rest-client did by reading
+    # APP_CONFIG on every call.
+    stub_const('APP_CONFIG', { 'os_server_host_url' => 'http://127.0.0.1:9001' })
+    first = OsHttp.client
+    expect(OsHttp.client).to be(first) # stable while the URL is unchanged
+
+    stub_const('APP_CONFIG', { 'os_server_host_url' => 'http://127.0.0.1:9002' })
+    expect(OsHttp.client).not_to be(first)
+  end
+
+  it 'raises when os_server_host_url is not configured' do
+    # Validates: fail loudly at first use, not with a nil URI error mid-job.
+    hide_const('APP_CONFIG')
+    expect { OsHttp.client }.to raise_error(/os_server_host_url/)
+  end
+end

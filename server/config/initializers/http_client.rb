@@ -166,15 +166,22 @@ module OsHttp
 
   # Lazily-constructed singleton: this file must not depend on APP_CONFIG load
   # order, and forked workers should open their own connection on first use.
+  # Rebuilt if os_server_host_url changes (the run_simulation feature specs
+  # repoint it at a per-process Capybara server after boot), matching
+  # rest-client's behavior of reading APP_CONFIG on every call.
   def self.client
-    @client ||= begin
-      unless defined?(APP_CONFIG) && APP_CONFIG['os_server_host_url']
-        raise "APP_CONFIG['os_server_host_url'] must be set before using OsHttp.client"
-      end
-
-      c = Client.new(base_url: APP_CONFIG['os_server_host_url'])
-      at_exit { c.shutdown }
-      c
+    unless defined?(APP_CONFIG) && APP_CONFIG['os_server_host_url']
+      raise "APP_CONFIG['os_server_host_url'] must be set before using OsHttp.client"
     end
+
+    url = APP_CONFIG['os_server_host_url']
+    if @client.nil? || @client_base_url != url
+      @client&.shutdown
+      c = Client.new(base_url: url)
+      at_exit { c.shutdown }
+      @client = c
+      @client_base_url = url
+    end
+    @client
   end
 end
