@@ -14,6 +14,12 @@ module DjJobs
     MAX_INLINE_SDP_LOG_BYTES = 5_000_000
     MAX_INLINE_SDP_LOG_LINES = 5_000
 
+    # Raised (instead of a bare String) when the downloaded analysis.zip cannot be
+    # extracted, so initialize_worker's cleanup can distinguish this deterministic
+    # failure and remove the analysis_dir AFTER write_lock has closed and deleted
+    # the lock file - see the CorruptAnalysisZip rescue in initialize_worker.
+    class CorruptAnalysisZip < StandardError; end
+
     def initialize(data_point_id, options = {})
       @data_point = DataPoint.find(data_point_id)
       @options = options
@@ -481,9 +487,14 @@ module DjJobs
             end
           rescue ::Zip::Error, ::Zlib::Error => e
             # A corrupt zip is a deterministic failure - retrying cannot succeed (issue #841).
-            # Remove any partially extracted files so a later attempt does not skip-and-reuse them.
-            FileUtils.rm_rf(analysis_dir)
-            raise "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: #{e.message}"
+            # Remove partially extracted files (while still holding the lock) so a later
+            # attempt does not skip-and-reuse them. The lock file itself must survive this
+            # sweep: its fd is still open here, Windows cannot delete an open file, and
+            # FileUtils.rm_rf swallows that failure silently. write_lock's rescue unlocks,
+            # closes, and deletes it on the way out, and initialize_worker's
+            # CorruptAnalysisZip rescue then removes the emptied directory.
+            FileUtils.rm_rf(Dir.glob("#{analysis_dir}/*") - [write_lock_file])
+            raise CorruptAnalysisZip, "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: #{e.message}"
           rescue StandardError => e
             retry if extract_count < extract_max_count
             raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
@@ -546,6 +557,20 @@ module DjJobs
 
       @sim_logger.info 'Finished worker initialization'
       return true
+    rescue CorruptAnalysisZip => e
+      # write_lock's rescue has already closed and deleted the lock file (the only fd that
+      # was still open under analysis_dir), and the in-lock sweep removed the extracted
+      # content. Dir.rmdir rather than rm_rf: if another worker has already re-locked and
+      # begun re-populating the directory, rmdir fails harmlessly instead of deleting its
+      # in-progress files.
+      begin
+        Dir.rmdir(analysis_dir)
+      rescue SystemCallError
+        @sim_logger.warn "Could not remove #{analysis_dir} after corrupt-zip cleanup; leaving it for the next worker."
+      end
+      @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
+      @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
+      return false
     rescue StandardError => e
       @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
       @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
@@ -564,11 +589,18 @@ module DjJobs
         # The protected block failed before a receipt file could be written. Delete the lock
         # file (not just release the flock) so a future attempt does not see a stale lock and
         # wait up to initialize_worker_timeout (default 8h) for a receipt that will never come.
+        # Unlock and close BEFORE deleting: Windows (the desktop/PAT deployment this lock
+        # exists for) cannot unlink an open file, and FileUtils.rm_f swallows that failure
+        # silently, leaving the stale lock - and the deadlock - in place.
+        lock_file.flock(File::LOCK_UN)
+        lock_file.close
         FileUtils.rm_f lock_file_path
         raise
       ensure
-        lock_file.flock(File::LOCK_UN)
-        lock_file.close
+        unless lock_file.closed?
+          lock_file.flock(File::LOCK_UN)
+          lock_file.close
+        end
       end
     end
 
