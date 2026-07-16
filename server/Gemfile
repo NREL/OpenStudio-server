@@ -103,7 +103,6 @@ gem 'bson', '~> 4.14.1' # bson 4.6.0 requires ruby >= 2.3.0
 gem 'msgpack', '~> 1.4.5'
 gem 'multi_json', '~> 1.15.0'
 gem 'nio4r', '~> 2.5.9'
-gem 'rest-client', '~> 2.1.0'
 
 # add to Gemfile to make available to Ruby scripts running via initialize/finalize scripts
 gem 'rubyXL', '~> 3.4.17'
@@ -142,6 +141,9 @@ group :development, :test do
   gem 'capybara', '~> 3.40'
   gem 'coveralls', '0.7.1', require: false
   gem 'public_suffix', '~> 5.0.5'
+  # test-only HTTP client for the live-stack feature specs; app code uses
+  # the persistent client in config/initializers/http_client.rb
+  gem 'rest-client', '~> 2.1.0'
   gem 'rspec', '~> 3.13.0'
   gem 'rspec-rails', '~> 5.0.3'
   gem 'rspec-retry', '~> 0.6.2'

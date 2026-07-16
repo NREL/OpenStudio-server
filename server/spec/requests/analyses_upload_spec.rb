@@ -11,7 +11,7 @@ require 'tmpdir'
 # of being accepted and later stranding the analysis in a failed InitializeAnalysis job.
 RSpec.describe 'Analyses seed zip upload', type: :request do
   before :all do
-    Project.destroy_all
+    destroy_projects_inline
     FactoryBot.create(:project_with_analyses, analyses_count: 1)
 
     @project = Project.first
@@ -25,7 +25,8 @@ RSpec.describe 'Analyses seed zip upload', type: :request do
     # inside the web container while the live app runs as an unprivileged user - a
     # leftover root-owned assets/analyses dir makes every later upload fail with
     # EACCES, and leftover projects break docker_stack_test_apis_spec assertions.
-    Project.destroy_all
+    # Inline so the DeleteAnalysis rm_rf cannot fire mid-run of a later spec.
+    destroy_projects_inline
     FileUtils.rm_rf(@tmp_dir)
   end
 

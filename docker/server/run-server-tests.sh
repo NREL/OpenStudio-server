@@ -19,9 +19,20 @@ do
 done
 
 #cd /opt/openstudio/server && bundle exec rspec; (( exit_status = exit_status || $? ))
+# Socket-level specs for the persistent worker->web HTTP client. Fast, no stack needed.
+cd /opt/openstudio/server && bundle exec rspec spec/lib/os_http_spec.rb; (( exit_status = exit_status || $? ))
 # Model/request specs for seed.zip upload validation + InitializeAnalysis failure handling (issue #841).
 # These need only rails+mongo, so run them first - they are fast and leave the db empty.
 cd /opt/openstudio/server && bundle exec rspec spec/models/analysis_init_spec.rb spec/requests/analyses_upload_spec.rb; (( exit_status = exit_status || $? ))
+# Job-level integration specs for RunSimulateDataPoint (dj + resque inline). They run the
+# full job - including the persistent worker->web HTTP client - against an in-process app.
+# Their after(:all) hooks destroy projects/paperclip assets so later specs start empty (#841).
+cd /opt/openstudio/server && bundle exec rspec spec/features/dj_run_simulation_data_point_spec.rb; (( exit_status = exit_status || $? ))
+cd /opt/openstudio/server && bundle exec rspec spec/features/resque_run_simulation_data_point_spec.rb; (( exit_status = exit_status || $? ))
+# The in-process spec apps above run as root and can leave a root-owned 0755
+# assets/data_points dir; remove it so the live app (nobody) can recreate it
+# writable, or the docker_stack specs below fail on result-file uploads (#841).
+rm -rf /mnt/openstudio/server/assets/data_points
 # Run only the algorithm specs. The other features/*_spec files should probably disappear and capybara/gecko
 # can be removed.
 cd /opt/openstudio/server && bundle exec rspec spec/features/docker_stack_custom_gems.rb; (( exit_status = exit_status || $? ))

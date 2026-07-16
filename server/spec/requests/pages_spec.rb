@@ -4,6 +4,8 @@
 # *******************************************************************************
 
 require 'rails_helper'
+# rest-client is test-only now; Bundler no longer auto-requires it
+require 'rest-client'
 
 RSpec.describe 'Pages Exist', type: :feature do
   it 'HomePage' do

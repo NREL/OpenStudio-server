@@ -12,7 +12,7 @@ require 'tmpdir'
 # detectable before the InitializeAnalysis job ever runs.
 RSpec.describe Analysis, type: :model do
   before :all do
-    Project.destroy_all
+    destroy_projects_inline
     @analysis = FactoryBot.create(:analysis)
     @tmp_dir = Dir.mktmpdir('analysis-init-spec')
   end
@@ -23,7 +23,8 @@ RSpec.describe Analysis, type: :model do
     # inside the web container while the live app runs as an unprivileged user - a
     # leftover root-owned assets/analyses dir makes every later upload fail with
     # EACCES, and leftover projects break docker_stack_test_apis_spec assertions.
-    Project.destroy_all
+    # Inline so the DeleteAnalysis rm_rf cannot fire mid-run of a later spec.
+    destroy_projects_inline
     FileUtils.rm_rf(@tmp_dir)
   end
 
