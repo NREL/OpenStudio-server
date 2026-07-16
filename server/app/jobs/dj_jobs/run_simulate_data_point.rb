@@ -81,6 +81,10 @@ module DjJobs
                       }
                     ] }
         report_file = "#{simulation_dir}/out.osw"
+        # simulation_dir can be missing here (initialize_worker failed, or the
+        # analysis dir was deleted out from under us); don't let the error
+        # report itself crash with ENOENT and mask the real failure.
+        FileUtils.mkdir_p simulation_dir unless Dir.exist? simulation_dir
         File.open(report_file, 'wb') do |f|
           f.puts ::JSON.pretty_generate(out_osw)
         end

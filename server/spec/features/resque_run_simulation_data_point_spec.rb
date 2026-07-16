@@ -15,6 +15,10 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: tru
 
   after :all do
     Rails.application.config.x.job_manager = @previous_job_manager
+    # Run in the docker CI job as root: destroy projects so paperclip assets
+    # are removed and the live-stack specs that follow start empty (#841).
+    # Inline so the DeleteAnalysis rm_rf cannot fire mid-run of a later spec.
+    destroy_projects_inline
   end
 
   before do
@@ -124,9 +128,11 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: tru
     puts "datapoint log for #{datapoint_id}: "
     puts j[:data_point][:sdp_log_file].inspect
 
+    # openstudio-workflow no longer logs 'Completed the EnergyPlus simulation';
+    # a zero exit from EnergyPlus is logged as "EnergyPlus returned '0'".
     found_complete = false
     j[:data_point][:sdp_log_file].each do |line|
-      if line.include? 'Completed the EnergyPlus simulation'
+      if line.include? "EnergyPlus returned '0'"
         found_complete = true
       end
     end

@@ -16,6 +16,10 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
 
   after :all do
     Rails.application.config.x.job_manager = @previous_job_manager
+    # Run in the docker CI job as root: destroy projects so paperclip assets
+    # are removed and the live-stack specs that follow start empty (#841).
+    # Inline so the DeleteAnalysis rm_rf cannot fire mid-run of a later spec.
+    destroy_projects_inline
   end
 
   before do
@@ -228,7 +232,9 @@ end
 RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: true do
   before do
     begin
-      Project.destroy_all
+      # This group is not tagged foreground: destroy inline or the enqueued
+      # DeleteAnalysis rm_rf runs later against the shared analysis dir.
+      destroy_projects_inline
     rescue Errno::EACCES => e
       puts 'Cannot unlink files, will try and continue'
     end
@@ -238,6 +244,13 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, depends_resque: tru
     @project = Project.first
     @analysis = @project.analyses.first
     @data_point = @analysis.data_points.first
+  end
+
+  after :all do
+    # Run in the docker CI job as root: destroy projects so paperclip assets
+    # are removed and the live-stack specs that follow start empty (#841).
+    # Inline so the DeleteAnalysis rm_rf cannot fire mid-run of a later spec.
+    destroy_projects_inline
   end
 
   it 'launches a script successfully' do
