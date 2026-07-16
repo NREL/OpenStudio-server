@@ -95,18 +95,18 @@ module DjJobs
       end
 
       # delete any existing data files from the server in case this is a 'rerun'
-      @sim_logger.info 'calling RestClient.delete in case this is a rerun to delete the /result_files directory'
+      @sim_logger.info 'calling HTTP delete in case this is a rerun to delete the /result_files directory'
       post_count = 0
       post_count_max = 50
       begin
         post_count += 1
         @sim_logger.info "delete post_count = #{post_count}; max is 50"
-        RestClient.delete "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}/result_files"
+        OsHttp.client.delete("/data_points/#{@data_point.id}/result_files")
       rescue StandardError => e
         sleep Random.new.rand(1.0..10.0)
         retry if post_count <= post_count_max
-        @sim_logger.error "RestClient.delete failed with error #{e.message}"
-        raise "RestClient.delete failed with error #{e.message}"
+        @sim_logger.error "HTTP delete failed with error #{e.message}"
+        raise "HTTP delete failed with error #{e.message}"
       end
       # Download the datapoint to run and save to disk
       url = "#{APP_CONFIG['os_server_host_url']}/data_points/#{@data_point.id}.json"
@@ -116,12 +116,12 @@ module DjJobs
       begin
         post_count += 1
         @sim_logger.info "get url post_count = #{post_count}"
-        r = RestClient.get url
+        r = OsHttp.client.get(url)
       rescue StandardError => e
         sleep Random.new.rand(1.0..10.0)
         retry if post_count <= post_count_max
-        @sim_logger.error "RestClient.get url failed with error #{e.message}"
-        raise "RestClient.get url failed with error #{e.message}"
+        @sim_logger.error "HTTP get failed with error #{e.message}"
+        raise "HTTP get failed with error #{e.message}"
       end
       raise 'Datapoint JSON could not be downloaded' unless r.code == 200
       # Parse to JSON to save it again with nice formatting
@@ -471,7 +471,7 @@ module DjJobs
           begin
             Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               json_download_count += 1
-              a = RestClient.get analysis_json_url
+              a = OsHttp.client.get(analysis_json_url)
               raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
 
               # Parse to JSON to save it again with nice formatting
@@ -595,7 +595,10 @@ module DjJobs
       end
     end
 
-    def upload_file(filename, type, display_name = nil, content_type = nil)
+    # _content_type is kept for call-site compatibility: rest-client sent it
+    # as a form field the server never read. The multipart part Content-Type
+    # is now derived from the file extension (see OsHttp::Client).
+    def upload_file(filename, type, display_name = nil, _content_type = nil)
       upload_file_attempt = 0
       upload_file_max_attempt = 4
       display_name ||= File.basename(filename, '.*')
@@ -608,18 +611,10 @@ module DjJobs
       begin
         Timeout.timeout(@data_point.analysis.upload_results_timeout) do
           upload_file_attempt += 1
-          if content_type
-            res = RestClient.post(data_point_url,
-                                  file: { display_name: display_name,
-                                          type: type,
-                                          attachment: File.new(filename, 'rb') },
-                                  content_type: content_type)
-          else
-            res = RestClient.post(data_point_url,
-                                  file: { display_name: display_name,
-                                          type: type,
-                                          attachment: File.new(filename, 'rb') })
-          end
+          res = OsHttp.client.post_form(data_point_url,
+                                        file: { display_name: display_name,
+                                                type: type,
+                                                attachment: File.new(filename, 'rb') })
           @sim_logger.info "Saving report responded with #{res}"
           return true
         end

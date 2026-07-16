@@ -5,6 +5,8 @@
 
 require 'rails_helper'
 require 'tempfile'
+# rest-client is test-only now; Bundler no longer auto-requires it
+require 'rest-client'
 
 RSpec.describe DjJobs::RunSimulateDataPoint, type: :feature, foreground: true do
   before :all do

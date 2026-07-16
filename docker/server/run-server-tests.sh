@@ -19,6 +19,8 @@ do
 done
 
 #cd /opt/openstudio/server && bundle exec rspec; (( exit_status = exit_status || $? ))
+# Socket-level specs for the persistent worker->web HTTP client. Fast, no stack needed.
+cd /opt/openstudio/server && bundle exec rspec spec/lib/os_http_spec.rb; (( exit_status = exit_status || $? ))
 # Model/request specs for seed.zip upload validation + InitializeAnalysis failure handling (issue #841).
 # These need only rails+mongo, so run them first - they are fast and leave the db empty.
 cd /opt/openstudio/server && bundle exec rspec spec/models/analysis_init_spec.rb spec/requests/analyses_upload_spec.rb; (( exit_status = exit_status || $? ))

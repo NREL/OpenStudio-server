@@ -4,6 +4,8 @@
 # *******************************************************************************
 
 require 'rails_helper'
+# rest-client is test-only now; Bundler no longer auto-requires it
+require 'rest-client'
 
 RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :feature, foreground: true, depends_resque: true do
   before :all do
