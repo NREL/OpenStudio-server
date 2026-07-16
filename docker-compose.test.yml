@@ -22,6 +22,11 @@ services:
       args:
         rails_env: docker
         bundle_args: ''
+        # embed layer-cache metadata so pushed images can seed later builds (BuildKit
+        # no longer uses pulled images as cache without it, unlike the classic builder)
+        BUILDKIT_INLINE_CACHE: '1'
+      cache_from:
+        - nrel/openstudio-server:latest
     environment:
       - CI
       - COVERALLS_REPO_TOKEN
@@ -53,6 +58,11 @@ services:
       args:
         rails_env: docker
         bundle_args: ''
+        # embed layer-cache metadata so pushed images can seed later builds (BuildKit
+        # no longer uses pulled images as cache without it, unlike the classic builder)
+        BUILDKIT_INLINE_CACHE: '1'
+      cache_from:
+        - nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=background,analyses
@@ -75,6 +85,11 @@ services:
       args:
         rails_env: docker
         bundle_args: ''
+        # embed layer-cache metadata so pushed images can seed later builds (BuildKit
+        # no longer uses pulled images as cache without it, unlike the classic builder)
+        BUILDKIT_INLINE_CACHE: '1'
+      cache_from:
+        - nrel/openstudio-server:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - QUEUES=requeued,simulations
@@ -92,7 +107,12 @@ services:
   rserve:
     image: nrel/openstudio-rserve:latest
     platform: ${DOCKER_PLATFORM:-linux/amd64}
-    build: ./docker/R
+    build:
+      context: ./docker/R
+      args:
+        BUILDKIT_INLINE_CACHE: '1'
+      cache_from:
+        - nrel/openstudio-rserve:latest
     environment:
       - OS_SERVER_NUMBER_OF_WORKERS=1
       - REDIS_URL=${REDIS_URL}
