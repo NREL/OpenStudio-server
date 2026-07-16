@@ -120,7 +120,21 @@ jobs:
           docker --version
           docker-compose --version
           docker-compose -f docker-compose.test.yml pull
-          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+          # Rebuild the rserve image only when its inputs changed. PR runs otherwise reuse
+          # the pulled nrel/openstudio-rserve:latest (kept fresh by docker-upload on
+          # develop/master pushes): rebuilding R packages on every run cost ~10 min and
+          # failed whenever CRAN had a transient outage or mid-day version drift.
+          # Push runs always build everything - docker-upload deploys those images.
+          # Two-commit tree diff (not A...B) so it works on the shallow PR merge-ref clone;
+          # any fetch/diff failure falls back to building everything.
+          BUILD_SERVICES="web rserve"
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ] \
+             && git fetch --no-tags --quiet --depth=1 origin "${GITHUB_BASE_REF}" \
+             && git diff --quiet FETCH_HEAD HEAD -- docker/R; then
+            echo "docker/R is unchanged by this PR: reusing pulled nrel/openstudio-rserve:latest instead of rebuilding it"
+            BUILD_SERVICES="web"
+          fi
+          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG $BUILD_SERVICES
           docker-compose -f docker-compose.test.yml up -d
           #set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
           docker-compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
