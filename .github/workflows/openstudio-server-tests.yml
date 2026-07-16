@@ -1,12 +1,20 @@
 name: openstudio-server
 
-on: [push, pull_request]
+# Run each workflow once per change: pull_request covers feature branches
+# (pushing a branch with an open PR previously triggered a duplicate push
+# run), push covers the long-lived and release branches that deploy images.
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - '*.*.*'   # release branches, e.g. 3.11.0
+      - '*-LTS'   # e.g. 2.9.X-LTS
+  pull_request:
 
-# example of how to restrict to one branch and push event
-#on:
-#  push:
-#    branches:
-#      - test_branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   USE_TESTING_TIMEOUTS: "true"
