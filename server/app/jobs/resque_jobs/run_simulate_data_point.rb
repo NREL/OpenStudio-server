@@ -22,7 +22,24 @@ module ResqueJobs
       # There is a case where that worker completes a successful job, before the requeued DP starts.
       # In that case, we should skip re-running that DP because it was both completed and completed normal already.
       # If its a requeued failed job, then that should still get re-run
-      if !(statuses[:status] == 'completed' && statuses[:status_message] == 'completed normal')
+      #
+      # A job can also sit on the :simulations/:requeued Resque list for a long time (worker
+      # backlog, HPA scale-down, etc). If the owning analysis was explicitly stopped in the
+      # meantime (Analysis#stop_analysis/#soft_stop_analysis, e.g. ops quarantining a batch with
+      # a permanently corrupt seed zip), run_flag is false and this stale payload must not
+      # dispatch a fresh worker download/extract against it - that just recreates the same
+      # failure or deadlock the stop was meant to end.
+      # run_flag defaults to false and only flips true when the analysis is started, so
+      # run_flag alone cannot distinguish "ops stopped this analysis" from "nobody has
+      # started it yet" - and datapoints CAN legitimately be submitted against a
+      # never-started analysis (batch datapoint upload + direct submit_simulation).
+      # start_time comes from the analysis' jobs, which exist iff it was started.
+      analysis_stopped = d.analysis.run_flag == false && !d.analysis.start_time.nil?
+      if analysis_stopped
+        msg = "SKIPPING #{data_point_id} because analysis #{d.analysis_id} has run_flag=false (analysis was stopped)"
+        d.add_to_rails_log(msg)
+        puts msg
+      elsif !(statuses[:status] == 'completed' && statuses[:status_message] == 'completed normal')
         msg = "RUNNING DJ: #{statuses[:status]} and #{statuses[:status_message]}"
         d.add_to_rails_log(msg)
         puts msg
