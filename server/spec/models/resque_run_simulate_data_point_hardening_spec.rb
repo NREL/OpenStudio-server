@@ -112,5 +112,15 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :model do
         described_class.perform(data_point.id)
       end
     end
+
+    context 'when the datapoint lookup itself fails (d is nil in the rescue path)' do
+      it 'logs the original error instead of raising NoMethodError on nil ' \
+         '(so the job fails cleanly and can be retried, not crash the rescue)' do
+        missing_id = data_point.id
+        data_point.destroy!
+
+        expect { described_class.perform(missing_id) }.not_to raise_error
+      end
+    end
   end
 end

@@ -51,16 +51,20 @@ module ResqueJobs
         puts msg
       end 
     rescue SignalException, Errno::ENOSPC, Resque::DirtyExit, Resque::TermException, Resque::PruneDeadWorkerDirtyExit => e
-      # Log the termination and re-enqueue attempt
-      d.add_to_rails_log("Worker Caught Exception: #{e.inspect}")#: Re-enqueueing DataPoint ID #{data_point_id}")
+      # Log the termination and re-enqueue attempt. d is nil when DataPoint.find above
+      # raised (e.g. the datapoint was deleted), so guard it - otherwise the rescue itself
+      # crashes with NoMethodError and masks the real error, leaving a non-retryable job.
+      msg = "Worker Caught Exception: #{e.inspect}"#: Re-enqueueing DataPoint ID #{data_point_id}")
+      d.nil? ? Rails.logger.warn(msg) : d.add_to_rails_log(msg)
       #Resque.enqueue_to(:requeued, self, data_point_id, options)
       #puts "DataPoint #{data_point_id} re-enqueued."
-      puts "Worker Caught Exception: #{e.inspect}"
+      puts msg
     rescue => e
-      d.add_to_rails_log("Worker Caught Unhandled Exception: #{e.message}")#: Re-enqueueing DataPoint ID #{data_point_id}")
+      msg = "Worker Caught Unhandled Exception: #{e.message}"#: Re-enqueueing DataPoint ID #{data_point_id}")
+      d.nil? ? Rails.logger.warn(msg) : d.add_to_rails_log(msg)
       #Resque.enqueue_to(:requeued, self, data_point_id, options)
       #puts "Unhandled exception, re-enqueued DataPoint."
-      puts "Worker Caught Unhandled Exception: #{e.message}"
+      puts msg
     end
   end
 end
