@@ -13,6 +13,8 @@ module DjJobs
 
     MAX_INLINE_SDP_LOG_BYTES = 5_000_000
     MAX_INLINE_SDP_LOG_LINES = 5_000
+    MAX_INLINE_RESULTS_BYTES = 5_000_000
+    MAX_INLINE_RESULTS_MEASURE_BYTES = 1_000_000
 
     # Raised (instead of a bare String) when the downloaded analysis.zip cannot be
     # extracted, so initialize_worker's cleanup can distinguish this deterministic
@@ -293,6 +295,7 @@ module DjJobs
           results_file = "#{run_dir}/measure_attributes.json"
           if File.exist? results_file
             results = JSON.parse(File.read(results_file), symbolize_names: true)
+            results = prune_oversized_results(results, File.size(results_file))
             @data_point.update(results: results)
           else
             #run_result = :errored  #This should not be an error for workflows with no measures
@@ -367,6 +370,15 @@ module DjJobs
       rescue ScriptError, NoMemoryError, StandardError => e
         log_message = "#{__FILE__} failed with #{e.message}, #{e.backtrace.join("\n")}"
         @sim_logger&.error log_message
+        # Drop any unsaved (possibly oversized) attributes first, otherwise the
+        # terminal-state saves below re-raise the same persistence error (e.g.
+        # a results document over the BSON size limit) and the DataPoint is
+        # left as 'started' forever.
+        begin
+          @data_point.reload
+        rescue StandardError
+          nil
+        end
         @data_point.set_error_flag
         @data_point.sdp_log_file = inline_log_lines(run_log_file)
       ensure
@@ -736,6 +748,24 @@ module DjJobs
         @sim_logger&.error "Could not save report #{display_name} with message: #{e.message} in #{e.backtrace.join("\n")}"
         return false
       end
+    end
+
+    # Keep the DataPoint document under mongo's BSON document cap: when
+    # measure_attributes.json is oversized, replace any per-measure result
+    # whose serialized size exceeds MAX_INLINE_RESULTS_MEASURE_BYTES with a
+    # stub instead of failing the save after a successful simulation. Small
+    # results (objective values etc.) are preserved so algorithms still work.
+    def prune_oversized_results(results, file_size)
+      return results unless file_size > MAX_INLINE_RESULTS_BYTES && results.is_a?(Hash)
+
+      results.each do |measure, values|
+        size = values.to_json.bytesize
+        next unless size > MAX_INLINE_RESULTS_MEASURE_BYTES
+
+        @sim_logger&.warn "Result for '#{measure}' is #{size} bytes; storing a stub instead to keep the DataPoint under the BSON document limit."
+        results[measure] = { openstudio_server_truncated: "result of #{size} bytes exceeded #{MAX_INLINE_RESULTS_MEASURE_BYTES} bytes and was not stored inline" }
+      end
+      results
     end
 
     def inline_log_lines(log_path)

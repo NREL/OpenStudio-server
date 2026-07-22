@@ -84,6 +84,19 @@ module ResqueJobs
       d.add_to_rails_log(msg)
       #Resque.enqueue_to(:requeued, self, data_point_id, options)
       #puts "Unhandled exception, re-enqueued DataPoint."
+      # Leave the DataPoint in a terminal state instead of 'started' forever.
+      # R-driven algorithms (morris/sobol/nsga2) poll the dp and otherwise spin
+      # until their own timeout, then fail the whole analysis on all-penalty
+      # results. reload first: a dirty in-memory document (e.g. results over
+      # the BSON size limit) would make these saves re-raise the same error.
+      # d is non-nil here: the nil case re-raised above.
+      begin
+        d.reload
+        d.set_error_flag
+        d.set_complete_state
+      rescue StandardError => e2
+        puts "Could not set terminal state on DataPoint #{data_point_id}: #{e2.message}"
+      end
     end
   end
 end
