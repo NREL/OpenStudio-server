@@ -16,6 +16,15 @@ module ResqueJobs
 
     def self.perform(data_point_id, options = {})
       d = DataPoint.find(data_point_id)
+      # raise_not_found_error is false in every env (mongoid.yml), so find returns nil
+      # for a datapoint deleted between enqueue and perform - there is nothing to run
+      # or log to, so skip instead of crashing on the nil below (#846).
+      if d.nil?
+        msg = "SKIPPING #{data_point_id}: DataPoint no longer exists"
+        Rails.logger.error msg
+        puts msg
+        return
+      end
       statuses = d.get_statuses
       # A DP can be requeued when a worker is getting shutdown as a spot instance.
       # When that happens the status gets changed from ':started' to ':queued' but the resque job is still processing on the worker until it is killed.
@@ -51,16 +60,30 @@ module ResqueJobs
         puts msg
       end 
     rescue SignalException, Errno::ENOSPC, Resque::DirtyExit, Resque::TermException, Resque::PruneDeadWorkerDirtyExit => e
-      # Log the termination and re-enqueue attempt
-      d.add_to_rails_log("Worker Caught Exception: #{e.inspect}")#: Re-enqueueing DataPoint ID #{data_point_id}")
+      # Log the termination and re-enqueue attempt.
+      # d is nil when DataPoint.find itself raised (e.g. transient Mongo failure under
+      # load - #846): there is no datapoint to log to, and calling add_to_rails_log on
+      # nil masked the root cause with a NoMethodError, leaving a non-retryable failed
+      # job. Log with the id and re-raise so Resque records the original error instead.
+      msg = "Worker Caught Exception: #{e.inspect}"#: Re-enqueueing DataPoint ID #{data_point_id}")
+      puts msg
+      if d.nil?
+        Rails.logger.error "#{msg} (data_point_id=#{data_point_id}, DataPoint.find failed)"
+        raise
+      end
+      d.add_to_rails_log(msg)
       #Resque.enqueue_to(:requeued, self, data_point_id, options)
       #puts "DataPoint #{data_point_id} re-enqueued."
-      puts "Worker Caught Exception: #{e.inspect}"
     rescue => e
-      d.add_to_rails_log("Worker Caught Unhandled Exception: #{e.message}")#: Re-enqueueing DataPoint ID #{data_point_id}")
+      msg = "Worker Caught Unhandled Exception: #{e.message}"#: Re-enqueueing DataPoint ID #{data_point_id}")
+      puts msg
+      if d.nil?
+        Rails.logger.error "#{msg} (data_point_id=#{data_point_id}, DataPoint.find failed)"
+        raise
+      end
+      d.add_to_rails_log(msg)
       #Resque.enqueue_to(:requeued, self, data_point_id, options)
       #puts "Unhandled exception, re-enqueued DataPoint."
-      puts "Worker Caught Unhandled Exception: #{e.message}"
     end
   end
 end

@@ -112,5 +112,53 @@ RSpec.describe ResqueJobs::RunSimulateDataPoint, type: :model do
         described_class.perform(data_point.id)
       end
     end
+
+    context 'when the datapoint cannot be loaded, so d is nil or never bound (regression for #846/#848)' do
+      # Incident (k8s/KEDA, ~1,500+ concurrent workers): a datapoint deleted between
+      # enqueue and perform makes DataPoint.find return nil (raise_not_found_error is
+      # false in every env in mongoid.yml), so d.get_statuses raises; a transient Mongo
+      # failure under load makes find itself raise. Either way both rescue clauses then
+      # called d.add_to_rails_log on a nil d, so the Resque failed queue filled with
+      # masking "NoMethodError ... for nil" entries while the real root cause was
+      # swallowed and the datapoint sat permanently stuck in its prior status.
+      before do
+        # The rescue clause names Resque::* error classes, which Ruby only evaluates
+        # when an exception actually propagates. The resque gem is not bundled on
+        # Windows (server/Gemfile gates it), so define stand-ins when absent to keep
+        # this spec runnable outside the docker stack.
+        unless defined?(Resque::DirtyExit)
+          stub_const('Resque::DirtyExit', Class.new(StandardError))
+          stub_const('Resque::TermException', Class.new(StandardError))
+          stub_const('Resque::PruneDeadWorkerDirtyExit', Class.new(StandardError))
+        end
+      end
+
+      it 'skips cleanly (no dispatch, no NoMethodError) when the datapoint was deleted between enqueue and perform' do
+        gone_id = data_point.id.to_s
+        data_point.destroy!
+
+        expect(DjJobs::RunSimulateDataPoint).not_to receive(:new)
+
+        expect { described_class.perform(gone_id) }.not_to raise_error
+      end
+
+      it 'surfaces a transient find failure (e.g. Mongo timeout under load) as itself, not a masking NoMethodError' do
+        transient_error = Class.new(StandardError)
+        allow(DataPoint).to receive(:find).and_raise(transient_error, 'socket timeout')
+
+        expect { described_class.perform(data_point.id) }.to raise_error(transient_error, 'socket timeout')
+      end
+
+      it 'still logs to the datapoint and swallows when d IS bound (pre-existing rescue behavior preserved)' do
+        set_data_point_status(status: 'na')
+        analysis.update!(run_flag: true)
+        allow(DataPoint).to receive(:find).and_return(data_point)
+        allow(data_point).to receive(:add_to_rails_log).and_call_original
+        allow(DjJobs::RunSimulateDataPoint).to receive(:new).and_raise(StandardError, 'boom')
+
+        expect { described_class.perform(data_point.id) }.not_to raise_error
+        expect(data_point).to have_received(:add_to_rails_log).with('Worker Caught Unhandled Exception: boom')
+      end
+    end
   end
 end
