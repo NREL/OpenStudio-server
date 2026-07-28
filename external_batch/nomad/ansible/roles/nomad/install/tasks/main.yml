@@ -3,18 +3,26 @@
 # Nomad binary installation (common to server and clients)
 # =============================================================================
 
+- name: Check if Nomad is already installed on remote
+  ansible.builtin.stat:
+    path: /usr/local/bin/nomad
+  register: remote_nomad
+
 - name: Stat the local Nomad zip
   local_action: stat path="{{ local_nomad_zip }}"
   register: local_zip
   become: false
+  when: not remote_nomad.stat.exists
 
-- name: Fail if Nomad zip not found locally
+- name: Fail if Nomad zip not found locally (and not pre-installed)
   ansible.builtin.fail:
     msg: >
       Nomad zip not found at {{ local_nomad_zip }}.
       Download it from https://releases.hashicorp.com/nomad/{{ nomad_version }}/ and
-      set local_nomad_zip in inventory.yml.
-  when: not local_zip.stat.exists
+      set local_nomad_zip in inventory.yml, or use the golden image.
+  when:
+    - not remote_nomad.stat.exists
+    - not local_zip.stat.exists
 
 - name: Create Nomad directories
   ansible.builtin.file:
@@ -26,6 +34,7 @@
   loop:
     - /opt/nomad/data
     - /etc/nomad.d
+  when: not remote_nomad.stat.exists
 
 - name: Copy Nomad zip to remote
   ansible.builtin.copy:
@@ -34,6 +43,7 @@
     owner: root
     group: root
     mode: "0644"
+  when: local_zip.stat is defined and local_zip.stat.exists
 
 - name: Extract Nomad binary
   ansible.builtin.unarchive:
@@ -43,6 +53,7 @@
     include:
       - nomad
   notify: restart nomad
+  when: local_zip.stat is defined and local_zip.stat.exists
 
 - name: Set Nomad binary permissions
   ansible.builtin.file:
@@ -50,6 +61,7 @@
     owner: root
     group: root
     mode: "0755"
+  when: local_zip.stat is defined and local_zip.stat.exists
 
 - name: Install Nomad systemd service
   ansible.builtin.copy:

@@ -22,12 +22,16 @@ job "{{JOB_NAME}}" {
         value     = "^nomad-client"
       }
 
+      # Run task_wrapper.sh from the shared NFS mount.
+      # Make sure the NFS batch root is world-writable (chmod 755) so the
+      # task's default user (nobody) can write results.
+      # For production: pre-bake AMI with /usr/local/bin/task_wrapper.sh
+      # installed and use user = "root" for NFS writes.
       config {
-        command = "/usr/local/bin/task_wrapper.sh"
+        command = "/bin/bash"
         args = [
-          "--package-uri", "{{PACKAGE_URI}}",
-          "--results-uri", "{{RESULTS_URI}}",
-          "--openstudio-cmd", "openstudio"
+          "-c",
+          "/nfs/opensstudio/batch/task_wrapper.sh --package-uri '{{PACKAGE_URI}}' --results-uri '{{RESULTS_URI}}' --openstudio-cmd openstudio"
         ]
       }
 
@@ -50,7 +54,7 @@ job "{{JOB_NAME}}" {
       # of the 32 GB available — tight. Use CM.2Medium or reduce memory.
       resources {
         cpu    = 2000 # MHz — ~1 vCPU at modern clock speeds
-        memory = 4096 # MB  — 4 GB, comfortable for medium models
+        memory = 2096 # MB  — 4 GB, comfortable for medium models
         disk   = 1000 # MB  — scratch space for extraction + logs
 
         # ── Resource limits (soft) vs reservations (hard) ──────────

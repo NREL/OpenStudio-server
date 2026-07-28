@@ -151,12 +151,29 @@ if [[ ! -f "$RUN_CHUNK" ]]; then
     log "ERROR: $RUN_CHUNK not found"
     exit 3
 fi
-ruby "$RUN_CHUNK" \
-    --package "$PACKAGE_DIR" \
-    --results "$RESULTS_DIR" \
-    --chunk "$CHUNK_INDEX" \
-    --openstudio "$OPENSTUDIO_CMD"
-RUN_EXIT=$?
+
+# Resolve Ruby command — prefer system Ruby, fall back to OpenStudio embedded
+if command -v ruby &>/dev/null; then
+    log "Using system Ruby"
+    ruby "$RUN_CHUNK" \
+        --package "$PACKAGE_DIR" \
+        --results "$RESULTS_DIR" \
+        --chunk "$CHUNK_INDEX" \
+        --openstudio "$OPENSTUDIO_CMD"
+    RUN_EXIT=$?
+elif command -v openstudio &>/dev/null; then
+    # OpenStudio bundles Ruby 3.2.2.  Use openstudio -e to run run_chunk.rb,
+    # constructing ARGV explicitly (openstudio -e passes no args to ARGV).
+    # openstudio --execute evaluates a Ruby string.  We build a one-liner
+    # that sets ARGV and loads run_chunk.rb.
+    log "Using OpenStudio embedded Ruby"
+    openstudio -e \
+      "ARGV = ['--package', '${PACKAGE_DIR}', '--results', '${RESULTS_DIR}', '--chunk', '${CHUNK_INDEX}', '--openstudio', '${OPENSTUDIO_CMD}']; load '${RUN_CHUNK}'"
+    RUN_EXIT=$?
+else
+    log "ERROR: Neither ruby nor openstudio found"
+    exit 5
+fi
 if [[ $RUN_EXIT -ne 0 ]]; then
     log "WARNING: run_chunk.rb exited with code $RUN_EXIT"
 fi

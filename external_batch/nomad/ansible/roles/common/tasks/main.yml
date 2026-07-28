@@ -36,9 +36,10 @@
       - rsync
       - gnupg
       - software-properties-common
+      - libgomp1        # Required by EnergyPlus (bundled with OpenStudio)
     state: present
-    update_cache: true
-    cache_valid_time: 3600
+    update_cache: false
+    cache_valid_time: 86400
 
 - name: Ensure /etc/hosts is protected
   ansible.builtin.file:

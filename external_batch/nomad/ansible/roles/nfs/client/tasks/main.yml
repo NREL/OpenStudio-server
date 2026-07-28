@@ -7,7 +7,8 @@
   ansible.builtin.apt:
     name: nfs-common
     state: present
-    update_cache: true
+    update_cache: false
+    cache_valid_time: 86400
 
 - name: Create NFS mount point
   ansible.builtin.file:
@@ -31,4 +32,4 @@
   ansible.builtin.command: df -h "{{ nfs_export_path }}"
   register: df_result
   changed_when: false
-  failed_when: "'nomad-server:' not in df_result.stdout"
+  failed_when: "nfs_export_path not in df_result.stdout"

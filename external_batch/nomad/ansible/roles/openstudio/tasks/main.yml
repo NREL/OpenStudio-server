@@ -32,6 +32,8 @@
     src: "/tmp/openstudio-{{ openstudio_version }}.tar.gz"
     dest: /opt
     remote_src: true
+    extra_opts:
+      - --strip-components=3
     creates: "/opt/openstudio-{{ openstudio_version }}/bin/openstudio"
 
 - name: Create OpenStudio symlink
@@ -68,3 +70,13 @@
     owner: root
     group: root
     mode: "0755"
+
+# Symlink for compatibility — the job templates may reference
+# /opt/nomad/task_wrapper.sh (older versions) or /usr/local/bin/task_wrapper.sh.
+- name: Create /opt/nomad/ compat symlink for task_wrapper.sh
+  ansible.builtin.file:
+    src: /usr/local/bin/task_wrapper.sh
+    dest: /opt/nomad/task_wrapper.sh
+    state: link
+    owner: root
+    group: root

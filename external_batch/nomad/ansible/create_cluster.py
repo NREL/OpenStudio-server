@@ -6,6 +6,11 @@ Discovers your OpenStack environment (quota, images, flavors, networks),
 creates a nomad-server + N nomad-client VMs, assigns floating IPs, and
 auto-generates inventory.yml ready for `make deploy`.
 
+Once a cluster exists, running the script again automatically detects the
+existing cluster and enters "additive mode": it discovers which image and
+flavor the existing clients use, skips server creation, numbers new clients
+after the existing ones, and merges the new clients into inventory.yml.
+
 Creating many VMs is bottlenecked by volume-creation time (~30-60s per VM
 in this OpenStack environment).  This script pipelines the work: it fires
 off all server creations in parallel, then batch-waits for ACTIVE status,
@@ -13,23 +18,29 @@ then resolves IPs and floating IPs in parallel.  With --parallel 20 and
 384 clients, the serial ~6.5 hours drops to ~8 minutes.
 
 Usage:
-    # Interactive (prompts for choices):
+    # Greenfield — create a brand-new cluster (prompts for choices):
     ./create_cluster.py
 
-    # Fully automated with CLI flags:
-    ./create_cluster.py --clients 8 \
-        --image ubuntu-jammy-20260320 \
-        --flavor-server CM.Small \
-        --flavor-client CM.Medium \
-        --key-name achapin \
-        --network nomad-net \
+    # Greenfield — fully automated with CLI flags:
+    ./create_cluster.py --clients 8 \\
+        --image nomad-client-base-20260705 \\
+        --flavor-server CM.Small \\
+        --flavor-client CM.Medium \\
+        --key-name achapin \\
+        --network nomad-net \\
         --security-group nomad-sg
 
-    # Fill quota with maximum clients (non-interactive):
-    ./create_cluster.py --max \
-        --image ubuntu-jammy-20260320 \
-        --flavor-client CM.Medium \
+    # Greenfield — fill quota with maximum clients:
+    ./create_cluster.py --max \\
+        --image nomad-client-base-20260705 \\
+        --flavor-client CM.Medium \\
         --key-name achapin --yes
+
+    # Additive — add more clients to an existing cluster (auto-detects):
+    ./create_cluster.py --clients 4 --yes
+
+    # Additive — fill remaining quota with new clients:
+    ./create_cluster.py --max --yes
 
 Prerequisites:
     - openstack CLI installed and authenticated (OS_* env vars or clouds.yaml)
@@ -50,9 +61,10 @@ import yaml
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 
-def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
+def run(cmd: list[str], quiet: bool = False, **kwargs) -> subprocess.CompletedProcess:
     """Run a command, print it, return the result. Exits on failure."""
-    print(f"  + {' '.join(cmd)}")
+    if not quiet:
+        print(f"  + {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True, **kwargs)
     if result.returncode != 0:
         print(f"  FAILED (exit {result.returncode}): {result.stderr.strip()}")
@@ -60,9 +72,9 @@ def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
     return result
 
 
-def openstack(*args: str) -> str:
+def openstack(*args: str, quiet: bool = False) -> str:
     """Run an openstack CLI command and return stdout."""
-    return run(["openstack", *args]).stdout.strip()
+    return run(["openstack", *args], quiet=quiet).stdout.strip()
 
 
 def bold(s: str) -> str:
@@ -236,6 +248,63 @@ def discover_availability_zones() -> list[str]:
     )
 
 
+def discover_existing_cluster(prefix: str) -> dict:
+    """Discover existing nomad server and clients by name pattern.
+
+    Returns:
+        {
+            "server": {"name": str, "id": str} or None,
+            "clients": [{"name": str, "id": str, "index": int}],
+            "max_client_index": int,  # 0 if no clients found
+        }
+    """
+    raw = openstack("server", "list", "--name", f"{prefix}-", "-f", "yaml")
+    servers = yaml.safe_load(raw) or []
+
+    result: dict = {"server": None, "clients": [], "max_client_index": 0}
+
+    for s in servers:
+        name = s.get("Name", "")
+        sid = s.get("ID", "")
+        status = s.get("Status", "")
+        if status.upper() not in ("ACTIVE",):
+            continue
+        if name == f"{prefix}-server":
+            result["server"] = {"name": name, "id": sid}
+        elif name.startswith(f"{prefix}-client-"):
+            try:
+                idx = int(name.split("-")[-1])
+                result["clients"].append({"name": name, "id": sid, "index": idx})
+                if idx > result["max_client_index"]:
+                    result["max_client_index"] = idx
+            except ValueError:
+                pass
+
+    # Sort clients by index for deterministic output
+    result["clients"].sort(key=lambda c: c["index"])
+    return result
+
+
+def get_server_flavor(server_id: str) -> str:
+    """Return the original flavor name of a server (e.g. 'CM.Medium')."""
+    raw = openstack("server", "show", server_id, "-f", "yaml")
+    info = yaml.safe_load(raw) or {}
+    flavor_info = info.get("flavor", {})
+    if isinstance(flavor_info, dict):
+        return flavor_info.get("original_name", "")
+    return ""
+
+
+def get_server_image_name(server_id: str) -> str:
+    """Return the image name used when the server was created."""
+    raw = openstack("server", "show", server_id, "-f", "yaml")
+    info = yaml.safe_load(raw) or {}
+    image_info = info.get("image", {})
+    if isinstance(image_info, dict):
+        return image_info.get("original_name", "")
+    return ""
+
+
 # ── VM creation ──────────────────────────────────────────────────────────
 
 
@@ -296,14 +365,16 @@ def _create_server_and_parse_id(cmd: list[str], name: str) -> str:
     # Parse the ID from the table output
     for line in result.stdout.splitlines():
         if "| id" in line.lower() or "| id " in line.lower():
-            return line.split("|")[2].strip()
+            parts = line.split("|")
+            if len(parts) > 2:
+                return parts[2].strip()
     # Fallback: look up by name
     return openstack("server", "show", name, "-f", "value", "-c", "id")
 
 
 def get_server_status(server_id: str) -> str:
     """Return the current status of a server."""
-    return openstack("server", "show", server_id, "-f", "value", "-c", "status").strip()
+    return openstack("server", "show", server_id, "-f", "value", "-c", "status", quiet=True).strip()
 
 
 def get_server_name(server_id: str) -> str:
@@ -339,27 +410,96 @@ def wait_for_servers_active(
 ) -> None:
     """Wait for all servers to reach ACTIVE status.
 
-    server_ids maps name → server_id so we can print readable progress.
+    Uses wall-clock time so that slow ``openstack server show`` calls don't
+    prevent the timeout from triggering.  Status checks are parallelised
+    (``ThreadPoolExecutor``) to avoid O(N*wall) per iteration.
+
+    Prints a per-iteration summary of how many servers are in each non-ACTIVE
+    status.  All ``print()`` calls use ``flush=True`` so progress is visible
+    even when stdout is piped.
+
+    *server_ids* maps name → server_id so we can print readable progress.
     """
+    # Cap concurrency so we don't hammer the OpenStack API.
+    MAX_STATUS_WORKERS = 30
+
     pending = dict(server_ids)  # name → id
-    elapsed = 0
-    while pending and elapsed < timeout:
-        still_pending = {}
-        for name, sid in pending.items():
-            status = get_server_status(sid)
-            if status.upper() == "ACTIVE":
-                print(f"    {name} → ACTIVE")
-            else:
-                still_pending[name] = sid
+    start = time.monotonic()
+    iteration = 0
+    while pending:
+        elapsed = time.monotonic() - start
+        if elapsed > timeout:
+            names = ", ".join(pending.keys())
+            print(f"  ERROR: {len(pending)} servers still not active after "
+                  f"{timeout}s ({elapsed:.0f}s wall): {names}", flush=True)
+            sys.exit(1)
+
+        iteration += 1
+        # Collect statuses so we can summarise counts per status.
+        statuses: dict[str, list[str]] = {}
+        still_pending: dict[str, str] = {}
+
+        # ── Parallel status check ────────────────────────────────────
+        pending_items = list(pending.items())
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=min(MAX_STATUS_WORKERS, len(pending_items) or 1)
+        ) as pool:
+            fut_to_info = {
+                pool.submit(get_server_status, sid): (name, sid)
+                for name, sid in pending_items
+            }
+            checked = 0
+            for fut in concurrent.futures.as_completed(fut_to_info):
+                name, sid = fut_to_info[fut]
+                status = fut.result()
+                statuses.setdefault(status, []).append(name)
+                if status.upper() == "ACTIVE":
+                    print(f"    {name} → ACTIVE", flush=True)
+                else:
+                    still_pending[name] = sid
+                checked += 1
+                if checked % 100 == 0:
+                    print(f"    … checked {checked}/{len(pending_items)}",
+                          flush=True)
+        # ── End parallel status check ─────────────────────────────────
+
         pending = still_pending
         if pending:
-            print(f"    ({len(pending)} still building, checking again in {interval}s...)")
+            # Short-circuit: terminal/abnormal states that will *never*
+            # transition to ACTIVE on their own.
+            terminal = {k: v for k, v in statuses.items()
+                        if v and k.upper() in (
+                            "ERROR", "STOPPED", "SHUTOFF",
+                            "SUSPENDED", "SHELVED", "SHELVED_OFFLOADED",
+                            "DELETED", "SOFT_DELETED",
+                        )}
+            if terminal:
+                for st, names_ in terminal.items():
+                    print(f"  {yellow('⚠')} {len(names_)} servers in {st}: "
+                          f"{', '.join(names_[:5])}"
+                          f"{' ...' if len(names_) > 5 else ''}", flush=True)
+                names = ", ".join(pending.keys())
+                print(f"  {bold('FATAL')}: {len(pending)} servers stuck in "
+                      f"terminal state after {elapsed:.1f}s — aborting",
+                      flush=True)
+                sys.exit(1)
+
+            # Build a summary like "3 BUILD, 1 VERIFY_RESIZE"
+            counts: list[str] = []
+            for st, names_ in statuses.items():
+                su = st.upper()
+                if su == "ACTIVE":
+                    continue
+                n = len(names_)
+                counts.append(f"{str(n)} {st}")
+            summary = " | ".join(counts) if counts else str(len(pending))
+            print(f"    ({len(pending)} still non-ACTIVE — {summary}, "
+                  f"checking again in {interval}s, "
+                  f"wall {elapsed:.0f}s / {timeout}s)", flush=True)
             time.sleep(interval)
-            elapsed += interval
-    if pending:
-        names = ", ".join(pending.keys())
-        print(f"  ERROR: Servers still not active after {timeout}s: {names}")
-        sys.exit(1)
+        elif iteration > 1:
+            print(f"    {green('✓')} All {len(server_ids)} servers ACTIVE "
+                  f"({elapsed:.0f}s wall)", flush=True)
 
 
 # ── Parallel helpers ─────────────────────────────────────────────────────
@@ -614,6 +754,80 @@ def generate_inventory(
     return yaml.safe_dump(inventory, default_flow_style=False, sort_keys=False)
 
 
+def read_existing_inventory(path: str) -> dict | None:
+    """Read an existing inventory.yml if it exists.
+
+    Returns parsed dict, or None if the file doesn't exist or is empty.
+    """
+    if not os.path.isfile(path):
+        return None
+    try:
+        with open(path) as f:
+            data = yaml.safe_load(f)
+        return data if isinstance(data, dict) else None
+    except yaml.YAMLError:
+        return None
+
+
+def merge_inventory(
+    existing: dict | None,
+    new_clients: list[dict],
+    server_name: str | None,
+    server_floating_ip: str | None,
+    server_internal_ip: str | None,
+    config: dict,
+) -> str:
+    """Merge newly provisioned clients into existing inventory YAML.
+
+    If an existing inventory is provided, new client entries are appended
+    to the nomad_clients host group and nomad_client_internal_ips var.
+    If no existing inventory or server info is given, it falls back to a
+    full inventory generation (greenfield path).
+
+    new_clients: list of dicts with keys: name, internal_ip, floating_ip
+    """
+    if existing is None:
+        # No existing inventory — should not happen in additive mode, but
+        # fall back to a new inventory if a server is provided.
+        if server_name and server_floating_ip and server_internal_ip:
+            return generate_inventory(
+                server_name=server_name,
+                server_floating_ip=server_floating_ip,
+                server_internal_ip=server_internal_ip,
+                clients=new_clients,
+                config=config,
+            )
+        # Clients-only: generate with a placeholder server (inventory.yml
+        # will need manual editing).
+        return generate_inventory(
+            server_name=server_name or "<SERVER_NAME>",
+            server_floating_ip=server_floating_ip or "<SERVER_FLOATING_IP>",
+            server_internal_ip=server_internal_ip or "<SERVER_INTERNAL_IP>",
+            clients=new_clients,
+            config=config,
+        )
+
+    # Deep-copy so we don't mutate the input
+    merged = yaml.safe_load(yaml.safe_dump(existing)) or {}
+
+    # Ensure the client host group exists
+    children = merged.setdefault("all", {}).setdefault("children", {})
+    client_group = children.setdefault("nomad_clients", {})
+    client_hosts = client_group.setdefault("hosts", {})
+
+    # Merge new clients into the host group
+    for c in new_clients:
+        client_hosts[c["name"]] = {"ansible_host": c["floating_ip"]}
+
+    # Merge new clients into nomad_client_internal_ips
+    all_vars = merged.setdefault("all", {}).setdefault("vars", {})
+    internal_ips = all_vars.setdefault("nomad_client_internal_ips", {})
+    for c in new_clients:
+        internal_ips[c["name"]] = c["internal_ip"]
+
+    return yaml.safe_dump(merged, default_flow_style=False, sort_keys=False)
+
+
 # ── Main ─────────────────────────────────────────────────────────────────
 
 
@@ -628,7 +842,7 @@ Examples:
 
   # Fully automated
   ./create_cluster.py --clients 8 \\
-      --image ubuntu-jammy-20260320 \\
+      --image nomad-client-base-20260705 \\
       --flavor-server CM.Small \\
       --flavor-client CM.Medium \\
       --key-name achapin \\
@@ -637,7 +851,7 @@ Examples:
 
   # Fill quota (non-interactive)
   ./create_cluster.py --max \\
-      --image ubuntu-jammy-20260320 \\
+      --image nomad-client-base-20260705 \\
       --flavor-client CM.Medium \\
       --key-name achapin --yes
         """,
@@ -756,30 +970,64 @@ def main():
     print(f"  {'Instances':<30} {used.get('instances', '?'):<10} {'?':<10} {limits.get('instances', 'N/A'):<10}")
     print()
 
-    # ── 2. Image selection ───────────────────────────────────────────
-    ubuntu_images = [
-        im["name"]
-        for im in images
-        if "ubuntu" in im["name"].lower() and "jammy" in im["name"].lower()
-    ]
-    image_choices = ubuntu_images[:10] if ubuntu_images else [im["name"] for im in images[:20]]
+    # ── 1.5 Discover existing cluster ───────────────────────────────
+    prefix = args.prefix
+    existing = discover_existing_cluster(prefix)
+    is_additive = existing["server"] is not None
+    existing_client_count = len(existing["clients"])
+    existing_client_indices = [c["index"] for c in existing["clients"]]
 
+    if is_additive:
+        print(f"{bold('▸ Existing cluster detected')}")
+        print(f"    {prefix}-server:     {green('exists')}")
+        print(f"    {prefix}-client:     {green(f'{existing_client_count} running')} "
+              f"(indices {existing_client_indices[:5]}{'...' if existing_client_count > 5 else ''})")
+        print(f"  → {bold('Additive mode')} — adding more clients to the existing cluster\n")
+
+    # ── 2. Image selection ───────────────────────────────────────────
     image_name = args.image or ""
+
+    if is_additive and not image_name:
+        # Auto-detect image from existing server or first client
+        detect_id = (existing["server"] or {}).get("id") or (
+            existing["clients"][0]["id"] if existing["clients"] else None
+        )
+        if detect_id:
+            image_name = get_server_image_name(detect_id)
+            print(f"{bold('▸ Image:')} {image_name} (auto-detected from existing cluster)")
+        else:
+            image_name = ""
+
     if not image_name:
-        default_img = "ubuntu-jammy-20260320"
+        # Prefer custom golden image, fall back to plain Ubuntu Jammy
+        custom_images = [
+            im["name"]
+            for im in images
+            if "nomad-client-base" in im["name"].lower()
+        ]
+        ubuntu_images = [
+            im["name"]
+            for im in images
+            if "ubuntu" in im["name"].lower() and "jammy" in im["name"].lower()
+        ]
+        image_choices = (custom_images + ubuntu_images)[:10] if (custom_images or ubuntu_images) else [im["name"] for im in images[:20]]
+
+        default_img = "nomad-client-base-20260705"
         if default_img in image_choices:
             image_name = default_img
+        elif custom_images:
+            image_name = custom_images[0]
         elif image_choices:
             image_name = image_choices[0]
 
-    if interactive:
-        print(f"{bold('▸ Available images (Ubuntu 22.04 recommended):')}")
-        for i, im in enumerate(image_choices[:10], 1):
-            print(f"    {i}) {im}")
-        print(f"    ... ({len(images)} total images)")
-        image_name = prompt("Image", default=image_name, options=image_choices[:10])
-    else:
-        print(f"{bold('▸ Image:')} {image_name}")
+        if interactive:
+            print(f"{bold('▸ Available images (Ubuntu 22.04 recommended):')}")
+            for i, im in enumerate(image_choices[:10], 1):
+                print(f"    {i}) {im}")
+            print(f"    ... ({len(images)} total images)")
+            image_name = prompt("Image", default=image_name, options=image_choices[:10])
+        else:
+            print(f"{bold('▸ Image:')} {image_name}")
 
     # Resolve image name to UUID
     print(f"  Resolving image ID...")
@@ -803,7 +1051,28 @@ def main():
     flavor_server = args.flavor_server or ""
     flavor_client = args.flavor_client or ""
 
-    if interactive:
+    # In additive mode, auto-detect client flavor from existing clients
+    if is_additive and not flavor_client:
+        if existing["clients"]:
+            flavor_client = get_server_flavor(existing["clients"][0]["id"])
+            print(f"{bold('▸ Client flavor:')} {flavor_client} (auto-detected from existing clients)")
+        else:
+            # No existing clients (weird for additive mode, but possible if
+            # only the server exists). Fall through to interactive prompt.
+            pass
+        # Server flavor not needed — server already exists
+        flavor_server = args.flavor_server or ""
+
+    if is_additive:
+        # In additive mode, we still need the server flavor spec for quota
+        # calculation. If not provided, try to detect from existing server.
+        if not flavor_server and existing["server"]:
+            flavor_server = get_server_flavor(existing["server"]["id"])
+            print(f"{bold('▸ Server flavor:')} {flavor_server} (auto-detected)")
+        elif not flavor_server:
+            flavor_server = ""
+
+    if interactive and not is_additive:
         # ─ Recommend a server flavor ─
         print(f"\n{bold('▸ Available flavors (compute, sorted by vCPU):')}")
         print(
@@ -832,8 +1101,9 @@ def main():
             f"{dim('(CM.Medium=~8 concurrent sims, CM.Tiny=~2 — pick bigger = fewer VMs)')}"
         )
         flavor_client = prompt("Flavor", default=default_client)
-    else:
-        print(f"{bold('▸ Server flavor:')} {flavor_server}")
+    elif not interactive:
+        if not is_additive:
+            print(f"{bold('▸ Server flavor:')} {flavor_server}")
         print(f"{bold('▸ Client flavor:')} {flavor_client}")
 
     # ── 4. Keypair ───────────────────────────────────────────────────
@@ -873,11 +1143,17 @@ def main():
         cc = client_flavor_spec["vcpus"]
         cr = client_flavor_spec["ram_mb"]
 
-        # How many clients fit after reserving 1 server + 5% overhead?
+        # How many NEW clients fit after reserving existing usage + overhead?
         buffer = 0.05
-        max_by_cores = max(0, int((free_cores * (1 - buffer) - sc) / cc)) if cc else 0
-        max_by_ram = max(0, int((free_ram_mb * (1 - buffer) - sr) / cr)) if cr else 0
-        max_by_ips = max(0, free_ips - 1)  # server needs 1 floating IP
+        if is_additive:
+            # Server already exists — don't reserve server resources again
+            max_by_cores = max(0, int(free_cores * (1 - buffer) / cc)) if cc else 0
+            max_by_ram = max(0, int(free_ram_mb * (1 - buffer) / cr)) if cr else 0
+            max_by_ips = max(0, free_ips)  # no new server floating IP needed
+        else:
+            max_by_cores = max(0, int((free_cores * (1 - buffer) - sc) / cc)) if cc else 0
+            max_by_ram = max(0, int((free_ram_mb * (1 - buffer) - sr) / cr)) if cr else 0
+            max_by_ips = max(0, free_ips - 1)  # server needs 1 floating IP
 
         # Hard limit: minimum of all constraints
         hard_max = min(max_by_cores, max_by_ram, max_by_ips)
@@ -885,45 +1161,54 @@ def main():
         # Recommended: 90% of hard max (leave some headroom), min 1
         recommended_clients = max(1, int(hard_max * 0.9))
 
-    num_clients = args.clients
+    # Determine how many NEW clients to create
+    num_new_clients = args.clients
     if args.max and not interactive:
         if recommended_clients > 0:
-            num_clients = hard_max
-            print(f"{bold('▸ --max:')} creating {num_clients} clients (quota cap)")
+            num_new_clients = hard_max
+            verb = "adding" if is_additive else "creating"
+            print(f"{bold('▸ --max:')} {verb} {num_new_clients} new clients (quota cap)")
         else:
             print("  ERROR: Cannot calculate quota capacity (flavor lookup failed)")
             sys.exit(1)
     elif interactive:
+        prompt_label = "Number of ADDITIONAL Nomad clients to create" if is_additive else "Number of Nomad clients to create"
+
         print(f"\n{bold('▸ Quota-based client capacity:')}")
         if server_flavor_spec and client_flavor_spec:
+            if is_additive:
+                print(f"    Existing clients: {existing_client_count}")
+                print(f"    Free quota → ~{max_by_cores} new clients (cores), "
+                      f"~{max_by_ram} (RAM), ~{max_by_ips} (floating IPs)")
+            else:
+                print(
+                    f"    Cores:   {free_cores} free → "
+                    f"~{max_by_cores} clients  "
+                    f"({server_flavor_spec['vcpus']}vCPU server + "
+                    f"{client_flavor_spec['vcpus']}vCPU each)"
+                )
+                print(
+                    f"    RAM:     {free_ram_mb:,}MB free → "
+                    f"~{max_by_ram} clients  "
+                    f"({server_flavor_spec['ram_mb']:,}MB server + "
+                    f"{client_flavor_spec['ram_mb']:,}MB each)"
+                )
+                print(
+                    f"    FloatIP: {free_ips} free → "
+                    f"~{max_by_ips} clients  (1 for server)"
+                )
             print(
-                f"    Cores:   {free_cores} free → "
-                f"~{max_by_cores} clients  "
-                f"({server_flavor_spec['vcpus']}vCPU server + "
-                f"{client_flavor_spec['vcpus']}vCPU each)"
-            )
-            print(
-                f"    RAM:     {free_ram_mb:,}MB free → "
-                f"~{max_by_ram} clients  "
-                f"({server_flavor_spec['ram_mb']:,}MB server + "
-                f"{client_flavor_spec['ram_mb']:,}MB each)"
-            )
-            print(
-                f"    FloatIP: {free_ips} free → "
-                f"~{max_by_ips} clients  (1 for server)"
-            )
-            print(
-                f"    {bold('Recommended max')}: {hard_max} "
+                f"    {bold('Recommended max NEW')}: {hard_max} "
                 f"(recommended w/ headroom: {recommended_clients})"
             )
         else:
             print(f"    (could not look up flavor specs — using default)")
 
         raw = prompt(
-            "Number of Nomad clients to create",
+            prompt_label,
             default=str(recommended_clients),
         )
-        num_clients = int(raw)
+        num_new_clients = int(raw)
     else:
         # Non-interactive: validate requested count against quota
         if (
@@ -931,15 +1216,21 @@ def main():
             and client_flavor_spec
             and recommended_clients > 0
         ):
-            if num_clients > hard_max:
+            if num_new_clients > hard_max:
                 print(
-                    f"  {yellow('⚠')} Requested {num_clients} clients "
-                    f"exceeds quota capacity ({hard_max})."
+                    f"  {yellow('⚠')} Requested {num_new_clients} new clients "
+                    f"exceeds quota capacity ({hard_max} new)."
                 )
                 print(f"  Set --clients {hard_max} or lower.")
                 sys.exit(1)
 
-    print(f"{bold('▸ Clients:')} {num_clients}")
+    # Total clients after this run (for display)
+    total_clients_after = existing_client_count + num_new_clients
+    if is_additive:
+        print(f"{bold('▸ New clients:')} {num_new_clients}  "
+              f"(total after: {green(str(total_clients_after))})")
+    else:
+        print(f"{bold('▸ Clients:')} {num_new_clients}")
 
     # ── 6. Network ───────────────────────────────────────────────────
     network_name = args.network
@@ -1006,45 +1297,69 @@ def main():
         az = ""
 
     # ── 9. Confirmation ──────────────────────────────────────────────
-    total_cores = 0
-    total_ram_mb = 0
+    new_cores = 0
+    new_ram_mb = 0
+    existing_cores = 0
+    existing_ram_mb = 0
     # Look up flavor specs
     for f in flavors:
-        if f["name"] == flavor_server:
-            total_cores += f["vcpus"]
-            total_ram_mb += f["ram_mb"]
+        if is_additive:
+            pass  # Already accounted in quota usage
+        if f["name"] == flavor_server and not is_additive:
+            new_cores += f["vcpus"]
+            new_ram_mb += f["ram_mb"]
         if f["name"] == flavor_client:
-            total_cores += f["vcpus"] * num_clients
-            total_ram_mb += f["ram_mb"] * num_clients
+            new_cores += f["vcpus"] * num_new_clients
+            new_ram_mb += f["ram_mb"] * num_new_clients
+            if is_additive:
+                existing_cores = f["vcpus"] * existing_client_count
+                existing_ram_mb = f["ram_mb"] * existing_client_count
+        if f["name"] == flavor_server and is_additive:
+            existing_cores += f["vcpus"]
+            existing_ram_mb += f["ram_mb"]
+
+    total_cores = existing_cores + new_cores
+    total_ram_mb = existing_ram_mb + new_ram_mb
 
     print(f"\n{bold('═' * 60)}")
     print(f"  {bold('Summary')}")
     print(f"  {'─' * 40}")
-    print(f"  {'Component':<20} {'Count':<8} {'vCPUs':<8} {'RAM':<10}")
-    print(f"  {'─' * 46}")
+
+    if is_additive:
+        print(f"  {'Existing':>8} {'New':>8} {'Total':>8}")
+        print(f"  {'─' * 28}")
+        print(f"  Clients  {existing_client_count:>5}  {num_new_clients:>5}  {total_clients_after:>5}")
+        print(f"  vCPUs    {existing_cores:>5}  {new_cores:>5}  {total_cores:>5}")
+        print(f"  RAM (MB) {existing_ram_mb:>6,}  {new_ram_mb:>6,}  {total_ram_mb:>6,}")
+        print(f"  FloatIP  {existing_client_count + (1 if existing['server'] else 0):>5}  {num_new_clients:>5}  {existing_client_count + num_new_clients + (1 if existing['server'] else 0):>5}")
+        print(f"  {'─' * 28}")
+    else:
+        print(f"  {'Component':<20} {'Count':<8} {'vCPUs':<8} {'RAM':<10}")
+        print(f"  {'─' * 46}")
+        print(
+            f"  {'nomad-server':<20} {'1':<8} "
+            f"{next((f['vcpus'] for f in flavors if f['name'] == flavor_server), '?'):<8} "
+            f"{next((f['ram_mb'] for f in flavors if f['name'] == flavor_server), '?'):<6}MB"
+        )
+        print(
+            f"  {'nomad-client':<20} {num_new_clients:<8} "
+            f"{next((f['vcpus'] for f in flavors if f['name'] == flavor_client), '?') * num_new_clients:<8} "
+            f"{next((f['ram_mb'] for f in flavors if f['name'] == flavor_client), '?') * num_new_clients:<6}MB"
+        )
+        print(f"  {'─' * 46}")
+
     print(
-        f"  {'nomad-server':<20} {'1':<8} "
-        f"{next((f['vcpus'] for f in flavors if f['name'] == flavor_server), '?'):<8} "
-        f"{next((f['ram_mb'] for f in flavors if f['name'] == flavor_server), '?'):<6}MB"
-    )
-    print(
-        f"  {'nomad-client':<20} {num_clients:<8} "
-        f"{next((f['vcpus'] for f in flavors if f['name'] == flavor_client), '?') * num_clients:<8} "
-        f"{next((f['ram_mb'] for f in flavors if f['name'] == flavor_client), '?') * num_clients:<6}MB"
-    )
-    print(f"  {'─' * 46}")
-    print(
-        f"  {'Total':<20} {1 + num_clients:<8} {total_cores:<8} "
+        f"  {'Total':<20} {1 + num_new_clients:<8} {total_cores:<8} "
         f"{total_ram_mb:<6}MB"
     )
     print(
         f"  {'Free in quota':<36} "
         f"{free_cores:<8} {free_ram_mb:<6}MB"
     )
-    print(f"  {'Floating IPs needed':<20} {1 + num_clients:<8}")
+    print(f"  {'Floating IPs needed':<20} {num_new_clients + (0 if is_additive else 1):<8}")
     print(f"  {'Free floating IPs':<20} {free_ips:<8}")
     print(
-        f"  {'Quota cap (max clients)':<20} "
+        f"  {'Quota cap (max new)':<20} "
         f"{hard_max if server_flavor_spec and client_flavor_spec else '?'}"
     )
     print(f"  {'Image':<20} {image_name}")
@@ -1052,12 +1367,13 @@ def main():
     print(f"  {'Security group':<20} {sg_name}")
     print(f"  {'Keypair':<20} {key_name}")
 
-    if free_ips < 1 + num_clients:
+    if free_ips < num_new_clients + (0 if is_additive else 1):
         print(f"\n  {yellow('⚠')} Not enough floating IPs available!")
         sys.exit(1)
 
     if not args.yes:
-        yn = input(f"\n  {bold('Create these VMs?')} [y/N]: ").strip().lower()
+        verb = "Add these" if is_additive else "Create these"
+        yn = input(f"\n  {bold(f'{verb} VMs?')} [y/N]: ").strip().lower()
         if yn != "y":
             print("  Aborted.")
             sys.exit(0)
@@ -1065,9 +1381,6 @@ def main():
     # ── 10. Create VMs (fully parallel pipeline) ─────────────────────
     # Flavors with 0 disk require volume-backed servers.
     # Use a 10GB boot volume for 0-disk flavors.
-    server_boot_volume = (
-        0 if (server_flavor_spec and server_flavor_spec["disk_gb"] > 0) else 10
-    )
     client_boot_volume = (
         0 if (client_flavor_spec and client_flavor_spec["disk_gb"] > 0) else 10
     )
@@ -1078,22 +1391,12 @@ def main():
     prefix = args.prefix
     server_name = f"{prefix}-server"
 
-    all_specs = [
-        {
-            "name": server_name,
-            "image_id": image_id,
-            "flavor": flavor_server,
-            "network": network_name,
-            "key_name": key_name,
-            "security_group": sg_name,
-            "az": az,
-            "boot_volume_gb": server_boot_volume,
-        }
-    ]
-    for i in range(1, num_clients + 1):
-        all_specs.append(
+    if is_additive:
+        # Skip server creation, start client numbering after existing max
+        client_start = existing["max_client_index"] + 1
+        all_specs = [
             {
-                "name": f"{prefix}-client-{i}",
+                "name": f"{prefix}-client-{client_start + i - 1}",
                 "image_id": image_id,
                 "flavor": flavor_client,
                 "network": network_name,
@@ -1102,50 +1405,113 @@ def main():
                 "az": az,
                 "boot_volume_gb": client_boot_volume,
             }
+            for i in range(1, num_new_clients + 1)
+        ]
+        num_new_servers = num_new_clients  # only clients, no server
+    else:
+        server_boot_volume = (
+            0 if (server_flavor_spec and server_flavor_spec["disk_gb"] > 0) else 10
         )
+        all_specs = [
+            {
+                "name": server_name,
+                "image_id": image_id,
+                "flavor": flavor_server,
+                "network": network_name,
+                "key_name": key_name,
+                "security_group": sg_name,
+                "az": az,
+                "boot_volume_gb": server_boot_volume,
+            }
+        ]
+        client_start = 1
+        for i in range(client_start, num_new_clients + 1):
+            all_specs.append(
+                {
+                    "name": f"{prefix}-client-{i}",
+                    "image_id": image_id,
+                    "flavor": flavor_client,
+                    "network": network_name,
+                    "key_name": key_name,
+                    "security_group": sg_name,
+                    "az": az,
+                    "boot_volume_gb": client_boot_volume,
+                }
+            )
+        num_new_servers = 1 + num_new_clients
 
     # ── Phase 1: Submit all creates in parallel (no --wait) ─────
     name_to_id = batch_submit_creates(all_specs, parallel)
-    server_id = name_to_id[server_name]
-    print(f"  {green('✓')} {len(name_to_id)} servers submitted")
+
+    if is_additive:
+        server_id = existing["server"]["id"]
+        print(f"  {green('✓')} {len(name_to_id)} new client(s) submitted")
+    else:
+        server_id = name_to_id[server_name]
+        print(f"  {green('✓')} {len(name_to_id)} servers submitted")
 
     # ── Phase 2: Wait for all to become ACTIVE (batch poll) ────
-    print(f"\n  {bold('Waiting for all VMs to become ACTIVE...')}")
-    wait_for_servers_active(name_to_id, interval=15, timeout=900)
-    print(f"  {green('✓')} All servers ACTIVE")
+    if name_to_id:
+        print(f"\n  {bold('Waiting for all VMs to become ACTIVE...')}")
+        wait_for_servers_active(name_to_id, interval=15, timeout=900)
+        print(f"  {green('✓')} All servers ACTIVE")
+    else:
+        print("  No new VMs to wait for.")
 
     # ── Phase 3: Resolve internal IPs (parallel) ───────────────
-    print(f"\n  {bold('Resolving internal IPs...')}")
-    name_to_ip = batch_get_ips(name_to_id, network_name, parallel)
-    server_internal = name_to_ip[server_name]
-    print(f"  {green('✓')} IPs resolved")
+    if name_to_id:
+        print(f"\n  {bold('Resolving internal IPs...')}")
+        name_to_ip = batch_get_ips(name_to_id, network_name, parallel)
+        print(f"  {green('✓')} IPs resolved")
+    else:
+        name_to_ip = {}
 
     # ── Phase 4: Allocate floating IPs (parallel) ──────────────
-    print(f"\n  {bold('Allocating floating IPs...')}")
-    total_servers = len(name_to_id)
-    floating_ips = batch_allocate_floating_ips(total_servers, parallel)
-    server_floating = floating_ips[0]  # first entry = server
-    print(f"  {green('✓')} {len(floating_ips)} IPs allocated")
+    if name_to_id:
+        print(f"\n  {bold('Allocating floating IPs...')}")
+        floating_ips = batch_allocate_floating_ips(len(name_to_id), parallel)
+        print(f"  {green('✓')} {len(floating_ips)} IPs allocated")
+    else:
+        floating_ips = []
 
     # ── Phase 5: Assign floating IPs (parallel) ────────────────
-    print(f"\n  {bold('Assigning floating IPs...')}")
-    batch_assign_floating_ips(name_to_id, floating_ips, parallel)
-    print(f"  {green('✓')} All floating IPs assigned")
+    if name_to_id and floating_ips:
+        print(f"\n  {bold('Assigning floating IPs...')}")
+        batch_assign_floating_ips(name_to_id, floating_ips, parallel)
+        print(f"  {green('✓')} All floating IPs assigned")
 
     # Build client_info for inventory generation
     client_info = []
-    for i in range(1, num_clients + 1):
-        cname = f"{prefix}-client-{i}"
-        client_info.append(
-            {
-                "name": cname,
-                "id": name_to_id[cname],
-                "internal_ip": name_to_ip[cname],
-                "floating_ip": floating_ips[i],
-            }
-        )
+    if is_additive:
+        # New clients are named {prefix}-client-{existing_max + 1} ... etc.
+        # all_specs[i] corresponds to name in name_to_id
+        for spec in all_specs:
+            cname = spec["name"]
+            cid = name_to_id.get(cname, "")
+            client_info.append(
+                {
+                    "name": cname,
+                    "id": cid,
+                    "internal_ip": name_to_ip.get(cname, "<UNKNOWN>"),
+                    "floating_ip": floating_ips[all_specs.index(spec)] if floating_ips else "<UNKNOWN>",
+                }
+            )
+    else:
+        for i in range(client_start, num_new_clients + 1):
+            cname = f"{prefix}-client-{i}"
+            cid = name_to_id.get(cname, "")
+            client_info.append(
+                {
+                    "name": cname,
+                    "id": cid,
+                    "internal_ip": name_to_ip.get(cname, "<UNKNOWN>"),
+                    "floating_ip": floating_ips[i] if len(floating_ips) > i else "<UNKNOWN>",
+                }
+            )
+        server_internal = name_to_ip.get(server_name, "<UNKNOWN>")
+        server_floating = floating_ips[0] if len(floating_ips) > 0 else "<UNKNOWN>"
 
-    # ── 11. Generate inventory ──────────────────────────────────────
+    # ── 11. Generate / merge inventory ──────────────────────────────
     if not args.no_auto_inventory:
         config = {
             "vpc_cidr": "192.168.100.0/24",
@@ -1155,18 +1521,74 @@ def main():
             "local_openstudio_tarball": "/tmp/OpenStudio-3.10.0.tar.gz",
             "nfs_export_path": "/nfs/opensstudio/batch",
         }
-        inventory_yaml = generate_inventory(
-            server_name=server_name,
-            server_floating_ip=server_floating,
-            server_internal_ip=server_internal,
-            clients=client_info,
-            config=config,
-        )
 
         out_path = args.inventory_output
+
+        if is_additive:
+            # Read existing inventory, merge new clients
+            existing_inv = read_existing_inventory(out_path)
+            if existing_inv:
+                inventory_yaml = merge_inventory(
+                    existing=existing_inv,
+                    new_clients=client_info,
+                    server_name=existing["server"]["name"] if existing["server"] else None,
+                    server_floating_ip=None,  # preserve existing
+                    server_internal_ip=None,
+                    config=config,
+                )
+                print(f"\n  {green('✓')} Merged {len(client_info)} new client(s) into {out_path}")
+            else:
+                # No existing inventory — create fresh with just the new clients
+                # plus existing server info if available
+                if existing["server"]:
+                    existing_server_floating = ""
+                    existing_server_internal = ""
+                    try:
+                        s_raw = openstack("server", "show", existing["server"]["id"], "-f", "yaml")
+                        s_info = yaml.safe_load(s_raw) or {}
+                        addrs = s_info.get("addresses", {})
+                        net_addrs = addrs.get(network_name, [])
+                        for a in net_addrs:
+                            if isinstance(a, dict) and a.get("OS-EXT-IPS:type") == "floating":
+                                existing_server_floating = a.get("addr", "")
+                            elif isinstance(a, dict) and a.get("OS-EXT-IPS:type") == "fixed":
+                                existing_server_internal = a.get("addr", "")
+                    except Exception:
+                        pass
+                    inventory_yaml = generate_inventory(
+                        server_name=existing["server"]["name"],
+                        server_floating_ip=existing_server_floating or "<SERVER_FLOATING_IP>",
+                        server_internal_ip=existing_server_internal or "<SERVER_INTERNAL_IP>",
+                        clients=client_info + [
+                            # Include existing clients too (gathered from OpenStack)
+                            {"name": c["name"], "internal_ip": "<UNKNOWN>", "floating_ip": "<UNKNOWN>"}
+                            for c in existing["clients"]
+                        ],
+                        config=config,
+                    )
+                else:
+                    inventory_yaml = generate_inventory(
+                        server_name=server_name,
+                        server_floating_ip="<SERVER_FLOATING_IP>",
+                        server_internal_ip="<SERVER_INTERNAL_IP>",
+                        clients=client_info,
+                        config=config,
+                    )
+                print(f"\n  {green('✓')} Inventory written to {out_path}")
+        else:
+            # Greenfield — generate fresh inventory
+            inventory_yaml = generate_inventory(
+                server_name=server_name,
+                server_floating_ip=server_floating,
+                server_internal_ip=server_internal,
+                clients=client_info,
+                config=config,
+            )
+            print(f"\n  {green('✓')} Inventory written to {out_path}")
+
         with open(out_path, "w") as f:
             f.write(inventory_yaml)
-        print(f"\n  {green('✓')} Inventory written to {out_path}")
+
         print(f"\n  {bold('Next steps:')}")
         print(f"    1. Edit {out_path} to set:")
         print(f"       - local_nomad_zip (path to Nomad binary)")
@@ -1178,13 +1600,27 @@ def main():
 
     # ── 12. Summary ─────────────────────────────────────────────────
     print(f"\n{bold('═' * 60)}")
-    print(f"  {bold('Cluster created!')}")
-    print(f"  {'─' * 40}")
-    print(f"  {server_name:20} {server_floating}  (internal: {server_internal})")
-    for c in client_info:
-        print(f"  {c['name']:20} {c['floating_ip']}  (internal: {c['internal_ip']})")
-    print(f"\n  SSH access: ssh ubuntu@<floating-ip>")
-    print(f"  Nomad UI:   http://{server_floating}:4646")
+
+    if is_additive:
+        print(f"  {bold('New clients added to cluster!')}")
+        print(f"  {'─' * 40}")
+        if existing["server"]:
+            print(f"  {existing['server']['name']:20} (existing)")
+        for c in existing["clients"]:
+            print(f"  {c['name']:20} (existing)")
+        for c in client_info:
+            print(f"  {c['name']:20} {c['floating_ip']}  (internal: {c['internal_ip']})  {green('★ NEW')}")
+        print(f"\n  Total clients: {total_clients_after}")
+        print(f"  Run 'make deploy' to provision the new clients")
+    else:
+        print(f"  {bold('Cluster created!')}")
+        print(f"  {'─' * 40}")
+        print(f"  {server_name:20} {server_floating}  (internal: {server_internal})")
+        for c in client_info:
+            print(f"  {c['name']:20} {c['floating_ip']}  (internal: {c['internal_ip']})")
+        print(f"\n  SSH access: ssh ubuntu@<floating-ip>")
+        print(f"  Nomad UI:   http://{server_floating}:4646")
+
     print(f"{bold('═' * 60)}\n")
 
 
