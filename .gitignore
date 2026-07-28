@@ -28,3 +28,36 @@ worker-data
 
 # Environment-specific config (copy from .env.example)
 .env
+
+inventory.yml
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SSH keys and secrets (never commit)
+external_batch/nomad/id_*
+external_batch/nomad/known_hosts
+
+# Backup files
+*.bak
+*.bak2
+*.backup
+
+# Local scripts and configs
+external_batch/nomad/tail
+external_batch/nomad/submit_analysis_nomad.rb
+external_batch/nomad/submit_nomad.rb.backup
+external_batch/nomad/templates/*.bak*
+
+# IDE/agent directories
+.agents/
+.agent/
+
+# Local documentation
+docs/morning_workflow.md
+
+# Spec files generated for hardening tests (local only)
+server/spec/models/*hardening_spec.rb

@@ -22,6 +22,7 @@
   hosts: nomad_clients
   become: true
   serial: "{{ nomad_client_serial | default(10) }}"
+  max_fail_percentage: 100
 
   roles:
     - role: common
@@ -41,6 +42,8 @@
       register: final_status
       changed_when: false
       ignore_errors: true
+      environment:
+        NOMAD_ADDR: "http://nomad-server:4646"
     - name: Show node status summary
       ansible.builtin.debug:
         var: final_status.stdout_lines

@@ -13,15 +13,17 @@ job "{{JOB_NAME}}" {
     task "run_chunks" {
       driver = "exec"
 
+      # Run as root so we can install tools and write to NFS.
+      # In production, use a pre-baked AMI and a non-root user.
+      user = "root"
+
       config {
-        command = "/opt/nomad/task_wrapper.sh"
-        # We'll use a loop inside the task wrapper or modify it to handle multiple chunks
-        # For simplicity in this example, we'll pass the total chunks and let the wrapper handle distribution
+        command = "/bin/bash"
         args = [
-          "--package-uri", "{{PACKAGE_URI}}",
-          "--results-uri", "{{RESULTS_URI}}",
-          "--total-chunks", "{{NUM_CHUNKS}}",
-          "--openstudio-cmd", "openstudio"
+          "-c",
+          # Install latest task_wrapper.sh from shared NFS, then run it.
+          # This enables painless updates without re-baking client AMIs.
+          "cp /nfs/opensstudio/batch/task_wrapper.sh /usr/local/bin/task_wrapper.sh && chmod 755 /usr/local/bin/task_wrapper.sh && /usr/local/bin/task_wrapper.sh --package-uri '{{PACKAGE_URI}}' --results-uri '{{RESULTS_URI}}' --total-chunks '{{NUM_CHUNKS}}' --openstudio-cmd openstudio"
         ]
       }
 

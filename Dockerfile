@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 # may include suffix
-ARG OPENSTUDIO_VERSION=3.11.0
+ARG OPENSTUDIO_VERSION=3.10.0
 ARG DOCKER_PLATFORM=linux/amd64
 FROM --platform=${DOCKER_PLATFORM} nrel/openstudio:${OPENSTUDIO_VERSION} AS base
 ARG OPENSTUDIO_VERSION

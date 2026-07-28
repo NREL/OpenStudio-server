@@ -3,6 +3,10 @@
 # Nomad Client configuration (runs on every nomad-client)
 # =============================================================================
 
+- name: Detect default network interface
+  ansible.builtin.set_fact:
+    default_iface: "{{ ansible_default_ipv4.interface | default('eth0') }}"
+
 - name: Deploy Nomad client configuration
   ansible.builtin.copy:
     dest: /etc/nomad.d/nomad.hcl
@@ -15,8 +19,8 @@
 
       client {
         enabled    = true
-        servers    = ["nomad-server:4646"]
-        network_interface = "eth0"
+        servers    = ["nomad-server:4647"]
+        network_interface = "{{ default_iface }}"
       }
 
       plugin "raw_exec" {
@@ -35,10 +39,22 @@
     state: started
     enabled: true
 
+- name: Add NOMAD_ADDR to environment for CLI access
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    regexp: "^NOMAD_ADDR="
+    line: "NOMAD_ADDR=http://nomad-server:4646"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Wait for Nomad client to join cluster
-  ansible.builtin.command: nomad node status
-  register: node_status
-  changed_when: false
+  ansible.builtin.uri:
+    url: "http://nomad-server:4646/v1/agent/members"
+    method: GET
+    status_code: 200
+  register: cluster_members
   retries: 10
   delay: 3
-  until: node_status.rc == 0
+  until: cluster_members.status == 200
+  ignore_errors: true
