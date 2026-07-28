@@ -8,7 +8,7 @@ OPENSTUDIO_VERSION_EXT="${3:-}"
 
 if [ ! -z ${OPENSTUDIO_VERSION} ] && [ ! -z ${OPENSTUDIO_SHA} ]; then
     # OPENSTUDIO_VERSION_EXT may be empty
-    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_SHA}-Ubuntu-24.04-x86_64.deb
+    OPENSTUDIO_DOWNLOAD_FILENAME=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_SHA}-Ubuntu-22.04-x86_64.deb
     echo "Installing OpenStudio ${OPENSTUDIO_DOWNLOAD_FILENAME}"
     #OPENSTUDIO_DOWNLOAD_BASE_URL=https://openstudio-ci-builds.s3-us-west-2.amazonaws.com/develop
     #OPENSTUDIO_DOWNLOAD_BASE_URL=https://github.com/NatLabRockies/OpenStudio/releases/download/v3.8.0

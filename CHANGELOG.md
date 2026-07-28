@@ -1,20 +1,15 @@
 OpenStudio Server
 =================
 
-Version 3.11.0
--------------
-* Bumped OpenStudio Server version to 3.11.0.
-* Updated CI and build infrastructure to support newer platforms:
-* Migrated Ubuntu CI from 22.04 to 24.04.
-* Updated macOS runner and version checks to support macOS 15.
-* Updated MongoDB version used in CI to 8.x.
-* Updated container tags and packaging logic for modern OS targets.
-* Updated packaged Ruby and dependency handling for Ubuntu 24.04.
-* Adjusted test expectations in docker_stack_requeue_spec.rb to reflect updated behavior.
-* Cleaned up legacy Windows install and packaging logic.
-
 Version 3.10.0
 -------------
+* Bumped OpenStudio Server version to 3.10.0.
+* Reverted CI and build infrastructure to 3.10.0 baseline:
+* Migrated Ubuntu CI from 24.04 back to 22.04.
+* Updated macOS runner back to macOS 13.
+* Updated MongoDB version used in CI to 6.x.
+* Updated container tags and packaging logic for 3.10.0 targets.
+* Updated packaged Ruby and dependency handling for Ubuntu 22.04.
 * Custom Gems working again https://github.com/NatLabRockies/OpenStudio-server/pull/818
 * remove URBANopt until 3.10.1 bc of gem conflicts
 * webpage fix https://github.com/NatLabRockies/OpenStudio-server/pull/819
@@ -22,7 +17,6 @@ Version 3.10.0
 * upgrade from Rails 6 to Rails 7, Mongoid 8.1, Puma 6.6 and remove webrick https://github.com/NatLabRockies/OpenStudio-server/pull/825
 * Local Server startup enhancements for PAT https://github.com/NatLabRockies/OpenStudio-server/pull/827
 
-  
 Version 3.9.0
 -------------
 * 3.9.0 was pulled and several RCs were tried to fix various issues.  This was the last RC before we ran out of funding for the release cycle.

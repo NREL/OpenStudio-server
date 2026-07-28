@@ -4,7 +4,7 @@
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 # may include suffix
-ARG OPENSTUDIO_VERSION=3.11.0
+ARG OPENSTUDIO_VERSION=3.10.0
 ARG DOCKER_PLATFORM=linux/amd64
 FROM --platform=${DOCKER_PLATFORM} nrel/openstudio:${OPENSTUDIO_VERSION} AS base
 ARG OPENSTUDIO_VERSION
@@ -13,10 +13,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install required libaries.
 #   realpath - needed for wait-for-it
 RUN apt-get update && apt-get install -y --no-install-recommends gnupg lsb-release \
-    && curl -fsSLk https://pgp.mongodb.com/server-8.0.asc -o /tmp/mongodb-server-8.0.asc \
-    && gpg --batch --show-keys --with-colons /tmp/mongodb-server-8.0.asc | grep -q '^fpr:::::::::4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05:' \
-    && gpg --batch --yes --dearmor -o /usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg /tmp/mongodb-server-8.0.asc \
-    && echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/8.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-8.0.list \
+    && curl -fsSLk https://pgp.mongodb.com/server-6.0.asc -o /tmp/mongodb-server-6.0.asc \
+    && gpg --batch --show-keys --with-colons /tmp/mongodb-server-6.0.asc | grep -q '^fpr:::::::::4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05:' \
+    && gpg --batch --yes --dearmor -o /usr/share/keyrings/mongodb-org-6.0-archive-keyring.gpg /tmp/mongodb-server-6.0.asc \
+    && echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-6.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         mongodb-org \

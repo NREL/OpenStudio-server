@@ -15,8 +15,8 @@ echo "pull images"
 docker pull registry:2.6
 docker pull nrel/openstudio-server:$Args
 docker pull nrel/openstudio-rserve:$Args
-docker pull mongo:8.0.12
-docker pull redis:4.0.6
+docker pull mongo:6.0.12
+docker pull redis:6.0.9
 
 echo "create registry"
 docker volume create --name=regdata
@@ -26,8 +26,8 @@ sleep 10
 echo "tag"
 docker tag nrel/openstudio-server:$Args 127.0.0.1:5000/openstudio-server
 docker tag nrel/openstudio-rserve:$Args 127.0.0.1:5000/openstudio-rserve
-docker tag mongo:8.0.12 127.0.0.1:5000/mongo
-docker tag redis:4.0.6 127.0.0.1:5000/redis
+docker tag mongo:6.0.12 127.0.0.1:5000/mongo
+docker tag redis:6.0.9 127.0.0.1:5000/redis
 sleep 3
 echo "push"
 docker push 127.0.0.1:5000/openstudio-server

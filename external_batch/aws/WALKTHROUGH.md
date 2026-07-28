@@ -67,15 +67,15 @@ What this created (and where to see it in the console):
 ```powershell
 cd external_batch
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com
-docker build -f aws/Dockerfile --build-arg OPENSTUDIO_VERSION=3.11.0 -t <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.11.0 .
-docker push <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.11.0
+docker build -f aws/Dockerfile --build-arg OPENSTUDIO_VERSION=3.10.0 -t <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.10.0 .
+docker push <ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.10.0
 ```
 
 **If docker login fails with `400 Bad Request` / `no basic auth credentials`**:
 Windows PowerShell 5.1 mangles the piped password. Run the same two commands in
 Git Bash or cmd.exe instead — they pipe raw bytes and work.
 
-Verify in the console: ECR → osaf-batch-runner → the `3.11.0` tag is listed.
+Verify in the console: ECR → osaf-batch-runner → the `3.10.0` tag is listed.
 
 ## 4. Run an analysis
 

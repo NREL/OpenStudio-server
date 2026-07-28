@@ -24,7 +24,7 @@ New to external batch development? This section will help you set up a test envi
 ### Prerequisites
 - Ruby 3.2 (the server Gemfile pins `~>3.2.0`; the runner itself is plain stdlib Ruby)
 - OpenStudio CLI installed and accessible in PATH
-- OpenStudio Server 3.11.0+ (this documentation applies to v3.11.0 and later)
+- OpenStudio Server 3.10.0+ (this documentation applies to v3.10.0 and later)
 - Git
 
 ### Quick Start Test
@@ -42,8 +42,8 @@ New to external batch development? This section will help you set up a test envi
 
 ## Versioning Information
 
-This documentation applies to **OpenStudio Server version 3.11.0 and later**.
-- External batch feature introduced: OpenStudio Server 3.11.0 (first release of this feature)
+This documentation applies to **OpenStudio Server version 3.10.0 and later**.
+- External batch feature introduced: OpenStudio Server 3.10.0 (first release of this feature)
 - Package/results contract: `schema_version` 1 (`ExternalBatch::SCHEMA_VERSION`); the runner refuses to process a manifest with a different schema_version
 
 ## Architecture Overview

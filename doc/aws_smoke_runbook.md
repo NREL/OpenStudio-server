@@ -36,9 +36,9 @@ Image build + push (login MUST be from Git Bash/cmd — PowerShell 5.1 pipe brok
 cd /c/projects/OS-Server-develop/external_batch
 '/c/Program Files/Amazon/AWSCLIV2/aws.exe' ecr get-login-password --region us-east-1 \
   | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
-docker build -f aws/Dockerfile --build-arg OPENSTUDIO_VERSION=3.11.0 \
-  -t <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.11.0 .
-docker push <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.11.0
+docker build -f aws/Dockerfile --build-arg OPENSTUDIO_VERSION=3.10.0 \
+  -t <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.10.0 .
+docker push <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/osaf-batch-runner:3.10.0
 ```
 
 ## Server side (spec-harness variant — no meta-CLI gem build needed)
