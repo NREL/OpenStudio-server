@@ -9,6 +9,7 @@ on:
     branches:
       - develop
       - master
+      - '179'     # OS 3.10.0 branch, deploys 3.10.0-179 images
       - '*.*.*'   # release branches, e.g. 3.10.0
       - '*-LTS'   # e.g. 2.9.X-LTS
   pull_request:
@@ -151,10 +152,11 @@ jobs:
       shell: bash 
       run: ./ci/github-actions/print_logs.sh
     - name: docker-upload
-      if: | 
-        github.ref == 'refs/heads/master' || 
+      if: |
+        github.ref == 'refs/heads/master' ||
         github.ref == 'refs/heads/develop' ||
-        github.ref == 'refs/heads/3.10.0'
+        github.ref == 'refs/heads/3.10.0' ||
+        github.ref == 'refs/heads/179'
       shell: bash
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 
