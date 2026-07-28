@@ -31,7 +31,7 @@ fundamentals.
 
 The [openstudio_meta](./bin/openstudio_meta) file is a ruby script which provides access to packaging and execution 
 commands which allow for this codebase to be embedded in applications deployed to computers without docker. Deployment 
-requires that [MongoDB 6.0.12](https://www.mongodb.com/download-center/community/releases/archive) and [Ruby v3.2](https://www.ruby-lang.org/en/downloads/) 
+requires that [MongoDB 8.0.12](https://www.mongodb.com/download-center/community/releases/archive) and [Ruby v3.2](https://www.ruby-lang.org/en/downloads/) 
 are additionally packaged. 
 
 The openstudio_meta deployment relies on the `install_gems` command, which uses local system libraries to build all 

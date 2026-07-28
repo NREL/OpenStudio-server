@@ -1,7 +1,7 @@
 # Version used to deploy the latest version of the server from docker hub.
 services:
   db:
-    image: mongo:6.0.12
+    image: mongo:8.0.12
     ports:
       - "27017:27017"
     deploy:
