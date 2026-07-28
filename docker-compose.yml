@@ -44,7 +44,7 @@ services:
       - ./external_batch:/opt/openstudio/external_batch:ro
       - ./external_batch/nomad/id_ed25519:/config/ssh/id_rsync:ro
       - ./external_batch/nomad/known_hosts:/config/ssh/known_hosts:ro
-    command: bash -c 'apt-get update -qq && apt-get install -y -qq rsync; chmod 600 /config/ssh/id_rsync 2>/dev/null; /usr/local/bin/start-server'
+    command: /usr/local/bin/start-server
   web-background:
     image: nrel/openstudio-server:latest
     platform: ${DOCKER_PLATFORM:-linux/amd64}
@@ -72,7 +72,7 @@ services:
       - ./external_batch:/opt/openstudio/external_batch:ro
       - ./external_batch/nomad/id_ed25519:/config/ssh/id_rsync:ro
       - ./external_batch/nomad/known_hosts:/config/ssh/known_hosts:ro
-    command: bash -c 'apt-get update -qq && apt-get install -y -qq rsync; chmod 600 /config/ssh/id_rsync 2>/dev/null; /usr/local/bin/start-web-background'
+    command: /usr/local/bin/start-web-background
   worker:
     image: nrel/openstudio-server:latest
     platform: ${DOCKER_PLATFORM:-linux/amd64}
