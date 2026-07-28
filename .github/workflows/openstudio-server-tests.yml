@@ -4,6 +4,7 @@ name: openstudio-server
 # (pushing a branch with an open PR previously triggered a duplicate push
 # run), push covers the long-lived and release branches that deploy images.
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop
