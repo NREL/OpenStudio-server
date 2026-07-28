@@ -67,9 +67,16 @@ sync_cmd = if is_s3
 elsif options[:ssh_host]
   ssh_key_arg = options[:ssh_key] ? "-i #{options[:ssh_key]}" : ''
   "rsync -avz -e \"ssh #{ssh_key_arg} -o StrictHostKeyChecking=no\" \"#{options[:ssh_host]}:#{options[:results_uri]}/\" \"#{results_dir}/\""
-else
-  # For NFS/local filesystem, use rsync
-  "rsync -a --quiet \"#{options[:results_uri]}/\" \"#{results_dir}/\""
+end
+
+# NFS/local mount needs no external tool: mirror in-process so the sync loop
+# also works on hosts without rsync (Windows dev boxes, slim containers).
+def sync_local(results_uri, results_dir)
+  unless Dir.exist?(results_uri)
+    warn "results dir not yet present (will retry): #{results_uri}"
+    return
+  end
+  FileUtils.cp_r(File.join(results_uri, '.'), results_dir)
 end
 
 def all_chunks_done?(results_dir, num_chunks)
@@ -77,7 +84,11 @@ def all_chunks_done?(results_dir, num_chunks)
 end
 
 loop do
-  system(sync_cmd) || warn("sync failed (will retry): #{sync_cmd}")
+  if sync_cmd
+    system(sync_cmd) || warn("sync failed (will retry): #{sync_cmd}")
+  else
+    sync_local(options[:results_uri], results_dir)
+  end
   done = all_chunks_done?(results_dir, num_chunks)
   markers = (0...num_chunks).count { |i| File.exist?(File.join(results_dir, "chunk_#{i}.done")) }
   puts "[sync_results #{Time.now}] #{markers}/#{num_chunks} chunks done"
