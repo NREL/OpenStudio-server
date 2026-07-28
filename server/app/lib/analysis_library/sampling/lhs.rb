@@ -128,18 +128,24 @@ module AnalysisLibrary::Sampling
 
         samples[var.id.to_s] = variable_samples
 
-      # NOTE: the R backend renders a histogram PreflightImage per variable here.
-      # The Ruby backend now also generates histogram images (pure Ruby implementation).
-      logger.info "Generating preflight histogram for #{var.name} (Ruby sampling backend)"
-      histogram_file = generate_ruby_histogram(var.name, variable_samples)
-      if histogram_file && File.exist?(histogram_file)
-        pfi = PreflightImage.add_from_disk(var.id, 'histogram', histogram_file)
-        var.preflight_images << pfi unless var.preflight_images.include?(pfi)
-        # Clean up the temporary file
-        FileUtils.rm_f(histogram_file)
-      else
-        logger.info "No histogram file generated for #{var.name}"
-      end
+        # NOTE: the R backend renders a histogram PreflightImage per variable here.
+        # The Ruby backend now also generates histogram images (pure Ruby implementation).
+        logger.info "Generating preflight histogram for #{var.name} (Ruby sampling backend)"
+        histogram_file = generate_ruby_histogram(var.name, variable_samples)
+        if histogram_file && File.exist?(histogram_file)
+          begin
+            pfi = PreflightImage.add_from_disk(var.id, 'histogram', histogram_file)
+            var.preflight_images << pfi unless var.preflight_images.include?(pfi)
+          rescue StandardError => e
+            # Attaching runs paperclip styles through ImageMagick; hosts without it
+            # (PAT-local installs, bare CI runners) must still be able to sample.
+            logger.warn "Skipping preflight histogram for #{var.name}: #{e.message}"
+          ensure
+            FileUtils.rm_f(histogram_file)
+          end
+        else
+          logger.info "No histogram file generated for #{var.name}"
+        end
 
         var.r_index = i_var + 1 # r_index is 1-based
         var.save!
