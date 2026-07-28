@@ -2,7 +2,7 @@
 set -euo pipefail
 echo "The build architecture is ${ImageOS}"
 
-if [ "${ImageOS}" == "ubuntu22" ] && [ "${BUILD_TYPE}" == "docker" ]; then
+if [ "${ImageOS}" == "ubuntu24" ] && [ "${BUILD_TYPE}" == "docker" ]; then
     echo "Installing docker compose"
     sudo rm -f /usr/local/bin/docker-compose
     curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -14,7 +14,7 @@ if [ "${ImageOS}" == "ubuntu22" ] && [ "${BUILD_TYPE}" == "docker" ]; then
 
 else
     # sudo rvm implode --force  # rvm PATH rewriting interferes with portable Ruby.
-    if [ "${ImageOS}" == "macos13" ]; then
+    if [ "${ImageOS}" == "macos15" ]; then
 
         brew update > $GITHUB_WORKSPACE/spec/files/logs/brew-update.log
         brew install pv tree coreutils shared-mime-info
@@ -33,14 +33,14 @@ else
         rm ruby-3.2.2-darwin.tar.gz
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
-        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-6.0.12.tgz
-        tar xvzf mongodb-macos-x86_64-6.0.12.tgz
+        curl -SLO https://fastdl.mongodb.org/osx/mongodb-macos-x86_64-8.0.12.tgz
+        tar xvzf mongodb-macos-x86_64-8.0.12.tgz
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
-         echo "Error: Failed to extract Mongo 6.0.12 archive"
+         echo "Error: Failed to extract Mongo 8.0.12 archive"
          exit $exit_status_tar
         fi
-        sudo cp mongodb-macos-x86_64-6.0.12/bin/* /usr/local/bin/
+        sudo cp mongodb-macos-x86_64-8.0.12/bin/* /usr/local/bin/
         rm -r mongodb-macos*
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed
@@ -83,14 +83,14 @@ else
         ulimit -n 4096
         ulimit -a
 
-    elif [ "${ImageOS}" == "ubuntu22" ]; then
+    elif [ "${ImageOS}" == "ubuntu24" ]; then
         echo "Setting up Ubuntu for unit tests and Rubocop"
         # install pipe viewer to throttle printing logs to screen (not a big deal in linux, but it is in osx)
         sudo apt-get update && sudo apt-get install -y wget gnupg software-properties-common build-essential
         # Import MongoDB public GPG key
-        sudo wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-org-6.0-archive-keyring.gpg
+        sudo wget -qO - https://www.mongodb.org/static/pgp/server-8.0.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg
         # Add MongoDB to the sources list
-        echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-6.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+        echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-org-8.0-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
 
         sudo apt-get update
         sudo apt-get install -y pv tree mongodb-org libqdbm14 libxml2-dev
@@ -112,8 +112,8 @@ else
         # install portable ruby - required for build that will eventually be published
         # see https://github.com/NatLabRockies/OpenStudio-PAT/wiki/Pat-Build-Notes
         #curl -SLO --insecure https://openstudio-resources.s3.amazonaws.com/pat-dependencies3/ruby-3.2.2-linux.tar.gz
-        curl -SLO --insecure https://openstudio-resources.s3.us-east-1.amazonaws.com/pat-dependencies3/ruby-3.2.2-ubuntu22.04-x86_64.tar.gz                             
-        tar xvzf ruby-3.2.2-ubuntu22.04-x86_64.tar.gz 
+        curl -SLO --insecure https://openstudio-resources.s3.us-east-1.amazonaws.com/pat-dependencies3/ruby-3.2.2-ubuntu24.04-x86_64.tar.gz                             
+        tar xvzf ruby-3.2.2-ubuntu24.04-x86_64.tar.gz 
         exit_status_tar=$?
         if [ $exit_status_tar -ne 0 ]; then
          echo "Error: Failed to extract Ruby 3.2.2 archive"
@@ -123,7 +123,7 @@ else
         sudo rm -rf /usr/local/ruby
         sudo mv ruby /usr/local/
         ldd /usr/local/ruby/bin/ruby
-        rm ruby-3.2.2-ubuntu22.04-x86_64.tar.gz 
+        rm ruby-3.2.2-ubuntu24.04-x86_64.tar.gz 
 
         mkdir -p reports/rspec
         sudo ./ci/github-actions/install_openstudio.sh $OPENSTUDIO_VERSION $OPENSTUDIO_VERSION_SHA $OPENSTUDIO_VERSION_EXT

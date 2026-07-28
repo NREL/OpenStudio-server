@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # platform-specific config here (also in setup.sh):
-if [ "${ImageOS}" == "macos13" ]; then
+if [ "${ImageOS}" == "macos15" ]; then
     # Dir containing openstudio
     export OS_NAME_WITH_PLUS=OpenStudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}+${OPENSTUDIO_VERSION_SHA}-Darwin-x86_64
     export RUBYLIB="$HOME/$OS_NAME_WITH_PLUS/Ruby"
@@ -11,7 +11,7 @@ if [ "${ImageOS}" == "macos13" ]; then
     export GEM_HOME="$GITHUB_WORKSPACE/gems"
     export GEM_PATH="$GITHUB_WORKSPACE/gems:$GITHUB_WORKSPACE/gems/bundler/gems"
     mongo_dir="/usr/local/bin"
-elif [ "${ImageOS}" == "ubuntu22" ]; then
+elif [ "${ImageOS}" == "ubuntu24" ]; then
     # Dir containing openstudio
     export ENERGYPLUS_EXE_PATH=/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/EnergyPlus/energyplus
     export PATH=/usr/local/ruby/bin:/usr/bin:/usr/local/openstudio-${OPENSTUDIO_VERSION}${OPENSTUDIO_VERSION_EXT}/bin:${PATH}
@@ -83,14 +83,14 @@ else
 
         # Fix the shebang line in the bundle and bundler scripts
         echo "Fixing the shebang line in the bundle and bundler scripts"
-        if [ "${ImageOS}" == "macos13" ]; then
+        if [ "${ImageOS}" == "macos15" ]; then
             sed -i '' "1s|.*|#!${RUBY_PATH}|" $BUNDLE_PATH
         else
             sed -i "1s|.*|#!${RUBY_PATH}|" $BUNDLE_PATH
         fi
 
         # Remove additional lines added by RubyGems
-        if [ "${ImageOS}" == "macos13" ]; then
+        if [ "${ImageOS}" == "macos15" ]; then
             sed -i '' '/_=_\\/,/#!\/usr\/bin\/env ruby/d' $BUNDLE_PATH
         else
             sed -i '/_=_\\/,/#!\/usr\/bin\/env ruby/d' $BUNDLE_PATH
