@@ -710,10 +710,10 @@ module DjJobs
           @sim_logger.info "Zip: Extracting #{f.name}"
           f_path = File.join(destination, f.name)
           FileUtils.mkdir_p(File.dirname(f_path))
-          if File.exist?(f_path)
+          if File.exist?(f_path) && !overwrite
             @sim_logger.warn "SKIPPED: #{f.name}, already existed."
           else
-            zf.extract(f, f_path)
+            zf.extract(f, f_path) { overwrite }
           end
         end
       end

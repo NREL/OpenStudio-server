@@ -222,4 +222,63 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
       expect(job.instance_variable_get(:@data_point).analysis.initialize_worker_timeout).to eq 28800
     end
   end
+
+  describe '#extract_archive overwrite parameter (issue #858)' do
+    # Use allocate to get a bare instance without hitting the database, then wire up a
+    # minimal sim_logger so the logging calls inside extract_archive don't raise.
+    subject(:job) { described_class.allocate.tap { |j| j.instance_variable_set(:@sim_logger, Logger.new(nil)) } }
+
+    def build_test_zip(dir, entries)
+      zip_path = File.join(dir, 'test.zip')
+      Zip::OutputStream.open(zip_path) do |zos|
+        entries.each do |name, content|
+          zos.put_next_entry(name)
+          zos.write(content)
+        end
+      end
+      zip_path
+    end
+
+    it 'overwrites existing files when overwrite=true (the default), replacing stale content' do
+      Dir.mktmpdir do |dest|
+        stale_path = File.join(dest, 'measure.xml')
+        File.write(stale_path, 'stale content')
+
+        zip_dir = Dir.mktmpdir('extract-archive-overwrite')
+        zip_path = build_test_zip(zip_dir, { 'measure.xml' => 'fresh content' })
+
+        job.send(:extract_archive, zip_path, dest, true)
+
+        expect(File.read(stale_path)).to eq 'fresh content'
+        FileUtils.rm_rf(zip_dir)
+      end
+    end
+
+    it 'skips existing files when overwrite=false, preserving their content' do
+      Dir.mktmpdir do |dest|
+        existing_path = File.join(dest, 'measure.xml')
+        File.write(existing_path, 'original content')
+
+        zip_dir = Dir.mktmpdir('extract-archive-no-overwrite')
+        zip_path = build_test_zip(zip_dir, { 'measure.xml' => 'new content' })
+
+        job.send(:extract_archive, zip_path, dest, false)
+
+        expect(File.read(existing_path)).to eq 'original content'
+        FileUtils.rm_rf(zip_dir)
+      end
+    end
+
+    it 'extracts new files regardless of overwrite setting' do
+      Dir.mktmpdir do |dest|
+        zip_dir = Dir.mktmpdir('extract-archive-new-file')
+        zip_path = build_test_zip(zip_dir, { 'new_file.txt' => 'new content' })
+
+        job.send(:extract_archive, zip_path, dest)
+
+        expect(File.read(File.join(dest, 'new_file.txt'))).to eq 'new content'
+        FileUtils.rm_rf(zip_dir)
+      end
+    end
+  end
 end
