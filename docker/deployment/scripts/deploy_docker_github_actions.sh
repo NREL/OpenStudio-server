@@ -18,6 +18,9 @@ elif [ "${GITHUB_REF}" == "refs/heads/3.10.0" ]; then
      IMAGETAG="3.10.0-rc2"
 elif [ "${GITHUB_REF}" == "refs/heads/179" ]; then
      IMAGETAG="3.10.0-179"
+# issue-857 zip-corruption fix candidate for cluster testing; remove mapping once merged into 179
+elif [ "${GITHUB_REF}" == "refs/heads/fix/zip-read-only-extract" ]; then
+     IMAGETAG="179-flock"
 fi
 
 if [ "${IMAGETAG}" != "skip" ]; then
