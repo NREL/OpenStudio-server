@@ -1,0 +1,35 @@
+---
+# =============================================================================
+# NFS Client role (runs on every nomad-client)
+# =============================================================================
+
+- name: Install NFS common utilities
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+    update_cache: false
+    cache_valid_time: 86400
+
+- name: Create NFS mount point
+  ansible.builtin.file:
+    path: "{{ nfs_export_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Mount NFS share
+  ansible.builtin.mount:
+    path: "{{ nfs_export_path }}"
+    src: "nomad-server:{{ nfs_export_path }}"
+    fstype: nfs
+    opts: defaults,_netdev
+    state: mounted
+    dump: "0"
+    passno: "0"
+
+- name: Verify NFS mount is active
+  ansible.builtin.command: df -h "{{ nfs_export_path }}"
+  register: df_result
+  changed_when: false
+  failed_when: "nfs_export_path not in df_result.stdout"

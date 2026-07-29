@@ -52,6 +52,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg lsb-relea
         nodejs \
         procps \
         python3-numpy \
+        rsync \
         tar \
         unzip \
         wget \

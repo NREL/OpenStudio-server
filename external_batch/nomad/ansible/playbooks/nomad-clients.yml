@@ -1,0 +1,50 @@
+---
+# =============================================================================
+# Nomad Clients Playbook
+# =============================================================================
+# Provisions ALL nomad-client VMs with:
+#   - Common base packages and /etc/hosts
+#   - NFS client (nfs-common + fstab mount)
+#   - Nomad binary + systemd service
+#   - Nomad client configuration (points at nomad-server:4646)
+#   - OpenStudio CLI (from local tarball)
+#   - Runner scripts (run_chunk.rb, task_wrapper.sh)
+#
+# To target a single client:
+#   ansible-playbook playbooks/nomad-clients.yml --limit nomad-client-3
+#
+# To add a new client after initial provisioning:
+#   1. Add it to inventory.yml under nomad_clients
+#   2. ansible-playbook playbooks/nomad-clients.yml --limit nomad-client-<N>
+# =============================================================================
+
+- name: Provision Nomad Clients
+  hosts: nomad_clients
+  become: true
+  serial: "{{ nomad_client_serial | default(10) }}"
+  max_fail_percentage: 100
+
+  roles:
+    - role: common
+      tags: [common, always]
+    - role: nfs/client
+      tags: [nfs, nfs-client]
+    - role: nomad/install
+      tags: [nomad, nomad-install]
+    - role: nomad/client
+      tags: [nomad, nomad-client]
+    - role: openstudio
+      tags: [openstudio, runner]
+
+  post_tasks:
+    - name: Display Nomad node status
+      ansible.builtin.command: nomad node status
+      register: final_status
+      changed_when: false
+      ignore_errors: true
+      environment:
+        NOMAD_ADDR: "http://nomad-server:4646"
+    - name: Show node status summary
+      ansible.builtin.debug:
+        var: final_status.stdout_lines
+      when: final_status is succeeded

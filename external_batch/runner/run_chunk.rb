@@ -30,6 +30,7 @@ require 'timeout'
 require 'socket'
 require 'time'
 require 'rbconfig'
+require 'digest'
 
 SCHEMA_VERSION = 1
 
@@ -92,40 +93,86 @@ def spawn_pgroup_opts
   Gem.win_platform? ? {} : { pgroup: true }
 end
 
-# Replicates the dp-level script hooks from DjJobs::RunSimulateDataPoint#run_script_with_args.
-# POSIX-only; on Windows (mock executor) scripts are skipped with a warning.
-def run_data_point_script(analysis_dir, analysis_id, dp_id, script_name, results_dp_dir, runner_log)
-  pid = nil
-  script_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.sh")
-  return unless File.file?(script_path)
+  # Replicates the dp-level script hooks from DjJobs::RunSimulateDataPoint#run_script_with_args.
+  # Supports POSIX shell scripts (.sh) and Windows scripts (.bat, .cmd, .ps1).
+  # On unsupported platforms, scripts are skipped with a warning.
+  def run_data_point_script(analysis_dir, analysis_id, dp_id, script_name, results_dp_dir, runner_log)
+    pid = nil
+    script_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.sh")
+    
+    # Check for platform-specific script extensions
+    unless File.file?(script_path)
+      if Gem.win_platform?
+        # Try Windows script extensions
+        [".bat", ".cmd", ".ps1"].each do |ext|
+          alt_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}#{ext}")
+          if File.file?(alt_path)
+            script_path = alt_path
+            break
+          end
+        end
+      end
+    end
+    
+    return unless File.file?(script_path)
 
-  if Gem.win_platform?
-    runner_log.puts "WARNING: #{script_name}.sh present but shell scripts are not supported on Windows; skipping"
-    return
+    if Gem.win_platform?
+      args_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.args")
+      args = []
+      if File.file?(args_path)
+        parsed = JSON.parse(File.read(args_path))
+        args = parsed if parsed.is_a?(Array)
+      end
+      env = { 'SCRIPT_ANALYSIS_ID' => analysis_id, 'SCRIPT_DATA_POINT_ID' => dp_id }
+      log_path = File.join(results_dp_dir, "#{script_name}.log")
+
+      # Windows scripts keep their native CRLF line endings (rewriting to LF
+      # can break cmd.exe label parsing) and are spawned argv-style through
+      # their interpreter so paths/args with spaces need no hand-quoting.
+      case File.extname(script_path)
+      when ".ps1"
+        runner_log.puts "Executing PowerShell script: #{script_path}"
+        pid = Process.spawn(env, 'powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', script_path,
+                            *args.map(&:to_s), [:out, :err] => [log_path, 'w'])
+      when ".bat", ".cmd"
+        runner_log.puts "Executing batch script: #{script_path}"
+        pid = Process.spawn(env, 'cmd.exe', '/c', script_path,
+                            *args.map(&:to_s), [:out, :err] => [log_path, 'w'])
+      else
+        runner_log.puts "WARNING: Unsupported script type #{script_path} on Windows; skipping"
+        return
+      end
+    else
+      # POSIX platform (Linux/macOS) - original logic
+      unless File.file?(script_path)
+        runner_log.puts "WARNING: #{script_name}.sh present but not a regular file; skipping"
+        return
+      end
+      
+      args_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.args")
+      args = []
+      if File.file?(args_path)
+        parsed = JSON.parse(File.read(args_path))
+        args = parsed if parsed.is_a?(Array)
+      end
+    
+      File.chmod(0o755, script_path)
+      text = File.read(script_path)
+      File.open(script_path, 'wb') { |f| f.print text.gsub(/\r\n/m, "\n") }
+    
+      log_path = File.join(results_dp_dir, "#{script_name}.log")
+      env = { 'SCRIPT_ANALYSIS_ID' => analysis_id, 'SCRIPT_DATA_POINT_ID' => dp_id }
+      pid = Process.spawn(env, script_path, *args.map(&:to_s), [:out, :err] => [log_path, 'w'], **spawn_pgroup_opts)
+    end
+    
+    Timeout.timeout(4 * 3600) { Process.wait(pid) }
+    runner_log.puts "#{File.basename(script_path)} exited with #{$?.exitstatus}"
+  rescue Timeout::Error
+    kill_process_tree(pid, runner_log) if pid
+    runner_log.puts "#{File.basename(script_path)} killed after 4h timeout"
+  rescue StandardError => e
+    runner_log.puts "#{File.basename(script_path)} failed: #{e.message}"
   end
-
-  args_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.args")
-  args = []
-  if File.file?(args_path)
-    parsed = JSON.parse(File.read(args_path))
-    args = parsed if parsed.is_a?(Array)
-  end
-
-  File.chmod(0o755, script_path)
-  text = File.read(script_path)
-  File.open(script_path, 'wb') { |f| f.print text.gsub(/\r\n/m, "\n") }
-
-  log_path = File.join(results_dp_dir, "#{script_name}.log")
-  env = { 'SCRIPT_ANALYSIS_ID' => analysis_id, 'SCRIPT_DATA_POINT_ID' => dp_id }
-  pid = Process.spawn(env, script_path, *args.map(&:to_s), [:out, :err] => [log_path, 'w'], **spawn_pgroup_opts)
-  Timeout.timeout(4 * 3600) { Process.wait(pid) }
-  runner_log.puts "#{script_name}.sh exited with #{$?.exitstatus}"
-rescue Timeout::Error
-  kill_process_tree(pid, runner_log) if pid
-  runner_log.puts "#{script_name}.sh killed after 4h timeout"
-rescue StandardError => e
-  runner_log.puts "#{script_name}.sh failed: #{e.message}"
-end
 
 def kill_process_tree(pid, runner_log)
   if Gem.win_platform?
@@ -149,6 +196,49 @@ def copy_if_exists(src, dest_dir, dest_name = nil)
 
   FileUtils.mkdir_p dest_dir
   FileUtils.cp src, File.join(dest_dir, dest_name || File.basename(src))
+end
+
+# Bundler installs run once per runner process, not once per datapoint, and a
+# completion marker (keyed on the Gemfile digest) lets other runner processes
+# sharing the same analysis_dir skip the install entirely instead of racing it.
+# Returns true when the bundle is usable.
+def install_bundle(label, gemfile_path, bundle_path, log_path)
+  marker = File.join(bundle_path, '.os_bundle_complete')
+  stamp = Digest::SHA256.file(gemfile_path).hexdigest
+  if File.exist?(marker) && File.read(marker).strip == stamp
+    log "#{label} bundle already installed at #{bundle_path}; skipping"
+    return true
+  end
+
+  cmd = "bundle install --gemfile=#{gemfile_path} --path=#{bundle_path} --retry 3"
+  log "#{label} bundle install: #{cmd} (log: #{log_path})"
+  bundle_env = {
+    'BUNDLE_GEMFILE' => gemfile_path,
+    'BUNDLE_PATH' => bundle_path,
+    'RUBYOPT' => nil,
+    'BUNDLER_SETUP' => nil
+  }
+  pid = Process.spawn(bundle_env, cmd, [:out, :err] => [log_path, 'w'],
+                      chdir: File.dirname(gemfile_path), **spawn_pgroup_opts)
+  begin
+    Timeout.timeout(4 * 3600) { Process.wait(pid) }
+  rescue Timeout::Error
+    kill_process_tree(pid, $stdout)
+    log "#{label} bundle install killed after 4h timeout"
+    return false
+  end
+
+  if $?.exitstatus == 0
+    FileUtils.mkdir_p bundle_path
+    File.write(marker, stamp)
+    true
+  else
+    log "#{label} bundle install exited with #{$?.exitstatus}; datapoints will likely fail (see #{log_path})"
+    false
+  end
+rescue StandardError => e
+  log "#{label} bundle install failed: #{e.message}"
+  false
 end
 
 def run_data_point(dp_id, analysis_dir, results_root, manifest, openstudio_cmd)
@@ -175,12 +265,21 @@ def run_data_point(dp_id, analysis_dir, results_root, manifest, openstudio_cmd)
       break
     end
 
-    run_data_point_script(analysis_dir, manifest['analysis_id'], dp_id, 'initialize', tmp_results_dp, runner_log)
+      run_data_point_script(analysis_dir, manifest['analysis_id'], dp_id, 'initialize', tmp_results_dp, runner_log)
 
-    # mirror the worker's OSCLI invocation (DjJobs::RunSimulateDataPoint#perform)
-    cli_verbose = manifest['cli_verbose'] || ''
-    cli_debug = manifest['cli_debug'] || ''
-    cmd = "#{openstudio_cmd} #{cli_verbose} run --workflow \"#{osw_path}\" #{cli_debug}".squeeze(' ').strip
+      # mirror the worker's OSCLI invocation (DjJobs::RunSimulateDataPoint#perform)
+      cli_verbose = manifest['cli_verbose'] || ''
+      cli_debug = manifest['cli_debug'] || ''
+      
+      # Add bundle options to OSCLI command if gemfile is specified
+      if manifest['gemfile']
+        gemfile_dir = analysis_dir
+        # Use the same logic as Utility::Oss.oscli_cmd_bundle_args
+        bundle_option = " --bundle #{gemfile_dir}/Gemfile --bundle_path #{gemfile_dir}/gems --bundle_without native_ext"
+        cmd = "#{openstudio_cmd}#{bundle_option} #{cli_verbose} run --workflow \"#{osw_path}\" #{cli_debug}".squeeze(' ').strip
+      else
+        cmd = "#{openstudio_cmd} #{cli_verbose} run --workflow \"#{osw_path}\" #{cli_debug}".squeeze(' ').strip
+      end
     process_log = File.join(dp_dir, 'oscli_simulation.log')
     runner_log.puts "Running workflow using cmd #{cmd} and writing log to #{process_log}"
 
@@ -248,6 +347,29 @@ def run_data_point(dp_id, analysis_dir, results_root, manifest, openstudio_cmd)
   File.write(File.join(results_dp, 'status.json'), JSON.pretty_generate(status))
 
   completed_status
+end
+
+# Install analysis bundles up front. On failure the datapoints still run —
+# the OSCLI --bundle invocation fails fast with its own per-dp log, so every
+# dp reaches a terminal status.json instead of the runner dying here.
+if manifest['urbanopt']
+  uo_gemfile = File.join(analysis_dir, 'lib', 'urbanopt', 'Gemfile')
+  if File.file?(uo_gemfile)
+    install_bundle('UrbanOpt', uo_gemfile, File.join(analysis_dir, 'lib', 'urbanopt', '.bundle'),
+                   File.join(options[:results], 'urbanopt_bundle.log'))
+  else
+    log "UrbanOpt analysis detected but no Gemfile found at #{uo_gemfile}"
+  end
+end
+
+if manifest['gemfile']
+  gemfile = File.join(analysis_dir, 'Gemfile')
+  if File.file?(gemfile)
+    install_bundle('Analysis', gemfile, File.join(analysis_dir, 'gems'),
+                   File.join(options[:results], 'bundle.log'))
+  else
+    log "Gemfile analysis detected but no Gemfile found at #{gemfile}"
+  end
 end
 
 overall_failures = 0

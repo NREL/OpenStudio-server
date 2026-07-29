@@ -1,0 +1,49 @@
+---
+# =============================================================================
+# Common setup applied to ALL nodes (server + clients)
+# =============================================================================
+
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Build /etc/hosts entries — server
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: "{{ nomad_server_internal_ip | regex_escape() }}\\s+nomad-server"
+    line: "{{ nomad_server_internal_ip }}\tnomad-server"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Build /etc/hosts entries — all clients (dynamic from inventory)
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: "{{ item.value | regex_escape() }}\\s+{{ item.key }}"
+    line: "{{ item.value }}\t{{ item.key }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ nomad_client_internal_ips | dict2items }}"
+  loop_control:
+    label: "{{ item.value }}  {{ item.key }}"
+
+- name: Install common system packages
+  ansible.builtin.apt:
+    name:
+      - unzip
+      - curl
+      - rsync
+      - gnupg
+      - software-properties-common
+      - libgomp1        # Required by EnergyPlus (bundled with OpenStudio)
+    state: present
+    update_cache: false
+    cache_valid_time: 86400
+
+- name: Ensure /etc/hosts is protected
+  ansible.builtin.file:
+    path: /etc/hosts
+    owner: root
+    group: root
+    mode: "0644"

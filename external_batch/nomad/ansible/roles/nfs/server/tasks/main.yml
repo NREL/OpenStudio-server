@@ -1,0 +1,43 @@
+---
+# =============================================================================
+# NFS Server role (runs on nomad-server only)
+# =============================================================================
+
+- name: Install NFS kernel server
+  ansible.builtin.apt:
+    name: nfs-kernel-server
+    state: present
+    update_cache: true
+
+- name: Create NFS export directory
+  ansible.builtin.file:
+    path: "{{ nfs_export_path }}"
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+
+- name: Configure /etc/exports
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    regexp: "^{{ nfs_export_path | regex_escape() }}"
+    line: "{{ nfs_export_path }} {{ vpc_cidr }}(rw,sync,no_subtree_check,no_root_squash)"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: exportfs
+
+- name: Enable and start NFS server
+  ansible.builtin.systemd:
+    name: nfs-kernel-server
+    enabled: true
+    state: started
+
+- name: Flush exportfs handler now (so clients can mount immediately)
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify NFS export is active
+  ansible.builtin.command: showmount -e localhost
+  register: showmount_result
+  changed_when: false
+  failed_when: "'{{ nfs_export_path }}' not in showmount_result.stdout"
