@@ -50,12 +50,12 @@ all:
     local_nomad_zip: "/tmp/nomad_1.5.3_linux_amd64.zip"
 
     # ── OpenStudio ────────────────────────────────────────────────────────
-    openstudio_version: "3.11.0"
+    openstudio_version: "3.10.0"
     # Path to a local copy of the OpenStudio Linux tarball (downloaded on
     # your Mac from the OpenStudio builds S3 bucket). The playbook copies
     # this to each client and installs it.
     # Download from: https://openstudio-builds.s3.amazonaws.com/
-    local_openstudio_tarball: "/tmp/OpenStudio-3.11.0-xxx-Ubuntu-22.04-x86_64.tar.gz"
+    local_openstudio_tarball: "/tmp/OpenStudio-3.10.0-xxx-Ubuntu-22.04-x86_64.tar.gz"
 
     # ── NFS ───────────────────────────────────────────────────────────────
     nfs_export_path: "/nfs/opensstudio/batch"

@@ -78,7 +78,7 @@ syntax:
 	        -e "vpc_cidr=10.0.0.0/8" \
 	        -e "local_nomad_zip=/tmp/nomad.zip" \
 	        -e "local_openstudio_tarball=/tmp/os.tar.gz" \
-	        -e "openstudio_version=3.11.0" \
+	        -e "openstudio_version=3.10.0" \
 	        test.yml 2>/dev/null \
 	      || ansible-lint "$$r" 2>/dev/null \
 	      || echo "  (ok — standalone role file, checked by playbook syntax above)"; \
