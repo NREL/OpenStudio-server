@@ -155,7 +155,7 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
         lock_path = File.join(dir, 'analysis_zip.lock')
         lock_key = "analysis_zip.lock:#{File.basename(File.dirname(lock_path))}"
         fake_redis = instance_double('Redis')
-        renewal_thread = instance_double(Thread, kill: nil, join: nil)
+        renewal_thread = instance_double(Thread, join: nil, alive?: false)
         job = described_class.allocate
 
         allow(job).to receive(:redis_lock_client).and_return(fake_redis)
@@ -190,6 +190,21 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
       expect(result).to be false
       expect(File.exist?(write_lock_file)).to be false
       expect(File.exist?(receipt_file)).to be false
+    end
+
+    it 'does not delete a Redis-backed lock file when Redis is unavailable to this worker' do
+      analysis.initialize_worker_timeout = 1
+      analysis.save!
+
+      job = build_job(redis_lock_client: nil)
+      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
+      File.write(write_lock_file, 'redis-lock:deadbeef-token')
+      allow(job).to receive(:sleep)
+
+      result = job.initialize_worker
+
+      expect(result).to be false
+      expect(File.exist?(write_lock_file)).to be true
     end
   end
 

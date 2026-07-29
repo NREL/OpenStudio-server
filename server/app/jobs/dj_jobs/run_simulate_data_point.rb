@@ -450,7 +450,7 @@ module DjJobs
               # existing two-probe guard so a brief lease handoff cannot be mistaken
               # for abandonment.
               if redis_lock
-                if redis_lock_active?(write_lock_file)
+                if redis_lock_active?(redis_lock, write_lock_file)
                   abandoned_probes = 0
                 else
                   abandoned_probes += 1
@@ -461,6 +461,11 @@ module DjJobs
                     break
                   end
                 end
+              elsif redis_backed_lock_file?(write_lock_file)
+                # We cannot safely infer abandonment from flock when this lock file was
+                # created by the Redis lease path (no flock is held). Treat Redis
+                # unavailability as indeterminate and wait for receipt/timeout.
+                abandoned_probes = 0
               elsif lock_abandoned?(write_lock_file)
                 abandoned_probes += 1
                 if abandoned_probes >= 2
@@ -484,12 +489,14 @@ module DjJobs
           # still owns the file, and deleting it would let a third worker re-create the
           # lock on a new inode and initialize the same analysis_dir concurrently.
           if redis_lock
-            if redis_lock_active?(write_lock_file)
+            if redis_lock_active?(redis_lock, write_lock_file)
               @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; the Redis lease is still active, leaving its lock in place."
             else
               @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the Redis lease is gone; clearing the stale lock so a future worker does not wait on it."
               FileUtils.rm_f write_lock_file
             end
+          elsif redis_backed_lock_file?(write_lock_file)
+            @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; Redis is unavailable and this lock looks Redis-backed, so abandonment cannot be determined safely. Leaving the lock in place."
           elsif lock_abandoned?(write_lock_file)
             @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the lock is not held; clearing the stale lock so a future worker does not wait on it."
             FileUtils.rm_f write_lock_file
@@ -674,11 +681,18 @@ module DjJobs
       120_000
     end
 
-    def redis_lock_active?(lock_file_path)
-      redis = redis_lock_client
-      return false unless redis
-
+    def redis_lock_active?(redis, lock_file_path)
       redis.exists?(redis_lock_key(lock_file_path)).to_i.positive?
+    end
+
+    def redis_backed_lock_file?(lock_file_path)
+      return false unless File.exist?(lock_file_path)
+
+      File.open(lock_file_path, 'r') do |f|
+        f.read(256).to_s.include?('redis-lock:')
+      end
+    rescue StandardError
+      false
     end
 
     def acquire_redis_lock(redis, lock_file_path)
@@ -686,21 +700,48 @@ module DjJobs
       lock_token = SecureRandom.uuid
       return nil unless redis.set(lock_key, lock_token, nx: true, px: redis_lock_ttl_ms)
 
+      renewal_state = { stop: false, failed: false, last_renewed_at: Process.clock_gettime(Process::CLOCK_MONOTONIC) }
       renewal_thread = Thread.new do
+        backoff_seconds = 1
         loop do
-          sleep redis_lock_ttl_ms / 2000
-          break unless redis.get(lock_key) == lock_token
+          sleep redis_lock_ttl_ms / 2000.0
+          break if renewal_state[:stop]
 
-          redis.pexpire(lock_key, redis_lock_ttl_ms)
+          begin
+            unless redis.get(lock_key) == lock_token
+              renewal_state[:failed] = true
+              @sim_logger&.error "Redis lease token for #{lock_key} changed while holding write lock; aborting lease renewal."
+              break
+            end
+
+            redis.pexpire(lock_key, redis_lock_ttl_ms)
+            renewal_state[:last_renewed_at] = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            backoff_seconds = 1
+          rescue StandardError => e
+            @sim_logger&.warn "Redis lease renewal failed for #{lock_key}: #{e.message}"
+            if Process.clock_gettime(Process::CLOCK_MONOTONIC) - renewal_state[:last_renewed_at] > (redis_lock_ttl_ms / 1000.0)
+              renewal_state[:failed] = true
+              @sim_logger&.error "Redis lease for #{lock_key} has not been renewed within TTL; aborting lease renewal."
+              break
+            end
+
+            sleep backoff_seconds
+            backoff_seconds = [backoff_seconds * 2, 5].min
+          end
         end
       end
 
-      [lock_key, lock_token, renewal_thread]
+      [lock_key, lock_token, renewal_thread, renewal_state]
     end
 
-    def release_redis_lock(redis, lock_key, lock_token, renewal_thread)
-      renewal_thread&.kill
-      renewal_thread&.join
+    def release_redis_lock(redis, lock_key, lock_token, renewal_thread, renewal_state)
+      if renewal_state
+        renewal_state[:stop] = true
+      end
+      if renewal_thread
+        renewal_thread.join(2)
+        @sim_logger&.warn "Redis lease renewal thread for #{lock_key} did not stop within 2s; continuing with best-effort lock release." if renewal_thread.alive?
+      end
 
       redis.eval(<<~LUA, [lock_key], [lock_token])
         if redis.call('get', KEYS[1]) == ARGV[1] then
@@ -709,8 +750,10 @@ module DjJobs
 
         return 0
       LUA
+      renewal_state && renewal_state[:failed]
     rescue StandardError => e
       @sim_logger&.warn "Could not release Redis lock #{lock_key}: #{e.message}"
+      true
     end
 
     def write_lock(lock_file_path)
@@ -719,15 +762,21 @@ module DjJobs
         lock_data = acquire_redis_lock(redis, lock_file_path)
         raise "Could not acquire Redis lock for #{lock_file_path}" unless lock_data
 
-        lock_key, lock_token, renewal_thread = lock_data
+        lock_key, lock_token, renewal_thread, renewal_state = lock_data
         begin
-          File.open(lock_file_path, 'a') { |lock_file| lock_file << Time.now }
-          yield
+          File.open(lock_file_path, 'a') { |lock_file| lock_file << "redis-lock:#{lock_token} #{Time.now}\n" }
+          result = yield
+          raise "Redis lock renewal failed for #{lock_file_path}; aborting to avoid concurrent initialization." if renewal_state[:failed]
+
+          result
         rescue StandardError
           FileUtils.rm_f lock_file_path
           raise
         ensure
-          release_redis_lock(redis, lock_key, lock_token, renewal_thread)
+          renewal_failed = release_redis_lock(redis, lock_key, lock_token, renewal_thread, renewal_state)
+          if renewal_failed && !$!
+            raise "Redis lock renewal failed for #{lock_file_path}; protected work must be retried."
+          end
         end
       else
         lock_file = File.open(lock_file_path, 'a')
