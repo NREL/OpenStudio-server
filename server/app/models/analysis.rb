@@ -517,17 +517,23 @@ class Analysis
   # This is local function for workaround until that is resolved
   # OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
   def extract_archive(archive_filename, destination, overwrite = true)
-    ::Zip.sort_entries = true
-    Zip::File.open(archive_filename) do |zf|
-      zf.each do |f|
-        Rails.logger.debug "Extracting #{f.name}"
-        f_path = File.join(destination, f.name)
-        FileUtils.mkdir_p(File.dirname(f_path))
-        if File.exist?(f_path)
-          Rails.logger.debug "SKIPPED: #{f.name}, already existed."
-        else
-          zf.extract(f, f_path)
-        end
+    # Zip::File.new, NOT the Zip::File.open block form: open's implicit close calls
+    # commit, which REWRITES the archive in place (temp file + rename over the
+    # original) whenever the in-memory entry order differs from the stored order -
+    # which ::Zip.sort_entries = true guaranteed for any unsorted zip. This method
+    # extracts the LIVE seed_zip attachment at analysis start, exactly when workers
+    # download the same file via download_analysis_zip, so the rewrite raced (and
+    # corrupted) every fresh analysis's first datapoints on shared-filesystem
+    # deployments (issue #857). Same read-only rationale as seed_zip_error above.
+    zf = ::Zip::File.new(archive_filename)
+    zf.each do |f|
+      Rails.logger.debug "Extracting #{f.name}"
+      f_path = File.join(destination, f.name)
+      FileUtils.mkdir_p(File.dirname(f_path))
+      if File.exist?(f_path)
+        Rails.logger.debug "SKIPPED: #{f.name}, already existed."
+      else
+        zf.extract(f, f_path)
       end
     end
   end
