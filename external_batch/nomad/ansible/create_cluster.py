@@ -744,7 +744,7 @@ def generate_inventory(
                 "nomad_version": config.get("nomad_version", "1.5.3"),
                 "local_nomad_zip": config.get("local_nomad_zip", ""),
                 # OpenStudio
-                "openstudio_version": config.get("openstudio_version", "3.10.0"),
+                "openstudio_version": config.get("openstudio_version", "3.11.0"),
                 "local_openstudio_tarball": config.get("local_openstudio_tarball", ""),
                 # NFS
                 "nfs_export_path": config.get("nfs_export_path", "/nfs/opensstudio/batch"),
@@ -1517,8 +1517,8 @@ def main():
             "vpc_cidr": "192.168.100.0/24",
             "nomad_version": "1.5.3",
             "local_nomad_zip": "/tmp/nomad_1.5.3_linux_amd64.zip",
-            "openstudio_version": "3.10.0",
-            "local_openstudio_tarball": "/tmp/OpenStudio-3.10.0.tar.gz",
+            "openstudio_version": "3.11.0",
+            "local_openstudio_tarball": "/tmp/OpenStudio-3.11.0.tar.gz",
             "nfs_export_path": "/nfs/opensstudio/batch",
         }
 

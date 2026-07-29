@@ -93,11 +93,11 @@ Required arguments:
 - `BATCH_DIR` - Path to the batched analysis directory
 - `--nomad-addr` - Nomad server address (e.g., http://localhost:4646)
 - `--job-template` - Path to Nomad job template file
+- `--package-location` - Where to store/retrieve packages (NFS path, S3 URI, etc.)
 
 Optional arguments:
 - `--namespace` - Nomad namespace (default: "default")
 - `--job-name` - Custom job name (default: osaf-nomad-analysis-<id>)
-- `--package-location` - Where to store/retrieve packages (NFS path, S3 URI, etc.)
 - `--ssh-host` - SSH host for rsync bridge (e.g., `ubuntu@<NOMAD_SERVER_FLOATING_IP>`); overrides `OS_SERVER_NOMAD_SSH_HOST` env var
 - `--ssh-key` - SSH key path for rsync (default: /config/ssh/id_rsync)
 - `--dry-run` - Print the commands without executing them

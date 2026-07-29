@@ -39,7 +39,7 @@ opt_parser = OptionParser.new do |o|
   o.banner = 'Usage: ruby submit_nomad.rb BATCH_DIR [options]'
   o.on('--nomad-addr ADDRESS', "Nomad server address (default: #{options[:nomad_addr]})") { |v| options[:nomad_addr] = v }
   o.on('--job-template PATH', 'Path to Nomad job template file (required)') { |v| options[:job_template] = v }
-  o.on('--package-location LOCATION', 'Base location for packages and results (NFS path or S3 URI)') { |v| options[:package_location] = v }
+  o.on('--package-location LOCATION', 'Base location for packages and results (NFS path or S3 URI, required)') { |v| options[:package_location] = v }
   o.on('--job-name NAME', 'Job name (default osaf-nomad-analysis-<id>)') { |v| options[:job_name] = v }
   o.on('--namespace NAMESPACE', 'Nomad namespace (default: "default")') { |v| options[:namespace] = v }
   o.on('--ssh-host HOST', 'SSH host for rsync (e.g., ubuntu@<NOMAD_SERVER_FLOATING_IP>)') { |v| options[:ssh_host] = v }
@@ -51,6 +51,9 @@ opt_parser.parse!
 
 batch_dir = ARGV.shift
 abort opt_parser.banner if batch_dir.nil?
+abort "--job-template is required\n#{opt_parser.banner}" if options[:job_template].nil?
+abort "No job template at #{options[:job_template]}" unless File.file?(options[:job_template])
+abort "--package-location is required\n#{opt_parser.banner}" if options[:package_location].nil?
 batch_dir = File.expand_path(batch_dir)
 
 manifest_path = File.join(batch_dir, 'package', 'manifest.json')

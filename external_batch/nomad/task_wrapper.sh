@@ -76,8 +76,17 @@ unset BUNDLE_BIN_PATH BUNDLE_GEMFILE RUBYOPT RUBYLIB
 # export OPENSTUDIO_ROOT="/opt/openstudio"  # Example - adjust as needed
 # Ensure OpenStudio CLI is in PATH (assuming it's installed and available)
 
-# Set up directories
-LOCAL_WORK_DIR="/tmp/nomad/task"
+# Set up directories. The work dir must be unique per allocation — several
+# allocations can land on the same client, and a shared /tmp path would let
+# them clobber each other's workspace. Nomad provides a private per-task dir;
+# outside Nomad fall back to a throwaway mktemp dir.
+if [[ -n "${NOMAD_TASK_DIR:-}" ]]; then
+    LOCAL_WORK_DIR="$NOMAD_TASK_DIR/work"
+else
+    LOCAL_WORK_DIR="$(mktemp -d /tmp/nomad_task.XXXXXX)"
+    trap 'rm -rf "$LOCAL_WORK_DIR"' EXIT
+fi
+log "Local work dir: $LOCAL_WORK_DIR"
 PACKAGE_DIR="$LOCAL_WORK_DIR/package"
 RESULTS_DIR="$LOCAL_WORK_DIR/results"
 mkdir -p "$PACKAGE_DIR" "$RESULTS_DIR"
@@ -100,7 +109,9 @@ if [[ "$PACKAGE_TYPE" == "nfsmount" ]]; then
         exit 2
     fi
     log "Copying package from NFS location: $PACKAGE_URI_NORMALIZED"
-    cp -r "$PACKAGE_URI_NORMALIZED"/* "$PACKAGE_DIR/"
+    # cp -a src/. dest/ includes dotfiles, preserves permissions/timestamps,
+    # and does not fail on an empty source dir (a bare glob would)
+    cp -a "$PACKAGE_URI_NORMALIZED/." "$PACKAGE_DIR/"
 elif [[ "$PACKAGE_TYPE" == "s3" ]]; then
     # For S3, sync package from remote storage
     if [[ -z "${AWS_DEFAULT_REGION:-}" ]]; then
@@ -195,8 +206,8 @@ if [[ "$RESULTS_TYPE" == "s3" ]]; then
     done
 elif [[ "$RESULTS_TYPE" == "nfsmount" ]]; then
     log "Copying results to NFS location: $RESULTS_DIR -> $RESULTS_FINAL_DIR"
-    # Copy results to the final NFS location
-    cp -r "$RESULTS_DIR"/* "$RESULTS_FINAL_DIR/"
+    # Copy results to the final NFS location (dotfile-safe, empty-dir-safe)
+    cp -a "$RESULTS_DIR/." "$RESULTS_FINAL_DIR/"
 fi
 
 log "Chunk $CHUNK_INDEX completed successfully"

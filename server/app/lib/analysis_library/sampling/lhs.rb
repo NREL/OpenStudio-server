@@ -4,6 +4,8 @@
 # *******************************************************************************
 
 require 'zlib'
+require 'fileutils'
+require 'tempfile'
 
 # Pure-Ruby LHS sampler. Drop-in replacement for AnalysisLibrary::R::Lhs that
 # does not require Rserve, so sampling works on `openstudio_meta start_local`
@@ -237,9 +239,10 @@ module AnalysisLibrary::Sampling
        # representing where the histogram would be
        # A full implementation would properly encode histogram bars
        
-       # IHLR chunk
-       ihlr_data = [width, height, 8, 2, 0, 0, 0].pack('N2C4')
-       ihlr_chunk = [ihlr_data.length].pack('N') + 'IHLR' + ihlr_data + [Zlib::crc32('IHLR' + ihlr_data)].pack('N')
+       # IHDR chunk: width, height, bit depth 8, color type 2 (truecolor),
+       # compression 0, filter 0, interlace 0 — 13 bytes exactly
+       ihdr_data = [width, height, 8, 2, 0, 0, 0].pack('N2C5')
+       ihdr_chunk = [ihdr_data.length].pack('N') + 'IHDR' + ihdr_data + [Zlib::crc32('IHDR' + ihdr_data)].pack('N')
        
        # IDAT chunk (image data) - simplified
        # Create simple image data: background color with a bar representing data
@@ -282,7 +285,7 @@ module AnalysisLibrary::Sampling
        # IEND chunk
        iend_chunk = [0].pack('N') + 'IEND' + [Zlib::crc32('IEND')].pack('N')
        
-       png_signature + ihlr_chunk + idat_chunk + iend_chunk
+       png_signature + ihdr_chunk + idat_chunk + iend_chunk
      end
 end
 end

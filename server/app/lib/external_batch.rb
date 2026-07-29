@@ -3,6 +3,8 @@
 # See also https://openstudio.net/license
 # *******************************************************************************
 
+require 'tmpdir'
+
 # External batch execution: package an analysis's datapoints to a directory,
 # have an external executor (local mock, Kestrel/SLURM array via Apptainer, or
 # AWS Batch array job) run them with the OpenStudio CLI, and ingest the results
@@ -17,13 +19,10 @@ module ExternalBatch
     # Handle potential nil from ENV and provide fallback
     env_root = ENV['OS_SERVER_EXTERNAL_BATCH_ROOT']
     if env_root.nil? || env_root.empty?
-      # Handle potential undefined APP_CONFIG
-      if defined?(APP_CONFIG) && APP_CONFIG
-        sim_root_path = APP_CONFIG['sim_root_path']
-      else
-        # Fallback to a reasonable default if APP_CONFIG is not available
-        sim_root_path = Dir.tmpdir  # Use system temp directory as fallback
-      end
+      sim_root_path = APP_CONFIG['sim_root_path'] if defined?(APP_CONFIG) && APP_CONFIG
+      # Fall back to the system temp dir when APP_CONFIG is unavailable or
+      # holds no usable sim_root_path (File.join would raise on nil)
+      sim_root_path = Dir.tmpdir if sim_root_path.to_s.strip.empty?
       root = File.join(sim_root_path, 'external_batch')
     else
       root = env_root

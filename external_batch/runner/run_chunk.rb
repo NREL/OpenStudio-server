@@ -30,6 +30,7 @@ require 'timeout'
 require 'socket'
 require 'time'
 require 'rbconfig'
+require 'digest'
 
 SCHEMA_VERSION = 1
 
@@ -116,55 +117,27 @@ end
     return unless File.file?(script_path)
 
     if Gem.win_platform?
+      args_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.args")
+      args = []
+      if File.file?(args_path)
+        parsed = JSON.parse(File.read(args_path))
+        args = parsed if parsed.is_a?(Array)
+      end
+      env = { 'SCRIPT_ANALYSIS_ID' => analysis_id, 'SCRIPT_DATA_POINT_ID' => dp_id }
+      log_path = File.join(results_dp_dir, "#{script_name}.log")
+
+      # Windows scripts keep their native CRLF line endings (rewriting to LF
+      # can break cmd.exe label parsing) and are spawned argv-style through
+      # their interpreter so paths/args with spaces need no hand-quoting.
       case File.extname(script_path)
       when ".ps1"
-        # PowerShell script
         runner_log.puts "Executing PowerShell script: #{script_path}"
-        args_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.args")
-        args = []
-        if File.file?(args_path)
-          parsed = JSON.parse(File.read(args_path))
-          args = parsed if parsed.is_a?(Array)
-        end
-        
-        # Build PowerShell command with arguments
-        ps_command = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", "\"#{script_path}\""]
-        ps_command += args.map { |a| "\"#{a}\"" } if args.any?
-        cmd = ps_command.join(" ")
-        
-        # Set up environment variables
-        env = { 'SCRIPT_ANALYSIS_ID' => analysis_id, 'SCRIPT_DATA_POINT_ID' => dp_id }
-        
-        log_path = File.join(results_dp_dir, "#{script_name}.log")
-        File.chmod(0o755, script_path)
-        text = File.read(script_path)
-        File.open(script_path, 'wb') { |f| f.print text.gsub(/\r\n/m, "\n") }
-        
-        pid = Process.spawn(env, cmd, [:out, :err] => [log_path, 'w'])
+        pid = Process.spawn(env, 'powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', script_path,
+                            *args.map(&:to_s), [:out, :err] => [log_path, 'w'])
       when ".bat", ".cmd"
-        # Batch script
         runner_log.puts "Executing batch script: #{script_path}"
-        args_path = File.join(analysis_dir, 'scripts', 'data_point', "#{script_name}.args")
-        args = []
-        if File.file?(args_path)
-          parsed = JSON.parse(File.read(args_path))
-          args = parsed if parsed.is_a?(Array)
-        end
-        
-        # Build batch command with arguments
-        cmd = ["\"#{script_path}\""]
-        cmd += args if args.any?
-        cmd = cmd.join(" ")
-        
-        # Set up environment variables
-        env = { 'SCRIPT_ANALYSIS_ID' => analysis_id, 'SCRIPT_DATA_POINT_ID' => dp_id }
-        
-        log_path = File.join(results_dp_dir, "#{script_name}.log")
-        File.chmod(0o755, script_path)
-        text = File.read(script_path)
-        File.open(script_path, 'wb') { |f| f.print text.gsub(/\r\n/m, "\n") }
-        
-        pid = Process.spawn(env, cmd, [:out, :err] => [log_path, 'w'])
+        pid = Process.spawn(env, 'cmd.exe', '/c', script_path,
+                            *args.map(&:to_s), [:out, :err] => [log_path, 'w'])
       else
         runner_log.puts "WARNING: Unsupported script type #{script_path} on Windows; skipping"
         return
@@ -225,6 +198,49 @@ def copy_if_exists(src, dest_dir, dest_name = nil)
   FileUtils.cp src, File.join(dest_dir, dest_name || File.basename(src))
 end
 
+# Bundler installs run once per runner process, not once per datapoint, and a
+# completion marker (keyed on the Gemfile digest) lets other runner processes
+# sharing the same analysis_dir skip the install entirely instead of racing it.
+# Returns true when the bundle is usable.
+def install_bundle(label, gemfile_path, bundle_path, log_path)
+  marker = File.join(bundle_path, '.os_bundle_complete')
+  stamp = Digest::SHA256.file(gemfile_path).hexdigest
+  if File.exist?(marker) && File.read(marker).strip == stamp
+    log "#{label} bundle already installed at #{bundle_path}; skipping"
+    return true
+  end
+
+  cmd = "bundle install --gemfile=#{gemfile_path} --path=#{bundle_path} --retry 3"
+  log "#{label} bundle install: #{cmd} (log: #{log_path})"
+  bundle_env = {
+    'BUNDLE_GEMFILE' => gemfile_path,
+    'BUNDLE_PATH' => bundle_path,
+    'RUBYOPT' => nil,
+    'BUNDLER_SETUP' => nil
+  }
+  pid = Process.spawn(bundle_env, cmd, [:out, :err] => [log_path, 'w'],
+                      chdir: File.dirname(gemfile_path), **spawn_pgroup_opts)
+  begin
+    Timeout.timeout(4 * 3600) { Process.wait(pid) }
+  rescue Timeout::Error
+    kill_process_tree(pid, $stdout)
+    log "#{label} bundle install killed after 4h timeout"
+    return false
+  end
+
+  if $?.exitstatus == 0
+    FileUtils.mkdir_p bundle_path
+    File.write(marker, stamp)
+    true
+  else
+    log "#{label} bundle install exited with #{$?.exitstatus}; datapoints will likely fail (see #{log_path})"
+    false
+  end
+rescue StandardError => e
+  log "#{label} bundle install failed: #{e.message}"
+  false
+end
+
 def run_data_point(dp_id, analysis_dir, results_root, manifest, openstudio_cmd)
   started_at = Time.now.iso8601
   dp_dir = File.join(analysis_dir, "data_point_#{dp_id}")
@@ -250,83 +266,6 @@ def run_data_point(dp_id, analysis_dir, results_root, manifest, openstudio_cmd)
     end
 
       run_data_point_script(analysis_dir, manifest['analysis_id'], dp_id, 'initialize', tmp_results_dp, runner_log)
-
-      # Handle UrbanOpt bundling if this is an UrbanOpt analysis
-      if manifest['urbanopt']
-        urbanopt_dir = File.join(analysis_dir, 'lib', 'urbanopt')
-        gemfile_path = File.join(urbanopt_dir, 'Gemfile')
-        if File.file?(gemfile_path)
-          bundle_log_path = File.join(tmp_results_dp, 'urbanopt_bundle.log')
-          runner_log.puts "Installing UrbanOpt bundle using gemfile #{gemfile_path}"
-          
-          # Set up bundle environment
-          bundle_env = {
-            'BUNDLE_GEMFILE' => gemfile_path,
-            'BUNDLE_PATH' => File.join(urbanopt_dir, '.bundle'),
-            'RUBYOPT' => nil,
-            'BUNDLER_SETUP' => nil
-          }
-          
-          cmd = "bundle install --gemfile=#{gemfile_path} --path=#{File.join(urbanopt_dir, '.bundle')} --retry 10"
-          runner_log.puts "Bundle install command: #{cmd}"
-          
-          pid = Process.spawn(bundle_env, cmd, [:out, :err] => [bundle_log_path, 'w'], chdir: urbanopt_dir, **spawn_pgroup_opts)
-          begin
-            Timeout.timeout(4 * 3600) { Process.wait(pid) }  # 4 hour timeout for bundle install
-            runner_log.puts "UrbanOpt bundle install exited with #{$?.exitstatus}"
-            if $?.exitstatus != 0
-              runner_log.puts "UrbanOpt bundle install failed: #{File.read(bundle_log_path)}"
-            end
-          rescue Timeout::Error
-            kill_process_tree(pid, runner_log) if pid
-            runner_log.puts "UrbanOpt bundle install killed after 4h timeout"
-            raise "UrbanOpt bundle install timed out"
-          rescue StandardError => e
-            runner_log.puts "UrbanOpt bundle install failed: #{e.message}"
-            raise e
-          end
-        else
-          runner_log.puts "UrbanOpt analysis detected but no Gemfile found at #{gemfile_path}"
-        end
-      end
-
-      # Handle gemfile bundling if this analysis has a custom gemfile
-      if manifest['gemfile']
-        gemfile_path = File.join(analysis_dir, 'Gemfile')
-        if File.file?(gemfile_path)
-          bundle_log_path = File.join(tmp_results_dp, 'bundle.log')
-          runner_log.puts "Installing gems using gemfile #{gemfile_path}"
-          
-          # Set up bundle environment
-          bundle_env = {
-            'BUNDLE_GEMFILE' => gemfile_path,
-            'BUNDLE_PATH' => File.join(analysis_dir, 'gems'),
-            'RUBYOPT' => nil,
-            'BUNDLER_SETUP' => nil
-          }
-          
-          cmd = "bundle install --gemfile=#{gemfile_path} --path=#{File.join(analysis_dir, 'gems')} --retry 3"
-          runner_log.puts "Bundle install command: #{cmd}"
-          
-          pid = Process.spawn(bundle_env, cmd, [:out, :err] => [bundle_log_path, 'w'], chdir: analysis_dir, **spawn_pgroup_opts)
-          begin
-            Timeout.timeout(4 * 3600) { Process.wait(pid) }  # 4 hour timeout for bundle install
-            runner_log.puts "Bundle install exited with #{$?.exitstatus}"
-            if $?.exitstatus != 0
-              runner_log.puts "Bundle install failed: #{File.read(bundle_log_path)}"
-            end
-          rescue Timeout::Error
-            kill_process_tree(pid, runner_log) if pid
-            runner_log.puts "Bundle install killed after 4h timeout"
-            raise "Bundle install timed out"
-          rescue StandardError => e
-            runner_log.puts "Bundle install failed: #{e.message}"
-            raise e
-          end
-        else
-          runner_log.puts "Gemfile analysis detected but no Gemfile found at #{gemfile_path}"
-        end
-      end
 
       # mirror the worker's OSCLI invocation (DjJobs::RunSimulateDataPoint#perform)
       cli_verbose = manifest['cli_verbose'] || ''
@@ -408,6 +347,29 @@ def run_data_point(dp_id, analysis_dir, results_root, manifest, openstudio_cmd)
   File.write(File.join(results_dp, 'status.json'), JSON.pretty_generate(status))
 
   completed_status
+end
+
+# Install analysis bundles up front. On failure the datapoints still run —
+# the OSCLI --bundle invocation fails fast with its own per-dp log, so every
+# dp reaches a terminal status.json instead of the runner dying here.
+if manifest['urbanopt']
+  uo_gemfile = File.join(analysis_dir, 'lib', 'urbanopt', 'Gemfile')
+  if File.file?(uo_gemfile)
+    install_bundle('UrbanOpt', uo_gemfile, File.join(analysis_dir, 'lib', 'urbanopt', '.bundle'),
+                   File.join(options[:results], 'urbanopt_bundle.log'))
+  else
+    log "UrbanOpt analysis detected but no Gemfile found at #{uo_gemfile}"
+  end
+end
+
+if manifest['gemfile']
+  gemfile = File.join(analysis_dir, 'Gemfile')
+  if File.file?(gemfile)
+    install_bundle('Analysis', gemfile, File.join(analysis_dir, 'gems'),
+                   File.join(options[:results], 'bundle.log'))
+  else
+    log "Gemfile analysis detected but no Gemfile found at #{gemfile}"
+  end
 end
 
 overall_failures = 0

@@ -42,8 +42,11 @@ services:
     volumes:
       - osdata:/mnt/openstudio
       - ./external_batch:/opt/openstudio/external_batch:ro
-      - ./external_batch/nomad/id_ed25519:/config/ssh/id_rsync:ro
-      - ./external_batch/nomad/known_hosts:/config/ssh/known_hosts:ro
+      # Tracked dir (only a README in git); drop id_rsync/known_hosts in it to
+      # enable the Nomad rsync bridge — see external_batch/nomad/ssh/README.md.
+      # A dir mount keeps fresh-clone `docker compose up` working, unlike
+      # file mounts whose gitignored sources would not exist yet.
+      - ./external_batch/nomad/ssh:/config/ssh:ro
     command: /usr/local/bin/start-server
   web-background:
     image: nrel/openstudio-server:latest
@@ -70,8 +73,11 @@ services:
     volumes:
       - osdata:/mnt/openstudio
       - ./external_batch:/opt/openstudio/external_batch:ro
-      - ./external_batch/nomad/id_ed25519:/config/ssh/id_rsync:ro
-      - ./external_batch/nomad/known_hosts:/config/ssh/known_hosts:ro
+      # Tracked dir (only a README in git); drop id_rsync/known_hosts in it to
+      # enable the Nomad rsync bridge — see external_batch/nomad/ssh/README.md.
+      # A dir mount keeps fresh-clone `docker compose up` working, unlike
+      # file mounts whose gitignored sources would not exist yet.
+      - ./external_batch/nomad/ssh:/config/ssh:ro
     command: /usr/local/bin/start-web-background
   worker:
     image: nrel/openstudio-server:latest

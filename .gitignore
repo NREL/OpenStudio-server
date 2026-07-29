@@ -40,6 +40,8 @@ __pycache__/
 # SSH keys and secrets (never commit)
 external_batch/nomad/id_*
 external_batch/nomad/known_hosts
+external_batch/nomad/ssh/*
+!external_batch/nomad/ssh/README.md
 
 # Backup files
 *.bak
