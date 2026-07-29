@@ -147,6 +147,32 @@ RSpec.describe Analysis, type: :model do
     end
   end
 
+  describe '#extract_archive read-only behavior (issue #857)' do
+    it 'leaves the seed zip byte-identical after extraction' do
+      # Entries deliberately NOT in sorted order: with ::Zip.sort_entries = true, the
+      # Zip::File.open block form's implicit close called commit and REWROTE the archive
+      # in place (temp file + rename). run_initialization extracts the live seed_zip.path
+      # on the web-background node at analysis start - exactly when workers download the
+      # same file via download_analysis_zip - so that rewrite raced every fresh analysis's
+      # first datapoints on shared-filesystem deployments (issue #857).
+      zip_path = File.join(@tmp_dir, 'unsorted_seed.zip')
+      Zip::OutputStream.open(zip_path) do |zos|
+        zos.put_next_entry('zzz_last.txt')
+        zos.write('z' * 100)
+        zos.put_next_entry('aaa_first.txt')
+        zos.write('a' * 100)
+      end
+      before_md5 = Digest::MD5.file(zip_path).hexdigest
+      dest = File.join(@tmp_dir, 'extract_archive_dest')
+
+      @analysis.extract_archive(zip_path, dest)
+
+      expect(Digest::MD5.file(zip_path).hexdigest).to eq(before_md5), 'extract_archive must never modify the archive it reads'
+      expect(File.read(File.join(dest, 'aaa_first.txt'))).to eq('a' * 100)
+      expect(File.read(File.join(dest, 'zzz_last.txt'))).to eq('z' * 100)
+    end
+  end
+
   describe '#fail_job!' do
     it 'marks the newest job failed so the analysis reaches a terminal state' do
       # Regression: issue #841 - analyses with failed initialization sat in 'queued'
