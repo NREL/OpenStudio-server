@@ -10,6 +10,7 @@ module DjJobs
     include DjJobs::UrbanOpt
     require 'date'
     require 'json'
+    require 'securerandom'
 
     MAX_INLINE_SDP_LOG_BYTES = 5_000_000
     MAX_INLINE_SDP_LOG_LINES = 5_000
@@ -421,7 +422,8 @@ module DjJobs
         @sim_logger.warn "initialize_worker_timeout option: #{@data_point.analysis.initialize_worker_timeout} is not valid.  Using 28800s instead."
         @data_point.analysis.initialize_worker_timeout = 28800
       end
-      # This block makes this code threadsafe for non-docker deployments, i.e. desktop usage
+      # Keep the receipt file as the handoff signal. Redis provides the cross-host lease
+      # when available; the file-lock fallback remains for local-only environments.
       if File.exist? write_lock_file
         @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
 
@@ -433,6 +435,7 @@ module DjJobs
         # never come just wastes a worker slot for no reason.
         lock_holder_gone = false
         abandoned_probes = 0
+        redis_lock = redis_lock_client
         begin
           Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
             loop do
@@ -443,13 +446,22 @@ module DjJobs
                 break
               end
 
-              # flock is released by the OS when its holder dies, even on SIGKILL/OOM -
-              # deaths write_lock's own rescue cleanup never sees. A lock file whose flock
-              # is acquirable is abandoned; detect that here instead of waiting out the
-              # full initialize_worker_timeout. Require two consecutive positive probes
-              # (a poll interval apart) so a holder's open->flock startup gap can never
-              # read as abandonment.
-              if lock_abandoned?(write_lock_file)
+              # Redis-backed leases are the cross-host coordination path. Keep the
+              # existing two-probe guard so a brief lease handoff cannot be mistaken
+              # for abandonment.
+              if redis_lock
+                if redis_lock_active?(write_lock_file)
+                  abandoned_probes = 0
+                else
+                  abandoned_probes += 1
+                  if abandoned_probes >= 2
+                    @sim_logger.error 'write_lock_file exists but its Redis lease is gone; the original holder died without cleaning up. Clearing the abandoned lock and failing this attempt so it can be retried.'
+                    FileUtils.rm_f write_lock_file
+                    lock_holder_gone = true
+                    break
+                  end
+                end
+              elsif lock_abandoned?(write_lock_file)
                 abandoned_probes += 1
                 if abandoned_probes >= 2
                   @sim_logger.error 'write_lock_file exists but its flock is not held; the original holder died without cleaning up. Clearing the abandoned lock and failing this attempt so it can be retried.'
@@ -471,7 +483,14 @@ module DjJobs
           # initialize_worker_timeout, so it can legitimately outlive this single wait)
           # still owns the file, and deleting it would let a third worker re-create the
           # lock on a new inode and initialize the same analysis_dir concurrently.
-          if lock_abandoned?(write_lock_file)
+          if redis_lock
+            if redis_lock_active?(write_lock_file)
+              @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; the Redis lease is still active, leaving its lock in place."
+            else
+              @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the Redis lease is gone; clearing the stale lock so a future worker does not wait on it."
+              FileUtils.rm_f write_lock_file
+            end
+          elsif lock_abandoned?(write_lock_file)
             @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the lock is not held; clearing the stale lock so a future worker does not wait on it."
             FileUtils.rm_f write_lock_file
           else
@@ -636,28 +655,103 @@ module DjJobs
       true
     end
 
-    def write_lock(lock_file_path)
-      lock_file = File.open(lock_file_path, 'a')
-      begin
-        lock_file.flock(File::LOCK_EX)
-        lock_file << Time.now
+    def redis_lock_client
+      return nil unless defined?(Resque) && Resque.respond_to?(:redis)
 
-        yield
-      rescue StandardError
-        # The protected block failed before a receipt file could be written. Delete the lock
-        # file (not just release the flock) so a future attempt does not see a stale lock and
-        # wait up to initialize_worker_timeout (default 8h) for a receipt that will never come.
-        # Unlock and close BEFORE deleting: Windows (the desktop/PAT deployment this lock
-        # exists for) cannot unlink an open file, and FileUtils.rm_f swallows that failure
-        # silently, leaving the stale lock - and the deadlock - in place.
-        lock_file.flock(File::LOCK_UN)
-        lock_file.close
-        FileUtils.rm_f lock_file_path
-        raise
-      ensure
-        unless lock_file.closed?
+      redis = Resque.redis
+      return redis if redis.respond_to?(:set) && redis.respond_to?(:exists?) && redis.respond_to?(:get) && redis.respond_to?(:pexpire) && redis.respond_to?(:eval)
+
+      nil
+    rescue StandardError
+      nil
+    end
+
+    def redis_lock_key(lock_file_path)
+      "analysis_zip.lock:#{File.basename(File.dirname(lock_file_path))}"
+    end
+
+    def redis_lock_ttl_ms
+      120_000
+    end
+
+    def redis_lock_active?(lock_file_path)
+      redis = redis_lock_client
+      return false unless redis
+
+      redis.exists?(redis_lock_key(lock_file_path)).to_i.positive?
+    end
+
+    def acquire_redis_lock(redis, lock_file_path)
+      lock_key = redis_lock_key(lock_file_path)
+      lock_token = SecureRandom.uuid
+      return nil unless redis.set(lock_key, lock_token, nx: true, px: redis_lock_ttl_ms)
+
+      renewal_thread = Thread.new do
+        loop do
+          sleep redis_lock_ttl_ms / 2000
+          break unless redis.get(lock_key) == lock_token
+
+          redis.pexpire(lock_key, redis_lock_ttl_ms)
+        end
+      end
+
+      [lock_key, lock_token, renewal_thread]
+    end
+
+    def release_redis_lock(redis, lock_key, lock_token, renewal_thread)
+      renewal_thread&.kill
+      renewal_thread&.join
+
+      redis.eval(<<~LUA, [lock_key], [lock_token])
+        if redis.call('get', KEYS[1]) == ARGV[1] then
+          return redis.call('del', KEYS[1])
+        end
+
+        return 0
+      LUA
+    rescue StandardError => e
+      @sim_logger&.warn "Could not release Redis lock #{lock_key}: #{e.message}"
+    end
+
+    def write_lock(lock_file_path)
+      redis = redis_lock_client
+      if redis
+        lock_data = acquire_redis_lock(redis, lock_file_path)
+        raise "Could not acquire Redis lock for #{lock_file_path}" unless lock_data
+
+        lock_key, lock_token, renewal_thread = lock_data
+        begin
+          File.open(lock_file_path, 'a') { |lock_file| lock_file << Time.now }
+          yield
+        rescue StandardError
+          FileUtils.rm_f lock_file_path
+          raise
+        ensure
+          release_redis_lock(redis, lock_key, lock_token, renewal_thread)
+        end
+      else
+        lock_file = File.open(lock_file_path, 'a')
+        begin
+          lock_file.flock(File::LOCK_EX)
+          lock_file << Time.now
+
+          yield
+        rescue StandardError
+          # The protected block failed before a receipt file could be written. Delete the lock
+          # file (not just release the flock) so a future attempt does not see a stale lock and
+          # wait up to initialize_worker_timeout (default 8h) for a receipt that will never come.
+          # Unlock and close BEFORE deleting: Windows (the desktop/PAT deployment this lock
+          # exists for) cannot unlink an open file, and FileUtils.rm_f swallows that failure
+          # silently, leaving the stale lock - and the deadlock - in place.
           lock_file.flock(File::LOCK_UN)
           lock_file.close
+          FileUtils.rm_f lock_file_path
+          raise
+        ensure
+          unless lock_file.closed?
+            lock_file.flock(File::LOCK_UN)
+            lock_file.close
+          end
         end
       end
     end

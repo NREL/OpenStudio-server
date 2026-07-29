@@ -47,8 +47,10 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
   let(:analysis) { Analysis.new(project_id: project.id).tap(&:save!) }
   let(:data_point) { DataPoint.new(analysis_id: analysis.id).tap(&:save!) }
 
-  def build_job
-    described_class.new(data_point.id)
+  def build_job(redis_lock_client: nil)
+    job = described_class.new(data_point.id)
+    allow(job).to receive(:redis_lock_client).and_return(redis_lock_client)
+    job
   end
 
   describe '#initialize_worker with a stale/abandoned analysis_zip.lock' do
@@ -127,6 +129,8 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
     it 'removes the lock file (not just releasing the flock) when the protected block raises' do
       Dir.mktmpdir do |dir|
         lock_path = File.join(dir, 'analysis_zip.lock')
+        job = described_class.allocate
+        allow(job).to receive(:redis_lock_client).and_return(nil)
 
         expect { job.write_lock(lock_path) { raise 'boom' } }.to raise_error('boom')
         expect(File.exist?(lock_path)).to be false
@@ -136,12 +140,56 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
     it 'leaves the lock file in place when the protected block succeeds (only the flock is released)' do
       Dir.mktmpdir do |dir|
         lock_path = File.join(dir, 'analysis_zip.lock')
+        job = described_class.allocate
+        allow(job).to receive(:redis_lock_client).and_return(nil)
 
         result = job.write_lock(lock_path) { 'downloaded ok' }
 
         expect(result).to eq 'downloaded ok'
         expect(File.exist?(lock_path)).to be true
       end
+    end
+
+    it 'uses a Redis lease when one is available' do
+      Dir.mktmpdir do |dir|
+        lock_path = File.join(dir, 'analysis_zip.lock')
+        lock_key = "analysis_zip.lock:#{File.basename(File.dirname(lock_path))}"
+        fake_redis = instance_double('Redis')
+        renewal_thread = instance_double(Thread, kill: nil, join: nil)
+        job = described_class.allocate
+
+        allow(job).to receive(:redis_lock_client).and_return(fake_redis)
+        allow(Thread).to receive(:new).and_return(renewal_thread)
+        expect(fake_redis).to receive(:set).with(lock_key, kind_of(String), nx: true, px: 120_000).and_return(true)
+        expect(fake_redis).to receive(:eval).with(kind_of(String), [lock_key], kind_of(Array)).and_return(1)
+
+        result = job.write_lock(lock_path) { 'downloaded ok' }
+
+        expect(result).to eq 'downloaded ok'
+        expect(File.exist?(lock_path)).to be true
+      end
+    end
+  end
+
+  describe '#initialize_worker with a Redis-backed lock' do
+    it 'treats an expired Redis lease as abandoned and clears the stale lock file' do
+      analysis.initialize_worker_timeout = 20
+      analysis.save!
+
+      fake_redis = instance_double('Redis')
+      job = build_job(redis_lock_client: fake_redis)
+      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
+      receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
+      File.write(write_lock_file, 'held by a redis-backed worker')
+
+      allow(job).to receive(:sleep)
+      allow(fake_redis).to receive(:exists?).and_return(0, 0)
+
+      result = job.initialize_worker
+
+      expect(result).to be false
+      expect(File.exist?(write_lock_file)).to be false
+      expect(File.exist?(receipt_file)).to be false
     end
   end
 
