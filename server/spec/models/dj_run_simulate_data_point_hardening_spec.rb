@@ -7,12 +7,10 @@ require 'rails_helper'
 require 'tmpdir'
 require 'zip'
 
-# Regression specs for the DjJobs::RunSimulateDataPoint#initialize_worker/#write_lock
-# hardening: a competing worker's abandoned analysis_zip.lock (the holder crashed mid
-# download/extract without ever writing analysis_zip.receipt) used to either deadlock a
-# second worker for the full initialize_worker_timeout (default 8h) or, worse, let it fall
-# through to a silent "return true" after the wait timed out. A corrupt analysis.zip was
-# also retried 3x before failing, wasting time on a deterministic failure.
+# Regression specs for DjJobs::RunSimulateDataPoint#initialize_worker/#write_lock.
+# After Redis lock migration, initialize_worker should always enter write_lock when
+# receipt_file is missing (even if analysis_zip.lock exists). A corrupt analysis.zip
+# must still fail deterministically without retrying extraction.
 #
 # See dj_run_simulation_data_point_spec.rb for the full Capybara/Resque integration
 # coverage of this class (including the original 'creates a write lock that is
@@ -53,73 +51,44 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
     job
   end
 
-  describe '#initialize_worker with a stale/abandoned analysis_zip.lock' do
-    it 'returns false promptly (not true) when the lock holder disappears without ever writing a receipt' do
-      analysis.initialize_worker_timeout = 20 # long enough that a real Timeout::Error cannot be what resolves this call
-      analysis.save!
-
+  describe '#initialize_worker lock behavior' do
+    it 'returns early when receipt_file already exists' do
       job = build_job
-      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
       receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
-      File.write(write_lock_file, 'held by a worker that is about to crash')
+      FileUtils.mkdir_p(job.send(:analysis_dir))
+      File.write(receipt_file, Time.now.to_s)
 
-      # Simulate the original holder dying mid-extraction: its cleanup (fix #2, write_lock's
-      # rescue) removes the lock file, but it never got far enough to write a receipt.
-      remover = Thread.new do
-        sleep 0.5
-        FileUtils.rm_f(write_lock_file)
-      end
-
-      start = Time.now
+      expect(job).not_to receive(:write_lock)
       result = job.initialize_worker
-      elapsed = Time.now - start
-      remover.join
-
-      expect(result).to be false
-      expect(elapsed).to be < 10 # well under the 20s configured timeout: it did NOT wait it out
-      expect(File.exist?(receipt_file)).to be false
-    end
-
-    it 'returns false and deletes the stale lock file when the wait genuinely times out' do
-      analysis.initialize_worker_timeout = 2 # short timeout so the test itself stays fast
-      analysis.save!
-
-      job = build_job
-      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
-      receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
-      # Lock file present the whole time and no one ever removes it or writes a receipt --
-      # a genuinely stuck/hung holder.
-      File.write(write_lock_file, 'held by a worker that is stuck')
-
-      start = Time.now
-      result = job.initialize_worker
-      elapsed = Time.now - start
-
-      expect(result).to be false
-      expect(elapsed).to be < 10 # proves it timed out at ~2s, not the old 28800s default
-      expect(File.exist?(write_lock_file)).to be(false), 'stale lock must be removed so a future worker does not inherit the same wait'
-      expect(File.exist?(receipt_file)).to be false
-    end
-
-    it 'still returns true when the receipt file appears before the lock disappears or the wait times out (non-broken-path regression)' do
-      analysis.initialize_worker_timeout = 30
-      analysis.save!
-
-      job = build_job
-      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
-      receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
-      File.write(write_lock_file, 'held by a worker that is about to finish successfully')
-
-      creator = Thread.new do
-        sleep 0.3
-        File.write(receipt_file, Time.now.to_s)
-      end
-
-      result = job.initialize_worker
-      creator.join
 
       expect(result).to be true
-      expect(File.exist?(write_lock_file)).to be(true), 'the successful holder (not the waiter) owns cleaning up the lock file'
+    end
+
+    it 'always goes through write_lock when receipt_file is missing, even if analysis_zip.lock already exists' do
+      analysis.initialize_worker_timeout = 20
+      analysis.save!
+
+      job = build_job
+      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
+      receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
+      FileUtils.mkdir_p(job.send(:analysis_dir))
+      File.write(write_lock_file, 'pre-existing lock marker')
+
+      expect(job).not_to receive(:run_script_with_args)
+      expect(job).not_to receive(:run_bundle_gems)
+      expect(job).to receive(:write_lock).with(
+        write_lock_file,
+        receipt_file_path: receipt_file,
+        wait_timeout: analysis.initialize_worker_timeout
+      ).once do |_lock_path, _opts, &_blk|
+        File.write(receipt_file, Time.now.to_s)
+        true
+      end
+
+      result = job.initialize_worker
+
+      expect(result).to be true
+      expect(File.exist?(receipt_file)).to be true
     end
   end
 
@@ -169,27 +138,83 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
         expect(File.exist?(lock_path)).to be true
       end
     end
-  end
 
-  describe '#initialize_worker with a Redis-backed lock' do
-    it 'treats an expired Redis lease as abandoned and clears the stale lock file' do
-      analysis.initialize_worker_timeout = 20
-      analysis.save!
+    it 'retries Redis lock acquisition until it succeeds' do
+      Dir.mktmpdir do |dir|
+        lock_path = File.join(dir, 'analysis_zip.lock')
+        lock_key = "analysis_zip.lock:#{File.basename(File.dirname(lock_path))}"
+        fake_redis = instance_double('Redis')
+        renewal_thread = instance_double(Thread, kill: nil, join: nil)
+        job = described_class.allocate
 
-      fake_redis = instance_double('Redis')
-      job = build_job(redis_lock_client: fake_redis)
-      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
-      receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
-      File.write(write_lock_file, 'held by a redis-backed worker')
+        allow(job).to receive(:redis_lock_client).and_return(fake_redis)
+        allow(job).to receive(:sleep)
+        allow(Thread).to receive(:new).and_return(renewal_thread)
+        expect(fake_redis).to receive(:set).with(lock_key, kind_of(String), nx: true, px: 120_000).and_return(nil, nil, true)
+        expect(fake_redis).to receive(:eval).with(kind_of(String), [lock_key], kind_of(Array)).and_return(1)
 
+        result = job.write_lock(lock_path, wait_timeout: 5) { 'downloaded ok' }
+
+        expect(result).to eq 'downloaded ok'
+      end
+    end
+
+    it 'returns early when receipt appears while waiting on a Redis lock' do
+      Dir.mktmpdir do |dir|
+        lock_path = File.join(dir, 'analysis_zip.lock')
+        lock_key = "analysis_zip.lock:#{File.basename(File.dirname(lock_path))}"
+        receipt_path = File.join(dir, 'analysis_zip.receipt')
+        fake_redis = instance_double('Redis')
+        job = described_class.allocate
+
+        allow(job).to receive(:redis_lock_client).and_return(fake_redis)
+        allow(job).to receive(:sleep) { File.write(receipt_path, Time.now.to_s) }
+        expect(fake_redis).to receive(:set).with(lock_key, kind_of(String), nx: true, px: 120_000).and_return(nil, nil)
+        expect(fake_redis).not_to receive(:eval)
+
+        yielded = false
+        result = job.write_lock(lock_path, receipt_file_path: receipt_path, wait_timeout: 5) do
+          yielded = true
+        end
+
+        expect(result).to be_nil
+        expect(yielded).to be false
+      end
+    end
+
+    it 'retries local flock acquisition until it succeeds' do
+      lock_path = '/tmp/analysis_zip.lock'
+      lock_file = instance_double(File, closed?: false)
+      job = described_class.allocate
+
+      allow(job).to receive(:redis_lock_client).and_return(nil)
       allow(job).to receive(:sleep)
-      allow(fake_redis).to receive(:exists?).and_return(0, 0)
+      allow(File).to receive(:open).with(lock_path, 'a').and_return(lock_file)
+      expect(lock_file).to receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(false, false, true)
+      expect(lock_file).to receive(:<<).with(kind_of(Time))
+      expect(lock_file).to receive(:flock).with(File::LOCK_UN).once
+      expect(lock_file).to receive(:close).once
 
-      result = job.initialize_worker
+      result = job.write_lock(lock_path, wait_timeout: 5) { 'downloaded ok' }
 
-      expect(result).to be false
-      expect(File.exist?(write_lock_file)).to be false
-      expect(File.exist?(receipt_file)).to be false
+      expect(result).to eq 'downloaded ok'
+    end
+
+    it 'enforces wait_timeout for local flock acquisition' do
+      lock_path = '/tmp/analysis_zip.lock'
+      lock_file = instance_double(File)
+      job = described_class.allocate
+
+      allow(job).to receive(:redis_lock_client).and_return(nil)
+      allow(lock_file).to receive(:closed?).and_return(false)
+      allow(File).to receive(:open).with(lock_path, 'a').and_return(lock_file)
+      expect(lock_file).to receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(false)
+      expect(lock_file).not_to receive(:flock).with(File::LOCK_UN)
+      expect(FileUtils).not_to receive(:rm_f).with(lock_path)
+      expect(lock_file).to receive(:close).once
+
+      expect { job.write_lock(lock_path, wait_timeout: 0) { 'downloaded ok' } }
+        .to raise_error("Could not acquire local lock for #{lock_path}")
     end
   end
 
@@ -246,24 +271,20 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
 
   describe '#initialize_worker invalid initialize_worker_timeout correction (typo fix regression)' do
     it 'corrects a non-positive initialize_worker_timeout on the real Analysis instance (not a throwaway class variable) and proceeds without raising' do
-      analysis.initialize_worker_timeout = 0 # invalid; must be corrected to 28800 before the Timeout.timeout call reads it
+      analysis.initialize_worker_timeout = 0
       analysis.save!
 
       job = build_job
-      write_lock_file = File.join(job.send(:analysis_dir), 'analysis_zip.lock')
-      receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
-      # A pre-existing lock (no receipt yet) routes initialize_worker through the
-      # "wait for receipt" branch, whose Timeout.timeout call is exactly the one that used
-      # to read the never-corrected class variable's stale invalid value.
-      File.write(write_lock_file, 'held by another worker')
-
-      creator = Thread.new do
-        sleep 0.3
+      allow(job).to receive(:run_script_with_args)
+      allow(job).to receive(:run_bundle_gems)
+      allow(job).to receive(:write_lock) do |_lock_path, &_blk|
+        receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
+        FileUtils.mkdir_p(job.send(:analysis_dir))
         File.write(receipt_file, Time.now.to_s)
+        true
       end
 
       result = job.initialize_worker
-      creator.join
 
       expect(result).to be true
       expect(job.instance_variable_get(:@intialize_worker_errs)).to be_empty

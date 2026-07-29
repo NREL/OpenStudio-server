@@ -422,196 +422,119 @@ module DjJobs
         @sim_logger.warn "initialize_worker_timeout option: #{@data_point.analysis.initialize_worker_timeout} is not valid.  Using 28800s instead."
         @data_point.analysis.initialize_worker_timeout = 28800
       end
-      # Keep the receipt file as the handoff signal. Redis provides the cross-host lease
-      # when available; the file-lock fallback remains for local-only environments.
-      if File.exist? write_lock_file
-        @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
+      # Keep the receipt file as the handoff signal. write_lock blocks on either the
+      # Redis lease (cross-host) or flock (local fallback) until the holder completes.
+      # Try to download the analysis zip, but first lock simultanious threads
+      initialized_analysis = false
+      write_lock(write_lock_file, receipt_file_path: receipt_file, wait_timeout: @data_point.analysis.initialize_worker_timeout) do |_|
+        if File.exist?(receipt_file)
+          @sim_logger.info 'receipt_file appeared while waiting for lock, moving on'
+          next
+        end
 
-        # Wait until receipt file appears, then return or error. Also bail out early if the
-        # lock file itself disappears without a receipt ever showing up: that means the
-        # original holder died (crashed, OOM-killed, evicted, hit a deterministic failure
-        # like a corrupt seed zip) partway through without completing initialization.
-        # Waiting the full initialize_worker_timeout (default 8h) for a receipt that will
-        # never come just wastes a worker slot for no reason.
-        lock_holder_gone = false
-        abandoned_probes = 0
-        redis_lock = redis_lock_client
+        initialized_analysis = true
+        zip_download_count = 0
+        zip_max_download_count = 12
+        download_file = "#{analysis_dir}/analysis.zip"
+        download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
+        @sim_logger.info "Downloading analysis zip from #{download_url}"
+        sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
         begin
           Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
-            loop do
-              break if File.exist? receipt_file
-
-              unless File.exist? write_lock_file
-                lock_holder_gone = true
-                break
-              end
-
-              # Redis-backed leases are the cross-host coordination path. Keep the
-              # existing two-probe guard so a brief lease handoff cannot be mistaken
-              # for abandonment.
-              if redis_lock
-                if redis_lock_active?(write_lock_file)
-                  abandoned_probes = 0
-                else
-                  abandoned_probes += 1
-                  if abandoned_probes >= 2
-                    @sim_logger.error 'write_lock_file exists but its Redis lease is gone; the original holder died without cleaning up. Clearing the abandoned lock and failing this attempt so it can be retried.'
-                    FileUtils.rm_f write_lock_file
-                    lock_holder_gone = true
-                    break
-                  end
-                end
-              elsif lock_abandoned?(write_lock_file)
-                abandoned_probes += 1
-                if abandoned_probes >= 2
-                  @sim_logger.error 'write_lock_file exists but its flock is not held; the original holder died without cleaning up. Clearing the abandoned lock and failing this attempt so it can be retried.'
-                  FileUtils.rm_f write_lock_file
-                  lock_holder_gone = true
-                  break
-                end
-              else
-                abandoned_probes = 0
-              end
-
-              @sim_logger.info 'waiting for receipt file to appear'
-              sleep 3
-            end
-          end
-        rescue ::Timeout::Error
-          # Only clear the lock if nothing is actually holding it: a holder that is alive
-          # but slow (each of its download/extract steps gets its own
-          # initialize_worker_timeout, so it can legitimately outlive this single wait)
-          # still owns the file, and deleting it would let a third worker re-create the
-          # lock on a new inode and initialize the same analysis_dir concurrently.
-          if redis_lock
-            if redis_lock_active?(write_lock_file)
-              @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; the Redis lease is still active, leaving its lock in place."
-            else
-              @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the Redis lease is gone; clearing the stale lock so a future worker does not wait on it."
-              FileUtils.rm_f write_lock_file
-            end
-          elsif lock_abandoned?(write_lock_file)
-            @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the lock is not held; clearing the stale lock so a future worker does not wait on it."
-            FileUtils.rm_f write_lock_file
-          else
-            @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; the lock holder is still alive, leaving its lock in place."
-          end
-          return false
-        end
-
-        if File.exist? receipt_file
-          @sim_logger.info 'receipt_file appeared, moving on'
-          return true
-        else
-          @sim_logger.error 'write_lock_file was removed by its holder without a receipt_file appearing; the original holder failed to initialize. Failing this attempt so it can be retried.' if lock_holder_gone
-          return false
-        end
-      else
-        # Try to download the analysis zip, but first lock simultanious threads
-        write_lock(write_lock_file) do |_|
-          zip_download_count = 0
-          zip_max_download_count = 12
-          download_file = "#{analysis_dir}/analysis.zip"
-          download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
-          @sim_logger.info "Downloading analysis zip from #{download_url}"
-          sleep Random.new.rand(5.0) # Try and stagger the initial hits to the zip download url
-          begin
-            Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
-              zip_download_count += 1
-              File.open(download_file, 'wb') do |saved_file|
-                # the following "open" is provided by open-uri
-                URI.open(download_url, 'rb') do |read_file|
-                  saved_file.write(read_file.read)
-                end
+            zip_download_count += 1
+            File.open(download_file, 'wb') do |saved_file|
+              # the following "open" is provided by open-uri
+              URI.open(download_url, 'rb') do |read_file|
+                saved_file.write(read_file.read)
               end
             end
-          rescue StandardError => e
-            FileUtils.rm_f download_file if File.exist? download_file
-            sleep Random.new.rand(1.0..10.0)
-            retry if zip_download_count < zip_max_download_count
-            raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
           end
-
-          # Extract the zip
-          extract_count = 0
-          extract_max_count = 3
-          @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
-          begin
-            Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
-              extract_count += 1
-	      # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NatLabRockies/OpenStudio/issues/3942
-	      # This is local function for workaround until that is resolved
-              #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
-              extract_archive(download_file, analysis_dir)
-            end
-          rescue ::Zip::Error, ::Zlib::Error => e
-            # A corrupt zip is a deterministic failure - retrying cannot succeed (issue #841).
-            # Remove partially extracted files (while still holding the lock) so a later
-            # attempt does not skip-and-reuse them. The lock file itself must survive this
-            # sweep: its fd is still open here, Windows cannot delete an open file, and
-            # FileUtils.rm_rf swallows that failure silently. write_lock's rescue unlocks,
-            # closes, and deletes it on the way out, and initialize_worker's
-            # CorruptAnalysisZip rescue then removes the emptied directory.
-            FileUtils.rm_rf(Dir.glob("#{analysis_dir}/*") - [write_lock_file])
-            raise CorruptAnalysisZip, "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: #{e.message}"
-          rescue StandardError => e
-            retry if extract_count < extract_max_count
-            raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
-          end
-
-          # Download only one copy of the analysis.json
-          json_download_count = 0
-          json_max_download_count = 12
-          analysis_json_file = "#{analysis_dir}/analysis.json"
-          analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
-          @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
-          begin
-            Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
-              json_download_count += 1
-              a = OsHttp.client.get(analysis_json_url)
-              raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
-
-              # Parse to JSON to save it again with nice formatting
-              File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
-            end
-          rescue StandardError => e
-            FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
-            sleep Random.new.rand(1.0..10.0)
-            retry if json_download_count < json_max_download_count
-            raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
-          end
-
-          #moved back to datapoint
-          ## Check for UO and bundle
-          #if @data_point.analysis.urbanopt
-          #  #bundle install
-          #  bundle_count = 0
-          #  bundle_max_count = 10
-          #  begin
-          #    cmd = "cd #{analysis_dir}/lib/urbanopt; bundle install --path=#{analysis_dir}/lib/urbanopt/ --gemfile=#{analysis_dir}/lib/urbanopt/Gemfile --retry 10"
-          #    uo_bundle_log = File.join(analysis_dir, 'urbanopt_bundle.log')
-          #    @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
-          #    pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
-          #    Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
-          #      bundle_count += 1
-          #      Process.wait(pid)
-          #    end
-          #  rescue StandardError => e
-          #    sleep Random.new.rand(1.0..10.0)
-          #    retry if bundle_count < bundle_max_count
-          #    raise "Could not bundle UrbanOpt after #{bundle_max_count} attempts. Failed with message #{e.message}."
-          #  ensure
-          #    uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
-          #  end
-          #end
-          # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
-          File.open(receipt_file, 'w') { |f| f << Time.now }
+        rescue StandardError => e
+          FileUtils.rm_f download_file if File.exist? download_file
+          sleep Random.new.rand(1.0..10.0)
+          retry if zip_download_count < zip_max_download_count
+          raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
         end
 
+        # Extract the zip
+        extract_count = 0
+        extract_max_count = 3
+        @sim_logger.info "Extracting analysis zip to #{analysis_dir}"
+        begin
+          Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
+            extract_count += 1
+	    # The method call below is failing on windows due to ruby bindings issue. see https://github.com/NatLabRockies/OpenStudio/issues/3942
+	    # This is local function for workaround until that is resolved
+            #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
+            extract_archive(download_file, analysis_dir)
+          end
+        rescue ::Zip::Error, ::Zlib::Error => e
+          # A corrupt zip is a deterministic failure - retrying cannot succeed (issue #841).
+          # Remove partially extracted files (while still holding the lock) so a later
+          # attempt does not skip-and-reuse them. The lock file itself must survive this
+          # sweep: its fd is still open here, Windows cannot delete an open file, and
+          # FileUtils.rm_rf swallows that failure silently. write_lock's rescue unlocks,
+          # closes, and deletes it on the way out, and initialize_worker's
+          # CorruptAnalysisZip rescue then removes the emptied directory.
+          FileUtils.rm_rf(Dir.glob("#{analysis_dir}/*") - [write_lock_file])
+          raise CorruptAnalysisZip, "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: #{e.message}"
+        rescue StandardError => e
+          retry if extract_count < extract_max_count
+          raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
+        end
+
+        # Download only one copy of the analysis.json
+        json_download_count = 0
+        json_max_download_count = 12
+        analysis_json_file = "#{analysis_dir}/analysis.json"
+        analysis_json_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}.json"
+        @sim_logger.info "Downloading analysis.json from #{analysis_json_url}"
+        begin
+          Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
+            json_download_count += 1
+            a = OsHttp.client.get(analysis_json_url)
+            raise "Analysis JSON could not be downloaded - responce code of #{a.code} received." unless a.code == 200
+
+            # Parse to JSON to save it again with nice formatting
+            File.open(analysis_json_file, 'w') { |f| f << JSON.pretty_generate(JSON.parse(a)) }
+          end
+        rescue StandardError => e
+          FileUtils.rm_f analysis_json_file if File.exist? analysis_json_file
+          sleep Random.new.rand(1.0..10.0)
+          retry if json_download_count < json_max_download_count
+          raise "Downloading and extracting the analysis JSON failed #{json_max_download_count} with message #{e.message}"
+        end
+
+        #moved back to datapoint
+        ## Check for UO and bundle
+        #if @data_point.analysis.urbanopt
+        #  #bundle install
+        #  bundle_count = 0
+        #  bundle_max_count = 10
+        #  begin
+        #    cmd = "cd #{analysis_dir}/lib/urbanopt; bundle install --path=#{analysis_dir}/lib/urbanopt/ --gemfile=#{analysis_dir}/lib/urbanopt/Gemfile --retry 10"
+        #    uo_bundle_log = File.join(analysis_dir, 'urbanopt_bundle.log')
+        #    @sim_logger.info "Installing UrbanOpt bundle using cmd #{cmd} and writing log to #{uo_bundle_log}"
+        #    pid = Process.spawn(cmd, [:err, :out] => [uo_bundle_log, 'w'])
+        #    Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
+        #      bundle_count += 1
+        #      Process.wait(pid)
+        #    end
+        #  rescue StandardError => e
+        #    sleep Random.new.rand(1.0..10.0)
+        #    retry if bundle_count < bundle_max_count
+        #    raise "Could not bundle UrbanOpt after #{bundle_max_count} attempts. Failed with message #{e.message}."
+        #  ensure
+        #    uo_log("urbanopt_bundle") if @data_point.analysis.urbanopt
+        #  end
+        #end
+        # Now tell all other future data-points that it is okay to skip this step by creating the receipt file.
+        File.open(receipt_file, 'w') { |f| f << Time.now }
+      end
+      if initialized_analysis
         # Run the server data_point initialization script with defined arguments, if it exists.
         run_script_with_args 'initialize'
         run_bundle_gems if @data_point.analysis.gemfile
-      
       end
 
       @sim_logger.info 'Finished worker initialization'
@@ -636,25 +559,6 @@ module DjJobs
       return false
     end
 
-    # Simple method to write a lock file in order for competing threads to wait before continuing.
-    # True when the lock file exists but no process holds its flock - i.e. the
-    # holder died (SIGKILL/OOM/eviction) without running write_lock's cleanup.
-    # The probe takes and immediately releases the flock; a live holder keeps
-    # LOCK_EX for its whole critical section, so LOCK_NB fails against it.
-    def lock_abandoned?(lock_file_path)
-      File.open(lock_file_path, 'r') do |f|
-        if f.flock(File::LOCK_EX | File::LOCK_NB)
-          f.flock(File::LOCK_UN)
-          true
-        else
-          false
-        end
-      end
-    rescue Errno::ENOENT
-      # Deleted between our existence check and the open: holder is gone.
-      true
-    end
-
     def redis_lock_client
       return nil unless defined?(Resque) && Resque.respond_to?(:redis)
 
@@ -672,13 +576,6 @@ module DjJobs
 
     def redis_lock_ttl_ms
       120_000
-    end
-
-    def redis_lock_active?(lock_file_path)
-      redis = redis_lock_client
-      return false unless redis
-
-      redis.exists?(redis_lock_key(lock_file_path)).to_i.positive?
     end
 
     def acquire_redis_lock(redis, lock_file_path)
@@ -713,11 +610,19 @@ module DjJobs
       @sim_logger&.warn "Could not release Redis lock #{lock_key}: #{e.message}"
     end
 
-    def write_lock(lock_file_path)
+    def write_lock(lock_file_path, receipt_file_path: nil, wait_timeout: nil)
       redis = redis_lock_client
       if redis
-        lock_data = acquire_redis_lock(redis, lock_file_path)
-        raise "Could not acquire Redis lock for #{lock_file_path}" unless lock_data
+        deadline = wait_timeout ? Time.now + wait_timeout : nil
+        lock_data = nil
+        loop do
+          lock_data = acquire_redis_lock(redis, lock_file_path)
+          break if lock_data
+          return if receipt_file_path && File.exist?(receipt_file_path)
+          raise "Could not acquire Redis lock for #{lock_file_path}" if deadline && Time.now >= deadline
+
+          sleep 0.5
+        end
 
         lock_key, lock_token, renewal_thread = lock_data
         begin
@@ -731,25 +636,38 @@ module DjJobs
         end
       else
         lock_file = File.open(lock_file_path, 'a')
+        deadline = wait_timeout ? Time.now + wait_timeout : nil
+        acquired_lock = false
         begin
-          lock_file.flock(File::LOCK_EX)
+          loop do
+            if lock_file.flock(File::LOCK_EX | File::LOCK_NB)
+              acquired_lock = true
+              break
+            end
+            return if receipt_file_path && File.exist?(receipt_file_path)
+            raise "Could not acquire local lock for #{lock_file_path}" if deadline && Time.now >= deadline
+
+            sleep 0.5
+          end
           lock_file << Time.now
 
           yield
         rescue StandardError
-          # The protected block failed before a receipt file could be written. Delete the lock
-          # file (not just release the flock) so a future attempt does not see a stale lock and
-          # wait up to initialize_worker_timeout (default 8h) for a receipt that will never come.
-          # Unlock and close BEFORE deleting: Windows (the desktop/PAT deployment this lock
-          # exists for) cannot unlink an open file, and FileUtils.rm_f swallows that failure
-          # silently, leaving the stale lock - and the deadlock - in place.
-          lock_file.flock(File::LOCK_UN)
-          lock_file.close
-          FileUtils.rm_f lock_file_path
+          if acquired_lock
+            # The protected block failed before a receipt file could be written. Delete the lock
+            # file (not just release the flock) so a future attempt does not see a stale lock and
+            # wait up to initialize_worker_timeout (default 8h) for a receipt that will never come.
+            # Unlock and close BEFORE deleting: Windows (the desktop/PAT deployment this lock
+            # exists for) cannot unlink an open file, and FileUtils.rm_f swallows that failure
+            # silently, leaving the stale lock - and the deadlock - in place.
+            lock_file.flock(File::LOCK_UN)
+            lock_file.close
+            FileUtils.rm_f lock_file_path
+          end
           raise
         ensure
           unless lock_file.closed?
-            lock_file.flock(File::LOCK_UN)
+            lock_file.flock(File::LOCK_UN) if acquired_lock
             lock_file.close
           end
         end
