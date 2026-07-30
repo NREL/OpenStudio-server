@@ -530,10 +530,12 @@ class Analysis
       Rails.logger.debug "Extracting #{f.name}"
       f_path = File.join(destination, f.name)
       FileUtils.mkdir_p(File.dirname(f_path))
-      if File.exist?(f_path)
+      if File.exist?(f_path) && !overwrite
         Rails.logger.debug "SKIPPED: #{f.name}, already existed."
       else
-        zf.extract(f, f_path)
+        # the block authorizes replacing an existing file - without it rubyzip
+        # raises Zip::DestinationFileExistsError instead of overwriting (issue #858)
+        zf.extract(f, f_path) { true }
       end
     end
   end
