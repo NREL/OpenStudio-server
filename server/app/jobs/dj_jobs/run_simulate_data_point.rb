@@ -490,8 +490,20 @@ module DjJobs
       else
         # Try to download the analysis zip, but first lock simultanious threads
         write_lock(write_lock_file) do |_|
+          # Re-check the receipt now that we hold the lock: a worker that passed the
+          # outer receipt check may acquire the lock only after the init winner
+          # completed and wrote the receipt. Without this, every such worker
+          # re-downloads and re-extracts over content other datapoints are actively
+          # reading (issue #857's N-worker re-download herd).
+          if File.exist?(receipt_file)
+            @sim_logger.info 'receipt_file appeared while waiting for the lock; skipping analysis download/extract'
+            next
+          end
+
           zip_download_count = 0
           zip_max_download_count = 12
+          zip_validation_failures = 0
+          zip_validation_failure_max = 3
           download_file = "#{analysis_dir}/analysis.zip"
           download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
           @sim_logger.info "Downloading analysis zip from #{download_url}"
@@ -499,15 +511,47 @@ module DjJobs
           begin
             Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               zip_download_count += 1
-              File.open(download_file, 'wb') do |saved_file|
-                # the following "open" is provided by open-uri
-                URI.open(download_url, 'rb') do |read_file|
-                  saved_file.write(read_file.read)
+              # Download to a private temp name and validate BEFORE renaming into the
+              # shared path: on multi-node deployments the served bytes can be
+              # truncated or otherwise transiently corrupt (issue #857), and
+              # extracting them used to escalate a transient fetch problem into a
+              # terminal CorruptAnalysisZip failure. The rename is atomic within the
+              # directory, so readers of analysis.zip never observe a partial file;
+              # the pid suffix keeps a concurrent initializer (should locking ever
+              # fail) writing to its own temp file instead of interleaving with ours.
+              download_tmp = "#{download_file}.#{Process.pid}.part"
+              begin
+                File.open(download_tmp, 'wb') do |saved_file|
+                  # the following "open" is provided by open-uri
+                  URI.open(download_url, 'rb') do |read_file|
+                    saved_file.write(read_file.read)
+                  end
                 end
+                zip_error = Analysis.seed_zip_error(download_tmp)
+                if zip_error
+                  zip_validation_failures += 1
+                  # A transiently-corrupt transfer heals on retry; a corrupt-at-rest
+                  # zip fails validation identically every time. After
+                  # zip_validation_failure_max consecutive validation failures treat
+                  # the corruption as deterministic and fail terminally (issue #841
+                  # fail-fast semantics), sweeping partial content while still
+                  # holding the lock - same cleanup contract as the extract-stage
+                  # corrupt-zip rescue below.
+                  if zip_validation_failures >= zip_validation_failure_max
+                    FileUtils.rm_rf(Dir.glob("#{analysis_dir}/*") - [write_lock_file])
+                    raise CorruptAnalysisZip, "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: downloaded copy failed validation on #{zip_validation_failures} consecutive attempts: #{zip_error}"
+                  end
+                  raise "downloaded analysis zip failed validation (truncated or corrupt transfer): #{zip_error}"
+                end
+
+                FileUtils.mv(download_tmp, download_file)
+              ensure
+                FileUtils.rm_f download_tmp
               end
             end
           rescue StandardError => e
-            FileUtils.rm_f download_file if File.exist? download_file
+            raise if e.is_a?(CorruptAnalysisZip)
+
             sleep Random.new.rand(1.0..10.0)
             retry if zip_download_count < zip_max_download_count
             raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
@@ -624,7 +668,13 @@ module DjJobs
     # LOCK_EX for its whole critical section, so LOCK_NB fails against it.
     def lock_abandoned?(lock_file_path)
       File.open(lock_file_path, 'r') do |f|
-        if f.flock(File::LOCK_EX | File::LOCK_NB)
+        # LOCK_SH, not LOCK_EX: over NFSv4 flock is emulated with byte-range locks,
+        # and an exclusive (write) probe on a fd opened read-only raises
+        # Errno::EBADF - so on the k8s/NFS deployments this probe crashed every
+        # waiter (issue #857). A shared probe is grantable on a read-only fd on
+        # every filesystem and is still blocked by a live holder's LOCK_EX, which
+        # is all the probe needs to distinguish held from abandoned.
+        if f.flock(File::LOCK_SH | File::LOCK_NB)
           f.flock(File::LOCK_UN)
           true
         else
@@ -634,6 +684,15 @@ module DjJobs
     rescue Errno::ENOENT
       # Deleted between our existence check and the open: holder is gone.
       true
+    rescue SystemCallError => e
+      # The probe itself failed (EBADF/ENOLCK/EIO on exotic network filesystems):
+      # abandonment cannot be determined, and the only safe reading is "held".
+      # Treating an indeterminate probe as abandoned deletes a LIVE holder's lock
+      # file, which lets the next worker re-create the lock on a new inode and
+      # initialize the same analysis_dir concurrently - the very corruption this
+      # probe exists to prevent.
+      @sim_logger&.warn "lock_abandoned? probe failed with #{e.class}: #{e.message}; treating lock as held"
+      false
     end
 
     def write_lock(lock_file_path)
@@ -704,17 +763,24 @@ module DjJobs
     # This is local function for workaround until that is resolved
     #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
     def extract_archive(archive_filename, destination, overwrite = true)
-      ::Zip.sort_entries = true
-      Zip::File.open(archive_filename) do |zf|
-        zf.each do |f|
-          @sim_logger.info "Zip: Extracting #{f.name}"
-          f_path = File.join(destination, f.name)
-          FileUtils.mkdir_p(File.dirname(f_path))
-          if File.exist?(f_path)
-            @sim_logger.warn "SKIPPED: #{f.name}, already existed."
-          else
-            zf.extract(f, f_path)
-          end
+      # Zip::File.new, NOT the Zip::File.open block form: open's implicit close calls
+      # commit, which REWRITES the archive in place (temp file + rename over the
+      # original) whenever the in-memory entry order differs from the stored order -
+      # which ::Zip.sort_entries = true guaranteed for any unsorted zip. On the shared
+      # analysis dir that rewrite races other workers downloading/extracting the same
+      # analysis.zip and corrupts it (issue #857). Sorting is irrelevant to extraction,
+      # and the global flag would poison every other Zip::File.open in this process.
+      zf = ::Zip::File.new(archive_filename)
+      zf.each do |f|
+        @sim_logger.info "Zip: Extracting #{f.name}"
+        f_path = File.join(destination, f.name)
+        FileUtils.mkdir_p(File.dirname(f_path))
+        if File.exist?(f_path) && !overwrite
+          @sim_logger.warn "SKIPPED: #{f.name}, already existed."
+        else
+          # the block authorizes replacing an existing file - without it rubyzip
+          # raises Zip::DestinationFileExistsError instead of overwriting (issue #858)
+          zf.extract(f, f_path) { true }
         end
       end
     end
