@@ -273,6 +273,51 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
     end
   end
 
+  # Regression specs for issue #858: extract_archive declared an overwrite parameter but
+  # never checked it -- every existing file was skipped unconditionally. A worker killed
+  # mid-extract (rollout restart) leaves partial/stale files in the shared analysis dir;
+  # the next worker's extract must replace them, or OpenStudio's BCLMeasure loader chokes
+  # on the stale measure.xml ("could not be read as XML data").
+  describe '#extract_archive overwrite behavior (issue #858)' do
+    subject(:job) { described_class.allocate.tap { |j| j.instance_variable_set(:@sim_logger, Logger.new(nil)) } }
+
+    def build_measure_zip(path, xml)
+      Zip::OutputStream.open(path) do |zos|
+        zos.put_next_entry('measures/m1/measure.xml')
+        zos.write(xml)
+      end
+      path
+    end
+
+    it 'replaces a pre-existing stale file with the archive contents by default' do
+      Dir.mktmpdir do |dir|
+        zip_path = build_measure_zip(File.join(dir, 'analysis.zip'), '<measure>fresh</measure>')
+        dest = File.join(dir, 'dest')
+        stale_path = File.join(dest, 'measures/m1/measure.xml')
+        FileUtils.mkdir_p(File.dirname(stale_path))
+        File.write(stale_path, '<measure>stale, from a worker killed mid-ext')
+
+        job.send(:extract_archive, zip_path, dest)
+
+        expect(File.read(stale_path)).to eq('<measure>fresh</measure>'), 'overwrite defaults to true: stale pre-existing files must be replaced, not skipped'
+      end
+    end
+
+    it 'keeps a pre-existing file when overwrite is false' do
+      Dir.mktmpdir do |dir|
+        zip_path = build_measure_zip(File.join(dir, 'analysis.zip'), '<measure>fresh</measure>')
+        dest = File.join(dir, 'dest')
+        existing_path = File.join(dest, 'measures/m1/measure.xml')
+        FileUtils.mkdir_p(File.dirname(existing_path))
+        File.write(existing_path, '<measure>keep me</measure>')
+
+        job.send(:extract_archive, zip_path, dest, false)
+
+        expect(File.read(existing_path)).to eq('<measure>keep me</measure>')
+      end
+    end
+  end
+
   describe '#initialize_worker with a truncated analysis.zip download (issue #857 serving race)' do
     def build_valid_zip(path)
       Zip::OutputStream.open(path) do |zos|

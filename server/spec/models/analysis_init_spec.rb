@@ -173,6 +173,43 @@ RSpec.describe Analysis, type: :model do
     end
   end
 
+  # Regression specs for issue #858: the overwrite parameter was declared but never
+  # checked, so re-running initialization over a dir with stale/partial files silently
+  # kept the stale copies.
+  describe '#extract_archive overwrite behavior (issue #858)' do
+    def build_overwrite_zip(path)
+      Zip::OutputStream.open(path) do |zos|
+        zos.put_next_entry('data/seed.txt')
+        zos.write('fresh seed payload')
+      end
+      path
+    end
+
+    it 'replaces a pre-existing stale file with the archive contents by default' do
+      zip_path = build_overwrite_zip(File.join(@tmp_dir, 'overwrite_default.zip'))
+      dest = File.join(@tmp_dir, 'overwrite_default_dest')
+      stale_path = File.join(dest, 'data/seed.txt')
+      FileUtils.mkdir_p(File.dirname(stale_path))
+      File.write(stale_path, 'stale partial extraction')
+
+      @analysis.extract_archive(zip_path, dest)
+
+      expect(File.read(stale_path)).to eq('fresh seed payload'), 'overwrite defaults to true: stale pre-existing files must be replaced, not skipped'
+    end
+
+    it 'keeps a pre-existing file when overwrite is false' do
+      zip_path = build_overwrite_zip(File.join(@tmp_dir, 'overwrite_false.zip'))
+      dest = File.join(@tmp_dir, 'overwrite_false_dest')
+      existing_path = File.join(dest, 'data/seed.txt')
+      FileUtils.mkdir_p(File.dirname(existing_path))
+      File.write(existing_path, 'keep me')
+
+      @analysis.extract_archive(zip_path, dest, false)
+
+      expect(File.read(existing_path)).to eq('keep me')
+    end
+  end
+
   describe '#fail_job!' do
     it 'marks the newest job failed so the analysis reaches a terminal state' do
       # Regression: issue #841 - analyses with failed initialization sat in 'queued'
