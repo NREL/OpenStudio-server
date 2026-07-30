@@ -156,7 +156,8 @@ jobs:
         github.ref == 'refs/heads/master' ||
         github.ref == 'refs/heads/develop' ||
         github.ref == 'refs/heads/3.10.0' ||
-        github.ref == 'refs/heads/179'
+        github.ref == 'refs/heads/179' ||
+        github.ref == 'refs/heads/fix/zip-read-only-extract'
       shell: bash
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 
