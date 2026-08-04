@@ -1,47 +1,36 @@
 #!/usr/bin/env bash
+# Tags the locally-built images with an arch suffix and pushes them.
+# The canonical (multi-arch) tags are created later by
+# merge_manifests_github_actions.sh.
+#
+# Required env: DOCKER_USER, DOCKER_PASS
+# Optional env: DEPLOY_ARCH (amd64|arm64, default amd64)
+set -euo pipefail
 
-# Default set IMAGETAG to skip. 
-IMAGETAG="skip"
+source "$(dirname "$0")/get_image_tag.sh"
+DEPLOY_ARCH=${DEPLOY_ARCH:-amd64}
 
-if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
-    IMAGETAG="develop"
-elif [ "${GITHUB_REF}" == "refs/heads/2.9.X-LTS" ]; then
-    IMAGETAG="2.9.X-LTS"
-elif [ "${GITHUB_REF}" == "refs/heads/master" ]; then
-    # Retrieve the version number from rails
-    IMAGETAG="$(ruby -e "load 'server/app/lib/openstudio_server/version.rb'; print OpenstudioServer::Version+OpenstudioServer::VERSION_EXT")"
-# Uncomment and set branch name for custom builds. 
-# Currently setting this to setup_github_actions to test upload. 
-elif [ "${GITHUB_REF}" == "refs/heads/setup_github_actions" ]; then
-    IMAGETAG=experimental
-elif [ "${GITHUB_REF}" == "refs/heads/3.10.0" ]; then
-     IMAGETAG="3.10.0-rc2"
-elif [ "${GITHUB_REF}" == "refs/heads/179" ]; then
-     IMAGETAG="3.10.0-179"
-# issue-857 zip-corruption fix candidate for cluster testing; remove mapping once merged into 179
-elif [ "${GITHUB_REF}" == "refs/heads/fix/zip-read-only-extract" ]; then
-     IMAGETAG="179-flock"
+if [ "${IMAGETAG}" == "skip" ]; then
+    echo "Not on a deployable branch [master/develop/179/...] or this is a pull request"
+    exit 0
 fi
 
-if [ "${IMAGETAG}" != "skip" ]; then
-    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-    echo "Tagging image as $IMAGETAG"
-    docker tag nrel/openstudio-server nrel/openstudio-server:$IMAGETAG; (( exit_status = exit_status || $? ))
-    docker tag nrel/openstudio-rserve nrel/openstudio-rserve:$IMAGETAG; (( exit_status = exit_status || $? ))
-    docker push nrel/openstudio-server:$IMAGETAG; (( exit_status = exit_status || $? ))
-    docker push nrel/openstudio-rserve:$IMAGETAG; (( exit_status = exit_status || $? ))
+# Push arch-suffixed images. The canonical tags are assembled by the manifest
+# job so that parallel amd64/arm64 pushes never clobber each other.
+for IMAGE in nrel/openstudio-server nrel/openstudio-rserve; do
+    echo "Tagging image as ${IMAGE}:${IMAGETAG}-${DEPLOY_ARCH}"
+    docker tag "${IMAGE}" "${IMAGE}:${IMAGETAG}-${DEPLOY_ARCH}"
+    docker push "${IMAGE}:${IMAGETAG}-${DEPLOY_ARCH}"
+done
 
-    if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
-        # Deploy master as the latest.
-        docker tag nrel/openstudio-server nrel/openstudio-server:latest; (( exit_status = exit_status || $? ))
-        docker tag nrel/openstudio-rserve nrel/openstudio-rserve:latest; (( exit_status = exit_status || $? ))
-
-        docker push nrel/openstudio-server:latest; (( exit_status = exit_status || $? ))
-        docker push nrel/openstudio-rserve:latest; (( exit_status = exit_status || $? ))
-    fi
-
-    exit $exit_status
-else
-    echo "Not on a deployable branch [master/nrcan-master/develop] or this is a pull request"
+if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
+    # Deploy master as the latest.
+    for IMAGE in nrel/openstudio-server nrel/openstudio-rserve; do
+        docker tag "${IMAGE}" "${IMAGE}:latest-${DEPLOY_ARCH}"
+        docker push "${IMAGE}:latest-${DEPLOY_ARCH}"
+    done
 fi
+
+echo "Done pushing ${DEPLOY_ARCH} artifacts for ${IMAGETAG}"

@@ -159,8 +159,13 @@ EXPOSE 8080 9090
 # Multistage build includes test library. To build without testing run
 # docker build --target base -t some-tag .
 FROM base
-ENV GECKODRIVER_VERSION=v0.21.0
+# geckodriver >= v0.30.0 ships linux-aarch64 builds (v0.21.0 was linux64-only).
+# The test suite no longer drives Firefox through geckodriver (see
+# run-server-tests.sh), so this is mainly for manual/legacy test runs.
+ENV GECKODRIVER_VERSION=v0.35.0
 # Install vfb and firefox requirement if docker-test env
+# Automatically populated by BuildKit (amd64 / arm64).
+ARG TARGETARCH
 RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" && \
     apt-get update && \
     apt-get install -y xvfb \
@@ -172,10 +177,11 @@ RUN echo "Running in testing environment - Installing Firefox and Gecko Driver" 
         firefox && \
     rm -rf /var/lib/apt/lists/* && \
     cd /usr/local/bin && \
-    wget http://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz && \
-    tar -xvzf geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz && \
-    rm geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz && \
-    chmod +x geckodriver;
+    if [ "${TARGETARCH}" = "arm64" ]; then GECKODRIVER_ARCH="linux-aarch64"; else GECKODRIVER_ARCH="linux64"; fi && \
+    wget http://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-${GECKODRIVER_ARCH}.tar.gz && \
+    tar -xvzf geckodriver-${GECKODRIVER_VERSION}-${GECKODRIVER_ARCH}.tar.gz && \
+    rm geckodriver-${GECKODRIVER_VERSION}-${GECKODRIVER_ARCH}.tar.gz && \
+    chmod +x geckodriver
 
 COPY /docker/server/run-server-tests.sh /usr/local/bin/run-server-tests
 RUN chmod +x /usr/local/bin/run-server-tests
