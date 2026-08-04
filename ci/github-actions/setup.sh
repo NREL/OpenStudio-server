@@ -2,7 +2,7 @@
 set -euo pipefail
 echo "The build architecture is ${ImageOS}"
 
-if [ "${ImageOS}" == "ubuntu24" ] && [ "${BUILD_TYPE}" == "docker" ]; then
+if { [ "${ImageOS}" == "ubuntu24" ] || [ "${ImageOS}" == "ubuntu24-arm64" ]; } && [ "${BUILD_TYPE}" == "docker" ]; then
     echo "Installing docker compose"
     sudo rm -f /usr/local/bin/docker-compose
     curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
