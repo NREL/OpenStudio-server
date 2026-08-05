@@ -60,25 +60,25 @@ To develop locally the following dependency stack is recommended.
 #### Docker Compose
 
 ```bash
-docker-compose build
+docker compose build
 ```
 
 ... [be patient](https://www.youtube.com/watch?v=f4hkPn0Un_Q) ... If the containers build successfully start them by 
-running `docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=4 docker-compose up --scale worker=4`
+running `docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=4 docker compose up --scale worker=4`
 where 4 is equal to the number of worker nodes you wish to run. For single node servers this should not be greater 
 than the total number of available cores minus 4.
 
 Resetting the containers can be accomplished by running:
 
 ```bash
-docker-compose rm -f
+docker compose rm -f
 docker volume rm osdata dbdata
 docker volume create --name=osdata
 docker volume create --name=dbdata
-OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up -d --scale worker=N
+OS_SERVER_NUMBER_OF_WORKERS=N docker compose up -d --scale worker=N
 
 # Or one line
-docker-compose rm -f && docker-compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker-compose up -d --scale worker=N
+docker compose rm -f && docker compose build && docker volume rm osdata dbdata && docker volume create --name=osdata && docker volume create --name=dbdata && OS_SERVER_NUMBER_OF_WORKERS=N docker compose up -d --scale worker=N
 ```
 
 Congratulations! Visit `http://localhost:8080` to see the OpenStudio Server Management Console.
@@ -89,17 +89,17 @@ Congratulations! Visit `http://localhost:8080` to see the OpenStudio Server Mana
 export OPENSTUDIO_TAG=develop
 export RAILS_ENV=docker-test
 
-docker-compose rm -f
+docker compose rm -f
 docker volume rm osdata
 sed -i -E "s/.git//g" .dockerignore
 docker volume create --name=osdata
-docker-compose -f docker-compose.test.yml pull
-docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
-docker-compose -f docker-compose.test.yml up -d
-docker-compose exec -T web /usr/local/bin/run-server-tests
-docker-compose stop
+docker compose -f docker-compose.test.yml pull
+docker compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG
+docker compose -f docker-compose.test.yml up -d
+docker compose exec -T web /usr/local/bin/run-server-tests
+docker compose stop
 git checkout -- .dockerignore && git checkout -- Dockerfile
-docker-compose rm -f
+docker compose rm -f
 ```
 
 ### Local Docker Swarm Deployment

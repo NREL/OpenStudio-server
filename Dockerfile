@@ -1,6 +1,6 @@
 # AUTHOR:           Nicholas Long
 # DESCRIPTION:      OpenStudio Server Docker Container
-# TO_BUILD_AND_RUN: docker-compose up
+# TO_BUILD_AND_RUN: docker compose up
 # NOTES:            Currently this is one big dockerfile and non-optimal.
 
 # may include suffix
