@@ -23,7 +23,7 @@ env:
   OPENSTUDIO_VERSION: 3.10.0
   OPENSTUDIO_VERSION_SHA: 86d7e215a1
   OPENSTUDIO_VERSION_EXT: ""
-  DOCKER_COMPOSE_VERSION: 5.4.0
+  DOCKER_COMPOSE_VERSION: 2.38.2
   BUNDLE_WITHOUT: native_ext
 
 
@@ -120,6 +120,19 @@ jobs:
       run: rm -rf /opt/hostedtoolcache 
     - name: Check out repository
       uses: actions/checkout@v4
+    - name: Fix Docker Path for ARM64 Runner
+      run: |
+          if [ -f /usr/bin/docker ]; then
+            echo "Docker already exists in /usr/bin"
+          elif [ -f /usr/local/bin/docker ]; then
+            sudo ln -s /usr/local/bin/docker /usr/bin/docker
+          else
+            # If not found in common locations, explicitly locate and export it
+            DOCKER_BIN=$(which docker || find / -name docker -type f -perm -o+x 2>/dev/null | head -n 1)
+            if [ ! -z "$DOCKER_BIN" ]; then
+              sudo ln -s "$DOCKER_BIN" /usr/bin/docker
+            fi
+          fi
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
