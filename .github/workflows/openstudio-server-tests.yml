@@ -23,7 +23,7 @@ env:
   OPENSTUDIO_VERSION: 3.10.0
   OPENSTUDIO_VERSION_SHA: 86d7e215a1
   OPENSTUDIO_VERSION_EXT: ""
-  DOCKER_COMPOSE_VERSION: 1.29.2
+  DOCKER_COMPOSE_VERSION: 2.38.2
   BUNDLE_WITHOUT: native_ext
 
 
@@ -101,12 +101,38 @@ jobs:
         name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
   docker:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            os: ubuntu-24.04
+            platform: linux/amd64
+          - arch: arm64
+            os: ubuntu-24.04-arm
+            platform: linux/arm64
+    env:
+      DEPLOY_ARCH: ${{ matrix.arch }}
+      DOCKER_PLATFORM: ${{ matrix.platform }}
     steps:
     - name: Delete huge unnecessary tools folder
       run: rm -rf /opt/hostedtoolcache 
     - name: Check out repository
       uses: actions/checkout@v4
+    - name: Fix Docker Path for ARM64 Runner
+      run: |
+          if [ -f /usr/bin/docker ]; then
+            echo "Docker already exists in /usr/bin"
+          elif [ -f /usr/local/bin/docker ]; then
+            sudo ln -s /usr/local/bin/docker /usr/bin/docker
+          else
+            # If not found in common locations, explicitly locate and export it
+            DOCKER_BIN=$(which docker || find / -name docker -type f -perm -o+x 2>/dev/null | head -n 1)
+            if [ ! -z "$DOCKER_BIN" ]; then
+              sudo ln -s "$DOCKER_BIN" /usr/bin/docker
+            fi
+          fi
     - name: setup
       shell: bash 
       run: ./ci/github-actions/setup.sh
@@ -120,8 +146,15 @@ jobs:
           docker volume create --name=osdata
           docker images --all
           docker --version
-          docker-compose --version
-          docker-compose -f docker-compose.test.yml pull
+          docker compose --version
+          if [ "${DEPLOY_ARCH}" = "arm64" ]; then
+            # The first arm64 run may predate an arm64 entry in the :latest
+            # manifests, so tolerate pull failure and build from scratch.
+            # BuildKit also skips missing cache_from images without failing.
+            docker compose -f docker-compose.test.yml pull || echo "arm64 pull skipped/failed; building from scratch"
+          else
+            docker compose -f docker-compose.test.yml pull
+          fi
           # Rebuild the rserve image only when its inputs changed. PR runs otherwise reuse
           # the pulled nrel/openstudio-rserve:latest (kept fresh by docker-upload on
           # develop/master pushes): rebuilding R packages on every run cost ~10 min and
@@ -136,11 +169,11 @@ jobs:
             echo "docker/R is unchanged by this PR: reusing pulled nrel/openstudio-rserve:latest instead of rebuilding it"
             BUILD_SERVICES="web"
           fi
-          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG $BUILD_SERVICES
-          docker-compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG --build-arg DOCKER_PLATFORM=$DOCKER_PLATFORM $BUILD_SERVICES
+          docker compose -f docker-compose.test.yml up -d
           #set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
-          docker-compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
-          docker-compose stop
+          docker compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
+          docker compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
       env: 
         CI: true
@@ -164,6 +197,35 @@ jobs:
         CI: true
         BUILD_TYPE: docker
         # On forked Pull Requests secrets will not be sent to the runner. See more info here: 
+        # https://docs.github.com/en/actions/reference/encrypted-secrets
+        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+  docker-manifest:
+    # Merge the per-arch images pushed by the docker job into canonical
+    # multi-arch manifests. Runs after BOTH matrix legs (amd64 + arm64) push.
+    needs: docker
+    runs-on: ubuntu-24.04
+    if: |
+      github.ref == 'refs/heads/master' ||
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/3.10.0' ||
+      github.ref == 'refs/heads/179' ||
+      github.ref == 'refs/heads/fix/zip-read-only-extract'
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+    - name: setup
+      shell: bash
+      run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: docker
+    - name: merge multi-arch manifests
+      shell: bash
+      run: ./docker/deployment/scripts/merge_manifests_github_actions.sh
+      env:
+        CI: true
+        BUILD_TYPE: docker
+        # On forked Pull Requests secrets will not be sent to the runner. See more info here:
         # https://docs.github.com/en/actions/reference/encrypted-secrets
         DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         DOCKER_USER: ${{ secrets.DOCKER_USER }}

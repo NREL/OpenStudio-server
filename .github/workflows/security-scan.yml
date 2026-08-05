@@ -22,7 +22,7 @@ env:
   OPENSTUDIO_VERSION: 3.10.0
   OPENSTUDIO_VERSION_SHA: 86d7e215a1
   OPENSTUDIO_VERSION_EXT: ""
-  DOCKER_COMPOSE_VERSION: 1.29.2
+  DOCKER_COMPOSE_VERSION: 2.38.2
   BUNDLE_WITHOUT: native_ext
 
 
@@ -45,8 +45,8 @@ jobs:
           docker volume create --name=osdata
           docker images --all
           docker --version
-          docker-compose --version
-          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web 
+          docker compose --version
+          docker compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG web 
       env: 
         CI: true
         OS_SERVER_NUMBER_OF_WORKERS: 4

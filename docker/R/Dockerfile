@@ -1,6 +1,6 @@
 # AUTHOR:           Nicholas Long
 # DESCRIPTION:      OpenStudio Server R Container
-# TO_BUILD_AND_RUN: docker-compose up
+# TO_BUILD_AND_RUN: docker compose up
 
 ARG DOCKER_PLATFORM=linux/amd64
 FROM --platform=${DOCKER_PLATFORM} nrel/openstudio-r:4.4.0
