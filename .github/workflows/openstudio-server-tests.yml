@@ -133,14 +133,14 @@ jobs:
           docker volume create --name=osdata
           docker images --all
           docker --version
-          docker-compose --version
+          docker compose --version
           if [ "${DEPLOY_ARCH}" = "arm64" ]; then
             # The first arm64 run may predate an arm64 entry in the :latest
             # manifests, so tolerate pull failure and build from scratch.
             # BuildKit also skips missing cache_from images without failing.
-            docker-compose -f docker-compose.test.yml pull || echo "arm64 pull skipped/failed; building from scratch"
+            docker compose -f docker-compose.test.yml pull || echo "arm64 pull skipped/failed; building from scratch"
           else
-            docker-compose -f docker-compose.test.yml pull
+            docker compose -f docker-compose.test.yml pull
           fi
           # Rebuild the rserve image only when its inputs changed. PR runs otherwise reuse
           # the pulled nrel/openstudio-rserve:latest (kept fresh by docker-upload on
@@ -156,11 +156,11 @@ jobs:
             echo "docker/R is unchanged by this PR: reusing pulled nrel/openstudio-rserve:latest instead of rebuilding it"
             BUILD_SERVICES="web"
           fi
-          docker-compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG --build-arg DOCKER_PLATFORM=$DOCKER_PLATFORM $BUILD_SERVICES
-          docker-compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml build --build-arg OPENSTUDIO_VERSION=$OPENSTUDIO_TAG --build-arg DOCKER_PLATFORM=$DOCKER_PLATFORM $BUILD_SERVICES
+          docker compose -f docker-compose.test.yml up -d
           #set SKIP_URBANOPT_ALGO=true to skip UrbanOpt algo tests
-          docker-compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
-          docker-compose stop
+          docker compose exec -e SKIP_URBANOPT_ALGO=true -T web /usr/local/bin/run-server-tests
+          docker compose stop
           git checkout -- .dockerignore && git checkout -- Dockerfile
       env: 
         CI: true

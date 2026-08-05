@@ -4,6 +4,13 @@ echo "The build architecture is ${ImageOS}"
 
 if { [ "${ImageOS}" == "ubuntu24" ] || [ "${ImageOS}" == "ubuntu24-arm64" ]; } && [ "${BUILD_TYPE}" == "docker" ]; then
     echo "Installing docker compose"
+    echo "Check if docker compose is already installed"
+    if command -v docker-compose &> /dev/null; then
+        echo "docker-compose is already installed"
+        docker-compose --version
+        exit 0
+    fi
+    # install docker compose v2
     sudo rm -f /usr/local/bin/docker-compose
     curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
     chmod +x docker-compose
