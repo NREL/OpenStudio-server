@@ -11,10 +11,10 @@ if { [ "${ImageOS}" == "ubuntu24" ] || [ "${ImageOS}" == "ubuntu24-arm64" ]; } &
         exit 0
     fi
     # install docker compose v2
-    sudo rm -f /usr/local/bin/docker-compose
+    sudo rm -f /usr/bin/docker-compose
     curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
     chmod +x docker-compose
-    sudo mv docker-compose /usr/local/lib/docker/cli-plugins
+    sudo mv docker-compose /usr/bin/
     # install pipeviewer
     sudo apt-get update
     sudo apt-get install -y pv ruby
