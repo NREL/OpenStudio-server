@@ -4,11 +4,12 @@ name: docker security scan
 # (pushing a branch with an open PR previously triggered a duplicate push
 # run), push covers the long-lived and release branches that deploy images.
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop
       - master
-      - '*.*.*'   # release branches, e.g. 3.11.0
+      - '*.*.*'   # release branches, e.g. 3.10.0
       - '*-LTS'   # e.g. 2.9.X-LTS
   pull_request:
 
@@ -18,8 +19,8 @@ concurrency:
 
 env:
   USE_TESTING_TIMEOUTS: "true"
-  OPENSTUDIO_VERSION: 3.11.0
-  OPENSTUDIO_VERSION_SHA: 241b8abb4d
+  OPENSTUDIO_VERSION: 3.10.0
+  OPENSTUDIO_VERSION_SHA: 86d7e215a1
   OPENSTUDIO_VERSION_EXT: ""
   DOCKER_COMPOSE_VERSION: 1.29.2
   BUNDLE_WITHOUT: native_ext
@@ -39,7 +40,7 @@ jobs:
     - name: docker
       shell: bash 
       run: |
-          export OPENSTUDIO_TAG=3.11.0
+          export OPENSTUDIO_TAG=3.10.0
           sed -i -E "s/.git//g" .dockerignore
           docker volume create --name=osdata
           docker images --all

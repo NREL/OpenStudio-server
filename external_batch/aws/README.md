@@ -35,8 +35,8 @@ terraform apply -var region=us-west-2 -var bucket_name=<unique-bucket-name>
 # build + push the runner image (from external_batch/):
 cd ..
 aws ecr get-login-password | docker login --username AWS --password-stdin <ecr_repository_url%/*>
-docker build -f aws/Dockerfile --build-arg OPENSTUDIO_VERSION=3.11.0 -t <ecr_repository_url>:3.11.0 ..
-docker push <ecr_repository_url>:3.11.0
+docker build -f aws/Dockerfile --build-arg OPENSTUDIO_VERSION=3.10.0 -t <ecr_repository_url>:3.10.0 ..
+docker push <ecr_repository_url>:3.10.0
 ```
 
 ## Per run

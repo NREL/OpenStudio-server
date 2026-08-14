@@ -1,9 +1,9 @@
 OpenStudio Server
 =================
 
-Version 3.11.0
+Version 3.10.0
 -------------
-* Bumped OpenStudio Server version to 3.11.0.
+* Pinned OpenStudio at 3.10.0 (86d7e215a1); server version set to 3.10.0.
 * Updated CI and build infrastructure to support newer platforms:
 * Migrated Ubuntu CI from 22.04 to 24.04.
 * Updated macOS runner and version checks to support macOS 15.
@@ -12,9 +12,6 @@ Version 3.11.0
 * Updated packaged Ruby and dependency handling for Ubuntu 24.04.
 * Adjusted test expectations in docker_stack_requeue_spec.rb to reflect updated behavior.
 * Cleaned up legacy Windows install and packaging logic.
-
-Version 3.10.0
--------------
 * Custom Gems working again https://github.com/NatLabRockies/OpenStudio-server/pull/818
 * remove URBANopt until 3.10.1 bc of gem conflicts
 * webpage fix https://github.com/NatLabRockies/OpenStudio-server/pull/819

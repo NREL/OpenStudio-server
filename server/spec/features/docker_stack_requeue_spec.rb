@@ -109,6 +109,43 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
             electricity_consumption_nmbe: -82.94121,
             natural_gas_consumption_cvrmse: 69.4762,
             natural_gas_consumption_nmbe: -50.88541
+           },
+           # OpenStudio 3.10.0 results
+           {
+            electricity_consumption_cvrmse: 11.80643639,
+            electricity_consumption_nmbe: -9.992706452,
+            natural_gas_consumption_cvrmse: 88.97549886,
+            natural_gas_consumption_nmbe: -71.2422889
+           },
+           {
+            electricity_consumption_cvrmse: 22.26135019,
+            electricity_consumption_nmbe: 21.07474074,
+            natural_gas_consumption_cvrmse: 123.6693321,
+            natural_gas_consumption_nmbe: 89.28433483
+           },
+           {
+            electricity_consumption_cvrmse: 19.92877245,
+            electricity_consumption_nmbe: -19.20285379,
+            natural_gas_consumption_cvrmse: 81.09035156,
+            natural_gas_consumption_nmbe: -61.5710272
+           },
+           {
+            electricity_consumption_cvrmse: 41.31502887,
+            electricity_consumption_nmbe: -41.6127891,
+            natural_gas_consumption_cvrmse: 99.892904,
+            natural_gas_consumption_nmbe: 70.79385513
+           },
+           {
+            electricity_consumption_cvrmse: 55.38893763588019,
+            electricity_consumption_nmbe: -57.11056265094546,
+            natural_gas_consumption_cvrmse: 43.52243818,
+            natural_gas_consumption_nmbe: 22.80778241
+           },
+           {
+            electricity_consumption_cvrmse: 80.27419288,
+            electricity_consumption_nmbe: -83.30621751,
+            natural_gas_consumption_cvrmse: 69.47538644,
+            natural_gas_consumption_nmbe: -50.88411437
            }]
     
     # setup bad results
@@ -294,6 +331,25 @@ RSpec.describe 'RunRequeue', type: :feature, algo: true do
             electricity_consumption_nmbe: -89.3516,
             natural_gas_consumption_cvrmse: 59.58792,
             natural_gas_consumption_nmbe: 37.55463
+           },
+           # OpenStudio 3.10.0 results
+           {
+            electricity_consumption_cvrmse: 45.748727859310684,
+            electricity_consumption_nmbe: -47.15331592,
+            natural_gas_consumption_cvrmse: 93.87522319797985,
+            natural_gas_consumption_nmbe: -76.99356458
+           },
+           {
+            electricity_consumption_cvrmse: 36.992082716685594,
+            electricity_consumption_nmbe: 36.75558058301333,
+            natural_gas_consumption_cvrmse: 26.054394017956753,
+            natural_gas_consumption_nmbe: -1.974857387
+           },
+           {
+            electricity_consumption_cvrmse: 88.15691010253096,
+            electricity_consumption_nmbe: -90.09381264,
+            natural_gas_consumption_cvrmse: 59.5879904,
+            natural_gas_consumption_nmbe: 37.55474192165185
            }]
     
     # setup bad results

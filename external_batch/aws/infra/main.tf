@@ -59,7 +59,7 @@ variable "container_memory_mb" {
 variable "runner_image_tag" {
   description = "Tag of the runner image in the ECR repo (e.g. the OpenStudio version)"
   type        = string
-  default     = "3.11.0"
+  default     = "3.10.0"
 }
 
 variable "results_expire_days" {

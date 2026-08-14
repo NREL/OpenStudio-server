@@ -2,7 +2,7 @@
 # Build from the external_batch/ directory so both COPY paths resolve:
 #   docker build -f aws/Dockerfile -t <account>.dkr.ecr.<region>.amazonaws.com/osaf-batch-runner:<os_ver> .
 #   docker push  <account>.dkr.ecr.<region>.amazonaws.com/osaf-batch-runner:<os_ver>
-ARG OPENSTUDIO_VERSION=3.11.0
+ARG OPENSTUDIO_VERSION=3.10.0
 FROM nrel/openstudio:${OPENSTUDIO_VERSION}
 
 # ruby for the (stdlib-only) runner + AWS CLI v2 for the S3 sync in/out
