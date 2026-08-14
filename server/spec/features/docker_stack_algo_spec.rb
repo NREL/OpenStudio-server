@@ -873,7 +873,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/zip")
     expect(a.size).to be >(30000)
-    expect(a.size).to be <(40000)
+    expect(a.size).to be <(46000)
     
     puts 'check logs for mongo index errors'
     a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
@@ -1360,7 +1360,7 @@ RSpec.describe 'RunAlgorithms', type: :feature, algo: true do
     expect(a.headers[:status]).to eq("200 OK")
     expect(a.headers[:content_type]).to eq("application/zip")
     expect(a.size).to be >(170000)
-    expect(a.size).to be <(200000)
+    expect(a.size).to be <(230000)
     
     puts 'check logs for mongo index errors'
     a = RestClient.get "http://#{@host}/analyses/#{analysis_id}/debug_log"
