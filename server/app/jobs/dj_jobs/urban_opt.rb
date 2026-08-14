@@ -55,7 +55,7 @@ module DjJobs
         # add check for a valid timeout value
         unless @data_point.analysis.run_workflow_timeout.positive?
           @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-          @data_point.analysis.run_workflow_timeout = 28800
+          @@data_point.analysis.run_workflow_timeout = 28800
         end
         Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
           Process.wait(pid)
@@ -222,7 +222,7 @@ module DjJobs
         # add check for a valid timeout value
         unless @data_point.analysis.run_workflow_timeout.positive?
           @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-          @data_point.analysis.run_workflow_timeout = 28800
+          @@data_point.analysis.run_workflow_timeout = 28800
         end
         Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
           Process.wait(pid)
