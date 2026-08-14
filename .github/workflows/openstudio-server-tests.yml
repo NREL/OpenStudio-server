@@ -9,6 +9,7 @@ on:
     branches:
       - develop
       - master
+      - '179D-310' # rollback-debug branch, deploys 3.10.0-179D-test images
       - '*.*.*'   # release branches, e.g. 3.10.0
       - '*-LTS'   # e.g. 2.9.X-LTS
   pull_request:
@@ -154,7 +155,8 @@ jobs:
       if: | 
         github.ref == 'refs/heads/master' || 
         github.ref == 'refs/heads/develop' ||
-        github.ref == 'refs/heads/3.10.0'
+        github.ref == 'refs/heads/3.10.0' ||
+        github.ref == 'refs/heads/179D-310'
       shell: bash
       run: ./docker/deployment/scripts/deploy_docker_github_actions.sh
       env: 

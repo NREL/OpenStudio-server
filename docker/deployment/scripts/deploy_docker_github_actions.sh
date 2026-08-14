@@ -16,6 +16,8 @@ elif [ "${GITHUB_REF}" == "refs/heads/setup_github_actions" ]; then
     IMAGETAG=experimental
 elif [ "${GITHUB_REF}" == "refs/heads/3.10.0" ]; then
      IMAGETAG="3.10.0-rc2"
+elif [ "${GITHUB_REF}" == "refs/heads/179D-310" ]; then
+     IMAGETAG="3.10.0-179D-test"
 fi
 
 if [ "${IMAGETAG}" != "skip" ]; then
